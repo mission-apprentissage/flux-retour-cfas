@@ -19,7 +19,7 @@ import { CfaEffectifsTable } from "./CfaEffectifsTable";
 import filterStyles from "./CfaFilters.module.css";
 import { CfaRuptureInfoModal, ruptureInfoModal } from "./CfaRuptureInfoModal";
 import cardStyles from "./CfaRuptureSegment.module.css";
-import { useDeclareCfaRupture } from "./hooks";
+import { useDeclareCfaRupture, useSortablePagination } from "./hooks";
 
 interface CfaEffectifsListProps {
   data: ICfaEffectifsResponse | null;
@@ -102,18 +102,7 @@ export function CfaEffectifsList({
 
   const hasActiveFilters = collabStatuses.length > 0 || formations.length > 0 || enRuptureValues.length > 0;
 
-  const handleSort = (sortKey: string) => {
-    if (sort === sortKey) {
-      onParamsChange({ order: order === "asc" ? "desc" : "asc" });
-    } else {
-      onParamsChange({ sort: sortKey, order: "asc" });
-    }
-  };
-
-  const handlePageChange = (page: number) => {
-    onParamsChange({ page: String(page) });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const { handleSort, handlePageChange } = useSortablePagination(sort, order, onParamsChange);
 
   return (
     <div>

@@ -2,30 +2,38 @@
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
+import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { useCallback, useMemo, useState } from "react";
 
 import { MultiSelectDropdown } from "@/app/_components/common/MultiSelectDropdown";
-import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import type {
   CfaCollaborationStatus,
   ICfaEffectif,
   ICfaEffectifsResponse,
-  ICfaRuptureEffectif,
-  ICfaRuptureSegment,
+  ICfaRupturesResponse,
 } from "@/common/types/cfaRuptures";
-import { COLLAB_STATUS_LABELS } from "@/common/types/cfaRuptures";
+import { COLLAB_STATUS_FILTER_LABELS, COLLAB_STATUS_FILTER_OPTIONS } from "@/common/types/cfaRuptures";
 
 import { CfaDeclareDateRuptureModal, declareDateRuptureModal } from "./CfaDeclareDateRuptureModal";
 import filterStyles from "./CfaFilters.module.css";
-import { CfaRuptureSegment } from "./CfaRuptureSegment";
+import cardStyles from "./CfaRuptureSegment.module.css";
 import styles from "./CfaRupturesList.module.css";
+import { CfaRuptureTable } from "./CfaRuptureTable";
 import { CfaSearchResults } from "./CfaSearchResults";
-import { useDeclareCfaRupture } from "./hooks";
+import { highlightHorsCollab } from "./collabFilterLabel";
+import { useDeclareCfaRupture, useSortablePagination } from "./hooks";
 
 interface CfaRupturesListProps {
-  segments: ICfaRuptureSegment[];
+  ruptureData: ICfaRupturesResponse | undefined;
+  isRuptureLoading: boolean;
   organismeId: string;
+  sort: string;
+  order: "asc" | "desc";
+  collabStatusFilter: string;
+  formationFilter?: string;
+  onParamsChange: (updates: Record<string, string | undefined>) => void;
+  // Recherche (mode dédié, conserve la déclaration de rupture inline)
   searchInput: string;
   onSearchChange: (value: string) => void;
   searchData: ICfaEffectifsResponse | undefined;
@@ -33,24 +41,18 @@ interface CfaRupturesListProps {
   searchSort: string;
   searchOrder: "asc" | "desc";
   onSearchSort: (sortKey: string) => void;
-  onPageChange: (page: number) => void;
-}
-
-function filterEffectifs(
-  effectifs: ICfaRuptureEffectif[],
-  collabStatuses: CfaCollaborationStatus[],
-  formations: string[]
-): ICfaRuptureEffectif[] {
-  return effectifs.filter((e) => {
-    if (collabStatuses.length > 0 && !collabStatuses.includes(e.collab_status)) return false;
-    if (formations.length > 0 && !formations.includes(e.libelle_formation)) return false;
-    return true;
-  });
+  onSearchPageChange: (page: number) => void;
 }
 
 export function CfaRupturesList({
-  segments,
+  ruptureData,
+  isRuptureLoading,
   organismeId,
+  sort,
+  order,
+  collabStatusFilter,
+  formationFilter,
+  onParamsChange,
   searchInput,
   onSearchChange,
   searchData,
@@ -58,11 +60,8 @@ export function CfaRupturesList({
   searchSort,
   searchOrder,
   onSearchSort,
-  onPageChange,
+  onSearchPageChange,
 }: CfaRupturesListProps) {
-  const { trackPlausibleEvent } = usePlausibleAppTracking();
-  const [collabStatuses, setCollabStatuses] = useState<CfaCollaborationStatus[]>([]);
-  const [formations, setFormations] = useState<string[]>([]);
   const [selectedEffectif, setSelectedEffectif] = useState<ICfaEffectif | null>(null);
   const { mutateAsync: declareRupture } = useDeclareCfaRupture();
 
@@ -88,33 +87,35 @@ export function CfaRupturesList({
     [organismeId, selectedEffectif, declareRupture]
   );
 
-  const formationOptions = useMemo(() => {
-    const allFormations = new Set<string>();
-    for (const segment of segments) {
-      for (const e of segment.effectifs) {
-        if (e.libelle_formation) allFormations.add(e.libelle_formation);
-      }
-    }
-    return Array.from(allFormations)
-      .sort((a, b) => a.localeCompare(b, "fr"))
-      .map((f) => ({ value: f, label: f }));
-  }, [segments]);
+  const collabStatuses = useMemo(
+    () => (collabStatusFilter ? collabStatusFilter.split(",").filter(Boolean) : []),
+    [collabStatusFilter]
+  );
+
+  const formations = useMemo(
+    () => (formationFilter ? formationFilter.split(",").filter(Boolean) : []),
+    [formationFilter]
+  );
 
   const collabOptions = useMemo(
-    () => Object.entries(COLLAB_STATUS_LABELS).map(([value, label]) => ({ value, label })),
+    () =>
+      COLLAB_STATUS_FILTER_OPTIONS.map((value) => ({
+        value,
+        label: COLLAB_STATUS_FILTER_LABELS[value],
+        labelNode: highlightHorsCollab(COLLAB_STATUS_FILTER_LABELS[value]),
+      })),
     []
   );
-
-  const filteredSegments = useMemo(
-    () =>
-      searchInput
-        ? segments
-        : segments.map((seg) => ({
-            ...seg,
-            effectifs: filterEffectifs(seg.effectifs, collabStatuses, formations),
-          })),
-    [segments, searchInput, collabStatuses, formations]
+  const formationOptions = useMemo(
+    () => (ruptureData?.filters.formations ?? []).map((f) => ({ value: f, label: f })),
+    [ruptureData?.filters.formations]
   );
+
+  const { handleSort, handlePageChange } = useSortablePagination(sort, order, onParamsChange);
+
+  const total = ruptureData?.pagination.total ?? 0;
+  const totalPages = ruptureData?.pagination.totalPages ?? 0;
+  const effectifs = ruptureData?.effectifs ?? [];
 
   return (
     <div>
@@ -147,12 +148,10 @@ export function CfaRupturesList({
                 <MultiSelectDropdown
                   options={collabOptions}
                   value={collabStatuses}
-                  onChange={(v) => {
-                    setCollabStatuses(v as CfaCollaborationStatus[]);
-                    if (v.length > 0)
-                      trackPlausibleEvent("cfa_liste_filtre_collab", undefined, { valeurs: v.join(",") });
-                  }}
-                  placeholder="Statut de la collaboration avec la ML"
+                  onChange={(v) =>
+                    onParamsChange({ collab_status: v.length > 0 ? v.join(",") : undefined, page: undefined })
+                  }
+                  placeholder="Statut collaboration ML"
                 />
               </div>
 
@@ -160,11 +159,9 @@ export function CfaRupturesList({
                 <MultiSelectDropdown
                   options={formationOptions}
                   value={formations}
-                  onChange={(v) => {
-                    setFormations(v);
-                    if (v.length > 0)
-                      trackPlausibleEvent("cfa_liste_filtre_formation", undefined, { valeurs: v.join(",") });
-                  }}
+                  onChange={(v) =>
+                    onParamsChange({ formation: v.length > 0 ? v.join(",") : undefined, page: undefined })
+                  }
                   placeholder="Toutes les formations"
                 />
               </div>
@@ -177,10 +174,14 @@ export function CfaRupturesList({
                     key={status}
                     pressed
                     nativeButtonProps={{
-                      onClick: () => setCollabStatuses((prev) => prev.filter((s) => s !== status)),
+                      onClick: () =>
+                        onParamsChange({
+                          collab_status: collabStatuses.filter((s) => s !== status).join(",") || undefined,
+                          page: undefined,
+                        }),
                     }}
                   >
-                    {COLLAB_STATUS_LABELS[status]}
+                    {COLLAB_STATUS_FILTER_LABELS[status as CfaCollaborationStatus] ?? status}
                   </Tag>
                 ))}
                 {formations.map((f) => (
@@ -188,7 +189,11 @@ export function CfaRupturesList({
                     key={f}
                     pressed
                     nativeButtonProps={{
-                      onClick: () => setFormations((prev) => prev.filter((v) => v !== f)),
+                      onClick: () =>
+                        onParamsChange({
+                          formation: formations.filter((v) => v !== f).join(",") || undefined,
+                          page: undefined,
+                        }),
                     }}
                   >
                     {f}
@@ -197,10 +202,7 @@ export function CfaRupturesList({
                 <button
                   type="button"
                   className={filterStyles.resetButton}
-                  onClick={() => {
-                    setCollabStatuses([]);
-                    setFormations([]);
-                  }}
+                  onClick={() => onParamsChange({ collab_status: undefined, formation: undefined, page: undefined })}
                 >
                   Réinitialiser les filtres
                 </button>
@@ -218,15 +220,44 @@ export function CfaRupturesList({
           order={searchOrder}
           onSort={onSearchSort}
           onToggleRupture={handleToggleRupture}
-          onPageChange={(page) => {
-            onPageChange(page);
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
+          onPageChange={onSearchPageChange}
         />
       ) : (
-        filteredSegments.map((seg) => (
-          <CfaRuptureSegment key={seg.segment} segment={seg.segment} effectifs={seg.effectifs} />
-        ))
+        <section className={`${cardStyles.card} ${cardStyles.cardWithMargin}`}>
+          <div className={cardStyles.cardHeader}>
+            <h2 className={cardStyles.cardTitle}>Jeunes en rupture</h2>
+            <span className={cardStyles.cardCount}>
+              {total} effectif{total !== 1 ? "s" : ""}
+            </span>
+          </div>
+
+          {effectifs.length === 0 ? (
+            <p className={cardStyles.emptyMessage}>
+              {isRuptureLoading ? "Chargement…" : "Aucun effectif en rupture ne correspond à votre recherche."}
+            </p>
+          ) : (
+            <>
+              <CfaRuptureTable effectifs={effectifs} sort={sort} order={order} onSort={handleSort} />
+              {totalPages > 1 && (
+                <div className={cardStyles.paginationContainer}>
+                  <Pagination
+                    key={`${ruptureData?.pagination.page}-${total}`}
+                    count={totalPages}
+                    defaultPage={ruptureData?.pagination.page ?? 1}
+                    getPageLinkProps={(pageNumber) => ({
+                      href: `#page-${pageNumber}`,
+                      onClick: (e: React.MouseEvent) => {
+                        e.preventDefault();
+                        handlePageChange(pageNumber);
+                      },
+                    })}
+                    showFirstLast
+                  />
+                </div>
+              )}
+            </>
+          )}
+        </section>
       )}
 
       <div className={styles.infoBox}>

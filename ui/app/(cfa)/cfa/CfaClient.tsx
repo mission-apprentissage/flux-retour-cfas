@@ -1,45 +1,31 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { CfaDashboard } from "@/app/_components/ruptures/cfa/CfaDashboard";
 import { CfaDashboardSkeleton } from "@/app/_components/ruptures/cfa/CfaDashboardSkeleton";
-import { useCfaEffectifs, useCfaEffectifsRuptures } from "@/app/_components/ruptures/cfa/hooks";
+import { useCfaEffectifs, useCfaEffectifsRuptures, useCfaUrlParams } from "@/app/_components/ruptures/cfa/hooks";
 import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+
+const RUPTURES_PAGE_SIZE = 100;
 
 export default function CfaClient() {
   const { user } = useAuth();
   const organismeId = user?.organisation?.organisme_id;
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateParams } = useCfaUrlParams("/cfa");
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const hasTrackedSearchRef = useRef(false);
 
   const urlSearch = searchParams?.get("search") || "";
-  const searchPage = Number(searchParams?.get("page")) || 1;
-  const searchSort = searchParams?.get("sort") || "nom";
-  const searchOrder = (searchParams?.get("order") || "asc") as "asc" | "desc";
+  const page = Number(searchParams?.get("page")) || 1;
+  const urlSort = searchParams?.get("sort") || undefined;
+  const urlOrder = searchParams?.get("order") || undefined;
+  const collabStatus = searchParams?.get("collab_status") || "";
+  const formation = searchParams?.get("formation") || undefined;
 
   const [searchInput, setSearchInput] = useState(urlSearch);
   const [debouncedSearch, setDebouncedSearch] = useState(urlSearch);
-
-  const updateParams = useCallback(
-    (updates: Record<string, string | undefined>) => {
-      const params = new URLSearchParams(searchParams?.toString() || "");
-      for (const [key, value] of Object.entries(updates)) {
-        if (value) {
-          params.set(key, value);
-        } else {
-          params.delete(key);
-        }
-      }
-      const qs = params.toString();
-      router.push(qs ? `/cfa?${qs}` : "/cfa", { scroll: false });
-    },
-    [searchParams, router]
-  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -56,36 +42,70 @@ export default function CfaClient() {
 
   useEffect(() => {
     if (debouncedSearch !== urlSearch) {
-      updateParams({ search: debouncedSearch || undefined, page: undefined });
+      // Les modes liste-rupture et recherche partagent les params sort/order mais ont des défauts
+      // différents (date_rupture/desc vs nom/asc) et des colonnes triables distinctes. On réinitialise
+      // sort/order à chaque bascule de mode pour que chacun reparte sur son propre défaut.
+      const modeChanged = !!debouncedSearch !== !!urlSearch;
+      updateParams({
+        search: debouncedSearch || undefined,
+        page: undefined,
+        ...(modeChanged ? { sort: undefined, order: undefined } : {}),
+      });
     }
   }, [debouncedSearch, urlSearch, updateParams]);
 
-  const { data, isLoading } = useCfaEffectifsRuptures(organismeId);
+  const isSearching = !!debouncedSearch;
+
+  // Tri de la liste rupture (défaut : date de rupture décroissante).
+  const ruptureSort = urlSort || "date_rupture";
+  const ruptureOrder = (urlOrder === "asc" ? "asc" : "desc") as "asc" | "desc";
+
+  const { data: ruptureData, isLoading: isRuptureLoading } = useCfaEffectifsRuptures(
+    isSearching ? undefined : organismeId,
+    {
+      page,
+      limit: RUPTURES_PAGE_SIZE,
+      sort: ruptureSort,
+      order: ruptureOrder,
+      collab_status: collabStatus || undefined,
+      formation,
+    }
+  );
 
   useEffect(() => {
-    if (data) {
+    if (ruptureData) {
       trackPlausibleEvent("cfa_liste_ouverte");
     }
-  }, [!!data]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [!!ruptureData]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const { data: searchData, isLoading: isSearchLoading } = useCfaEffectifs(debouncedSearch ? organismeId : undefined, {
-    page: searchPage,
-    limit: 20,
+  // Tri de la recherche (défaut : nom croissant).
+  const searchSort = urlSort || "nom";
+  const searchOrder = (urlOrder === "desc" ? "desc" : "asc") as "asc" | "desc";
+
+  const { data: searchData, isLoading: isSearchLoading } = useCfaEffectifs(isSearching ? organismeId : undefined, {
+    page,
+    limit: RUPTURES_PAGE_SIZE,
     search: debouncedSearch || undefined,
     sort: searchSort,
     order: searchOrder,
   });
 
-  if (!organismeId || !data || isLoading) {
+  if (!organismeId || (!isSearching && ruptureData === undefined && isRuptureLoading)) {
     return <CfaDashboardSkeleton />;
   }
 
   return (
     <div className="fr-container">
       <CfaDashboard
-        data={data.segments}
-        isAllowedDeca={data.isAllowedDeca}
+        ruptureData={ruptureData}
+        isRuptureLoading={isRuptureLoading}
+        isAllowedDeca={ruptureData?.isAllowedDeca ?? false}
         organismeId={organismeId}
+        sort={ruptureSort}
+        order={ruptureOrder}
+        collabStatusFilter={collabStatus}
+        formationFilter={formation}
+        onParamsChange={updateParams}
         searchInput={searchInput}
         onSearchChange={setSearchInput}
         searchData={searchData}
@@ -94,12 +114,15 @@ export default function CfaClient() {
         searchOrder={searchOrder}
         onSearchSort={(sortKey) => {
           if (sortKey === searchSort) {
-            updateParams({ order: searchOrder === "asc" ? "desc" : "asc" });
+            updateParams({ order: searchOrder === "asc" ? "desc" : "asc", page: undefined });
           } else {
-            updateParams({ sort: sortKey, order: "asc" });
+            updateParams({ sort: sortKey, order: "asc", page: undefined });
           }
         }}
-        onPageChange={(page) => updateParams({ page: page > 1 ? String(page) : undefined })}
+        onSearchPageChange={(p) => {
+          updateParams({ page: p > 1 ? String(p) : undefined });
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
       />
     </div>
   );
