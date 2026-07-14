@@ -12508,6 +12508,82 @@ exports[`validation-schema > should create validation schema for maintenanceMess
 }
 `;
 
+exports[`validation-schema > should create validation schema for missionLocaleCfaInvitations > missionLocaleCfaInvitations 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "author_id": {
+      "bsonType": "objectId",
+      "description": "Utilisateur ML ayant déclenché l'invitation (usersMigration._id)",
+    },
+    "cc_email": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Email du conseiller mis en copie de l'invitation",
+    },
+    "created_at": {
+      "bsonType": "date",
+      "description": "Date de création en base de données",
+    },
+    "email_destinataire": {
+      "bsonType": "string",
+      "description": "Email de contact du CFA utilisé pour l'envoi",
+    },
+    "invitation_token": {
+      "bsonType": "string",
+      "description": "Token de l'entrée \`invitations\` créée pour le parcours d'inscription du CFA",
+    },
+    "mission_locale_id": {
+      "bsonType": "objectId",
+      "description": "Organisation MISSION_LOCALE émettrice (organisations._id)",
+    },
+    "note": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Note de recommandation facultative rédigée par le conseiller",
+    },
+    "organisation_id": {
+      "bsonType": "objectId",
+      "description": "Organisation ORGANISME_FORMATION liée (= invitations.organisation_id)",
+    },
+    "organisme_id": {
+      "bsonType": "objectId",
+      "description": "CFA cible issu du référentiel (organismes._id)",
+    },
+    "siret": {
+      "bsonType": "string",
+      "description": "SIRET du CFA au moment de l'envoi (dénormalisé pour traçabilité)",
+    },
+    "uai": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "UAI du CFA au moment de l'envoi (dénormalisé)",
+    },
+  },
+  "required": [
+    "_id",
+    "mission_locale_id",
+    "author_id",
+    "organisme_id",
+    "organisation_id",
+    "siret",
+    "email_destinataire",
+    "invitation_token",
+    "created_at",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for missionLocaleEffectif > missionLocaleEffectif 1`] = `
 {
   "additionalProperties": false,
