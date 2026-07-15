@@ -202,10 +202,10 @@ export async function setupJobProcessor() {
               },
             },
 
-            "Envoi WhatsApp préqualif quotidien à 9h": {
-              cron_string: "0 9 * * *",
+            "Envoi WhatsApp préqualif quotidien à 18h30": {
+              cron_string: "30 18 * * *",
               handler: async () => {
-                const PREQUALIF_DAILY_CRON_ENABLED = false; // TODO : passer à true après backfill
+                const PREQUALIF_DAILY_CRON_ENABLED = true;
                 const PREQUALIF_DAILY_CRON_CAP = 500;
                 if (!PREQUALIF_DAILY_CRON_ENABLED) {
                   logger.info("PREQUALIF_DAILY_CRON_ENABLED=false, skip cron WhatsApp préqualif");
