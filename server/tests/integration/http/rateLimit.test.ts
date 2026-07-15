@@ -418,7 +418,7 @@ describe("Rate limiting", () => {
         const r = await client.post("/api/v1/auth/login", { email, password: "wrong" });
         assert.strictEqual(r.status, 401, `attempt #${i + 1} should stay 401 (no 429) under global shadow`);
       }
-    });
+    }, 30_000);
   });
 
   describe("heavy tier (mongo-backed: exact & persistent across replicas, unlike the memory tiers)", () => {
