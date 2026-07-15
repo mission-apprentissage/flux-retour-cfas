@@ -1,19 +1,17 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { CfaEffectifsList } from "@/app/_components/ruptures/cfa/CfaEffectifsList";
 import { CfaEffectifsSkeleton } from "@/app/_components/ruptures/cfa/CfaEffectifsSkeleton";
-import { useCfaEffectifs } from "@/app/_components/ruptures/cfa/hooks";
+import { useCfaEffectifs, useCfaUrlParams } from "@/app/_components/ruptures/cfa/hooks";
 import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 export default function CfaEffectifsClient() {
   const { user } = useAuth();
   const organismeId = user?.organisation?.organisme_id;
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateParams } = useCfaUrlParams("/cfa/effectifs");
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   useEffect(() => {
@@ -21,7 +19,7 @@ export default function CfaEffectifsClient() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const page = Number(searchParams?.get("page")) || 1;
-  const limit = Number(searchParams?.get("limit")) || 20;
+  const limit = Number(searchParams?.get("limit")) || 100;
   const search = searchParams?.get("search") || "";
   const sort = searchParams?.get("sort") || "nom";
   const order = (searchParams?.get("order") as "asc" | "desc") || "asc";
@@ -31,21 +29,6 @@ export default function CfaEffectifsClient() {
 
   const [searchInput, setSearchInput] = useState(search);
   const [debouncedSearch, setDebouncedSearch] = useState(search);
-
-  const updateParams = useCallback(
-    (updates: Record<string, string | undefined>) => {
-      const params = new URLSearchParams(searchParams?.toString() || "");
-      for (const [key, value] of Object.entries(updates)) {
-        if (value) {
-          params.set(key, value);
-        } else {
-          params.delete(key);
-        }
-      }
-      router.push(`/cfa/effectifs?${params.toString()}`, { scroll: false });
-    },
-    [searchParams, router]
-  );
 
   useEffect(() => {
     const timer = setTimeout(() => {

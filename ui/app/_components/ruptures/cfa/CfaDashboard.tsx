@@ -3,15 +3,21 @@
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 
 import { DECA_TOOLTIP_TEXT } from "@/common/types/cfaRuptures";
-import type { ICfaEffectifsResponse, ICfaRuptureSegment } from "@/common/types/cfaRuptures";
+import type { ICfaEffectifsResponse, ICfaRupturesResponse } from "@/common/types/cfaRuptures";
 
 import styles from "./CfaDashboard.module.css";
 import { CfaRupturesList } from "./CfaRupturesList";
 
 interface CfaDashboardProps {
-  data: ICfaRuptureSegment[];
+  ruptureData: ICfaRupturesResponse | undefined;
+  isRuptureLoading: boolean;
   isAllowedDeca: boolean;
   organismeId: string;
+  sort: string;
+  order: "asc" | "desc";
+  collabStatusFilter: string;
+  formationFilter?: string;
+  onParamsChange: (updates: Record<string, string | undefined>) => void;
   searchInput: string;
   onSearchChange: (value: string) => void;
   searchData: ICfaEffectifsResponse | undefined;
@@ -19,13 +25,19 @@ interface CfaDashboardProps {
   searchSort: string;
   searchOrder: "asc" | "desc";
   onSearchSort: (sortKey: string) => void;
-  onPageChange: (page: number) => void;
+  onSearchPageChange: (page: number) => void;
 }
 
 export function CfaDashboard({
-  data,
+  ruptureData,
+  isRuptureLoading,
   isAllowedDeca,
   organismeId,
+  sort,
+  order,
+  collabStatusFilter,
+  formationFilter,
+  onParamsChange,
   searchInput,
   onSearchChange,
   searchData,
@@ -33,7 +45,7 @@ export function CfaDashboard({
   searchSort,
   searchOrder,
   onSearchSort,
-  onPageChange,
+  onSearchPageChange,
 }: CfaDashboardProps) {
   return (
     <div>
@@ -65,8 +77,14 @@ export function CfaDashboard({
         </p>
       </div>
       <CfaRupturesList
-        segments={data}
+        ruptureData={ruptureData}
+        isRuptureLoading={isRuptureLoading}
         organismeId={organismeId}
+        sort={sort}
+        order={order}
+        collabStatusFilter={collabStatusFilter}
+        formationFilter={formationFilter}
+        onParamsChange={onParamsChange}
         searchInput={searchInput}
         onSearchChange={onSearchChange}
         searchData={searchData}
@@ -74,7 +92,7 @@ export function CfaDashboard({
         searchSort={searchSort}
         searchOrder={searchOrder}
         onSearchSort={onSearchSort}
-        onPageChange={onPageChange}
+        onSearchPageChange={onSearchPageChange}
       />
     </div>
   );

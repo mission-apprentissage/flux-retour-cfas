@@ -8,6 +8,9 @@ import styles from "./MultiSelectDropdown.module.css";
 interface Option {
   value: string;
   label: string;
+  // Rendu riche optionnel de l'option (ex: mise en gras d'une partie). `label` reste le texte
+  // de repli, utilisé pour l'affichage du bouton (getDisplayText) et l'accessibilité.
+  labelNode?: ReactNode;
 }
 
 interface MultiSelectDropdownProps {
@@ -185,7 +188,7 @@ export function MultiSelectDropdown({
                   <Checkbox
                     options={[
                       {
-                        label: option.label,
+                        label: option.labelNode ?? option.label,
                         nativeInputProps: {
                           checked: value.includes(option.value),
                           onChange: () => handleToggle(option.value),
