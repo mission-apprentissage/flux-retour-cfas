@@ -17,3 +17,14 @@ export function formatPhoneNumber(phone: string | undefined | null): string | nu
     return null;
   }
 }
+
+export function isValidPhone(phone: string | undefined | null): boolean {
+  if (!phone?.trim()) return false;
+
+  try {
+    const countryCode = getDomTomISOCountryCodeFromPhoneNumber(phone);
+    return parsePhoneNumberWithError(phone, countryCode).isValid();
+  } catch {
+    return false;
+  }
+}

@@ -238,7 +238,9 @@ describe("Mission Locale Routes", () => {
         expect(res2.data.a_traiter).toStrictEqual([]);
       });
 
-      it("CFA accepte l'acc conjoint => Le jeune est visible par la ML", async () => {
+      // Flux v1 (case à cocher, sans verified_info) : doit rester accepté — la validation
+      // téléphone ne s'applique qu'aux soumissions v2 qui envoient verified_info.
+      it("CFA accepte l'acc conjoint (flux v1, sans verified_info) => Le jeune est visible par la ML", async () => {
         const res = await requestAsOrganisation(
           { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
           "put",
@@ -257,6 +259,52 @@ describe("Mission Locale Routes", () => {
           `/api/v1/organisation/mission-locale/effectifs-per-month`
         );
         expect(res2.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      });
+
+      // Flux v2 : dès que verified_info est fourni, le téléphone est obligatoire et son format validé.
+      it("CFA soumet une collab v2 avec un téléphone vide => 400", async () => {
+        const res = await requestAsOrganisation(
+          { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+          "put",
+          `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectif/${EFFECTIF_ID.toString()}`,
+          {
+            rupture: true,
+            acc_conjoint: true,
+            verified_info: { telephone: "" },
+          }
+        );
+
+        expect(res.status).toBe(400);
+      });
+
+      it("CFA soumet une collab v2 avec un téléphone au mauvais format => 400", async () => {
+        const res = await requestAsOrganisation(
+          { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+          "put",
+          `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectif/${EFFECTIF_ID.toString()}`,
+          {
+            rupture: true,
+            acc_conjoint: true,
+            verified_info: { telephone: "123" },
+          }
+        );
+
+        expect(res.status).toBe(400);
+      });
+
+      it("CFA soumet une collab v2 avec un téléphone valide => 200", async () => {
+        const res = await requestAsOrganisation(
+          { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+          "put",
+          `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectif/${EFFECTIF_ID.toString()}`,
+          {
+            rupture: true,
+            acc_conjoint: true,
+            verified_info: { telephone: "0612345678" },
+          }
+        );
+
+        expect(res.status).toBe(200);
       });
     });
 

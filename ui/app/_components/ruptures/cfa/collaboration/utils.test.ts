@@ -192,6 +192,13 @@ describe("isValidPhone", () => {
     expect(isValidPhone("01 45 67 89 01")).toBe(true);
   });
 
+  it("accepts valid DOM-TOM numbers", () => {
+    expect(isValidPhone("0692123456")).toBe(true); // mobile Réunion
+    expect(isValidPhone("0590123456")).toBe(true); // Guadeloupe
+    // Format international ultramarin : rejeté par l'ancienne regex FR-only, désormais accepté
+    expect(isValidPhone("+262692000001")).toBe(true);
+  });
+
   it("rejects invalid numbers", () => {
     expect(isValidPhone("123")).toBe(false);
     expect(isValidPhone("abcdefghij")).toBe(false);
