@@ -28,7 +28,6 @@ const SKIP_PATHS = new Set(["/api", "/api/healthcheck"]);
 function shouldSkip(req: express.Request): boolean {
   if (req.method === "OPTIONS") return true;
   if (SKIP_PATHS.has(req.path)) return true;
-  if (config.rateLimit.skipPrivateIps && isPrivateIp(req.ip)) return true;
   return false;
 }
 
@@ -102,8 +101,10 @@ function setRetryAfterHeader(res: express.Response, result: RateLimiterRes) {
 }
 
 function build({ tier, store, config: tierConfig, getKey }: BuildOpts): express.RequestHandler {
+  const isIpKeyed = getKey === byIp;
   return async function rateLimit(req, res, next) {
     if (shouldSkip(req)) return next();
+    if (isIpKeyed && config.rateLimit.skipPrivateIps && isPrivateIp(req.ip)) return next();
 
     const key = getKey(req, res);
     if (!key) return next();
@@ -117,6 +118,7 @@ function build({ tier, store, config: tierConfig, getKey }: BuildOpts): express.
       next();
     } catch (err) {
       if (err instanceof RateLimiterRes) {
+        const enforced = tierConfig.enforce && !config.rateLimit.shadow;
         const meta = {
           tier,
           key,
@@ -124,22 +126,24 @@ function build({ tier, store, config: tierConfig, getKey }: BuildOpts): express.
           userId: (req.user as any)?._id?.toString?.(),
           route: req.originalUrl,
           retryAfter: Math.ceil(err.msBeforeNext / 1000),
-          enforced: tierConfig.enforce,
+          enforced,
           would_block: true,
         };
         logger.warn(meta, "[rate-limit] blocked");
 
         if (Math.random() < SENTRY_SAMPLE_RATE) {
-          import("@sentry/node").then(({ captureMessage }) => {
-            captureMessage(`[rate-limit] ${tier} blocked`, {
-              level: "warning",
-              tags: { rate_limit_tier: tier, enforced: String(tierConfig.enforce) },
-              extra: meta,
-            });
-          });
+          import("@sentry/node")
+            .then(({ captureMessage }) => {
+              captureMessage(`[rate-limit] ${tier} blocked`, {
+                level: "warning",
+                tags: { rate_limit_tier: tier, enforced: String(enforced) },
+                extra: meta,
+              });
+            })
+            .catch(() => undefined);
         }
 
-        if (!tierConfig.enforce) {
+        if (!enforced) {
           return next();
         }
         setRateLimitInfoHeaders(res, tierConfig, err);
@@ -147,9 +151,11 @@ function build({ tier, store, config: tierConfig, getKey }: BuildOpts): express.
         return next(Boom.tooManyRequests("Trop de requêtes, veuillez réessayer plus tard."));
       }
       logger.error({ tier, err }, "[rate-limit] consume failed, failing open");
-      import("@sentry/node").then(({ captureException }) => {
-        captureException(err, { level: "error", tags: { rate_limit_tier: tier } });
-      });
+      import("@sentry/node")
+        .then(({ captureException }) => {
+          captureException(err, { level: "error", tags: { rate_limit_tier: tier } });
+        })
+        .catch(() => undefined);
       next();
     }
   };
@@ -167,6 +173,12 @@ const byEmailLowercased: BuildOpts["getKey"] = (req) => {
 const byUserId: BuildOpts["getKey"] = (req) => {
   const id = (req.user as any)?._id;
   if (id) return id.toString();
+  return req.ip || "unknown";
+};
+
+const byOrganismeSource: BuildOpts["getKey"] = (req) => {
+  const id = (req.user as any)?.source_organisme_id;
+  if (typeof id === "string" && id) return id;
   return req.ip || "unknown";
 };
 
@@ -236,7 +248,7 @@ export const apiLimiter = build({
 
 export const heavyLimiter = build({
   tier: "heavy",
-  store: "memory",
+  store: "mongo",
   config: config.rateLimit.tiers.heavy,
   getKey: byUserId,
 });
@@ -248,18 +260,45 @@ export const webhookLimiter = build({
   getKey: byIp,
 });
 
-/** Test-only : vide le cache de limiteurs pour repartir d'un compteur neuf. */
+export const referentielLimiter = build({
+  tier: "referentiel",
+  store: "memory",
+  config: config.rateLimit.tiers.referentiel,
+  getKey: byIp,
+});
+
+export const ingestionLimiter = build({
+  tier: "ingestion",
+  store: "memory",
+  config: config.rateLimit.tiers.ingestion,
+  getKey: byOrganismeSource,
+});
+
+export const ingestionAuthLimiter = build({
+  tier: "ingestionAuth",
+  store: "memory",
+  config: config.rateLimit.tiers.ingestionAuth,
+  getKey: byIp,
+});
+
 export function _resetLimitersForTests(): void {
   limiterCache.clear();
 }
 
-/** Reset les compteurs login (IP + email) après un succès, pour éviter le ratchet après recovery. */
+async function clearLimiterKey(tier: string, key: string | undefined): Promise<void> {
+  if (!key) return;
+  const limiter = limiterCache.get(tier);
+  if (!limiter) return;
+  await limiter.delete(key).catch(() => undefined);
+}
+
 export async function clearLoginCounters(email: string, ip: string | undefined): Promise<void> {
-  const tasks: Promise<unknown>[] = [];
-  const emailKey = email.trim().toLowerCase();
-  const emailLimiter = limiterCache.get("loginEmail");
-  if (emailLimiter && emailKey) tasks.push(emailLimiter.delete(emailKey).catch(() => undefined));
-  const ipLimiter = limiterCache.get("loginIp");
-  if (ipLimiter && ip) tasks.push(ipLimiter.delete(ip).catch(() => undefined));
-  await Promise.all(tasks);
+  await Promise.all([
+    clearLimiterKey("loginEmail", email.trim().toLowerCase() || undefined),
+    clearLimiterKey("loginIp", ip),
+  ]);
+}
+
+export async function clearIngestionAuthCounter(ip: string | undefined): Promise<void> {
+  await clearLimiterKey("ingestionAuth", ip || "unknown");
 }

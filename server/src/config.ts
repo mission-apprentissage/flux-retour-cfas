@@ -19,6 +19,10 @@ const config = {
     .asInt(),
   rateLimit: {
     skipPrivateIps: env.get("MNA_TDB_RATE_LIMIT_SKIP_PRIVATE_IPS").default("true").asBool(),
+    // Shadow global : quand true, AUCUN tier ne renvoie 429 (les dépassements sont seulement
+    // loggués `would_block` + échantillonnés vers Sentry). Sert à observer le trafic réel et
+    // calibrer les tiers avant de basculer en enforce, sans redéploiement.
+    shadow: env.get("MNA_TDB_RATE_LIMIT_SHADOW").default("false").asBool(),
     tiers: {
       loginIp: { points: 20, duration: 900, enforce: true },
       loginEmail: { points: 20, duration: 3600, enforce: true },
@@ -31,6 +35,9 @@ const config = {
       api: { points: 1000, duration: 60, enforce: true },
       heavy: { points: 10, duration: 60, enforce: true },
       webhook: { points: 100, duration: 60, enforce: true },
+      referentiel: { points: 600, duration: 60, enforce: true },
+      ingestion: { points: 3000, duration: 60, enforce: true },
+      ingestionAuth: { points: 300, duration: 60, enforce: true },
     },
   },
   mongodb: {

@@ -156,13 +156,17 @@ import { proxyIpVerification } from "./middlewares/proxyIpVerification";
 import {
   activationLimiter,
   apiLimiter,
+  clearIngestionAuthCounter,
   clearLoginCounters,
   heavyLimiter,
+  ingestionAuthLimiter,
+  ingestionLimiter,
   loginEmailLimiter,
   loginIpLimiter,
   passwordResetLimiter,
   publicDashboardLimiter,
   publicLimiter,
+  referentielLimiter,
   registerLimiter,
   resendEmailLimiter,
   webhookLimiter,
@@ -556,6 +560,7 @@ function setupRoutes(app: Application) {
 
   app.use(
     ["/api/v3/dossiers-apprenants"],
+    ingestionAuthLimiter,
     requireBearerAuthentication(),
     async (req, res, next) => {
       try {
@@ -565,6 +570,8 @@ function setupRoutes(app: Application) {
           source: SOURCE_APPRENANT.ERP,
           source_organisme_id: organisme._id.toString(),
         };
+
+        void clearIngestionAuthCounter(req.ip);
 
         Sentry.setUser({
           segment: "bearer",
@@ -577,6 +584,7 @@ function setupRoutes(app: Application) {
         next(err);
       }
     },
+    ingestionLimiter,
     dossierApprenantRouter()
   );
 
@@ -585,6 +593,7 @@ function setupRoutes(app: Application) {
    *********************************************************/
   app.use(
     "/api/organismes",
+    referentielLimiter,
     requireApiKeyAuthenticationMiddleware({
       apiKeyValue: config.organismesConsultationApiKey,
     }),
