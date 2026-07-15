@@ -5354,6 +5354,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/netmask@npm:^2.0.6":
+  version: 2.0.6
+  resolution: "@types/netmask@npm:2.0.6"
+  checksum: 17e9cc68f28492a2f8bfe063ff64c5159aeb8d1d7441c3f1cc11232200d55a01b55cdfe975b8bba96c6f8f2c43964fcd925461d902afdd9b63683058f49a036c
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:*, @types/node@npm:>=12.13.0":
   version: 25.6.0
   resolution: "@types/node@npm:25.6.0"
@@ -15322,6 +15329,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"netmask@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "netmask@npm:2.1.1"
+  checksum: a733e8873a457138518ac0ac9d7c92147b79886c336300ffd2403e067790338eb48939dd0cbbb94251ff070859e7b6dca43410057c99edb8e1982d34a4145a5b
+  languageName: node
+  linkType: hard
+
 "next-plausible@npm:^3.12.2":
   version: 3.12.2
   resolution: "next-plausible@npm:3.12.2"
@@ -18469,6 +18483,7 @@ __metadata:
     "@types/express": ^4.17.21
     "@types/lodash-es": ^4.17.12
     "@types/multer": ^1.4.12
+    "@types/netmask": ^2.0.6
     "@types/node": ^22.7.5
     "@types/sax": ^1.2.7
     "@types/stream-chain": ^2.1.0
@@ -18513,6 +18528,7 @@ __metadata:
     mjml: ^4.15.3
     mongodb: ^5.9.2
     multer: ^2.1.1
+    netmask: ^2.1.1
     nock: ^14.0.0-beta.15
     node-xlsx: ^0.24.0
     nodemailer: ^8.0.5

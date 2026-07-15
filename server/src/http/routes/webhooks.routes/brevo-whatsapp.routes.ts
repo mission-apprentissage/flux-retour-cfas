@@ -1,6 +1,5 @@
 import { captureException } from "@sentry/node";
 import express from "express";
-import { RateLimiterMemory } from "rate-limiter-flexible";
 import { z } from "zod";
 
 import logger from "@/common/logger";
@@ -43,24 +42,6 @@ const zInboundEventBody = z.object({
   message: z.object({ text: z.string().optional(), id: z.string().optional() }).optional(),
 });
 
-// --- Rate limiting ---
-
-const webhookRateLimiter = new RateLimiterMemory({
-  keyPrefix: "webhook_brevo_whatsapp",
-  points: 100,
-  duration: 60,
-});
-
-async function rateLimitMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
-  try {
-    await webhookRateLimiter.consume(req.ip || "unknown");
-    next();
-  } catch {
-    logger.warn({ ip: req.ip }, "WhatsApp webhook rate limited");
-    return res.status(429).json({ error: "Too many requests" });
-  }
-}
-
 function verifyWebhookToken(req: express.Request, res: express.Response, next: express.NextFunction) {
   const expectedToken = config.brevo.whatsapp?.webhookToken;
 
@@ -95,7 +76,7 @@ export default () => {
    * 2. Événements de statut (delivered, read, failed)
    * 3. Format legacy "inbound"
    */
-  router.post("/", rateLimitMiddleware, verifyWebhookToken, async (req, res) => {
+  router.post("/", verifyWebhookToken, async (req, res) => {
     try {
       const body = req.body;
       const eventName = body.eventName || body.event;

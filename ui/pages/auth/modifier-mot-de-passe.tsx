@@ -20,6 +20,7 @@ import * as Yup from "yup";
 import YupPassword from "yup-password";
 
 import { _post } from "@/common/httpClient";
+import { getApiErrorMessage, isRateLimited } from "@/common/rateLimit";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import useToaster from "@/hooks/useToaster";
 import { ShowPassword } from "@/theme/components/icons";
@@ -96,6 +97,10 @@ const ResetPasswordPage = () => {
         router.push("/auth/connexion");
       } catch (e) {
         console.error(e);
+        if (isRateLimited(e)) {
+          setStatus({ error: getApiErrorMessage(e) });
+          return;
+        }
         setStatus({
           error: (
             <span>
