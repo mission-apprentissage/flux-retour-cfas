@@ -3,14 +3,19 @@ import { strict as assert } from "assert";
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
 import { RateLimiterMongo } from "rate-limiter-flexible";
+import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
+import { v4 as uuidv4 } from "uuid";
 import { afterEach, beforeEach, describe, it, vi } from "vitest";
 
-import { usersMigrationDb } from "@/common/model/collections";
+import { createSession } from "@/common/actions/sessions.actions";
+import { COOKIE_NAME } from "@/common/constants/cookieName";
+import { organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { hash } from "@/common/utils/passwordUtils";
 import config from "@/config";
 import { _resetLimitersForTests, isPrivateIp } from "@/http/middlewares/rateLimit";
+import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { initTestApp } from "@tests/utils/testUtils";
+import { id, initTestApp } from "@tests/utils/testUtils";
 
 let httpClient: AxiosInstance;
 
@@ -202,16 +207,39 @@ describe("Rate limiting", () => {
       }
     });
 
-    it("never rate-limits loopback when skipPrivateIps is on, even past the loginIp budget", async () => {
+    it("never rate-limits loopback on an IP-keyed tier when skipPrivateIps is on, even past the loginIp budget", async () => {
       const previous = config.rateLimit.skipPrivateIps;
       config.rateLimit.skipPrivateIps = true;
       try {
-        const email = "ratelimit-loopback@test.fr";
+        // Emails distincts pour isoler le tier IP (loginIp) : loginEmail est keyé email et n'est,
+        // lui, PAS désactivé par le skip IP privée (cf. build > isIpKeyed), donc on ne veut pas
+        // qu'il morde ici. On vérifie uniquement que le budget IP est bien contourné sur loopback.
+        const total = config.rateLimit.tiers.loginIp.points + 10;
+        const emails = Array.from({ length: total }, (_, i) => `ratelimit-loopback-${i}@test.fr`);
+        for (const email of emails) await createConfirmedUser(email);
+        for (let i = 0; i < total; i++) {
+          const r = await httpClient.post("/api/v1/auth/login", { email: emails[i], password: "wrong" });
+          assert.strictEqual(r.status, 401, `attempt #${i + 1}: expected 401, got ${r.status}`);
+        }
+      } finally {
+        config.rateLimit.skipPrivateIps = previous;
+      }
+    }, 30_000);
+
+    it("still enforces an email-keyed tier on loopback (skipPrivateIps only covers IP-keyed tiers)", async () => {
+      const previous = config.rateLimit.skipPrivateIps;
+      config.rateLimit.skipPrivateIps = true;
+      try {
+        // loginIp (IP-keyé) est contourné sur loopback, mais loginEmail (keyé email, 20/h) ne doit
+        // PAS l'être : le skip IP privée ne concerne que les tiers keyés IP.
+        const email = "ratelimit-loopback-email@test.fr";
         await createConfirmedUser(email);
-        for (let i = 0; i < config.rateLimit.tiers.loginIp.points + 10; i++) {
+        for (let i = 0; i < config.rateLimit.tiers.loginEmail.points; i++) {
           const r = await httpClient.post("/api/v1/auth/login", { email, password: "wrong" });
           assert.strictEqual(r.status, 401, `attempt #${i + 1}: expected 401, got ${r.status}`);
         }
+        const blocked = await httpClient.post("/api/v1/auth/login", { email, password: "wrong" });
+        assert.strictEqual(blocked.status, 429, "email-keyed loginEmail must still bite on loopback");
       } finally {
         config.rateLimit.skipPrivateIps = previous;
       }
@@ -287,6 +315,181 @@ describe("Rate limiting", () => {
       } finally {
         config.rateLimit.tiers.webhook.points = previousPoints;
       }
+    });
+  });
+
+  describe("referentiel tier (/api/organismes, limiter runs before API-key auth)", () => {
+    afterEach(() => {
+      config.rateLimit.tiers.referentiel.points = 600;
+    });
+
+    it("returns 429 once the referentiel budget is exhausted, before reaching auth", async () => {
+      config.rateLimit.tiers.referentiel.points = 2;
+      _resetLimitersForTests();
+      const { httpClient: client } = await initTestApp();
+
+      // Sans clé API : les requêtes sous budget sont rejetées par l'auth (≠ 429),
+      // la requête au-delà du budget est bloquée en amont par le limiteur.
+      for (let i = 0; i < 2; i++) {
+        const r = await client.get("/api/organismes");
+        assert.notStrictEqual(r.status, 429, `attempt #${i + 1} should be under budget`);
+      }
+      const blocked = await client.get("/api/organismes");
+      assert.strictEqual(blocked.status, 429, "3rd referentiel call should exceed the budget");
+    });
+  });
+
+  describe("ingestion tier (/api/v3/dossiers-apprenants, keyed by organisme source)", () => {
+    afterEach(() => {
+      config.rateLimit.tiers.ingestion.points = 3000;
+    });
+
+    it("returns 429 once an organisme exceeds its per-organisme ingestion budget", async () => {
+      config.rateLimit.tiers.ingestion.points = 2;
+      _resetLimitersForTests();
+      const { httpClient: client } = await initTestApp();
+
+      const api_key = uuidv4();
+      const org = createRandomOrganisme({ uai: "0802004U", siret: "77937827200016", api_key });
+      await organismesDb().insertOne({ ...org, _id: new ObjectId() });
+      const headers = { Authorization: `Bearer ${api_key}` };
+
+      for (let i = 0; i < 2; i++) {
+        const r = await client.post("/api/v3/dossiers-apprenants", [], { headers });
+        assert.notStrictEqual(r.status, 429, `attempt #${i + 1} should be under budget`);
+      }
+      const blocked = await client.post("/api/v3/dossiers-apprenants", [], { headers });
+      assert.strictEqual(blocked.status, 429, "3rd ingestion call should exceed the per-organisme budget");
+    });
+  });
+
+  describe("ingestionAuth guard (/api/v3/dossiers-apprenants, IP-keyed, before bearer auth)", () => {
+    afterEach(() => {
+      config.rateLimit.tiers.ingestionAuth.points = 300;
+    });
+
+    it("caps a flood of invalid bearer tokens per IP before it reaches the key lookup", async () => {
+      config.rateLimit.tiers.ingestionAuth.points = 2;
+      _resetLimitersForTests();
+      const { httpClient: client } = await initTestApp();
+      const headers = { Authorization: "Bearer not-a-real-key" };
+
+      // Tokens invalides : rejetés par l'auth (403), aucun reward → le compteur IP s'accumule.
+      for (let i = 0; i < 2; i++) {
+        const r = await client.post("/api/v3/dossiers-apprenants", [], { headers });
+        assert.notStrictEqual(r.status, 429, `attempt #${i + 1} should be auth-rejected (not 429) under budget`);
+      }
+      const blocked = await client.post("/api/v3/dossiers-apprenants", [], { headers });
+      assert.strictEqual(blocked.status, 429, "3rd invalid-token call should be blocked before reaching auth");
+    });
+
+    it("rewards a valid key: successful auth clears the IP counter so legit bulk never trips the guard", async () => {
+      config.rateLimit.tiers.ingestionAuth.points = 2;
+      _resetLimitersForTests();
+      const { httpClient: client } = await initTestApp();
+
+      const api_key = uuidv4();
+      const org = createRandomOrganisme({ uai: "0802004U", siret: "77937827200016", api_key });
+      await organismesDb().insertOne({ ...org, _id: new ObjectId() });
+      const headers = { Authorization: `Bearer ${api_key}` };
+
+      // 4 requêtes valides > budget de 2 : sans reward la 3ᵉ serait 429 ; le reward garde le compteur à zéro.
+      for (let i = 0; i < 4; i++) {
+        const r = await client.post("/api/v3/dossiers-apprenants", [], { headers });
+        assert.notStrictEqual(r.status, 429, `valid attempt #${i + 1} should never hit the ingestionAuth guard`);
+      }
+    });
+  });
+
+  describe("global shadow flag", () => {
+    afterEach(() => {
+      config.rateLimit.shadow = false;
+    });
+
+    it("suppresses 429 across all tiers, even an enforced one, when config.rateLimit.shadow is on", async () => {
+      config.rateLimit.shadow = true;
+      _resetLimitersForTests();
+      const { httpClient: client } = await initTestApp();
+      const email = "ratelimit-shadow-global@test.fr";
+      await createConfirmedUser(email);
+
+      // loginIp est enforce:true, mais le shadow global doit neutraliser le 429 (reste en 401).
+      for (let i = 0; i < config.rateLimit.tiers.loginIp.points + 3; i++) {
+        const r = await client.post("/api/v1/auth/login", { email, password: "wrong" });
+        assert.strictEqual(r.status, 401, `attempt #${i + 1} should stay 401 (no 429) under global shadow`);
+      }
+    });
+  });
+
+  describe("heavy tier (mongo-backed: exact & persistent across replicas, unlike the memory tiers)", () => {
+    const SIRET = "41054102000070";
+    const UAI = "0332881D";
+    const cfaOrganisationId = new ObjectId(id(1));
+    const cfaOrganismeId = new ObjectId(id(2));
+    const adminEmail = "ratelimit-heavy-admin@cfa.local";
+
+    afterEach(() => {
+      config.rateLimit.tiers.heavy.points = 10;
+    });
+
+    async function seedCfaAdminCookie(): Promise<string> {
+      await organismesDb().insertOne(
+        generateOrganismeFixture({ _id: cfaOrganismeId, siret: SIRET, uai: UAI, nom: "CAMPUS DU LAC" })
+      );
+      await organisationsDb().insertOne({
+        _id: cfaOrganisationId,
+        created_at: new Date(),
+        type: "ORGANISME_FORMATION",
+        siret: SIRET,
+        uai: UAI,
+        organisme_id: cfaOrganismeId.toString(),
+      } as any);
+      await usersMigrationDb().insertOne({
+        _id: new ObjectId(id(10)),
+        account_status: "CONFIRMED",
+        created_at: new Date(),
+        password_updated_at: new Date(),
+        connection_history: [],
+        emails: [],
+        email: adminEmail,
+        nom: "Admin",
+        prenom: "Alice",
+        fonction: "Directrice",
+        password: TEST_PASSWORD_HASH,
+        organisation_id: cfaOrganisationId,
+        organisation_role: "admin",
+        has_accept_cgu_version: "v1",
+      } as any);
+      const token = await createSession(adminEmail);
+      return `${COOKIE_NAME}=${token}`;
+    }
+
+    it("enforces exactly and keeps blocking after a limiter-cache reset (mongo persists, memory would not)", async () => {
+      config.rateLimit.tiers.heavy.points = 2;
+      _resetLimitersForTests();
+      const { httpClient: client } = await initTestApp();
+      const cookie = await seedCfaAdminCookie();
+
+      // Corps invalide (emails vide → 400) : heavyLimiter est posé AVANT le handler, il consomme
+      // quand même. On isole le rate-limit sans créer d'invitations/emails.
+      const hit = () => client.post("/api/v1/organisation/membres/batch", { emails: [] }, { headers: { cookie } });
+
+      for (let i = 0; i < 2; i++) {
+        const r = await hit();
+        assert.notStrictEqual(r.status, 429, `attempt #${i + 1} should be under the heavy budget`);
+      }
+      const blocked = await hit();
+      assert.strictEqual(blocked.status, 429, "3rd heavy call should exceed the budget");
+
+      // Reset du cache de limiteurs (vide les compteurs mémoire) : un tier mémoire repartirait de
+      // zéro. heavy est mongo → le compteur persiste dans rateLimits, donc toujours 429.
+      _resetLimitersForTests();
+      const stillBlocked = await hit();
+      assert.strictEqual(
+        stillBlocked.status,
+        429,
+        "heavy is mongo-backed: the counter must survive a limiter-cache reset"
+      );
     });
   });
 
