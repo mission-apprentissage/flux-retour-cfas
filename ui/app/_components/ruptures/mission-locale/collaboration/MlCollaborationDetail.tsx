@@ -19,7 +19,8 @@ const styles = withSharedStyles(localStyles);
 
 function getMlListInfo(
   effectif: IEffectifMissionLocale["effectif"],
-  nomListe: API_EFFECTIF_LISTE | null
+  nomListe: API_EFFECTIF_LISTE | null,
+  codePostal?: string | null
 ): { label: string; href: string } {
   const statut: API_EFFECTIF_LISTE =
     nomListe ??
@@ -29,7 +30,9 @@ function getMlListInfo(
         ? API_EFFECTIF_LISTE.A_TRAITER
         : API_EFFECTIF_LISTE.TRAITE);
 
-  const href = `/mission-locale?statut=${statut}`;
+  // Conserve le filtre villes au retour à la liste via le fil d'Ariane.
+  const cpQuery = codePostal ? `&cp=${codePostal}` : "";
+  const href = `/mission-locale?statut=${statut}${cpQuery}`;
 
   switch (statut) {
     case API_EFFECTIF_LISTE.INJOIGNABLE:
@@ -59,7 +62,8 @@ export function MlCollaborationDetail({ data }: MlCollaborationDetailProps) {
   const collabReceived = !!effectif.organisme_data?.acc_conjoint;
   const pageRef = useRef<HTMLDivElement>(null);
 
-  const { label: listLabel, href: listHref } = getMlListInfo(effectif, nomListe);
+  const codePostal = searchParams?.get("cp");
+  const { label: listLabel, href: listHref } = getMlListInfo(effectif, nomListe, codePostal);
 
   // Dépend de effectif.id : la navigation Précédent/Suivant change l'[id] sans démonter le composant
   // (data servie depuis le cache react-query), il faut donc re-scroller et re-tracker à chaque dossier.

@@ -3,6 +3,8 @@ export type EffectifData = {
   nom: string;
   prenom: string;
   libelle_formation: string;
+  commune?: string | null;
+  code_postal?: string | null;
   organisme_nom: string;
   organisme_raison_sociale: string;
   organisme_enseigne: string;

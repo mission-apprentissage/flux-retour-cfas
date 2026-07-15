@@ -321,7 +321,7 @@ describe("CFA Effectifs Actions", () => {
       const mlRecord = createMlEffectifDoc(otherEffectif, {
         effectif_snapshot: { ...otherEffectif, organisme_id: rOrgId },
         identifiant_normalise: apprenantBase,
-        situation: "INJOIGNABLE_APRES_RELANCES",
+        situation: "RDV_PRIS",
         soft_deleted: false,
       });
       await missionLocaleEffectifsDb().insertOne(mlRecord as any);
@@ -332,8 +332,9 @@ describe("CFA Effectifs Actions", () => {
 
       const match = result.effectifs.find((e) => (e as any).id?.toString() === ownEffectif._id.toString());
       expect(match).toBeDefined();
-      // traite_par_ml prouve que le fallback a matché (sinon default demarrer_collab).
-      expect((match as any).collab_status).toBe("traite_par_ml");
+      // Dossier hors-collab (acc_conjoint absent) sur lequel la ML a agi → "Contacté par la ML — Hors collab".
+      // Un statut non-default prouve que le fallback identifiant a matché (sinon default demarrer_collab).
+      expect((match as any).collab_status).toBe("contacte_par_ml_hors_collab");
     });
 
     it("fallback identifiant : ne matche PAS un ml record hors famille", async () => {

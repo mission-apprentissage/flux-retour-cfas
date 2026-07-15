@@ -82,6 +82,10 @@ describe("Mission Locale Routes", () => {
         `/api/v1/organisation/mission-locale/effectifs-per-month`
       );
       expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+
+      const effectifs = res.data.a_traiter.flatMap((curr) => curr.data);
+      expect(effectifs).toHaveLength(1);
+      expect(effectifs[0]).toMatchObject({ commune: "Paris", code_postal: "75001" });
     });
   });
 
@@ -650,16 +654,43 @@ describe("Mission Locale Routes", () => {
       await db.command({ collMod: "missionLocaleEffectif", validationLevel: "off" }).catch(() => {});
     });
 
+    // GET /villes : options du filtre "Villes" construites sur TOUS les effectifs de la ML
+    // (distinct par code postal, trié, dédupliqué, codes postaux absents ignorés).
+    it("GET /villes : liste distincte, triée, dédupliquée, sans code postal absent", async () => {
+      const withAdresse = (doc: object, adresse: Record<string, string>) => {
+        (doc as any).effectif_snapshot.apprenant.adresse = adresse;
+        return doc;
+      };
+
+      await insertDoc(withAdresse(makeDoc({}).doc, { commune: "Marseille", code_postal: "13001" }));
+      // même code postal, libellé de commune différent -> doit être dédupliqué et le libellé
+      // retenu doit être déterministe ($min => "Marseille" < "Marseille 1er Arrondissement").
+      await insertDoc(withAdresse(makeDoc({}).doc, { commune: "Marseille 1er Arrondissement", code_postal: "13001" }));
+      await insertDoc(withAdresse(makeDoc({}).doc, { commune: "Paris", code_postal: "75001" }));
+      await insertDoc(withAdresse(makeDoc({}).doc, { commune: "Inconnue" })); // pas de code postal -> ignoré
+
+      const res = await requestAsOrganisation(ML_DATA, "get", `/api/v1/organisation/mission-locale/villes`);
+
+      expect(res.data).toEqual([
+        { value: "13001", label: "13001, Marseille" },
+        { value: "75001", label: "75001, Paris" },
+      ]);
+    });
+
     // Règle : « Si le CFA demande une collaboration, l'affichage est forcé dans le bloc
     // prioritaire (jeune en abandon +180j) → la ML doit toujours le voir. »
     it("Demande de collaboration + rupture > 180j : visible ET prioritaire", async () => {
       const { snapshotId, doc } = makeDoc({ accConjoint: true, ruptureDaysAgo: 200 });
+      (doc as any).effectif_snapshot.apprenant.adresse = { commune: "Marseille", code_postal: "13001" };
       await insertDoc(doc);
 
       const res = await getPerMonth();
       const id = snapshotId.toString();
       expect(isVisible(res, id)).toBe(true);
       expect(isInPrioritaire(res, id)).toBe(true);
+
+      const prioritaire = (res.data.prioritaire?.effectifs ?? []).find((e: { id: string }) => e.id === id);
+      expect(prioritaire).toMatchObject({ commune: "Marseille", code_postal: "13001" });
     });
 
     // Règle : « ... (jeune en fin de formation) ... » — modélisé par un retour en apprentissage.
@@ -754,6 +785,74 @@ describe("Mission Locale Routes", () => {
       expect(idxCollab).toBeLessThan(idxRdv);
       expect(idxRdv).toBeLessThan(idxMineur);
     });
+
+    // Règle (miroir de la collab CFA) : « Si le jeune a explicitement demandé un RDV
+    // (souhaite_rdv), l'affichage est forcé dans le bloc prioritaire même s'il sortirait
+    // sinon de l'outil — fin de formation, rupture > 180j, ou hors fenêtre d'activation. »
+    // Les docs sont volontairement hors collab (accConjoint:false, isAllowedCollab:false)
+    // pour isoler le signal souhaite_rdv comme seule cause de la visibilité/priorité.
+
+    it("Souhaite un RDV + fin de formation : visible ET prioritaire", async () => {
+      const { snapshotId, doc } = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: false,
+        ruptureDaysAgo: 30,
+        statusValue: "FIN_DE_FORMATION",
+        enCours: "FIN_DE_FORMATION",
+      });
+      (doc as any).souhaite_rdv = true;
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(true);
+      expect(isInPrioritaire(res, id)).toBe(true);
+    });
+
+    it("Souhaite un RDV + rupture > 180j : visible ET prioritaire", async () => {
+      const { snapshotId, doc } = makeDoc({ accConjoint: false, isAllowedCollab: false, ruptureDaysAgo: 200 });
+      (doc as any).souhaite_rdv = true;
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(true);
+      expect(isInPrioritaire(res, id)).toBe(true);
+    });
+
+    it("Souhaite un RDV + rupture hors fenêtre d'activation ML : visible ET prioritaire", async () => {
+      const { snapshotId, doc } = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: false,
+        ruptureDaysAgo: 300,
+        mlActivatedDaysAgo: 10,
+      });
+      (doc as any).souhaite_rdv = true;
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(true);
+      expect(isInPrioritaire(res, id)).toBe(true);
+    });
+
+    // Témoin : même situation (fin de formation, hors collab) SANS demande de RDV →
+    // le jeune reste masqué. Prouve que souhaite_rdv est bien la cause de l'affichage forcé.
+    it("Sans demande de RDV + fin de formation : non visible (comportement inchangé)", async () => {
+      const { snapshotId, doc } = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: false,
+        ruptureDaysAgo: 30,
+        statusValue: "FIN_DE_FORMATION",
+        enCours: "FIN_DE_FORMATION",
+      });
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(false);
+      expect(isInPrioritaire(res, id)).toBe(false);
+    });
   });
 
   describe("GET /parametres + PUT /parametres (rdv_url)", () => {
@@ -811,38 +910,66 @@ describe("Mission Locale Routes", () => {
       await db.command({ collMod: "missionLocaleEffectif", validationLevel: "off" }).catch(() => {});
     });
 
-    it("compte les effectifs souhaite_rdv=true de la ML courante", async () => {
-      const mlEffectifId1 = new ObjectId();
-      const mlEffectifId2 = new ObjectId();
-      const mlEffectifId3 = new ObjectId();
-      // 2 effectifs souhaite_rdv=true, 1 false → count attendu = 2
-      const baseDoc = {
+    const dayAgo = (n: number) => {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - n);
+      return d;
+    };
+
+    // Doc réaliste qui traverse missionLocaleBaseAggregation : âge dans la fenêtre 16-26,
+    // année scolaire active, date_rupture présente. souhaite_rdv force la visibilité ; on fait
+    // varier l'âge / l'année scolaire pour vérifier que le compteur s'aligne désormais sur les
+    // filtres de la liste (et ne compte plus les jeunes que le conseiller ne retrouve pas).
+    const makeBannerDoc = ({
+      souhaiteRdv = true,
+      ageYears = 20,
+      anneeScolaire = "2025-2026",
+      softDeleted = false,
+      situation = null,
+    }: {
+      souhaiteRdv?: boolean;
+      ageYears?: number;
+      anneeScolaire?: string;
+      softDeleted?: boolean;
+      situation?: SITUATION_ENUM | null;
+    } = {}) =>
+      ({
+        _id: new ObjectId(),
         mission_locale_id: ML_ID,
         effectif_id: new ObjectId(),
         created_at: new Date(),
         brevo: {},
-        current_status: {},
+        souhaite_rdv: souhaiteRdv,
+        ...(softDeleted ? { soft_deleted: true } : {}),
+        ...(situation ? { situation } : {}),
+        current_status: { value: "RUPTURANT", date: dayAgo(60) },
+        date_rupture: dayAgo(60),
         effectif_snapshot: {
           _id: new ObjectId(),
           organisme_id: ORGANISME_ID,
           id_erp_apprenant: "x",
           source: "test",
-          annee_scolaire: "2024-2025",
-          apprenant: { nom: "X", prenom: "Y", telephone: "0600000000" },
+          annee_scolaire: anneeScolaire,
+          apprenant: {
+            nom: "X",
+            prenom: "Y",
+            telephone: "0600000000",
+            date_de_naissance: new Date(new Date().setFullYear(new Date().getFullYear() - ageYears)),
+          },
           formation: {},
+          _computed: { statut: { en_cours: "RUPTURANT" } },
           is_lock: false,
           created_at: new Date(),
           updated_at: new Date(),
         },
-      };
-      await missionLocaleEffectifsDb().insertMany(
-        [
-          { ...baseDoc, _id: mlEffectifId1, souhaite_rdv: true } as any,
-          { ...baseDoc, _id: mlEffectifId2, souhaite_rdv: true } as any,
-          { ...baseDoc, _id: mlEffectifId3, souhaite_rdv: false } as any,
-        ],
-        { bypassDocumentValidation: true }
-      );
+      }) as any;
+
+    const insertBannerDocs = (docs: object[]) =>
+      missionLocaleEffectifsDb().insertMany(docs as any, { bypassDocumentValidation: true });
+
+    it("compte les effectifs souhaite_rdv=true visibles de la ML courante", async () => {
+      // 2 effectifs souhaite_rdv=true (dans le périmètre) + 1 false → count attendu = 2
+      await insertBannerDocs([makeBannerDoc(), makeBannerDoc(), makeBannerDoc({ souhaiteRdv: false })]);
 
       const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
       expect(res.status).toBe(200);
@@ -850,30 +977,44 @@ describe("Mission Locale Routes", () => {
     });
 
     it("exclut les effectifs soft-deleted", async () => {
-      const baseDoc = {
-        mission_locale_id: ML_ID,
-        effectif_id: new ObjectId(),
-        created_at: new Date(),
-        brevo: {},
-        current_status: {},
-        souhaite_rdv: true,
-        effectif_snapshot: {
-          _id: new ObjectId(),
-          organisme_id: ORGANISME_ID,
-          id_erp_apprenant: "x",
-          source: "test",
-          annee_scolaire: "2024-2025",
-          apprenant: { nom: "X", prenom: "Y", telephone: "0600000000" },
-          formation: {},
-          is_lock: false,
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-      };
-      await missionLocaleEffectifsDb().insertMany(
-        [{ ...baseDoc, _id: new ObjectId() } as any, { ...baseDoc, _id: new ObjectId(), soft_deleted: true } as any],
-        { bypassDocumentValidation: true }
-      );
+      await insertBannerDocs([makeBannerDoc(), makeBannerDoc({ softDeleted: true })]);
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.data).toEqual({ souhaite_rdv_count: 1 });
+    });
+
+    // Régression du bug bandeau ↔ liste : un jeune souhaite_rdv hors fenêtre d'âge (≥ 26 ans)
+    // sort de la liste (filtre âge ML) → il ne doit plus être compté par le bandeau.
+    it("exclut un jeune souhaite_rdv hors fenêtre d'âge (≥ 26 ans)", async () => {
+      await insertBannerDocs([makeBannerDoc({ ageYears: 20 }), makeBannerDoc({ ageYears: 27 })]);
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.data).toEqual({ souhaite_rdv_count: 1 });
+    });
+
+    // Idem pour une année scolaire hors de la plage active : comptée avant, exclue maintenant.
+    it("exclut un jeune souhaite_rdv dont l'année scolaire est hors plage", async () => {
+      await insertBannerDocs([
+        makeBannerDoc({ anneeScolaire: "2025-2026" }),
+        makeBannerDoc({ anneeScolaire: "2022-2023" }),
+      ]);
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.data).toEqual({ souhaite_rdv_count: 1 });
+    });
+
+    // Régression SANTERRE : un jeune souhaite_rdv déjà traité (RDV déjà pris) n'apparaît dans aucune
+    // liste actionnable → il ne doit pas être compté par le bandeau « contactez-les ».
+    it("exclut un jeune souhaite_rdv déjà traité (RDV_PRIS)", async () => {
+      await insertBannerDocs([makeBannerDoc(), makeBannerDoc({ situation: SITUATION_ENUM.RDV_PRIS })]);
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.data).toEqual({ souhaite_rdv_count: 1 });
+    });
+
+    // Un jeune souhaite_rdv « à recontacter » (CONTACTE_SANS_RETOUR) reste actionnable → compté.
+    it("compte un jeune souhaite_rdv à recontacter (CONTACTE_SANS_RETOUR)", async () => {
+      await insertBannerDocs([makeBannerDoc({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR })]);
 
       const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
       expect(res.data).toEqual({ souhaite_rdv_count: 1 });

@@ -144,6 +144,48 @@ exports[`validation-schema > should create validation schema for brevoMissionLoc
 }
 `;
 
+exports[`validation-schema > should create validation schema for brevoSyncSettings > brevoSyncSettings 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "daily_full_sync_enabled": {
+      "bsonType": "bool",
+      "description": "Active le cron quotidien de synchro full vers Brevo",
+    },
+    "events_enabled": {
+      "bsonType": "bool",
+      "description": "Active l'émission d'événements Brevo (API Events) sur transitions métier — prod uniquement",
+    },
+    "instant_sync_enabled": {
+      "bsonType": "bool",
+      "description": "Active la synchro instantanée unitaire (création de compte / changement de statut)",
+    },
+    "key": {
+      "bsonType": "string",
+      "description": "Discriminant du document singleton de configuration",
+    },
+    "updated_at": {
+      "bsonType": "date",
+      "description": "Date de dernière modification d'un toggle",
+    },
+    "updated_by": {
+      "bsonType": "string",
+      "description": "Email de l'administrateur ayant modifié un toggle",
+    },
+  },
+  "required": [
+    "_id",
+    "key",
+    "daily_full_sync_enabled",
+    "instant_sync_enabled",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for connexionInvitations > connexionInvitations 1`] = `
 {
   "additionalProperties": false,

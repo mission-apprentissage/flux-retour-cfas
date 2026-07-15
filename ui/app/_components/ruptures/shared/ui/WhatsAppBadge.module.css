@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background-color: #ededed;
+  background: var(--background-contrast-blue-france, #ececfe);
   color: #3a3a3a;
 }
 

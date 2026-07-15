@@ -84,6 +84,16 @@ const cfaForceVisibleExpr = () => ({
 });
 
 /**
+ * Expression d'agrégation : le jeune a explicitement demandé un rendez-vous
+ * (`souhaite_rdv`, posé via la préqualification / le rappel WhatsApp).
+ * Comme une demande de collaboration CFA, ce signal fort force la visibilité de
+ * l'effectif côté Mission Locale même s'il sortirait sinon de l'outil (jeune en fin
+ * de formation, en abandon +180j, revenu en contrat, ou non visible pour une autre raison).
+ * Aligne la liste sur le compteur de la bannière "Souhaite un RDV", qui ne filtre pas sur ces critères.
+ */
+const souhaiteRdvForceVisibleExpr = () => ({ $eq: [{ $ifNull: ["$souhaite_rdv", false] }, true] });
+
+/**
  * Vérifie si un nouveau contrat est arrivé après une rupture déclarée par le CFA.
  * Retourne true si cfa_rupture_declaration doit être nettoyé.
  */
@@ -149,14 +159,15 @@ const buildEffMissionLocaleFilter = buildEffRuptureAgeFilter;
 
 /**
  * Prédicat "prioritaire" pour la Mission Locale.
- * Une demande de collaboration du CFA (`a_risque_accompagnement_conjoint`) force le
- * passage dans le bloc prioritaire, même si le jeune est revenu en formation
- * (`nouveau_contrat`) ou en abandon +180j.
+ * Une demande de collaboration du CFA (`a_risque_accompagnement_conjoint`) ou une demande
+ * de RDV du jeune (`a_risque_souhaite_rdv`) force le passage dans le bloc prioritaire,
+ * même si le jeune est revenu en formation (`nouveau_contrat`) ou en abandon +180j.
  */
 const buildPrioritaireMatchOr = () => ({
   $or: [
     { a_contacter: true },
     { a_risque_accompagnement_conjoint: true },
+    { a_risque_souhaite_rdv: true },
     { $and: [{ a_risque: true }, { nouveau_contrat: false }] },
   ],
 });
@@ -261,6 +272,9 @@ const matchDernierStatutPipelineMl = (): any => {
         // Collab V2 : un effectif "envoyé" par le CFA (demande de collaboration ou envoi
         // automatique après 45j) reste visible même si le jeune n'est plus rupturant.
         { $expr: cfaForceVisibleExpr() },
+        // Demande de RDV : un jeune ayant sollicité un rendez-vous reste visible même
+        // s'il n'est plus rupturant (ex: revenu en formation / fin de formation).
+        { souhaite_rdv: true },
       ],
     },
   };
@@ -340,6 +354,8 @@ const addFieldFromActivationDate = () => {
       },
       // Collab V2 : un effectif "envoyé" par le CFA reste dans la plage d'activation.
       cfaForceVisibleExpr(),
+      // Demande de RDV : un jeune ayant sollicité un rendez-vous reste dans la plage d'activation.
+      souhaiteRdvForceVisibleExpr(),
     ],
   };
 
@@ -367,6 +383,8 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
       // Effectif "envoyé" par le CFA : demande de collaboration (acc_conjoint)
       // ou envoi automatique après 45j de rupture (CFA en V2 collab).
       cfaForceVisibleExpr(),
+      // Demande de RDV : un jeune ayant sollicité un rendez-vous reste visible côté ML.
+      souhaiteRdvForceVisibleExpr(),
       // Situation déjà définie → toujours visible
       {
         $ne: [{ $ifNull: ["$situation", null] }, null],
@@ -516,16 +534,13 @@ const addMissionLocaleFieldTraitementStatus = () => {
       // Collab V2 : une demande de collaboration du CFA force le caractère prioritaire,
       // indépendamment d'un retour en formation ou d'une rupture de plus de 180 jours.
       ACCOMPAGNEMENT_CONJOINT_CONDITION,
+      // Demande de RDV : un jeune ayant sollicité un rendez-vous est prioritaire,
+      // indépendamment d'un retour en formation ou d'une rupture de plus de 180 jours.
+      SOUHAITE_RDV_CONDITION,
       {
         $and: [
           {
-            $or: [
-              RQTH_CONDITION,
-              MINEUR_CONDITION,
-              ACCOMPAGNEMENT_CONJOINT_CONDITION,
-              WHATSAPP_CALLBACK_CONDITION,
-              SOUHAITE_RDV_CONDITION,
-            ],
+            $or: [RQTH_CONDITION, MINEUR_CONDITION, WHATSAPP_CALLBACK_CONDITION],
           },
           {
             $or: [
@@ -930,11 +945,16 @@ export const missionLocaleBaseAggregation = async (
 const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifId: ObjectId,
-  nom_liste: API_EFFECTIF_LISTE
+  nom_liste: API_EFFECTIF_LISTE,
+  codesPostaux?: string[]
 ) => {
   const aggregation = [
     ...(await missionLocaleBaseAggregation(organisation)),
     ...matchTraitementEffectifPipelineMl(nom_liste, organisation.type),
+    // Filtre villes : restreint le précédent/suivant au sous-ensemble filtré côté liste.
+    ...(codesPostaux && codesPostaux.length > 0
+      ? [{ $match: { "effectif_snapshot.apprenant.adresse.code_postal": { $in: codesPostaux } } }]
+      : []),
     {
       $sort: getSortedRulesByListeType(nom_liste),
     },
@@ -1103,6 +1123,8 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                   $ifNull: ["$$ROOT.identifiant_normalise.prenom", "$$ROOT.effectif_snapshot.apprenant.prenom"],
                 },
                 libelle_formation: "$$ROOT.effectif_snapshot.formation.libelle_long",
+                commune: "$$ROOT.effectif_snapshot.apprenant.adresse.commune",
+                code_postal: "$$ROOT.effectif_snapshot.apprenant.adresse.code_postal",
                 organisme_nom: "$$ROOT.organisme.nom",
                 organisme_raison_sociale: "$$ROOT.organisme.raison_sociale",
                 organisme_enseigne: "$$ROOT.organisme.enseigne",
@@ -1189,7 +1211,8 @@ export const getEffectifFromMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifId: string,
   nom_liste: API_EFFECTIF_LISTE,
-  userId?: ObjectId
+  userId?: ObjectId,
+  codesPostaux?: string[]
 ) => {
   const aggregation = [
     ...(await generateOrganisationMatchStage(organisation)),
@@ -1302,7 +1325,8 @@ export const getEffectifFromMissionLocaleId = async (
   const next = await getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId(
     organisation,
     new ObjectId(effectifId),
-    nom_liste
+    nom_liste,
+    codesPostaux
   );
   return { effectif, ...next };
 };
@@ -1444,6 +1468,42 @@ export const getEffectifsListByMissionLocaleId = async (
   return missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
 };
 
+/**
+ * Retourne la liste des codes postaux / communes du "territoire" d'une Mission Locale,
+ * construite à partir de TOUS ses effectifs (toutes listes confondues). Déduplique par code
+ * postal, ignore les codes postaux absents et trie par code postal croissant. Sert à peupler
+ * les options du filtre "Villes" (le filtrage lui-même reste côté client).
+ */
+export const getPostalCodesByMissionLocaleId = async (
+  missionLocale: IOrganisationMissionLocale
+): Promise<Array<{ value: string; label: string }>> => {
+  const results = await missionLocaleEffectifsDb()
+    .aggregate<{ _id: string; commune: string | null }>([
+      {
+        $match: {
+          mission_locale_id: new ObjectId(missionLocale._id),
+          soft_deleted: { $ne: true },
+          "effectif_snapshot.apprenant.adresse.code_postal": { $nin: [null, ""] },
+        },
+      },
+      {
+        $group: {
+          _id: "$effectif_snapshot.apprenant.adresse.code_postal",
+          // $min (et non $first) pour un libellé déterministe lorsqu'un même code postal porte
+          // plusieurs libellés de commune (communes fusionnées, CEDEX, casse/accents hétérogènes).
+          commune: { $min: "$effectif_snapshot.apprenant.adresse.commune" },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ])
+    .toArray();
+
+  return results.map(({ _id, commune }) => ({
+    value: _id,
+    label: commune ? `${_id}, ${commune}` : _id,
+  }));
+};
+
 export const getEffectifARisqueByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   nom_liste: API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE | API_EFFECTIF_LISTE.PRIORITAIRE
@@ -1474,6 +1534,8 @@ export const getEffectifARisqueByMissionLocaleId = async (
               nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
               prenom: { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom"] },
               libelle_formation: "$effectif_snapshot.formation.libelle_long",
+              commune: "$effectif_snapshot.apprenant.adresse.commune",
+              code_postal: "$effectif_snapshot.apprenant.adresse.code_postal",
               organisme_nom: "$organisme.nom",
               organisme_raison_sociale: "$organisme.raison_sociale",
               organisme_enseigne: "$organisme.enseigne",

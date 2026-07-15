@@ -6,6 +6,7 @@ import brevoMissionLocaleListModelDescriptor, {
 import brevoMissionLocaleTemplateModelDescriptor, {
   IBrevoMissionLocaleTemplate,
 } from "shared/models/data/brevoMissionLocaleTemplate.model";
+import brevoSyncSettingsModelDescriptor, { IBrevoSyncSettings } from "shared/models/data/brevoSyncSettings.model";
 import connexionInvitationsModelDescriptor, {
   IConnexionInvitation,
 } from "shared/models/data/connexionInvitations.model";
@@ -85,6 +86,7 @@ export const modelDescriptors = [
   missionLocaleEffectifLogDescriptor,
   brevoMissionLocaleListModelDescriptor,
   brevoContactListModelDescriptor,
+  brevoSyncSettingsModelDescriptor,
   connexionInvitationsModelDescriptor,
   transmissionDailyReportDescriptor,
   missionLocaleStatsDescriptor,
@@ -133,6 +135,8 @@ export const brevoMissionLocaleListDb = () =>
   getDbCollection<IBrevoMissionLocaleList>(brevoMissionLocaleListModelDescriptor.collectionName);
 export const brevoContactListDb = () =>
   getDbCollection<IBrevoContactList>(brevoContactListModelDescriptor.collectionName);
+export const brevoSyncSettingsDb = () =>
+  getDbCollection<IBrevoSyncSettings>(brevoSyncSettingsModelDescriptor.collectionName);
 export const connexionInvitationsDb = () =>
   getDbCollection<IConnexionInvitation>(connexionInvitationsModelDescriptor.collectionName);
 export const transmissionDailyReportDb = () =>

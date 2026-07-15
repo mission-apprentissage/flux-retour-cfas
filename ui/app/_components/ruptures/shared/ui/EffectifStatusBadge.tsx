@@ -245,7 +245,7 @@ function AContacterBadge({ iconSize, fontSize }: { iconSize: string; fontSize: s
 function SouhaiteRdvBadge({ fontSize }: { fontSize: string }) {
   return (
     <span className={`fr-badge ${badgeStyles.whatsappBadgeCallback}`} aria-label="Effectif souhaite un RDV">
-      <i className="ri-message-3-fill fr-icon--sm" style={{ color: "#18753C" }} />
+      <i className="ri-chat-check-fill fr-icon--sm" style={{ color: "#18753C" }} />
       <span className={styles.availabilityDot} aria-hidden="true">
         <span className={styles.availabilityDotOuter} />
         <span className={styles.availabilityDotInner} />
@@ -254,19 +254,21 @@ function SouhaiteRdvBadge({ fontSize }: { fontSize: string }) {
       <Tooltip
         kind="hover"
         title={
-          <span className={styles.tooltipContent}>
+          <div className={styles.tooltipContent}>
             <span className={styles.tooltipIcon} style={{ display: "inline-flex", alignItems: "center" }}>
-              <i className="ri-message-3-fill fr-icon--sm" style={{ color: "#18753C" }} />
+              <i className="ri-chat-check-fill fr-icon--sm" style={{ color: "#18753C" }} />
               <span className={styles.availabilityDot} aria-hidden="true">
                 <span className={styles.availabilityDotOuter} />
                 <span className={styles.availabilityDotInner} />
               </span>
             </span>
-            <span>
-              Le jeune a indiqu&eacute; via WhatsApp qu&apos;il souhaite &ecirc;tre recontact&eacute; par la Mission
-              Locale.
-            </span>
-          </span>
+            <div>
+              <p className={styles.tooltipText}>Nous avons contacté ce jeune par message pour qualifier son intérêt.</p>
+              <p className={styles.tooltipText}>
+                <strong>Il ou elle a demandé à être recontacté•e par la Mission Locale.</strong>
+              </p>
+            </div>
+          </div>
         }
       />
     </span>

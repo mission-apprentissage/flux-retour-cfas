@@ -1,72 +1,60 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { CFA_SUIVI_CATEGORY } from "shared/models/routes/organismes/cfa";
+import type { CfaSuiviCategory } from "shared/models/routes/organismes/cfa";
 
 import { CfaCollaborationsList } from "@/app/_components/ruptures/cfa/CfaCollaborationsList";
 import { CfaEffectifsSkeleton } from "@/app/_components/ruptures/cfa/CfaEffectifsSkeleton";
-import { useCfaEffectifs } from "@/app/_components/ruptures/cfa/hooks";
+import { useCfaSuiviMissionLocale, useCfaUrlParams } from "@/app/_components/ruptures/cfa/hooks";
 import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
-import { ACTIVE_COLLAB_STATUSES } from "@/common/types/cfaRuptures";
+
+const VALID_CATEGORIES = Object.values(CFA_SUIVI_CATEGORY) as string[];
 
 export default function CfaCollaborationsClient() {
   const { user } = useAuth();
   const organismeId = user?.organisation?.organisme_id;
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { searchParams, updateParams } = useCfaUrlParams("/cfa/collaborations");
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   useEffect(() => {
     trackPlausibleEvent("cfa_collab_en_cours_ouverte");
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const categoryParam = searchParams?.get("category") || "";
+  const category = (
+    VALID_CATEGORIES.includes(categoryParam) ? categoryParam : CFA_SUIVI_CATEGORY.COLLAB
+  ) as CfaSuiviCategory;
   const page = Number(searchParams?.get("page")) || 1;
-  const limit = Number(searchParams?.get("limit")) || 20;
   const search = searchParams?.get("search") || "";
-  const sort = searchParams?.get("sort") || "last_activity";
+  const sort = searchParams?.get("sort") || "date_rupture";
   const order = searchParams?.get("order") === "asc" ? "asc" : "desc";
-  const collabStatusParam = searchParams?.get("collab_status") || ACTIVE_COLLAB_STATUSES.join(",");
+  const collabStatusParam = searchParams?.get("collab_status") || "";
   const formation = searchParams?.get("formation") || undefined;
 
   const [searchInput, setSearchInput] = useState(search);
   const [debouncedSearch, setDebouncedSearch] = useState(search);
 
-  const updateParams = useCallback(
-    (updates: Record<string, string | undefined>) => {
-      const params = new URLSearchParams(searchParams?.toString() || "");
-      for (const [key, value] of Object.entries(updates)) {
-        if (value) {
-          params.set(key, value);
-        } else {
-          params.delete(key);
-        }
-      }
-      router.push(`/cfa/collaborations?${params.toString()}`, { scroll: false });
-    },
-    [searchParams, router]
-  );
-
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchInput);
-    }, 300);
+    const timer = setTimeout(() => setDebouncedSearch(searchInput), 300);
     return () => clearTimeout(timer);
   }, [searchInput]);
 
   useEffect(() => {
     if (debouncedSearch !== search) {
-      updateParams({ search: debouncedSearch || undefined, page: "1" });
+      updateParams({ search: debouncedSearch || undefined, page: undefined });
     }
   }, [debouncedSearch, search, updateParams]);
 
-  const { data, isLoading } = useCfaEffectifs(organismeId, {
+  const { data, isLoading } = useCfaSuiviMissionLocale(organismeId, {
+    category,
     page,
-    limit,
+    limit: 100,
     search: debouncedSearch || undefined,
     sort,
     order,
-    collab_status: collabStatusParam,
+    collab_status: collabStatusParam || undefined,
     formation,
   });
 
@@ -78,6 +66,9 @@ export default function CfaCollaborationsClient() {
     <div className="fr-container">
       <CfaCollaborationsList
         data={data ?? null}
+        organismeId={organismeId ?? ""}
+        category={category}
+        onCategoryChange={(c) => updateParams({ category: c, page: undefined, collab_status: undefined })}
         searchInput={searchInput}
         onSearchChange={setSearchInput}
         sort={sort}

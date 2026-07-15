@@ -4,7 +4,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Highlight } from "@codegouvfr/react-dsfr/Highlight";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import React, { useCallback, useState } from "react";
 import { IEffectifMissionLocale } from "shared";
 
@@ -117,6 +117,7 @@ export function EffectifInfo({
   const { user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [effectifUpdated, setEffectifUpdated] = useState(false);
   const [infosOpen, setInfosOpen] = useState(false);
   const isPrioritaire = effectif.prioritaire && (effectif.a_traiter || effectif.injoignable);
@@ -128,7 +129,9 @@ export function EffectifInfo({
           const pathSegments = pathname.split("/");
           pathSegments[pathSegments.length - 1] = nextEffectifId;
           const newPath = pathSegments.join("/");
-          router.push(newPath);
+          // Conserve la query (nom_liste + filtre villes) pour rester dans le même sous-ensemble.
+          const query = searchParams?.toString();
+          router.push(query ? `${newPath}?${query}` : newPath);
         } else {
           router.push("/");
         }
@@ -136,7 +139,7 @@ export function EffectifInfo({
         router.push("/");
       }
     },
-    [nextEffectifId, pathname, router]
+    [nextEffectifId, pathname, router, searchParams]
   );
 
   const handleContactFormSuccess = (shouldContinue?: boolean) => {

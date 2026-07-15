@@ -88,7 +88,7 @@ describe("hydrateEffectifsComputedTypesGenerique", () => {
       });
 
       const { insertedId } = await effectifsDb().insertOne(effectif as IEffectif);
-      await hydrateEffectifsComputedTypesGenerique();
+      await hydrateEffectifsComputedTypesGenerique({ evaluationDate });
 
       const updatedEffectif = await effectifsDb().findOne({ _id: insertedId });
 

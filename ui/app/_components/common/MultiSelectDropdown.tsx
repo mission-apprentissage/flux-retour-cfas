@@ -1,13 +1,16 @@
 "use client";
 
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import styles from "./MultiSelectDropdown.module.css";
 
 interface Option {
   value: string;
   label: string;
+  // Rendu riche optionnel de l'option (ex: mise en gras d'une partie). `label` reste le texte
+  // de repli, utilisé pour l'affichage du bouton (getDisplayText) et l'accessibilité.
+  labelNode?: ReactNode;
 }
 
 interface MultiSelectDropdownProps {
@@ -17,6 +20,10 @@ interface MultiSelectDropdownProps {
   placeholder?: string;
   label?: string;
   getDisplayText?: (selected: string[], options: Option[], placeholder: string) => string;
+  enableSelectAll?: boolean;
+  renderFooter?: (api: { close: () => void }) => ReactNode;
+  onClose?: () => void;
+  fitContent?: boolean;
 }
 
 function defaultDisplayText(_selected: string[], _options: Option[], placeholder: string): string {
@@ -30,23 +37,34 @@ export function MultiSelectDropdown({
   placeholder = "Sélectionner...",
   label,
   getDisplayText = defaultDisplayText,
+  enableSelectAll = false,
+  renderFooter,
+  onClose,
+  fitContent = false,
 }: MultiSelectDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  const dismiss = useCallback(() => {
+    setIsOpen(false);
+    setFocusedIndex(-1);
+    onCloseRef.current?.();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        setFocusedIndex(-1);
+        dismiss();
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [dismiss]);
 
   const handleToggle = (optionValue: string) => {
     if (value.includes(optionValue)) {
@@ -54,6 +72,11 @@ export function MultiSelectDropdown({
     } else {
       onChange([...value, optionValue]);
     }
+  };
+
+  const isAllSelected = options.length > 0 && value.length === options.length;
+  const handleSelectAll = () => {
+    onChange(isAllSelected ? [] : options.map((o) => o.value));
   };
 
   const handleKeyDown = useCallback(
@@ -85,12 +108,11 @@ export function MultiSelectDropdown({
           break;
         case "Escape":
           e.preventDefault();
-          setIsOpen(false);
-          setFocusedIndex(-1);
+          dismiss();
           break;
       }
     },
-    [isOpen, focusedIndex, options, value]
+    [isOpen, focusedIndex, options, value, dismiss]
   );
 
   useEffect(() => {
@@ -102,15 +124,23 @@ export function MultiSelectDropdown({
   const displayText = getDisplayText(value, options, placeholder);
 
   return (
-    <div className={styles.container} ref={dropdownRef} onKeyDown={handleKeyDown}>
+    <div
+      className={`${styles.container} ${fitContent ? styles.containerFit : ""}`}
+      ref={dropdownRef}
+      onKeyDown={handleKeyDown}
+    >
       {label && <label className="fr-label">{label}</label>}
       <div className={styles.selectWrapper}>
         <button
           type="button"
-          className={styles.selectButton}
+          className={`${styles.selectButton} ${fitContent ? styles.selectButtonFit : ""}`}
           onClick={() => {
-            setIsOpen(!isOpen);
-            if (!isOpen) setFocusedIndex(0);
+            if (isOpen) {
+              dismiss();
+            } else {
+              setIsOpen(true);
+              setFocusedIndex(0);
+            }
           }}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
@@ -120,8 +150,31 @@ export function MultiSelectDropdown({
         </button>
 
         {isOpen && (
-          <div className={styles.dropdown} role="listbox" aria-multiselectable="true">
+          <div
+            className={`${styles.dropdown} ${fitContent ? styles.dropdownFit : ""}`}
+            role="listbox"
+            aria-multiselectable="true"
+          >
             <div className={styles.dropdownContent}>
+              {enableSelectAll && options.length > 1 && (
+                <div
+                  className={`${styles.option} ${styles.selectAllOption}`}
+                  role="option"
+                  aria-selected={isAllSelected}
+                >
+                  <Checkbox
+                    options={[
+                      {
+                        label: isAllSelected ? "Tout désélectionner" : "Tout sélectionner",
+                        nativeInputProps: {
+                          checked: isAllSelected,
+                          onChange: handleSelectAll,
+                        },
+                      },
+                    ]}
+                  />
+                </div>
+              )}
               {options.map((option, index) => (
                 <div
                   key={option.value}
@@ -135,7 +188,7 @@ export function MultiSelectDropdown({
                   <Checkbox
                     options={[
                       {
-                        label: option.label,
+                        label: option.labelNode ?? option.label,
                         nativeInputProps: {
                           checked: value.includes(option.value),
                           onChange: () => handleToggle(option.value),
@@ -146,6 +199,7 @@ export function MultiSelectDropdown({
                 </div>
               ))}
             </div>
+            {renderFooter && <div className={styles.footer}>{renderFooter({ close: () => setIsOpen(false) })}</div>}
           </div>
         )}
       </div>

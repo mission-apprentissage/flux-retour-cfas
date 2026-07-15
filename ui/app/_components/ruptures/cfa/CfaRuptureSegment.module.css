@@ -36,54 +36,86 @@
   margin-top: 1.5rem;
 }
 
-.noticeBox {
-  background: var(--background-default-grey);
-  border: 1px solid var(--border-default-grey);
-  border-radius: 0.25rem;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.noticeTitle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0 0 0.25rem;
-  font-weight: 700;
-  font-size: 0.875rem;
-  color: var(--text-default-grey);
-}
-
-.noticeTitle i {
-  color: var(--text-mention-grey);
-}
-
-.noticeContent {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--text-mention-grey);
-}
-
 .emptyMessage {
   color: var(--text-mention-grey);
   font-style: italic;
   padding: 1rem 0;
 }
 
-.expandContainer {
-  display: flex;
-  justify-content: center;
-  margin-top: 0.5rem;
+/* Tableaux à colonnes figées : aligne les sections avant/après le bandeau "+45j" */
+.fixedTable {
+  table-layout: fixed;
+  width: 100%;
 }
 
-.expandButton {
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 24px;
-  text-decoration: underline;
-  padding: 8px 12px 8px 16px;
-  gap: 8px;
+/* Bandeau de section "+45j après rupture" — bloc détaché, hors tableau (cf. maquette) */
+.transmisAutoBanner {
   background: var(--background-alt-grey);
   border: 1px solid var(--border-default-grey);
   border-radius: 4px;
+  padding: 16px 32px;
+  margin: 8px 0 16px;
+}
+
+.transmisAutoTitle {
+  margin: 0 0 16px;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 28px;
+  color: var(--text-default-grey);
+}
+
+.transmisAutoNoticeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.transmisAutoIcon {
+  flex-shrink: 0;
+  color: var(--text-mention-grey);
+}
+
+.transmisAutoText {
+  flex: 1 1 auto;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--text-default-grey);
+}
+
+.transmisAutoToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 0;
+  background: none;
+  border: none;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--text-action-high-blue-france);
+  text-decoration: underline;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.transmisAutoToggle i {
+  color: var(--text-action-high-blue-france);
+}
+
+.transmisAutoContent {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-mention-grey);
+}
+
+.transmisAutoTags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }

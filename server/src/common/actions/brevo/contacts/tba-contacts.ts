@@ -25,7 +25,7 @@ import config from "@/config";
 
 import { getOrCreateConnexionInvitationsByEmails } from "./connexion-invitations.actions";
 import { cleanSiret, formatCivilite, formatEmail, formatJoinedList, formatName } from "./formatters";
-import { BrevoAttributeType, ContactListDefinition, ContactListUtm } from "./types";
+import { BrevoAttributeType, ContactListDefinition, ContactListUtm, FetchContactsFilter } from "./types";
 import { buildUtmUrl } from "./utm";
 
 const TBA_CONTACTS_UTM: ContactListUtm = {
@@ -222,12 +222,25 @@ type TbaAdresse = {
  *   2. `find` séparé sur `organismes` filtré par `uai ∈ [...]`. Jointure JS sur
  *      le couple (uai, siret) — un même uai peut exister sur plusieurs sirets.
  */
-const selectTbaContacts = async (): Promise<TbaUserContext[]> => {
+// Tous les statuts de compte synchronisés vers Brevo. On synchronise aussi les
+// comptes en attente (email/admin) pour que Brevo reflète l'ensemble du cycle de
+// vie ; `STATUT_COMPTE_USER` permet la segmentation côté Brevo.
+const SYNCED_ACCOUNT_STATUSES = ["CONFIRMED", "PENDING_ADMIN_VALIDATION", "PENDING_EMAIL_VALIDATION"];
+
+const selectTbaContacts = async (filter?: FetchContactsFilter): Promise<TbaUserContext[]> => {
   type UserWithOrg = Omit<TbaUserContext, "organisme">;
 
   // Phase 1 — Aggregate users + organisations (lookup `_id`, indexé).
   const usersWithOrgsStages = [
-    { $match: { account_status: "CONFIRMED", unsubscribe: { $ne: true } } },
+    {
+      $match: {
+        account_status: { $in: SYNCED_ACCOUNT_STATUSES },
+        unsubscribe: { $ne: true },
+        // Filtre optionnel pour la synchro unitaire (appliqué AVANT le `$project`
+        // qui drop le `_id`).
+        ...(filter?.userIds?.length ? { _id: { $in: filter.userIds } } : {}),
+      },
+    },
     {
       $lookup: {
         from: "organisations",
@@ -763,8 +776,8 @@ const buildLienByEmail = async (users: TbaUserContext[]): Promise<Map<string, st
   return lienByEmail;
 };
 
-const fetchContacts = async (): Promise<BrevoContact[]> => {
-  const users = await selectTbaContacts();
+const fetchContacts = async (filter?: FetchContactsFilter): Promise<BrevoContact[]> => {
+  const users = await selectTbaContacts(filter);
 
   const cfaOrgIds = users
     .filter((u) => u.organisation.type === "ORGANISME_FORMATION")
@@ -826,7 +839,7 @@ export const tbaContactsContactList: ContactListDefinition = {
   slug: "tba-contacts",
   label: "TBA — Tous les utilisateurs",
   description:
-    "Tous les utilisateurs TBA confirmés et non désabonnés (OF, ML, ARML, …, hors administrateurs). Segmentation côté Brevo via les attributs cfa_* et ml_*.",
+    "Tous les utilisateurs TBA non désabonnés, quel que soit leur statut de compte (confirmés et en attente email/admin ; OF, ML, ARML, …, hors administrateurs). Segmentation côté Brevo via STATUT_COMPTE_USER et les attributs cfa_* et ml_*.",
   brevoFolderId: config.brevo.campaignFolderId,
   brevoListId: config.brevo.tbaContactsListId,
   attributesSchema: tbaContactsAttributesSchema,

@@ -19,6 +19,8 @@ import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
   getEffectifsListByMissionLocaleId,
+  getPostalCodesByMissionLocaleId,
+  missionLocaleBaseAggregation,
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
@@ -32,6 +34,7 @@ export default () => {
   const router = express.Router();
   router.get("/effectif/:id", returnResult(getEffectifMissionLocale));
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
+  router.get("/villes", returnResult(getVillesMissionLocale));
   router.get("/export/effectifs", returnResult(exportEffectifMissionLocale));
   router.post("/effectif/:id", returnResult(updateEffectifMissionLocaleData));
   router.get("/parametres", returnResult(getMlParametres));
@@ -42,12 +45,23 @@ export default () => {
 
 const getMlBannerStats = async (_req, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
-  const souhaite_rdv_count = await missionLocaleEffectifsDb().countDocuments({
-    mission_locale_id: new ObjectId(missionLocale._id),
-    souhaite_rdv: true,
-    soft_deleted: { $ne: true },
-  });
-  return { souhaite_rdv_count };
+  // Le compteur du bandeau doit refléter exactement ce que le conseiller retrouve dans la liste.
+  // On réutilise donc le pipeline de visibilité (mêmes filtres âge / année scolaire / activation que
+  // la liste et le récap hebdo) plutôt qu'un countDocuments brut : ce dernier comptait aussi des jeunes
+  // filtrés hors liste (≥ 26 ans, année scolaire hors plage, sans date de rupture) et gonflait le bandeau.
+  const result = await missionLocaleEffectifsDb()
+    .aggregate([
+      { $match: { souhaite_rdv: true } },
+      ...(await missionLocaleBaseAggregation(missionLocale)),
+      // On ne compte que les jeunes encore actionnables : « à traiter » (situation nulle) ou
+      // « à recontacter » (CONTACTE_SANS_RETOUR). On exclut les « déjà traités » (RDV déjà pris,
+      // nouveau projet…), sinon le bandeau « contactez-les » compte des jeunes déjà pris en charge,
+      // absents des listes que le conseiller consulte.
+      { $match: { $or: [{ a_traiter: true }, { injoignable: true }] } },
+      { $count: "souhaite_rdv_count" },
+    ])
+    .next();
+  return { souhaite_rdv_count: result?.souhaite_rdv_count ?? 0 };
 };
 
 const zMlParametresBody = z.object({
@@ -98,13 +112,22 @@ const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
   return await getAllEffectifsParMois(missionLocale, userId);
 };
 
+const getVillesMissionLocale = async (_req, { locals }) => {
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  if (!missionLocale) {
+    throw Boom.forbidden("No mission locale in session");
+  }
+  return await getPostalCodesByMissionLocaleId(missionLocale);
+};
+
 const getEffectifMissionLocale = async (req, { locals }) => {
-  const { nom_liste } = await validateFullZodObjectSchema(req.query, effectifMissionLocaleListe);
+  const { nom_liste, code_postal } = await validateFullZodObjectSchema(req.query, effectifMissionLocaleListe);
   const effectifId = req.params.id;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
   const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
-  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste, userId);
+  const codesPostaux = code_postal ? code_postal.split(",").filter(Boolean) : undefined;
+  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste, userId, codesPostaux);
 };
 
 const exportEffectifMissionLocale = async (req, res) => {

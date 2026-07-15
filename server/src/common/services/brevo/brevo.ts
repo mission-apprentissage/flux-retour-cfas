@@ -1,4 +1,9 @@
-import brevo, { AccountApiApiKeys, ContactsApiApiKeys, TransactionalEmailsApiApiKeys } from "@getbrevo/brevo";
+import brevo, {
+  AccountApiApiKeys,
+  ContactsApiApiKeys,
+  EventsApiApiKeys,
+  TransactionalEmailsApiApiKeys,
+} from "@getbrevo/brevo";
 import { captureException } from "@sentry/node";
 import Boom from "boom";
 import { format } from "date-fns";
@@ -27,8 +32,20 @@ const initContactApi = () => {
   return apiContactInstance;
 };
 
+const initEventApi = () => {
+  const apiEventInstance = new brevo.EventsApi();
+  const apiKey = config.brevo.apiKey;
+  if (!apiKey) {
+    captureException(new Error("Brevo API key not set"));
+    return null;
+  }
+  apiEventInstance.setApiKey(EventsApiApiKeys.apiKey, apiKey);
+  return apiEventInstance;
+};
+
 const EmailInstance: brevo.TransactionalEmailsApi | null = initEmailApi();
 const ContactInstance: brevo.ContactsApi | null = initContactApi();
+const EventInstance: brevo.EventsApi | null = initEventApi();
 
 export const sendTransactionalEmail = async (recipientEmail: string, templateId: number) => {
   if (!EmailInstance) {
@@ -407,4 +424,47 @@ export const checkBrevoHealth = async (): Promise<BrevoHealthReport> => {
   }
 
   return { apiKey: apiKeyCheck, tbaContactsList: listCheck };
+};
+
+// Identifiants d'un contact côté Brevo pour l'API Events (au moins un requis).
+export type BrevoEventIdentifiers = {
+  emailId?: string;
+  extId?: string;
+  phoneId?: string;
+};
+
+export type BrevoEventPayload = {
+  eventName: string;
+  identifiers: BrevoEventIdentifiers;
+  eventDate?: string;
+  contactProperties?: Record<string, unknown>;
+  eventProperties?: Record<string, unknown>;
+};
+
+/**
+ * Émet un événement vers l'API Events de Brevo (`POST /v3/events`) pour déclencher
+ * des scénarios d'automation. Throw en cas d'erreur Brevo (message explicite) afin
+ * que le job appelant puisse retry — l'`enqueue` en amont, lui, ne throw jamais.
+ */
+export const sendBrevoEvent = async (payload: BrevoEventPayload) => {
+  if (!EventInstance) {
+    throw Boom.internal("Brevo instance not initialized");
+  }
+
+  const event = new brevo.Event();
+  event.eventName = payload.eventName;
+  event.identifiers = payload.identifiers;
+  if (payload.eventDate) event.eventDate = payload.eventDate;
+  if (payload.contactProperties) event.contactProperties = payload.contactProperties;
+  if (payload.eventProperties) event.eventProperties = payload.eventProperties;
+
+  try {
+    return await EventInstance.createEvent(event);
+  } catch (e: any) {
+    captureException(e);
+    const brevoBody = e?.response?.body ?? e?.body;
+    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e?.message ?? "unknown error";
+    const status = e?.response?.statusCode ?? e?.statusCode ?? "?";
+    throw new Error(`Brevo API error [${status}] when creating event "${payload.eventName}": ${brevoMsg}`);
+  }
 };

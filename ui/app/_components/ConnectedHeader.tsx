@@ -74,7 +74,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
         baseItems.push({
           text: (
             <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
-              Collaborations en cours
+              Suivi Missions Locales
               {unreadCount > 0 && (
                 <span
                   style={{
