@@ -32,7 +32,6 @@ export * from "./ParentGroupIcon";
 export * from "./Settings4Fill";
 export * from "./ShowPassword";
 export * from "./SubtractLine";
-export * from "./Support";
 export * from "./TechnicalError";
 export * from "./Trash";
 export * from "./UploadLine";
