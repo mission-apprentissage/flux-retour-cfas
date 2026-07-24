@@ -2,10 +2,6 @@ name: CI
 
 on:
   workflow_call:
-    secrets:
-      CODECOV_TOKEN:
-        description: Code coverrage token
-        required: true
 jobs:
   npm-packages-check:
     runs-on: ubuntu-latest
@@ -16,19 +12,50 @@ jobs:
           fetch-depth: 1
           persist-credentials: true
 
-      - name: Clone mna-npm-check repository
-        uses: actions/checkout@v4
-        with:
-          repository: mission-apprentissage/mna-npm-check
-          path: mna-npm-check
-
       - name: Analyze NPM dependancies
-        run: mna-npm-check/npm-check.sh -p .
+        uses: ./.github/actions/npm-check
 
-  tests:
+  lint:
     if: ${{ success() }}
     needs: ["npm-packages-check"]
-    name: "Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+
+      - name: Make sure to use same dependencies version across all packages
+        run: yarn dedupe --check
+
+      - name: lint
+        run: yarn lint:node
+
+      - name: prettier
+        run: yarn prettier:check
+
+  typecheck:
+    if: ${{ success() }}
+    needs: ["npm-packages-check"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+
+      - name: typecheck
+        run: yarn typecheck:ci
+
+  test-node:
+    if: ${{ success() }}
+    needs: ["npm-packages-check"]
     runs-on: ubuntu-latest
     services:
       mongodb:
@@ -41,45 +68,38 @@ jobs:
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-node@v4
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+
+      - name: test
+        run: yarn test:ci:node
+
+  # Commandes exécutées en direct (sans yarn, qui exige un install node) :
+  # miroir des scripts classifier:install / lint:classifier / test:ci:classifier
+  test-classifier:
+    if: ${{ success() }}
+    needs: ["npm-packages-check"]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server-classifier
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v6
         with:
-          node-version: 22.6
+          fetch-depth: 1
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - uses: actions/cache@v4
-        with:
-          path: |
-            **/node_modules
-            .yarn/install-state.gz
-            .yarn/cache
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: yarn-
-
-      - name: Install dependencies
-        run: yarn install
+          cache: pip
+          cache-dependency-path: server-classifier/requirements*.txt
 
       - name: Install classifier dependencies
-        run: yarn classifier:install
+        run: python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 
-      - name: Make sure to use same dependencies version across all packages
-        run: yarn dedupe --check
+      - name: lint classifier
+        run: .venv/bin/ruff check . && .venv/bin/ruff format --check .
 
-      - name: lint
-        run: yarn lint
-
-      - name: typecheck
-        run: yarn typecheck:ci
-
-      - name: test
-        run: yarn test:ci
-
-      - name: prettier
-        run: yarn prettier:check
-
-      - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: test classifier
+        run: .venv/bin/pytest -v

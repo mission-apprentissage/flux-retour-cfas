@@ -1,0 +1,57 @@
+name: Setup project
+description: Setup Node.js, restauration du cache yarn et installation des dépendances
+
+inputs:
+  node-version:
+    description: Version de Node.js
+    required: false
+    default: "22.6"
+  openpgp-key:
+    description: Clé privée OpenPGP à importer dans le keyring (active aussi le setup SOPS)
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Initialize the GnuPG keyring
+      if: inputs.openpgp-key != ''
+      run: echo -n "$OPENPGP_KEY" | gpg --import
+      shell: bash
+      env:
+        OPENPGP_KEY: ${{ inputs.openpgp-key }}
+
+    - name: Setup SOPS
+      if: inputs.openpgp-key != ''
+      uses: nhedger/setup-sops@v2
+
+    - uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Restore yarn cache
+      id: yarn-cache
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          **/node_modules
+          .yarn/install-state.gz
+          .yarn/cache
+        key: yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: yarn-
+
+    - name: Install dependencies
+      run: yarn install --immutable
+      shell: bash
+
+    # Sauvegarde immédiate après l'install : le cache est conservé même si un
+    # step ultérieur du job échoue (remplace l'option dépréciée save-always)
+    - name: Save yarn cache
+      if: always() && steps.yarn-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          **/node_modules
+          .yarn/install-state.gz
+          .yarn/cache
+        key: yarn-${{ hashFiles('**/yarn.lock') }}
