@@ -23,14 +23,8 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Clone mna-npm-check repository
-        uses: actions/checkout@v6
-        with:
-          repository: mission-apprentissage/mna-npm-check
-          path: mna-npm-check
-
       - name: Analyze NPM dependancies
-        run: mna-npm-check/npm-check.sh -p .
+        uses: ./.github/actions/npm-check
 
   build:
     if: ${{ success() }}
@@ -91,7 +85,7 @@ jobs:
         run: echo "VERSION=$(git describe --tags --abbrev=0 | cut -c2-)" >> "$GITHUB_OUTPUT"
 
       - name: bump and release
-        run: .bin/mna app:build "${{ inputs.version }}" push $(git rev-parse HEAD) "${{ inputs.environment }}"
+        run: .bin/mna app:build "${{ inputs.version }}" push "$(git rev-parse HEAD)" "${{ inputs.environment }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
