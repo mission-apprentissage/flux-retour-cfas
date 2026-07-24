@@ -60,7 +60,9 @@ jobs:
 
       - name: Add Job summary
         if: always()
-        run: echo 'You can get logs using `.bin/mna app:deploy:log:decrypt ${{ github.run_id }} logs-sync-preprod`' >> $GITHUB_STEP_SUMMARY
+        run: |
+          # shellcheck disable=SC2016 # les backticks sont du markdown, pas une substitution shell
+          echo 'You can get logs using `.bin/mna app:deploy:log:decrypt ${{ github.run_id }} logs-sync-preprod`' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Notify failure on Slack
         uses: ravsamhq/notify-slack-action@v2
