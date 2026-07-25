@@ -8,6 +8,7 @@ import { captureException } from "@sentry/node";
 import Boom from "boom";
 import { format } from "date-fns";
 
+import logger from "@/common/logger";
 import config from "@/config";
 
 const initEmailApi = () => {
@@ -47,21 +48,58 @@ const EmailInstance: brevo.TransactionalEmailsApi | null = initEmailApi();
 const ContactInstance: brevo.ContactsApi | null = initContactApi();
 const EventInstance: brevo.EventsApi | null = initEventApi();
 
-export const sendTransactionalEmail = async (recipientEmail: string, templateId: number) => {
+export interface SendTransactionalEmailOptions {
+  cc?: string[];
+  /**
+   * Hors production, redirige l'email vers cette adresse (l'utilisateur connecté qui teste) au lieu
+   * du vrai destinataire. Permet de tester les envois (ex. invitation CFA via impersonation d'une ML)
+   * sans écrire aux vrais destinataires. Sans aucun effet en production.
+   */
+  redirectRecipientInNonProdTo?: string;
+}
+
+export const sendTransactionalEmail = async (
+  recipientEmail: string,
+  templateId: number,
+  params?: Record<string, unknown>,
+  options?: SendTransactionalEmailOptions
+) => {
   if (!EmailInstance) {
     throw Boom.internal("Brevo instance not initialized");
   }
 
-  const brevoAttributes = await getContactDetails(recipientEmail);
+  // Par défaut les variables du template proviennent de la fiche contact Brevo du destinataire
+  // (cas des campagnes ML → jeunes). Quand `params` est fourni, on les passe directement : utile
+  // lorsque le destinataire n'est pas un contact Brevo (ex. le directeur d'un CFA invité par une ML).
+  const emailParams = params ?? (await getContactDetails(recipientEmail));
 
-  if (!brevoAttributes) {
+  if (!emailParams) {
     throw Boom.internal("No Brevo attributes found");
+  }
+
+  // Garde-fou hors production : on n'écrit jamais au vrai destinataire mais à l'utilisateur qui teste.
+  const redirectTo = config.env !== "production" ? options?.redirectRecipientInNonProdTo : undefined;
+  const finalRecipient = redirectTo || recipientEmail;
+  const isRedirected = finalRecipient !== recipientEmail;
+
+  if (isRedirected) {
+    logger.info(
+      { templateId, realRecipient: recipientEmail, redirectedTo: finalRecipient, env: config.env },
+      "Email Brevo redirigé vers l'utilisateur de test (hors production)"
+    );
   }
 
   const sendSmtpEmail = new brevo.SendSmtpEmail();
   sendSmtpEmail.templateId = templateId;
-  sendSmtpEmail.to = [{ email: recipientEmail }];
-  sendSmtpEmail.params = brevoAttributes;
+  sendSmtpEmail.to = [{ email: finalRecipient }];
+  // En mode redirigé, on expose le vrai destinataire dans les variables pour information du testeur.
+  sendSmtpEmail.params = isRedirected
+    ? { ...(emailParams as Record<string, unknown>), DESTINATAIRE_REEL: recipientEmail }
+    : emailParams;
+  // Pas de CC quand l'email est redirigé (le testeur est déjà le destinataire principal).
+  if (options?.cc?.length && !isRedirected) {
+    sendSmtpEmail.cc = options.cc.map((email) => ({ email }));
+  }
   try {
     return await EmailInstance.sendTransacEmail(sendSmtpEmail);
   } catch (e) {

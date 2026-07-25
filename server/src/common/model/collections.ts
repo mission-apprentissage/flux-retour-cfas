@@ -23,6 +23,9 @@ import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invi
 import invitationsArchiveModelDescriptor, { IInvitationArchive } from "shared/models/data/invitationsArchive.model";
 import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtSessions.model";
 import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/models/data/maintenanceMessages.model";
+import missionLocaleCfaInvitationsDescriptor, {
+  IMissionLocaleCfaInvitation,
+} from "shared/models/data/missionLocaleCfaInvitations.model";
 import missionLocaleEffectifDescriptor, {
   IMissionLocaleEffectif,
 } from "shared/models/data/missionLocaleEffectif.model";
@@ -81,6 +84,7 @@ export const modelDescriptors = [
   transmissionV2Descriptor,
   ReseauxModelDescriptor,
   missionLocaleEffectifDescriptor,
+  missionLocaleCfaInvitationsDescriptor,
   regionsModelDescriptor,
   brevoMissionLocaleTemplateModelDescriptor,
   missionLocaleEffectifLogDescriptor,
@@ -124,6 +128,8 @@ export const reseauxDb = () => getDbCollection<IReseau>(ReseauxModelDescriptor.c
 
 export const missionLocaleEffectifsDb = () =>
   getDbCollection<IMissionLocaleEffectif>(missionLocaleEffectifDescriptor.collectionName);
+export const missionLocaleCfaInvitationsDb = () =>
+  getDbCollection<IMissionLocaleCfaInvitation>(missionLocaleCfaInvitationsDescriptor.collectionName);
 export const missionLocaleStatsDb = () =>
   getDbCollection<IMissionLocaleStats>(missionLocaleStatsDescriptor.collectionName);
 export const missionLocaleEffectifsLogDb = () =>

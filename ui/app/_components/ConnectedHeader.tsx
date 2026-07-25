@@ -51,8 +51,17 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
     if (organisationType === ORGANISATION_TYPE.MISSION_LOCALE) {
       baseItems.push({
         text: "Mon tableau de bord",
+        isActive: pathname === "/mission-locale" || pathname?.startsWith("/mission-locale/validation"),
         linkProps: {
           href: "/mission-locale",
+          target: "_self",
+        },
+      });
+      baseItems.push({
+        text: "Inviter les CFA",
+        isActive: pathname?.startsWith("/mission-locale/inviter-les-cfa"),
+        linkProps: {
+          href: "/mission-locale/inviter-les-cfa",
           target: "_self",
         },
       });
