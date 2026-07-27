@@ -7,6 +7,41 @@ on:
         description: Code coverrage token
         required: true
 jobs:
+  gitleaks:
+    name: "Gitleaks"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v6
+        with:
+          # historique complet requis pour git diff BASE_SHA..HEAD_SHA
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".node-version"
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+            .yarn/install-state.gz
+            .yarn/cache
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: yarn-
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Scan secrets (gitleaks)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
+        run: yarn gitleaks:check ci
+
   npm-packages-check:
     runs-on: ubuntu-latest
     steps:
