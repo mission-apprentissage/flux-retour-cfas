@@ -29,7 +29,7 @@ jobs:
           OPENPGP_KEY: ${{ secrets.OPENPGP_PRIVATE_SUBKEY }}
 
       - name: Setup SOPS
-        uses: nhedger/setup-sops@v2
+        uses: nhedger/setup-sops@v3
 
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
@@ -53,7 +53,7 @@ jobs:
 
       - name: Upload logs artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: logs-sync-preprod
           path: /tmp/deploy.log.gpg

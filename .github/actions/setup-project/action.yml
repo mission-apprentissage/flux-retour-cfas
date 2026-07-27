@@ -19,7 +19,7 @@ runs:
 
     - name: Setup SOPS
       if: inputs.openpgp-key != ''
-      uses: nhedger/setup-sops@v2
+      uses: nhedger/setup-sops@v3
 
     - uses: actions/setup-node@v6
       with:
