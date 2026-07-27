@@ -12,7 +12,7 @@ jobs:
           fetch-depth: 1
           persist-credentials: true
 
-      - name: Analyze NPM dependancies
+      - name: Analyze NPM dependencies
         uses: ./.github/actions/npm-check
 
   lint:

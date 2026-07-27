@@ -24,7 +24,7 @@ jobs:
 
       - name: Initialize the GnuPG keyring
         run: |
-          echo -n "$OPENPGP_KEY" | gpg --import
+          printf '%s' "$OPENPGP_KEY" | gpg --import
         env:
           OPENPGP_KEY: ${{ secrets.OPENPGP_PRIVATE_SUBKEY }}
 

@@ -12,7 +12,7 @@ runs:
   steps:
     - name: Initialize the GnuPG keyring
       if: inputs.openpgp-key != ''
-      run: echo -n "$OPENPGP_KEY" | gpg --import
+      run: printf '%s' "$OPENPGP_KEY" | gpg --import
       shell: bash
       env:
         OPENPGP_KEY: ${{ inputs.openpgp-key }}

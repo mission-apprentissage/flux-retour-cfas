@@ -10,6 +10,6 @@ runs:
         repository: mission-apprentissage/mna-npm-check
         path: mna-npm-check
 
-    - name: Analyze NPM dependancies
+    - name: Analyze NPM dependencies
       run: mna-npm-check/npm-check.sh -p .
       shell: bash
