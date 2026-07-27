@@ -1,4 +1,4 @@
-FROM node:22.6-slim AS builder_root
+FROM node:24-slim AS builder_root
 WORKDIR /app
 COPY .yarn /app/.yarn
 COPY package.json package.json
@@ -31,7 +31,7 @@ RUN --mount=type=cache,target=/app/.yarn/cache yarn workspaces focus --all --pro
 RUN mkdir -p /app/shared/node_modules && mkdir -p /app/server/node_modules
 
 # Production image, copy all the files and run next
-FROM node:22.6-slim AS server
+FROM node:24-slim AS server
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y ca-certificates curl && update-ca-certificates && apt-get clean
@@ -78,7 +78,7 @@ ENV NEXT_PUBLIC_ENV=$PUBLIC_ENV
 RUN --mount=type=cache,target=/app/ui/.next/cache yarn workspace ui build
 
 # Production image, copy all the files and run next
-FROM node:22.6-slim AS ui
+FROM node:24-slim AS ui
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y ca-certificates curl && update-ca-certificates && apt-get clean
