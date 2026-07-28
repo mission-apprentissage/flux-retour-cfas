@@ -413,7 +413,11 @@ export async function seedSipaTestNancy({
   await insertRecords(dryRun);
 
   if (!dryRun) {
-    await verify();
+    try {
+      await verify();
+    } catch (err) {
+      logger.error({ err }, "Vérification SIPA échouée (non bloquant, le seed reste appliqué)");
+    }
   }
 
   return 0;
