@@ -1,4 +1,3 @@
-import { ArrowForwardIcon } from "@chakra-ui/icons";
 import { Box, Center, Container, Divider, Grid, GridItem, Heading, HStack, Spinner, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useCallback, useMemo } from "react";
@@ -13,7 +12,6 @@ import {
 
 import { _get } from "@/common/httpClient";
 import { formatCivility, prettyFormatNumber } from "@/common/utils/stringUtils";
-import Link from "@/components/Links/Link";
 import SecondarySelectButton from "@/components/SelectButton/SecondarySelectButton";
 import SuggestFeature from "@/components/SuggestFeature/SuggestFeature";
 import { InfoTooltip } from "@/components/Tooltip/InfoTooltip";
@@ -166,11 +164,6 @@ const DashboardTransverse = () => {
         </HStack>
 
         <IndicateursGrid indicateursEffectifs={indicateursEffectifs.total} loading={indicateursEffectifs.isLoading} />
-
-        <Link href="/indicateurs" color="action-high-blue-france" isUnderlined>
-          Explorer plus d’indicateurs
-          <ArrowForwardIcon />
-        </Link>
 
         <Divider size="md" my={8} borderBottomWidth="2px" opacity="1" />
 

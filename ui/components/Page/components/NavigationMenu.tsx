@@ -139,7 +139,6 @@ function NavBarTransverse(): React.ReactElement {
             Mon tableau de bord
           </NavItem>
           <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
-          <NavItem to="/indicateurs">Mes indicateurs</NavItem>
           {organisationType === ORGANISATION_TYPE.DREETS && (
             <NavItem
               to="/voeux-affelnet"
@@ -154,7 +153,6 @@ function NavBarTransverse(): React.ReactElement {
               Vœux Affelnet
             </NavItem>
           )}
-          <NavItem to="/national/indicateurs">Indicateurs Nationaux</NavItem>
           <MenuQuestions />
         </>
       );
@@ -212,7 +210,6 @@ function NavBarOrganismeFormation(): ReactElement {
       {organisme?.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
         <NavItem to="/organismes">Mes organismes</NavItem>
       )}
-      <NavItem to="/indicateurs">Mes indicateurs</NavItem>
       <NavItem to="/effectifs">Mes effectifs</NavItem>
       {organisme && (
         <NavItem
@@ -225,9 +222,6 @@ function NavBarOrganismeFormation(): ReactElement {
           Mon enquête SIFA
         </NavItem>
       )}
-      <NavItem to="/national/indicateurs" exactMatch>
-        Indicateurs Nationaux
-      </NavItem>
       <MenuQuestions />
       <NavItem to="/parametres" ml="auto">
         <SettingsIcon mr={2} />

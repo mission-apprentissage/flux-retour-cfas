@@ -48,7 +48,6 @@ import {
   effectifsFiltersTerritoireSchema,
   fullEffectifsFiltersSchema,
 } from "@/common/actions/helpers/filters";
-import { getIndicateursNational } from "@/common/actions/indicateurs/indicateurs-national.actions";
 import {
   getEffectifsNominatifsWithoutId,
   getIndicateursEffectifsParDepartement,
@@ -530,14 +529,6 @@ function setupRoutes(app: Application) {
       publicLimiter,
       returnResult(async () => {
         return await findMaintenanceMessages();
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/national",
-      publicDashboardLimiter,
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersTerritoireSchema);
-        return await getIndicateursNational(filters);
       })
     )
     .get(

@@ -5265,15 +5265,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jsonwebtoken@npm:^9.0.7":
-  version: 9.0.7
-  resolution: "@types/jsonwebtoken@npm:9.0.7"
-  dependencies:
-    "@types/node": "*"
-  checksum: 872b62e2a50ec399d695402ccddfeb5cd66a6c3d28511f27453b932b6b67eb82c2d0ecaa864939848b88b3a8276c2492647bf5707bc82a6ac7e420d3412b9047
-  languageName: node
-  linkType: hard
-
 "@types/keyv@npm:^3.1.4":
   version: 3.1.4
   resolution: "@types/keyv@npm:3.1.4"
@@ -20605,7 +20596,6 @@ __metadata:
     "@tanstack/react-query": 4.36.1
     "@tanstack/react-table": ^8.20.5
     "@tsconfig/next": ^2.0.3
-    "@types/jsonwebtoken": ^9.0.7
     "@types/lodash": ^4.17.16
     "@types/node": ^22.7.5
     "@types/qs": ^6.9.18
@@ -20619,7 +20609,6 @@ __metadata:
     dotenv: ^16.4.5
     formik: ^2.4.6
     framer-motion: ^7.10.3
-    jsonwebtoken: ^9.0.2
     libphonenumber-js: ^1.12.23
     lodash-es: 4.18.1
     lodash.debounce: 4.0.8

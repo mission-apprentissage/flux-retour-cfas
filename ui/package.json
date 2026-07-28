@@ -50,7 +50,6 @@
     "date-fns": "^2.30.0",
     "formik": "^2.4.6",
     "framer-motion": "^7.10.3",
-    "jsonwebtoken": "^9.0.2",
     "libphonenumber-js": "^1.12.23",
     "lodash-es": "4.18.1",
     "lodash.debounce": "4.0.8",
@@ -87,7 +86,6 @@
   "devDependencies": {
     "@gouvfr/dsfr": "^1.14.4",
     "@tsconfig/next": "^2.0.3",
-    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.7.5",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",

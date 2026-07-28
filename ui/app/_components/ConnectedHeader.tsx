@@ -123,13 +123,6 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           },
         });
         baseItems.push({
-          text: "Mes indicateurs",
-          linkProps: {
-            href: "/indicateurs",
-            target: "_self",
-          },
-        });
-        baseItems.push({
           text: "Mes effectifs",
           linkProps: {
             href: "/effectifs",
@@ -140,13 +133,6 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           text: "Mon enquête SIFA",
           linkProps: {
             href: "/enquete-sifa",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: "Indicateurs Nationaux",
-          linkProps: {
-            href: "/national/indicateurs",
             target: "_self",
           },
         });
@@ -194,13 +180,6 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           target: "_self",
         },
       });
-      baseItems.push({
-        text: "Mes indicateurs",
-        linkProps: {
-          href: "/indicateurs",
-          target: "_self",
-        },
-      });
       if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.ACADEMIE) {
         baseItems.push({
           text: "Vœux Affelnet",
@@ -210,13 +189,6 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           },
         });
       }
-      baseItems.push({
-        text: "Indicateurs Nationaux",
-        linkProps: {
-          href: "/national/indicateurs",
-          target: "_self",
-        },
-      });
     } else if (organisationType === ORGANISATION_TYPE.ARML) {
       baseItems.push({
         text: "Suivi des indicateurs",

@@ -228,7 +228,6 @@ const Header = () => {
 
     const pathsWithOrganismeId = [
       "/",
-      "/indicateurs",
       "/effectifs",
       "/enquete-sifa",
       "/transmissions",
