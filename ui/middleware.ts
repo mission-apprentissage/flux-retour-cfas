@@ -71,6 +71,8 @@ function redirectToHome(
     case "MISSION_LOCALE":
       return NextResponse.redirect(new URL("/mission-locale", request.url));
     case "ARML":
+    case "DREETS":
+    case "DDETS":
       return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
     case "ADMINISTRATEUR":
       return NextResponse.redirect(new URL("/admin/suivi-des-indicateurs", request.url));

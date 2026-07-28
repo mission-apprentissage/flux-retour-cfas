@@ -135,10 +135,15 @@ function NavBarTransverse(): React.ReactElement {
             organisationType === ORGANISATION_TYPE.DDETS) && (
             <NavItem to="/suivi-des-indicateurs">Suivi des indicateurs</NavItem>
           )}
-          <NavItem to="/home" exactMatch>
-            Mon tableau de bord
-          </NavItem>
-          <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
+          {(organisationType === ORGANISATION_TYPE.TETE_DE_RESEAU ||
+            organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) && (
+            <>
+              <NavItem to="/home" exactMatch>
+                Mon tableau de bord
+              </NavItem>
+              <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
+            </>
+          )}
           {organisationType === ORGANISATION_TYPE.DREETS && (
             <NavItem
               to="/voeux-affelnet"

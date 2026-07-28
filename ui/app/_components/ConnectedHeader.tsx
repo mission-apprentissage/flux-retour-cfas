@@ -166,20 +166,25 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           },
         });
       }
-      baseItems.push({
-        text: "Mon tableau de bord",
-        linkProps: {
-          href: "/home",
-          target: "_self",
-        },
-      });
-      baseItems.push({
-        text: getMesOrganismesLabel(organisationType || ""),
-        linkProps: {
-          href: "/organismes",
-          target: "_self",
-        },
-      });
+      if (
+        organisationType === ORGANISATION_TYPE.TETE_DE_RESEAU ||
+        organisationType === ORGANISATION_TYPE.ADMINISTRATEUR
+      ) {
+        baseItems.push({
+          text: "Mon tableau de bord",
+          linkProps: {
+            href: "/home",
+            target: "_self",
+          },
+        });
+        baseItems.push({
+          text: getMesOrganismesLabel(organisationType || ""),
+          linkProps: {
+            href: "/organismes",
+            target: "_self",
+          },
+        });
+      }
       if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.ACADEMIE) {
         baseItems.push({
           text: "Vœux Affelnet",
