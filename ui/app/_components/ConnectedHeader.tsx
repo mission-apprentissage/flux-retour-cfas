@@ -129,13 +129,6 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
             target: "_self",
           },
         });
-        baseItems.push({
-          text: "Mon enquête SIFA",
-          linkProps: {
-            href: "/enquete-sifa",
-            target: "_self",
-          },
-        });
       }
     } else if (
       [

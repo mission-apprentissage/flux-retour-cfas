@@ -216,17 +216,6 @@ function NavBarOrganismeFormation(): ReactElement {
         <NavItem to="/organismes">Mes organismes</NavItem>
       )}
       <NavItem to="/effectifs">Mes effectifs</NavItem>
-      {organisme && (
-        <NavItem
-          to="/enquete-sifa"
-          isDisabled={!organisme.first_transmission_date}
-          disabledReason={
-            !organisme.first_transmission_date ? "Désactivé car votre organisme n'a encore rien transmis" : ""
-          }
-        >
-          Mon enquête SIFA
-        </NavItem>
-      )}
       <MenuQuestions />
       <NavItem to="/parametres" ml="auto">
         <SettingsIcon mr={2} />
@@ -263,20 +252,9 @@ function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactEl
           </>
         )}
         {organisme?.permissions?.manageEffectifs && (
-          <>
-            <NavItem to={`/organismes/${organismeId}/effectifs`} colorActive="dsfr_lightprimary.bluefrance_850">
-              Ses effectifs
-            </NavItem>
-            <NavItem
-              to={`/organismes/${organismeId}/enquete-sifa`}
-              isDisabled={!organisme.first_transmission_date}
-              disabledReason={
-                !organisme.first_transmission_date ? "Désactivé car l'organisme n'a encore rien transmis" : ""
-              }
-            >
-              Son enquête SIFA
-            </NavItem>
-          </>
+          <NavItem to={`/organismes/${organismeId}/effectifs`} colorActive="dsfr_lightprimary.bluefrance_850">
+            Ses effectifs
+          </NavItem>
         )}
       </Flex>
     </Container>

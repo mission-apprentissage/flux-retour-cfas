@@ -229,7 +229,6 @@ const Header = () => {
     const pathsWithOrganismeId = [
       "/",
       "/effectifs",
-      "/enquete-sifa",
       "/transmissions",
       new RegExp("^/organismes.*"),
       new RegExp("^/transmissions/\\d{4}-\\d{2}-\\d{2}$"),
