@@ -111,7 +111,7 @@ export const zConnaissanceMlEnum = z.nativeEnum(CONNAISSANCE_ML_ENUM);
 export const zAccConjointMotifEnum = z.nativeEnum(ACC_CONJOINT_MOTIF_ENUM);
 export const zApiEffectifListeEnum = z.nativeEnum(API_EFFECTIF_LISTE);
 
-export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error", "pending"]);
+const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error", "pending"]);
 
 export type IEmailStatusEnum = z.output<typeof zEmailStatusEnum>;
 

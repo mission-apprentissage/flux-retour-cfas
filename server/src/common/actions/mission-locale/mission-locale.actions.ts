@@ -17,7 +17,6 @@ import {
   API_EFFECTIF_LISTE,
   CONNAISSANCE_ML_ENUM,
   SITUATION_ENUM,
-  zEmailStatusEnum,
 } from "shared/models/data/missionLocaleEffectif.model";
 import { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
@@ -37,7 +36,6 @@ import {
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { triggerWhatsAppIfEligible } from "@/common/services/brevo/whatsapp";
 import { extractScoreInput, scoreEffectifs } from "@/common/services/classifier";
-import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
@@ -1568,51 +1566,6 @@ export const getEffectifARisqueByMissionLocaleId = async (
   return result;
 };
 
-const getEffectifMissionLocaleEligibleToBrevoAggregation = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
-) => [
-  ...(await generateOrganisationMatchStage(organisation)),
-  ...buildEffMissionLocaleFilter(),
-  ...filterByDernierStatutPipelineMl(),
-  ...addFieldFromActivationDate(),
-  ...filterByActivationDatePipelineMl(),
-];
-
-export const getEffectifMissionLocaleEligibleToBrevoCount = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
-) => {
-  const effectifsMissionLocaleAggregation = [
-    ...(await getEffectifMissionLocaleEligibleToBrevoAggregation(organisation)),
-
-    {
-      $facet: {
-        total: [{ $count: "total" }],
-        eligible: [
-          { $match: { email_status: zEmailStatusEnum.enum.valid, "brevo.token": { $ne: null } } },
-          { $count: "total" },
-        ],
-        details: [
-          {
-            $group: {
-              _id: { $ifNull: ["$email_status", "not_processed"] },
-              count: { $sum: 1 },
-            },
-          },
-        ],
-      },
-    },
-    {
-      $project: {
-        total: { $arrayElemAt: ["$total.total", 0] },
-        eligible: { $arrayElemAt: ["$eligible.total", 0] },
-        details: 1,
-      },
-    },
-  ];
-  const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).next();
-  return data;
-};
-
 export async function getAllEffectifsParMois(
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   userId?: ObjectId
@@ -1630,114 +1583,6 @@ export async function getAllEffectifsParMois(
 
   return { a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable };
 }
-
-// BAL
-
-export const getEffectifMissionLocaleEligibleToBrevo = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
-) => {
-  const effectifsMissionLocaleAggregation = [
-    ...(await getEffectifMissionLocaleEligibleToBrevoAggregation(organisation)),
-    {
-      $match: {
-        soft_deleted: { $ne: true },
-        "brevo.token": { $ne: null },
-      },
-    },
-    {
-      $lookup: {
-        from: "organisations",
-        let: { id: "$mission_locale_id" },
-        pipeline: [
-          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
-          {
-            $project: {
-              _id: 1,
-              nom: 1,
-              site_web: 1,
-            },
-          },
-        ],
-        as: "mission_locale",
-      },
-    },
-    {
-      $lookup: {
-        from: "organismes",
-        let: { id: "$effectif_snapshot.organisme_id" },
-        pipeline: [
-          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
-          {
-            $project: {
-              _id: 1,
-              nom: 1,
-            },
-          },
-        ],
-        as: "organisme",
-      },
-    },
-    {
-      $unwind: {
-        path: "$organisme",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $unwind: {
-        path: "$mission_locale",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        email: "$effectif_snapshot.apprenant.courriel",
-        nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
-        prenom: { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom"] },
-        "urls.TDB_AB_TEST_A": {
-          $concat: [config.publicUrl, "/campagnes/mission-locale/", "$brevo.token"],
-        },
-        "urls.TDB_AB_TEST_B_TRUE": {
-          $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/true"],
-        },
-        "urls.TDB_AB_TEST_B_FALSE": {
-          $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/false"],
-        },
-        "urls.TDB_LBA_LINK": {
-          $concat: [
-            config.publicUrl,
-            "/api/v1/mission-locale/lba?",
-            "rncp=",
-            "$effectif_snapshot.formation.rncp",
-            "&cfd=",
-            "$effectif_snapshot.formation.cfd",
-          ],
-        },
-        "urls.TDB_MISSION_LOCALE_URL": "$mission_locale.site_web",
-        telephone: "$effectif_snapshot.apprenant.telephone",
-        nom_organisme: "$organisme.nom",
-        nom_mission_locale: "$mission_locale.nom",
-        mission_locale_id: { $toString: "$effectif_snapshot.apprenant.adresse.mission_locale_id" },
-        date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
-        date_derniere_rupture: "$date_rupture",
-      },
-    },
-  ];
-  const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
-  return data as Array<{
-    email: string;
-    prenom: string;
-    nom: string;
-    urls?: Record<string, string> | null;
-    telephone?: string | null;
-    nom_organisme?: string | null;
-    mission_locale_id: string;
-    nom_mission_locale: string;
-    date_de_naissance?: Date | null;
-    date_derniere_rupture?: Date | null;
-  }>;
-};
 
 export const getMissionLocaleRupturantToCheckMail = async (): Promise<Array<string>> => {
   return (
