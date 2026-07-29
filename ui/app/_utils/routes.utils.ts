@@ -14,7 +14,13 @@ interface IPages {
 
 const SITE_NAME = "Tableau de bord de l'apprentissage";
 
-type TypePublic = "missions_locales" | "operateur_public" | "organisme_formation";
+type TypePublic =
+  | "missions_locales"
+  | "operateur_public"
+  | "organisme_formation"
+  | "tete_de_reseau"
+  | "france_travail"
+  | "autre";
 
 export const PAGES = {
   static: {
