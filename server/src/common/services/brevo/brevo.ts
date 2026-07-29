@@ -1,25 +1,9 @@
-import brevo, {
-  AccountApiApiKeys,
-  ContactsApiApiKeys,
-  EventsApiApiKeys,
-  TransactionalEmailsApiApiKeys,
-} from "@getbrevo/brevo";
+import brevo, { AccountApiApiKeys, ContactsApiApiKeys, EventsApiApiKeys } from "@getbrevo/brevo";
 import { captureException } from "@sentry/node";
 import Boom from "boom";
 import { format } from "date-fns";
 
 import config from "@/config";
-
-const initEmailApi = () => {
-  const apiEmailInstance = new brevo.TransactionalEmailsApi();
-  const apiKey = config.brevo.apiKey;
-  if (!apiKey) {
-    captureException(new Error("Brevo API key not set"));
-    return null;
-  }
-  apiEmailInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, apiKey);
-  return apiEmailInstance;
-};
 
 const initContactApi = () => {
   const apiContactInstance = new brevo.ContactsApi();
@@ -43,44 +27,8 @@ const initEventApi = () => {
   return apiEventInstance;
 };
 
-const EmailInstance: brevo.TransactionalEmailsApi | null = initEmailApi();
 const ContactInstance: brevo.ContactsApi | null = initContactApi();
 const EventInstance: brevo.EventsApi | null = initEventApi();
-
-export const sendTransactionalEmail = async (recipientEmail: string, templateId: number) => {
-  if (!EmailInstance) {
-    throw Boom.internal("Brevo instance not initialized");
-  }
-
-  const brevoAttributes = await getContactDetails(recipientEmail);
-
-  if (!brevoAttributes) {
-    throw Boom.internal("No Brevo attributes found");
-  }
-
-  const sendSmtpEmail = new brevo.SendSmtpEmail();
-  sendSmtpEmail.templateId = templateId;
-  sendSmtpEmail.to = [{ email: recipientEmail }];
-  sendSmtpEmail.params = brevoAttributes;
-  try {
-    return await EmailInstance.sendTransacEmail(sendSmtpEmail);
-  } catch (e) {
-    captureException(e);
-    return;
-  }
-};
-
-export const getContactDetails = async (email: string) => {
-  if (!ContactInstance) {
-    throw Boom.internal("Brevo instance not initialized");
-  }
-  try {
-    return (await ContactInstance.getContactInfo(email)).body.attributes;
-  } catch (e) {
-    captureException(e);
-    return;
-  }
-};
 
 const BREVO_IMPORT_BATCH_SIZE = 500;
 

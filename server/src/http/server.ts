@@ -188,7 +188,6 @@ import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import reseauxAdmin from "./routes/admin.routes/reseaux.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
-import campagneRouter from "./routes/campagne.routes/campagne.routes";
 import emails from "./routes/emails.routes";
 import connexionInfoRouter from "./routes/onboarding.routes/connexion-info.route";
 import franceTravailAuthentRoutes from "./routes/organisations.routes/france-travail/france-travail.routes";
@@ -1190,7 +1189,6 @@ function setupRoutes(app: Application) {
       )
   );
 
-  app.use("/api/v1/campagne", publicDashboardLimiter, campagneRouter());
   app.use("/api/v1/onboarding/connexion-info", publicLimiter, connexionInfoRouter());
   app.use(authRouter);
 }

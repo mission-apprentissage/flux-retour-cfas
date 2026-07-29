@@ -111,10 +111,6 @@ export async function middleware(request: NextRequest) {
     return redirectToHome(session, request, requestNextData);
   }
 
-  if (pathname === "/campagnes/mission-locale") {
-    return NextResponse.next();
-  }
-
   if (session && pathname === "/auth/connexion") {
     return NextResponse.redirect(new URL("/", request.url));
   }
