@@ -12,6 +12,7 @@ import { publicConfig } from "@/config.public";
 
 import { defaultColorScheme } from "./_dsfr-setup/default-color-scheme";
 import { StartDsfr } from "./_dsfr-setup/start-dsfr";
+import "remixicon/fonts/remixicon.css";
 import "./global.css";
 
 export const dynamic = "force-dynamic";
