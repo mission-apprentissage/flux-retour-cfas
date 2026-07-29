@@ -195,9 +195,6 @@ const UserMenu = () => {
                   <MenuItem href="/admin/organismes/gestion" icon={<Parametre boxSize={3} color="#000091" />}>
                     Gestion des organismes
                   </MenuItem>
-                  <MenuItem href="/admin/maintenance" icon={<Parametre boxSize={3} color="#000091" />}>
-                    Message de maintenance
-                  </MenuItem>
                   <MenuItem href="/admin/impostures" icon={<SpyLineIcon boxSize={3} color="#000091" />}>
                     Impostures
                   </MenuItem>

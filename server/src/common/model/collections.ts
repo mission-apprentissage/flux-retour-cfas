@@ -16,7 +16,6 @@ import franceTravailEffectifDescriptor, {
 import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invitations.model";
 import invitationsArchiveModelDescriptor, { IInvitationArchive } from "shared/models/data/invitationsArchive.model";
 import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtSessions.model";
-import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/models/data/maintenanceMessages.model";
 import missionLocaleEffectifDescriptor, {
   IMissionLocaleEffectif,
 } from "shared/models/data/missionLocaleEffectif.model";
@@ -54,7 +53,6 @@ export const modelDescriptors = [
   formationsCatalogueModelDescriptor,
   usersMigrationModelDescriptor,
   JwtSessionsModelDescriptor,
-  MaintenanceMessagesModelDescriptor,
   invitationsModelDescriptor,
   invitationsArchiveModelDescriptor,
   organisationsModelDescriptor,
@@ -97,8 +95,6 @@ export const invitationsDb = () => getDbCollection<IInvitation>(invitationsModel
 export const invitationsArchiveDb = () =>
   getDbCollection<IInvitationArchive>(invitationsArchiveModelDescriptor.collectionName);
 export const organisationsDb = () => getDbCollection<IOrganisation>(organisationsModelDescriptor.collectionName);
-export const maintenanceMessageDb = () =>
-  getDbCollection<IMaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<IEffectif>(effectifsModelDescriptor.collectionName);
 export const effectifsArchiveDb = () =>
   getDbCollection<IEffectifArchive>(effectifsArchiveModelDescriptor.collectionName);

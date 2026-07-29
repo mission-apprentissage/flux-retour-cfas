@@ -61,7 +61,6 @@ import {
   getOrganismeIndicateursOrganismes,
 } from "@/common/actions/indicateurs/indicateurs.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
-import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
 import {
   cancelInvitation,
   createOrganisation,
@@ -181,7 +180,6 @@ import collaborationsAdmin from "./routes/admin.routes/collaborations.routes";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
 import invitationsAdmin from "./routes/admin.routes/invitations.routes";
-import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import missionLocaleRoutesAdmin from "./routes/admin.routes/mission-locale.routes";
 import opcosRoutesAdmin from "./routes/admin.routes/opcos.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
@@ -521,13 +519,6 @@ function setupRoutes(app: Application) {
           password: passwordSchema(req.user.organisation.type === "ADMINISTRATEUR").required(),
         });
         await changePassword(req.user, password);
-      })
-    )
-    .get(
-      "/api/v1/maintenanceMessages",
-      publicLimiter,
-      returnResult(async () => {
-        return await findMaintenanceMessages();
       })
     )
     .get(
@@ -1136,7 +1127,6 @@ function setupRoutes(app: Application) {
           return await getStatOrganismes();
         })
       )
-      .use("/maintenanceMessages", maintenancesAdmin())
       .post(
         "/impersonate",
         returnResult(async (req, res) => {

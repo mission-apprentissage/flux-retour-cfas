@@ -14,7 +14,6 @@ import { useEffect } from "react";
 import { RecoilRoot } from "recoil";
 
 import { queryClient } from "@/common/queryClient";
-import AlertMessage from "@/components/AlertMessage/AlertMessage";
 import UserWrapper from "@/components/UserWrapper/UserWrapper";
 import { publicConfig } from "@/config.public";
 import Fonts from "@/theme/Fonts";
@@ -33,7 +32,6 @@ function MyApp({ Component, pageProps }) {
         <ChakraProvider theme={theme} resetCSS>
           <Fonts />
           <QueryClientProvider client={queryClient}>
-            <AlertMessage />
             <UserWrapper ssrAuth={pageProps.auth}>
               <Component {...pageProps} />
             </UserWrapper>

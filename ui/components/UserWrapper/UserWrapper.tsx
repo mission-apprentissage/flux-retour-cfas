@@ -1,5 +1,4 @@
 import { Box, Flex, Spinner, Text } from "@chakra-ui/react";
-import { useRouter } from "next/router";
 import React, { useState, useEffect, createContext, useRef } from "react";
 
 import { emitter } from "@/common/emitter";
@@ -8,7 +7,6 @@ import { IAuthenticationContext } from "@/common/internal/AuthContext";
 import { Cgu, CGU_VERSION } from "@/components/legal/Cgu";
 import AcknowledgeModal from "@/components/Modals/AcknowledgeModal";
 import useAuth from "@/hooks/useAuth";
-import useMaintenanceMessages from "@/hooks/useMaintenanceMessages";
 
 const ForceAcceptCGU = ({ children }) => {
   const { auth, refreshSession } = useAuth();
@@ -66,22 +64,7 @@ export const AuthenticationContext = createContext<IAuthenticationContext>({} as
 
 const UserWrapper = ({ children, ssrAuth }) => {
   const [auth, setAuth] = useState(ssrAuth);
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(!ssrAuth);
-  const { messageMaintenance } = useMaintenanceMessages();
-
-  useEffect(() => {
-    (async () => {
-      if (
-        messageMaintenance?.enabled &&
-        router.asPath !== "/en-maintenance" &&
-        router.asPath !== "/auth/connexion" &&
-        auth?.organisation?.type === "ADMINISTRATEUR"
-      ) {
-        router.push("/en-maintenance");
-      }
-    })();
-  }, [auth, messageMaintenance?.enabled, router]);
 
   useEffect(() => {
     async function getUser() {

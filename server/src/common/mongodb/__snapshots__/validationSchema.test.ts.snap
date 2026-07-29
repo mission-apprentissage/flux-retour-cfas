@@ -12385,56 +12385,6 @@ exports[`validation-schema > should create validation schema for jwtSessions > j
 }
 `;
 
-exports[`validation-schema > should create validation schema for maintenanceMessages > maintenanceMessages 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "context": {
-      "bsonType": "string",
-      "enum": [
-        "manuel",
-        "automatique",
-        "maintenance",
-      ],
-    },
-    "enabled": {
-      "bsonType": "bool",
-      "description": "Message actif ou non",
-    },
-    "msg": {
-      "bsonType": "string",
-      "description": "Message de maintenance",
-    },
-    "name": {
-      "bsonType": "string",
-      "description": "email du créateur du message",
-    },
-    "time": {
-      "bsonType": "date",
-      "description": "Date de mise en place du message",
-    },
-    "type": {
-      "bsonType": "string",
-      "enum": [
-        "alert",
-        "info",
-      ],
-    },
-  },
-  "required": [
-    "_id",
-    "msg",
-    "name",
-    "type",
-    "context",
-  ],
-}
-`;
-
 exports[`validation-schema > should create validation schema for missionLocaleEffectif > missionLocaleEffectif 1`] = `
 {
   "additionalProperties": false,
