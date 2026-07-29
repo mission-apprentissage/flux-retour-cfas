@@ -80,6 +80,12 @@ const nextConfig = {
       //   permanent: true,
       // },
       {
+        // Page /stats supprimée (contenu retiré) — on redirige l'ancienne URL indexée vers l'accueil.
+        source: "/stats",
+        destination: "/",
+        permanent: true,
+      },
+      {
         source: "/politique-confidentialite",
         destination: "/politique-de-confidentialite",
         permanent: true,

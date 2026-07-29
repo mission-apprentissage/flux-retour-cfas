@@ -84,9 +84,6 @@ const Footer = () => {
                 <Link href={"/cgu"}>Conditions générales d’utilisation</Link>
               </ListItem>
               <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                <Link href="/stats">Statistiques</Link>
-              </ListItem>
-              <ListItem _after={{ content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                 <Link target="_blank" rel="noopener noreferrer" href={CRISP_FAQ}>
                   Centre d’aide
                 </Link>

@@ -46,10 +46,6 @@ export function Footer() {
           linkProps: { href: "/cgu" },
         },
         {
-          text: "Statistiques",
-          linkProps: { href: "/stats" },
-        },
-        {
           text: "Centre d’aide",
           linkProps: {
             href: CRISP_FAQ,
