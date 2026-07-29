@@ -21,7 +21,6 @@ import {
 import { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
-import { v4 as uuidv4 } from "uuid";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
@@ -2409,7 +2408,7 @@ interface IMissionLocaleSnapshotResult {
  *
  * Si un autre ml record (actif OU soft-deleted) occupe déjà `(mission_locale_id, newEffectif._id)` :
  * on "réveille" ce squatter (s'il était soft-deleted), on merge l'orphelin dedans (champs utilisateur,
- * logs, brevo.history) puis on soft-delete l'orphelin. Évite l'E11000 sur l'index unique
+ * logs) puis on soft-delete l'orphelin. Évite l'E11000 sur l'index unique
  * `mission_locale_id_1_effectif_id_1` qui n'est pas filtré sur `soft_deleted`.
  *
  * Garde anti-disparition : si remplacer le snapshot par celui de `newEffectif` ferait perdre
@@ -2494,7 +2493,7 @@ export async function migrateMlRecordEffectifId(
       );
     }
 
-    // 2. Merge donor -> keeper (logs, brevo.history, MERGEABLE_FIELDS) + soft-delete orphan + $unset identifiant_normalise.
+    // 2. Merge donor -> keeper (logs, MERGEABLE_FIELDS) + soft-delete orphan + $unset identifiant_normalise.
     await mergeAndSoftDeleteDuplicates(squatter._id, [mlRecordId]);
 
     // 3. Backfill identifiant_normalise sur le keeper si manquant (cas legacy).
@@ -2660,10 +2659,6 @@ export const createMissionLocaleSnapshot = async (
           effectif_snapshot_date: date,
           date_rupture: currentStatus?.date,
           created_at: date,
-          brevo: {
-            token: uuidv4(),
-            token_created_at: date,
-          },
           computed: {
             organisme: {
               ml_beta_activated_at: organisation?.ml_beta_activated_at,
@@ -2882,7 +2877,6 @@ export function sortKeeperPriority(
  * Fusionne les champs utilisateur des doublons vers le keeper, puis soft-delete les doublons.
  *
  * - Réassigne les logs `missionLocaleEffectifLog` du donor vers le keeper (préserve l'historique côté UI).
- * - Préserve les `brevo.token` des donors dans `keeper.brevo.history` (évite de casser les liens email actifs).
  * - `$unset` `identifiant_normalise` sur les donors avant soft-delete (libère le partial unique index).
  */
 export async function mergeAndSoftDeleteDuplicates(keeperId: ObjectId, duplicateIds: ObjectId[]) {
@@ -2905,30 +2899,9 @@ export async function mergeAndSoftDeleteDuplicates(keeperId: ObjectId, duplicate
     }
   }
 
-  // Préserver les tokens brevo des donors dans keeper.brevo.history pour ne pas casser les liens email déjà envoyés.
-  const historyEntries: Array<{ token: string; token_created_at?: Date; token_expired_at?: Date }> = [];
   const now = new Date();
-  for (const donor of duplicates) {
-    if (donor.brevo?.token && donor.brevo.token !== keeper.brevo?.token) {
-      historyEntries.push({
-        token: donor.brevo.token,
-        token_created_at: donor.brevo.token_created_at ?? undefined,
-        token_expired_at: now,
-      });
-    }
-    for (const entry of donor.brevo?.history ?? []) {
-      if (entry.token && entry.token !== keeper.brevo?.token) {
-        historyEntries.push(entry);
-      }
-    }
-  }
-
-  if (Object.keys(mergeUpdate).length > 0 || historyEntries.length > 0) {
-    const update: Record<string, unknown> = { $set: { ...mergeUpdate, updated_at: now } };
-    if (historyEntries.length > 0) {
-      update.$push = { "brevo.history": { $each: historyEntries } };
-    }
-    await missionLocaleEffectifsDb().updateOne({ _id: keeperId }, update);
+  if (Object.keys(mergeUpdate).length > 0) {
+    await missionLocaleEffectifsDb().updateOne({ _id: keeperId }, { $set: { ...mergeUpdate, updated_at: now } });
   }
 
   // Réassigner les logs des donors vers le keeper (préserve l'historique conseiller ML).

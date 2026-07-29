@@ -6,7 +6,6 @@ import { IEffectif, IOrganisationMissionLocale, IOrganisationOrganismeFormation 
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { CfaEffectifSource, ICfaEffectif, ICfaEffectifsResponse } from "shared/models/routes/organismes/cfa";
 import { getAnneesScolaireListFromDate } from "shared/utils";
-import { v4 as uuidv4 } from "uuid";
 
 import { isDecaSnapshot, migrateMlRecordEffectifId } from "@/common/actions/mission-locale/mission-locale.actions";
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
@@ -742,10 +741,6 @@ export async function declareCfaEffectifRupture(
       current_status: {
         value: currentStatus?.valeur ?? null,
         date: currentStatus?.date ?? null,
-      },
-      brevo: {
-        token: uuidv4(),
-        token_created_at: now,
       },
       computed: {
         organisme: {

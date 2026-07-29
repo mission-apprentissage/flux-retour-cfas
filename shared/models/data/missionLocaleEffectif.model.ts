@@ -190,20 +190,23 @@ const zMissionLocaleEffectif = z.object({
       telephone: z.string().nullish(),
     })
     .nullish(),
-  brevo: z.object({
-    token: z.string().uuid().nullish(),
-    token_created_at: z.date().nullish(),
-    token_expired_at: z.date().nullish(),
-    history: z
-      .array(
-        z.object({
-          token: z.string().uuid(),
-          token_created_at: z.date().optional(),
-          token_expired_at: z.date().optional(),
-        })
-      )
-      .nullish(),
-  }),
+  // Champ historique (flux campagne ML abandonné) : conservé en lecture seule, plus jamais écrit.
+  brevo: z
+    .object({
+      token: z.string().uuid().nullish(),
+      token_created_at: z.date().nullish(),
+      token_expired_at: z.date().nullish(),
+      history: z
+        .array(
+          z.object({
+            token: z.string().uuid(),
+            token_created_at: z.date().optional(),
+            token_expired_at: z.date().optional(),
+          })
+        )
+        .nullish(),
+    })
+    .nullish(),
   soft_deleted: z.boolean().nullish(),
   a_traiter: z.boolean().nullish(),
   injoignable: z.boolean().nullish(),
