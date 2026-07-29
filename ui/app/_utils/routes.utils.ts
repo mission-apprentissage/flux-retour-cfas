@@ -64,6 +64,14 @@ export const PAGES = {
         title: `Webinaires | ${SITE_NAME}`,
       }),
     },
+    contact: {
+      getPath: () => "/contact",
+      title: "Contact",
+      index: true,
+      getMetadata: () => ({
+        title: `Contacter l’équipe support | ${SITE_NAME}`,
+      }),
+    },
     authConnexion: {
       getPath: () => "/auth/connexion",
       title: "Connexion",
