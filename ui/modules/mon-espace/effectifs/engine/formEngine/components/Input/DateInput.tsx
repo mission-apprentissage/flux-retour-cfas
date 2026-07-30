@@ -1,5 +1,5 @@
 import { IconButton, Input as ChackraInput, InputProps } from "@chakra-ui/react";
-import fr from "date-fns/locale/fr";
+import { fr } from "date-fns/locale/fr";
 import range from "lodash.range";
 import { DateTime } from "luxon";
 import React, { forwardRef, useMemo } from "react";

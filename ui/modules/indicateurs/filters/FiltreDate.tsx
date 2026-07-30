@@ -1,6 +1,6 @@
 import { endOfMonth, isThisMonth } from "date-fns"; // eslint-disable-line import/no-duplicates
 // besoin de date-fns 3 pour import esm, voir https://github.com/date-fns/date-fns/issues/2629
-import fr from "date-fns/locale/fr"; // eslint-disable-line import/no-duplicates
+import { fr } from "date-fns/locale/fr"; // eslint-disable-line import/no-duplicates
 import { Dispatch, SetStateAction, useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 
