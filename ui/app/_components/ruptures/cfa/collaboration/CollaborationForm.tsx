@@ -187,7 +187,7 @@ export function CollaborationForm({ effectif, onSuccess, onCancel }: Collaborati
       }}
       validate={validate}
       onSubmit={(values) => {
-        if (submitMutation.isLoading) return;
+        if (submitMutation.isPending) return;
         if (values.still_at_cfa === null || values.referent_type === null) return;
 
         const commentaires_par_motif: Partial<Record<ACC_CONJOINT_MOTIF_ENUM, string>> = {};
@@ -237,7 +237,7 @@ export function CollaborationForm({ effectif, onSuccess, onCancel }: Collaborati
 interface CollaborationFormInnerProps {
   effectif: IEffectifMissionLocale["effectif"];
   onCancel: () => void;
-  submitMutation: { isLoading: boolean; isError: boolean };
+  submitMutation: { isPending: boolean; isError: boolean };
   hasSubmittedRef: React.MutableRefObject<boolean>;
 }
 
@@ -313,7 +313,7 @@ function CollaborationFormInner({ effectif, onCancel, submitMutation, hasSubmitt
         <CollaborationSidebar
           effectif={effectif}
           progress={progress}
-          isLoading={submitMutation.isLoading}
+          isLoading={submitMutation.isPending}
           hasError={submitMutation.isError}
           onSubmit={submitForm}
         />

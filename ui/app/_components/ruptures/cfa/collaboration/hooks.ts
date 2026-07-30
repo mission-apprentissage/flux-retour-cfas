@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { IEffectifMissionLocale } from "shared";
 import { IVerifiedInfo } from "shared/models/data/missionLocaleEffectif.model";
 import { IUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
@@ -24,20 +24,16 @@ type CollaborationFormPayload = Required<
 export function useCfaEffectifDetail(id: string) {
   const { user } = useAuth();
 
-  return useQuery(
-    ["effectif", id],
-    async () => {
+  return useSuspenseQuery({
+    queryKey: ["effectif", id],
+
+    queryFn: async () => {
       if (!id) return null;
       return await _get<IEffectifMissionLocale>(
         `/api/v1/organismes/${user?.organisation?.organisme_id}/cfa/effectif/${id}`
       );
     },
-    {
-      enabled: !!id,
-      suspense: true,
-      useErrorBoundary: true,
-    }
-  );
+  });
 }
 
 export function useSubmitCollaborationForm(effectifId: string, onSuccess: () => void) {
@@ -61,8 +57,10 @@ export function useSubmitCollaborationForm(effectifId: string, onSuccess: () => 
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["effectif"]);
-      queryClient.invalidateQueries(cfaQueryKeys.all);
+      queryClient.invalidateQueries({
+        queryKey: ["effectif"],
+      });
+      queryClient.invalidateQueries({ queryKey: cfaQueryKeys.all });
       onSuccess();
     },
   });

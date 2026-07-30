@@ -185,9 +185,11 @@ const organismesTableColumnsDefs: ColumnDef<IArchivableOrganismeJson, any>[] = [
 const Organisme = () => {
   const title = "Gestion des organismes";
 
-  const result = useQuery(["/api/v1/admin/organismes/archivables"], () =>
-    _get<IArchivableOrganismesResponseJson>("/api/v1/admin/organismes/archivables")
-  );
+  const result = useQuery({
+    queryKey: ["/api/v1/admin/organismes/archivables"],
+
+    queryFn: () => _get<IArchivableOrganismesResponseJson>("/api/v1/admin/organismes/archivables"),
+  });
 
   return (
     <SimplePage title={title}>

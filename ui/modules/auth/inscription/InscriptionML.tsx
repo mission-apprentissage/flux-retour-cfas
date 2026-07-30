@@ -33,11 +33,16 @@ export const InscriptionML = ({ setOrganisation }: InscriptionOrganistionChildPr
 
   const [missionLocaleList, setMissionLocaleList] = useState<Array<IOrganisationMissionLocale>>([]);
 
-  const { data: missionLocales } = useQuery<Array<IOrganisationMissionLocale>>(["mission-locale"], async () =>
-    _get("/api/v1/mission-locale")
-  );
+  const { data: missionLocales } = useQuery<Array<IOrganisationMissionLocale>>({
+    queryKey: ["mission-locale"],
 
-  const { data: armls } = useQuery<Array<IOrganisationARML>>(["arml"], async () => _get("/api/v1/mission-locale/arml"));
+    queryFn: async () => _get("/api/v1/mission-locale"),
+  });
+
+  const { data: armls } = useQuery<Array<IOrganisationARML>>({
+    queryKey: ["arml"],
+    queryFn: async () => _get("/api/v1/mission-locale/arml"),
+  });
 
   useEffect(() => {
     if (missionLocales) {

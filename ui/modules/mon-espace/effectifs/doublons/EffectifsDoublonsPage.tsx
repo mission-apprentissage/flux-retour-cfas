@@ -1,5 +1,5 @@
 import { Box, Center, HStack, Heading, Spinner, Text, Stack, VStack, useDisclosure, Button } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import React, { useRef } from "react";
 import { useRecoilValue } from "recoil";
 import { CRISP_FAQ, DuplicateEffectifGroup, SUPPORT_PAGE_ACCUEIL } from "shared";
@@ -19,9 +19,10 @@ const EffectifsDoublonsPage = ({ isMine }) => {
   const { pageIndex, pageSize, onPageChange, totalPages, totalCount, setTotalItemsCount, onPageSizeChange } =
     usePagination();
 
-  const { data: duplicates, isLoading } = useQuery<DuplicateEffectifGroup[]>(
-    [`duplicates-effectifs`, organisme?._id, pageIndex, pageSize],
-    async () => {
+  const { data: duplicates, isLoading } = useQuery<DuplicateEffectifGroup[]>({
+    queryKey: [`duplicates-effectifs`, organisme?._id, pageIndex, pageSize],
+
+    queryFn: async () => {
       const response = await _get(`/api/v1/organismes/${organisme?._id}/duplicates`, {
         params: {
           page: pageIndex + 1,
@@ -31,10 +32,9 @@ const EffectifsDoublonsPage = ({ isMine }) => {
       setTotalItemsCount(response.totalItems);
       return response.data;
     },
-    {
-      keepPreviousData: true,
-    }
-  );
+
+    placeholderData: keepPreviousData,
+  });
 
   if (isLoading) {
     return (

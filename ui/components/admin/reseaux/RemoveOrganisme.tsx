@@ -14,8 +14,10 @@ export const RemoveOrganisme: React.FC<{
 }> = ({ reseauId, organismeId, organismeName, refetch }) => {
   const toast = useToast();
 
-  const { mutateAsync: removeReseaux, isLoading: isRemoving } = useMutation(async () => {
-    return await _delete(`/api/v1/admin/reseaux/${reseauId}/organismes/${organismeId}`);
+  const { mutateAsync: removeReseaux, isPending: isRemoving } = useMutation({
+    mutationFn: async () => {
+      return await _delete(`/api/v1/admin/reseaux/${reseauId}/organismes/${organismeId}`);
+    },
   });
 
   const handleRemove = async (onClose: () => void) => {

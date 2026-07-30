@@ -9,9 +9,11 @@ import { InscriptionOrganistionChildProps } from "./common";
 export const InscriptionFranceTravail = ({
   setOrganisation,
 }: InscriptionOrganistionChildProps & { title?: string }) => {
-  const { data: franceTravailOrganisations } = useQuery<Array<IOrganisationFranceTravail>>(["ft"], async () =>
-    _get("/api/v1/france-travail")
-  );
+  const { data: franceTravailOrganisations } = useQuery<Array<IOrganisationFranceTravail>>({
+    queryKey: ["ft"],
+
+    queryFn: async () => _get("/api/v1/france-travail"),
+  });
 
   const onSelectedFranceTravail = (ftId: string) => {
     const ft = franceTravailOrganisations?.find(({ _id }) => _id.toString() === ftId);

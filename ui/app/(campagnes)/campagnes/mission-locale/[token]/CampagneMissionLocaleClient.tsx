@@ -3,9 +3,9 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AuthError, _get } from "@/common/httpClient";
 import { publicConfig } from "@/config.public";
@@ -17,20 +17,20 @@ export default function CampagneMissionLocaleClient({ token }: { token: string }
   const router = useRouter();
   const [formData, setFormData] = useState<{ isInterested: boolean | null }>({ isInterested: null });
 
-  const { data, error, isLoading, isError } = useQuery(
-    ["ml-effectif", token],
-    () => _get(`/api/v1/campagne/mission-locale/${token}`),
-    {
-      enabled: !!token,
-      keepPreviousData: true,
-      retry: false,
-      onError(err) {
-        if (err instanceof AuthError) {
-          router.push("/campagnes/mission-locale/lien-invalide");
-        }
-      },
+  const { data, error, isLoading, isError } = useQuery({
+    queryKey: ["ml-effectif", token],
+    queryFn: () => _get(`/api/v1/campagne/mission-locale/${token}`),
+    enabled: !!token,
+    placeholderData: keepPreviousData,
+    retry: false,
+  });
+
+  // v5 : onError a été retiré de useQuery — la redirection sur AuthError se fait désormais via un effet.
+  useEffect(() => {
+    if (isError && error instanceof AuthError) {
+      router.push("/campagnes/mission-locale/lien-invalide");
     }
-  );
+  }, [isError, error, router]);
 
   if (isLoading || (isError && error instanceof AuthError)) {
     return (

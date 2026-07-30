@@ -38,11 +38,11 @@ interface InfosTransmissionParametrageOFAProps {
 
 const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
   const router = useRouter();
-  const { data: parametrage } = useQuery<InfosTransmissionParametrageOFAProps, any>(
-    ["admin/organismes/"],
-    () => _get(`/api/v1/admin/organismes/${organisme?._id}/parametrage-transmission`),
-    { enabled: router.isReady }
-  );
+  const { data: parametrage } = useQuery<InfosTransmissionParametrageOFAProps, any>({
+    queryKey: ["admin/organismes/"],
+    queryFn: () => _get(`/api/v1/admin/organismes/${organisme?._id}/parametrage-transmission`),
+    enabled: router.isReady,
+  });
   const [showFullApiKey, setShowFullApiKey] = useState(false);
   const { onCopy, hasCopied } = useClipboard(parametrage?.api_key ?? "");
   const toggleApiKeyVisibility = () => setShowFullApiKey(!showFullApiKey);
@@ -58,11 +58,11 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
     usersTotal: number;
     usersAdmin: number;
     invitationsPending: number;
-  }>(
-    ["admin/invitations/counts/organisme", organisme?._id],
-    () => _get(`/api/v1/admin/invitations/counts/organisme/${organisme?._id}`),
-    { enabled: !!organisme?._id && router.isReady }
-  );
+  }>({
+    queryKey: ["admin/invitations/counts/organisme", organisme?._id],
+    queryFn: () => _get(`/api/v1/admin/invitations/counts/organisme/${organisme?._id}`),
+    enabled: !!organisme?._id && router.isReady,
+  });
 
   const apiKeyDisplay = parametrage?.api_key
     ? showFullApiKey

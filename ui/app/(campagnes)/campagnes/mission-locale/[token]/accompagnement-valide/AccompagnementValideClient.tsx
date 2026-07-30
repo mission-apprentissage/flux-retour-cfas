@@ -5,7 +5,7 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -64,20 +64,20 @@ export default function AccompagnementValideClient({ token }: { token: string })
     phoneError: "",
   });
 
-  const { data, error, isLoading, isError } = useQuery(
-    ["ml-effectif", token],
-    () => _get(`/api/v1/campagne/mission-locale/${token}`),
-    {
-      enabled: !!token,
-      keepPreviousData: true,
-      retry: false,
-      onError(err) {
-        if (err instanceof AuthError) {
-          router.push("/campagnes/mission-locale/lien-invalide");
-        }
-      },
+  const { data, error, isLoading, isError } = useQuery({
+    queryKey: ["ml-effectif", token],
+    queryFn: () => _get(`/api/v1/campagne/mission-locale/${token}`),
+    enabled: !!token,
+    placeholderData: keepPreviousData,
+    retry: false,
+  });
+
+  // v5 : onError a été retiré de useQuery — la redirection sur AuthError se fait désormais via un effet.
+  useEffect(() => {
+    if (isError && error instanceof AuthError) {
+      router.push("/campagnes/mission-locale/lien-invalide");
     }
-  );
+  }, [isError, error, router]);
 
   useEffect(() => {
     if (data?.telephone) {
@@ -85,9 +85,9 @@ export default function AccompagnementValideClient({ token }: { token: string })
     }
   }, [data]);
 
-  const updatePhoneMutation = useMutation((telephone: string) =>
-    _post(`/api/v1/campagne/mission-locale/${token}/telephone`, { telephone })
-  );
+  const updatePhoneMutation = useMutation({
+    mutationFn: (telephone: string) => _post(`/api/v1/campagne/mission-locale/${token}/telephone`, { telephone }),
+  });
 
   const handleSavePhone = () => {
     const result = phoneSchema.safeParse(state.newPhone);

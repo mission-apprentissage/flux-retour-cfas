@@ -70,7 +70,9 @@ const OrganismeDoublonDeleteAlertDialog = ({
               onClick={async () => {
                 await _post(`/api/v1/admin/fusion-organismes`, { organismeFiableId, organismeSansUaiId });
                 toastSuccess("Les organismes ont bien été fusionnés !");
-                queryClient.invalidateQueries(["admin/organismes-duplicates"]);
+                queryClient.invalidateQueries({
+                  queryKey: ["admin/organismes-duplicates"],
+                });
                 onClose();
               }}
               ml={3}

@@ -15,11 +15,15 @@ import useToaster from "@/hooks/useToaster";
 export const getServerSideProps = async (context) => ({ props: { ...(await getAuthServerSideProps(context)) } });
 
 function useActivation(activationToken: string) {
-  const { data, isLoading, isError } = useQuery<any, any>(["useActivation", activationToken], async () => {
-    if (!activationToken) {
-      throw new Error("Missing activation token");
-    }
-    return await _post("/api/v1/auth/activation", { activationToken });
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["useActivation", activationToken],
+
+    queryFn: async () => {
+      if (!activationToken) {
+        throw new Error("Missing activation token");
+      }
+      return await _post("/api/v1/auth/activation", { activationToken });
+    },
   });
 
   return {

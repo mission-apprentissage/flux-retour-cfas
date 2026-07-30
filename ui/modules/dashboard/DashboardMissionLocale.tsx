@@ -20,11 +20,11 @@ import { RupturantsIcon } from "./icons";
 const DashboardMissionLocale = () => {
   const { auth } = useAuth();
 
-  const { data: indicateurs, isFetching: isLoading } = useQuery(
-    ["mission-locale-indicateurs"],
-    () => _get("/api/v1/organisation/mission-locale/indicateurs"),
-    { retry: 1 }
-  );
+  const { data: indicateurs, isFetching: isLoading } = useQuery({
+    queryKey: ["mission-locale-indicateurs"],
+    queryFn: () => _get("/api/v1/organisation/mission-locale/indicateurs"),
+    retry: 1,
+  });
 
   if (isLoading) {
     return (

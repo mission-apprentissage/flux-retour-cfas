@@ -87,11 +87,11 @@ export default function CollabV2AdminSection({ organisme }: Props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [action, setAction] = useState<"activate" | "deactivate" | null>(null);
 
-  const { data, isLoading, isFetching, refetch } = useQuery<EligibilityResult>(
-    ["admin/organismes/collab-v2-eligibility", organisme._id],
-    () => _get(`/api/v1/admin/organismes/${organisme._id}/collab-v2-eligibility`),
-    { enabled: !!organisme._id }
-  );
+  const { data, isLoading, isFetching, refetch } = useQuery<EligibilityResult>({
+    queryKey: ["admin/organismes/collab-v2-eligibility", organisme._id],
+    queryFn: () => _get(`/api/v1/admin/organismes/${organisme._id}/collab-v2-eligibility`),
+    enabled: !!organisme._id,
+  });
 
   const activateMutation = useMutation({
     mutationFn: () =>
@@ -203,8 +203,8 @@ export default function CollabV2AdminSection({ organisme }: Props) {
             w="fit-content"
             bg="white"
             onClick={() => openConfirm("deactivate")}
-            isDisabled={!siret || !uai || deactivateMutation.isLoading || isFetching}
-            isLoading={deactivateMutation.isLoading}
+            isDisabled={!siret || !uai || deactivateMutation.isPending || isFetching}
+            isLoading={deactivateMutation.isPending}
           >
             <Box as="i" className="ri-user-unfollow-line" verticalAlign="middle" mr={2} />
             Désactiver collaboration v2
@@ -214,8 +214,8 @@ export default function CollabV2AdminSection({ organisme }: Props) {
             variant="primary"
             w="fit-content"
             onClick={() => openConfirm("activate")}
-            isDisabled={!eligible || !siret || !uai || activateMutation.isLoading || isFetching}
-            isLoading={activateMutation.isLoading}
+            isDisabled={!eligible || !siret || !uai || activateMutation.isPending || isFetching}
+            isLoading={activateMutation.isPending}
             title={!eligible ? "Tous les critères d'éligibilité doivent être satisfaits" : undefined}
           >
             <Box as="i" className="ri-user-follow-line" verticalAlign="middle" mr={2} />

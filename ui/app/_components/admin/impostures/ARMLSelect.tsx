@@ -9,7 +9,10 @@ interface ARMLSelectProps {
 }
 
 export const ARMLSelect = ({ setOrganisation }: ARMLSelectProps) => {
-  const { data: armls } = useQuery<Array<IOrganisationARML>>(["arml"], async () => _get("/api/v1/mission-locale/arml"));
+  const { data: armls } = useQuery<Array<IOrganisationARML>>({
+    queryKey: ["arml"],
+    queryFn: async () => _get("/api/v1/mission-locale/arml"),
+  });
 
   const onSelectedArml = (armlId: string) => {
     const arml = armls?.find(({ _id }) => _id.toString() === armlId);

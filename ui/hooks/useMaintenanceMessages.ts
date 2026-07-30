@@ -8,7 +8,10 @@ const useMaintenanceMessages = () => {
     isLoading,
     error,
     refetch,
-  } = useQuery<any, any>(["maintenanceMessages"], () => _get("/api/v1/maintenanceMessages"));
+  } = useQuery({
+    queryKey: ["maintenanceMessages"],
+    queryFn: () => _get("/api/v1/maintenanceMessages"),
+  });
 
   const messageMaintenance = messages?.find((d) => d.context === "maintenance");
   const messageAutomatique = messages?.find((d) => d.context === "automatique" && d.msg);

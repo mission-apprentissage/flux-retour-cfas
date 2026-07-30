@@ -63,7 +63,9 @@ const EffectifDoublonDeleteAlertDialog = ({
               onClick={async () => {
                 trackPlausibleEvent("suppression_doublons_effectifs");
                 await _delete(`/api/v1/effectif/${duplicateDetail?.id}`);
-                queryClient.invalidateQueries(["duplicates-effectifs"]);
+                queryClient.invalidateQueries({
+                  queryKey: ["duplicates-effectifs"],
+                });
                 onClose();
               }}
               ml={3}

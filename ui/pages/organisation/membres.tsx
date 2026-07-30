@@ -25,12 +25,18 @@ const PageGestionDesMembres = () => {
     data: membres,
     status: statusMembres,
     refetch: refetchMembres,
-  } = useQuery<any[]>(["membres"], (): any => _get("/api/v1/organisation/membres"));
+  } = useQuery({
+    queryKey: ["membres"],
+    queryFn: (): any => _get("/api/v1/organisation/membres"),
+  });
   const {
     data: invitations,
     status: statusInvitations,
     refetch: refetchInvitations,
-  } = useQuery<any[]>(["invitations"], (): any => _get("/api/v1/organisation/invitations"));
+  } = useQuery({
+    queryKey: ["invitations"],
+    queryFn: (): any => _get("/api/v1/organisation/invitations"),
+  });
 
   const membresEnAttenteValidation = useMemo(
     () => membres?.filter((member) => member.account_status === "PENDING_ADMIN_VALIDATION") ?? [],

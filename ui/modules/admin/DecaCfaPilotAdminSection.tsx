@@ -90,11 +90,11 @@ export default function DecaCfaPilotAdminSection({ organisme }: Props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [action, setAction] = useState<"activate" | "deactivate" | null>(null);
 
-  const { data, isLoading, isFetching, refetch } = useQuery<EligibilityResult>(
-    ["admin/organismes/deca-cfa-pilot-eligibility", organisme._id],
-    () => _get(`/api/v1/admin/organismes/${organisme._id}/deca-cfa-pilot-eligibility`),
-    { enabled: !!organisme._id }
-  );
+  const { data, isLoading, isFetching, refetch } = useQuery<EligibilityResult>({
+    queryKey: ["admin/organismes/deca-cfa-pilot-eligibility", organisme._id],
+    queryFn: () => _get(`/api/v1/admin/organismes/${organisme._id}/deca-cfa-pilot-eligibility`),
+    enabled: !!organisme._id,
+  });
 
   const activateMutation = useMutation({
     mutationFn: (items: Array<{ siret: string; uai: string }>) =>
@@ -222,8 +222,8 @@ export default function DecaCfaPilotAdminSection({ organisme }: Props) {
             w="fit-content"
             bg="white"
             onClick={() => openConfirm("deactivate")}
-            isDisabled={!siret || !uai || deactivateMutation.isLoading || isFetching}
-            isLoading={deactivateMutation.isLoading}
+            isDisabled={!siret || !uai || deactivateMutation.isPending || isFetching}
+            isLoading={deactivateMutation.isPending}
           >
             <Box as="i" className="ri-shield-cross-line" verticalAlign="middle" mr={2} />
             Désactiver DECA-CFA pilot
@@ -233,8 +233,8 @@ export default function DecaCfaPilotAdminSection({ organisme }: Props) {
             variant="primary"
             w="fit-content"
             onClick={() => openConfirm("activate")}
-            isDisabled={!eligible || !siret || !uai || activateMutation.isLoading || isFetching}
-            isLoading={activateMutation.isLoading}
+            isDisabled={!eligible || !siret || !uai || activateMutation.isPending || isFetching}
+            isLoading={activateMutation.isPending}
             title={!eligible ? "Tous les critères d'éligibilité doivent être satisfaits" : undefined}
           >
             <Box as="i" className="ri-shield-check-line" verticalAlign="middle" mr={2} />

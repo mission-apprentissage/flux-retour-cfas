@@ -28,7 +28,10 @@ export const useEffectifForm = ({ schema }: { schema: any }) => {
         ({
           organisme: await snapshot.getPromise(organismeAtom),
           effectifId: await snapshot.getPromise(effectifIdAtom),
-          dossier: await snapshot.getPromise(dossierAtom), // TODO
+
+          // TODO
+          dossier: await snapshot.getPromise(dossierAtom),
+
           fields: await snapshot.getPromise(effectifFormAtom),
           values: await snapshot.getPromise(valuesSelector),
         }) as any,
