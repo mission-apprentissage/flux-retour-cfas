@@ -20,6 +20,7 @@ import {
   type OnboardingMlItem,
   useCfaInvitationInfo,
 } from "@/app/_components/onboarding";
+import { PAGES } from "@/app/_utils/routes.utils";
 import { _post } from "@/common/httpClient";
 import { getApiErrorMessage, isRateLimited } from "@/common/rateLimit";
 
@@ -74,7 +75,7 @@ function Step1({ info, onNext }: { info: CfaOnboardingInfo; onNext: () => void }
             label: (
               <span>
                 J&apos;accepte les{" "}
-                <a href="/cgu" target="_blank" rel="noopener" className={styles.cguLink}>
+                <a href={PAGES.static.cgu.getPath()} target="_blank" rel="noopener" className={styles.cguLink}>
                   conditions générales d&apos;utilisation
                 </a>{" "}
                 du service du Tableau de bord de l&apos;apprentissage et je prends connaissance de la{" "}

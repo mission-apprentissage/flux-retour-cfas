@@ -72,6 +72,14 @@ export const PAGES = {
         title: `Contacter l’équipe support | ${SITE_NAME}`,
       }),
     },
+    cgu: {
+      getPath: () => "/cgu",
+      title: "Conditions générales d’utilisation",
+      index: true,
+      getMetadata: () => ({
+        title: `Conditions générales d’utilisation | ${SITE_NAME}`,
+      }),
+    },
     authConnexion: {
       getPath: () => "/auth/connexion",
       title: "Connexion",
