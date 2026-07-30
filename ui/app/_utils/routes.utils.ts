@@ -72,6 +72,14 @@ export const PAGES = {
         title: `Contacter l’équipe support | ${SITE_NAME}`,
       }),
     },
+    accessibilite: {
+      getPath: () => "/accessibilite",
+      title: "Déclaration d’accessibilité",
+      index: true,
+      getMetadata: () => ({
+        title: `Déclaration d’accessibilité | ${SITE_NAME}`,
+      }),
+    },
     cgu: {
       getPath: () => "/cgu",
       title: "Conditions générales d’utilisation",

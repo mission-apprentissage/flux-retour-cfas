@@ -36,7 +36,7 @@ export function Footer() {
         },
         {
           text: "Accessibilité : non conforme",
-          linkProps: { href: "/accessibilite" },
+          linkProps: { href: PAGES.static.accessibilite.getPath() },
         },
         {
           text: "Mentions légales",
