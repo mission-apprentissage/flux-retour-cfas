@@ -91,7 +91,7 @@
     "trailingComma": "es5"
   },
   "devDependencies": {
-    "@faker-js/faker": "^8.4.1",
+    "@faker-js/faker": "^10.5.0",
     "@types/boom": "^7.3.5",
     "@types/bunyan": "^1.8.11",
     "@types/express": "^5.0.6",

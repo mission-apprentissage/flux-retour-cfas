@@ -2353,10 +2353,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@faker-js/faker@npm:^8.4.1":
-  version: 8.4.1
-  resolution: "@faker-js/faker@npm:8.4.1"
-  checksum: d802d531f8929562715adc279cfec763c9a4bc596ec67b0ce43fd0ae61b285d2b0eec6f1f4aa852452a63721a842fe7e81926dce7bd92acca94b01e2a1f55f5a
+"@faker-js/faker@npm:^10.5.0":
+  version: 10.5.0
+  resolution: "@faker-js/faker@npm:10.5.0"
+  checksum: 8f9beff2475ee57e83abd0a0e450c9587638c49d012e56fbf86e6a56bbcaef340eabd83d868b339c37163cea90e3aca33f585f3078f7126f90d7417ce903b5e7
   languageName: node
   linkType: hard
 
@@ -18418,7 +18418,7 @@ __metadata:
   resolution: "server@workspace:server"
   dependencies:
     "@asteasolutions/zod-to-openapi": ^7.3.0
-    "@faker-js/faker": ^8.4.1
+    "@faker-js/faker": ^10.5.0
     "@getbrevo/brevo": ^2.2.0
     "@sentry/cli": ^2.37.0
     "@sentry/integrations": ^7.114.0
