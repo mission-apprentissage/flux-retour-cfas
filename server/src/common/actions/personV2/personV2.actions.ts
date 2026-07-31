@@ -47,5 +47,5 @@ export async function getPersonV2FromIdentifiant(input: {
     { returnDocument: "after", upsert: true }
   );
 
-  return person.value;
+  return person;
 }

@@ -47,7 +47,7 @@ export const updateMaintenanceMessage = async (_id: string | ObjectId, data: Par
     { returnDocument: "after" }
   );
 
-  return updated.value;
+  return updated;
 };
 
 /**
