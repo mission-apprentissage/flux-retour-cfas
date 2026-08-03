@@ -44,7 +44,7 @@ export default function AccessibilitePage() {
           <ul>
             <li>
               E-mail&nbsp;:{" "}
-              <a href={`mailto:${CONTACT_EMAIL}`} className={styles.contactLink}>
+              <a href={`mailto:${CONTACT_EMAIL}`} className={`${fr.cx("fr-link")} ${styles.contactLink}`}>
                 {CONTACT_EMAIL}
               </a>
             </li>

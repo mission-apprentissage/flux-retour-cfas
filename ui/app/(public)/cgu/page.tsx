@@ -15,7 +15,7 @@ const CGU_VERSION_AFFICHEE = "v0.4";
 const DERNIERE_MISE_A_JOUR = "20 janvier 2025";
 
 const ContactEmailLink = () => (
-  <a href={`mailto:${CONTACT_EMAIL}`} className={styles.mailLink}>
+  <a href={`mailto:${CONTACT_EMAIL}`} className={`${fr.cx("fr-link")} ${styles.mailLink}`}>
     {CONTACT_EMAIL}
   </a>
 );
