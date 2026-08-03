@@ -80,9 +80,20 @@ const nextConfig = {
       //   permanent: true,
       // },
       {
-        // Page /stats supprimée (contenu retiré) — on redirige l'ancienne URL indexée vers l'accueil.
         source: "/stats",
         destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/questions-reponses",
+        destination: "https://aide.cfas.apprentissage.beta.gouv.fr/fr/",
+        basePath: false,
+        permanent: true,
+      },
+      {
+        source: "/questions-reponses/:path*",
+        destination: "https://aide.cfas.apprentissage.beta.gouv.fr/fr/",
+        basePath: false,
         permanent: true,
       },
       {
