@@ -29,7 +29,7 @@ function InfoFiabilisationOrganisme({ fiabilisationStatut }: { fiabilisationStat
           est fermé
         </ListItem>
       </UnorderedList>
-      <Link isExternal href={FAQ_REFERENCER_ETABLISSEMENT} textDecoration="underline" display="inline" mt={6}>
+      <Link href={FAQ_REFERENCER_ETABLISSEMENT} textDecoration="underline" display="inline" mt={6}>
         En savoir plus sur la démarche à suivre
       </Link>
     </>

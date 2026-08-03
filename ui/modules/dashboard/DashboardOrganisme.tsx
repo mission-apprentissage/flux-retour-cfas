@@ -436,7 +436,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                                     services du rectorat de l’académie où se situe votre CFA. Plus d’informations dans
                                     l’article{" "}
                                     <Link
-                                      isExternal
                                       href={FAQ_REFERENCER_ETABLISSEMENT}
                                       textDecoration="underline"
                                       display="inline"
@@ -478,7 +477,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                                   nouveau SIRET, veuillez le signaler aux acteurs publics de l’apprentissage.
                                 </Text>
                                 <Link
-                                  isExternal
                                   href={FAQ_REFERENCER_ETABLISSEMENT}
                                   textDecoration="underline"
                                   display="inline"
