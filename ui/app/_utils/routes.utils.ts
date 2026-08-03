@@ -72,6 +72,14 @@ export const PAGES = {
         title: `Contacter l’équipe support | ${SITE_NAME}`,
       }),
     },
+    glossaire: {
+      getPath: () => "/glossaire",
+      title: "Glossaire",
+      index: true,
+      getMetadata: () => ({
+        title: `Glossaire | ${SITE_NAME}`,
+      }),
+    },
     accessibilite: {
       getPath: () => "/accessibilite",
       title: "Déclaration d’accessibilité",

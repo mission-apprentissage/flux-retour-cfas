@@ -8,6 +8,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
+import { PAGES } from "@/app/_utils/routes.utils";
 import { _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
 import { getAccountLabel } from "@/common/utils/accountUtils";
@@ -201,7 +202,12 @@ export const UserConnectedHeader = () => {
                 </ListItemIcon>
                 Centre d&apos;aide
               </MenuItem>,
-              <MenuItem key="cfa-aide-glossaire" component="a" href="/glossaire" onClick={handleClose}>
+              <MenuItem
+                key="cfa-aide-glossaire"
+                component="a"
+                href={PAGES.static.glossaire.getPath()}
+                onClick={handleClose}
+              >
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-book-2-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>

@@ -4,6 +4,7 @@ import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { usePathname } from "next/navigation";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
+import { PAGES } from "@/app/_utils/routes.utils";
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
 
@@ -252,7 +253,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
 
     aideMenuLinks.push({
       linkProps: {
-        href: "/glossaire",
+        href: PAGES.static.glossaire.getPath(),
         target: "_self",
       },
       text: "Glossaire",
