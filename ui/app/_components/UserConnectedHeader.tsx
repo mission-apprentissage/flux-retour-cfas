@@ -216,7 +216,7 @@ export const UserConnectedHeader = () => {
               <MenuItem
                 key="cfa-aide-referencement"
                 component="a"
-                href="/referencement-organisme"
+                href={PAGES.static.referencementOrganisme.getPath()}
                 onClick={handleClose}
               >
                 <ListItemIcon>

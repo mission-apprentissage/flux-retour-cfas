@@ -72,6 +72,14 @@ export const PAGES = {
         title: `Contacter l’équipe support | ${SITE_NAME}`,
       }),
     },
+    referencementOrganisme: {
+      getPath: () => "/referencement-organisme",
+      title: "Référencement de votre organisme",
+      index: true,
+      getMetadata: () => ({
+        title: `Comment bien référencer son établissement et ses formations ? | ${SITE_NAME}`,
+      }),
+    },
     glossaire: {
       getPath: () => "/glossaire",
       title: "Glossaire",

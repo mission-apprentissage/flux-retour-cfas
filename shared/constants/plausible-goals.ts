@@ -1,4 +1,4 @@
-export const plausibleGoals = [
+const plausibleGoals = [
   // Page Statistiques
   "clic_statistiques",
   "clic_stats_visites",
@@ -55,6 +55,7 @@ export const plausibleGoals = [
   "referencement_clic_onglet_siret",
   "referencement_clic_onglet_uai",
   "referencement_clic_onglet_nature",
+  "referencement_clic_onglet_relations_entre_organismes",
   "referencement_clic_onglet_qualiopi",
   "referencement_clic_onglet_code_rncp",
   "referencement_telechargement_tuile_uai",

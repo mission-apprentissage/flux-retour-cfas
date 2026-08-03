@@ -244,7 +244,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
     ) {
       aideMenuLinks.push({
         linkProps: {
-          href: "/referencement-organisme",
+          href: PAGES.static.referencementOrganisme.getPath(),
           target: "_self",
         },
         text: "Référencement de votre organisme",
