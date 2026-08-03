@@ -97,6 +97,12 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/comprendre-les-donnees",
+        destination: "https://aide.cfas.apprentissage.beta.gouv.fr/fr/",
+        basePath: false,
+        permanent: true,
+      },
+      {
         source: "/politique-confidentialite",
         destination: "/politique-de-confidentialite",
         permanent: true,
