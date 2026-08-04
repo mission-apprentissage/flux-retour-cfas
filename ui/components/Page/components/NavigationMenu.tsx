@@ -302,7 +302,7 @@ const MenuQuestions = () => {
           {(organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) && (
             <MenuItem
               as="a"
-              href="https://cfas.apprentissage.beta.gouv.fr/docs/kit-deploiement-tba-op"
+              href="/docs/kit-deploiement-tba-op"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackPlausibleEvent("clic_homepage_kit_deploiement")}

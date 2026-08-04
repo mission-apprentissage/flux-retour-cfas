@@ -100,6 +100,13 @@ export const PAGES = {
         title: `Page d’aide & FAQ | ${SITE_NAME}`,
       }),
     },
+    docsKitDeploiementTbaOp: {
+      getPath: () => "/docs/kit-deploiement-tba-op",
+      title: "Kit de déploiement : Opérateurs Publics",
+      getMetadata: () => ({
+        title: `Kit de déploiement : Opérateurs Publics | ${SITE_NAME}`,
+      }),
+    },
     politiqueConfidentialite: {
       getPath: () => "/politique-de-confidentialite",
       title: "Politique de confidentialité",

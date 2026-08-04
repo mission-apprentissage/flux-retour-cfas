@@ -220,7 +220,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
     if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) {
       aideMenuLinks.push({
         linkProps: {
-          href: "https://cfas.apprentissage.beta.gouv.fr/docs/kit-deploiement-tba-op",
+          href: PAGES.static.docsKitDeploiementTbaOp.getPath(),
           target: "_blank",
           rel: "noopener noreferrer",
         },
