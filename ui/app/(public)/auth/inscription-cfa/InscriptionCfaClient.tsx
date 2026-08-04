@@ -79,7 +79,12 @@ function Step1({ info, onNext }: { info: CfaOnboardingInfo; onNext: () => void }
                   conditions générales d&apos;utilisation
                 </a>{" "}
                 du service du Tableau de bord de l&apos;apprentissage et je prends connaissance de la{" "}
-                <a href="/politique-de-confidentialite" target="_blank" rel="noopener" className={styles.cguLink}>
+                <a
+                  href={PAGES.static.politiqueConfidentialite.getPath()}
+                  target="_blank"
+                  rel="noopener"
+                  className={styles.cguLink}
+                >
                   politique de confidentialité
                 </a>
               </span>

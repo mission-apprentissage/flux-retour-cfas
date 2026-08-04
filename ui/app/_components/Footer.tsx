@@ -56,7 +56,7 @@ export function Footer() {
         },
         {
           text: "Politique de confidentialité",
-          linkProps: { href: "/politique-de-confidentialite" },
+          linkProps: { href: PAGES.static.politiqueConfidentialite.getPath() },
         },
         {
           text: "À propos",

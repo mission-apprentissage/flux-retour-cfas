@@ -93,6 +93,13 @@ export const PAGES = {
         title: `Mentions légales | ${SITE_NAME}`,
       }),
     },
+    politiqueConfidentialite: {
+      getPath: () => "/politique-de-confidentialite",
+      title: "Politique de confidentialité",
+      getMetadata: () => ({
+        title: `Politique de confidentialité | ${SITE_NAME}`,
+      }),
+    },
     cgu: {
       getPath: () => "/cgu",
       title: "Conditions générales d’utilisation",
