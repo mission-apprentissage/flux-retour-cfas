@@ -23,7 +23,7 @@ export default async function PolitiqueDeConfidentialitePage() {
 
   if (!recordMap) {
     return (
-      <main id="politique-de-confidentialite-content" className={fr.cx("fr-container", "fr-py-6w")}>
+      <main className={fr.cx("fr-container", "fr-py-6w")}>
         <h1>Politique de confidentialité</h1>
         <Alert
           severity="error"
@@ -35,7 +35,7 @@ export default async function PolitiqueDeConfidentialitePage() {
   }
 
   return (
-    <main id="politique-de-confidentialite-content">
+    <main>
       <NotionBody recordMap={recordMap} />
     </main>
   );

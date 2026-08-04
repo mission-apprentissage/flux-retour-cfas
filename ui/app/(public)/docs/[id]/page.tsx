@@ -34,7 +34,7 @@ export default async function DocsPage({ params }: DocsPageProps) {
   }
 
   return (
-    <main id="docs-content">
+    <main>
       <NotionBody recordMap={recordMap} />
     </main>
   );

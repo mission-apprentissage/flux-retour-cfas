@@ -23,7 +23,7 @@ export default async function MentionsLegalesPage() {
 
   if (!recordMap) {
     return (
-      <main id="mentions-legales-content" className={fr.cx("fr-container", "fr-py-6w")}>
+      <main className={fr.cx("fr-container", "fr-py-6w")}>
         <h1>Mentions légales</h1>
         <Alert
           severity="error"
@@ -35,7 +35,7 @@ export default async function MentionsLegalesPage() {
   }
 
   return (
-    <main id="mentions-legales-content">
+    <main>
       <NotionBody recordMap={recordMap} />
     </main>
   );

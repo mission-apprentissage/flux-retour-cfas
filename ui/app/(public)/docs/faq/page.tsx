@@ -23,7 +23,7 @@ export default async function DocsFaqPage() {
 
   if (!recordMap) {
     return (
-      <main id="docs-faq-content" className={fr.cx("fr-container", "fr-py-6w")}>
+      <main className={fr.cx("fr-container", "fr-py-6w")}>
         <h1>Page d’aide & FAQ</h1>
         <Alert
           severity="error"
@@ -35,7 +35,7 @@ export default async function DocsFaqPage() {
   }
 
   return (
-    <main id="docs-faq-content">
+    <main>
       <NotionBody recordMap={recordMap} />
     </main>
   );

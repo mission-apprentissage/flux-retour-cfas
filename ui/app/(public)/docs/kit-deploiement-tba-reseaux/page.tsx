@@ -23,7 +23,7 @@ export default async function DocsKitDeploiementTbaReseauxPage() {
 
   if (!recordMap) {
     return (
-      <main id="docs-kit-deploiement-tba-reseaux-content" className={fr.cx("fr-container", "fr-py-6w")}>
+      <main className={fr.cx("fr-container", "fr-py-6w")}>
         <h1>Kit de déploiement : Réseaux</h1>
         <Alert
           severity="error"
@@ -35,7 +35,7 @@ export default async function DocsKitDeploiementTbaReseauxPage() {
   }
 
   return (
-    <main id="docs-kit-deploiement-tba-reseaux-content">
+    <main>
       <NotionBody recordMap={recordMap} />
     </main>
   );
