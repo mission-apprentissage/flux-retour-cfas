@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export interface IPage {
   getPath: (args?: any) => string;
   title: string;
-  getMetadata?: (args?: any) => Metadata;
+  getMetadata: (args?: any) => Metadata;
 }
 
 interface IPages {
