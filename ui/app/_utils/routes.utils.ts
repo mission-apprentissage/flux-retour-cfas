@@ -107,6 +107,13 @@ export const PAGES = {
         title: `Kit de déploiement : Opérateurs Publics | ${SITE_NAME}`,
       }),
     },
+    docsKitDeploiementTbaReseaux: {
+      getPath: () => "/docs/kit-deploiement-tba-reseaux",
+      title: "Kit de déploiement : Réseaux",
+      getMetadata: () => ({
+        title: `Kit de déploiement : Réseaux | ${SITE_NAME}`,
+      }),
+    },
     politiqueConfidentialite: {
       getPath: () => "/politique-de-confidentialite",
       title: "Politique de confidentialité",
