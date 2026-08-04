@@ -4,7 +4,7 @@ import { PAGES } from "@/app/_utils/routes.utils";
 
 import ActivationClient from "../_components/ActivationClient";
 
-export const metadata = PAGES.static.authBienvenue.getMetadata();
+export const metadata = PAGES.static.authFinalisation.getMetadata();
 
 export default function Page() {
   return (

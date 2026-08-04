@@ -10,7 +10,7 @@ import { SUPPORT_PAGE_ACCUEIL } from "shared";
 
 import { _post } from "@/common/httpClient";
 
-import styles from "./Bienvenue.module.css";
+import styles from "./activation-client.module.css";
 
 const REDIRECT_DELAY_MS = 2500;
 
@@ -41,7 +41,7 @@ function useActivation(activationToken: string | null) {
   };
 }
 
-export default function BienvenueClient() {
+export default function ActivationClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activationToken = searchParams?.get("activationToken") ?? null;

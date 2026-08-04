@@ -149,6 +149,13 @@ export const PAGES = {
         title: `Bienvenue | ${SITE_NAME}`,
       }),
     },
+    authFinalisation: {
+      getPath: () => "/auth/finalisation",
+      title: "Confirmation de votre compte",
+      getMetadata: () => ({
+        title: `Confirmation de votre compte | ${SITE_NAME}`,
+      }),
+    },
     authInscriptionBravo: {
       getPath: () => "/auth/inscription/bravo",
       title: "Compte à valider",
