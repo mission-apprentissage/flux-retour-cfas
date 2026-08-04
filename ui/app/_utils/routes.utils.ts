@@ -149,6 +149,34 @@ export const PAGES = {
         title: `Bienvenue | ${SITE_NAME}`,
       }),
     },
+    authInscriptionBravo: {
+      getPath: () => "/auth/inscription/bravo",
+      title: "Compte à valider",
+      getMetadata: () => ({
+        title: `Vérifiez votre boite mail | ${SITE_NAME}`,
+      }),
+    },
+    authInscriptionOrganismeInconnu: {
+      getPath: () => "/auth/inscription/organisme-inconnu",
+      title: "Retrouver son UAI ou son SIRET",
+      getMetadata: () => ({
+        title: `Retrouver l’UAI ou le SIRET de son organisme | ${SITE_NAME}`,
+      }),
+    },
+    authInscriptionReseauAutre: {
+      getPath: () => "/auth/inscription/reseau-autre",
+      title: "Réseau non référencé",
+      getMetadata: () => ({
+        title: `Réseau non référencé | ${SITE_NAME}`,
+      }),
+    },
+    authRefusInvitation: {
+      getPath: () => "/auth/refus-invitation",
+      title: "Refus d’invitation",
+      getMetadata: () => ({
+        title: `Refus d’invitation | ${SITE_NAME}`,
+      }),
+    },
     authMotDePasseOublie: {
       getPath: () => "/auth/mot-de-passe-oublie",
       title: "Mot de passe oublié",
