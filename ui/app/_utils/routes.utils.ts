@@ -93,6 +93,13 @@ export const PAGES = {
         title: `Mentions légales | ${SITE_NAME}`,
       }),
     },
+    docsFaq: {
+      getPath: () => "/docs/faq",
+      title: "Page d’aide & FAQ",
+      getMetadata: () => ({
+        title: `Page d’aide & FAQ | ${SITE_NAME}`,
+      }),
+    },
     politiqueConfidentialite: {
       getPath: () => "/politique-de-confidentialite",
       title: "Politique de confidentialité",
