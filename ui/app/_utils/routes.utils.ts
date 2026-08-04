@@ -184,6 +184,13 @@ export const PAGES = {
         title: `Mot de passe oublié | ${SITE_NAME}`,
       }),
     },
+    authModifierMotDePasse: {
+      getPath: () => "/auth/modifier-mot-de-passe",
+      title: "Nouveau mot de passe",
+      getMetadata: () => ({
+        title: `Nouveau mot de passe | ${SITE_NAME}`,
+      }),
+    },
   },
   dynamic: {
     docsPage: ({ id, title }: { id: string; title?: string }) => ({
