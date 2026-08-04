@@ -158,6 +158,13 @@ export const PAGES = {
     },
   },
   dynamic: {
+    docsPage: ({ id, title }: { id: string; title?: string }) => ({
+      getPath: () => `/docs/${id}`,
+      title: title ?? "Documentation",
+      getMetadata: () => ({
+        title: `${title ?? "Documentation"} | ${SITE_NAME}`,
+      }),
+    }),
     authInscription: ({ typeOrganisation }: { typeOrganisation?: TypePublic } = {}): IPage => ({
       getPath: () => (typeOrganisation ? `/auth/inscription/${typeOrganisation}` : "/auth/inscription"),
       title: "Inscription",
