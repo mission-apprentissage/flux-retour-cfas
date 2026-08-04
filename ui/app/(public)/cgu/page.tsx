@@ -1,5 +1,6 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import type { ReactNode } from "react";
+import { CGU_DERNIERE_MISE_A_JOUR, CGU_VERSION } from "shared/constants";
 
 import { PAGES } from "@/app/_utils/routes.utils";
 
@@ -10,9 +11,6 @@ import styles from "./page.module.scss";
 export const metadata = PAGES.static.cgu.getMetadata();
 
 const CONTACT_EMAIL = "tableau-de-bord@apprentissage.beta.gouv.fr";
-
-const CGU_VERSION_AFFICHEE = "v0.4";
-const DERNIERE_MISE_A_JOUR = "20 janvier 2025";
 
 const ContactEmailLink = () => (
   <a href={`mailto:${CONTACT_EMAIL}`} className={`${fr.cx("fr-link")} ${styles.mailLink}`}>
@@ -317,7 +315,7 @@ export default function CguPage() {
         <div className={fr.cx("fr-col-12", "fr-col-md-8")}>
           <h1 className={styles.title}>Conditions générales d’utilisation du Tableau de bord de l’apprentissage</h1>
           <p className={styles.version}>
-            Dernière mise à jour le : {DERNIERE_MISE_A_JOUR} - {CGU_VERSION_AFFICHEE}
+            Dernière mise à jour le : {CGU_DERNIERE_MISE_A_JOUR} - {CGU_VERSION}
           </p>
           <p>
             Les présentes conditions générales d’utilisation (dites « CGU ») définissent les conditions d’accès et

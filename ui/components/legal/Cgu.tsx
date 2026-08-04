@@ -1,10 +1,11 @@
 import { Box, HStack, Heading, Text, Link, Flex, UnorderedList, ListItem } from "@chakra-ui/react";
 import React, { useEffect } from "react";
+import { CGU_DERNIERE_MISE_A_JOUR, CGU_VERSION } from "shared/constants";
 
 import Section from "@/components/Section/Section";
 import Sommaire from "@/components/Sommaire/Sommaire";
 
-export const CGU_VERSION = "v0.4";
+export { CGU_VERSION };
 
 const anchors = {
   ChampPreambule: "champ-preambule",
@@ -463,7 +464,9 @@ export const Cgu = ({ onLoad, isWrapped }: { onLoad?: () => void; isWrapped?: bo
           <Heading textStyle="h2" color="grey.800" mt={5}>
             CONDITIONS GÉNÉRALES D&apos;UTILISATION DU TABLEAU DE BORD DE L’APPRENTISSAGE
           </Heading>
-          <Text>Dernière mise à jour le : 20 janvier 2025 - {CGU_VERSION} </Text>
+          <Text>
+            Dernière mise à jour le : {CGU_DERNIERE_MISE_A_JOUR} - {CGU_VERSION}{" "}
+          </Text>
           <Text mt={4}>
             Les présentes conditions générales d’utilisation (dites « CGU ») définissent les conditions d’accès et
             d’utilisation des Services par l’Utilisateur.
