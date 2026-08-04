@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 export interface IPage {
   getPath: (args?: any) => string;
   title: string;
-  index?: boolean;
   getMetadata?: (args?: any) => Metadata;
 }
 
@@ -27,7 +26,6 @@ export const PAGES = {
     home: {
       getPath: () => "/",
       title: "Accueil",
-      index: true,
       getMetadata: () => ({
         title: `Accueil | ${SITE_NAME}`,
       }),
@@ -35,7 +33,6 @@ export const PAGES = {
     accueilCfa: {
       getPath: () => "/accueil-cfa",
       title: "Établissement de formation (CFA)",
-      index: true,
       getMetadata: () => ({
         title: `Accueil CFA | ${SITE_NAME}`,
       }),
@@ -43,7 +40,6 @@ export const PAGES = {
     accueilMissionLocale: {
       getPath: () => "/accueil-mission-locale",
       title: "Missions Locales",
-      index: true,
       getMetadata: () => ({
         title: `Accueil mission locale | ${SITE_NAME}`,
       }),
@@ -51,7 +47,6 @@ export const PAGES = {
     accueilTerritoire: {
       getPath: () => "/accueil-territoire",
       title: "Collectivités et acteurs de l'apprentissage",
-      index: true,
       getMetadata: () => ({
         title: `Accueil territoire | ${SITE_NAME}`,
       }),
@@ -59,7 +54,6 @@ export const PAGES = {
     webinaires: {
       getPath: () => "/webinaires",
       title: "Webinaires",
-      index: true,
       getMetadata: () => ({
         title: `Webinaires | ${SITE_NAME}`,
       }),
@@ -67,7 +61,6 @@ export const PAGES = {
     contact: {
       getPath: () => "/contact",
       title: "Contact",
-      index: true,
       getMetadata: () => ({
         title: `Contacter l’équipe support | ${SITE_NAME}`,
       }),
@@ -75,7 +68,6 @@ export const PAGES = {
     referencementOrganisme: {
       getPath: () => "/referencement-organisme",
       title: "Référencement de votre organisme",
-      index: true,
       getMetadata: () => ({
         title: `Comment bien référencer son établissement et ses formations ? | ${SITE_NAME}`,
       }),
@@ -83,7 +75,6 @@ export const PAGES = {
     glossaire: {
       getPath: () => "/glossaire",
       title: "Glossaire",
-      index: true,
       getMetadata: () => ({
         title: `Glossaire | ${SITE_NAME}`,
       }),
@@ -91,15 +82,20 @@ export const PAGES = {
     accessibilite: {
       getPath: () => "/accessibilite",
       title: "Déclaration d’accessibilité",
-      index: true,
       getMetadata: () => ({
         title: `Déclaration d’accessibilité | ${SITE_NAME}`,
+      }),
+    },
+    mentionsLegales: {
+      getPath: () => "/mentions-legales",
+      title: "Mentions légales",
+      getMetadata: () => ({
+        title: `Mentions légales | ${SITE_NAME}`,
       }),
     },
     cgu: {
       getPath: () => "/cgu",
       title: "Conditions générales d’utilisation",
-      index: true,
       getMetadata: () => ({
         title: `Conditions générales d’utilisation | ${SITE_NAME}`,
       }),
@@ -107,7 +103,6 @@ export const PAGES = {
     authConnexion: {
       getPath: () => "/auth/connexion",
       title: "Connexion",
-      index: false,
       getMetadata: () => ({
         title: `Connexion | ${SITE_NAME}`,
       }),
@@ -115,7 +110,6 @@ export const PAGES = {
     authInscriptionCfa: {
       getPath: () => "/auth/inscription-cfa",
       title: "Création de compte CFA",
-      index: false,
       getMetadata: () => ({
         title: `Création de compte CFA | ${SITE_NAME}`,
       }),
@@ -123,7 +117,6 @@ export const PAGES = {
     authBienvenue: {
       getPath: () => "/auth/bienvenue",
       title: "Bienvenue",
-      index: false,
       getMetadata: () => ({
         title: `Bienvenue | ${SITE_NAME}`,
       }),
@@ -131,7 +124,6 @@ export const PAGES = {
     authMotDePasseOublie: {
       getPath: () => "/auth/mot-de-passe-oublie",
       title: "Mot de passe oublié",
-      index: false,
       getMetadata: () => ({
         title: `Mot de passe oublié | ${SITE_NAME}`,
       }),
@@ -141,7 +133,6 @@ export const PAGES = {
     authInscription: ({ typeOrganisation }: { typeOrganisation?: TypePublic } = {}): IPage => ({
       getPath: () => (typeOrganisation ? `/auth/inscription/${typeOrganisation}` : "/auth/inscription"),
       title: "Inscription",
-      index: false,
       getMetadata: () => ({
         title: `Inscription | ${SITE_NAME}`,
       }),

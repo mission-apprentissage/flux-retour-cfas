@@ -40,7 +40,7 @@ export function Footer() {
         },
         {
           text: "Mentions légales",
-          linkProps: { href: "/mentions-legales" },
+          linkProps: { href: PAGES.static.mentionsLegales.getPath() },
         },
         {
           text: "Conditions générales d’utilisation",
