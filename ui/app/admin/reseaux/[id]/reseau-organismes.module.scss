@@ -1,49 +1,18 @@
-.header {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-.backLink {
-  margin-bottom: 1rem;
-}
-
-.title {
-  color: var(--text-title-blue-france);
-}
-
 .searchPanel {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
   align-items: flex-end;
-  padding: 1rem;
-  margin: 1.5rem 0 2rem;
-  border: 1px solid var(--border-default-blue-france);
+  margin-bottom: 2rem;
 }
 
 .searchField {
   flex: 1 1 24rem;
-}
-
-.tableWrapper {
-  overflow-x: auto;
-
-  :global(.fr-table thead th > div) {
-    align-items: center;
-
-    i {
-      line-height: 1;
-      transform: translateY(-2px);
-    }
-  }
+  margin-bottom: 0;
 }
 
 .organismeName {
   display: block;
-  max-width: 24rem;
 }
 
 .localisation {
@@ -55,23 +24,6 @@
   font-size: 0.75rem;
   color: var(--text-mention-grey);
   white-space: nowrap;
-}
-
-.natureResponsable {
-  background-color: #e3e3fd;
-}
-
-.natureFormateur {
-  background-color: #fceeac;
-}
-
-.natureResponsableFormateur {
-  background-color: #e6feda;
-}
-
-.natureInconnue {
-  white-space: nowrap;
-  background-color: #ffe8e5;
 }
 
 .searchRow {

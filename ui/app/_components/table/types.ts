@@ -39,4 +39,6 @@ export interface FullTableProps {
   renderSubComponent?: (rowData: TableRowData) => ReactNode;
   getRowCanExpand?: (rowData: TableRowData) => boolean;
   expandColumnLabel?: string;
+  expandedByDefault?: boolean;
+  tableLabel?: string;
 }

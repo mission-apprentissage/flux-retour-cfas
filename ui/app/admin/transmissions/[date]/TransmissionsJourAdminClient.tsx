@@ -6,9 +6,10 @@ import { useState } from "react";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
-import { FullTable } from "@/app/_components/table/FullTable";
 import { formatDate } from "@/app/_utils/date.utils";
 import { PAGES } from "@/app/_utils/routes.utils";
+import { AdminPageHeader } from "@/app/admin/_components/AdminPageHeader";
+import { AdminTable } from "@/app/admin/_components/AdminTable";
 import { _get } from "@/common/httpClient";
 
 import styles from "./transmissions-jour.module.scss";
@@ -79,19 +80,15 @@ export default function TransmissionsJourAdminClient({ date }: { date: string })
 
   return (
     <>
-      <div className={styles.backLink}>
-        <DsfrLink href={PAGES.static.adminTransmissions.getPath()} arrow="left">
-          Retour au tableau des rapports
-        </DsfrLink>
-      </div>
-
-      <h1 className={styles.title}>{formattedDate ? `Rapport du ${formattedDate}` : "Rapport de transmission"}</h1>
-
-      {pagination && (
-        <p className={styles.intro}>
-          {pagination.total} organisme{pagination.total > 1 ? "s" : ""} ayant transmis des effectifs ce jour-là
-        </p>
-      )}
+      <AdminPageHeader
+        backLink={{ href: PAGES.static.adminTransmissions.getPath(), label: "Retour au tableau des rapports" }}
+        title={formattedDate ? `Rapport du ${formattedDate}` : "Rapport de transmission"}
+        intro={
+          pagination
+            ? `${pagination.total} organisme${pagination.total > 1 ? "s" : ""} ayant transmis des effectifs ce jour-là`
+            : undefined
+        }
+      />
 
       {error ? (
         <Alert
@@ -102,17 +99,16 @@ export default function TransmissionsJourAdminClient({ date }: { date: string })
       ) : isLoading ? (
         <TableSkeleton />
       ) : (
-        <div className={styles.tableWrapper}>
-          <FullTable
-            data={(data?.data ?? []).map(toTableRow)}
-            columns={TRANSMISSIONS_JOUR_COLUMNS}
-            pagination={pagination}
-            onPageChange={setPage}
-            onPageSizeChange={setLimit}
-            pageSize={limit}
-            emptyMessage="Aucune transmission pour cette journée"
-          />
-        </div>
+        <AdminTable
+          data={(data?.data ?? []).map(toTableRow)}
+          columns={TRANSMISSIONS_JOUR_COLUMNS}
+          tableLabel={formattedDate ? `Transmissions par organisme du ${formattedDate}` : "Transmissions par organisme"}
+          pagination={pagination}
+          onPageChange={setPage}
+          onPageSizeChange={setLimit}
+          pageSize={limit}
+          emptyMessage="Aucune transmission pour cette journée"
+        />
       )}
     </>
   );

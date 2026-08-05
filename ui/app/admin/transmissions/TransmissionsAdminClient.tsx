@@ -7,9 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
-import { FullTable } from "@/app/_components/table/FullTable";
 import { formatDate } from "@/app/_utils/date.utils";
 import { PAGES } from "@/app/_utils/routes.utils";
+import { AdminPageHeader } from "@/app/admin/_components/AdminPageHeader";
+import { AdminTable } from "@/app/admin/_components/AdminTable";
 import { _get } from "@/common/httpClient";
 
 import styles from "./transmissions.module.scss";
@@ -32,7 +33,7 @@ const TRANSMISSIONS_COLUMNS = [
   { label: "Effectifs transmis", dataKey: "success", sortable: false },
   { label: "Effectifs en échec", dataKey: "error", sortable: false },
   { label: "Total effectifs", dataKey: "total", sortable: false },
-  { label: "Voir", dataKey: "actions", sortable: false },
+  { label: "", dataKey: "actions", sortable: false },
 ];
 
 function toTableRow(transmission: TransmissionDay) {
@@ -83,10 +84,18 @@ export default function TransmissionsAdminClient() {
     ({ signal }) => _get("/api/v1/admin/transmissions", { params: { page, limit }, signal })
   );
 
+  const total = data?.pagination?.total;
+
   return (
     <>
-      <h1 className={styles.title}>Toutes les transmissions</h1>
-      <p className={styles.intro}>Visualisez l’état des données transmises ou non, jour par jour, par organisme.</p>
+      <AdminPageHeader
+        title="Toutes les transmissions"
+        intro={
+          total !== undefined
+            ? `${total} journée${total > 1 ? "s" : ""} de transmission — état des données transmises ou non, jour par jour, par organisme.`
+            : "État des données transmises ou non, jour par jour, par organisme."
+        }
+      />
 
       {error ? (
         <Alert
@@ -97,17 +106,16 @@ export default function TransmissionsAdminClient() {
       ) : isLoading ? (
         <TableSkeleton />
       ) : (
-        <div className={styles.tableWrapper}>
-          <FullTable
-            data={(data?.data ?? []).map(toTableRow)}
-            columns={TRANSMISSIONS_COLUMNS}
-            pagination={data?.pagination ?? null}
-            onPageChange={setPage}
-            onPageSizeChange={setLimit}
-            pageSize={limit}
-            emptyMessage="Aucune transmission à afficher"
-          />
-        </div>
+        <AdminTable
+          data={(data?.data ?? []).map(toTableRow)}
+          columns={TRANSMISSIONS_COLUMNS}
+          tableLabel="Transmissions par jour"
+          pagination={data?.pagination ?? null}
+          onPageChange={setPage}
+          onPageSizeChange={setLimit}
+          pageSize={limit}
+          emptyMessage="Aucune transmission à afficher"
+        />
       )}
     </>
   );

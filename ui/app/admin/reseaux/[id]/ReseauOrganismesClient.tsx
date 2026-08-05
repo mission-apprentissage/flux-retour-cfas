@@ -5,7 +5,6 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { SortingState } from "@tanstack/react-table";
 import format from "date-fns/format/index";
@@ -15,9 +14,10 @@ import { IReseau, normalize, UAI_INCONNUE_TAG_FORMAT } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
-import { FullTable } from "@/app/_components/table/FullTable";
 import { PAGES } from "@/app/_utils/routes.utils";
-import { NATURE_ORGANISME } from "@/common/constants/organismes";
+import { AdminPageHeader } from "@/app/admin/_components/AdminPageHeader";
+import { AdminTable } from "@/app/admin/_components/AdminTable";
+import { NatureOrganismeTag } from "@/app/admin/_components/NatureOrganismeTag";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import { _delete, _get, _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -50,16 +50,8 @@ const RESEAU_COLUMNS = [
   { label: "SIRET", dataKey: "siret" },
   { label: "Nature", dataKey: "nature" },
   { label: "Localisation", dataKey: "adresse" },
-  { label: "Supprimer", dataKey: "actions", sortable: false },
+  { label: "", dataKey: "actions", sortable: false },
 ];
-
-const NATURE_CLASS: Record<string, string> = {
-  responsable: styles.natureResponsable,
-  formateur: styles.natureFormateur,
-  responsable_formateur: styles.natureResponsableFormateur,
-  lieu_formation: styles.natureInconnue,
-  inconnue: styles.natureInconnue,
-};
 
 const addOrganismeModal = createModal({ id: "admin-reseau-add-organisme", isOpenedByDefault: false });
 const removeOrganismeModal = createModal({ id: "admin-reseau-remove-organisme", isOpenedByDefault: false });
@@ -167,6 +159,7 @@ export default function ReseauOrganismesClient({ id }: { id: string }) {
     setPage(1);
   }, [searchValue, sorting]);
 
+  const hasActiveSearch = searchValue.length >= MIN_SEARCH_LENGTH;
   const lastPage = Math.max(1, Math.ceil(sortedOrganismes.length / pageSize));
   const currentPage = Math.min(page, lastPage);
   const pageOrganismes = sortedOrganismes.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -236,11 +229,7 @@ export default function ReseauOrganismesClient({ id }: { id: string }) {
       ),
       uai: organisme.uai || UAI_INCONNUE_TAG_FORMAT,
       siret: organisme.siret || UAI_INCONNUE_TAG_FORMAT,
-      nature: (
-        <Tag small className={NATURE_CLASS[organisme.nature] ?? NATURE_CLASS.inconnue}>
-          {NATURE_ORGANISME[organisme.nature] ?? NATURE_ORGANISME.inconnue}
-        </Tag>
-      ),
+      nature: <NatureOrganismeTag nature={organisme.nature} />,
       adresse: (
         <>
           <span className={styles.localisation}>{organisme.adresse?.commune || ""}</span>
@@ -273,18 +262,22 @@ export default function ReseauOrganismesClient({ id }: { id: string }) {
 
   return (
     <>
-      <div className={styles.backLink}>
-        <DsfrLink href={PAGES.static.adminReseaux.getPath()} arrow="left">
-          Revenir en arrière
-        </DsfrLink>
-      </div>
-
-      <div className={styles.header}>
-        <h1 className={styles.title}>{reseauNom ? `Réseau ${reseauNom}` : "Réseau"}</h1>
-        <Button iconId="fr-icon-add-line" onClick={() => addOrganismeModal.open()} disabled={!reseau}>
-          Ajouter un organisme
-        </Button>
-      </div>
+      <AdminPageHeader
+        backLink={{ href: PAGES.static.adminReseaux.getPath(), label: "Retour à la liste des réseaux" }}
+        title={reseauNom ? `Réseau ${reseauNom}` : "Réseau"}
+        intro={
+          reseau
+            ? hasActiveSearch
+              ? `${sortedOrganismes.length} résultat${sortedOrganismes.length > 1 ? "s" : ""} sur ${reseau.organismes.length} organisme${reseau.organismes.length > 1 ? "s" : ""}`
+              : `${reseau.organismes.length} organisme${reseau.organismes.length > 1 ? "s" : ""} dans ce réseau`
+            : undefined
+        }
+        action={
+          <Button iconId="fr-icon-add-line" onClick={() => addOrganismeModal.open()} disabled={!reseau}>
+            Ajouter un organisme
+          </Button>
+        }
+      />
 
       {feedback && (
         <Alert
@@ -309,42 +302,44 @@ export default function ReseauOrganismesClient({ id }: { id: string }) {
       ) : (
         <>
           <div className={styles.searchPanel}>
-            <div className={styles.searchField}>
-              <Input
-                label="Rechercher un organisme"
-                hintText="Par nom, UAI, SIRET ou ville (indiquez au moins deux caractères)"
-                nativeInputProps={{
-                  type: "search",
-                  value: searchValue,
-                  onChange: (event) => setSearchValue(event.target.value),
-                }}
-              />
-            </div>
+            <Input
+              className={styles.searchField}
+              label="Rechercher un organisme"
+              hintText="Par nom, UAI, SIRET ou ville (indiquez au moins deux caractères)"
+              nativeInputProps={{
+                type: "search",
+                value: searchValue,
+                onChange: (event) => setSearchValue(event.target.value),
+              }}
+            />
             <Button
               priority="secondary"
               iconId="fr-icon-download-line"
               iconPosition="left"
               onClick={handleExport}
               disabled={sortedOrganismes.length === 0}
-              title={sortedOrganismes.length === 0 ? "Aucun organisme à télécharger" : undefined}
+              title={
+                sortedOrganismes.length === 0
+                  ? "Aucun organisme à télécharger"
+                  : `Télécharger les ${sortedOrganismes.length} organismes affichés au format Excel`
+              }
             >
               Télécharger la liste
             </Button>
           </div>
 
-          <div className={styles.tableWrapper}>
-            <FullTable
-              data={tableData}
-              columns={RESEAU_COLUMNS}
-              pagination={{ total: sortedOrganismes.length, page: currentPage, limit: pageSize, lastPage }}
-              onPageChange={setPage}
-              onPageSizeChange={setPageSize}
-              pageSize={pageSize}
-              sorting={sorting}
-              onSortingChange={setSorting}
-              emptyMessage="Aucun organisme dans ce réseau"
-            />
-          </div>
+          <AdminTable
+            data={tableData}
+            columns={RESEAU_COLUMNS}
+            tableLabel={`Organismes du réseau ${reseauNom}`}
+            pagination={{ total: sortedOrganismes.length, page: currentPage, limit: pageSize, lastPage }}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            pageSize={pageSize}
+            sorting={sorting}
+            onSortingChange={setSorting}
+            emptyMessage="Aucun organisme ne correspond à votre recherche"
+          />
         </>
       )}
 

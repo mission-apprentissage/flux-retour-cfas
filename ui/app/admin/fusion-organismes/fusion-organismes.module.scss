@@ -1,21 +1,3 @@
-.title {
-  margin-bottom: 2rem;
-  color: var(--text-title-blue-france);
-}
-
-.tableWrapper {
-  overflow-x: auto;
-
-  :global(.fr-table table) {
-    display: table;
-    width: 100%;
-  }
-
-  :global(.fr-table thead th:first-child) {
-    width: 3rem;
-  }
-}
-
 .groupName {
   display: inline-block;
   margin-right: 1rem;

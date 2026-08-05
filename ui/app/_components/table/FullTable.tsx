@@ -2,7 +2,6 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
-import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import {
   useReactTable,
@@ -15,7 +14,7 @@ import {
   getExpandedRowModel,
   type ExpandedState,
 } from "@tanstack/react-table";
-import { useCallback, useRef, useEffect, useState, Fragment } from "react";
+import { useCallback, useRef, useEffect, useId, useState, Fragment } from "react";
 
 import { useTableData, useTableColumns } from "./hooks";
 import { FullTableProps, TableRowData } from "./types";
@@ -92,19 +91,27 @@ function PageSizeSelector({
   pageSize: number;
   onPageSizeChange: (pageSize: number) => void;
 }) {
+  const selectId = useId();
   const pageSizeOptions = [5, 10, 20, 50];
+
   return (
-    <Select
-      label=""
-      options={pageSizeOptions.map((size) => ({
-        value: size.toString(),
-        label: `Voir par ${size}`,
-      }))}
-      nativeSelectProps={{
-        value: pageSize.toString(),
-        onChange: (e) => onPageSizeChange(Number(e.target.value)),
-      }}
-    />
+    <div className={fr.cx("fr-select-group")}>
+      <label className={fr.cx("fr-label", "fr-sr-only")} htmlFor={selectId}>
+        Nombre de résultats par page
+      </label>
+      <select
+        id={selectId}
+        className={fr.cx("fr-select")}
+        value={pageSize.toString()}
+        onChange={(event) => onPageSizeChange(Number(event.target.value))}
+      >
+        {pageSizeOptions.map((size) => (
+          <option key={size} value={size.toString()}>
+            Voir par {size}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
 
@@ -127,11 +134,13 @@ export function FullTable({
   renderSubComponent,
   getRowCanExpand,
   expandColumnLabel = "Détail",
+  expandedByDefault = false,
+  tableLabel,
 }: FullTableProps) {
   const tableRef = useRef<HTMLDivElement>(null);
   const tableData = useTableData(data);
   const tableColumns = useTableColumns(columns);
-  const [expanded, setExpanded] = useState<ExpandedState>({});
+  const [expanded, setExpanded] = useState<ExpandedState>(expandedByDefault ? true : {});
   const isExpandable = Boolean(renderSubComponent);
 
   const scrollToTop = useCallback(() => {
@@ -251,6 +260,7 @@ export function FullTable({
           {isExpandable ? (
             <div className="fr-table">
               <table>
+                {tableLabel && <caption className={fr.cx("fr-sr-only")}>{tableLabel}</caption>}
                 <thead>
                   <tr>
                     <th scope="col">
@@ -301,6 +311,8 @@ export function FullTable({
             </div>
           ) : (
             <Table
+              caption={tableLabel}
+              noCaption
               headers={headerCells.map((header) => (
                 <TableHeaderCell key={header.id} header={header} />
               ))}

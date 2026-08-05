@@ -9,7 +9,8 @@ import { useCallback, useState } from "react";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
-import { FullTable } from "@/app/_components/table/FullTable";
+import { AdminPageHeader } from "@/app/admin/_components/AdminPageHeader";
+import { AdminTable } from "@/app/admin/_components/AdminTable";
 import { NATURE_ORGANISME } from "@/common/constants/organismes";
 import { _get, _post } from "@/common/httpClient";
 
@@ -147,11 +148,14 @@ export default function FusionOrganismesClient() {
 
   return (
     <>
-      <h1 className={styles.title}>
-        {allGroups.length > 0
-          ? `Vérifier les ${allGroups.length} duplicats d’organisme`
-          : "Vérifier les duplicats d’organisme"}
-      </h1>
+      <AdminPageHeader
+        title={
+          allGroups.length > 0
+            ? `Vérifier les ${allGroups.length} duplicats d’organisme`
+            : "Vérifier les duplicats d’organisme"
+        }
+        intro="Comparez les organismes partageant un même SIRET, puis fusionnez-les lorsqu'il s'agit bien du même établissement."
+      />
 
       {feedback && (
         <Alert
@@ -173,42 +177,42 @@ export default function FusionOrganismesClient() {
       ) : isLoading ? (
         <TableSkeleton />
       ) : (
-        <div className={styles.tableWrapper}>
-          <FullTable
-            data={tableData}
-            columns={DUPLICATES_COLUMNS}
-            pagination={{ total: allGroups.length, page: currentPage, limit: PAGE_SIZE, lastPage }}
-            onPageChange={setPage}
-            pageSize={PAGE_SIZE}
-            expandColumnLabel="Détail des duplicats"
-            getRowCanExpand={() => true}
-            renderSubComponent={(rowData) => (
-              <>
-                <DuplicateDetails duplicates={rowData.duplicates} />
-                {rowData.duplicates.length === 2 ? (
-                  <Button
-                    priority="secondary"
-                    iconId="ri-eye-line"
-                    iconPosition="left"
-                    onClick={() => {
-                      setSelectedGroup(rowData.duplicates);
-                      detailModal.open();
-                    }}
-                  >
-                    Voir les détails
-                  </Button>
-                ) : (
-                  <Alert
-                    severity="warning"
-                    small
-                    description="Attention il y a plus de 2 organismes en duplicat, analyse complémentaire nécessaire."
-                  />
-                )}
-              </>
-            )}
-            emptyMessage="Aucun duplicat d’organisme à vérifier"
-          />
-        </div>
+        <AdminTable
+          data={tableData}
+          columns={DUPLICATES_COLUMNS}
+          tableLabel="Organismes en duplicat"
+          pagination={{ total: allGroups.length, page: currentPage, limit: PAGE_SIZE, lastPage }}
+          onPageChange={setPage}
+          pageSize={PAGE_SIZE}
+          expandColumnLabel="Détail des duplicats"
+          expandedByDefault
+          getRowCanExpand={() => true}
+          renderSubComponent={(rowData) => (
+            <>
+              <DuplicateDetails duplicates={rowData.duplicates} />
+              {rowData.duplicates.length === 2 ? (
+                <Button
+                  priority="secondary"
+                  iconId="ri-eye-line"
+                  iconPosition="left"
+                  onClick={() => {
+                    setSelectedGroup(rowData.duplicates);
+                    detailModal.open();
+                  }}
+                >
+                  Voir les détails
+                </Button>
+              ) : (
+                <Alert
+                  severity="warning"
+                  small
+                  description="Attention il y a plus de 2 organismes en duplicat, analyse complémentaire nécessaire."
+                />
+              )}
+            </>
+          )}
+          emptyMessage="Aucun duplicat d’organisme à vérifier"
+        />
       )}
 
       <detailModal.Component
