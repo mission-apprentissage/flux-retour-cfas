@@ -78,11 +78,11 @@
   display: flex;
   gap: 1rem;
   align-items: flex-end;
-}
 
-.searchInput {
-  flex: 1;
-  margin-bottom: 0;
+  .searchInput {
+    flex: 1;
+    margin-bottom: 0;
+  }
 }
 
 .searchError {
