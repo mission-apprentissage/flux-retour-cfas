@@ -1,0 +1,152 @@
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.backLink {
+  margin-bottom: 1rem;
+}
+
+.title {
+  color: var(--text-title-blue-france);
+}
+
+.searchPanel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  padding: 1rem;
+  margin: 1.5rem 0 2rem;
+  border: 1px solid var(--border-default-blue-france);
+}
+
+.searchField {
+  flex: 1 1 24rem;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+
+  :global(.fr-table thead th > div) {
+    align-items: center;
+
+    i {
+      line-height: 1;
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.organismeName {
+  display: block;
+  max-width: 24rem;
+}
+
+.localisation {
+  display: block;
+}
+
+.localisationDetails {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+  white-space: nowrap;
+}
+
+.natureResponsable {
+  background-color: #e3e3fd;
+}
+
+.natureFormateur {
+  background-color: #fceeac;
+}
+
+.natureResponsableFormateur {
+  background-color: #e6feda;
+}
+
+.natureInconnue {
+  white-space: nowrap;
+  background-color: #ffe8e5;
+}
+
+.searchRow {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.searchInput {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.searchError {
+  color: var(--text-default-error);
+}
+
+.searchResults {
+  max-height: 15rem;
+  padding: 0;
+  margin: 1rem 0 0;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--border-default-grey);
+}
+
+.searchResult {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: none;
+
+  &:hover {
+    background-color: var(--background-alt-grey);
+  }
+}
+
+.searchResultName {
+  display: block;
+  font-weight: 700;
+}
+
+.searchResultDetails {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.selectedOrganisme {
+  padding: 1rem;
+  margin-top: 1.5rem;
+  border: 1px solid var(--border-default-grey);
+}
+
+.selectedOrganismeList {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+
+.selectedOrganismeValue {
+  margin: 0;
+  font-weight: 700;
+}
+
+.alreadyInReseau {
+  margin-top: 1rem;
+  color: var(--text-default-error);
+}
+
+.confirmQuestion {
+  margin-top: 1rem;
+  font-style: italic;
+}

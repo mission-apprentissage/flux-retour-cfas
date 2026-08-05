@@ -26,7 +26,6 @@ export * from "./Parametre";
 export * from "./ParentGroupIcon";
 export * from "./Settings4Fill";
 export * from "./SubtractLine";
-export * from "./Trash";
 export * from "./UploadLine";
 export * from "./UserFill";
 export * from "./ValidateIcon";

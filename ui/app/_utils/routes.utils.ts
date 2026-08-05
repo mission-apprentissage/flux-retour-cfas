@@ -216,9 +216,9 @@ export const PAGES = {
   dynamic: {
     adminReseau: ({ id, nom }: { id: string; nom?: string }): IPage => ({
       getPath: () => `/admin/reseaux/${encodeURIComponent(id)}`,
-      title: nom ?? "Réseau",
+      title: nom ? `Réseau ${nom}` : "Réseau",
       getMetadata: () => ({
-        title: `${nom ?? "Réseau"} | ${SITE_NAME}`,
+        title: `${nom ? `Réseau ${nom}` : "Réseau"} | ${SITE_NAME}`,
       }),
     }),
     adminTransmissionsJour: ({ date, label }: { date: string; label?: string }): IPage => ({
