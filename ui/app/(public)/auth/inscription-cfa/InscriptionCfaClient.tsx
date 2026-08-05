@@ -2,13 +2,13 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
-import { PasswordInput } from "@codegouvfr/react-dsfr/blocks/PasswordInput";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
+import { CGU_VERSION } from "shared/constants";
 import { maskEmail } from "shared/utils/maskEmail";
 
 import {
@@ -24,20 +24,15 @@ import { PAGES } from "@/app/_utils/routes.utils";
 import { _post } from "@/common/httpClient";
 import { getApiErrorMessage, isRateLimited } from "@/common/rateLimit";
 
+import { PasswordField } from "../_components/PasswordField";
+import { DEFAULT_PASSWORD_MIN_LENGTH, getPasswordError } from "../_components/passwordRules";
+
 import styles from "./InscriptionCfa.module.css";
 
 type Step = 1 | 2 | 3;
 
 const RESEND_COOLDOWN_STORAGE_KEY = "inscription_cfa_resend_locked_until";
 const RESEND_COOLDOWN_MS = 60_000;
-
-const PASSWORD_RULES = [
-  { label: "Au moins 12 caractères", test: (p: string) => p.length >= 12 },
-  { label: "1 lettre minuscule", test: (p: string) => /[a-z]/.test(p) },
-  { label: "1 lettre majuscule", test: (p: string) => /[A-Z]/.test(p) },
-  { label: "1 chiffre", test: (p: string) => /\d/.test(p) },
-  { label: "1 caractère spécial (ex : ! @ # $ % & * - _)", test: (p: string) => /[^a-zA-Z0-9]/.test(p) },
-];
 
 const SIDE_PANEL_INTRO =
   "Le Tableau de bord de l'apprentissage : l'outil de collaboration entre les CFA et les Missions Locales pour l'accompagnement des jeunes en rupture de contrat d'apprentissage.";
@@ -139,7 +134,7 @@ function Step2({
   const [error, setError] = useState("");
 
   const isAdmin = info.role === "admin";
-  const passwordValid = PASSWORD_RULES.every((r) => r.test(password));
+  const passwordValid = !getPasswordError(password, DEFAULT_PASSWORD_MIN_LENGTH);
   const telephoneValid = /^\d{10}$/.test(telephone);
 
   const canSubmit =
@@ -270,21 +265,18 @@ function Step2({
             />
           </div>
 
-          <PasswordInput
+          <PasswordField
             label={
               <>
                 Choisissez votre mot de passe <span className={styles.requiredMark}>*</span>
               </>
             }
-            nativeInputProps={{
-              value: password,
-              onChange: (e) => setPassword(e.target.value),
-              onBlur: () => setTouched((t) => ({ ...t, password: true })),
-            }}
-            messages={PASSWORD_RULES.map((rule) => ({
-              message: rule.label,
-              severity: password ? (rule.test(password) ? "valid" : "error") : "info",
-            }))}
+            id="password"
+            name="password"
+            value={password}
+            minLength={DEFAULT_PASSWORD_MIN_LENGTH}
+            onChange={(e) => setPassword(e.target.value)}
+            onBlur={() => setTouched((t) => ({ ...t, password: true }))}
           />
 
           {error && <Alert severity="error" small description={error} className={styles.infoAlert} />}
@@ -424,7 +416,7 @@ export default function InscriptionCfaClient() {
       await _post("/api/v1/auth/register-cfa", {
         token,
         ...data,
-        has_accept_cgu_version: "v1",
+        has_accept_cgu_version: CGU_VERSION,
       });
       sessionStorage.setItem(RESEND_COOLDOWN_STORAGE_KEY, String(Date.now() + RESEND_COOLDOWN_MS));
       setRegisteredPrenom(data.prenom);
