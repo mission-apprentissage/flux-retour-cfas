@@ -230,7 +230,12 @@ export const UserConnectedHeader = () => {
               <ListSubheader key="admin-header" component="div" sx={{ fontWeight: "bold", color: "text.primary" }}>
                 Administration
               </ListSubheader>,
-              <MenuItem key="admin-transmissions" component="a" href="/admin/transmissions" onClick={handleClose}>
+              <MenuItem
+                key="admin-transmissions"
+                component="a"
+                href={PAGES.static.adminTransmissions.getPath()}
+                onClick={handleClose}
+              >
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>

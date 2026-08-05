@@ -205,6 +205,13 @@ export const PAGES = {
         title: `Gestion des réseaux | ${SITE_NAME}`,
       }),
     },
+    adminTransmissions: {
+      getPath: () => "/admin/transmissions",
+      title: "Toutes les transmissions",
+      getMetadata: () => ({
+        title: `Toutes les transmissions | ${SITE_NAME}`,
+      }),
+    },
   },
   dynamic: {
     adminReseau: ({ id, nom }: { id: string; nom?: string }): IPage => ({
@@ -212,6 +219,13 @@ export const PAGES = {
       title: nom ?? "Réseau",
       getMetadata: () => ({
         title: `${nom ?? "Réseau"} | ${SITE_NAME}`,
+      }),
+    }),
+    adminTransmissionsJour: ({ date, label }: { date: string; label?: string }): IPage => ({
+      getPath: () => `/admin/transmissions/${encodeURIComponent(date)}`,
+      title: label ? `Rapport du ${label}` : "Rapport de transmission",
+      getMetadata: () => ({
+        title: `${label ? `Rapport du ${label}` : "Rapport de transmission"} | ${SITE_NAME}`,
       }),
     }),
     docsPage: ({ id, title }: { id: string; title?: string }) => ({

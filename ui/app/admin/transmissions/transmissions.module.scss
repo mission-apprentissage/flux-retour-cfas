@@ -1,0 +1,31 @@
+.title {
+  margin-bottom: 1rem;
+  color: var(--text-title-blue-france);
+}
+
+.intro {
+  margin-bottom: 2rem;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.status {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.statusComplete {
+  color: var(--text-default-success);
+}
+
+.statusIncomplete {
+  color: var(--text-default-error);
+}
+
+.errorCount {
+  font-weight: 700;
+  color: var(--text-default-error);
+}
