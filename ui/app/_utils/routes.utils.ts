@@ -205,6 +205,13 @@ export const PAGES = {
         title: `Gestion des réseaux | ${SITE_NAME}`,
       }),
     },
+    adminFusionOrganismes: {
+      getPath: () => "/admin/fusion-organismes",
+      title: "Vérifier les duplicats d’organisme",
+      getMetadata: () => ({
+        title: `Vérifier les duplicats d’organisme | ${SITE_NAME}`,
+      }),
+    },
     adminTransmissions: {
       getPath: () => "/admin/transmissions",
       title: "Toutes les transmissions",

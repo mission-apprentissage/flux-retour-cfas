@@ -1,0 +1,70 @@
+.title {
+  margin-bottom: 2rem;
+  color: var(--text-title-blue-france);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+
+  :global(.fr-table table) {
+    display: table;
+    width: 100%;
+  }
+
+  :global(.fr-table thead th:first-child) {
+    width: 3rem;
+  }
+}
+
+.groupName {
+  display: inline-block;
+  margin-right: 1rem;
+  font-weight: 700;
+}
+
+.duplicates {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+}
+
+.duplicateName {
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.duplicateFields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin: 0;
+}
+
+.missingValue {
+  color: var(--text-mention-grey);
+}
+
+.unreliable {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  color: var(--text-default-warning);
+}
+
+.comparison {
+  width: 100%;
+  table-layout: fixed;
+
+  td,
+  th {
+    padding: 0.5rem 1rem;
+    text-align: left;
+    overflow-wrap: break-word;
+    border-bottom: 1px solid var(--border-default-grey);
+  }
+}
+
+.mergeWarning {
+  font-weight: 700;
+}

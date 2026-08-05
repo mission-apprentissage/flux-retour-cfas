@@ -272,7 +272,7 @@ export const UserConnectedHeader = () => {
               <MenuItem
                 key="admin-fusion-organismes"
                 component="a"
-                href="/admin/fusion-organismes"
+                href={PAGES.static.adminFusionOrganismes.getPath()}
                 onClick={handleClose}
               >
                 <ListItemIcon>
