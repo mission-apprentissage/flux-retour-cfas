@@ -242,7 +242,12 @@ export const UserConnectedHeader = () => {
                 </ListItemIcon>
                 Gestion des utilisateurs
               </MenuItem>,
-              <MenuItem key="admin-reseaux" component="a" href="/admin/reseaux" onClick={handleClose}>
+              <MenuItem
+                key="admin-reseaux"
+                component="a"
+                href={PAGES.static.adminReseaux.getPath()}
+                onClick={handleClose}
+              >
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>

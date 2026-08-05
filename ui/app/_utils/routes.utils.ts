@@ -198,8 +198,22 @@ export const PAGES = {
         title: `Nouveau mot de passe | ${SITE_NAME}`,
       }),
     },
+    adminReseaux: {
+      getPath: () => "/admin/reseaux",
+      title: "Gestion des réseaux",
+      getMetadata: () => ({
+        title: `Gestion des réseaux | ${SITE_NAME}`,
+      }),
+    },
   },
   dynamic: {
+    adminReseau: ({ id, nom }: { id: string; nom?: string }): IPage => ({
+      getPath: () => `/admin/reseaux/${encodeURIComponent(id)}`,
+      title: nom ?? "Réseau",
+      getMetadata: () => ({
+        title: `${nom ?? "Réseau"} | ${SITE_NAME}`,
+      }),
+    }),
     docsPage: ({ id, title }: { id: string; title?: string }) => ({
       getPath: () => `/docs/${id}`,
       title: title ?? "Documentation",
