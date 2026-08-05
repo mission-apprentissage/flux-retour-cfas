@@ -1,5 +1,6 @@
 "use client";
 
+import { fr } from "@codegouvfr/react-dsfr";
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
@@ -11,8 +12,10 @@ import {
   Cell,
   getSortedRowModel,
   getFilteredRowModel,
+  getExpandedRowModel,
+  type ExpandedState,
 } from "@tanstack/react-table";
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useRef, useEffect, useState, Fragment } from "react";
 
 import { useTableData, useTableColumns } from "./hooks";
 import { FullTableProps, TableRowData } from "./types";
@@ -121,10 +124,15 @@ export function FullTable({
   headerAction = null,
   hasPagination = true,
   onRowClick,
+  renderSubComponent,
+  getRowCanExpand,
+  expandColumnLabel = "Détail",
 }: FullTableProps) {
   const tableRef = useRef<HTMLDivElement>(null);
   const tableData = useTableData(data);
   const tableColumns = useTableColumns(columns);
+  const [expanded, setExpanded] = useState<ExpandedState>({});
+  const isExpandable = Boolean(renderSubComponent);
 
   const scrollToTop = useCallback(() => {
     if (tableRef.current) {
@@ -143,18 +151,26 @@ export function FullTable({
     }
   }, []);
 
-  const table = useReactTable({
+  const table = useReactTable<TableRowData>({
     data: tableData,
     columns: tableColumns,
     state: {
       sorting,
       columnFilters,
+      ...(isExpandable ? { expanded } : {}),
     },
     onSortingChange: onSortingChange || (() => {}),
     onColumnFiltersChange: onColumnFiltersChange || (() => {}),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    ...(isExpandable
+      ? {
+          onExpandedChange: setExpanded,
+          getExpandedRowModel: getExpandedRowModel(),
+          getRowCanExpand: (row) => (getRowCanExpand ? getRowCanExpand(row.original) : true),
+        }
+      : {}),
     enableSorting: true,
     enableColumnFilters: true,
     manualSorting: false,
@@ -184,7 +200,7 @@ export function FullTable({
   const currentPage = pagination?.page || 1;
 
   useEffect(() => {
-    if (!onRowClick || !tableRef.current) return;
+    if (!onRowClick || isExpandable || !tableRef.current) return;
 
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -207,7 +223,9 @@ export function FullTable({
       tableElement.addEventListener("click", handleClick);
       return () => tableElement.removeEventListener("click", handleClick);
     }
-  }, [data, onRowClick, table]);
+  }, [data, onRowClick, table, isExpandable]);
+
+  const headerCells = table.getHeaderGroups()[0]?.headers ?? [];
 
   return (
     <>
@@ -230,16 +248,67 @@ export function FullTable({
               {headerAction && <div>{headerAction}</div>}
             </div>
           )}
-          <Table
-            headers={
-              table
-                .getHeaderGroups()[0]
-                ?.headers.map((header) => <TableHeaderCell key={header.id} header={header} />) || []
-            }
-            data={table
-              .getSortedRowModel()
-              .rows.map((row) => row.getVisibleCells().map((cell) => <TableBodyCell key={cell.id} cell={cell} />))}
-          />
+          {isExpandable ? (
+            <div className="fr-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">
+                      <span className="fr-sr-only">{expandColumnLabel}</span>
+                    </th>
+                    {headerCells.map((header) => (
+                      <th key={header.id} scope="col">
+                        <TableHeaderCell header={header} />
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {table.getRowModel().rows.map((row) => (
+                    <Fragment key={row.id}>
+                      <tr>
+                        <td>
+                          {row.getCanExpand() && (
+                            <button
+                              type="button"
+                              aria-expanded={row.getIsExpanded()}
+                              aria-label={`${expandColumnLabel} : ${row.getIsExpanded() ? "replier" : "déplier"}`}
+                              onClick={row.getToggleExpandedHandler()}
+                              className={fr.cx(
+                                "fr-btn",
+                                "fr-btn--tertiary-no-outline",
+                                "fr-btn--sm",
+                                row.getIsExpanded() ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"
+                              )}
+                            />
+                          )}
+                        </td>
+                        {row.getVisibleCells().map((cell) => (
+                          <td key={cell.id}>
+                            <TableBodyCell cell={cell} />
+                          </td>
+                        ))}
+                      </tr>
+                      {row.getIsExpanded() && (
+                        <tr>
+                          <td colSpan={row.getVisibleCells().length + 1}>{renderSubComponent!(row.original)}</td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <Table
+              headers={headerCells.map((header) => (
+                <TableHeaderCell key={header.id} header={header} />
+              ))}
+              data={table
+                .getSortedRowModel()
+                .rows.map((row) => row.getVisibleCells().map((cell) => <TableBodyCell key={cell.id} cell={cell} />))}
+            />
+          )}
           {hasPagination && (
             <div
               style={{
