@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import type { IOrganisationJson } from "shared";
 import { CGU_VERSION } from "shared/constants";
 
+import { RequiredMark } from "@/app/_components/inscription/RequiredMark";
 import { PAGES } from "@/app/_utils/routes.utils";
 import { _get, _post } from "@/common/httpClient";
 import { getApiErrorMessage } from "@/common/rateLimit";
@@ -189,7 +190,7 @@ export default function ProfilClient() {
                 <Input
                   label={
                     <>
-                      Votre courriel <span className={styles.requiredMark}>*</span>
+                      Votre courriel <RequiredMark />
                     </>
                   }
                   hintText={EMAIL_HINT}
@@ -214,7 +215,7 @@ export default function ProfilClient() {
                 <RadioButtons
                   legend={
                     <>
-                      Votre civilité <span className={styles.requiredMark}>*</span>
+                      Votre civilité <RequiredMark />
                     </>
                   }
                   name={field.name}
@@ -250,7 +251,7 @@ export default function ProfilClient() {
                     label={
                       input.required ? (
                         <>
-                          {input.label} <span className={styles.requiredMark}>*</span>
+                          {input.label} <RequiredMark />
                         </>
                       ) : (
                         input.label
@@ -276,7 +277,7 @@ export default function ProfilClient() {
                 <PasswordField
                   label={
                     <>
-                      Mot de passe <span className={styles.requiredMark}>*</span>
+                      Mot de passe <RequiredMark />
                     </>
                   }
                   id={field.name}
@@ -296,7 +297,7 @@ export default function ProfilClient() {
                 <PasswordField
                   label={
                     <>
-                      Confirmation du mot de passe <span className={styles.requiredMark}>*</span>
+                      Confirmation du mot de passe <RequiredMark />
                     </>
                   }
                   id={field.name}

@@ -6,7 +6,7 @@ import type { IOrganisationFranceTravail } from "shared";
 
 import { _get } from "@/common/httpClient";
 
-import styles from "./inscription-form.module.scss";
+import { RequiredMark } from "./RequiredMark";
 import type { InscriptionFormProps } from "./types";
 
 export function InscriptionFranceTravail({ setOrganisation }: Pick<InscriptionFormProps, "setOrganisation">) {
@@ -18,7 +18,7 @@ export function InscriptionFranceTravail({ setOrganisation }: Pick<InscriptionFo
     <Select
       label={
         <>
-          Votre structure régionale : <span className={styles.requiredMark}>*</span>
+          Votre structure régionale : <RequiredMark />
         </>
       }
       placeholder="Sélectionner une région"

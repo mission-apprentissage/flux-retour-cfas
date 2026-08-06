@@ -5,7 +5,7 @@ import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { useState } from "react";
 import { REGIONS_SORTED, type IRegionCode } from "shared";
 
-import styles from "@/app/_components/inscription/inscription-form.module.scss";
+import { RequiredMark } from "@/app/_components/inscription/RequiredMark";
 import type { SetOrganisation } from "@/app/_components/inscription/types";
 
 const types = [
@@ -23,7 +23,7 @@ export function CarifOrefForm({ setOrganisation }: { setOrganisation: SetOrganis
       <RadioButtons
         legend={
           <>
-            Vous représentez : <span className={styles.requiredMark}>*</span>
+            Vous représentez : <RequiredMark />
           </>
         }
         name="typeCarifOref"
@@ -44,7 +44,7 @@ export function CarifOrefForm({ setOrganisation }: { setOrganisation: SetOrganis
         <Select
           label={
             <>
-              Votre territoire : <span className={styles.requiredMark}>*</span>
+              Votre territoire : <RequiredMark />
             </>
           }
           placeholder="Sélectionner un territoire"

@@ -9,6 +9,7 @@ import { Field, Form, Formik } from "formik";
 import { useRouter } from "next/navigation";
 import type { IReseau } from "shared";
 
+import { RequiredMark } from "@/app/_components/inscription/RequiredMark";
 import type { InscriptionFormProps } from "@/app/_components/inscription/types";
 import { PAGES } from "@/app/_utils/routes.utils";
 import { _get, _post } from "@/common/httpClient";
@@ -51,7 +52,7 @@ export function InscriptionTeteDeReseau({
       <Select
         label={
           <>
-            Vous représentez le réseau : <span className={styles.requiredMark}>*</span>
+            Vous représentez le réseau : <RequiredMark />
           </>
         }
         placeholder="Sélectionner votre réseau"
@@ -84,7 +85,7 @@ export function InscriptionTeteDeReseau({
                   <Input
                     label={
                       <>
-                        Indiquez le nom de votre réseau : <span className={styles.requiredMark}>*</span>
+                        Indiquez le nom de votre réseau : <RequiredMark />
                       </>
                     }
                     state={meta.touched && meta.error ? "error" : "default"}
@@ -106,7 +107,7 @@ export function InscriptionTeteDeReseau({
                   <Input
                     label={
                       <>
-                        Votre courriel : <span className={styles.requiredMark}>*</span>
+                        Votre courriel : <RequiredMark />
                       </>
                     }
                     state={meta.touched && meta.error ? "error" : "default"}

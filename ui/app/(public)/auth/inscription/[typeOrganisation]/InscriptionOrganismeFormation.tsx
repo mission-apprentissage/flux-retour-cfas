@@ -4,6 +4,7 @@ import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { OrganismeSearchForm, type OrganismeSearchKind } from "@/app/_components/inscription/OrganismeSearchForm";
+import { RequiredMark } from "@/app/_components/inscription/RequiredMark";
 import type { InscriptionFormProps } from "@/app/_components/inscription/types";
 import { PAGES } from "@/app/_utils/routes.utils";
 
@@ -37,7 +38,7 @@ export function InscriptionOrganismeFormation({ organisation, setOrganisation }:
       <RadioButtons
         legend={
           <>
-            Au choix, indiquez l’UAI ou le SIRET de votre établissement : <span className={styles.requiredMark}>*</span>
+            Au choix, indiquez l’UAI ou le SIRET de votre établissement : <RequiredMark />
           </>
         }
         name="select"

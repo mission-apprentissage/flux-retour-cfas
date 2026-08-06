@@ -15,17 +15,19 @@ export type AuthCardStep = {
 export function AuthCard({
   title,
   step,
+  maxWidth = 600,
   children,
   footer,
 }: {
   title: string;
   step?: AuthCardStep;
+  maxWidth?: number;
   children: ReactNode;
   footer?: ReactNode;
 }) {
   return (
     <div className={styles.wrapper}>
-      <div className={styles.card}>
+      <div className={styles.card} style={{ maxWidth: `${maxWidth}px` }}>
         <h1 className={styles.title}>{title}</h1>
 
         {step && (

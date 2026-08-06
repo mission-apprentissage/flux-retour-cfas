@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { CGU_VERSION } from "shared/constants";
 import { maskEmail } from "shared/utils/maskEmail";
 
+import { RequiredMark } from "@/app/_components/inscription/RequiredMark";
 import {
   type CfaOnboardingInfo,
   OnboardingError,
@@ -177,7 +178,7 @@ function Step2({
           <Input
             label={
               <>
-                Prénom <span className={styles.requiredMark}>*</span>
+                Prénom <RequiredMark />
               </>
             }
             state={touched.prenom && !prenom.trim() ? "error" : "default"}
@@ -192,7 +193,7 @@ function Step2({
           <Input
             label={
               <>
-                Nom de famille <span className={styles.requiredMark}>*</span>
+                Nom de famille <RequiredMark />
               </>
             }
             state={touched.nom && !nom.trim() ? "error" : "default"}
@@ -207,7 +208,7 @@ function Step2({
           <Input
             label={
               <>
-                Votre numéro de téléphone professionnel <span className={styles.requiredMark}>*</span>
+                Votre numéro de téléphone professionnel <RequiredMark />
               </>
             }
             state={touched.telephone && !telephoneValid ? "error" : "default"}
@@ -232,7 +233,7 @@ function Step2({
           <Input
             label={
               <>
-                Intitulé de poste au sein de l&apos;établissement <span className={styles.requiredMark}>*</span>
+                Intitulé de poste au sein de l&apos;établissement <RequiredMark />
               </>
             }
             state={touched.fonction && !fonction.trim() ? "error" : "default"}
@@ -274,7 +275,7 @@ function Step2({
           <PasswordField
             label={
               <>
-                Choisissez votre mot de passe <span className={styles.requiredMark}>*</span>
+                Choisissez votre mot de passe <RequiredMark />
               </>
             }
             id="password"

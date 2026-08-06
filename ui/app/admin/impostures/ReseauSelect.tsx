@@ -4,7 +4,7 @@ import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { useQuery } from "@tanstack/react-query";
 import type { IReseau } from "shared";
 
-import styles from "@/app/_components/inscription/inscription-form.module.scss";
+import { RequiredMark } from "@/app/_components/inscription/RequiredMark";
 import type { SetOrganisation } from "@/app/_components/inscription/types";
 import { _get } from "@/common/httpClient";
 
@@ -15,7 +15,7 @@ export function ReseauSelect({ setOrganisation }: { setOrganisation: SetOrganisa
     <Select
       label={
         <>
-          Vous représentez le réseau : <span className={styles.requiredMark}>*</span>
+          Vous représentez le réseau : <RequiredMark />
         </>
       }
       placeholder="Sélectionner un réseau"

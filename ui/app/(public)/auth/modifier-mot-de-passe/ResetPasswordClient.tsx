@@ -10,6 +10,7 @@ import { useState } from "react";
 import { _post } from "@/common/httpClient";
 import { getApiErrorMessage, isRateLimited } from "@/common/rateLimit";
 
+import { AuthCard } from "../_components/AuthCard";
 import { PasswordField } from "../_components/PasswordField";
 import { ADMIN_PASSWORD_MIN_LENGTH, DEFAULT_PASSWORD_MIN_LENGTH, getPasswordError } from "../_components/passwordRules";
 
@@ -63,50 +64,46 @@ export default function ResetPasswordClient() {
   };
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Veuillez saisir un nouveau mot de passe</h1>
-
-        {isDone ? (
-          <Alert
-            severity="success"
-            small
-            description="Votre mot de passe a bien été changé. Vous pouvez désormais vous connecter."
-          />
-        ) : (
-          <Formik<ResetPasswordValues> initialValues={{ newPassword: "" }} validate={validate} onSubmit={handleSubmit}>
-            {({ status = {}, isSubmitting }) => (
-              <Form noValidate>
-                <Field name="newPassword">
-                  {({ field, meta }: any) => (
-                    <PasswordField
-                      label="Nouveau mot de passe"
-                      id={field.name}
-                      name={field.name}
-                      value={field.value}
-                      placeholder="Votre mot de passe..."
-                      minLength={minLength}
-                      hasError={Boolean(meta.touched && meta.error)}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                    />
-                  )}
-                </Field>
-
-                <Button type="submit" disabled={isSubmitting} className={styles.submit}>
-                  Réinitialiser le mot de passe
-                </Button>
-
-                {status.error && (
-                  <div className={styles.alert}>
-                    <Alert severity={status.severity ?? "error"} small description={status.error} />
-                  </div>
+    <AuthCard title="Veuillez saisir un nouveau mot de passe" maxWidth={480}>
+      {isDone ? (
+        <Alert
+          severity="success"
+          small
+          description="Votre mot de passe a bien été changé. Vous pouvez désormais vous connecter."
+        />
+      ) : (
+        <Formik<ResetPasswordValues> initialValues={{ newPassword: "" }} validate={validate} onSubmit={handleSubmit}>
+          {({ status = {}, isSubmitting }) => (
+            <Form noValidate>
+              <Field name="newPassword">
+                {({ field, meta }: any) => (
+                  <PasswordField
+                    label="Nouveau mot de passe"
+                    id={field.name}
+                    name={field.name}
+                    value={field.value}
+                    placeholder="Votre mot de passe..."
+                    minLength={minLength}
+                    hasError={Boolean(meta.touched && meta.error)}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                  />
                 )}
-              </Form>
-            )}
-          </Formik>
-        )}
-      </div>
-    </div>
+              </Field>
+
+              <Button type="submit" disabled={isSubmitting} className={styles.submit}>
+                Réinitialiser le mot de passe
+              </Button>
+
+              {status.error && (
+                <div className={styles.alert}>
+                  <Alert severity={status.severity ?? "error"} small description={status.error} />
+                </div>
+              )}
+            </Form>
+          )}
+        </Formik>
+      )}
+    </AuthCard>
   );
 }

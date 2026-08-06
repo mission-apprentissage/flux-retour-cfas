@@ -13,7 +13,7 @@ import {
   type OrganisationsNationalesKey,
 } from "shared";
 
-import styles from "./inscription-form.module.scss";
+import { RequiredMark } from "./RequiredMark";
 import type { InscriptionFormProps } from "./types";
 
 const typesOrganisationBase = [
@@ -53,7 +53,7 @@ export function InscriptionOperateurPublic({
       <Select
         label={
           <>
-            Vous représentez : <span className={styles.requiredMark}>*</span>
+            Vous représentez : <RequiredMark />
           </>
         }
         placeholder="Sélectionner un opérateur public"
@@ -70,7 +70,7 @@ export function InscriptionOperateurPublic({
         <Select
           label={
             <>
-              Votre territoire : <span className={styles.requiredMark}>*</span>
+              Votre territoire : <RequiredMark />
             </>
           }
           placeholder="Sélectionner un territoire"
@@ -90,7 +90,7 @@ export function InscriptionOperateurPublic({
         <Select
           label={
             <>
-              Votre territoire : <span className={styles.requiredMark}>*</span>
+              Votre territoire : <RequiredMark />
             </>
           }
           placeholder="Sélectionner un territoire"
@@ -114,7 +114,7 @@ export function InscriptionOperateurPublic({
           key={typeOrganisation}
           label={
             <>
-              Votre territoire : <span className={styles.requiredMark}>*</span>
+              Votre territoire : <RequiredMark />
             </>
           }
           placeholder="Sélectionner un territoire"
@@ -132,7 +132,7 @@ export function InscriptionOperateurPublic({
         <Select
           label={
             <>
-              Préciser l’organisation : <span className={styles.requiredMark}>*</span>
+              Préciser l’organisation : <RequiredMark />
             </>
           }
           placeholder="Sélectionner votre organisation"

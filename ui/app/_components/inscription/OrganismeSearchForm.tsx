@@ -15,6 +15,7 @@ import { getApiErrorMessage } from "@/common/rateLimit";
 import { sleep } from "@/common/utils/misc";
 
 import styles from "./inscription-form.module.scss";
+import { RequiredMark } from "./RequiredMark";
 import type { InscriptionFormProps } from "./types";
 
 export type OrganismeSearchKind = "uai" | "siret";
@@ -156,7 +157,7 @@ export function OrganismeSearchForm({
               <Input
                 label={
                   <>
-                    {config.label} <span className={styles.requiredMark}>*</span>
+                    {config.label} <RequiredMark />
                   </>
                 }
                 hintText={config.hint}

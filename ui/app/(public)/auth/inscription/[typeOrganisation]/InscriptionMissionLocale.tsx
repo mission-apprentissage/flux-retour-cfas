@@ -6,10 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { DEPARTEMENTS_BY_CODE, type IOrganisationARML, type IOrganisationMissionLocale } from "shared";
 
+import { RequiredMark } from "@/app/_components/inscription/RequiredMark";
 import type { InscriptionFormProps } from "@/app/_components/inscription/types";
 import { _get } from "@/common/httpClient";
-
-import styles from "./inscription-organisation.module.scss";
 
 const typesOrganisation = [
   { label: "L'UNML (Union Nationale)", value: "UNML", disabled: true },
@@ -45,7 +44,7 @@ export function InscriptionMissionLocale({ setOrganisation }: Pick<InscriptionFo
       <RadioButtons
         legend={
           <>
-            Vous représentez : <span className={styles.requiredMark}>*</span>
+            Vous représentez : <RequiredMark />
           </>
         }
         name="typeOrganisationMl"
@@ -68,7 +67,7 @@ export function InscriptionMissionLocale({ setOrganisation }: Pick<InscriptionFo
         <Select
           label={
             <>
-              Votre ARML : <span className={styles.requiredMark}>*</span>
+              Votre ARML : <RequiredMark />
             </>
           }
           placeholder="Sélectionner une ARML"
@@ -88,7 +87,7 @@ export function InscriptionMissionLocale({ setOrganisation }: Pick<InscriptionFo
         <Select
           label={
             <>
-              Votre département : <span className={styles.requiredMark}>*</span>
+              Votre département : <RequiredMark />
             </>
           }
           placeholder="Sélectionner un département"
@@ -110,7 +109,7 @@ export function InscriptionMissionLocale({ setOrganisation }: Pick<InscriptionFo
           key={departement}
           label={
             <>
-              Votre Mission Locale : <span className={styles.requiredMark}>*</span>
+              Votre Mission Locale : <RequiredMark />
             </>
           }
           placeholder="Sélectionner une Mission Locale"
