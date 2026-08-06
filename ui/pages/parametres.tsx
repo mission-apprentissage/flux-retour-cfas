@@ -74,7 +74,7 @@ const ParametresPage = () => {
 
   const { erps, erpsById } = useErp();
 
-  const { organisme, refetch: refetchOrganisme } = useOrganisationOrganisme();
+  const { organisme, isLoading: isLoadingOrganisme, refetch: refetchOrganisme } = useOrganisationOrganisme();
 
   const erpV3 = (router.query.erpV3 as string | undefined)?.toLowerCase();
 
@@ -90,6 +90,10 @@ const ParametresPage = () => {
     setStepConfigurationERP("v3");
     router.push(router.pathname); // supprime le paramètre en query
   }, []);
+
+  if (isLoadingOrganisme) {
+    return null;
+  }
 
   if (!organisme) {
     window.location.href = "/";

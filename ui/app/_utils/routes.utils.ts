@@ -240,6 +240,13 @@ export const PAGES = {
         title: `Impostures | ${SITE_NAME}`,
       }),
     },
+    connexionApi: {
+      getPath: () => "/connexion-api",
+      title: "Connexion ERP",
+      getMetadata: () => ({
+        title: `Connexion ERP | ${SITE_NAME}`,
+      }),
+    },
   },
   dynamic: {
     adminReseau: ({ id, nom }: { id: string; nom?: string }): IPage => ({
