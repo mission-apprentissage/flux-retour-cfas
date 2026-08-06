@@ -19,6 +19,7 @@ import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { formatDate } from "@/app/_utils/date.utils";
 import { AdminPageHeader } from "@/app/admin/_components/AdminPageHeader";
 import { AdminTable } from "@/app/admin/_components/AdminTable";
+import { AdminUsersTable } from "@/app/admin/_components/AdminUsersTable";
 import { NatureOrganismeTag } from "@/app/admin/_components/NatureOrganismeTag";
 import {
   EtatOrganismeBadge,
@@ -26,7 +27,6 @@ import {
   ReferentielBadge,
 } from "@/app/admin/_components/OrganismeStatusBadges";
 import { TransmissionTag } from "@/app/admin/_components/TransmissionTag";
-import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 import { _get } from "@/common/httpClient";
 
 import styles from "./gestion-organismes.module.scss";
@@ -144,37 +144,6 @@ function DuplicatsTable({ organismes }: { organismes: IOrganismeJson[] }) {
         <EtatOrganismeBadge key="etat" ferme={organisme.ferme} />,
         <Count key="effectifs-en-cours" value={organisme.effectifs_current_year_count ?? 0} />,
         <Count key="effectifs-total" value={organisme.effectifs_count ?? 0} />,
-      ])}
-    />
-  );
-}
-
-function UsersTable({ users }: { users: IUsersMigrationJson[] }) {
-  return (
-    <Table
-      caption={`${users.length} utilisateur${plural(users.length)} rattaché${plural(users.length)} à cet organisme`}
-      bordered
-      headers={[
-        "Nom",
-        "Prénom",
-        "Courriel",
-        "Téléphone",
-        "Fonction",
-        "Statut du compte",
-        "Création",
-        "Dernière connexion",
-      ]}
-      data={users.map((user) => [
-        user.nom,
-        user.prenom,
-        user.email,
-        user.telephone || <span className={styles.zero}>Non renseigné</span>,
-        user.fonction || <span className={styles.zero}>Non renseignée</span>,
-        <Badge key="statut" severity={user.account_status === "CONFIRMED" ? "success" : "warning"} small>
-          {USER_STATUS_LABELS[user.account_status] ?? user.account_status}
-        </Badge>,
-        user.created_at ? formatDate(user.created_at) : <span className={styles.zero}>Inconnue</span>,
-        user.last_connection ? formatDate(user.last_connection) : <span className={styles.zero}>Jamais connecté</span>,
       ])}
     />
   );
@@ -394,7 +363,12 @@ export default function GestionOrganismesClient() {
                   {rowData.detail.delegations.length > 0 && (
                     <DelegationsTable organismes={rowData.detail.delegations} />
                   )}
-                  {rowData.detail.users.length > 0 && <UsersTable users={rowData.detail.users} />}
+                  {rowData.detail.users.length > 0 && (
+                    <AdminUsersTable
+                      users={rowData.detail.users}
+                      caption={`${rowData.detail.users.length} utilisateur${plural(rowData.detail.users.length)} rattaché${plural(rowData.detail.users.length)} à cet organisme`}
+                    />
+                  )}
                   {rowData.detail.duplicats.length > 0 && <DuplicatsTable organismes={rowData.detail.duplicats} />}
                 </div>
               )}
