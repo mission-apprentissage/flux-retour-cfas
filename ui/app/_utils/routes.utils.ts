@@ -247,6 +247,13 @@ export const PAGES = {
         title: `Connexion ERP | ${SITE_NAME}`,
       }),
     },
+    voeuxAffelnet: {
+      getPath: () => "/voeux-affelnet",
+      title: "Vœux Affelnet",
+      getMetadata: () => ({
+        title: `Vœux Affelnet | ${SITE_NAME}`,
+      }),
+    },
   },
   dynamic: {
     adminReseau: ({ id, nom }: { id: string; nom?: string }): IPage => ({

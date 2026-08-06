@@ -183,7 +183,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
         baseItems.push({
           text: "Vœux Affelnet",
           linkProps: {
-            href: "/voeux-affelnet",
+            href: PAGES.static.voeuxAffelnet.getPath(),
             target: "_self",
           },
         });
