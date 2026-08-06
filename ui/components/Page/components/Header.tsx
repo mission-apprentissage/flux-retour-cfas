@@ -123,10 +123,7 @@ const UserMenu = () => {
               </Flex>
             </MenuButton>
             <MenuList color="#000091">
-              <MenuItem
-                href="/mon-compte"
-                icon={<i className="ri-account-circle-fill" style={{ fontSize: "0.875rem" }} />}
-              >
+              <MenuItem href="/compte" icon={<i className="ri-account-circle-fill" style={{ fontSize: "0.875rem" }} />}>
                 Mon compte
               </MenuItem>
               {hasRight(MENU_ENTRIES.ROLES) && (

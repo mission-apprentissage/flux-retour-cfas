@@ -118,6 +118,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/mon-compte",
+        destination: "/compte",
+        permanent: false,
+      },
+      {
         source: "/sondage",
         destination: "https://tally.so/r/rjv1GN",
         basePath: false,
