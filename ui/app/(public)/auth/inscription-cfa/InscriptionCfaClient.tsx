@@ -146,7 +146,13 @@ function Step2({
     setSubmitting(true);
     setError("");
     try {
-      await onSubmit({ nom: nom.trim(), prenom: prenom.trim(), telephone, fonction: fonction.trim(), password });
+      await onSubmit({
+        nom: nom.trim(),
+        prenom: prenom.trim(),
+        telephone,
+        fonction: fonction.trim(),
+        password: password.trim(),
+      });
     } catch (err: any) {
       setError(getApiErrorMessage(err, "Une erreur est survenue"));
       setSubmitting(false);

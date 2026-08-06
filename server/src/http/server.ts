@@ -132,7 +132,11 @@ import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationCfaSchema } from "@/common/validation/registrationCfaSchema";
-import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
+import {
+  registrationSchema,
+  registrationUnknownNetworkSchema,
+  zRegistration,
+} from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
 import config from "@/config";
 
@@ -437,7 +441,7 @@ function setupRoutes(app: Application) {
       "/api/v1/auth/register",
       registerLimiter,
       returnResult(async (req) => {
-        const registration = await validateFullZodObjectSchema(req.body, registrationSchema);
+        const registration = await zRegistration.parseAsync(req.body);
         registration.user.email = registration.user.email.toLowerCase();
         return await register(registration);
       })

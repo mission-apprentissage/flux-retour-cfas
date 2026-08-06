@@ -138,7 +138,7 @@ export default function ProfilClient() {
           prenom: values.prenom,
           fonction: values.fonction,
           telephone: values.telephone,
-          password: values.password,
+          password: values.password.trim(),
           has_accept_cgu_version: CGU_VERSION,
         },
         organisation,
