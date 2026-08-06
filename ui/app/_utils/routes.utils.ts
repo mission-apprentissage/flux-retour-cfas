@@ -226,6 +226,13 @@ export const PAGES = {
         title: `Organismes absents du référentiel | ${SITE_NAME}`,
       }),
     },
+    adminOrganismesRecherche: {
+      getPath: () => "/admin/organismes/recherche",
+      title: "Recherche d’un organisme",
+      getMetadata: () => ({
+        title: `Recherche d’un organisme | ${SITE_NAME}`,
+      }),
+    },
   },
   dynamic: {
     adminReseau: ({ id, nom }: { id: string; nom?: string }): IPage => ({
@@ -233,6 +240,29 @@ export const PAGES = {
       title: nom ? `Réseau ${nom}` : "Réseau",
       getMetadata: () => ({
         title: `${nom ? `Réseau ${nom}` : "Réseau"} | ${SITE_NAME}`,
+      }),
+    }),
+    adminOrganismeSupport: ({
+      siret,
+      uai,
+      nom,
+      query,
+    }: {
+      siret: string;
+      uai?: string | null;
+      nom?: string;
+      query?: string;
+    }): IPage => ({
+      getPath: () => {
+        const params = new URLSearchParams();
+        if (uai) params.set("uai", uai);
+        if (query) params.set("q", query);
+        const search = params.toString();
+        return `/admin/organismes/recherche/${encodeURIComponent(siret)}${search ? `?${search}` : ""}`;
+      },
+      title: nom ?? "Organisme",
+      getMetadata: () => ({
+        title: `${nom ?? `Organisme ${siret}`} | ${SITE_NAME}`,
       }),
     }),
     adminTransmissionsJour: ({ date, label }: { date: string; label?: string }): IPage => ({

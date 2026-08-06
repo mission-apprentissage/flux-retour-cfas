@@ -187,7 +187,7 @@ const UserMenu = () => {
                     Gestion des réseaux
                   </MenuItem>
                   <MenuItem href="/admin/organismes/recherche" icon={<Parametre boxSize={3} color="#000091" />}>
-                    Recherche organisme
+                    Recherche d’un organisme
                   </MenuItem>
                   <MenuItem href="/admin/fusion-organismes" icon={<Parametre boxSize={3} color="#000091" />}>
                     Fusion d&apos;organismes

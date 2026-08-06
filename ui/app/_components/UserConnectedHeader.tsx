@@ -261,13 +261,13 @@ export const UserConnectedHeader = () => {
               <MenuItem
                 key="admin-organismes-recherche"
                 component="a"
-                href="/admin/organismes/recherche"
+                href={PAGES.static.adminOrganismesRecherche.getPath()}
                 onClick={handleClose}
               >
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
-                Recherche organisme
+                Recherche d’un organisme
               </MenuItem>,
               <MenuItem
                 key="admin-fusion-organismes"
