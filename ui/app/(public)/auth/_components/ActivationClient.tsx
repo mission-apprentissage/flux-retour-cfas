@@ -10,7 +10,8 @@ import { SUPPORT_PAGE_ACCUEIL } from "shared";
 
 import { _post } from "@/common/httpClient";
 
-import styles from "./activation-client.module.css";
+import styles from "./activation-client.module.scss";
+import { AuthMessageCard } from "./AuthMessageCard";
 
 const REDIRECT_DELAY_MS = 2500;
 
@@ -41,6 +42,12 @@ function useActivation(activationToken: string | null) {
   };
 }
 
+const homeLink = (
+  <a href="/" className={`${fr.cx("fr-link", "fr-link--icon-left", "fr-icon-arrow-left-line")}`}>
+    Retour à l&apos;accueil
+  </a>
+);
+
 export default function ActivationClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -55,103 +62,84 @@ export default function ActivationClient() {
     }
   }, [account_status, router]);
 
-  const showError = !activationToken || isError;
-
-  return (
-    <div className={styles.wrapper}>
-      <div className={styles.card}>
-        {!showError && isLoading && <LoadingState />}
-        {showError && <ErrorState />}
-        {!showError && account_status === "PENDING_ADMIN_VALIDATION" && (
-          <PendingState validationByGestionnaire={Boolean(validationByGestionnaire)} />
-        )}
-        {!showError && account_status === "CONFIRMED" && <ConfirmedState />}
-
-        <a href="/" className={`fr-link fr-link--icon-left fr-icon-arrow-left-line ${styles.homeLink}`}>
-          Retour à l&apos;accueil
-        </a>
-      </div>
-    </div>
-  );
-}
-
-function LoadingState() {
-  return (
-    <div role="status" aria-live="polite">
-      <div className={styles.iconWrap}>
-        <div className={styles.loadingSpinner} aria-hidden />
-      </div>
-      <h1 className={styles.title}>Confirmation de votre compte</h1>
-      <p className={styles.lead}>Nous validons votre lien d&apos;activation, merci de patienter quelques instants…</p>
-    </div>
-  );
-}
-
-function ErrorState() {
-  return (
-    <>
-      <div className={`${styles.iconWrap} ${styles.iconWrapError}`}>
-        <i className={`${fr.cx("fr-icon-close-circle-fill")} ${styles.icon} ${styles.iconError}`} aria-hidden />
-      </div>
-      <h1 className={styles.title}>Ce lien n&apos;est plus valide</h1>
-      <p className={styles.lead}>
-        Le lien d&apos;activation a expiré ou a déjà été utilisé. Contactez-nous en précisant votre adresse courriel
-        pour qu&apos;un administrateur puisse vous aider.
-      </p>
-      <div className={styles.actions}>
-        <Button linkProps={{ href: SUPPORT_PAGE_ACCUEIL, target: "_blank", rel: "noopener noreferrer" }}>
-          Contacter le support
-        </Button>
-        <Button priority="secondary" linkProps={{ href: "/auth/connexion" }}>
-          Aller à la connexion
-        </Button>
-      </div>
-    </>
-  );
-}
-
-function PendingState({ validationByGestionnaire }: { validationByGestionnaire: boolean }) {
-  return (
-    <>
-      <div className={`${styles.iconWrap} ${styles.iconWrapPending}`}>
-        <i className={`${fr.cx("fr-icon-time-line")} ${styles.icon} ${styles.iconPending}`} aria-hidden />
-      </div>
-      <h1 className={styles.title}>Votre compte est en attente de validation</h1>
-      <p className={styles.lead}>
-        {validationByGestionnaire ? (
+  if (!activationToken || isError) {
+    return (
+      <AuthMessageCard
+        icon="fr-icon-close-circle-fill"
+        tone="error"
+        title="Ce lien n’est plus valide"
+        actions={
           <>
-            Pour des raisons de sécurité, un{" "}
-            <span className={styles.leadStrong}>gestionnaire de votre organisation</span> va examiner votre demande.
+            <Button linkProps={{ href: SUPPORT_PAGE_ACCUEIL, target: "_blank", rel: "noopener noreferrer" }}>
+              Contacter le support
+            </Button>
+            <Button priority="secondary" linkProps={{ href: "/auth/connexion" }}>
+              Aller à la connexion
+            </Button>
           </>
-        ) : (
-          <>
-            Pour des raisons de sécurité, un <span className={styles.leadStrong}>administrateur</span> va examiner votre
-            demande.
-          </>
-        )}
-      </p>
-      <Alert
-        className={styles.alert}
-        severity="info"
-        small
-        description="Vous serez notifié(e) par courriel dès que votre demande sera validée. Pensez à vérifier vos courriers indésirables."
-      />
-    </>
-  );
-}
+        }
+        footer={homeLink}
+      >
+        <p>
+          Le lien d’activation a expiré ou a déjà été utilisé. Contactez-nous en précisant votre adresse courriel pour
+          qu’un administrateur puisse vous aider.
+        </p>
+      </AuthMessageCard>
+    );
+  }
 
-function ConfirmedState() {
+  if (isLoading) {
+    return (
+      <AuthMessageCard
+        icon={<span className={styles.loadingSpinner} aria-hidden />}
+        title="Confirmation de votre compte"
+        footer={homeLink}
+      >
+        <p role="status" aria-live="polite">
+          Nous validons votre lien d’activation, merci de patienter quelques instants…
+        </p>
+      </AuthMessageCard>
+    );
+  }
+
+  if (account_status === "PENDING_ADMIN_VALIDATION") {
+    return (
+      <AuthMessageCard icon="fr-icon-time-line" title="Votre compte est en attente de validation" footer={homeLink}>
+        <p>
+          Pour des raisons de sécurité, un{" "}
+          <strong>{validationByGestionnaire ? "gestionnaire de votre organisation" : "administrateur"}</strong> va
+          examiner votre demande.
+        </p>
+        <Alert
+          className={styles.alert}
+          severity="info"
+          small
+          description="Vous serez notifié(e) par courriel dès que votre demande sera validée. Pensez à vérifier vos courriers indésirables."
+        />
+      </AuthMessageCard>
+    );
+  }
+
+  if (account_status === "CONFIRMED") {
+    return (
+      <AuthMessageCard
+        icon="fr-icon-checkbox-circle-fill"
+        tone="success"
+        title="Votre compte est validé"
+        footer={homeLink}
+      >
+        <p>Bienvenue sur le Tableau de bord de l’apprentissage.</p>
+        <p className={styles.redirectRow} role="status" aria-live="polite">
+          <span className={styles.redirectSpinner} aria-hidden />
+          Redirection vers la page de connexion…
+        </p>
+      </AuthMessageCard>
+    );
+  }
+
   return (
-    <>
-      <div className={`${styles.iconWrap} ${styles.iconWrapSuccess}`}>
-        <i className={`${fr.cx("fr-icon-checkbox-circle-fill")} ${styles.icon} ${styles.iconSuccess}`} aria-hidden />
-      </div>
-      <h1 className={styles.title}>Votre compte est validé</h1>
-      <p className={styles.lead}>Bienvenue sur le Tableau de bord de l&apos;apprentissage.</p>
-      <div className={styles.redirectRow} role="status" aria-live="polite">
-        <span className={styles.redirectSpinner} aria-hidden />
-        Redirection vers la page de connexion…
-      </div>
-    </>
+    <AuthMessageCard icon="fr-icon-time-line" title="Confirmation de votre compte" footer={homeLink}>
+      <p>Votre demande a bien été prise en compte.</p>
+    </AuthMessageCard>
   );
 }

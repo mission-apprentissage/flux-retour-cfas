@@ -40,6 +40,10 @@
   background-color: var(--background-contrast-warning);
 }
 
+.iconWrapError {
+  background-color: var(--background-contrast-error);
+}
+
 .icon {
   font-size: 2.25rem;
   line-height: 1;
@@ -55,6 +59,10 @@
 
 .iconWrapWarning .icon {
   color: var(--text-default-warning);
+}
+
+.iconWrapError .icon {
+  color: var(--text-default-error);
 }
 
 .title {
@@ -86,5 +94,9 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.footer {
   margin-top: 1.5rem;
 }
