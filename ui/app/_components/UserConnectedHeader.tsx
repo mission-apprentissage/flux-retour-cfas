@@ -283,13 +283,13 @@ export const UserConnectedHeader = () => {
               <MenuItem
                 key="admin-organismes-gestion"
                 component="a"
-                href="/admin/organismes/gestion"
+                href={PAGES.static.adminOrganismesGestion.getPath()}
                 onClick={handleClose}
               >
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
-                Gestion des organismes
+                Organismes absents du référentiel
               </MenuItem>,
               <MenuItem key="admin-brevo-contacts" component="a" href="/admin/brevo-contacts" onClick={handleClose}>
                 <ListItemIcon>

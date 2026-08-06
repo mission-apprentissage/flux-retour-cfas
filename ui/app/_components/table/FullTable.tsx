@@ -299,7 +299,7 @@ export function FullTable({
                           </td>
                         ))}
                       </tr>
-                      {row.getIsExpanded() && (
+                      {row.getIsExpanded() && row.getCanExpand() && (
                         <tr>
                           <td colSpan={row.getVisibleCells().length + 1}>{renderSubComponent!(row.original)}</td>
                         </tr>

@@ -193,7 +193,7 @@ const UserMenu = () => {
                     Fusion d&apos;organismes
                   </MenuItem>
                   <MenuItem href="/admin/organismes/gestion" icon={<Parametre boxSize={3} color="#000091" />}>
-                    Gestion des organismes
+                    Organismes absents du référentiel
                   </MenuItem>
                   <MenuItem href="/admin/impostures" icon={<SpyLineIcon boxSize={3} color="#000091" />}>
                     Impostures

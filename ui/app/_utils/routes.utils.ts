@@ -219,6 +219,13 @@ export const PAGES = {
         title: `Toutes les transmissions | ${SITE_NAME}`,
       }),
     },
+    adminOrganismesGestion: {
+      getPath: () => "/admin/organismes/gestion",
+      title: "Organismes absents du référentiel",
+      getMetadata: () => ({
+        title: `Organismes absents du référentiel | ${SITE_NAME}`,
+      }),
+    },
   },
   dynamic: {
     adminReseau: ({ id, nom }: { id: string; nom?: string }): IPage => ({
