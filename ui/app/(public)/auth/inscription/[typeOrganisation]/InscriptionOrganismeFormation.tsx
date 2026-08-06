@@ -3,11 +3,11 @@
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { OrganismeSearchForm, type OrganismeSearchKind } from "@/app/_components/inscription/OrganismeSearchForm";
+import type { InscriptionFormProps } from "@/app/_components/inscription/types";
 import { PAGES } from "@/app/_utils/routes.utils";
 
 import styles from "./inscription-organisation.module.scss";
-import { OrganismeSearchForm, type OrganismeSearchKind } from "./OrganismeSearchForm";
-import type { InscriptionFormProps } from "./types";
 
 const SEARCH_KINDS: { value: OrganismeSearchKind; label: string }[] = [
   { value: "uai", label: "UAI" },

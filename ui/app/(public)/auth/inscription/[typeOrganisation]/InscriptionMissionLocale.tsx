@@ -6,10 +6,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { DEPARTEMENTS_BY_CODE, type IOrganisationARML, type IOrganisationMissionLocale } from "shared";
 
+import type { InscriptionFormProps } from "@/app/_components/inscription/types";
 import { _get } from "@/common/httpClient";
 
 import styles from "./inscription-organisation.module.scss";
-import type { InscriptionFormProps } from "./types";
 
 const typesOrganisation = [
   { label: "L'UNML (Union Nationale)", value: "UNML", disabled: true },

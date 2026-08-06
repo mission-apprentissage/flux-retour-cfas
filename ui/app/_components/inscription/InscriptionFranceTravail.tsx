@@ -6,7 +6,7 @@ import type { IOrganisationFranceTravail } from "shared";
 
 import { _get } from "@/common/httpClient";
 
-import styles from "./inscription-organisation.module.scss";
+import styles from "./inscription-form.module.scss";
 import type { InscriptionFormProps } from "./types";
 
 export function InscriptionFranceTravail({ setOrganisation }: Pick<InscriptionFormProps, "setOrganisation">) {

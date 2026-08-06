@@ -14,7 +14,7 @@ import { _post } from "@/common/httpClient";
 import { getApiErrorMessage } from "@/common/rateLimit";
 import { sleep } from "@/common/utils/misc";
 
-import styles from "./inscription-organisation.module.scss";
+import styles from "./inscription-form.module.scss";
 import type { InscriptionFormProps } from "./types";
 
 export type OrganismeSearchKind = "uai" | "siret";

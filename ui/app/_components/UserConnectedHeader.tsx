@@ -297,7 +297,12 @@ export const UserConnectedHeader = () => {
                 </ListItemIcon>
                 Listes de contacts Brevo
               </MenuItem>,
-              <MenuItem key="admin-impostures" component="a" href="/admin/impostures" onClick={handleClose}>
+              <MenuItem
+                key="admin-impostures"
+                component="a"
+                href={PAGES.static.adminImpostures.getPath()}
+                onClick={handleClose}
+              >
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-eye-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>

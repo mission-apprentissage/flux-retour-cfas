@@ -233,6 +233,13 @@ export const PAGES = {
         title: `Recherche d’un organisme | ${SITE_NAME}`,
       }),
     },
+    adminImpostures: {
+      getPath: () => "/admin/impostures",
+      title: "Impostures",
+      getMetadata: () => ({
+        title: `Impostures | ${SITE_NAME}`,
+      }),
+    },
   },
   dynamic: {
     adminReseau: ({ id, nom }: { id: string; nom?: string }): IPage => ({

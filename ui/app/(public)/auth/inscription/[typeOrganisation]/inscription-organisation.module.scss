@@ -51,36 +51,3 @@
 .footerLink {
   margin-top: 1.5rem;
 }
-
-.organismeFound {
-  padding: 1rem;
-  margin-top: 1rem;
-  border: 2px dashed var(--border-plain-success);
-}
-
-.organismeFoundTitle {
-  margin: 0 0 0.5rem;
-  font-size: 1.125rem;
-  font-weight: 700;
-}
-
-.organismeDetails {
-  margin: 0;
-
-  p {
-    margin: 0 0 0.25rem;
-  }
-}
-
-.organismeClosed {
-  margin-top: 0.5rem;
-  color: var(--text-default-error);
-}
-
-.selectOrganismeButton {
-  margin-top: 1rem;
-}
-
-.searchStatus {
-  margin-top: 1rem;
-}

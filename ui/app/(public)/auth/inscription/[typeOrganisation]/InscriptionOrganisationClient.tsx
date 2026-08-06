@@ -6,13 +6,13 @@ import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
 import { SUPPORT_PAGE_ACCUEIL, type IOrganisationCreate } from "shared";
 
+import { InscriptionFranceTravail } from "@/app/_components/inscription/InscriptionFranceTravail";
+import { InscriptionOperateurPublic } from "@/app/_components/inscription/InscriptionOperateurPublic";
 import { PAGES } from "@/app/_utils/routes.utils";
 import type { CategorieCompteInscription } from "@/modules/auth/inscription/categories";
 
 import styles from "./inscription-organisation.module.scss";
-import { InscriptionFranceTravail } from "./InscriptionFranceTravail";
 import { InscriptionMissionLocale } from "./InscriptionMissionLocale";
-import { InscriptionOperateurPublic } from "./InscriptionOperateurPublic";
 import { InscriptionOrganismeFormation } from "./InscriptionOrganismeFormation";
 import { InscriptionTeteDeReseau } from "./InscriptionTeteDeReseau";
 

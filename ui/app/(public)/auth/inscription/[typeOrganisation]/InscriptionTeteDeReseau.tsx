@@ -9,12 +9,12 @@ import { Field, Form, Formik } from "formik";
 import { useRouter } from "next/navigation";
 import type { IReseau } from "shared";
 
+import type { InscriptionFormProps } from "@/app/_components/inscription/types";
 import { PAGES } from "@/app/_utils/routes.utils";
 import { _get, _post } from "@/common/httpClient";
 import { getApiErrorMessage } from "@/common/rateLimit";
 
 import styles from "./inscription-organisation.module.scss";
-import type { InscriptionFormProps } from "./types";
 
 const AUTRE_RESEAU = "AUTRE";
 
