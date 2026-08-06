@@ -16,6 +16,8 @@ export function PasswordField({
   placeholder,
   minLength,
   hasError = false,
+  stateRelatedMessage,
+  showRules = true,
   onChange,
   onBlur,
 }: {
@@ -26,16 +28,27 @@ export function PasswordField({
   placeholder?: string;
   minLength: number;
   hasError?: boolean;
+  stateRelatedMessage?: ReactNode;
+  showRules?: boolean;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
 }) {
   const [shown, setShown] = useState(false);
+  const [engaged, setEngaged] = useState(false);
+
+  const showChecklist = showRules && (engaged || value.length > 0);
 
   return (
     <>
       <Input
         label={label}
+        hintText={
+          showRules && !showChecklist
+            ? `Au moins ${minLength} caractères, dont une majuscule, une minuscule, un chiffre et un caractère spécial.`
+            : undefined
+        }
         state={hasError ? "error" : "default"}
+        stateRelatedMessage={stateRelatedMessage}
         nativeInputProps={{
           id,
           name,
@@ -44,6 +57,7 @@ export function PasswordField({
           value,
           placeholder,
           onChange,
+          onFocus: () => setEngaged(true),
           onBlur,
         }}
         action={
@@ -57,20 +71,22 @@ export function PasswordField({
         }
       />
 
-      <div className={`${fr.cx("fr-messages-group")} ${styles.rules}`} aria-live="polite">
-        <p className={fr.cx("fr-message")}>Votre mot de passe doit contenir :</p>
-        {getPasswordRules(minLength).map((rule, index) => (
-          <p
-            key={index}
-            className={fr.cx(
-              "fr-message",
-              !value ? "fr-message--info" : rule.isSatisfied(value.trim()) ? "fr-message--valid" : "fr-message--error"
-            )}
-          >
-            {rule.label}
-          </p>
-        ))}
-      </div>
+      {showChecklist && (
+        <div className={`${fr.cx("fr-messages-group")} ${styles.rules}`} aria-live="polite">
+          <p className={fr.cx("fr-message")}>Votre mot de passe doit contenir :</p>
+          {getPasswordRules(minLength).map((rule, index) => (
+            <p
+              key={index}
+              className={fr.cx(
+                "fr-message",
+                !value ? "fr-message--info" : rule.isSatisfied(value.trim()) ? "fr-message--valid" : "fr-message--error"
+              )}
+            >
+              {rule.label}
+            </p>
+          ))}
+        </div>
+      )}
     </>
   );
 }

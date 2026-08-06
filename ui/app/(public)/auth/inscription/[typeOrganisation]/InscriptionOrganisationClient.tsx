@@ -9,7 +9,9 @@ import { SUPPORT_PAGE_ACCUEIL, type IOrganisationCreate } from "shared";
 import { InscriptionFranceTravail } from "@/app/_components/inscription/InscriptionFranceTravail";
 import { InscriptionOperateurPublic } from "@/app/_components/inscription/InscriptionOperateurPublic";
 import { PAGES } from "@/app/_utils/routes.utils";
-import type { CategorieCompteInscription } from "@/modules/auth/inscription/categories";
+import { categoriesCompteInscription, type CategorieCompteInscription } from "@/modules/auth/inscription/categories";
+
+import { AuthCard } from "../../_components/AuthCard";
 
 import styles from "./inscription-organisation.module.scss";
 import { InscriptionMissionLocale } from "./InscriptionMissionLocale";
@@ -25,67 +27,77 @@ export default function InscriptionOrganisationClient({
   const [organisation, setOrganisation] = useState<IOrganisationCreate | null>(null);
   const [hideBackNextButtons, setHideBackNextButtons] = useState(false);
 
+  const categorie = categoriesCompteInscription.find((item) => item.value === typeOrganisation);
+
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Créer votre compte</h1>
+    <AuthCard
+      title="Créer votre compte"
+      step={{ current: 2, total: 3, title: "Votre organisation", nextTitle: "Vos informations" }}
+    >
+      <p className={styles.recap}>
+        <span>
+          Type d’organisation : <strong>{categorie?.text}</strong>
+        </span>
+        <a className={fr.cx("fr-link", "fr-link--sm")} href={PAGES.dynamic.authInscription().getPath()}>
+          Modifier
+        </a>
+      </p>
 
-        {typeOrganisation === "autre" && (
-          <div className={styles.contactBlock}>
-            <p>Contacter l&apos;équipe :</p>
-            <a className={fr.cx("fr-link")} href={SUPPORT_PAGE_ACCUEIL} target="_blank" rel="noopener noreferrer">
-              Contactez-nous
-            </a>
-          </div>
-        )}
+      {typeOrganisation === "autre" && (
+        <div className={styles.contactBlock}>
+          <p>Contacter l&apos;équipe :</p>
+          <a className={fr.cx("fr-link")} href={SUPPORT_PAGE_ACCUEIL} target="_blank" rel="noopener noreferrer">
+            Contactez-nous
+          </a>
+        </div>
+      )}
 
-        {typeOrganisation === "organisme_formation" && (
-          <Suspense>
-            <InscriptionOrganismeFormation organisation={organisation} setOrganisation={setOrganisation} />
-          </Suspense>
-        )}
+      {typeOrganisation === "organisme_formation" && (
+        <Suspense>
+          <InscriptionOrganismeFormation organisation={organisation} setOrganisation={setOrganisation} />
+        </Suspense>
+      )}
 
-        {typeOrganisation === "missions_locales" && <InscriptionMissionLocale setOrganisation={setOrganisation} />}
+      {typeOrganisation === "missions_locales" && <InscriptionMissionLocale setOrganisation={setOrganisation} />}
 
-        {typeOrganisation === "operateur_public" && <InscriptionOperateurPublic setOrganisation={setOrganisation} />}
+      {typeOrganisation === "operateur_public" && <InscriptionOperateurPublic setOrganisation={setOrganisation} />}
 
-        {typeOrganisation === "tete_de_reseau" && (
-          <InscriptionTeteDeReseau
-            organisation={organisation}
-            setOrganisation={setOrganisation}
-            setHideBackNextButtons={setHideBackNextButtons}
-          />
-        )}
+      {typeOrganisation === "tete_de_reseau" && (
+        <InscriptionTeteDeReseau
+          organisation={organisation}
+          setOrganisation={setOrganisation}
+          setHideBackNextButtons={setHideBackNextButtons}
+        />
+      )}
 
-        {typeOrganisation === "france_travail" && <InscriptionFranceTravail setOrganisation={setOrganisation} />}
+      {typeOrganisation === "france_travail" && <InscriptionFranceTravail setOrganisation={setOrganisation} />}
 
-        {!hideBackNextButtons && (
-          <div className={styles.actions}>
-            <Button
-              type="button"
-              priority="secondary"
-              onClick={() => router.push(PAGES.dynamic.authInscription().getPath())}
-            >
-              Revenir
-            </Button>
-            <Button
-              type="button"
-              disabled={!organisation}
-              onClick={() => router.push(`/auth/inscription/profil?organisation=${JSON.stringify(organisation)}`)}
-            >
-              Suivant
-            </Button>
-          </div>
-        )}
+      {!hideBackNextButtons && (
+        <div className={styles.actions}>
+          <Button
+            type="button"
+            priority="secondary"
+            onClick={() => router.push(PAGES.dynamic.authInscription().getPath())}
+          >
+            Revenir
+          </Button>
+          <Button
+            type="button"
+            disabled={!organisation}
+            onClick={() => router.push(`/auth/inscription/profil?organisation=${JSON.stringify(organisation)}`)}
+          >
+            Suivant
+          </Button>
+        </div>
+      )}
 
-        {typeOrganisation === "organisme_formation" && (
-          <p className={styles.footerLink}>
-            <a className={fr.cx("fr-link")} href={PAGES.static.authInscriptionOrganismeInconnu.getPath()}>
-              Vous ne connaissez ni votre UAI ni votre SIRET
-            </a>
-          </p>
-        )}
-      </div>
-    </div>
+      {typeOrganisation === "organisme_formation" && (
+        <p className={styles.footerLink}>
+          <a className={fr.cx("fr-link")} href={PAGES.static.authInscriptionOrganismeInconnu.getPath()}>
+            Vous ne connaissez ni votre UAI ni votre SIRET
+          </a>
+        </p>
+      )}
+    </AuthCard>
   );
 }

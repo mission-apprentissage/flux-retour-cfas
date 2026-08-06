@@ -16,6 +16,7 @@ import { PAGES } from "@/app/_utils/routes.utils";
 import { _get, _post } from "@/common/httpClient";
 import { getApiErrorMessage } from "@/common/rateLimit";
 
+import { AuthCard } from "../../_components/AuthCard";
 import { PasswordField } from "../../_components/PasswordField";
 import {
   ADMIN_PASSWORD_MIN_LENGTH,
@@ -29,9 +30,8 @@ import styles from "./profil.module.scss";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const EMAIL_HINT =
-  "Pour des raisons de sécurité, merci d'utiliser un email nominatif professionnel lié à votre organisation " +
-  "(exemple : prenom.nom@cfa-dumoulin.fr). Les adresses génériques (contact@, apprentissage@…) et personnelles " +
-  "(@gmail, @hotmail, @orange…) ne peuvent pas être validées.";
+  "Courriel nominatif professionnel lié à votre organisation (ex. : prenom.nom@cfa-dumoulin.fr). " +
+  "Les adresses génériques (contact@, apprentissage@…) et personnelles (@gmail, @orange…) ne peuvent pas être validées.";
 
 type ProfilValues = {
   email: string;
@@ -85,17 +85,14 @@ export default function ProfilClient() {
 
   if (loadError) {
     return (
-      <div className={styles.wrapper}>
-        <div className={styles.card}>
-          <h1 className={styles.title}>Créer votre compte</h1>
-          <Alert severity="error" small description={loadError} />
-          <div className={styles.actions}>
-            <Button priority="secondary" linkProps={{ href: PAGES.dynamic.authInscription().getPath() }}>
-              Reprendre l&apos;inscription
-            </Button>
-          </div>
+      <AuthCard title="Créer votre compte">
+        <Alert severity="error" small description={loadError} />
+        <div className={styles.actions}>
+          <Button priority="secondary" linkProps={{ href: PAGES.dynamic.authInscription().getPath() }}>
+            Reprendre l&apos;inscription
+          </Button>
         </div>
-      </div>
+      </AuthCard>
     );
   }
 
@@ -162,162 +159,161 @@ export default function ProfilClient() {
   };
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Créer votre compte</h1>
+    <AuthCard
+      title="Créer votre compte"
+      step={invitationToken ? undefined : { current: 3, total: 3, title: "Vos informations" }}
+    >
+      <OrganisationSummary organisation={organisation} />
 
-        <OrganisationSummary organisation={organisation} />
+      <Formik<ProfilValues>
+        initialValues={{
+          email: fixedEmail,
+          civility: "",
+          nom: "",
+          prenom: "",
+          fonction: "",
+          telephone: "",
+          password: "",
+          password_confirmation: "",
+          has_accepted_cgu: false,
+          consent_of: false,
+        }}
+        enableReinitialize
+        validate={validate}
+        onSubmit={handleSubmit}
+      >
+        {({ status = {}, isSubmitting, setFieldValue }) => (
+          <Form noValidate>
+            <Field name="email">
+              {({ field, meta }: any) => (
+                <Input
+                  label={
+                    <>
+                      Votre courriel <span className={styles.requiredMark}>*</span>
+                    </>
+                  }
+                  hintText={EMAIL_HINT}
+                  disabled={fixedEmail !== ""}
+                  state={meta.touched && meta.error ? "error" : "default"}
+                  stateRelatedMessage={meta.touched ? meta.error : undefined}
+                  nativeInputProps={{
+                    id: field.name,
+                    name: field.name,
+                    type: "email",
+                    value: field.value,
+                    placeholder: "Ex : jeandupont@cfa.fr",
+                    onChange: field.onChange,
+                    onBlur: field.onBlur,
+                  }}
+                />
+              )}
+            </Field>
 
-        <Formik<ProfilValues>
-          initialValues={{
-            email: fixedEmail,
-            civility: "",
-            nom: "",
-            prenom: "",
-            fonction: "",
-            telephone: "",
-            password: "",
-            password_confirmation: "",
-            has_accepted_cgu: false,
-            consent_of: false,
-          }}
-          enableReinitialize
-          validate={validate}
-          onSubmit={handleSubmit}
-        >
-          {({ status = {}, isSubmitting, setFieldValue }) => (
-            <Form noValidate>
-              <Field name="email">
+            <Field name="civility">
+              {({ field, meta }: any) => (
+                <RadioButtons
+                  legend={
+                    <>
+                      Votre civilité <span className={styles.requiredMark}>*</span>
+                    </>
+                  }
+                  name={field.name}
+                  orientation="horizontal"
+                  state={meta.touched && meta.error ? "error" : "default"}
+                  stateRelatedMessage={meta.touched ? meta.error : undefined}
+                  options={["Monsieur", "Madame"].map((civility) => ({
+                    label: civility,
+                    nativeInputProps: {
+                      value: civility,
+                      checked: field.value === civility,
+                      onChange: () => setFieldValue("civility", civility),
+                    },
+                  }))}
+                />
+              )}
+            </Field>
+
+            {[
+              { name: "nom", label: "Votre nom", placeholder: "Ex : Dupont", required: true },
+              { name: "prenom", label: "Votre prénom", placeholder: "Ex : Jean", required: true },
+              {
+                name: "fonction",
+                label: "Votre fonction au sein de l'établissement",
+                placeholder: "Ex : Responsable administratif",
+                required: true,
+              },
+              { name: "telephone", label: "Téléphone", placeholder: "Ex : 06 89 10 11 12", required: false },
+            ].map((input) => (
+              <Field key={input.name} name={input.name}>
                 {({ field, meta }: any) => (
                   <Input
                     label={
-                      <>
-                        Votre courriel <span className={styles.requiredMark}>*</span>
-                      </>
+                      input.required ? (
+                        <>
+                          {input.label} <span className={styles.requiredMark}>*</span>
+                        </>
+                      ) : (
+                        input.label
+                      )
                     }
-                    hintText={EMAIL_HINT}
-                    disabled={fixedEmail !== ""}
                     state={meta.touched && meta.error ? "error" : "default"}
                     stateRelatedMessage={meta.touched ? meta.error : undefined}
                     nativeInputProps={{
                       id: field.name,
                       name: field.name,
-                      type: "email",
                       value: field.value,
-                      placeholder: "Ex : jeandupont@cfa.fr",
+                      placeholder: input.placeholder,
                       onChange: field.onChange,
                       onBlur: field.onBlur,
                     }}
                   />
                 )}
               </Field>
+            ))}
 
-              <Field name="civility">
-                {({ field, meta }: any) => (
-                  <RadioButtons
-                    legend={
-                      <>
-                        Votre civilité <span className={styles.requiredMark}>*</span>
-                      </>
-                    }
-                    name={field.name}
-                    orientation="horizontal"
-                    state={meta.touched && meta.error ? "error" : "default"}
-                    stateRelatedMessage={meta.touched ? meta.error : undefined}
-                    options={["Monsieur", "Madame"].map((civility) => ({
-                      label: civility,
-                      nativeInputProps: {
-                        value: civility,
-                        checked: field.value === civility,
-                        onChange: () => setFieldValue("civility", civility),
-                      },
-                    }))}
-                  />
-                )}
-              </Field>
+            <Field name="password">
+              {({ field, meta }: any) => (
+                <PasswordField
+                  label={
+                    <>
+                      Mot de passe <span className={styles.requiredMark}>*</span>
+                    </>
+                  }
+                  id={field.name}
+                  name={field.name}
+                  value={field.value}
+                  placeholder="Choisissez votre mot de passe"
+                  minLength={passwordMinLength}
+                  hasError={Boolean(meta.touched && meta.error)}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
+            </Field>
 
-              {[
-                { name: "nom", label: "Votre nom", placeholder: "Ex : Dupont", required: true },
-                { name: "prenom", label: "Votre prénom", placeholder: "Ex : Jean", required: true },
-                {
-                  name: "fonction",
-                  label: "Votre fonction au sein de l'établissement",
-                  placeholder: "Ex : Responsable administratif",
-                  required: true,
-                },
-                { name: "telephone", label: "Téléphone", placeholder: "Ex : 06 89 10 11 12", required: false },
-              ].map((input) => (
-                <Field key={input.name} name={input.name}>
-                  {({ field, meta }: any) => (
-                    <Input
-                      label={
-                        input.required ? (
-                          <>
-                            {input.label} <span className={styles.requiredMark}>*</span>
-                          </>
-                        ) : (
-                          input.label
-                        )
-                      }
-                      state={meta.touched && meta.error ? "error" : "default"}
-                      stateRelatedMessage={meta.touched ? meta.error : undefined}
-                      nativeInputProps={{
-                        id: field.name,
-                        name: field.name,
-                        value: field.value,
-                        placeholder: input.placeholder,
-                        onChange: field.onChange,
-                        onBlur: field.onBlur,
-                      }}
-                    />
-                  )}
-                </Field>
-              ))}
+            <Field name="password_confirmation">
+              {({ field, meta }: any) => (
+                <PasswordField
+                  label={
+                    <>
+                      Confirmation du mot de passe <span className={styles.requiredMark}>*</span>
+                    </>
+                  }
+                  id={field.name}
+                  name={field.name}
+                  value={field.value}
+                  placeholder="Confirmez votre mot de passe"
+                  minLength={passwordMinLength}
+                  showRules={false}
+                  hasError={Boolean(field.value && meta.error)}
+                  stateRelatedMessage={field.value ? meta.error : undefined}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
+            </Field>
 
-              <Field name="password">
-                {({ field, meta }: any) => (
-                  <PasswordField
-                    label={
-                      <>
-                        Mot de passe <span className={styles.requiredMark}>*</span>
-                      </>
-                    }
-                    id={field.name}
-                    name={field.name}
-                    value={field.value}
-                    placeholder="Choisissez votre mot de passe"
-                    minLength={passwordMinLength}
-                    hasError={Boolean(meta.touched && meta.error)}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                  />
-                )}
-              </Field>
-
-              <Field name="password_confirmation">
-                {({ field, meta }: any) => (
-                  <Input
-                    label={
-                      <>
-                        Confirmation du mot de passe <span className={styles.requiredMark}>*</span>
-                      </>
-                    }
-                    state={field.value && meta.error ? "error" : "default"}
-                    stateRelatedMessage={field.value ? meta.error : undefined}
-                    nativeInputProps={{
-                      id: field.name,
-                      name: field.name,
-                      type: "password",
-                      autoComplete: "new-password",
-                      value: field.value,
-                      placeholder: "Confirmez votre mot de passe",
-                      onChange: field.onChange,
-                      onBlur: field.onBlur,
-                    }}
-                  />
-                )}
-              </Field>
-
+            <div className={styles.consents}>
               <Field name="has_accepted_cgu">
                 {({ field, meta }: any) => (
                   <Checkbox
@@ -327,7 +323,7 @@ export default function ProfilClient() {
                     options={[
                       {
                         label: (
-                          <>
+                          <span>
                             J&apos;atteste avoir lu et accepté les{" "}
                             <a
                               className={fr.cx("fr-link")}
@@ -337,7 +333,7 @@ export default function ProfilClient() {
                             >
                               conditions générales d&apos;utilisation
                             </a>
-                          </>
+                          </span>
                         ),
                         nativeInputProps: {
                           name: field.name,
@@ -373,25 +369,25 @@ export default function ProfilClient() {
                   )}
                 </Field>
               )}
+            </div>
 
-              {status.error && (
-                <div className={styles.alert}>
-                  <Alert severity="error" small description={status.error} />
-                </div>
-              )}
-
-              <div className={styles.actions}>
-                <Button type="button" priority="secondary" onClick={() => router.back()}>
-                  Revenir
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  S&rsquo;inscrire
-                </Button>
+            {status.error && (
+              <div className={styles.alert}>
+                <Alert severity="error" small description={status.error} />
               </div>
-            </Form>
-          )}
-        </Formik>
-      </div>
-    </div>
+            )}
+
+            <div className={styles.actions}>
+              <Button type="button" priority="secondary" onClick={() => router.back()}>
+                Revenir
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                S&rsquo;inscrire
+              </Button>
+            </div>
+          </Form>
+        )}
+      </Formik>
+    </AuthCard>
   );
 }

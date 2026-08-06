@@ -1,25 +1,3 @@
-.wrapper {
-  display: flex;
-  justify-content: center;
-  padding: clamp(1.5rem, 4vw, 4rem) 1rem;
-}
-
-.card {
-  width: 100%;
-  max-width: 600px;
-  padding: clamp(1.5rem, 4vw, 3rem);
-  background-color: var(--background-default-grey);
-  border: 1px solid var(--border-default-grey);
-}
-
-.title {
-  margin: 0 0 1.5rem;
-  font-size: clamp(1.375rem, 3vw, 1.75rem);
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--text-title-grey);
-}
-
 .summary {
   margin-bottom: 2rem;
 }
@@ -35,13 +13,14 @@
 }
 
 .requiredMark {
+  font-weight: 700;
   color: var(--text-default-error);
 }
 
-.hint {
-  margin: 0.25rem 0 0;
-  font-size: 0.875rem;
-  color: var(--text-mention-grey);
+.consents {
+  padding-top: 0.5rem;
+  margin-top: 2rem;
+  border-top: 1px solid var(--border-default-grey);
 }
 
 .checkbox {
