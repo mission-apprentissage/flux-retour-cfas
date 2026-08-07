@@ -1,8 +1,7 @@
-import { Button, ButtonProps } from "@chakra-ui/react";
+import { Alert, AlertIcon, Button, ButtonProps } from "@chakra-ui/react";
 import { useState } from "react";
 
 import { sleep } from "@/common/utils/misc";
-import useToaster from "@/hooks/useToaster";
 
 export type AppButtonProps = {
   action: (() => Promise<any>) | (() => any);
@@ -10,15 +9,16 @@ export type AppButtonProps = {
 } & ButtonProps;
 
 function AppButton({ children, action, ...props }: AppButtonProps) {
-  const { toastError } = useToaster();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function onClick() {
     try {
+      setError(null);
       setIsLoading(true);
       await action();
     } catch (err) {
-      toastError(err.message);
+      setError(err.message);
     } finally {
       await sleep(300); // évite un changement instantané
       setIsLoading(false);
@@ -26,19 +26,27 @@ function AppButton({ children, action, ...props }: AppButtonProps) {
   }
 
   return (
-    <Button
-      variant={props.variant ?? "secondary"}
-      borderBottom={isLoading && props.variant === "link" ? "0" : "1px"}
-      borderRadius="0"
-      _active={{
-        color: "bluefrance",
-      }}
-      isLoading={isLoading}
-      onClick={onClick}
-      {...props}
-    >
-      {children}
-    </Button>
+    <>
+      <Button
+        variant={props.variant ?? "secondary"}
+        borderBottom={isLoading && props.variant === "link" ? "0" : "1px"}
+        borderRadius="0"
+        _active={{
+          color: "bluefrance",
+        }}
+        isLoading={isLoading}
+        onClick={onClick}
+        {...props}
+      >
+        {children}
+      </Button>
+      {error && (
+        <Alert status="error" mt={2}>
+          <AlertIcon />
+          {error}
+        </Alert>
+      )}
+    </>
   );
 }
 

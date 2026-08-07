@@ -6,6 +6,7 @@ import { useState } from "react";
 import { UAI_INCONNUE } from "shared/models/data/organismes.model";
 
 import { _get, _post } from "@/common/httpClient";
+import Ribbons from "@/components/Ribbons/Ribbons";
 import Tag from "@/components/Tag/Tag";
 import { Checkbox, CloseCircle } from "@/theme/components/icons";
 
@@ -47,6 +48,7 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
   const { onCopy, hasCopied } = useClipboard(parametrage?.api_key ?? "");
   const toggleApiKeyVisibility = () => setShowFullApiKey(!showFullApiKey);
   const { isOpen: isInviteOpen, onOpen: openInvite, onClose: closeInvite } = useDisclosure();
+  const [inviteFeedback, setInviteFeedback] = useState<{ id: number; message: string } | null>(null);
 
   const canInviteAdmin = Boolean(organisme?.siret);
   const normalizedUai =
@@ -211,6 +213,12 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
         </Button>
       </HStack>
 
+      {inviteFeedback && (
+        <Ribbons key={inviteFeedback.id} variant="success" showClose>
+          <Text color="grey.800">{inviteFeedback.message}</Text>
+        </Ribbons>
+      )}
+
       {counts?.organisation_id && (
         <Stack spacing={1} pl={1}>
           <Link
@@ -247,7 +255,10 @@ const InfosTransmissionEtParametrageOFA = ({ organisme, ...props }) => {
           siret={organisme.siret}
           uai={normalizedUai}
           organismeNom={organismeNom}
-          onSuccess={() => refetchCounts()}
+          onSuccess={(message) => {
+            if (message) setInviteFeedback({ id: Date.now(), message });
+            refetchCounts();
+          }}
         />
       )}
 

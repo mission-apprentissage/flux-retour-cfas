@@ -33,7 +33,6 @@ import Ribbons from "@/components/Ribbons/Ribbons";
 import withAuth from "@/components/withAuth";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import { useErp } from "@/hooks/useErp";
-import useToaster from "@/hooks/useToaster";
 import { FileDownloadIcon } from "@/modules/dashboard/icons";
 import NewTable from "@/modules/indicateurs/NewTable";
 import { Checkbox as IconCheckbox } from "@/theme/components/icons";
@@ -64,7 +63,6 @@ const desiredOrder = [
  */
 const ParametresPage = () => {
   const router = useRouter();
-  const { toastSuccess } = useToaster();
   const [stepConfigurationERP, setStepConfigurationERP] = useState<"none" | "choix_erp" | "unsupported_erp" | "v3">(
     "none"
   );
@@ -364,7 +362,6 @@ const ParametresPage = () => {
             erpId={selectedERPId}
             onGenerateKey={async () => {
               await _post(`/api/v1/organismes/${organisme._id}/api-key`);
-              toastSuccess("Votre clé d’échange a été correctement générée.");
               await refetchOrganisme();
             }}
             onConfigurationMismatch={async () => {
@@ -403,8 +400,8 @@ interface ConfigurationERPV3Props {
   erpsById: Array<IErp>;
 }
 function ConfigurationERPV3(props: ConfigurationERPV3Props) {
-  const { toastSuccess } = useToaster();
   const [copied, setCopied] = useState(false);
+  const [keyGenerated, setKeyGenerated] = useState(false);
 
   const erp = props.erpsById[props.erpId];
   const verified = !!props.organisme.api_siret && !!props.organisme.api_uai;
@@ -530,6 +527,11 @@ function ConfigurationERPV3(props: ConfigurationERPV3Props) {
 
           {props.organisme.api_key ? (
             <>
+              {keyGenerated && (
+                <Ribbons variant="success">
+                  <Box color="grey.800">Votre clé d’échange a été correctement générée.</Box>
+                </Ribbons>
+              )}
               <Input type="text" name="apiKey" value={props.organisme.api_key} required readOnly w="380px" />
 
               <HStack gap={3}>
@@ -541,12 +543,16 @@ function ConfigurationERPV3(props: ConfigurationERPV3Props) {
                   text={props.organisme.api_key}
                   onCopy={() => {
                     setCopied(true);
-                    toastSuccess("Copié !");
                   }}
                 >
                   <Button variant="primary">Copier la clé</Button>
                 </CopyToClipboard>
               </HStack>
+              {copied && (
+                <Ribbons variant="success">
+                  <Box color="grey.800">Copié !</Box>
+                </Ribbons>
+              )}
             </>
           ) : (
             <HStack gap={3}>
@@ -554,7 +560,13 @@ function ConfigurationERPV3(props: ConfigurationERPV3Props) {
                 Revenir en arrière
               </Button>
 
-              <AppButton variant="primary" action={props.onGenerateKey}>
+              <AppButton
+                variant="primary"
+                action={async () => {
+                  await props.onGenerateKey();
+                  setKeyGenerated(true);
+                }}
+              >
                 Générer la clé d’échange
               </AppButton>
             </HStack>

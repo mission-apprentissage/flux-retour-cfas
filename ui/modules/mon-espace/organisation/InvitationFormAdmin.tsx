@@ -1,10 +1,10 @@
-import { Box, Button, Flex, Input, Heading } from "@chakra-ui/react";
+import { Box, Button, Flex, Input, Heading, Text } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import React, { useState } from "react";
 import { object, string } from "yup";
 
 import { _post } from "@/common/httpClient";
-import useToaster from "@/hooks/useToaster";
+import Ribbons from "@/components/Ribbons/Ribbons";
 import { MissionLocaleSelect } from "@/modules/auth/inscription/components/MissionLocaleSelect";
 
 async function inviteUserToOrganisation(email: string, mission_locale_id: number) {
@@ -19,8 +19,12 @@ interface InvitationFormProps {
 }
 
 const InvitationFormAdmin = (props: InvitationFormProps) => {
-  const { toastSuccess, toastError } = useToaster();
   const [organisation, setOrganisation] = useState<{ ml_id: number } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    id: number;
+    variant: "success" | "error";
+    message: string;
+  } | null>(null);
   const { values, handleChange, handleSubmit, errors, touched, resetForm } = useFormik({
     initialValues: {
       userEmail: "",
@@ -36,11 +40,19 @@ const InvitationFormAdmin = (props: InvitationFormProps) => {
         }
         await inviteUserToOrganisation(form.userEmail, organisation.ml_id);
         resetForm();
-        toastSuccess("Un email d'invitation a été envoyé au destinataire.");
+        setFeedback({
+          id: Date.now(),
+          variant: "success",
+          message: "Un email d'invitation a été envoyé au destinataire.",
+        });
         props.onInvitation?.();
       } catch (err) {
         console.error(err);
-        toastError(err?.json?.data?.message || "Oups, une erreur est survenue, merci de réessayer plus tard");
+        setFeedback({
+          id: Date.now(),
+          variant: "error",
+          message: err?.json?.data?.message || "Oups, une erreur est survenue, merci de réessayer plus tard",
+        });
       }
     },
   });
@@ -54,6 +66,11 @@ const InvitationFormAdmin = (props: InvitationFormProps) => {
       <Heading as="h2" color="#417DC4" fontSize="xl" fontWeight="700">
         Inviter un membre dans une mission locale
       </Heading>
+      {feedback && (
+        <Ribbons key={feedback.id} variant={feedback.variant} showClose mt={4}>
+          <Text color="grey.800">{feedback.message}</Text>
+        </Ribbons>
+      )}
       <MissionLocaleSelect setOrganisation={onOrganisationSet} />
       <Flex flexDirection="column" pt={5} minWidth="max-content">
         <Flex gap={4} minWidth="max-content">

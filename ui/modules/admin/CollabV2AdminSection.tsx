@@ -13,12 +13,12 @@ import {
   Stack,
   Text,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 
 import { _get, _post } from "@/common/httpClient";
+import Ribbons from "@/components/Ribbons/Ribbons";
 import Tag from "@/components/Tag/Tag";
 import { Checkbox, CloseCircle } from "@/theme/components/icons";
 
@@ -83,9 +83,10 @@ type Props = {
 };
 
 export default function CollabV2AdminSection({ organisme }: Props) {
-  const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [action, setAction] = useState<"activate" | "deactivate" | null>(null);
+  const [feedback, setFeedback] = useState<{ id: number; variant: "success" | "error"; message: string } | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
 
   const { data, isLoading, isFetching, refetch } = useQuery<EligibilityResult>(
     ["admin/organismes/collab-v2-eligibility", organisme._id],
@@ -111,6 +112,7 @@ export default function CollabV2AdminSection({ organisme }: Props) {
   const openConfirm = useCallback(
     (next: "activate" | "deactivate") => {
       setAction(next);
+      setModalError(null);
       onOpen();
     },
     [onOpen]
@@ -121,30 +123,23 @@ export default function CollabV2AdminSection({ organisme }: Props) {
       onClose();
       return;
     }
+    setModalError(null);
     try {
       const mutation = action === "activate" ? activateMutation : deactivateMutation;
       const result = await mutation.mutateAsync();
       const verb = action === "activate" ? "Activation" : "Désactivation";
       const isOk = ["activated", "already_active", "deactivated"].includes(result?.status ?? "");
-      toast({
-        title: `${verb} collaboration v2`,
-        description: `Statut : ${result?.status ?? "erreur"}`,
-        status: isOk ? "success" : "error",
-        duration: 5000,
-        isClosable: true,
+      setFeedback({
+        id: Date.now(),
+        variant: isOk ? "success" : "error",
+        message: `${verb} collaboration v2 — Statut : ${result?.status ?? "erreur"}`,
       });
       onClose();
       await refetch();
     } catch (err: any) {
-      toast({
-        title: "Erreur",
-        description: err?.json?.data?.message || "Une erreur est survenue",
-        status: "error",
-        duration: 6000,
-        isClosable: true,
-      });
+      setModalError(err?.json?.data?.message || "Une erreur est survenue");
     }
-  }, [action, activateMutation, deactivateMutation, refetch, toast, onClose]);
+  }, [action, activateMutation, deactivateMutation, refetch, onClose]);
 
   return (
     <>
@@ -196,6 +191,12 @@ export default function CollabV2AdminSection({ organisme }: Props) {
         </Stack>
       ) : null}
 
+      {feedback && (
+        <Ribbons key={feedback.id} variant={feedback.variant} showClose>
+          <Text color="grey.800">{feedback.message}</Text>
+        </Ribbons>
+      )}
+
       <HStack>
         {alreadyActive ? (
           <Button
@@ -231,6 +232,11 @@ export default function CollabV2AdminSection({ organisme }: Props) {
             {action === "activate" ? "Activer collaboration v2" : "Désactiver collaboration v2"}
           </ModalHeader>
           <ModalBody>
+            {modalError && (
+              <Ribbons variant="error" mb={4} width="100%">
+                <Text color="grey.800">{modalError}</Text>
+              </Ribbons>
+            )}
             <Text>
               {action === "activate"
                 ? `Activer l'interface v2/collaboration pour ${organisme.nom || organisme.raison_sociale || siret} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_collab et la date d'activation ML seront posés. Les effectifs DECA ne seront PAS rendus visibles (is_allowed_deca non posé).`

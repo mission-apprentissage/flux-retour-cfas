@@ -13,12 +13,12 @@ import {
   Stack,
   Text,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 
 import { _get, _post } from "@/common/httpClient";
+import Ribbons from "@/components/Ribbons/Ribbons";
 import Tag from "@/components/Tag/Tag";
 import { Checkbox, CloseCircle } from "@/theme/components/icons";
 
@@ -86,9 +86,10 @@ type Props = {
 };
 
 export default function DecaCfaPilotAdminSection({ organisme }: Props) {
-  const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [action, setAction] = useState<"activate" | "deactivate" | null>(null);
+  const [feedback, setFeedback] = useState<{ id: number; variant: "success" | "error"; message: string } | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
 
   const { data, isLoading, isFetching, refetch } = useQuery<EligibilityResult>(
     ["admin/organismes/deca-cfa-pilot-eligibility", organisme._id],
@@ -120,6 +121,7 @@ export default function DecaCfaPilotAdminSection({ organisme }: Props) {
   const openConfirm = useCallback(
     (next: "activate" | "deactivate") => {
       setAction(next);
+      setModalError(null);
       onOpen();
     },
     [onOpen]
@@ -131,31 +133,24 @@ export default function DecaCfaPilotAdminSection({ organisme }: Props) {
       return;
     }
     const items = [{ siret, uai }];
+    setModalError(null);
     try {
       const mutation = action === "activate" ? activateMutation : deactivateMutation;
       const result = await mutation.mutateAsync(items);
       const item = result.items[0];
       const verb = action === "activate" ? "Activation" : "Désactivation";
       const isOk = ["activated", "already_active", "deactivated"].includes(item?.status ?? "");
-      toast({
-        title: `${verb} DECA-CFA pilot`,
-        description: `Statut : ${item?.status ?? "erreur"}`,
-        status: isOk ? "success" : "error",
-        duration: 5000,
-        isClosable: true,
+      setFeedback({
+        id: Date.now(),
+        variant: isOk ? "success" : "error",
+        message: `${verb} DECA-CFA pilot — Statut : ${item?.status ?? "erreur"}`,
       });
       onClose();
       await refetch();
     } catch (err: any) {
-      toast({
-        title: "Erreur",
-        description: err?.json?.data?.message || "Une erreur est survenue",
-        status: "error",
-        duration: 6000,
-        isClosable: true,
-      });
+      setModalError(err?.json?.data?.message || "Une erreur est survenue");
     }
-  }, [action, siret, uai, activateMutation, deactivateMutation, refetch, toast, onClose]);
+  }, [action, siret, uai, activateMutation, deactivateMutation, refetch, onClose]);
 
   return (
     <>
@@ -215,6 +210,12 @@ export default function DecaCfaPilotAdminSection({ organisme }: Props) {
         </Stack>
       ) : null}
 
+      {feedback && (
+        <Ribbons key={feedback.id} variant={feedback.variant} showClose>
+          <Text color="grey.800">{feedback.message}</Text>
+        </Ribbons>
+      )}
+
       <HStack>
         {alreadyActive ? (
           <Button
@@ -248,6 +249,11 @@ export default function DecaCfaPilotAdminSection({ organisme }: Props) {
         <ModalContent borderRadius="0" p={4}>
           <ModalHeader>{action === "activate" ? "Activer DECA-CFA pilot" : "Désactiver DECA-CFA pilot"}</ModalHeader>
           <ModalBody>
+            {modalError && (
+              <Ribbons variant="error" mb={4} width="100%">
+                <Text color="grey.800">{modalError}</Text>
+              </Ribbons>
+            )}
             <Text>
               {action === "activate"
                 ? `Activer le programme DECA-CFA pilot pour ${organisme.nom || organisme.raison_sociale || siret} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Les flags is_allowed_deca / is_allowed_collab seront posés et la date d'activation ML sera propagée.`

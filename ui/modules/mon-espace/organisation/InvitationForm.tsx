@@ -1,10 +1,10 @@
-import { Box, Button, Flex, Input, Heading } from "@chakra-ui/react";
+import { Box, Button, Flex, Input, Heading, Text } from "@chakra-ui/react";
 import { useFormik } from "formik";
-import React from "react";
+import React, { useState } from "react";
 import { object, string } from "yup";
 
 import { _post } from "@/common/httpClient";
-import useToaster from "@/hooks/useToaster";
+import Ribbons from "@/components/Ribbons/Ribbons";
 
 async function inviteUserToOrganisation(email: string) {
   await _post("/api/v1/organisation/membres", {
@@ -17,7 +17,11 @@ interface InvitationFormProps {
 }
 
 const InvitationForm = (props: InvitationFormProps) => {
-  const { toastSuccess, toastError } = useToaster();
+  const [feedback, setFeedback] = useState<{
+    id: number;
+    variant: "success" | "error";
+    message: string;
+  } | null>(null);
   const { values, handleChange, handleSubmit, errors, touched, resetForm } = useFormik({
     initialValues: {
       userEmail: "",
@@ -30,11 +34,19 @@ const InvitationForm = (props: InvitationFormProps) => {
       try {
         await inviteUserToOrganisation(form.userEmail);
         resetForm();
-        toastSuccess("Un email d'invitation a été envoyé au destinataire.");
+        setFeedback({
+          id: Date.now(),
+          variant: "success",
+          message: "Un email d'invitation a été envoyé au destinataire.",
+        });
         props.onInvitation?.();
       } catch (err) {
         console.error(err);
-        toastError(err?.json?.data?.message || "Oups, une erreur est survenue, merci de réessayer plus tard");
+        setFeedback({
+          id: Date.now(),
+          variant: "error",
+          message: err?.json?.data?.message || "Oups, une erreur est survenue, merci de réessayer plus tard",
+        });
       }
     },
   });
@@ -44,6 +56,11 @@ const InvitationForm = (props: InvitationFormProps) => {
       <Heading as="h2" color="#417DC4" fontSize="xl" fontWeight="700">
         Inviter un membre de votre organisme
       </Heading>
+      {feedback && (
+        <Ribbons key={feedback.id} variant={feedback.variant} showClose mt={4}>
+          <Text color="grey.800">{feedback.message}</Text>
+        </Ribbons>
+      )}
       <Flex flexDirection="column" pt={5} minWidth="max-content">
         <Flex gap={4} minWidth="max-content">
           <Box flex="1">

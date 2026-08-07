@@ -24,7 +24,6 @@ import { useState } from "react";
 import { object, string, boolean } from "yup";
 
 import { _post } from "@/common/httpClient";
-import useToaster from "@/hooks/useToaster";
 
 interface InviteCfaAdminModalProps {
   isOpen: boolean;
@@ -32,7 +31,7 @@ interface InviteCfaAdminModalProps {
   siret: string;
   uai?: string | null;
   organismeNom: string;
-  onSuccess?: () => void;
+  onSuccess?: (message?: string) => void;
 }
 
 interface InviteResponse {
@@ -57,7 +56,6 @@ export default function InviteCfaAdminModal({
   organismeNom,
   onSuccess,
 }: InviteCfaAdminModalProps) {
-  const { toastSuccess } = useToaster();
   const [serverError, setServerError] = useState<string | null>(null);
   const [pendingConflict, setPendingConflict] = useState<{ email: string } | null>(null);
   const [resending, setResending] = useState(false);
@@ -78,11 +76,9 @@ export default function InviteCfaAdminModal({
           nom: values.nom.trim(),
         });
         const expireTxt = new Date(res.expiresAt).toLocaleString("fr-FR");
-        toastSuccess(`Invitation envoyée à ${res.email}. Expire le ${expireTxt}.`, {
-          description: res.warning,
-        });
+        const message = `Invitation envoyée à ${res.email}. Expire le ${expireTxt}.${res.warning ? ` ${res.warning}` : ""}`;
         formik.resetForm();
-        onSuccess?.();
+        onSuccess?.(message);
         onClose();
       } catch (err: any) {
         const msg: string = err?.json?.data?.message || err?.message || "Une erreur est survenue";
@@ -106,10 +102,9 @@ export default function InviteCfaAdminModal({
         ...(uai ? { uai } : {}),
       });
       const expireTxt = new Date(res.expiresAt).toLocaleString("fr-FR");
-      toastSuccess(`Email renvoyé à ${res.email}. Nouvelle expiration : ${expireTxt}.`);
       formik.resetForm();
       setPendingConflict(null);
-      onSuccess?.();
+      onSuccess?.(`Email renvoyé à ${res.email}. Nouvelle expiration : ${expireTxt}.`);
       onClose();
     } catch (err: any) {
       setServerError(err?.json?.data?.message || err?.message || "Échec du renvoi");

@@ -29,15 +29,14 @@ import DocumentsActionButtons from "@/components/Televersement/DocumentsActionBu
 import FileUploadComponent from "@/components/Televersement/FileUploadComponent";
 import InfoBetaPanel from "@/components/Televersement/InfoBetaPanel";
 import useExcelFileProcessor from "@/hooks/useExcelFileProcessor";
-import useToaster from "@/hooks/useToaster";
 import { UploadLine } from "@/theme/components/icons";
 
 import TeleversementTable from "./TeleversementTable";
 import TeleversementValide from "./TeleversementValide";
 
 export default function Televersement({ organismeId, isMine }: { organismeId: string; isMine: boolean }) {
-  const { toastError } = useToaster();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
 
   const {
@@ -59,10 +58,11 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
 
   const handleSubmit = async () => {
     if (errorsCount > 0 || error) {
-      toastError("Please fix the errors before submitting.");
+      setSubmitError("Please fix the errors before submitting.");
       setIsSubmitting(false);
       return;
     }
+    setSubmitError(null);
     setIsSubmitting(true);
     setStatus("processing");
     const res = await _post(`/api/v1/organismes/${organismeId}/upload/import/v3`, toEffectifsQueue(processedData));
@@ -130,6 +130,20 @@ export default function Televersement({ organismeId, isMine }: { organismeId: st
           </Box>
         )}
 
+        {error && (
+          <Ribbons key={error} variant="error" my={8} showClose>
+            <Text fontSize="md" color="grey.800">
+              {error}
+            </Text>
+          </Ribbons>
+        )}
+        {submitError && (
+          <Ribbons variant="error" my={8} showClose>
+            <Text fontSize="md" color="grey.800">
+              {submitError}
+            </Text>
+          </Ribbons>
+        )}
         {status === "validation_success" && (
           <Ribbons variant="success" my={8}>
             <Box mb="8">

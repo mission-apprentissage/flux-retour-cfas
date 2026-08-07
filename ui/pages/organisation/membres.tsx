@@ -2,16 +2,16 @@ import { HamburgerIcon } from "@chakra-ui/icons";
 import { Box, Container, Heading, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 
 import { _delete, _get, _post } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import Page from "@/components/Page/Page";
+import Ribbons from "@/components/Ribbons/Ribbons";
 import Table from "@/components/Table/Table";
 import withAuth, { allOrganisationExcept } from "@/components/withAuth";
 import useAuth from "@/hooks/useAuth";
-import useToaster from "@/hooks/useToaster";
 import InvitationForm from "@/modules/mon-espace/organisation/InvitationForm";
 import InvitationFormAdmin from "@/modules/mon-espace/organisation/InvitationFormAdmin";
 
@@ -19,7 +19,9 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 
 const PageGestionDesMembres = () => {
   const { auth } = useAuth();
-  const { toastSuccess } = useToaster();
+  const [feedback, setFeedback] = useState<{ id: number; message: string } | null>(null);
+
+  const showSuccess = (message: string) => setFeedback({ id: Date.now(), message });
 
   const {
     data: membres,
@@ -39,31 +41,31 @@ const PageGestionDesMembres = () => {
 
   async function resendInvitation(invitationId: string) {
     await _post(`/api/v1/organisation/invitations/${invitationId}/resend`);
-    toastSuccess("L'email d'invitation a été renvoyé");
+    showSuccess("L'email d'invitation a été renvoyé");
   }
 
   async function cancelInvitation(invitationId: string) {
     await _delete(`/api/v1/organisation/invitations/${invitationId}`);
     await refetchInvitations();
-    toastSuccess("L'invitation a été annulée");
+    showSuccess("L'invitation a été annulée");
   }
 
   async function validateMembre(userId: string) {
     await _post(`/api/v1/organisation/membres/${userId}/validate`);
     await refetchMembres();
-    toastSuccess("Le membre a été validé");
+    showSuccess("Le membre a été validé");
   }
 
   async function rejectMembre(userId: string) {
     await _post(`/api/v1/organisation/membres/${userId}/reject`);
     await refetchMembres();
-    toastSuccess("Le membre a été refusé");
+    showSuccess("Le membre a été refusé");
   }
 
   async function deleteMembre(userId: string) {
     await _delete(`/api/v1/organisation/membres/${userId}`);
     await refetchMembres();
-    toastSuccess("Le membre a été supprimé");
+    showSuccess("Le membre a été supprimé");
   }
 
   const title = "Gestion des rôles et habilitations";
@@ -80,6 +82,11 @@ const PageGestionDesMembres = () => {
           <Text fontSize="sm">
             Vous êtes actuellement <strong>Gestionnaire</strong> pour votre organisation sur le tableau de bord.
           </Text>
+          {feedback && (
+            <Ribbons key={feedback.id} variant="success" showClose mt={4}>
+              <Text color="grey.800">{feedback.message}</Text>
+            </Ribbons>
+          )}
           <InvitationForm onInvitation={() => refetchInvitations()} />
           {auth.organisation.type === "ADMINISTRATEUR" && (
             <InvitationFormAdmin onInvitation={() => refetchInvitations()} />
