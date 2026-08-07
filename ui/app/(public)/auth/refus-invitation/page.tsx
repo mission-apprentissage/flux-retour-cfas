@@ -8,10 +8,10 @@ export const metadata = PAGES.static.authRefusInvitation.getMetadata();
 
 export default function RefusInvitationPage() {
   return (
-    <main>
+    <>
       <Suspense>
         <RefusInvitationClient />
       </Suspense>
-    </main>
+    </>
   );
 }

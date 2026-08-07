@@ -26,7 +26,7 @@ export function AuthCard({
   footer?: ReactNode;
 }) {
   return (
-    <div className={styles.wrapper}>
+    <main className={styles.wrapper}>
       <div className={styles.card} style={{ maxWidth: `${maxWidth}px` }}>
         <h1 className={styles.title}>{title}</h1>
 
@@ -38,6 +38,6 @@ export function AuthCard({
 
         {footer && <div className={styles.footer}>{footer}</div>}
       </div>
-    </div>
+    </main>
   );
 }

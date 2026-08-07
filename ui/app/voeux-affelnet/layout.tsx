@@ -15,7 +15,11 @@ const ALLOWED_ORGANISATION_TYPES: string[] = [ORGANISATION_TYPE.DREETS, ORGANISA
 export default async function VoeuxAffelnetLayout({ children }: { children: ReactNode }) {
   const user = await getSession();
 
-  if (!user || !ALLOWED_ORGANISATION_TYPES.includes(user.organisation?.type as string)) {
+  if (!user) {
+    redirect("/auth/connexion");
+  }
+
+  if (!ALLOWED_ORGANISATION_TYPES.includes(user.organisation?.type as string)) {
     redirect("/home");
   }
 

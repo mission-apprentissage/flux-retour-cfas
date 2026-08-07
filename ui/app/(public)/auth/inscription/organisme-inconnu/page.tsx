@@ -6,8 +6,8 @@ export const metadata = PAGES.static.authInscriptionOrganismeInconnu.getMetadata
 
 export default function InscriptionOrganismeInconnuPage() {
   return (
-    <main>
+    <>
       <OrganismeInconnuClient />
-    </main>
+    </>
   );
 }

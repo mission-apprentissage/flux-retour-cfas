@@ -8,7 +8,7 @@ export const metadata = PAGES.static.authInscriptionReseauAutre.getMetadata();
 
 export default function InscriptionReseauAutrePage() {
   return (
-    <main>
+    <>
       <AuthMessageCard
         icon="ri-time-line"
         tone="warning"
@@ -28,6 +28,6 @@ export default function InscriptionReseauAutrePage() {
         </p>
         <p>Merci de votre patience et de l’intérêt que vous portez au tableau de bord de l’apprentissage.</p>
       </AuthMessageCard>
-    </main>
+    </>
   );
 }

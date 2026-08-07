@@ -19,9 +19,9 @@ export default async function ConnexionApiLayout({ children }: { children: React
         <div className={styles.layout}>
           <SkipLinks links={[{ anchor: "#contenu", label: "Contenu" }]} />
           {user ? <ConnectedHeader /> : <PublicHeader />}
-          <div id="contenu" tabIndex={-1} className={styles.main}>
+          <main id="contenu" tabIndex={-1} className={styles.main}>
             {children}
-          </div>
+          </main>
           <Footer />
         </div>
       </UserContextProvider>

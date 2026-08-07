@@ -27,7 +27,7 @@ export function AuthMessageCard({
   footer?: ReactNode;
 }) {
   return (
-    <div className={styles.wrapper}>
+    <main className={styles.wrapper}>
       <div className={styles.card}>
         <div className={`${styles.iconWrap} ${ICON_TONE[tone]}`}>
           {typeof icon === "string" ? <i className={`${icon} ${styles.icon}`} aria-hidden="true" /> : icon}
@@ -37,6 +37,6 @@ export function AuthMessageCard({
         {actions ? <div className={styles.actions}>{actions}</div> : null}
         {footer ? <div className={styles.footer}>{footer}</div> : null}
       </div>
-    </div>
+    </main>
   );
 }
