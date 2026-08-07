@@ -21,7 +21,6 @@ import { COMPTE_SETTINGS_HREF } from "@/common/utils/compteSettings";
 import { formatDateDayMonthYear, formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import { useErp } from "@/hooks/useErp";
-import useToaster from "@/hooks/useToaster";
 
 const desiredOrder = [
   "ymag",
@@ -46,7 +45,6 @@ const desiredOrder = [
  */
 export default function ParametresClient() {
   const router = useRouter();
-  const { toastSuccess } = useToaster();
   const [stepConfigurationERP, setStepConfigurationERP] = useState<"none" | "choix_erp" | "unsupported_erp" | "v3">(
     "none"
   );
@@ -54,6 +52,7 @@ export default function ParametresClient() {
   const [selectedERP, setSelectedERP] = useState({} as IErp);
   const [unsupportedERPName, setUnsupportedERPName] = useState("");
   const [regeneratedApiKey, setRegeneratedApiKey] = useState<string | null>(null);
+  const [regeneratedKeyCopied, setRegeneratedKeyCopied] = useState(false);
 
   const { erps, erpsById } = useErp();
 
@@ -137,9 +136,21 @@ export default function ParametresClient() {
                                       readOnly
                                     />
                                   </div>
-                                  <CopyToClipboard text={regeneratedApiKey} onCopy={() => toastSuccess("Copié !")}>
+                                  <CopyToClipboard
+                                    text={regeneratedApiKey}
+                                    onCopy={() => setRegeneratedKeyCopied(true)}
+                                  >
                                     <Button>Copier la clé</Button>
                                   </CopyToClipboard>
+                                  {regeneratedKeyCopied && (
+                                    <Alert
+                                      severity="success"
+                                      title="Copié !"
+                                      description=""
+                                      small
+                                      className="fr-mt-1w"
+                                    />
+                                  )}
                                 </>
                               ) : (
                                 <Button
@@ -147,7 +158,6 @@ export default function ParametresClient() {
                                   onClick={async () => {
                                     const { apiKey } = await _post(`/api/v1/organismes/${organisme._id}/api-key`);
                                     setRegeneratedApiKey(apiKey);
-                                    toastSuccess("Votre clé d'échange a été correctement générée.");
                                     await refetchOrganisme();
                                   }}
                                 >
@@ -367,7 +377,6 @@ export default function ParametresClient() {
             erpId={selectedERPId}
             onGenerateKey={async () => {
               await _post(`/api/v1/organismes/${organisme._id}/api-key`);
-              toastSuccess("Votre clé d'échange a été correctement générée.");
               await refetchOrganisme();
             }}
             onConfigurationMismatch={async () => {
@@ -404,8 +413,8 @@ interface ConfigurationERPV3Props {
   erpsById: any;
 }
 function ConfigurationERPV3(props: ConfigurationERPV3Props) {
-  const { toastSuccess } = useToaster();
   const [copied, setCopied] = useState(false);
+  const [keyGenerated, setKeyGenerated] = useState(false);
 
   const erp = props.erpsById[props.erpId];
   const verified = !!props.organisme.api_siret && !!props.organisme.api_uai;
@@ -507,6 +516,17 @@ function ConfigurationERPV3(props: ConfigurationERPV3Props) {
 
           {props.organisme.api_key ? (
             <>
+              {keyGenerated && (
+                <Alert
+                  severity="success"
+                  title="Votre clé d'échange a été correctement générée."
+                  description=""
+                  small
+                  closable
+                  onClose={() => setKeyGenerated(false)}
+                  className="fr-mb-2w"
+                />
+              )}
               <div className="fr-mb-3w">
                 <label className="fr-label" htmlFor="apiKey">
                   Votre clé d&apos;échange
@@ -530,12 +550,12 @@ function ConfigurationERPV3(props: ConfigurationERPV3Props) {
                   text={props.organisme.api_key}
                   onCopy={() => {
                     setCopied(true);
-                    toastSuccess("Copié !");
                   }}
                 >
                   <Button>Copier la clé</Button>
                 </CopyToClipboard>
               </div>
+              {copied && <Alert severity="success" title="Copié !" description="" small className="fr-mb-3w" />}
             </>
           ) : (
             <div className="fr-btns-group fr-btns-group--inline-md">
@@ -543,7 +563,14 @@ function ConfigurationERPV3(props: ConfigurationERPV3Props) {
                 Revenir en arrière
               </Button>
 
-              <Button onClick={props.onGenerateKey}>Générer la clé d&apos;échange</Button>
+              <Button
+                onClick={async () => {
+                  await props.onGenerateKey();
+                  setKeyGenerated(true);
+                }}
+              >
+                Générer la clé d&apos;échange
+              </Button>
             </div>
           )}
 

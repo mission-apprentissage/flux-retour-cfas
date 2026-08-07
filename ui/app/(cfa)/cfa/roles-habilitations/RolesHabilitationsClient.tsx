@@ -17,7 +17,6 @@ import { FullTable } from "@/app/_components/table/FullTable";
 import { ColumnData } from "@/app/_components/table/types";
 import { useCfaAdmin } from "@/app/_hooks/useCfaAdmin";
 import { _delete, _get, _post, _put } from "@/common/httpClient";
-import useToaster from "@/hooks/useToaster";
 
 import InvitationSidePanel from "./InvitationSidePanel";
 import styles from "./RolesHabilitationsClient.module.css";
@@ -93,7 +92,7 @@ const COLUMNS: ColumnData[] = [
 export default function RolesHabilitationsClient() {
   const { user, isCfaAdmin } = useCfaAdmin();
   const router = useRouter();
-  const { toastSuccess, toastError } = useToaster();
+  const [feedback, setFeedback] = useState<{ severity: "success" | "error"; message: string } | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isInvitationPanelOpen, setIsInvitationPanelOpen] = useState(false);
   const pendingDeleteRef = useRef<{ userId: string; email: string } | null>(null);
@@ -136,23 +135,20 @@ export default function RolesHabilitationsClient() {
     try {
       await _delete(`/api/v1/organisation/membres/${pending.userId}`);
       await refetchMembres();
-      toastSuccess("L'utilisateur a été supprimé");
+      setFeedback({ severity: "success", message: "L'utilisateur a été supprimé" });
     } catch (err: any) {
-      toastError(err?.json?.data?.message || "Une erreur est survenue");
+      setFeedback({ severity: "error", message: err?.json?.data?.message || "Une erreur est survenue" });
     }
-  }, [refetchMembres, toastSuccess, toastError]);
+  }, [refetchMembres]);
 
-  const handleResendInvitation = useCallback(
-    async (invitationId: string) => {
-      try {
-        await _post(`/api/v1/organisation/invitations/${invitationId}/resend`);
-        toastSuccess("L'email d'invitation a été renvoyé");
-      } catch (err: any) {
-        toastError(err?.json?.data?.message || "Une erreur est survenue");
-      }
-    },
-    [toastSuccess, toastError]
-  );
+  const handleResendInvitation = useCallback(async (invitationId: string) => {
+    try {
+      await _post(`/api/v1/organisation/invitations/${invitationId}/resend`);
+      setFeedback({ severity: "success", message: "L'email d'invitation a été renvoyé" });
+    } catch (err: any) {
+      setFeedback({ severity: "error", message: err?.json?.data?.message || "Une erreur est survenue" });
+    }
+  }, []);
 
   const openCancelInvitationModal = useCallback((invitationId: string) => {
     pendingCancelRef.current = invitationId;
@@ -165,11 +161,11 @@ export default function RolesHabilitationsClient() {
     try {
       await _delete(`/api/v1/organisation/invitations/${invitationId}`);
       await refetchInvitations();
-      toastSuccess("L'invitation a été annulée");
+      setFeedback({ severity: "success", message: "L'invitation a été annulée" });
     } catch (err: any) {
-      toastError(err?.json?.data?.message || "Une erreur est survenue");
+      setFeedback({ severity: "error", message: err?.json?.data?.message || "Une erreur est survenue" });
     }
-  }, [refetchInvitations, toastSuccess, toastError]);
+  }, [refetchInvitations]);
 
   const openRoleChangeModal = useCallback((userId: string, email: string, currentRole: "admin" | "member") => {
     setRoleChangeError(null);
@@ -185,20 +181,28 @@ export default function RolesHabilitationsClient() {
       await _put(`/api/v1/organisation/membres/${pending.userId}/role`, { role: pending.newRole });
       roleChangeModal.close();
       await refetchMembres();
-      toastSuccess(
-        pending.newRole === "admin"
-          ? "L'utilisateur a été promu administrateur"
-          : "L'utilisateur n'est plus administrateur"
-      );
+      setFeedback({
+        severity: "success",
+        message:
+          pending.newRole === "admin"
+            ? "L'utilisateur a été promu administrateur"
+            : "L'utilisateur n'est plus administrateur",
+      });
     } catch (err: any) {
       setRoleChangeError(err?.json?.data?.message || "Une erreur est survenue");
     }
-  }, [pendingRoleChange, refetchMembres, toastSuccess]);
+  }, [pendingRoleChange, refetchMembres]);
 
-  const handleInvitationSuccess = useCallback(async () => {
-    await refetchMembres();
-    await refetchInvitations();
-  }, [refetchMembres, refetchInvitations]);
+  const handleInvitationSuccess = useCallback(
+    async (message?: string) => {
+      await refetchMembres();
+      await refetchInvitations();
+      if (message) {
+        setFeedback({ severity: "success", message });
+      }
+    },
+    [refetchMembres, refetchInvitations]
+  );
 
   const filteredMembres = useMemo(() => {
     if (!membres) return [];
@@ -419,6 +423,18 @@ export default function RolesHabilitationsClient() {
           Retrouvez ici l&apos;ensemble des utilisateurs habilités à consulter les données des apprenants, utiliser le
           service et demander des collaborations avec les Missions Locales.
         </p>
+
+        {feedback && (
+          <Alert
+            severity={feedback.severity}
+            title={feedback.message}
+            description=""
+            small
+            closable
+            onClose={() => setFeedback(null)}
+            className="fr-mb-2w"
+          />
+        )}
 
         <div className={styles.topBar}>
           <div className={styles.searchWrapper}>

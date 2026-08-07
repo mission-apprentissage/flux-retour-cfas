@@ -1,20 +1,20 @@
 "use client";
 
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { FieldArray, Form, Formik, FormikHelpers } from "formik";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { z, ZodError } from "zod";
 
 import { _post } from "@/common/httpClient";
-import useToaster from "@/hooks/useToaster";
 
 import styles from "./InvitationSidePanel.module.css";
 
 interface InvitationSidePanelProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (message?: string) => void;
 }
 
 const emailSchema = z.string().email("Adresse email invalide");
@@ -58,10 +58,11 @@ function validate(values: FormValues) {
 }
 
 export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: InvitationSidePanelProps) {
-  const { toastSuccess, toastError } = useToaster();
   const dialogRef = useRef<HTMLDivElement>(null);
+  const [feedbacks, setFeedbacks] = useState<Array<{ severity: "success" | "error"; message: string }>>([]);
 
   const handleClose = useCallback(() => {
+    setFeedbacks([]);
     onClose();
   }, [onClose]);
 
@@ -111,6 +112,7 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
       const validEmails = uniqueEntries.map((e) => e.email);
       const roles = uniqueEntries.map((e) => e.role);
 
+      setFeedbacks([]);
       try {
         const result = await _post<
           { emails: string[]; roles: Array<"admin" | "member"> },
@@ -121,11 +123,10 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
         const successes = result.success ?? [];
 
         if (errors.length === 0) {
-          toastSuccess(
+          handleClose();
+          onSuccess(
             validEmails.length === 1 ? "L'invitation a été envoyée" : `${validEmails.length} invitations envoyées`
           );
-          handleClose();
-          onSuccess();
           return;
         }
 
@@ -142,11 +143,19 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
           failedTouched.push({ email: true });
         });
 
+        const partialFeedbacks: Array<{ severity: "success" | "error"; message: string }> = [];
         if (successes.length > 0) {
-          toastSuccess(successes.length === 1 ? "1 invitation envoyée" : `${successes.length} invitations envoyées`);
+          partialFeedbacks.push({
+            severity: "success",
+            message: successes.length === 1 ? "1 invitation envoyée" : `${successes.length} invitations envoyées`,
+          });
           onSuccess();
         }
-        toastError(errors.length === 1 ? "1 invitation en erreur" : `${errors.length} invitations en erreur`);
+        partialFeedbacks.push({
+          severity: "error",
+          message: errors.length === 1 ? "1 invitation en erreur" : `${errors.length} invitations en erreur`,
+        });
+        setFeedbacks(partialFeedbacks);
 
         resetForm({
           values: { entries: failedEntries.length > 0 ? failedEntries : initialValues.entries },
@@ -154,12 +163,12 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
           touched: { entries: failedTouched } as any,
         });
       } catch (err: any) {
-        toastError(err?.json?.data?.message || "Une erreur est survenue");
+        setFeedbacks([{ severity: "error", message: err?.json?.data?.message || "Une erreur est survenue" }]);
       } finally {
         setSubmitting(false);
       }
     },
-    [handleClose, onSuccess, toastSuccess, toastError]
+    [handleClose, onSuccess]
   );
 
   if (!isOpen) return null;
@@ -195,6 +204,19 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
                   </div>
 
                   <h2 className={styles.title}>Ajouter de nouveaux utilisateurs sur le Tableau de bord</h2>
+
+                  {feedbacks.map((feedback, index) => (
+                    <Alert
+                      key={`${feedback.severity}-${feedback.message}`}
+                      severity={feedback.severity}
+                      title={feedback.message}
+                      description=""
+                      small
+                      closable
+                      onClose={() => setFeedbacks((prev) => prev.filter((_, i) => i !== index))}
+                      className="fr-mb-2w"
+                    />
+                  ))}
 
                   <FieldArray name="entries">
                     {({ push, remove }) => (
