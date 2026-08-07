@@ -17,12 +17,10 @@ import {
   API_EFFECTIF_LISTE,
   CONNAISSANCE_ML_ENUM,
   SITUATION_ENUM,
-  zEmailStatusEnum,
 } from "shared/models/data/missionLocaleEffectif.model";
 import { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
-import { v4 as uuidv4 } from "uuid";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
@@ -37,7 +35,6 @@ import {
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { triggerWhatsAppIfEligible } from "@/common/services/brevo/whatsapp";
 import { extractScoreInput, scoreEffectifs } from "@/common/services/classifier";
-import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
@@ -1568,51 +1565,6 @@ export const getEffectifARisqueByMissionLocaleId = async (
   return result;
 };
 
-const getEffectifMissionLocaleEligibleToBrevoAggregation = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
-) => [
-  ...(await generateOrganisationMatchStage(organisation)),
-  ...buildEffMissionLocaleFilter(),
-  ...filterByDernierStatutPipelineMl(),
-  ...addFieldFromActivationDate(),
-  ...filterByActivationDatePipelineMl(),
-];
-
-export const getEffectifMissionLocaleEligibleToBrevoCount = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
-) => {
-  const effectifsMissionLocaleAggregation = [
-    ...(await getEffectifMissionLocaleEligibleToBrevoAggregation(organisation)),
-
-    {
-      $facet: {
-        total: [{ $count: "total" }],
-        eligible: [
-          { $match: { email_status: zEmailStatusEnum.enum.valid, "brevo.token": { $ne: null } } },
-          { $count: "total" },
-        ],
-        details: [
-          {
-            $group: {
-              _id: { $ifNull: ["$email_status", "not_processed"] },
-              count: { $sum: 1 },
-            },
-          },
-        ],
-      },
-    },
-    {
-      $project: {
-        total: { $arrayElemAt: ["$total.total", 0] },
-        eligible: { $arrayElemAt: ["$eligible.total", 0] },
-        details: 1,
-      },
-    },
-  ];
-  const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).next();
-  return data;
-};
-
 export async function getAllEffectifsParMois(
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   userId?: ObjectId
@@ -1630,114 +1582,6 @@ export async function getAllEffectifsParMois(
 
   return { a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable };
 }
-
-// BAL
-
-export const getEffectifMissionLocaleEligibleToBrevo = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
-) => {
-  const effectifsMissionLocaleAggregation = [
-    ...(await getEffectifMissionLocaleEligibleToBrevoAggregation(organisation)),
-    {
-      $match: {
-        soft_deleted: { $ne: true },
-        "brevo.token": { $ne: null },
-      },
-    },
-    {
-      $lookup: {
-        from: "organisations",
-        let: { id: "$mission_locale_id" },
-        pipeline: [
-          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
-          {
-            $project: {
-              _id: 1,
-              nom: 1,
-              site_web: 1,
-            },
-          },
-        ],
-        as: "mission_locale",
-      },
-    },
-    {
-      $lookup: {
-        from: "organismes",
-        let: { id: "$effectif_snapshot.organisme_id" },
-        pipeline: [
-          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
-          {
-            $project: {
-              _id: 1,
-              nom: 1,
-            },
-          },
-        ],
-        as: "organisme",
-      },
-    },
-    {
-      $unwind: {
-        path: "$organisme",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $unwind: {
-        path: "$mission_locale",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        email: "$effectif_snapshot.apprenant.courriel",
-        nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
-        prenom: { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom"] },
-        "urls.TDB_AB_TEST_A": {
-          $concat: [config.publicUrl, "/campagnes/mission-locale/", "$brevo.token"],
-        },
-        "urls.TDB_AB_TEST_B_TRUE": {
-          $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/true"],
-        },
-        "urls.TDB_AB_TEST_B_FALSE": {
-          $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/false"],
-        },
-        "urls.TDB_LBA_LINK": {
-          $concat: [
-            config.publicUrl,
-            "/api/v1/mission-locale/lba?",
-            "rncp=",
-            "$effectif_snapshot.formation.rncp",
-            "&cfd=",
-            "$effectif_snapshot.formation.cfd",
-          ],
-        },
-        "urls.TDB_MISSION_LOCALE_URL": "$mission_locale.site_web",
-        telephone: "$effectif_snapshot.apprenant.telephone",
-        nom_organisme: "$organisme.nom",
-        nom_mission_locale: "$mission_locale.nom",
-        mission_locale_id: { $toString: "$effectif_snapshot.apprenant.adresse.mission_locale_id" },
-        date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
-        date_derniere_rupture: "$date_rupture",
-      },
-    },
-  ];
-  const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
-  return data as Array<{
-    email: string;
-    prenom: string;
-    nom: string;
-    urls?: Record<string, string> | null;
-    telephone?: string | null;
-    nom_organisme?: string | null;
-    mission_locale_id: string;
-    nom_mission_locale: string;
-    date_de_naissance?: Date | null;
-    date_derniere_rupture?: Date | null;
-  }>;
-};
 
 export const getMissionLocaleRupturantToCheckMail = async (): Promise<Array<string>> => {
   return (
@@ -2564,7 +2408,7 @@ interface IMissionLocaleSnapshotResult {
  *
  * Si un autre ml record (actif OU soft-deleted) occupe déjà `(mission_locale_id, newEffectif._id)` :
  * on "réveille" ce squatter (s'il était soft-deleted), on merge l'orphelin dedans (champs utilisateur,
- * logs, brevo.history) puis on soft-delete l'orphelin. Évite l'E11000 sur l'index unique
+ * logs) puis on soft-delete l'orphelin. Évite l'E11000 sur l'index unique
  * `mission_locale_id_1_effectif_id_1` qui n'est pas filtré sur `soft_deleted`.
  *
  * Garde anti-disparition : si remplacer le snapshot par celui de `newEffectif` ferait perdre
@@ -2649,7 +2493,7 @@ export async function migrateMlRecordEffectifId(
       );
     }
 
-    // 2. Merge donor -> keeper (logs, brevo.history, MERGEABLE_FIELDS) + soft-delete orphan + $unset identifiant_normalise.
+    // 2. Merge donor -> keeper (logs, MERGEABLE_FIELDS) + soft-delete orphan + $unset identifiant_normalise.
     await mergeAndSoftDeleteDuplicates(squatter._id, [mlRecordId]);
 
     // 3. Backfill identifiant_normalise sur le keeper si manquant (cas legacy).
@@ -2815,10 +2659,6 @@ export const createMissionLocaleSnapshot = async (
           effectif_snapshot_date: date,
           date_rupture: currentStatus?.date,
           created_at: date,
-          brevo: {
-            token: uuidv4(),
-            token_created_at: date,
-          },
           computed: {
             organisme: {
               ml_beta_activated_at: organisation?.ml_beta_activated_at,
@@ -3037,7 +2877,6 @@ export function sortKeeperPriority(
  * Fusionne les champs utilisateur des doublons vers le keeper, puis soft-delete les doublons.
  *
  * - Réassigne les logs `missionLocaleEffectifLog` du donor vers le keeper (préserve l'historique côté UI).
- * - Préserve les `brevo.token` des donors dans `keeper.brevo.history` (évite de casser les liens email actifs).
  * - `$unset` `identifiant_normalise` sur les donors avant soft-delete (libère le partial unique index).
  */
 export async function mergeAndSoftDeleteDuplicates(keeperId: ObjectId, duplicateIds: ObjectId[]) {
@@ -3060,30 +2899,9 @@ export async function mergeAndSoftDeleteDuplicates(keeperId: ObjectId, duplicate
     }
   }
 
-  // Préserver les tokens brevo des donors dans keeper.brevo.history pour ne pas casser les liens email déjà envoyés.
-  const historyEntries: Array<{ token: string; token_created_at?: Date; token_expired_at?: Date }> = [];
   const now = new Date();
-  for (const donor of duplicates) {
-    if (donor.brevo?.token && donor.brevo.token !== keeper.brevo?.token) {
-      historyEntries.push({
-        token: donor.brevo.token,
-        token_created_at: donor.brevo.token_created_at ?? undefined,
-        token_expired_at: now,
-      });
-    }
-    for (const entry of donor.brevo?.history ?? []) {
-      if (entry.token && entry.token !== keeper.brevo?.token) {
-        historyEntries.push(entry);
-      }
-    }
-  }
-
-  if (Object.keys(mergeUpdate).length > 0 || historyEntries.length > 0) {
-    const update: Record<string, unknown> = { $set: { ...mergeUpdate, updated_at: now } };
-    if (historyEntries.length > 0) {
-      update.$push = { "brevo.history": { $each: historyEntries } };
-    }
-    await missionLocaleEffectifsDb().updateOne({ _id: keeperId }, update);
+  if (Object.keys(mergeUpdate).length > 0) {
+    await missionLocaleEffectifsDb().updateOne({ _id: keeperId }, { $set: { ...mergeUpdate, updated_at: now } });
   }
 
   // Réassigner les logs des donors vers le keeper (préserve l'historique conseiller ML).

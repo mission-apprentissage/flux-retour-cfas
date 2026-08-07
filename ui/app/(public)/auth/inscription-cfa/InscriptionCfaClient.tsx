@@ -2,15 +2,16 @@
 
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
-import { PasswordInput } from "@codegouvfr/react-dsfr/blocks/PasswordInput";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
+import { CGU_VERSION } from "shared/constants";
 import { maskEmail } from "shared/utils/maskEmail";
 
+import { RequiredMark } from "@/app/_components/inscription/RequiredMark";
 import {
   type CfaOnboardingInfo,
   OnboardingError,
@@ -20,8 +21,12 @@ import {
   type OnboardingMlItem,
   useCfaInvitationInfo,
 } from "@/app/_components/onboarding";
+import { PAGES } from "@/app/_utils/routes.utils";
 import { _post } from "@/common/httpClient";
 import { getApiErrorMessage, isRateLimited } from "@/common/rateLimit";
+
+import { PasswordField } from "../_components/PasswordField";
+import { DEFAULT_PASSWORD_MIN_LENGTH, getPasswordError } from "../_components/passwordRules";
 
 import styles from "./InscriptionCfa.module.css";
 
@@ -29,14 +34,6 @@ type Step = 1 | 2 | 3;
 
 const RESEND_COOLDOWN_STORAGE_KEY = "inscription_cfa_resend_locked_until";
 const RESEND_COOLDOWN_MS = 60_000;
-
-const PASSWORD_RULES = [
-  { label: "Au moins 12 caractères", test: (p: string) => p.length >= 12 },
-  { label: "1 lettre minuscule", test: (p: string) => /[a-z]/.test(p) },
-  { label: "1 lettre majuscule", test: (p: string) => /[A-Z]/.test(p) },
-  { label: "1 chiffre", test: (p: string) => /\d/.test(p) },
-  { label: "1 caractère spécial (ex : ! @ # $ % & * - _)", test: (p: string) => /[^a-zA-Z0-9]/.test(p) },
-];
 
 const SIDE_PANEL_INTRO =
   "Le Tableau de bord de l'apprentissage : l'outil de collaboration entre les CFA et les Missions Locales pour l'accompagnement des jeunes en rupture de contrat d'apprentissage.";
@@ -74,11 +71,16 @@ function Step1({ info, onNext }: { info: CfaOnboardingInfo; onNext: () => void }
             label: (
               <span>
                 J&apos;accepte les{" "}
-                <a href="/cgu" target="_blank" rel="noopener" className={styles.cguLink}>
+                <a href={PAGES.static.cgu.getPath()} target="_blank" rel="noopener" className={styles.cguLink}>
                   conditions générales d&apos;utilisation
                 </a>{" "}
                 du service du Tableau de bord de l&apos;apprentissage et je prends connaissance de la{" "}
-                <a href="/politique-de-confidentialite" target="_blank" rel="noopener" className={styles.cguLink}>
+                <a
+                  href={PAGES.static.politiqueConfidentialite.getPath()}
+                  target="_blank"
+                  rel="noopener"
+                  className={styles.cguLink}
+                >
                   politique de confidentialité
                 </a>
               </span>
@@ -133,7 +135,7 @@ function Step2({
   const [error, setError] = useState("");
 
   const isAdmin = info.role === "admin";
-  const passwordValid = PASSWORD_RULES.every((r) => r.test(password));
+  const passwordValid = !getPasswordError(password, DEFAULT_PASSWORD_MIN_LENGTH);
   const telephoneValid = /^\d{10}$/.test(telephone);
 
   const canSubmit =
@@ -145,7 +147,13 @@ function Step2({
     setSubmitting(true);
     setError("");
     try {
-      await onSubmit({ nom: nom.trim(), prenom: prenom.trim(), telephone, fonction: fonction.trim(), password });
+      await onSubmit({
+        nom: nom.trim(),
+        prenom: prenom.trim(),
+        telephone,
+        fonction: fonction.trim(),
+        password: password.trim(),
+      });
     } catch (err: any) {
       setError(getApiErrorMessage(err, "Une erreur est survenue"));
       setSubmitting(false);
@@ -170,7 +178,7 @@ function Step2({
           <Input
             label={
               <>
-                Prénom <span className={styles.requiredMark}>*</span>
+                Prénom <RequiredMark />
               </>
             }
             state={touched.prenom && !prenom.trim() ? "error" : "default"}
@@ -185,7 +193,7 @@ function Step2({
           <Input
             label={
               <>
-                Nom de famille <span className={styles.requiredMark}>*</span>
+                Nom de famille <RequiredMark />
               </>
             }
             state={touched.nom && !nom.trim() ? "error" : "default"}
@@ -200,7 +208,7 @@ function Step2({
           <Input
             label={
               <>
-                Votre numéro de téléphone professionnel <span className={styles.requiredMark}>*</span>
+                Votre numéro de téléphone professionnel <RequiredMark />
               </>
             }
             state={touched.telephone && !telephoneValid ? "error" : "default"}
@@ -225,7 +233,7 @@ function Step2({
           <Input
             label={
               <>
-                Intitulé de poste au sein de l&apos;établissement <span className={styles.requiredMark}>*</span>
+                Intitulé de poste au sein de l&apos;établissement <RequiredMark />
               </>
             }
             state={touched.fonction && !fonction.trim() ? "error" : "default"}
@@ -264,21 +272,18 @@ function Step2({
             />
           </div>
 
-          <PasswordInput
+          <PasswordField
             label={
               <>
-                Choisissez votre mot de passe <span className={styles.requiredMark}>*</span>
+                Choisissez votre mot de passe <RequiredMark />
               </>
             }
-            nativeInputProps={{
-              value: password,
-              onChange: (e) => setPassword(e.target.value),
-              onBlur: () => setTouched((t) => ({ ...t, password: true })),
-            }}
-            messages={PASSWORD_RULES.map((rule) => ({
-              message: rule.label,
-              severity: password ? (rule.test(password) ? "valid" : "error") : "info",
-            }))}
+            id="password"
+            name="password"
+            value={password}
+            minLength={DEFAULT_PASSWORD_MIN_LENGTH}
+            onChange={(e) => setPassword(e.target.value)}
+            onBlur={() => setTouched((t) => ({ ...t, password: true }))}
           />
 
           {error && <Alert severity="error" small description={error} className={styles.infoAlert} />}
@@ -418,7 +423,7 @@ export default function InscriptionCfaClient() {
       await _post("/api/v1/auth/register-cfa", {
         token,
         ...data,
-        has_accept_cgu_version: "v1",
+        has_accept_cgu_version: CGU_VERSION,
       });
       sessionStorage.setItem(RESEND_COOLDOWN_STORAGE_KEY, String(Date.now() + RESEND_COOLDOWN_MS));
       setRegisteredPrenom(data.prenom);

@@ -123,10 +123,7 @@ const UserMenu = () => {
               </Flex>
             </MenuButton>
             <MenuList color="#000091">
-              <MenuItem
-                href="/mon-compte"
-                icon={<i className="ri-account-circle-fill" style={{ fontSize: "0.875rem" }} />}
-              >
+              <MenuItem href="/compte" icon={<i className="ri-account-circle-fill" style={{ fontSize: "0.875rem" }} />}>
                 Mon compte
               </MenuItem>
               {hasRight(MENU_ENTRIES.ROLES) && (
@@ -187,16 +184,13 @@ const UserMenu = () => {
                     Gestion des réseaux
                   </MenuItem>
                   <MenuItem href="/admin/organismes/recherche" icon={<Parametre boxSize={3} color="#000091" />}>
-                    Recherche organisme
+                    Recherche d’un organisme
                   </MenuItem>
                   <MenuItem href="/admin/fusion-organismes" icon={<Parametre boxSize={3} color="#000091" />}>
                     Fusion d&apos;organismes
                   </MenuItem>
                   <MenuItem href="/admin/organismes/gestion" icon={<Parametre boxSize={3} color="#000091" />}>
-                    Gestion des organismes
-                  </MenuItem>
-                  <MenuItem href="/admin/maintenance" icon={<Parametre boxSize={3} color="#000091" />}>
-                    Message de maintenance
+                    Organismes absents du référentiel
                   </MenuItem>
                   <MenuItem href="/admin/impostures" icon={<SpyLineIcon boxSize={3} color="#000091" />}>
                     Impostures
@@ -228,9 +222,7 @@ const Header = () => {
 
     const pathsWithOrganismeId = [
       "/",
-      "/indicateurs",
       "/effectifs",
-      "/enquete-sifa",
       "/transmissions",
       new RegExp("^/organismes.*"),
       new RegExp("^/transmissions/\\d{4}-\\d{2}-\\d{2}$"),

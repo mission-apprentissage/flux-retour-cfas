@@ -436,7 +436,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                                     services du rectorat de l’académie où se situe votre CFA. Plus d’informations dans
                                     l’article{" "}
                                     <Link
-                                      isExternal
                                       href={FAQ_REFERENCER_ETABLISSEMENT}
                                       textDecoration="underline"
                                       display="inline"
@@ -478,7 +477,6 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
                                   nouveau SIRET, veuillez le signaler aux acteurs publics de l’apprentissage.
                                 </Text>
                                 <Link
-                                  isExternal
                                   href={FAQ_REFERENCER_ETABLISSEMENT}
                                   textDecoration="underline"
                                   display="inline"
@@ -859,30 +857,36 @@ const DashboardOrganisme = ({ organisme, modePublique }: Props) => {
               <IndicateursGrid indicateursEffectifs={indicateursEffectifs} loading={indicateursEffectifsLoading} />
             )}
 
-            {aucunEffectifTransmis ? (
-              !modePublique &&
-              (!organisme.mode_de_transmission ? (
-                <Link href="/parametres" variant="whiteBg" display="block" ml="auto" width="fit-content">
-                  Paramétrer un moyen de transmission
-                </Link>
-              ) : (
-                organisme.mode_de_transmission === "MANUEL" && (
-                  <Link href="/effectifs/televersement" variant="whiteBg" display="block" ml="auto" width="fit-content">
-                    Ajouter via fichier Excel
+            {aucunEffectifTransmis
+              ? !modePublique &&
+                (!organisme.mode_de_transmission ? (
+                  <Link href="/parametres" variant="whiteBg" display="block" ml="auto" width="fit-content">
+                    Paramétrer un moyen de transmission
                   </Link>
-                )
-              ))
-            ) : (
-              <Link
-                href={`${modePublique ? `/organismes/${organisme._id}` : ""}/indicateurs`}
-                variant="whiteBg"
-                display="block"
-                ml="auto"
-                width="fit-content"
-              >
-                Voir les indicateurs
-              </Link>
-            )}
+                ) : (
+                  organisme.mode_de_transmission === "MANUEL" && (
+                    <Link
+                      href="/effectifs/televersement"
+                      variant="whiteBg"
+                      display="block"
+                      ml="auto"
+                      width="fit-content"
+                    >
+                      Ajouter via fichier Excel
+                    </Link>
+                  )
+                ))
+              : modePublique && (
+                  <Link
+                    href={`/organismes/${organisme._id}/indicateurs`}
+                    variant="whiteBg"
+                    display="block"
+                    ml="auto"
+                    width="fit-content"
+                  >
+                    Voir les indicateurs
+                  </Link>
+                )}
 
             {organisme.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
               <>

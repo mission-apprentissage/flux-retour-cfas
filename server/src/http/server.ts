@@ -48,7 +48,6 @@ import {
   effectifsFiltersTerritoireSchema,
   fullEffectifsFiltersSchema,
 } from "@/common/actions/helpers/filters";
-import { getIndicateursNational } from "@/common/actions/indicateurs/indicateurs-national.actions";
 import {
   getEffectifsNominatifsWithoutId,
   getIndicateursEffectifsParDepartement,
@@ -62,7 +61,6 @@ import {
   getOrganismeIndicateursOrganismes,
 } from "@/common/actions/indicateurs/indicateurs.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
-import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
 import {
   cancelInvitation,
   createOrganisation,
@@ -134,7 +132,11 @@ import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { registrationCfaSchema } from "@/common/validation/registrationCfaSchema";
-import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
+import {
+  registrationSchema,
+  registrationUnknownNetworkSchema,
+  zRegistration,
+} from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
 import config from "@/config";
 
@@ -182,14 +184,12 @@ import collaborationsAdmin from "./routes/admin.routes/collaborations.routes";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
 import invitationsAdmin from "./routes/admin.routes/invitations.routes";
-import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import missionLocaleRoutesAdmin from "./routes/admin.routes/mission-locale.routes";
 import opcosRoutesAdmin from "./routes/admin.routes/opcos.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import reseauxAdmin from "./routes/admin.routes/reseaux.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
-import campagneRouter from "./routes/campagne.routes/campagne.routes";
 import emails from "./routes/emails.routes";
 import connexionInfoRouter from "./routes/onboarding.routes/connexion-info.route";
 import franceTravailAuthentRoutes from "./routes/organisations.routes/france-travail/france-travail.routes";
@@ -441,7 +441,7 @@ function setupRoutes(app: Application) {
       "/api/v1/auth/register",
       registerLimiter,
       returnResult(async (req) => {
-        const registration = await validateFullZodObjectSchema(req.body, registrationSchema);
+        const registration = await zRegistration.parseAsync(req.body);
         registration.user.email = registration.user.email.toLowerCase();
         return await register(registration);
       })
@@ -523,21 +523,6 @@ function setupRoutes(app: Application) {
           password: passwordSchema(req.user.organisation.type === "ADMINISTRATEUR").required(),
         });
         await changePassword(req.user, password);
-      })
-    )
-    .get(
-      "/api/v1/maintenanceMessages",
-      publicLimiter,
-      returnResult(async () => {
-        return await findMaintenanceMessages();
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/national",
-      publicDashboardLimiter,
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersTerritoireSchema);
-        return await getIndicateursNational(filters);
       })
     )
     .get(
@@ -1146,7 +1131,6 @@ function setupRoutes(app: Application) {
           return await getStatOrganismes();
         })
       )
-      .use("/maintenanceMessages", maintenancesAdmin())
       .post(
         "/impersonate",
         returnResult(async (req, res) => {
@@ -1199,7 +1183,6 @@ function setupRoutes(app: Application) {
       )
   );
 
-  app.use("/api/v1/campagne", publicDashboardLimiter, campagneRouter());
   app.use("/api/v1/onboarding/connexion-info", publicLimiter, connexionInfoRouter());
   app.use(authRouter);
 }

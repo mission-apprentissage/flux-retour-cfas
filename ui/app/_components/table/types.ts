@@ -36,4 +36,9 @@ export interface FullTableProps {
   headerAction?: ReactNode;
   hasPagination?: boolean;
   onRowClick?: (rowData: TableRowData) => void;
+  renderSubComponent?: (rowData: TableRowData) => ReactNode;
+  getRowCanExpand?: (rowData: TableRowData) => boolean;
+  expandColumnLabel?: string;
+  expandedByDefault?: boolean;
+  tableLabel?: string;
 }

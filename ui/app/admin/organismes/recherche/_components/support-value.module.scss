@@ -1,0 +1,24 @@
+.value {
+  overflow-wrap: break-word;
+}
+
+.missing {
+  font-style: italic;
+  color: var(--text-disabled-grey);
+}
+
+.error,
+.warning {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: baseline;
+  overflow-wrap: break-word;
+}
+
+.error {
+  color: var(--text-default-error);
+}
+
+.warning {
+  color: var(--text-default-warning);
+}

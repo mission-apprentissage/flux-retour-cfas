@@ -375,12 +375,7 @@ function Indicateurs({
               </Text>
               <Text>
                 En savoir plus sur les démarches à suivre sur la{" "}
-                <Link
-                  isExternal
-                  href="https://tableau-de-bord-preprod.apprentissage.beta.gouv.fr/referencement-organismez"
-                  isUnderlined
-                  display="inline"
-                >
+                <Link href="/referencement-organisme" isUnderlined display="inline">
                   page de Référencement
                 </Link>
                 .
@@ -424,12 +419,7 @@ function Indicateurs({
               <ListItem>
                 Si l&apos;organisme ne possède pas encore d&apos;UAI, il doit s&apos;adresser aux services du rectorat
                 de l&apos;académie où se situe le CFA. Plus d&apos;informations dans la{" "}
-                <Link
-                  href="https://tableau-de-bord-preprod.apprentissage.beta.gouv.fr/referencement-organisme"
-                  isUnderlined
-                  isExternal
-                  whiteSpace="nowrap"
-                >
+                <Link href="/referencement-organisme" isUnderlined whiteSpace="nowrap">
                   page de Référencement
                 </Link>
                 .

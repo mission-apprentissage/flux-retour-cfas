@@ -4,6 +4,7 @@ import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { usePathname } from "next/navigation";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
+import { PAGES } from "@/app/_utils/routes.utils";
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
 
@@ -123,30 +124,9 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           },
         });
         baseItems.push({
-          text: "Mes indicateurs",
-          linkProps: {
-            href: "/indicateurs",
-            target: "_self",
-          },
-        });
-        baseItems.push({
           text: "Mes effectifs",
           linkProps: {
             href: "/effectifs",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: "Mon enquête SIFA",
-          linkProps: {
-            href: "/enquete-sifa",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: "Indicateurs Nationaux",
-          linkProps: {
-            href: "/national/indicateurs",
             target: "_self",
           },
         });
@@ -180,43 +160,34 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           },
         });
       }
-      baseItems.push({
-        text: "Mon tableau de bord",
-        linkProps: {
-          href: "/home",
-          target: "_self",
-        },
-      });
-      baseItems.push({
-        text: getMesOrganismesLabel(organisationType || ""),
-        linkProps: {
-          href: "/organismes",
-          target: "_self",
-        },
-      });
-      baseItems.push({
-        text: "Mes indicateurs",
-        linkProps: {
-          href: "/indicateurs",
-          target: "_self",
-        },
-      });
-      if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.ACADEMIE) {
+      if (
+        organisationType === ORGANISATION_TYPE.TETE_DE_RESEAU ||
+        organisationType === ORGANISATION_TYPE.ADMINISTRATEUR
+      ) {
         baseItems.push({
-          text: "Vœux Affelnet",
+          text: "Mon tableau de bord",
           linkProps: {
-            href: "/voeux-affelnet",
+            href: "/home",
+            target: "_self",
+          },
+        });
+        baseItems.push({
+          text: getMesOrganismesLabel(organisationType || ""),
+          linkProps: {
+            href: "/organismes",
             target: "_self",
           },
         });
       }
-      baseItems.push({
-        text: "Indicateurs Nationaux",
-        linkProps: {
-          href: "/national/indicateurs",
-          target: "_self",
-        },
-      });
+      if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.ACADEMIE) {
+        baseItems.push({
+          text: "Vœux Affelnet",
+          linkProps: {
+            href: PAGES.static.voeuxAffelnet.getPath(),
+            target: "_self",
+          },
+        });
+      }
     } else if (organisationType === ORGANISATION_TYPE.ARML) {
       baseItems.push({
         text: "Suivi des indicateurs",
@@ -249,7 +220,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
     if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) {
       aideMenuLinks.push({
         linkProps: {
-          href: "https://cfas.apprentissage.beta.gouv.fr/docs/kit-deploiement-tba-op",
+          href: PAGES.static.docsKitDeploiementTbaOp.getPath(),
           target: "_blank",
           rel: "noopener noreferrer",
         },
@@ -273,7 +244,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
     ) {
       aideMenuLinks.push({
         linkProps: {
-          href: "/referencement-organisme",
+          href: PAGES.static.referencementOrganisme.getPath(),
           target: "_self",
         },
         text: "Référencement de votre organisme",
@@ -282,7 +253,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
 
     aideMenuLinks.push({
       linkProps: {
-        href: "/glossaire",
+        href: PAGES.static.glossaire.getPath(),
         target: "_self",
       },
       text: "Glossaire",

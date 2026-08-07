@@ -4,7 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { IconButton, Link, Stack } from "@mui/material";
+import { Link, Stack } from "@mui/material";
 import { Field, Form, Formik } from "formik";
 import NextLink from "next/link";
 import React from "react";
@@ -12,7 +12,6 @@ import { useLocalStorage } from "usehooks-ts";
 
 import { OrganismeCard, type ConnexionInvitationInfo } from "@/app/_components/onboarding";
 import { getApiErrorMessage, isRateLimited } from "@/common/rateLimit";
-import { ShowPassword } from "@/theme/components/icons";
 
 import { type AuthConnexionValues, submitLogin, validateAuthConnexion } from "./login.schema";
 
@@ -92,13 +91,13 @@ export function ConnexionInvitationLoginForm({ invitation }: ConnexionInvitation
                     autoFocus: true,
                   }}
                   action={
-                    <IconButton
+                    <Button
                       type="button"
+                      priority="tertiary no outline"
+                      iconId={show ? "ri-eye-off-line" : "ri-eye-line"}
+                      title={show ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                       onClick={() => setShow((s) => !s)}
-                      aria-label={show ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-                    >
-                      <ShowPassword />
-                    </IconButton>
+                    />
                   }
                 />
               )}

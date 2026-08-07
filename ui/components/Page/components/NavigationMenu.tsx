@@ -135,11 +135,15 @@ function NavBarTransverse(): React.ReactElement {
             organisationType === ORGANISATION_TYPE.DDETS) && (
             <NavItem to="/suivi-des-indicateurs">Suivi des indicateurs</NavItem>
           )}
-          <NavItem to="/home" exactMatch>
-            Mon tableau de bord
-          </NavItem>
-          <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
-          <NavItem to="/indicateurs">Mes indicateurs</NavItem>
+          {(organisationType === ORGANISATION_TYPE.TETE_DE_RESEAU ||
+            organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) && (
+            <>
+              <NavItem to="/home" exactMatch>
+                Mon tableau de bord
+              </NavItem>
+              <NavItem to="/organismes">{getMesOrganismesLabelFromOrganisationType(organisationType)}</NavItem>
+            </>
+          )}
           {organisationType === ORGANISATION_TYPE.DREETS && (
             <NavItem
               to="/voeux-affelnet"
@@ -154,7 +158,6 @@ function NavBarTransverse(): React.ReactElement {
               Vœux Affelnet
             </NavItem>
           )}
-          <NavItem to="/national/indicateurs">Indicateurs Nationaux</NavItem>
           <MenuQuestions />
         </>
       );
@@ -212,22 +215,7 @@ function NavBarOrganismeFormation(): ReactElement {
       {organisme?.organismesFormateurs && organisme.organismesFormateurs.length > 0 && (
         <NavItem to="/organismes">Mes organismes</NavItem>
       )}
-      <NavItem to="/indicateurs">Mes indicateurs</NavItem>
       <NavItem to="/effectifs">Mes effectifs</NavItem>
-      {organisme && (
-        <NavItem
-          to="/enquete-sifa"
-          isDisabled={!organisme.first_transmission_date}
-          disabledReason={
-            !organisme.first_transmission_date ? "Désactivé car votre organisme n'a encore rien transmis" : ""
-          }
-        >
-          Mon enquête SIFA
-        </NavItem>
-      )}
-      <NavItem to="/national/indicateurs" exactMatch>
-        Indicateurs Nationaux
-      </NavItem>
       <MenuQuestions />
       <NavItem to="/parametres" ml="auto">
         <SettingsIcon mr={2} />
@@ -264,20 +252,9 @@ function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactEl
           </>
         )}
         {organisme?.permissions?.manageEffectifs && (
-          <>
-            <NavItem to={`/organismes/${organismeId}/effectifs`} colorActive="dsfr_lightprimary.bluefrance_850">
-              Ses effectifs
-            </NavItem>
-            <NavItem
-              to={`/organismes/${organismeId}/enquete-sifa`}
-              isDisabled={!organisme.first_transmission_date}
-              disabledReason={
-                !organisme.first_transmission_date ? "Désactivé car l'organisme n'a encore rien transmis" : ""
-              }
-            >
-              Son enquête SIFA
-            </NavItem>
-          </>
+          <NavItem to={`/organismes/${organismeId}/effectifs`} colorActive="dsfr_lightprimary.bluefrance_850">
+            Ses effectifs
+          </NavItem>
         )}
       </Flex>
     </Container>
@@ -325,7 +302,7 @@ const MenuQuestions = () => {
           {(organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) && (
             <MenuItem
               as="a"
-              href="https://cfas.apprentissage.beta.gouv.fr/docs/kit-deploiement-tba-op"
+              href="/docs/kit-deploiement-tba-op"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackPlausibleEvent("clic_homepage_kit_deploiement")}

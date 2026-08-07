@@ -2949,13 +2949,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kurkle/color@npm:^0.3.0":
-  version: 0.3.2
-  resolution: "@kurkle/color@npm:0.3.2"
-  checksum: 79e97b31f8f6efb28c69d373f94b0c7480226fe8ec95221f518ac998e156444a496727ce47de6d728eb5c3369288e794cba82cae34253deb0d472d3bfe080e49
-  languageName: node
-  linkType: hard
-
 "@matejmazur/react-katex@npm:^3.1.3":
   version: 3.1.3
   resolution: "@matejmazur/react-katex@npm:3.1.3"
@@ -5265,15 +5258,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jsonwebtoken@npm:^9.0.7":
-  version: 9.0.7
-  resolution: "@types/jsonwebtoken@npm:9.0.7"
-  dependencies:
-    "@types/node": "*"
-  checksum: 872b62e2a50ec399d695402ccddfeb5cd66a6c3d28511f27453b932b6b67eb82c2d0ecaa864939848b88b3a8276c2492647bf5707bc82a6ac7e420d3412b9047
-  languageName: node
-  linkType: hard
-
 "@types/keyv@npm:^3.1.4":
   version: 3.1.4
   resolution: "@types/keyv@npm:3.1.4"
@@ -7262,15 +7246,6 @@ __metadata:
   version: 1.1.4
   resolution: "character-reference-invalid@npm:1.1.4"
   checksum: 20274574c70e05e2f81135f3b93285536bc8ff70f37f0809b0d17791a832838f1e49938382899ed4cb444e5bbd4314ca1415231344ba29f4222ce2ccf24fea0b
-  languageName: node
-  linkType: hard
-
-"chart.js@npm:^4.4.5":
-  version: 4.4.5
-  resolution: "chart.js@npm:4.4.5"
-  dependencies:
-    "@kurkle/color": ^0.3.0
-  checksum: 85fda8749bbcfd20f7809b2abb64dd9be720d97b24e14de8aaf9a14407b45218de5757ae28538061a87c453b8b2b301f2b697f93e18c8a8466d58aec1695ad3e
   languageName: node
   linkType: hard
 
@@ -17062,16 +17037,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-chartjs-2@npm:^5.2.0":
-  version: 5.2.0
-  resolution: "react-chartjs-2@npm:5.2.0"
-  peerDependencies:
-    chart.js: ^4.1.1
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: ace702185be1450e5888a8bcd8b5fc1995067e3b11d236764a67f5567a3d7c32ff16923b8d48d3d39bda6e45135da6c044c9b43fbe8e1978f95aca9d2c0ce348
-  languageName: node
-  linkType: hard
-
 "react-clientside-effect@npm:^1.2.6":
   version: 1.2.6
   resolution: "react-clientside-effect@npm:1.2.6"
@@ -20605,7 +20570,6 @@ __metadata:
     "@tanstack/react-query": 4.36.1
     "@tanstack/react-table": ^8.20.5
     "@tsconfig/next": ^2.0.3
-    "@types/jsonwebtoken": ^9.0.7
     "@types/lodash": ^4.17.16
     "@types/node": ^22.7.5
     "@types/qs": ^6.9.18
@@ -20613,13 +20577,11 @@ __metadata:
     "@types/react-dom": ^18.3.1
     axios: 1.15.2
     chakra-ui-markdown-renderer: 4.1.0
-    chart.js: ^4.4.5
     crisp-sdk-web: ^1.0.27
     date-fns: ^2.30.0
     dotenv: ^16.4.5
     formik: ^2.4.6
     framer-motion: ^7.10.3
-    jsonwebtoken: ^9.0.2
     libphonenumber-js: ^1.12.23
     lodash-es: 4.18.1
     lodash.debounce: 4.0.8
@@ -20634,7 +20596,6 @@ __metadata:
     notion-types: ^6.16.0
     react: ^18.3.1
     react-accessible-treeview: ^2.8.3
-    react-chartjs-2: ^5.2.0
     react-copy-to-clipboard: 5.1.0
     react-datepicker: ^4.25.0
     react-dom: ^18.3.1
@@ -20653,7 +20614,6 @@ __metadata:
     vitest: ^2.1.4
     xlsx: "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
     yup: 0.32.11
-    yup-password: 0.2.2
     zod: ^3.23.8
     zod-formik-adapter: ^1.3.0
   languageName: unknown
@@ -21704,13 +21664,6 @@ __metadata:
   version: 1.0.0
   resolution: "yocto-queue@npm:1.0.0"
   checksum: 2cac84540f65c64ccc1683c267edce396b26b1e931aa429660aefac8fbe0188167b7aee815a3c22fa59a28a58d898d1a2b1825048f834d8d629f4c2a5d443801
-  languageName: node
-  linkType: hard
-
-"yup-password@npm:0.2.2":
-  version: 0.2.2
-  resolution: "yup-password@npm:0.2.2"
-  checksum: 39bbe9f5498b1021f8cf7f4b66df75bfb3b0a53bef057f34066a40f7ae72a6334f542cef5ad29926c36bcf79bcb8d8795136eee50b80fe94a5b3bf431470bebf
   languageName: node
   linkType: hard
 

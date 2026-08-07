@@ -4,7 +4,7 @@ export interface DateFilters {
   date: Date;
 }
 
-export interface TerritoireFilters extends DateFilters {
+interface TerritoireFilters extends DateFilters {
   organisme_regions: string[];
   organisme_departements: string[];
   organisme_academies: string[];
@@ -37,7 +37,7 @@ export function parseQueryFieldDate(value: string | string[] | undefined): Date 
   return new Date(parseQueryField(value)[0] ?? Date.now());
 }
 
-export function parseTerritoireFiltersFromQuery(query: QueryFilter<TerritoireFilters>): TerritoireFilters {
+function parseTerritoireFiltersFromQuery(query: QueryFilter<TerritoireFilters>): TerritoireFilters {
   return {
     date: parseQueryFieldDate(query.date),
     organisme_regions: parseQueryField(query.organisme_regions),

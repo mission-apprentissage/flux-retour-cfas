@@ -3,6 +3,7 @@
 import { Footer as DsfrFooter } from "@codegouvfr/react-dsfr/Footer";
 import { CRISP_FAQ } from "shared";
 
+import { PAGES } from "@/app/_utils/routes.utils";
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 
 export function Footer() {
@@ -35,19 +36,15 @@ export function Footer() {
         },
         {
           text: "Accessibilité : non conforme",
-          linkProps: { href: "/accessibilite" },
+          linkProps: { href: PAGES.static.accessibilite.getPath() },
         },
         {
           text: "Mentions légales",
-          linkProps: { href: "/mentions-legales" },
+          linkProps: { href: PAGES.static.mentionsLegales.getPath() },
         },
         {
           text: "Conditions générales d’utilisation",
-          linkProps: { href: "/cgu" },
-        },
-        {
-          text: "Statistiques",
-          linkProps: { href: "/stats" },
+          linkProps: { href: PAGES.static.cgu.getPath() },
         },
         {
           text: "Centre d’aide",
@@ -59,7 +56,7 @@ export function Footer() {
         },
         {
           text: "Politique de confidentialité",
-          linkProps: { href: "/politique-de-confidentialite" },
+          linkProps: { href: PAGES.static.politiqueConfidentialite.getPath() },
         },
         {
           text: "À propos",

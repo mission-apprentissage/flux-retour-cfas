@@ -12,7 +12,7 @@ if (publicConfig.env === "local") {
   axios.defaults.withCredentials = true;
 }
 
-export class AuthError extends Error {
+class AuthError extends Error {
   json: any;
   statusCode: any;
   prettyMessage: any;
