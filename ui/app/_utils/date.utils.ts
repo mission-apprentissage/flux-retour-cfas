@@ -1,4 +1,4 @@
-import format from "date-fns/format/index";
+import { format } from "date-fns/format";
 import { fr } from "date-fns/locale";
 
 export function formatDate(dateString) {

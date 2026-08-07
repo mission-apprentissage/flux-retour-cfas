@@ -42,16 +42,17 @@ const FiltreFormationSecteurProfessionnel = (props: FiltreFormationSecteurProfes
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: famillesMetiers, isFetching: isLoading } = useQuery<RomeNode[]>(
-    ["arborescence-rome-14-06-2021.json"],
-    async () => {
+  const { data: famillesMetiers, isFetching: isLoading } = useQuery<RomeNode[]>({
+    queryKey: ["arborescence-rome-14-06-2021.json"],
+
+    queryFn: async () => {
       const famillersMetiers = await _getUI<FamilleMetier[]>("/arborescence-rome-14-06-2021.json");
       return famillersMetiers.map((familleMetiers) => normalizeRomeNodeInPlace(familleMetiers));
     },
-    {
-      cacheTime: 99999999, // never expire, change the URL if that must expire
-    }
-  );
+
+    // never expire, change the URL if that must expire
+    gcTime: 99999999,
+  });
 
   const filteredFamillesMetiers = useMemo(() => {
     if (!famillesMetiers) {

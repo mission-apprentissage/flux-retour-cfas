@@ -1,11 +1,7 @@
-// catch all unhandled promise rejections and call the error middleware
-import "express-async-errors";
-
 import fs from "fs";
 
 import * as Sentry from "@sentry/node";
 import { zUai } from "api-alternance-sdk/internal";
-import bodyParser from "body-parser";
 import Boom from "boom";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -249,6 +245,10 @@ async function sipaSuiviRateLimitMiddleware(req: express.Request, res: express.R
 export default async function createServer(): Promise<Application> {
   const app = express();
 
+  // Express 5 : le parseur de query par défaut est passé de "extended" à "simple".
+  // On force "extended" (qs) car l'UI envoie des paramètres tableau en bracket-notation
+  // (ex. téléchargements mission-locale), qui doivent se parser en tableaux côté serveur.
+  app.set("query parser", "extended");
   app.set("trust proxy", config.trustProxy);
 
   // Configure Sentry
@@ -279,7 +279,7 @@ export default async function createServer(): Promise<Application> {
   }
 
   app.use(
-    bodyParser.json({
+    express.json({
       limit: config.bodyParserLimit,
       verify: (req: any, _res, buf) => {
         // Conserver le body brut pour la vérification HMAC des webhooks
@@ -544,14 +544,14 @@ function setupRoutes(app: Application) {
       "/api/v1/invitations/:token",
       publicLimiter,
       returnResult(async (req) => {
-        return await getInvitationByToken(req.params.token);
+        return await getInvitationByToken(req.params.token as string);
       })
     )
     .post(
       "/api/v1/invitations/:token/reject",
       publicLimiter,
       returnResult(async (req) => {
-        await rejectInvitation(req.params.token);
+        await rejectInvitation(req.params.token as string);
       })
     )
     .use("/api/v1/reseaux", publicDashboardLimiter, getAllReseauxRoutes())
@@ -706,7 +706,10 @@ function setupRoutes(app: Application) {
         "/indicateurs/organismes/:type",
         requireIndicateursOrganismesAccess,
         returnResult(async (req, res) => {
-          const indicateurs = await getIndicateursForRelatedOrganismes(res.locals.organismeId, req.params.type);
+          const indicateurs = await getIndicateursForRelatedOrganismes(
+            res.locals.organismeId,
+            req.params.type as string
+          );
           const type = await z.enum(typesOrganismesIndicateurs).parseAsync(req.params.type);
           await createTelechargementListeNomLog(
             `organismes_${type}`,
@@ -1080,7 +1083,7 @@ function setupRoutes(app: Application) {
         requireCfaAdminIfCfa,
         returnResult(async (req) => {
           const { role } = await validateFullZodObjectSchema(req.body, { role: z.enum(["admin", "member"]) });
-          await updateMemberRole(req.user, req.params.userId, role);
+          await updateMemberRole(req.user, req.params.userId as string, role);
         })
       )
       .get(

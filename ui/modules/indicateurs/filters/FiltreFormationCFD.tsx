@@ -37,16 +37,16 @@ const FiltreFormationCFD = (props: FiltreFormationCFDProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: formations, isFetching: isLoading } = useQuery<IFormationSearchResponse[]>(
-    ["formations", searchTerm],
-    () =>
+  const { data: formations, isFetching: isLoading } = useQuery<IFormationSearchResponse[]>({
+    queryKey: ["formations", searchTerm],
+
+    queryFn: () =>
       _post("/api/v1/formations/search", {
         searchTerm,
       }),
-    {
-      enabled: searchTerm.length >= MINIMUM_CHARS_TO_PERFORM_SEARCH,
-    }
-  );
+
+    enabled: searchTerm.length >= MINIMUM_CHARS_TO_PERFORM_SEARCH,
+  });
 
   function updateSelection(cfd: string) {
     const index = props.value.indexOf(cfd);

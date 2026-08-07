@@ -13,17 +13,21 @@ type CfdDetailsProps = {
 };
 
 export function CfdDetails(props: CfdDetailsProps) {
-  const cfdInfoQuery = useQuery(["/api/v1/cfd", props.code ?? null], async ({ queryKey }) => {
-    const [_, rncp] = queryKey;
+  const cfdInfoQuery = useQuery({
+    queryKey: ["/api/v1/cfd", props.code ?? null],
 
-    if (rncp) {
-      return _get<CfdInfo | null>(`/api/v1/cfd/${rncp}`);
-    }
+    queryFn: async ({ queryKey }) => {
+      const [_, rncp] = queryKey;
 
-    return null;
+      if (rncp) {
+        return _get<CfdInfo | null>(`/api/v1/cfd/${rncp}`);
+      }
+
+      return null;
+    },
   });
 
-  if (cfdInfoQuery.isLoading) {
+  if (cfdInfoQuery.isPending) {
     return (
       <Center h="100%">
         <Spinner />

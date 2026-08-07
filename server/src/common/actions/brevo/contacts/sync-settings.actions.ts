@@ -66,7 +66,7 @@ export const setBrevoSyncSetting = async (
       { $set: set, $setOnInsert: setOnInsert },
       { upsert: true, returnDocument: "after" }
     );
-    return toSettings(res.value);
+    return toSettings(res);
   } catch (err: any) {
     // Race E11000 : un autre upsert a créé le document en parallèle (index unique
     // sur `key`). Le document existe désormais → simple update sans upsert.
@@ -76,7 +76,7 @@ export const setBrevoSyncSetting = async (
       { $set: set },
       { returnDocument: "after" }
     );
-    return toSettings(res.value);
+    return toSettings(res);
   }
 };
 

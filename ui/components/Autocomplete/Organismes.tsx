@@ -51,13 +51,12 @@ export const AutoCompleteOrganismes: React.FC<AutoCompleteProps> = ({ onSelect }
     },
   });
 
-  const { data, isFetching } = useQuery<ExtendedOrganisme[]>(
-    ["organismes", query],
-    () => _get<ExtendedOrganisme[]>(`/api/v1/admin/reseaux/organismes/search/${query}`, { params: { q: query } }),
-    {
-      enabled: query.length >= 3,
-    }
-  );
+  const { data, isFetching } = useQuery<ExtendedOrganisme[]>({
+    queryKey: ["organismes", query],
+    queryFn: () =>
+      _get<ExtendedOrganisme[]>(`/api/v1/admin/reseaux/organismes/search/${query}`, { params: { q: query } }),
+    enabled: query.length >= 3,
+  });
 
   const handleSelect = (organisme: ExtendedOrganisme) => {
     onSelect(organisme);

@@ -16,9 +16,10 @@ export function useClientQuery<
     setIsClient(true);
   }, []);
 
-  return useQuery<TData, TError, TData, TQueryKey>(queryKey, queryFn, {
+  return useQuery<TData, TError, TData, TQueryKey>({
+    queryKey,
+    queryFn,
     enabled: isClient && (options?.enabled ?? true),
-    suspense: options?.suspense ?? false,
     ...options,
   });
 }

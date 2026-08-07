@@ -97,7 +97,9 @@ export default function EffectifDetail({ data }: { data: IEffectifMissionLocale 
           : `/${orgType}?type=${nomListe}&rupture=${data?.effectif.date_rupture}`;
 
       setTimeout(() => {
-        queryClient.invalidateQueries(["effectif"]);
+        queryClient.invalidateQueries({
+          queryKey: ["effectif"],
+        });
         router.push(targetUrl);
       }, REDIRECTION_DELAY);
     },

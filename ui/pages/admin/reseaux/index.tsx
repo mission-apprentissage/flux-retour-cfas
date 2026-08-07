@@ -16,11 +16,10 @@ const Users = () => {
   const router = useRouter();
   const [selectedReseau, setSelectedReseau] = useState<string>();
 
-  const { data: reseauxData } = useQuery<{ _id: string; nom: string }[], any>(
-    ["reseau", "admin", "search"],
-    ({ signal }) => _get(`/api/v1/admin/reseaux`, { signal }),
-    {}
-  );
+  const { data: reseauxData } = useQuery<{ _id: string; nom: string }[], any>({
+    queryKey: ["reseau", "admin", "search"],
+    queryFn: ({ signal }) => _get(`/api/v1/admin/reseaux`, { signal }),
+  });
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedReseau(event.target.value);

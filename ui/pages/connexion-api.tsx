@@ -8,7 +8,7 @@ import { IOrganisationType } from "shared";
 import { useLocalStorage } from "usehooks-ts";
 import { z } from "zod";
 
-import { _post } from "@/common/httpClient";
+import { AuthError, _post } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import Page from "@/components/Page/Page";
 import Ribbons from "@/components/Ribbons/Ribbons";
@@ -20,9 +20,11 @@ export const getServerSideProps = async (context) => ({ props: { ...(await getAu
 
 const useFetchVerifyUser = (organismeId) => {
   const router = useRouter();
-  const { data, isLoading, error } = useQuery<any, any>(["verify-user", organismeId], () =>
-    _post(`/api/v1/organismes/${organismeId}/verify-user`, router.query)
-  );
+  const { data, isLoading, error } = useQuery<any, AuthError>({
+    queryKey: ["verify-user", organismeId],
+
+    queryFn: () => _post(`/api/v1/organismes/${organismeId}/verify-user`, router.query),
+  });
 
   return { data, loading: isLoading, error };
 };

@@ -46,14 +46,16 @@ export function useIndicateurNational(
   effectifsFilters: Partial<TerritoireFilters>,
   enabled: boolean
 ): UseIndicateursEffectifsParDepartement {
-  const { isSuccess, data } = useQuery<ApiResult>(
-    ["indicateurs/national", effectifsFilters],
-    () =>
+  const { isSuccess, data } = useQuery<ApiResult>({
+    queryKey: ["indicateurs/national", effectifsFilters],
+
+    queryFn: () =>
       _get("/api/v1/indicateurs/national", {
         params: convertEffectifsFiltersToQuery(effectifsFilters),
       }),
-    { enabled }
-  );
+
+    enabled,
+  });
 
   const effectifParDepartement = isSuccess ? data.indicateursEffectifs : null;
   const organismeParDepartement = isSuccess ? data.indicateursOrganismes : null;

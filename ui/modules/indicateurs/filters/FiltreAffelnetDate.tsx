@@ -1,4 +1,4 @@
-import fr from "date-fns/locale/fr";
+import { fr } from "date-fns/locale/fr";
 import { Dispatch, SetStateAction, useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 

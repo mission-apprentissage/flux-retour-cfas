@@ -1,6 +1,6 @@
 import { AddIcon } from "@chakra-ui/icons";
 import { Box, Container, Heading, HStack } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useSetRecoilState } from "recoil";
@@ -94,9 +94,10 @@ function EffectifsPage(props: EffectifsPageProps) {
     setPagination(zodPagination);
   }, [router.query]);
 
-  const { data, isFetching } = useQuery(
-    ["organismes", props.organisme._id, "effectifs", pagination, search, filters],
-    async () => {
+  const { data, isFetching } = useQuery({
+    queryKey: ["organismes", props.organisme._id, "effectifs", pagination, search, filters],
+
+    queryFn: async () => {
       const { page, limit, sort, order } = pagination;
       const { formation_libelle_long, statut_courant, annee_scolaire, source } = filters;
       const response = await _get(`/api/v1/organismes/${props.organisme._id}/effectifs`, {
@@ -124,12 +125,15 @@ function EffectifsPage(props: EffectifsPageProps) {
 
       return { total, filters: returnedFilters, organismesEffectifs };
     },
-    { keepPreviousData: true }
-  );
 
-  const { data: duplicates } = useQuery(["organismes", props.organisme._id, "duplicates"], () =>
-    _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${props.organisme?._id}/duplicates`)
-  );
+    placeholderData: keepPreviousData,
+  });
+
+  const { data: duplicates } = useQuery({
+    queryKey: ["organismes", props.organisme._id, "duplicates"],
+
+    queryFn: () => _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${props.organisme?._id}/duplicates`),
+  });
 
   const handleTableChange = (newPagination: IPaginationFilters) => {
     setPagination(newPagination);

@@ -33,7 +33,7 @@ import { OrganismeSupportInfoJson, UAI_INCONNUE_TAG_FORMAT } from "shared";
 import { OffreFormation } from "shared/models/data/@types/OffreFormation";
 import { z } from "zod";
 
-import { _get, _post } from "@/common/httpClient";
+import { HTTPError, _get, _post } from "@/common/httpClient";
 import { getAuthServerSideProps } from "@/common/SSR/getAuthServerSideProps";
 import { EtablissementInfo } from "@/components/admin/organismes/recherche/EtablissementInfo";
 import { FormationsInfo } from "@/components/admin/organismes/recherche/FormationsInfo";
@@ -92,11 +92,11 @@ const Organisme = () => {
     onSubmit,
   });
 
-  const { data, isFetching, isSuccess, error } = useQuery<OrganismeSupportInfoJson[], any>(
-    ["organisme", "admin", "search", q],
-    ({ signal }) => _get<OrganismeSupportInfoJson[]>(`/api/v1/admin/organismes/search/${q}`, { signal }),
-    { enabled: isValid }
-  );
+  const { data, isFetching, isSuccess, error } = useQuery<OrganismeSupportInfoJson[], HTTPError>({
+    queryKey: ["organisme", "admin", "search", q],
+    queryFn: ({ signal }) => _get<OrganismeSupportInfoJson[]>(`/api/v1/admin/organismes/search/${q}`, { signal }),
+    enabled: isValid,
+  });
 
   return (
     <Page>

@@ -70,19 +70,19 @@ function IndicateursForm(props: IndicateursFormProps) {
     };
   }, [JSON.stringify(router.query)]);
 
-  const { data: indicateursEffectifs, isLoading: indicateursEffectifsLoading } = useQuery(
-    [props.organismeId, "indicateurs/effectifs/par-organisme", JSON.stringify(effectifsFilters)],
-    () =>
+  const { data: indicateursEffectifs, isLoading: indicateursEffectifsLoading } = useQuery({
+    queryKey: [props.organismeId, "indicateurs/effectifs/par-organisme", JSON.stringify(effectifsFilters)],
+
+    queryFn: () =>
       _get<IndicateursEffectifsAvecOrganisme[]>(
         `/api/v1${props.organismeId ? `/organismes/${props.organismeId}` : ""}/indicateurs/effectifs/par-organisme`,
         {
           params: convertEffectifsFiltersToQuery(effectifsFilters),
         }
       ),
-    {
-      enabled: router.isReady,
-    }
-  );
+
+    enabled: router.isReady,
+  });
 
   const prominentOrganismeId = props.organismeId ?? ownOrganisme?._id;
   const prominentOrganisme = (indicateursEffectifs ?? []).find((org) => org.organisme_id === prominentOrganismeId);

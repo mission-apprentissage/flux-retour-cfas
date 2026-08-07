@@ -13,17 +13,21 @@ type RncpDetailsProps = {
 };
 
 export function RncpDetails(props: RncpDetailsProps) {
-  const rncpInfoQuery = useQuery(["/api/v1/rncp", props.code ?? null], async ({ queryKey }) => {
-    const [_, rncp] = queryKey;
+  const rncpInfoQuery = useQuery({
+    queryKey: ["/api/v1/rncp", props.code ?? null],
 
-    if (rncp) {
-      return _get<RncpInfo | null>(`/api/v1/rncp/${rncp}`);
-    }
+    queryFn: async ({ queryKey }) => {
+      const [_, rncp] = queryKey;
 
-    return null;
+      if (rncp) {
+        return _get<RncpInfo | null>(`/api/v1/rncp/${rncp}`);
+      }
+
+      return null;
+    },
   });
 
-  if (rncpInfoQuery.isLoading) {
+  if (rncpInfoQuery.isPending) {
     return (
       <Center h="100%">
         <Spinner />

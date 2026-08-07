@@ -11,13 +11,11 @@ import ListeOrganismesPage from "@/modules/organismes/ListeOrganismesPage";
 function SesOrganismesFiables() {
   const router = useRouter();
   const organismeId = router.query.organismeId as string;
-  const { data: organismes } = useQuery<Organisme[]>(
-    ["organismes", organismeId, "organismes"],
-    () => _get(`/api/v1/organismes/${organismeId}/organismes`),
-    {
-      enabled: !!organismeId,
-    }
-  );
+  const { data: organismes } = useQuery<Organisme[]>({
+    queryKey: ["organismes", organismeId, "organismes"],
+    queryFn: () => _get(`/api/v1/organismes/${organismeId}/organismes`),
+    enabled: !!organismeId,
+  });
 
   if (!organismes) {
     return (

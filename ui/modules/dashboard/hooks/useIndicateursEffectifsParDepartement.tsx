@@ -15,14 +15,16 @@ export function useIndicateursEffectifsParDepartement(
   effectifsFilters: DateFilters,
   enabled: boolean
 ): UseIndicateursEffectifsParDepartement {
-  const { data, isLoading } = useQuery<IndicateursEffectifsAvecDepartement[]>(
-    ["indicateurs/effectifs", effectifsFilters.date.toISOString()],
-    () =>
+  const { data, isLoading } = useQuery<IndicateursEffectifsAvecDepartement[]>({
+    queryKey: ["indicateurs/effectifs", effectifsFilters.date.toISOString()],
+
+    queryFn: () =>
       _get("/api/v1/indicateurs/effectifs/par-departement", {
         params: convertEffectifsFiltersToQuery(effectifsFilters),
       }),
-    { enabled }
-  );
+
+    enabled,
+  });
 
   const total = useMemo(
     () =>

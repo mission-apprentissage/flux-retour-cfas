@@ -75,7 +75,7 @@ const updateEffectif = async (_id: ObjectId, data: any, opt = { keepPreviousErro
     { returnDocument: "after" }
   );
 
-  return updated.value;
+  return updated;
 };
 
 export function flatPathsWithoutEmpty<T>(object: T): Paths<T>[] {
@@ -127,7 +127,7 @@ export const lockEffectif = async (effectif: IEffectif) => {
     { returnDocument: "after" }
   );
 
-  return updated.value as IEffectif;
+  return updated as IEffectif;
 };
 
 export const addComputedFields = async <T extends WithoutId<IEffectif | IEffectifDECA>>({

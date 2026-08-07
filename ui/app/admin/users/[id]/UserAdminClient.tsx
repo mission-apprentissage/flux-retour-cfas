@@ -6,7 +6,7 @@ import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Box, Stack, Typography } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
@@ -31,10 +31,9 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
   const [pendingRole, setPendingRole] = useState<"admin" | "member" | null>(null);
   const [roleChangeError, setRoleChangeError] = useState<string | null>(null);
 
-  const { data, refetch: refetchUser } = useQuery(["user", id], () => _get(`/api/v1/admin/users/${id}`), {
-    enabled: !!id,
-    suspense: true,
-    useErrorBoundary: true,
+  const { data, refetch: refetchUser } = useSuspenseQuery({
+    queryKey: ["user", id],
+    queryFn: () => _get(`/api/v1/admin/users/${id}`),
   });
 
   const user = data?.user;

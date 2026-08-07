@@ -15,7 +15,10 @@ interface MissionLocaleSelectProps {
 export const MissionLocaleSelect = ({ setOrganisation }: MissionLocaleSelectProps) => {
   const { data: missionLocales, isLoading } = useQuery<
     { organisation: IOrganisationMissionLocale; externalML: IMissionLocale }[]
-  >(["mission-locale"], async () => _get("/api/v1/admin/mission-locale"));
+  >({
+    queryKey: ["mission-locale"],
+    queryFn: async () => _get("/api/v1/admin/mission-locale"),
+  });
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);

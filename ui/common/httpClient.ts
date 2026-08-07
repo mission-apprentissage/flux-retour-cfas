@@ -25,7 +25,7 @@ export class AuthError extends Error {
   }
 }
 
-class HTTPError extends Error {
+export class HTTPError extends Error {
   json: any;
   messages: any;
   statusCode: any;

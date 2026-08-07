@@ -51,10 +51,10 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     },
     { returnDocument: "after" }
   );
-  if (!updated.value) {
+  if (!updated) {
     throw new Error("Effectif not found or update failed");
   }
-  await createOrUpdateMissionLocaleStats(updated.value?.mission_locale_id);
+  await createOrUpdateMissionLocaleStats(updated.mission_locale_id);
   return updated;
 };
 

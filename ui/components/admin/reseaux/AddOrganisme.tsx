@@ -19,14 +19,14 @@ export const AddOrganisme = ({ reseauId, reseauName, refetch }: AddOrganismeProp
   const [selectedOrganisme, setSelectedOrganisme] = useState<Organisme | null>(null);
   const toast = useToast();
 
-  const { mutateAsync: addReseaux, isLoading: isAdding } = useMutation(
-    async ({ organismeId }: { organismeId: string | null | undefined }) => {
+  const { mutateAsync: addReseaux, isPending: isAdding } = useMutation({
+    mutationFn: async ({ organismeId }: { organismeId: string | null | undefined }) => {
       if (!selectedOrganisme) {
         throw new Error("No organisme selected");
       }
       return await _put(`/api/v1/admin/reseaux/${reseauId}`, { organismeId });
-    }
-  );
+    },
+  });
 
   const handleAdd = async (onClose: () => void) => {
     if (!selectedOrganisme) return;

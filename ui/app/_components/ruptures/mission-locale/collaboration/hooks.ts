@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { API_EFFECTIF_LISTE, IEffectifMissionLocale, IUpdateMissionLocaleEffectif } from "shared";
 
@@ -27,9 +27,10 @@ export function useMlEffectifDetail(id: string) {
   // Filtre villes transmis pour que le backend calcule précédent/suivant sur le sous-ensemble filtré.
   const codePostal = searchParams?.get("cp") || undefined;
 
-  return useQuery(
-    [...effectifQueryKeys.detail(id), nomListe, codePostal],
-    async () => {
+  return useSuspenseQuery({
+    queryKey: [...effectifQueryKeys.detail(id), nomListe, codePostal],
+
+    queryFn: async () => {
       if (!id) return null;
       return await _get<IEffectifMissionLocale>(`/api/v1/organisation/mission-locale/effectif/${id}`, {
         params: {
@@ -38,10 +39,5 @@ export function useMlEffectifDetail(id: string) {
         },
       });
     },
-    {
-      enabled: !!id,
-      suspense: true,
-      useErrorBoundary: true,
-    }
-  );
+  });
 }

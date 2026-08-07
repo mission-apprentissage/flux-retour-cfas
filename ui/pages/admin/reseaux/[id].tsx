@@ -26,7 +26,10 @@ const ReseauOrganismesPage = ({ id }) => {
     IReseau & {
       organismes: Organisme[];
     }
-  >(["reseau"], () => _get(`/api/v1/admin/reseaux/${id}`), {});
+  >({
+    queryKey: ["reseau"],
+    queryFn: () => _get(`/api/v1/admin/reseaux/${id}`),
+  });
 
   if (!reseau?.organismes) {
     return (

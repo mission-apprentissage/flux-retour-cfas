@@ -35,7 +35,7 @@ export function MlAdminRdvUrlEditor({ mlId, rdvUrl }: Props) {
   const [value, setValue] = useState(rdvUrl ?? "");
   const [error, setError] = useState<string | null>(null);
   const { toastSuccess, toastError } = useToaster();
-  const { mutateAsync, isLoading } = useUpdateMlParametresAdmin(mlId);
+  const { mutateAsync, isPending: isLoading } = useUpdateMlParametresAdmin(mlId);
 
   const handleSave = async () => {
     const parsed = rdvUrlSchema.safeParse(value);

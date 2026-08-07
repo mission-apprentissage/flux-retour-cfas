@@ -11,19 +11,19 @@ export const useInitEffectifForm = ({ controller, canEdit }) => {
   const effectifId = useRecoilValue<any>(effectifIdAtom);
   const organisme = useRecoilValue<any>(organismeAtom);
 
-  const { isLoading, isFetching } = useQuery(
-    ["effectif", effectifId],
-    async () => {
+  const { isLoading, isFetching } = useQuery({
+    queryKey: ["effectif", effectifId],
+
+    queryFn: async () => {
       if (!effectifId) return null;
       const effectifForm = await _get(`/api/v1/effectif/${effectifId}`);
       const fields = initFields({ effectifForm, schema: effectifFormSchema, canEdit, organisme });
       controller.setFields(fields);
       return effectifForm;
     },
-    {
-      refetchOnMount: false,
-    }
-  );
+
+    refetchOnMount: false,
+  });
 
   return { isLoading: isLoading || isFetching };
 };

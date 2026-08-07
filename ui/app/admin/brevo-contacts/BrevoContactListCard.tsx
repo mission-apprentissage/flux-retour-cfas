@@ -44,7 +44,7 @@ export function BrevoContactListCard({ contactList, onRequestSync, onShowSampleD
   });
 
   // mutation.isLoading + variables.dryRun = état "Test en cours" vs "Sync en cours".
-  const running: null | "dryRun" | "sync" = syncMutation.isLoading
+  const running: null | "dryRun" | "sync" = syncMutation.isPending
     ? syncMutation.variables?.dryRun
       ? "dryRun"
       : "sync"
