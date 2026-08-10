@@ -7,6 +7,12 @@ import { IndicateursEffectifsAvecOrganisme, IOrganisationType } from "shared";
 
 import { useTeteDeReseaux } from "@/app/_hooks/useTeteDeReseaux";
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
+import {
+  convertPaginationInfosToQuery,
+  PaginationInfos,
+  PaginationInfosQuery,
+  parsePaginationInfosFromQuery,
+} from "@/common/filters/pagination";
 import { _get } from "@/common/httpClient";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import DownloadButton from "@/components/buttons/DownloadButton";
@@ -31,12 +37,6 @@ import {
   EffectifsFiltersFullQuery,
   parseEffectifsFiltersFullFromQuery,
 } from "../models/effectifs-filters";
-import {
-  convertPaginationInfosToQuery,
-  PaginationInfos,
-  PaginationInfosQuery,
-  parsePaginationInfosFromQuery,
-} from "../models/pagination";
 
 import IndicateursFilter from "./FilterAccordion";
 import FiltreFormationCFD from "./filters/FiltreFormationCFD";

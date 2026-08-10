@@ -3,11 +3,6 @@ import { useRouter } from "next/router";
 import { useMemo } from "react";
 import { IOrganisationIndicateursOrganismes, IOrganismesCount, normalize } from "shared";
 
-import {
-  OrganismesFiltersQuery,
-  filterOrganismesArrayFromOrganismesFilters,
-  parseOrganismesFiltersFromQuery,
-} from "@/common/filters/organismes-filters";
 import { _get, _post, _put } from "@/common/httpClient";
 import { Organisme, OrganismeNormalized } from "@/common/internal/Organisme";
 
@@ -73,15 +68,13 @@ export function useOrganisationOrganisme(enabled?: boolean) {
 }
 
 // récupère les organismes accessibles (OF, opérateur public, etc)
-export function useOrganisationOrganismes() {
-  const router = useRouter();
-
+export function useOrganisationOrganismes(enabled?: boolean) {
   const {
     data: organismes,
     isLoading,
     error,
   } = useQuery<Organisme[], any>(["organisation/organismes"], () => _get("/api/v1/organisation/organismes"), {
-    enabled: router.isReady,
+    enabled: enabled ?? true,
   });
 
   return {
@@ -92,37 +85,15 @@ export function useOrganisationOrganismes() {
 }
 
 export function useOrganisationIndicateursOrganismes() {
-  const router = useRouter();
-
   const { data, isLoading, error } = useQuery<IOrganisationIndicateursOrganismes, any>(
     ["organisation/organismes/indicateurs"],
-    () => _get("/api/v1/organisation/organismes/indicateurs"),
-    {
-      enabled: router.isReady,
-    }
+    () => _get("/api/v1/organisation/organismes/indicateurs")
   );
 
   return {
     data,
     isLoading,
     error,
-  };
-}
-
-export function useOrganismesFiltered(organismes: OrganismeNormalized[]) {
-  const router = useRouter();
-
-  const organismesFiltered = useMemo(() => {
-    return organismes
-      ? filterOrganismesArrayFromOrganismesFilters(
-          organismes,
-          parseOrganismesFiltersFromQuery(router.query as unknown as OrganismesFiltersQuery)
-        )
-      : undefined;
-  }, [organismes, router.query]);
-
-  return {
-    organismesFiltered,
   };
 }
 
