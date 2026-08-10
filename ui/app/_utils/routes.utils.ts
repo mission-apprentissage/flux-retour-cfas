@@ -254,6 +254,69 @@ export const PAGES = {
         title: `Vœux Affelnet | ${SITE_NAME}`,
       }),
     },
+    tableauDeBord: {
+      getPath: () => "/home",
+      title: "Mon tableau de bord",
+      getMetadata: () => ({
+        title: SITE_NAME,
+      }),
+    },
+    parametres: {
+      getPath: () => "/parametres",
+      title: "Paramétrage de votre moyen de transmission",
+      getMetadata: () => ({
+        title: `Paramétrage de votre moyen de transmission | ${SITE_NAME}`,
+      }),
+    },
+    organisationMembres: {
+      getPath: () => "/organisation/membres",
+      title: "Gestion des rôles et habilitations",
+      getMetadata: () => ({
+        title: `Gestion des rôles et habilitations | ${SITE_NAME}`,
+      }),
+    },
+    transmissions: {
+      getPath: () => "/transmissions",
+      title: "Mes transmissions",
+      getMetadata: () => ({
+        title: `Mes transmissions | ${SITE_NAME}`,
+      }),
+    },
+    effectifs: {
+      getPath: () => "/effectifs",
+      title: "Mes effectifs",
+      getMetadata: () => ({
+        title: `Mes effectifs | ${SITE_NAME}`,
+      }),
+    },
+    effectifsDoublons: {
+      getPath: () => "/effectifs/doublons",
+      title: "Doublons",
+      getMetadata: () => ({
+        title: `Doublons | ${SITE_NAME}`,
+      }),
+    },
+    effectifsTeleversement: {
+      getPath: () => "/effectifs/televersement",
+      title: "Import des effectifs",
+      getMetadata: () => ({
+        title: `Import des effectifs | ${SITE_NAME}`,
+      }),
+    },
+    organismes: {
+      getPath: () => "/organismes",
+      title: "Mes organismes",
+      getMetadata: () => ({
+        title: `Mes organismes | ${SITE_NAME}`,
+      }),
+    },
+    organismesACompleter: {
+      getPath: () => "/organismes/a-completer",
+      title: "Mes organismes",
+      getMetadata: () => ({
+        title: `Mes organismes | ${SITE_NAME}`,
+      }),
+    },
   },
   dynamic: {
     adminReseau: ({ id, nom }: { id: string; nom?: string }): IPage => ({
@@ -305,6 +368,77 @@ export const PAGES = {
       title: "Inscription",
       getMetadata: () => ({
         title: `Inscription | ${SITE_NAME}`,
+      }),
+    }),
+    transmissionsJour: ({ date, label }: { date: string; label?: string }): IPage => ({
+      getPath: () => `/transmissions/${encodeURIComponent(date)}`,
+      title: label ? `Rapport du ${label}` : "Rapport de transmission",
+      getMetadata: () => ({
+        title: `${label ? `Rapport du ${label}` : "Rapport de transmission"} | ${SITE_NAME}`,
+      }),
+    }),
+    organisme: ({ organismeId, nom }: { organismeId: string; nom?: string }): IPage => ({
+      getPath: () => `/organismes/${encodeURIComponent(organismeId)}`,
+      title: nom ? `Tableau de bord ${nom}` : "Tableau de bord de l’organisme",
+      getMetadata: () => ({
+        title: `${nom ? `Tableau de bord ${nom}` : "Tableau de bord de l’organisme"} | ${SITE_NAME}`,
+      }),
+    }),
+    organismeTransmissions: ({ organismeId }: { organismeId: string }): IPage => ({
+      getPath: () => `/organismes/${encodeURIComponent(organismeId)}/transmissions`,
+      title: "Ses transmissions",
+      getMetadata: () => ({
+        title: `Ses transmissions | ${SITE_NAME}`,
+      }),
+    }),
+    organismeTransmissionsJour: ({
+      organismeId,
+      date,
+      label,
+    }: {
+      organismeId: string;
+      date: string;
+      label?: string;
+    }): IPage => ({
+      getPath: () => `/organismes/${encodeURIComponent(organismeId)}/transmissions/${encodeURIComponent(date)}`,
+      title: label ? `Rapport du ${label}` : "Rapport de transmission",
+      getMetadata: () => ({
+        title: `${label ? `Rapport du ${label}` : "Rapport de transmission"} | ${SITE_NAME}`,
+      }),
+    }),
+    organismeOrganismes: ({ organismeId }: { organismeId: string }): IPage => ({
+      getPath: () => `/organismes/${encodeURIComponent(organismeId)}/organismes`,
+      title: "Ses organismes",
+      getMetadata: () => ({
+        title: `Ses organismes | ${SITE_NAME}`,
+      }),
+    }),
+    organismeEffectifs: ({ organismeId }: { organismeId: string }): IPage => ({
+      getPath: () => `/organismes/${encodeURIComponent(organismeId)}/effectifs`,
+      title: "Ses effectifs",
+      getMetadata: () => ({
+        title: `Ses effectifs | ${SITE_NAME}`,
+      }),
+    }),
+    organismeEffectifsDoublons: ({ organismeId }: { organismeId: string }): IPage => ({
+      getPath: () => `/organismes/${encodeURIComponent(organismeId)}/effectifs/doublons`,
+      title: "Doublons",
+      getMetadata: () => ({
+        title: `Doublons | ${SITE_NAME}`,
+      }),
+    }),
+    organismeEffectifsTeleversement: ({ organismeId }: { organismeId: string }): IPage => ({
+      getPath: () => `/organismes/${encodeURIComponent(organismeId)}/effectifs/televersement`,
+      title: "Import des effectifs",
+      getMetadata: () => ({
+        title: `Import des effectifs | ${SITE_NAME}`,
+      }),
+    }),
+    organismeIndicateurs: ({ organismeId }: { organismeId: string }): IPage => ({
+      getPath: () => `/organismes/${encodeURIComponent(organismeId)}/indicateurs`,
+      title: "Ses indicateurs",
+      getMetadata: () => ({
+        title: `Ses indicateurs | ${SITE_NAME}`,
       }),
     }),
   },
