@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useCallback } from "react";
 import { DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, TYPES_ORGANISATION } from "shared";
 
+import { useTeteDeReseaux } from "@/app/_hooks/useTeteDeReseaux";
 import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 import {
   UsersFilters,
@@ -13,7 +14,6 @@ import {
   convertUsersFiltersToQuery,
   parseUsersFiltersFromQuery,
 } from "@/modules/admin/users/models/users-filters";
-import { useTeteDeReseaux } from "@/modules/dashboard/hooks/useTeteDeReseaux";
 
 import { MultiSelectDropdown } from "./MultiSelectDropdown";
 

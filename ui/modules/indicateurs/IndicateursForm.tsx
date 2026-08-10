@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { useMemo } from "react";
 import { IndicateursEffectifsAvecOrganisme, IOrganisationType } from "shared";
 
+import { useTeteDeReseaux } from "@/app/_hooks/useTeteDeReseaux";
 import { indicateursParOrganismeExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
@@ -23,7 +24,6 @@ import FiltreFormationNiveau from "@/modules/indicateurs/filters/FiltreFormation
 import FiltreOrganismeReseau from "@/modules/indicateurs/filters/FiltreOrganismeReseau";
 import FiltreOrganismeSearch from "@/modules/indicateurs/filters/FiltreOrganismeSearch";
 
-import { useTeteDeReseaux } from "../dashboard/hooks/useTeteDeReseaux";
 import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "../dashboard/icons";
 import IndicateursGrid from "../dashboard/IndicateursGrid";
 import {

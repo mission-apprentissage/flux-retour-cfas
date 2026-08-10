@@ -19,14 +19,14 @@ import { AdminPageHeader } from "@/app/admin/_components/AdminPageHeader";
 import { AdminTable } from "@/app/admin/_components/AdminTable";
 import { NatureOrganismeTag } from "@/app/admin/_components/NatureOrganismeTag";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
-import { _delete, _get, _put } from "@/common/httpClient";
-import { Organisme } from "@/common/internal/Organisme";
-import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import {
   OrganismesFiltersQuery,
   filterOrganismesArrayFromOrganismesFilters,
   parseOrganismesFiltersFromQuery,
-} from "@/modules/organismes/models/organismes-filters";
+} from "@/common/filters/organismes-filters";
+import { _delete, _get, _put } from "@/common/httpClient";
+import { Organisme } from "@/common/internal/Organisme";
+import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 
 import { OrganismeAutocomplete, OrganismeSearchResult } from "./OrganismeAutocomplete";
 import styles from "./reseau-organismes.module.scss";

@@ -1,6 +1,5 @@
+import { OrganismeNormalized } from "@/common/internal/Organisme";
 import { stripEmptyFields } from "@/common/utils/misc";
-
-import { OrganismeNormalized } from "../ListeOrganismesPage";
 
 export interface OrganismesFiltersQuery {
   qualiopi: string;

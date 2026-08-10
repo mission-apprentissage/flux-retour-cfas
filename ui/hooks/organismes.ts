@@ -3,14 +3,13 @@ import { useRouter } from "next/router";
 import { useMemo } from "react";
 import { IOrganisationIndicateursOrganismes, IOrganismesCount, normalize } from "shared";
 
-import { _get, _post, _put } from "@/common/httpClient";
-import { Organisme } from "@/common/internal/Organisme";
-import { OrganismeNormalized } from "@/modules/organismes/ListeOrganismesPage";
 import {
   OrganismesFiltersQuery,
   filterOrganismesArrayFromOrganismesFilters,
   parseOrganismesFiltersFromQuery,
-} from "@/modules/organismes/models/organismes-filters";
+} from "@/common/filters/organismes-filters";
+import { _get, _post, _put } from "@/common/httpClient";
+import { Organisme, OrganismeNormalized } from "@/common/internal/Organisme";
 
 // récupère un organisme
 export function useOrganisme(organismeId: string | undefined | null) {

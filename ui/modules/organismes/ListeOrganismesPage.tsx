@@ -29,12 +29,6 @@ import { IndicateursOrganisme, IndicateursOrganisationsOrganismes } from "../das
 
 import OrganismesTable from "./OrganismesTable";
 
-export type OrganismeNormalized = Organisme & {
-  normalizedName: string;
-  normalizedUai: string;
-  normalizedCommune: string;
-};
-
 interface ListeOrganismesPageProps {
   organismes: Organisme[];
   modePublique?: boolean;

@@ -3,6 +3,12 @@ import { useRouter } from "next/router";
 import { useMemo } from "react";
 import { IOrganisationType } from "shared";
 
+import {
+  OrganismesFilters,
+  OrganismesFiltersQuery,
+  parseOrganismesFiltersFromQuery,
+  convertOrganismesFiltersToQuery,
+} from "@/common/filters/organismes-filters";
 import useAuth from "@/hooks/useAuth";
 
 import {
@@ -18,12 +24,6 @@ import FiltreOrganismeRegions from "./filters/FiltreOrganismeRegions";
 import FiltreOrganismeTransmission from "./filters/FiltreOrganismeTransmission";
 import FiltreOrganismeUai from "./filters/FiltreOrganismeUai";
 import FiltreYesNo from "./filters/FiltreYesNo";
-import {
-  OrganismesFilters,
-  OrganismesFiltersQuery,
-  parseOrganismesFiltersFromQuery,
-  convertOrganismesFiltersToQuery,
-} from "./models/organismes-filters";
 
 export interface OrganismeFiltersListVisibilityProps {
   showFilterUai?: boolean;
