@@ -1,14 +1,14 @@
-import { WarningTwoIcon, InfoIcon } from "@chakra-ui/icons";
-import { Box, Table, Tbody, Text, Tr, Td, UnorderedList, TableContainer, ListItem, Link } from "@chakra-ui/react";
+"use client";
+
+import { fr } from "@codegouvfr/react-dsfr";
 import { SOURCE_APPRENANT, TD_MANUEL_ELEMENT_LINK } from "shared";
 import { dossierApprenantSchemaV3Base } from "shared/models/parts/dossierApprenantSchemaV3";
 import { z } from "zod";
 
 import { formatPhoneNumber } from "@/app/_utils/phone.utils";
 
-import { InfoTooltip } from "../Tooltip/InfoTooltip";
-
-import { ErrorMessages } from "./EffectifErrorsMessage";
+import { ErrorMessages } from "./effectifQueueErrorMessages";
+import styles from "./transmissions.module.scss";
 
 const attributes = [
   { label: "Identifant ERP", value: "id_erp_apprenant" },
@@ -79,12 +79,9 @@ const attributes = [
     value: "etablissement_lieu_de_formation_code_postal",
   },
 ];
-interface EffectifQueueItemViewProps {
-  effectifQueueItem: any; // use zod typings
-}
 
-const buildValidationError = (validation_errors) => {
-  return validation_errors.reduce((acc, { message, path }) => {
+const buildValidationError = (validation_errors: Array<{ message: string; path: string[] }>) => {
+  return (validation_errors ?? []).reduce((acc, { message, path }) => {
     return {
       ...acc,
       ...path.reduce((acc2, pathValue) => {
@@ -100,87 +97,77 @@ const buildValidationError = (validation_errors) => {
   }, {});
 };
 
-const DescriptionErrorListComponent = ({ errorList }) => (
-  <UnorderedList>
-    {errorList.map((err, index) => (
-      <ListItem key={index}>{err}</ListItem>
-    ))}
-  </UnorderedList>
-);
+const RequiredMark = ({ value }: { value: string }) =>
+  !(dossierApprenantSchemaV3Base.shape[value] instanceof z.ZodOptional) ? (
+    <span role="presentation" aria-hidden="true" className={styles.requiredMark}>
+      *
+    </span>
+  ) : null;
 
-const EffectifQueueItemView = ({ effectifQueueItem }: EffectifQueueItemViewProps) => {
+export function EffectifQueueItemDetail({ effectifQueueItem }: { effectifQueueItem: any }) {
   const validationErrorFormated = buildValidationError(effectifQueueItem.validation_errors);
-  const computeRequired = (value) => {
-    return !(dossierApprenantSchemaV3Base.shape[value] instanceof z.ZodOptional) ? (
-      <Box as="span" role="presentation" aria-hidden="true" color="red.500" ml={1}>
-        *
-      </Box>
-    ) : null;
-  };
-  return (
-    <Box>
-      {effectifQueueItem.source !== SOURCE_APPRENANT.FICHIER && effectifQueueItem.validation_errors.length ? (
-        <Text color="#0063CB" fontSize={15} mt={5} mb={5}>
-          <InfoIcon mr={2} />
-          Veuillez corriger ces données directement dans votre ERP pour qu’elles soient correctement transmises.
-        </Text>
-      ) : null}
+  const hasValidationErrors = Boolean(effectifQueueItem.validation_errors?.length);
 
-      {effectifQueueItem.source === SOURCE_APPRENANT.FICHIER && effectifQueueItem.validation_errors.length ? (
-        <Text color="#0063CB" fontSize={15} mt={5} mb={5}>
-          <InfoIcon mr={2} />
-          Veuillez prendre connaissance des erreurs. Si des questions persistent, veuillez{" "}
-          <Link variant="link" color="inherit" href={TD_MANUEL_ELEMENT_LINK} isExternal>
+  return (
+    <div>
+      {hasValidationErrors && effectifQueueItem.source !== SOURCE_APPRENANT.FICHIER && (
+        <p className={styles.detailNotice}>
+          <i className={fr.cx("fr-icon-info-fill", "fr-icon--sm")} aria-hidden="true" /> Veuillez corriger ces données
+          directement dans votre ERP pour qu’elles soient correctement transmises.
+        </p>
+      )}
+
+      {hasValidationErrors && effectifQueueItem.source === SOURCE_APPRENANT.FICHIER && (
+        <p className={styles.detailNotice}>
+          <i className={fr.cx("fr-icon-info-fill", "fr-icon--sm")} aria-hidden="true" /> Veuillez prendre connaissance
+          des erreurs. Si des questions persistent, veuillez{" "}
+          <a href={TD_MANUEL_ELEMENT_LINK} target="_blank" rel="noopener noreferrer" className="fr-link">
             nous contacter
-          </Link>
-        </Text>
-      ) : null}
+          </a>
+        </p>
+      )}
 
       {effectifQueueItem.error ? (
-        <Text color="#CE0500" fontSize={15} mt={5} mb={5}>
-          <WarningTwoIcon mr={2} />
-          Une erreur s&apos;est produite lors de la transmission des effectifs. Aucune action de votre part n&apos;est
-          nécessaire. Si le problème persiste dans vos prochains rapports, veuillez nous contacter.
-          <InfoTooltip
-            headerComponent={() => <Text>Erreurs</Text>}
-            contentComponent={() => <DescriptionErrorListComponent errorList={[effectifQueueItem.error]} />}
-          />
-        </Text>
+        <p className={styles.detailError}>
+          <i className={fr.cx("fr-icon-warning-fill", "fr-icon--sm")} aria-hidden="true" /> Une erreur s&apos;est
+          produite lors de la transmission des effectifs. Aucune action de votre part n&apos;est nécessaire. Si le
+          problème persiste dans vos prochains rapports, veuillez nous contacter.
+        </p>
       ) : null}
 
-      <TableContainer>
-        <Table variant="unstyled">
-          <Tbody>
-            {attributes.map((rowItem, index) => (
-              <Tr key={index}>
-                <Td fontStyle="italic" width="35%" whiteSpace="normal" wordBreak="break-word">
-                  {rowItem.label}
-                  {computeRequired(rowItem.value)}
-                </Td>
-                <Td width="25%" whiteSpace="normal" wordBreak="break-word">
-                  {rowItem.value} {computeRequired(rowItem.value)}
-                </Td>
-                <Td fontWeight="bold" width="40%" whiteSpace="normal" wordBreak="break-word">
-                  {validationErrorFormated[rowItem.value] ? <WarningTwoIcon color="#CE0500" mr={1} /> : null}
-                  {rowItem.value === "tel_apprenant"
-                    ? formatPhoneNumber(effectifQueueItem[rowItem.value]) || "-"
-                    : effectifQueueItem[rowItem.value]}
-                  {validationErrorFormated[rowItem.value] ? (
-                    <InfoTooltip
-                      headerComponent={() => <Text>{rowItem.value}</Text>}
-                      contentComponent={() => (
-                        <DescriptionErrorListComponent errorList={validationErrorFormated[rowItem.value]} />
-                      )}
-                    />
-                  ) : null}
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
-    </Box>
+      <table className={styles.detailTable}>
+        <tbody>
+          {attributes.map((rowItem, index) => (
+            <tr key={index}>
+              <td className={styles.detailLabel}>
+                {rowItem.label}
+                <RequiredMark value={rowItem.value} />
+              </td>
+              <td className={styles.detailField}>
+                {rowItem.value} <RequiredMark value={rowItem.value} />
+              </td>
+              <td className={styles.detailValue}>
+                {validationErrorFormated[rowItem.value] ? (
+                  <i
+                    className={`${fr.cx("fr-icon-warning-fill", "fr-icon--sm")} ${styles.detailWarningIcon}`}
+                    aria-hidden="true"
+                  />
+                ) : null}
+                {rowItem.value === "tel_apprenant"
+                  ? formatPhoneNumber(effectifQueueItem[rowItem.value]) || "-"
+                  : effectifQueueItem[rowItem.value]}
+                {validationErrorFormated[rowItem.value] ? (
+                  <ul className={styles.detailErrorList}>
+                    {validationErrorFormated[rowItem.value].map((err, i) => (
+                      <li key={i}>{err}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
-};
-
-export default EffectifQueueItemView;
+}

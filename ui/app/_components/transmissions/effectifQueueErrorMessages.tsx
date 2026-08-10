@@ -1,31 +1,34 @@
-import { Link } from "@chakra-ui/react";
-import React from "react";
-import { ORGANISME_LIEU_NOT_FOUND, ORGANISME_FORMATEUR_NOT_FOUND, ORGANISME_RESPONSABLE_NOT_FOUND } from "shared";
+import { ORGANISME_FORMATEUR_NOT_FOUND, ORGANISME_LIEU_NOT_FOUND, ORGANISME_RESPONSABLE_NOT_FOUND } from "shared";
 
 const organismeNotFound = (type: string) => (
   <>
     Couple UAI/SIRET du {type} non trouvé dans le{" "}
-    <Link href="https://referentiel.apprentissage.onisep.fr/" isExternal textDecoration="underline" display="inline">
+    <a
+      href="https://referentiel.apprentissage.onisep.fr/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="fr-link"
+    >
       Référentiel
-    </Link>{" "}
+    </a>{" "}
     de l’apprentissage (ONISEP) et dans le{" "}
-    <Link
+    <a
       href="https://catalogue-apprentissage.intercariforef.org/"
-      isExternal
-      textDecoration="underline"
-      display="inline"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="fr-link"
     >
       Catalogue
-    </Link>{" "}
+    </a>{" "}
     de l’apprentissage. Veuillez faire référencer votre{" "}
-    <Link
+    <a
       href="https://www.intercariforef.org/referencer-son-offre-de-formation"
-      isExternal
-      textDecoration="underline"
-      display="inline"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="fr-link"
     >
       offre de formation
-    </Link>{" "}
+    </a>{" "}
     auprès de votre Carif-Oref Régional.
   </>
 );
