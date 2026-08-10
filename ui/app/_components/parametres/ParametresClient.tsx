@@ -17,10 +17,11 @@ import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { _delete, _post, _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
-import { COMPTE_SETTINGS_HREF } from "@/common/utils/compteSettings";
 import { formatDateDayMonthYear, formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
 import { useErp } from "@/hooks/useErp";
+
+import styles from "./parametres.module.scss";
 
 const desiredOrder = [
   "ymag",
@@ -40,10 +41,23 @@ const desiredOrder = [
   "hyperplanning",
 ];
 
+interface ParametresClientProps {
+  /** Cible du lien « Mes effectifs » (branche ERP configuré). */
+  effectifsHref: string;
+  /** URL vers laquelle nettoyer le `?erpV3=` une fois capturé. */
+  erpV3CleanupHref: string;
+  /** Comportement legacy de /parametres : sans organisme rattaché, retour à l'accueil. */
+  redirectHomeWhenNoOrganisme?: boolean;
+}
+
 /**
  * Composant à plusieurs états selon stepConfigurationERP.
  */
-export default function ParametresClient() {
+export default function ParametresClient({
+  effectifsHref,
+  erpV3CleanupHref,
+  redirectHomeWhenNoOrganisme,
+}: ParametresClientProps) {
   const router = useRouter();
   const [stepConfigurationERP, setStepConfigurationERP] = useState<"none" | "choix_erp" | "unsupported_erp" | "v3">(
     "none"
@@ -56,9 +70,10 @@ export default function ParametresClient() {
 
   const { erps, erpsById } = useErp();
 
-  const { organisme, refetch: refetchOrganisme } = useOrganisationOrganisme();
+  const { organisme, isLoading: isLoadingOrganisme, refetch: refetchOrganisme } = useOrganisationOrganisme();
 
-  const erpV3 = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("erpV3") : null;
+  const erpV3 =
+    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("erpV3")?.toLowerCase() : null;
 
   useEffect(() => {
     setSelectedERP(erpsById[selectedERPId]);
@@ -71,10 +86,14 @@ export default function ParametresClient() {
     }
     setSelectedERPId(erpV3);
     setStepConfigurationERP("v3");
-    router.replace(COMPTE_SETTINGS_HREF); // nettoie le ?erpV3 de l'URL (la page vit désormais dans le hub /compte)
-  }, [erpV3]);
+    router.replace(erpV3CleanupHref); // nettoie le ?erpV3 de l'URL
+  }, []);
 
   if (!organisme) {
+    if (redirectHomeWhenNoOrganisme && !isLoadingOrganisme) {
+      window.location.href = "/";
+      return null;
+    }
     return <ContentSkeleton />;
   }
 
@@ -87,7 +106,7 @@ export default function ParametresClient() {
         {stepConfigurationERP === "none" &&
           (organisme.mode_de_transmission ? (
             <>
-              <div className="fr-grid-row fr-grid-row--gutters fr-mb-3w fr-mt-3w fr-p-3w fr-background-alt--grey">
+              <div className={`fr-grid-row fr-grid-row--gutters fr-mb-3w fr-mt-3w fr-p-3w ${styles.transmissionBlock}`}>
                 <div className="fr-col-12 fr-col-md-8">
                   {organisme.mode_de_transmission === "API" ? (
                     <>
@@ -168,7 +187,7 @@ export default function ParametresClient() {
                           }
                         />
                       )}
-                      <DsfrLink href="/cfa" className="fr-mt-2w">
+                      <DsfrLink href={effectifsHref} className="fr-mt-2w">
                         Mes effectifs
                       </DsfrLink>
                     </>
@@ -186,6 +205,10 @@ export default function ParametresClient() {
                         Actuellement, cet ERP n&apos;est pas encore interfaçé avec le tableau de bord. Nous vous
                         tiendrons informé dès que ce sera le cas.
                       </p>
+                      <p className="fr-text--bold">En attendant, veuillez téléverser manuellement vos effectifs.</p>
+                      <DsfrLink href="/effectifs/televersement" className="fr-mt-2w">
+                        Téléverser les effectifs
+                      </DsfrLink>
                     </>
                   ) : (
                     <>
@@ -197,6 +220,10 @@ export default function ParametresClient() {
                           {organisme.mode_de_transmission_configuration_author_fullname})
                         </p>
                       )}
+                      <p className="fr-mt-2w">Cliquez ci-dessous pour transmettre manuellement vos effectifs.</p>
+                      <DsfrLink href="/effectifs/televersement" className="fr-mt-2w">
+                        Téléverser les effectifs
+                      </DsfrLink>
                     </>
                   )}
                 </div>
