@@ -19,6 +19,7 @@ import { useCfaAdmin } from "@/app/_hooks/useCfaAdmin";
 import { _delete, _get, _post, _put } from "@/common/httpClient";
 
 import InvitationSidePanel from "./InvitationSidePanel";
+import { InviteMissionLocaleSection } from "./InviteMissionLocaleSection";
 import styles from "./RolesHabilitationsClient.module.css";
 
 interface Member {
@@ -89,9 +90,19 @@ const COLUMNS: ColumnData[] = [
   { label: centered("Actions"), dataKey: "actions", width: "14%", sortable: false },
 ];
 
-export default function RolesHabilitationsClient() {
+interface RolesHabilitationsClientProps {
+  /** Montage /cfa/roles-habilitations : réservé aux admins de CFA ML-beta, les autres sont renvoyés vers /cfa. */
+  requireCfaAdmin?: boolean;
+  description?: string;
+}
+
+export default function RolesHabilitationsClient({
+  requireCfaAdmin,
+  description = "Retrouvez ici l'ensemble des utilisateurs habilités à consulter les données des apprenants, utiliser le service et demander des collaborations avec les Missions Locales.",
+}: RolesHabilitationsClientProps) {
   const { user, isCfaAdmin } = useCfaAdmin();
   const router = useRouter();
+  const canDisplay = requireCfaAdmin ? isCfaAdmin : true;
   const [feedback, setFeedback] = useState<{ severity: "success" | "error"; message: string } | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isInvitationPanelOpen, setIsInvitationPanelOpen] = useState(false);
@@ -111,7 +122,7 @@ export default function RolesHabilitationsClient() {
   } = useQuery<Member[]>({
     queryKey: ["organisation-membres"],
     queryFn: () => _get("/api/v1/organisation/membres"),
-    enabled: isCfaAdmin,
+    enabled: canDisplay,
   });
 
   const {
@@ -121,7 +132,7 @@ export default function RolesHabilitationsClient() {
   } = useQuery<Invitation[]>({
     queryKey: ["organisation-invitations"],
     queryFn: () => _get("/api/v1/organisation/invitations"),
-    enabled: isCfaAdmin,
+    enabled: canDisplay,
   });
 
   const openDeleteMembreModal = useCallback((userId: string, email: string) => {
@@ -149,6 +160,32 @@ export default function RolesHabilitationsClient() {
       setFeedback({ severity: "error", message: err?.json?.data?.message || "Une erreur est survenue" });
     }
   }, []);
+
+  const handleValidateMembre = useCallback(
+    async (userId: string) => {
+      try {
+        await _post(`/api/v1/organisation/membres/${userId}/validate`);
+        await refetchMembres();
+        setFeedback({ severity: "success", message: "Le membre a été validé" });
+      } catch (err: any) {
+        setFeedback({ severity: "error", message: err?.json?.data?.message || "Une erreur est survenue" });
+      }
+    },
+    [refetchMembres]
+  );
+
+  const handleRejectMembre = useCallback(
+    async (userId: string) => {
+      try {
+        await _post(`/api/v1/organisation/membres/${userId}/reject`);
+        await refetchMembres();
+        setFeedback({ severity: "success", message: "Le membre a été refusé" });
+      } catch (err: any) {
+        setFeedback({ severity: "error", message: err?.json?.data?.message || "Une erreur est survenue" });
+      }
+    },
+    [refetchMembres]
+  );
 
   const openCancelInvitationModal = useCallback((invitationId: string) => {
     pendingCancelRef.current = invitationId;
@@ -242,6 +279,11 @@ export default function RolesHabilitationsClient() {
               {user?.email === m.email && <span className={styles.youSuffix}> (vous)</span>}
             </span>
             {m.organisation_role === "admin" && <AdminTag />}
+            {m.account_status === "PENDING_ADMIN_VALIDATION" && (
+              <Badge small noIcon severity="warning">
+                En attente de validation
+              </Badge>
+            )}
           </span>
         ),
         telephone: <div className={styles.textCenter}>{m.telephone || "—"}</div>,
@@ -259,30 +301,55 @@ export default function RolesHabilitationsClient() {
         actions: (
           <div className={styles.actionsCell}>
             {user?.email !== m.email ? (
-              <>
-                <Button
-                  iconId={m.organisation_role === "admin" ? "ri-shield-line" : "ri-shield-star-line"}
-                  priority="tertiary no outline"
-                  size="small"
-                  title={
-                    m.organisation_role === "admin" ? "Retirer le rôle administrateur" : "Promouvoir administrateur"
-                  }
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openRoleChangeModal(m._id, m.email, m.organisation_role ?? "member");
-                  }}
-                />
-                <Button
-                  iconId="ri-close-line"
-                  priority="secondary"
-                  size="small"
-                  title="Retirer l'accès"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openDeleteMembreModal(m._id, m.email);
-                  }}
-                />
-              </>
+              m.account_status === "PENDING_ADMIN_VALIDATION" ? (
+                <>
+                  <Button
+                    iconId="ri-check-line"
+                    priority="tertiary no outline"
+                    size="small"
+                    title="Valider le compte"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleValidateMembre(m._id);
+                    }}
+                  />
+                  <Button
+                    iconId="ri-close-line"
+                    priority="secondary"
+                    size="small"
+                    title="Refuser la demande"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRejectMembre(m._id);
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  <Button
+                    iconId={m.organisation_role === "admin" ? "ri-shield-line" : "ri-shield-star-line"}
+                    priority="tertiary no outline"
+                    size="small"
+                    title={
+                      m.organisation_role === "admin" ? "Retirer le rôle administrateur" : "Promouvoir administrateur"
+                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openRoleChangeModal(m._id, m.email, m.organisation_role ?? "member");
+                    }}
+                  />
+                  <Button
+                    iconId="ri-close-line"
+                    priority="secondary"
+                    size="small"
+                    title="Retirer l'accès"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openDeleteMembreModal(m._id, m.email);
+                    }}
+                  />
+                </>
+              )
             ) : null}
           </div>
         ),
@@ -349,12 +416,14 @@ export default function RolesHabilitationsClient() {
     openRoleChangeModal,
     handleResendInvitation,
     openCancelInvitationModal,
+    handleValidateMembre,
+    handleRejectMembre,
   ]);
 
   const isLoading = isLoadingMembres || isLoadingInvitations;
 
   // Redirect non-admin users after all hooks
-  if (!isCfaAdmin) {
+  if (!canDisplay) {
     router.replace("/cfa");
     return null;
   }
@@ -419,10 +488,7 @@ export default function RolesHabilitationsClient() {
       </roleChangeModal.Component>
       <div>
         <h1 className={styles.title}>Rôles et habilitations</h1>
-        <p className={styles.description}>
-          Retrouvez ici l&apos;ensemble des utilisateurs habilités à consulter les données des apprenants, utiliser le
-          service et demander des collaborations avec les Missions Locales.
-        </p>
+        <p className={styles.description}>{description}</p>
 
         {feedback && (
           <Alert
@@ -456,6 +522,8 @@ export default function RolesHabilitationsClient() {
             Ajouter un utilisateur
           </Button>
         </div>
+
+        {user?.organisation?.type === "ADMINISTRATEUR" && <InviteMissionLocaleSection />}
 
         {isLoading ? (
           <div className={styles.skeletonContainer}>
