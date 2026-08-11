@@ -23,6 +23,11 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin: 2rem 0;
+
+  @media (width <= 62em) {
+    grid-template-rows: none;
+    grid-template-columns: 1fr;
+  }
 }
 
 .card {
@@ -236,6 +241,10 @@
   gap: 3rem;
   margin-top: 4rem;
   margin-bottom: 1.5rem;
+
+  @media (width <= 62em) {
+    flex-direction: column;
+  }
 }
 
 .faqMain {
@@ -265,6 +274,14 @@
   margin-top: 1.5rem;
   background-color: var(--background-alt-grey);
   border-radius: 0.5rem;
+
+  @media (width <= 48em) {
+    grid-template-columns: 1fr;
+
+    .contactBoxContent {
+      padding: 0;
+    }
+  }
 }
 
 .contactBoxImage {
