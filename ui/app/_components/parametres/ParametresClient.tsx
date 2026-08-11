@@ -12,6 +12,7 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { IErp } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
+import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { ContentSkeleton, PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { CONTACT_ADDRESS } from "@/common/constants/product";
@@ -99,9 +100,9 @@ export default function ParametresClient({
 
   const title = "Paramétrage de votre moyen de transmission";
   return (
-    <div className="fr-container">
+    <div>
       <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
-        <h1 className="fr-h3 fr-text--blue-france fr-mb-3w fr-mt-3w">{title}</h1>
+        <PageHeader title={title} />
 
         {stepConfigurationERP === "none" &&
           (organisme.mode_de_transmission ? (

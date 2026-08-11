@@ -1,6 +1,7 @@
 "use client";
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
@@ -8,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { TD_MANUEL_ELEMENT_LINK } from "shared";
 
+import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { _post } from "@/common/httpClient";
 import { toEffectifsQueue } from "@/common/utils/televersement";
 import useExcelFileProcessor from "@/hooks/useExcelFileProcessor";
@@ -68,18 +70,21 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
 
   return (
     <div>
-      <div className={styles.titleRow}>
-        <h1 className={styles.title}>
-          Import des effectifs{" "}
-          <span className={styles.betaBadge}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="" src="/images/eclair.svg" /> version beta
-          </span>
-        </h1>
-        <a href={TD_MANUEL_ELEMENT_LINK} target="_blank" rel="noopener noreferrer" className="fr-link">
-          <i className="fr-icon-question-line fr-icon--sm" aria-hidden="true" /> Aide
-        </a>
-      </div>
+      <PageHeader
+        title={
+          <>
+            Import des effectifs{" "}
+            <Badge severity="new" noIcon as="span">
+              version beta
+            </Badge>
+          </>
+        }
+        action={
+          <a href={TD_MANUEL_ELEMENT_LINK} target="_blank" rel="noopener noreferrer" className="fr-link">
+            <i className="fr-icon-question-line fr-icon--sm" aria-hidden="true" /> Aide
+          </a>
+        }
+      />
 
       {status === "idle" && (
         <div className={styles.introPanel}>

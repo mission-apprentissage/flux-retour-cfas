@@ -6,6 +6,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
+import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { DataTable } from "@/app/_components/table/DataTable";
 import { formatDate } from "@/app/_utils/date.utils";
@@ -124,11 +125,10 @@ export default function TransmissionsClient({ modePublique = false, organismeId 
 
   return (
     <div>
-      <h1 className={styles.title}>{modePublique ? "Ses" : "Mes"} transmissions</h1>
-      <p className={styles.description}>
-        Visualisez l’état de la donnée des apprenants et leurs contrats transmis ou non, via l’API. L’ensemble des
-        éléments manquants et/ou invalides sont listés dans un rapport complet.
-      </p>
+      <PageHeader
+        title={`${modePublique ? "Ses" : "Mes"} transmissions`}
+        intro="Visualisez l’état de la donnée des apprenants et leurs contrats transmis ou non, via l’API. L’ensemble des éléments manquants et/ou invalides sont listés dans un rapport complet."
+      />
 
       {error ? (
         <Alert

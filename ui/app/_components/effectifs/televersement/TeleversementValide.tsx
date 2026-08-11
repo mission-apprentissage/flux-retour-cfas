@@ -3,6 +3,7 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
+import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { PAGES } from "@/app/_utils/routes.utils";
 
 import styles from "./televersement.module.scss";
@@ -10,7 +11,7 @@ import styles from "./televersement.module.scss";
 export function TeleversementValide({ organismeId, isMine }: { organismeId: string; isMine: boolean }) {
   return (
     <div>
-      <h1 className={styles.title}>Import des effectifs</h1>
+      <PageHeader title="Import des effectifs" />
       <div className={styles.successPanel}>
         <div className={styles.successTitleRow}>
           <i className="fr-icon-checkbox-circle-fill" aria-hidden="true" />

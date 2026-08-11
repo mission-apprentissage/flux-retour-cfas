@@ -13,7 +13,8 @@ import { fr as frLocale } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
 
-import { FullTable } from "@/app/_components/table/FullTable";
+import { PageHeader } from "@/app/_components/page-header/PageHeader";
+import { DataTable } from "@/app/_components/table/DataTable";
 import { ColumnData } from "@/app/_components/table/types";
 import { useCfaAdmin } from "@/app/_hooks/useCfaAdmin";
 import { _delete, _get, _post, _put } from "@/common/httpClient";
@@ -78,7 +79,11 @@ const roleChangeModal = createModal({
 const centered = (text: string) => <div className={styles.centered}>{text}</div>;
 
 function AdminTag() {
-  return <span className={styles.adminTag}>ADMIN</span>;
+  return (
+    <Badge severity="info" noIcon small as="span">
+      Admin
+    </Badge>
+  );
 }
 
 const COLUMNS: ColumnData[] = [
@@ -304,7 +309,7 @@ export default function RolesHabilitationsClient({
               m.account_status === "PENDING_ADMIN_VALIDATION" ? (
                 <>
                   <Button
-                    iconId="ri-check-line"
+                    iconId="fr-icon-check-line"
                     priority="tertiary no outline"
                     size="small"
                     title="Valider le compte"
@@ -314,7 +319,7 @@ export default function RolesHabilitationsClient({
                     }}
                   />
                   <Button
-                    iconId="ri-close-line"
+                    iconId="fr-icon-close-line"
                     priority="secondary"
                     size="small"
                     title="Refuser la demande"
@@ -339,7 +344,7 @@ export default function RolesHabilitationsClient({
                     }}
                   />
                   <Button
-                    iconId="ri-close-line"
+                    iconId="fr-icon-close-line"
                     priority="secondary"
                     size="small"
                     title="Retirer l'accès"
@@ -383,7 +388,7 @@ export default function RolesHabilitationsClient({
         actions: (
           <div className={styles.actionsCell}>
             <Button
-              iconId="ri-mail-send-line"
+              iconId="fr-icon-mail-line"
               priority="tertiary no outline"
               size="small"
               title="Renvoyer l'invitation"
@@ -393,7 +398,7 @@ export default function RolesHabilitationsClient({
               }}
             />
             <Button
-              iconId="ri-close-line"
+              iconId="fr-icon-close-line"
               priority="secondary"
               size="small"
               title="Annuler l'invitation"
@@ -487,8 +492,7 @@ export default function RolesHabilitationsClient({
           : `Voulez-vous vraiment retirer le rôle administrateur à ${pendingRoleChange?.email} ? Cette personne ne pourra plus gérer les utilisateurs.`}
       </roleChangeModal.Component>
       <div>
-        <h1 className={styles.title}>Rôles et habilitations</h1>
-        <p className={styles.description}>{description}</p>
+        <PageHeader title="Rôles et habilitations" intro={description} />
 
         {feedback && (
           <Alert
@@ -518,7 +522,7 @@ export default function RolesHabilitationsClient({
               )}
             />
           </div>
-          <Button iconId="ri-add-line" iconPosition="right" onClick={() => setIsInvitationPanelOpen(true)}>
+          <Button iconId="fr-icon-add-line" iconPosition="right" onClick={() => setIsInvitationPanelOpen(true)}>
             Ajouter un utilisateur
           </Button>
         </div>
@@ -532,7 +536,7 @@ export default function RolesHabilitationsClient({
             ))}
           </div>
         ) : (
-          <FullTable data={tableData} columns={COLUMNS} emptyMessage="Aucun utilisateur trouvé" hasPagination={false} />
+          <DataTable data={tableData} columns={COLUMNS} emptyMessage="Aucun utilisateur trouvé" hasPagination={false} />
         )}
       </div>
       <InvitationSidePanel

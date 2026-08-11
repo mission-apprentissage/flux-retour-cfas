@@ -199,7 +199,7 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
                 <div className={styles.body}>
                   <div className={styles.closeRow}>
                     <button type="button" onClick={handleClose} className={styles.closeButton}>
-                      Fermer <span className="ri-close-line" aria-hidden="true" />
+                      Fermer <span className="fr-icon-close-line fr-icon--sm" aria-hidden="true" />
                     </button>
                   </div>
 
@@ -248,7 +248,7 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
                                 {values.entries.length > 1 && (
                                   <Button
                                     type="button"
-                                    iconId="ri-close-line"
+                                    iconId="fr-icon-close-line"
                                     priority="tertiary no outline"
                                     size="small"
                                     title="Supprimer"
@@ -286,7 +286,7 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
                         >
                           <Button
                             type="button"
-                            iconId="ri-add-line"
+                            iconId="fr-icon-add-line"
                             iconPosition="right"
                             priority="secondary"
                             size="small"
@@ -306,7 +306,7 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
                     {ctaLabel}
                   </Button>
                   <div className={styles.hint}>
-                    <i className={`ri-information-line ${styles.hintIcon}`} aria-hidden="true" />
+                    <i className={`fr-icon-info-line fr-icon--sm ${styles.hintIcon}`} aria-hidden="true" />
                     <span>
                       En tant qu&apos;administrateur sur le service du Tableau de bord de l&apos;apprentissage, vous
                       garantissez que les personnes qui auront accès au service sont habilitées à consulter les

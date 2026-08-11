@@ -7,6 +7,7 @@ import { useState } from "react";
 import { EFFECTIFS_GROUP } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
+import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { DataTable } from "@/app/_components/table/DataTable";
 import { formatDate } from "@/app/_utils/date.utils";
@@ -125,13 +126,11 @@ export default function TransmissionsDetailsClient({
 
   return (
     <div>
-      <h1 className={styles.title}>Rapport du {formatDate(date)}</h1>
-      <p className={styles.backRow}>
-        <DsfrLink href={backHref} arrow="none">
-          <i className="fr-icon-arrow-left-line fr-icon--sm" aria-hidden="true" /> Retour au tableau des rapports
-        </DsfrLink>
-        <span>Mes erreurs de transmissions du {formatDate(date)}</span>
-      </p>
+      <PageHeader
+        backLink={{ href: backHref, label: "Retour au tableau des rapports" }}
+        title={`Rapport du ${formatDate(date)}`}
+        intro={`Mes erreurs de transmissions du ${formatDate(date)}`}
+      />
 
       <Tabs
         tabs={[

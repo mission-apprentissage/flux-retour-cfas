@@ -16,18 +16,6 @@
   color: var(--text-mention-grey);
 }
 
-.adminTag {
-  display: inline-block;
-  padding: 2px 8px;
-  background-color: #6a6af4;
-  color: #ffffff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: 0.5px;
-  border-radius: 4px;
-}
-
 .nameCell {
   display: inline-flex;
   align-items: center;
@@ -62,17 +50,6 @@
   flex-wrap: wrap;
 }
 
-.title {
-  font-weight: 700;
-  font-size: 40px;
-  color: #000091;
-  margin-bottom: 1rem;
-}
-
-.description {
-  margin-bottom: 2rem;
-}
-
 .topBar {
   display: flex;
   justify-content: space-between;
@@ -86,7 +63,7 @@
 }
 
 .searchInput {
-  background-color: #ececfe;
+  background-color: var(--background-alt-blue-france);
 }
 
 .skeletonContainer {
@@ -99,7 +76,12 @@
 .skeletonItem {
   height: 52px;
   border-radius: 4px;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(
+    90deg,
+    var(--background-alt-grey) 25%,
+    var(--background-contrast-grey) 50%,
+    var(--background-alt-grey) 75%
+  );
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s infinite;
 }

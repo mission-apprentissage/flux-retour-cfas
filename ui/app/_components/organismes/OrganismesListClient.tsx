@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { CRISP_FAQ, IOrganisationType, SUPPORT_PAGE_ACCUEIL } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
+import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { useAuth } from "@/app/_context/UserContext";
 import { _get } from "@/common/httpClient";
@@ -70,19 +71,21 @@ export default function OrganismesListClient({ modePublique = false, organismeId
 
   return (
     <div>
-      <h1 className={styles.title}>
-        {modePublique ? "Ses organismes" : getHeaderTitleFromOrganisationType(organisationType)}
-      </h1>
-      <p>
-        Retrouvez ci-dessous les <b>{organismesNormalized.allOrganismes.length}</b> établissements{" "}
-        {organisationType === "ORGANISME_FORMATION" ? (
-          <>sous votre gestion et la nature de chacun.</>
-        ) : organisationType === "TETE_DE_RESEAU" ? (
-          <>de votre réseau, ainsi que le nombre de formations dispensées par chacun.</>
-        ) : (
-          <>de votre territoire.</>
-        )}
-      </p>
+      <PageHeader
+        title={modePublique ? "Ses organismes" : getHeaderTitleFromOrganisationType(organisationType)}
+        intro={
+          <>
+            Retrouvez ci-dessous les <b>{organismesNormalized.allOrganismes.length}</b> établissements{" "}
+            {organisationType === "ORGANISME_FORMATION" ? (
+              <>sous votre gestion et la nature de chacun.</>
+            ) : organisationType === "TETE_DE_RESEAU" ? (
+              <>de votre réseau, ainsi que le nombre de formations dispensées par chacun.</>
+            ) : (
+              <>de votre territoire.</>
+            )}
+          </>
+        }
+      />
       <p className={styles.sources}>
         Sources :{" "}
         <a
@@ -139,27 +142,21 @@ export default function OrganismesListClient({ modePublique = false, organismeId
 
           <OrganismesFaq organisationType={organisationType} />
 
-          <div className={styles.contactBox}>
-            <div className={styles.contactBoxImage}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/contact.svg" alt="" />
-            </div>
-            <div className={styles.contactBoxContent}>
-              <p className={styles.contactBoxTitle}>Vous ne trouvez pas la réponse à vos questions ?</p>
-              <div className={styles.contactBoxLinks}>
-                <a href={CRISP_FAQ} target="_blank" rel="noopener noreferrer" className="fr-link">
-                  Aide
-                </a>
-                <DsfrLink href="/referencement-organisme">Voir la page de référencement</DsfrLink>
-              </div>
-            </div>
+          <div className="fr-callout fr-mt-3w">
+            <h3 className="fr-callout__title">Vous ne trouvez pas la réponse à vos questions ?</h3>
+            <p className="fr-callout__text">
+              <a href={CRISP_FAQ} target="_blank" rel="noopener noreferrer" className="fr-link fr-mr-3w">
+                Aide
+              </a>
+              <DsfrLink href="/referencement-organisme">Voir la page de référencement</DsfrLink>
+            </p>
           </div>
         </div>
         <div className={styles.faqAside}>
           {organisationType !== "ORGANISME_FORMATION" && (
-            <div className={styles.asideCard}>
-              <p className={styles.asideCardTitle}>Le saviez-vous ?</p>
-              <p>
+            <div className="fr-callout">
+              <h3 className="fr-callout__title">Le saviez-vous ?</h3>
+              <p className="fr-callout__text">
                 Notre équipe vous accompagne dans le déploiement du Tableau de bord de l’apprentissage. Nous organisons
                 des webinaires réguliers avec les CFA de votre{" "}
                 {organisationType === "TETE_DE_RESEAU" ? <>réseau</> : <>territoire</>}.{" "}

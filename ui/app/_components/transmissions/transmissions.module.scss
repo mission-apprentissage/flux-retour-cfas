@@ -1,15 +1,3 @@
-.title {
-  margin-bottom: 1rem;
-  font-size: 40px;
-  font-weight: 700;
-  color: var(--text-title-blue-france);
-}
-
-.description {
-  max-width: 48rem;
-  margin-bottom: 2rem;
-}
-
 .status {
   display: inline-flex;
   gap: 0.25rem;
@@ -27,13 +15,6 @@
 .errorCount {
   font-weight: 700;
   color: var(--text-default-error);
-}
-
-.backRow {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  margin-bottom: 2rem;
 }
 
 .detailNotice {
