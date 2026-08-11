@@ -1,5 +1,3 @@
-import { Link } from "@chakra-ui/react";
-
 const headerTooltips = {
   Ligne: (
     <>
@@ -174,15 +172,14 @@ const headerTooltips = {
   formation_cfd: (
     <>
       Vous pouvez trouver le Code Diplôme de la formation sur le{" "}
-      <Link
-        href={"https://catalogue-apprentissage.intercariforef.org/recherche/formations"}
-        display="inline"
-        textDecoration={"underline"}
-        color="bluefrance"
-        isExternal
+      <a
+        href="https://catalogue-apprentissage.intercariforef.org/recherche/formations"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fr-link"
       >
         Catalogue des offres de formations en apprentissage
-      </Link>
+      </a>
       , en indiquant le SIRET de votre établissement (donnée obligatoire).
     </>
   ),

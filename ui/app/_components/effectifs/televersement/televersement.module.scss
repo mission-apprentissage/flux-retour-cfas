@@ -1,0 +1,244 @@
+.title {
+  margin-bottom: 1rem;
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--text-title-blue-france);
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.betaBadge {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  vertical-align: middle;
+  color: #6e445a;
+  background-color: #fee7fc;
+  border-radius: 4px;
+}
+
+.introPanel {
+  padding: 2.5rem 3.5rem;
+  margin-top: 2.5rem;
+  background-color: var(--background-alt-grey);
+
+  > ul > li {
+    margin-bottom: 0.75rem;
+  }
+}
+
+.docsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.docLink {
+  padding: 0;
+  background: none;
+}
+
+.uploadZone {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 20px;
+  margin: 2rem 0;
+  color: var(--text-mention-grey);
+  text-align: center;
+  cursor: pointer;
+  border: 2px dashed var(--border-action-high-blue-france);
+  border-radius: 6px;
+  transition:
+    border 0.24s ease-in-out,
+    background-color 0.24s ease-in-out;
+
+  i {
+    margin-bottom: 0.5rem;
+    color: var(--text-title-blue-france);
+  }
+
+  &:hover {
+    background-color: var(--background-alt-blue-france);
+    border-color: #3a55d1;
+  }
+}
+
+.uploadZoneActive {
+  background-color: var(--background-alt-blue-france);
+  border-color: #3a55d1;
+}
+
+.uploadSpinner {
+  flex: 1;
+  text-align: center;
+}
+
+.submitRow {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.reuploadBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1.5rem;
+  border: 1px solid var(--border-default-grey);
+}
+
+.lineCount {
+  padding-bottom: 1.25rem;
+}
+
+.statusValide {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  color: #18753c;
+}
+
+.statusErreur {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  color: #b34000;
+}
+
+.cellError {
+  color: var(--text-default-error);
+}
+
+.headerWithTooltip {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.televersementTable {
+  td,
+  th {
+    min-width: 10rem;
+  }
+
+  th:first-child,
+  td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    min-width: 5rem;
+    background-color: inherit;
+  }
+
+  th:last-child,
+  td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 2;
+    background-color: inherit;
+  }
+
+  th:first-child,
+  th:last-child {
+    background-color: var(--background-default-grey);
+  }
+
+  tr {
+    background-color: var(--background-default-grey);
+  }
+
+  :global(.fr-table) tbody tr:nth-child(even) {
+    background-color: var(--background-alt-grey);
+  }
+}
+
+.successPanel {
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid #eee;
+}
+
+.successTitleRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  color: #18753c;
+}
+
+.successTitle {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.successWarning {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: #b34000;
+}
+
+.successActions {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: flex-end;
+}
+
+.successAside {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 2.5rem;
+  margin: 2rem 0;
+  background-color: #f5f5fe;
+}
+
+.successAsideTitle {
+  margin-bottom: 0.75rem;
+  font-size: 22px;
+  font-weight: 700;
+  color: #161616;
+}
+
+.orangeNote {
+  margin: 1rem 0;
+  font-size: 0.875rem;
+  color: #ef5800;
+}
+
+.obligatoiresGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.obligatoiresGridTwo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.collapseToggle {
+  padding: 0;
+  margin-bottom: 0.5rem;
+  background: none;
+}
