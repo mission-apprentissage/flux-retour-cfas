@@ -6,7 +6,7 @@ import type { RncpInfo } from "shared/models/apis/@types/ApiAlternance";
 import { _get } from "@/common/httpClient";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import { Label } from "@/components/admin/organismes/recherche/Label";
-import { niveauFormationByNiveau } from "@/modules/indicateurs/filters/FiltreFormationNiveau";
+import { niveauFormationByNiveau } from "@/modules/indicateurs/filters/niveauxFormation";
 
 type RncpDetailsProps = {
   code: string | null;

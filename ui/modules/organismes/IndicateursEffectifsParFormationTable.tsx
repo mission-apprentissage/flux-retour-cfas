@@ -20,7 +20,7 @@ import { IndicateursEffectifsAvecFormation } from "shared";
 import { _get } from "@/common/httpClient";
 
 import { AbandonsIcon, ApprentisIcon, InscritsSansContratsIcon, RupturantsIcon } from "../dashboard/icons";
-import { niveauFormationByNiveau } from "../indicateurs/filters/FiltreFormationNiveau";
+import { niveauFormationByNiveau } from "../indicateurs/filters/niveauxFormation";
 
 import { CertificationDetails } from "./CertificationDetails/CertificationDetails";
 
