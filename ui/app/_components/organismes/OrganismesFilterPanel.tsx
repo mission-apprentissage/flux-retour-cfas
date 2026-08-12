@@ -2,11 +2,10 @@
 
 import { DEPARTEMENTS_SORTED, IOrganisationType, REGIONS_SORTED, UAI_INCONNUE_CAPITALIZE } from "shared";
 
+import { FilterCheckboxMenu } from "@/app/_components/filters/FilterCheckboxMenu";
+import styles from "@/app/_components/filters/filters.module.scss";
 import { useAuth } from "@/app/_context/UserContext";
 import { OrganismesFilters } from "@/common/filters/organismes-filters";
-
-import { FilterCheckboxMenu } from "./FilterCheckboxMenu";
-import styles from "./organismes.module.scss";
 
 export interface OrganismeFiltersListVisibilityProps {
   showFilterUai?: boolean;

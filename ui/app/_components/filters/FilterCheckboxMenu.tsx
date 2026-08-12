@@ -3,7 +3,7 @@
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { useEffect, useRef, useState } from "react";
 
-import styles from "./organismes.module.scss";
+import styles from "./filters.module.scss";
 
 interface FilterCheckboxMenuOption {
   value: string;
