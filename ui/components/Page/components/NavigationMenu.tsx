@@ -7,11 +7,10 @@ import { CRISP_FAQ, IOrganisationType, ORGANISATION_TYPE } from "shared";
 import { AuthContext } from "@/common/internal/AuthContext";
 import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
 import Link from "@/components/Links/Link";
-import { useOrganisationOrganisme } from "@/hooks/organismes";
+import { useOrganisationOrganisme, useOrganisme } from "@/hooks/organismes";
 import { usePlausibleTracking } from "@/hooks/plausible";
 import useAuth from "@/hooks/useAuth";
 import { useCfaUnreadNotificationsCount } from "@/hooks/useCfaUnreadNotifications";
-import { useEffectifsOrganisme } from "@/modules/mon-espace/effectifs/useEffectifsOrganisme";
 import { Close, MenuFill, ParentGroupIcon } from "@/theme/components/icons";
 
 function getMesOrganismesLabelFromOrganisationType(type: IOrganisationType): string {
@@ -226,7 +225,7 @@ function NavBarOrganismeFormation(): ReactElement {
 }
 
 function NavBarAutreOrganisme({ organismeId }: { organismeId: string }): ReactElement {
-  const { organisme } = useEffectifsOrganisme(organismeId);
+  const { organisme } = useOrganisme(organismeId);
 
   return (
     <Container maxW="xl">
