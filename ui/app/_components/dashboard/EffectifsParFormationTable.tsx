@@ -4,8 +4,8 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Fragment, useCallback, useMemo, useState } from "react";
 import { IndicateursEffectifsAvecFormation } from "shared";
 
-import { niveauFormationByNiveau } from "@/modules/indicateurs/filters/niveauxFormation";
-import { CertificationDetails } from "@/modules/organismes/CertificationDetails/CertificationDetails";
+import { CertificationDetails } from "@/app/_components/certification/CertificationDetails";
+import { niveauFormationByNiveau } from "@/app/_components/certification/niveauxFormation";
 
 import styles from "./effectifs-par-formation.module.scss";
 
