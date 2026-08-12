@@ -87,8 +87,9 @@ const CARDS: CardConfig[] = [
 interface IndicateursCardsProps {
   indicateursEffectifs: IndicateursEffectifs;
   loading: boolean;
-  effectifsFilters: EffectifsFiltersFull;
-  organismeId: string;
+  /** Sans filtres ni organisme, les téléchargements de listes nominatives ne sont pas proposés. */
+  effectifsFilters?: EffectifsFiltersFull;
+  organismeId?: string;
 }
 
 function Card({ children, big }: { children: ReactNode; big?: boolean }) {
@@ -114,6 +115,7 @@ export function IndicateursCards({
     : [];
 
   const downloadEffectifsNominatifs = async (type: Exclude<TypeEffectifNominatif, "inconnu">) => {
+    if (!effectifsFilters || !organismeId) return;
     trackPlausibleEvent(typeToGoalPlausible[type]);
     const effectifs = await _get(`/api/v1/organismes/${organismeId}/indicateurs/effectifs/${type}`, {
       params: convertEffectifsFiltersToQuery(effectifsFilters),
@@ -149,7 +151,7 @@ export function IndicateursCards({
                 <p className={styles.cardLabel}>
                   {card.label} <Tooltip kind="hover" title={card.tooltip} />
                 </p>
-                {permissionEffectifsNominatifs.includes(card.type) && (
+                {permissionEffectifsNominatifs.includes(card.type) && effectifsFilters && organismeId && (
                   <Button
                     priority="tertiary no outline"
                     size="small"

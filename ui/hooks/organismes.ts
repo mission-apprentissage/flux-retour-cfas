@@ -1,5 +1,4 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/router";
 import { useMemo } from "react";
 import { IOrganisationIndicateursOrganismes, IOrganismesCount, normalize } from "shared";
 
@@ -149,12 +148,8 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
 }
 
 export function useOrganismesDuplicatsLists() {
-  const router = useRouter();
-
-  const { data: organismesDuplicats, isLoading } = useQuery<Organisme[], any>(
-    ["admin/organismes-duplicates"],
-    () => _get("/api/v1/admin/organismes-duplicates"),
-    { enabled: router.isReady }
+  const { data: organismesDuplicats, isLoading } = useQuery<Organisme[], any>(["admin/organismes-duplicates"], () =>
+    _get("/api/v1/admin/organismes-duplicates")
   );
 
   return { organismesDuplicats, isLoading };

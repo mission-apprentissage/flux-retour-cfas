@@ -1,0 +1,76 @@
+.wrapper {
+  display: flex;
+  flex: 1;
+  gap: 1rem;
+  align-items: center;
+}
+
+@media (width <= 48em) {
+  .wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.legend {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  list-style: none;
+}
+
+.legendItem {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.legendDot {
+  flex: 0 0 auto;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+}
+
+.carte {
+  position: relative;
+  width: 100%;
+
+  svg {
+    width: 100%;
+  }
+
+  path {
+    stroke: var(--grey-0-1000);
+    stroke-opacity: 0.25;
+    stroke-width: 1px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  g path:hover {
+    filter: brightness(1.1);
+  }
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  padding: 10px 12px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  pointer-events: none;
+  background-color: var(--background-default-grey);
+  border: 1px solid var(--border-default-grey);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 15%);
+}
+
+.tooltipTitle {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 700;
+}

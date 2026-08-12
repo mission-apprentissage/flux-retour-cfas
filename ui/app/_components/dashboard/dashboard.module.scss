@@ -1,0 +1,361 @@
+.headerBand {
+  padding: 2rem 0;
+  background-color: var(--background-alt-grey);
+  border-top: 1px solid var(--border-default-grey);
+  border-bottom: 1px solid var(--border-default-grey);
+}
+
+.headerLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (width <= 62em) {
+  .headerLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.publicViewBadge {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-active-blue-france);
+  background-color: var(--background-open-blue-france);
+}
+
+.publicViewHint {
+  display: block;
+  font-size: 0.75rem;
+}
+
+.welcome {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.organismeName {
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: var(--text-active-blue-france);
+  text-transform: uppercase;
+}
+
+.badgesRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.identityList {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.identityRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.identityLabel {
+  color: var(--text-default-grey);
+}
+
+.identityValue {
+  font-weight: 700;
+}
+
+.identityTag {
+  padding: 0.25rem 0.5rem;
+  font-weight: 700;
+  background-color: var(--background-contrast-grey);
+}
+
+.identityTagWarning {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  color: var(--text-default-warning);
+}
+
+.externalLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.sectionTitle {
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-title-blue-france);
+}
+
+.sectionTitleSuffix {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.subSectionTitle {
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-title-blue-france);
+}
+
+.separator {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 2px solid var(--border-default-grey);
+}
+
+.alignRight {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.organismesCard {
+  padding: 2rem;
+  margin-top: 2rem;
+  background-color: var(--background-alt-grey);
+}
+
+.organismesCardBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: center;
+}
+
+@media (width <= 48em) {
+  .organismesCardBody {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.legendList {
+  display: grid;
+  gap: 0.75rem;
+  align-content: center;
+  margin: 0;
+}
+
+.legendItem {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-mention-grey);
+}
+
+.legendDot {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+}
+
+.legendDotTransmet {
+  background-color: var(--background-flat-success);
+}
+
+.legendDotNonTransmet {
+  background-color: var(--background-flat-warning);
+}
+
+.pieWrapper {
+  min-height: 250px;
+}
+
+.onboardingStep {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  padding: 2rem;
+  background-color: var(--background-alt-grey);
+}
+
+.onboardingStep + .onboardingStep {
+  margin-top: 0.5rem;
+}
+
+.onboardingNumber {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-title-blue-france);
+  background-color: var(--background-default-grey);
+  border: 1px solid var(--border-active-blue-france);
+  border-radius: 50%;
+}
+
+.cerfaCard {
+  padding: 1rem;
+  background: linear-gradient(
+    282deg,
+    #fceeac 0%,
+    #ffe4b9 9.5%,
+    #ffdfcd 21.5%,
+    #ffdee1 27.5%,
+    #ffe1ee 38%,
+    #fde3f4 46%,
+    #fbe6fa 55%,
+    #f8e9ff 63.5%,
+    #f3eaff 72%,
+    #efebff 82%,
+    #ebecff 91.5%,
+    #efebff 100%
+  );
+  border-radius: 8px;
+}
+
+.cerfaTitle {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  color: var(--text-action-high-blue-france);
+}
+
+.cerfaText {
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.cerfaFooter {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.cerfaIcon {
+  flex: 0 0 auto;
+  width: 2.5rem;
+}
+
+.suggestFeature {
+  display: flex;
+  gap: 4rem;
+  align-items: center;
+  padding: 2.5rem 3.5rem;
+  margin: 4rem 0;
+  background-color: var(--background-alt-blue-france);
+}
+
+@media (width <= 62em) {
+  .suggestFeature {
+    flex-direction: column-reverse;
+    gap: 2rem;
+    padding: 2rem;
+  }
+}
+
+.suggestTitle {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.suggestImage {
+  flex: 0 0 auto;
+  width: 200px;
+  user-select: none;
+}
+
+.perimetreTitle {
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-title-blue-france);
+}
+
+.dateFilterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.mapsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+@media (width <= 62em) {
+  .mapsGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.mapCard {
+  padding: 2rem 3rem;
+  background-color: var(--background-alt-grey);
+}
+
+.mapCardTitle {
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text-title-blue-france);
+}
+
+.adminLinksGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+@media (width <= 48em) {
+  .adminLinksGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.adminLinkCard {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 1.5rem;
+  color: var(--text-default-grey);
+  text-decoration: none;
+  background-color: var(--background-default-grey);
+  border: 1px solid var(--border-default-grey);
+  border-bottom: 4px solid var(--border-plain-blue-france);
+}
+
+.adminLinkCard:hover {
+  background-color: var(--background-default-grey-hover);
+}
+
+.adminLinkIcon {
+  color: var(--text-default-warning);
+}
