@@ -1,48 +1,40 @@
 "use client";
 
-import type { PieCustomLayerProps } from "@nivo/pie";
 import dynamic from "next/dynamic";
 
-const ResponsivePie = dynamic(() => import("@nivo/pie").then((m) => m.ResponsivePie), { ssr: false });
+import styles from "./pie.module.scss";
 
-function CenteredMetric({ dataWithArc, centerX, centerY }: PieCustomLayerProps<any>) {
-  const total = dataWithArc.reduce((acc, datum) => acc + datum.value, 0);
-  return (
-    <>
-      <text
-        x={centerX}
-        y={centerY - 10}
-        textAnchor="middle"
-        dominantBaseline="central"
-        style={{ fill: "#3A3A3A", fontSize: "28px", fontWeight: "bold" }}
-      >
-        {`${total}`}
-      </text>
-      <text
-        x={centerX}
-        y={centerY + 15}
-        textAnchor="middle"
-        dominantBaseline="central"
-        style={{ fill: "#666666", fontSize: "14px" }}
-      >
-        OFA
-      </text>
-    </>
-  );
+// Chargé à la demande : le graphique ne concerne que les organismes ayant des formateurs rattachés.
+const PieChart = dynamic(() => import("@mui/x-charts/PieChart").then((m) => m.PieChart), { ssr: false });
+
+interface PieDatum {
+  id: string;
+  value: number;
+  color: string;
 }
 
-export function Pie({ data }: { data: any[] }) {
+export function Pie({ data }: { data: PieDatum[] }) {
+  const total = data.reduce((acc, datum) => acc + datum.value, 0);
+
   return (
-    <ResponsivePie
-      margin={{ top: 32, right: 32, bottom: 32, left: 32 }}
-      data={data}
-      innerRadius={0.6}
-      cornerRadius={3}
-      activeOuterRadiusOffset={8}
-      enableArcLinkLabels={false}
-      colors={{ datum: "data.color" }}
-      enableArcLabels={false}
-      layers={["arcs", CenteredMetric]}
-    />
+    <div className={styles.wrapper}>
+      <PieChart
+        series={[
+          {
+            data: data.map((datum) => ({ id: datum.id, value: datum.value, label: datum.id, color: datum.color })),
+            innerRadius: "60%",
+            cornerRadius: 3,
+            highlightScope: { highlight: "item" },
+          },
+        ]}
+        height={250}
+        margin={{ top: 32, right: 32, bottom: 32, left: 32 }}
+        hideLegend
+      />
+      <div className={styles.centeredMetric} aria-hidden="true">
+        <span className={styles.total}>{total}</span>
+        <span className={styles.unit}>OFA</span>
+      </div>
+    </div>
   );
 }
