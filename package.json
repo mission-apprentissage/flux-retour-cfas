@@ -55,9 +55,7 @@
     "knip": "knip"
   },
   "dependencies": {
-    "@types/lodash": "^4.17.16",
-    "husky": "^8.0.3",
-    "libphonenumber-js": "^1.11.19"
+    "husky": "^8.0.3"
   },
   "resolutions": {
     "axios": "1.15.2",
