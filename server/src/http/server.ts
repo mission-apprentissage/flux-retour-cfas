@@ -5,7 +5,6 @@ import fs from "fs";
 
 import * as Sentry from "@sentry/node";
 import { zUai } from "api-alternance-sdk/internal";
-import bodyParser from "body-parser";
 import Boom from "boom";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -279,7 +278,7 @@ export default async function createServer(): Promise<Application> {
   }
 
   app.use(
-    bodyParser.json({
+    express.json({
       limit: config.bodyParserLimit,
       verify: (req: any, _res, buf) => {
         // Conserver le body brut pour la vérification HMAC des webhooks

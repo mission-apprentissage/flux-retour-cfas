@@ -37,12 +37,10 @@
     "axios": "1.15.2",
     "axios-cache-interceptor": "1.6.2",
     "axios-retry": "4.5.0",
-    "body-parser": "^1.20.3",
     "boom": "7.3.0",
     "bson": "^5.5.1",
     "bunyan": "1.8.15",
     "commander": "^9.5.0",
-    "compose-middleware": "5.0.1",
     "convert-csv-to-json": "^1.5.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -67,7 +65,6 @@
     "netmask": "^2.1.1",
     "nodemailer": "^8.0.5",
     "nodemailer-html-to-text": "3.2.0",
-    "omit-deep": "0.3.0",
     "passport": "0.5.2",
     "passport-jwt": "^4.0.1",
     "passport-localapikey": "0.0.3",
@@ -79,7 +76,6 @@
     "stream-json": "^1.8.0",
     "swagger-ui-express": "^5.0.1",
     "type-fest": "^4.26.1",
-    "uuid": "8.3.2",
     "zod": "^3.23.8"
   },
   "prettier": {

@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { captureException } from "@sentry/node";
 import { ObjectId } from "mongodb";
 import { IMissionLocaleEffectif, SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
@@ -9,7 +11,6 @@ import {
   CONVERSATION_STATE,
   USER_RESPONSE_TYPE,
 } from "shared/models/data/whatsappContact.model";
-import { v4 as uuidv4 } from "uuid";
 
 import logger from "@/common/logger";
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
@@ -528,7 +529,7 @@ async function handlePrequalifYes(
 
   let message: string;
   if (ml.rdv_url) {
-    const token = uuidv4();
+    const token = randomUUID();
     const now = new Date();
     await missionLocaleEffectifsDb().updateOne(
       { _id: effectif._id },

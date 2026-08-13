@@ -1,10 +1,10 @@
 import { strict as assert } from "assert";
+import { randomUUID } from "node:crypto";
 
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
 import { RateLimiterMongo } from "rate-limiter-flexible";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
-import { v4 as uuidv4 } from "uuid";
 import { afterEach, beforeEach, describe, it, vi } from "vitest";
 
 import { createSession } from "@/common/actions/sessions.actions";
@@ -349,7 +349,7 @@ describe("Rate limiting", () => {
       _resetLimitersForTests();
       const { httpClient: client } = await initTestApp();
 
-      const api_key = uuidv4();
+      const api_key = randomUUID();
       const org = createRandomOrganisme({ uai: "0802004U", siret: "77937827200016", api_key });
       await organismesDb().insertOne({ ...org, _id: new ObjectId() });
       const headers = { Authorization: `Bearer ${api_key}` };
@@ -388,7 +388,7 @@ describe("Rate limiting", () => {
       _resetLimitersForTests();
       const { httpClient: client } = await initTestApp();
 
-      const api_key = uuidv4();
+      const api_key = randomUUID();
       const org = createRandomOrganisme({ uai: "0802004U", siret: "77937827200016", api_key });
       await organismesDb().insertOne({ ...org, _id: new ObjectId() });
       const headers = { Authorization: `Bearer ${api_key}` };

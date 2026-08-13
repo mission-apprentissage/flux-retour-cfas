@@ -1,8 +1,9 @@
+import { randomUUID } from "node:crypto";
+
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationOrganismeFormation } from "shared/models";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
-import { v4 as uuidv4 } from "uuid";
 import { describe, it, beforeEach, expect } from "vitest";
 
 import { getCfaEffectifsEnRupture } from "@/common/actions/cfa/cfa-effectifs-ruptures.actions";
@@ -65,7 +66,7 @@ async function createMlEffectif(overrides: Record<string, any> = {}) {
       date: dateRupture,
     },
     created_at: now,
-    brevo: { token: uuidv4(), token_created_at: now },
+    brevo: { token: randomUUID(), token_created_at: now },
     ...(overrides.cfa_rupture_declaration ? { cfa_rupture_declaration: overrides.cfa_rupture_declaration } : {}),
     ...(overrides.soft_deleted ? { soft_deleted: true } : {}),
   };

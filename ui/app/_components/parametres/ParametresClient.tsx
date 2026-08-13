@@ -8,7 +8,6 @@ import { Select } from "@codegouvfr/react-dsfr/Select";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
-import { CopyToClipboard } from "react-copy-to-clipboard";
 import { IErp } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
@@ -156,12 +155,14 @@ export default function ParametresClient({
                                       readOnly
                                     />
                                   </div>
-                                  <CopyToClipboard
-                                    text={regeneratedApiKey}
-                                    onCopy={() => setRegeneratedKeyCopied(true)}
+                                  <Button
+                                    onClick={async () => {
+                                      await navigator.clipboard.writeText(regeneratedApiKey);
+                                      setRegeneratedKeyCopied(true);
+                                    }}
                                   >
-                                    <Button>Copier la clé</Button>
-                                  </CopyToClipboard>
+                                    Copier la clé
+                                  </Button>
                                   {regeneratedKeyCopied && (
                                     <Alert
                                       severity="success"
@@ -574,14 +575,14 @@ function ConfigurationERPV3(props: ConfigurationERPV3Props) {
                   Revenir en arrière
                 </Button>
 
-                <CopyToClipboard
-                  text={props.organisme.api_key}
-                  onCopy={() => {
+                <Button
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(props.organisme.api_key ?? "");
                     setCopied(true);
                   }}
                 >
-                  <Button>Copier la clé</Button>
-                </CopyToClipboard>
+                  Copier la clé
+                </Button>
               </div>
               {copied && <Alert severity="success" title="Copié !" description="" small className="fr-mb-3w" />}
             </>
