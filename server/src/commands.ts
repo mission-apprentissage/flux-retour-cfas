@@ -425,6 +425,17 @@ program
   });
 
 program
+  .command("tmp:seed-sipa-test-nancy")
+  .description(
+    "Seed du jeu de test SIPA/académie de Nancy (effectifs CFA + DECA 2026-2027) puis vérification de la sortie SIPA"
+  )
+  .option("--cleanup", "Supprime uniquement les effectifs de test (tag SIPA_TEST_NANCY_)", false)
+  .option("--verify", "Rejoue uniquement l'agrégation SIPA et rapporte les écarts, sans insérer", false)
+  .option("--dry-run", "Simulation d'insertion sans écriture", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:seed-sipa-test-nancy"));
+
+program
   .command("brevo-contacts:sync")
   .description("Synchronise une liste de contacts vers Brevo (création/peuplement de la liste)")
   .requiredOption("--slug <slug>", "Slug de la liste (ex: cfa-users)")

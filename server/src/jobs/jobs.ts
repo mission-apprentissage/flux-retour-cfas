@@ -88,6 +88,7 @@ import {
 import { revokeStaleApiKeysJob } from "./organismes/revoke-stale-api-keys";
 import { validationTerritoires } from "./territoire/validationTerritoire";
 import { seedMlRdvUrl } from "./tmp/seed-ml-rdv-url";
+import { seedSipaTestNancy } from "./tmp/seed-sipa-test-nancy";
 import { sendWhatsAppInjoignables } from "./whatsapp/send-whatsapp-injoignables";
 import { sendWhatsAppPrequalif } from "./whatsapp/send-whatsapp-prequalif";
 
@@ -702,6 +703,16 @@ export async function setupJobProcessor() {
             throw new Error("csvPath est requis");
           }
           return seedMlRdvUrl({ csvPath: payload.csvPath, dryRun: payload.dryRun ?? false });
+        },
+      },
+      "tmp:seed-sipa-test-nancy": {
+        handler: async (job) => {
+          const payload = job.payload as { cleanup?: boolean; verify?: boolean; dryRun?: boolean } | undefined;
+          return seedSipaTestNancy({
+            cleanup: payload?.cleanup ?? false,
+            verify: payload?.verify ?? false,
+            dryRun: payload?.dryRun ?? false,
+          });
         },
       },
       "brevo-contacts:sync": {
