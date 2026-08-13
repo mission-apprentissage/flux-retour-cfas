@@ -10,7 +10,6 @@ import Boom from "boom";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application } from "express";
-import Joi from "joi";
 import { ObjectId } from "mongodb";
 import passport from "passport";
 import { RateLimiterMemory } from "rate-limiter-flexible";
@@ -127,10 +126,11 @@ import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
-import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
+import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
 import objectIdSchema from "@/common/validation/objectIdSchema";
+import { ADMIN_PASSWORD_MIN_LENGTH, zPassword } from "@/common/validation/passwordSchema";
 import { registrationCfaSchema } from "@/common/validation/registrationCfaSchema";
 import {
   registrationSchema,
@@ -357,8 +357,8 @@ function setupRoutes(app: Application) {
       "/api/v1/organismes/search-by-uai",
       publicLimiter,
       returnResult(async (req) => {
-        const { uai } = await validateFullObjectSchema(req.body, {
-          uai: Joi.string().required().uppercase(),
+        const { uai } = await validateFullZodObjectSchema(req.body, {
+          uai: z.string().transform((value) => value.toUpperCase()),
         });
         return await findOrganismesByUAI(uai);
       })
@@ -518,9 +518,9 @@ function setupRoutes(app: Application) {
       checkPasswordToken(),
       returnResult(async (req) => {
         // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
-        const { password } = await validateFullObjectSchema(req.body, {
-          passwordToken: Joi.string().required(),
-          password: passwordSchema(req.user.organisation.type === "ADMINISTRATEUR").required(),
+        const { password } = await validateFullZodObjectSchema(req.body, {
+          passwordToken: z.string(),
+          password: zPassword(req.user.organisation.type === "ADMINISTRATEUR" ? ADMIN_PASSWORD_MIN_LENGTH : undefined),
         });
         await changePassword(req.user, password);
       })
