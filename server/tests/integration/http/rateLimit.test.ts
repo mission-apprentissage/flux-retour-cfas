@@ -42,7 +42,10 @@ async function createConfirmedUser(email: string) {
   });
 }
 
-describe("Rate limiting", () => {
+// Chaque scénario enchaîne 20 à 30 tentatives de connexion, et chaque tentative paie un hash
+// sha512crypt volontairement lent (anti-brute-force). Le budget par défaut de 5 s suffit à peine
+// à vide et saute dès que la suite complète tourne en parallèle.
+describe("Rate limiting", { timeout: 60_000 }, () => {
   useMongo();
 
   beforeEach(async () => {
