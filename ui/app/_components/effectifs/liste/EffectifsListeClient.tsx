@@ -165,7 +165,7 @@ export function EffectifsListeClient({ organisme, modePublique }: { organisme: O
       source: (
         <CellValue
           effectif={effectif}
-          fieldName="apprenant.prenom"
+          fieldName="source"
           value={effectif.source === "FICHIER" ? capitalizeWords(effectif.source) : effectif.source}
         />
       ),
@@ -376,6 +376,7 @@ export function EffectifsListeClient({ organisme, modePublique }: { organisme: O
           }}
           emptyMessage={isFetching ? "Chargement…" : "Aucun effectif à afficher"}
           tableLabel={`Liste des effectifs de ${organisme.raison_sociale ?? "l'organisme"}`}
+          expandMode="single"
           renderSubComponent={(rawData) => (
             <EffectifDetail
               effectifId={rawData.id}

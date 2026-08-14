@@ -13,6 +13,7 @@ import {
   getFilteredRowModel,
   getExpandedRowModel,
   type ExpandedState,
+  type OnChangeFn,
 } from "@tanstack/react-table";
 import { useCallback, useRef, useEffect, useId, useState, Fragment } from "react";
 
@@ -135,6 +136,7 @@ export function FullTable({
   getRowCanExpand,
   expandColumnLabel = "Détail",
   expandedByDefault = false,
+  expandMode = "multiple",
   tableLabel,
 }: FullTableProps) {
   const tableRef = useRef<HTMLDivElement>(null);
@@ -142,6 +144,21 @@ export function FullTable({
   const tableColumns = useTableColumns(columns);
   const [expanded, setExpanded] = useState<ExpandedState>(expandedByDefault ? true : {});
   const isExpandable = Boolean(renderSubComponent);
+
+  const handleExpandedChange = useCallback<OnChangeFn<ExpandedState>>(
+    (updater) => {
+      setExpanded((previous) => {
+        const next = typeof updater === "function" ? updater(previous) : updater;
+        if (expandMode !== "single" || typeof next !== "object" || next === null) {
+          return next;
+        }
+        const previousState = typeof previous === "object" && previous !== null ? previous : {};
+        const justOpened = Object.keys(next).find((rowId) => next[rowId] && !previousState[rowId]);
+        return justOpened ? { [justOpened]: true } : next;
+      });
+    },
+    [expandMode]
+  );
 
   const scrollToTop = useCallback(() => {
     if (tableRef.current) {
@@ -175,7 +192,7 @@ export function FullTable({
     getFilteredRowModel: getFilteredRowModel(),
     ...(isExpandable
       ? {
-          onExpandedChange: setExpanded,
+          onExpandedChange: handleExpandedChange,
           getExpandedRowModel: getExpandedRowModel(),
           getRowCanExpand: (row) => (getRowCanExpand ? getRowCanExpand(row.original) : true),
         }

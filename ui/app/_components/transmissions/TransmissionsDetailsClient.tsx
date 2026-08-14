@@ -160,6 +160,7 @@ export default function TransmissionsDetailsClient({
                   onPageSizeChange={setErrorLimit}
                   pageSize={errorLimit}
                   emptyMessage="Aucun effectif en échec pour cette journée"
+                  expandMode="single"
                   renderSubComponent={(rowData) => <EffectifQueueItemDetail effectifQueueItem={rowData} />}
                 />
               </>

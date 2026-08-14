@@ -40,5 +40,6 @@ export interface FullTableProps {
   getRowCanExpand?: (rowData: TableRowData) => boolean;
   expandColumnLabel?: string;
   expandedByDefault?: boolean;
+  expandMode?: "single" | "multiple";
   tableLabel?: string;
 }

@@ -72,6 +72,7 @@ export function DoublonsList({
       onPageSizeChange={onPageSizeChange}
       pageSize={pageSize}
       emptyMessage="Aucun duplicat d’effectif à afficher"
+      expandMode="single"
       renderSubComponent={(rowData) => <DoublonsDetailTable group={rowData} onRequestDelete={onRequestDelete} />}
     />
   );
