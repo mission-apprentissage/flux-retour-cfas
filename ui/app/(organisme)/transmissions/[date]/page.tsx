@@ -16,7 +16,7 @@ export default async function TransmissionsJourPage({ params }: { params: Promis
   const organismeId = organisation && "organisme_id" in organisation ? organisation.organisme_id : null;
 
   if (!organismeId) {
-    redirect("/home");
+    redirect("/");
   }
 
   return (

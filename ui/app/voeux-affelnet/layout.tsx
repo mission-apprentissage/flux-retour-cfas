@@ -20,7 +20,7 @@ export default async function VoeuxAffelnetLayout({ children }: { children: Reac
   }
 
   if (!ALLOWED_ORGANISATION_TYPES.includes(user.organisation?.type as string)) {
-    redirect("/home");
+    redirect("/");
   }
 
   return (

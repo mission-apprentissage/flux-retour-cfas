@@ -94,9 +94,9 @@ function redirectToHome(
       if (session.organisation?.ml_beta_activated_at) {
         return NextResponse.redirect(new URL("/cfa", request.url));
       }
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/organismes", request.url));
     default:
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/organismes", request.url));
   }
 }
 
@@ -119,7 +119,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
     if (session.organisation?.type !== "MISSION_LOCALE") {
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next(requestNextData);
   }
@@ -129,7 +129,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
     if (session.organisation?.type !== "FRANCE_TRAVAIL") {
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next(requestNextData);
   }
@@ -139,7 +139,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
     if (session.organisation?.type !== "ORGANISME_FORMATION" || !session.organisation?.ml_beta_activated_at) {
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next(requestNextData);
   }

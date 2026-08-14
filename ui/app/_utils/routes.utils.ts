@@ -254,13 +254,6 @@ export const PAGES = {
         title: `Vœux Affelnet | ${SITE_NAME}`,
       }),
     },
-    tableauDeBord: {
-      getPath: () => "/home",
-      title: "Mon tableau de bord",
-      getMetadata: () => ({
-        title: SITE_NAME,
-      }),
-    },
     parametres: {
       getPath: () => "/parametres",
       title: "Paramétrage de votre moyen de transmission",

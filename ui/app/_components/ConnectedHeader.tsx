@@ -165,13 +165,6 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
         organisationType === ORGANISATION_TYPE.ADMINISTRATEUR
       ) {
         baseItems.push({
-          text: "Mon tableau de bord",
-          linkProps: {
-            href: "/home",
-            target: "_self",
-          },
-        });
-        baseItems.push({
           text: getMesOrganismesLabel(organisationType || ""),
           linkProps: {
             href: "/organismes",

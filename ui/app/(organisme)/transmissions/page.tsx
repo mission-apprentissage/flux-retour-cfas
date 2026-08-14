@@ -12,7 +12,7 @@ export default async function TransmissionsPage() {
   const organismeId = organisation && "organisme_id" in organisation ? organisation.organisme_id : null;
 
   if (!organismeId) {
-    redirect("/home");
+    redirect("/");
   }
 
   return (
