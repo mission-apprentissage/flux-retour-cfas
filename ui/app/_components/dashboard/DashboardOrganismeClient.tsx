@@ -3,9 +3,8 @@
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useQueries } from "@tanstack/react-query";
-import { CRISP_FAQ, IndicateursEffectifsAvecFormation, STATUT_FIABILISATION_ORGANISME } from "shared";
+import { CRISP_FAQ, STATUT_FIABILISATION_ORGANISME } from "shared";
 
-import { IndicateursCards } from "@/app/_components/indicateurs/IndicateursCards";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
@@ -15,9 +14,7 @@ import { formatCivility } from "@/common/utils/stringUtils";
 
 import { CerfaCard } from "./CerfaCard";
 import styles from "./dashboard.module.scss";
-import { EffectifsParFormationTable } from "./EffectifsParFormationTable";
 import { OrganismeIdentite } from "./OrganismeIdentite";
-import { OrganismesRattaches } from "./OrganismesRattaches";
 import { SuggestFeature } from "./SuggestFeature";
 import { TransmissionOnboarding } from "./TransmissionOnboarding";
 
@@ -36,20 +33,6 @@ function useOrganismeData(organisme: Organisme, modePublique: boolean) {
         queryKey: ["organismes", organismeId, "indicateurs/effectifs"],
         queryFn: () =>
           _get(`/api/v1/organismes/${organismeId}/indicateurs/effectifs`, { params: { date: new Date() } }),
-        enabled: !!organismeId && !!permissions?.indicateursEffectifs,
-      },
-      {
-        queryKey: ["organismes", organismeId, "indicateurs/organismes"],
-        queryFn: () => _get(`/api/v1/organismes/${organismeId}/indicateurs/organismes`),
-        enabled: !!organismeId,
-      },
-      {
-        queryKey: ["organismes", organismeId, "indicateurs/effectifs/par-formation"],
-        queryFn: () =>
-          _get<IndicateursEffectifsAvecFormation[]>(
-            `/api/v1/organismes/${organismeId}/indicateurs/effectifs/par-formation`,
-            { params: { date: new Date() } }
-          ),
         enabled: !!organismeId && !!permissions?.indicateursEffectifs,
       },
       {
@@ -72,19 +55,15 @@ export function DashboardOrganismeClient({ organisme, modePublique }: DashboardO
   const organisation = user?.organisation as any;
   const organisationType = organisation?.type;
 
-  const [indicateursEffectifsQuery, indicateursOrganismesQuery, formationsQuery, duplicatesQuery, contactsQuery] =
-    useOrganismeData(organisme, modePublique);
+  const [indicateursEffectifsQuery, duplicatesQuery, contactsQuery] = useOrganismeData(organisme, modePublique);
 
   if (!organisme) return null;
 
   const indicateursEffectifs = indicateursEffectifsQuery.data as any;
-  const indicateursOrganismes = indicateursOrganismesQuery.data as any;
-  const formationsAvecIndicateurs = formationsQuery.data as IndicateursEffectifsAvecFormation[] | undefined;
   const duplicates = duplicatesQuery.data as any;
   const contacts = contactsQuery.data as any[] | undefined;
 
   const aucunEffectifTransmis = !organisme.first_transmission_date;
-  const hasOrganismesFormateurs = (organisme.organismesFormateurs?.length ?? 0) > 0;
   const isFiable = organisme.fiabilisation_statut === STATUT_FIABILISATION_ORGANISME.FIABLE;
   const indicateursEffectifsPartielsMessage =
     organisme.permissions?.indicateursEffectifs && getIndicateursEffectifsPartielsMessage(organisation, organisme);
@@ -156,12 +135,6 @@ export function DashboardOrganismeClient({ organisme, modePublique }: DashboardO
       <div className="fr-container fr-pt-4w fr-pb-6w">
         {organisme.permissions?.indicateursEffectifs ? (
           <>
-            <h2 className={styles.sectionTitle}>
-              Aperçu de {modePublique ? "ses" : "vos"} indicateurs
-              {hasOrganismesFormateurs && " et établissements"}{" "}
-              <span className={styles.sectionTitleSuffix}>(année scolaire 2024-2025)</span>
-            </h2>
-
             {!modePublique && duplicates && duplicates.totalItems > 0 && (
               <Alert
                 severity="warning"
@@ -241,13 +214,6 @@ export function DashboardOrganismeClient({ organisme, modePublique }: DashboardO
               />
             )}
 
-            {indicateursEffectifs && (
-              <IndicateursCards
-                indicateursEffectifs={indicateursEffectifs}
-                loading={indicateursEffectifsQuery.isLoading}
-              />
-            )}
-
             {aucunEffectifTransmis &&
               !modePublique &&
               (!organisme.mode_de_transmission ? (
@@ -266,23 +232,7 @@ export function DashboardOrganismeClient({ organisme, modePublique }: DashboardO
                 )
               ))}
 
-            {hasOrganismesFormateurs && (
-              <OrganismesRattaches
-                organisme={organisme}
-                modePublique={modePublique}
-                indicateursOrganismes={indicateursOrganismes}
-              />
-            )}
-
             {!modePublique && aucunEffectifTransmis && <TransmissionOnboarding />}
-
-            {formationsAvecIndicateurs && formationsAvecIndicateurs.length > 0 && (
-              <>
-                <hr className={styles.separator} />
-                <h2 className={styles.sectionTitle}>Répartition des effectifs par niveau et formations</h2>
-                <EffectifsParFormationTable formations={formationsAvecIndicateurs} />
-              </>
-            )}
 
             <SuggestFeature />
           </>
