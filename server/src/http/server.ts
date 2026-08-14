@@ -35,21 +35,9 @@ import {
   deleteOldestDuplicates,
   getDuplicatesEffectifsForOrganismeIdWithPagination,
 } from "@/common/actions/effectifs.duplicates.actions";
-import {
-  dateFiltersSchema,
-  effectifsFiltersTerritoireSchema,
-  fullEffectifsFiltersSchema,
-} from "@/common/actions/helpers/filters";
-import {
-  getIndicateursEffectifsParDepartement,
-  getOrganismeIndicateursEffectifs,
-  getOrganismeIndicateursEffectifsParFormation,
-} from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
-import {
-  getIndicateursForRelatedOrganismes,
-  getIndicateursOrganismesParDepartement,
-  getOrganismeIndicateursOrganismes,
-} from "@/common/actions/indicateurs/indicateurs.actions";
+import { effectifsFiltersTerritoireSchema } from "@/common/actions/helpers/filters";
+import { getOrganismeIndicateursEffectifs } from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
+import { getIndicateursForRelatedOrganismes } from "@/common/actions/indicateurs/indicateurs.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import {
   cancelInvitation,
@@ -634,21 +622,6 @@ function setupRoutes(app: Application) {
         })
       )
       .get(
-        "/indicateurs/effectifs/par-formation",
-        requireOrganismePermission("indicateursEffectifs"),
-        returnResult(async (req, res) => {
-          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-          return await getOrganismeIndicateursEffectifsParFormation(req.user, res.locals.organismeId, filters);
-        })
-      )
-      .get(
-        "/indicateurs/organismes",
-        requireIndicateursOrganismesAccess,
-        returnResult(async (req, res) => {
-          return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
-        })
-      )
-      .get(
         "/indicateurs/organismes/:type",
         requireIndicateursOrganismesAccess,
         returnResult(async (req, res) => {
@@ -784,33 +757,15 @@ function setupRoutes(app: Application) {
       .use("/mission-locale", requireOrganismePermission("manageEffectifs"), missionLocaleOrganismeRoutes())
   );
 
-  /********************************
-   * Indicateurs aggrégés         *
-   ********************************/
-  authRouter
-    .get(
-      "/api/v1/indicateurs/effectifs/par-departement",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
-        return await getIndicateursEffectifsParDepartement(filters, req.user.acl);
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/organismes/par-departement",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
-        return await getIndicateursOrganismesParDepartement(filters, req.user.acl);
-      })
-    )
-    .post(
-      "/api/v1/formations/search",
-      returnResult(async (req) => {
-        const { searchTerm } = await validateFullZodObjectSchema(req.body, {
-          searchTerm: z.string().min(3),
-        });
-        return await searchOrganismesFormations(searchTerm);
-      })
-    );
+  authRouter.post(
+    "/api/v1/formations/search",
+    returnResult(async (req) => {
+      const { searchTerm } = await validateFullZodObjectSchema(req.body, {
+        searchTerm: z.string().min(3),
+      });
+      return await searchOrganismesFormations(searchTerm);
+    })
+  );
 
   authRouter.get(
     "/api/v1/rncp/:code_rncp",
