@@ -1,5 +1,4 @@
 import { ObjectId } from "mongodb";
-import { TypeEffectifNominatif } from "shared/constants/indicateurs";
 import { Acl } from "shared/constants/permissions";
 import { type IndicateursEffectifsAvecFormation } from "shared/models";
 
@@ -10,8 +9,6 @@ import { DateFilters, EffectifsFiltersTerritoire, FullEffectifsFilters, Territoi
 
 import {
   getIndicateursEffectifsParDepartementGenerique,
-  getIndicateursEffectifsParOrganismeGenerique,
-  getEffectifsNominatifsGenerique,
   getOrganismeIndicateursEffectifsParFormationGenerique,
   getOrganismeIndicateursEffectifsGenerique,
 } from "./indicateurs.actions";
@@ -49,44 +46,6 @@ export const getIndicateursEffectifsParDepartement = async (filters: DateFilters
 
   return Object.values(mapDepartement);
 };
-
-export const getIndicateursEffectifsParOrganisme = async (
-  ctx: AuthContext,
-  filters: FullEffectifsFilters,
-  organismeId?: ObjectId
-) => [
-  ...(await getIndicateursEffectifsParOrganismeGenerique(ctx, filters, effectifsDb(), false, organismeId)),
-  ...(await getIndicateursEffectifsParOrganismeGenerique(ctx, filters, effectifsDECADb(), true, organismeId)),
-];
-
-export const getEffectifsNominatifsWithoutId = async (
-  ctx: AuthContext,
-  filters: FullEffectifsFilters,
-  type: TypeEffectifNominatif,
-  organismeId?: ObjectId
-): Promise<{ effectifsWithoutIds: any[]; ids: ObjectId[] }> => {
-  const effectifs = await getEffectifsNominatifs(ctx, filters, type, organismeId);
-  return effectifs.reduce<{ effectifsWithoutIds: any[]; ids: ObjectId[] }>(
-    (acc, { _id, ...rest }) => ({
-      effectifsWithoutIds: [...acc.effectifsWithoutIds, rest],
-      ids: [...acc.ids, _id],
-    }),
-    {
-      effectifsWithoutIds: [],
-      ids: [],
-    }
-  );
-};
-
-const getEffectifsNominatifs = async (
-  ctx: AuthContext,
-  filters: FullEffectifsFilters,
-  type: TypeEffectifNominatif,
-  organismeId?: ObjectId
-) => [
-  ...(await getEffectifsNominatifsGenerique(ctx, filters, type, effectifsDb(), false, organismeId)),
-  ...(await getEffectifsNominatifsGenerique(ctx, filters, type, effectifsDECADb(), true, organismeId)),
-];
 
 export const getOrganismeIndicateursEffectifs = async (
   ctx: AuthContext,

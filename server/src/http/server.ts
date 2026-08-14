@@ -12,13 +12,7 @@ import express, { Application } from "express";
 import { ObjectId } from "mongodb";
 import passport from "passport";
 import { RateLimiterMemory } from "rate-limiter-flexible";
-import {
-  CODE_POSTAL_REGEX,
-  SOURCE_APPRENANT,
-  typesEffectifNominatif,
-  typesOrganismesIndicateurs,
-  zEffectifArchive,
-} from "shared";
+import { CODE_POSTAL_REGEX, SOURCE_APPRENANT, typesOrganismesIndicateurs, zEffectifArchive } from "shared";
 import {
   computeWarningsForDossierApprenantSchemaV3,
   dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret,
@@ -47,9 +41,7 @@ import {
   fullEffectifsFiltersSchema,
 } from "@/common/actions/helpers/filters";
 import {
-  getEffectifsNominatifsWithoutId,
   getIndicateursEffectifsParDepartement,
-  getIndicateursEffectifsParOrganisme,
   getOrganismeIndicateursEffectifs,
   getOrganismeIndicateursEffectifsParFormation,
 } from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
@@ -642,41 +634,11 @@ function setupRoutes(app: Application) {
         })
       )
       .get(
-        "/indicateurs/effectifs/par-organisme",
-        requireOrganismePermission("indicateursEffectifs"),
-        returnResult(async (req, res) => {
-          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-          return await getIndicateursEffectifsParOrganisme(req.user, filters, res.locals.organismeId);
-        })
-      )
-      .get(
         "/indicateurs/effectifs/par-formation",
         requireOrganismePermission("indicateursEffectifs"),
         returnResult(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
           return await getOrganismeIndicateursEffectifsParFormation(req.user, res.locals.organismeId, filters);
-        })
-      )
-      .get(
-        "/indicateurs/effectifs/:type",
-        requireOrganismePermission("effectifsNominatifs"),
-        returnResult(async (req, res) => {
-          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-          const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
-          const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(
-            req.user,
-            filters,
-            type,
-            res.locals.organismeId
-          );
-          await createTelechargementListeNomLog(
-            type,
-            ids.map((id) => id.toString()),
-            new Date(),
-            req.user._id,
-            res.locals.organismeId
-          );
-          return effectifsWithoutIds;
         })
       )
       .get(
@@ -831,35 +793,6 @@ function setupRoutes(app: Application) {
       returnResult(async (req) => {
         const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
         return await getIndicateursEffectifsParDepartement(filters, req.user.acl);
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/effectifs/par-organisme",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-        return await getIndicateursEffectifsParOrganisme(req.user, filters);
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/effectifs/:type",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-        const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
-        const permissions = req.user.acl.effectifsNominatifs[type];
-        if (permissions === false) {
-          throw Boom.forbidden("Permissions invalides");
-        }
-
-        const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(req.user, filters, type);
-        await createTelechargementListeNomLog(
-          type,
-          ids.map((id) => id.toString()),
-          new Date(),
-          req.user._id,
-          undefined,
-          new ObjectId(req.user.organisation_id)
-        );
-        return effectifsWithoutIds;
       })
     )
     .get(

@@ -4,14 +4,11 @@ import {
   IndicateursEffectifs,
   IndicateursEffectifsAvecDepartement,
   IndicateursEffectifsAvecFormation,
-  IndicateursEffectifsAvecOrganisme,
   IndicateursOrganismes,
   IndicateursOrganismesAvecDepartement,
   ORGANISME_INDICATEURS_TYPE,
   STATUT_APPRENANT,
-  TypeEffectifNominatif,
   hasRecentTransmissions,
-  shouldDisplayContactInEffectifNominatif,
 } from "shared";
 
 import {
@@ -382,75 +379,6 @@ export async function getIndicateursOrganismesParDepartement(
   return indicateurs;
 }
 
-export async function getIndicateursEffectifsParOrganismeGenerique(
-  ctx: AuthContext,
-  filters: FullEffectifsFilters,
-  db: Collection<any>,
-  decaMode: boolean = false,
-  organismeId?: ObjectId
-): Promise<IndicateursEffectifsAvecOrganisme[]> {
-  const indicateurs = (await db
-    .aggregate([
-      {
-        $match: combineFilters(
-          await getOrganismeRestriction(organismeId),
-          buildDECAFilter(decaMode),
-          ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs),
-          {
-            "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
-          }
-        ),
-      },
-      ...buildIndicateursEffectifsPipeline("$organisme_id", filters.date),
-      {
-        $lookup: {
-          from: "organismes",
-          localField: "_id",
-          foreignField: "_id",
-          as: "organisme",
-          pipeline: [
-            {
-              $project: {
-                uai: 1,
-                siret: 1,
-                nom: {
-                  $ifNull: ["$enseigne", "$raison_sociale"],
-                },
-                nature: {
-                  $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
-                },
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$organisme",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          organisme_id: "$_id",
-          uai: "$organisme.uai",
-          siret: "$organisme.siret",
-          nom: "$organisme.nom",
-          nature: "$organisme.nature",
-
-          apprenants: 1,
-          apprentis: 1,
-          inscrits: 1,
-          abandons: 1,
-          rupturants: 1,
-        },
-      },
-    ])
-    .toArray()) as IndicateursEffectifsAvecOrganisme[];
-  return indicateurs;
-}
-
 export async function getOrganismeIndicateursEffectifsParFormationGenerique(
   ctx: AuthContext,
   organismeId: ObjectId,
@@ -498,139 +426,6 @@ export async function getOrganismeIndicateursEffectifsParFormationGenerique(
     ])
     .toArray();
 
-  return indicateurs;
-}
-
-export async function getEffectifsNominatifsGenerique(
-  ctx: AuthContext,
-  filters: FullEffectifsFilters,
-  type: TypeEffectifNominatif,
-  db: Collection<any>,
-  decaMode: boolean = false,
-  organismeId?: ObjectId
-): Promise<IndicateursEffectifsAvecOrganisme[]> {
-  const computedType = (t: TypeEffectifNominatif) => {
-    switch (t) {
-      case "apprenant":
-        return ["APPRENTI", "INSCRIT", "RUPTURANT", "FIN_DE_FORMATION"];
-      case "apprenti":
-        return ["APPRENTI", "FIN_DE_FORMATION"];
-      case "inscritSansContrat":
-        return ["INSCRIT"];
-      case "rupturant":
-        return ["RUPTURANT"];
-      case "abandon":
-        return ["ABANDON"];
-      default:
-        return [t];
-    }
-  };
-  const indicateurs = (await db
-    .aggregate([
-      {
-        $match: combineFilters(
-          await getOrganismeRestriction(organismeId),
-          buildDECAFilter(decaMode),
-          ...buildEffectifMongoFilters(filters, ctx.acl.effectifsNominatifs[type]),
-          {
-            "_computed.organisme.fiable": true, // TODO : a supprimer si on permet de choisir de voir les effectifs des non fiables
-          }
-        ),
-      },
-      {
-        $addFields: {
-          "_computed.statut.parcours": {
-            $sortArray: {
-              input: {
-                $filter: {
-                  input: "$_computed.statut.parcours",
-                  as: "statut",
-                  cond: {
-                    $lte: ["$$statut.date", filters.date],
-                  },
-                },
-              },
-              sortBy: { date: 1 },
-            },
-          },
-        },
-      },
-      {
-        $match: { "_computed.statut.parcours": { $not: { $size: 0 } } },
-      },
-      {
-        $addFields: {
-          statut_apprenant_at_date: {
-            $last: "$_computed.statut.parcours",
-          },
-        },
-      },
-      {
-        $addFields: {
-          statut: "$statut_apprenant_at_date.valeur",
-        },
-      },
-      {
-        $match: {
-          statut: { $in: computedType(type) },
-        },
-      },
-      {
-        $lookup: {
-          from: "organismes",
-          localField: "organisme_id",
-          foreignField: "_id",
-          as: "organisme",
-          pipeline: [
-            {
-              $project: {
-                uai: 1,
-                siret: 1,
-                nom: {
-                  $ifNull: ["$enseigne", "$raison_sociale"],
-                },
-                nature: {
-                  $ifNull: ["$nature", "inconnue"], // On devrait plutôt remplir automatiquement la nature
-                },
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$organisme",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          organisme_uai: "$organisme.uai",
-          organisme_siret: "$organisme.siret",
-          organisme_nom: "$organisme.nom",
-          organisme_nature: "$organisme.nature",
-          apprenant_statut: "$statut",
-          apprenant_nom: "$apprenant.nom",
-          apprenant_prenom: "$apprenant.prenom",
-          apprenant_date_de_naissance: { $substr: ["$apprenant.date_de_naissance", 0, 10] },
-          formation_cfd: "$formation.cfd",
-          formation_rncp: "$formation.rncp",
-          formation_libelle_long: "$formation.libelle_long",
-          formation_annee: "$formation.annee",
-          formation_niveau: "$formation.niveau",
-          formation_date_debut_formation: { $arrayElemAt: ["$formation.periode", 0] },
-          formation_date_fin_formation: { $arrayElemAt: ["$formation.periode", 1] },
-          ...(shouldDisplayContactInEffectifNominatif(ctx.organisation.type)
-            ? {
-                apprenant_courriel: "$apprenant.courriel",
-                apprenant_telephone: "$apprenant.telephone",
-              }
-            : {}),
-        },
-      },
-    ])
-    .toArray()) as IndicateursEffectifsAvecOrganisme[];
   return indicateurs;
 }
 
