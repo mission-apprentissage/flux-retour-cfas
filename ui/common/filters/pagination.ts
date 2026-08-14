@@ -12,13 +12,6 @@ export interface PaginationInfos {
   sort: SortingState;
 }
 
-export function parsePaginationInfosFromQuery(query: PaginationInfosQuery): PaginationInfos {
-  return {
-    pagination: query.pagination ? JSON.parse(query.pagination) : null,
-    sort: query.sort ? JSON.parse(query.sort) : null,
-  };
-}
-
 export function convertPaginationInfosToQuery(infos: Partial<PaginationInfos>): PaginationInfosQuery {
   return stripEmptyFields({
     pagination: infos.pagination ? JSON.stringify(infos.pagination) : undefined,

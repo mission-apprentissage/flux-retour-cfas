@@ -3,50 +3,6 @@ import { DEPARTEMENTS, IOrganisation, IUsersMigration } from "shared";
 import { Organisme } from "./internal/Organisme";
 import { ExportColumn } from "./utils/exportUtils";
 
-export const indicateursParOrganismeExportColumns = [
-  {
-    label: "organisme_uai",
-    key: "uai",
-    width: 15,
-  },
-  {
-    label: "organisme_siret",
-    key: "siret",
-    xlsxType: "string",
-    width: 15,
-  },
-  {
-    label: "organisme_nom",
-    key: "nom",
-    width: 60,
-  },
-  {
-    label: "organisme_nature",
-    key: "nature",
-    width: 20,
-  },
-  {
-    label: "apprentis",
-    key: "apprentis",
-    width: 10,
-  },
-  {
-    label: "inscrits",
-    key: "inscrits",
-    width: 16,
-  },
-  {
-    label: "rupturants",
-    key: "rupturants",
-    width: 10,
-  },
-  {
-    label: "sorties",
-    key: "abandons",
-    width: 10,
-  },
-] as const satisfies ReadonlyArray<ExportColumn>;
-
 export const effectifsExportColumns = [
   {
     label: "organisme_uai",

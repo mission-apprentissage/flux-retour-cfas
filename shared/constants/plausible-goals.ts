@@ -29,14 +29,6 @@ const plausibleGoals = [
   "clic_sifa_faq",
 
   // Téléchargements
-  // - Page indicateurs
-  "telechargement_liste_sans_contrats",
-  "telechargement_liste_rupturants",
-  "telechargement_liste_abandons",
-  "telechargement_liste_apprentis",
-  "telechargement_liste_apprenants",
-  "telechargement_liste_repartition_effectifs",
-
   // - Page organismes
   "telechargement_liste_of_a_fiabiliser",
   "telechargement_liste_of_fiables",

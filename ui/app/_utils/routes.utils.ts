@@ -434,12 +434,5 @@ export const PAGES = {
         title: `Import des effectifs | ${SITE_NAME}`,
       }),
     }),
-    organismeIndicateurs: ({ organismeId }: { organismeId: string }): IPage => ({
-      getPath: () => `/organismes/${encodeURIComponent(organismeId)}/indicateurs`,
-      title: "Ses indicateurs",
-      getMetadata: () => ({
-        title: `Ses indicateurs | ${SITE_NAME}`,
-      }),
-    }),
   },
 } as const satisfies IPages;

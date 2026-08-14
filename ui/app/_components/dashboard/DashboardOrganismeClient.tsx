@@ -248,30 +248,23 @@ export function DashboardOrganismeClient({ organisme, modePublique }: DashboardO
               />
             )}
 
-            {aucunEffectifTransmis
-              ? !modePublique &&
-                (!organisme.mode_de_transmission ? (
+            {aucunEffectifTransmis &&
+              !modePublique &&
+              (!organisme.mode_de_transmission ? (
+                <div className={styles.alignRight}>
+                  <Button priority="secondary" linkProps={{ href: "/parametres" }}>
+                    Paramétrer un moyen de transmission
+                  </Button>
+                </div>
+              ) : (
+                organisme.mode_de_transmission === "MANUEL" && (
                   <div className={styles.alignRight}>
-                    <Button priority="secondary" linkProps={{ href: "/parametres" }}>
-                      Paramétrer un moyen de transmission
+                    <Button priority="secondary" linkProps={{ href: "/effectifs/televersement" }}>
+                      Ajouter via fichier Excel
                     </Button>
                   </div>
-                ) : (
-                  organisme.mode_de_transmission === "MANUEL" && (
-                    <div className={styles.alignRight}>
-                      <Button priority="secondary" linkProps={{ href: "/effectifs/televersement" }}>
-                        Ajouter via fichier Excel
-                      </Button>
-                    </div>
-                  )
-                ))
-              : modePublique && (
-                  <div className={styles.alignRight}>
-                    <Button priority="secondary" linkProps={{ href: `/organismes/${organisme._id}/indicateurs` }}>
-                      Voir les indicateurs
-                    </Button>
-                  </div>
-                )}
+                )
+              ))}
 
             {hasOrganismesFormateurs && (
               <OrganismesRattaches
