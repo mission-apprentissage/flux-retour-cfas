@@ -4,6 +4,7 @@ import { ConnectedHeader } from "../_components/ConnectedHeader";
 import { UserContextProvider } from "../_components/context/UserContext";
 import { Footer } from "../_components/Footer";
 import { CfaInviteBanner } from "../_components/ruptures/cfa/CfaInviteBanner";
+import { CfaUpdateBanner } from "../_components/ruptures/cfa/CfaUpdateBanner";
 import { getSession } from "../_utils/session.utils";
 import { Providers } from "../providers";
 
@@ -16,15 +17,18 @@ export default async function RootLayout({ children }: { children: JSX.Element }
     <Providers>
       <UserContextProvider user={user}>
         <ConnectedHeader />
+        <CfaUpdateBanner />
         <CfaInviteBanner />
-        <div
+        <main
+          id="contenu"
+          tabIndex={-1}
           style={{
             flex: 1,
             background: "linear-gradient(180deg, #F6F6F6 5.73%, #F5F5FE 41.13%)",
           }}
         >
           {children}
-        </div>
+        </main>
         <Footer />
         <CrispChatNoSSR />
       </UserContextProvider>
