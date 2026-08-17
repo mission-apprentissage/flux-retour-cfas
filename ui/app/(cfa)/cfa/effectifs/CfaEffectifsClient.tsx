@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { CfaEffectifsList } from "@/app/_components/ruptures/cfa/CfaEffectifsList";
 import { CfaEffectifsSkeleton } from "@/app/_components/ruptures/cfa/CfaEffectifsSkeleton";
+import { CfaWelcomeCard } from "@/app/_components/ruptures/cfa/CfaWelcomeCard";
 import { useCfaEffectifs, useCfaUrlParams } from "@/app/_components/ruptures/cfa/hooks";
 import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
@@ -58,6 +59,7 @@ export default function CfaEffectifsClient() {
 
   return (
     <div className="fr-container">
+      <CfaWelcomeCard />
       <CfaEffectifsList
         data={data ?? null}
         isAllowedDeca={data?.isAllowedDeca ?? false}
