@@ -264,7 +264,7 @@
 
 .qualiopiList li i {
   flex-shrink: 0;
-  color: var(--success-425-625-hover);
+  color: var(--text-default-success);
 }
 
 .qualiopiLogo {

@@ -5,6 +5,7 @@ import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import { PAGES } from "@/app/_utils/routes.utils";
 import { COMPTE_SETTINGS_HREF } from "@/common/utils/compteSettings";
 
 import styles from "./CfaAPropos.module.css";
@@ -396,7 +397,7 @@ export function CfaAProposClient() {
                   priority="primary"
                   iconId="fr-icon-arrow-right-line"
                   iconPosition="right"
-                  linkProps={{ href: COMPTE_SETTINGS_HREF }}
+                  linkProps={{ href: PAGES.static.effectifsTeleversement.getPath() }}
                 >
                   Ajouter mes données avec un fichier tableur
                 </Button>
