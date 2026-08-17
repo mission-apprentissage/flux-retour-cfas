@@ -1,0 +1,16 @@
+/* DSFR espace tous les onglets via `.fr-nav__list > :first-child:nth-last-child(3) ~ *`. */
+:global(.fr-nav__item):has(.aProposLink) {
+  margin-left: auto !important;
+}
+
+.aProposItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+@media (max-width: 992px) {
+  :global(.fr-nav__item):has(.aProposLink) {
+    margin-left: 0 !important;
+  }
+}

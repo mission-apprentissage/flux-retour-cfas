@@ -1,0 +1,344 @@
+.hero {
+  background-color: var(--background-alt-blue-france);
+}
+
+.heroInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.heroTitle {
+  margin: 0;
+  max-width: 42rem;
+  color: var(--text-title-grey);
+}
+
+.heroSubtitle {
+  display: block;
+  margin-top: 1.5rem;
+}
+
+.heroImage {
+  width: auto;
+  max-width: 34%;
+  height: auto;
+}
+
+/* Le groupe (cfa) applique un dégradé de fond ; la page À propos est sur fond blanc
+   pour que les encadrés gris ressortent. */
+.page {
+  background-color: var(--background-default-grey);
+}
+
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 3rem;
+  padding-top: 3rem;
+  padding-bottom: 4rem;
+}
+
+.sidebar {
+  flex: 0 0 20rem;
+  position: sticky;
+  top: 1rem;
+}
+
+.content {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 48rem;
+}
+
+.section {
+  padding-bottom: 3rem;
+  border-bottom: 1px solid var(--border-default-grey);
+  margin-bottom: 3rem;
+  scroll-margin-top: 1rem;
+}
+
+.section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.section p {
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  color: var(--text-title-grey);
+}
+
+.sectionTitle {
+  margin-bottom: 2rem;
+  color: var(--text-title-grey);
+}
+
+.subTitle {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  color: var(--text-title-grey);
+}
+
+.emphasis {
+  font-weight: 700;
+  color: var(--text-title-grey);
+}
+
+.quote {
+  margin: 0 0 1.5rem;
+  padding: 0 0 0 1.5rem;
+  border-left: 4px solid var(--border-default-blue-france);
+  font-size: 1.25rem;
+  line-height: 2rem;
+  color: var(--text-default-grey);
+}
+
+.quoteStrong {
+  font-weight: 700;
+  color: var(--text-title-grey);
+}
+
+.callout {
+  margin-bottom: 2rem;
+  padding: 1.5rem 2rem;
+  border-left: 4px solid var(--border-default-blue-france);
+  background-color: var(--background-contrast-grey);
+}
+
+.callout p {
+  font-weight: 400;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  color: var(--text-default-grey);
+}
+
+.callout p:last-child {
+  margin-bottom: 0;
+}
+
+.callout p.calloutTitle {
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  color: var(--text-title-grey);
+}
+
+.steps {
+  margin-bottom: 2rem;
+  padding-left: 1.25rem;
+  font-weight: 500;
+  color: var(--text-title-grey);
+}
+
+.steps li {
+  margin-bottom: 1rem;
+}
+
+.bulletList {
+  margin-bottom: 2rem;
+  padding-left: 1.25rem;
+  font-weight: 500;
+  color: var(--text-title-grey);
+}
+
+.bulletList li {
+  margin-bottom: 1rem;
+}
+
+.etapes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0 0 2rem;
+  padding: 0;
+  list-style: none;
+}
+
+.etape {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-default-grey);
+  border-bottom: 4px solid var(--border-contrast-grey);
+  background-color: var(--background-default-grey);
+}
+
+.etapeImage {
+  width: 100%;
+  height: 120px;
+  object-fit: contain;
+}
+
+.etapeLabel {
+  font-weight: 500;
+  color: var(--text-title-grey);
+}
+
+.figure {
+  margin: 0 0 2rem;
+}
+
+.figureImage {
+  width: 100%;
+  height: auto;
+}
+
+.freinsBlock {
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background-color: var(--background-alt-blue-france);
+}
+
+.freinsBlock p.freinsTitle {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  color: var(--text-mention-grey);
+}
+
+.freins {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.frein {
+  display: flex;
+  flex: 0 0 8rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-title-grey);
+}
+
+.freinIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  background-color: var(--background-action-low-blue-france);
+  color: var(--text-action-high-blue-france);
+}
+
+.qualiopi {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.qualiopiList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-default-grey);
+}
+
+.qualiopiList li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  color: var(--text-title-grey);
+}
+
+.qualiopiList li i {
+  flex-shrink: 0;
+  color: var(--success-425-625-hover);
+}
+
+.qualiopiLogo {
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+}
+
+.optionList {
+  margin: 0 0 2rem;
+  padding: 0;
+  list-style: none;
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border-default-grey);
+  border-bottom: 4px solid var(--border-contrast-grey);
+  background-color: var(--background-default-grey);
+}
+
+.option p {
+  margin-bottom: 0;
+}
+
+.optionIcon {
+  flex-shrink: 0;
+  color: var(--text-action-high-blue-france);
+}
+
+.contactImage {
+  display: block;
+  margin-top: 2rem;
+  width: auto;
+  height: auto;
+}
+
+@media (max-width: 992px) {
+  .layout {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .sidebar {
+    position: static;
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .heroInner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .heroImage {
+    max-width: 100%;
+  }
+
+  .etapes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .etapes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .qualiopi {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

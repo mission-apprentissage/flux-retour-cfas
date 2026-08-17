@@ -6,11 +6,11 @@ import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
 import { PAGES } from "@/app/_utils/routes.utils";
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
-import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
 
 import { useAuth } from "../_context/UserContext";
 import { usePlausibleAppTracking } from "../_hooks/plausible";
 
+import styles from "./ConnectedHeader.module.css";
 import { Impersonate } from "./Impersonate";
 import { useCfaUnreadNotificationsCount } from "./ruptures/cfa/hooks";
 import { UserConnectedHeader } from "./UserConnectedHeader";
@@ -20,10 +20,8 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   const pathname = usePathname();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
-  const isCfaWithMlBeta = checkCfaWithMlBeta(user?.organisation);
-  const { data: unreadData } = useCfaUnreadNotificationsCount(
-    isCfaWithMlBeta ? user?.organisation?.organisme_id : undefined
-  );
+  const isCfa = user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION;
+  const { data: unreadData } = useCfaUnreadNotificationsCount(isCfa ? user?.organisation?.organisme_id : undefined);
   const unreadCount = unreadData?.count ?? 0;
 
   const getMesOrganismesLabel = (type: string) => {
@@ -58,79 +56,56 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
         },
       });
     } else if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION) {
-      if (user?.organisation?.ml_beta_activated_at) {
-        baseItems.push({
-          text: "Effectifs en ruptures",
-          isActive:
-            pathname === "/cfa" ||
-            (pathname?.startsWith("/cfa/") &&
-              !pathname?.startsWith("/cfa/effectifs") &&
-              !pathname?.startsWith("/cfa/collaborations") &&
-              !pathname?.startsWith("/cfa/parametres")),
-          linkProps: {
-            href: "/cfa",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
-              Suivi Missions Locales
-              {unreadCount > 0 && (
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    backgroundColor: "var(--text-default-error)",
-                    flexShrink: 0,
-                  }}
-                  role="status"
-                  aria-label={`${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}`}
-                />
-              )}
-            </span>
-          ),
-          isActive: pathname?.startsWith("/cfa/collaborations"),
-          linkProps: {
-            href: "/cfa/collaborations",
-            target: "_self",
-            onClick: () => trackPlausibleEvent("cfa_liste_onglet_collab"),
-          },
-        });
-        baseItems.push({
-          text: "Tous mes effectifs",
-          isActive: pathname?.startsWith("/cfa/effectifs"),
-          linkProps: {
-            href: "/cfa/effectifs",
-            target: "_self",
-            onClick: () => trackPlausibleEvent("cfa_liste_onglet_tous"),
-          },
-        });
-      } else {
-        baseItems.push({
-          text: "Mon tableau de bord",
-          linkProps: {
-            href: "/",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: "Mes organismes",
-          linkProps: {
-            href: "/organismes",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: "Mes effectifs",
-          linkProps: {
-            href: "/effectifs",
-            target: "_self",
-          },
-        });
-      }
+      baseItems.push({
+        text: "Effectifs de l'établissement",
+        isActive: pathname?.startsWith("/cfa/effectifs"),
+        linkProps: {
+          href: "/cfa/effectifs",
+          target: "_self",
+          onClick: () => trackPlausibleEvent("cfa_liste_onglet_tous"),
+        },
+      });
+      baseItems.push({
+        text: (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+            Collaboration et suivi Missions Locales
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  backgroundColor: "var(--text-default-error)",
+                  flexShrink: 0,
+                }}
+                role="status"
+                aria-label={`${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}`}
+              />
+            )}
+          </span>
+        ),
+        isActive: pathname?.startsWith("/cfa/collaborations"),
+        linkProps: {
+          href: "/cfa/collaborations",
+          target: "_self",
+          onClick: () => trackPlausibleEvent("cfa_liste_onglet_collab"),
+        },
+      });
+      baseItems.push({
+        text: (
+          <span className={styles.aProposItem}>
+            À propos de la nouvelle version
+            <i className="fr-icon-information-line fr-icon--sm" aria-hidden="true" />
+          </span>
+        ),
+        isActive: pathname?.startsWith("/cfa/a-propos"),
+        linkProps: {
+          href: "/cfa/a-propos",
+          target: "_self",
+          className: styles.aProposLink,
+        },
+      });
     } else if (
       [
         ORGANISATION_TYPE.TETE_DE_RESEAU,
@@ -252,7 +227,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
       text: "Glossaire",
     });
 
-    if (!isCfaWithMlBeta) {
+    if (!isCfa) {
       baseItems.push({
         text: "Aide et ressources",
         menuLinks: aideMenuLinks,
