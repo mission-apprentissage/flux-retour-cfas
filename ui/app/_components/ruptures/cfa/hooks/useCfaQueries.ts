@@ -13,7 +13,6 @@ interface CfaEffectifsParams {
   search?: string;
   sort: string;
   order: "asc" | "desc";
-  en_rupture?: string;
   collab_status?: string;
   formation?: string;
 }
@@ -98,7 +97,7 @@ export function useCfaSuiviMissionLocale(organismeId: string | undefined, params
 export { useCfaUnreadNotificationsCount } from "@/hooks/useCfaUnreadNotifications";
 
 export function useCfaEffectifs(organismeId: string | undefined, params: CfaEffectifsParams) {
-  const { page, limit, sort, order, search, en_rupture, collab_status, formation } = params;
+  const { page, limit, sort, order, search, collab_status, formation } = params;
 
   return useQuery<ICfaEffectifsResponse>({
     queryKey: cfaQueryKeys.effectifs(organismeId!, params),
@@ -110,7 +109,6 @@ export function useCfaEffectifs(organismeId: string | undefined, params: CfaEffe
         order,
       };
       if (search) queryParams.search = search;
-      if (en_rupture) queryParams.en_rupture = en_rupture;
       if (collab_status) queryParams.collab_status = collab_status;
       if (formation) queryParams.formation = formation;
 

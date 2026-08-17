@@ -50,7 +50,7 @@ export function CfaCollaborationBadge({ status, effectifId, inline = false }: Cf
             <span className={styles.horsCollabInfo}>
               <Tooltip
                 kind="hover"
-                title="Ce jeune a été contacté par la Mission Locale en dehors d'une collaboration : son dossier a été transmis automatiquement à partir de 45 jours après la rupture."
+                title="Ce jeune a été contacté par la Mission Locale en dehors d'une collaboration : son dossier lui a été transmis automatiquement 45 jours après la rupture."
               />
             </span>
           </span>

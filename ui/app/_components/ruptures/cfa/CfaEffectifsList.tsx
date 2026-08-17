@@ -4,22 +4,19 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
-import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { MultiSelectDropdown } from "@/app/_components/common/MultiSelectDropdown";
-import { useAuth } from "@/app/_context/UserContext";
-import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
-import type { CfaCollaborationStatus, ICfaEffectif, ICfaEffectifsResponse } from "@/common/types/cfaRuptures";
-import { COLLAB_STATUS_LABELS, DECA_TOOLTIP_TEXT, EN_RUPTURE_OPTIONS } from "@/common/types/cfaRuptures";
+import { DsfrLink } from "@/app/_components/link/DsfrLink";
+import type { CfaCollaborationStatus, ICfaEffectifsResponse } from "@/common/types/cfaRuptures";
+import { COLLAB_STATUS_LABELS } from "@/common/types/cfaRuptures";
 
-import { CfaDeclareDateRuptureModal, declareDateRuptureModal } from "./CfaDeclareDateRuptureModal";
+import { CfaEffectifsHeader } from "./CfaEffectifsHeader";
 import styles from "./CfaEffectifsList.module.css";
-import { CfaEffectifsTable } from "./CfaEffectifsTable";
 import filterStyles from "./CfaFilters.module.css";
-import { CfaRuptureInfoModal, ruptureInfoModal } from "./CfaRuptureInfoModal";
 import cardStyles from "./CfaRuptureSegment.module.css";
-import { useDeclareCfaRupture, useSortablePagination } from "./hooks";
+import { CfaTousEffectifsTable } from "./CfaTousEffectifsTable";
+import { useSortablePagination } from "./hooks";
 
 interface CfaEffectifsListProps {
   data: ICfaEffectifsResponse | null;
@@ -28,7 +25,6 @@ interface CfaEffectifsListProps {
   onSearchChange: (value: string) => void;
   sort: string;
   order: "asc" | "desc";
-  enRuptureFilter?: string;
   collabStatusFilter?: string;
   formationFilter?: string;
   onParamsChange: (updates: Record<string, string | undefined>) => void;
@@ -41,43 +37,10 @@ export function CfaEffectifsList({
   onSearchChange,
   sort,
   order,
-  enRuptureFilter,
   collabStatusFilter,
   formationFilter,
   onParamsChange,
 }: CfaEffectifsListProps) {
-  const { user } = useAuth();
-  const organismeId = user?.organisation?.organisme_id;
-  const { mutateAsync: declareRupture } = useDeclareCfaRupture();
-  const { trackPlausibleEvent } = usePlausibleAppTracking();
-  const [selectedEffectif, setSelectedEffectif] = useState<ICfaEffectif | null>(null);
-
-  const handleToggleRupture = useCallback((effectif: ICfaEffectif) => {
-    setSelectedEffectif(effectif);
-    if (effectif.en_rupture) {
-      ruptureInfoModal.open();
-    } else {
-      declareDateRuptureModal.open();
-    }
-  }, []);
-
-  const handleDeclareRupture = useCallback(
-    async (dateRupture: string) => {
-      if (!organismeId || !selectedEffectif) return;
-      try {
-        await declareRupture({
-          organismeId,
-          effectifId: selectedEffectif.id,
-          dateRupture,
-          source: selectedEffectif.source,
-        });
-      } catch {
-        // Error is handled by the modal (status === "error" state)
-      }
-    },
-    [organismeId, selectedEffectif, declareRupture]
-  );
-
   const collabStatuses = useMemo(
     () => (collabStatusFilter ? collabStatusFilter.split(",").filter(Boolean) : []),
     [collabStatusFilter]
@@ -87,8 +50,6 @@ export function CfaEffectifsList({
     () => (formationFilter ? formationFilter.split(",").filter(Boolean) : []),
     [formationFilter]
   );
-
-  const enRuptureValues = useMemo(() => (enRuptureFilter ? [enRuptureFilter] : []), [enRuptureFilter]);
 
   const formationOptions = useMemo(
     () => (data?.filters.formations ?? []).map((f) => ({ value: f, label: f })),
@@ -100,37 +61,22 @@ export function CfaEffectifsList({
     []
   );
 
-  const hasActiveFilters = collabStatuses.length > 0 || formations.length > 0 || enRuptureValues.length > 0;
+  const hasActiveFilters = collabStatuses.length > 0 || formations.length > 0;
 
   const { handleSort, handlePageChange } = useSortablePagination(sort, order, onParamsChange);
 
   return (
     <div>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Tous mes effectifs</h1>
-        <p className={styles.subtitle}>
-          Retrouvez ici la liste de tous les effectifs auxquels le Tableau de Bord a accès grâce à la connexion de votre
-          ERP.
-          {isAllowedDeca && (
-            <>
-              {" "}
-              Cette liste contient également les effectifs captés par la base de données{" "}
-              <strong style={{ color: "var(--text-action-high-blue-france)" }}>DECA</strong>
-              <span style={{ marginLeft: "0.25rem" }}>
-                <Tooltip kind="hover" title={DECA_TOOLTIP_TEXT} />
-              </span>
-            </>
-          )}
-        </p>
-      </div>
+      <CfaEffectifsHeader isAllowedDeca={isAllowedDeca} />
 
-      <div className={filterStyles.filtersSection}>
-        <div className={filterStyles.searchField}>
+      <section className={styles.hero}>
+        <h2 className={styles.heroTitle}>Un ou une jeune a besoin de l&apos;aide d&apos;une Mission Locale ?</h2>
+        <div className={styles.heroSearch}>
           <Input
-            label="Rechercher"
+            label="Rechercher un jeune"
             hideLabel
             nativeInputProps={{
-              placeholder: "Rechercher un jeune par nom ou prénom",
+              placeholder: "Rechercher un jeune par son prénom ou son nom ici",
               type: "search",
               value: searchInput,
               onChange: (e) => onSearchChange(e.target.value),
@@ -144,37 +90,20 @@ export function CfaEffectifsList({
             }
           />
         </div>
+        <p className={styles.heroNotice}>
+          Veuillez noter que le Tableau de bord travaille avec les Missions Locales qui accompagnent uniquement les
+          publics de 16 à 25 ans.
+        </p>
+        <DsfrLink href="/cfa/a-propos#pourquoi-collaborer" className={styles.heroLink}>
+          Pourquoi collaborer avec les Missions Locales ?
+        </DsfrLink>
+      </section>
 
-        <div className={filterStyles.filtersRow}>
+      <div className={filterStyles.filtersSection}>
+        <div className={`${filterStyles.filtersRow} ${styles.filtersRow}`}>
           <span className={filterStyles.filterLabel}>Filtrer</span>
 
-          <div className={filterStyles.selectField}>
-            <MultiSelectDropdown
-              options={EN_RUPTURE_OPTIONS}
-              value={enRuptureValues}
-              onChange={(v) => {
-                onParamsChange({ en_rupture: v[0] || undefined, page: "1" });
-                if (v.length > 0) trackPlausibleEvent("cfa_liste_filtre_statut", undefined, { valeurs: v.join(",") });
-              }}
-              placeholder="En rupture"
-            />
-          </div>
-
-          <div className={filterStyles.selectFieldWide}>
-            <MultiSelectDropdown
-              options={collabOptions}
-              value={collabStatuses}
-              onChange={(v) =>
-                onParamsChange({
-                  collab_status: v.length > 0 ? v.join(",") : undefined,
-                  page: "1",
-                })
-              }
-              placeholder="Collaboration avec la ML"
-            />
-          </div>
-
-          <div className={filterStyles.selectFieldWide}>
+          <div className={styles.filterField}>
             <MultiSelectDropdown
               options={formationOptions}
               value={formations}
@@ -187,21 +116,24 @@ export function CfaEffectifsList({
               placeholder="Toutes les formations"
             />
           </div>
+
+          <div className={styles.filterField}>
+            <MultiSelectDropdown
+              options={collabOptions}
+              value={collabStatuses}
+              onChange={(v) =>
+                onParamsChange({
+                  collab_status: v.length > 0 ? v.join(",") : undefined,
+                  page: "1",
+                })
+              }
+              placeholder="Statut de la collaboration avec la ML"
+            />
+          </div>
         </div>
 
         {hasActiveFilters && (
           <div className={filterStyles.tagsRow}>
-            {enRuptureValues.map((v) => (
-              <Tag
-                key={v}
-                pressed
-                nativeButtonProps={{
-                  onClick: () => onParamsChange({ en_rupture: undefined, page: "1" }),
-                }}
-              >
-                En rupture : {v === "oui" ? "Oui" : "Non"}
-              </Tag>
-            ))}
             {collabStatuses.map((status) => (
               <Tag
                 key={status}
@@ -241,7 +173,6 @@ export function CfaEffectifsList({
               className={filterStyles.resetButton}
               onClick={() =>
                 onParamsChange({
-                  en_rupture: undefined,
                   collab_status: undefined,
                   formation: undefined,
                   page: "1",
@@ -257,19 +188,13 @@ export function CfaEffectifsList({
       {data && (
         <section className={cardStyles.card}>
           <div className={cardStyles.cardHeader}>
-            <h3 className={cardStyles.cardTitle}>Tous mes effectifs</h3>
+            <h2 className={cardStyles.cardTitle}>Tous les effectifs</h2>
             <span className={cardStyles.cardCount}>
               {data.pagination.total} effectif{data.pagination.total !== 1 ? "s" : ""}
             </span>
           </div>
 
-          <CfaEffectifsTable
-            effectifs={data.effectifs}
-            sort={sort}
-            order={order}
-            onSort={handleSort}
-            onToggleRupture={handleToggleRupture}
-          />
+          <CfaTousEffectifsTable effectifs={data.effectifs} sort={sort} order={order} onSort={handleSort} />
 
           {data.pagination.totalPages > 1 && (
             <div className={cardStyles.paginationContainer}>
@@ -290,11 +215,6 @@ export function CfaEffectifsList({
           )}
         </section>
       )}
-      <CfaDeclareDateRuptureModal
-        effectifName={selectedEffectif ? `${selectedEffectif.prenom} ${selectedEffectif.nom}` : ""}
-        onConfirm={handleDeclareRupture}
-      />
-      <CfaRuptureInfoModal />
     </div>
   );
 }

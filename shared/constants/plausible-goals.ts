@@ -106,7 +106,6 @@ const plausibleGoals = [
   // CFA — Liste
   "cfa_liste_ouverte",
   "cfa_liste_jeune_ouvert",
-  "cfa_liste_filtre_statut",
   "cfa_liste_filtre_collab",
   "cfa_liste_filtre_formation",
   "cfa_liste_recherche",
