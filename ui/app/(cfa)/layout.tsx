@@ -8,6 +8,8 @@ import { CfaUpdateBanner } from "../_components/ruptures/cfa/CfaUpdateBanner";
 import { getSession } from "../_utils/session.utils";
 import { Providers } from "../providers";
 
+import styles from "./layout.module.css";
+
 const CrispChatNoSSR = dynamic(() => import("../_components/CrispChat").then((mod) => mod.CrispChat));
 
 export default async function RootLayout({ children }: { children: JSX.Element }) {
@@ -17,16 +19,11 @@ export default async function RootLayout({ children }: { children: JSX.Element }
     <Providers>
       <UserContextProvider user={user}>
         <ConnectedHeader />
-        <CfaUpdateBanner />
-        <CfaInviteBanner />
-        <main
-          id="contenu"
-          tabIndex={-1}
-          style={{
-            flex: 1,
-            background: "linear-gradient(180deg, #F6F6F6 5.73%, #F5F5FE 41.13%)",
-          }}
-        >
+        <div className={styles.bannerSlot}>
+          <CfaUpdateBanner />
+          <CfaInviteBanner />
+        </div>
+        <main id="contenu" tabIndex={-1} className={styles.content}>
           {children}
         </main>
         <Footer />
