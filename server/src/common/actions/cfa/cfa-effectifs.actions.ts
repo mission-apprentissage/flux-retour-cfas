@@ -788,6 +788,7 @@ export async function declareCfaEffectifRupture(
   }
 
   const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
+  const organisme = await organismesDb().findOne({ _id: organismeId }, { projection: { is_allowed_collab: 1 } });
 
   try {
     const { insertedId } = await missionLocaleEffectifsDb().insertOne({
@@ -804,6 +805,7 @@ export async function declareCfaEffectifRupture(
       computed: {
         organisme: {
           ml_beta_activated_at: organisation?.ml_beta_activated_at ?? null,
+          is_allowed_collab: organisme?.is_allowed_collab ?? false,
         },
         ...(mlOrganisation.activated_at ? { mission_locale: { activated_at: mlOrganisation.activated_at } } : {}),
       },
