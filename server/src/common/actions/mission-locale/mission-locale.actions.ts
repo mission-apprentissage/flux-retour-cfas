@@ -4,6 +4,7 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import { AggregationCursor, MongoServerError } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
+import { CFA_COLLAB_AUTO_SEND_DELAI_DAYS } from "shared/constants/collaboration";
 import {
   IEffectif,
   IOrganisationMissionLocale,
@@ -51,7 +52,6 @@ import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "./mission-locale.constants";
 
 const DECA_RUPTURE_DATE_DEBUT = new Date("2025-11-01");
 const DELAI_MIN_RUPTURE_FIN_FORMATION_DAYS = 90;
-const CFA_COLLAB_AUTO_SEND_DELAI_DAYS = 45;
 
 /**
  * Expression d'agrégation : l'effectif a été "envoyé" à la Mission Locale par le CFA.
