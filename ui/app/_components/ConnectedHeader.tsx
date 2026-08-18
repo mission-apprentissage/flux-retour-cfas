@@ -248,6 +248,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
       serviceTitle={PRODUCT_NAME_TITLE}
       quickAccessItems={[<Impersonate key="impersonate" />, <UserConnectedHeader key="user-connected" />]}
       navigation={getNavigationItems()}
+      disableDisplay
     />
   );
 }
