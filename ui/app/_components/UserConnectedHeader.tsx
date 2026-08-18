@@ -12,7 +12,6 @@ import { PAGES } from "@/app/_utils/routes.utils";
 import { _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
 import { getAccountLabel } from "@/common/utils/accountUtils";
-import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
 import { COMPTE_ACCOUNT_HREF, COMPTE_SETTINGS_HREF, getCompteSettingsTab } from "@/common/utils/compteSettings";
 
 import { useAuth } from "../_context/UserContext";
@@ -22,21 +21,21 @@ export const UserConnectedHeader = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  const isCfaWithMlBeta = checkCfaWithMlBeta(user?.organisation);
+  const isCfa = user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION;
   const isMissionLocale = user?.organisation?.type === ORGANISATION_TYPE.MISSION_LOCALE;
   // Onglet "Paramètres" géré par le hub /compte (ML, CFA-beta), source unique partagée avec le hub.
   const settingsTab = getCompteSettingsTab(user?.organisation);
 
   // Nom de l'organisation affiché sous le nom de l'utilisateur : le nom de l'organisme pour un CFA,
   // le nom de la Mission Locale pour un agent ML.
-  const organisationLabel = isCfaWithMlBeta
+  const organisationLabel = isCfa
     ? user?.organisation_nom
     : user?.organisation?.type === "MISSION_LOCALE"
       ? `Mission Locale ${user.organisation.nom}`
       : undefined;
 
   // Affichage à deux lignes (prénom/nom au-dessus de l'organisation), identique entre CFA et ML.
-  const showUserNameHeader = (isCfaWithMlBeta || isMissionLocale) && !!user?.prenom && !!user?.nom;
+  const showUserNameHeader = (isCfa || isMissionLocale) && !!user?.prenom && !!user?.nom;
 
   const logout = async () => {
     await _post("/api/v1/auth/logout");
@@ -54,7 +53,7 @@ export const UserConnectedHeader = () => {
     const organisationType = user?.organisation?.type;
     switch (entry) {
       case "ROLES":
-        return organisationType !== ORGANISATION_TYPE.MISSION_LOCALE && !isCfaWithMlBeta;
+        return organisationType !== ORGANISATION_TYPE.MISSION_LOCALE && !isCfa;
       case "TRANSMISSIONS":
         return organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION;
       case "ADMIN":
@@ -64,11 +63,7 @@ export const UserConnectedHeader = () => {
     }
   };
 
-  const settingsUrl = settingsTab
-    ? COMPTE_SETTINGS_HREF
-    : user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION && !isCfaWithMlBeta
-      ? "/parametres"
-      : undefined;
+  const settingsUrl = settingsTab ? COMPTE_SETTINGS_HREF : undefined;
 
   return (
     <>
@@ -173,7 +168,7 @@ export const UserConnectedHeader = () => {
               </MenuItem>
             )}
 
-            {isCfaWithMlBeta && (user?.organisation_role === "admin" || user?.impersonating === true) && (
+            {isCfa && (user?.organisation_role === "admin" || user?.impersonating === true) && (
               <MenuItem component="a" href="/cfa/roles-habilitations" onClick={handleClose}>
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-team-fill", "fr-icon--sm")}></i>
@@ -182,13 +177,7 @@ export const UserConnectedHeader = () => {
               </MenuItem>
             )}
 
-            {isCfaWithMlBeta && [
-              <MenuItem key="cfa-parametres" component="a" href={COMPTE_SETTINGS_HREF} onClick={handleClose}>
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                {settingsTab?.label ?? "Paramètres de connexion ERP"}
-              </MenuItem>,
+            {isCfa && [
               <ListSubheader
                 key="cfa-aide-header"
                 component="div"
