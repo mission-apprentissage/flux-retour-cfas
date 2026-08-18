@@ -83,6 +83,7 @@ import { migrateAutreSituations } from "./migration/migrate-autre-situations";
 import {
   createAllMissingOrganismeOrganisation,
   deleteOrganisationWithoutUser,
+  hydrateOrganismesHasAccount,
   updateOrganismeIdInOrganisations,
 } from "./organisations/organisation.job";
 import { revokeStaleApiKeysJob } from "./organismes/revoke-stale-api-keys";
@@ -104,6 +105,8 @@ const dailyJobs = async (queued: boolean) => {
   await addJob({ name: "hydrate:organismes", queued });
 
   await addJob({ name: "hydrate:organismes-organisations", queued });
+
+  await addJob({ name: "hydrate:organismes-has-account", queued });
 
   // # Mise à jour des relations
   await addJob({ name: "hydrate:organismes-relations", queued });
@@ -373,6 +376,11 @@ export async function setupJobProcessor() {
       "hydrate:organismes-organisations": {
         handler: async () => {
           return createAllMissingOrganismeOrganisation();
+        },
+      },
+      "hydrate:organismes-has-account": {
+        handler: async () => {
+          return hydrateOrganismesHasAccount();
         },
       },
       "hydrate:organismes-effectifs-count": {

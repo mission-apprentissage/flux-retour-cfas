@@ -731,6 +731,7 @@ const lookUpOrganisme = (withContacts: boolean = false) => {
               siret: 1,
               enseigne: 1,
               is_allowed_deca: 1,
+              has_account: 1,
             },
           },
         ],
