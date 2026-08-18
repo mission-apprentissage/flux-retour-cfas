@@ -386,6 +386,15 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
       {
         $ne: [{ $ifNull: ["$situation", null] }, null],
       },
+      // Antériorité : un dossier créé avant l'activation ML de son organisme reste visible,
+      // quel que soit l'état de collaboration. Évite qu'activer un organisme retire aux ML
+      // des dossiers qu'elles voyaient déjà.
+      {
+        $and: [
+          { $ne: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null] },
+          { $lt: ["$created_at", "$computed.organisme.ml_beta_activated_at"] },
+        ],
+      },
     ],
   };
 
