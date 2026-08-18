@@ -180,24 +180,6 @@ async function handlePrequalifYesSideEffects(effectif: IMissionLocaleEffectif): 
 
   const alreadyClosed = effectif.whatsapp_contact?.conversation_state === CONVERSATION_STATE.CLOSED;
 
-  const cfaWentV2 = effectif.computed?.organisme?.is_allowed_collab === true;
-  const cfaAccConjoint = effectif.organisme_data?.acc_conjoint === true;
-  if (cfaWentV2 || cfaAccConjoint) {
-    logger.warn(
-      {
-        effectifId: effectif._id,
-        cfaWentV2,
-        cfaAccConjoint,
-      },
-      "Préqualif YES reçu mais CFA bascule V2 / acc_conjoint entre envoi et réponse — souhaite_rdv NON posé (exclusion PRD)"
-    );
-    captureException(new Error("Prequalif YES skipped: CFA went V2 between send and reply"), {
-      tags: { feature: "whatsapp_prequalif", step: "yes_skipped_cfa_v2" },
-      extra: { effectifId: effectif._id.toString() },
-    });
-    return;
-  }
-
   // Idempotence : si la conversation est déjà CLOSED, le premier YES a été traité.
   // Re-appliquer le $set réécraserait `souhaite_rdv_at` avec un `now` ultérieur (drift métier).
   // La notif ML conserve sa propre garde (`prequalif_notif_sent_at`).
