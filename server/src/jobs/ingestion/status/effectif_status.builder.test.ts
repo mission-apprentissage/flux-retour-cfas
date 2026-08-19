@@ -523,14 +523,14 @@ describe("buildEffectifStatus", () => {
       },
     ],
     [
-      // Tolérance fin de formation : contrat terminé naturellement à 45 j de la fin de session
+      // Borne de tolérance : contrat terminé naturellement à exactement 60 j de la fin de session
       // → FIN_DE_FORMATION dès J+1 (et non RUPTURANT).
       {
         session: { debut: new Date("2024-01-01"), fin: new Date("2024-12-15") },
         contrats: {
           "2024-02-01": {
             date_debut: new Date("2024-02-01T00:00:00.000Z"),
-            date_fin: new Date("2024-10-31T00:00:00.000Z"),
+            date_fin: new Date("2024-10-16T00:00:00.000Z"),
             rupture: null,
             employeur: { siret: null },
           },
@@ -542,19 +542,19 @@ describe("buildEffectifStatus", () => {
         parcours: [
           { valeur: "INSCRIT", date: new Date("2024-01-01") },
           { valeur: "APPRENTI", date: new Date("2024-02-01") },
-          { valeur: "FIN_DE_FORMATION", date: new Date("2024-11-01") },
+          { valeur: "FIN_DE_FORMATION", date: new Date("2024-10-17") },
         ],
       },
     ],
     [
-      // Hors tolérance : 46 j entre la fin de contrat et la fin de session → RUPTURANT sur tout le
+      // Hors tolérance : 61 j entre la fin de contrat et la fin de session → RUPTURANT sur tout le
       // gap, FIN_DE_FORMATION uniquement le dernier jour de session (règle préexistante).
       {
         session: { debut: new Date("2024-01-01"), fin: new Date("2024-12-15") },
         contrats: {
           "2024-02-01": {
             date_debut: new Date("2024-02-01T00:00:00.000Z"),
-            date_fin: new Date("2024-10-30T00:00:00.000Z"),
+            date_fin: new Date("2024-10-15T00:00:00.000Z"),
             rupture: null,
             employeur: { siret: null },
           },
@@ -566,7 +566,7 @@ describe("buildEffectifStatus", () => {
         parcours: [
           { valeur: "INSCRIT", date: new Date("2024-01-01") },
           { valeur: "APPRENTI", date: new Date("2024-02-01") },
-          { valeur: "RUPTURANT", date: new Date("2024-10-31") },
+          { valeur: "RUPTURANT", date: new Date("2024-10-16") },
           { valeur: "FIN_DE_FORMATION", date: new Date("2024-12-15") },
         ],
       },

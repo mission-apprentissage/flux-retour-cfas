@@ -29,7 +29,8 @@ function getDaysBetween({ start, end }: { start: Date; end: Date }): string[] {
   }).map((date) => formatISO(date, { representation: "date" }));
 }
 
-export const FIN_FORMATION_TOLERANCE_DAYS = 45;
+// Sans rapport avec le délai d'envoi automatique en collab (CFA_COLLAB_AUTO_SEND_DELAI_DAYS).
+export const FIN_FORMATION_TOLERANCE_DAYS = 60;
 
 function getContratFinEffective(contrat: IEffectifV2["contrats"][string], sessionFin: Date): Date {
   return contrat.rupture?.date_rupture ? addDays(contrat.rupture.date_rupture, -1) : (contrat.date_fin ?? sessionFin);
