@@ -1,32 +1,32 @@
 .card {
-  background-color: #ffffff;
+  background-color: var(--background-default-grey);
   padding: clamp(0px, 3vw, 2rem);
 }
 
 .accent {
-  color: #6a6af4;
+  color: var(--text-active-blue-france);
 }
 
 .etabCard {
-  background: #ffffff;
+  background: var(--background-default-grey);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  border: 1px solid #dddddd;
+  border: 1px solid var(--border-default-grey);
   border-radius: 4px;
 }
 
 .etabIcon {
-  color: #000091;
+  color: var(--text-action-high-blue-france);
   flex-shrink: 0;
 }
 
 .etabName {
   font-weight: 700;
   font-size: 16px;
-  color: #161616;
+  color: var(--text-title-grey);
   margin: 0;
 }
 
@@ -34,11 +34,11 @@
   margin: 0;
   font-weight: 400;
   font-size: 14px;
-  color: #3a3a3a;
+  color: var(--text-default-grey);
 }
 
 .cguLink {
-  color: #000091;
+  color: var(--text-action-high-blue-france);
   font-weight: 700;
 }
 
@@ -61,7 +61,7 @@
 
 .notMyEtab {
   font-size: 0.875rem;
-  color: #000091;
+  color: var(--text-action-high-blue-france);
 }
 
 .infoAlert {
@@ -72,26 +72,21 @@
   display: flex;
   align-items: flex-start;
   gap: 0.25rem;
-  color: #0063cb;
+  color: var(--text-default-info);
   font-size: 12px;
   line-height: 1.4;
   margin: -1rem 0 1rem;
 }
 
 .infoHintIcon {
-  color: #0063cb;
+  color: var(--text-default-info);
   flex-shrink: 0;
   margin-top: 1px;
 }
 
-.requiredMark {
-  color: #ce0500;
-  font-weight: 700;
-}
-
 .roleBlock {
-  background-color: #f5f5fe;
-  border: 1px solid #ececfe;
+  background-color: var(--background-alt-blue-france);
+  border: 1px solid var(--border-default-blue-france);
   padding: 1rem 1.25rem;
   margin-bottom: 1rem;
 }
@@ -100,14 +95,14 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #000091;
+  color: var(--text-action-high-blue-france);
   font-size: 14px;
   font-weight: 700;
   margin: 0 0 0.5rem;
 }
 
 .roleTitleIcon {
-  color: #000091;
+  color: var(--text-action-high-blue-france);
   flex-shrink: 0;
 }
 
@@ -127,7 +122,7 @@
 }
 
 .loginBlock {
-  background-color: #ffffff;
+  background-color: var(--background-default-grey);
   padding: clamp(1rem, 3vw, 2rem);
   margin-top: 1.5rem;
   display: flex;
@@ -148,7 +143,7 @@
 
 .step3Icon {
   font-size: 2.5rem;
-  color: #000091;
+  color: var(--text-action-high-blue-france);
   margin-bottom: 1rem;
   display: block;
 }
@@ -175,7 +170,7 @@
 
 .step3Separator {
   border: none;
-  border-top: 1px solid #dddddd;
+  border-top: 1px solid var(--border-default-grey);
   margin: 0 auto 1.5rem;
   max-width: 400px;
 }
@@ -189,7 +184,7 @@
   background: none;
   border: none;
   padding: 0;
-  color: #000091;
+  color: var(--text-action-high-blue-france);
   font-weight: 500;
   font-family: inherit;
   font-size: inherit;

@@ -1,0 +1,17 @@
+.rowLabel {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.notApplicable {
+  color: var(--text-disabled-grey);
+}
+
+.catalogueValues {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}

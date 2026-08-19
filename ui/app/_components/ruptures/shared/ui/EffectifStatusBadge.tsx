@@ -79,28 +79,6 @@ export function EffectifStatusBadge({ effectif, organisation }: EffectifStatusBa
   return null;
 }
 
-export function EffectifDetailStatusBadge({ effectif }: EffectifStatusBadgeProps) {
-  if (effectif.prioritaire && effectif.a_traiter) {
-    return (
-      <span className="fr-badge fr-badge--red-inverted" aria-label="Effectif prioritaire">
-        <i className="fr-icon-fire-fill fr-icon--sm" />
-        <span className={`${styles.badgeTextSpacing} ${styles.fontWeightNormal}`}>À TRAITER EN PRIORITÉ</span>
-      </span>
-    );
-  }
-
-  if (effectif.prioritaire && !effectif.a_traiter && effectif.injoignable) {
-    return (
-      <span className="fr-badge fr-badge--red-inverted" aria-label="Effectif prioritaire">
-        <i className="fr-icon-fire-fill fr-icon--sm" />
-        <span className={`${styles.badgeTextSpacing} ${styles.fontWeightNormal}`}>À RECONTACTER EN PRIORITÉ</span>
-      </span>
-    );
-  }
-
-  return <EffectifStatusBadge effectif={effectif} />;
-}
-
 type BadgeBuilderOptions = { fontSize: string; iconSize: string; includeFinDeFormation?: boolean };
 
 function getAllPriorityBadges(
@@ -171,16 +149,6 @@ export function EffectifPriorityBadgeMultiple({
   if (badges.length === 0) return null;
   if (badges.length === 1) return badges[0];
   return <div className={styles.badgesContainer}>{badges}</div>;
-}
-
-export function EffectifPriorityBadgeList({ effectif }: { effectif: IEffectifMissionLocale["effectif"] }) {
-  if (!(effectif.prioritaire && (effectif.a_traiter || effectif.injoignable))) {
-    return null;
-  }
-
-  const badges = getAllPriorityBadges(effectif, { fontSize: "12px", iconSize: "fr-icon--xs" });
-
-  return badges.length > 0 ? <div className={styles.badgesContainerWithMargin}>{badges}</div> : null;
 }
 
 function MineurBadge({ iconSize, fontSize }: { iconSize: string; fontSize: string }) {

@@ -166,7 +166,7 @@ export function CfaCollaborationsList({
   return (
     <div>
       <div className={styles.pageHeader}>
-        <h1 className={styles.title}>Suivi Missions Locales</h1>
+        <h1 className={styles.title}>Collaboration et suivi Missions Locales</h1>
         {organismeId && (
           <div className={styles.exportButtonWrap}>
             <CfaSuiviExportButton organismeId={organismeId} />

@@ -12,6 +12,7 @@ export function PublicHeaderWithoutAuth() {
       }}
       id="fr-header-simple-header-with-service-title-and-tagline"
       serviceTitle={PRODUCT_NAME_TITLE}
+      disableDisplay
     />
   );
 }

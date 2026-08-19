@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { subMonths } from "date-fns";
@@ -14,7 +16,6 @@ import {
 } from "shared";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme, hasRecentTransmissions, withOrganismeListSummary } from "shared/models/data/organismes.model";
-import { v4 as uuidv4 } from "uuid";
 
 import {
   findOrganismesAccessiblesByOrganisationOF,
@@ -221,7 +222,7 @@ export const generateApiKeyForOrg = async (organismeId: ObjectId) => {
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organismeId },
     {
-      $set: { api_key: uuidv4(), api_key_generated_at: new Date() },
+      $set: { api_key: randomUUID(), api_key_generated_at: new Date() },
       $unset: { api_key_revoked_at: "", api_key_revoked_reason: "" },
     },
     { returnDocument: "after" }

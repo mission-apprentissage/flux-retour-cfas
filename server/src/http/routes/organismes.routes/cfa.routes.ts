@@ -25,9 +25,10 @@ const zCfaEffectifsQuery = {
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(100),
   search: z.string().optional(),
-  sort: z.enum(["nom", "formation", "date_rupture", "en_rupture", "collab_status", "last_activity"]).default("nom"),
+  sort: z
+    .enum(["nom", "formation", "date_rupture", "en_rupture", "mission_locale", "collab_status", "last_activity"])
+    .default("nom"),
   order: z.enum(["asc", "desc"]).default("asc"),
-  en_rupture: z.enum(["oui", "non"]).optional(),
   collab_status: z.string().optional(),
   formation: z.string().optional(),
 };

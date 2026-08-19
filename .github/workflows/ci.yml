@@ -2,52 +2,23 @@ name: CI
 
 on:
   workflow_call:
-    secrets:
-      CODECOV_TOKEN:
-        description: Code coverrage token
-        required: true
 jobs:
-  npm-packages-check:
+  gitleaks:
+    name: "Gitleaks"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout project
         uses: actions/checkout@v6
         with:
-          fetch-depth: 1
-          persist-credentials: true
-
-      - name: Clone mna-npm-check repository
-        uses: actions/checkout@v4
-        with:
-          repository: mission-apprentissage/mna-npm-check
-          path: mna-npm-check
-
-      - name: Analyze NPM dependancies
-        run: mna-npm-check/npm-check.sh -p .
-
-  tests:
-    if: ${{ success() }}
-    needs: ["npm-packages-check"]
-    name: "Tests"
-    runs-on: ubuntu-latest
-    services:
-      mongodb:
-        image: mongo:7
-        ports:
-          - "27017:27017"
-    steps:
-      - name: Checkout project
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
+          # historique complet requis pour git diff BASE_SHA..HEAD_SHA
+          fetch-depth: 0
+          persist-credentials: false
 
       - uses: actions/setup-node@v6
         with:
           node-version-file: ".node-version"
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
 
       - uses: actions/cache@v4
         with:
@@ -61,25 +32,109 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Install classifier dependencies
-        run: yarn classifier:install
+      - name: Scan secrets (gitleaks)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
+        run: yarn gitleaks:check ci
+
+  npm-packages-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+
+      - name: Analyze NPM dependencies
+        uses: ./.github/actions/npm-check
+
+  lint:
+    if: ${{ success() }}
+    needs: ["npm-packages-check"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
 
       - name: Make sure to use same dependencies version across all packages
         run: yarn dedupe --check
 
       - name: lint
-        run: yarn lint
-
-      - name: typecheck
-        run: yarn typecheck:ci
-
-      - name: test
-        run: yarn test:ci
+        run: yarn lint:node
 
       - name: prettier
         run: yarn prettier:check
 
-      - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@v3
+  typecheck:
+    if: ${{ success() }}
+    needs: ["npm-packages-check"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v6
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          fetch-depth: 1
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+
+      - name: typecheck
+        run: yarn typecheck:ci
+
+  test-node:
+    if: ${{ success() }}
+    needs: ["npm-packages-check"]
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - "27017:27017"
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+
+      - name: test
+        run: yarn test:ci:node
+
+  # Commandes exécutées en direct (sans yarn, qui exige un install node) :
+  # miroir des scripts classifier:install / lint:classifier / test:ci:classifier
+  test-classifier:
+    if: ${{ success() }}
+    needs: ["npm-packages-check"]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server-classifier
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: server-classifier/requirements*.txt
+
+      - name: Install classifier dependencies
+        run: python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+
+      - name: lint classifier
+        run: .venv/bin/ruff check . && .venv/bin/ruff format --check .
+
+      - name: test classifier
+        run: .venv/bin/pytest -v

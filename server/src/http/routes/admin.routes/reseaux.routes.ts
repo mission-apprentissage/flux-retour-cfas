@@ -178,7 +178,22 @@ export default () => {
 };
 
 export const getAllReseaux = async () => {
-  return reseauxDb().find().sort({ nom: 1 }).toArray();
+  return reseauxDb()
+    .aggregate([
+      { $sort: { nom: 1 } },
+      {
+        $lookup: {
+          from: "organismes",
+          localField: "organismes_ids",
+          foreignField: "_id",
+          as: "organismes",
+          pipeline: [{ $project: { _id: 1 } }],
+        },
+      },
+      { $addFields: { organismes_count: { $size: "$organismes" } } },
+      { $project: { organismes: 0 } },
+    ])
+    .toArray();
 };
 
 export const createReseau = async ({ body }) => {

@@ -27,8 +27,8 @@
 .horsCollabContainer {
   display: inline-flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 /* Variante bandeau : étiquettes côte à côte plutôt qu'empilées */

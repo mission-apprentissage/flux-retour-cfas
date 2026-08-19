@@ -1,6 +1,3 @@
-import { format } from "date-fns/format";
-import { fr } from "date-fns/locale";
-
 export function formatDate(dateString) {
   if (!dateString) return "";
   return new Date(dateString).toLocaleDateString("fr-FR");
@@ -17,28 +14,6 @@ export function getAge(dateString) {
     age -= 1;
   }
   return age;
-}
-
-export function getMonthYearFromDate(dateString) {
-  if (!dateString) return "Non renseigné";
-  const date = new Date(dateString);
-  return date.toLocaleString("fr-FR", { month: "long", year: "numeric" });
-}
-
-export function formatDateWithTime(dateString) {
-  if (!dateString) return "";
-  return new Date(dateString).toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-export function formatMonthAndYear(dateString: string) {
-  const date = new Date(dateString);
-  return format(date, "MMMM yyyy", { locale: fr });
 }
 
 export function formatRelativeDate(date: Date | string): string {

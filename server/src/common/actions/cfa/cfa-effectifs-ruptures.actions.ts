@@ -1,5 +1,6 @@
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
+import { CFA_COLLAB_AUTO_SEND_DELAI_DAYS } from "shared/constants/collaboration";
 import { IOrganisationOrganismeFormation } from "shared/models";
 import { ICfaRuptureEffectif, ICfaRupturesResponse } from "shared/models/routes/organismes/cfa";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
@@ -126,7 +127,7 @@ export async function getCfaEffectifsEnRupture(
         _libelle_formation: "$effectif_snapshot.formation.libelle_long",
         collab_status: buildCollabStatusSwitch(),
         // Section "+45j après rupture" : dossier transmis automatiquement à la ML (>= 45 jours).
-        is_transmis_auto: { $gte: ["$dernierStatutDureeInDay", 45] },
+        is_transmis_auto: { $gte: ["$dernierStatutDureeInDay", CFA_COLLAB_AUTO_SEND_DELAI_DAYS] },
       },
     },
     { $addFields: { collab_status_order: buildCollabStatusOrderField() } },

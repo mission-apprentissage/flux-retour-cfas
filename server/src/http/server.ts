@@ -6,17 +6,10 @@ import Boom from "boom";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application } from "express";
-import Joi from "joi";
 import { ObjectId } from "mongodb";
 import passport from "passport";
 import { RateLimiterMemory } from "rate-limiter-flexible";
-import {
-  CODE_POSTAL_REGEX,
-  SOURCE_APPRENANT,
-  typesEffectifNominatif,
-  typesOrganismesIndicateurs,
-  zEffectifArchive,
-} from "shared";
+import { CODE_POSTAL_REGEX, SOURCE_APPRENANT, typesOrganismesIndicateurs, zEffectifArchive } from "shared";
 import {
   computeWarningsForDossierApprenantSchemaV3,
   dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret,
@@ -39,26 +32,10 @@ import {
   deleteOldestDuplicates,
   getDuplicatesEffectifsForOrganismeIdWithPagination,
 } from "@/common/actions/effectifs.duplicates.actions";
-import {
-  dateFiltersSchema,
-  effectifsFiltersTerritoireSchema,
-  fullEffectifsFiltersSchema,
-} from "@/common/actions/helpers/filters";
-import { getIndicateursNational } from "@/common/actions/indicateurs/indicateurs-national.actions";
-import {
-  getEffectifsNominatifsWithoutId,
-  getIndicateursEffectifsParDepartement,
-  getIndicateursEffectifsParOrganisme,
-  getOrganismeIndicateursEffectifs,
-  getOrganismeIndicateursEffectifsParFormation,
-} from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
-import {
-  getIndicateursForRelatedOrganismes,
-  getIndicateursOrganismesParDepartement,
-  getOrganismeIndicateursOrganismes,
-} from "@/common/actions/indicateurs/indicateurs.actions";
+import { effectifsFiltersTerritoireSchema } from "@/common/actions/helpers/filters";
+import { getOrganismeIndicateursEffectifs } from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
+import { getIndicateursForRelatedOrganismes } from "@/common/actions/indicateurs/indicateurs.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
-import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
 import {
   cancelInvitation,
   createOrganisation,
@@ -125,12 +102,17 @@ import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
-import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
+import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
 import objectIdSchema from "@/common/validation/objectIdSchema";
+import { ADMIN_PASSWORD_MIN_LENGTH, zPassword } from "@/common/validation/passwordSchema";
 import { registrationCfaSchema } from "@/common/validation/registrationCfaSchema";
-import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
+import {
+  registrationSchema,
+  registrationUnknownNetworkSchema,
+  zRegistration,
+} from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
 import config from "@/config";
 
@@ -178,14 +160,12 @@ import collaborationsAdmin from "./routes/admin.routes/collaborations.routes";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
 import invitationsAdmin from "./routes/admin.routes/invitations.routes";
-import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import missionLocaleRoutesAdmin from "./routes/admin.routes/mission-locale.routes";
 import opcosRoutesAdmin from "./routes/admin.routes/opcos.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import reseauxAdmin from "./routes/admin.routes/reseaux.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
-import campagneRouter from "./routes/campagne.routes/campagne.routes";
 import emails from "./routes/emails.routes";
 import connexionInfoRouter from "./routes/onboarding.routes/connexion-info.route";
 import franceTravailAuthentRoutes from "./routes/organisations.routes/france-travail/france-travail.routes";
@@ -357,8 +337,8 @@ function setupRoutes(app: Application) {
       "/api/v1/organismes/search-by-uai",
       publicLimiter,
       returnResult(async (req) => {
-        const { uai } = await validateFullObjectSchema(req.body, {
-          uai: Joi.string().required().uppercase(),
+        const { uai } = await validateFullZodObjectSchema(req.body, {
+          uai: z.string().transform((value) => value.toUpperCase()),
         });
         return await findOrganismesByUAI(uai);
       })
@@ -441,7 +421,7 @@ function setupRoutes(app: Application) {
       "/api/v1/auth/register",
       registerLimiter,
       returnResult(async (req) => {
-        const registration = await validateFullZodObjectSchema(req.body, registrationSchema);
+        const registration = await zRegistration.parseAsync(req.body);
         registration.user.email = registration.user.email.toLowerCase();
         return await register(registration);
       })
@@ -518,26 +498,11 @@ function setupRoutes(app: Application) {
       checkPasswordToken(),
       returnResult(async (req) => {
         // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
-        const { password } = await validateFullObjectSchema(req.body, {
-          passwordToken: Joi.string().required(),
-          password: passwordSchema(req.user.organisation.type === "ADMINISTRATEUR").required(),
+        const { password } = await validateFullZodObjectSchema(req.body, {
+          passwordToken: z.string(),
+          password: zPassword(req.user.organisation.type === "ADMINISTRATEUR" ? ADMIN_PASSWORD_MIN_LENGTH : undefined),
         });
         await changePassword(req.user, password);
-      })
-    )
-    .get(
-      "/api/v1/maintenanceMessages",
-      publicLimiter,
-      returnResult(async () => {
-        return await findMaintenanceMessages();
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/national",
-      publicDashboardLimiter,
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersTerritoireSchema);
-        return await getIndicateursNational(filters);
       })
     )
     .get(
@@ -655,51 +620,6 @@ function setupRoutes(app: Application) {
         returnResult(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersTerritoireSchema);
           return await getOrganismeIndicateursEffectifs(req.user, res.locals.organismeId, filters);
-        })
-      )
-      .get(
-        "/indicateurs/effectifs/par-organisme",
-        requireOrganismePermission("indicateursEffectifs"),
-        returnResult(async (req, res) => {
-          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-          return await getIndicateursEffectifsParOrganisme(req.user, filters, res.locals.organismeId);
-        })
-      )
-      .get(
-        "/indicateurs/effectifs/par-formation",
-        requireOrganismePermission("indicateursEffectifs"),
-        returnResult(async (req, res) => {
-          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-          return await getOrganismeIndicateursEffectifsParFormation(req.user, res.locals.organismeId, filters);
-        })
-      )
-      .get(
-        "/indicateurs/effectifs/:type",
-        requireOrganismePermission("effectifsNominatifs"),
-        returnResult(async (req, res) => {
-          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-          const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
-          const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(
-            req.user,
-            filters,
-            type,
-            res.locals.organismeId
-          );
-          await createTelechargementListeNomLog(
-            type,
-            ids.map((id) => id.toString()),
-            new Date(),
-            req.user._id,
-            res.locals.organismeId
-          );
-          return effectifsWithoutIds;
-        })
-      )
-      .get(
-        "/indicateurs/organismes",
-        requireIndicateursOrganismesAccess,
-        returnResult(async (req, res) => {
-          return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
         })
       )
       .get(
@@ -841,62 +761,15 @@ function setupRoutes(app: Application) {
       .use("/mission-locale", requireOrganismePermission("manageEffectifs"), missionLocaleOrganismeRoutes())
   );
 
-  /********************************
-   * Indicateurs aggrégés         *
-   ********************************/
-  authRouter
-    .get(
-      "/api/v1/indicateurs/effectifs/par-departement",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
-        return await getIndicateursEffectifsParDepartement(filters, req.user.acl);
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/effectifs/par-organisme",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-        return await getIndicateursEffectifsParOrganisme(req.user, filters);
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/effectifs/:type",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-        const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
-        const permissions = req.user.acl.effectifsNominatifs[type];
-        if (permissions === false) {
-          throw Boom.forbidden("Permissions invalides");
-        }
-
-        const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(req.user, filters, type);
-        await createTelechargementListeNomLog(
-          type,
-          ids.map((id) => id.toString()),
-          new Date(),
-          req.user._id,
-          undefined,
-          new ObjectId(req.user.organisation_id)
-        );
-        return effectifsWithoutIds;
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/organismes/par-departement",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
-        return await getIndicateursOrganismesParDepartement(filters, req.user.acl);
-      })
-    )
-    .post(
-      "/api/v1/formations/search",
-      returnResult(async (req) => {
-        const { searchTerm } = await validateFullZodObjectSchema(req.body, {
-          searchTerm: z.string().min(3),
-        });
-        return await searchOrganismesFormations(searchTerm);
-      })
-    );
+  authRouter.post(
+    "/api/v1/formations/search",
+    returnResult(async (req) => {
+      const { searchTerm } = await validateFullZodObjectSchema(req.body, {
+        searchTerm: z.string().min(3),
+      });
+      return await searchOrganismesFormations(searchTerm);
+    })
+  );
 
   authRouter.get(
     "/api/v1/rncp/:code_rncp",
@@ -1149,7 +1022,6 @@ function setupRoutes(app: Application) {
           return await getStatOrganismes();
         })
       )
-      .use("/maintenanceMessages", maintenancesAdmin())
       .post(
         "/impersonate",
         returnResult(async (req, res) => {
@@ -1202,7 +1074,6 @@ function setupRoutes(app: Application) {
       )
   );
 
-  app.use("/api/v1/campagne", publicDashboardLimiter, campagneRouter());
   app.use("/api/v1/onboarding/connexion-info", publicLimiter, connexionInfoRouter());
   app.use(authRouter);
 }

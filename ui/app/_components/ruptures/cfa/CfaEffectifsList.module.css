@@ -1,13 +1,64 @@
-.header {
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: var(--background-raised-grey);
+  border-radius: 4px;
+  padding: 3rem 2rem;
   margin-bottom: 2rem;
 }
 
-.title {
-  margin: 0 0 0.5rem;
+.heroTitle {
+  margin: 0 0 1.5rem;
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 36px;
   color: var(--text-title-blue-france);
 }
 
-.subtitle {
-  margin: 0;
+.heroSearch {
+  width: 100%;
+  max-width: 34rem;
+}
+
+.heroSearch :global(.fr-input) {
+  background-color: #ececfe;
+}
+
+.heroNotice {
+  margin: 0.5rem 0 1rem;
+  max-width: 34rem;
+  font-style: italic;
+  font-size: 0.875rem;
   color: var(--text-mention-grey);
+}
+
+.heroLink {
+  font-weight: 500;
+}
+
+.filtersRow {
+  justify-content: flex-start;
+}
+
+.filterField {
+  flex: 0 0 auto;
+  min-width: 17rem;
+  max-width: 22rem;
+}
+
+@media (max-width: 768px) {
+  .filterField {
+    max-width: none;
+  }
+
+  .hero {
+    padding: 2rem 1rem;
+  }
+
+  .heroTitle {
+    font-size: 22px;
+    line-height: 28px;
+  }
 }

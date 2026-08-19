@@ -1,16 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/router";
 import { useMemo } from "react";
 import { IOrganisationIndicateursOrganismes, IOrganismesCount, normalize } from "shared";
 
 import { _get, _post, _put } from "@/common/httpClient";
-import { Organisme } from "@/common/internal/Organisme";
-import { OrganismeNormalized } from "@/modules/organismes/ListeOrganismesPage";
-import {
-  OrganismesFiltersQuery,
-  filterOrganismesArrayFromOrganismesFilters,
-  parseOrganismesFiltersFromQuery,
-} from "@/modules/organismes/models/organismes-filters";
+import { Organisme, OrganismeNormalized } from "@/common/internal/Organisme";
 
 // récupère un organisme
 export function useOrganisme(organismeId: string | undefined | null) {
@@ -80,9 +73,7 @@ export function useOrganisationOrganisme(enabled?: boolean) {
 }
 
 // récupère les organismes accessibles (OF, opérateur public, etc)
-export function useOrganisationOrganismes() {
-  const router = useRouter();
-
+export function useOrganisationOrganismes(enabled?: boolean) {
   const {
     data: organismes,
     isLoading,
@@ -90,7 +81,7 @@ export function useOrganisationOrganismes() {
   } = useQuery<Organisme[], any>({
     queryKey: ["organisation/organismes"],
     queryFn: () => _get("/api/v1/organisation/organismes"),
-    enabled: router.isReady,
+    enabled: enabled ?? true,
   });
 
   return {
@@ -101,35 +92,15 @@ export function useOrganisationOrganismes() {
 }
 
 export function useOrganisationIndicateursOrganismes() {
-  const router = useRouter();
-
   const { data, isLoading, error } = useQuery<IOrganisationIndicateursOrganismes, any>({
     queryKey: ["organisation/organismes/indicateurs"],
     queryFn: () => _get("/api/v1/organisation/organismes/indicateurs"),
-    enabled: router.isReady,
   });
 
   return {
     data,
     isLoading,
     error,
-  };
-}
-
-export function useOrganismesFiltered(organismes: OrganismeNormalized[]) {
-  const router = useRouter();
-
-  const organismesFiltered = useMemo(() => {
-    return organismes
-      ? filterOrganismesArrayFromOrganismesFilters(
-          organismes,
-          parseOrganismesFiltersFromQuery(router.query as unknown as OrganismesFiltersQuery)
-        )
-      : undefined;
-  }, [organismes, router.query]);
-
-  return {
-    organismesFiltered,
   };
 }
 
@@ -185,70 +156,10 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
 }
 
 export function useOrganismesDuplicatsLists() {
-  const router = useRouter();
-
   const { data: organismesDuplicats, isLoading } = useQuery<Organisme[], any>({
     queryKey: ["admin/organismes-duplicates"],
     queryFn: () => _get("/api/v1/admin/organismes-duplicates"),
-    enabled: router.isReady,
   });
 
   return { organismesDuplicats, isLoading };
-}
-
-export function useAffelnetCount(affelnetYear: Date, organisme_departements?: string | string[] | undefined) {
-  const normalizedDepartements = useMemo(() => {
-    if (typeof organisme_departements === "string") {
-      return organisme_departements
-        .split(",")
-        .map((dept) => dept.trim())
-        .filter((dept) => dept !== "");
-    }
-    return organisme_departements?.filter((dept) => dept.trim() !== "") ?? [];
-  }, [organisme_departements]);
-
-  const queryKey = useMemo(
-    () => [
-      "affelnet/national/count",
-      { organisme_departements: normalizedDepartements, year: affelnetYear.getFullYear() },
-    ],
-    [normalizedDepartements, affelnetYear]
-  );
-
-  const queryFn = () => {
-    let url = `/api/v1/affelnet/national/count`;
-
-    url += `?year=${affelnetYear.getFullYear()}`;
-
-    if (normalizedDepartements.length > 0) {
-      url += `&organisme_departements=${normalizedDepartements.join(",")}`;
-    }
-    return _get(url);
-  };
-
-  const {
-    data: affelnetCount,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery<
-    {
-      voeuxFormules: number;
-      apprenantVoeuxFormules: number;
-      apprenantsNonContretise: number;
-      apprenantsRetrouves: number;
-    },
-    any
-  >({
-    queryKey,
-    queryFn,
-    enabled: true,
-  });
-
-  return {
-    affelnetCount,
-    isLoading,
-    error,
-    refetch,
-  };
 }

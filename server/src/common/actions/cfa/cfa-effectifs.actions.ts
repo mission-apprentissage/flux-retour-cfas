@@ -4,9 +4,13 @@ import { MongoServerError } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import { CfaEffectifSource, ICfaEffectif, ICfaEffectifsResponse } from "shared/models/routes/organismes/cfa";
+import {
+  CFA_EFFECTIF_SITUATION,
+  CfaEffectifSource,
+  ICfaEffectif,
+  ICfaEffectifsResponse,
+} from "shared/models/routes/organismes/cfa";
 import { getAnneesScolaireListFromDate } from "shared/utils";
-import { v4 as uuidv4 } from "uuid";
 
 import { isDecaSnapshot, migrateMlRecordEffectifId } from "@/common/actions/mission-locale/mission-locale.actions";
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
@@ -35,7 +39,6 @@ interface CfaEffectifsQueryParams {
   search?: string;
   sort: string;
   order: "asc" | "desc";
-  en_rupture?: "oui" | "non";
   collab_status?: string;
   formation?: string;
 }
@@ -50,6 +53,8 @@ function getSortField(sort: string): string {
       return "date_rupture_computed";
     case "en_rupture":
       return "en_rupture";
+    case "mission_locale":
+      return "mission_locale.nom";
     case "collab_status":
       return "collab_status";
     case "last_activity":
@@ -71,7 +76,7 @@ export async function getCfaEffectifs(
   const organismeId = new ObjectId(organisation.organisme_id);
   const familyOrganismeIds = await getFamilyOrganismeIds(organismeId);
   const anneeScolaireList = getAnneesScolaireListFromDate(new Date());
-  const { page, limit, search, sort, order, en_rupture, collab_status, formation } = params;
+  const { page, limit, search, sort, order, collab_status, formation } = params;
   const skip = (page - 1) * limit;
   const sortDirection = order === "asc" ? 1 : -1;
 
@@ -234,6 +239,22 @@ export async function getCfaEffectifs(
         has_unread_notification_computed: {
           $ifNull: ["$ml_doc.organisme_data.has_unread_notification", false],
         },
+        situation: {
+          $switch: {
+            branches: [
+              { case: "$en_rupture", then: CFA_EFFECTIF_SITUATION.RUPTURE },
+              {
+                case: { $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.ABANDON] },
+                then: CFA_EFFECTIF_SITUATION.ABANDON,
+              },
+              {
+                case: { $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.INSCRIT] },
+                then: CFA_EFFECTIF_SITUATION.SANS_CONTRAT,
+              },
+            ],
+            default: null,
+          },
+        },
       },
     }
   );
@@ -244,14 +265,48 @@ export async function getCfaEffectifs(
     ...buildCsvInConditions("formation.libelle_long", formation),
   ];
 
-  if (en_rupture === "oui") {
-    filterConditions.push({ en_rupture: true });
-  } else if (en_rupture === "non") {
-    filterConditions.push({ en_rupture: false });
-  }
-
   if (filterConditions.length > 0) {
     pipeline.push({ $match: { $and: filterConditions } });
+  }
+
+  // Mission Locale de rattachement : celle du dossier ML si elle existe, sinon celle déduite de
+  // l'adresse de l'apprenant. Jointures par égalité (index `_id` et `ml_id`) plutôt que $expr.
+  const missionLocaleStages: Record<string, unknown>[] = [
+    {
+      $lookup: {
+        from: "organisations",
+        localField: "ml_doc.mission_locale_id",
+        foreignField: "_id",
+        as: "ml_organisation_by_id",
+        pipeline: [{ $project: { _id: 0, nom: 1, commune: { $ifNull: ["$adresse.commune", null] } } }],
+      },
+    },
+    {
+      $lookup: {
+        from: "organisations",
+        localField: "apprenant.adresse.mission_locale_id",
+        foreignField: "ml_id",
+        as: "ml_organisation_by_adresse",
+        pipeline: [
+          { $match: { type: "MISSION_LOCALE" } },
+          { $project: { _id: 0, nom: 1, commune: { $ifNull: ["$adresse.commune", null] } } },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        mission_locale: {
+          $ifNull: [{ $first: "$ml_organisation_by_id" }, { $first: "$ml_organisation_by_adresse" }, null],
+        },
+      },
+    },
+  ];
+
+  // Trier sur le nom de la ML impose de résoudre la jointure sur tout l'ensemble filtré ; sinon
+  // elle n'est faite que sur la page demandée.
+  const sortsOnMissionLocale = sort === "mission_locale";
+  if (sortsOnMissionLocale) {
+    pipeline.push(...missionLocaleStages);
   }
 
   const sortField = getSortField(sort);
@@ -266,6 +321,7 @@ export async function getCfaEffectifs(
         sortStage,
         { $skip: skip },
         { $limit: limit },
+        ...(sortsOnMissionLocale ? [] : missionLocaleStages),
         {
           $project: {
             _id: 0,
@@ -283,6 +339,8 @@ export async function getCfaEffectifs(
             has_unread_notification: {
               $ifNull: ["$ml_doc.organisme_data.has_unread_notification", false],
             },
+            situation: 1,
+            mission_locale: 1,
           },
         },
       ],
@@ -730,6 +788,7 @@ export async function declareCfaEffectifRupture(
   }
 
   const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
+  const organisme = await organismesDb().findOne({ _id: organismeId }, { projection: { is_allowed_collab: 1 } });
 
   try {
     const { insertedId } = await missionLocaleEffectifsDb().insertOne({
@@ -743,13 +802,10 @@ export async function declareCfaEffectifRupture(
         value: currentStatus?.valeur ?? null,
         date: currentStatus?.date ?? null,
       },
-      brevo: {
-        token: uuidv4(),
-        token_created_at: now,
-      },
       computed: {
         organisme: {
           ml_beta_activated_at: organisation?.ml_beta_activated_at ?? null,
+          is_allowed_collab: organisme?.is_allowed_collab ?? false,
         },
         ...(mlOrganisation.activated_at ? { mission_locale: { activated_at: mlOrganisation.activated_at } } : {}),
       },

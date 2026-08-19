@@ -1527,7 +1527,7 @@ describe("WhatsApp Service", () => {
       assert.strictEqual(updated?.situation, SITUATION_ENUM.DEJA_ACCOMPAGNE);
     });
 
-    it("YES mais CFA bascule V2 entre envoi et réponse → souhaite_rdv NON posé (exclusion PRD)", async () => {
+    it("YES mais CFA bascule V2 entre envoi et réponse → souhaite_rdv posé quand même", async () => {
       const { effectifId } = await setupPrequalifEffectif({
         computed: { organisme: { is_allowed_collab: true } },
         whatsapp_contact: {
@@ -1543,7 +1543,27 @@ describe("WhatsApp Service", () => {
       await handleInboundWhatsAppMessage("+33611200000", "✅", "msg-cfa-v2", "visitor-cfa-v2");
 
       const updated = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
-      assert.ok(!updated?.souhaite_rdv, "souhaite_rdv ne doit pas être true pour un CFA V2");
+      assert.strictEqual(updated?.souhaite_rdv, true, "le jeune obtient le rappel qu'il a demandé");
+      assert.strictEqual(updated?.souhaite_rdv_source, "whatsapp_prequalif");
+    });
+
+    it("YES mais CFA en acc_conjoint entre envoi et réponse → souhaite_rdv posé quand même", async () => {
+      const { effectifId } = await setupPrequalifEffectif({
+        organisme_data: { acc_conjoint: true },
+        whatsapp_contact: {
+          phone_normalized: "+33611200001",
+          brevo_visitor_id: "visitor-cfa-acc",
+          last_message_sent_at: new Date(Date.now() - 60_000),
+          template_type: "prequalif",
+          sent_via: "backfill",
+          message_status: "sent",
+        },
+      });
+
+      await handleInboundWhatsAppMessage("+33611200001", "✅", "msg-cfa-acc", "visitor-cfa-acc");
+
+      const updated = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      assert.strictEqual(updated?.souhaite_rdv, true, "le jeune obtient le rappel qu'il a demandé");
     });
   });
 

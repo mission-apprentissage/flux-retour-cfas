@@ -1,4 +1,5 @@
 export * from "./aide";
+export * from "./cgu";
 export * from "./dossierApprenant";
 export * from "./effectifs";
 export * from "./fiabilisation";

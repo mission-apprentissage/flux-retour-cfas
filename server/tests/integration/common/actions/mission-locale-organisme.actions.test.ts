@@ -1,7 +1,8 @@
+import { randomUUID } from "node:crypto";
+
 import { ObjectId } from "mongodb";
 import { ACC_CONJOINT_MOTIF_ENUM, STATUT_APPRENANT } from "shared";
 import { getAnneesScolaireListFromDate } from "shared/utils";
-import { v4 as uuidv4 } from "uuid";
 import { describe, it, beforeEach, expect } from "vitest";
 
 import {
@@ -56,7 +57,7 @@ async function createMlEffectifDoc(overrides: Record<string, any> = {}) {
     date_rupture: new Date("2026-01-15"),
     current_status: { value: STATUT_APPRENANT.RUPTURANT, date: new Date("2026-01-15") },
     created_at: now,
-    brevo: { token: uuidv4(), token_created_at: now },
+    brevo: { token: randomUUID(), token_created_at: now },
     ...overrides,
   };
 }
