@@ -130,9 +130,10 @@ export function EffectifDetail({
   transmissionDate,
   validationErrors,
 }: EffectifDetailProps) {
-  const { data: effectif, isLoading } = useQuery(["effectif", effectifId], () =>
-    _get(`/api/v1/effectif/${effectifId}`)
-  );
+  const { data: effectif, isLoading } = useQuery({
+    queryKey: ["effectif", effectifId],
+    queryFn: () => _get(`/api/v1/effectif/${effectifId}`),
+  });
 
   if (isLoading || !effectif) {
     return <TableSkeleton />;

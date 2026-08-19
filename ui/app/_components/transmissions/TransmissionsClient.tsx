@@ -63,11 +63,12 @@ export default function TransmissionsClient({ modePublique = false, organismeId 
     data,
     error,
     isLoading: isLoadingTransmissions,
-  } = useQuery<TransmissionsByDayResponse, any>(
-    ["transmissions", organisme?._id, page, limit],
-    ({ signal }) => _get(`/api/v1/organismes/${organisme?._id}/transmission`, { params: { page, limit }, signal }),
-    { enabled: !!organisme }
-  );
+  } = useQuery<TransmissionsByDayResponse, any>({
+    queryKey: ["transmissions", organisme?._id, page, limit],
+    queryFn: ({ signal }) =>
+      _get(`/api/v1/organismes/${organisme?._id}/transmission`, { params: { page, limit }, signal }),
+    enabled: !!organisme,
+  });
 
   const detailHref = (day: string) =>
     modePublique && organisme

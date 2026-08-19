@@ -87,14 +87,20 @@ export default function FusionOrganismesClient() {
     error,
     isLoading,
     refetch,
-  } = useQuery<DuplicateGroup[], any>(["admin", "organismes-duplicates"], ({ signal }) =>
-    _get("/api/v1/admin/organismes-duplicates", { signal })
-  );
+  } = useQuery<DuplicateGroup[], any>({
+    queryKey: ["admin", "organismes-duplicates"],
+    queryFn: ({ signal }) => _get("/api/v1/admin/organismes-duplicates", { signal }),
+  });
 
-  const { mutateAsync: mergeOrganismes, isLoading: isMerging } = useMutation(
-    async ({ organismeFiableId, organismeSansUaiId }: { organismeFiableId: string; organismeSansUaiId: string }) =>
-      _post("/api/v1/admin/fusion-organismes", { organismeFiableId, organismeSansUaiId })
-  );
+  const { mutateAsync: mergeOrganismes, isPending: isMerging } = useMutation({
+    mutationFn: async ({
+      organismeFiableId,
+      organismeSansUaiId,
+    }: {
+      organismeFiableId: string;
+      organismeSansUaiId: string;
+    }) => _post("/api/v1/admin/fusion-organismes", { organismeFiableId, organismeSansUaiId }),
+  });
 
   const handleMerge = useCallback(async () => {
     if (!selectedGroup) return;

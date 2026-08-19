@@ -10,9 +10,10 @@ import { RequiredMark } from "./RequiredMark";
 import type { InscriptionFormProps } from "./types";
 
 export function InscriptionFranceTravail({ setOrganisation }: Pick<InscriptionFormProps, "setOrganisation">) {
-  const { data: franceTravailOrganisations } = useQuery<Array<IOrganisationFranceTravail>>(["ft"], async () =>
-    _get("/api/v1/france-travail")
-  );
+  const { data: franceTravailOrganisations } = useQuery<Array<IOrganisationFranceTravail>>({
+    queryKey: ["ft"],
+    queryFn: async () => _get("/api/v1/france-travail"),
+  });
 
   return (
     <Select

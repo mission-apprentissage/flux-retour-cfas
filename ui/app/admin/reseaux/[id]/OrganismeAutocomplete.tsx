@@ -23,11 +23,11 @@ export function OrganismeAutocomplete({ onSelect }: { onSelect: (organisme: Orga
   const [query, setQuery] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const { data, isFetching, error } = useQuery<OrganismeSearchResult[], any>(
-    ["admin", "reseaux", "organismes", "search", query],
-    ({ signal }) => _get(`/api/v1/admin/reseaux/organismes/search/${encodeURIComponent(query)}`, { signal }),
-    { enabled: query.length >= MIN_QUERY_LENGTH }
-  );
+  const { data, isFetching, error } = useQuery<OrganismeSearchResult[], any>({
+    queryKey: ["admin", "reseaux", "organismes", "search", query],
+    queryFn: ({ signal }) => _get(`/api/v1/admin/reseaux/organismes/search/${encodeURIComponent(query)}`, { signal }),
+    enabled: query.length >= MIN_QUERY_LENGTH,
+  });
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();

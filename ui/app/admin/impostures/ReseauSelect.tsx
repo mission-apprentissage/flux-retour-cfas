@@ -9,7 +9,10 @@ import type { SetOrganisation } from "@/app/_components/inscription/types";
 import { _get } from "@/common/httpClient";
 
 export function ReseauSelect({ setOrganisation }: { setOrganisation: SetOrganisation }) {
-  const { data: reseaux } = useQuery<IReseau[]>(["tete_de_reseaux"], () => _get("/api/v1/reseaux"));
+  const { data: reseaux } = useQuery<IReseau[]>({
+    queryKey: ["tete_de_reseaux"],
+    queryFn: () => _get("/api/v1/reseaux"),
+  });
 
   return (
     <Select

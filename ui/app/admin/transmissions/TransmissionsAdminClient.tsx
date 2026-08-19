@@ -79,10 +79,10 @@ export default function TransmissionsAdminClient() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
 
-  const { data, error, isLoading } = useQuery<TransmissionsByDayResponse, any>(
-    ["admin", "transmissions", page, limit],
-    ({ signal }) => _get("/api/v1/admin/transmissions", { params: { page, limit }, signal })
-  );
+  const { data, error, isLoading } = useQuery<TransmissionsByDayResponse, any>({
+    queryKey: ["admin", "transmissions", page, limit],
+    queryFn: ({ signal }) => _get("/api/v1/admin/transmissions", { params: { page, limit }, signal }),
+  });
 
   const total = data?.pagination?.total;
 

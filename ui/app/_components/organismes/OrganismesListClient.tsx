@@ -47,11 +47,11 @@ export default function OrganismesListClient({ modePublique = false, organismeId
     !modePublique && organisationType === "ORGANISME_FORMATION"
   );
   const { organismes: organisationOrganismes } = useOrganisationOrganismes(!modePublique);
-  const { data: organismesPubliques } = useQuery<Organisme[]>(
-    ["organismes", organismeId, "organismes"],
-    () => _get(`/api/v1/organismes/${organismeId}/organismes`),
-    { enabled: modePublique && !!organismeId }
-  );
+  const { data: organismesPubliques } = useQuery<Organisme[]>({
+    queryKey: ["organismes", organismeId, "organismes"],
+    queryFn: () => _get(`/api/v1/organismes/${organismeId}/organismes`),
+    enabled: modePublique && !!organismeId,
+  });
 
   const organismes = modePublique ? organismesPubliques : organisationOrganismes;
 

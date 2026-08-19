@@ -59,25 +59,25 @@ export default function TransmissionsDetailsClient({
   const organisme = modePublique ? organismePublique : organisationOrganisme;
   const organismeLoadError = modePublique ? organismeError : organisationError;
 
-  const errorsQuery = useQuery<any, any>(
-    ["transmissions-details", organisme?._id, date, errorPage, errorLimit],
-    ({ signal }) =>
+  const errorsQuery = useQuery<any, any>({
+    queryKey: ["transmissions-details", organisme?._id, date, errorPage, errorLimit],
+    queryFn: ({ signal }) =>
       _get(`/api/v1/organismes/${organisme?._id}/transmission/${date}/error`, {
         params: { page: errorPage, limit: errorLimit },
         signal,
       }),
-    { enabled: !!organisme }
-  );
+    enabled: !!organisme,
+  });
 
-  const successQuery = useQuery<any, any>(
-    ["transmissions-details-success", organisme?._id, date, successPage, successLimit],
-    ({ signal }) =>
+  const successQuery = useQuery<any, any>({
+    queryKey: ["transmissions-details-success", organisme?._id, date, successPage, successLimit],
+    queryFn: ({ signal }) =>
       _get(`/api/v1/organismes/${organisme?._id}/transmission/${date}/success`, {
         params: { page: successPage, limit: successLimit },
         signal,
       }),
-    { enabled: !!organisme }
-  );
+    enabled: !!organisme,
+  });
 
   const errorCount = errorsQuery.data?.pagination?.total ?? 0;
   const successCount = successQuery.data?.totalEffectifs ?? 0;

@@ -13,9 +13,12 @@ import styles from "./certification.module.scss";
 import { CertificationLabel } from "./CertificationLabel";
 
 export function RncpDetails({ code }: { code: string | null }) {
-  const rncpInfoQuery = useQuery(["/api/v1/rncp", code ?? null], async ({ queryKey }) => {
-    const [, rncp] = queryKey;
-    return rncp ? _get<RncpInfo | null>(`/api/v1/rncp/${rncp}`) : null;
+  const rncpInfoQuery = useQuery({
+    queryKey: ["/api/v1/rncp", code ?? null],
+    queryFn: async ({ queryKey }) => {
+      const [, rncp] = queryKey;
+      return rncp ? _get<RncpInfo | null>(`/api/v1/rncp/${rncp}`) : null;
+    },
   });
 
   if (rncpInfoQuery.isLoading) return <p>Chargement…</p>;

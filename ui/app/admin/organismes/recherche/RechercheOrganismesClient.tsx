@@ -95,11 +95,11 @@ export default function RechercheOrganismesClient() {
     data: organismes,
     error,
     isFetching,
-  } = useQuery<OrganismeSupportInfoJson[], any>(
-    ["admin", "organismes-support", query],
-    ({ signal }) => _get(`/api/v1/admin/organismes/search/${encodeURIComponent(query)}`, { signal }),
-    { enabled: isQueryValid }
-  );
+  } = useQuery<OrganismeSupportInfoJson[], any>({
+    queryKey: ["admin", "organismes-support", query],
+    queryFn: ({ signal }) => _get(`/api/v1/admin/organismes/search/${encodeURIComponent(query)}`, { signal }),
+    enabled: isQueryValid,
+  });
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();

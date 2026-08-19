@@ -36,7 +36,10 @@ export default function ReseauxAdminClient() {
     data: reseaux,
     error,
     isLoading,
-  } = useQuery<Reseau[], any>(["admin", "reseaux"], ({ signal }) => _get("/api/v1/admin/reseaux", { signal }));
+  } = useQuery<Reseau[], any>({
+    queryKey: ["admin", "reseaux"],
+    queryFn: ({ signal }) => _get("/api/v1/admin/reseaux", { signal }),
+  });
 
   const sortedReseaux = useMemo(() => {
     const [criterion] = sorting.length > 0 ? sorting : [{ id: "nom", desc: false }];

@@ -3,7 +3,7 @@
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { CRISP_FAQ, DuplicateEffectifDetail, DuplicateEffectifGroup, SUPPORT_PAGE_ACCUEIL } from "shared";
 
@@ -33,17 +33,17 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
   const [totalCount, setTotalCount] = useState(0);
   const [duplicateToDelete, setDuplicateToDelete] = useState<DuplicateEffectifDetail | null>(null);
 
-  const { data: duplicates, isLoading } = useQuery<DuplicateEffectifGroup[]>(
-    [`duplicates-effectifs`, organismeId, page, pageSize],
-    async () => {
+  const { data: duplicates, isLoading } = useQuery<DuplicateEffectifGroup[]>({
+    queryKey: [`duplicates-effectifs`, organismeId, page, pageSize],
+    queryFn: async () => {
       const response = await _get(`/api/v1/organismes/${organismeId}/duplicates`, {
         params: { page, limit: pageSize },
       });
       setTotalCount(response.totalItems);
       return response.data;
     },
-    { keepPreviousData: true }
-  );
+    placeholderData: keepPreviousData,
+  });
 
   const lastPage = Math.max(1, Math.ceil(totalCount / pageSize));
 
@@ -56,7 +56,7 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
     if (!duplicateToDelete) return;
     trackPlausibleEvent("suppression_doublons_effectifs");
     await _delete(`/api/v1/effectif/${duplicateToDelete.id}`);
-    queryClient.invalidateQueries(["duplicates-effectifs"]);
+    queryClient.invalidateQueries({ queryKey: ["duplicates-effectifs"] });
     deleteDoublonModal.close();
     setDuplicateToDelete(null);
   };
@@ -66,7 +66,7 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
       nb_doublons_supprimes_lot: totalCount,
     });
     await _delete(`/api/v1/organismes/${organismeId}/duplicates`);
-    queryClient.invalidateQueries(["duplicates-effectifs"]);
+    queryClient.invalidateQueries({ queryKey: ["duplicates-effectifs"] });
     deleteAllDoublonsModal.close();
   };
 

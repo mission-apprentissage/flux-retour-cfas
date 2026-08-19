@@ -13,11 +13,11 @@ function OrganismeFormationSummary({
 }: {
   organisation: IOrganisationJson & { type: "ORGANISME_FORMATION" };
 }) {
-  const { data, error, isLoading } = useQuery<{ raison_sociale?: string; enseigne?: string }, any>(
-    ["organisme-by-uai-siret", organisation.uai, organisation.siret],
-    () => _post("/api/v1/organismes/get-by-uai-siret", { uai: organisation.uai, siret: organisation.siret }),
-    { retry: false }
-  );
+  const { data, error, isLoading } = useQuery<{ raison_sociale?: string; enseigne?: string }, any>({
+    queryKey: ["organisme-by-uai-siret", organisation.uai, organisation.siret],
+    queryFn: () => _post("/api/v1/organismes/get-by-uai-siret", { uai: organisation.uai, siret: organisation.siret }),
+    retry: false,
+  });
 
   if (isLoading) {
     return <p role="status">Chargement de votre organisme…</p>;

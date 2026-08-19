@@ -32,9 +32,10 @@ export default function OrganismeSupportClient({ siret }: { siret: string }) {
     data: organismes,
     error,
     isLoading,
-  } = useQuery<OrganismeSupportInfoJson[], any>(["admin", "organismes-support", siret], ({ signal }) =>
-    _get(`/api/v1/admin/organismes/search/${encodeURIComponent(siret)}`, { signal })
-  );
+  } = useQuery<OrganismeSupportInfoJson[], any>({
+    queryKey: ["admin", "organismes-support", siret],
+    queryFn: ({ signal }) => _get(`/api/v1/admin/organismes/search/${encodeURIComponent(siret)}`, { signal }),
+  });
 
   const supportInfo = useMemo(() => {
     if (!organismes || organismes.length === 0) return null;
