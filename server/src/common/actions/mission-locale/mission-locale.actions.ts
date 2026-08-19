@@ -17,6 +17,7 @@ import {
   IEmailStatusEnum,
   API_EFFECTIF_LISTE,
   CONNAISSANCE_ML_ENUM,
+  IMissionLocaleEffectif,
   SITUATION_ENUM,
 } from "shared/models/data/missionLocaleEffectif.model";
 import { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
@@ -1629,6 +1630,21 @@ export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: st
   return result;
 };
 
+/**
+ * Le RQTH déclaré par le CFA dans le tunnel de collaboration prime sur la valeur de l'ERP :
+ * il doit être ré-appliqué à chaque réécriture du snapshot, sinon la déclaration est perdue.
+ */
+const applyRqthDeclaration = <T extends IEffectif | IEffectifDECA>(
+  snapshot: T,
+  mlRecord: IMissionLocaleEffectif
+): T => {
+  const declared = (mlRecord.organisme_data?.verified_info as { rqth_declare?: string } | undefined)?.rqth_declare;
+  if (declared !== "OUI" && declared !== "NON") {
+    return snapshot;
+  }
+  return { ...snapshot, apprenant: { ...snapshot.apprenant, rqth: declared === "OUI" } };
+};
+
 export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
   const eff = await missionLocaleEffectifsDb().findOne({ effectif_id: effectif._id });
   const currentStatus =
@@ -1639,7 +1655,9 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
   if (eff) {
     const cleanCfaDeclaration = shouldCleanCfaRuptureDeclaration(eff.cfa_rupture_declaration, currentStatus);
     const hasValidCfaDeclaration = !!eff.cfa_rupture_declaration && !cleanCfaDeclaration;
-    const shouldKeep = rupturantFilter || hasValidCfaDeclaration;
+    const hasAccConjoint = eff.organisme_data?.acc_conjoint === true;
+    const souhaiteRdv = eff.souhaite_rdv === true;
+    const shouldKeep = rupturantFilter || hasValidCfaDeclaration || hasAccConjoint || souhaiteRdv;
 
     const dateRupture = shouldKeep
       ? rupturantFilter
@@ -1652,7 +1670,7 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
       {
         $set: {
           ...(shouldKeep ? {} : { soft_deleted: true }),
-          effectif_snapshot: { ...effectif, _id: effectif._id },
+          effectif_snapshot: applyRqthDeclaration({ ...effectif, _id: effectif._id }, eff),
           effectif_snapshot_date: new Date(),
           updated_at: new Date(),
           date_rupture: dateRupture ?? null,
@@ -2476,9 +2494,9 @@ export async function migrateMlRecordEffectifId(
 
   const now = new Date();
 
-  const buildRefreshSet = (): Record<string, unknown> => {
+  const buildRefreshSet = (record: IMissionLocaleEffectif): Record<string, unknown> => {
     const set: Record<string, unknown> = {
-      effectif_snapshot: { ...newEffectif, _id: newEffectif._id },
+      effectif_snapshot: applyRqthDeclaration({ ...newEffectif, _id: newEffectif._id }, record),
       effectif_snapshot_date: now,
       updated_at: now,
       ...(options.extraSet ?? {}),
@@ -2515,7 +2533,12 @@ export async function migrateMlRecordEffectifId(
     }
 
     // 4. Refresh effectif_snapshot + extraSet APRÈS merge (sinon dot-paths d'extraSet bloqueraient le merge).
-    await missionLocaleEffectifsDb().updateOne({ _id: squatter._id }, { $set: buildRefreshSet() });
+    // Relecture : le merge a pu remonter l'organisme_data du donneur, dont dépend la déclaration RQTH.
+    const mergedSquatter = await missionLocaleEffectifsDb().findOne({ _id: squatter._id });
+    await missionLocaleEffectifsDb().updateOne(
+      { _id: squatter._id },
+      { $set: buildRefreshSet(mergedSquatter ?? squatter) }
+    );
 
     logger.info(
       {
@@ -2534,7 +2557,7 @@ export async function migrateMlRecordEffectifId(
   // Voie classique : pas de squatter, on repointe l'orphelin.
   await missionLocaleEffectifsDb().updateOne(
     { _id: mlRecordId },
-    { $set: { effectif_id: newEffectif._id, ...buildRefreshSet() } }
+    { $set: { effectif_id: newEffectif._id, ...buildRefreshSet(orphan) } }
   );
 
   logger.info(
