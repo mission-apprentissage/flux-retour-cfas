@@ -75,6 +75,16 @@
   font-weight: 400 !important;
 }
 
+.fr-btn[class^="ri-"],
+.fr-btn[class*=" ri-"] {
+  font-family: inherit !important;
+}
+
+.fr-btn[class^="ri-"]::before,
+.fr-btn[class*=" ri-"]::before {
+  font-family: remixicon !important;
+}
+
 .fr-badge--success-inverted {
   color: var(--background-contrast-success);
   background-color: var(--text-default-success);

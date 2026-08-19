@@ -43,4 +43,13 @@ export const diversCrons = {
     cron_string: "5 4 1 * *",
     handler: validationTerritoires,
   },
+
+  // TODO : Checker si coté métier l'archivage est toujours prévu ?
+  // "Run archive dossiers apprenants & effectifs job each first day of month at 12h45": {
+  //   cron_string: "45 12 1 * *",
+  //   handler: async () => {
+  //     // run-archive-job.sh yarn cli archive:dossiersApprenantsEffectifs
+  //     return 0;
+  //   },
+  // },
 } satisfies Record<string, CronDef>;

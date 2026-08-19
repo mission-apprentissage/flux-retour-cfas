@@ -426,6 +426,17 @@ program
   });
 
 program
+  .command("tmp:seed-sipa-test-nancy")
+  .description(
+    "Seed du jeu de test SIPA/académie de Nancy (effectifs CFA + DECA 2026-2027) puis vérification de la sortie SIPA"
+  )
+  .option("--cleanup", "Supprime uniquement les effectifs de test (tag SIPA_TEST_NANCY_)", false)
+  .option("--verify", "Rejoue uniquement l'agrégation SIPA et rapporte les écarts, sans insérer", false)
+  .option("--dry-run", "Simulation d'insertion sans écriture", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:seed-sipa-test-nancy"));
+
+program
   .command("brevo-contacts:sync")
   .description("Synchronise une liste de contacts vers Brevo (création/peuplement de la liste)")
   .requiredOption("--slug <slug>", "Slug de la liste (ex: cfa-users)")
@@ -480,11 +491,14 @@ program
         console.log(`  ${name}`);
       }
     }
-    const sortedCrons = Object.entries(crons).sort(([, a], [, b]) => {
-      const [minuteA, hourA] = a.cron_string.split(" ").map(Number);
-      const [minuteB, hourB] = b.cron_string.split(" ").map(Number);
-      return hourA * 60 + minuteA - (hourB * 60 + minuteB);
-    });
+    const dailyMinute = (cronString: string) => {
+      const [minute, hour] = cronString.split(" ");
+      const parsed = Number(hour) * 60 + Number(minute);
+      return Number.isFinite(parsed) ? parsed : Number.MAX_SAFE_INTEGER;
+    };
+    const sortedCrons = Object.entries(crons).sort(
+      ([nameA, a], [nameB, b]) => dailyMinute(a.cron_string) - dailyMinute(b.cron_string) || nameA.localeCompare(nameB)
+    );
     console.log(`\nCrons (${sortedCrons.length}) — cron_string interprété en Europe/Paris :`);
     for (const [name, def] of sortedCrons) {
       console.log(`  ${def.cron_string.padEnd(12)} ${name}`);

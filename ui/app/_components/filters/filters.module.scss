@@ -1,0 +1,49 @@
+.filterPanel {
+  margin-top: 1rem;
+}
+
+.filterPanelLabel {
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.filterPanelRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.filterMenu {
+  position: relative;
+}
+
+.filterButton {
+  gap: 0.5rem;
+}
+
+.filterBadge {
+  min-width: 1.25rem;
+  padding: 0 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-inverted-blue-france);
+  text-align: center;
+  background-color: var(--background-action-high-blue-france);
+  border-radius: 0.625rem;
+}
+
+.filterOverlay {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  min-width: 16rem;
+  max-height: 20rem;
+  padding: 1rem 1rem 0;
+  margin-top: 0.25rem;
+  overflow-y: auto;
+  background-color: var(--background-default-grey);
+  border: 1px solid var(--border-default-grey);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+}

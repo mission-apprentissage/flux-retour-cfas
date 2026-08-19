@@ -1,6 +1,5 @@
 import { captureException } from "@sentry/node";
 import express from "express";
-import Joi from "joi";
 import { ObjectId } from "mongodb";
 import { dossierApprenantSchemaV3Input, stripModelAdditionalKeys } from "shared/models/parts/dossierApprenantSchemaV3";
 
@@ -10,6 +9,7 @@ import { effectifsQueueDb } from "@/common/model/collections";
 import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model";
 import { formatDateYYYYMMDD } from "@/common/utils/dateUtils";
 import { formatError } from "@/common/utils/errorUtils";
+import { validateArrayInput } from "@/common/utils/inputValidationError";
 import stripNullProperties from "@/common/utils/stripNullProperties";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
@@ -23,9 +23,9 @@ export default () => {
    * Une validation plus complete est effectuée lors du traitement des données par process-effectifs-queue
    */
   router.post("/", async ({ user, body }, res) => {
-    const bodyItems = (
-      await Joi.array().max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH).validateAsync(body, { abortEarly: false })
-    ).map((e) => stripNullProperties(e));
+    const bodyItems = validateArrayInput(body, POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH).map((e) =>
+      stripNullProperties(e)
+    );
     const validationSchema = dossierApprenantSchemaV3Input;
 
     const source = user.source;

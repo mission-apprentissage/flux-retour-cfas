@@ -37,20 +37,6 @@ export const COLLAB_STATUS_FILTER_OPTIONS: CfaCollaborationStatus[] = [
   CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB,
 ];
 
-export const COLLAB_STATUS_ORDER: Record<CfaCollaborationStatus, number> = {
-  [CFA_COLLAB_STATUS.DEMARRER_COLLAB]: 0,
-  [CFA_COLLAB_STATUS.COLLAB_DEMANDEE]: 1,
-  [CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB]: 2,
-  [CFA_COLLAB_STATUS.TRAITE_PAR_ML]: 3,
-};
-
-// Statuts "actifs" = un dossier sur lequel il s'est passé quelque chose côté ML.
-export const ACTIVE_COLLAB_STATUSES = [
-  CFA_COLLAB_STATUS.COLLAB_DEMANDEE,
-  CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB,
-  CFA_COLLAB_STATUS.TRAITE_PAR_ML,
-] as const;
-
 export const ACTIVE_COLLAB_STATUS_LABELS: Partial<Record<CfaCollaborationStatus, string>> = {
   [CFA_COLLAB_STATUS.COLLAB_DEMANDEE]: "Demande collab envoyée",
   [CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB]: "Contacté par la ML hors collaboration",

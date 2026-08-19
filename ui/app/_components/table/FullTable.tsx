@@ -1,7 +1,7 @@
 "use client";
 
+import { fr } from "@codegouvfr/react-dsfr";
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
-import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import {
   useReactTable,
@@ -11,8 +11,11 @@ import {
   Cell,
   getSortedRowModel,
   getFilteredRowModel,
+  getExpandedRowModel,
+  type ExpandedState,
+  type OnChangeFn,
 } from "@tanstack/react-table";
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useRef, useEffect, useId, useState, Fragment } from "react";
 
 import { useTableData, useTableColumns } from "./hooks";
 import { FullTableProps, TableRowData } from "./types";
@@ -89,19 +92,27 @@ function PageSizeSelector({
   pageSize: number;
   onPageSizeChange: (pageSize: number) => void;
 }) {
+  const selectId = useId();
   const pageSizeOptions = [5, 10, 20, 50];
+
   return (
-    <Select
-      label=""
-      options={pageSizeOptions.map((size) => ({
-        value: size.toString(),
-        label: `Voir par ${size}`,
-      }))}
-      nativeSelectProps={{
-        value: pageSize.toString(),
-        onChange: (e) => onPageSizeChange(Number(e.target.value)),
-      }}
-    />
+    <div className={fr.cx("fr-select-group")}>
+      <label className={fr.cx("fr-label", "fr-sr-only")} htmlFor={selectId}>
+        Nombre de résultats par page
+      </label>
+      <select
+        id={selectId}
+        className={fr.cx("fr-select")}
+        value={pageSize.toString()}
+        onChange={(event) => onPageSizeChange(Number(event.target.value))}
+      >
+        {pageSizeOptions.map((size) => (
+          <option key={size} value={size.toString()}>
+            Voir par {size}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
 
@@ -121,10 +132,33 @@ export function FullTable({
   headerAction = null,
   hasPagination = true,
   onRowClick,
+  renderSubComponent,
+  getRowCanExpand,
+  expandColumnLabel = "Détail",
+  expandedByDefault = false,
+  expandMode = "multiple",
+  tableLabel,
 }: FullTableProps) {
   const tableRef = useRef<HTMLDivElement>(null);
   const tableData = useTableData(data);
   const tableColumns = useTableColumns(columns);
+  const [expanded, setExpanded] = useState<ExpandedState>(expandedByDefault ? true : {});
+  const isExpandable = Boolean(renderSubComponent);
+
+  const handleExpandedChange = useCallback<OnChangeFn<ExpandedState>>(
+    (updater) => {
+      setExpanded((previous) => {
+        const next = typeof updater === "function" ? updater(previous) : updater;
+        if (expandMode !== "single" || typeof next !== "object" || next === null) {
+          return next;
+        }
+        const previousState = typeof previous === "object" && previous !== null ? previous : {};
+        const justOpened = Object.keys(next).find((rowId) => next[rowId] && !previousState[rowId]);
+        return justOpened ? { [justOpened]: true } : next;
+      });
+    },
+    [expandMode]
+  );
 
   const scrollToTop = useCallback(() => {
     if (tableRef.current) {
@@ -143,18 +177,26 @@ export function FullTable({
     }
   }, []);
 
-  const table = useReactTable({
+  const table = useReactTable<TableRowData>({
     data: tableData,
     columns: tableColumns,
     state: {
       sorting,
       columnFilters,
+      ...(isExpandable ? { expanded } : {}),
     },
     onSortingChange: onSortingChange || (() => {}),
     onColumnFiltersChange: onColumnFiltersChange || (() => {}),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    ...(isExpandable
+      ? {
+          onExpandedChange: handleExpandedChange,
+          getExpandedRowModel: getExpandedRowModel(),
+          getRowCanExpand: (row) => (getRowCanExpand ? getRowCanExpand(row.original) : true),
+        }
+      : {}),
     enableSorting: true,
     enableColumnFilters: true,
     manualSorting: false,
@@ -184,7 +226,7 @@ export function FullTable({
   const currentPage = pagination?.page || 1;
 
   useEffect(() => {
-    if (!onRowClick || !tableRef.current) return;
+    if (!onRowClick || isExpandable || !tableRef.current) return;
 
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -207,7 +249,9 @@ export function FullTable({
       tableElement.addEventListener("click", handleClick);
       return () => tableElement.removeEventListener("click", handleClick);
     }
-  }, [data, onRowClick, table]);
+  }, [data, onRowClick, table, isExpandable]);
+
+  const headerCells = table.getHeaderGroups()[0]?.headers ?? [];
 
   return (
     <>
@@ -230,16 +274,70 @@ export function FullTable({
               {headerAction && <div>{headerAction}</div>}
             </div>
           )}
-          <Table
-            headers={
-              table
-                .getHeaderGroups()[0]
-                ?.headers.map((header) => <TableHeaderCell key={header.id} header={header} />) || []
-            }
-            data={table
-              .getSortedRowModel()
-              .rows.map((row) => row.getVisibleCells().map((cell) => <TableBodyCell key={cell.id} cell={cell} />))}
-          />
+          {isExpandable ? (
+            <div className="fr-table">
+              <table>
+                {tableLabel && <caption className={fr.cx("fr-sr-only")}>{tableLabel}</caption>}
+                <thead>
+                  <tr>
+                    <th scope="col">
+                      <span className="fr-sr-only">{expandColumnLabel}</span>
+                    </th>
+                    {headerCells.map((header) => (
+                      <th key={header.id} scope="col">
+                        <TableHeaderCell header={header} />
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {table.getRowModel().rows.map((row) => (
+                    <Fragment key={row.id}>
+                      <tr>
+                        <td>
+                          {row.getCanExpand() && (
+                            <button
+                              type="button"
+                              aria-expanded={row.getIsExpanded()}
+                              aria-label={`${expandColumnLabel} : ${row.getIsExpanded() ? "replier" : "déplier"}`}
+                              onClick={row.getToggleExpandedHandler()}
+                              className={fr.cx(
+                                "fr-btn",
+                                "fr-btn--tertiary-no-outline",
+                                "fr-btn--sm",
+                                row.getIsExpanded() ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"
+                              )}
+                            />
+                          )}
+                        </td>
+                        {row.getVisibleCells().map((cell) => (
+                          <td key={cell.id}>
+                            <TableBodyCell cell={cell} />
+                          </td>
+                        ))}
+                      </tr>
+                      {row.getIsExpanded() && row.getCanExpand() && (
+                        <tr>
+                          <td colSpan={row.getVisibleCells().length + 1}>{renderSubComponent!(row.original)}</td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <Table
+              caption={tableLabel}
+              noCaption
+              headers={headerCells.map((header) => (
+                <TableHeaderCell key={header.id} header={header} />
+              ))}
+              data={table
+                .getSortedRowModel()
+                .rows.map((row) => row.getVisibleCells().map((cell) => <TableBodyCell key={cell.id} cell={cell} />))}
+            />
+          )}
           {hasPagination && (
             <div
               style={{

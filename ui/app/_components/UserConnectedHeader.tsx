@@ -8,6 +8,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
+import { PAGES } from "@/app/_utils/routes.utils";
 import { _post } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
 import { getAccountLabel } from "@/common/utils/accountUtils";
@@ -201,7 +202,12 @@ export const UserConnectedHeader = () => {
                 </ListItemIcon>
                 Centre d&apos;aide
               </MenuItem>,
-              <MenuItem key="cfa-aide-glossaire" component="a" href="/glossaire" onClick={handleClose}>
+              <MenuItem
+                key="cfa-aide-glossaire"
+                component="a"
+                href={PAGES.static.glossaire.getPath()}
+                onClick={handleClose}
+              >
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-book-2-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
@@ -210,7 +216,7 @@ export const UserConnectedHeader = () => {
               <MenuItem
                 key="cfa-aide-referencement"
                 component="a"
-                href="/referencement-organisme"
+                href={PAGES.static.referencementOrganisme.getPath()}
                 onClick={handleClose}
               >
                 <ListItemIcon>
@@ -224,7 +230,12 @@ export const UserConnectedHeader = () => {
               <ListSubheader key="admin-header" component="div" sx={{ fontWeight: "bold", color: "text.primary" }}>
                 Administration
               </ListSubheader>,
-              <MenuItem key="admin-transmissions" component="a" href="/admin/transmissions" onClick={handleClose}>
+              <MenuItem
+                key="admin-transmissions"
+                component="a"
+                href={PAGES.static.adminTransmissions.getPath()}
+                onClick={handleClose}
+              >
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
@@ -236,7 +247,12 @@ export const UserConnectedHeader = () => {
                 </ListItemIcon>
                 Gestion des utilisateurs
               </MenuItem>,
-              <MenuItem key="admin-reseaux" component="a" href="/admin/reseaux" onClick={handleClose}>
+              <MenuItem
+                key="admin-reseaux"
+                component="a"
+                href={PAGES.static.adminReseaux.getPath()}
+                onClick={handleClose}
+              >
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
@@ -245,18 +261,18 @@ export const UserConnectedHeader = () => {
               <MenuItem
                 key="admin-organismes-recherche"
                 component="a"
-                href="/admin/organismes/recherche"
+                href={PAGES.static.adminOrganismesRecherche.getPath()}
                 onClick={handleClose}
               >
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
-                Recherche organisme
+                Recherche d’un organisme
               </MenuItem>,
               <MenuItem
                 key="admin-fusion-organismes"
                 component="a"
-                href="/admin/fusion-organismes"
+                href={PAGES.static.adminFusionOrganismes.getPath()}
                 onClick={handleClose}
               >
                 <ListItemIcon>
@@ -267,19 +283,13 @@ export const UserConnectedHeader = () => {
               <MenuItem
                 key="admin-organismes-gestion"
                 component="a"
-                href="/admin/organismes/gestion"
+                href={PAGES.static.adminOrganismesGestion.getPath()}
                 onClick={handleClose}
               >
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
-                Gestion des organismes
-              </MenuItem>,
-              <MenuItem key="admin-maintenance" component="a" href="/admin/maintenance" onClick={handleClose}>
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                Message de maintenance
+                Organismes absents du référentiel
               </MenuItem>,
               <MenuItem key="admin-brevo-contacts" component="a" href="/admin/brevo-contacts" onClick={handleClose}>
                 <ListItemIcon>
@@ -287,7 +297,12 @@ export const UserConnectedHeader = () => {
                 </ListItemIcon>
                 Listes de contacts Brevo
               </MenuItem>,
-              <MenuItem key="admin-impostures" component="a" href="/admin/impostures" onClick={handleClose}>
+              <MenuItem
+                key="admin-impostures"
+                component="a"
+                href={PAGES.static.adminImpostures.getPath()}
+                onClick={handleClose}
+              >
                 <ListItemIcon>
                   <i className={fr.cx("fr-icon-eye-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>

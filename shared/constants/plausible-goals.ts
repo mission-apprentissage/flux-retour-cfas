@@ -1,4 +1,4 @@
-export const plausibleGoals = [
+const plausibleGoals = [
   // Page Statistiques
   "clic_statistiques",
   "clic_stats_visites",
@@ -29,14 +29,6 @@ export const plausibleGoals = [
   "clic_sifa_faq",
 
   // Téléchargements
-  // - Page indicateurs
-  "telechargement_liste_sans_contrats",
-  "telechargement_liste_rupturants",
-  "telechargement_liste_abandons",
-  "telechargement_liste_apprentis",
-  "telechargement_liste_apprenants",
-  "telechargement_liste_repartition_effectifs",
-
   // - Page organismes
   "telechargement_liste_of_a_fiabiliser",
   "telechargement_liste_of_fiables",
@@ -55,6 +47,7 @@ export const plausibleGoals = [
   "referencement_clic_onglet_siret",
   "referencement_clic_onglet_uai",
   "referencement_clic_onglet_nature",
+  "referencement_clic_onglet_relations_entre_organismes",
   "referencement_clic_onglet_qualiopi",
   "referencement_clic_onglet_code_rncp",
   "referencement_telechargement_tuile_uai",

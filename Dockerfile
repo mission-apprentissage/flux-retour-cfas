@@ -1,6 +1,5 @@
 FROM node:22.6-slim AS builder_root
 WORKDIR /app
-RUN yarn set version 3.3.1
 COPY .yarn /app/.yarn
 COPY package.json package.json
 COPY yarn.lock yarn.lock

@@ -8,7 +8,10 @@ export const config = {
   matcher: "/((?!api|static|.*\\..*|_next).*)",
 };
 
-const publicPaths = ["/auth/connexion", "/auth/inscription", "/auth/inscription/profil"];
+const publicPaths = ["/auth/connexion", "/auth/inscription"];
+
+const isPublicPath = (pathname: string) =>
+  publicPaths.some((publicPath) => pathname === publicPath || pathname.startsWith(`${publicPath}/`));
 
 async function fetchSession(request: NextRequest): Promise<AuthContext | null> {
   try {
@@ -51,7 +54,7 @@ function handlePublicPaths(
   request: NextRequest,
   requestNextData: { request: { headers: Headers } }
 ): NextResponse | undefined {
-  if (publicPaths.includes(pathname)) {
+  if (isPublicPath(pathname)) {
     if (session) {
       return NextResponse.redirect(new URL("/", request.url));
     }
@@ -71,6 +74,8 @@ function redirectToHome(
     case "MISSION_LOCALE":
       return NextResponse.redirect(new URL("/mission-locale", request.url));
     case "ARML":
+    case "DREETS":
+    case "DDETS":
       return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
     case "ADMINISTRATEUR":
       return NextResponse.redirect(new URL("/admin/suivi-des-indicateurs", request.url));
@@ -89,9 +94,9 @@ function redirectToHome(
       if (session.organisation?.ml_beta_activated_at) {
         return NextResponse.redirect(new URL("/cfa", request.url));
       }
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/organismes", request.url));
     default:
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/organismes", request.url));
   }
 }
 
@@ -109,20 +114,12 @@ export async function middleware(request: NextRequest) {
     return redirectToHome(session, request, requestNextData);
   }
 
-  if (pathname === "/campagnes/mission-locale") {
-    return NextResponse.next();
-  }
-
-  if (session && pathname === "/auth/connexion") {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
   if (pathname === "/mission-locale" || pathname.startsWith("/mission-locale/")) {
     if (!session) {
       return NextResponse.redirect(new URL("/", request.url));
     }
     if (session.organisation?.type !== "MISSION_LOCALE") {
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next(requestNextData);
   }
@@ -132,7 +129,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
     if (session.organisation?.type !== "FRANCE_TRAVAIL") {
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next(requestNextData);
   }
@@ -142,7 +139,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
     if (session.organisation?.type !== "ORGANISME_FORMATION" || !session.organisation?.ml_beta_activated_at) {
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next(requestNextData);
   }

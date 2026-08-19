@@ -1,5 +1,3 @@
-import * as https from "https";
-
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import mime from "mime";
 
@@ -12,7 +10,7 @@ if (publicConfig.env === "local") {
   axios.defaults.withCredentials = true;
 }
 
-export class AuthError extends Error {
+class AuthError extends Error {
   json: any;
   statusCode: any;
   prettyMessage: any;
@@ -68,14 +66,6 @@ const getHeaders = (contentType: string | null = "application/json") => {
   };
 };
 
-const getHttpsAgent = () => {
-  return typeof window === "undefined"
-    ? new https.Agent({
-        rejectUnauthorized: false,
-      })
-    : undefined;
-};
-
 /**
  * Récupère un fichier exposé par l'UI.
  * Nécessaire pour l'environnement local, car les ports sont maintenant exposés.
@@ -84,7 +74,6 @@ export const _getUI = async <T = any>(path: string, options?: AxiosRequestConfig
   const response = await axios.get(path, {
     headers: getHeaders(),
     validateStatus: () => true,
-    httpsAgent: getHttpsAgent(),
     ...options,
   });
   return handleResponse<T>(path, response);
@@ -94,7 +83,6 @@ export const _get = async <T = any>(path: string, options?: AxiosRequestConfig<a
   const response = await axios.get(`${publicConfig.baseUrl}${path}`, {
     headers: getHeaders(),
     validateStatus: () => true,
-    httpsAgent: getHttpsAgent(),
     ...options,
   });
   return handleResponse<T>(path, response);
@@ -104,7 +92,6 @@ export const _getBlob = async (path: string, options?: AxiosRequestConfig<any>) 
   const response = await axios.get(`${publicConfig.baseUrl}${path}`, {
     headers: getHeaders(),
     validateStatus: () => true,
-    httpsAgent: getHttpsAgent(),
     responseType: "blob",
     ...options,
   });
@@ -123,7 +110,6 @@ export const _post = async <RequestBody = any, ResponseBody = any>(
   const response = await axios.post(`${publicConfig.baseUrl}${path}`, body, {
     headers: getHeaders(),
     validateStatus: () => true,
-    httpsAgent: getHttpsAgent(),
     ...options,
   });
   return handleResponse<ResponseBody>(path, response);
@@ -133,7 +119,6 @@ export const _put = async (path: string, body = {}, options?: AxiosRequestConfig
   const response = await axios.put(`${publicConfig.baseUrl}${path}`, body, {
     headers: getHeaders(),
     validateStatus: () => true,
-    httpsAgent: getHttpsAgent(),
     ...options,
   });
   return handleResponse(path, response);
@@ -143,7 +128,6 @@ export const _delete = async (path: string, options?: AxiosRequestConfig<any>) =
   const response = await axios.delete(`${publicConfig.baseUrl}${path}`, {
     headers: getHeaders(),
     validateStatus: () => true,
-    httpsAgent: getHttpsAgent(),
     ...options,
   });
   return handleResponse(path, response);

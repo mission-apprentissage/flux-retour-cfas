@@ -47,7 +47,7 @@ Avant d'installer le projet, assurez-vous d'avoir les éléments suivants :
 - **jq**
 - **yq**
 - **shred**
-- **NodeJS** 20+
+- **NodeJS** 22.6.0 (cf. `.node-version`)
 - **Python** 3.11+
 - **Ansible** 2.7+
 

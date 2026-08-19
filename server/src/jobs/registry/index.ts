@@ -21,7 +21,8 @@ type DomainRegistry = {
   crons?: Record<string, CronDef>;
 };
 
-// Registre par domaine — sert à `yarn cli jobs:list` ; la fusion `jobs` en est dérivée.
+// Registre par domaine — source de vérité unique : `jobs` et `crons` en sont dérivés,
+// et `yarn cli jobs:list` l'affiche. Ajouter un domaine ici suffit.
 export const registry = {
   daily: { jobs: dailyJobs, crons: dailyCrons },
   formations: { jobs: formationsJobs, crons: formationsCrons },
@@ -40,6 +41,32 @@ export const registry = {
   divers: { jobs: diversJobs, crons: diversCrons },
 } satisfies Record<string, DomainRegistry>;
 
-export const jobs: Record<string, JobDef> = Object.assign({}, ...Object.values(registry).map((domain) => domain.jobs));
+function mergeDomains<T>(kind: string, pick: (domain: DomainRegistry) => Record<string, T> | undefined) {
+  const merged: Record<string, T> = {};
+  const origin: Record<string, string> = {};
 
-export { crons } from "./crons";
+  for (const [domainName, domain] of Object.entries(registry as Record<string, DomainRegistry>)) {
+    for (const [name, def] of Object.entries(pick(domain) ?? {})) {
+      if (name in merged) {
+        throw new Error(
+          `Registre des jobs : ${kind} "${name}" déclaré à la fois dans "${origin[name]}" et "${domainName}". ` +
+            `Les noms doivent être uniques tous domaines confondus.`
+        );
+      }
+      merged[name] = def;
+      origin[name] = domainName;
+    }
+  }
+
+  return merged;
+}
+
+export const jobs = mergeDomains<JobDef>("job", (domain) => domain.jobs);
+
+/**
+ * ATTENTION : les cron_string sont interprétés en Europe/Paris, PAS en UTC.
+ * Ne jamais décaler un horaire pour "compenser" un fuseau.
+ *
+ * Planning à jour : `yarn cli jobs:list`.
+ */
+export const crons = mergeDomains<CronDef>("cron", (domain) => domain.crons);

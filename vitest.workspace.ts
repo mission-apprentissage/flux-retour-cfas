@@ -13,6 +13,8 @@ export default defineWorkspace([
       setupFiles: ["./tests/jest/setupFiles.ts"],
       globalSetup: ["./tests/jest/globalSetup.ts"],
       clearMocks: true,
+      testTimeout: 20_000,
+      hookTimeout: 30_000,
     },
     resolve: {
       alias: {

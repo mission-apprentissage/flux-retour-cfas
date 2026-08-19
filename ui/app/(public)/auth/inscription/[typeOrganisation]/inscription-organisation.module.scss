@@ -1,0 +1,37 @@
+.recap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  margin-bottom: 2rem;
+  background-color: var(--background-alt-grey);
+}
+
+.intro {
+  margin: 0 0 1rem;
+  font-weight: 700;
+  color: var(--text-title-grey);
+}
+
+.contactBlock {
+  padding-left: 1rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--border-action-high-blue-france);
+
+  p {
+    margin: 0 0 0.25rem;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.footerLink {
+  margin-top: 1.5rem;
+}
