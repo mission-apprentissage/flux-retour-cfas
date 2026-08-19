@@ -263,6 +263,20 @@ Ajouter les secrets détectés à la baseline des exceptions
 
 Les secrets actuellement ignorés sont stockés dans `gitleaks-fingerprints-baseline.txt`.
 
+Gitleaks tourne aussi en CI (job `Gitleaks` du workflow `ci.yml`, déclenché sur chaque PR et dans la merge queue). Le job est bloquant : il scanne l'état final des fichiers modifiés par la PR et échoue si un secret absent de la baseline est détecté.
+
+En cas de faux positif signalé par la CI (ligne `missing secret: <fichier:règle:secret>` dans les logs du job), deux options :
+
+- régénérer la baseline sur le périmètre de la PR puis commiter le fichier mis à jour :
+
+```bash
+  BASE_SHA=$(git merge-base origin/master HEAD) HEAD_SHA=$(git rev-parse HEAD) yarn gitleaks:update-ignore ci
+```
+
+- ou ajouter manuellement la ligne affichée dans `gitleaks-fingerprints-baseline.txt` (fichier trié et dédupliqué).
+
+> ⚠️ Cette procédure est réservée aux **faux positifs**. Un vrai secret détecté ne doit **jamais** être ajouté à la baseline (le fingerprint contient la valeur du secret en clair) : il faut le retirer du code, le remplacer par une variable d'environnement ou SOPS, et le **roter immédiatement**.
+
 #### SOPS
 
 Édition des variables d'environnement.
