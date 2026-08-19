@@ -81,7 +81,11 @@ export const updateOrganisme = async (_id: ObjectId, data: Partial<IOrganisme>) 
     { returnDocument: "after" }
   );
 
-  return updated as WithId<IOrganisme>;
+  if (!updated) {
+    throw new Error(`Unable to find organisme ${_id.toString()}`);
+  }
+
+  return updated;
 };
 
 /**

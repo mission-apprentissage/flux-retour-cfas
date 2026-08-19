@@ -127,7 +127,11 @@ export const lockEffectif = async (effectif: IEffectif) => {
     { returnDocument: "after" }
   );
 
-  return updated as IEffectif;
+  if (!updated) {
+    throw new Error(`Unable to find effectif ${effectif._id.toString()}`);
+  }
+
+  return updated;
 };
 
 export const addComputedFields = async <T extends WithoutId<IEffectif | IEffectifDECA>>({
