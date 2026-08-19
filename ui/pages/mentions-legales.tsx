@@ -10,9 +10,13 @@ import SimplePage from "@/components/Page/SimplePage";
 import "react-notion-x/src/styles.css";
 
 export const getStaticProps = (async () => {
-  const notion = new NotionAPI();
-  const recordMap = await notion.getPage("Mentions-l-gales-002a2868ea2f46cdb2d73207d12b6075");
-  return { props: { data: sanitizeNotionRecordMap(recordMap) }, revalidate: 60 * 30 };
+  try {
+    const notion = new NotionAPI();
+    const recordMap = await notion.getPage("Mentions-l-gales-002a2868ea2f46cdb2d73207d12b6075");
+    return { props: { data: sanitizeNotionRecordMap(recordMap) }, revalidate: 60 * 30 };
+  } catch (error) {
+    return { notFound: true, revalidate: 60 };
+  }
 }) satisfies GetStaticProps<{
   data: ExtendedRecordMap;
 }>;
