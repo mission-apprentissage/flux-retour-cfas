@@ -45,6 +45,7 @@ import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
 import {
   DATE_START_RUPTURES,
   buildEffRuptureAgeFilter,
+  buildVisibilityWindowMatch,
   createDernierStatutFieldPipeline as createDernierStatutFieldPipelineShared,
 } from "../shared/rupture-pipeline.utils";
 
@@ -61,8 +62,8 @@ const CFA_COLLAB_AUTO_SEND_DELAI_DAYS = 45;
  * Deux cas (V2 collab) :
  *  - explicitement, via une demande de collaboration (`organisme_data.acc_conjoint`) ;
  *  - automatiquement, pour un CFA en collab (`is_allowed_collab`) dès que la rupture
- *    dépasse 45 jours.
- * Dans les deux cas la ML doit voir l'effectif même s'il sortirait sinon de l'outil
+ *    dépasse 45 jours — sauf si l'effectif est depuis arrivé au terme de sa formation.
+ * L'envoi explicite force la visibilité même si l'effectif sortirait sinon de l'outil
  * (jeune en fin de formation, en abandon +180j, ou non visible pour une autre raison).
  */
 const cfaForceVisibleExpr = () => ({
@@ -78,6 +79,7 @@ const cfaForceVisibleExpr = () => ({
             { $dateSubtract: { startDate: "$$NOW", unit: "day", amount: CFA_COLLAB_AUTO_SEND_DELAI_DAYS } },
           ],
         },
+        { $ne: [{ $ifNull: ["$current_status.value", null] }, STATUT_APPRENANT.FIN_DE_FORMATION] },
       ],
     },
   ],
@@ -264,7 +266,10 @@ const matchDernierStatutPipelineMl = (): any => {
     $match: {
       date_rupture: { $lte: new Date() },
       $or: [
-        { "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT },
+        {
+          "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
+          "current_status.value": { $ne: STATUT_APPRENANT.FIN_DE_FORMATION },
+        },
         { cfa_rupture_declaration: { $exists: true, $ne: null } },
         // Un dossier qualifié par un conseiller ML reste traçable même si le snapshot ERP a évolué
         // (ex: apprenti revenu en formation après une rupture déjà traitée par la ML).
@@ -290,9 +295,7 @@ const generateOrganisationMatchStage = async (
 ) => {
   const matchStage = [
     {
-      $match: {
-        "effectif_snapshot.annee_scolaire": { $in: getAnneeScolaireListFromDateRange(DATE_START_RUPTURES, new Date()) },
-      },
+      $match: buildVisibilityWindowMatch(),
     },
     ...matchFromJointOrganisme(organisation.type),
   ];

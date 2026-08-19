@@ -139,6 +139,42 @@ describe("getCfaEffectifsEnRupture", () => {
     expect(result.pagination.total).toBe(1);
   });
 
+  // Sortant requalifié : le snapshot figé reste RUPTURANT, mais le contrat est arrivé à son terme.
+  // Le dossier sort de la liste ruptures du CFA, comme un retour en apprentissage.
+  it("exclut les dossiers passés en FIN_DE_FORMATION", async () => {
+    const now = new Date();
+    const dateRupture = new Date(now.getTime() - 30 * DAY);
+
+    const docs = await Promise.all([
+      createMlEffectif({ date_rupture: dateRupture }),
+      createMlEffectif({
+        date_rupture: dateRupture,
+        current_status: { value: STATUT_APPRENANT.FIN_DE_FORMATION, date: now },
+      }),
+    ]);
+    await missionLocaleEffectifsDb().insertMany(docs as any[]);
+
+    const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
+
+    expect(result.pagination.total).toBe(1);
+  });
+
+  it("n'exclut pas les FIN_DE_FORMATION quand cfa_rupture_declaration existe", async () => {
+    const now = new Date();
+    const dateRupture = new Date(now.getTime() - 30 * DAY);
+
+    const doc = await createMlEffectif({
+      date_rupture: dateRupture,
+      current_status: { value: STATUT_APPRENANT.FIN_DE_FORMATION, date: now },
+      cfa_rupture_declaration: { date_rupture: dateRupture, declared_at: now, declared_by: new ObjectId() },
+    });
+    await missionLocaleEffectifsDb().insertOne(doc as any);
+
+    const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
+
+    expect(result.pagination.total).toBe(1);
+  });
+
   it("n'exclut pas les APPRENTI quand cfa_rupture_declaration existe", async () => {
     const now = new Date();
     const dateRupture = new Date(now.getTime() - 30 * DAY);

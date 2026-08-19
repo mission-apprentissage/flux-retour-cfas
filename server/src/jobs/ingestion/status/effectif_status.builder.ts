@@ -1,5 +1,5 @@
 import Boom from "boom";
-import { addDays, eachDayOfInterval, formatISO, min } from "date-fns";
+import { addDays, differenceInCalendarDays, eachDayOfInterval, formatISO, min } from "date-fns";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import type { IEffectifComputedStatut, IEffectifV2 } from "shared/models";
 
@@ -29,6 +29,12 @@ function getDaysBetween({ start, end }: { start: Date; end: Date }): string[] {
   }).map((date) => formatISO(date, { representation: "date" }));
 }
 
+export const FIN_FORMATION_TOLERANCE_DAYS = 45;
+
+function getContratFinEffective(contrat: IEffectifV2["contrats"][string], sessionFin: Date): Date {
+  return contrat.rupture?.date_rupture ? addDays(contrat.rupture.date_rupture, -1) : (contrat.date_fin ?? sessionFin);
+}
+
 function buildEffectifParcours(
   effectif: Pick<IEffectifV2, "session" | "contrats" | "exclusion">
 ): IEffectifComputedStatut["parcours"] {
@@ -48,9 +54,7 @@ function buildEffectifParcours(
 
   for (const contrat of contrats) {
     // En cas de rupture, le dernier jour effectif en contrat correspond au jour avant la rupture
-    const lastDay = contrat.rupture?.date_rupture
-      ? addDays(contrat.rupture?.date_rupture, -1)
-      : (contrat.date_fin ?? effectif.session.fin);
+    const lastDay = getContratFinEffective(contrat, effectif.session.fin);
 
     getDaysBetween({
       start: contrat.date_debut,
@@ -97,15 +101,30 @@ function buildEffectifParcours(
     }
   }
 
-  // FIN_DE_FORMATION uniquement sur fin légitime : dernier jour APPRENTI/INSCRIT, ou dernier
-  // contrat (chronologique) terminé sans rupture ni exclusion. Sinon préserver RUPTURANT/ABANDON
-  // pour ne pas masquer la rupture côté CFA/ML.
   const lastDayKey = days.at(-1)!;
   const lastDayStatut = parcoursRaw.get(lastDayKey);
-  const sortedContrats = [...contrats].sort((a, b) => a.date_debut.getTime() - b.date_debut.getTime());
-  const lastContrat = sortedContrats.at(-1);
-  const lastContractEndedNaturally = lastContrat !== undefined && !lastContrat.rupture;
-  const hasNaturallyEndedContract = !effectif.exclusion && lastContractEndedNaturally;
+
+  const terminalContrat = contrats.reduce<{ contrat: (typeof contrats)[number]; fin: Date } | null>((acc, contrat) => {
+    const fin = getContratFinEffective(contrat, effectif.session.fin);
+    if (acc === null || fin > acc.fin || (fin.getTime() === acc.fin.getTime() && contrat.rupture)) {
+      return { contrat, fin };
+    }
+    return acc;
+  }, null);
+
+  const hasNaturallyEndedContract = !effectif.exclusion && terminalContrat !== null && !terminalContrat.contrat.rupture;
+
+  if (
+    hasNaturallyEndedContract &&
+    differenceInCalendarDays(effectif.session.fin, terminalContrat.fin) <= FIN_FORMATION_TOLERANCE_DAYS
+  ) {
+    getDaysBetween({ start: addDays(terminalContrat.fin, 1), end: effectif.session.fin }).forEach((day) => {
+      const statut = parcoursRaw.get(day);
+      if (statut === STATUT_APPRENANT.INSCRIT || statut === STATUT_APPRENANT.RUPTURANT) {
+        parcoursRaw.set(day, STATUT_APPRENANT.FIN_DE_FORMATION);
+      }
+    });
+  }
 
   if (
     lastDayStatut === STATUT_APPRENANT.APPRENTI ||

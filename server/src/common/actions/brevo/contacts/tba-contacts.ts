@@ -7,6 +7,7 @@ import { getAnneesScolaireListFromDate, getAnneeScolaireListFromDateRange } from
 import { findEligibleOrganismes } from "@/common/actions/organismes/deca-cfa-eligibility";
 import {
   buildEffRuptureAgeFilter,
+  buildRuptureStatusMatch,
   createDernierStatutFieldPipeline,
   DATE_START_RUPTURES,
 } from "@/common/actions/shared/rupture-pipeline.utils";
@@ -445,8 +446,9 @@ const fetchRupturantsStatsByOrgId = async (organismeIds: ObjectId[]): Promise<Ma
   if (organismeIds.length === 0) return new Map();
 
   // Phase 1 — Filtrage "en rupture" selon la définition métier partagée avec
-  // `cfa-effectifs-ruptures.actions.ts` : age, 180j, statut RUPTURANT ou
-  // déclaration CFA, exclusion des APPRENTI sans déclaration.
+  // `cfa-effectifs-ruptures.actions.ts` : age, 180j, statut RUPTURANT ou déclaration CFA,
+  // exclusion des APPRENTI/FIN_DE_FORMATION sans déclaration. Seule la fenêtre de visibilité
+  // diffère (millésime seul, sans la branche `date_rupture` : ciblage e-mail, pas liste CFA).
   const enRuptureFilterStages = [
     { $match: { "effectif_snapshot.organisme_id": { $in: organismeIds } } },
     ...buildEffRuptureAgeFilter(),
@@ -475,14 +477,7 @@ const fetchRupturantsStatsByOrgId = async (organismeIds: ObjectId[]): Promise<Ma
       },
     },
     { $match: { dernierStatutDureeInDay: { $lte: 180 } } },
-    {
-      $match: {
-        $or: [
-          { cfa_rupture_declaration: { $exists: true } },
-          { "current_status.value": { $ne: STATUT_APPRENANT.APPRENTI } },
-        ],
-      },
-    },
+    { $match: buildRuptureStatusMatch() },
   ];
 
   // Phase 2 — Group fin par (organisme × ML) + lookup pour récupérer le nom ML.

@@ -233,18 +233,26 @@ export const hydrateMissionLocaleAdresse = async () => {
   }
 };
 
-export const updateMissionLocaleEffectifCurrentStatus = async () => {
+export const updateMissionLocaleEffectifCurrentStatus = async (signal?: AbortSignal) => {
   const cursor = organisationsDb().find({
     type: "MISSION_LOCALE",
   });
 
+  let nbEffectifsMisAJour = 0;
+
   while (await cursor.hasNext()) {
+    if (signal?.aborted) {
+      return { aborted: true, nbEffectifsMisAJour };
+    }
     const orga = await cursor.next();
     if (!orga) {
       continue;
     }
     const cursor2 = missionLocaleEffectifsDb().find({ mission_locale_id: orga._id });
     while (await cursor2.hasNext()) {
+      if (signal?.aborted) {
+        return { aborted: true, nbEffectifsMisAJour };
+      }
       const eff = await cursor2.next();
       if (!eff) {
         continue;
@@ -286,9 +294,12 @@ export const updateMissionLocaleEffectifCurrentStatus = async () => {
             },
           }
         );
+        nbEffectifsMisAJour++;
       }
     }
   }
+
+  return { aborted: false, nbEffectifsMisAJour };
 };
 
 export const updateMissionLocaleAdresseFromExternalData = async (

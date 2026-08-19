@@ -1,6 +1,6 @@
 import { captureException } from "@sentry/node";
 import { formatISO } from "date-fns";
-import { cloneDeep } from "lodash-es";
+import { cloneDeep, isEqual } from "lodash-es";
 import { MongoServerError, UpdateFilter } from "mongodb";
 import { IContratV2, IEffectifV2 } from "shared/models";
 import type { IContrat } from "shared/models/data/effectifs/contrat.part";
@@ -25,14 +25,20 @@ type ICreateComputedStatutObjectParams = Readonly<{
 export async function updateEffectifStatut(
   effectif: IEffectifGenerique,
   evaluationDate: Date,
-  collection
+  collection,
+  { touchUpdatedAt = true }: { touchUpdatedAt?: boolean } = {}
 ): Promise<boolean> {
   if (!shouldUpdateStatut(effectif)) {
     return false;
   }
 
   try {
-    const updateObj = createUpdateObject(effectif, evaluationDate);
+    const computedStatut = createComputedStatutObject(effectif, evaluationDate);
+    if (!touchUpdatedAt && isEqual(effectif._computed?.statut ?? null, computedStatut)) {
+      return false;
+    }
+
+    const updateObj = createUpdateObject(computedStatut, touchUpdatedAt);
     const { modifiedCount } = await collection.updateOne({ _id: effectif._id }, updateObj);
     return modifiedCount > 0;
   } catch (err) {
@@ -79,11 +85,14 @@ export function createComputedStatutObject(
   }
 }
 
-function createUpdateObject(effectif: IEffectifGenerique, evaluationDate: Date): UpdateFilter<IEffectifGenerique> {
+function createUpdateObject(
+  computedStatut: IEffectifComputedStatut | null,
+  touchUpdatedAt = true
+): UpdateFilter<IEffectifGenerique> {
   return {
     $set: {
-      updated_at: new Date(),
-      "_computed.statut": createComputedStatutObject(effectif, evaluationDate),
+      ...(touchUpdatedAt ? { updated_at: new Date() } : {}),
+      "_computed.statut": computedStatut,
     },
   };
 }

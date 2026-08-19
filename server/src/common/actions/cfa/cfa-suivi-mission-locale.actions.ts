@@ -7,18 +7,17 @@ import {
   ICfaEffectif,
   ICfaSuiviMissionLocaleResponse,
 } from "shared/models/routes/organismes/cfa";
-import { getAnneeScolaireListFromDateRange } from "shared/utils";
 
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
 import {
-  DATE_START_RUPTURES,
   buildCollabStatusOrderField,
   buildCollabStatusSwitch,
   buildContactedByMlExpr,
   buildCsvInConditions,
   buildDistinctFacet,
   buildEffRuptureAgeFilter,
+  buildVisibilityWindowMatch,
   buildNameSearchConditions,
 } from "../shared/rupture-pipeline.utils";
 
@@ -71,13 +70,7 @@ function buildSuiviBasePipeline(
   }
 
   stages.push(
-    {
-      $match: {
-        "effectif_snapshot.annee_scolaire": {
-          $in: getAnneeScolaireListFromDateRange(DATE_START_RUPTURES, now),
-        },
-      },
-    },
+    { $match: buildVisibilityWindowMatch(now) },
     ...buildEffRuptureAgeFilter(),
     {
       $addFields: {

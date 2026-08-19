@@ -1,10 +1,28 @@
+import { STATUT_APPRENANT } from "shared/constants";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { USER_RESPONSE_TYPE } from "shared/models/data/whatsappContact.model";
 import { CFA_COLLAB_STATUS } from "shared/models/routes/organismes/cfa";
+import { getAnneeScolaireListFromDateRange } from "shared/utils";
 
 import { escapeRegex, parseStringToArray } from "@/common/utils/usersFiltersUtils";
 
 export const DATE_START_RUPTURES = new Date("2025-01-01");
+
+/** Fenêtre de visibilité d'un dossier ML/CFA : millésime d'année scolaire OU date de rupture. */
+export const buildVisibilityWindowMatch = (now: Date = new Date()) => ({
+  $or: [
+    { "effectif_snapshot.annee_scolaire": { $in: getAnneeScolaireListFromDateRange(DATE_START_RUPTURES, now) } },
+    { date_rupture: { $gte: DATE_START_RUPTURES } },
+  ],
+});
+
+/** Dossier « en rupture » : rupture déclarée par le CFA, ou statut courant ni APPRENTI ni FIN_DE_FORMATION. */
+export const buildRuptureStatusMatch = () => ({
+  $or: [
+    { cfa_rupture_declaration: { $exists: true } },
+    { "current_status.value": { $nin: [STATUT_APPRENANT.APPRENTI, STATUT_APPRENANT.FIN_DE_FORMATION] } },
+  ],
+});
 
 export const buildEffRuptureAgeFilter = () => {
   const now = new Date();
