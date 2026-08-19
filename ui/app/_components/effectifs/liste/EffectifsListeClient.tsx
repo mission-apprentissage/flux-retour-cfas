@@ -5,7 +5,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { SortingState } from "@tanstack/react-table";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -116,9 +116,9 @@ export function EffectifsListeClient({ organisme, modePublique }: { organisme: O
     router.replace(queryString ? `?${queryString}` : "?", { scroll: false });
   };
 
-  const { data, isLoading, isFetching } = useQuery(
-    ["organismes", organisme._id, "effectifs", { page, limit, sortId, sortOrder, search, filters }],
-    async () =>
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ["organismes", organisme._id, "effectifs", { page, limit, sortId, sortOrder, search, filters }],
+    queryFn: async () =>
       _get(`/api/v1/organismes/${organisme._id}/effectifs`, {
         params: {
           page,
@@ -132,12 +132,13 @@ export function EffectifsListeClient({ organisme, modePublique }: { organisme: O
           source: filters.source,
         },
       }),
-    { keepPreviousData: true }
-  );
+    placeholderData: keepPreviousData,
+  });
 
-  const { data: duplicates } = useQuery(["organismes", organisme._id, "duplicates"], () =>
-    _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${organisme._id}/duplicates`)
-  );
+  const { data: duplicates } = useQuery({
+    queryKey: ["organismes", organisme._id, "duplicates"],
+    queryFn: () => _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${organisme._id}/duplicates`),
+  });
 
   const availableFilters: Record<string, string[]> = data?.filters ?? {};
   const effectifs: any[] = data?.organismesEffectifs ?? [];

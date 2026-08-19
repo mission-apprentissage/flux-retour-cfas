@@ -20173,6 +20173,13 @@ exports[`validation-schema > should create validation schema for organismes > or
         },
       ],
     },
+    "has_account": {
+      "bsonType": [
+        "bool",
+        "null",
+      ],
+      "description": "Indique qu'au moins un compte utilisateur est attaché à l'organisation de cet organisme",
+    },
     "has_transmission_errors": {
       "bsonType": "bool",
       "description": "Indique si cet organisme a une transmissions d'effectif en erreur",

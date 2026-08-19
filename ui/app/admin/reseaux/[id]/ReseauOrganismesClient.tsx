@@ -7,7 +7,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { SortingState } from "@tanstack/react-table";
-import format from "date-fns/format/index";
+import { format } from "date-fns/format";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { IReseau, normalize, UAI_INCONNUE_TAG_FORMAT } from "shared";
@@ -96,9 +96,10 @@ export default function ReseauOrganismesClient({ id }: { id: string }) {
     error,
     isLoading,
     refetch,
-  } = useQuery<ReseauWithOrganismes, any>(["admin", "reseau", id], ({ signal }) =>
-    _get(`/api/v1/admin/reseaux/${id}`, { signal })
-  );
+  } = useQuery<ReseauWithOrganismes, any>({
+    queryKey: ["admin", "reseau", id],
+    queryFn: ({ signal }) => _get(`/api/v1/admin/reseaux/${id}`, { signal }),
+  });
 
   const reseauNom = reseau?.nom ?? "";
 
@@ -164,13 +165,13 @@ export default function ReseauOrganismesClient({ id }: { id: string }) {
   const currentPage = Math.min(page, lastPage);
   const pageOrganismes = sortedOrganismes.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  const { mutateAsync: addOrganisme, isLoading: isAdding } = useMutation(async (organismeId: string) =>
-    _put(`/api/v1/admin/reseaux/${id}`, { organismeId })
-  );
+  const { mutateAsync: addOrganisme, isPending: isAdding } = useMutation({
+    mutationFn: async (organismeId: string) => _put(`/api/v1/admin/reseaux/${id}`, { organismeId }),
+  });
 
-  const { mutateAsync: removeOrganisme, isLoading: isRemoving } = useMutation(async (organismeId: string) =>
-    _delete(`/api/v1/admin/reseaux/${id}/organismes/${organismeId}`)
-  );
+  const { mutateAsync: removeOrganisme, isPending: isRemoving } = useMutation({
+    mutationFn: async (organismeId: string) => _delete(`/api/v1/admin/reseaux/${id}/organismes/${organismeId}`),
+  });
 
   const handleAdd = useCallback(async () => {
     if (!selectedOrganisme) return;

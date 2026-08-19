@@ -94,7 +94,7 @@ export default () => {
         { returnDocument: "after" }
       );
 
-      if (!result.value) {
+      if (!result) {
         throw Boom.internal("Failed to update the organismes_ids array.");
       }
 
@@ -105,7 +105,7 @@ export default () => {
         await updateComputedFieldForOrganisme(updatedOrganisme);
       }
 
-      res.json(result.value);
+      res.json(result);
     }
   );
 
@@ -138,7 +138,7 @@ export default () => {
           { returnDocument: "after" }
         );
 
-        if (!result.value) {
+        if (!result) {
           throw Boom.notFound(`No reseau found with id ${id}`);
         }
 
@@ -149,7 +149,7 @@ export default () => {
           await updateComputedFieldForOrganisme(updatedOrganisme);
         }
 
-        res.json(result.value);
+        res.json(result);
       } catch (error) {
         console.error("Error during deletion:", error);
         throw Boom.internal("Failed to remove organismeId from reseau.");

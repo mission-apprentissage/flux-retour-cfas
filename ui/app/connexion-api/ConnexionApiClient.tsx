@@ -74,11 +74,11 @@ function NotConnected() {
 }
 
 function VerifyUser({ organismeId, query }: { organismeId: string; query: ConnexionApiQuery }) {
-  const { data, error } = useQuery<{ message?: string }, any>(
-    ["verify-user", organismeId],
-    () => _post(`/api/v1/organismes/${organismeId}/verify-user`, query),
-    { retry: false }
-  );
+  const { data, error } = useQuery<{ message?: string }, any>({
+    queryKey: ["verify-user", organismeId],
+    queryFn: () => _post(`/api/v1/organismes/${organismeId}/verify-user`, query),
+    retry: false,
+  });
 
   useEffect(() => {
     if (error?.statusCode === 403) {
@@ -121,10 +121,10 @@ function VerifyUser({ organismeId, query }: { organismeId: string; query: Connex
 
 function ConfiguredOrganisme({ query }: { query: ConnexionApiQuery }) {
   const router = useRouter();
-  const { data: organisme, isLoading } = useQuery<{ _id: string; api_key?: string }, any>(
-    ["organisation/organisme"],
-    () => _get("/api/v1/organisation/organisme")
-  );
+  const { data: organisme, isLoading } = useQuery<{ _id: string; api_key?: string }, any>({
+    queryKey: ["organisation/organisme"],
+    queryFn: () => _get("/api/v1/organisation/organisme"),
+  });
 
   const noApiKeyToVerify = !query.api_key;
 

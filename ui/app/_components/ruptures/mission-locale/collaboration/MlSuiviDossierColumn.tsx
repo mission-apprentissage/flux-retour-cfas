@@ -306,8 +306,8 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
             <Button
               type="button"
               priority={postComment.trim() ? "primary" : "secondary"}
-              disabled={!postComment.trim() || commentMutation.isLoading}
-              className={`${styles.dossierFormButton} ${!postComment.trim() || commentMutation.isLoading ? styles.dossierFormButtonDisabled : ""}`}
+              disabled={!postComment.trim() || commentMutation.isPending}
+              className={`${styles.dossierFormButton} ${!postComment.trim() || commentMutation.isPending ? styles.dossierFormButtonDisabled : ""}`}
               onClick={() => {
                 commentMutation.mutate(
                   { effectifId: effectif.id.toString(), data: { commentaires: postComment.trim() } },
@@ -320,7 +320,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                 );
               }}
             >
-              {commentMutation.isLoading ? "Envoi en cours..." : "Envoyer le commentaire"}
+              {commentMutation.isPending ? "Envoi en cours..." : "Envoyer le commentaire"}
             </Button>
           </div>
         </div>
@@ -704,7 +704,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                   type="button"
                   priority="primary"
                   className={styles.dossierFormButton}
-                  disabled={mutation.isLoading}
+                  disabled={mutation.isPending}
                   onClick={() => {
                     hasSubmittedRef.current = true;
                     mutation.mutate({
@@ -713,7 +713,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                     });
                   }}
                 >
-                  {mutation.isLoading ? "Envoi en cours..." : "Confirmer et marquer comme traité"}
+                  {mutation.isPending ? "Envoi en cours..." : "Confirmer et marquer comme traité"}
                 </Button>
                 <Button
                   type="button"
@@ -965,11 +965,11 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
 
               <Button
                 type="submit"
-                disabled={!formik.isValid || mutation.isLoading}
+                disabled={!formik.isValid || mutation.isPending}
                 priority={formik.isValid ? "primary" : "secondary"}
-                className={`${styles.dossierFormButton} ${!formik.isValid || mutation.isLoading ? styles.dossierFormButtonDisabled : ""}`}
+                className={`${styles.dossierFormButton} ${!formik.isValid || mutation.isPending ? styles.dossierFormButtonDisabled : ""}`}
               >
-                {mutation.isLoading
+                {mutation.isPending
                   ? "Envoi en cours..."
                   : mutation.isSuccess
                     ? "Enregistré"

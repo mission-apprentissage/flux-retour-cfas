@@ -69,10 +69,10 @@ export default function TransmissionsJourAdminClient({ date }: { date: string })
 
   const formattedDate = Number.isNaN(new Date(date).getTime()) ? null : formatDate(date);
 
-  const { data, error, isLoading } = useQuery<TransmissionsByOrganismeResponse, any>(
-    ["admin", "transmissions", date, page, limit],
-    ({ signal }) => _get(`/api/v1/admin/transmissions/${date}/error`, { params: { page, limit }, signal })
-  );
+  const { data, error, isLoading } = useQuery<TransmissionsByOrganismeResponse, any>({
+    queryKey: ["admin", "transmissions", date, page, limit],
+    queryFn: ({ signal }) => _get(`/api/v1/admin/transmissions/${date}/error`, { params: { page, limit }, signal }),
+  });
 
   const pagination = data?.pagination
     ? { ...data.pagination, lastPage: Math.ceil(data.pagination.total / data.pagination.limit) }

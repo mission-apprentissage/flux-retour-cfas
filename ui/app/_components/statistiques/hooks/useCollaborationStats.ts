@@ -8,9 +8,9 @@ import { STATS_QUERY_CONFIG } from "./useStatsQueries";
 export type ICollaborationStatsResponse = ICollaborationStatsResponseSchema;
 
 export function useCollaborationStats() {
-  return useQuery<ICollaborationStatsResponse>(
-    ["admin", "collaborations", "stats"],
-    () => _get<ICollaborationStatsResponse>("/api/v1/admin/collaborations/stats"),
-    STATS_QUERY_CONFIG
-  );
+  return useQuery<ICollaborationStatsResponse>({
+    queryKey: ["admin", "collaborations", "stats"],
+    queryFn: () => _get<ICollaborationStatsResponse>("/api/v1/admin/collaborations/stats"),
+    ...STATS_QUERY_CONFIG,
+  });
 }

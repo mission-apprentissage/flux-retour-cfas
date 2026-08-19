@@ -18,9 +18,10 @@ const emailSchema = z.string().email("L'email n'est pas au bon format");
 type MissionLocaleEntry = { organisation: IOrganisationMissionLocale; externalML: IMissionLocale };
 
 export function InviteMissionLocaleSection() {
-  const { data: missionLocales, isLoading } = useQuery<MissionLocaleEntry[]>(["mission-locale"], () =>
-    _get("/api/v1/admin/mission-locale")
-  );
+  const { data: missionLocales, isLoading } = useQuery<MissionLocaleEntry[]>({
+    queryKey: ["mission-locale"],
+    queryFn: () => _get("/api/v1/admin/mission-locale"),
+  });
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [searchTerm, setSearchTerm] = useState("");

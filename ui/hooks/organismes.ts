@@ -12,25 +12,33 @@ export function useOrganisme(organismeId: string | undefined | null) {
     isLoading,
     error,
     refetch,
-  } = useQuery<Organisme, any>(["organisme", organismeId], () => _get(`/api/v1/organismes/${organismeId}`), {
+  } = useQuery<Organisme, any>({
+    queryKey: ["organisme", organismeId],
+    queryFn: () => _get(`/api/v1/organismes/${organismeId}`),
     enabled: !!organismeId,
   });
 
   const endpoint = `/api/v1/organismes/${organismeId}`;
 
-  const { mutateAsync: generateApiKey, isLoading: isGeneratingApiKey } = useMutation(async () => {
-    const { apiKey } = await _post(`${endpoint}/api-key`);
-    await refetch();
-    return apiKey;
+  const { mutateAsync: generateApiKey, isPending: isGeneratingApiKey } = useMutation({
+    mutationFn: async () => {
+      const { apiKey } = await _post(`${endpoint}/api-key`);
+      await refetch();
+      return apiKey;
+    },
   });
 
-  const { mutateAsync: configureERP, isLoading: isConfiguringERP } = useMutation(
-    async (dataToUpdate: { erps: string[]; mode_de_transmission?: string; setup_step_courante?: string }) => {
+  const { mutateAsync: configureERP, isPending: isConfiguringERP } = useMutation({
+    mutationFn: async (dataToUpdate: {
+      erps: string[];
+      mode_de_transmission?: string;
+      setup_step_courante?: string;
+    }) => {
       const response = await _put(`${endpoint}/configure-erp`, dataToUpdate);
       await refetch();
       return response;
-    }
-  );
+    },
+  });
 
   return {
     organisme,
@@ -50,13 +58,11 @@ export function useOrganisationOrganisme(enabled?: boolean) {
     isLoading,
     refetch,
     error,
-  } = useQuery<Organisme & { organismesCount: IOrganismesCount }, any>(
-    ["organisation/organisme"],
-    () => _get("/api/v1/organisation/organisme"),
-    {
-      enabled: enabled ?? true,
-    }
-  );
+  } = useQuery<Organisme & { organismesCount: IOrganismesCount }, any>({
+    queryKey: ["organisation/organisme"],
+    queryFn: () => _get("/api/v1/organisation/organisme"),
+    enabled: enabled ?? true,
+  });
 
   return {
     organisme,
@@ -72,7 +78,9 @@ export function useOrganisationOrganismes(enabled?: boolean) {
     data: organismes,
     isLoading,
     error,
-  } = useQuery<Organisme[], any>(["organisation/organismes"], () => _get("/api/v1/organisation/organismes"), {
+  } = useQuery<Organisme[], any>({
+    queryKey: ["organisation/organismes"],
+    queryFn: () => _get("/api/v1/organisation/organismes"),
     enabled: enabled ?? true,
   });
 
@@ -84,10 +92,10 @@ export function useOrganisationOrganismes(enabled?: boolean) {
 }
 
 export function useOrganisationIndicateursOrganismes() {
-  const { data, isLoading, error } = useQuery<IOrganisationIndicateursOrganismes, any>(
-    ["organisation/organismes/indicateurs"],
-    () => _get("/api/v1/organisation/organismes/indicateurs")
-  );
+  const { data, isLoading, error } = useQuery<IOrganisationIndicateursOrganismes, any>({
+    queryKey: ["organisation/organismes/indicateurs"],
+    queryFn: () => _get("/api/v1/organisation/organismes/indicateurs"),
+  });
 
   return {
     data,
@@ -148,9 +156,10 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
 }
 
 export function useOrganismesDuplicatsLists() {
-  const { data: organismesDuplicats, isLoading } = useQuery<Organisme[], any>(["admin/organismes-duplicates"], () =>
-    _get("/api/v1/admin/organismes-duplicates")
-  );
+  const { data: organismesDuplicats, isLoading } = useQuery<Organisme[], any>({
+    queryKey: ["admin/organismes-duplicates"],
+    queryFn: () => _get("/api/v1/admin/organismes-duplicates"),
+  });
 
   return { organismesDuplicats, isLoading };
 }

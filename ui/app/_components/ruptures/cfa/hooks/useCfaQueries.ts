@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { _get } from "@/common/httpClient";
 import type {
@@ -65,8 +65,8 @@ export function useCfaEffectifsRuptures(organismeId: string | undefined, params:
       return _get(`/api/v1/organismes/${organismeId}/cfa/effectifs-ruptures`, { params: queryParams });
     },
     enabled: !!organismeId,
-    keepPreviousData: true,
-    useErrorBoundary: true,
+    placeholderData: keepPreviousData,
+    throwOnError: true,
   });
 }
 
@@ -88,8 +88,8 @@ export function useCfaSuiviMissionLocale(organismeId: string | undefined, params
       return _get(`/api/v1/organismes/${organismeId}/cfa/suivi-mission-locale`, { params: queryParams });
     },
     enabled: !!organismeId,
-    keepPreviousData: true,
-    useErrorBoundary: true,
+    placeholderData: keepPreviousData,
+    throwOnError: true,
   });
 }
 
@@ -115,7 +115,7 @@ export function useCfaEffectifs(organismeId: string | undefined, params: CfaEffe
       return _get(`/api/v1/organismes/${organismeId}/cfa/effectifs`, { params: queryParams });
     },
     enabled: !!organismeId,
-    keepPreviousData: true,
-    useErrorBoundary: true,
+    placeholderData: keepPreviousData,
+    throwOnError: true,
   });
 }

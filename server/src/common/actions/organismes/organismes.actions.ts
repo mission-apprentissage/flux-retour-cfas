@@ -81,7 +81,11 @@ export const updateOrganisme = async (_id: ObjectId, data: Partial<IOrganisme>) 
     { returnDocument: "after" }
   );
 
-  return updated.value as WithId<IOrganisme>;
+  if (!updated) {
+    throw new Error(`Unable to find organisme ${_id.toString()}`);
+  }
+
+  return updated;
 };
 
 /**
@@ -123,7 +127,7 @@ export const updateOrganismeTransmission = async (
     );
   }
 
-  if (!modifyResult.value) {
+  if (!modifyResult) {
     throw new Error(`Could not set organisme transmission infos on organisme ${organisme._id.toString()}`);
   }
 };
@@ -228,11 +232,11 @@ export const generateApiKeyForOrg = async (organismeId: ObjectId) => {
     { returnDocument: "after" }
   );
 
-  if (!updated.value) {
+  if (!updated) {
     throw Boom.notFound(`IOrganisme ${organismeId} not found`);
   }
 
-  return updated?.value.api_key;
+  return updated.api_key;
 };
 
 export const API_KEY_REVOCATION_REASON_INACTIVE = "inactif_12_mois";

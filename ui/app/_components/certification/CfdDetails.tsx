@@ -12,9 +12,12 @@ import styles from "./certification.module.scss";
 import { CertificationLabel } from "./CertificationLabel";
 
 export function CfdDetails({ code }: { code: string | null }) {
-  const cfdInfoQuery = useQuery(["/api/v1/cfd", code ?? null], async ({ queryKey }) => {
-    const [, cfd] = queryKey;
-    return cfd ? _get<CfdInfo | null>(`/api/v1/cfd/${cfd}`) : null;
+  const cfdInfoQuery = useQuery({
+    queryKey: ["/api/v1/cfd", code ?? null],
+    queryFn: async ({ queryKey }) => {
+      const [, cfd] = queryKey;
+      return cfd ? _get<CfdInfo | null>(`/api/v1/cfd/${cfd}`) : null;
+    },
   });
 
   if (cfdInfoQuery.isLoading) return <p>Chargement…</p>;

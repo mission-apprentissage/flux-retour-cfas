@@ -23,16 +23,17 @@ type ActivationResponse = {
 };
 
 function useActivation(activationToken: string | null) {
-  const { data, isLoading, isError } = useQuery<ActivationResponse, Error>(
-    ["useActivation", activationToken],
-    async () => {
+  const { data, isLoading, isError } = useQuery<ActivationResponse, Error>({
+    queryKey: ["useActivation", activationToken],
+    queryFn: async () => {
       if (!activationToken) {
         throw new Error("Missing activation token");
       }
       return await _post("/api/v1/auth/activation", { activationToken });
     },
-    { enabled: Boolean(activationToken), retry: false }
-  );
+    enabled: Boolean(activationToken),
+    retry: false,
+  });
 
   return {
     isLoading,

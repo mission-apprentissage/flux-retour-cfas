@@ -241,9 +241,10 @@ export default function GestionOrganismesClient() {
     data: organismes,
     error,
     isLoading,
-  } = useQuery<IArchivableOrganismesResponseJson, any>(["admin", "organismes-archivables"], ({ signal }) =>
-    _get("/api/v1/admin/organismes/archivables", { signal })
-  );
+  } = useQuery<IArchivableOrganismesResponseJson, any>({
+    queryKey: ["admin", "organismes-archivables"],
+    queryFn: ({ signal }) => _get("/api/v1/admin/organismes/archivables", { signal }),
+  });
 
   const rows = useMemo(() => mergeOrganismesByIdentity(organismes ?? []).map(toTableRow), [organismes]);
 

@@ -29,7 +29,10 @@ export function InscriptionTeteDeReseau({
   setHideBackNextButtons,
 }: InscriptionFormProps & { setHideBackNextButtons: (hidden: boolean) => void }) {
   const router = useRouter();
-  const { data: reseaux } = useQuery<IReseau[]>(["tete_de_reseaux"], () => _get("/api/v1/reseaux"));
+  const { data: reseaux } = useQuery<IReseau[]>({
+    queryKey: ["tete_de_reseaux"],
+    queryFn: () => _get("/api/v1/reseaux"),
+  });
 
   const options = reseaux ? [...reseaux, { nom: "Autre Réseau", key: AUTRE_RESEAU } as IReseau] : [];
 

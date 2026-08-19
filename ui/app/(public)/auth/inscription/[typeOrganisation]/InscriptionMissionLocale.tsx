@@ -22,10 +22,14 @@ export function InscriptionMissionLocale({ setOrganisation }: Pick<InscriptionFo
   const [typeOrganisation, setTypeOrganisation] = useState<TypeOrganisation | null>(null);
   const [departement, setDepartement] = useState<string>("");
 
-  const { data: missionLocales } = useQuery<Array<IOrganisationMissionLocale>>(["mission-locale"], async () =>
-    _get("/api/v1/mission-locale")
-  );
-  const { data: armls } = useQuery<Array<IOrganisationARML>>(["arml"], async () => _get("/api/v1/mission-locale/arml"));
+  const { data: missionLocales } = useQuery<Array<IOrganisationMissionLocale>>({
+    queryKey: ["mission-locale"],
+    queryFn: async () => _get("/api/v1/mission-locale"),
+  });
+  const { data: armls } = useQuery<Array<IOrganisationARML>>({
+    queryKey: ["arml"],
+    queryFn: async () => _get("/api/v1/mission-locale/arml"),
+  });
 
   const departementList = useMemo(() => {
     return (missionLocales ?? []).reduce<Record<string, Array<IOrganisationMissionLocale>>>((acc, curr) => {

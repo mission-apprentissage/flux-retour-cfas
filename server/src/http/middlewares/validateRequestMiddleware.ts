@@ -41,7 +41,9 @@ function validateRequestMiddleware<TParams = any, TQuery = any, TBody = any>(
     if (schemas.query) {
       const parsed = schemas.query.safeParse(req.query);
       if (parsed.success) {
-        req.query = parsed.data;
+        // Express 5 : req.query est un getter en lecture seule (le réassigner throw).
+        // On redéfinit la propriété pour exposer la donnée validée/coercée aux handlers.
+        Object.defineProperty(req, "query", { value: parsed.data, writable: true, configurable: true });
       } else {
         errors.push({ type: "Query", errors: parsed.error });
       }

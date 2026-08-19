@@ -531,7 +531,7 @@ export const updateUser = async (_id: string | ObjectId, data: Partial<IUsersMig
     { returnDocument: "after" }
   );
 
-  return updated.value;
+  return updated;
 };
 
 export const updateUserLastConnection = async (userId: ObjectId) => {

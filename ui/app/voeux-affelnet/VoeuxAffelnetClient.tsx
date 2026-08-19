@@ -61,12 +61,15 @@ export default function VoeuxAffelnetClient() {
     data: affelnetCount,
     isLoading,
     error,
-  } = useQuery<AffelnetCount, any>(["affelnet/national/count", { departements, year }], () => {
-    const params = new URLSearchParams({ year: String(year) });
-    if (departements.length > 0) {
-      params.set("organisme_departements", departements.join(","));
-    }
-    return _get(`/api/v1/affelnet/national/count?${params.toString()}`);
+  } = useQuery<AffelnetCount, any>({
+    queryKey: ["affelnet/national/count", { departements, year }],
+    queryFn: () => {
+      const params = new URLSearchParams({ year: String(year) });
+      if (departements.length > 0) {
+        params.set("organisme_departements", departements.join(","));
+      }
+      return _get(`/api/v1/affelnet/national/count?${params.toString()}`);
+    },
   });
 
   const download = async (kind: "concretise" | "non-concretise") => {

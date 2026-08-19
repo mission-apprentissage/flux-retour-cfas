@@ -163,7 +163,6 @@ function Step2({
   return (
     <div>
       <Stepper currentStep={2} stepCount={2} title="Mes informations" />
-
       <form onSubmit={handleSubmit} noValidate>
         <div>
           <Input label="Votre courriel" disabled nativeInputProps={{ value: info.email, readOnly: true }} />

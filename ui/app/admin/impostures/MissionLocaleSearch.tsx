@@ -25,7 +25,10 @@ export function MissionLocaleSearch({ setOrganisation }: { setOrganisation: SetO
     data: missionLocales,
     isLoading,
     error,
-  } = useQuery<MissionLocaleEntry[], any>(["admin", "mission-locale"], () => _get("/api/v1/admin/mission-locale"));
+  } = useQuery<MissionLocaleEntry[], any>({
+    queryKey: ["admin", "mission-locale"],
+    queryFn: () => _get("/api/v1/admin/mission-locale"),
+  });
 
   const indexed = useMemo(
     () =>

@@ -9,7 +9,10 @@ import type { SetOrganisation } from "@/app/_components/inscription/types";
 import { _get } from "@/common/httpClient";
 
 export function ARMLSelect({ setOrganisation }: { setOrganisation: SetOrganisation }) {
-  const { data: armls } = useQuery<Array<IOrganisationARML>>(["arml"], async () => _get("/api/v1/mission-locale/arml"));
+  const { data: armls } = useQuery<Array<IOrganisationARML>>({
+    queryKey: ["arml"],
+    queryFn: async () => _get("/api/v1/mission-locale/arml"),
+  });
 
   return (
     <Select

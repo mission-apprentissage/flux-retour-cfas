@@ -2238,12 +2238,12 @@ export const setEffectifMissionLocaleData = async (
   );
   if (Object.keys(dbSetObject).length > 0) {
     const logPayload = shouldClearStaleConnaissanceMl ? { ...dbSetObject, connaissance_ml: null } : dbSetObject;
-    await createEffectifMissionLocaleLog(updated.value?._id, logPayload, user, missionLocaleId);
+    await createEffectifMissionLocaleLog(updated?._id, logPayload, user, missionLocaleId);
   }
 
   // Déclencher WhatsApp si l'effectif est marqué comme "Contacté sans retour"
   if (effectifFields.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {
-    triggerWhatsAppIfEligible(updated.value, missionLocaleId).catch((error) => {
+    triggerWhatsAppIfEligible(updated, missionLocaleId).catch((error) => {
       logger.error({ error, effectifId: effectifId }, "Failed to trigger WhatsApp");
       captureException(error);
     });
@@ -2679,7 +2679,9 @@ export const createMissionLocaleSnapshot = async (
           ...(normalizedIdentifiant ? { identifiant_normalise: normalizedIdentifiant } : {}),
         },
       },
-      { upsert: shouldUpsert }
+      // includeResultMetadata: v6 renvoie le document nu par défaut ; on garde la forme ModifyResult
+      // ({ value, lastErrorObject, ok }) car on lit lastErrorObject.upserted / .n et value ci-dessous.
+      { upsert: shouldUpsert, includeResultMetadata: true }
     );
   } catch (error) {
     // Race condition : un doublon a été inséré entre le check et l'upsert
