@@ -29,9 +29,20 @@ export const buildVisibilityWindowMatch = (now: Date = new Date()) => ({
   ],
 });
 
-/** Dossier « en rupture » : rupture déclarée par le CFA, ou statut courant hors sortie de rupture. */
-export const buildRuptureStatusMatch = () => ({
-  $or: [{ cfa_rupture_declaration: { $exists: true } }, { "current_status.value": { $nin: STATUTS_SORTIE_RUPTURE } }],
+/**
+ * Dossier « en rupture » : rupture déclarée par le CFA, ou statut courant hors sortie de rupture.
+ * `keepQualifiedByMl` conserve en plus les dossiers déjà qualifiés par un conseiller ML — comme
+ * côté ML, on ne masque que ce sur quoi personne n'a agi. Sans lui, un jeune requalifié en fin de
+ * formation et marqué injoignable sort à la fois de la liste ruptures et de l'onglet Suivi ML
+ * (`buildContactedByMlExpr` exclut les situations « non joint ») : il disparaît de toute vue CFA.
+ * Laissé à false pour le ciblage e-mail, qui compte des ruptures et non des dossiers suivis.
+ */
+export const buildRuptureStatusMatch = ({ keepQualifiedByMl = false }: { keepQualifiedByMl?: boolean } = {}) => ({
+  $or: [
+    { cfa_rupture_declaration: { $exists: true } },
+    { "current_status.value": { $nin: STATUTS_SORTIE_RUPTURE } },
+    ...(keepQualifiedByMl ? [{ situation: { $exists: true, $ne: null } }] : []),
+  ],
 });
 
 /**

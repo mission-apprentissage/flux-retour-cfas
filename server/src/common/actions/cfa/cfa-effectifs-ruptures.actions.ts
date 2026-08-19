@@ -108,7 +108,7 @@ export async function getCfaEffectifsEnRupture(
     // Exclude effectifs who have since become APPRENTI again,
     // but only for system-detected ruptures (not CFA manual declarations,
     // where the ERP may not have updated the status yet)
-    { $match: buildRuptureStatusMatch() },
+    { $match: buildRuptureStatusMatch({ keepQualifiedByMl: true }) },
     {
       $addFields: {
         _nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
