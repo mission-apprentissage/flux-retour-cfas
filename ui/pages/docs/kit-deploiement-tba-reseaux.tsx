@@ -9,9 +9,13 @@ import SimplePage from "@/components/Page/SimplePage";
 import "react-notion-x/src/styles.css";
 
 export const getStaticProps = (async () => {
-  const notion = new NotionAPI();
-  const recordMap = await notion.getPage("Kit-d-ploiement-Tableau-de-bord-R-seaux-cb16eaaf93f840ebb5d7bbcf68925774");
-  return { props: { data: recordMap }, revalidate: 60 * 30 };
+  try {
+    const notion = new NotionAPI();
+    const recordMap = await notion.getPage("Kit-d-ploiement-Tableau-de-bord-R-seaux-cb16eaaf93f840ebb5d7bbcf68925774");
+    return { props: { data: recordMap }, revalidate: 60 * 30 };
+  } catch (error) {
+    return { notFound: true, revalidate: 60 };
+  }
 }) satisfies GetStaticProps<{
   data: ExtendedRecordMap;
 }>;

@@ -11,9 +11,13 @@ import SimplePage from "@/components/Page/SimplePage";
 import "react-notion-x/src/styles.css";
 
 export const getStaticProps = (async () => {
-  const notion = new NotionAPI();
-  const recordMap = await notion.getPage("Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0");
-  return { props: { data: recordMap }, revalidate: 60 * 30 };
+  try {
+    const notion = new NotionAPI();
+    const recordMap = await notion.getPage("Page-d-Aide-FAQ-dbb1eddc954441eaa0ba7f5c6404bdc0");
+    return { props: { data: recordMap }, revalidate: 60 * 30 };
+  } catch (error) {
+    return { notFound: true, revalidate: 60 };
+  }
 }) satisfies GetStaticProps<{
   data: ExtendedRecordMap;
 }>;
