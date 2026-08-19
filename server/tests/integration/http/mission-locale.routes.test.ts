@@ -370,6 +370,72 @@ describe("Mission Locale Routes", () => {
       });
     });
 
+    describe("Sortant requalifié (FIN_DE_FORMATION)", () => {
+      it("garde le dossier et préserve date_rupture", async () => {
+        const before = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(before?.date_rupture).toBeTruthy();
+
+        await effectifsDb().updateOne(
+          { _id: EFFECTIF_ID },
+          {
+            $push: {
+              "_computed.statut.parcours": { valeur: "FIN_DE_FORMATION", date: new Date() },
+            } as any,
+          }
+        );
+
+        const updatedEffectif = await effectifsDb().findOne({ _id: EFFECTIF_ID });
+        await updateOrDeleteMissionLocaleSnapshot(updatedEffectif!);
+
+        const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(after?.soft_deleted).toBeFalsy();
+        expect(after?.date_rupture).toEqual(before?.date_rupture);
+        expect(after?.current_status?.value).toBe("FIN_DE_FORMATION");
+      });
+
+      it("masque le dossier des listes ML sans le supprimer", async () => {
+        await effectifsDb().updateOne(
+          { _id: EFFECTIF_ID },
+          {
+            $push: {
+              "_computed.statut.parcours": { valeur: "FIN_DE_FORMATION", date: new Date() },
+            } as any,
+          }
+        );
+
+        const updatedEffectif = await effectifsDb().findOne({ _id: EFFECTIF_ID });
+        await updateOrDeleteMissionLocaleSnapshot(updatedEffectif!);
+
+        const res = await requestAsOrganisation(
+          { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+          "get",
+          `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
+        );
+        expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(0);
+
+        const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(after?.soft_deleted).toBeFalsy();
+      });
+
+      // Contraste : le retour en contrat reste un soft-delete (comportement préexistant inchangé).
+      it("soft-delete toujours un retour en APPRENTI", async () => {
+        await effectifsDb().updateOne(
+          { _id: EFFECTIF_ID },
+          {
+            $push: {
+              "_computed.statut.parcours": { valeur: "APPRENTI", date: new Date() },
+            } as any,
+          }
+        );
+
+        const updatedEffectif = await effectifsDb().findOne({ _id: EFFECTIF_ID });
+        await updateOrDeleteMissionLocaleSnapshot(updatedEffectif!);
+
+        const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(after?.soft_deleted).toBe(true);
+      });
+    });
+
     describe("La ML soumet le formulaire collaboration", () => {
       it.each([
         { situation: SITUATION_ENUM.CHERCHE_CONTRAT },

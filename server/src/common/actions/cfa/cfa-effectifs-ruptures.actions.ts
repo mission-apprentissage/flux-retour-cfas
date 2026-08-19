@@ -6,6 +6,7 @@ import { ICfaRuptureEffectif, ICfaRupturesResponse } from "shared/models/routes/
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
 import {
+  CFA_COLLAB_AUTO_SEND_DELAI_DAYS,
   buildCollabStatusOrderField,
   buildCollabStatusSwitch,
   buildCsvInConditions,
@@ -115,7 +116,7 @@ export async function getCfaEffectifsEnRupture(
         _libelle_formation: "$effectif_snapshot.formation.libelle_long",
         collab_status: buildCollabStatusSwitch(),
         // Section "+45j après rupture" : dossier transmis automatiquement à la ML (>= 45 jours).
-        is_transmis_auto: { $gte: ["$dernierStatutDureeInDay", 45] },
+        is_transmis_auto: { $gte: ["$dernierStatutDureeInDay", CFA_COLLAB_AUTO_SEND_DELAI_DAYS] },
       },
     },
     { $addFields: { collab_status_order: buildCollabStatusOrderField() } },
