@@ -1,8 +1,13 @@
+import Boom from "boom";
 import { ObjectId } from "bson";
 import { IUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
 
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
 
+import {
+  ensureMissionLocaleEffectifRecord,
+  resolveCfaEffectifSource,
+} from "../mission-locale/mission-locale-record.actions";
 import { createOrUpdateMissionLocaleStats } from "../mission-locale/mission-locale-stats.actions";
 
 export const setEffectifMissionLocaleDataFromOrganisme = async (
@@ -37,12 +42,51 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     }
   }
 
+  const effectifObjectId = new ObjectId(effectifId);
+  const existingFilter = {
+    "effectif_snapshot.organisme_id": organismeId,
+    effectif_id: effectifObjectId,
+    soft_deleted: { $ne: true },
+  };
+
+  const existing = await missionLocaleEffectifsDb().findOne(existingFilter);
+
+  if (data.acc_conjoint && existing?.organisme_data?.acc_conjoint) {
+    throw Boom.conflict("Un dossier de collaboration a déjà été envoyé pour cet effectif");
+  }
+
+  let targetFilter: Record<string, unknown> = existingFilter;
+
+  if (!existing) {
+    const { date_rupture: dateRupture } = data as IUpdateMissionLocaleEffectifOrganisme & { date_rupture?: Date };
+    const source = await resolveCfaEffectifSource(organismeId, effectifObjectId);
+
+    // Le `cfa_rupture_declaration` doit être posé dès la création : c'est lui qui garde le dossier
+    // visible côté ML lors d'un repointage d'effectif_id (garde anti-disparition de migrateMlRecordEffectifId).
+    const creationSet =
+      dateRupture && userId
+        ? { cfa_rupture_declaration: { date_rupture: dateRupture, declared_at: new Date(), declared_by: userId } }
+        : {};
+
+    const { recordId } = await ensureMissionLocaleEffectifRecord(
+      organismeId,
+      effectifId.toString(),
+      source,
+      creationSet,
+      {
+        dateRupture,
+      }
+    );
+
+    if (!recordId) {
+      throw Boom.internal("Impossible de créer le dossier Mission Locale pour cet effectif");
+    }
+
+    targetFilter = { _id: recordId };
+  }
+
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
-    {
-      "effectif_snapshot.organisme_id": organismeId,
-      effectif_id: new ObjectId(effectifId),
-      soft_deleted: { $ne: true },
-    },
+    targetFilter,
     {
       $set: {
         ...setFields,

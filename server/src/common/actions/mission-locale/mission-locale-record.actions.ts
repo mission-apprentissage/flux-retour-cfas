@@ -20,6 +20,36 @@ import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
 
 import { isDecaSnapshot, migrateMlRecordEffectifId } from "./mission-locale.actions";
 
+/**
+ * Détermine la collection source d'un effectif CFA. L'ERP est interrogé en premier (priorité
+ * ERP > DECA) et DECA n'est consulté que si l'organisme y a accès.
+ */
+export async function resolveCfaEffectifSource(
+  organismeId: ObjectId,
+  effectifId: ObjectId
+): Promise<CfaEffectifSource> {
+  const erpEffectif = await effectifsDb().findOne(
+    { _id: effectifId, organisme_id: organismeId },
+    { projection: { _id: 1 } }
+  );
+  if (erpEffectif) {
+    return "effectifs";
+  }
+
+  const organisme = await organismesDb().findOne({ _id: organismeId }, { projection: { is_allowed_deca: 1 } });
+  if (organisme?.is_allowed_deca) {
+    const decaEffectif = await effectifsDECADb().findOne(
+      { _id: effectifId, organisme_id: organismeId },
+      { projection: { _id: 1 } }
+    );
+    if (decaEffectif) {
+      return "effectifsDECA";
+    }
+  }
+
+  throw Boom.notFound("Effectif non trouvé");
+}
+
 export interface IEnsureMissionLocaleEffectifRecordResult {
   recordId: ObjectId | null;
   created: boolean;
@@ -213,6 +243,33 @@ export async function ensureMissionLocaleEffectifRecord(
       scoreEffectifInBackground(result.keeperId, effectif);
       return { recordId: result.keeperId, created: false };
     }
+  }
+
+  // L'index unique (mission_locale_id, effectif_id) n'est pas filtré sur soft_deleted : un dossier
+  // soft-deleted par l'hydratation ferait échouer l'INSERT en E11000. On le ressuscite.
+  const softDeletedRecord = await missionLocaleEffectifsDb().findOne({
+    mission_locale_id: mlOrganisation._id,
+    effectif_id: newEffectifId,
+    soft_deleted: true,
+  });
+
+  if (softDeletedRecord) {
+    await missionLocaleEffectifsDb().updateOne(
+      { _id: softDeletedRecord._id },
+      {
+        $set: {
+          soft_deleted: false,
+          effectif_snapshot: { ...effectif, _id: effectif._id },
+          effectif_snapshot_date: now,
+          current_status: { value: currentStatus?.valeur ?? null, date: currentStatus?.date ?? null },
+          ...(opts?.dateRupture ? { date_rupture: opts.dateRupture } : {}),
+          ...(normalizedIdentifiant ? { identifiant_normalise: normalizedIdentifiant } : {}),
+          ...extraSet,
+        },
+      }
+    );
+    scoreEffectifInBackground(softDeletedRecord._id, effectif);
+    return { recordId: softDeletedRecord._id, created: false };
   }
 
   const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
