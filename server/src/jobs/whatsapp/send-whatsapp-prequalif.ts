@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { STATUT_APPRENANT } from "shared/constants";
 
 import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "@/common/actions/mission-locale/mission-locale.constants";
 import parentLogger from "@/common/logger";
@@ -39,6 +40,7 @@ async function getEligibleEffectifs(): Promise<EligibleRow[]> {
           "classification_reponse_appel.score": { $gte: CONTACT_OPPORTUN_SCORE_THRESHOLD },
           situation: null,
           soft_deleted: { $ne: true },
+          "current_status.value": { $ne: STATUT_APPRENANT.FIN_DE_FORMATION },
           "computed.organisme.is_allowed_collab": { $ne: true },
           "organisme_data.acc_conjoint": { $ne: true },
           "whatsapp_contact.opted_out": { $ne: true },
