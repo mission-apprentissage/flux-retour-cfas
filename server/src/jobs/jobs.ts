@@ -245,6 +245,9 @@ export async function setupJobProcessor() {
                 const evaluationDate = new Date();
                 await hydrateWeeklyEffectifStatut(signal, evaluationDate);
                 await hydratePreviousYearMissionLocaleEffectifStatut(evaluationDate, signal);
+                // Sans ce rafraîchissement, `current_status` reste figé pour les dossiers dont le
+                // CFA ne transmet plus : les sortants requalifiés ne seraient jamais masqués.
+                await updateMissionLocaleEffectifCurrentStatus(signal);
               },
               resumable: true,
             },

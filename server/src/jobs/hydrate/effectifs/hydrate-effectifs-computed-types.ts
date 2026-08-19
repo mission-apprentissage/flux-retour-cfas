@@ -66,7 +66,17 @@ export async function hydrateEffectifsComputedTypes(
   };
 
   try {
-    const cursor = collection().find(query);
+    // Seuls ces champs alimentent le recalcul : sans projection, une passe complète transfère
+    // les documents entiers (plusieurs Go de BSON).
+    const cursor = collection().find(query, {
+      projection: {
+        "apprenant.historique_statut": 1,
+        formation: 1,
+        contrats: 1,
+        annee_scolaire: 1,
+        "_computed.statut": 1,
+      },
+    });
 
     while (await cursor.hasNext()) {
       const effectif: IEffectifGenerique | null = await cursor.next();
