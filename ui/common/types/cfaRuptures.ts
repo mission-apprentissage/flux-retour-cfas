@@ -45,7 +45,9 @@ export const ACTIVE_COLLAB_STATUS_LABELS: Partial<Record<CfaCollaborationStatus,
 };
 
 export const SITUATION_LABELS: Record<CfaEffectifSituation, string> = {
-  [CFA_EFFECTIF_SITUATION.RUPTURE]: "En rupture",
+  [CFA_EFFECTIF_SITUATION.RUPTURE]: "Rupture",
+  [CFA_EFFECTIF_SITUATION.RUPTURE_DECA]: "Rupture sur DECA",
+  [CFA_EFFECTIF_SITUATION.PREVENTION_RUPTURE]: "Prévention de rupture",
   [CFA_EFFECTIF_SITUATION.ABANDON]: "Abandon",
   [CFA_EFFECTIF_SITUATION.SANS_CONTRAT]: "Sans contrat",
 };

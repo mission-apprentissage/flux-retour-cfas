@@ -2,6 +2,7 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationOrganismeFormation } from "shared/models";
+import { CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import {
   CFA_EFFECTIF_SITUATION,
   CfaEffectifSource,
@@ -80,13 +81,18 @@ export async function getCfaEffectifs(
     annee_scolaire: { $in: anneeScolaireList },
   };
 
-  const pipeline: Record<string, unknown>[] = [{ $match: baseMatch }];
+  // La collection d'origine est marquée par branche d'union : le champ `source` de l'effectif ne
+  // permet pas de la déduire (un effectif ERP peut être marqué FICHIER après téléversement).
+  const pipeline: Record<string, unknown>[] = [
+    { $match: baseMatch },
+    { $addFields: { source_collection: "effectifs" } },
+  ];
 
   if (isAllowedDeca) {
     pipeline.push({
       $unionWith: {
         coll: "effectifsDECA",
-        pipeline: [{ $match: baseMatch }],
+        pipeline: [{ $match: baseMatch }, { $addFields: { source_collection: "effectifsDECA" } }],
       },
     });
   }
@@ -94,7 +100,7 @@ export async function getCfaEffectifs(
   pipeline.push(
     {
       $addFields: {
-        source_priority: { $cond: [{ $eq: ["$source", "ERP"] }, 0, 1] },
+        source_priority: { $cond: [{ $eq: ["$source_collection", "effectifs"] }, 0, 1] },
         _dedup_nom: stripDiacritics({ $toLower: { $trim: { input: { $ifNull: ["$apprenant.nom", ""] } } } }),
         _dedup_prenom: stripDiacritics({ $toLower: { $trim: { input: { $ifNull: ["$apprenant.prenom", ""] } } } }),
       },
@@ -108,11 +114,7 @@ export async function getCfaEffectifs(
           ddn: "$apprenant.date_de_naissance",
         },
         effectif_id: { $first: "$_id" },
-        source_collection: {
-          $first: {
-            $cond: [{ $eq: ["$source", "ERP"] }, "effectifs", "effectifsDECA"],
-          },
-        },
+        source_collection: { $first: "$source_collection" },
         doc: { $first: "$$ROOT" },
       },
     },
@@ -237,7 +239,17 @@ export async function getCfaEffectifs(
         situation: {
           $switch: {
             branches: [
+              // Ordre : la rupture DECA doit précéder la rupture ERP, et la prévention doit suivre
+              // les deux (un jeune déclaré en prévention puis réellement rupturé affiche "Rupture").
+              {
+                case: { $and: ["$en_rupture", { $eq: ["$source_collection", "effectifsDECA"] }] },
+                then: CFA_EFFECTIF_SITUATION.RUPTURE_DECA,
+              },
               { case: "$en_rupture", then: CFA_EFFECTIF_SITUATION.RUPTURE },
+              {
+                case: { $eq: ["$ml_doc.organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+                then: CFA_EFFECTIF_SITUATION.PREVENTION_RUPTURE,
+              },
               {
                 case: { $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.ABANDON] },
                 then: CFA_EFFECTIF_SITUATION.ABANDON,
