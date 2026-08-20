@@ -132,6 +132,27 @@ describe("Tunnel de collaboration CFA", () => {
       expect(created?.cfa_rupture_declaration?.date_rupture).toEqual(new Date("2026-05-04"));
     });
 
+    it("branche B : la date déclarée est enregistrée même si le dossier existe déjà", async () => {
+      const effectif = await insertEffectif();
+      await missionLocaleEffectifsDb().insertOne({
+        _id: new ObjectId(),
+        mission_locale_id: mlOrganisationId,
+        effectif_id: effectifId,
+        effectif_snapshot: { ...effectif, _id: effectifId, organisme_id: organismeId },
+        effectif_snapshot_date: new Date(),
+        date_rupture: new Date("2026-01-10"),
+        created_at: new Date(),
+        current_status: { value: null, date: null },
+      } as any);
+
+      await send(await parse(brancheB));
+
+      const updated = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+      expect(updated?.date_rupture).toEqual(new Date("2026-05-04"));
+      expect(updated?.cfa_rupture_declaration?.date_rupture).toEqual(new Date("2026-05-04"));
+      expect(updated?.cfa_rupture_declaration?.declared_by).toEqual(userId);
+    });
+
     it("branche C : dossier créé avec la recherche d'entreprise", async () => {
       await insertEffectif();
 

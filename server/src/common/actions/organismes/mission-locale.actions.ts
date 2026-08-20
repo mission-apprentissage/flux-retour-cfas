@@ -74,22 +74,26 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
 
   let targetFilter: Record<string, unknown> = existingFilter;
 
-  if (!existing) {
-    const dateRupture = data.date_rupture;
-    const source = await resolveCfaEffectifSource(organismeId, effectifObjectId);
+  const dateRupture = data.date_rupture;
+  // La date saisie par le CFA fait foi, que le dossier existe déjà ou non : c'est aussi elle qui
+  // garde le dossier visible côté ML lors d'un repointage d'effectif_id
+  // (garde anti-disparition de migrateMlRecordEffectifId).
+  const ruptureDeclaration =
+    dateRupture && userId
+      ? {
+          cfa_rupture_declaration: { date_rupture: dateRupture, declared_at: new Date(), declared_by: userId },
+          date_rupture: dateRupture,
+        }
+      : {};
 
-    // Le `cfa_rupture_declaration` doit être posé dès la création : c'est lui qui garde le dossier
-    // visible côté ML lors d'un repointage d'effectif_id (garde anti-disparition de migrateMlRecordEffectifId).
-    const creationSet =
-      dateRupture && userId
-        ? { cfa_rupture_declaration: { date_rupture: dateRupture, declared_at: new Date(), declared_by: userId } }
-        : {};
+  if (!existing) {
+    const source = await resolveCfaEffectifSource(organismeId, effectifObjectId);
 
     const { recordId } = await ensureMissionLocaleEffectifRecord(
       organismeId,
       effectifId.toString(),
       source,
-      creationSet,
+      ruptureDeclaration,
       {
         dateRupture,
       }
@@ -124,6 +128,7 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     {
       $set: {
         ...setFields,
+        ...ruptureDeclaration,
         updated_at: new Date(),
       },
     },
