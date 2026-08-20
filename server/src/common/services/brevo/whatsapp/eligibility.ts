@@ -14,6 +14,15 @@ import { applyTestPhoneOverride, maskPhone, normalizePhoneNumber } from "./phone
 export const PREQUALIF_RUPTURE_MAX_DAYS = 180;
 
 /**
+ * Exclusion PRD du flux préqualif : le dossier est suivi via la collaboration CFA
+ * (CFA basculé V2 ou accompagnement conjoint), le rappel WhatsApp ne s'applique pas.
+ * Utilisée à l'envoi (éligibilité) et à la réponse (garde anti-race dans les handlers).
+ */
+export function isExcludedByCfaCollab(effectif: IMissionLocaleEffectif): boolean {
+  return effectif.computed?.organisme?.is_allowed_collab === true || effectif.organisme_data?.acc_conjoint === true;
+}
+
+/**
  * Vérifie si un effectif est éligible pour recevoir un WhatsApp préqualif.
  *
  * Cible : "contacts opportuns" (score classifier ≥ 0.75) jamais traités, hors CFA V2
@@ -29,9 +38,7 @@ export function isEligibleForPrequalif(effectif: IMissionLocaleEffectif): boolea
   const score = effectif.classification_reponse_appel?.score ?? 0;
   if (score < CONTACT_OPPORTUN_SCORE_THRESHOLD) return false;
 
-  if (effectif.computed?.organisme?.is_allowed_collab === true) return false;
-
-  if (effectif.organisme_data?.acc_conjoint === true) return false;
+  if (isExcludedByCfaCollab(effectif)) return false;
 
   if (effectif.situation !== null && effectif.situation !== undefined) return false;
 

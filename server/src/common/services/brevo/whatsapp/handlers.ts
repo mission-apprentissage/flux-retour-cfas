@@ -18,6 +18,7 @@ import config from "@/config";
 
 import { sendWhatsAppMessage } from "./brevoApi";
 import { updateWhatsAppContact, getMissionLocaleInfo, getMissionLocaleInfoFull } from "./database";
+import { isExcludedByCfaCollab } from "./eligibility";
 import {
   buildAutoReplyMessage,
   buildCallbackMessage,
@@ -498,6 +499,36 @@ async function handlePrequalifYes(
   inboundHistory: IWhatsAppMessageHistory,
   prenom: string
 ): Promise<void> {
+  // Exclusion PRD (race send/réponse) : le dossier est passé côté collab CFA depuis l'envoi.
+  // Aucun souhaite_rdv, aucune notif ML — donc surtout pas de message promettant un rappel.
+  // On enregistre l'entrant et on clôt la conversation pour rester idempotent sur les répétitions.
+  if (isExcludedByCfaCollab(effectif)) {
+    if (effectif.whatsapp_contact?.conversation_state !== CONVERSATION_STATE.CLOSED) {
+      logger.warn(
+        {
+          effectifId: effectif._id,
+          cfaWentV2: effectif.computed?.organisme?.is_allowed_collab === true,
+          cfaAccConjoint: effectif.organisme_data?.acc_conjoint === true,
+        },
+        "Préqualif YES reçu mais CFA bascule V2 / acc_conjoint entre envoi et réponse — souhaite_rdv NON posé (exclusion PRD)"
+      );
+    }
+    const now = new Date();
+    await updateWhatsAppContact(
+      effectif._id,
+      {
+        user_response: USER_RESPONSE_TYPE.PREQUALIF_YES,
+        user_response_at: now,
+        user_response_raw: text,
+        conversation_state: CONVERSATION_STATE.CLOSED,
+        message_status: "read",
+        status_updated_at: now,
+      },
+      [inboundHistory]
+    );
+    return;
+  }
+
   await handlePrequalifYesSideEffects(effectif);
 
   const ml = await getMissionLocaleInfoFull(effectif.mission_locale_id);
