@@ -16,6 +16,7 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
   IEmailStatusEnum,
   API_EFFECTIF_LISTE,
+  CFA_SITUATION_TYPE_ENUM,
   CONNAISSANCE_ML_ENUM,
   IMissionLocaleEffectif,
   SITUATION_ENUM,
@@ -455,6 +456,9 @@ const addFieldTraitementStatus = (visibility: "MISSION_LOCALE" | "ORGANISME_FORM
             $and: [
               { $eq: ["$current_status.value", "APPRENTI"] },
               { $not: [{ $ifNull: ["$cfa_rupture_declaration", false] }] },
+              // Un dossier de prévention porte sur un jeune toujours en contrat : le statut
+              // APPRENTI sans déclaration de rupture y est normal, ce n'est pas un nouveau contrat.
+              { $ne: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
             ],
           },
           true,

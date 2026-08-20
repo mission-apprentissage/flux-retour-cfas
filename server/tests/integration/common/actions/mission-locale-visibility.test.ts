@@ -1,13 +1,14 @@
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationMissionLocale } from "shared/models";
-import { API_EFFECTIF_LISTE } from "shared/models/data/missionLocaleEffectif.model";
+import { API_EFFECTIF_LISTE, CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { describe, it, beforeEach, expect } from "vitest";
 
 import {
   getAllEffectifForMissionLocaleCursor,
   getEffectifARisqueByMissionLocaleId,
+  getEffectifFromMissionLocaleId,
   getEffectifsParMoisByMissionLocaleId,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
@@ -148,6 +149,25 @@ describe("Visibilité mission locale des dossiers sans date de rupture", () => {
     const result = await getEffectifsParMoisByMissionLocaleId(missionLocale, { type: API_EFFECTIF_LISTE.A_TRAITER });
 
     expect(flatten(result as any)).toHaveLength(0);
+  });
+
+  it("ne présente pas un dossier de prévention comme un nouveau contrat", async () => {
+    const doc = await insertMlRecord({
+      ...collabDossier(monthsAgo(1)),
+      current_status: { value: STATUT_APPRENANT.APPRENTI, date: monthsAgo(6) },
+    });
+    await missionLocaleEffectifsDb().updateOne(
+      { _id: doc._id },
+      { $set: { "organisme_data.situation_type": CFA_SITUATION_TYPE_ENUM.EN_CONTRAT } }
+    );
+
+    const { effectif } = await getEffectifFromMissionLocaleId(
+      missionLocale,
+      doc.effectif_snapshot._id.toString(),
+      API_EFFECTIF_LISTE.A_TRAITER
+    );
+
+    expect((effectif as any).nouveau_contrat).toBe(false);
   });
 
   it("n'élargit pas le curseur d'hydratation sur la collection effectifs", async () => {
