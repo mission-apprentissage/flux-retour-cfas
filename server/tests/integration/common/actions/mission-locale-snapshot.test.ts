@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
+import { RQTH_DECLARE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { describe, it, beforeEach, expect } from "vitest";
 
@@ -98,5 +99,40 @@ describe("updateOrDeleteMissionLocaleSnapshot", () => {
 
     const updated = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
     expect(updated?.soft_deleted).toBe(true);
+  });
+
+  describe("RQTH déclaré par le CFA", () => {
+    it("ré-applique rqth=true après réécriture du snapshot", async () => {
+      await insertMlRecord({
+        organisme_data: { acc_conjoint: true, verified_info: { rqth_declare: RQTH_DECLARE_ENUM.OUI } },
+      });
+
+      await updateOrDeleteMissionLocaleSnapshot(await buildEffectif({ apprenant: { rqth: false } }));
+
+      const updated = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+      expect(updated?.effectif_snapshot?.apprenant?.rqth).toBe(true);
+    });
+
+    it("ré-applique rqth=false même si l'ERP déclare true", async () => {
+      await insertMlRecord({
+        organisme_data: { acc_conjoint: true, verified_info: { rqth_declare: RQTH_DECLARE_ENUM.NON } },
+      });
+
+      await updateOrDeleteMissionLocaleSnapshot(await buildEffectif({ apprenant: { rqth: true } }));
+
+      const updated = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+      expect(updated?.effectif_snapshot?.apprenant?.rqth).toBe(false);
+    });
+
+    it("laisse la valeur de l'ERP quand le CFA n'a rien déclaré", async () => {
+      await insertMlRecord({
+        organisme_data: { acc_conjoint: true, verified_info: { rqth_declare: RQTH_DECLARE_ENUM.NON_RENSEIGNE } },
+      });
+
+      await updateOrDeleteMissionLocaleSnapshot(await buildEffectif({ apprenant: { rqth: true } }));
+
+      const updated = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+      expect(updated?.effectif_snapshot?.apprenant?.rqth).toBe(true);
+    });
   });
 });

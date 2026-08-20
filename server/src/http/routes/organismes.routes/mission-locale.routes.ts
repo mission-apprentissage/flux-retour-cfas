@@ -2,7 +2,7 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
 import { API_EFFECTIF_LISTE } from "shared/models";
-import { updateMissionLocaleEffectifOrganismeApi } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
+import { zUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
 import { z } from "zod";
 
 import {
@@ -54,7 +54,7 @@ const updateEffectifMissionLocaleData = async (req, { locals }) => {
     throw Boom.forbidden("No organisme found for the provided ID");
   }
 
-  const data = await validateFullZodObjectSchema(req.body, updateMissionLocaleEffectifOrganismeApi);
+  const data = await zUpdateMissionLocaleEffectifOrganisme.parseAsync(req.body);
 
   const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
   return await setEffectifMissionLocaleDataFromOrganisme(organisme._id, effectifId, data, userId);

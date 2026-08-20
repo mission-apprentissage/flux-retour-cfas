@@ -1,5 +1,6 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
+import { RQTH_DECLARE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { IUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
 
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
@@ -9,6 +10,12 @@ import {
   resolveCfaEffectifSource,
 } from "../mission-locale/mission-locale-record.actions";
 import { createOrUpdateMissionLocaleStats } from "../mission-locale/mission-locale-stats.actions";
+
+const isMineur = (dateDeNaissance: Date) => {
+  const majorite = new Date(dateDeNaissance);
+  majorite.setFullYear(majorite.getFullYear() + 18);
+  return majorite > new Date();
+};
 
 export const setEffectifMissionLocaleDataFromOrganisme = async (
   organismeId: ObjectId,
@@ -26,6 +33,12 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     "referent_coordonnees",
     "note_complementaire",
     "verified_info",
+    "situation_type",
+    "risque_rupture",
+    "date_abandon",
+    "date_debut_formation",
+    "recherche_entreprise",
+    "form_feedback",
   ];
 
   const setFields: Record<string, unknown> = {
@@ -40,6 +53,10 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     if (data[key] !== undefined) {
       setFields[`organisme_data.${key}`] = data[key];
     }
+  }
+
+  if (data.form_feedback) {
+    setFields["organisme_data.form_feedback"] = { ...data.form_feedback, responded_at: new Date() };
   }
 
   const effectifObjectId = new ObjectId(effectifId);
@@ -58,7 +75,7 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
   let targetFilter: Record<string, unknown> = existingFilter;
 
   if (!existing) {
-    const { date_rupture: dateRupture } = data as IUpdateMissionLocaleEffectifOrganisme & { date_rupture?: Date };
+    const dateRupture = data.date_rupture;
     const source = await resolveCfaEffectifSource(organismeId, effectifObjectId);
 
     // Le `cfa_rupture_declaration` doit être posé dès la création : c'est lui qui garde le dossier
@@ -83,6 +100,23 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     }
 
     targetFilter = { _id: recordId };
+  }
+
+  const targetRecord = existing ?? (await missionLocaleEffectifsDb().findOne(targetFilter as Record<string, unknown>));
+
+  if (data.verified_info) {
+    const dateDeNaissance = targetRecord?.effectif_snapshot?.apprenant?.date_de_naissance;
+    // RG14 : les coordonnées du responsable légal ne concernent que les mineurs. Le front les
+    // masque, le serveur ne s'y fie pas.
+    if (data.verified_info.responsable_legal && dateDeNaissance && !isMineur(dateDeNaissance)) {
+      const { responsable_legal: _responsableLegal, ...verifiedInfo } = data.verified_info;
+      setFields["organisme_data.verified_info"] = verifiedInfo;
+    }
+
+    const rqthDeclare = data.verified_info.rqth_declare;
+    if (rqthDeclare === RQTH_DECLARE_ENUM.OUI || rqthDeclare === RQTH_DECLARE_ENUM.NON) {
+      setFields["effectif_snapshot.apprenant.rqth"] = rqthDeclare === RQTH_DECLARE_ENUM.OUI;
+    }
   }
 
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
