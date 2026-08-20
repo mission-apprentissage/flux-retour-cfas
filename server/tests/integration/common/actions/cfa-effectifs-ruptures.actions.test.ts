@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationOrganismeFormation } from "shared/models";
+import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
 import { describe, it, beforeEach, expect } from "vitest";
 
@@ -69,6 +70,7 @@ async function createMlEffectif(overrides: Record<string, any> = {}) {
     brevo: { token: randomUUID(), token_created_at: now },
     ...(overrides.cfa_rupture_declaration ? { cfa_rupture_declaration: overrides.cfa_rupture_declaration } : {}),
     ...(overrides.soft_deleted ? { soft_deleted: true } : {}),
+    ...(overrides.situation ? { situation: overrides.situation } : {}),
   };
 }
 
@@ -132,6 +134,72 @@ describe("getCfaEffectifsEnRupture", () => {
         declared_at: now,
         declared_by: new ObjectId(),
       },
+    });
+    await missionLocaleEffectifsDb().insertOne(doc as any);
+
+    const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
+
+    expect(result.pagination.total).toBe(1);
+  });
+
+  // Sortant requalifié : le snapshot figé reste RUPTURANT, mais le contrat est arrivé à son terme.
+  // Le dossier sort de la liste ruptures du CFA, comme un retour en apprentissage.
+  it("exclut les dossiers passés en FIN_DE_FORMATION", async () => {
+    const now = new Date();
+    const dateRupture = new Date(now.getTime() - 30 * DAY);
+
+    const docs = await Promise.all([
+      createMlEffectif({ date_rupture: dateRupture }),
+      createMlEffectif({
+        date_rupture: dateRupture,
+        current_status: { value: STATUT_APPRENANT.FIN_DE_FORMATION, date: now },
+      }),
+    ]);
+    await missionLocaleEffectifsDb().insertMany(docs as any[]);
+
+    const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
+
+    expect(result.pagination.total).toBe(1);
+  });
+
+  // Le jeune que la ML a marqué injoignable ne remonte pas dans l'onglet "Suivi ML"
+  // (buildContactedByMlExpr exclut les situations "non joint"). S'il sortait aussi de la liste
+  // ruptures une fois requalifié, il disparaîtrait de toute vue CFA alors que la ML le voit encore.
+  it("n'exclut pas les FIN_DE_FORMATION qualifiés par la ML", async () => {
+    const now = new Date();
+    const dateRupture = new Date(now.getTime() - 30 * DAY);
+
+    const docs = await Promise.all([
+      createMlEffectif({
+        date_rupture: dateRupture,
+        current_status: { value: STATUT_APPRENANT.FIN_DE_FORMATION, date: now },
+        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+      }),
+      createMlEffectif({
+        date_rupture: dateRupture,
+        current_status: { value: STATUT_APPRENANT.FIN_DE_FORMATION, date: now },
+        situation: SITUATION_ENUM.RDV_PRIS,
+      }),
+      createMlEffectif({
+        date_rupture: dateRupture,
+        current_status: { value: STATUT_APPRENANT.FIN_DE_FORMATION, date: now },
+      }),
+    ]);
+    await missionLocaleEffectifsDb().insertMany(docs as any[]);
+
+    const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
+
+    expect(result.pagination.total).toBe(2);
+  });
+
+  it("n'exclut pas les FIN_DE_FORMATION quand cfa_rupture_declaration existe", async () => {
+    const now = new Date();
+    const dateRupture = new Date(now.getTime() - 30 * DAY);
+
+    const doc = await createMlEffectif({
+      date_rupture: dateRupture,
+      current_status: { value: STATUT_APPRENANT.FIN_DE_FORMATION, date: now },
+      cfa_rupture_declaration: { date_rupture: dateRupture, declared_at: now, declared_by: new ObjectId() },
     });
     await missionLocaleEffectifsDb().insertOne(doc as any);
 

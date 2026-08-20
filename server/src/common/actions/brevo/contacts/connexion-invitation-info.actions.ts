@@ -3,6 +3,7 @@ import { getAnneeScolaireListFromDateRange } from "shared/utils";
 
 import {
   buildEffRuptureAgeFilter,
+  buildRuptureStatusMatch,
   createDernierStatutFieldPipeline,
   DATE_START_RUPTURES,
 } from "@/common/actions/shared/rupture-pipeline.utils";
@@ -115,9 +116,8 @@ export const getConnexionInvitationInfoByEmail = async (email: string): Promise<
     return null;
   }
 
-  // Mêmes filtres "en rupture" que `tba-contacts.ts` /
-  // `cfa-effectifs-ruptures.actions.ts`. Différence : ici on remonte TOUTES
-  // les ML (pas top 2) avec leur adresse.
+  // Mêmes filtres "en rupture" que `tba-contacts.ts` (dont la même fenêtre de visibilité, sur le
+  // seul millésime). Différence : ici on remonte TOUTES les ML (pas top 2) avec leur adresse.
   let missionsLocales: ConnexionInvitationMissionLocale[] = [];
   if (userResult.organisme_id) {
     type RawMlRow = { nom: string | null; adresse: Record<string, unknown> | null; effectifs_count: number };
@@ -150,14 +150,7 @@ export const getConnexionInvitationInfoByEmail = async (email: string): Promise<
           },
         },
         { $match: { dernierStatutDureeInDay: { $lte: 180 } } },
-        {
-          $match: {
-            $or: [
-              { cfa_rupture_declaration: { $exists: true } },
-              { "current_status.value": { $ne: STATUT_APPRENANT.APPRENTI } },
-            ],
-          },
-        },
+        { $match: buildRuptureStatusMatch() },
         { $group: { _id: "$mission_locale_id", effectifs_count: { $sum: 1 } } },
         {
           $lookup: {

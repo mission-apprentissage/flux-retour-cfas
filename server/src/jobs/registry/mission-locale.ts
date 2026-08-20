@@ -1,7 +1,12 @@
 import type { CronDef, JobDef } from "job-processor";
 
+import { effectifsDb } from "@/common/model/collections";
+
 import { verifyMissionLocaleEffectifMail } from "../bal/bal.job";
-import { hydratePreviousYearMissionLocaleEffectifStatut } from "../hydrate/effectifs/hydrate-effectifs-computed-types";
+import {
+  hydrateEffectifsComputedTypes,
+  hydratePreviousYearMissionLocaleEffectifStatut,
+} from "../hydrate/effectifs/hydrate-effectifs-computed-types";
 import {
   backfillIdentifiantNormalise,
   hydrateDailyMissionLocaleStats,
@@ -62,6 +67,25 @@ export const missionLocaleJobs = {
     handler: async () => {
       return hydrateMissionLocaleAdresse();
     },
+  },
+  "tmp:migrate:statuts-then-ml-current-status": {
+    handler: async (_job, signal) => {
+      const statuts = await hydrateEffectifsComputedTypes({ touchUpdatedAt: false }, effectifsDb, signal);
+      if (statuts.aborted) {
+        throw signal.reason;
+      }
+      if (statuts.error) {
+        throw statuts.error;
+      }
+
+      const currentStatus = await updateMissionLocaleEffectifCurrentStatus(signal);
+      if (currentStatus.aborted) {
+        throw signal.reason;
+      }
+
+      return { statuts, currentStatus };
+    },
+    resumable: true,
   },
   "tmp:migrate:mission-locale-current-status": {
     handler: async () => {

@@ -17,6 +17,7 @@ import { extractScoreInput, scoreEffectifs } from "@/common/services/classifier"
 
 import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
 import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
+import { getCurrentStatutFromParcours } from "../shared/rupture-pipeline.utils";
 
 import { isDecaSnapshot, migrateMlRecordEffectifId } from "./mission-locale.actions";
 
@@ -97,9 +98,7 @@ export async function ensureMissionLocaleEffectifRecord(
   const newEffectifId = new ObjectId(effectifId);
   const incomingIsDeca = source === "effectifsDECA";
 
-  const currentStatus =
-    effectif._computed?.statut?.parcours?.filter((s) => s.date <= now).slice(-1)[0] ||
-    effectif._computed?.statut?.parcours?.slice(-1)[0];
+  const currentStatus = getCurrentStatutFromParcours(effectif._computed?.statut?.parcours, now);
 
   const normalizedIdentifiant =
     effectif.apprenant.nom && effectif.apprenant.prenom && effectif.apprenant.date_de_naissance

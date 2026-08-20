@@ -15,6 +15,7 @@ import {
   hydrateEffectifsLieuDeFormationVersOrganismeFormateur,
 } from "../hydrate/effectifs/update-effectifs-lieu-de-formation";
 import { hydrateInscritSansContrat } from "../hydrate/france-travail/hydrate-france-travail";
+import { updateMissionLocaleEffectifCurrentStatus } from "../hydrate/mission-locale/hydrate-mission-locale";
 
 export const effectifsJobs = {
   "hydrate:effectifs:update_all_computed_statut": {
@@ -83,6 +84,9 @@ export const effectifsCrons = {
       const evaluationDate = new Date();
       await hydrateWeeklyEffectifStatut(signal, evaluationDate);
       await hydratePreviousYearMissionLocaleEffectifStatut(evaluationDate, signal);
+      // Sans ce rafraîchissement, `current_status` reste figé pour les dossiers dont le
+      // CFA ne transmet plus : les sortants requalifiés ne seraient jamais masqués.
+      await updateMissionLocaleEffectifCurrentStatus(signal);
     },
     resumable: true,
   },

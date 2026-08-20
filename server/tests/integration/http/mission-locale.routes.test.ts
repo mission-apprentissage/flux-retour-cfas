@@ -370,6 +370,72 @@ describe("Mission Locale Routes", () => {
       });
     });
 
+    describe("Sortant requalifié (FIN_DE_FORMATION)", () => {
+      it("garde le dossier et préserve date_rupture", async () => {
+        const before = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(before?.date_rupture).toBeTruthy();
+
+        await effectifsDb().updateOne(
+          { _id: EFFECTIF_ID },
+          {
+            $push: {
+              "_computed.statut.parcours": { valeur: "FIN_DE_FORMATION", date: new Date() },
+            } as any,
+          }
+        );
+
+        const updatedEffectif = await effectifsDb().findOne({ _id: EFFECTIF_ID });
+        await updateOrDeleteMissionLocaleSnapshot(updatedEffectif!);
+
+        const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(after?.soft_deleted).toBeFalsy();
+        expect(after?.date_rupture).toEqual(before?.date_rupture);
+        expect(after?.current_status?.value).toBe("FIN_DE_FORMATION");
+      });
+
+      it("masque le dossier des listes ML sans le supprimer", async () => {
+        await effectifsDb().updateOne(
+          { _id: EFFECTIF_ID },
+          {
+            $push: {
+              "_computed.statut.parcours": { valeur: "FIN_DE_FORMATION", date: new Date() },
+            } as any,
+          }
+        );
+
+        const updatedEffectif = await effectifsDb().findOne({ _id: EFFECTIF_ID });
+        await updateOrDeleteMissionLocaleSnapshot(updatedEffectif!);
+
+        const res = await requestAsOrganisation(
+          { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+          "get",
+          `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
+        );
+        expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(0);
+
+        const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(after?.soft_deleted).toBeFalsy();
+      });
+
+      // Contraste : le retour en contrat reste un soft-delete (comportement préexistant inchangé).
+      it("soft-delete toujours un retour en APPRENTI", async () => {
+        await effectifsDb().updateOne(
+          { _id: EFFECTIF_ID },
+          {
+            $push: {
+              "_computed.statut.parcours": { valeur: "APPRENTI", date: new Date() },
+            } as any,
+          }
+        );
+
+        const updatedEffectif = await effectifsDb().findOne({ _id: EFFECTIF_ID });
+        await updateOrDeleteMissionLocaleSnapshot(updatedEffectif!);
+
+        const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(after?.soft_deleted).toBe(true);
+      });
+    });
+
     describe("La ML soumet le formulaire collaboration", () => {
       it.each([
         { situation: SITUATION_ENUM.CHERCHE_CONTRAT },
@@ -926,12 +992,18 @@ describe("Mission Locale Routes", () => {
       anneeScolaire = "2025-2026",
       softDeleted = false,
       situation = null,
+      dateRupture = dayAgo(60),
+      currentStatus = "RUPTURANT",
+      allowedCollab = false,
     }: {
       souhaiteRdv?: boolean;
       ageYears?: number;
       anneeScolaire?: string;
       softDeleted?: boolean;
       situation?: SITUATION_ENUM | null;
+      dateRupture?: Date;
+      currentStatus?: string;
+      allowedCollab?: boolean;
     } = {}) =>
       ({
         _id: new ObjectId(),
@@ -942,8 +1014,9 @@ describe("Mission Locale Routes", () => {
         souhaite_rdv: souhaiteRdv,
         ...(softDeleted ? { soft_deleted: true } : {}),
         ...(situation ? { situation } : {}),
-        current_status: { value: "RUPTURANT", date: dayAgo(60) },
-        date_rupture: dayAgo(60),
+        ...(allowedCollab ? { computed: { organisme: { is_allowed_collab: true } } } : {}),
+        current_status: { value: currentStatus, date: dateRupture },
+        date_rupture: dateRupture,
         effectif_snapshot: {
           _id: new ObjectId(),
           organisme_id: ORGANISME_ID,
@@ -976,6 +1049,66 @@ describe("Mission Locale Routes", () => {
       expect(res.data).toEqual({ souhaite_rdv_count: 2 });
     });
 
+    // Non-régression du masquage FIN_DE_FORMATION : la branche `souhaite_rdv` du $or de visibilité
+    // prime sur le statut courant — un jeune qui a demandé un RDV reste joignable pour la ML.
+    it("compte toujours un jeune souhaite_rdv passé en FIN_DE_FORMATION", async () => {
+      await insertBannerDocs([makeBannerDoc(), makeBannerDoc({ currentStatus: "FIN_DE_FORMATION" })]);
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.data).toEqual({ souhaite_rdv_count: 2 });
+    });
+
+    // Sortants requalifiés : le snapshot figé dit encore RUPTURANT, mais le statut courant est passé
+    // à FIN_DE_FORMATION (contrat arrivé à son terme, aucune rupture transmise). Le dossier sort des
+    // listes sans qu'aucune donnée ne soit réécrite — et y revient seul si une rupture arrive plus tard.
+    describe("masquage des sortants requalifiés (FIN_DE_FORMATION)", () => {
+      const countIn = (res: any, bucket: string) =>
+        (res.data[bucket] ?? []).reduce((acc: number, curr: { data?: unknown[] }) => acc + (curr.data?.length ?? 0), 0);
+
+      it("sort un dossier jamais traité de la liste à traiter", async () => {
+        await insertBannerDocs([
+          makeBannerDoc({ souhaiteRdv: false }),
+          makeBannerDoc({ souhaiteRdv: false, currentStatus: "FIN_DE_FORMATION" }),
+        ]);
+
+        const res = await requestAsOrganisation(
+          ML_DATA,
+          "get",
+          "/api/v1/organisation/mission-locale/effectifs-per-month"
+        );
+        expect(countIn(res, "a_traiter")).toBe(1);
+      });
+
+      // L'envoi automatique après 45j (CFA en collab) ne doit pas rouvrir un dossier requalifié :
+      // sans ce garde, tout dossier masqué réapparaîtrait de lui-même une fois les 45j écoulés.
+      it("sort un dossier d'un CFA en collab dont la rupture dépasse 45j", async () => {
+        await insertBannerDocs([
+          makeBannerDoc({ souhaiteRdv: false, allowedCollab: true }),
+          makeBannerDoc({ souhaiteRdv: false, allowedCollab: true, currentStatus: "FIN_DE_FORMATION" }),
+        ]);
+
+        const res = await requestAsOrganisation(
+          ML_DATA,
+          "get",
+          "/api/v1/organisation/mission-locale/effectifs-per-month"
+        );
+        expect(countIn(res, "a_traiter")).toBe(1);
+      });
+
+      it("garde un dossier déjà qualifié par un conseiller", async () => {
+        await insertBannerDocs([
+          makeBannerDoc({ souhaiteRdv: false, currentStatus: "FIN_DE_FORMATION", situation: SITUATION_ENUM.RDV_PRIS }),
+        ]);
+
+        const res = await requestAsOrganisation(
+          ML_DATA,
+          "get",
+          "/api/v1/organisation/mission-locale/effectifs-per-month"
+        );
+        expect(countIn(res, "traite")).toBe(1);
+      });
+    });
+
     it("exclut les effectifs soft-deleted", async () => {
       await insertBannerDocs([makeBannerDoc(), makeBannerDoc({ softDeleted: true })]);
 
@@ -993,14 +1126,28 @@ describe("Mission Locale Routes", () => {
     });
 
     // Idem pour une année scolaire hors de la plage active : comptée avant, exclue maintenant.
+    // La fenêtre de visibilité étant une union (millésime OU date_rupture >= 2025-01-01), le jeune
+    // exclu doit cumuler les deux : millésime hors plage ET rupture antérieure à la profondeur.
     it("exclut un jeune souhaite_rdv dont l'année scolaire est hors plage", async () => {
       await insertBannerDocs([
         makeBannerDoc({ anneeScolaire: "2025-2026" }),
-        makeBannerDoc({ anneeScolaire: "2022-2023" }),
+        makeBannerDoc({ anneeScolaire: "2022-2023", dateRupture: new Date("2023-03-01") }),
       ]);
 
       const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
       expect(res.data).toEqual({ souhaite_rdv_count: 1 });
+    });
+
+    // Visibilité par date de rupture : un dossier dont le millésime n'est pas (ou pas encore) dans
+    // la fenêtre reste visible dès lors que sa rupture est récente — plus d'attente du 1er août.
+    it("compte un jeune souhaite_rdv de millésime hors fenêtre mais à rupture récente", async () => {
+      await insertBannerDocs([
+        makeBannerDoc({ anneeScolaire: "2025-2026" }),
+        makeBannerDoc({ anneeScolaire: "2030-2031", dateRupture: dayAgo(30) }),
+      ]);
+
+      const res = await requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/banner-stats");
+      expect(res.data).toEqual({ souhaite_rdv_count: 2 });
     });
 
     // Régression SANTERRE : un jeune souhaite_rdv déjà traité (RDV déjà pris) n'apparaît dans aucune

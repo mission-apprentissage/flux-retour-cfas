@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
 import { ObjectId } from "mongodb";
+import { STATUT_APPRENANT } from "shared/constants";
 import { IMissionLocaleEffectif, SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { USER_RESPONSE_TYPE, CONVERSATION_STATE } from "shared/models/data/whatsappContact.model";
 import { it, describe, beforeEach, afterEach, vi, expect } from "vitest";
@@ -1189,6 +1190,14 @@ describe("WhatsApp Service", () => {
       const effectif = {
         ...baseEffectif,
         situation: SITUATION_ENUM.RDV_PRIS,
+      } as IMissionLocaleEffectif;
+      assert.strictEqual(isEligibleForPrequalif(effectif), false);
+    });
+
+    it("retourne false pour un sortant requalifié (FIN_DE_FORMATION)", () => {
+      const effectif = {
+        ...baseEffectif,
+        current_status: { value: STATUT_APPRENANT.FIN_DE_FORMATION, date: new Date() },
       } as IMissionLocaleEffectif;
       assert.strictEqual(isEligibleForPrequalif(effectif), false);
     });

@@ -2,8 +2,6 @@ import { unstable_cache } from "next/cache";
 import { NotionAPI } from "notion-client";
 import type { ExtendedRecordMap } from "notion-types";
 
-import { sanitizeNotionRecordMap } from "@/common/utils/notionUtils";
-
 const NOTION_REVALIDATE_SECONDS = 1800;
 
 export function getNotionPageTitle(recordMap: ExtendedRecordMap | null): string | null {
@@ -12,7 +10,10 @@ export function getNotionPageTitle(recordMap: ExtendedRecordMap | null): string 
   }
 
   const rootKey = Object.keys(recordMap.block)[0];
-  const title = recordMap.block[rootKey]?.value?.properties?.title;
+  // notion-client renvoie parfois la valeur doublement encapsulée ({ role, value: { role, value } }).
+  const inner = recordMap.block[rootKey]?.value;
+  const block = inner && "value" in inner ? inner.value : inner;
+  const title = block?.properties?.title;
 
   if (!Array.isArray(title)) {
     return null;
@@ -27,10 +28,7 @@ export function getNotionPageTitle(recordMap: ExtendedRecordMap | null): string 
 }
 
 export const getNotionPage = unstable_cache(
-  async (pageId: string): Promise<ExtendedRecordMap> => {
-    const recordMap = await new NotionAPI().getPage(pageId);
-    return sanitizeNotionRecordMap(recordMap);
-  },
+  async (pageId: string): Promise<ExtendedRecordMap> => new NotionAPI().getPage(pageId),
   ["notion-page"],
   { revalidate: NOTION_REVALIDATE_SECONDS }
 );
