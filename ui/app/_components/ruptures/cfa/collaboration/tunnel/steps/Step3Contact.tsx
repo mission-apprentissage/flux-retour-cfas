@@ -89,7 +89,7 @@ export function Step3Contact({ prenom, nom, isMineur }: Step3ContactProps) {
         name="verified_info.adresse_rue"
         label="Adresse postale du jeune"
         required
-        hint="Si vous ne dispose pas de l'adresse complète du jeune, saisissez uniquement le code postal et sélectionnez la commune."
+        hint="Si vous ne disposez pas de l'adresse complète du jeune, saisissez uniquement le code postal et sélectionnez la commune."
         onEdited={trackCoordonnees("adresse")}
       />
       <TextField name="verified_info.adresse_code_postal" label="Code postal" required />
@@ -122,8 +122,8 @@ export function Step3Contact({ prenom, nom, isMineur }: Step3ContactProps) {
             <span aria-hidden="true">💡</span>
             <span>
               <strong>
-                {prenom} {nom} est a moins de 18 ans. Si vous les connaissez, renseignez les coordonnées de ses
-                responsables légaux.
+                {prenom} {nom} a moins de 18 ans. Si vous les connaissez, renseignez les coordonnées de ses responsables
+                légaux.
               </strong>{" "}
               Si le jeune n&apos;est pas joignable, la Mission Locale pourra contacter ses responsables légaux.
             </span>

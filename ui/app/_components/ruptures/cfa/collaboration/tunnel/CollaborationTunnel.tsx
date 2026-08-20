@@ -278,7 +278,7 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
         ];
       case "risqueRupture":
         return [
-          "Cette question permet à la Mission Locale le degré d'urgence de la situation si il s'agit d'une collaboration pour de la prévention de rupture.",
+          "Cette question permet à la Mission Locale d'évaluer le degré d'urgence de la situation si il s'agit d'une collaboration pour de la prévention de rupture.",
           "Cependant, vous pouvez tout à fait demander une collaboration pour un jeune qui ne présente pas de signaux de rupture mais dont vous savez qu'il a besoin d'un accompagnement complémentaire à celui que vous dispensez au CFA.",
         ];
       case "maintienFormation":
@@ -325,8 +325,14 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
     currentStep === "recap" ? (
       <>
         {hasError && <p className={styles.submitError}>Une erreur est survenue. Veuillez réessayer.</p>}
-        <Button priority="primary" onClick={submitForm} disabled={isSubmitting}>
-          {isSubmitting ? "Envoi en cours..." : "Envoyer le dossier"}
+        <Button
+          priority="primary"
+          iconId="fr-icon-send-plane-fill"
+          iconPosition="right"
+          onClick={submitForm}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Envoi en cours..." : "Envoyer à la Mission Locale"}
         </Button>
       </>
     ) : (

@@ -93,7 +93,7 @@ export function ObjectifsSection({ prenom, sansContrat = false }: ObjectifsSecti
         Quel est l&apos;objectif de l&apos;accompagnement de {prenom} ?<span className={styles.required}>*</span>
       </p>
       <p className={styles.sectionHint}>
-        Vous pouvez sélectionner plusieurs objectifs. Détaillez les besoins spécifique du jeune pour chacun.
+        Vous pouvez sélectionner plusieurs objectifs. Détaillez les besoins spécifiques du jeune pour chacun.
       </p>
 
       <div className={`${styles.objectifCard} ${hasRecherche ? styles.objectifCardActive : ""}`}>
