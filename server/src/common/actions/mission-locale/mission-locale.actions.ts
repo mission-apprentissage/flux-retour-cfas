@@ -702,7 +702,8 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
           unread_by_current_user: "$unread_by_current_user",
         };
 
-  return [{ $project: { ...baseProjection, ...specificFields } }];
+  // Le retour sur le formulaire est un signal produit interne : jamais exposé, ni au CFA ni à la ML.
+  return [{ $project: { ...baseProjection, ...specificFields } }, { $unset: "organisme_data.form_feedback" }];
 };
 
 /**

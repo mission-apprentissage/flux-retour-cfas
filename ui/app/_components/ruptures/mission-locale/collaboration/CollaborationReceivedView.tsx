@@ -5,7 +5,9 @@ import { ACC_CONJOINT_MOTIF_ENUM, IEffectifMissionLocale } from "shared";
 import { MOTIF_EMOJIS, MOTIF_LABELS } from "@/app/_components/ruptures/shared/constants";
 import { formatDate } from "@/app/_utils/date.utils";
 
+import { DossierSituationBlock } from "../../shared/collaboration/DossierSituationBlock";
 import { ReferentCoordonnees } from "../../shared/collaboration/ReferentCoordonnees";
+import { ResponsableLegalBlock } from "../../shared/collaboration/ResponsableLegalBlock";
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
 import localStyles from "./MlCollaborationDetail.module.css";
@@ -34,13 +36,7 @@ export function CollaborationReceivedView({ effectif }: { effectif: IEffectifMis
       </div>
 
       <div className={styles.sentBubble}>
-        {od?.still_at_cfa != null && (
-          <div className={styles.sentBubbleSection}>
-            <p className={styles.sentStillAtCfa}>
-              {prenom} {od.still_at_cfa ? "est maintenu en formation dans le CFA ✅" : "n'est plus en formation au CFA"}
-            </p>
-          </div>
-        )}
+        <DossierSituationBlock organismeData={od} prenom={prenom} dateRupture={effectif.date_rupture} />
 
         {motifs.length > 0 && (
           <div className={styles.sentBubbleSection}>
@@ -80,12 +76,7 @@ export function CollaborationReceivedView({ effectif }: { effectif: IEffectifMis
           </div>
         )}
 
-        {od?.cause_rupture && (
-          <div className={styles.sentBubbleSection}>
-            <p className={styles.sentSectionTitle}>À propos de la rupture</p>
-            <p className={styles.sentBody}>{od.cause_rupture}</p>
-          </div>
-        )}
+        <ResponsableLegalBlock organismeData={od} />
 
         {od?.note_complementaire && (
           <div className={styles.sentBubbleSection}>

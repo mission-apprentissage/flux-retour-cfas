@@ -6,6 +6,8 @@ import zMissionLocaleEffectif, {
   zSituationEnum,
   zProblemeTypeEnum,
   zAccConjointMotifEnum,
+  zCfaRisqueRuptureEnum,
+  zCfaSituationTypeEnum,
   zConnaissanceMlEnum,
   zVerifiedInfo,
 } from "shared/models/data/missionLocaleEffectif.model";
@@ -129,6 +131,11 @@ const zEffectifMissionLocale = z
         referent_coordonnees: z.string().nullish(),
         note_complementaire: z.string().nullish(),
         verified_info: zVerifiedInfo.nullish(),
+        situation_type: zCfaSituationTypeEnum.nullish(),
+        risque_rupture: zCfaRisqueRuptureEnum.nullish(),
+        date_abandon: z.date().nullish(),
+        date_debut_formation: z.date().nullish(),
+        recherche_entreprise: z.string().nullish(),
       })
       .nullish(),
     mineur: z.boolean().nullish(),

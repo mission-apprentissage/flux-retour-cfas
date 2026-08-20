@@ -546,6 +546,8 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
         unread_by_current_user: "$unread_by_current_user",
       },
     },
+    // Le retour sur le formulaire est un signal produit interne : jamais exposé, ni au CFA ni à la ML.
+    { $unset: "organisme_data.form_feedback" },
   ];
 
   const directMatch = {

@@ -128,7 +128,9 @@ export function CfaEffectifInfoColumn({ effectif, onToggleRupture }: CfaEffectif
         {effectif.adresse?.code_postal && `(${effectif.adresse.code_postal})`}
       </p>
 
-      <p className={styles.rqthLine}>RQTH {effectif.rqth ? <strong>Oui</strong> : "Non"}</p>
+      <p className={styles.rqthLine}>
+        RQTH {effectif.rqth == null ? "—" : effectif.rqth ? <strong>Oui</strong> : "Non"}
+      </p>
 
       <hr className={styles.separator} />
 
