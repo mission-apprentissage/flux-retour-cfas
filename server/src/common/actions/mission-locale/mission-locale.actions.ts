@@ -694,13 +694,43 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
   return [{ $project: { ...baseProjection, ...specificFields } }];
 };
 
+/**
+ * Date de rattachement d'un dossier ML. Un dossier de collaboration ouvert en prévention ou pour
+ * un jeune sans contrat n'a pas de date de rupture : il est rattaché au mois de son envoi.
+ */
+const addDateReferenceField = () => [
+  {
+    $addFields: {
+      date_reference: { $ifNull: ["$date_rupture", "$organisme_data.reponse_at", "$created_at"] },
+    },
+  },
+];
+
+const buildFirstDayOfMonthExpr = (format?: string) => ({
+  $cond: {
+    if: { $lt: [{ $dateDiff: { startDate: "$date_reference", endDate: "$$NOW", unit: "day" } }, 180] },
+    then: {
+      $dateToString: {
+        date: {
+          $dateFromParts: {
+            year: { $year: "$date_reference" },
+            month: { $month: "$date_reference" },
+          },
+        },
+        ...(format ? { format } : {}),
+      },
+    },
+    else: "plus-de-180-j",
+  },
+});
+
 const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
   switch (nom_liste) {
     case API_EFFECTIF_LISTE.A_TRAITER:
     case API_EFFECTIF_LISTE.INJOIGNABLE:
     case API_EFFECTIF_LISTE.TRAITE:
     case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
-      return { date_rupture: -1 };
+      return { date_reference: -1 };
     case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
     case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
     case API_EFFECTIF_LISTE.PRIORITAIRE:
@@ -947,6 +977,7 @@ export const missionLocaleBaseAggregation = async (
     ...addFieldFromActivationDate(),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(organisation.type),
+    ...addDateReferenceField(),
   ];
 };
 
@@ -1088,33 +1119,19 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     ...filterByDernierStatutPipelineMl(),
     ...addFieldFromActivationDate(),
     ...addFieldTraitementStatus(organisation.type),
+    ...addDateReferenceField(),
   ];
 
   organismeMissionLocaleAggregation.push(
     {
       $sort: {
-        date_rupture: -1,
+        date_reference: -1,
       },
     },
     ...lookUpOrganisme(),
     {
       $addFields: {
-        firstDayOfMonth: {
-          $cond: {
-            if: { $lt: ["$$ROOT.dernierStatutDureeInDay", 180] },
-            then: {
-              $dateToString: {
-                date: {
-                  $dateFromParts: {
-                    year: { $year: "$date_rupture" },
-                    month: { $month: "$date_rupture" },
-                  },
-                },
-              },
-            },
-            else: "plus-de-180-j",
-          },
-        },
+        firstDayOfMonth: buildFirstDayOfMonthExpr(),
       },
     },
     {
@@ -1198,7 +1215,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   const sevenLastMonth = getSevenLastMonth();
   const mapped = sevenLastMonth.map((data) => {
     const found = result.find(({ month }) => {
-      return month.toString() === data.month;
+      return String(month ?? "") === data.month;
     });
     return found ? found : data;
   });
@@ -1351,23 +1368,7 @@ export const getEffectifsListByMissionLocaleId = async (
     return [
       {
         $addFields: {
-          firstDayOfMonth: {
-            $cond: {
-              if: { $lt: ["$dernierStatutDureeInDay", 180] },
-              then: {
-                $dateToString: {
-                  date: {
-                    $dateFromParts: {
-                      year: { $year: "$date_rupture" },
-                      month: { $month: "$date_rupture" },
-                    },
-                  },
-                  format: "%Y-%m",
-                },
-              },
-              else: "plus-de-180-j",
-            },
-          },
+          firstDayOfMonth: buildFirstDayOfMonthExpr("%Y-%m"),
         },
       },
       {
