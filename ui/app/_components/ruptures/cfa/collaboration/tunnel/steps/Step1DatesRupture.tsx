@@ -20,7 +20,7 @@ function DateField({ name, label }: { name: string; label: string }) {
         id={name}
         type="date"
         max={new Date().toISOString().slice(0, 10)}
-        className={`fr-input ${meta.touched && meta.error ? "fr-input--error" : ""}`}
+        className={`fr-input ${styles.dateField} ${meta.touched && meta.error ? "fr-input--error" : ""}`}
       />
       <ErrorMessage name={name} component="p" className="fr-error-text" />
     </div>
@@ -45,7 +45,7 @@ export function Step1DatesRupture() {
       {aQuitteLeCfa && (
         <div className={styles.fieldGroup}>
           <p className={styles.question}>Quand le jeune a-t-il quitté le CFA ?</p>
-          <DateField name="date_abandon" label="Date abandon" />
+          <DateField name="date_abandon" label="Date d'abandon" />
         </div>
       )}
 

@@ -26,7 +26,7 @@ export function Step1RentreeSansContrat({ prenom }: Step1RentreeSansContratProps
           id="date_debut_formation"
           type="date"
           max={new Date().toISOString().slice(0, 10)}
-          className={`fr-input ${dateMeta.touched && dateMeta.error ? "fr-input--error" : ""}`}
+          className={`fr-input ${styles.dateField} ${dateMeta.touched && dateMeta.error ? "fr-input--error" : ""}`}
         />
         <ErrorMessage name="date_debut_formation" component="p" className="fr-error-text" />
       </div>

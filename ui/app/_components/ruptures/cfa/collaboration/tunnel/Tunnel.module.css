@@ -19,6 +19,15 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
+
+  /* En mono-colonne, l'illustration décorative repousse la question sous la ligne de flottaison. */
+  .illustration {
+    display: none;
+  }
+
+  .sidebar {
+    position: static;
+  }
 }
 
 .sidebar {
@@ -279,4 +288,10 @@
   font-size: 1.125rem;
   font-weight: 700;
   color: var(--text-title-blue-france);
+}
+
+/* Un champ date n'a pas besoin de toute la colonne : au-delà, le curseur et le sélecteur
+   natif se retrouvent très loin du libellé. */
+.dateField {
+  max-width: 16rem;
 }
