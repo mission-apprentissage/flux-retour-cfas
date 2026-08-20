@@ -7,7 +7,7 @@ import { getDbCollection, getCollectionList } from "@/common/mongodb";
 export const createIndexes = async () => {
   for (const descriptor of modelDescriptors) {
     if (!descriptor.indexes) {
-      return;
+      continue;
     }
     logger.info(`Create indexes for collection ${descriptor.collectionName}`);
     await Promise.all(
