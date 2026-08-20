@@ -11,9 +11,30 @@ import { effectifsDb, effectifsDECADb, missionLocaleEffectifsDb } from "@/common
 
 export type IEffectifGenerique = IEffectif | IEffectifDECA;
 
-export const hydrateEffectifsComputedTypesGenerique = async (options?, signal?) => {
-  await hydrateEffectifsComputedTypes(options, effectifsDb, signal);
-  await hydrateEffectifsComputedTypes(options, effectifsDECADb, signal);
+export type IHydrateEffectifsComputedTypesResult = {
+  aborted: boolean;
+  error: unknown | null;
+  nbEffectifsMisAJour: number;
+  nbEffectifsNonMisAJour: number;
+};
+
+export const hydrateEffectifsComputedTypesGenerique = async (
+  options?,
+  signal?
+): Promise<IHydrateEffectifsComputedTypesResult> => {
+  const effectifsResult = await hydrateEffectifsComputedTypes(options, effectifsDb, signal);
+  if (effectifsResult.aborted) {
+    return effectifsResult;
+  }
+
+  const decaResult = await hydrateEffectifsComputedTypes(options, effectifsDECADb, signal);
+
+  return {
+    aborted: decaResult.aborted,
+    error: effectifsResult.error ?? decaResult.error,
+    nbEffectifsMisAJour: effectifsResult.nbEffectifsMisAJour + decaResult.nbEffectifsMisAJour,
+    nbEffectifsNonMisAJour: effectifsResult.nbEffectifsNonMisAJour + decaResult.nbEffectifsNonMisAJour,
+  };
 };
 /**
  * Met à jour le statut des effectifs en fonction d'une requête donnée.
@@ -23,10 +44,10 @@ export const hydrateEffectifsComputedTypesGenerique = async (options?, signal?) 
  *                          evaluationDate (La date pour évaluer le statut des effectifs).
  */
 export async function hydrateEffectifsComputedTypes(
-  { query = {}, evaluationDate = new Date() } = {},
+  { query = {}, evaluationDate = new Date(), touchUpdatedAt = true } = {},
   collection: typeof effectifsDb | typeof effectifsDECADb,
   signal?: AbortSignal
-) {
+): Promise<IHydrateEffectifsComputedTypesResult> {
   let nbEffectifsMisAJour = 0;
   let nbEffectifsNonMisAJour = 0;
 
@@ -35,7 +56,7 @@ export async function hydrateEffectifsComputedTypes(
 
   const processEffectif = async (eff: IEffectifGenerique) => {
     if (eff) {
-      const isSuccess = await updateEffectifStatut(eff, evaluationDate, collection());
+      const isSuccess = await updateEffectifStatut(eff, evaluationDate, collection(), { touchUpdatedAt });
       if (isSuccess) {
         nbEffectifsMisAJour++;
       } else {
@@ -45,7 +66,17 @@ export async function hydrateEffectifsComputedTypes(
   };
 
   try {
-    const cursor = collection().find(query);
+    // Seuls ces champs alimentent le recalcul : sans projection, une passe complète transfère
+    // les documents entiers (plusieurs Go de BSON).
+    const cursor = collection().find(query, {
+      projection: {
+        "apprenant.historique_statut": 1,
+        formation: 1,
+        contrats: 1,
+        annee_scolaire: 1,
+        "_computed.statut": 1,
+      },
+    });
 
     while (await cursor.hasNext()) {
       const effectif: IEffectifGenerique | null = await cursor.next();
@@ -56,7 +87,7 @@ export async function hydrateEffectifsComputedTypes(
       if (bulkEffectifs.length > BULK_SIZE) {
         await Promise.allSettled(bulkEffectifs.map(processEffectif));
         if (signal && signal.aborted) {
-          return;
+          return { aborted: true, error: null, nbEffectifsMisAJour, nbEffectifsNonMisAJour };
         }
         bulkEffectifs = [];
       }
@@ -67,9 +98,11 @@ export async function hydrateEffectifsComputedTypes(
     }
 
     logger.info(`${nbEffectifsMisAJour} effectifs mis à jour, ${nbEffectifsNonMisAJour} effectifs non mis à jour.`);
+    return { aborted: false, error: null, nbEffectifsMisAJour, nbEffectifsNonMisAJour };
   } catch (err) {
     logger.error(`Échec de la mise à jour des effectifs: ${err}`);
     captureException(err);
+    return { aborted: false, error: err, nbEffectifsMisAJour, nbEffectifsNonMisAJour };
   }
 }
 

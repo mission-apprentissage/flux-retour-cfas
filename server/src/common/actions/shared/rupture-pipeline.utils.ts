@@ -1,10 +1,64 @@
+import { STATUT_APPRENANT } from "shared/constants";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { USER_RESPONSE_TYPE } from "shared/models/data/whatsappContact.model";
 import { CFA_COLLAB_STATUS } from "shared/models/routes/organismes/cfa";
+import { getAnneeScolaireListFromDateRange } from "shared/utils";
 
 import { escapeRegex, parseStringToArray } from "@/common/utils/usersFiltersUtils";
 
 export const DATE_START_RUPTURES = new Date("2025-01-01");
+
+/** Délai au-delà duquel un dossier d'un CFA en collab part automatiquement à la ML. */
+export const CFA_COLLAB_AUTO_SEND_DELAI_DAYS = 45;
+
+/**
+ * Statuts courants traduisant une sortie de rupture : retour en contrat ou arrivée au terme
+ * de la formation. Un dossier dans l'un de ces statuts n'est plus à traiter.
+ */
+export const STATUTS_SORTIE_RUPTURE = [STATUT_APPRENANT.APPRENTI, STATUT_APPRENANT.FIN_DE_FORMATION];
+
+/**
+ * Fenêtre de visibilité d'un dossier ML/CFA : millésime d'année scolaire, date de rupture, ou
+ * date de rupture déclarée par le CFA (la déclaration précède parfois la transmission ERP).
+ */
+export const buildVisibilityWindowMatch = (now: Date = new Date()) => ({
+  $or: [
+    { "effectif_snapshot.annee_scolaire": { $in: getAnneeScolaireListFromDateRange(DATE_START_RUPTURES, now) } },
+    { date_rupture: { $gte: DATE_START_RUPTURES } },
+    { "cfa_rupture_declaration.date_rupture": { $gte: DATE_START_RUPTURES } },
+  ],
+});
+
+/**
+ * Dossier « en rupture » : rupture déclarée par le CFA, ou statut courant hors sortie de rupture.
+ * `keepQualifiedByMl` conserve en plus les dossiers déjà qualifiés par un conseiller ML — comme
+ * côté ML, on ne masque que ce sur quoi personne n'a agi. Sans lui, un jeune requalifié en fin de
+ * formation et marqué injoignable sort à la fois de la liste ruptures et de l'onglet Suivi ML
+ * (`buildContactedByMlExpr` exclut les situations « non joint ») : il disparaît de toute vue CFA.
+ * Laissé à false pour le ciblage e-mail, qui compte des ruptures et non des dossiers suivis.
+ */
+export const buildRuptureStatusMatch = ({ keepQualifiedByMl = false }: { keepQualifiedByMl?: boolean } = {}) => ({
+  $or: [
+    { cfa_rupture_declaration: { $exists: true } },
+    { "current_status.value": { $nin: STATUTS_SORTIE_RUPTURE } },
+    ...(keepQualifiedByMl ? [{ situation: { $exists: true, $ne: null } }] : []),
+  ],
+});
+
+/**
+ * Statut courant d'un parcours : dernière étape déjà atteinte. Si aucune ne l'est (parcours
+ * entièrement à venir), on retombe sur la première — jamais sur la dernière, qui vaut
+ * FIN_DE_FORMATION et masquerait un jeune dont la formation n'a pas commencé.
+ */
+export const getCurrentStatutFromParcours = <T extends { date: Date }>(
+  parcours: T[] | null | undefined,
+  now: Date = new Date()
+): T | undefined => {
+  if (!parcours || parcours.length === 0) {
+    return undefined;
+  }
+  return parcours.filter((statut) => new Date(statut.date) <= now).slice(-1)[0] ?? parcours[0];
+};
 
 export const buildEffRuptureAgeFilter = () => {
   const now = new Date();

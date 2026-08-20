@@ -1,4 +1,5 @@
 import { ObjectId } from "bson";
+import { STATUT_APPRENANT } from "shared/constants";
 import { IEffectif } from "shared/models/data/effectifs.model";
 
 import parentLogger from "@/common/logger";
@@ -24,6 +25,7 @@ export async function scoreExistingEffectifs({ dryRun, limit }: ScoreExistingEff
       classification_reponse_appel: { $exists: false },
       soft_deleted: { $ne: true },
       situation: null,
+      "current_status.value": { $ne: STATUT_APPRENANT.FIN_DE_FORMATION },
     })
     .project<{ _id: ObjectId; effectif_snapshot: IEffectif }>({ _id: 1, effectif_snapshot: 1 });
 

@@ -2,7 +2,9 @@ import { captureException } from "@sentry/node";
 import { ObjectId } from "mongodb";
 import { CODES_STATUT_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisationARML, IOrganisationMissionLocale } from "shared/models";
+import { IEffectifComputedStatut } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 
 import { activateMissionLocale } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { updateEffectifStatut } from "@/common/actions/effectifs.statut.actions";
@@ -19,6 +21,7 @@ import {
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
+import { getCurrentStatutFromParcours } from "@/common/actions/shared/rupture-pipeline.utils";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 import {
@@ -233,62 +236,92 @@ export const hydrateMissionLocaleAdresse = async () => {
   }
 };
 
-export const updateMissionLocaleEffectifCurrentStatus = async () => {
-  const cursor = organisationsDb().find({
-    type: "MISSION_LOCALE",
-  });
+const CURRENT_STATUS_BATCH_SIZE = 1000;
+
+export const updateMissionLocaleEffectifCurrentStatus = async (signal?: AbortSignal) => {
+  const missionLocaleIds = await organisationsDb()
+    .find({ type: "MISSION_LOCALE" }, { projection: { _id: 1 } })
+    .map(({ _id }) => _id)
+    .toArray();
+
+  let nbEffectifsMisAJour = 0;
+  let batch: Array<Pick<IMissionLocaleEffectif, "_id" | "effectif_id" | "current_status">> = [];
+
+  const flushBatch = async () => {
+    if (batch.length === 0) {
+      return;
+    }
+
+    const effectifIds = batch.map(({ effectif_id }) => effectif_id);
+    const rows = await effectifsDb()
+      .aggregate([
+        { $match: { _id: { $in: effectifIds } } },
+        { $unionWith: { coll: "effectifsDECA", pipeline: [{ $match: { _id: { $in: effectifIds } } }] } },
+        { $project: { parcours: "$_computed.statut.parcours" } },
+      ])
+      .toArray();
+
+    // Union effectifs -> effectifsDECA : le premier gagne, l'ERP prime sur DECA.
+    const parcoursByEffectifId = new Map<string, IEffectifComputedStatut["parcours"]>();
+    for (const { _id, parcours } of rows) {
+      const key = _id.toString();
+      if (!parcoursByEffectifId.has(key)) {
+        parcoursByEffectifId.set(key, parcours);
+      }
+    }
+
+    const now = new Date();
+    const ops = batch.flatMap((eff) => {
+      const currentStatus = getCurrentStatutFromParcours(parcoursByEffectifId.get(eff.effectif_id.toString()), now);
+      if (!currentStatus) {
+        return [];
+      }
+      if (
+        eff.current_status?.value === currentStatus.valeur &&
+        eff.current_status?.date?.getTime() === currentStatus.date?.getTime()
+      ) {
+        return [];
+      }
+      return [
+        {
+          updateOne: {
+            filter: { _id: eff._id },
+            update: {
+              $set: { "current_status.value": currentStatus.valeur, "current_status.date": currentStatus.date },
+            },
+          },
+        },
+      ];
+    });
+
+    if (ops.length > 0) {
+      await missionLocaleEffectifsDb().bulkWrite(ops);
+      nbEffectifsMisAJour += ops.length;
+    }
+    batch = [];
+  };
+
+  const cursor = missionLocaleEffectifsDb().find(
+    { mission_locale_id: { $in: missionLocaleIds } },
+    { projection: { _id: 1, effectif_id: 1, current_status: 1 } }
+  );
 
   while (await cursor.hasNext()) {
-    const orga = await cursor.next();
-    if (!orga) {
+    if (signal?.aborted) {
+      return { aborted: true, nbEffectifsMisAJour };
+    }
+    const eff = await cursor.next();
+    if (!eff) {
       continue;
     }
-    const cursor2 = missionLocaleEffectifsDb().find({ mission_locale_id: orga._id });
-    while (await cursor2.hasNext()) {
-      const eff = await cursor2.next();
-      if (!eff) {
-        continue;
-      }
-      const effectif = await effectifsDb()
-        .aggregate([
-          {
-            $unionWith: {
-              coll: "effectifsDECA",
-              pipeline: [{ $match: { _id: eff.effectif_id } }],
-            },
-          },
-          {
-            $match: {
-              _id: eff.effectif_id,
-            },
-          },
-          {
-            $project: {
-              parcours: "$_computed.statut.parcours",
-            },
-          },
-        ])
-        .next();
-      if (!effectif || !effectif.parcours || effectif.parcours.length === 0) {
-        continue;
-      }
-
-      const currentStatus =
-        effectif.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] || effectif.parcours.slice(-1)[0];
-
-      if (currentStatus) {
-        await missionLocaleEffectifsDb().updateOne(
-          { _id: eff._id },
-          {
-            $set: {
-              "current_status.value": currentStatus.valeur,
-              "current_status.date": currentStatus.date,
-            },
-          }
-        );
-      }
+    batch.push(eff);
+    if (batch.length >= CURRENT_STATUS_BATCH_SIZE) {
+      await flushBatch();
     }
   }
+  await flushBatch();
+
+  return { aborted: false, nbEffectifsMisAJour };
 };
 
 export const updateMissionLocaleAdresseFromExternalData = async (

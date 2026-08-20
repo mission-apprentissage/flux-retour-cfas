@@ -43,9 +43,13 @@ import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.act
 import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
 import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
 import {
+  CFA_COLLAB_AUTO_SEND_DELAI_DAYS,
   DATE_START_RUPTURES,
+  STATUTS_SORTIE_RUPTURE,
   buildEffRuptureAgeFilter,
+  buildVisibilityWindowMatch,
   createDernierStatutFieldPipeline as createDernierStatutFieldPipelineShared,
+  getCurrentStatutFromParcours,
 } from "../shared/rupture-pipeline.utils";
 
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
@@ -54,15 +58,14 @@ import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "./mission-locale.constants";
 
 const DECA_RUPTURE_DATE_DEBUT = new Date("2025-11-01");
 const DELAI_MIN_RUPTURE_FIN_FORMATION_DAYS = 90;
-const CFA_COLLAB_AUTO_SEND_DELAI_DAYS = 45;
 
 /**
  * Expression d'agrégation : l'effectif a été "envoyé" à la Mission Locale par le CFA.
  * Deux cas (V2 collab) :
  *  - explicitement, via une demande de collaboration (`organisme_data.acc_conjoint`) ;
  *  - automatiquement, pour un CFA en collab (`is_allowed_collab`) dès que la rupture
- *    dépasse 45 jours.
- * Dans les deux cas la ML doit voir l'effectif même s'il sortirait sinon de l'outil
+ *    dépasse 45 jours — sauf si l'effectif est depuis arrivé au terme de sa formation.
+ * L'envoi explicite force la visibilité même si l'effectif sortirait sinon de l'outil
  * (jeune en fin de formation, en abandon +180j, ou non visible pour une autre raison).
  */
 const cfaForceVisibleExpr = () => ({
@@ -78,6 +81,7 @@ const cfaForceVisibleExpr = () => ({
             { $dateSubtract: { startDate: "$$NOW", unit: "day", amount: CFA_COLLAB_AUTO_SEND_DELAI_DAYS } },
           ],
         },
+        { $ne: [{ $ifNull: ["$current_status.value", null] }, STATUT_APPRENANT.FIN_DE_FORMATION] },
       ],
     },
   ],
@@ -264,7 +268,10 @@ const matchDernierStatutPipelineMl = (): any => {
     $match: {
       date_rupture: { $lte: new Date() },
       $or: [
-        { "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT },
+        {
+          "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
+          "current_status.value": { $ne: STATUT_APPRENANT.FIN_DE_FORMATION },
+        },
         { cfa_rupture_declaration: { $exists: true, $ne: null } },
         // Un dossier qualifié par un conseiller ML reste traçable même si le snapshot ERP a évolué
         // (ex: apprenti revenu en formation après une rupture déjà traitée par la ML).
@@ -290,9 +297,7 @@ const generateOrganisationMatchStage = async (
 ) => {
   const matchStage = [
     {
-      $match: {
-        "effectif_snapshot.annee_scolaire": { $in: getAnneeScolaireListFromDateRange(DATE_START_RUPTURES, new Date()) },
-      },
+      $match: buildVisibilityWindowMatch(),
     },
     ...matchFromJointOrganisme(organisation.type),
   ];
@@ -544,7 +549,7 @@ const addMissionLocaleFieldTraitementStatus = () => {
           },
           {
             $or: [
-              { $ne: ["$current_status.value", STATUT_APPRENANT.APPRENTI] },
+              { $not: [{ $in: [{ $ifNull: ["$current_status.value", null] }, STATUTS_SORTIE_RUPTURE] }] },
               { $ifNull: ["$cfa_rupture_declaration", false] },
             ],
           },
@@ -1777,21 +1782,24 @@ export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: st
 
 export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
   const eff = await missionLocaleEffectifsDb().findOne({ effectif_id: effectif._id });
-  const currentStatus =
-    effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
-    effectif._computed?.statut?.parcours.slice(-1)[0];
+  const currentStatus = getCurrentStatutFromParcours(effectif._computed?.statut?.parcours);
   const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
 
   if (eff) {
     const cleanCfaDeclaration = shouldCleanCfaRuptureDeclaration(eff.cfa_rupture_declaration, currentStatus);
     const hasValidCfaDeclaration = !!eff.cfa_rupture_declaration && !cleanCfaDeclaration;
-    const shouldKeep = rupturantFilter || hasValidCfaDeclaration;
+    // Sortant requalifié : masqué des listes par `current_status`, jamais soft-deleted — le
+    // masquage doit rester réversible si une rupture est transmise plus tard.
+    const sortantRequalifie = currentStatus?.valeur === STATUT_APPRENANT.FIN_DE_FORMATION;
+    const shouldKeep = rupturantFilter || hasValidCfaDeclaration || sortantRequalifie;
 
-    const dateRupture = shouldKeep
-      ? rupturantFilter
-        ? currentStatus?.date
-        : eff.cfa_rupture_declaration?.date_rupture
-      : null;
+    const dateRupture = rupturantFilter
+      ? currentStatus?.date
+      : hasValidCfaDeclaration
+        ? eff.cfa_rupture_declaration?.date_rupture
+        : sortantRequalifie
+          ? eff.date_rupture
+          : null;
 
     await missionLocaleEffectifsDb().updateOne(
       { effectif_id: effectif._id },
@@ -1802,6 +1810,7 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
           effectif_snapshot_date: new Date(),
           updated_at: new Date(),
           date_rupture: dateRupture ?? null,
+          current_status: { value: currentStatus?.valeur ?? null, date: currentStatus?.date ?? null },
         },
         ...(cleanCfaDeclaration ? { $unset: { cfa_rupture_declaration: "" } } : {}),
       }
@@ -2630,9 +2639,7 @@ export async function migrateMlRecordEffectifId(
       ...(options.extraSet ?? {}),
     };
     if (!options.skipCurrentStatus) {
-      const currentStatus =
-        newEffectif._computed?.statut?.parcours?.filter((s) => s.date <= now).slice(-1)[0] ||
-        newEffectif._computed?.statut?.parcours?.slice(-1)[0];
+      const currentStatus = getCurrentStatutFromParcours(newEffectif._computed?.statut?.parcours, now);
       set.current_status = { value: currentStatus?.valeur ?? null, date: currentStatus?.date ?? null };
     }
     return set;
@@ -2695,9 +2702,7 @@ export const createMissionLocaleSnapshot = async (
   effectif: IEffectif | IEffectifDECA
 ): Promise<IMissionLocaleSnapshotResult | null> => {
   logMissionLocaleSnapshot(effectif);
-  const currentStatus =
-    effectif._computed?.statut?.parcours.filter((statut) => statut.date <= new Date()).slice(-1)[0] ||
-    effectif._computed?.statut?.parcours.slice(-1)[0];
+  const currentStatus = getCurrentStatutFromParcours(effectif._computed?.statut?.parcours);
 
   // Calcul de l'identifiant normalisé pour la détection de doublons
   const normalizedIdentifiant =

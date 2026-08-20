@@ -2,18 +2,19 @@ import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationOrganismeFormation } from "shared/models";
 import { ICfaRuptureEffectif, ICfaRupturesResponse } from "shared/models/routes/organismes/cfa";
-import { getAnneeScolaireListFromDateRange } from "shared/utils";
 
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
 import {
-  DATE_START_RUPTURES,
+  CFA_COLLAB_AUTO_SEND_DELAI_DAYS,
   buildCollabStatusOrderField,
   buildCollabStatusSwitch,
   buildCsvInConditions,
   buildDistinctFacet,
   buildEffRuptureAgeFilter,
+  buildVisibilityWindowMatch,
   buildNameSearchConditions,
+  buildRuptureStatusMatch,
   createDernierStatutFieldPipeline,
 } from "../shared/rupture-pipeline.utils";
 
@@ -61,11 +62,7 @@ function buildCfaOrganismeMatchStages(organisation: IOrganisationOrganismeFormat
     });
   }
 
-  stages.push({
-    $match: {
-      "effectif_snapshot.annee_scolaire": { $in: getAnneeScolaireListFromDateRange(DATE_START_RUPTURES, new Date()) },
-    },
-  });
+  stages.push({ $match: buildVisibilityWindowMatch() });
 
   return stages;
 }
@@ -111,14 +108,7 @@ export async function getCfaEffectifsEnRupture(
     // Exclude effectifs who have since become APPRENTI again,
     // but only for system-detected ruptures (not CFA manual declarations,
     // where the ERP may not have updated the status yet)
-    {
-      $match: {
-        $or: [
-          { cfa_rupture_declaration: { $exists: true } },
-          { "current_status.value": { $ne: STATUT_APPRENANT.APPRENTI } },
-        ],
-      },
-    },
+    { $match: buildRuptureStatusMatch({ keepQualifiedByMl: true }) },
     {
       $addFields: {
         _nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
@@ -126,7 +116,7 @@ export async function getCfaEffectifsEnRupture(
         _libelle_formation: "$effectif_snapshot.formation.libelle_long",
         collab_status: buildCollabStatusSwitch(),
         // Section "+45j après rupture" : dossier transmis automatiquement à la ML (>= 45 jours).
-        is_transmis_auto: { $gte: ["$dernierStatutDureeInDay", 45] },
+        is_transmis_auto: { $gte: ["$dernierStatutDureeInDay", CFA_COLLAB_AUTO_SEND_DELAI_DAYS] },
       },
     },
     { $addFields: { collab_status_order: buildCollabStatusOrderField() } },

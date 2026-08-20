@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { STATUT_APPRENANT } from "shared/constants";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import { CONVERSATION_STATE } from "shared/models/data/whatsappContact.model";
 
@@ -33,6 +34,8 @@ export function isEligibleForPrequalif(effectif: IMissionLocaleEffectif): boolea
   if (effectif.organisme_data?.acc_conjoint === true) return false;
 
   if (effectif.situation !== null && effectif.situation !== undefined) return false;
+
+  if (effectif.current_status?.value === STATUT_APPRENANT.FIN_DE_FORMATION) return false;
 
   if (!effectif.date_rupture) return false;
   const ruptureCutoff = new Date(Date.now() - PREQUALIF_RUPTURE_MAX_DAYS * 24 * 60 * 60 * 1000);

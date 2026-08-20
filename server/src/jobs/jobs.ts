@@ -6,6 +6,7 @@ import { syncContactList, syncSingleContact } from "@/common/actions/brevo/conta
 import { isBrevoDailyFullSyncActive } from "@/common/actions/brevo/contacts/sync-settings.actions";
 import { trackBrevoEvent } from "@/common/actions/brevo/events/track";
 import logger from "@/common/logger";
+import { effectifsDb } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
@@ -31,6 +32,7 @@ import {
 } from "./hydrate/affelnet/hydrate-voeux-effectifs";
 import { hydrateDecaRaw, hydrateDecaFromExistingEffectifs } from "./hydrate/deca/hydrate-deca-raw";
 import {
+  hydrateEffectifsComputedTypes,
   hydrateEffectifsComputedTypesGenerique,
   hydratePreviousYearMissionLocaleEffectifStatut,
 } from "./hydrate/effectifs/hydrate-effectifs-computed-types";
@@ -243,6 +245,9 @@ export async function setupJobProcessor() {
                 const evaluationDate = new Date();
                 await hydrateWeeklyEffectifStatut(signal, evaluationDate);
                 await hydratePreviousYearMissionLocaleEffectifStatut(evaluationDate, signal);
+                // Sans ce rafraîchissement, `current_status` reste figé pour les dossiers dont le
+                // CFA ne transmet plus : les sortants requalifiés ne seraient jamais masqués.
+                await updateMissionLocaleEffectifCurrentStatus(signal);
               },
               resumable: true,
             },
@@ -574,6 +579,25 @@ export async function setupJobProcessor() {
         handler: async () => {
           await updateNotActivatedMissionLocaleEffectifSnapshot();
         },
+      },
+      "tmp:migrate:statuts-then-ml-current-status": {
+        handler: async (_job, signal) => {
+          const statuts = await hydrateEffectifsComputedTypes({ touchUpdatedAt: false }, effectifsDb, signal);
+          if (statuts.aborted) {
+            throw signal.reason;
+          }
+          if (statuts.error) {
+            throw statuts.error;
+          }
+
+          const currentStatus = await updateMissionLocaleEffectifCurrentStatus(signal);
+          if (currentStatus.aborted) {
+            throw signal.reason;
+          }
+
+          return { statuts, currentStatus };
+        },
+        resumable: true,
       },
       "tmp:migrate:mission-locale-current-status": {
         handler: async () => {

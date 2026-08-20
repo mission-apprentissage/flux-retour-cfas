@@ -17,6 +17,7 @@ import {
   buildCsvInConditions,
   buildDistinctFacet,
   buildNameSearchConditions,
+  getCurrentStatutFromParcours,
 } from "@/common/actions/shared/rupture-pipeline.utils";
 import logger from "@/common/logger";
 import {
@@ -548,9 +549,7 @@ export async function declareCfaEffectifRupture(
   };
   const newEffectifId = new ObjectId(effectifId);
 
-  const currentStatus =
-    effectif._computed?.statut?.parcours?.filter((s) => s.date <= now).slice(-1)[0] ||
-    effectif._computed?.statut?.parcours?.slice(-1)[0];
+  const currentStatus = getCurrentStatutFromParcours(effectif._computed?.statut?.parcours, now);
 
   const normalizedIdentifiant =
     effectif.apprenant.nom && effectif.apprenant.prenom && effectif.apprenant.date_de_naissance
