@@ -260,19 +260,30 @@ const filterByActivationDatePipelineMl = () => {
 const matchDernierStatutPipelineMl = (): any => {
   return {
     $match: {
-      date_rupture: { $lte: new Date() },
-      $or: [
-        { "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT },
-        { cfa_rupture_declaration: { $exists: true, $ne: null } },
-        // Un dossier qualifié par un conseiller ML reste traçable même si le snapshot ERP a évolué
-        // (ex: apprenti revenu en formation après une rupture déjà traitée par la ML).
-        { situation: { $exists: true, $ne: null } },
-        // Collab V2 : un effectif "envoyé" par le CFA (demande de collaboration ou envoi
-        // automatique après 45j) reste visible même si le jeune n'est plus rupturant.
-        { $expr: cfaForceVisibleExpr() },
-        // Demande de RDV : un jeune ayant sollicité un rendez-vous reste visible même
-        // s'il n'est plus rupturant (ex: revenu en formation / fin de formation).
-        { souhaite_rdv: true },
+      $and: [
+        {
+          $or: [
+            { date_rupture: { $lte: new Date() } },
+            // Collab V2 élargie : un dossier envoyé par le CFA pour un jeune en contrat
+            // (prévention) ou sans contrat n'a pas de date de rupture.
+            { $expr: cfaForceVisibleExpr() },
+          ],
+        },
+        {
+          $or: [
+            { "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT },
+            { cfa_rupture_declaration: { $exists: true, $ne: null } },
+            // Un dossier qualifié par un conseiller ML reste traçable même si le snapshot ERP a évolué
+            // (ex: apprenti revenu en formation après une rupture déjà traitée par la ML).
+            { situation: { $exists: true, $ne: null } },
+            // Collab V2 : un effectif "envoyé" par le CFA (demande de collaboration ou envoi
+            // automatique après 45j) reste visible même si le jeune n'est plus rupturant.
+            { $expr: cfaForceVisibleExpr() },
+            // Demande de RDV : un jeune ayant sollicité un rendez-vous reste visible même
+            // s'il n'est plus rupturant (ex: revenu en formation / fin de formation).
+            { souhaite_rdv: true },
+          ],
+        },
       ],
     },
   };
