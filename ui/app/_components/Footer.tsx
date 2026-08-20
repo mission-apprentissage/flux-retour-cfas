@@ -10,6 +10,7 @@ export function Footer() {
   return (
     <DsfrFooter
       accessibility="non compliant"
+      accessibilityLinkProps={{ href: PAGES.static.accessibilite.getPath() }}
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
       homeLinkProps={{
         href: "/",
@@ -33,10 +34,6 @@ export function Footer() {
         {
           text: "Plan du site",
           linkProps: { href: "/sitemap.xml" },
-        },
-        {
-          text: "Accessibilité : non conforme",
-          linkProps: { href: PAGES.static.accessibilite.getPath() },
         },
         {
           text: "Mentions légales",

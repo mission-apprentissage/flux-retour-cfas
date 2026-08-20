@@ -6,6 +6,7 @@ import { IEffectifMissionLocale } from "shared";
 
 import { useAuth } from "@/app/_context/UserContext";
 import { formatDate } from "@/app/_utils/date.utils";
+import { dePrenom } from "@/app/_utils/ruptures.utils";
 import { getUserDisplayName, isCurrentUserId } from "@/app/_utils/user.utils";
 import { DECA_TOOLTIP_TEXT } from "@/common/types/cfaRuptures";
 
@@ -111,8 +112,8 @@ export function CfaSuiviDossierColumn({ effectif }: CfaSuiviDossierColumnProps) 
           <Notice
             title={
               <span>
-                Les informations liées au dossier de {effectif.prenom || "ce jeune"} sont obtenues depuis la base de
-                données <strong style={{ color: "var(--text-action-high-blue-france)" }}>DECA</strong>
+                Les informations liées au dossier {dePrenom(effectif.prenom || "ce jeune")} sont obtenues depuis la base
+                de données <strong style={{ color: "var(--text-action-high-blue-france)" }}>DECA</strong>
                 <span style={{ marginLeft: "0.25rem" }}>
                   <Tooltip kind="hover" title={DECA_TOOLTIP_TEXT} />
                 </span>
@@ -122,7 +123,7 @@ export function CfaSuiviDossierColumn({ effectif }: CfaSuiviDossierColumnProps) 
           />
         ) : (
           <Notice
-            title={`Les informations liées au dossier de ${effectif.prenom || "ce jeune"} sont obtenues directement de votre ERP. Il se peut que la situation réelle du jeune ait évolué.`}
+            title={`Les informations liées au dossier ${dePrenom(effectif.prenom || "ce jeune")} sont obtenues directement de votre ERP. Il se peut que la situation réelle du jeune ait évolué.`}
           />
         )}
       </div>

@@ -3,6 +3,7 @@
 import { useField, useFormikContext } from "formik";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { dePrenom } from "@/app/_utils/ruptures.utils";
 
 import { FormValues } from "../../types";
 import styles from "../Tunnel.module.css";
@@ -23,16 +24,14 @@ export function StepRecap({ prenom, nom, mlName }: StepRecapProps) {
     <div className={styles.fields}>
       <p className={styles.recapOverline}>Dossier prêt !</p>
       <h1 className={styles.recapTitle}>
-        Toutes les informations sont prêtes pour envoyer le dossier de{" "}
-        <span className={styles.recapHighlight}>
-          {prenom} {nom}
-        </span>{" "}
-        à la <span className={styles.recapHighlight}>{mlName ? `Mission Locale ${mlName}` : "Mission Locale"}</span>
+        Toutes les informations sont prêtes pour envoyer le dossier{" "}
+        <span className={styles.recapHighlight}>{dePrenom(`${prenom} ${nom}`)}</span> à la{" "}
+        <span className={styles.recapHighlight}>{mlName ? `Mission Locale ${mlName}` : "Mission Locale"}</span>
       </h1>
 
       <div className={styles.fieldGroup}>
         <label className="fr-label" htmlFor="note_complementaire">
-          Écrivez un petit message à la Mission Locale pour le dossier de {prenom}
+          Écrivez un petit message à la Mission Locale pour le dossier {dePrenom(prenom)}
           <span className="fr-hint-text">Facultatif</span>
         </label>
         <textarea

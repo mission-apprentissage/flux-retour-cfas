@@ -2,6 +2,8 @@
 
 import { ErrorMessage, useField } from "formik";
 
+import { dePrenom } from "@/app/_utils/ruptures.utils";
+
 import styles from "../Tunnel.module.css";
 
 interface Step1RentreeSansContratProps {
@@ -30,7 +32,7 @@ export function Step1RentreeSansContrat({ prenom }: Step1RentreeSansContratProps
       </div>
 
       <div className={styles.fieldGroup}>
-        <p className={styles.question}>Comment se passe la recherche d&apos;entreprise de {prenom} ?</p>
+        <p className={styles.question}>Comment se passe la recherche d&apos;entreprise {dePrenom(prenom)} ?</p>
         <p className={styles.questionHint}>
           Le jeune a-t-il déjà réalisé beaucoup de candidatures ? Depuis combien de temps le jeune candidate ? Quelles
           sont les méthodes qui ont été mises en place ?

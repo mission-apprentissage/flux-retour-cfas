@@ -4,6 +4,7 @@ import { IEffectifMissionLocale } from "shared";
 import { CFA_RISQUE_RUPTURE_ENUM, CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 
 import { formatDate } from "@/app/_utils/date.utils";
+import { dePrenom } from "@/app/_utils/ruptures.utils";
 
 import styles from "./CollaborationDetail.shared.module.css";
 
@@ -63,7 +64,7 @@ export function DossierSituationBlock({ organismeData, prenom, dateRupture }: Do
 
   return (
     <div className={styles.sentBubbleSection}>
-      <p className={styles.sentSectionTitle}>Situation de {prenom}</p>
+      <p className={styles.sentSectionTitle}>Situation {dePrenom(prenom)}</p>
       {lignes.map((ligne) => (
         <p key={ligne} className={styles.sentStillAtCfa}>
           {ligne}

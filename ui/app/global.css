@@ -136,3 +136,15 @@
     margin-left: 0;
   }
 }
+
+/* Les icônes DSFR héritent la line-height de leur conteneur : dans un badge
+   (line-height 24px) le glyphe de 12/14px se retrouve calé sur la ligne de base
+   et non au centre optique. En faire un conteneur flex neutralise l'écart. */
+.fr-badge > i[class*="fr-icon-"],
+.fr-badge > i[class*="ri-"],
+.fr-badge > span[class*="fr-icon-"] {
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  flex-shrink: 0;
+}

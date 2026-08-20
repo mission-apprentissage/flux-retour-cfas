@@ -134,6 +134,7 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
           <DsfrLink
             href="#"
             arrow="none"
+            size="sm"
             onClick={(e) => {
               e.preventDefault();
               setContactsOpen((open) => {
@@ -141,7 +142,7 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
                 return !open;
               });
             }}
-            className={`fr-link--icon-right ${contactsOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"} ${styles.mlCoordLink}`}
+            className={`fr-link--icon-right ${contactsOpen ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"} ${styles.mlCoordLink}`}
           >
             Coordonnées de l&apos;établissement
           </DsfrLink>
@@ -160,6 +161,7 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
             <DsfrLink
               href="#"
               arrow="none"
+              size="sm"
               onClick={(e) => {
                 e.preventDefault();
                 setContactsOpen((open) => {
@@ -167,7 +169,7 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
                   return !open;
                 });
               }}
-              className={`fr-link--icon-right ${contactsOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"} ${styles.mlCoordLink}`}
+              className={`fr-link--icon-right ${contactsOpen ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"} ${styles.mlCoordLink}`}
             >
               Coordonnées de l&apos;établissement
             </DsfrLink>

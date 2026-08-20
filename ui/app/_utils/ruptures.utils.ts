@@ -39,3 +39,12 @@ export const matchesPostalCodes = (effectif: EffectifData, selected: string[]): 
   if (selected.length === 0) return true;
   return !!effectif.code_postal && selected.includes(effectif.code_postal);
 };
+
+/**
+ * Élide « de » devant un prénom commençant par une voyelle ou un h muet :
+ * « de Enzo » → « d'Enzo ». Les prénoms à h aspiré (Hugo, Hector…) restent en « de ».
+ */
+export const dePrenom = (prenom: string): string => {
+  const premiere = prenom?.trim().charAt(0).toLowerCase();
+  return "aeiouyàâäéèêëîïôöùûü".includes(premiere) ? `d'${prenom}` : `de ${prenom}`;
+};

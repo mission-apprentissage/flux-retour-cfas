@@ -5,6 +5,7 @@ import { ACC_CONJOINT_MOTIF_ENUM } from "shared";
 
 import { MOTIF_EMOJIS, MOTIF_LABELS } from "@/app/_components/ruptures/shared/constants";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { dePrenom } from "@/app/_utils/ruptures.utils";
 
 import styles from "../CollaborationForm.module.css";
 import { FREINS_MOTIFS } from "../constants";
@@ -90,7 +91,7 @@ export function ObjectifsSection({ prenom, sansContrat = false }: ObjectifsSecti
   return (
     <div className={styles.sectionInner}>
       <p className={styles.sectionLabel}>
-        Quel est l&apos;objectif de l&apos;accompagnement de {prenom} ?<span className={styles.required}>*</span>
+        Quel est l&apos;objectif de l&apos;accompagnement {dePrenom(prenom)} ?<span className={styles.required}>*</span>
       </p>
       <p className={styles.sectionHint}>
         Vous pouvez sélectionner plusieurs objectifs. Détaillez les besoins spécifiques du jeune pour chacun.

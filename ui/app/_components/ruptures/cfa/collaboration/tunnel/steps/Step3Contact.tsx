@@ -4,6 +4,7 @@ import { ErrorMessage, useField, useFormikContext } from "formik";
 import { RQTH_DECLARE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { dePrenom } from "@/app/_utils/ruptures.utils";
 
 import { ReferentSection } from "../../sections/ReferentSection";
 import { FormValues } from "../../types";
@@ -74,13 +75,11 @@ export function Step3Contact({ prenom, nom, isMineur }: Step3ContactProps) {
         </span>
       </div>
 
-      <p className={styles.blockTitle}>
-        Informations de {prenom} {nom}
-      </p>
+      <p className={styles.blockTitle}>Informations {dePrenom(`${prenom} ${nom}`)}</p>
 
       <TextField
         name="verified_info.telephone"
-        label="N°de téléphone du jeune"
+        label="N° de téléphone du jeune"
         required
         onEdited={trackCoordonnees("telephone")}
       />

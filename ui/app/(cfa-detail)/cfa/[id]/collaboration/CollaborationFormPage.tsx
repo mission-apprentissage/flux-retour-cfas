@@ -10,6 +10,7 @@ import styles from "@/app/_components/ruptures/cfa/collaboration/CollaborationFo
 import { useCfaEffectifDetail } from "@/app/_components/ruptures/cfa/collaboration/hooks";
 import { CollaborationTunnel } from "@/app/_components/ruptures/cfa/collaboration/tunnel/CollaborationTunnel";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { dePrenom } from "@/app/_utils/ruptures.utils";
 
 export default function CollaborationFormPage({ id }: { id: string }) {
   const { data, isLoading } = useCfaEffectifDetail(id);
@@ -70,11 +71,8 @@ export default function CollaborationFormPage({ id }: { id: string }) {
               />
             </div>
             <p id="modal-success-title" className={styles.modalText}>
-              Le dossier de{" "}
-              <span className={styles.modalHighlight}>
-                {prenom} {nom}
-              </span>{" "}
-              a bien été envoyé à la{" "}
+              Le dossier <span className={styles.modalHighlight}>{dePrenom(`${prenom} ${nom}`)}</span> a bien été envoyé
+              à la{" "}
               <span className={styles.modalHighlight}>{mlName ? `Mission Locale ${mlName}` : "Mission Locale"}</span>
             </p>
             <div className={styles.modalActions}>
