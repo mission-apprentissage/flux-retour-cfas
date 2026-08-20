@@ -9,6 +9,7 @@ dbName="{{ MNA_TDB_MONGODB_DB_NAME }}"
 dbNameTarget="{{ SYNC_MNA_TDB_MONGODB_DB_NAME }}"
 
 SECONDS=0
+
 docker run -i --rm --log-driver=none mongo:8 bash -c "
   mongodump \
     --ssl \
@@ -24,4 +25,5 @@ docker run -i --rm --log-driver=none mongo:8 bash -c "
       --uri=\"${targetUri}\" \
       --authenticationDatabase=\"${dbNameTarget}\" \
       --drop"
+
 echo "Elapsed Time: $SECONDS seconds"
