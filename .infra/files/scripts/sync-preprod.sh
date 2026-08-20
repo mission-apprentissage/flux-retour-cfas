@@ -15,7 +15,7 @@ docker run -i --rm --log-driver=none mongo:8 bash -c "
     --uri=\"${sourceUri}\" \
     --db=\"${dbName}\" \
     --archive \
-    --authenticationDatabase=${dbName} \
+    --authenticationDatabase=\"${dbName}\" \
     | mongorestore \
       --archive \
       --nsInclude=\"${dbName}.*\" \
