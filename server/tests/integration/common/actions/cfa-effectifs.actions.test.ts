@@ -471,6 +471,35 @@ describe("CFA Effectifs Actions", () => {
       expect(result.effectif.date_rupture).toBeNull();
     });
 
+    it("résout la mission locale de rattachement sans dossier existant", async () => {
+      await organisationsDb().insertOne({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        ml_id: 337,
+        nom: "ML de rattachement",
+        adresse: { commune: "Paris", code_postal: "75001" },
+        created_at: new Date(),
+      } as any);
+      const effectif = await insertEffectif({
+        apprenant: { nom: "SANSDOSSIER", prenom: "Test", adresse: { mission_locale_id: 337 } },
+      });
+
+      const result = await getCfaEffectifDetail(organismeId, effectif._id.toString());
+
+      expect((result.effectif as any).mission_locale_organisation?.nom).toBe("ML de rattachement");
+      expect((result.effectif as any).mission_locale_organisation?.adresse?.commune).toBe("Paris");
+    });
+
+    it("laisse la mission locale nulle si la zone du jeune est inconnue", async () => {
+      const effectif = await insertEffectif({
+        apprenant: { nom: "SANSZONE", prenom: "Test", adresse: {} },
+      });
+
+      const result = await getCfaEffectifDetail(organismeId, effectif._id.toString());
+
+      expect((result.effectif as any).mission_locale_organisation).toBeNull();
+    });
+
     it("retourne les données depuis effectifsDECA si absent des autres collections", async () => {
       const decaEffectif = {
         _id: new ObjectId(),

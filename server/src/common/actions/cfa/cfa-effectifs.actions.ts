@@ -19,7 +19,13 @@ import {
   buildDistinctFacet,
   buildNameSearchConditions,
 } from "@/common/actions/shared/rupture-pipeline.utils";
-import { effectifsDb, effectifsDECADb, missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
+import {
+  effectifsDb,
+  effectifsDECADb,
+  missionLocaleEffectifsDb,
+  organisationsDb,
+  organismesDb,
+} from "@/common/model/collections";
 import { stripDiacritics } from "@/common/utils/mongoUtils";
 
 interface CfaEffectifsQueryParams {
@@ -352,10 +358,28 @@ export async function getCfaEffectifs(
   };
 }
 
-function formatRawEffectif(
+async function formatRawEffectif(
   raw: { _id: ObjectId; apprenant?: any; formation?: any; contrats?: any; source?: any; transmitted_at?: any },
   organisme: any
 ) {
+  // Projection alignée sur le $lookup de buildMlAggregation : le front ne doit connaître
+  // qu'une seule forme de mission_locale_organisation.
+  const missionLocaleOrganisation = raw.apprenant?.adresse?.mission_locale_id
+    ? await organisationsDb().findOne(
+        { type: "MISSION_LOCALE", ml_id: raw.apprenant.adresse.mission_locale_id },
+        {
+          projection: {
+            _id: 1,
+            nom: 1,
+            email: 1,
+            telephone: 1,
+            activated_at: 1,
+            adresse: { commune: 1, code_postal: 1 },
+          },
+        }
+      )
+    : null;
+
   return {
     id: raw._id,
     nom: raw.apprenant?.nom,
@@ -375,7 +399,7 @@ function formatRawEffectif(
     organisme,
     date_rupture: null,
     organisme_data: null,
-    mission_locale_organisation: null,
+    mission_locale_organisation: missionLocaleOrganisation,
     mission_locale_logs: [],
   };
 }
@@ -557,14 +581,14 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
       { _id: erpEffectif.organisme_id },
       { projection: { nom: 1, raison_sociale: 1, adresse: 1 } }
     );
-    return { effectif: formatRawEffectif(erpEffectif, organisme), currentIndex: 0, total: 1 };
+    return { effectif: await formatRawEffectif(erpEffectif, organisme), currentIndex: 0, total: 1 };
   }
   if (decaEffectif) {
     const organisme = await organismesDb().findOne(
       { _id: decaEffectif.organisme_id },
       { projection: { nom: 1, raison_sociale: 1, adresse: 1 } }
     );
-    return { effectif: formatRawEffectif(decaEffectif, organisme), currentIndex: 0, total: 1 };
+    return { effectif: await formatRawEffectif(decaEffectif, organisme), currentIndex: 0, total: 1 };
   }
 
   throw Boom.notFound("Effectif not found");
