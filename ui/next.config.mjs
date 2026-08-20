@@ -136,6 +136,13 @@ const nextConfig = {
         destination: "/api/r/:token",
         permanent: false,
       },
+      // Liens e-mails Brevo de la campagne jeunes ML (flux abandonné) encore en circulation :
+      // les pages et l'API campagne ont été supprimées, on évite un 404 sec.
+      {
+        source: "/campagnes/:path*",
+        destination: "/",
+        permanent: false,
+      },
     ];
   },
 };
