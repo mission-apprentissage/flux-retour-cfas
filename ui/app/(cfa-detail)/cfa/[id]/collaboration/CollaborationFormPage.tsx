@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IEffectifMissionLocale } from "shared";
 
-import { CollaborationForm } from "@/app/_components/ruptures/cfa/collaboration/CollaborationForm";
 import styles from "@/app/_components/ruptures/cfa/collaboration/CollaborationForm.module.css";
 import { useCfaEffectifDetail } from "@/app/_components/ruptures/cfa/collaboration/hooks";
+import { CollaborationTunnel } from "@/app/_components/ruptures/cfa/collaboration/tunnel/CollaborationTunnel";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 export default function CollaborationFormPage({ id }: { id: string }) {
@@ -28,8 +28,7 @@ export default function CollaborationFormPage({ id }: { id: string }) {
 
   const effectif = data?.effectif;
   const alreadySent = effectif?.organisme_data?.acc_conjoint === true;
-  const noRupture = effectif && !effectif.date_rupture;
-  const shouldRedirect = !isLoading && !showModal && effectif && (alreadySent || noRupture);
+  const shouldRedirect = !isLoading && !showModal && effectif && alreadySent;
 
   useEffect(() => {
     if (shouldRedirect) {
@@ -53,7 +52,7 @@ export default function CollaborationFormPage({ id }: { id: string }) {
   return (
     <>
       {effectif ? (
-        <CollaborationForm effectif={effectif} onSuccess={handleSuccess} onCancel={() => router.back()} />
+        <CollaborationTunnel effectif={effectif} onSuccess={handleSuccess} onCancel={() => router.back()} />
       ) : (
         <div style={{ padding: "2rem", maxWidth: "78rem", margin: "0 auto" }}>
           <p>Effectif introuvable.</p>
