@@ -1,11 +1,11 @@
 import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { NotionAPI } from "notion-client";
 import { ExtendedRecordMap } from "notion-types";
 import { NotionRenderer } from "react-notion-x";
 
 import { _get } from "@/common/httpClient";
+import { getNotionPage } from "@/common/utils/notionUtils";
 import SimplePage from "@/components/Page/SimplePage";
 import NotFound from "ui/pages/404";
 
@@ -21,10 +21,9 @@ export const getStaticPaths: GetStaticPaths<{ slug: string }> = async () => {
 export const getStaticProps = (async ({ params }) => {
   let recordMap: ExtendedRecordMap | null = null;
   try {
-    const notion = new NotionAPI();
     const id = params?.id as string;
     if (id) {
-      recordMap = await notion.getPage(id);
+      recordMap = await getNotionPage(id);
     }
   } catch (e) {
     recordMap = null;

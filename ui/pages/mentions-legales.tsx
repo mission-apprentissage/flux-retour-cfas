@@ -1,22 +1,16 @@
 import { GetStaticProps, InferGetStaticPropsType } from "next";
-import { NotionAPI } from "notion-client";
 import { ExtendedRecordMap } from "notion-types";
 import { NotionRenderer } from "react-notion-x";
 
 import { _get } from "@/common/httpClient";
-import { sanitizeNotionRecordMap } from "@/common/utils/notionUtils";
+import { getNotionPage } from "@/common/utils/notionUtils";
 import SimplePage from "@/components/Page/SimplePage";
 
 import "react-notion-x/src/styles.css";
 
 export const getStaticProps = (async () => {
-  try {
-    const notion = new NotionAPI();
-    const recordMap = await notion.getPage("Mentions-l-gales-002a2868ea2f46cdb2d73207d12b6075");
-    return { props: { data: sanitizeNotionRecordMap(recordMap) }, revalidate: 60 * 30 };
-  } catch (error) {
-    return { notFound: true, revalidate: 60 };
-  }
+  const recordMap = await getNotionPage("Mentions-l-gales-002a2868ea2f46cdb2d73207d12b6075");
+  return { props: { data: recordMap }, revalidate: 60 * 30 };
 }) satisfies GetStaticProps<{
   data: ExtendedRecordMap;
 }>;
