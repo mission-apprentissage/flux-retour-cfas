@@ -51,6 +51,13 @@ export function isEligibleForWhatsApp(effectif: IMissionLocaleEffectif): boolean
     return false;
   }
 
+  // Le message "injoignables" s'adresse à un jeune en rupture : un dossier de collaboration
+  // ouvert en prévention ou pour une rentrée sans contrat n'a pas de date de rupture et ne doit
+  // pas le recevoir. Le job batch applique déjà ce filtre, pas le déclenchement immédiat.
+  if (!effectif.date_rupture) {
+    return false;
+  }
+
   // Déjà contacté par WhatsApp
   if (effectif.whatsapp_contact?.last_message_sent_at) {
     return false;

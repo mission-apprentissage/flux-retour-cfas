@@ -291,6 +291,7 @@ describe("WhatsApp Service", () => {
       mission_locale_id: new ObjectId(),
       effectif_id: new ObjectId(),
       created_at: new Date(),
+      date_rupture: new Date("2026-05-04"),
       brevo: {},
       current_status: {},
       effectif_snapshot: {
@@ -351,6 +352,11 @@ describe("WhatsApp Service", () => {
           opted_out: true,
         },
       } as IMissionLocaleEffectif;
+      assert.strictEqual(isEligibleForWhatsApp(effectif), false);
+    });
+
+    it("retourne false sans date de rupture (dossier de prévention ou rentrée sans contrat)", () => {
+      const effectif = { ...baseEffectif, date_rupture: null } as IMissionLocaleEffectif;
       assert.strictEqual(isEligibleForWhatsApp(effectif), false);
     });
   });
