@@ -17,6 +17,16 @@ if [ "$DIFF_MODE" = "ci" ] && { [ -z "${BASE_SHA:-}" ] || [ -z "${HEAD_SHA:-}" ]
   exit 1
 fi
 
+# push créant la branche (before = SHA zéro) ou force-push (before absent du clone) :
+# le diff BASE..HEAD serait impossible, on replie sur le parent du commit scanné
+if [ "$DIFF_MODE" = "ci" ]; then
+  if printf '%s' "$BASE_SHA" | grep -Eq '^0+$' || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+    echo "BASE_SHA $BASE_SHA is not diffable, falling back to $HEAD_SHA~1"
+    BASE_SHA="$(git rev-parse "$HEAD_SHA~1")"
+  fi
+  export BASE_SHA HEAD_SHA
+fi
+
 rm -f "report.json"
 
 echo "generating report"
@@ -41,13 +51,14 @@ while read -r line; do
   if ! grep -Fqx -- "$line" "gitleaks-fingerprints-baseline.txt"; then
 
     HAS_ERROR="1"
-    echo "missing secret: $line"
+    echo "missing secret: $(cut -d: -f1,2 <<< "$line")"
   fi
 done < "$TMP_FINGERPRINTS"
 
 rm -f "$TMP_FINGERPRINTS"
 if [ $HAS_ERROR = "1" ] ; then
     echo "❌ new errors detected !"
+    echo "→ le fingerprint complet (avec le secret) n'est jamais affiché ici : en local, lancez 'yarn gitleaks:update-ignore' pour l'ajouter à gitleaks-fingerprints-baseline.txt si c'est un faux positif"
     exit 1
 else
     echo "✅ no new error"
