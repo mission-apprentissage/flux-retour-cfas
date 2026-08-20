@@ -4,8 +4,8 @@ import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import type { ICfaEffectif } from "@/common/types/cfaRuptures";
-import { SITUATION_LABELS } from "@/common/types/cfaRuptures";
+import type { CfaEffectifSituation, ICfaEffectif } from "@/common/types/cfaRuptures";
+import { CFA_EFFECTIF_SITUATION, SITUATION_LABELS } from "@/common/types/cfaRuptures";
 
 import sharedStyles from "../shared/ui/SortableTable.module.css";
 import { SortableHeader } from "../shared/ui/SortableTableParts";
@@ -22,6 +22,16 @@ interface CfaTousEffectifsTableProps {
   onSort: (key: SortKey) => void;
 }
 
+const SITUATION_TOOLTIPS: Partial<Record<CfaEffectifSituation, string>> = {
+  [CFA_EFFECTIF_SITUATION.RUPTURE]: "Ce jeune est en rupture de contrat d'après votre source de données.",
+  [CFA_EFFECTIF_SITUATION.RUPTURE_DECA]:
+    "Cette rupture provient de la base DECA (contrats déposés par les OPCO et les DDETS), et non de votre ERP.",
+  [CFA_EFFECTIF_SITUATION.PREVENTION_RUPTURE]:
+    "Vous avez envoyé un dossier à la Mission Locale pour ce jeune encore en contrat, afin de prévenir une rupture.",
+  [CFA_EFFECTIF_SITUATION.ABANDON]: "Ce jeune a abandonné sa formation d'après votre source de données.",
+  [CFA_EFFECTIF_SITUATION.SANS_CONTRAT]: "Ce jeune est inscrit en formation mais n'a pas de contrat d'apprentissage.",
+};
+
 function SituationCell({ effectif }: { effectif: ICfaEffectif }) {
   if (!effectif.situation) {
     return <span className={styles.emptyCell}>—</span>;
@@ -35,12 +45,21 @@ function SituationCell({ effectif }: { effectif: ICfaEffectif }) {
       })
     : null;
 
+  const tooltip = SITUATION_TOOLTIPS[effectif.situation];
+  const showDateRupture =
+    effectif.situation === CFA_EFFECTIF_SITUATION.RUPTURE || effectif.situation === CFA_EFFECTIF_SITUATION.RUPTURE_DECA;
+
   return (
     <div className={styles.situationCell}>
-      <span className={styles.situationLabel}>{SITUATION_LABELS[effectif.situation]}</span>
-      {effectif.situation === "rupture" && dateRupture && (
-        <span className={styles.situationDetail}>depuis le {dateRupture}</span>
-      )}
+      <span className={styles.situationLabel}>
+        {SITUATION_LABELS[effectif.situation]}
+        {tooltip && (
+          <span className={styles.situationTooltip}>
+            <Tooltip kind="hover" title={tooltip} />
+          </span>
+        )}
+      </span>
+      {showDateRupture && dateRupture && <span className={styles.situationDetail}>depuis le {dateRupture}</span>}
     </div>
   );
 }
@@ -66,7 +85,7 @@ export function CfaTousEffectifsTable({ effectifs, sort, order, onSort }: CfaTou
                 <span className={styles.headerTooltip}>
                   <Tooltip
                     kind="hover"
-                    title="Situation de l'apprenant issue de votre source de données : en rupture de contrat, en abandon de formation, ou inscrit sans contrat."
+                    title="Situation de l'apprenant : rupture de contrat, prévention de rupture après l'envoi d'un dossier, abandon de formation, ou inscription sans contrat."
                   />
                 </span>
               </span>
@@ -181,7 +200,15 @@ export function CfaTousEffectifsTable({ effectifs, sort, order, onSort }: CfaTou
                         </span>
                       </span>
                     ) : effectif.collab_status ? (
-                      <CfaCollaborationBadge status={effectif.collab_status} effectifId={effectif.id} />
+                      <CfaCollaborationBadge
+                        status={effectif.collab_status}
+                        effectifId={effectif.id}
+                        unavailableReason={
+                          effectif.mission_locale
+                            ? undefined
+                            : "La Mission Locale de rattachement de ce jeune n'a pas pu être identifiée à partir de son adresse : vérifiez son code postal auprès de votre ERP avant de démarrer une collaboration."
+                        }
+                      />
                     ) : (
                       <span className={styles.emptyCell}>—</span>
                     )}

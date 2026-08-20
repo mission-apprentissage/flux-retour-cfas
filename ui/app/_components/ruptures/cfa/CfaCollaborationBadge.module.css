@@ -56,3 +56,9 @@
 .horsCollabInfo {
   color: var(--text-mention-grey);
 }
+
+.unavailableCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}

@@ -15,13 +15,31 @@ interface CfaCollaborationBadgeProps {
   // Affiche les étiquettes "Contacté par la ML" / "Hors collab" côte à côte (contexte bandeau)
   // au lieu de l'empilement vertical utilisé dans le tableau.
   inline?: boolean;
+  // Renseigné quand la collaboration est impossible : le CTA est rendu inactif et la raison
+  // est affichée en infobulle.
+  unavailableReason?: string;
 }
 
-export function CfaCollaborationBadge({ status, effectifId, inline = false }: CfaCollaborationBadgeProps) {
+export function CfaCollaborationBadge({
+  status,
+  effectifId,
+  inline = false,
+  unavailableReason,
+}: CfaCollaborationBadgeProps) {
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   switch (status) {
     case "demarrer_collab":
+      if (unavailableReason) {
+        return (
+          <span className={styles.unavailableCta}>
+            <Button priority="primary" size="small" disabled>
+              Démarrer une collab
+            </Button>
+            <Tooltip kind="hover" title={unavailableReason} />
+          </span>
+        );
+      }
       return (
         <Button
           priority="primary"
@@ -29,7 +47,7 @@ export function CfaCollaborationBadge({ status, effectifId, inline = false }: Cf
           iconId="fr-icon-arrow-right-line"
           iconPosition="right"
           linkProps={{
-            href: `/cfa/${effectifId}`,
+            href: `/cfa/${effectifId}/collaboration`,
             onClick: () => trackPlausibleEvent("cfa_liste_demarrer_collab", undefined, { effectifId }),
           }}
         >

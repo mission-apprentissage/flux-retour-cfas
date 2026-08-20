@@ -9,13 +9,14 @@ import { useMemo } from "react";
 import { MultiSelectDropdown } from "@/app/_components/common/MultiSelectDropdown";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import type { CfaCollaborationStatus, ICfaEffectifsResponse } from "@/common/types/cfaRuptures";
-import { COLLAB_STATUS_LABELS } from "@/common/types/cfaRuptures";
+import { COLLAB_STATUS_FILTER_LABELS, COLLAB_STATUS_FILTER_OPTIONS } from "@/common/types/cfaRuptures";
 
 import { CfaEffectifsHeader } from "./CfaEffectifsHeader";
 import styles from "./CfaEffectifsList.module.css";
 import filterStyles from "./CfaFilters.module.css";
 import cardStyles from "./CfaRuptureSegment.module.css";
 import { CfaTousEffectifsTable } from "./CfaTousEffectifsTable";
+import { highlightHorsCollab } from "./collabFilterLabel";
 import { useSortablePagination } from "./hooks";
 
 interface CfaEffectifsListProps {
@@ -57,7 +58,12 @@ export function CfaEffectifsList({
   );
 
   const collabOptions = useMemo(
-    () => Object.entries(COLLAB_STATUS_LABELS).map(([value, label]) => ({ value, label })),
+    () =>
+      COLLAB_STATUS_FILTER_OPTIONS.map((value) => ({
+        value,
+        label: COLLAB_STATUS_FILTER_LABELS[value],
+        labelNode: highlightHorsCollab(COLLAB_STATUS_FILTER_LABELS[value]),
+      })),
     []
   );
 
@@ -148,7 +154,7 @@ export function CfaEffectifsList({
                   },
                 }}
               >
-                {COLLAB_STATUS_LABELS[status as CfaCollaborationStatus] ?? status}
+                {COLLAB_STATUS_FILTER_LABELS[status as CfaCollaborationStatus] ?? status}
               </Tag>
             ))}
             {formations.map((f) => (
