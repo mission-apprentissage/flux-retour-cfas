@@ -36,9 +36,9 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
     <div className={styles.infoColumn}>
       <div className={styles.nameRow}>
         <div className={styles.avatar}>{getInitials(effectif.nom, effectif.prenom)}</div>
-        <h4 className="fr-h4">
+        <h1 className="fr-h4">
           {effectif.prenom} {effectif.nom}
-        </h4>
+        </h1>
       </div>
 
       <hr className={styles.separator} />
