@@ -32,9 +32,9 @@ const SITUATION_TOOLTIPS: Partial<Record<CfaEffectifSituation, string>> = {
   [CFA_EFFECTIF_SITUATION.SANS_CONTRAT]: "Ce jeune est inscrit en formation mais n'a pas de contrat d'apprentissage.",
 };
 
-function SituationCell({ effectif }: { effectif: ICfaEffectif }) {
+function SituationCell({ effectif, dimmed }: { effectif: ICfaEffectif; dimmed?: boolean }) {
   if (!effectif.situation) {
-    return <span className={styles.emptyCell}>—</span>;
+    return <span className={`${styles.emptyCell} ${dimmed ? styles.dimmed : ""}`}>—</span>;
   }
 
   const dateRupture = effectif.date_rupture
@@ -52,14 +52,16 @@ function SituationCell({ effectif }: { effectif: ICfaEffectif }) {
   return (
     <div className={styles.situationCell}>
       <span className={styles.situationLabel}>
-        {SITUATION_LABELS[effectif.situation]}
+        <span className={dimmed ? styles.dimmed : undefined}>{SITUATION_LABELS[effectif.situation]}</span>
         {tooltip && (
-          <span className={styles.situationTooltip}>
+          <span className={`${styles.situationTooltip} ${dimmed ? styles.situationTooltipDimmed : ""}`}>
             <Tooltip kind="hover" title={tooltip} />
           </span>
         )}
       </span>
-      {showDateRupture && dateRupture && <span className={styles.situationDetail}>depuis le {dateRupture}</span>}
+      {showDateRupture && dateRupture && (
+        <span className={`${styles.situationDetail} ${dimmed ? styles.dimmed : ""}`}>depuis le {dateRupture}</span>
+      )}
     </div>
   );
 }
@@ -160,9 +162,7 @@ export function CfaTousEffectifsTable({ effectifs, sort, order, onSort }: CfaTou
                   </div>
                 </td>
                 <td>
-                  <div className={rowClass}>
-                    <SituationCell effectif={effectif} />
-                  </div>
+                  <SituationCell effectif={effectif} dimmed={isOutOfRange} />
                 </td>
                 <td>
                   <div className={`${sharedStyles.formationCell} ${rowClass ?? ""}`}>

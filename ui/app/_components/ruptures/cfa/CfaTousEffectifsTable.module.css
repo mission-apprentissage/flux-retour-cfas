@@ -78,3 +78,11 @@
   vertical-align: middle;
   margin-left: 0.25rem;
 }
+
+.dimmed {
+  opacity: 0.5;
+}
+
+.situationTooltipDimmed > i {
+  opacity: 0.5;
+}
