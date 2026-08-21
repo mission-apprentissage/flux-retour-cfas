@@ -214,6 +214,7 @@ export function EffectifsListeClient({ organisme, modePublique }: { organisme: O
     <div>
       <PageHeader
         title={title}
+        titleAs={modePublique ? "h2" : "h1"}
         action={
           <Button
             priority="secondary"
@@ -281,7 +282,7 @@ export function EffectifsListeClient({ organisme, modePublique }: { organisme: O
 
         <div className={styles.filtersRow}>
           <div className={filterStyles.filterPanel}>
-            <p className={filterStyles.filterPanelLabel}>FILTRER PAR</p>
+            <p className={filterStyles.filterPanelLabel}>Filtrer par</p>
             <div className={filterStyles.filterPanelRow}>
               {availableFilters.annee_scolaire && (
                 <FilterCheckboxMenu

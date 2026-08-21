@@ -5,7 +5,9 @@
 .filterPanelLabel {
   margin-bottom: 0.25rem;
   font-size: 0.75rem;
-  font-weight: 800;
+  font-weight: 700;
+  color: var(--text-mention-grey);
+  text-transform: uppercase;
 }
 
 .filterPanelRow {
@@ -13,6 +15,14 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+}
+
+.activeTagsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.75rem;
 }
 
 .filterMenu {
