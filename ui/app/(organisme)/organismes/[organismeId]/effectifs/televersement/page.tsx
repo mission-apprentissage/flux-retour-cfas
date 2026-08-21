@@ -11,8 +11,8 @@ export default async function OrganismeTeleversementPage({ params }: { params: P
   const { organismeId } = await params;
 
   return (
-    <div className="fr-container fr-pt-3w fr-pb-6w">
+    <>
       <OrganismeTeleversementPageClient organismeId={organismeId} />
-    </div>
+    </>
   );
 }

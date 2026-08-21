@@ -11,8 +11,8 @@ export default async function OrganismeDoublonsPage({ params }: { params: Promis
   const { organismeId } = await params;
 
   return (
-    <div className="fr-container fr-pt-3w fr-pb-6w">
+    <>
       <OrganismeDoublonsPageClient organismeId={organismeId} />
-    </div>
+    </>
   );
 }

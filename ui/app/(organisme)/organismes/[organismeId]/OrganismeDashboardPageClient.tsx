@@ -8,12 +8,8 @@ export default function OrganismeDashboardPageClient({ organismeId }: { organism
   const { organisme } = useOrganisme(organismeId);
 
   if (!organisme) {
-    return (
-      <div className="fr-container fr-pt-3w fr-pb-6w">
-        <TableSkeleton />
-      </div>
-    );
+    return <TableSkeleton />;
   }
 
-  return <DashboardOrganismeClient organisme={organisme} modePublique />;
+  return <DashboardOrganismeClient organisme={organisme} />;
 }

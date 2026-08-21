@@ -129,7 +129,8 @@ export default function TransmissionsDetailsClient({
       <PageHeader
         backLink={{ href: backHref, label: "Retour au tableau des rapports" }}
         title={`Rapport du ${formatDate(date)}`}
-        intro={`Mes erreurs de transmissions du ${formatDate(date)}`}
+        titleAs={modePublique ? "h2" : "h1"}
+        intro={`${modePublique ? "Les" : "Mes"} erreurs de transmissions du ${formatDate(date)}`}
       />
 
       <Tabs

@@ -9,11 +9,13 @@ export function PageHeader({
   intro,
   action,
   backLink,
+  titleAs: TitleTag = "h1",
 }: {
   title: ReactNode;
   intro?: ReactNode;
   action?: ReactNode;
   backLink?: { href: string; label: string };
+  titleAs?: "h1" | "h2";
 }) {
   return (
     <>
@@ -26,7 +28,7 @@ export function PageHeader({
       )}
 
       <div className={styles.header}>
-        <h1 className={styles.title}>{title}</h1>
+        <TitleTag className={styles.title}>{title}</TitleTag>
         {action}
       </div>
 

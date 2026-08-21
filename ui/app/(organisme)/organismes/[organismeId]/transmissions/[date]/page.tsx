@@ -14,8 +14,8 @@ export default async function OrganismeTransmissionsJourPage({
   const { organismeId, date } = await params;
 
   return (
-    <div className="fr-container fr-pt-3w fr-pb-6w">
+    <>
       <TransmissionsDetailsClient modePublique organismeId={organismeId} date={date} />
-    </div>
+    </>
   );
 }

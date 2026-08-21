@@ -1,79 +1,147 @@
-.headerBand {
-  padding: 2rem 0;
-  background-color: var(--background-alt-grey);
-  border-top: 1px solid var(--border-default-grey);
-  border-bottom: 1px solid var(--border-default-grey);
+.ficheHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
-.headerLayout {
+.ficheSurtitre {
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.ficheTitre {
+  margin-bottom: 0.75rem;
+  color: var(--text-title-blue-france);
+}
+
+.ficheGrid {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
-  gap: 2rem;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 1.5rem;
   align-items: start;
+  margin-bottom: 1.5rem;
 }
 
 @media (width <= 62em) {
-  .headerLayout {
+  .ficheGrid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
-.welcome {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-  font-weight: 700;
+.ficheCard {
+  padding: 2rem;
+  background: var(--background-raised-grey);
+  border-radius: 4px;
 }
 
-.organismeName {
+.ficheCardTitle {
   margin-bottom: 1rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-active-blue-france);
-  text-transform: uppercase;
+  color: var(--text-title-blue-france);
+}
+
+.statTotal {
+  margin-bottom: 1rem;
+  color: var(--text-default-grey);
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--background-alt-blue-france);
+  border-radius: 4px;
+}
+
+.statNumber {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-title-blue-france);
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: var(--text-default-grey);
 }
 
 .badgesRow {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1.5rem;
 }
 
-.identityList {
-  display: grid;
-  gap: 0.75rem;
-  margin: 0;
-}
-
-.identityRow {
+.identifiantsRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: baseline;
+  gap: 1rem 3rem;
+  margin-bottom: 1rem;
 }
 
-.identityLabel {
-  color: var(--text-default-grey);
+.identifiantLabel {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-mention-grey);
+  text-transform: uppercase;
 }
 
-.identityValue {
+.identifiantValue {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  font-size: 1.125rem;
   font-weight: 700;
 }
 
-.identityTag {
-  padding: 0.25rem 0.5rem;
-  font-weight: 700;
-  background-color: var(--background-contrast-grey);
-}
-
-.identityTagWarning {
+.identifiantWarning {
   display: inline-flex;
   gap: 0.25rem;
   align-items: center;
   color: var(--text-default-warning);
+}
+
+.identityDivider {
+  padding: 0;
+  margin: 1rem 0;
+  border: 0;
+  border-top: 1px solid var(--border-default-grey);
+}
+
+.infoLignes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.infoLigne {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin: 0;
+
+  i {
+    color: var(--text-title-blue-france);
+  }
+}
+
+.infoMention {
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
 }
 
 .externalLinks {
@@ -81,99 +149,6 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
-}
-
-.sectionTitle {
-  margin-bottom: 1.5rem;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text-title-blue-france);
-}
-
-.separator {
-  margin: 2rem 0;
-  border: 0;
-  border-top: 2px solid var(--border-default-grey);
-}
-
-.alignRight {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-}
-
-.onboardingStep {
-  display: flex;
-  gap: 1.5rem;
-  align-items: flex-start;
-  padding: 2rem;
-  background-color: var(--background-alt-grey);
-}
-
-.onboardingStep + .onboardingStep {
-  margin-top: 0.5rem;
-}
-
-.onboardingNumber {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-title-blue-france);
-  background-color: var(--background-default-grey);
-  border: 1px solid var(--border-active-blue-france);
-  border-radius: 50%;
-}
-
-.cerfaCard {
-  padding: 1rem;
-  background: linear-gradient(
-    282deg,
-    #fceeac 0%,
-    #ffe4b9 9.5%,
-    #ffdfcd 21.5%,
-    #ffdee1 27.5%,
-    #ffe1ee 38%,
-    #fde3f4 46%,
-    #fbe6fa 55%,
-    #f8e9ff 63.5%,
-    #f3eaff 72%,
-    #efebff 82%,
-    #ebecff 91.5%,
-    #efebff 100%
-  );
-  border-radius: 8px;
-}
-
-.cerfaTitle {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 0.75rem;
-  font-weight: 700;
-  color: var(--text-action-high-blue-france);
-}
-
-.cerfaText {
-  margin-bottom: 0.75rem;
-  font-size: 0.875rem;
-}
-
-.cerfaFooter {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-top: 0.75rem;
-  font-size: 0.875rem;
-}
-
-.cerfaIcon {
-  flex: 0 0 auto;
-  width: 2.5rem;
 }
 
 .suggestFeature {

@@ -1,3 +1,5 @@
+import dashboardStyles from "@/app/_components/dashboard/dashboard.module.scss";
+import { OrganismeNavTabs } from "@/app/_components/dashboard/OrganismeNavTabs";
 import { PAGES } from "@/app/_utils/routes.utils";
 
 import OrganismeEffectifsPageClient from "./OrganismeEffectifsPageClient";
@@ -11,8 +13,10 @@ export default async function OrganismeEffectifsPage({ params }: { params: Promi
   const { organismeId } = await params;
 
   return (
-    <div className="fr-container fr-pt-3w fr-pb-6w">
-      <OrganismeEffectifsPageClient organismeId={organismeId} />
-    </div>
+    <OrganismeNavTabs organismeId={organismeId} activeTab="effectifs">
+      <div className={dashboardStyles.ficheCard}>
+        <OrganismeEffectifsPageClient organismeId={organismeId} />
+      </div>
+    </OrganismeNavTabs>
   );
 }
