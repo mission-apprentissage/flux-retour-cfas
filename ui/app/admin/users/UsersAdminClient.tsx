@@ -88,22 +88,37 @@ export default function UsersAdminClient() {
   const initialTab = (searchParams?.get("tab") as TabKey) || "users";
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const organisationIdFilter = searchParams?.get("organisation_id") || undefined;
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState(searchParams?.get("q") || "");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchParams?.get("q") || "");
+  const [currentPage, setCurrentPage] = useState(Math.max(1, Number(searchParams?.get("page")) || 1));
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [sorting, setSorting] = useState<SortingState>([{ id: "created_at", desc: true }]);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
+  const updateQueryParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      });
+      if (params.toString() !== (searchParams?.toString() || "")) {
+        router.replace(`/admin/users?${params.toString()}`, { scroll: false });
+      }
+    },
+    [router, searchParams]
+  );
+
   const handleTabChange = useCallback(
     (tabId: TabKey) => {
       setActiveTab(tabId);
-      const params = new URLSearchParams(searchParams?.toString() || "");
-      params.set("tab", tabId);
-      router.replace(`/admin/users?${params.toString()}`);
+      updateQueryParams({ tab: tabId });
     },
-    [router, searchParams]
+    [updateQueryParams]
   );
 
   useEffect(() => {
@@ -114,10 +129,11 @@ export default function UsersAdminClient() {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
       setCurrentPage(1);
+      updateQueryParams({ q: searchTerm.trim() || null, page: null });
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchTerm]);
+  }, [searchTerm, updateQueryParams]);
 
   const usersFilters = useMemo(() => {
     if (!searchParams) return {};
@@ -142,9 +158,13 @@ export default function UsersAdminClient() {
     setCurrentPage(1);
   }, [usersFilters, searchTerm]);
 
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-  }, []);
+  const handlePageChange = useCallback(
+    (page: number) => {
+      setCurrentPage(page);
+      updateQueryParams({ page: page > 1 ? String(page) : null });
+    },
+    [updateQueryParams]
+  );
 
   const hasFiltersOrSearch = useMemo(() => {
     const hasActiveFilters = Object.values(usersFilters).some((value) => {
@@ -303,7 +323,7 @@ export default function UsersAdminClient() {
             priority="secondary"
             disabled={isExporting}
           >
-            {isExporting ? "Export en cours..." : "Télécharger la liste"}
+            {isExporting ? "Export en cours…" : "Télécharger la liste"}
           </Button>
         </Stack>
       </Box>
@@ -337,8 +357,9 @@ export default function UsersAdminClient() {
                   <input
                     className={className}
                     id={id}
-                    placeholder="Nom, prénom, email, organisation..."
+                    placeholder="Nom, prénom, email, organisation…"
                     type={type}
+                    autoComplete="off"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
