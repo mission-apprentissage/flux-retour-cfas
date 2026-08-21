@@ -1,17 +1,18 @@
 import { ACC_CONJOINT_MOTIF_ENUM } from "shared";
+import { CFA_SITUATION_TYPE_ENUM, RQTH_DECLARE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { describe, expect, it } from "vitest";
 
+import { buildTunnelSteps } from "./tunnel/useTunnelSteps";
 import { FormValues } from "./types";
 import {
   buildAdresseRue,
   formatAdresseDisplay,
-  isSection1Valid,
-  isSection3Valid,
-  isSection4Valid,
-  isSection5Valid,
+  isContactValid,
+  isDatesRuptureValid,
+  isObjectifsValid,
+  isRentreeSansContratValid,
   isValidPhone,
   isValidEmail,
-  computeProgress,
 } from "./utils";
 
 const baseVerifiedInfo = {
@@ -26,14 +27,24 @@ const baseVerifiedInfo = {
 
 function makeValues(overrides: Partial<FormValues> = {}): FormValues {
   return {
+    situation_type: CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE,
+    risque_rupture: null,
     still_at_cfa: true,
+    date_rupture: "2026-05-04",
+    date_abandon: "",
+    date_debut_formation: "",
+    recherche_entreprise: "",
     motifs: [ACC_CONJOINT_MOTIF_ENUM.REORIENTATION],
     commentaires_par_motif: {},
     cause_rupture: "Raison de la rupture",
     referent_type: "me",
     referent_details: "",
     verified_info: baseVerifiedInfo,
+    rqth_declare: RQTH_DECLARE_ENUM.NON_RENSEIGNE,
+    responsable_legal: { nom: "", telephone: "", courriel: "" },
     note_complementaire: "",
+    feedback_note: null,
+    feedback_remarque: "",
     ...overrides,
   };
 }
@@ -81,103 +92,6 @@ describe("formatAdresseDisplay", () => {
   });
 });
 
-describe("isSection1Valid", () => {
-  it("valid with simple motif (no freins, no comment required)", () => {
-    expect(isSection1Valid(makeValues({ motifs: [ACC_CONJOINT_MOTIF_ENUM.AUTRE] }))).toBe(true);
-  });
-
-  it("invalid when REORIENTATION lacks comment", () => {
-    expect(
-      isSection1Valid(
-        makeValues({
-          motifs: [ACC_CONJOINT_MOTIF_ENUM.REORIENTATION],
-          commentaires_par_motif: {},
-        })
-      )
-    ).toBe(false);
-  });
-
-  it("valid when REORIENTATION has comment", () => {
-    expect(
-      isSection1Valid(
-        makeValues({
-          motifs: [ACC_CONJOINT_MOTIF_ENUM.REORIENTATION],
-          commentaires_par_motif: { [ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]: "Veut changer de voie" },
-        })
-      )
-    ).toBe(true);
-  });
-
-  it("invalid when still_at_cfa is null", () => {
-    expect(isSection1Valid(makeValues({ still_at_cfa: null }))).toBe(false);
-  });
-
-  it("invalid when no motifs", () => {
-    expect(isSection1Valid(makeValues({ motifs: [] }))).toBe(false);
-  });
-
-  it("invalid when frein motif lacks comment", () => {
-    expect(
-      isSection1Valid(
-        makeValues({
-          motifs: [ACC_CONJOINT_MOTIF_ENUM.LOGEMENT],
-          commentaires_par_motif: {},
-        })
-      )
-    ).toBe(false);
-  });
-
-  it("valid when frein motif has comment", () => {
-    expect(
-      isSection1Valid(
-        makeValues({
-          motifs: [ACC_CONJOINT_MOTIF_ENUM.LOGEMENT],
-          commentaires_par_motif: { [ACC_CONJOINT_MOTIF_ENUM.LOGEMENT]: "Pas de logement" },
-        })
-      )
-    ).toBe(true);
-  });
-
-  it("invalid when RECHERCHE_EMPLOI lacks comment", () => {
-    expect(
-      isSection1Valid(
-        makeValues({
-          motifs: [ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI],
-          commentaires_par_motif: {},
-        })
-      )
-    ).toBe(false);
-  });
-});
-
-describe("isSection3Valid", () => {
-  it("valid with non-empty cause", () => {
-    expect(isSection3Valid(makeValues())).toBe(true);
-  });
-
-  it("invalid with empty/whitespace cause", () => {
-    expect(isSection3Valid(makeValues({ cause_rupture: "   " }))).toBe(false);
-  });
-});
-
-describe("isSection4Valid", () => {
-  it("valid with referent_type me", () => {
-    expect(isSection4Valid(makeValues({ referent_type: "me" }))).toBe(true);
-  });
-
-  it("valid with referent_type other and details", () => {
-    expect(isSection4Valid(makeValues({ referent_type: "other", referent_details: "Jean 0600000000" }))).toBe(true);
-  });
-
-  it("invalid with referent_type null", () => {
-    expect(isSection4Valid(makeValues({ referent_type: null }))).toBe(false);
-  });
-
-  it("invalid with referent_type other but empty details", () => {
-    expect(isSection4Valid(makeValues({ referent_type: "other", referent_details: "" }))).toBe(false);
-  });
-});
-
 describe("isValidPhone", () => {
   it("accepts valid French mobile numbers", () => {
     expect(isValidPhone("0612345678")).toBe(true);
@@ -221,77 +135,129 @@ describe("isValidEmail", () => {
   });
 });
 
-describe("isSection5Valid", () => {
-  it("valid with all required fields filled", () => {
-    expect(isSection5Valid(makeValues())).toBe(true);
+describe("buildTunnelSteps", () => {
+  it("branche A : risque de rupture puis objectifs", () => {
+    expect(buildTunnelSteps(makeValues({ situation_type: CFA_SITUATION_TYPE_ENUM.EN_CONTRAT }))).toEqual([
+      "situation",
+      "risqueRupture",
+      "objectifs",
+      "contact",
+      "recap",
+    ]);
   });
 
-  it("invalid when telephone is empty", () => {
-    expect(isSection5Valid(makeValues({ verified_info: { ...baseVerifiedInfo, telephone: "" } }))).toBe(false);
+  it("branche B : maintien en formation puis dates de rupture", () => {
+    expect(
+      buildTunnelSteps(makeValues({ situation_type: CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE, still_at_cfa: false }))
+    ).toEqual(["situation", "maintienFormation", "datesRupture", "objectifs", "contact", "recap"]);
   });
 
-  it("invalid when telephone format is wrong", () => {
-    expect(isSection5Valid(makeValues({ verified_info: { ...baseVerifiedInfo, telephone: "123" } }))).toBe(false);
+  it("branche C : pas d'écran intermédiaire de statut", () => {
+    expect(buildTunnelSteps(makeValues({ situation_type: CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT }))).toEqual([
+      "situation",
+      "rentreeSansContrat",
+      "objectifs",
+      "contact",
+      "recap",
+    ]);
   });
 
-  it("invalid when adresse_rue is empty", () => {
-    expect(isSection5Valid(makeValues({ verified_info: { ...baseVerifiedInfo, adresse_rue: "" } }))).toBe(false);
-  });
-
-  it("courriel is not required", () => {
-    expect(isSection5Valid(makeValues({ verified_info: { ...baseVerifiedInfo, courriel: "" } }))).toBe(true);
-  });
-
-  it("invalid when courriel is filled but has wrong format", () => {
-    expect(isSection5Valid(makeValues({ verified_info: { ...baseVerifiedInfo, courriel: "notanemail" } }))).toBe(false);
-  });
-
-  it("valid when courriel has correct format", () => {
-    expect(isSection5Valid(makeValues({ verified_info: { ...baseVerifiedInfo, courriel: "test@test.fr" } }))).toBe(
-      true
-    );
+  it("s'arrête au premier écran tant que la branche n'est pas choisie", () => {
+    expect(buildTunnelSteps(makeValues({ situation_type: null }))).toEqual(["situation"]);
   });
 });
 
-describe("computeProgress", () => {
-  it("returns 0 for empty form", () => {
+describe("isObjectifsValid", () => {
+  it("valide avec un objectif sans commentaire requis", () => {
+    expect(isObjectifsValid(makeValues({ motifs: [ACC_CONJOINT_MOTIF_ENUM.AUTRE] }))).toBe(true);
+  });
+
+  it("réorientation sans commentaire reste valide", () => {
+    expect(isObjectifsValid(makeValues({ motifs: [ACC_CONJOINT_MOTIF_ENUM.REORIENTATION] }))).toBe(true);
+  });
+
+  it("invalide sans objectif", () => {
+    expect(isObjectifsValid(makeValues({ motifs: [] }))).toBe(false);
+  });
+
+  it("invalide si un frein n'a pas de commentaire", () => {
+    expect(isObjectifsValid(makeValues({ motifs: [ACC_CONJOINT_MOTIF_ENUM.LOGEMENT] }))).toBe(false);
     expect(
-      computeProgress(
+      isObjectifsValid(
         makeValues({
-          still_at_cfa: null,
-          motifs: [],
-          cause_rupture: "",
-          referent_type: null,
-          verified_info: {
-            telephone: "",
-            courriel: "",
-            adresse_rue: "",
-            adresse_code_postal: "",
-            adresse_commune: "",
-            formation_libelle: "",
-            date_fin_formation: "",
-          },
+          motifs: [ACC_CONJOINT_MOTIF_ENUM.LOGEMENT],
+          commentaires_par_motif: { [ACC_CONJOINT_MOTIF_ENUM.LOGEMENT]: "Pas de logement" },
         })
       )
-    ).toBe(0);
+    ).toBe(true);
   });
 
-  it("returns 100 for fully filled form", () => {
-    expect(computeProgress(makeValues())).toBe(100);
+  it("invalide si la recherche d'emploi n'a pas de commentaire", () => {
+    expect(isObjectifsValid(makeValues({ motifs: [ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] }))).toBe(false);
+  });
+});
+
+describe("isDatesRuptureValid", () => {
+  it("valide avec date de rupture et cause", () => {
+    expect(isDatesRuptureValid(makeValues())).toBe(true);
   });
 
-  it("does not count frein comments in progress (fixed total)", () => {
-    const values = makeValues({
-      motifs: [ACC_CONJOINT_MOTIF_ENUM.LOGEMENT, ACC_CONJOINT_MOTIF_ENUM.REORIENTATION],
-      commentaires_par_motif: {},
-    });
-    const progress = computeProgress(values);
-    expect(progress).toBe(100);
+  it("invalide sans date de rupture", () => {
+    expect(isDatesRuptureValid(makeValues({ date_rupture: "" }))).toBe(false);
   });
 
-  it("does not count referent_details in progress (fixed total)", () => {
-    const withDetails = computeProgress(makeValues({ referent_type: "other", referent_details: "Jean" }));
-    const withoutDetails = computeProgress(makeValues({ referent_type: "other", referent_details: "" }));
-    expect(withDetails).toBe(withoutDetails);
+  it("invalide sans cause", () => {
+    expect(isDatesRuptureValid(makeValues({ cause_rupture: "   " }))).toBe(false);
+  });
+
+  it("exige la date d'abandon quand le jeune a quitté le CFA", () => {
+    expect(isDatesRuptureValid(makeValues({ still_at_cfa: false }))).toBe(false);
+    expect(isDatesRuptureValid(makeValues({ still_at_cfa: false, date_abandon: "2026-05-06" }))).toBe(true);
+  });
+
+  it("invalide si l'abandon précède la rupture", () => {
+    expect(isDatesRuptureValid(makeValues({ still_at_cfa: false, date_abandon: "2026-05-01" }))).toBe(false);
+  });
+});
+
+describe("isRentreeSansContratValid", () => {
+  it("exige la date de début de formation et la recherche d'entreprise", () => {
+    expect(isRentreeSansContratValid(makeValues())).toBe(false);
+    expect(
+      isRentreeSansContratValid(
+        makeValues({ date_debut_formation: "2026-01-06", recherche_entreprise: "12 candidatures" })
+      )
+    ).toBe(true);
+  });
+});
+
+describe("isContactValid", () => {
+  it("valide avec téléphone, adresse et référent", () => {
+    expect(isContactValid(makeValues())).toBe(true);
+  });
+
+  it("invalide sans téléphone", () => {
+    expect(isContactValid(makeValues({ verified_info: { ...baseVerifiedInfo, telephone: "" } }))).toBe(false);
+  });
+
+  it("invalide avec un téléphone mal formé", () => {
+    expect(isContactValid(makeValues({ verified_info: { ...baseVerifiedInfo, telephone: "123" } }))).toBe(false);
+  });
+
+  it("n'exige pas la rue mais exige code postal et commune", () => {
+    expect(isContactValid(makeValues({ verified_info: { ...baseVerifiedInfo, adresse_rue: "" } }))).toBe(true);
+    expect(isContactValid(makeValues({ verified_info: { ...baseVerifiedInfo, adresse_commune: "" } }))).toBe(false);
+    expect(isContactValid(makeValues({ verified_info: { ...baseVerifiedInfo, adresse_code_postal: "" } }))).toBe(false);
+  });
+
+  it("accepte un courriel vide mais refuse un courriel invalide", () => {
+    expect(isContactValid(makeValues({ verified_info: { ...baseVerifiedInfo, courriel: "" } }))).toBe(true);
+    expect(isContactValid(makeValues({ verified_info: { ...baseVerifiedInfo, courriel: "notanemail" } }))).toBe(false);
+  });
+
+  it("exige les coordonnées d'un référent autre", () => {
+    expect(isContactValid(makeValues({ referent_type: null }))).toBe(false);
+    expect(isContactValid(makeValues({ referent_type: "other", referent_details: "" }))).toBe(false);
+    expect(isContactValid(makeValues({ referent_type: "other", referent_details: "Jean 0600000000" }))).toBe(true);
   });
 });

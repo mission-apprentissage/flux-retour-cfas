@@ -108,10 +108,33 @@ export enum API_EFFECTIF_LISTE {
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
 export const zProblemeTypeEnum = z.nativeEnum(PROBLEME_TYPE_ENUM);
 export const zConnaissanceMlEnum = z.nativeEnum(CONNAISSANCE_ML_ENUM);
+export enum CFA_SITUATION_TYPE_ENUM {
+  EN_CONTRAT = "EN_CONTRAT",
+  RUPTURE_OU_SORTIE = "RUPTURE_OU_SORTIE",
+  SANS_CONTRAT = "SANS_CONTRAT",
+}
+
+export enum CFA_RISQUE_RUPTURE_ENUM {
+  INEVITABLE = "INEVITABLE",
+  TRES_ELEVE = "TRES_ELEVE",
+  MODERE = "MODERE",
+  FAIBLE = "FAIBLE",
+}
+
+export enum RQTH_DECLARE_ENUM {
+  NON_RENSEIGNE = "NON_RENSEIGNE",
+  OUI = "OUI",
+  NON = "NON",
+}
+
+export const zCfaSituationTypeEnum = z.nativeEnum(CFA_SITUATION_TYPE_ENUM);
+export const zCfaRisqueRuptureEnum = z.nativeEnum(CFA_RISQUE_RUPTURE_ENUM);
+export const zRqthDeclareEnum = z.nativeEnum(RQTH_DECLARE_ENUM);
+
 export const zAccConjointMotifEnum = z.nativeEnum(ACC_CONJOINT_MOTIF_ENUM);
 export const zApiEffectifListeEnum = z.nativeEnum(API_EFFECTIF_LISTE);
 
-export const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error", "pending"]);
+const zEmailStatusEnum = z.enum(["valid", "invalid", "not_supported", "error", "pending"]);
 
 export type IEmailStatusEnum = z.output<typeof zEmailStatusEnum>;
 
@@ -123,6 +146,19 @@ export const zVerifiedInfo = z.object({
   adresse_commune: z.string().nullish(),
   formation_libelle: z.string().nullish(),
   date_fin_formation: z.string().nullish(),
+  rqth_declare: zRqthDeclareEnum
+    .nullish()
+    .describe(
+      "Statut RQTH déclaré par le CFA. Oui/Non écrasent effectif_snapshot.apprenant.rqth ; conservé ici pour l'audit et la ré-application après refresh de snapshot"
+    ),
+  responsable_legal: z
+    .object({
+      nom: z.string().nullish(),
+      telephone: z.string().nullish(),
+      courriel: z.string().nullish(),
+    })
+    .nullish()
+    .describe("Coordonnées du responsable légal, saisies uniquement si le jeune est mineur"),
 });
 
 export type IVerifiedInfo = z.output<typeof zVerifiedInfo>;
@@ -180,6 +216,24 @@ const zMissionLocaleEffectif = z.object({
         .describe("Coordonnées du référent CFA (snapshot figé au moment de l'envoi)"),
       note_complementaire: z.string().nullish().describe("Note complémentaire facultative pour la ML"),
       verified_info: zVerifiedInfo.nullish().describe("Informations vérifiées/corrigées par le CFA pour la ML"),
+      situation_type: zCfaSituationTypeEnum
+        .nullish()
+        .describe("Branche du tunnel choisie par le CFA. Absent : dossier antérieur, à lire comme RUPTURE_OU_SORTIE"),
+      risque_rupture: zCfaRisqueRuptureEnum.nullish().describe("Niveau de risque de rupture, jeune encore en contrat"),
+      date_abandon: z.date().nullish().describe("Date de sortie du CFA, uniquement si still_at_cfa est false"),
+      date_debut_formation: z
+        .date()
+        .nullish()
+        .describe("Date de début de formation au CFA, pour le calcul du délai des 90 jours côté ML"),
+      recherche_entreprise: z.string().nullish().describe("Description de la recherche d'entreprise en cours"),
+      form_feedback: z
+        .object({
+          note: z.number().int().min(0).max(5).nullish(),
+          remarque: z.string().nullish(),
+          responded_at: z.date().nullish(),
+        })
+        .nullish()
+        .describe("Satisfaction sur le formulaire lui-même. Usage interne produit, jamais exposé côté ML"),
     })
     .nullish(),
   effectif_choice: z
@@ -190,20 +244,23 @@ const zMissionLocaleEffectif = z.object({
       telephone: z.string().nullish(),
     })
     .nullish(),
-  brevo: z.object({
-    token: z.string().uuid().nullish(),
-    token_created_at: z.date().nullish(),
-    token_expired_at: z.date().nullish(),
-    history: z
-      .array(
-        z.object({
-          token: z.string().uuid(),
-          token_created_at: z.date().optional(),
-          token_expired_at: z.date().optional(),
-        })
-      )
-      .nullish(),
-  }),
+  // Champ historique (flux campagne ML abandonné) : conservé en lecture seule, plus jamais écrit.
+  brevo: z
+    .object({
+      token: z.string().uuid().nullish(),
+      token_created_at: z.date().nullish(),
+      token_expired_at: z.date().nullish(),
+      history: z
+        .array(
+          z.object({
+            token: z.string().uuid(),
+            token_created_at: z.date().optional(),
+            token_expired_at: z.date().optional(),
+          })
+        )
+        .nullish(),
+    })
+    .nullish(),
   soft_deleted: z.boolean().nullish(),
   a_traiter: z.boolean().nullish(),
   injoignable: z.boolean().nullish(),

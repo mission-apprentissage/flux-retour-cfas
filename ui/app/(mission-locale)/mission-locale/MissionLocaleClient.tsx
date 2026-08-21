@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 
 import { MLHeader } from "@/app/_components/mission-locale/MLHeader";
@@ -16,23 +16,15 @@ export default function MissionLocaleClient() {
   const statutParam = searchParams?.get("statut") || null;
   const dateRupture = searchParams?.get("rupture") || null;
 
-  const { data } = useQuery<MonthsData>(
-    ["effectifs-per-month-user"],
-    () => _get(`/api/v1/organisation/mission-locale/effectifs-per-month`),
-    {
-      suspense: true,
-      useErrorBoundary: true,
-    }
-  );
+  const { data } = useSuspenseQuery<MonthsData>({
+    queryKey: ["effectifs-per-month-user"],
+    queryFn: () => _get(`/api/v1/organisation/mission-locale/effectifs-per-month`),
+  });
 
-  const { data: postalCodeOptions } = useQuery<PostalCodeOption[]>(
-    ["mission-locale-villes"],
-    () => _get(`/api/v1/organisation/mission-locale/villes`),
-    {
-      suspense: true,
-      useErrorBoundary: true,
-    }
-  );
+  const { data: postalCodeOptions } = useSuspenseQuery<PostalCodeOption[]>({
+    queryKey: ["mission-locale-villes"],
+    queryFn: () => _get(`/api/v1/organisation/mission-locale/villes`),
+  });
 
   return (
     <>

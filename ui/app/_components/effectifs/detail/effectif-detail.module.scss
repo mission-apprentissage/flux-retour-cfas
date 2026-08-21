@@ -1,0 +1,128 @@
+.detail {
+  padding: 1rem 1.5rem 1.5rem;
+  background-color: var(--background-alt-grey);
+}
+
+.transmissionDate {
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.accordionTitle {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.errorCount {
+  font-size: 0.75rem;
+  color: var(--text-default-error);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 3rem;
+}
+
+@media (width <= 48em) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.blockTitle {
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-title-blue-france);
+  border-bottom: 2px solid var(--border-plain-blue-france);
+}
+
+.fieldList {
+  margin: 0 0 1.5rem;
+}
+
+.field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-default-grey);
+}
+
+.fieldLabel {
+  flex: 1 1 55%;
+  min-width: 0;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.fieldValue {
+  flex: 1 1 40%;
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.fieldValueEmpty {
+  color: var(--text-disabled-grey);
+}
+
+.fieldError {
+  flex: 1 1 100%;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-default-error);
+}
+
+.adresseErp {
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  background-color: var(--background-default-grey);
+  border: 1px solid var(--border-default-grey);
+}
+
+.statutRow {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-default-grey);
+}
+
+.statutValue {
+  font-weight: 700;
+}
+
+.statutHistoriqueTitle {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.contratTitle {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-title-blue-france);
+}
+
+.contratBlock + .contratBlock {
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--border-default-grey);
+}
+
+.emptyBlock {
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.applyAll {
+  margin-bottom: 1.5rem;
+}

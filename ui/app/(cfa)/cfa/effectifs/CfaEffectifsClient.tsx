@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { CfaEffectifsList } from "@/app/_components/ruptures/cfa/CfaEffectifsList";
 import { CfaEffectifsSkeleton } from "@/app/_components/ruptures/cfa/CfaEffectifsSkeleton";
+import { CfaWelcomeCard } from "@/app/_components/ruptures/cfa/CfaWelcomeCard";
 import { useCfaEffectifs, useCfaUrlParams } from "@/app/_components/ruptures/cfa/hooks";
 import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
@@ -23,7 +24,6 @@ export default function CfaEffectifsClient() {
   const search = searchParams?.get("search") || "";
   const sort = searchParams?.get("sort") || "nom";
   const order = (searchParams?.get("order") as "asc" | "desc") || "asc";
-  const en_rupture = searchParams?.get("en_rupture") || undefined;
   const collab_status = searchParams?.get("collab_status") || undefined;
   const formation = searchParams?.get("formation") || undefined;
 
@@ -49,7 +49,6 @@ export default function CfaEffectifsClient() {
     search: debouncedSearch || undefined,
     sort,
     order,
-    en_rupture,
     collab_status,
     formation,
   });
@@ -60,6 +59,7 @@ export default function CfaEffectifsClient() {
 
   return (
     <div className="fr-container">
+      <CfaWelcomeCard />
       <CfaEffectifsList
         data={data ?? null}
         isAllowedDeca={data?.isAllowedDeca ?? false}
@@ -67,7 +67,6 @@ export default function CfaEffectifsClient() {
         onSearchChange={setSearchInput}
         sort={sort}
         order={order as "asc" | "desc"}
-        enRuptureFilter={en_rupture}
         collabStatusFilter={collab_status}
         formationFilter={formation}
         onParamsChange={updateParams}

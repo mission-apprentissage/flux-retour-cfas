@@ -442,11 +442,8 @@ export const getSuccessfulTransmissionStatusDetailsForAGivenDay = async (
         },
       },
       {
-        $group: {
-          _id: "$organisme_id",
-          count: {
-            $sum: 1,
-          },
+        $sort: {
+          processed_at: 1,
         },
       },
       {
@@ -462,31 +459,22 @@ export const getSuccessfulTransmissionStatusDetailsForAGivenDay = async (
             {
               $lookup: {
                 from: "organismes",
-                localField: "_id",
+                localField: "organisme_id",
                 foreignField: "_id",
-                as: "orga",
-                pipeline: [{ $project: { uai: 1, nom: 1, siret: 1, adresse: "$adresse.complete" } }],
+                as: "organisme",
+                pipeline: [{ $project: { uai: 1, nom: 1, siret: 1 } }],
               },
             },
             {
-              $unwind: "$orga",
-            },
-            {
-              $project: {
-                id: "$_id",
-                uai: "$orga.uai",
-                name: "$orga.nom",
-                siret: "$orga.siret",
-                adresse: "$orga.adresse",
-                effectifCount: "$count",
-                _id: 0,
-              },
+              $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true },
             },
           ],
         },
       },
       {
-        $unwind: "$pagination",
+        $unwind: {
+          path: "$pagination",
+        },
       },
     ])
     .next();

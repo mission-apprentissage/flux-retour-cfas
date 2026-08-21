@@ -25,9 +25,9 @@ const BREVO_HEALTH_QUERY_CONFIG = {
 } as const;
 
 export function useBrevoHealth() {
-  return useQuery<BrevoHealthReport>(
-    [...brevoContactsQueryKeys.all, "health"] as const,
-    () => _get<BrevoHealthReport>("/api/v1/admin/brevo-contacts/health"),
-    BREVO_HEALTH_QUERY_CONFIG
-  );
+  return useQuery<BrevoHealthReport>({
+    queryKey: [...brevoContactsQueryKeys.all, "health"] as const,
+    queryFn: () => _get<BrevoHealthReport>("/api/v1/admin/brevo-contacts/health"),
+    ...BREVO_HEALTH_QUERY_CONFIG,
+  });
 }

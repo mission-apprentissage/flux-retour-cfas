@@ -24,12 +24,12 @@ jobs:
 
       - name: Initialize the GnuPG keyring
         run: |
-          echo -n "$OPENPGP_KEY" | gpg --import
+          printf '%s' "$OPENPGP_KEY" | gpg --import
         env:
           OPENPGP_KEY: ${{ secrets.OPENPGP_PRIVATE_SUBKEY }}
 
       - name: Setup SOPS
-        uses: nhedger/setup-sops@v2
+        uses: nhedger/setup-sops@v3
 
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
@@ -53,14 +53,16 @@ jobs:
 
       - name: Upload logs artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: logs-sync-preprod
           path: /tmp/deploy.log.gpg
 
       - name: Add Job summary
         if: always()
-        run: echo 'You can get logs using `.bin/mna app:deploy:log:decrypt ${{ github.run_id }} logs-sync-preprod`' >> $GITHUB_STEP_SUMMARY
+        run: |
+          # shellcheck disable=SC2016 # les backticks sont du markdown, pas une substitution shell
+          echo 'You can get logs using `.bin/mna app:deploy:log:decrypt ${{ github.run_id }} logs-sync-preprod`' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Notify failure on Slack
         uses: ravsamhq/notify-slack-action@v2

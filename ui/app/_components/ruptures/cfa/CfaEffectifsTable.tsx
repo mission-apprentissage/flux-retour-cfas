@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Fragment } from "react";
 
+import { dePrenom } from "@/app/_utils/ruptures.utils";
 import type { ICfaEffectif } from "@/common/types/cfaRuptures";
 
 import sharedStyles from "../shared/ui/SortableTable.module.css";
@@ -229,8 +230,8 @@ export function CfaEffectifsTable({
                         <i className="fr-icon-info-fill fr-icon--sm" aria-hidden="true" />
                         <div>
                           <p className={styles.alertTitle}>
-                            Le dossier de {effectif.prenom} n&apos;est pas en rupture, pour collaborer avec la Mission
-                            Locale déclarez &quot;Oui&quot; sur le statut &quot;En rupture&quot;
+                            Le dossier {dePrenom(effectif.prenom)} n&apos;est pas en rupture, pour collaborer avec la
+                            Mission Locale déclarez &quot;Oui&quot; sur le statut &quot;En rupture&quot;
                           </p>
                           <p className={styles.alertDescription}>
                             Le statut indiqué dans votre ERP ne nous a pas permis de vous afficher le dossier de{" "}

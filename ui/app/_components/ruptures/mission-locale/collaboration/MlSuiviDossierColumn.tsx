@@ -6,6 +6,7 @@ import { useFormik } from "formik";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { IEffectifMissionLocale, SITUATION_ENUM } from "shared";
+import { CFA_COLLAB_AUTO_SEND_DELAI_DAYS } from "shared/constants/collaboration";
 
 import { EffectifStatusBadge } from "@/app/_components/ruptures/shared/ui/EffectifStatusBadge";
 import { useAuth } from "@/app/_context/UserContext";
@@ -127,7 +128,6 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
 
   const collabStarted = effectif.organisme_data?.acc_conjoint === true;
   const cfaIsTdbUser = !!effectif.organisme?.ml_beta_activated_at;
-  const isDecaCfa = !!effectif.organisme?.is_allowed_deca;
   const daysSinceRupture = effectif.date_rupture
     ? (Date.now() - new Date(effectif.date_rupture).getTime()) / (1000 * 60 * 60 * 24)
     : 0;
@@ -136,9 +136,12 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
   // - collab active (CFA a envoyé le dossier)
   // - CFA non utilisateur TDB (pas de collab possible)
   // - effectif grandfathéré (créé avant l'activation du CFA sur TDB)
-  // - CFA est à la fois TDB et DECA uniquement, et 45j écoulés depuis la rupture (délai de grâce)
+  // - délai de grâce écoulé depuis la rupture : même seuil que la visibilité côté ML
   const canProcessDossier =
-    collabStarted || !cfaIsTdbUser || !!effectif.is_grandfathered || (isDecaCfa && daysSinceRupture >= 45);
+    collabStarted ||
+    !cfaIsTdbUser ||
+    !!effectif.is_grandfathered ||
+    daysSinceRupture >= CFA_COLLAB_AUTO_SEND_DELAI_DAYS;
   const isStandaloneMode = canProcessDossier && !collabStarted;
 
   const showForm = canProcessDossier && !isDossierTraite && !isRecontacter && !mutation.isSuccess;
@@ -303,8 +306,8 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
             <Button
               type="button"
               priority={postComment.trim() ? "primary" : "secondary"}
-              disabled={!postComment.trim() || commentMutation.isLoading}
-              className={`${styles.dossierFormButton} ${!postComment.trim() || commentMutation.isLoading ? styles.dossierFormButtonDisabled : ""}`}
+              disabled={!postComment.trim() || commentMutation.isPending}
+              className={`${styles.dossierFormButton} ${!postComment.trim() || commentMutation.isPending ? styles.dossierFormButtonDisabled : ""}`}
               onClick={() => {
                 commentMutation.mutate(
                   { effectifId: effectif.id.toString(), data: { commentaires: postComment.trim() } },
@@ -317,7 +320,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                 );
               }}
             >
-              {commentMutation.isLoading ? "Envoi en cours..." : "Envoyer le commentaire"}
+              {commentMutation.isPending ? "Envoi en cours..." : "Envoyer le commentaire"}
             </Button>
           </div>
         </div>
@@ -701,7 +704,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                   type="button"
                   priority="primary"
                   className={styles.dossierFormButton}
-                  disabled={mutation.isLoading}
+                  disabled={mutation.isPending}
                   onClick={() => {
                     hasSubmittedRef.current = true;
                     mutation.mutate({
@@ -710,7 +713,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                     });
                   }}
                 >
-                  {mutation.isLoading ? "Envoi en cours..." : "Confirmer et marquer comme traité"}
+                  {mutation.isPending ? "Envoi en cours..." : "Confirmer et marquer comme traité"}
                 </Button>
                 <Button
                   type="button"
@@ -962,11 +965,11 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
 
               <Button
                 type="submit"
-                disabled={!formik.isValid || mutation.isLoading}
+                disabled={!formik.isValid || mutation.isPending}
                 priority={formik.isValid ? "primary" : "secondary"}
-                className={`${styles.dossierFormButton} ${!formik.isValid || mutation.isLoading ? styles.dossierFormButtonDisabled : ""}`}
+                className={`${styles.dossierFormButton} ${!formik.isValid || mutation.isPending ? styles.dossierFormButtonDisabled : ""}`}
               >
-                {mutation.isLoading
+                {mutation.isPending
                   ? "Envoi en cours..."
                   : mutation.isSuccess
                     ? "Enregistré"

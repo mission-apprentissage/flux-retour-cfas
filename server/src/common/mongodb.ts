@@ -1,5 +1,4 @@
 import { CollectionInfo, Document, MongoClient } from "mongodb";
-import omitDeep from "omit-deep";
 import { zodToMongoSchema } from "shared/models";
 
 import logger from "@/common/logger";
@@ -119,7 +118,7 @@ export const configureDbSchemaValidation = async (modelDescriptors) => {
         validationLevel: "strict",
         validationAction: "error",
         validator: {
-          $jsonSchema: { title: collectionName, ...omitDeep(convertedSchema, ["example"]) }, // strip example field because NON STANDARD jsonSchema
+          $jsonSchema: { title: collectionName, ...omitDeepKeys(convertedSchema, ["example"]) }, // strip example field because NON STANDARD jsonSchema
         },
       });
     })
@@ -134,3 +133,22 @@ export const clearAllCollections = async () => {
   let collections = await getDatabase().collections();
   return Promise.all(collections.map((c) => c.deleteMany({})));
 };
+
+/**
+ * Retire récursivement les clés indiquées (jsonSchema Mongo n'accepte pas le champ `example`).
+ */
+function omitDeepKeys<T>(value: T, keys: string[]): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => omitDeepKeys(item, keys)) as T;
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([key]) => !keys.includes(key))
+        .map(([key, item]) => [key, omitDeepKeys(item, keys)])
+    ) as T;
+  }
+
+  return value;
+}

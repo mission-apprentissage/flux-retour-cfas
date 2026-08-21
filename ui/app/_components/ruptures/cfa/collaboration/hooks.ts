@@ -1,43 +1,41 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { IEffectifMissionLocale } from "shared";
-import { IVerifiedInfo } from "shared/models/data/missionLocaleEffectif.model";
+import { CFA_SITUATION_TYPE_ENUM, IVerifiedInfo } from "shared/models/data/missionLocaleEffectif.model";
 import { IUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
 
 import { cfaQueryKeys } from "@/app/_components/ruptures/cfa/hooks/useCfaQueries";
 import { useAuth } from "@/app/_context/UserContext";
 import { _get, _put } from "@/common/httpClient";
 
-export type VerifiedInfo = { [_K in keyof IVerifiedInfo]-?: string };
+export type VerifiedInfo = { [_K in keyof Omit<IVerifiedInfo, "rqth_declare" | "responsable_legal">]-?: string };
 
-type CollaborationFormPayload = Required<
-  Pick<
-    IUpdateMissionLocaleEffectifOrganisme,
-    "still_at_cfa" | "motif" | "commentaires_par_motif" | "cause_rupture" | "referent_type" | "referent_coordonnees"
-  >
+type CollaborationFormPayload = Omit<
+  IUpdateMissionLocaleEffectifOrganisme,
+  "rupture" | "acc_conjoint" | "verified_info" | "date_rupture" | "date_abandon" | "date_debut_formation"
 > & {
-  note_complementaire?: string;
-  verified_info: VerifiedInfo;
+  situation_type: CFA_SITUATION_TYPE_ENUM;
+  verified_info: Record<string, unknown>;
+  // Les dates transitent en ISO court (input type=date), le serveur les coerce.
+  date_rupture?: string;
+  date_abandon?: string;
+  date_debut_formation?: string;
 };
 
 export function useCfaEffectifDetail(id: string) {
   const { user } = useAuth();
 
-  return useQuery(
-    ["effectif", id],
-    async () => {
+  return useSuspenseQuery({
+    queryKey: ["effectif", id],
+
+    queryFn: async () => {
       if (!id) return null;
       return await _get<IEffectifMissionLocale>(
         `/api/v1/organismes/${user?.organisation?.organisme_id}/cfa/effectif/${id}`
       );
     },
-    {
-      enabled: !!id,
-      suspense: true,
-      useErrorBoundary: true,
-    }
-  );
+  });
 }
 
 export function useSubmitCollaborationForm(effectifId: string, onSuccess: () => void) {
@@ -48,21 +46,16 @@ export function useSubmitCollaborationForm(effectifId: string, onSuccess: () => 
     mutationFn: async (payload: CollaborationFormPayload) => {
       const organismeId = user?.organisation?.organisme_id;
       return _put(`/api/v1/organismes/${organismeId}/mission-locale/effectif/${effectifId}`, {
-        rupture: true,
+        rupture: payload.situation_type === CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE,
         acc_conjoint: true,
-        motif: payload.motif,
-        still_at_cfa: payload.still_at_cfa,
-        commentaires_par_motif: payload.commentaires_par_motif,
-        cause_rupture: payload.cause_rupture,
-        referent_type: payload.referent_type,
-        referent_coordonnees: payload.referent_coordonnees,
-        note_complementaire: payload.note_complementaire || undefined,
-        verified_info: payload.verified_info,
+        ...payload,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["effectif"]);
-      queryClient.invalidateQueries(cfaQueryKeys.all);
+      queryClient.invalidateQueries({
+        queryKey: ["effectif"],
+      });
+      queryClient.invalidateQueries({ queryKey: cfaQueryKeys.all });
       onSuccess();
     },
   });

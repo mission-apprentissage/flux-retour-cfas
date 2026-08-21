@@ -6,7 +6,7 @@ import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Box, Stack, Typography } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
@@ -14,7 +14,6 @@ import UserForm from "@/app/_components/admin/UserForm";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get, _put } from "@/common/httpClient";
-import useToaster from "@/hooks/useToaster";
 
 interface UserAdminClientProps {
   id: string;
@@ -27,14 +26,13 @@ const adminRoleChangeModal = createModal({
 
 export default function UserAdminClient({ id }: UserAdminClientProps) {
   const router = useRouter();
-  const { toastSuccess } = useToaster();
   const [pendingRole, setPendingRole] = useState<"admin" | "member" | null>(null);
   const [roleChangeError, setRoleChangeError] = useState<string | null>(null);
+  const [roleChangeSuccess, setRoleChangeSuccess] = useState<string | null>(null);
 
-  const { data, refetch: refetchUser } = useQuery(["user", id], () => _get(`/api/v1/admin/users/${id}`), {
-    enabled: !!id,
-    suspense: true,
-    useErrorBoundary: true,
+  const { data, refetch: refetchUser } = useSuspenseQuery({
+    queryKey: ["user", id],
+    queryFn: () => _get(`/api/v1/admin/users/${id}`),
   });
 
   const user = data?.user;
@@ -43,6 +41,7 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
 
   const openRoleChangeModal = useCallback((newRole: "admin" | "member") => {
     setRoleChangeError(null);
+    setRoleChangeSuccess(null);
     setPendingRole(newRole);
     adminRoleChangeModal.open();
   }, []);
@@ -55,13 +54,13 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
       await _put(`/api/v1/admin/users/${id}/role`, { role: newRole });
       adminRoleChangeModal.close();
       await refetchUser();
-      toastSuccess(
+      setRoleChangeSuccess(
         newRole === "admin" ? "L'utilisateur a été promu administrateur" : "L'utilisateur n'est plus administrateur"
       );
     } catch (err: any) {
       setRoleChangeError(err?.json?.data?.message || "Une erreur est survenue");
     }
-  }, [id, pendingRole, refetchUser, toastSuccess]);
+  }, [id, pendingRole, refetchUser]);
 
   return (
     <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
@@ -150,6 +149,17 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
                   {currentRole === "admin" ? "Retirer le rôle administrateur" : "Promouvoir administrateur"}
                 </Button>
               </Box>
+              {roleChangeSuccess && (
+                <Alert
+                  severity="success"
+                  title={roleChangeSuccess}
+                  description=""
+                  small
+                  closable
+                  onClose={() => setRoleChangeSuccess(null)}
+                  className="fr-mt-2w"
+                />
+              )}
             </Box>
           )}
           <UserForm user={user} onUpdate={() => refetchUser} onDelete={() => router.push("/admin/users")} />

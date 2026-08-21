@@ -1,0 +1,88 @@
+.emptyMessage {
+  color: var(--text-mention-grey);
+  font-style: italic;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.emptyCell {
+  color: var(--text-mention-grey);
+}
+
+.plainHeader {
+  display: inline-flex;
+  align-items: center;
+  font: inherit;
+  color: inherit;
+}
+
+.headerTooltip {
+  margin-left: 0.25rem;
+  text-transform: none;
+}
+
+.situationCell {
+  display: flex;
+  flex-direction: column;
+}
+
+.situationLabel {
+  font-weight: 500;
+  color: var(--text-default-grey);
+  white-space: nowrap;
+}
+
+.situationDetail {
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+  white-space: nowrap;
+}
+
+.missionLocaleHeader {
+  white-space: nowrap;
+}
+
+.missionLocaleCell {
+  display: flex;
+  flex-direction: column;
+}
+
+.missionLocaleCommune {
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+}
+
+.outOfRangeRow {
+  opacity: 0.5;
+}
+
+.outOfRangeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--background-contrast-grey);
+  color: var(--text-mention-grey);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+}
+
+.outOfRangeTooltip {
+  text-transform: none;
+}
+
+.situationTooltip {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 0.25rem;
+}
+
+.dimmed {
+  opacity: 0.5;
+}
+
+.situationTooltipDimmed > i {
+  opacity: 0.5;
+}

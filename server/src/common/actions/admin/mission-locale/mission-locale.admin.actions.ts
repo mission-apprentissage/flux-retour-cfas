@@ -303,6 +303,21 @@ export const updateMissionLocaleEffectifComputedOrganisme = (date: Date, organis
   );
 };
 
+/**
+ * Dénormalise l'appartenance au flux de collaboration sur les dossiers déjà créés.
+ * Sans ça, activer un organisme ne rend visibles côté ML que ses futurs dossiers.
+ */
+export const updateMissionLocaleEffectifComputedCollab = (organismeId: ObjectId, isAllowedCollab: boolean) => {
+  return missionLocaleEffectifsDb().updateMany(
+    { "effectif_snapshot.organisme_id": organismeId },
+    {
+      $set: {
+        "computed.organisme.is_allowed_collab": isAllowedCollab,
+      },
+    }
+  );
+};
+
 export const updateMissionLocaleEffectifComputedML = (date: Date, missionLocaleId: ObjectId) => {
   return missionLocaleEffectifsDb().updateMany(
     { mission_locale_id: missionLocaleId },

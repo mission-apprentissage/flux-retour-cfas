@@ -693,7 +693,7 @@ const buildAttributes = (
     UAI_SIRET: uai && siret ? `${uai}_${siret}` : null,
     STATUT_SIRET: statutSiret,
     ORGANISME_ID: user.organisme?._id ? String(user.organisme._id) : null,
-    URL_TBA: isCfa && user.organisme?._id ? `${config.publicUrl}/organismes/${String(user.organisme._id)}` : null,
+    URL_TBA: isCfa && user.organisme?._id ? `${config.publicUrl}/cfa` : null,
 
     CFA_NATURE: isCfa ? (user.organisme?.nature ?? null) : null,
     CFA_NB_FORMATEURS: isCfa ? (user.organisme?.organismesFormateursCount ?? 0) : null,

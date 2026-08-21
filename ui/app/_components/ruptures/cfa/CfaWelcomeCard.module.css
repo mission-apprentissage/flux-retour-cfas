@@ -1,0 +1,75 @@
+.card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+  padding: 2.5rem 3rem;
+  background-color: var(--background-action-low-blue-france);
+  color: var(--text-action-high-blue-france);
+}
+
+.close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+}
+
+.content {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 34rem;
+}
+
+.badge {
+  display: inline-block;
+  margin: 0 0 1.5rem;
+  padding: 0.25rem 0.75rem;
+  background-color: var(--background-action-low-blue-france-hover);
+  font-weight: 700;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  text-transform: uppercase;
+  color: var(--text-action-high-blue-france);
+}
+
+.title {
+  margin: 0 0 1.5rem;
+  font-weight: 700;
+  font-size: 2.5rem;
+  line-height: 3rem;
+  color: var(--text-action-high-blue-france);
+}
+
+.text {
+  margin: 0 0 1.5rem;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: var(--text-default-grey);
+}
+
+.illustration {
+  flex-shrink: 0;
+  width: auto;
+  max-width: 45%;
+  height: auto;
+}
+
+@media (max-width: 62em) {
+  .card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 2rem 1.5rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+    line-height: 2.25rem;
+  }
+
+  .illustration {
+    max-width: 100%;
+  }
+}

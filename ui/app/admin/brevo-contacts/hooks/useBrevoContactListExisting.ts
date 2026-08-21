@@ -7,9 +7,9 @@ import { BREVO_CONTACTS_QUERY_CONFIG, brevoContactsQueryKeys } from "./useBrevoC
 export type ExistingBrevoContactList = { listId: number; listName: string; updated_at: string } | null;
 
 export function useBrevoContactListExisting(slug: string) {
-  return useQuery<ExistingBrevoContactList>(
-    brevoContactsQueryKeys.existing(slug),
-    () => _get<ExistingBrevoContactList>(`/api/v1/admin/brevo-contacts/${slug}/list`),
-    BREVO_CONTACTS_QUERY_CONFIG
-  );
+  return useQuery<ExistingBrevoContactList>({
+    queryKey: brevoContactsQueryKeys.existing(slug),
+    queryFn: () => _get<ExistingBrevoContactList>(`/api/v1/admin/brevo-contacts/${slug}/list`),
+    ...BREVO_CONTACTS_QUERY_CONFIG,
+  });
 }

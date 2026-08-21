@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
@@ -13,7 +14,6 @@ import { FullTable } from "@/app/_components/table/FullTable";
 import { ColumnData } from "@/app/_components/table/types";
 import { AdminInvitation, useAdminInvitations } from "@/app/_hooks/useAdminInvitations";
 import { _delete, _post } from "@/common/httpClient";
-import useToaster from "@/hooks/useToaster";
 
 interface InvitationsTableProps {
   status: "pending" | "consumed";
@@ -77,13 +77,14 @@ const resendModal = createModal({
 });
 
 export default function InvitationsTable({ status, organisation_id }: InvitationsTableProps) {
-  const { toastSuccess, toastError } = useToaster();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [sorting, setSorting] = useState<SortingState>([{ id: "created_at", desc: true }]);
   const [pendingAction, setPendingAction] = useState<{ id: string; email: string } | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -104,34 +105,36 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
 
   const confirmCancel = useCallback(async () => {
     if (!pendingAction) return;
+    setActionError(null);
     try {
       await _delete(`/api/v1/admin/invitations/${pendingAction.id}`);
-      toastSuccess(`Invitation à ${pendingAction.email} annulée`);
+      setActionSuccess(`Invitation à ${pendingAction.email} annulée`);
       cancelModal.close();
       setPendingAction(null);
       await refetch();
     } catch (err: any) {
-      toastError(err?.json?.data?.message || "Erreur lors de l'annulation");
+      setActionError(err?.json?.data?.message || "Erreur lors de l'annulation");
     }
-  }, [pendingAction, toastSuccess, toastError, refetch]);
+  }, [pendingAction, refetch]);
 
   const confirmResend = useCallback(async () => {
     if (!pendingAction) return;
+    setActionError(null);
     try {
       const res = await _post<any, { email: string; expiresAt: string }>(
         `/api/v1/admin/invitations/${pendingAction.id}/resend`,
         {}
       );
-      toastSuccess(
+      setActionSuccess(
         `Email renvoyé à ${res.email}. Nouvelle expiration : ${new Date(res.expiresAt).toLocaleString("fr-FR")}`
       );
       resendModal.close();
       setPendingAction(null);
       await refetch();
     } catch (err: any) {
-      toastError(err?.json?.data?.message || "Erreur lors du renvoi");
+      setActionError(err?.json?.data?.message || "Erreur lors du renvoi");
     }
-  }, [pendingAction, toastSuccess, toastError, refetch]);
+  }, [pendingAction, refetch]);
 
   const tableData = useMemo(() => {
     return invitations.map((inv: AdminInvitation) => {
@@ -226,6 +229,8 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
                   iconId="ri-mail-send-line"
                   title="Renvoyer"
                   onClick={() => {
+                    setActionSuccess(null);
+                    setActionError(null);
                     setPendingAction({ id: inv._id, email: inv.email });
                     resendModal.open();
                   }}
@@ -238,6 +243,8 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
                   iconId="ri-close-circle-line"
                   title="Annuler"
                   onClick={() => {
+                    setActionSuccess(null);
+                    setActionError(null);
                     setPendingAction({ id: inv._id, email: inv.email });
                     cancelModal.open();
                   }}
@@ -255,6 +262,16 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
 
   return (
     <Stack spacing={2}>
+      {actionSuccess && (
+        <Alert
+          severity="success"
+          title={actionSuccess}
+          description=""
+          small
+          closable
+          onClose={() => setActionSuccess(null)}
+        />
+      )}
       <SearchBar
         label="Rechercher une invitation"
         onButtonClick={(value) => setSearchTerm(value)}
@@ -262,7 +279,7 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
           <input
             className={className}
             id={id}
-            placeholder="Email, nom, organisme, SIRET..."
+            placeholder="Email, nom, organisme, SIRET…"
             type={type}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -301,6 +318,17 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
           },
         ]}
       >
+        {actionError && (
+          <Alert
+            severity="error"
+            title={actionError}
+            description=""
+            small
+            closable
+            onClose={() => setActionError(null)}
+            className="fr-mb-2w"
+          />
+        )}
         Voulez-vous vraiment annuler l&apos;invitation à <strong>{pendingAction?.email}</strong> ? Le destinataire ne
         pourra plus activer son compte via ce lien.
       </cancelModal.Component>
@@ -318,6 +346,17 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
           },
         ]}
       >
+        {actionError && (
+          <Alert
+            severity="error"
+            title={actionError}
+            description=""
+            small
+            closable
+            onClose={() => setActionError(null)}
+            className="fr-mb-2w"
+          />
+        )}
         Un nouvel email sera envoyé à <strong>{pendingAction?.email}</strong> avec une expiration renouvelée à 96
         heures.
       </resendModal.Component>

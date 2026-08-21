@@ -42,7 +42,7 @@ export const getOrCreateConnexionInvitationByEmail = async ({
     { upsert: true, returnDocument: "after" }
   );
 
-  return result.value?.token ?? tentativeToken;
+  return result?.token ?? tentativeToken;
 };
 
 export const getConnexionInvitationByToken = async (token: string): Promise<IConnexionInvitation | null> => {

@@ -68,37 +68,6 @@ export const analyzeSearchTerm = (
   return "mixed";
 };
 
-export const buildTextSearchQueryAfterLookup = (searchTerm: string) => {
-  const trimmedTerm = searchTerm.trim();
-
-  if (trimmedTerm.length < 2) {
-    return [];
-  }
-
-  if (trimmedTerm.length > 100) {
-    return [];
-  }
-
-  const escapedTerm = escapeRegex(trimmedTerm);
-
-  return [
-    { nom: { $regex: escapedTerm, $options: "i" } },
-    { prenom: { $regex: escapedTerm, $options: "i" } },
-    { nomComplet: { $regex: escapedTerm, $options: "i" } },
-    { nomCompletInverse: { $regex: escapedTerm, $options: "i" } },
-    { email: { $regex: escapedTerm, $options: "i" } },
-    { telephone: { $regex: escapedTerm, $options: "i" } },
-    { "organisation.nom": { $regex: escapedTerm, $options: "i" } },
-    { "organisation.siret": { $regex: escapedTerm, $options: "i" } },
-    { "organisation.uai": { $regex: escapedTerm, $options: "i" } },
-    { "organisation.organisme.nom": { $regex: escapedTerm, $options: "i" } },
-    { "organisation.organisme.raison_sociale": { $regex: escapedTerm, $options: "i" } },
-    { "organisation.organisme.enseigne": { $regex: escapedTerm, $options: "i" } },
-    { "organisation.organisme.siret": { $regex: escapedTerm, $options: "i" } },
-    { "organisation.organisme.uai": { $regex: escapedTerm, $options: "i" } },
-  ];
-};
-
 export const buildFiltersFromQuery = (queryParams: UsersFiltersParams) => {
   const { q, account_status, type_utilisateur, reseaux, departements, regions } = queryParams;
   const query: any = {};

@@ -36,9 +36,9 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
     <div className={styles.infoColumn}>
       <div className={styles.nameRow}>
         <div className={styles.avatar}>{getInitials(effectif.nom, effectif.prenom)}</div>
-        <h4 className="fr-h4">
+        <h1 className="fr-h4">
           {effectif.prenom} {effectif.nom}
-        </h4>
+        </h1>
       </div>
 
       <hr className={styles.separator} />
@@ -84,7 +84,9 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
         {effectif.adresse?.code_postal && `(${effectif.adresse.code_postal})`}
       </p>
 
-      <p className={styles.rqthLine}>RQTH {effectif.rqth ? <strong>Oui</strong> : "Non"}</p>
+      <p className={styles.rqthLine}>
+        RQTH {effectif.rqth == null ? "—" : effectif.rqth ? <strong>Oui</strong> : "Non"}
+      </p>
 
       <hr className={styles.separator} />
 
@@ -132,6 +134,7 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
           <DsfrLink
             href="#"
             arrow="none"
+            size="sm"
             onClick={(e) => {
               e.preventDefault();
               setContactsOpen((open) => {
@@ -139,7 +142,7 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
                 return !open;
               });
             }}
-            className={`fr-link--icon-right ${contactsOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"} ${styles.mlCoordLink}`}
+            className={`fr-link--icon-right ${contactsOpen ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"} ${styles.mlCoordLink}`}
           >
             Coordonnées de l&apos;établissement
           </DsfrLink>
@@ -158,6 +161,7 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
             <DsfrLink
               href="#"
               arrow="none"
+              size="sm"
               onClick={(e) => {
                 e.preventDefault();
                 setContactsOpen((open) => {
@@ -165,7 +169,7 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
                   return !open;
                 });
               }}
-              className={`fr-link--icon-right ${contactsOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"} ${styles.mlCoordLink}`}
+              className={`fr-link--icon-right ${contactsOpen ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"} ${styles.mlCoordLink}`}
             >
               Coordonnées de l&apos;établissement
             </DsfrLink>

@@ -292,6 +292,7 @@ describe("WhatsApp Service", () => {
       mission_locale_id: new ObjectId(),
       effectif_id: new ObjectId(),
       created_at: new Date(),
+      date_rupture: new Date("2026-05-04"),
       brevo: {},
       current_status: {},
       effectif_snapshot: {
@@ -352,6 +353,11 @@ describe("WhatsApp Service", () => {
           opted_out: true,
         },
       } as IMissionLocaleEffectif;
+      assert.strictEqual(isEligibleForWhatsApp(effectif), false);
+    });
+
+    it("retourne false sans date de rupture (dossier de prévention ou rentrée sans contrat)", () => {
+      const effectif = { ...baseEffectif, date_rupture: null } as IMissionLocaleEffectif;
       assert.strictEqual(isEligibleForWhatsApp(effectif), false);
     });
   });
@@ -1549,10 +1555,42 @@ describe("WhatsApp Service", () => {
         },
       });
 
+      vi.mocked(sendWhatsAppMessage).mockClear();
       await handleInboundWhatsAppMessage("+33611200000", "✅", "msg-cfa-v2", "visitor-cfa-v2");
 
       const updated = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
-      assert.ok(!updated?.souhaite_rdv, "souhaite_rdv ne doit pas être true pour un CFA V2");
+      assert.ok(updated, "l'effectif doit être retrouvé");
+      assert.notStrictEqual(updated.souhaite_rdv, true, "souhaite_rdv ne doit pas être true pour un CFA V2");
+      assert.strictEqual(updated.whatsapp_contact?.conversation_state, CONVERSATION_STATE.CLOSED);
+      assert.ok(!updated.whatsapp_contact?.rdv_redirect_token, "pas de token RDV pour un dossier exclu");
+      expect(sendWhatsAppMessage).not.toHaveBeenCalled();
+    });
+
+    it("YES mais CFA en acc_conjoint entre envoi et réponse → souhaite_rdv NON posé (exclusion PRD)", async () => {
+      const { effectifId } = await setupPrequalifEffectif({
+        organisme_data: { acc_conjoint: true },
+        whatsapp_contact: {
+          phone_normalized: "+33611200001",
+          brevo_visitor_id: "visitor-cfa-acc",
+          last_message_sent_at: new Date(Date.now() - 60_000),
+          template_type: "prequalif",
+          sent_via: "backfill",
+          message_status: "sent",
+        },
+      });
+
+      vi.mocked(sendWhatsAppMessage).mockClear();
+      await handleInboundWhatsAppMessage("+33611200001", "✅", "msg-cfa-acc", "visitor-cfa-acc");
+
+      const updated = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      assert.ok(updated, "l'effectif doit être retrouvé");
+      assert.notStrictEqual(
+        updated.souhaite_rdv,
+        true,
+        "souhaite_rdv ne doit pas être true pour un CFA en acc_conjoint"
+      );
+      assert.strictEqual(updated.whatsapp_contact?.conversation_state, CONVERSATION_STATE.CLOSED);
+      expect(sendWhatsAppMessage).not.toHaveBeenCalled();
     });
   });
 

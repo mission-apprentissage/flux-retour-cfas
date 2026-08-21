@@ -1,0 +1,32 @@
+.title {
+  margin-bottom: 2rem;
+  color: var(--text-title-blue-france);
+}
+
+.table {
+  th {
+    color: var(--text-title-grey);
+  }
+
+  thead tr {
+    border-bottom: 3px solid var(--border-active-blue-france);
+  }
+}
+
+.termColumn {
+  width: 14rem;
+}
+
+.term {
+  font-weight: 700;
+  vertical-align: top;
+  text-align: left;
+  white-space: normal;
+}
+
+.definition {
+  p:not(:last-child),
+  ul:not(:last-child) {
+    margin-bottom: 0.5rem;
+  }
+}

@@ -8,7 +8,7 @@ import { CfaContainer } from "../CfaContainer";
 import CfaCollaborationsClient from "./CfaCollaborationsClient";
 
 export const metadata: Metadata = {
-  title: "Suivi Missions Locales | Tableau de bord de l'apprentissage",
+  title: "Collaboration et suivi Missions Locales | Tableau de bord de l'apprentissage",
 };
 
 export default function CfaCollaborationsPage() {

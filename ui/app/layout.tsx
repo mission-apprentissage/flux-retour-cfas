@@ -12,13 +12,16 @@ import { publicConfig } from "@/config.public";
 
 import { defaultColorScheme } from "./_dsfr-setup/default-color-scheme";
 import { StartDsfr } from "./_dsfr-setup/start-dsfr";
+import "remixicon/fonts/remixicon.css";
+import "react-datepicker/dist/react-datepicker.css";
 import "./global.css";
+import "./_styles/month-select.css";
 
 export const dynamic = "force-dynamic";
 
 export default async function RootLayout({ children }: { children: JSX.Element }) {
   return (
-    <html {...getHtmlAttributes({ defaultColorScheme })}>
+    <html {...getHtmlAttributes({ defaultColorScheme, lang: "fr" })}>
       <head>
         <StartDsfr />
         <DsfrHead

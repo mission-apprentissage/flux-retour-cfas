@@ -2,6 +2,7 @@ import { ErrorMessage, useField, useFormikContext } from "formik";
 
 import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { dePrenom } from "@/app/_utils/ruptures.utils";
 
 import styles from "../CollaborationForm.module.css";
 import { FormValues } from "../types";
@@ -19,8 +20,9 @@ export function ReferentSection({ prenom }: ReferentSectionProps) {
   return (
     <div className={styles.sectionBlock}>
       <p className={styles.sectionLabel}>
-        Si la Mission Locale devait contacter quelqu&apos;un sur le dossier de{" "}
-        <span className={styles.titleHighlight}>{prenom}</span>, qui est-ce ?<span className={styles.required}>*</span>
+        Si la Mission Locale devait contacter quelqu&apos;un sur le dossier{" "}
+        <span className={styles.titleHighlight}>{dePrenom(prenom)}</span>, qui est-ce ?
+        <span className={styles.required}>*</span>
       </p>
       <div className={styles.referentCardGroup}>
         <div

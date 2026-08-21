@@ -190,11 +190,12 @@ export function EffectifsPriorityTable({
               <DsfrLink
                 href="#"
                 arrow="none"
+                size="sm"
                 onClick={(e) => {
                   e.preventDefault();
                   setInfoOpen((open) => !open);
                 }}
-                className={`fr-link--icon-right ${infoOpen ? "ri-arrow-drop-up-line" : "ri-arrow-drop-down-line"}`}
+                className={`fr-link--icon-right ${infoOpen ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"}`}
               >
                 Qui sont les jeunes affichés dans cette liste ?
               </DsfrLink>
