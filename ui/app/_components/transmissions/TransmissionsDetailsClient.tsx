@@ -4,12 +4,13 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { EFFECTIFS_GROUP } from "shared";
+import { EFFECTIFS_GROUP, ORGANISATION_TYPE } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { DataTable } from "@/app/_components/table/DataTable";
+import { useAuth } from "@/app/_context/UserContext";
 import { formatDate } from "@/app/_utils/date.utils";
 import { PAGES } from "@/app/_utils/routes.utils";
 import { _get } from "@/common/httpClient";
@@ -30,11 +31,12 @@ const ERROR_COLUMNS = [
 ];
 
 const SUCCESS_COLUMNS = [
-  { label: "Nom de l'établissement", dataKey: "organisme_name", width: "30%", sortable: false },
-  { label: "SIRET", dataKey: "organisme_siret", sortable: false },
-  { label: "UAI", dataKey: "organisme_uai", sortable: false },
-  { label: "Adresse", dataKey: "organisme_address", sortable: false },
-  { label: "Effectifs", dataKey: "organisme_effectifs", sortable: false },
+  { label: "Apprenant", dataKey: "apprenant", width: "22%", sortable: false },
+  { label: "Date de naissance", dataKey: "birthdate", sortable: false },
+  { label: "Code Diplôme", dataKey: "code_diplome", sortable: false },
+  { label: "RNCP", dataKey: "code_rncp", sortable: false },
+  { label: "Heure d'envoi", dataKey: "processed_at", sortable: false },
+  { label: "Établissement d'affectation", dataKey: "organisme_name", width: "24%", sortable: false },
 ];
 
 interface TransmissionsDetailsClientProps {
@@ -48,6 +50,11 @@ export default function TransmissionsDetailsClient({
   modePublique = false,
   organismeId,
 }: TransmissionsDetailsClientProps) {
+  const { user } = useAuth();
+  const canOpenFicheOrganisme =
+    user?.organisation?.type === ORGANISATION_TYPE.ADMINISTRATEUR ||
+    user?.organisation?.type === ORGANISATION_TYPE.TETE_DE_RESEAU;
+
   const [errorPage, setErrorPage] = useState(1);
   const [errorLimit, setErrorLimit] = useState(20);
   const [successPage, setSuccessPage] = useState(1);
@@ -112,15 +119,20 @@ export default function TransmissionsDetailsClient({
   const successRows = (successQuery.data?.data ?? []).map((item: any) => ({
     rawData: item,
     element: {
-      organisme_name: (
-        <DsfrLink href={`/organismes/${item.id}`} arrow="none">
-          {item.name}
+      apprenant: `${item.prenom_apprenant} ${item.nom_apprenant}`,
+      birthdate: formatDate(item.date_de_naissance_apprenant),
+      code_diplome: item.formation_cfd,
+      code_rncp: item.formation_rncp,
+      processed_at: formatDateHourMinutesSecondsMs(item.processed_at),
+      organisme_name: !item.organisme ? (
+        "—"
+      ) : canOpenFicheOrganisme ? (
+        <DsfrLink href={`/organismes/${item.organisme._id}`} arrow="none">
+          {item.organisme.nom}
         </DsfrLink>
+      ) : (
+        item.organisme.nom
       ),
-      organisme_siret: item.siret,
-      organisme_uai: item.uai,
-      organisme_address: item.adresse,
-      organisme_effectifs: item.effectifCount,
     },
   }));
 
@@ -180,9 +192,12 @@ export default function TransmissionsDetailsClient({
             ) : (
               <>
                 <div className="fr-my-3w">
-                  <p>Identifiez les organismes vers lesquels les effectifs ont été transmis et affectés.</p>
+                  <p>
+                    Cliquez sur une ligne d’apprenant pour consulter l’ensemble des données transmises et identifier
+                    l’établissement vers lequel l’effectif a été affecté.
+                  </p>
                   <p className={styles.detailNotice}>
-                    <i className="fr-icon-info-fill fr-icon--sm" aria-hidden="true" /> Les établissements ci-dessous
+                    <i className="fr-icon-info-fill fr-icon--sm" aria-hidden="true" /> Les établissements d’affectation
                     sont rattachés aux vôtres. Si vous avez une question, ou constatez une anomalie, veuillez{" "}
                     <a href={EFFECTIFS_GROUP} target="_blank" rel="noopener noreferrer" className="fr-link">
                       nous contacter
@@ -199,6 +214,8 @@ export default function TransmissionsDetailsClient({
                   onPageSizeChange={setSuccessLimit}
                   pageSize={successLimit}
                   emptyMessage="Aucun effectif transmis pour cette journée"
+                  expandMode="single"
+                  renderSubComponent={(rowData) => <EffectifQueueItemDetail effectifQueueItem={rowData} />}
                 />
               </>
             ),
