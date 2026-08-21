@@ -1,13 +1,30 @@
 "use client";
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const DISMISS_STORAGE_KEY = "deca-alert-dismissed";
 
 export function DecaAlert() {
   const [isOpen, setIsOpen] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    if (window.localStorage.getItem(DISMISS_STORAGE_KEY)) {
+      setDismissed(true);
+    }
+  }, []);
+
+  if (dismissed) {
+    return null;
+  }
 
   return (
     <Alert
+      onClose={() => {
+        window.localStorage.setItem(DISMISS_STORAGE_KEY, "1");
+        setDismissed(true);
+      }}
       severity="info"
       small
       closable
