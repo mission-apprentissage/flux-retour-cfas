@@ -8,7 +8,7 @@ import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { Box, Stack, Typography } from "@mui/material";
 import { SortingState } from "@tanstack/react-table";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "shared/constants/territoires";
 
 import InvitationsTable from "@/app/_components/admin/InvitationsTable";
@@ -127,13 +127,16 @@ export default function UsersAdminClient() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      // Sans changement réel de recherche, ne pas toucher à la pagination : l'effet se redéclenche
+      // à chaque mise à jour de l'URL (identité de updateQueryParams) et effacerait la page courante.
+      if (searchTerm === debouncedSearchTerm) return;
       setDebouncedSearchTerm(searchTerm);
       setCurrentPage(1);
       updateQueryParams({ q: searchTerm.trim() || null, page: null });
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchTerm, updateQueryParams]);
+  }, [searchTerm, debouncedSearchTerm, updateQueryParams]);
 
   const usersFilters = useMemo(() => {
     if (!searchParams) return {};
@@ -154,9 +157,23 @@ export default function UsersAdminClient() {
     setCurrentPage(1);
   }, []);
 
+  // Clé stable des filtres (hors pagination, onglet et recherche) : l'objet usersFilters change
+  // d'identité à chaque navigation, ce qui réinitialisait la page à chaque changement d'URL.
+  const usersFiltersKey = useMemo(() => {
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    ["page", "tab", "q"].forEach((key) => params.delete(key));
+    params.sort();
+    return params.toString();
+  }, [searchParams]);
+
+  const isInitialFiltersSync = useRef(true);
   useEffect(() => {
+    if (isInitialFiltersSync.current) {
+      isInitialFiltersSync.current = false;
+      return;
+    }
     setCurrentPage(1);
-  }, [usersFilters, searchTerm]);
+  }, [usersFiltersKey]);
 
   const handlePageChange = useCallback(
     (page: number) => {
