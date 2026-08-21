@@ -1,9 +1,8 @@
 import { Collection, ObjectId } from "mongodb";
-import { IndicateursEffectifs, ORGANISME_INDICATEURS_TYPE, STATUT_APPRENANT, hasRecentTransmissions } from "shared";
+import { IndicateursEffectifs, STATUT_APPRENANT } from "shared";
 
 import { EffectifsFiltersTerritoire, combineFilters } from "@/common/actions/helpers/filters";
 import { findOrganismesFormateursIdsOfOrganisme } from "@/common/actions/helpers/permissions";
-import { organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 
 import { buildEffectifMongoFilters } from "./effectifs/effectifs-filters";
@@ -140,28 +139,3 @@ async function getOrganismeRestriction(organismeId?: ObjectId) {
     ? { organisme_id: { $in: [organismeId, ...(await findOrganismesFormateursIdsOfOrganisme(organismeId, true))] } }
     : {};
 }
-
-export const getIndicateursForRelatedOrganismes = async (organismeId: ObjectId, indicateurType: string) => {
-  const org = await organismesDb().findOne({ _id: organismeId });
-  const organismesFormateurs = org?.organismesFormateurs;
-
-  if (!organismesFormateurs) {
-    return [];
-  }
-
-  // Initialise les indicateurs pour tous les organismes formateurs avec son propre organisme
-  const allOrganismes = [org, ...organismesFormateurs];
-
-  switch (indicateurType) {
-    case ORGANISME_INDICATEURS_TYPE.SANS_EFFECTIFS:
-      return allOrganismes.filter(({ last_transmission_date }) => !hasRecentTransmissions(last_transmission_date));
-    case ORGANISME_INDICATEURS_TYPE.NATURE_INCONNUE:
-      return allOrganismes.filter(({ nature }) => nature === "inconnue");
-    case ORGANISME_INDICATEURS_TYPE.SIRET_FERME:
-      return allOrganismes.filter(({ ferme }) => !!ferme);
-    case ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE:
-      return allOrganismes.filter(({ uai }) => !uai);
-    default:
-      return [];
-  }
-};

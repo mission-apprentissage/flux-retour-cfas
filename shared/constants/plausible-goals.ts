@@ -68,12 +68,6 @@ const plausibleGoals = [
 
   "clic_homepage_kit_deploiement",
 
-  // Indicateurs organismes
-  "telechargement_liste_organismes_sans_effectifs",
-  "telechargement_liste_organismes_nature_inconnue",
-  "telechargement_liste_organismes_siret_ferme",
-  "telechargement_liste_organismes_uai_non_determine",
-
   // Mission locale
   "telechargement_mission_locale_liste",
   "telechargement_mission_locale_liste_mois",
