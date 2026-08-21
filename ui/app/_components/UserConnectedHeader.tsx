@@ -56,8 +56,6 @@ export const UserConnectedHeader = () => {
         return organisationType !== ORGANISATION_TYPE.MISSION_LOCALE && !isCfa;
       case "TRANSMISSIONS":
         return organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION;
-      case "ADMIN":
-        return organisationType === ORGANISATION_TYPE.ADMINISTRATEUR;
       default:
         return false;
     }
@@ -212,90 +210,6 @@ export const UserConnectedHeader = () => {
                   <i className={fr.cx("fr-icon-building-fill", "fr-icon--sm")}></i>
                 </ListItemIcon>
                 Référencement organisme
-              </MenuItem>,
-            ]}
-
-            {hasRight("ADMIN") && [
-              <ListSubheader key="admin-header" component="div" sx={{ fontWeight: "bold", color: "text.primary" }}>
-                Administration
-              </ListSubheader>,
-              <MenuItem
-                key="admin-transmissions"
-                component="a"
-                href={PAGES.static.adminTransmissions.getPath()}
-                onClick={handleClose}
-              >
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                Toutes les transmissions
-              </MenuItem>,
-              <MenuItem key="admin-users" component="a" href="/admin/users" onClick={handleClose}>
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                Gestion des utilisateurs
-              </MenuItem>,
-              <MenuItem
-                key="admin-reseaux"
-                component="a"
-                href={PAGES.static.adminReseaux.getPath()}
-                onClick={handleClose}
-              >
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                Gestion des réseaux
-              </MenuItem>,
-              <MenuItem
-                key="admin-organismes-recherche"
-                component="a"
-                href={PAGES.static.adminOrganismesRecherche.getPath()}
-                onClick={handleClose}
-              >
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                Recherche d’un organisme
-              </MenuItem>,
-              <MenuItem
-                key="admin-fusion-organismes"
-                component="a"
-                href={PAGES.static.adminFusionOrganismes.getPath()}
-                onClick={handleClose}
-              >
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                Fusion d&apos;organismes
-              </MenuItem>,
-              <MenuItem
-                key="admin-organismes-gestion"
-                component="a"
-                href={PAGES.static.adminOrganismesGestion.getPath()}
-                onClick={handleClose}
-              >
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-settings-5-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                Organismes absents du référentiel
-              </MenuItem>,
-              <MenuItem key="admin-brevo-contacts" component="a" href="/admin/brevo-contacts" onClick={handleClose}>
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-mail-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                Listes de contacts Brevo
-              </MenuItem>,
-              <MenuItem
-                key="admin-impostures"
-                component="a"
-                href={PAGES.static.adminImpostures.getPath()}
-                onClick={handleClose}
-              >
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-eye-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                Impostures
               </MenuItem>,
             ]}
 

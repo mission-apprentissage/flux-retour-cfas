@@ -158,10 +158,29 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
       }
       if (organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) {
         baseItems.push({
+          text: "Gestion des utilisateurs",
+          isActive: pathname?.startsWith("/admin/users"),
+          linkProps: {
+            href: "/admin/users",
+            target: "_self",
+          },
+        });
+        baseItems.push({
+          text: "Impostures",
+          isActive: pathname?.startsWith("/admin/impostures"),
+          linkProps: {
+            href: "/admin/impostures",
+            target: "_self",
+          },
+        });
+        baseItems.push({
           text: "Administration",
-          isActive: !!pathname?.startsWith("/admin") && !pathname?.startsWith("/admin/suivi-des-indicateurs"),
+          isActive:
+            !!pathname?.startsWith("/admin") &&
+            !pathname?.startsWith("/admin/suivi-des-indicateurs") &&
+            !pathname?.startsWith("/admin/users") &&
+            !pathname?.startsWith("/admin/impostures"),
           menuLinks: [
-            { text: "Gestion des utilisateurs", linkProps: { href: "/admin/users", target: "_self" } },
             { text: "Gestion des réseaux", linkProps: { href: "/admin/reseaux", target: "_self" } },
             { text: "Toutes les transmissions", linkProps: { href: "/admin/transmissions", target: "_self" } },
             { text: "Recherche d'un organisme", linkProps: { href: "/admin/organismes/recherche", target: "_self" } },
@@ -171,7 +190,6 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
               linkProps: { href: "/admin/organismes/gestion", target: "_self" },
             },
             { text: "Listes de contacts Brevo", linkProps: { href: "/admin/brevo-contacts", target: "_self" } },
-            { text: "Impostures", linkProps: { href: "/admin/impostures", target: "_self" } },
           ],
         });
       }
