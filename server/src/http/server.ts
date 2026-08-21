@@ -9,7 +9,7 @@ import express, { Application } from "express";
 import { ObjectId } from "mongodb";
 import passport from "passport";
 import { RateLimiterMemory } from "rate-limiter-flexible";
-import { CODE_POSTAL_REGEX, SOURCE_APPRENANT, typesOrganismesIndicateurs, zEffectifArchive } from "shared";
+import { CODE_POSTAL_REGEX, SOURCE_APPRENANT, zEffectifArchive } from "shared";
 import {
   computeWarningsForDossierApprenantSchemaV3,
   dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret,
@@ -34,7 +34,6 @@ import {
 } from "@/common/actions/effectifs.duplicates.actions";
 import { effectifsFiltersTerritoireSchema } from "@/common/actions/helpers/filters";
 import { getOrganismeIndicateursEffectifs } from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
-import { getIndicateursForRelatedOrganismes } from "@/common/actions/indicateurs/indicateurs.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import {
   cancelInvitation,
@@ -59,7 +58,6 @@ import {
   generateApiKeyForOrg,
   getInvalidSiretsFromDossierApprenant,
   getInvalidUaisFromDossierApprenant,
-  getOrganisationIndicateursForRelatedOrganismes,
   getOrganisationIndicateursOrganismes,
   getOrganismeByAPIKey,
   getOrganismeById,
@@ -68,6 +66,7 @@ import {
   getStatOrganismes,
   listContactsOrganisme,
   listOrganisationOrganismes,
+  listOrganisationOrganismesPaginated,
   listOrganismesFormateurs,
   resetConfigurationERP,
   verifyOrganismeAPIKeyToUser,
@@ -85,7 +84,6 @@ import {
   parseSuiviQuery,
   zSipaLoginBody,
 } from "@/common/actions/sipa.actions";
-import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import {
   changePassword,
   getUserByEmail,
@@ -119,7 +117,6 @@ import config from "@/config";
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import {
-  requireIndicateursOrganismesAccess,
   requireAdministrator,
   requireCfaAdminIfCfa,
   requireEffectifOrganismePermission,
@@ -623,25 +620,6 @@ function setupRoutes(app: Application) {
         })
       )
       .get(
-        "/indicateurs/organismes/:type",
-        requireIndicateursOrganismesAccess,
-        returnResult(async (req, res) => {
-          const indicateurs = await getIndicateursForRelatedOrganismes(
-            res.locals.organismeId,
-            req.params.type as string
-          );
-          const type = await z.enum(typesOrganismesIndicateurs).parseAsync(req.params.type);
-          await createTelechargementListeNomLog(
-            `organismes_${type}`,
-            indicateurs.map(({ _id }) => (_id ? _id.toString() : "")),
-            new Date(),
-            req.user._id,
-            res.locals.organismeId
-          );
-          return indicateurs;
-        })
-      )
-      .get(
         "/contacts",
         requireOrganismePermission("viewContacts"),
         returnResult(async (req, res) => {
@@ -869,24 +847,44 @@ function setupRoutes(app: Application) {
         })
       )
       .get(
-        "/organismes/indicateurs",
+        "/organismes/paginated",
         returnResult(async (req) => {
-          return await getOrganisationIndicateursOrganismes(req.user.acl);
+          const query = await validateFullZodObjectSchema(req.query, {
+            page: z.coerce.number().int().positive().default(1),
+            limit: z.coerce.number().int().positive().max(100).default(20),
+            sort: z.enum(["nom", "nature", "transmission", "formations", "adresse"]).default("nom"),
+            order: z.enum(["asc", "desc"]).default("asc"),
+            search: z.string().optional(),
+            departements: z.string().optional(),
+            regions: z.string().optional(),
+            nature: z.string().optional(),
+            transmission: z.string().optional(),
+            qualiopi: z.string().optional(),
+            ferme: z.string().optional(),
+            etatUAI: z.string().optional(),
+          });
+          const csv = (value?: string) => (value ? value.split(",").filter(Boolean) : undefined);
+          const csvBool = (value?: string) => csv(value)?.map((item) => item === "true");
+          return await listOrganisationOrganismesPaginated(req.user.acl, {
+            page: query.page,
+            limit: query.limit,
+            sort: query.sort,
+            order: query.order,
+            search: query.search,
+            departements: csv(query.departements),
+            regions: csv(query.regions),
+            nature: csv(query.nature),
+            transmission: csv(query.transmission),
+            qualiopi: csvBool(query.qualiopi),
+            ferme: csvBool(query.ferme),
+            etatUAI: csvBool(query.etatUAI),
+          });
         })
       )
       .get(
-        "/organismes/indicateurs/:type",
-        returnResult(async (req, res) => {
-          const indicateurs = await getOrganisationIndicateursForRelatedOrganismes(req.user.acl, req.params.type);
-          const type = await z.enum(typesOrganismesIndicateurs).parseAsync(req.params.type);
-          await createTelechargementListeNomLog(
-            `organismes_${type}`,
-            indicateurs.map(({ _id }) => (_id ? _id.toString() : "")),
-            new Date(),
-            req.user._id,
-            res.locals.organismeId
-          );
-          return indicateurs;
+        "/organismes/indicateurs",
+        returnResult(async (req) => {
+          return await getOrganisationIndicateursOrganismes(req.user.acl);
         })
       )
       .get(
