@@ -64,7 +64,7 @@ export function OrganismeFicheHeader({ organismeId }: { organismeId: string }) {
       />
 
       <div className={styles.ficheHeader}>
-        <div>
+        <div className={styles.ficheHeaderMain}>
           <p className={styles.ficheSurtitre}>Tableau de bord de l&apos;organisme</p>
           <h1 className={styles.ficheTitre}>{organismeNom}</h1>
           <div className={styles.badgesRow}>
@@ -90,6 +90,7 @@ export function OrganismeFicheHeader({ organismeId }: { organismeId: string }) {
         {isAdmin && (
           <Button
             priority="tertiary"
+            className={styles.ficheHeaderAction}
             onClick={async () => {
               await _post<IOrganisationCreate>("/api/v1/admin/impersonate", {
                 type: "ORGANISME_FORMATION",

@@ -1,10 +1,18 @@
 .ficheHeader {
   display: flex;
-  flex-wrap: wrap;
   gap: 1rem;
   align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 1rem;
+}
+
+.ficheHeaderMain {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ficheHeaderAction {
+  flex-shrink: 0;
 }
 
 .ficheSurtitre {
