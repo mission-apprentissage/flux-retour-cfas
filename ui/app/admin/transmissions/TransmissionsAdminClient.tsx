@@ -56,9 +56,13 @@ function toTableRow(transmission: TransmissionDay) {
           Complète
         </span>
       ),
-      success: transmission.success,
-      error: <span className={hasError ? styles.errorCount : undefined}>{transmission.error}</span>,
-      total: transmission.total,
+      success: Number(transmission.success).toLocaleString("fr-FR"),
+      error: (
+        <span className={hasError ? styles.errorCount : undefined}>
+          {Number(transmission.error).toLocaleString("fr-FR")}
+        </span>
+      ),
+      total: Number(transmission.total).toLocaleString("fr-FR"),
       actions: (
         <Button
           linkProps={{ href: PAGES.dynamic.adminTransmissionsJour({ date: transmission.day }).getPath() }}

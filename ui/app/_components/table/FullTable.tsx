@@ -17,6 +17,7 @@ import {
 } from "@tanstack/react-table";
 import { useCallback, useRef, useEffect, useId, useState, Fragment } from "react";
 
+import styles from "./FullTable.module.css";
 import { useTableData, useTableColumns } from "./hooks";
 import { FullTableProps, TableRowData } from "./types";
 
@@ -258,7 +259,7 @@ export function FullTable({
       {isEmpty ? (
         <p>{emptyMessage}</p>
       ) : (
-        <div ref={tableRef} className={onRowClick ? "clickable-table" : ""}>
+        <div ref={tableRef} className={`${styles.tableContainer} ${onRowClick ? "clickable-table" : ""}`}>
           {onRowClick && (
             <style>{`
               .clickable-table tbody tr {

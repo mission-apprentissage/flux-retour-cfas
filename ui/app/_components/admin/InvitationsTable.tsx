@@ -279,7 +279,7 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
           <input
             className={className}
             id={id}
-            placeholder="Email, nom, organisme, SIRET..."
+            placeholder="Email, nom, organisme, SIRET…"
             type={type}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
