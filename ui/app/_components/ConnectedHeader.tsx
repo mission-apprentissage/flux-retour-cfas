@@ -156,6 +156,25 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           },
         });
       }
+      if (organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) {
+        baseItems.push({
+          text: "Administration",
+          isActive: !!pathname?.startsWith("/admin") && !pathname?.startsWith("/admin/suivi-des-indicateurs"),
+          menuLinks: [
+            { text: "Gestion des utilisateurs", linkProps: { href: "/admin/users", target: "_self" } },
+            { text: "Gestion des réseaux", linkProps: { href: "/admin/reseaux", target: "_self" } },
+            { text: "Toutes les transmissions", linkProps: { href: "/admin/transmissions", target: "_self" } },
+            { text: "Recherche d'un organisme", linkProps: { href: "/admin/organismes/recherche", target: "_self" } },
+            { text: "Fusion d'organismes", linkProps: { href: "/admin/fusion-organismes", target: "_self" } },
+            {
+              text: "Organismes absents du référentiel",
+              linkProps: { href: "/admin/organismes/gestion", target: "_self" },
+            },
+            { text: "Listes de contacts Brevo", linkProps: { href: "/admin/brevo-contacts", target: "_self" } },
+            { text: "Impostures", linkProps: { href: "/admin/impostures", target: "_self" } },
+          ],
+        });
+      }
     } else if (organisationType === ORGANISATION_TYPE.ARML) {
       baseItems.push({
         text: "Suivi des indicateurs",
