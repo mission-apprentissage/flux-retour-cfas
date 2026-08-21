@@ -91,10 +91,11 @@ export function useOrganisationOrganismes(enabled?: boolean) {
   };
 }
 
-export function useOrganisationIndicateursOrganismes() {
+export function useOrganisationIndicateursOrganismes(enabled = true) {
   const { data, isLoading, error } = useQuery<IOrganisationIndicateursOrganismes, any>({
     queryKey: ["organisation/organismes/indicateurs"],
     queryFn: () => _get("/api/v1/organisation/organismes/indicateurs"),
+    enabled,
   });
 
   return {

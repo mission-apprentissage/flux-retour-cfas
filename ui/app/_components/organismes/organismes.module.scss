@@ -1,6 +1,6 @@
 .sectionTitle {
   margin-bottom: 2rem;
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 700;
   color: var(--text-title-blue-france);
 }
@@ -8,6 +8,7 @@
 .sources {
   margin-bottom: 2rem;
   font-style: italic;
+  color: var(--text-mention-grey);
 }
 
 .cardsGrid {
@@ -24,7 +25,8 @@
 }
 
 .card {
-  background-color: var(--background-alt-grey);
+  background: var(--background-raised-grey);
+  border-radius: 4px;
 }
 
 .cardBig {
@@ -63,12 +65,12 @@
 }
 
 .cardCount {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 700;
 }
 
 .cardCountBig {
-  font-size: 40px;
+  font-size: 2.5rem;
   font-weight: 700;
 }
 
@@ -91,7 +93,7 @@
 }
 
 .cardIconAlert {
-  color: var(--text-default-error);
+  color: var(--text-default-warning);
 }
 
 .cardDownloadLink {
@@ -107,9 +109,10 @@
 }
 
 .searchPanel {
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid var(--border-open-blue-france);
+  padding: 1rem 1.5rem 1.5rem;
+  margin-bottom: 1.5rem;
+  background: var(--background-raised-grey);
+  border-radius: 4px;
 }
 
 .searchRow {
@@ -143,12 +146,16 @@
   color: var(--text-default-error);
 }
 
-.localisationSub {
-  display: block;
-  padding-top: 0.5rem;
-  font-size: 0.75rem;
-  color: var(--text-mention-grey);
+.localisationCell {
   white-space: nowrap;
+}
+
+.formationsLink {
+  white-space: nowrap;
+}
+
+.formationsVide {
+  color: var(--text-mention-grey);
 }
 
 .etatFerme {
@@ -160,6 +167,10 @@
   display: inline-flex;
   flex-direction: column;
   gap: 0.25rem;
+
+  :global(.fr-badge) {
+    white-space: nowrap;
+  }
 }
 
 .transmissionDate {
@@ -196,4 +207,10 @@
 
 .faqAside {
   flex: 1;
+}
+
+// Double sélecteur : les styles émotion de MUI (font-style: inherit) sont injectés après les CSS modules.
+.organismeNameInconnu.organismeNameInconnu {
+  font-style: italic;
+  color: var(--text-mention-grey);
 }

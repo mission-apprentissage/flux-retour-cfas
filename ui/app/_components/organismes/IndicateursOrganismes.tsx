@@ -1,24 +1,22 @@
 "use client";
 
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ReactNode } from "react";
-import { IOrganismesCount, ORGANISME_INDICATEURS_TYPE, PlausibleGoalType, TypeOrganismesIndicateurs } from "shared";
+import { IOrganismesCount } from "shared";
 
-import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
-import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
-import { _get } from "@/common/httpClient";
+import { convertOrganismesFiltersToQuery, OrganismesFilters } from "@/common/filters/organismes-filters";
 import { Organisme } from "@/common/internal/Organisme";
-import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { formatNumber } from "@/common/utils/stringUtils";
 import { useOrganisationIndicateursOrganismes, useOrganisme } from "@/hooks/organismes";
 
 import styles from "./organismes.module.scss";
 
-const typeToGoalPlausible: { [key: string]: PlausibleGoalType } = {
-  [ORGANISME_INDICATEURS_TYPE.SANS_EFFECTIFS]: "telechargement_liste_organismes_sans_effectifs",
-  [ORGANISME_INDICATEURS_TYPE.NATURE_INCONNUE]: "telechargement_liste_organismes_nature_inconnue",
-  [ORGANISME_INDICATEURS_TYPE.SIRET_FERME]: "telechargement_liste_organismes_siret_ferme",
-  [ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE]: "telechargement_liste_organismes_uai_non_determine",
+const FILTRES_ANOMALIES: Record<string, Partial<OrganismesFilters>> = {
+  sans_effectifs: { transmission: ["jamais", "arrete"] },
+  nature_inconnue: { nature: ["inconnue"] },
+  siret_ferme: { ferme: [true] },
+  uai_non_determine: { etatUAI: [false] },
 };
 
 function StateIcon({ count }: { count?: number }) {
@@ -64,10 +62,10 @@ function Card({
   );
 }
 
-function DownloadListLink({ onDownload }: { onDownload: () => void }) {
+function FilterListLink({ onFilter }: { onFilter: () => void }) {
   return (
-    <button type="button" className={`fr-link fr-link--sm ${styles.cardDownloadLink}`} onClick={onDownload}>
-      <i className="fr-icon-download-line fr-icon--sm" aria-hidden="true" /> Télécharger la liste
+    <button type="button" className={`fr-link fr-link--sm ${styles.cardDownloadLink}`} onClick={onFilter}>
+      Voir dans la liste <i className="fr-icon-arrow-right-line fr-icon--sm" aria-hidden="true" />
     </button>
   );
 }
@@ -76,13 +74,24 @@ function Indicateurs({
   data,
   isLoading,
   error,
-  downloadOrganismesIndicateurs,
 }: {
   data: Partial<IOrganismesCount>;
   isLoading: boolean;
   error: unknown;
-  downloadOrganismesIndicateurs: (type: TypeOrganismesIndicateurs) => Promise<void>;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Applique le filtre de l'anomalie en conservant la recherche et le tri en cours, et en revenant en page 1.
+  const applyFilter = (type: keyof typeof FILTRES_ANOMALIES) => {
+    const query = new URLSearchParams({
+      ...(searchParams?.get("search") ? { search: searchParams.get("search") as string } : {}),
+      ...(searchParams?.get("sort") ? { sort: searchParams.get("sort") as string } : {}),
+      ...(convertOrganismesFiltersToQuery(FILTRES_ANOMALIES[type]) as Record<string, string>),
+    });
+    router.replace(`?${query.toString()}`, { scroll: false });
+  };
+
   if (error) {
     return <p className={styles.indicateursError}>Une erreur est survenue</p>;
   }
@@ -139,13 +148,7 @@ function Indicateurs({
           count={countSansTransmissions}
           icon={<StateIcon count={countSansTransmissions} />}
         >
-          {countSansTransmissions > 0 && (
-            <DownloadListLink
-              onDownload={() =>
-                downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.SANS_EFFECTIFS as "sans_effectifs")
-              }
-            />
-          )}
+          {countSansTransmissions > 0 && <FilterListLink onFilter={() => applyFilter("sans_effectifs")} />}
         </Card>
       </div>
 
@@ -194,13 +197,7 @@ function Indicateurs({
             </>
           }
         >
-          {countNatureInconnue > 0 && (
-            <DownloadListLink
-              onDownload={() =>
-                downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.NATURE_INCONNUE as "nature_inconnue")
-              }
-            />
-          )}
+          {countNatureInconnue > 0 && <FilterListLink onFilter={() => applyFilter("nature_inconnue")} />}
         </Card>
       </div>
 
@@ -233,11 +230,7 @@ function Indicateurs({
             </>
           }
         >
-          {countSiretFerme > 0 && (
-            <DownloadListLink
-              onDownload={() => downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.SIRET_FERME as "siret_ferme")}
-            />
-          )}
+          {countSiretFerme > 0 && <FilterListLink onFilter={() => applyFilter("siret_ferme")} />}
         </Card>
       </div>
 
@@ -269,13 +262,7 @@ function Indicateurs({
             </ul>
           }
         >
-          {countUaiNonDetermine > 0 && (
-            <DownloadListLink
-              onDownload={() =>
-                downloadOrganismesIndicateurs(ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE as "uai_non_determine")
-              }
-            />
-          )}
+          {countUaiNonDetermine > 0 && <FilterListLink onFilter={() => applyFilter("uai_non_determine")} />}
         </Card>
       </div>
     </div>
@@ -283,51 +270,21 @@ function Indicateurs({
 }
 
 export function IndicateursOrganisationsOrganismes() {
-  const { trackPlausibleEvent } = usePlausibleAppTracking();
   const organisationData = useOrganisationIndicateursOrganismes();
-
-  const downloadOrganismesIndicateurs = async (type: TypeOrganismesIndicateurs) => {
-    trackPlausibleEvent(typeToGoalPlausible[type]);
-    const organismes = await _get(`/api/v1/organisation/organismes/indicateurs/${type}`);
-    exportDataAsXlsx(
-      `tdb-organismes-${type}.xlsx`,
-      organismes.map((organisme) => convertOrganismeToExport(organisme)),
-      organismesExportColumns
-    );
-  };
 
   return (
     <Indicateurs
       data={organisationData.data || {}}
       isLoading={organisationData.isLoading}
       error={organisationData.error}
-      downloadOrganismesIndicateurs={downloadOrganismesIndicateurs}
     />
   );
 }
 
 export function IndicateursOrganisme({ organismeId }: { organismeId: string }) {
-  const { trackPlausibleEvent } = usePlausibleAppTracking();
   const organismeData = useOrganisme(organismeId);
 
   const data = (organismeData.organisme as Organisme & { organismesCount?: IOrganismesCount })?.organismesCount || {};
 
-  const downloadOrganismesIndicateurs = async (type: TypeOrganismesIndicateurs) => {
-    trackPlausibleEvent(typeToGoalPlausible[type]);
-    const organismes = await _get(`/api/v1/organismes/${organismeId}/indicateurs/organismes/${type}`);
-    exportDataAsXlsx(
-      `tdb-organismes-${type}.xlsx`,
-      organismes.map((organisme) => convertOrganismeToExport(organisme)),
-      organismesExportColumns
-    );
-  };
-
-  return (
-    <Indicateurs
-      data={data}
-      isLoading={organismeData.isLoading}
-      error={organismeData.error}
-      downloadOrganismesIndicateurs={downloadOrganismesIndicateurs}
-    />
-  );
+  return <Indicateurs data={data} isLoading={organismeData.isLoading} error={organismeData.error} />;
 }

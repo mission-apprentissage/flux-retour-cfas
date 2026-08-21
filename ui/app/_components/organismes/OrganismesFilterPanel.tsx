@@ -1,11 +1,26 @@
 "use client";
 
+import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { DEPARTEMENTS_SORTED, IOrganisationType, REGIONS_SORTED, UAI_INCONNUE_CAPITALIZE } from "shared";
 
 import { FilterCheckboxMenu } from "@/app/_components/filters/FilterCheckboxMenu";
 import styles from "@/app/_components/filters/filters.module.scss";
 import { useAuth } from "@/app/_context/UserContext";
 import { OrganismesFilters } from "@/common/filters/organismes-filters";
+
+const NATURE_LABELS: Record<string, string> = {
+  responsable: "Responsable",
+  formateur: "Formateur",
+  responsable_formateur: "Responsable formateur",
+  inconnue: "Nature inconnue",
+};
+
+const TRANSMISSION_LABELS: Record<string, string> = {
+  recent: "Transmis < 1 mois",
+  "1_3_mois": "Transmis entre 1 et 3 mois",
+  arrete: "Arrêt des transmissions",
+  jamais: "Jamais transmis",
+};
 
 export interface OrganismeFiltersListVisibilityProps {
   showFilterUai?: boolean;
@@ -49,9 +64,53 @@ export function OrganismesFilterPanel(props: OrganismesFilterPanelProps) {
     return true;
   });
 
+  const removeValue = <K extends keyof OrganismesFilters>(key: K, value: OrganismesFilters[K][number]) => {
+    props.onFiltersChange({
+      [key]: (props.filters[key] as Array<typeof value>).filter((item) => item !== value),
+    } as Partial<OrganismesFilters>);
+  };
+
+  const activeTags: Array<{ key: string; label: string; onDismiss: () => void }> = [
+    ...props.filters.departements.map((code) => ({
+      key: `departement-${code}`,
+      label: `Département ${code}`,
+      onDismiss: () => removeValue("departements", code),
+    })),
+    ...props.filters.regions.map((code) => ({
+      key: `region-${code}`,
+      label: REGIONS_SORTED.find((region) => region.code === code)?.nom ?? `Région ${code}`,
+      onDismiss: () => removeValue("regions", code),
+    })),
+    ...props.filters.nature.map((nature) => ({
+      key: `nature-${nature}`,
+      label: NATURE_LABELS[nature] ?? nature,
+      onDismiss: () => removeValue("nature", nature),
+    })),
+    ...props.filters.etatUAI.map((etat) => ({
+      key: `uai-${etat}`,
+      label: etat ? "UAI connue" : `UAI ${UAI_INCONNUE_CAPITALIZE.toLowerCase()}`,
+      onDismiss: () => removeValue("etatUAI", etat),
+    })),
+    ...props.filters.transmission.map((state) => ({
+      key: `transmission-${state}`,
+      label: TRANSMISSION_LABELS[state] ?? state,
+      onDismiss: () => removeValue("transmission", state),
+    })),
+    ...props.filters.qualiopi.map((value) => ({
+      key: `qualiopi-${value}`,
+      label: value ? "Certifié Qualiopi" : "Non certifié Qualiopi",
+      onDismiss: () => removeValue("qualiopi", value),
+    })),
+    ...props.filters.ferme.map((value) => ({
+      key: `ferme-${value}`,
+      label: value ? "SIRET fermé" : "SIRET en activité",
+      onDismiss: () => removeValue("ferme", value),
+    })),
+  ];
+
   return (
     <div className={styles.filterPanel}>
-      <p className={styles.filterPanelLabel}>FILTRER PAR</p>
+      <p className={styles.filterPanelLabel}>Filtrer par</p>
       <div className={styles.filterPanelRow}>
         {props.showFilterLocalisation && isAllowedToShowFilterDepartement(type) && (
           <FilterCheckboxMenu
@@ -135,10 +194,22 @@ export function OrganismesFilterPanel(props: OrganismesFilterPanelProps) {
           />
         )}
 
-        <button type="button" className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm" onClick={props.onReset}>
-          réinitialiser
-        </button>
+        {activeTags.length > 0 && (
+          <button type="button" className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm" onClick={props.onReset}>
+            Réinitialiser
+          </button>
+        )}
       </div>
+
+      {activeTags.length > 0 && (
+        <div className={styles.activeTagsRow}>
+          {activeTags.map((tag) => (
+            <Tag key={tag.key} small dismissible nativeButtonProps={{ onClick: tag.onDismiss, type: "button" }}>
+              {tag.label}
+            </Tag>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
