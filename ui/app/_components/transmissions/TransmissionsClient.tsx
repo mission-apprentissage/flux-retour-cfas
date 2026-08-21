@@ -52,12 +52,12 @@ export default function TransmissionsClient({ modePublique = false, organismeId 
   const organisme = modePublique ? organismePublique : organisationOrganisme;
   const organismeLoadError = modePublique ? organismeError : organisationError;
 
-  // efface la notification « erreurs de transmission » du header dès que la page est consultée
+  // efface la notification « erreurs de transmission » du header dès que la page est consultée par l'organisme lui-même
   useEffect(() => {
-    if (organisme?.has_transmission_errors) {
+    if (!modePublique && organisme?.has_transmission_errors) {
       _put(`/api/v1/organismes/${organisme._id}/transmission/reset-notification`, {});
     }
-  }, [organisme]);
+  }, [organisme, modePublique]);
 
   const {
     data,
@@ -128,6 +128,7 @@ export default function TransmissionsClient({ modePublique = false, organismeId 
     <div>
       <PageHeader
         title={`${modePublique ? "Ses" : "Mes"} transmissions`}
+        titleAs={modePublique ? "h2" : "h1"}
         intro="Visualisez l’état de la donnée des apprenants et leurs contrats transmis ou non, via l’API. L’ensemble des éléments manquants et/ou invalides sont listés dans un rapport complet."
       />
 
