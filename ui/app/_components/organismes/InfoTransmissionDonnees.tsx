@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
-import { isBefore, subMonths, subWeeks } from "date-fns";
+import { isBefore, subMonths } from "date-fns";
 
 import { TRANSMISSION_ORGANISME } from "@/common/constants/organismes";
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
@@ -25,7 +25,7 @@ function getTranmissionDonneesState(
       ? "donnees_non_transmises"
       : isBefore(new Date(lastTransmissionDate), subMonths(new Date(), 3))
         ? "donnees_obsoletes"
-        : isBefore(new Date(lastTransmissionDate), subWeeks(new Date(), 1))
+        : isBefore(new Date(lastTransmissionDate), subMonths(new Date(), 1))
           ? "donnees_anciennes"
           : "donnees_recentes";
 }
