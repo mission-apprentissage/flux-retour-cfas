@@ -49,6 +49,7 @@ export function DeploymentRow({
         <div className={percentage ? styles.deploymentValueWithPercentage : undefined}>
           <p className={styles.deploymentValue}>{value}</p>
           {percentage &&
+            percentage !== "0%" &&
             (loadingPercentage ? (
               <Skeleton width="40px" height="20px" />
             ) : (
