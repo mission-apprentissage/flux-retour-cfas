@@ -1,3 +1,4 @@
+import logger from "@/common/logger";
 import { getDatabase } from "@/common/mongodb";
 
 const ETABLISSEMENTS = [
@@ -74,14 +75,20 @@ export const up = async () => {
   const flagResult = await db
     .collection("organismes")
     .updateMany({ $or: orConditions }, { $set: { is_allowed_deca: true } });
-  console.log(`Organismes flaggés: ${flagResult.matchedCount}/${ETABLISSEMENTS.length}`);
+  logger.info(
+    { matchedCount: flagResult.matchedCount, expectedCount: ETABLISSEMENTS.length },
+    "[Migration] Organismes flaggés"
+  );
 
   // 2. Récupérer les IDs des organismes flaggés
   const organismes = await db.collection("organismes").find({ is_allowed_deca: true }).project({ _id: 1 }).toArray();
   const organismeIds = organismes.map((o) => o._id.toString());
 
   if (organismeIds.length !== ETABLISSEMENTS.length) {
-    console.warn(`Attention: ${organismeIds.length} organismes trouvés sur ${ETABLISSEMENTS.length} attendus`);
+    logger.warn(
+      { foundCount: organismeIds.length, expectedCount: ETABLISSEMENTS.length },
+      "[Migration] Nombre d'organismes trouvés différent de celui attendu"
+    );
   }
 
   // 3. Activer ml_beta_activated_at sur les organisations
@@ -93,7 +100,7 @@ export const up = async () => {
     },
     { $set: { ml_beta_activated_at: now } }
   );
-  console.log(`Organisations activées: ${orgResult.modifiedCount}`);
+  logger.info({ modifiedCount: orgResult.modifiedCount }, "[Migration] Organisations activées");
 };
 
 export const down = async () => {
@@ -111,7 +118,7 @@ export const down = async () => {
       },
       { $unset: { ml_beta_activated_at: "" } }
     );
-    console.log(`Organisations désactivées: ${orgResult.modifiedCount}`);
+    logger.info({ modifiedCount: orgResult.modifiedCount }, "[Migration] Organisations désactivées");
   }
 
   await db.collection("organismes").updateMany({ is_allowed_deca: true }, { $unset: { is_allowed_deca: "" } });

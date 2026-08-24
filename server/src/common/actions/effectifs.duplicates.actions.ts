@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { DuplicateEffectifGroup, DuplicateEffectifGroupPagination, getAnneesScolaireListFromDate } from "shared";
 
+import logger from "@/common/logger";
 import { effectifsDb } from "@/common/model/collections";
 
 /**
@@ -143,6 +144,6 @@ export const deleteOldestDuplicates = async (organisme_id: ObjectId): Promise<vo
 
     await effectifsDb().deleteMany({ _id: { $in: idsToDelete } });
   } catch (error) {
-    console.error("Une erreur s'est produite lors du processus de suppression :", error);
+    logger.error({ err: error }, "Une erreur s'est produite lors du processus de suppression des doublons");
   }
 };
