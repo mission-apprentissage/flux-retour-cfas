@@ -27,6 +27,9 @@ async function main() {
   if (!arboPrincipaleSheetName) {
     throw new Error(`Onglet Arbo Principale non trouvée. Le fichier a sans doute changé de format.`);
   }
+  // Script autonome lancé à la main : il ne charge pas dotenv, donc importer @/common/logger
+  // (et par ricochet @/config et ses variables required) le ferait planter au démarrage.
+  // eslint-disable-next-line no-console
   console.log(`Données : ${arboPrincipaleSheetName}`);
   const arboPrincipaleSheet = workbook.Sheets[arboPrincipaleSheetName];
 
@@ -94,6 +97,7 @@ async function main() {
   famillesMetiers.forEach((familleMetier) => addIdsToNames(familleMetier));
 
   writeFileSync("arborescence-rome.json", Buffer.from(JSON.stringify(famillesMetiers), "utf8"));
+  // eslint-disable-next-line no-console
   console.log("Fichier créé : arborescence-rome.json");
 }
 

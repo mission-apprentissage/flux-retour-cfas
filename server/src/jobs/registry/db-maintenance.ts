@@ -44,6 +44,9 @@ export const dbMaintenanceJobs = {
   "migrations:status": {
     handler: async () => {
       const pendingMigrations = await statusMigration();
+      // Sortie brute volontaire : .infra/ansible/deploy.yml teste la présence de la ligne exacte
+      // "migrations-status=synced" dans stdout_lines. Le logger (JSON en prod) casserait le déploiement.
+      // eslint-disable-next-line no-console
       console.log(`migrations-status=${pendingMigrations === 0 ? "synced" : "pending"}`);
       return;
     },

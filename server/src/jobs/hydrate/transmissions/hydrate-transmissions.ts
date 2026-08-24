@@ -52,19 +52,19 @@ export const hydrateAllTransmissions = async () => {
 
   if (!allDates || allDates.length === 0) {
     captureException(new Error("No transmission dates found."));
-    console.error("No transmission dates found.");
+    logger.error("Aucune date de transmission trouvée");
     return;
   }
   for (const date of allDates) {
     if (!date) {
-      console.error("Invalid date found in transmission dates:", date);
+      logger.error({ date }, "Date invalide dans les dates de transmission");
       continue;
     }
     try {
       await insertTransmissions(new Date(date));
     } catch (error) {
       captureException(error);
-      console.error(`Error processing date ${date}:`, error);
+      logger.error({ err: error, date }, "Erreur lors du traitement de la date de transmission");
     }
   }
 };
@@ -74,12 +74,12 @@ export const forceHydrateAllTransmissions = async () => {
 
   for (const date of allDates) {
     if (!date) {
-      console.error("Invalid date found in transmission dates:", date);
+      logger.error({ date }, "Date invalide dans les dates de transmission");
       continue;
     }
     const today = new Date();
     if (date === formatDateYYYYMMDD(today)) {
-      console.warn(`Skipping today's date: ${date}`);
+      logger.warn({ date }, "Date du jour ignorée");
       continue;
     }
 
@@ -88,7 +88,7 @@ export const forceHydrateAllTransmissions = async () => {
       await insertTransmissions(new Date(date));
     } catch (error) {
       captureException(error);
-      console.error(`Error processing date ${date}:`, error);
+      logger.error({ err: error, date }, "Erreur lors du traitement de la date de transmission");
     }
   }
 };

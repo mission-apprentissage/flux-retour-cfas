@@ -1,3 +1,4 @@
+import logger from "@/common/logger";
 import { getDatabase } from "@/common/mongodb";
 
 const ETABLISSEMENTS = [
@@ -73,7 +74,10 @@ export const up = async () => {
   const flagResult = await db
     .collection("organismes")
     .updateMany({ $or: orConditions }, { $set: { is_allowed_collab: true } });
-  console.log(`Organismes flaggés: ${flagResult.matchedCount}/${ETABLISSEMENTS.length}`);
+  logger.info(
+    { matchedCount: flagResult.matchedCount, expectedCount: ETABLISSEMENTS.length },
+    "[Migration] Organismes flaggés"
+  );
 };
 
 export const down = async () => {

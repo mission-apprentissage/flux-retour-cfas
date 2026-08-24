@@ -98,22 +98,14 @@ function createUpdateObject(
 }
 
 function handleUpdateError(err: unknown, effectif: IEffectifGenerique) {
-  console.error("Erreur lors de la mise à jour de l'effectif :", err);
-  if (
-    err instanceof MongoServerError &&
-    err.errInfo &&
-    err.errInfo.details &&
-    Array.isArray(err.errInfo.details.schemaRulesNotSatisfied)
-  ) {
-    console.error(
-      "Erreurs de validation de schéma détaillées :",
-      JSON.stringify(err.errInfo.details.schemaRulesNotSatisfied, null, 2)
-    );
-  }
+  const schemaRulesNotSatisfied =
+    err instanceof MongoServerError && Array.isArray(err.errInfo?.details?.schemaRulesNotSatisfied)
+      ? err.errInfo.details.schemaRulesNotSatisfied
+      : undefined;
+
   logger.error(
-    `Erreur lors de la mise à jour de l'effectif ${effectif._id}: ${
-      err instanceof Error ? err.message : JSON.stringify(err)
-    }`
+    { err, effectifId: effectif._id, schemaRulesNotSatisfied },
+    "Erreur lors de la mise à jour de l'effectif"
   );
   captureException(err);
 }
