@@ -1,0 +1,27 @@
+.nameCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+}
+
+.statutHeader {
+  text-align: right;
+}
+
+.emptyMessage {
+  color: var(--text-mention-grey);
+  margin: 1.5rem 0;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+/* `.fr-table > table` (DSFR) l'emporte sur une simple classe : on cible le conteneur. */
+:global(.fr-table) > .table {
+  display: table;
+  width: 100%;
+  min-width: 48rem;
+  overflow: visible;
+}

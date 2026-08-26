@@ -58,6 +58,11 @@ export function PageHeader({
         return "traité en priorité";
       case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
         return "à traiter en priorité";
+      case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+      case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
+        return "à traiter ou recontacter";
+      case API_EFFECTIF_LISTE.COLLAB_TRAITE:
+        return "traité";
       default:
         return "";
     }

@@ -1,0 +1,11 @@
+.anneeFermee {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.anneeLienAfficher {
+  font-weight: 400;
+  text-decoration: underline;
+  color: var(--text-action-high-blue-france);
+}

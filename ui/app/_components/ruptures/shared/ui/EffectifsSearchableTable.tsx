@@ -1,7 +1,7 @@
 "use client";
 
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
-import { memo } from "react";
+import { memo, ReactNode } from "react";
 import { IMissionLocaleEffectifList } from "shared";
 
 import { PostalCodeOption } from "@/app/_utils/ruptures.utils";
@@ -25,6 +25,8 @@ type EffectifsSearchableTableProps = {
   postalCodeOptions?: PostalCodeOption[];
   selectedPostalCodes?: string[];
   onPostalCodesChange?: (value: string[]) => void;
+  /** Filtres additionnels affichés dans la même rangée que le filtre villes. */
+  filtresSupplementaires?: ReactNode;
 };
 
 export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
@@ -41,6 +43,7 @@ export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
   postalCodeOptions = [],
   selectedPostalCodes = [],
   onPostalCodesChange,
+  filtresSupplementaires,
 }: EffectifsSearchableTableProps) {
   return (
     <div>
@@ -59,8 +62,13 @@ export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
           )}
         />
       </div>
-      {showVillesFilter && postalCodeOptions.length > 0 && onPostalCodesChange && (
-        <VillesFilter options={postalCodeOptions} value={selectedPostalCodes} onChange={onPostalCodesChange} />
+      {(filtresSupplementaires || (showVillesFilter && postalCodeOptions.length > 0 && onPostalCodesChange)) && (
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", gap: "1rem" }}>
+          {showVillesFilter && postalCodeOptions.length > 0 && onPostalCodesChange && (
+            <VillesFilter options={postalCodeOptions} value={selectedPostalCodes} onChange={onPostalCodesChange} />
+          )}
+          {filtresSupplementaires}
+        </div>
       )}
       {!isTraite && (priorityData || hadEffectifsPrioritaires) && (
         <div style={{ marginBottom: "2rem" }}>
