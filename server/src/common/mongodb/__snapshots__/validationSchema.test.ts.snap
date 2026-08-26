@@ -12694,6 +12694,28 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
         },
       },
     },
+    "date_dernier_passage_a_recontacter": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date du dernier passage manuel du dossier au statut « À recontacter » (situation CONTACTE_SANS_RETOUR)",
+    },
+    "date_derniere_action_ml": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de la dernière écriture d'un utilisateur ML sur le dossier (référence du nudge). Les événements automatiques (WhatsApp, refresh de snapshot) ne la mettent pas à jour",
+    },
     "date_rupture": {
       "anyOf": [
         {
@@ -12703,6 +12725,17 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
           "bsonType": "null",
         },
       ],
+    },
+    "date_traitement": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date à laquelle le dossier a été traité (situation posée hors CONTACTE_SANS_RETOUR). Remise à null si le dossier repasse à traiter ou à recontacter",
     },
     "deca_feedback": {
       "anyOf": [

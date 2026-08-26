@@ -201,6 +201,18 @@ const matchTraitementEffectifPipelineMl = (
           },
         },
       ];
+    case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+      return [{ $match: { $or: [{ a_traiter: true }, { injoignable: true }] } }];
+    case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
+      return [
+        {
+          $match: {
+            $and: [{ "organisme_data.acc_conjoint": true }, { $or: [{ a_traiter: true }, { injoignable: true }] }],
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.COLLAB_TRAITE:
+      return [{ $match: { a_traiter: false, injoignable: false, "organisme_data.acc_conjoint": true } }];
   }
 
   const WHATSAPP_CALLBACK_INJOIGNABLE = { whatsapp_callback_requested: true, injoignable: true };
@@ -762,6 +774,25 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
         a_risque_whatsapp_callback: -1,
         a_contacter: -1,
       };
+    // Listes fusionnées : nudge en tête, puis les critères de priorité (Collaboration CFA,
+    // Souhaite un RDV, Mineur, RQTH — dissociés), puis À recontacter avant À traiter.
+    // `_id` en dernier pour un ordre déterministe (précédent/suivant de la fiche).
+    case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+    case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
+      return {
+        relance_urgente: -1,
+        a_risque_accompagnement_conjoint: -1,
+        a_risque_souhaite_rdv: -1,
+        a_risque_mineur: -1,
+        a_risque_rqth: -1,
+        injoignable: -1,
+        date_reference: -1,
+        _id: 1,
+      };
+    case API_EFFECTIF_LISTE.COLLAB_TRAITE:
+      return { date_traitement: -1, date_reference: -1, _id: 1 };
+    default:
+      throw Boom.badRequest(`Liste inconnue: ${nom_liste}`);
   }
 };
 
