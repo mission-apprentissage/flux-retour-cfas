@@ -52,6 +52,7 @@ import {
 } from "../shared/rupture-pipeline.utils";
 
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
+import { computeSuiviDatesSet } from "./mission-locale-suivi-dates";
 import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
 import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "./mission-locale.constants";
 
@@ -2294,6 +2295,7 @@ export const setEffectifMissionLocaleData = async (
     effectif_id: new ObjectId(effectifId),
   });
 
+  const now = new Date();
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
     {
       mission_locale_id: missionLocaleId,
@@ -2302,7 +2304,8 @@ export const setEffectifMissionLocaleData = async (
     {
       $set: {
         ...dbSetObject,
-        updated_at: new Date(),
+        ...computeSuiviDatesSet(effectifFields.situation, Object.keys(dbSetObject).length > 0, now),
+        updated_at: now,
         ...(effectif?.organisme_data?.acc_conjoint
           ? {
               "organisme_data.has_unread_notification": true,

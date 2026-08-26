@@ -632,6 +632,94 @@ describe("Mission Locale Routes", () => {
     });
   });
 
+    describe("Dates de suivi du dossier (À traiter / À recontacter / Traité)", () => {
+      const postSituation = (body: Record<string, unknown>) =>
+        requestAsOrganisation(ML_DATA, "post", `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`, body);
+
+      it("une situation traitée pose date_traitement et date_derniere_action_ml", async () => {
+        const res = await postSituation({ situation: SITUATION_ENUM.RDV_PRIS });
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_traitement).toBeInstanceOf(Date);
+        expect(effectif?.date_derniere_action_ml).toBeInstanceOf(Date);
+        expect(effectif?.date_dernier_passage_a_recontacter ?? null).toBeNull();
+      });
+
+      it("le passage à CONTACTE_SANS_RETOUR pose la date de recontact et annule date_traitement", async () => {
+        await postSituation({ situation: SITUATION_ENUM.RDV_PRIS });
+        await postSituation({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR });
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_dernier_passage_a_recontacter).toBeInstanceOf(Date);
+        expect(effectif?.date_traitement).toBeNull();
+      });
+
+      it("un dossier repassé de recontact à traité reprend une date_traitement", async () => {
+        await postSituation({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR });
+        await postSituation({ situation: SITUATION_ENUM.REORIENTATION });
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_traitement).toBeInstanceOf(Date);
+        // la trace du dernier passage à recontacter est conservée
+        expect(effectif?.date_dernier_passage_a_recontacter).toBeInstanceOf(Date);
+      });
+
+      it("une écriture sans situation ne touche que date_derniere_action_ml", async () => {
+        await postSituation({ situation: SITUATION_ENUM.RDV_PRIS });
+        const before = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        await postSituation({ commentaires: "relance téléphonique" });
+
+        const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(after?.date_traitement?.getTime()).toBe(before?.date_traitement?.getTime());
+        expect(after?.date_derniere_action_ml?.getTime()).toBeGreaterThan(
+          before?.date_derniere_action_ml?.getTime() ?? Infinity
+        );
+      });
+
+      it("l'admin qui pose une situation via le back-office pose aussi les dates", async () => {
+        const res = await requestAsOrganisation(
+          { type: "ADMINISTRATEUR" },
+          "put",
+          "/api/v1/admin/mission-locale/effectif",
+          {
+            mission_locale_id: ML_ID.toString(),
+            effectif_id: EFFECTIF_ID.toString(),
+            situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+          }
+        );
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_dernier_passage_a_recontacter).toBeInstanceOf(Date);
+        expect(effectif?.date_derniere_action_ml).toBeInstanceOf(Date);
+      });
+
+      it("le reset admin efface les trois dates de suivi", async () => {
+        await postSituation({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR });
+        await postSituation({ situation: SITUATION_ENUM.RDV_PRIS });
+
+        const res = await requestAsOrganisation(
+          { type: "ADMINISTRATEUR" },
+          "post",
+          "/api/v1/admin/mission-locale/effectif/reset",
+          {
+            mission_locale_id: ML_ID.toString(),
+            effectif_id: EFFECTIF_ID.toString(),
+          }
+        );
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_traitement).toBeUndefined();
+        expect(effectif?.date_dernier_passage_a_recontacter).toBeUndefined();
+        expect(effectif?.date_derniere_action_ml).toBeUndefined();
+      });
+    });
+  });
+
   describe("Collab V2 — visibilité et priorité forcées par le CFA", () => {
     const dayAgo = (n: number) => {
       const d = new Date();
