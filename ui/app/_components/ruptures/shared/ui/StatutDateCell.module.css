@@ -1,0 +1,19 @@
+.statutCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.derniereActivite {
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--text-mention-grey);
+  white-space: nowrap;
+}
+
+.derniereActiviteAlerte {
+  composes: derniereActivite;
+  font-weight: 700;
+  color: var(--text-default-warning);
+}

@@ -1,6 +1,7 @@
 import { format } from "date-fns/format";
 import { fr } from "date-fns/locale";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
+import { ML_DELAI_RELANCE_JOURS } from "shared/constants";
 
 import { EffectifData, MonthItem } from "../../common/types/ruptures";
 
@@ -47,4 +48,17 @@ export const matchesPostalCodes = (effectif: EffectifData, selected: string[]): 
 export const dePrenom = (prenom: string): string => {
   const premiere = prenom?.trim().charAt(0).toLowerCase();
   return "aeiouyàâäéèêëîïôöùûü".includes(premiere) ? `d'${prenom}` : `de ${prenom}`;
+};
+
+/**
+ * Indique si un dossier reste sans action au-delà du délai de relance (RG9) : le sous-texte
+ * daté du statut passe alors en gras et en orange. Comparaison en jours révolus, comme le
+ * nudge de tri côté serveur.
+ */
+export const isDelaiRelanceDepasse = (date: string | Date | null | undefined, now: Date = new Date()): boolean => {
+  if (!date) return false;
+  const reference = new Date(date);
+  if (Number.isNaN(reference.getTime())) return false;
+  const joursEcoules = Math.floor((now.getTime() - reference.getTime()) / (24 * 60 * 60 * 1000));
+  return joursEcoules > ML_DELAI_RELANCE_JOURS;
 };

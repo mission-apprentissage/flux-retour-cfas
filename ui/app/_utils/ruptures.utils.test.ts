@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { EffectifData } from "../../common/types/ruptures";
 
-import { dePrenom, matchesPostalCodes } from "./ruptures.utils";
+import { dePrenom, isDelaiRelanceDepasse, matchesPostalCodes } from "./ruptures.utils";
 
 const makeEffectif = (overrides: Partial<EffectifData> = {}): EffectifData => ({
   id: Math.random().toString(36).slice(2),
@@ -38,6 +38,28 @@ describe("matchesPostalCodes", () => {
 
   it("excludes an effectif without a postal code when a filter is active", () => {
     expect(matchesPostalCodes(makeEffectif({ code_postal: null }), ["13001"])).toBe(false);
+  });
+});
+
+describe("isDelaiRelanceDepasse", () => {
+  const now = new Date("2026-08-24T10:00:00.000Z");
+  const joursAvant = (jours: number) => new Date(now.getTime() - jours * 24 * 60 * 60 * 1000);
+
+  it("ne signale rien sans date", () => {
+    expect(isDelaiRelanceDepasse(null, now)).toBe(false);
+    expect(isDelaiRelanceDepasse(undefined, now)).toBe(false);
+    expect(isDelaiRelanceDepasse("pas une date", now)).toBe(false);
+  });
+
+  it("ne signale pas un dossier dans le délai", () => {
+    expect(isDelaiRelanceDepasse(joursAvant(3), now)).toBe(false);
+    // le seuil est atteint mais pas dépassé
+    expect(isDelaiRelanceDepasse(joursAvant(7), now)).toBe(false);
+  });
+
+  it("signale un dossier au-delà du délai", () => {
+    expect(isDelaiRelanceDepasse(joursAvant(8), now)).toBe(true);
+    expect(isDelaiRelanceDepasse(joursAvant(30).toISOString(), now)).toBe(true);
   });
 });
 

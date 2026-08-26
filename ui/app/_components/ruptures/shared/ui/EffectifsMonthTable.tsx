@@ -19,9 +19,10 @@ import { EffectifData, MonthItem, SelectedSection } from "@/common/types/rupture
 import { matchesSearchTerm } from "../utils/searchUtils";
 
 import { CommuneCell } from "./CommuneCell";
-import { EffectifPriorityBadgeMultiple, EffectifStatusBadge } from "./EffectifStatusBadge";
+import { EffectifPriorityBadgeMultiple } from "./EffectifStatusBadge";
 import styles from "./MonthTable.module.css";
 import notificationStyles from "./NotificationBadge.module.css";
+import { StatutDateCell } from "./StatutDateCell";
 
 type EffectifsMonthTableProps = {
   monthItem: MonthItem;
@@ -43,7 +44,7 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
     id: effectif.id,
     badge: (
       <div style={{ display: "flex", alignItems: "end", width: "100%", justifyContent: "flex-end" }}>
-        <EffectifStatusBadge effectif={effectif} organisation={isCfaPage ? "ORGANISME_FORMATION" : "MISSION_LOCALE"} />
+        <StatutDateCell effectif={effectif} organisation={isCfaPage ? "ORGANISME_FORMATION" : "MISSION_LOCALE"} />
       </div>
     ),
     name: (
@@ -113,6 +114,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
       case API_EFFECTIF_LISTE.A_TRAITER:
       case API_EFFECTIF_LISTE.INJOIGNABLE:
       case API_EFFECTIF_LISTE.TRAITE:
+      case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
         return [
           { label: "Apprenant", dataKey: "name", width: 250 },
           { label: "Formation", dataKey: "formation", width: "auto" },
@@ -150,6 +152,9 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
 
   // Transmet le filtre villes à la fiche pour que le calcul précédent/suivant reste dans le sous-ensemble filtré.
   const cpQuery = selectedPostalCodes.length > 0 ? `&cp=${selectedPostalCodes.join(",")}` : "";
+  // La liste fusionnée alimente aussi la vue « Dossiers prioritaires » : on marque l'origine
+  // pour que le fil d'Ariane de la fiche ramène bien à la liste d'où vient le conseiller.
+  const origineQuery = pathname?.startsWith("/mission-locale/ruptures") ? "&origine=ruptures" : "";
 
   const getRowLink = (rawData: EffectifData) => {
     if (pathname && pathname.startsWith("/cfa")) {
@@ -158,7 +163,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
 
     return user.organisation.type === "ADMINISTRATEUR" && mlId
       ? `/admin/mission-locale/${mlId}/edit/${rawData.id}/?nom_liste=${listType}${cpQuery}`
-      : `/mission-locale/${rawData.id}?nom_liste=${listType}${cpQuery}`;
+      : `/mission-locale/${rawData.id}?nom_liste=${listType}${cpQuery}${origineQuery}`;
   };
 
   const monthHeaderClassName = styles.monthSection;

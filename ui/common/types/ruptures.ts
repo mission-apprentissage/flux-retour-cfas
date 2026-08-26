@@ -1,3 +1,5 @@
+import type { ML_SITUATION_DOSSIER } from "shared/constants";
+
 export type EffectifData = {
   id: string;
   nom: string;
@@ -14,16 +16,35 @@ export type EffectifData = {
   acc_conjoint: boolean;
   rqth: boolean;
   a_traiter: boolean;
+  injoignable?: boolean;
   nouveau_contrat: boolean;
   unread_by_current_user?: boolean;
   whatsapp_callback_requested?: boolean;
   whatsapp_no_help_responded?: boolean;
   souhaite_rdv?: boolean;
   souhaite_rdv_at?: string | null;
+  // Dates de suivi du dossier (sous-texte daté sous le badge de statut)
+  date_reception?: string | null;
+  date_traitement?: string | null;
+  date_dernier_passage_a_recontacter?: string | null;
+  date_derniere_action_ml?: string | null;
 };
 
 export type EffectifPriorityData = EffectifData & {
   date_rupture: string;
+};
+
+/** Ligne des listes « Dossiers prioritaires » et « Collaborations CFA ». */
+export type MlListeEffectif = EffectifData & {
+  injoignable: boolean;
+  situation_dossier: ML_SITUATION_DOSSIER;
+  relance_urgente: boolean;
+  date_rupture?: string | null;
+};
+
+export type MlListeResponse = {
+  effectifs: MlListeEffectif[];
+  counts: { a_traiter_ou_recontacter: number; traite: number };
 };
 
 export type MonthItem = {
@@ -40,4 +61,5 @@ export type MonthsData = {
   injoignable_prioritaire: { hadEffectifsPrioritaires: boolean; effectifs: EffectifData[] };
   traite: MonthItem[];
   injoignable: MonthItem[];
+  a_traiter_ou_recontacter: MonthItem[];
 };
