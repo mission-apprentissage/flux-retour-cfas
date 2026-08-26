@@ -24,11 +24,17 @@ interface MultiSelectDropdownProps {
   renderFooter?: (api: { close: () => void }) => ReactNode;
   onClose?: () => void;
   fitContent?: boolean;
+  /** Affiche un champ de recherche pour filtrer les options (listes longues). */
+  searchable?: boolean;
+  searchPlaceholder?: string;
 }
 
 function defaultDisplayText(_selected: string[], _options: Option[], placeholder: string): string {
   return placeholder;
 }
+
+/** insensible à la casse et aux accents : « merignac » retrouve « Mérignac » */
+const normaliser = (texte: string) => texte.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
 export function MultiSelectDropdown({
   options,
@@ -41,17 +47,27 @@ export function MultiSelectDropdown({
   renderFooter,
   onClose,
   fitContent = false,
+  searchable = false,
+  searchPlaceholder = "Rechercher",
 }: MultiSelectDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [recherche, setRecherche] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const searchRef = useRef<HTMLInputElement>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+
+  const optionsVisibles =
+    searchable && recherche.trim()
+      ? options.filter((option) => normaliser(option.label).includes(normaliser(recherche.trim())))
+      : options;
 
   const dismiss = useCallback(() => {
     setIsOpen(false);
     setFocusedIndex(-1);
+    setRecherche("");
     onCloseRef.current?.();
   }, []);
 
@@ -74,9 +90,15 @@ export function MultiSelectDropdown({
     }
   };
 
-  const isAllSelected = options.length > 0 && value.length === options.length;
+  // avec une recherche active, la sélection globale ne porte que sur les options visibles
+  const valeursVisibles = optionsVisibles.map((o) => o.value);
+  const isAllSelected = optionsVisibles.length > 0 && valeursVisibles.every((v) => value.includes(v));
   const handleSelectAll = () => {
-    onChange(isAllSelected ? [] : options.map((o) => o.value));
+    if (isAllSelected) {
+      onChange(value.filter((v) => !valeursVisibles.includes(v)));
+      return;
+    }
+    onChange([...value, ...valeursVisibles.filter((v) => !value.includes(v))]);
   };
 
   const handleKeyDown = useCallback(
@@ -90,10 +112,13 @@ export function MultiSelectDropdown({
         return;
       }
 
+      // l'espace et Entrée doivent rester disponibles pour la saisie
+      const saisieEnCours = e.target === searchRef.current;
+
       switch (e.key) {
         case "ArrowDown":
           e.preventDefault();
-          setFocusedIndex((prev) => (prev < options.length - 1 ? prev + 1 : prev));
+          setFocusedIndex((prev) => (prev < optionsVisibles.length - 1 ? prev + 1 : prev));
           break;
         case "ArrowUp":
           e.preventDefault();
@@ -101,9 +126,10 @@ export function MultiSelectDropdown({
           break;
         case "Enter":
         case " ":
+          if (saisieEnCours) break;
           e.preventDefault();
-          if (focusedIndex >= 0 && focusedIndex < options.length) {
-            handleToggle(options[focusedIndex].value);
+          if (focusedIndex >= 0 && focusedIndex < optionsVisibles.length) {
+            handleToggle(optionsVisibles[focusedIndex].value);
           }
           break;
         case "Escape":
@@ -112,7 +138,7 @@ export function MultiSelectDropdown({
           break;
       }
     },
-    [isOpen, focusedIndex, options, value, dismiss]
+    [isOpen, focusedIndex, optionsVisibles, value, dismiss]
   );
 
   useEffect(() => {
@@ -155,8 +181,27 @@ export function MultiSelectDropdown({
             role="listbox"
             aria-multiselectable="true"
           >
+            {searchable && (
+              <div className={styles.searchRow}>
+                <input
+                  ref={searchRef}
+                  type="search"
+                  className={`fr-input ${styles.searchInput}`}
+                  placeholder={searchPlaceholder}
+                  value={recherche}
+                  aria-label={searchPlaceholder}
+                  onChange={(e) => {
+                    setRecherche(e.target.value);
+                    setFocusedIndex(0);
+                  }}
+                />
+              </div>
+            )}
             <div className={styles.dropdownContent}>
-              {enableSelectAll && options.length > 1 && (
+              {searchable && optionsVisibles.length === 0 && (
+                <p className={styles.aucunResultat}>Aucun résultat pour « {recherche.trim()} »</p>
+              )}
+              {enableSelectAll && optionsVisibles.length > 1 && (
                 <div
                   className={`${styles.option} ${styles.selectAllOption}`}
                   role="option"
@@ -175,7 +220,7 @@ export function MultiSelectDropdown({
                   />
                 </div>
               )}
-              {options.map((option, index) => (
+              {optionsVisibles.map((option, index) => (
                 <div
                   key={option.value}
                   ref={(el) => {

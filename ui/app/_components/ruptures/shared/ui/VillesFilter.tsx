@@ -49,6 +49,8 @@ export function VillesFilter({ options, value, onChange }: VillesFilterProps) {
             placeholder="Villes"
             fitContent
             enableSelectAll
+            searchable
+            searchPlaceholder="Rechercher une commune"
             // Fermeture sans valider = abandon : on réaligne le brouillon sur la sélection appliquée.
             onClose={() => setDraft(value.length > 0 ? value : allValues)}
             renderFooter={({ close }) => (

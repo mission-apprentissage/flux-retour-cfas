@@ -133,3 +133,23 @@
   margin: 0;
   padding: 0;
 }
+
+.searchRow {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-default-grey);
+  background: var(--background-default-grey);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.searchInput {
+  width: 100%;
+}
+
+.aucunResultat {
+  margin: 0;
+  padding: 0.75rem;
+  color: var(--text-mention-grey);
+  font-size: 0.875rem;
+}
