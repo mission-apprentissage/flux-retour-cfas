@@ -60,7 +60,8 @@ const zOrganisationMissionLocaleCreate = z.object({
   nom: z.string({ description: "Nom de la mission locale" }),
   siret: z.string({ description: "N° SIRET" }).nullish(),
   ml_id: z.number({ description: "Identifiant de la mission locale" }),
-  email: z.string({ description: "Email de la mission locale" }).email().nullish(),
+  // Le référentiel ML renvoie parfois un contact vide : "" est toléré au même titre que null/undefined.
+  email: z.string({ description: "Email de la mission locale" }).email().or(z.literal("")).nullish(),
   telephone: z.string({ description: "Téléphone de la mission locale" }).nullish(),
   site_web: z.string({ description: "Site web de la mission locale" }).nullish(),
   activated_at: z.coerce.date({ description: "Date d'activation de la mission locale" }).optional(),

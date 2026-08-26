@@ -19202,7 +19202,15 @@ exports[`validation-schema > should create validation schema for organisations >
         "email": {
           "anyOf": [
             {
-              "bsonType": "string",
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "description": "Email de la mission locale",
+                },
+                {
+                  "bsonType": "string",
+                },
+              ],
               "description": "Email de la mission locale",
             },
             {
