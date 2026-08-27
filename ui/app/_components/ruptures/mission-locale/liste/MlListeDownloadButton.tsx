@@ -4,18 +4,17 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import mime from "mime";
 import qs from "qs";
 import { useState } from "react";
+import { IMissionLocaleEffectifList } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _getBlob } from "@/common/httpClient";
 import { downloadObject } from "@/common/utils/browser";
 
-import type { NomListeFusionnee } from "./hooks";
-
 export function MlListeDownloadButton({
   nomListe,
   onError,
 }: {
-  nomListe: NomListeFusionnee;
+  nomListe: IMissionLocaleEffectifList;
   onError: (message: string | null) => void;
 }) {
   const [isFetching, setIsFetching] = useState(false);

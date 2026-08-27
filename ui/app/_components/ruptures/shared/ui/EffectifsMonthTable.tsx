@@ -29,7 +29,6 @@ type EffectifsMonthTableProps = {
   searchTerm: string;
   handleSectionChange?: (section: SelectedSection) => void;
   listType: IMissionLocaleEffectifList;
-  onDownloadMonth?: (month: string, listType: IMissionLocaleEffectifList) => void;
   selectedPostalCodes?: string[];
 };
 
@@ -77,19 +76,9 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
 
 function buildMonthLabel(month: string) {
   if (month === "plus-de-180-j") {
-    return {
-      labelElement: "+ de 180j | En abandon",
-      labelString: month,
-      downloadLabel: "+ de 180j",
-    };
+    return { labelElement: "+ de 180j | En abandon", labelString: month };
   }
-
-  const formattedMonth = formatMonthAndYear(month);
-  return {
-    labelElement: formattedMonth,
-    labelString: month,
-    downloadLabel: formattedMonth,
-  };
+  return { labelElement: formatMonthAndYear(month), labelString: month };
 }
 
 export const EffectifsMonthTable = memo(function EffectifsMonthTable({
@@ -97,7 +86,6 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   searchTerm,
   handleSectionChange,
   listType,
-  onDownloadMonth,
   selectedPostalCodes = [],
 }: EffectifsMonthTableProps) {
   const { user } = useAuth();
@@ -106,7 +94,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   const searchParams = useSearchParams();
   const mlId = params?.id as string | undefined;
   const isCfaPage = pathname && pathname.startsWith("/cfa");
-  const { labelElement, labelString, downloadLabel } = buildMonthLabel(monthItem.month);
+  const { labelElement, labelString } = buildMonthLabel(monthItem.month);
   const anchorId = anchorFromLabel(labelString);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -176,10 +164,10 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
       {monthItem.data.length === 0 ? (
         <>
           <div className={monthHeaderClassName}>
-            <h4 className={styles.monthTitle}>
-              {labelElement}
-              {` (${monthItem.data.length})`}
-            </h4>
+            <div className={styles.monthHeader}>
+              <h4 className={styles.monthTitle}>{labelElement}</h4>
+              <span className={styles.monthCount}>0 jeune</span>
+            </div>
           </div>
           <div style={{ marginTop: "1rem" }}>
             {monthItem.treated_count && monthItem.treated_count > 0 ? (
@@ -193,21 +181,10 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
         <>
           <div className={monthHeaderClassName}>
             <div className={styles.monthHeader}>
-              <h4 className={styles.monthTitle}>
-                {labelElement}
-                {` (${filteredData.length})`}
-              </h4>
-              {!isCfaPage && onDownloadMonth && (
-                <Button
-                  priority="secondary"
-                  size="small"
-                  iconId="ri-download-line"
-                  iconPosition="right"
-                  onClick={() => onDownloadMonth(monthItem.month, listType)}
-                >
-                  Ruptures en {downloadLabel}
-                </Button>
-              )}
+              <h4 className={styles.monthTitle}>{labelElement}</h4>
+              <span className={styles.monthCount}>
+                {filteredData.length} jeune{filteredData.length > 1 ? "s" : ""}
+              </span>
             </div>
           </div>
           <div style={{ marginTop: "1rem" }}>

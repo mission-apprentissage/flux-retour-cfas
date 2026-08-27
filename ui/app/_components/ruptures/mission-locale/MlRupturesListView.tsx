@@ -23,11 +23,10 @@ import { EffectifData, MonthItem, MonthsData } from "@/common/types/ruptures";
 import { EffectifsSearchableTable } from "../shared/ui/EffectifsSearchableTable";
 import { matchesSearchTerm } from "../shared/utils/searchUtils";
 
-import { DownloadSection } from "./DownloadSection";
-import { MlCriteresFilter } from "./liste/MlCriteresFilter";
+import { MlListeDownloadButton } from "./liste/MlListeDownloadButton";
+import { MlListeFilters } from "./liste/MlListeFilters";
 import { useMlListeFiltres } from "./liste/useMlListeFiltres";
 import styles from "./MlRupturesListView.module.css";
-import { useMonthDownload } from "./useMonthDownload";
 
 /** Sous-onglets de la liste ruptures : les dossiers actionnables d'un côté, les dossiers clos de l'autre. */
 const SOUS_ONGLETS = {
@@ -54,7 +53,7 @@ export function MlRupturesListView({
   initialStatut,
   initialRuptureDate,
 }: MlRupturesListViewProps) {
-  const { downloadMonth, downloadError, setDownloadError } = useMonthDownload();
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const [sousOnglet, setSousOnglet] = useState<SousOnglet>(sousOngletDepuisStatut(initialStatut ?? null));
@@ -77,7 +76,7 @@ export function MlRupturesListView({
     if (initialStatut) setSousOnglet(sousOngletDepuisStatut(initialStatut));
   }, [initialStatut]);
 
-  // Le filtre critères s'applique en amont : la recherche et le filtre villes restent gérés par le tableau.
+  // Le filtre critères retire les dossiers en amont ; recherche et villes filtrent à l'affichage.
   const appliquerCriteres = useCallback(
     (months: MonthItem[]): MonthItem[] => {
       if (criteres.length === 0) return months;
@@ -122,19 +121,13 @@ export function MlRupturesListView({
 
   const totalATraiter = useMemo(() => countVisible(moisATraiter), [moisATraiter, countVisible]);
   const totalTraites = useMemo(() => countVisible(moisTraites), [moisTraites, countVisible]);
+  const totalAffiche = estTraites ? totalTraites : totalATraiter;
 
   const buildMonthLabel = useCallback(
     (month: string) =>
       month === "plus-de-180-j"
-        ? {
-            labelElement: (
-              <>
-                + de 180j | <i>En abandon</i>
-              </>
-            ),
-            labelString: month,
-          }
-        : { labelElement: formatMonthAndYear(month), labelString: month },
+        ? { labelElement: "+ de 180j", labelString: month, sousTitre: "En abandon" }
+        : { labelElement: formatMonthAndYear(month), labelString: month, sousTitre: null },
     []
   );
 
@@ -154,18 +147,19 @@ export function MlRupturesListView({
   const itemMois = useCallback(
     (monthItem: MonthItem) => {
       const monthCount = countVisibleInMonth(monthItem);
-      const { labelElement, labelString } = buildMonthLabel(monthItem.month);
+      const { labelElement, labelString, sousTitre } = buildMonthLabel(monthItem.month);
       const anchorId = anchorFromLabel(labelString);
       return {
-        text:
-          monthCount > 0 ? (
-            <strong>
+        // Libellés en graisse normale, avec « En abandon » en sous-titre du bucket +180j (maquette).
+        text: (
+          <span className={styles.moisItem}>
+            <span>
               {labelElement}
-              {monthItem.month === "plus-de-180-j" ? "" : ` (${monthCount})`}
-            </strong>
-          ) : (
-            labelElement
-          ),
+              {monthCount > 0 ? ` (${monthCount})` : ""}
+            </span>
+            {sousTitre && <span className={styles.moisSousTitre}>{sousTitre}</span>}
+          </span>
+        ),
         linkProps: {
           href: `#${anchorId}`,
           onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -270,20 +264,22 @@ export function MlRupturesListView({
           )
         ) : (
           <>
-            <DownloadSection listType={sousOnglet} />
+            <div className={styles.panneauEntete}>
+              <h2 className={styles.panneauTitre}>{estTraites ? "Dossiers traités" : "À traiter"}</h2>
+              <div className={styles.panneauActions}>
+                <span className={styles.panneauCompteur}>
+                  {totalAffiche} jeune{totalAffiche > 1 ? "s" : ""}
+                </span>
+                <MlListeDownloadButton nomListe={sousOnglet} onError={setDownloadError} />
+              </div>
+            </div>
             <SuspenseWrapper fallback={<TableSkeleton />}>
               <EffectifsSearchableTable
                 data={moisRendus}
                 isTraite={sousOnglet === SOUS_ONGLETS.TRAITES}
                 searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
                 listType={sousOnglet}
-                onDownloadMonth={downloadMonth}
-                showVillesFilter
-                postalCodeOptions={postalCodeOptions}
                 selectedPostalCodes={selectedPostalCodes}
-                onPostalCodesChange={handlePostalCodesChange}
-                filtresSupplementaires={<MlCriteresFilter value={criteres} onChange={setCriteres} />}
               />
             </SuspenseWrapper>
           </>
@@ -294,6 +290,15 @@ export function MlRupturesListView({
 
   return (
     <>
+      <MlListeFilters
+        recherche={searchTerm}
+        onRechercheChange={setSearchTerm}
+        villesOptions={postalCodeOptions}
+        codesPostaux={selectedPostalCodes}
+        onCodesPostauxChange={handlePostalCodesChange}
+        criteres={criteres}
+        onCriteresChange={setCriteres}
+      />
       <Tabs
         selectedTabId={sousOnglet}
         onTabChange={(id) => {

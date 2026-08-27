@@ -34,8 +34,7 @@
 }
 
 .monthSection {
-  padding: 1.5rem;
-  background-color: #f6f6f6;
+  padding: 1.5rem 0 0.5rem;
 }
 
 .monthHeader {
@@ -49,4 +48,17 @@
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
+}
+
+.monthHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Effectif du mois, en retrait du titre (maquette). */
+.monthCount {
+  color: var(--text-mention-grey);
+  font-size: 0.875rem;
+  white-space: nowrap;
 }
