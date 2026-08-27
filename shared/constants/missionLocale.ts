@@ -22,3 +22,16 @@ export const ML_SITUATION_DOSSIER_LABEL: Record<ML_SITUATION_DOSSIER, string> = 
 
 export const zMlSituationDossier = z.nativeEnum(ML_SITUATION_DOSSIER);
 export type IMlSituationDossier = z.infer<typeof zMlSituationDossier>;
+
+/** Colonnes triables des listes ML. Sans tri demandé, l'ordre de priorité du serveur s'applique. */
+export enum ML_TRI_COLONNE {
+  NOM = "nom",
+  SITUATION = "situation",
+  FORMATION = "formation",
+  COMMUNE = "commune",
+  STATUT = "statut",
+}
+
+export const zMlTriColonne = z.nativeEnum(ML_TRI_COLONNE);
+export const zMlTriOrdre = z.enum(["asc", "desc"]);
+export type MlTri = { colonne: ML_TRI_COLONNE; ordre: z.infer<typeof zMlTriOrdre> };

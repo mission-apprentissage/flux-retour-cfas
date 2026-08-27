@@ -122,8 +122,12 @@ const getEffectifsFusionnesMissionLocale = async (req, { locals }) => {
     throw Boom.forbidden("No mission locale in session");
   }
 
-  const { nom_liste } = await validateFullZodObjectSchema(req.query, effectifsFusionnesQuerySchema);
-  return await getEffectifsFusionnesByMissionLocaleId(missionLocale, nom_liste);
+  const { nom_liste, tri, ordre } = await validateFullZodObjectSchema(req.query, effectifsFusionnesQuerySchema);
+  return await getEffectifsFusionnesByMissionLocaleId(
+    missionLocale,
+    nom_liste,
+    tri ? { colonne: tri, ordre: ordre ?? "asc" } : null
+  );
 };
 
 const getVillesMissionLocale = async (_req, { locals }) => {
@@ -135,13 +139,23 @@ const getVillesMissionLocale = async (_req, { locals }) => {
 };
 
 const getEffectifMissionLocale = async (req, { locals }) => {
-  const { nom_liste, code_postal } = await validateFullZodObjectSchema(req.query, effectifMissionLocaleListe);
+  const { nom_liste, code_postal, tri, ordre } = await validateFullZodObjectSchema(
+    req.query,
+    effectifMissionLocaleListe
+  );
   const effectifId = req.params.id;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
   const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
   const codesPostaux = code_postal ? code_postal.split(",").filter(Boolean) : undefined;
-  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste, userId, codesPostaux);
+  return await getEffectifFromMissionLocaleId(
+    missionLocale,
+    effectifId,
+    nom_liste,
+    userId,
+    codesPostaux,
+    tri ? { colonne: tri, ordre: ordre ?? "asc" } : null
+  );
 };
 
 const exportEffectifMissionLocale = async (req, res) => {

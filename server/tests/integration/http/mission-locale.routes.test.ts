@@ -1,6 +1,6 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "bson";
-import { ML_SITUATION_DOSSIER, SITUATION_ENUM } from "shared";
+import { ML_SITUATION_DOSSIER, ML_TRI_COLONNE, SITUATION_ENUM } from "shared";
 import { API_EFFECTIF_LISTE, CONNAISSANCE_ML_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { it, expect, describe, beforeEach, vi } from "vitest";
 
@@ -258,6 +258,71 @@ describe("Mission Locale Routes", () => {
       expect(fiche.data.next.nom).toBe(ordre[1]);
       // navigation circulaire : le précédent du premier est le dernier de la liste
       expect(fiche.data.previous.nom).toBe(ordre[2]);
+    });
+
+    describe("Tri par colonne", () => {
+      const NOM_LISTE = API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER;
+      const trier = (tri: string, ordre: string) =>
+        requestAsOrganisation(
+          ML_DATA,
+          "get",
+          `/api/v1/organisation/mission-locale/effectifs?nom_liste=${NOM_LISTE}&tri=${tri}&ordre=${ordre}`
+        );
+
+      it("trie par nom dans les deux sens", async () => {
+        await ingestRupturant("CHARLIE", "Test");
+        await ingestRupturant("ALPHA", "Test");
+        await ingestRupturant("BRAVO", "Test");
+
+        const asc = await trier(ML_TRI_COLONNE.NOM, "asc");
+        expect(asc.status).toBe(200);
+        expect(asc.data.effectifs.map((e) => e.nom)).toEqual(["ALPHA", "BRAVO", "CHARLIE"]);
+
+        const desc = await trier(ML_TRI_COLONNE.NOM, "desc");
+        expect(desc.data.effectifs.map((e) => e.nom)).toEqual(["CHARLIE", "BRAVO", "ALPHA"]);
+      });
+
+      it("sans tri demandé, garde l'ordre de priorité du serveur", async () => {
+        await ingestRupturant("ZULU", "Test");
+        const collabId = await ingestRupturant("ALPHA", "Test");
+        await requestAsOrganisation(
+          { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+          "put",
+          `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectif/${collabId.toString()}`,
+          { rupture: true, acc_conjoint: true }
+        );
+
+        // la collaboration CFA prime, même si son nom est premier dans l'alphabet
+        const parDefaut = await getListe(NOM_LISTE);
+        expect(parDefaut.data.effectifs.map((e) => e.nom)).toEqual(["ALPHA", "ZULU"]);
+
+        const parNom = await trier(ML_TRI_COLONNE.NOM, "desc");
+        expect(parNom.data.effectifs.map((e) => e.nom)).toEqual(["ZULU", "ALPHA"]);
+      });
+
+      it("aligne le précédent/suivant de la fiche sur la colonne triée", async () => {
+        await ingestRupturant("CHARLIE", "Test");
+        await ingestRupturant("ALPHA", "Test");
+        await ingestRupturant("BRAVO", "Test");
+
+        const liste = await trier(ML_TRI_COLONNE.NOM, "asc");
+        const premier = liste.data.effectifs[0];
+
+        const fiche = await requestAsOrganisation(
+          ML_DATA,
+          "get",
+          `/api/v1/organisation/mission-locale/effectif/${premier.id}?nom_liste=${NOM_LISTE}&tri=${ML_TRI_COLONNE.NOM}&ordre=asc`
+        );
+
+        expect(fiche.status).toBe(200);
+        expect(fiche.data.currentIndex).toBe(0);
+        expect(fiche.data.next.nom).toBe("BRAVO");
+      });
+
+      it("rejette une colonne de tri inconnue", async () => {
+        const res = await trier("age", "asc");
+        expect(res.status).toBe(400);
+      });
     });
   });
 

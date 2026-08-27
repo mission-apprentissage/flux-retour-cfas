@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { zMlSituationDossier } from "../../../constants/missionLocale";
+import { zMlSituationDossier, zMlTriColonne, zMlTriOrdre } from "../../../constants/missionLocale";
 import { API_EFFECTIF_LISTE, zApiEffectifListeEnum, zSituationEnum } from "../../data/missionLocaleEffectif.model";
 
 export const effectifsParMoisFiltersMissionLocaleAPISchema = {
@@ -23,6 +23,9 @@ export const effectifMissionLocaleListe = {
   nom_liste: zApiEffectifListeEnum,
   // Filtre villes (codes postaux séparés par des virgules) pour restreindre le calcul précédent/suivant.
   code_postal: z.string().optional(),
+  // Tri de la liste d'origine, pour que le précédent/suivant suive l'ordre affiché.
+  tri: zMlTriColonne.optional(),
+  ordre: zMlTriOrdre.optional(),
 };
 
 /** Listes plates de l'espace ML : dossiers prioritaires et collaborations CFA. */
@@ -34,6 +37,8 @@ export const zNomListeFusionnee = z.enum([
 
 export const effectifsFusionnesQuerySchema = {
   nom_liste: zNomListeFusionnee,
+  tri: zMlTriColonne.optional(),
+  ordre: zMlTriOrdre.optional(),
 };
 
 export const zMissionLocaleEffectifListItem = z.object({

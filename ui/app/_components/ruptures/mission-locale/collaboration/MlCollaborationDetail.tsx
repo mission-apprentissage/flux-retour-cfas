@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 import { API_EFFECTIF_LISTE, IEffectifMissionLocale } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { triQueryDepuisUrl } from "@/app/_utils/ruptures.utils";
 
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 import { PageHeader } from "../../shared/ui/PageHeader";
@@ -24,7 +25,8 @@ function getMlListInfo(
   /** Vue d'où provient le dossier : la liste fusionnée alimente les vues prioritaires ET ruptures. */
   origine?: string | null,
   criteres?: string | null,
-  sousOnglet?: string | null
+  sousOnglet?: string | null,
+  triQuery?: string
 ): { label: string; href: string } {
   const statut: API_EFFECTIF_LISTE =
     nomListe ??
@@ -36,7 +38,7 @@ function getMlListInfo(
 
   // Conserve les filtres actifs au retour à la liste via le fil d'Ariane.
   const cpQuery = codePostal ? `&cp=${codePostal}` : "";
-  const filtresQuery = `${cpQuery}${criteres ? `&criteres=${criteres}` : ""}`;
+  const filtresQuery = `${cpQuery}${criteres ? `&criteres=${criteres}` : ""}${triQuery ?? ""}`;
   const href = `/mission-locale/ruptures?statut=${statut}${filtresQuery}`;
 
   switch (statut) {
@@ -93,7 +95,8 @@ export function MlCollaborationDetail({ data }: MlCollaborationDetailProps) {
     codePostal,
     origine,
     criteres,
-    sousOnglet
+    sousOnglet,
+    triQueryDepuisUrl(searchParams?.get("tri"), searchParams?.get("ordre"))
   );
 
   // Dépend de effectif.id : la navigation Précédent/Suivant change l'[id] sans démonter le composant

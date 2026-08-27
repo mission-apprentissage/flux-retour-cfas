@@ -39,9 +39,9 @@ const BLOC_EXPLICATIF = (
 );
 
 function MlPrioritairesListe() {
-  const { data } = useMlListe(NOM_LISTE);
-  const { data: villesOptions } = useMlVilles();
   const filtres = useMlListeFiltres();
+  const { data } = useMlListe(NOM_LISTE, filtres.tri);
+  const { data: villesOptions } = useMlVilles();
 
   const effectifsFiltres = useMemo(
     () =>
@@ -90,6 +90,8 @@ function MlPrioritairesListe() {
           videTitre="Aucun dossier prioritaire à traiter"
           videSousTitre="Tous les dossiers prioritaires ont été traités."
           videImage="/images/mission-locale-treated.svg"
+          tri={filtres.tri}
+          onTri={filtres.changerTri}
         />
       </Tabs>
     </>

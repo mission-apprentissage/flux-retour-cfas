@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ML_SITUATION_DOSSIER_LABEL } from "shared/constants";
+import { ML_SITUATION_DOSSIER_LABEL, ML_TRI_COLONNE } from "shared/constants";
 
 import type { MlListeEffectif } from "@/common/types/ruptures";
 
@@ -14,17 +14,30 @@ import { StatutDateCell } from "../../shared/ui/StatutDateCell";
 
 import styles from "./MlEffectifsTable.module.css";
 import { ML_SITUATION_TOOLTIPS } from "./situationTooltips";
+import type { MlTriEtat } from "./tri";
 
 interface MlEffectifsTableProps {
   effectifs: MlListeEffectif[];
   getRowLink: (effectif: MlListeEffectif) => string;
   emptyMessage?: string;
+  tri?: MlTriEtat | null;
+  onTri?: (colonne: ML_TRI_COLONNE) => void;
 }
+
+const COLONNES: { label: string; cle: ML_TRI_COLONNE; className?: string }[] = [
+  { label: "Prénom Nom", cle: ML_TRI_COLONNE.NOM },
+  { label: "Situation", cle: ML_TRI_COLONNE.SITUATION },
+  { label: "Formation CFA", cle: ML_TRI_COLONNE.FORMATION },
+  { label: "Commune du jeune", cle: ML_TRI_COLONNE.COMMUNE },
+  { label: "Statut", cle: ML_TRI_COLONNE.STATUT },
+];
 
 export function MlEffectifsTable({
   effectifs,
   getRowLink,
   emptyMessage = "Aucun dossier trouvé.",
+  tri,
+  onTri,
 }: MlEffectifsTableProps) {
   const router = useRouter();
 
@@ -37,11 +50,37 @@ export function MlEffectifsTable({
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>Prénom Nom</th>
-            <th>Situation</th>
-            <th>Formation CFA</th>
-            <th>Commune du jeune</th>
-            <th className={styles.statutHeader}>Statut</th>
+            {COLONNES.map(({ label, cle }) => {
+              const ordreAria =
+                tri?.colonne === cle
+                  ? tri.ordre === "asc"
+                    ? ("ascending" as const)
+                    : ("descending" as const)
+                  : undefined;
+              return (
+                <th
+                  key={cle}
+                  className={cle === ML_TRI_COLONNE.STATUT ? styles.statutHeader : undefined}
+                  aria-sort={ordreAria}
+                >
+                  <span className={styles.headerContenu}>
+                    {label}
+                    {onTri && (
+                      // fr-btn--sort porte l'icône double flèche et sa rotation selon aria-sort ;
+                      // son libellé est masqué par le DSFR mais reste lu par les lecteurs d'écran.
+                      <button
+                        type="button"
+                        className="fr-btn fr-btn--secondary fr-btn--sort"
+                        aria-sort={ordreAria}
+                        onClick={() => onTri(cle)}
+                      >
+                        {`Trier par ${label}`}
+                      </button>
+                    )}
+                  </span>
+                </th>
+              );
+            })}
             <th aria-label="Accès au dossier" />
           </tr>
         </thead>

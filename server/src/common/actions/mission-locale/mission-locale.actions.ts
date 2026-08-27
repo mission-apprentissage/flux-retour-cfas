@@ -3,8 +3,9 @@ import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
 import { AggregationCursor, MongoServerError } from "mongodb";
-import { ML_DELAI_RELANCE_JOURS, ML_SITUATION_DOSSIER, STATUT_APPRENANT } from "shared/constants";
+import { ML_DELAI_RELANCE_JOURS, ML_SITUATION_DOSSIER, ML_TRI_COLONNE, STATUT_APPRENANT } from "shared/constants";
 import { CFA_COLLAB_AUTO_SEND_DELAI_DAYS } from "shared/constants/collaboration";
+import type { MlTri } from "shared/constants/missionLocale";
 import {
   IEffectif,
   IOrganisationMissionLocale,
@@ -850,6 +851,63 @@ const getSortPrerequisiteStages = (nom_liste: API_EFFECTIF_LISTE) => {
   }
 };
 
+/**
+ * Champs de tri par colonne : le nom concaténé et minusculisé, et le rang du statut dérivé.
+ * `situation_dossier` vient d'addSituationDossierField(), à appeler avant le $sort.
+ */
+const addTriColonneFields = () => [
+  {
+    $addFields: {
+      tri_nom: {
+        $toLower: {
+          $concat: [
+            { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom", ""] },
+            " ",
+            { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom", ""] },
+          ],
+        },
+      },
+      tri_statut: {
+        $switch: {
+          branches: [
+            { case: "$a_traiter", then: 0 },
+            { case: "$injoignable", then: 1 },
+          ],
+          default: 2,
+        },
+      },
+    },
+  },
+];
+
+/** Tri demandé par le conseiller. `_id` ferme chaque tri pour garder le précédent/suivant déterministe. */
+const getTriColonneRules = (colonne: ML_TRI_COLONNE, ordre: 1 | -1) => {
+  switch (colonne) {
+    case ML_TRI_COLONNE.NOM:
+      return { tri_nom: ordre, _id: 1 };
+    case ML_TRI_COLONNE.SITUATION:
+      return { situation_dossier: ordre, tri_nom: 1, _id: 1 };
+    case ML_TRI_COLONNE.FORMATION:
+      return { "effectif_snapshot.formation.libelle_long": ordre, tri_nom: 1, _id: 1 };
+    case ML_TRI_COLONNE.COMMUNE:
+      return { "effectif_snapshot.apprenant.adresse.commune": ordre, tri_nom: 1, _id: 1 };
+    case ML_TRI_COLONNE.STATUT:
+      return { tri_statut: ordre, date_reference: -1, _id: 1 };
+    default:
+      throw Boom.badRequest(`Colonne de tri inconnue: ${colonne}`);
+  }
+};
+
+/** Étages de tri d'une liste ML : ordre de priorité par défaut, colonne demandée sinon. */
+const getTriStages = (nom_liste: API_EFFECTIF_LISTE, tri?: MlTri | null) => [
+  ...getSortPrerequisiteStages(nom_liste),
+  ...addSituationDossierField(),
+  ...(tri ? addTriColonneFields() : []),
+  {
+    $sort: tri ? getTriColonneRules(tri.colonne, tri.ordre === "desc" ? -1 : 1) : getSortedRulesByListeType(nom_liste),
+  },
+];
+
 const buildFirstDayOfMonthExpr = (format?: string) => ({
   $cond: {
     if: { $lt: [{ $dateDiff: { startDate: "$date_reference", endDate: "$$NOW", unit: "day" } }, 180] },
@@ -1149,7 +1207,8 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifId: ObjectId,
   nom_liste: API_EFFECTIF_LISTE,
-  codesPostaux?: string[]
+  codesPostaux?: string[],
+  tri?: MlTri | null
 ) => {
   const aggregation = [
     ...(await missionLocaleBaseAggregation(organisation)),
@@ -1158,10 +1217,8 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
     ...(codesPostaux && codesPostaux.length > 0
       ? [{ $match: { "effectif_snapshot.apprenant.adresse.code_postal": { $in: codesPostaux } } }]
       : []),
-    ...getSortPrerequisiteStages(nom_liste),
-    {
-      $sort: getSortedRulesByListeType(nom_liste),
-    },
+    // Même tri que la liste, sinon la numérotation « dossier n°X sur N » ne lui correspond plus.
+    ...getTriStages(nom_liste, tri),
     {
       $project: {
         _id: 0,
@@ -1442,7 +1499,8 @@ export const getEffectifFromMissionLocaleId = async (
   effectifId: string,
   nom_liste: API_EFFECTIF_LISTE,
   userId?: ObjectId,
-  codesPostaux?: string[]
+  codesPostaux?: string[],
+  tri?: MlTri | null
 ) => {
   const aggregation = [
     ...(await generateOrganisationMatchStage(organisation)),
@@ -1558,7 +1616,8 @@ export const getEffectifFromMissionLocaleId = async (
     organisation,
     new ObjectId(effectifId),
     nom_liste,
-    codesPostaux
+    codesPostaux,
+    tri
   );
   return { effectif, ...next };
 };
@@ -1801,7 +1860,8 @@ type NomListeFusionnee =
 /** Listes plates de l'espace ML, triées serveur, avec les compteurs des sous-onglets. */
 export const getEffectifsFusionnesByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale,
-  nomListe: NomListeFusionnee
+  nomListe: NomListeFusionnee,
+  tri?: MlTri | null
 ) => {
   const isCollab = nomListe !== API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER;
 
@@ -1812,9 +1872,7 @@ export const getEffectifsFusionnesByMissionLocaleId = async (
       $facet: {
         liste: [
           ...matchTraitementEffectifPipelineMl(nomListe, organisation.type),
-          ...getSortPrerequisiteStages(nomListe),
-          ...addSituationDossierField(),
-          { $sort: getSortedRulesByListeType(nomListe) },
+          ...getTriStages(nomListe, tri),
           ...lookUpOrganisme(),
           {
             $project: {

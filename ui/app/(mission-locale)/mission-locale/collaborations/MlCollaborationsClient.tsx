@@ -39,8 +39,8 @@ function MlCollaborationsListes() {
 
   // Les deux listes sont chargées ensemble : changer de sous-onglet reste instantané et
   // conserve les filtres, sans re-suspendre la page.
-  const { data: aTraiter } = useMlListe(API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER);
-  const { data: traites } = useMlListe(API_EFFECTIF_LISTE.COLLAB_TRAITE);
+  const { data: aTraiter } = useMlListe(API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER, filtres.tri);
+  const { data: traites } = useMlListe(API_EFFECTIF_LISTE.COLLAB_TRAITE, filtres.tri);
   const { data: villesOptions } = useMlVilles();
 
   const estTraites = sousOnglet === SOUS_ONGLETS.TRAITES;
@@ -112,6 +112,8 @@ function MlCollaborationsListes() {
               : "Les CFA connectés au Tableau de bord ne vous ont envoyé aucun dossier pour le moment."
           }
           videImage={estTraites ? "/images/mission-locale-treated.svg" : "/images/mission-locale-not-treated.svg"}
+          tri={filtres.tri}
+          onTri={filtres.changerTri}
         />
       </Tabs>
     </>

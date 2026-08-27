@@ -51,6 +51,13 @@ export const dePrenom = (prenom: string): string => {
 };
 
 /**
+ * Suffixe de tri reconstruit depuis l'URL de la fiche, pour que le précédent/suivant et le
+ * retour à la liste conservent l'ordre affiché.
+ */
+export const triQueryDepuisUrl = (tri?: string | null, ordre?: string | null): string =>
+  tri ? `&tri=${tri}&ordre=${ordre === "desc" ? "desc" : "asc"}` : "";
+
+/**
  * Date du sous-texte de statut : « aujourd'hui » le jour même (maquette), « le JJ/MM/AAAA » sinon.
  */
 export const formatDateSuivi = (

@@ -9,6 +9,14 @@
   text-align: right;
 }
 
+/* Libellé et bouton de tri alignés, sans césure du libellé (maquette). */
+.headerContenu {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
 .emptyMessage {
   color: var(--text-mention-grey);
   margin: 1.5rem 0;

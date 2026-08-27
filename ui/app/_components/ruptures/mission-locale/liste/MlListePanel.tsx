@@ -2,6 +2,7 @@
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { useState } from "react";
+import { ML_TRI_COLONNE } from "shared/constants";
 
 import { MlCard } from "@/app/_components/card/MlCard";
 import type { MlListeEffectif } from "@/common/types/ruptures";
@@ -10,6 +11,7 @@ import type { NomListeFusionnee } from "./hooks";
 import { MlEffectifsTable } from "./MlEffectifsTable";
 import { MlListeDownloadButton } from "./MlListeDownloadButton";
 import styles from "./MlListePanel.module.css";
+import type { MlTriEtat } from "./tri";
 
 interface MlListePanelProps {
   titre: string;
@@ -21,6 +23,8 @@ interface MlListePanelProps {
   videTitre: string;
   videSousTitre?: string;
   videImage?: string;
+  tri?: MlTriEtat | null;
+  onTri?: (colonne: ML_TRI_COLONNE) => void;
 }
 
 export function MlListePanel({
@@ -32,6 +36,8 @@ export function MlListePanel({
   videTitre,
   videSousTitre,
   videImage = "/images/mission-locale-not-treated.svg",
+  tri,
+  onTri,
 }: MlListePanelProps) {
   const [erreurTelechargement, setErreurTelechargement] = useState<string | null>(null);
 
@@ -64,6 +70,8 @@ export function MlListePanel({
         effectifs={effectifs}
         getRowLink={getRowLink}
         emptyMessage="Aucun dossier ne correspond à votre recherche."
+        tri={tri}
+        onTri={onTri}
       />
     </div>
   );

@@ -24,11 +24,14 @@ export function useMlUpdateEffectif() {
 export function useMlEffectifDetail(id: string) {
   const searchParams = useSearchParams();
   const nomListe = (searchParams?.get("nom_liste") as API_EFFECTIF_LISTE) || API_EFFECTIF_LISTE.A_TRAITER;
-  // Filtre villes transmis pour que le backend calcule précédent/suivant sur le sous-ensemble filtré.
+  // Filtre villes et tri transmis pour que le backend calcule précédent/suivant sur la liste
+  // telle qu'elle était affichée.
   const codePostal = searchParams?.get("cp") || undefined;
+  const tri = searchParams?.get("tri") || undefined;
+  const ordre = searchParams?.get("ordre") || undefined;
 
   return useSuspenseQuery({
-    queryKey: [...effectifQueryKeys.detail(id), nomListe, codePostal],
+    queryKey: [...effectifQueryKeys.detail(id), nomListe, codePostal, tri, ordre],
 
     queryFn: async () => {
       if (!id) return null;
@@ -36,6 +39,7 @@ export function useMlEffectifDetail(id: string) {
         params: {
           nom_liste: nomListe,
           ...(codePostal ? { code_postal: codePostal } : {}),
+          ...(tri ? { tri, ordre: ordre ?? "asc" } : {}),
         },
       });
     },

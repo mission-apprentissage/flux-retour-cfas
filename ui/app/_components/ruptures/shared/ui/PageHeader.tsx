@@ -5,6 +5,7 @@ import { API_EFFECTIF_LISTE } from "shared";
 
 import { Spinner } from "@/app/_components/common/Spinner";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
+import { triQueryDepuisUrl } from "@/app/_utils/ruptures.utils";
 
 import styles from "./PageHeader.module.css";
 
@@ -29,9 +30,10 @@ export function PageHeader({
   const searchParams = useSearchParams();
   const rawList = searchParams ? (searchParams.get("nom_liste") as API_EFFECTIF_LISTE | null) : null;
   const nomListe = rawList || API_EFFECTIF_LISTE.A_TRAITER;
-  // Conserve le filtre villes en naviguant entre dossiers (précédent/suivant).
+  // Conserve le filtre villes et le tri en naviguant entre dossiers (précédent/suivant).
   const codePostal = searchParams?.get("cp") || null;
-  const listQuery = `?nom_liste=${nomListe}${codePostal ? `&cp=${codePostal}` : ""}`;
+  const triQuery = triQueryDepuisUrl(searchParams?.get("tri"), searchParams?.get("ordre"));
+  const listQuery = `?nom_liste=${nomListe}${codePostal ? `&cp=${codePostal}` : ""}${triQuery}`;
 
   const basePath = (() => {
     if (pathname && pathname.startsWith("/cfa")) {
