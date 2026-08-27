@@ -1,7 +1,6 @@
 import { ML_DELAI_RELANCE_JOURS } from "shared/constants";
 
-import { formatDate } from "@/app/_utils/date.utils";
-import { isDelaiRelanceDepasse } from "@/app/_utils/ruptures.utils";
+import { formatDateSuivi, isDelaiRelanceDepasse } from "@/app/_utils/ruptures.utils";
 
 import { EffectifStatusBadge } from "./EffectifStatusBadge";
 import styles from "./StatutDateCell.module.css";
@@ -19,19 +18,20 @@ interface StatutDateCellProps {
 
 function getDerniereActivite(effectif: StatutDateCellEffectif) {
   if (effectif.a_traiter) {
-    return { prefixe: "reçu", date: effectif.date_reception, alertable: true };
+    return { prefixe: "reçu", date: effectif.date_reception, alertable: true, relatif: true };
   }
+  // « depuis aujourd'hui » se lit mal : ce préfixe garde toujours la date
   if (effectif.injoignable) {
-    return { prefixe: "depuis", date: effectif.date_dernier_passage_a_recontacter, alertable: true };
+    return { prefixe: "depuis", date: effectif.date_dernier_passage_a_recontacter, alertable: true, relatif: false };
   }
-  return { prefixe: "traité", date: effectif.date_traitement, alertable: false };
+  return { prefixe: "traité", date: effectif.date_traitement, alertable: false, relatif: true };
 }
 
 /** Badge de statut et sa date, en orange au-delà du délai de relance (jamais pour un dossier traité). */
 export function StatutDateCell({ effectif, organisation }: StatutDateCellProps) {
-  const { prefixe, date, alertable } = getDerniereActivite(effectif);
+  const { prefixe, date, alertable, relatif } = getDerniereActivite(effectif);
   const enRetard = alertable && isDelaiRelanceDepasse(date);
-  const dateFormatee = formatDate(date);
+  const dateFormatee = formatDateSuivi(date, { relatif });
 
   return (
     <div className={styles.statutCell}>
@@ -41,7 +41,7 @@ export function StatutDateCell({ effectif, organisation }: StatutDateCellProps) 
           className={enRetard ? styles.derniereActiviteAlerte : styles.derniereActivite}
           {...(enRetard ? { "aria-label": `En attente depuis plus de ${ML_DELAI_RELANCE_JOURS} jours` } : {})}
         >
-          {prefixe} le {dateFormatee}
+          {prefixe} {dateFormatee}
         </span>
       )}
     </div>

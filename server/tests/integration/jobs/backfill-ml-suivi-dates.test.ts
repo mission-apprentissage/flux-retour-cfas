@@ -85,6 +85,26 @@ describe("backfillMlSuiviDates", () => {
     expect(after?.date_derniere_action_ml).toEqual(daysAgo(5));
   });
 
+  it("ne ressuscite pas les dates d'un dossier réinitialisé par un admin", async () => {
+    // le reset admin `$unset` la situation : le champ est absent, là où un retour à « à traiter »
+    // par le conseiller la laisse à null
+    const doc = createMlEffectifDoc();
+    await missionLocaleEffectifsDb().insertOne(doc as any);
+    await missionLocaleEffectifsLogDb().insertMany([
+      createLogDoc(doc._id, { situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR, created_at: daysAgo(20) }),
+      createLogDoc(doc._id, { situation: SITUATION_ENUM.RDV_PRIS, created_at: daysAgo(10) }),
+      createLogDoc(doc._id, { situation: null, created_at: daysAgo(2) }),
+    ] as any);
+
+    await backfillMlSuiviDates();
+
+    const after = await missionLocaleEffectifsDb().findOne({ _id: doc._id });
+    expect(after?.date_traitement ?? null).toBeNull();
+    expect(after?.date_dernier_passage_a_recontacter ?? null).toBeNull();
+    // le reset est lui-même une action ML
+    expect(after?.date_derniere_action_ml).toEqual(daysAgo(2));
+  });
+
   it("laisse un dossier à traiter sans logs intact", async () => {
     const doc = createMlEffectifDoc({ situation: null });
     await missionLocaleEffectifsDb().insertOne(doc as any);

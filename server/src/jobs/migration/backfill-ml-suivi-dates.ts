@@ -82,12 +82,15 @@ export async function backfillMlSuiviDates() {
       if (!effectif) {
         continue;
       }
-      // une date effacée par un reset admin ne doit pas être ressuscitée depuis les logs
+      // une date effacée par un reset admin ne doit pas être ressuscitée depuis les logs.
+      // Le reset `$unset` la situation (champ absent) là où un retour à « à traiter » par le
+      // conseiller la met à null (champ présent) : c'est ce qui distingue les deux cas.
+      const resetParAdmin = !("situation" in effectif);
       const set: Partial<IMissionLocaleEffectif> = {
         ...(agg.derniere_action && effectif.date_derniere_action_ml == null
           ? { date_derniere_action_ml: agg.derniere_action }
           : {}),
-        ...(agg.dernier_recontact && effectif.date_dernier_passage_a_recontacter == null
+        ...(agg.dernier_recontact && effectif.date_dernier_passage_a_recontacter == null && !resetParAdmin
           ? { date_dernier_passage_a_recontacter: agg.dernier_recontact }
           : {}),
         ...(agg.dernier_traitement && effectif.date_traitement == null && isTreatedSituation(effectif.situation)

@@ -38,6 +38,11 @@ export function DownloadSection({ listType }: DownloadSectionProps) {
           downloadText: "déjà traités",
           buttonLabel: "Liste des jeunes déjà traités",
         };
+      case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+        return {
+          downloadText: "à traiter ou recontacter",
+          buttonLabel: "Liste des jeunes à traiter ou recontacter",
+        };
       default:
         return {
           downloadText: "",

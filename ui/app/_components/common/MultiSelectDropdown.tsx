@@ -64,12 +64,17 @@ export function MultiSelectDropdown({
       ? options.filter((option) => normaliser(option.label).includes(normaliser(recherche.trim())))
       : options;
 
-  const dismiss = useCallback(() => {
+  const fermer = useCallback(() => {
     setIsOpen(false);
     setFocusedIndex(-1);
     setRecherche("");
-    onCloseRef.current?.();
   }, []);
+
+  // Fermeture sans validation : le consommateur en est averti pour réaligner son brouillon.
+  const dismiss = useCallback(() => {
+    fermer();
+    onCloseRef.current?.();
+  }, [fermer]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -244,7 +249,7 @@ export function MultiSelectDropdown({
                 </div>
               ))}
             </div>
-            {renderFooter && <div className={styles.footer}>{renderFooter({ close: () => setIsOpen(false) })}</div>}
+            {renderFooter && <div className={styles.footer}>{renderFooter({ close: fermer })}</div>}
           </div>
         )}
       </div>

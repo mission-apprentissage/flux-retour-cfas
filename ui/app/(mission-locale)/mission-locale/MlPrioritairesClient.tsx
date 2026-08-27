@@ -53,7 +53,8 @@ function MlPrioritairesListe() {
     [data.effectifs, filtres.recherche, filtres.codesPostaux, filtres.criteres]
   );
 
-  // Les filtres suivent vers la fiche : le précédent/suivant et le retour restent dans le sous-ensemble filtré.
+  // Les filtres suivent vers la fiche pour le retour à la liste. Le précédent/suivant, calculé
+  // côté serveur, ne connaît que les villes : les critères ne le restreignent pas.
   const getRowLink = (effectif: MlListeEffectif) =>
     `/mission-locale/${effectif.id}?nom_liste=${NOM_LISTE}${filtres.filtresQuery}`;
 

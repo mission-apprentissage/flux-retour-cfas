@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { memo, useState } from "react";
 import { API_EFFECTIF_LISTE, IMissionLocaleEffectifList } from "shared";
 
@@ -103,6 +103,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   const { user } = useAuth();
   const params = useParams();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const mlId = params?.id as string | undefined;
   const isCfaPage = pathname && pathname.startsWith("/cfa");
   const { labelElement, labelString, downloadLabel } = buildMonthLabel(monthItem.month);
@@ -152,6 +153,8 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
 
   // Transmet le filtre villes à la fiche pour que le calcul précédent/suivant reste dans le sous-ensemble filtré.
   const cpQuery = selectedPostalCodes.length > 0 ? `&cp=${selectedPostalCodes.join(",")}` : "";
+  // Les critères ne sont pas connus du serveur : transmis pour que le retour à la liste les retrouve.
+  const criteresQuery = searchParams?.get("criteres") ? `&criteres=${searchParams.get("criteres")}` : "";
   // La liste fusionnée alimente aussi la vue « Dossiers prioritaires » : on marque l'origine
   // pour que le fil d'Ariane de la fiche ramène bien à la liste d'où vient le conseiller.
   const origineQuery = pathname?.startsWith("/mission-locale/ruptures") ? "&origine=ruptures" : "";
@@ -163,7 +166,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
 
     return user.organisation.type === "ADMINISTRATEUR" && mlId
       ? `/admin/mission-locale/${mlId}/edit/${rawData.id}/?nom_liste=${listType}${cpQuery}`
-      : `/mission-locale/${rawData.id}?nom_liste=${listType}${cpQuery}${origineQuery}`;
+      : `/mission-locale/${rawData.id}?nom_liste=${listType}${cpQuery}${criteresQuery}${origineQuery}`;
   };
 
   const monthHeaderClassName = styles.monthSection;

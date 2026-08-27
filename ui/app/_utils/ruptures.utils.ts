@@ -51,6 +51,20 @@ export const dePrenom = (prenom: string): string => {
 };
 
 /**
+ * Date du sous-texte de statut : « aujourd'hui » le jour même (maquette), « le JJ/MM/AAAA » sinon.
+ */
+export const formatDateSuivi = (
+  date: string | Date | null | undefined,
+  { relatif = true, now = new Date() }: { relatif?: boolean; now?: Date } = {}
+): string => {
+  if (!date) return "";
+  const reference = new Date(date);
+  if (Number.isNaN(reference.getTime())) return "";
+  if (relatif && reference.toDateString() === now.toDateString()) return "aujourd'hui";
+  return `le ${reference.toLocaleDateString("fr-FR")}`;
+};
+
+/**
  * Indique si un dossier reste sans action au-delà du délai de relance (RG9) : le sous-texte
  * daté du statut passe alors en gras et en orange. Comparaison en jours révolus, comme le
  * nudge de tri côté serveur.

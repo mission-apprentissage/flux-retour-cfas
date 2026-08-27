@@ -3200,6 +3200,10 @@ export const getMissionLocaleStat = async (
 const MERGEABLE_FIELDS = [
   "situation",
   "situation_autre",
+  // dates de suivi : sans elles, le keeper hérite d'une situation sans sa date (sous-texte et tri faussés)
+  "date_traitement",
+  "date_dernier_passage_a_recontacter",
+  "date_derniere_action_ml",
   "commentaires",
   "deja_connu",
   "connaissance_ml",

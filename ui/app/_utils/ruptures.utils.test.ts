@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { EffectifData } from "../../common/types/ruptures";
 
-import { dePrenom, isDelaiRelanceDepasse, matchesPostalCodes } from "./ruptures.utils";
+import { dePrenom, formatDateSuivi, isDelaiRelanceDepasse, matchesPostalCodes } from "./ruptures.utils";
 
 const makeEffectif = (overrides: Partial<EffectifData> = {}): EffectifData => ({
   id: Math.random().toString(36).slice(2),
@@ -60,6 +60,28 @@ describe("isDelaiRelanceDepasse", () => {
   it("signale un dossier au-delà du délai", () => {
     expect(isDelaiRelanceDepasse(joursAvant(8), now)).toBe(true);
     expect(isDelaiRelanceDepasse(joursAvant(30).toISOString(), now)).toBe(true);
+  });
+});
+
+describe("formatDateSuivi", () => {
+  const now = new Date("2026-08-24T10:00:00.000Z");
+
+  it("ne rend rien sans date exploitable", () => {
+    expect(formatDateSuivi(null, { now })).toBe("");
+    expect(formatDateSuivi(undefined, { now })).toBe("");
+    expect(formatDateSuivi("pas une date", { now })).toBe("");
+  });
+
+  it("dit « aujourd'hui » le jour même", () => {
+    expect(formatDateSuivi(new Date("2026-08-24T08:00:00.000Z"), { now })).toBe("aujourd'hui");
+  });
+
+  it("donne la date les autres jours", () => {
+    expect(formatDateSuivi(new Date("2026-08-20T08:00:00.000Z"), { now })).toBe("le 20/08/2026");
+  });
+
+  it("garde la date quand la forme relative est désactivée", () => {
+    expect(formatDateSuivi(new Date("2026-08-24T08:00:00.000Z"), { relatif: false, now })).toBe("le 24/08/2026");
   });
 });
 
