@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { EffectifData } from "../../common/types/ruptures";
 
-import { matchesPostalCodes } from "./ruptures.utils";
+import { dePrenom, matchesPostalCodes } from "./ruptures.utils";
 
 const makeEffectif = (overrides: Partial<EffectifData> = {}): EffectifData => ({
   id: Math.random().toString(36).slice(2),
@@ -38,5 +38,22 @@ describe("matchesPostalCodes", () => {
 
   it("excludes an effectif without a postal code when a filter is active", () => {
     expect(matchesPostalCodes(makeEffectif({ code_postal: null }), ["13001"])).toBe(false);
+  });
+});
+
+describe("dePrenom", () => {
+  it("élide devant une voyelle", () => {
+    expect(dePrenom("Enzo")).toBe("d'Enzo");
+    expect(dePrenom("Amélie")).toBe("d'Amélie");
+    expect(dePrenom("Ilhan")).toBe("d'Ilhan");
+  });
+
+  it("garde « de » devant une consonne", () => {
+    expect(dePrenom("Martin")).toBe("de Martin");
+    expect(dePrenom("Théo")).toBe("de Théo");
+  });
+
+  it("gère un prénom accentué", () => {
+    expect(dePrenom("Élodie")).toBe("d'Élodie");
   });
 });

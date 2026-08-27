@@ -1,12 +1,12 @@
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
+import { CFA_COLLAB_AUTO_SEND_DELAI_DAYS } from "shared/constants/collaboration";
 import { IOrganisationOrganismeFormation } from "shared/models";
 import { ICfaRuptureEffectif, ICfaRupturesResponse } from "shared/models/routes/organismes/cfa";
 
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
 import {
-  CFA_COLLAB_AUTO_SEND_DELAI_DAYS,
   buildCollabStatusOrderField,
   buildCollabStatusSwitch,
   buildCsvInConditions,

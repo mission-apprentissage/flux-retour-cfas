@@ -19,3 +19,10 @@ export const REPONDU_SITUATIONS: ReadonlyArray<SITUATION_ENUM> = [
   SITUATION_ENUM.REORIENTATION,
   SITUATION_ENUM.AUTRE,
 ];
+
+/**
+ * Délai, en jours, après lequel un dossier en rupture est transmis automatiquement
+ * à la Mission Locale pour un CFA en collaboration — et à partir duquel la ML peut
+ * le traiter. Visibilité et capacité de traitement partagent ce seuil.
+ */
+export const CFA_COLLAB_AUTO_SEND_DELAI_DAYS = 45;

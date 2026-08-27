@@ -1,0 +1,297 @@
+.page {
+  min-height: 100vh;
+  background: var(--background-alt-blue-france);
+  padding-bottom: 4rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 22rem 1fr;
+  gap: 3rem;
+  max-width: 78rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 0;
+  align-items: start;
+}
+
+@media (max-width: 62em) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  /* En mono-colonne, l'illustration décorative repousse la question sous la ligne de flottaison. */
+  .illustration {
+    display: none;
+  }
+
+  .sidebar {
+    position: static;
+  }
+}
+
+.sidebar {
+  position: sticky;
+  top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cancelButton {
+  color: var(--text-default-error);
+  align-self: flex-start;
+}
+
+.illustration {
+  width: 100%;
+  max-width: 18rem;
+  height: auto;
+  align-self: center;
+}
+
+.tipCard {
+  display: flex;
+  gap: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 6px rgb(0 0 18 / 8%);
+}
+
+.tipIcon {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+
+.tipText {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-default-grey);
+}
+
+.tipText + .tipText {
+  margin-top: 0.75rem;
+}
+
+.content {
+  background: white;
+  border-radius: 8px;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.backButton {
+  align-self: flex-start;
+  padding-left: 0;
+}
+
+.stepCounter {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.stepTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.3;
+  color: var(--text-title-blue-france);
+}
+
+.progressSegments {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.progressSegment {
+  height: 0.5rem;
+  border-radius: 4px;
+  background: var(--background-contrast-grey);
+}
+
+.progressSegmentActive {
+  background: var(--text-action-high-blue-france);
+}
+
+.nextStep {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.question {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-default-grey);
+}
+
+.questionHint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.radioCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: white;
+  border: 1px solid var(--border-default-grey);
+  border-radius: 8px;
+  padding: 1.125rem 1rem;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-default-grey);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.radioCard:not(.radioCardSelected):hover {
+  border-color: var(--text-action-high-blue-france);
+  background: var(--background-action-low-blue-france);
+}
+
+.radioCardSelected {
+  border-color: var(--blue-france-main-525);
+  background: var(--background-alt-blue-france);
+}
+
+.radioInput {
+  accent-color: var(--text-action-high-blue-france);
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+  cursor: pointer;
+}
+
+.radioLabelText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.radioHint {
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.recapTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.35;
+  color: var(--text-title-blue-france);
+}
+
+.recapOverline {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-default-success);
+  text-transform: uppercase;
+}
+
+.recapHighlight {
+  color: var(--text-action-high-blue-france);
+}
+
+.feedbackCard {
+  background: var(--background-alt-grey);
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.feedbackScale {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.feedbackButton {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-default-grey);
+  background: white;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-default-grey);
+}
+
+.feedbackButtonSelected {
+  border-color: var(--blue-france-main-525);
+  background: var(--background-alt-blue-france);
+  font-weight: 700;
+}
+
+.feedbackLegend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+}
+
+.submitError {
+  margin: 0;
+  color: var(--text-default-error);
+  font-size: 0.875rem;
+}
+
+.minorBanner {
+  display: flex;
+  gap: 0.75rem;
+  background: var(--background-alt-blue-france);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.blockTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-title-blue-france);
+}
+
+/* Un champ date n'a pas besoin de toute la colonne : au-delà, le curseur et le sélecteur
+   natif se retrouvent très loin du libellé. */
+.dateField {
+  max-width: 16rem;
+}

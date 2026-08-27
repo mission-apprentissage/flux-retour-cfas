@@ -1,10 +1,10 @@
 import { strict as assert } from "assert";
+import { randomUUID } from "node:crypto";
 
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
 import { RateLimiterMongo } from "rate-limiter-flexible";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
-import { v4 as uuidv4 } from "uuid";
 import { afterEach, beforeEach, describe, it, vi } from "vitest";
 
 import { createSession } from "@/common/actions/sessions.actions";
@@ -42,7 +42,10 @@ async function createConfirmedUser(email: string) {
   });
 }
 
-describe("Rate limiting", () => {
+// Chaque scénario enchaîne 20 à 30 tentatives de connexion, et chaque tentative paie un hash
+// sha512crypt volontairement lent (anti-brute-force). Le budget par défaut de 5 s suffit à peine
+// à vide et saute dès que la suite complète tourne en parallèle.
+describe("Rate limiting", { timeout: 60_000 }, () => {
   useMongo();
 
   beforeEach(async () => {
@@ -349,7 +352,7 @@ describe("Rate limiting", () => {
       _resetLimitersForTests();
       const { httpClient: client } = await initTestApp();
 
-      const api_key = uuidv4();
+      const api_key = randomUUID();
       const org = createRandomOrganisme({ uai: "0802004U", siret: "77937827200016", api_key });
       await organismesDb().insertOne({ ...org, _id: new ObjectId() });
       const headers = { Authorization: `Bearer ${api_key}` };
@@ -388,7 +391,7 @@ describe("Rate limiting", () => {
       _resetLimitersForTests();
       const { httpClient: client } = await initTestApp();
 
-      const api_key = uuidv4();
+      const api_key = randomUUID();
       const org = createRandomOrganisme({ uai: "0802004U", siret: "77937827200016", api_key });
       await organismesDb().insertOne({ ...org, _id: new ObjectId() });
       const headers = { Authorization: `Bearer ${api_key}` };

@@ -2,6 +2,7 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Box, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
@@ -13,6 +14,11 @@ import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 import { _delete, _put, _post } from "@/common/httpClient";
 
 import userSchema from "../../../modules/admin/userSchema";
+
+const deleteUserModal = createModal({
+  id: "admin-user-delete",
+  isOpenedByDefault: false,
+});
 
 const UserForm = ({
   user,
@@ -125,25 +131,22 @@ const UserForm = ({
     },
   });
 
-  const onDeleteClicked = async (e) => {
-    e.preventDefault();
-    if (confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) {
-      const result = await _delete(`/api/v1/admin/users/${user._id}`);
-      if (result?.ok) {
-        setAlert({
-          message: "Utilisateur supprimé",
-          severity: "success",
-        });
-      } else {
-        setAlert({
-          message: "Erreur lors de la suppression de l'utilisateur.",
-          severity: "error",
-          description: " Merci de réessayer plus tard",
-        });
-      }
-
-      return onDelete?.();
+  const performDelete = async () => {
+    const result = await _delete(`/api/v1/admin/users/${user._id}`);
+    if (result?.ok) {
+      setAlert({
+        message: "Utilisateur supprimé",
+        severity: "success",
+      });
+    } else {
+      setAlert({
+        message: "Erreur lors de la suppression de l'utilisateur.",
+        severity: "error",
+        description: " Merci de réessayer plus tard",
+      });
     }
+
+    return onDelete?.();
   };
 
   const confirmUserAccess = async (validate) => {
@@ -342,10 +345,34 @@ const UserForm = ({
               <Button type="submit" priority="primary" disabled={!dirty}>
                 Enregistrer
               </Button>
-              <Button priority="secondary" onClick={onDeleteClicked}>
+              <Button type="button" priority="secondary" onClick={() => deleteUserModal.open()}>
                 Supprimer l&apos;utilisateur
               </Button>
             </Stack>
+            <deleteUserModal.Component
+              title="Supprimer l'utilisateur"
+              buttons={[
+                {
+                  children: "Annuler",
+                  doClosesModal: true,
+                  priority: "secondary",
+                },
+                {
+                  children: "Supprimer définitivement",
+                  doClosesModal: true,
+                  priority: "primary",
+                  onClick: performDelete,
+                },
+              ]}
+            >
+              <p>
+                Vous allez supprimer le compte de{" "}
+                <strong>
+                  {user.prenom} {user.nom}
+                </strong>{" "}
+                ({user.email}). Cette action est irréversible.
+              </p>
+            </deleteUserModal.Component>
           </Box>
         ) : (
           <Button type="submit" priority="primary">

@@ -63,11 +63,7 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
     <div className={styles.collaborationColumn}>
       {!dossierTraité && <p className={styles.columnHeader}>Collaboration avec la Mission Locale</p>}
 
-      {!effectif.date_rupture ? (
-        <p className={styles.collabDisabledMessage}>
-          La collaboration avec une Mission Locale n&apos;est possible que pour les jeunes en rupture de contrat.
-        </p>
-      ) : !dossierTraité ? (
+      {!dossierTraité ? (
         <>
           {ml ? (
             <>

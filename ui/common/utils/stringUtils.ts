@@ -5,9 +5,6 @@ export const formatNumber = (number) => {
   return Number(number).toLocaleString("fr-FR");
 };
 
-export const formatSiretSplitted = (siret) => {
-  return validateSiret(siret) ? `${siret.substr(0, 9)} ${siret.substr(9, siret.length)}` : siret;
-};
 export const formatSiretSplittedWithDefaultValue = (siret) => {
   if (!siret) return "SIRET INCONNU";
   return validateSiret(siret) ? `${siret.substr(0, 9)} ${siret.substr(9, siret.length)}` : "SIRET INVALIDE";

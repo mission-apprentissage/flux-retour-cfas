@@ -59,7 +59,8 @@ export function StatCard({
               {loadingPercentage ? (
                 <Skeleton width="40px" height="20px" />
               ) : (
-                percentage && (
+                percentage &&
+                percentage !== "0%" && (
                   <p className={styles.cardPercentage} style={{ color: percentageColor }}>
                     {percentage}
                   </p>

@@ -8,9 +8,6 @@ import { escapeRegex, parseStringToArray } from "@/common/utils/usersFiltersUtil
 
 export const DATE_START_RUPTURES = new Date("2025-01-01");
 
-/** Délai au-delà duquel un dossier d'un CFA en collab part automatiquement à la ML. */
-export const CFA_COLLAB_AUTO_SEND_DELAI_DAYS = 45;
-
 /**
  * Statuts courants traduisant une sortie de rupture : retour en contrat ou arrivée au terme
  * de la formation. Un dossier dans l'un de ces statuts n'est plus à traiter.
@@ -62,9 +59,9 @@ export const getCurrentStatutFromParcours = <T extends { date: Date }>(
 
 export const buildEffRuptureAgeFilter = () => {
   const now = new Date();
-  return [
-    {
-      $match: {
+  const ageConditions = {
+    $and: [
+      {
         $or: [
           {
             "effectif_snapshot.apprenant.date_de_naissance": {
@@ -73,10 +70,26 @@ export const buildEffRuptureAgeFilter = () => {
           },
           { "effectif_snapshot.apprenant.rqth": true },
         ],
-        soft_deleted: { $ne: true },
+      },
+      {
         "effectif_snapshot.apprenant.date_de_naissance": {
           $lte: new Date(new Date(now).setFullYear(now.getFullYear() - 16)),
         },
+      },
+    ],
+  };
+
+  return [
+    {
+      $match: {
+        // Hors du $or : le soft-delete ne doit jamais être contourné.
+        soft_deleted: { $ne: true },
+        $or: [
+          ageConditions,
+          // Un dossier de collaboration envoyé par le CFA ne disparaît plus pour un motif d'âge
+          // (ex : le jeune atteint 26 ans pendant le suivi).
+          { "organisme_data.acc_conjoint": true },
+        ],
       },
     },
   ];

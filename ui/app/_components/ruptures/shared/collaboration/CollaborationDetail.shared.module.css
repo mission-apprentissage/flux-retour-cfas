@@ -151,10 +151,22 @@
   margin: 0.25rem 0;
 }
 
-.mlCoordLink {
+/* a.… : MUI (DsfrLink) applique ses propres classes et écrasait le gras demandé ici.
+   La taille, elle, vient de la prop size="sm" du composant : DSFR la pose en !important. */
+a.mlCoordLink {
   font-weight: 700;
-  display: inline-block;
+  /* inline-flex : le chevron DSFR est rendu en ::after et se calait sous la ligne de base
+     (vertical-align négatif) avec un écart de 8px, ce qui le détachait du libellé. */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
   margin-bottom: 1rem;
+}
+
+/* a.… : même spécificité que la règle DSFR .fr-link--icon-right::after, l'élément la départage. */
+a.mlCoordLink::after {
+  margin-left: 0;
+  flex-shrink: 0;
 }
 
 .mlContactDetails {

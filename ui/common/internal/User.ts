@@ -1,8 +1,3 @@
-export interface UsersPaginated {
-  pagination: Pagination;
-  data: User[];
-}
-
 export interface User {
   _id: string;
   account_status: string;

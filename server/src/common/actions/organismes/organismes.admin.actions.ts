@@ -11,6 +11,7 @@ import type { IArchivableOrganismesResponse } from "shared/models/routes/admin/o
 
 import {
   activateOrganisme,
+  updateMissionLocaleEffectifComputedCollab,
   updateMissionLocaleEffectifComputedOrganisme,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getCfdInfo } from "@/common/apis/apiAlternance/apiAlternance";
@@ -683,6 +684,7 @@ export async function activateCollabV2(
       )) as Pick<IOrganisationOrganismeFormation, "ml_beta_activated_at"> | null;
       const mlBetaActivatedAt = existingOrg?.ml_beta_activated_at ?? undefined;
       await organismesDb().updateOne({ _id }, { $set: { is_allowed_collab: true } });
+      await updateMissionLocaleEffectifComputedCollab(_id, true);
       if (mlBetaActivatedAt) {
         await updateMissionLocaleEffectifComputedOrganisme(mlBetaActivatedAt, _id);
       }
@@ -700,6 +702,7 @@ export async function activateCollabV2(
 
   try {
     await organismesDb().updateOne({ _id }, { $set: { is_allowed_collab: true } });
+    await updateMissionLocaleEffectifComputedCollab(_id, true);
 
     const existingOrg = (await organisationsDb().findOne(
       { type: "ORGANISME_FORMATION", organisme_id: organismeId },
@@ -752,6 +755,7 @@ export async function deactivateCollabV2(
 
   try {
     await organismesDb().updateOne({ _id }, { $unset: { is_allowed_collab: "" } });
+    await updateMissionLocaleEffectifComputedCollab(_id, false);
 
     if (organisme.is_allowed_deca !== true) {
       await organisationsDb().updateMany(

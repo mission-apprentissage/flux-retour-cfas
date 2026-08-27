@@ -1,5 +1,6 @@
+import { randomUUID } from "node:crypto";
+
 import { AxiosInstance } from "axiosist";
-import { v4 as uuidv4 } from "uuid";
 import { it, expect, describe, beforeEach } from "vitest";
 
 import { organismesDb } from "@/common/model/collections";
@@ -12,7 +13,7 @@ let httpClient: AxiosInstance;
 
 const uai = "0802004U";
 const siret = "77937827200016";
-const api_key = uuidv4();
+const api_key = randomUUID();
 
 describe("Dossier Apprenants Route V3", () => {
   useMongo();

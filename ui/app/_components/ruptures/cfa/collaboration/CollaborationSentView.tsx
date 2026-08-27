@@ -8,7 +8,9 @@ import { useAuth } from "@/app/_context/UserContext";
 import { formatDate } from "@/app/_utils/date.utils";
 import { getUserDisplayName, isCurrentUserId } from "@/app/_utils/user.utils";
 
+import { DossierSituationBlock } from "../../shared/collaboration/DossierSituationBlock";
 import { ReferentCoordonnees } from "../../shared/collaboration/ReferentCoordonnees";
+import { ResponsableLegalBlock } from "../../shared/collaboration/ResponsableLegalBlock";
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
 import localStyles from "./CfaCollaborationDetail.module.css";
@@ -41,7 +43,10 @@ export function CollaborationSentView({
   const hasBubbleContent =
     motifs.length > 0 ||
     !!od?.cause_rupture ||
+    !!od?.recherche_entreprise ||
+    !!od?.risque_rupture ||
     od?.still_at_cfa != null ||
+    !!od?.verified_info?.responsable_legal ||
     !!od?.referent_coordonnees ||
     !!od?.note_complementaire;
 
@@ -113,6 +118,8 @@ export function CollaborationSentView({
 
       {hasBubbleContent && (
         <div className={styles.sentBubble}>
+          <DossierSituationBlock organismeData={od} prenom={prenom} dateRupture={effectif.date_rupture} />
+
           {motifs.length > 0 && (
             <div className={styles.sentBubbleSection}>
               <p className={styles.sentSectionTitle}>Quel accompagnement attendu ?</p>
@@ -151,21 +158,7 @@ export function CollaborationSentView({
             </div>
           )}
 
-          {od?.cause_rupture && (
-            <div className={styles.sentBubbleSection}>
-              <p className={styles.sentSectionTitle}>À propos de la rupture</p>
-              <p className={styles.sentBody}>{od.cause_rupture}</p>
-            </div>
-          )}
-
-          {od?.still_at_cfa != null && (
-            <div className={styles.sentBubbleSection}>
-              <p className={styles.sentStillAtCfa}>
-                {prenom}{" "}
-                {od.still_at_cfa ? "est maintenu en formation dans le CFA ✅" : "n'est plus en formation au CFA"}
-              </p>
-            </div>
-          )}
+          <ResponsableLegalBlock organismeData={od} />
 
           {od?.referent_coordonnees && (
             <div className={styles.sentBubbleSection}>

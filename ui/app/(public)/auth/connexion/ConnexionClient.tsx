@@ -1,8 +1,6 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import { Container, Link, Stack, Typography } from "@mui/material";
-import NextLink from "next/link";
 
 import {
   formatAdresseShort,
@@ -13,6 +11,9 @@ import {
   useConnexionInvitationInfo,
   type OnboardingMlItem,
 } from "@/app/_components/onboarding";
+import { PAGES } from "@/app/_utils/routes.utils";
+
+import { AuthCard } from "../_components/AuthCard";
 
 import styles from "./Connexion.module.scss";
 import { ConnexionInvitationLoginForm } from "./ConnexionInvitationLoginForm";
@@ -45,30 +46,19 @@ export default function ConnexionClient() {
 
   if (invitation.status === "idle") {
     return (
-      <Container
-        maxWidth="sm"
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          border: "1px solid",
-          borderColor: fr.colors.decisions.border.default.grey.default,
-          py: { xs: fr.spacing("6w") },
-          px: { xs: fr.spacing("6w") },
-          mx: "auto",
-          my: { xs: fr.spacing("2w"), md: fr.spacing("4w") },
-        }}
+      <AuthCard
+        title="Connectez-vous"
+        footer={
+          <p className={styles.footerText}>
+            Vous n&apos;avez pas encore de compte ?{" "}
+            <a className={fr.cx("fr-link")} href={PAGES.dynamic.authInscription().getPath()}>
+              Créer un compte
+            </a>
+          </p>
+        }
       >
-        <Typography component="h1" variant="h3" sx={{ mb: fr.spacing("3w") }}>
-          Connectez-vous
-        </Typography>
         <StandardLoginForm />
-        <Stack direction="row" spacing={fr.spacing("1w")} justifyContent="center" sx={{ mt: fr.spacing("8w") }}>
-          <Typography>Vous n&apos;avez pas encore de compte ?</Typography>
-          <Link component={NextLink} href="/auth/inscription">
-            Créer un compte
-          </Link>
-        </Stack>
-      </Container>
+      </AuthCard>
     );
   }
 

@@ -80,6 +80,7 @@ export function DecommissionnementHeader() {
       id="fr-header-decommissionnement"
       serviceTitle={<>Tableau de bord de l&apos;apprentissage</>}
       quickAccessItems={[<Impersonate key="impersonate" />, <LogoutMenu key="logout-menu" />]}
+      disableDisplay
     />
   );
 }

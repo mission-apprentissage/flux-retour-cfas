@@ -6,6 +6,8 @@ import zMissionLocaleEffectif, {
   zSituationEnum,
   zProblemeTypeEnum,
   zAccConjointMotifEnum,
+  zCfaRisqueRuptureEnum,
+  zCfaSituationTypeEnum,
   zConnaissanceMlEnum,
   zVerifiedInfo,
 } from "shared/models/data/missionLocaleEffectif.model";
@@ -81,6 +83,7 @@ const zEffectifMissionLocale = z
         .optional(),
       is_allowed_deca: z.boolean().describe("Organisme du programme DECA-CFA").nullish(),
       ml_beta_activated_at: z.date().describe("Date d'activation ML beta du CFA").nullish(),
+      has_account: z.boolean().describe("Au moins un compte utilisateur confirmé sur l'organisation du CFA").nullish(),
     }),
     source: SourceApprenantEnum,
     a_traiter: z.boolean(),
@@ -128,6 +131,11 @@ const zEffectifMissionLocale = z
         referent_coordonnees: z.string().nullish(),
         note_complementaire: z.string().nullish(),
         verified_info: zVerifiedInfo.nullish(),
+        situation_type: zCfaSituationTypeEnum.nullish(),
+        risque_rupture: zCfaRisqueRuptureEnum.nullish(),
+        date_abandon: z.date().nullish(),
+        date_debut_formation: z.date().nullish(),
+        recherche_entreprise: z.string().nullish(),
       })
       .nullish(),
     mineur: z.boolean().nullish(),

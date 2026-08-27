@@ -5,6 +5,7 @@ import { ACC_CONJOINT_MOTIF_ENUM } from "shared";
 
 import { MOTIF_EMOJIS, MOTIF_LABELS } from "@/app/_components/ruptures/shared/constants";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { dePrenom } from "@/app/_utils/ruptures.utils";
 
 import styles from "../CollaborationForm.module.css";
 import { FREINS_MOTIFS } from "../constants";
@@ -12,6 +13,8 @@ import { FormValues } from "../types";
 
 interface ObjectifsSectionProps {
   prenom: string;
+  // Branche C (jeune sans contrat) : deux objectifs changent de formulation.
+  sansContrat?: boolean;
 }
 
 function MotifCommentaire({
@@ -38,7 +41,7 @@ function MotifCommentaire({
   );
 }
 
-export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
+export function ObjectifsSection({ prenom, sansContrat = false }: ObjectifsSectionProps) {
   const { values, setFieldValue } = useFormikContext<FormValues>();
   const [freinsOpen, setFreinsOpen] = useState(false);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
@@ -57,11 +60,7 @@ export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
       } else {
         trackPlausibleEvent("cfa_form_objectif_selectionne", undefined, { objectif: motif });
       }
-      if (
-        FREINS_MOTIFS.includes(motif) ||
-        motif === ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI ||
-        motif === ACC_CONJOINT_MOTIF_ENUM.REORIENTATION
-      ) {
+      if (FREINS_MOTIFS.includes(motif) || motif === ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI) {
         setFieldValue(`commentaires_par_motif.${motif}`, values.commentaires_par_motif[motif] ?? "");
       }
     } else {
@@ -92,7 +91,10 @@ export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
   return (
     <div className={styles.sectionInner}>
       <p className={styles.sectionLabel}>
-        Quel est l&apos;objectif de l&apos;accompagnement de {prenom} ?<span className={styles.required}>*</span>
+        Quel est l&apos;objectif de l&apos;accompagnement {dePrenom(prenom)} ?<span className={styles.required}>*</span>
+      </p>
+      <p className={styles.sectionHint}>
+        Vous pouvez sélectionner plusieurs objectifs. Détaillez les besoins spécifiques du jeune pour chacun.
       </p>
 
       <div className={`${styles.objectifCard} ${hasRecherche ? styles.objectifCardActive : ""}`}>
@@ -101,7 +103,9 @@ export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
           options={[
             {
               label: `L'aider dans sa recherche d'entreprise ${MOTIF_EMOJIS[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]}`,
-              hintText: "(Aide au CV, appui sur la recherche d'entreprise...)",
+              hintText: sansContrat
+                ? "(Nouvelles méthodes, aide au CV...)"
+                : "(Aide au CV, appui sur la recherche d'entreprise...)",
               nativeInputProps: {
                 checked: hasRecherche,
                 onChange: (e) => toggleMotif(ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI, e.target.checked),
@@ -112,7 +116,9 @@ export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
         {hasRecherche && (
           <div className={styles.subSection}>
             <p className={styles.subSectionLabel}>
-              Précisez votre demande d&apos;aide et décrivez ce qui a déjà été mis en place
+              {sansContrat
+                ? "De quoi le jeune a-t-il besoin selon vous pour sa recherche d'entreprise ?"
+                : "Précisez votre demande d'aide et décrivez ce qui a déjà été mis en place"}
               <span className={styles.required}>*</span>
             </p>
             <MotifCommentaire
@@ -181,7 +187,9 @@ export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
           options={[
             {
               label: `L'aider dans sa réorientation ${MOTIF_EMOJIS[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]}`,
-              hintText: "(Le jeune semble avoir quitté le CFA ou a formulé un souhait de se réorienter)",
+              hintText: sansContrat
+                ? "(Le jeune pourrait changer de formation pour faciliter sa recherche de contrat)"
+                : "(Le jeune semble avoir quitté le CFA ou a formulé un souhait de se réorienter)",
               nativeInputProps: {
                 checked: hasReorientation,
                 onChange: (e) => toggleMotif(ACC_CONJOINT_MOTIF_ENUM.REORIENTATION, e.target.checked),
@@ -189,19 +197,6 @@ export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
             },
           ]}
         />
-        {hasReorientation && (
-          <div className={styles.subSection}>
-            <p className={styles.subSectionLabel}>
-              Le jeune a quitté le CFA ou souhaite se réorienter ? Précisez la situation actuelle en quelques mots
-              <span className={styles.required}>*</span>
-            </p>
-            <MotifCommentaire
-              motif={ACC_CONJOINT_MOTIF_ENUM.REORIENTATION}
-              placeholder="Précisez la situation actuelle en quelques mots"
-              rows={3}
-            />
-          </div>
-        )}
       </div>
 
       <ErrorMessage name="motifs" component="p" className="fr-error-text" />

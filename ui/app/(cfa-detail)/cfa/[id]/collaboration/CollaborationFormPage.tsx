@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IEffectifMissionLocale } from "shared";
 
-import { CollaborationForm } from "@/app/_components/ruptures/cfa/collaboration/CollaborationForm";
 import styles from "@/app/_components/ruptures/cfa/collaboration/CollaborationForm.module.css";
 import { useCfaEffectifDetail } from "@/app/_components/ruptures/cfa/collaboration/hooks";
+import { CollaborationTunnel } from "@/app/_components/ruptures/cfa/collaboration/tunnel/CollaborationTunnel";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { dePrenom } from "@/app/_utils/ruptures.utils";
 
 export default function CollaborationFormPage({ id }: { id: string }) {
   const { data, isLoading } = useCfaEffectifDetail(id);
@@ -28,8 +29,7 @@ export default function CollaborationFormPage({ id }: { id: string }) {
 
   const effectif = data?.effectif;
   const alreadySent = effectif?.organisme_data?.acc_conjoint === true;
-  const noRupture = effectif && !effectif.date_rupture;
-  const shouldRedirect = !isLoading && !showModal && effectif && (alreadySent || noRupture);
+  const shouldRedirect = !isLoading && !showModal && effectif && alreadySent;
 
   useEffect(() => {
     if (shouldRedirect) {
@@ -53,7 +53,7 @@ export default function CollaborationFormPage({ id }: { id: string }) {
   return (
     <>
       {effectif ? (
-        <CollaborationForm effectif={effectif} onSuccess={handleSuccess} onCancel={() => router.back()} />
+        <CollaborationTunnel effectif={effectif} onSuccess={handleSuccess} onCancel={() => router.back()} />
       ) : (
         <div style={{ padding: "2rem", maxWidth: "78rem", margin: "0 auto" }}>
           <p>Effectif introuvable.</p>
@@ -71,11 +71,8 @@ export default function CollaborationFormPage({ id }: { id: string }) {
               />
             </div>
             <p id="modal-success-title" className={styles.modalText}>
-              Le dossier de{" "}
-              <span className={styles.modalHighlight}>
-                {prenom} {nom}
-              </span>{" "}
-              a bien été envoyé à la{" "}
+              Le dossier <span className={styles.modalHighlight}>{dePrenom(`${prenom} ${nom}`)}</span> a bien été envoyé
+              à la{" "}
               <span className={styles.modalHighlight}>{mlName ? `Mission Locale ${mlName}` : "Mission Locale"}</span>
             </p>
             <div className={styles.modalActions}>

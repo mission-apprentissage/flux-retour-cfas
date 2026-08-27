@@ -1,7 +1,7 @@
 "use client";
 
-import format from "date-fns/format/index";
-import formatDistanceToNow from "date-fns/formatDistanceToNow/index";
+import { format } from "date-fns/format";
+import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { fr } from "date-fns/locale";
 
 import commonStyles from "./tables/common.module.css";

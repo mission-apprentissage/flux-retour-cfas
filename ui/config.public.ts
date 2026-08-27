@@ -4,12 +4,6 @@ interface PublicConfig {
   host: string;
   env: "local" | "recette" | "production" | "preview" | "preprod";
   version: string;
-  matomo: {
-    url: string;
-    siteId: string;
-    jsTrackerFile: string;
-    disableCookies: boolean;
-  };
 }
 
 const SENTRY_DSN = "https://77feecd94eb54b3491f81e3c5aaa026c@sentry.apprentissage.beta.gouv.fr/6";
@@ -22,12 +16,6 @@ function getProductionPublicConfig(): PublicConfig {
     env: "production",
     host,
     baseUrl: `https://${host}`,
-    matomo: {
-      url: "https://stats.beta.gouv.fr",
-      siteId: "94",
-      jsTrackerFile: "js/container_s4n03ZE1.js",
-      disableCookies: true,
-    },
     version: getVersion(),
   };
 }
@@ -40,12 +28,6 @@ function getRecettePublicConfig(): PublicConfig {
     env: "recette",
     host,
     baseUrl: `https://${host}`,
-    matomo: {
-      url: "https://stats.beta.gouv.fr",
-      siteId: "",
-      jsTrackerFile: "",
-      disableCookies: true,
-    },
     version: getVersion(),
   };
 }
@@ -58,12 +40,6 @@ function getPreprodPublicConfig(): PublicConfig {
     env: "preprod",
     host,
     baseUrl: `https://${host}`,
-    matomo: {
-      url: "https://stats.beta.gouv.fr",
-      siteId: "",
-      jsTrackerFile: "",
-      disableCookies: true,
-    },
     version: getVersion(),
   };
 }
@@ -83,12 +59,6 @@ function getPreviewPublicConfig(): PublicConfig {
     env: "preview",
     host,
     baseUrl: `https://${host}`,
-    matomo: {
-      url: "https://stats.beta.gouv.fr",
-      siteId: "",
-      jsTrackerFile: "",
-      disableCookies: true,
-    },
     version: getVersion(),
   };
 }
@@ -101,12 +71,6 @@ function getLocalPublicConfig(): PublicConfig {
     env: "local",
     host,
     baseUrl: `http://${host}:${process.env.NEXT_PUBLIC_API_PORT}`,
-    matomo: {
-      url: "https://stats.beta.gouv.fr",
-      siteId: "",
-      jsTrackerFile: "",
-      disableCookies: true,
-    },
     version: getVersion(),
   };
 }

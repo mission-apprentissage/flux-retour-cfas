@@ -1,0 +1,102 @@
+.wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: calc(100vh - 200px);
+  padding: clamp(1.5rem, 4vw, 4rem) 1rem;
+  background-color: var(--background-alt-blue-france);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 640px;
+  padding: clamp(2rem, 5vw, 3.5rem) clamp(1.5rem, 4vw, 3rem);
+  text-align: center;
+  background-color: var(--background-default-grey);
+}
+
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 1.5rem;
+  border-radius: 50%;
+}
+
+.iconWrapInfo {
+  background-color: var(--background-contrast-blue-france);
+}
+
+.iconWrapSuccess {
+  background-color: var(--background-contrast-success);
+}
+
+.iconWrapWarning {
+  background-color: var(--background-contrast-warning);
+}
+
+.iconWrapError {
+  background-color: var(--background-contrast-error);
+}
+
+.icon {
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.iconWrapInfo .icon {
+  color: var(--text-action-high-blue-france);
+}
+
+.iconWrapSuccess .icon {
+  color: var(--text-default-success);
+}
+
+.iconWrapWarning .icon {
+  color: var(--text-default-warning);
+}
+
+.iconWrapError .icon {
+  color: var(--text-default-error);
+}
+
+.title {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.5rem, 3vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-title-grey);
+}
+
+.lead {
+  max-width: 480px;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-default-grey);
+
+  p {
+    margin: 0 0 0.75rem;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.footer {
+  margin-top: 1.5rem;
+}

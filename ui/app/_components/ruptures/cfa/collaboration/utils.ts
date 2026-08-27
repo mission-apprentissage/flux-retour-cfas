@@ -38,60 +38,29 @@ export function formatAdresseDisplay(info: VerifiedInfo): string {
   return parts.join(", ");
 }
 
-export function isSection1Valid(v: FormValues): boolean {
-  if (v.still_at_cfa === null) return false;
+export function isObjectifsValid(v: FormValues): boolean {
   if (v.motifs.length === 0) return false;
-  const freinsOk = FREINS_MOTIFS.every((m) => !v.motifs.includes(m) || !!v.commentaires_par_motif[m]?.trim());
-  if (
-    v.motifs.includes(ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI) &&
-    !v.commentaires_par_motif[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]?.trim()
-  )
-    return false;
-  if (
-    v.motifs.includes(ACC_CONJOINT_MOTIF_ENUM.REORIENTATION) &&
-    !v.commentaires_par_motif[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]?.trim()
-  )
-    return false;
-  return freinsOk;
+  const commentaireRequis = [ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI, ...FREINS_MOTIFS];
+  return commentaireRequis.every((m) => !v.motifs.includes(m) || !!v.commentaires_par_motif[m]?.trim());
 }
 
-export function isSection3Valid(v: FormValues): boolean {
+export function isDatesRuptureValid(v: FormValues): boolean {
+  if (!v.date_rupture) return false;
+  if (v.still_at_cfa === false && !v.date_abandon) return false;
+  if (v.date_abandon && v.date_abandon < v.date_rupture) return false;
   return !!v.cause_rupture.trim();
 }
 
-export function isSection4Valid(v: FormValues): boolean {
-  if (v.referent_type === null) return false;
-  if (v.referent_type === "other" && !v.referent_details.trim()) return false;
-  return true;
+export function isRentreeSansContratValid(v: FormValues): boolean {
+  return !!v.date_debut_formation && !!v.recherche_entreprise.trim();
 }
 
-export function isSection5Valid(v: FormValues): boolean {
+export function isContactValid(v: FormValues): boolean {
   const info = v.verified_info;
   if (!info.telephone.trim() || !isValidPhone(info.telephone)) return false;
   if (info.courriel.trim() && !isValidEmail(info.courriel)) return false;
-  return !!(
-    info.adresse_rue.trim() &&
-    info.adresse_code_postal.trim() &&
-    info.adresse_commune.trim() &&
-    info.formation_libelle.trim() &&
-    info.date_fin_formation.trim()
-  );
-}
-
-export function computeProgress(v: FormValues): number {
-  let filled = 0;
-  const total = 10;
-
-  if (v.still_at_cfa !== null) filled++;
-  if (v.motifs.length > 0) filled++;
-  if (v.cause_rupture.trim()) filled++;
-  if (v.referent_type !== null) filled++;
-  if (v.verified_info.telephone.trim()) filled++;
-  if (v.verified_info.adresse_rue.trim()) filled++;
-  if (v.verified_info.adresse_code_postal.trim()) filled++;
-  if (v.verified_info.adresse_commune.trim()) filled++;
-  if (v.verified_info.formation_libelle.trim()) filled++;
-  if (v.verified_info.date_fin_formation.trim()) filled++;
-
-  return Math.round((filled / total) * 100);
+  if (!info.adresse_code_postal.trim() || !info.adresse_commune.trim()) return false;
+  if (v.referent_type === null) return false;
+  if (v.referent_type === "other" && !v.referent_details.trim()) return false;
+  return true;
 }

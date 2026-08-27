@@ -1,6 +1,5 @@
 import * as Sentry from "@sentry/node";
 import Boom from "boom";
-import { compose } from "compose-middleware";
 import { ObjectId } from "mongodb";
 import passport from "passport";
 import { Strategy, ExtractJwt, Strategy as JWTStrategy } from "passport-jwt";
@@ -97,8 +96,10 @@ export const authMiddleware = () => {
     )
   );
 
-  return compose([
-    passport.authenticate("jwtStrategy2", { session: false, failWithError: true }),
+  const authenticate = passport.authenticate("jwtStrategy2", { session: false, failWithError: true });
+
+  return composeMiddlewares([
+    authenticate,
     // TODO stratégie à supprimer pour récupérer la session associée en BDD
     async (req, res, next) => {
       const activeSession = await findSessionByToken(req.cookies[COOKIE_NAME]);
@@ -165,4 +166,31 @@ async function extractUserFromJWT(jwtPayload: any, done: (err?: Error | null, pa
   } catch (err: any) {
     done(err);
   }
+}
+
+/**
+ * Enchaîne des middlewares Express en un seul : chaque étape n'appelle la suivante que si elle
+ * n'a ni terminé la réponse ni signalé d'erreur.
+ */
+function composeMiddlewares(middlewares: any[]) {
+  return (req: any, res: any, next: any) => {
+    let index = -1;
+
+    const run = (i: number, err?: any) => {
+      if (err) return next(err);
+      if (i <= index) return next(new Error("next() appelé plusieurs fois"));
+      index = i;
+
+      const middleware = middlewares[i];
+      if (!middleware) return next();
+
+      try {
+        Promise.resolve(middleware(req, res, (nextErr?: any) => run(i + 1, nextErr))).catch(next);
+      } catch (error) {
+        next(error);
+      }
+    };
+
+    run(0);
+  };
 }

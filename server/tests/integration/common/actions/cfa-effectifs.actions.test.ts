@@ -1,5 +1,8 @@
 import { ObjectId } from "mongodb";
+import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationOrganismeFormation } from "shared/models";
+import { CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { CFA_EFFECTIF_SITUATION } from "shared/models/routes/organismes/cfa";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { describe, it, beforeEach, expect } from "vitest";
 
@@ -144,9 +147,9 @@ describe("CFA Effectifs Actions", () => {
       expect(result.effectifs[0].nom).toBe("DUPONT");
     });
 
-    it("filtre par en_rupture=oui", async () => {
+    it("expose la situation « rupture » pour une rupture déclarée par le CFA", async () => {
       const ruptureEffectif = await insertEffectif({ apprenant: { nom: "RUPTURE", prenom: "Test" } });
-      await insertEffectif({ apprenant: { nom: "NORMAL", prenom: "Test" } });
+      await insertEffectif({ apprenant: { nom: "ZNORMAL", prenom: "Test" } });
 
       await missionLocaleEffectifsDb().insertOne(
         createMlEffectifDoc(ruptureEffectif, {
@@ -158,10 +161,79 @@ describe("CFA Effectifs Actions", () => {
         }) as any
       );
 
-      const result = await getCfaEffectifs(organisation, false, { ...defaultParams, en_rupture: "oui" });
+      const result = await getCfaEffectifs(organisation, false, defaultParams);
 
-      expect(result.pagination.total).toBe(1);
-      expect(result.effectifs[0].nom).toBe("RUPTURE");
+      expect(result.pagination.total).toBe(2);
+      const rupture = result.effectifs.find((e) => e.nom === "RUPTURE");
+      expect(rupture?.en_rupture).toBe(true);
+      expect(rupture?.situation).toBe("rupture");
+    });
+
+    it("expose la Mission Locale de rattachement du dossier ML", async () => {
+      const effectif = await insertEffectif({ apprenant: { nom: "DUPONT", prenom: "Jean" } });
+      await organisationsDb().insertOne({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        nom: "TECHNOWEST",
+        ml_id: 4242,
+        adresse: { commune: "Mérignac" },
+        created_at: new Date(),
+      } as any);
+      await missionLocaleEffectifsDb().insertOne(createMlEffectifDoc(effectif) as any);
+
+      const result = await getCfaEffectifs(organisation, false, defaultParams);
+
+      expect(result.effectifs[0].mission_locale).toEqual({ nom: "TECHNOWEST", commune: "Mérignac" });
+    });
+
+    it("trie sur le nom de la Mission Locale", async () => {
+      const secondMlId = new ObjectId(id(4));
+      await organisationsDb().insertMany([
+        {
+          _id: mlOrganisationId,
+          type: "MISSION_LOCALE",
+          nom: "ZORRO",
+          ml_id: 4242,
+          adresse: { commune: "Mérignac" },
+          created_at: new Date(),
+        },
+        {
+          _id: secondMlId,
+          type: "MISSION_LOCALE",
+          nom: "ALPHA",
+          ml_id: 4243,
+          adresse: { commune: "Albi" },
+          created_at: new Date(),
+        },
+      ] as any);
+
+      const premier = await insertEffectif({ apprenant: { nom: "AAA", prenom: "Test" } });
+      const second = await insertEffectif({ apprenant: { nom: "BBB", prenom: "Test" } });
+      await missionLocaleEffectifsDb().insertMany([
+        createMlEffectifDoc(premier),
+        { ...createMlEffectifDoc(second), mission_locale_id: secondMlId },
+      ] as any);
+
+      const result = await getCfaEffectifs(organisation, false, { ...defaultParams, sort: "mission_locale" });
+
+      expect(result.effectifs.map((e) => e.mission_locale?.nom)).toEqual(["ALPHA", "ZORRO"]);
+    });
+
+    it("accepte encore le tri en_rupture servant la recherche du tableau de bord", async () => {
+      const ruptureEffectif = await insertEffectif({ apprenant: { nom: "AAA", prenom: "Test" } });
+      await insertEffectif({ apprenant: { nom: "BBB", prenom: "Test" } });
+      await missionLocaleEffectifsDb().insertOne(
+        createMlEffectifDoc(ruptureEffectif, {
+          cfa_rupture_declaration: { date_rupture: new Date(), declared_at: new Date(), declared_by: userId },
+        }) as any
+      );
+
+      const result = await getCfaEffectifs(organisation, false, {
+        ...defaultParams,
+        sort: "en_rupture",
+        order: "desc",
+      });
+
       expect(result.effectifs[0].en_rupture).toBe(true);
     });
 
@@ -402,6 +474,35 @@ describe("CFA Effectifs Actions", () => {
       expect(result.effectif.date_rupture).toBeNull();
     });
 
+    it("résout la mission locale de rattachement sans dossier existant", async () => {
+      await organisationsDb().insertOne({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        ml_id: 337,
+        nom: "ML de rattachement",
+        adresse: { commune: "Paris", code_postal: "75001" },
+        created_at: new Date(),
+      } as any);
+      const effectif = await insertEffectif({
+        apprenant: { nom: "SANSDOSSIER", prenom: "Test", adresse: { mission_locale_id: 337 } },
+      });
+
+      const result = await getCfaEffectifDetail(organismeId, effectif._id.toString());
+
+      expect((result.effectif as any).mission_locale_organisation?.nom).toBe("ML de rattachement");
+      expect((result.effectif as any).mission_locale_organisation?.adresse?.commune).toBe("Paris");
+    });
+
+    it("laisse la mission locale nulle si la zone du jeune est inconnue", async () => {
+      const effectif = await insertEffectif({
+        apprenant: { nom: "SANSZONE", prenom: "Test", adresse: {} },
+      });
+
+      const result = await getCfaEffectifDetail(organismeId, effectif._id.toString());
+
+      expect((result.effectif as any).mission_locale_organisation).toBeNull();
+    });
+
     it("retourne les données depuis effectifsDECA si absent des autres collections", async () => {
       const decaEffectif = {
         _id: new ObjectId(),
@@ -472,6 +573,63 @@ describe("CFA Effectifs Actions", () => {
 
       expect((result.effectif as any).situation?.situation).toBe("INJOIGNABLE_APRES_RELANCES");
       expect((result.effectif as any).situation?.commentaires).toBe("déjà traité par la ML");
+    });
+  });
+
+  describe("colonne situation", () => {
+    it("distingue une rupture issue de DECA", async () => {
+      const decaEffectif = {
+        _id: new ObjectId(),
+        deca_raw_id: new ObjectId(),
+        ...(await createSampleEffectif({
+          organisme: sampleOrganisme,
+          annee_scolaire: ANNEE_SCOLAIRE,
+          apprenant: { nom: "DECARUPT", prenom: "Test" },
+          source: "DECA" as any,
+        })),
+        organisme_id: organismeId,
+        is_deca_compatible: true,
+      };
+      decaEffectif._computed = {
+        ...decaEffectif._computed,
+        statut: { ...decaEffectif._computed?.statut, en_cours: STATUT_APPRENANT.RUPTURANT },
+      } as any;
+      await effectifsDECADb().insertOne(decaEffectif as any);
+
+      const result = await getCfaEffectifs(organisation, true, defaultParams);
+
+      expect(result.effectifs[0].situation).toBe(CFA_EFFECTIF_SITUATION.RUPTURE_DECA);
+    });
+
+    it("affiche la prévention de rupture pour un dossier envoyé sur un jeune en contrat", async () => {
+      const effectif = await insertEffectif({ apprenant: { nom: "PREVENTION", prenom: "Test" } });
+      await missionLocaleEffectifsDb().insertOne(
+        createMlEffectifDoc(effectif, {
+          organisme_data: { acc_conjoint: true, situation_type: CFA_SITUATION_TYPE_ENUM.EN_CONTRAT },
+        }) as any
+      );
+
+      const result = await getCfaEffectifs(organisation, false, defaultParams);
+
+      expect(result.effectifs[0].situation).toBe(CFA_EFFECTIF_SITUATION.PREVENTION_RUPTURE);
+    });
+
+    it("affiche la rupture plutôt que la prévention si le jeune a effectivement rompu", async () => {
+      const effectif = await insertEffectif({ apprenant: { nom: "RUPTUREAPRES", prenom: "Test" } });
+      await missionLocaleEffectifsDb().insertOne(
+        createMlEffectifDoc(effectif, {
+          organisme_data: { acc_conjoint: true, situation_type: CFA_SITUATION_TYPE_ENUM.EN_CONTRAT },
+          cfa_rupture_declaration: {
+            date_rupture: new Date("2026-05-04"),
+            declared_at: new Date(),
+            declared_by: userId,
+          },
+        }) as any
+      );
+
+      const result = await getCfaEffectifs(organisation, false, defaultParams);
+
+      expect(result.effectifs[0].situation).toBe(CFA_EFFECTIF_SITUATION.RUPTURE);
     });
   });
 

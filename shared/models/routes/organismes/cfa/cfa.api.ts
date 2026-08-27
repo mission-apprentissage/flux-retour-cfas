@@ -88,6 +88,21 @@ export interface ICfaSuiviMissionLocaleResponse {
 
 export type CfaEffectifSource = "effectifs" | "effectifsDECA";
 
+export const CFA_EFFECTIF_SITUATION = {
+  RUPTURE: "rupture",
+  RUPTURE_DECA: "rupture_deca",
+  PREVENTION_RUPTURE: "prevention_rupture",
+  ABANDON: "abandon",
+  SANS_CONTRAT: "sans_contrat",
+} as const;
+
+export type CfaEffectifSituation = (typeof CFA_EFFECTIF_SITUATION)[keyof typeof CFA_EFFECTIF_SITUATION];
+
+export interface ICfaEffectifMissionLocale {
+  nom: string;
+  commune: string | null;
+}
+
 export interface ICfaEffectif {
   id: string;
   source: CfaEffectifSource;
@@ -101,6 +116,8 @@ export interface ICfaEffectif {
   formation_niveau_libelle: string | null;
   collab_status: CfaCollaborationStatus | null;
   has_unread_notification: boolean;
+  situation?: CfaEffectifSituation | null;
+  mission_locale?: ICfaEffectifMissionLocale | null;
 }
 
 export interface ICfaEffectifsResponse {

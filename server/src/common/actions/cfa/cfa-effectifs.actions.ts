@@ -1,15 +1,17 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
-import { MongoServerError } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
-import { IEffectif, IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "shared/models";
-import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import { CfaEffectifSource, ICfaEffectif, ICfaEffectifsResponse } from "shared/models/routes/organismes/cfa";
+import { IOrganisationOrganismeFormation } from "shared/models";
+import { CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import {
+  CFA_EFFECTIF_SITUATION,
+  CfaEffectifSource,
+  ICfaEffectif,
+  ICfaEffectifsResponse,
+} from "shared/models/routes/organismes/cfa";
 import { getAnneesScolaireListFromDate } from "shared/utils";
-import { v4 as uuidv4 } from "uuid";
 
-import { isDecaSnapshot, migrateMlRecordEffectifId } from "@/common/actions/mission-locale/mission-locale.actions";
-import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
+import { ensureMissionLocaleEffectifRecord } from "@/common/actions/mission-locale/mission-locale-record.actions";
 import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import {
@@ -17,9 +19,7 @@ import {
   buildCsvInConditions,
   buildDistinctFacet,
   buildNameSearchConditions,
-  getCurrentStatutFromParcours,
 } from "@/common/actions/shared/rupture-pipeline.utils";
-import logger from "@/common/logger";
 import {
   effectifsDb,
   effectifsDECADb,
@@ -27,7 +27,6 @@ import {
   organisationsDb,
   organismesDb,
 } from "@/common/model/collections";
-import { extractScoreInput, scoreEffectifs } from "@/common/services/classifier";
 import { stripDiacritics } from "@/common/utils/mongoUtils";
 
 interface CfaEffectifsQueryParams {
@@ -36,7 +35,6 @@ interface CfaEffectifsQueryParams {
   search?: string;
   sort: string;
   order: "asc" | "desc";
-  en_rupture?: "oui" | "non";
   collab_status?: string;
   formation?: string;
 }
@@ -51,6 +49,8 @@ function getSortField(sort: string): string {
       return "date_rupture_computed";
     case "en_rupture":
       return "en_rupture";
+    case "mission_locale":
+      return "mission_locale.nom";
     case "collab_status":
       return "collab_status";
     case "last_activity":
@@ -72,7 +72,7 @@ export async function getCfaEffectifs(
   const organismeId = new ObjectId(organisation.organisme_id);
   const familyOrganismeIds = await getFamilyOrganismeIds(organismeId);
   const anneeScolaireList = getAnneesScolaireListFromDate(new Date());
-  const { page, limit, search, sort, order, en_rupture, collab_status, formation } = params;
+  const { page, limit, search, sort, order, collab_status, formation } = params;
   const skip = (page - 1) * limit;
   const sortDirection = order === "asc" ? 1 : -1;
 
@@ -81,13 +81,18 @@ export async function getCfaEffectifs(
     annee_scolaire: { $in: anneeScolaireList },
   };
 
-  const pipeline: Record<string, unknown>[] = [{ $match: baseMatch }];
+  // La collection d'origine est marquée par branche d'union : le champ `source` de l'effectif ne
+  // permet pas de la déduire (un effectif ERP peut être marqué FICHIER après téléversement).
+  const pipeline: Record<string, unknown>[] = [
+    { $match: baseMatch },
+    { $addFields: { source_collection: "effectifs" } },
+  ];
 
   if (isAllowedDeca) {
     pipeline.push({
       $unionWith: {
         coll: "effectifsDECA",
-        pipeline: [{ $match: baseMatch }],
+        pipeline: [{ $match: baseMatch }, { $addFields: { source_collection: "effectifsDECA" } }],
       },
     });
   }
@@ -95,7 +100,7 @@ export async function getCfaEffectifs(
   pipeline.push(
     {
       $addFields: {
-        source_priority: { $cond: [{ $eq: ["$source", "ERP"] }, 0, 1] },
+        source_priority: { $cond: [{ $eq: ["$source_collection", "effectifs"] }, 0, 1] },
         _dedup_nom: stripDiacritics({ $toLower: { $trim: { input: { $ifNull: ["$apprenant.nom", ""] } } } }),
         _dedup_prenom: stripDiacritics({ $toLower: { $trim: { input: { $ifNull: ["$apprenant.prenom", ""] } } } }),
       },
@@ -109,11 +114,7 @@ export async function getCfaEffectifs(
           ddn: "$apprenant.date_de_naissance",
         },
         effectif_id: { $first: "$_id" },
-        source_collection: {
-          $first: {
-            $cond: [{ $eq: ["$source", "ERP"] }, "effectifs", "effectifsDECA"],
-          },
-        },
+        source_collection: { $first: "$source_collection" },
         doc: { $first: "$$ROOT" },
       },
     },
@@ -235,6 +236,32 @@ export async function getCfaEffectifs(
         has_unread_notification_computed: {
           $ifNull: ["$ml_doc.organisme_data.has_unread_notification", false],
         },
+        situation: {
+          $switch: {
+            branches: [
+              // Ordre : la rupture DECA doit précéder la rupture ERP, et la prévention doit suivre
+              // les deux (un jeune déclaré en prévention puis réellement rupturé affiche "Rupture").
+              {
+                case: { $and: ["$en_rupture", { $eq: ["$source_collection", "effectifsDECA"] }] },
+                then: CFA_EFFECTIF_SITUATION.RUPTURE_DECA,
+              },
+              { case: "$en_rupture", then: CFA_EFFECTIF_SITUATION.RUPTURE },
+              {
+                case: { $eq: ["$ml_doc.organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+                then: CFA_EFFECTIF_SITUATION.PREVENTION_RUPTURE,
+              },
+              {
+                case: { $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.ABANDON] },
+                then: CFA_EFFECTIF_SITUATION.ABANDON,
+              },
+              {
+                case: { $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.INSCRIT] },
+                then: CFA_EFFECTIF_SITUATION.SANS_CONTRAT,
+              },
+            ],
+            default: null,
+          },
+        },
       },
     }
   );
@@ -245,14 +272,48 @@ export async function getCfaEffectifs(
     ...buildCsvInConditions("formation.libelle_long", formation),
   ];
 
-  if (en_rupture === "oui") {
-    filterConditions.push({ en_rupture: true });
-  } else if (en_rupture === "non") {
-    filterConditions.push({ en_rupture: false });
-  }
-
   if (filterConditions.length > 0) {
     pipeline.push({ $match: { $and: filterConditions } });
+  }
+
+  // Mission Locale de rattachement : celle du dossier ML si elle existe, sinon celle déduite de
+  // l'adresse de l'apprenant. Jointures par égalité (index `_id` et `ml_id`) plutôt que $expr.
+  const missionLocaleStages: Record<string, unknown>[] = [
+    {
+      $lookup: {
+        from: "organisations",
+        localField: "ml_doc.mission_locale_id",
+        foreignField: "_id",
+        as: "ml_organisation_by_id",
+        pipeline: [{ $project: { _id: 0, nom: 1, commune: { $ifNull: ["$adresse.commune", null] } } }],
+      },
+    },
+    {
+      $lookup: {
+        from: "organisations",
+        localField: "apprenant.adresse.mission_locale_id",
+        foreignField: "ml_id",
+        as: "ml_organisation_by_adresse",
+        pipeline: [
+          { $match: { type: "MISSION_LOCALE" } },
+          { $project: { _id: 0, nom: 1, commune: { $ifNull: ["$adresse.commune", null] } } },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        mission_locale: {
+          $ifNull: [{ $first: "$ml_organisation_by_id" }, { $first: "$ml_organisation_by_adresse" }, null],
+        },
+      },
+    },
+  ];
+
+  // Trier sur le nom de la ML impose de résoudre la jointure sur tout l'ensemble filtré ; sinon
+  // elle n'est faite que sur la page demandée.
+  const sortsOnMissionLocale = sort === "mission_locale";
+  if (sortsOnMissionLocale) {
+    pipeline.push(...missionLocaleStages);
   }
 
   const sortField = getSortField(sort);
@@ -267,6 +328,7 @@ export async function getCfaEffectifs(
         sortStage,
         { $skip: skip },
         { $limit: limit },
+        ...(sortsOnMissionLocale ? [] : missionLocaleStages),
         {
           $project: {
             _id: 0,
@@ -284,6 +346,8 @@ export async function getCfaEffectifs(
             has_unread_notification: {
               $ifNull: ["$ml_doc.organisme_data.has_unread_notification", false],
             },
+            situation: 1,
+            mission_locale: 1,
           },
         },
       ],
@@ -306,10 +370,28 @@ export async function getCfaEffectifs(
   };
 }
 
-function formatRawEffectif(
+async function formatRawEffectif(
   raw: { _id: ObjectId; apprenant?: any; formation?: any; contrats?: any; source?: any; transmitted_at?: any },
   organisme: any
 ) {
+  // Projection alignée sur le $lookup de buildMlAggregation : le front ne doit connaître
+  // qu'une seule forme de mission_locale_organisation.
+  const missionLocaleOrganisation = raw.apprenant?.adresse?.mission_locale_id
+    ? await organisationsDb().findOne(
+        { type: "MISSION_LOCALE", ml_id: raw.apprenant.adresse.mission_locale_id },
+        {
+          projection: {
+            _id: 1,
+            nom: 1,
+            email: 1,
+            telephone: 1,
+            activated_at: 1,
+            adresse: { commune: 1, code_postal: 1 },
+          },
+        }
+      )
+    : null;
+
   return {
     id: raw._id,
     nom: raw.apprenant?.nom,
@@ -329,7 +411,7 @@ function formatRawEffectif(
     organisme,
     date_rupture: null,
     organisme_data: null,
-    mission_locale_organisation: null,
+    mission_locale_organisation: missionLocaleOrganisation,
     mission_locale_logs: [],
   };
 }
@@ -464,6 +546,8 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
         unread_by_current_user: "$unread_by_current_user",
       },
     },
+    // Le retour sur le formulaire est un signal produit interne : jamais exposé, ni au CFA ni à la ML.
+    { $unset: "organisme_data.form_feedback" },
   ];
 
   const directMatch = {
@@ -511,14 +595,14 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
       { _id: erpEffectif.organisme_id },
       { projection: { nom: 1, raison_sociale: 1, adresse: 1 } }
     );
-    return { effectif: formatRawEffectif(erpEffectif, organisme), currentIndex: 0, total: 1 };
+    return { effectif: await formatRawEffectif(erpEffectif, organisme), currentIndex: 0, total: 1 };
   }
   if (decaEffectif) {
     const organisme = await organismesDb().findOne(
       { _id: decaEffectif.organisme_id },
       { projection: { nom: 1, raison_sociale: 1, adresse: 1 } }
     );
-    return { effectif: formatRawEffectif(decaEffectif, organisme), currentIndex: 0, total: 1 };
+    return { effectif: await formatRawEffectif(decaEffectif, organisme), currentIndex: 0, total: 1 };
   }
 
   throw Boom.notFound("Effectif not found");
@@ -531,298 +615,25 @@ export async function declareCfaEffectifRupture(
   dateRupture: Date,
   userId: ObjectId
 ) {
-  const db = source === "effectifsDECA" ? effectifsDECADb() : effectifsDb();
-  const effectif = await db.findOne({
-    _id: new ObjectId(effectifId),
-    organisme_id: organismeId,
-  });
-
-  if (!effectif) {
-    throw Boom.notFound("Effectif non trouvé");
-  }
-
   const now = new Date();
   const declaration = {
     date_rupture: dateRupture,
     declared_at: now,
     declared_by: userId,
   };
-  const newEffectifId = new ObjectId(effectifId);
 
-  const currentStatus = getCurrentStatutFromParcours(effectif._computed?.statut?.parcours, now);
-
-  const normalizedIdentifiant =
-    effectif.apprenant.nom && effectif.apprenant.prenom && effectif.apprenant.date_de_naissance
-      ? normalisePersonIdentifiant({
-          nom: effectif.apprenant.nom,
-          prenom: effectif.apprenant.prenom,
-          date_de_naissance: effectif.apprenant.date_de_naissance,
-        })
-      : undefined;
-
-  let existing = await missionLocaleEffectifsDb().findOne({
-    effectif_id: newEffectifId,
-    "effectif_snapshot.organisme_id": organismeId,
-    soft_deleted: { $ne: true },
-  });
-
-  if (!existing && normalizedIdentifiant) {
-    existing = await missionLocaleEffectifsDb().findOne({
-      "identifiant_normalise.nom": normalizedIdentifiant.nom,
-      "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
-      "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
-      "effectif_snapshot.organisme_id": organismeId,
-      soft_deleted: { $ne: true },
-    });
-  }
-
-  if (existing) {
-    const ruptureSet = {
+  const { created } = await ensureMissionLocaleEffectifRecord(
+    organismeId,
+    effectifId,
+    source,
+    {
       cfa_rupture_declaration: declaration,
       "organisme_data.rupture": true,
       "organisme_data.reponse_at": now,
       updated_at: now,
-    };
-    const isMigration = !existing.effectif_id.equals(newEffectifId);
-    const existingIsDeca = isDecaSnapshot(existing.effectif_snapshot);
-    const incomingIsDeca = source === "effectifsDECA";
+    },
+    { dateRupture }
+  );
 
-    let keeperId = existing._id;
-    // Repointer effectif_id sur mismatch sinon le toggle reste OFF (lookup par effectif_id).
-    // Skip si dégradation ERP→DECA — priorité ERP > DECA.
-    if (isMigration && !(incomingIsDeca && !existingIsDeca)) {
-      const result = await migrateMlRecordEffectifId(existing._id, existing.effectif_id, effectif, {
-        extraSet: ruptureSet,
-      });
-      keeperId = result.keeperId;
-    } else {
-      if (isMigration) {
-        logger.warn(
-          {
-            ml_record: existing._id,
-            existing_effectif: existing.effectif_id,
-            existing_source: existing.effectif_snapshot?.source,
-            incoming_effectif: newEffectifId,
-            incoming_source: source,
-          },
-          "declareCfaEffectifRupture: dégradation ERP→DECA bloquée, patch en place sans repointer effectif_id"
-        );
-      }
-      await missionLocaleEffectifsDb().updateOne({ _id: existing._id }, { $set: ruptureSet });
-    }
-    scoreEffectifInBackground(keeperId, effectif);
-    return { created: false, updated: true };
-  }
-
-  const mlNumericId = effectif.apprenant.adresse?.mission_locale_id;
-  if (!mlNumericId) {
-    throw Boom.badData("Impossible de déclarer en rupture : zone Mission Locale non identifiée pour cet effectif");
-  }
-
-  const mlOrganisation = (await organisationsDb().findOne({
-    type: "MISSION_LOCALE",
-    ml_id: mlNumericId,
-  })) as IOrganisationMissionLocale | null;
-
-  if (!mlOrganisation) {
-    throw Boom.badData("Impossible de déclarer en rupture : organisation Mission Locale non trouvée");
-  }
-
-  // Record orphelin sur la même ML mais rattaché à un autre CFA (ex. deux établissements
-  // d'une même CMA). Sans migration proactive, l'INSERT échouerait en E11000 et le
-  // fallback patcherait le squatter sans repointer effectif_id.
-  if (normalizedIdentifiant) {
-    const crossOrganismeOrphan = await missionLocaleEffectifsDb().findOne({
-      "identifiant_normalise.nom": normalizedIdentifiant.nom,
-      "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
-      "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
-      mission_locale_id: mlOrganisation._id,
-      soft_deleted: { $ne: true },
-    });
-
-    if (crossOrganismeOrphan) {
-      const orphanIsDeca = isDecaSnapshot(crossOrganismeOrphan.effectif_snapshot);
-      const incomingIsDeca = source === "effectifsDECA";
-      const ruptureSet = {
-        cfa_rupture_declaration: declaration,
-        "organisme_data.rupture": true,
-        "organisme_data.reponse_at": now,
-        updated_at: now,
-      };
-
-      // Skip si dégradation ERP→DECA — priorité ERP > DECA. Patch en place.
-      if (incomingIsDeca && !orphanIsDeca) {
-        logger.warn(
-          {
-            ml_record: crossOrganismeOrphan._id,
-            existing_effectif: crossOrganismeOrphan.effectif_id,
-            existing_organisme: crossOrganismeOrphan.effectif_snapshot?.organisme_id,
-            incoming_effectif: newEffectifId,
-            incoming_organisme: organismeId,
-            incoming_source: source,
-          },
-          "declareCfaEffectifRupture: cross-organisme migration ERP→DECA bloquée, patch en place"
-        );
-        await missionLocaleEffectifsDb().updateOne({ _id: crossOrganismeOrphan._id }, { $set: ruptureSet });
-        scoreEffectifInBackground(crossOrganismeOrphan._id, effectif);
-        return { created: false, updated: true };
-      }
-
-      const result = await migrateMlRecordEffectifId(
-        crossOrganismeOrphan._id,
-        crossOrganismeOrphan.effectif_id,
-        effectif,
-        { extraSet: ruptureSet }
-      );
-      scoreEffectifInBackground(result.keeperId, effectif);
-      return { created: false, updated: true };
-    }
-  }
-
-  // Cross-ML : l'index unique global sur identifiant_normalise bloque l'INSERT. On repointe
-  // effectif_id + snapshot, mais on PRÉSERVE mission_locale_id et les fields ML utilisateur
-  // (situation, commentaires, ...) — la ML d'origine continue son suivi (policy produit).
-  // skipCurrentStatus évite d'écraser current_status avec celui calculé depuis le nouvel effectif.
-  if (normalizedIdentifiant) {
-    const crossMlOrphan = await missionLocaleEffectifsDb().findOne({
-      "identifiant_normalise.nom": normalizedIdentifiant.nom,
-      "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
-      "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
-      soft_deleted: { $ne: true },
-    });
-
-    if (crossMlOrphan) {
-      const orphanIsDeca = isDecaSnapshot(crossMlOrphan.effectif_snapshot);
-      const incomingIsDeca = source === "effectifsDECA";
-      const ruptureSet = {
-        cfa_rupture_declaration: declaration,
-        "organisme_data.rupture": true,
-        "organisme_data.reponse_at": now,
-        updated_at: now,
-      };
-
-      // Priorité ERP > DECA : patch en place sans repointer, snapshot ERP préservé.
-      if (incomingIsDeca && !orphanIsDeca) {
-        logger.warn(
-          {
-            ml_record: crossMlOrphan._id,
-            existing_effectif: crossMlOrphan.effectif_id,
-            existing_ml: crossMlOrphan.mission_locale_id,
-            incoming_effectif: newEffectifId,
-            incoming_organisme: organismeId,
-            incoming_source: source,
-          },
-          "declareCfaEffectifRupture: cross-ML migration ERP→DECA bloquée, patch en place"
-        );
-        await missionLocaleEffectifsDb().updateOne({ _id: crossMlOrphan._id }, { $set: ruptureSet });
-        scoreEffectifInBackground(crossMlOrphan._id, effectif);
-        return { created: false, updated: true };
-      }
-
-      const result = await migrateMlRecordEffectifId(crossMlOrphan._id, crossMlOrphan.effectif_id, effectif, {
-        extraSet: ruptureSet,
-        skipCurrentStatus: true,
-      });
-      scoreEffectifInBackground(result.keeperId, effectif);
-      return { created: false, updated: true };
-    }
-  }
-
-  const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
-
-  try {
-    const { insertedId } = await missionLocaleEffectifsDb().insertOne({
-      mission_locale_id: mlOrganisation._id,
-      effectif_id: newEffectifId,
-      effectif_snapshot: { ...effectif, _id: effectif._id },
-      effectif_snapshot_date: now,
-      date_rupture: dateRupture,
-      created_at: now,
-      current_status: {
-        value: currentStatus?.valeur ?? null,
-        date: currentStatus?.date ?? null,
-      },
-      brevo: {
-        token: uuidv4(),
-        token_created_at: now,
-      },
-      computed: {
-        organisme: {
-          ml_beta_activated_at: organisation?.ml_beta_activated_at ?? null,
-        },
-        ...(mlOrganisation.activated_at ? { mission_locale: { activated_at: mlOrganisation.activated_at } } : {}),
-      },
-      cfa_rupture_declaration: declaration,
-      organisme_data: {
-        rupture: true,
-        reponse_at: now,
-        has_unread_notification: false,
-      },
-      ...(normalizedIdentifiant ? { identifiant_normalise: normalizedIdentifiant } : {}),
-    } as any);
-    scoreEffectifInBackground(insertedId, effectif);
-  } catch (error) {
-    if (error instanceof MongoServerError && error.code === 11000) {
-      const filter = normalizedIdentifiant
-        ? {
-            "identifiant_normalise.nom": normalizedIdentifiant.nom,
-            "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
-            "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
-            mission_locale_id: mlOrganisation._id,
-            soft_deleted: { $ne: true },
-          }
-        : {
-            effectif_id: newEffectifId,
-            mission_locale_id: mlOrganisation._id,
-            soft_deleted: { $ne: true },
-          };
-
-      const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
-        filter,
-        {
-          $set: {
-            cfa_rupture_declaration: declaration,
-            "organisme_data.rupture": true,
-            "organisme_data.reponse_at": now,
-            updated_at: now,
-          },
-        },
-        { returnDocument: "after", projection: { _id: 1 }, includeResultMetadata: false }
-      );
-      if (updated?._id) {
-        scoreEffectifInBackground(updated._id, effectif);
-      }
-      return { created: false, updated: true };
-    }
-    throw error;
-  }
-
-  return { created: true, updated: false };
-}
-
-function scoreEffectifInBackground(missionLocaleEffectifId: ObjectId, effectif: IEffectif | IEffectifDECA) {
-  const scoreInput = extractScoreInput(effectif);
-  if (!scoreInput) return;
-
-  scoreEffectifs([scoreInput])
-    .then((result) => {
-      const score = result.scores?.[0];
-      if (score != null) {
-        return missionLocaleEffectifsDb().updateOne(
-          { _id: missionLocaleEffectifId },
-          {
-            $set: {
-              classification_reponse_appel: {
-                score,
-                model: result.model,
-                scored_at: new Date(),
-              },
-            },
-          }
-        );
-      }
-    })
-    .catch((err) => {
-      logger.warn({ err, effectif_id: effectif._id }, "Classifier scoring failed, continuing without score");
-    });
+  return created ? { created: true, updated: false } : { created: false, updated: true };
 }

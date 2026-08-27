@@ -71,79 +71,6 @@ exports[`validation-schema > should create validation schema for brevoContactLis
 }
 `;
 
-exports[`validation-schema > should create validation schema for brevoMissionLocaleList > brevoMissionLocaleList 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "created_at": {
-      "bsonType": "date",
-    },
-    "listId": {
-      "bsonType": "number",
-    },
-    "ml_id": {
-      "bsonType": "number",
-    },
-    "type": {
-      "bsonType": "string",
-      "enum": [
-        "MISSION_LOCALE_RUPTURANT",
-      ],
-    },
-    "updated_at": {
-      "bsonType": "date",
-    },
-  },
-  "required": [
-    "_id",
-    "listId",
-    "type",
-    "ml_id",
-  ],
-}
-`;
-
-exports[`validation-schema > should create validation schema for brevoMissionLocaleTemplate > brevoMissionLocaleTemplate 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "created_at": {
-      "bsonType": "date",
-    },
-    "name": {
-      "bsonType": "string",
-      "enum": [
-        "CONFIRMATION",
-        "REFUS",
-      ],
-    },
-    "templateId": {
-      "bsonType": "number",
-    },
-    "type": {
-      "bsonType": "string",
-      "enum": [
-        "MISSION_LOCALE",
-      ],
-    },
-  },
-  "required": [
-    "_id",
-    "templateId",
-    "name",
-    "type",
-  ],
-}
-`;
-
 exports[`validation-schema > should create validation schema for brevoSyncSettings > brevoSyncSettings 1`] = `
 {
   "additionalProperties": false,
@@ -12458,56 +12385,6 @@ exports[`validation-schema > should create validation schema for jwtSessions > j
 }
 `;
 
-exports[`validation-schema > should create validation schema for maintenanceMessages > maintenanceMessages 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "context": {
-      "bsonType": "string",
-      "enum": [
-        "manuel",
-        "automatique",
-        "maintenance",
-      ],
-    },
-    "enabled": {
-      "bsonType": "bool",
-      "description": "Message actif ou non",
-    },
-    "msg": {
-      "bsonType": "string",
-      "description": "Message de maintenance",
-    },
-    "name": {
-      "bsonType": "string",
-      "description": "email du créateur du message",
-    },
-    "time": {
-      "bsonType": "date",
-      "description": "Date de mise en place du message",
-    },
-    "type": {
-      "bsonType": "string",
-      "enum": [
-        "alert",
-        "info",
-      ],
-    },
-  },
-  "required": [
-    "_id",
-    "msg",
-    "name",
-    "type",
-    "context",
-  ],
-}
-`;
-
 exports[`validation-schema > should create validation schema for missionLocaleEffectif > missionLocaleEffectif 1`] = `
 {
   "additionalProperties": false,
@@ -12523,68 +12400,75 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
       ],
     },
     "brevo": {
-      "additionalProperties": false,
-      "bsonType": "object",
-      "properties": {
-        "history": {
-          "anyOf": [
-            {
-              "bsonType": "array",
-              "items": {
-                "additionalProperties": false,
-                "bsonType": "object",
-                "properties": {
-                  "token": {
-                    "bsonType": "string",
-                  },
-                  "token_created_at": {
-                    "bsonType": "date",
-                  },
-                  "token_expired_at": {
-                    "bsonType": "date",
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "history": {
+              "anyOf": [
+                {
+                  "bsonType": "array",
+                  "items": {
+                    "additionalProperties": false,
+                    "bsonType": "object",
+                    "properties": {
+                      "token": {
+                        "bsonType": "string",
+                      },
+                      "token_created_at": {
+                        "bsonType": "date",
+                      },
+                      "token_expired_at": {
+                        "bsonType": "date",
+                      },
+                    },
+                    "required": [
+                      "token",
+                    ],
                   },
                 },
-                "required": [
-                  "token",
-                ],
-              },
+                {
+                  "bsonType": "null",
+                },
+              ],
             },
-            {
-              "bsonType": "null",
+            "token": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
             },
-          ],
+            "token_created_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "token_expired_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+          },
         },
-        "token": {
-          "anyOf": [
-            {
-              "bsonType": "string",
-            },
-            {
-              "bsonType": "null",
-            },
-          ],
+        {
+          "bsonType": "null",
         },
-        "token_created_at": {
-          "anyOf": [
-            {
-              "bsonType": "date",
-            },
-            {
-              "bsonType": "null",
-            },
-          ],
-        },
-        "token_expired_at": {
-          "anyOf": [
-            {
-              "bsonType": "date",
-            },
-            {
-              "bsonType": "null",
-            },
-          ],
-        },
-      },
+      ],
     },
     "cfa_rupture_declaration": {
       "anyOf": [
@@ -17946,6 +17830,70 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Commentaires libres par motif",
             },
+            "date_abandon": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Date de sortie du CFA, uniquement si still_at_cfa est false",
+            },
+            "date_debut_formation": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Date de début de formation au CFA, pour le calcul du délai des 90 jours côté ML",
+            },
+            "form_feedback": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "note": {
+                      "anyOf": [
+                        {
+                          "bsonType": "int",
+                          "maximum": 5,
+                          "minimum": 0,
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "remarque": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                    },
+                    "responded_at": {
+                      "anyOf": [
+                        {
+                          "bsonType": "date",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Satisfaction sur le formulaire lui-même. Usage interne produit, jamais exposé côté ML",
+            },
             "has_unread_notification": {
               "bsonType": "bool",
               "description": "Indique si l'utilisateur CFA qui a fait acc_conjoint a une notification non lue suite à une action de la ML",
@@ -17981,6 +17929,13 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Note complémentaire facultative pour la ML",
             },
+            "recherche_entreprise": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "Description de la recherche d'entreprise en cours",
+            },
             "referent_coordonnees": {
               "bsonType": [
                 "string",
@@ -18015,12 +17970,45 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Date de réponse au formulaire par le CFA",
             },
+            "risque_rupture": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "enum": [
+                    "INEVITABLE",
+                    "TRES_ELEVE",
+                    "MODERE",
+                    "FAIBLE",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Niveau de risque de rupture, jeune encore en contrat",
+            },
             "rupture": {
               "bsonType": [
                 "bool",
                 "null",
               ],
               "description": "Indique si l'effectif est signalé en rupture par le CFA",
+            },
+            "situation_type": {
+              "anyOf": [
+                {
+                  "bsonType": "string",
+                  "enum": [
+                    "EN_CONTRAT",
+                    "RUPTURE_OU_SORTIE",
+                    "SANS_CONTRAT",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Branche du tunnel choisie par le CFA. Absent : dossier antérieur, à lire comme RUPTURE_OU_SORTIE",
             },
             "still_at_cfa": {
               "bsonType": [
@@ -18070,6 +18058,54 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                         "string",
                         "null",
                       ],
+                    },
+                    "responsable_legal": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "bsonType": "object",
+                          "properties": {
+                            "courriel": {
+                              "bsonType": [
+                                "string",
+                                "null",
+                              ],
+                            },
+                            "nom": {
+                              "bsonType": [
+                                "string",
+                                "null",
+                              ],
+                            },
+                            "telephone": {
+                              "bsonType": [
+                                "string",
+                                "null",
+                              ],
+                            },
+                          },
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                      "description": "Coordonnées du responsable légal, saisies uniquement si le jeune est mineur",
+                    },
+                    "rqth_declare": {
+                      "anyOf": [
+                        {
+                          "bsonType": "string",
+                          "enum": [
+                            "NON_RENSEIGNE",
+                            "OUI",
+                            "NON",
+                          ],
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                      "description": "Statut RQTH déclaré par le CFA. Oui/Non écrasent effectif_snapshot.apprenant.rqth ; conservé ici pour l'audit et la ré-application après refresh de snapshot",
                     },
                     "telephone": {
                       "bsonType": [
@@ -18486,7 +18522,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "effectif_id",
     "created_at",
     "effectif_snapshot",
-    "brevo",
     "current_status",
   ],
 }
@@ -20297,6 +20332,13 @@ exports[`validation-schema > should create validation schema for organismes > or
           "bsonType": "null",
         },
       ],
+    },
+    "has_account": {
+      "bsonType": [
+        "bool",
+        "null",
+      ],
+      "description": "Indique qu'au moins un compte utilisateur est attaché à l'organisation de cet organisme",
     },
     "has_transmission_errors": {
       "bsonType": "bool",

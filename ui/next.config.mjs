@@ -80,6 +80,29 @@ const nextConfig = {
       //   permanent: true,
       // },
       {
+        source: "/stats",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/questions-reponses",
+        destination: "https://aide.cfas.apprentissage.beta.gouv.fr/fr/",
+        basePath: false,
+        permanent: true,
+      },
+      {
+        source: "/questions-reponses/:path*",
+        destination: "https://aide.cfas.apprentissage.beta.gouv.fr/fr/",
+        basePath: false,
+        permanent: true,
+      },
+      {
+        source: "/comprendre-les-donnees",
+        destination: "https://aide.cfas.apprentissage.beta.gouv.fr/fr/",
+        basePath: false,
+        permanent: true,
+      },
+      {
         source: "/politique-confidentialite",
         destination: "/politique-de-confidentialite",
         permanent: true,
@@ -95,6 +118,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/mon-compte",
+        destination: "/compte",
+        permanent: false,
+      },
+      {
         source: "/sondage",
         destination: "https://tally.so/r/rjv1GN",
         basePath: false,
@@ -106,6 +134,13 @@ const nextConfig = {
       {
         source: "/r/:token",
         destination: "/api/r/:token",
+        permanent: false,
+      },
+      // Liens e-mails Brevo de la campagne jeunes ML (flux abandonné) encore en circulation :
+      // les pages et l'API campagne ont été supprimées, on évite un 404 sec.
+      {
+        source: "/campagnes/:path*",
+        destination: "/",
         permanent: false,
       },
     ];
