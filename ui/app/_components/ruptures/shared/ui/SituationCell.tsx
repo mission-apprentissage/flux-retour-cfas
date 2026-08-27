@@ -5,7 +5,7 @@ import styles from "./SituationCell.module.css";
 interface SituationCellProps {
   /** absent : la cellule affiche un tiret */
   label?: string | null;
-  tooltip?: string;
+  tooltip?: React.ReactNode;
   /** précision sous le libellé (ex. « depuis le 12/08/2026 ») */
   detail?: string | null;
   dimmed?: boolean;
