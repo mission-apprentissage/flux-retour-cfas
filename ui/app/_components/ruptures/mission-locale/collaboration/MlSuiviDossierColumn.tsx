@@ -495,7 +495,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                       trackPlausibleEvent("ml_form_contact_non_situation", undefined, { motif: "tentative_relancer" });
                     }}
                   />
-                  <span aria-hidden="true">🔄</span> Tentative de contact, à relancer
+                  <span aria-hidden="true">🔄</span> À recontacter plus tard
                 </label>
 
                 {formik.values.situationNonContact === "tentative_relancer" && !tentativeCalloutDismissed && (
