@@ -3,20 +3,14 @@
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { IEffectifMissionLocale } from "shared";
 import { IMlSituationDossier, ML_SITUATION_DOSSIER_LABEL } from "shared/constants";
-import { CFA_RISQUE_RUPTURE_ENUM, CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 
+import { RISQUE_RUPTURE_LABELS } from "@/app/_components/ruptures/shared/constants";
 import { ML_SITUATION_TOOLTIPS } from "@/app/_components/ruptures/shared/ui/situationTooltips";
 import { formatDate } from "@/app/_utils/date.utils";
 import { dePrenom } from "@/app/_utils/ruptures.utils";
 
 import styles from "./CollaborationDetail.shared.module.css";
-
-const RISQUE_LABELS: Record<CFA_RISQUE_RUPTURE_ENUM, string> = {
-  [CFA_RISQUE_RUPTURE_ENUM.INEVITABLE]: "Inévitable",
-  [CFA_RISQUE_RUPTURE_ENUM.TRES_ELEVE]: "Très élevé",
-  [CFA_RISQUE_RUPTURE_ENUM.MODERE]: "Modéré",
-  [CFA_RISQUE_RUPTURE_ENUM.FAIBLE]: "Faible",
-};
 
 type OrganismeData = IEffectifMissionLocale["effectif"]["organisme_data"];
 
@@ -44,7 +38,7 @@ export function DossierSituationBlock({
 
   if (situationType === CFA_SITUATION_TYPE_ENUM.EN_CONTRAT) {
     if (od.risque_rupture) {
-      lignes.push(`⚠️ Risque de rupture : ${RISQUE_LABELS[od.risque_rupture]}`);
+      lignes.push(`⚠️ Risque de rupture : ${RISQUE_RUPTURE_LABELS[od.risque_rupture]}`);
     }
   }
 

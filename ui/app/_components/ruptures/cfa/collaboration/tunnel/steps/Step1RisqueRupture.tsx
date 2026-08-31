@@ -3,9 +3,18 @@
 import { useFormikContext } from "formik";
 import { CFA_RISQUE_RUPTURE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 
+import { RISQUE_RUPTURE_DESCRIPTIONS, RISQUE_RUPTURE_LABELS } from "@/app/_components/ruptures/shared/constants";
+
 import { FormValues } from "../../types";
 import { RadioCardGroup } from "../RadioCardGroup";
 import styles from "../Tunnel.module.css";
+
+const RISQUE_OPTIONS = [
+  CFA_RISQUE_RUPTURE_ENUM.INEVITABLE,
+  CFA_RISQUE_RUPTURE_ENUM.TRES_ELEVE,
+  CFA_RISQUE_RUPTURE_ENUM.MODERE,
+  CFA_RISQUE_RUPTURE_ENUM.FAIBLE,
+];
 
 export function Step1RisqueRupture() {
   const { values, setFieldValue } = useFormikContext<FormValues>();
@@ -17,40 +26,14 @@ export function Step1RisqueRupture() {
         name="risque_rupture"
         value={values.risque_rupture}
         onChange={(value) => setFieldValue("risque_rupture", value)}
-        options={[
-          {
-            value: CFA_RISQUE_RUPTURE_ENUM.INEVITABLE,
-            label: (
-              <>
-                <strong>Inévitable</strong>, la rupture est prévue dans un futur proche
-              </>
-            ),
-          },
-          {
-            value: CFA_RISQUE_RUPTURE_ENUM.TRES_ELEVE,
-            label: (
-              <>
-                <strong>Très élevé</strong>, le jeune va certainement connaître une rupture de contrat
-              </>
-            ),
-          },
-          {
-            value: CFA_RISQUE_RUPTURE_ENUM.MODERE,
-            label: (
-              <>
-                <strong>Modéré</strong>, la rupture peut être évitée si des solutions sont trouvées
-              </>
-            ),
-          },
-          {
-            value: CFA_RISQUE_RUPTURE_ENUM.FAIBLE,
-            label: (
-              <>
-                <strong>Faible</strong>, pas de rupture en vue, mais ce jeune a besoin d&apos;un accompagnement
-              </>
-            ),
-          },
-        ]}
+        options={RISQUE_OPTIONS.map((risque) => ({
+          value: risque,
+          label: (
+            <>
+              <strong>{RISQUE_RUPTURE_LABELS[risque]}</strong>, {RISQUE_RUPTURE_DESCRIPTIONS[risque]}
+            </>
+          ),
+        }))}
       />
     </>
   );
