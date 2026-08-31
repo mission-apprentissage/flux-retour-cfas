@@ -16,7 +16,6 @@ const styles = withSharedStyles(localStyles);
 
 export function CollaborationReceivedView({ effectif }: { effectif: IEffectifMissionLocale["effectif"] }) {
   const od = effectif.organisme_data;
-  const prenom = effectif.prenom;
 
   const organismeName = effectif.organisme?.nom || effectif.organisme?.raison_sociale || "";
 
@@ -38,7 +37,6 @@ export function CollaborationReceivedView({ effectif }: { effectif: IEffectifMis
       <div className={styles.sentBubble}>
         <DossierSituationBlock
           organismeData={od}
-          prenom={prenom}
           dateRupture={effectif.date_rupture}
           situationDossier={effectif.situation_dossier}
         />

@@ -369,6 +369,32 @@ a.mlCoordLink::after {
   border-radius: 4px;
 }
 
+.sentSituationLine {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  font-family: Marianne, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  color: var(--text-default-grey);
+  margin: 0;
+}
+
+.sentSituationLine :global([class^="fr-icon-"]),
+.sentSituationLine :global([class^="ri-"]) {
+  flex-shrink: 0;
+  align-self: center;
+  color: var(--blue-france-main-525);
+}
+
+.sentSituationLineError :global([class^="fr-icon-"]) {
+  color: var(--text-default-error);
+}
+
+.sentSituationDate {
+  font-weight: 400;
+}
+
 .sentMotifInline {
   font-family: Marianne, sans-serif;
   font-weight: 400;
@@ -389,15 +415,6 @@ a.mlCoordLink::after {
   line-height: 1.5rem;
   color: var(--text-title-grey);
   margin: 0 0 0.125rem 0;
-}
-
-.sentStillAtCfa {
-  font-family: Marianne, sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
-  line-height: 1.5rem;
-  color: var(--text-title-grey);
-  margin: 0;
 }
 
 .sentFooter :global([class^="fr-icon-"]) {
