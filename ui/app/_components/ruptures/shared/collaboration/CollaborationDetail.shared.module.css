@@ -345,18 +345,6 @@ a.mlCoordLink::after {
   margin-bottom: 0;
 }
 
-.situationEncadre {
-  display: inline-flex;
-  gap: 0.25rem;
-  align-items: center;
-  width: fit-content;
-  padding: 0.25rem 0.75rem;
-  margin: 0 0 0.5rem 0;
-  font-weight: 500;
-  color: var(--text-default-grey);
-  border: 1px solid var(--border-default-grey);
-}
-
 .sentSectionTitle {
   font-family: Marianne, sans-serif;
   font-weight: 700;
@@ -364,6 +352,21 @@ a.mlCoordLink::after {
   line-height: 1.25rem;
   color: var(--text-mention-grey);
   margin: 0 0 0.25rem 0;
+}
+
+.situationTag {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  height: 2rem;
+  margin-bottom: 0.25rem;
+  padding: 0 0.5rem;
+  font-family: Marianne, sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text-default-grey);
+  border: 1px solid var(--border-contrast-grey);
+  border-radius: 4px;
 }
 
 .sentMotifInline {

@@ -1,16 +1,15 @@
 "use client";
 
-import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { IEffectifMissionLocale } from "shared";
-import { IMlSituationDossier, ML_SITUATION_DOSSIER_LABEL } from "shared/constants";
+import { ML_SITUATION_DOSSIER } from "shared/constants";
 import { CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 
 import { RISQUE_RUPTURE_LABELS } from "@/app/_components/ruptures/shared/constants";
-import { ML_SITUATION_TOOLTIPS } from "@/app/_components/ruptures/shared/ui/situationTooltips";
 import { formatDate } from "@/app/_utils/date.utils";
 import { dePrenom } from "@/app/_utils/ruptures.utils";
 
 import styles from "./CollaborationDetail.shared.module.css";
+import { SituationDossierTag } from "./SituationDossierTag";
 
 type OrganismeData = IEffectifMissionLocale["effectif"]["organisme_data"];
 
@@ -18,8 +17,8 @@ interface DossierSituationBlockProps {
   organismeData: OrganismeData;
   prenom: string;
   dateRupture?: Date | string | null;
-  /** rappel de la situation telle qu'affichée en liste ; absent côté CFA */
-  situationDossier?: IMlSituationDossier | null;
+  /** Côté ML uniquement : le champ n'est pas projeté pour le CFA. */
+  situationDossier?: ML_SITUATION_DOSSIER | null;
 }
 
 export function DossierSituationBlock({
@@ -64,19 +63,14 @@ export function DossierSituationBlock({
 
   const detail = situationType === CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT ? od.recherche_entreprise : od.cause_rupture;
 
-  if (lignes.length === 0 && !detail && !situationDossier) return null;
+  if (!situationDossier && lignes.length === 0 && !detail) return null;
 
   return (
     <div className={styles.sentBubbleSection}>
       <p className={styles.sentSectionTitle}>
         {situationDossier ? "Situation du jeune" : `Situation ${dePrenom(prenom)}`}
       </p>
-      {situationDossier && (
-        <p className={styles.situationEncadre}>
-          {ML_SITUATION_DOSSIER_LABEL[situationDossier]}
-          <Tooltip kind="hover" title={ML_SITUATION_TOOLTIPS[situationDossier]} />
-        </p>
-      )}
+      {situationDossier && <SituationDossierTag situation={situationDossier} />}
       {lignes.map((ligne) => (
         <p key={ligne} className={styles.sentStillAtCfa}>
           {ligne}
