@@ -72,6 +72,15 @@ export const dePrenom = (prenom: string): string => {
   return "aeiouyàâäéèêëîïôöùûü".includes(premiere) ? `d'${prenom}` : `de ${prenom}`;
 };
 
+/** Minorité réelle : le champ `mineur` de l'API est un critère de priorité, restreint aux 16-18 ans. */
+export const isMineur = (dateDeNaissance: unknown): boolean => {
+  if (!dateDeNaissance) return false;
+  const majorite = new Date(dateDeNaissance as string);
+  if (Number.isNaN(majorite.getTime())) return false;
+  majorite.setFullYear(majorite.getFullYear() + 18);
+  return majorite > new Date();
+};
+
 /**
  * Suffixe de tri reconstruit depuis l'URL de la fiche, pour que le précédent/suivant et le
  * retour à la liste conservent l'ordre affiché.

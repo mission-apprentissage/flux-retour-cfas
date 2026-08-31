@@ -8,6 +8,7 @@ import { CFA_SITUATION_TYPE_ENUM, RQTH_DECLARE_ENUM } from "shared/models/data/m
 
 import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { isMineur } from "@/app/_utils/ruptures.utils";
 
 import { useSubmitCollaborationForm, VerifiedInfo } from "../hooks";
 import { ObjectifsSection } from "../sections/ObjectifsSection";
@@ -31,13 +32,6 @@ import styles from "./Tunnel.module.css";
 import { TunnelLayout } from "./TunnelLayout";
 import { StepId, STEP_NUMBER } from "./types";
 import { buildTunnelSteps, EMPTY_BRANCH_VALUES } from "./useTunnelSteps";
-
-const isMineur = (dateDeNaissance: unknown): boolean => {
-  if (!dateDeNaissance) return false;
-  const majorite = new Date(dateDeNaissance as string);
-  majorite.setFullYear(majorite.getFullYear() + 18);
-  return majorite > new Date();
-};
 
 interface CollaborationTunnelProps {
   effectif: IEffectifMissionLocale["effectif"];
