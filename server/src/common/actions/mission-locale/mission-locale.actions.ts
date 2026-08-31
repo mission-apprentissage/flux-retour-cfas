@@ -800,7 +800,7 @@ const addNudgeFields = () => [
   },
 ];
 
-/** Qualification du tunnel CFA si elle existe, sinon statut ERP/DECA. */
+/** Qualification du tunnel CFA si elle existe, sinon statut ERP/DECA. Risque faible = besoin d'aide hors rupture. */
 const addSituationDossierField = () => [
   {
     $addFields: {

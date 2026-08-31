@@ -264,7 +264,10 @@ describe("getEffectifsFusionnesByMissionLocaleId", () => {
   describe("export des nouvelles listes", () => {
     it("exporte la situation du dossier et les dates de suivi", async () => {
       await insertMlRecord("EXPORTCOLLAB", {
-        organisme_data: collabData({ situation_type: CFA_SITUATION_TYPE_ENUM.EN_CONTRAT }),
+        organisme_data: collabData({
+          situation_type: CFA_SITUATION_TYPE_ENUM.EN_CONTRAT,
+          risque_rupture: CFA_RISQUE_RUPTURE_ENUM.TRES_ELEVE,
+        }),
         situation: SITUATION_ENUM.RDV_PRIS,
         date_traitement: daysAgo(1),
       });
@@ -298,7 +301,12 @@ describe("getEffectifsFusionnesByMissionLocaleId", () => {
     it.each([
       {
         nom: "PREVENTION",
-        overrides: { organisme_data: collabData({ situation_type: CFA_SITUATION_TYPE_ENUM.EN_CONTRAT }) },
+        overrides: {
+          organisme_data: collabData({
+            situation_type: CFA_SITUATION_TYPE_ENUM.EN_CONTRAT,
+            risque_rupture: CFA_RISQUE_RUPTURE_ENUM.MODERE,
+          }),
+        },
         attendu: ML_SITUATION_DOSSIER.PREVENTION_RUPTURE,
       },
       {
