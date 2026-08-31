@@ -338,7 +338,7 @@ a.mlCoordLink::after {
 
 .sentBubbleSection {
   padding: 0;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .sentBubbleSection:last-child {
@@ -406,6 +406,10 @@ a.mlCoordLink::after {
 
 .sentMotifInline strong {
   font-weight: 700;
+}
+
+.sentMotifComment {
+  color: var(--text-mention-grey);
 }
 
 .sentBody {

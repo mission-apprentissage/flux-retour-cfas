@@ -174,9 +174,9 @@
 
 .sentBubble {
   background: white;
-  border: 1px solid var(--border-default-grey);
+  border: 1px solid var(--border-open-blue-france);
   border-radius: 8px;
-  padding: 1rem 1.25rem;
+  padding: 1rem 1.5rem;
   margin: 1rem 4rem 1rem 0.25rem;
 }
 
@@ -189,6 +189,10 @@
   font-weight: 700;
   line-height: 1.4;
   margin: 0.5rem 4rem 0 0.25rem;
+}
+
+.sentFooterLabel {
+  flex: 1;
 }
 
 .dossierForm {
