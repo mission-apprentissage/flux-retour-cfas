@@ -9,11 +9,11 @@ import type { MlListeEffectif } from "@/common/types/ruptures";
 import { CommuneCell } from "../../shared/ui/CommuneCell";
 import { EffectifPriorityBadgeMultiple } from "../../shared/ui/EffectifStatusBadge";
 import { SituationCell } from "../../shared/ui/SituationCell";
+import { ML_SITUATION_TOOLTIPS } from "../../shared/ui/situationTooltips";
 import sharedStyles from "../../shared/ui/SortableTable.module.css";
 import { StatutDateCell } from "../../shared/ui/StatutDateCell";
 
 import styles from "./MlEffectifsTable.module.css";
-import { ML_SITUATION_TOOLTIPS } from "./situationTooltips";
 import type { MlTriEtat } from "./tri";
 
 interface MlEffectifsTableProps {

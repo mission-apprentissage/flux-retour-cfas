@@ -345,6 +345,18 @@ a.mlCoordLink::after {
   margin-bottom: 0;
 }
 
+.situationEncadre {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  width: fit-content;
+  padding: 0.25rem 0.75rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+  color: var(--text-default-grey);
+  border: 1px solid var(--border-default-grey);
+}
+
 .sentSectionTitle {
   font-family: Marianne, sans-serif;
   font-weight: 700;

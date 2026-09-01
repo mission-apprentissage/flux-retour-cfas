@@ -1,8 +1,11 @@
 "use client";
 
+import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { IEffectifMissionLocale } from "shared";
+import { IMlSituationDossier, ML_SITUATION_DOSSIER_LABEL } from "shared/constants";
 import { CFA_RISQUE_RUPTURE_ENUM, CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 
+import { ML_SITUATION_TOOLTIPS } from "@/app/_components/ruptures/shared/ui/situationTooltips";
 import { formatDate } from "@/app/_utils/date.utils";
 import { dePrenom } from "@/app/_utils/ruptures.utils";
 
@@ -21,9 +24,16 @@ interface DossierSituationBlockProps {
   organismeData: OrganismeData;
   prenom: string;
   dateRupture?: Date | string | null;
+  /** rappel de la situation telle qu'affichée en liste ; absent côté CFA */
+  situationDossier?: IMlSituationDossier | null;
 }
 
-export function DossierSituationBlock({ organismeData, prenom, dateRupture }: DossierSituationBlockProps) {
+export function DossierSituationBlock({
+  organismeData,
+  prenom,
+  dateRupture,
+  situationDossier,
+}: DossierSituationBlockProps) {
   const od = organismeData;
   if (!od) return null;
 
@@ -53,18 +63,26 @@ export function DossierSituationBlock({ organismeData, prenom, dateRupture }: Do
   if (situationType === CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT) {
     lignes.push(
       od.date_debut_formation
-        ? `📅 Rentrée sans contrat, formation débutée le ${formatDate(od.date_debut_formation)}`
+        ? `📅 Date de début de formation le ${formatDate(od.date_debut_formation)}`
         : "📅 Rentrée sans contrat"
     );
   }
 
   const detail = situationType === CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT ? od.recherche_entreprise : od.cause_rupture;
 
-  if (lignes.length === 0 && !detail) return null;
+  if (lignes.length === 0 && !detail && !situationDossier) return null;
 
   return (
     <div className={styles.sentBubbleSection}>
-      <p className={styles.sentSectionTitle}>Situation {dePrenom(prenom)}</p>
+      <p className={styles.sentSectionTitle}>
+        {situationDossier ? "Situation du jeune" : `Situation ${dePrenom(prenom)}`}
+      </p>
+      {situationDossier && (
+        <p className={styles.situationEncadre}>
+          {ML_SITUATION_DOSSIER_LABEL[situationDossier]}
+          <Tooltip kind="hover" title={ML_SITUATION_TOOLTIPS[situationDossier]} />
+        </p>
+      )}
       {lignes.map((ligne) => (
         <p key={ligne} className={styles.sentStillAtCfa}>
           {ligne}
