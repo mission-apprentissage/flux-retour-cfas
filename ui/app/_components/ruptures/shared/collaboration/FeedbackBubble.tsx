@@ -65,7 +65,12 @@ export function FeedbackBubble({ log, effectif, styles, variant, showCurrentUser
       <div className={styles[cls.bubble]}>
         <div className={styles.sentBubbleSection}>
           <p className={styles.sentSectionTitle}>Situation</p>
-          <BooleanLine label="Jeune contacté" value={contactReussi} className={styles.feedbackLine} />
+          <BooleanLine
+            label="Jeune contacté"
+            labelFaux="Pas de réponse du jeune"
+            value={contactReussi}
+            className={styles.feedbackLine}
+          />
           {!contactReussi && log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR && (
             <p className={styles.feedbackLine}>
               {"🔄 "}
