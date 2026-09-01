@@ -2,7 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import { EffectifData } from "../../common/types/ruptures";
 
-import { dePrenom, formatDateSuivi, isDelaiRelanceDepasse, matchesPostalCodes } from "./ruptures.utils";
+import {
+  dePrenom,
+  estMoisRecent,
+  estMoisToutTraite,
+  formatDateSuivi,
+  formatMoisAbrege,
+  isDelaiRelanceDepasse,
+  matchesPostalCodes,
+} from "./ruptures.utils";
 
 const makeEffectif = (overrides: Partial<EffectifData> = {}): EffectifData => ({
   id: Math.random().toString(36).slice(2),
@@ -82,6 +90,37 @@ describe("formatDateSuivi", () => {
 
   it("garde la date quand la forme relative est désactivée", () => {
     expect(formatDateSuivi(new Date("2026-08-24T08:00:00.000Z"), { relatif: false, now })).toBe("le 24/08/2026");
+  });
+});
+
+describe("formatMoisAbrege", () => {
+  it("abrège les mois longs et garde les courts", () => {
+    expect(formatMoisAbrege("2026-07-01T00:00:00.000Z")).toBe("Juil. 2026");
+    expect(formatMoisAbrege("2026-01-01T00:00:00.000Z")).toBe("Janv. 2026");
+    expect(formatMoisAbrege("2025-08-01T00:00:00.000Z")).toBe("Août 2025");
+    expect(formatMoisAbrege("2025-04-01T00:00:00.000Z")).toBe("Avril 2025");
+  });
+});
+
+describe("estMoisRecent", () => {
+  const now = new Date("2026-08-15T00:00:00.000Z");
+
+  it("garde les douze derniers mois, mois courant inclus", () => {
+    expect(estMoisRecent("2026-08-01T00:00:00.000Z", now)).toBe(true);
+    expect(estMoisRecent("2025-08-01T00:00:00.000Z", now)).toBe(true);
+  });
+
+  it("écarte ce qui a plus d'un an", () => {
+    expect(estMoisRecent("2025-07-01T00:00:00.000Z", now)).toBe(false);
+  });
+});
+
+describe("estMoisToutTraite", () => {
+  it("ne retient que les mois sans dossier actionnable mais avec des traités", () => {
+    expect(estMoisToutTraite({ month: "2025-08-01", data: [], treated_count: 4 })).toBe(true);
+    expect(estMoisToutTraite({ month: "2025-08-01", data: [], treated_count: 0 })).toBe(false);
+    expect(estMoisToutTraite({ month: "2025-08-01", data: [], treated_count: undefined })).toBe(false);
+    expect(estMoisToutTraite({ month: "2025-08-01", data: [makeEffectif()], treated_count: 4 })).toBe(false);
   });
 });
 

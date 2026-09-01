@@ -10,16 +10,16 @@
   color: var(--text-action-high-blue-france);
 }
 
-/* Navigation par mois : libellés en graisse normale, « En abandon » en sous-titre. */
 .moisItem {
   display: flex;
-  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
   font-weight: 400;
 }
 
-.moisSousTitre {
-  font-size: 0.75rem;
-  font-style: italic;
+.moisToutTraite {
   color: var(--text-mention-grey);
 }
 

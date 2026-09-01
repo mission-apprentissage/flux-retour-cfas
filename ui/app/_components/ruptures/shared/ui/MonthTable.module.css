@@ -25,6 +25,16 @@
   gap: 8px;
 }
 
+.identite {
+  display: flex;
+  flex-direction: column;
+  text-decoration: underline;
+}
+
+.identiteNom {
+  text-transform: uppercase;
+}
+
 .prioritaireBadge {
   gap: 0.2rem;
 }

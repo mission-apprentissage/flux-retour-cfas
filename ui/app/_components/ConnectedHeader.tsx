@@ -67,7 +67,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
         },
       });
       baseItems.push({
-        text: "Liste ruptures",
+        text: "Tous les dossiers",
         isActive: pathname?.startsWith("/mission-locale/ruptures"),
         linkProps: {
           href: "/mission-locale/ruptures",

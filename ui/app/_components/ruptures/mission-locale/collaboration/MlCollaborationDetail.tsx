@@ -50,7 +50,7 @@ function getMlListInfo(
       return { label: "Dossiers déjà traités", href };
     case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
       return origine === "ruptures"
-        ? { label: "Liste des jeunes en rupture", href }
+        ? { label: "Tous les dossiers", href }
         : {
             label: "Dossiers prioritaires à traiter",
             href: `/mission-locale${filtresQuery ? `?${filtresQuery.slice(1)}` : ""}`,

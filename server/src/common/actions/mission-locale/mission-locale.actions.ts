@@ -1468,10 +1468,13 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   );
   const result = await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
 
-  // Navigation par année : on renvoie les mois réellement présents, sans compléter les mois vides
-  // ni rogner la fin de liste.
+  // On renvoie les mois réellement présents, sans compléter les mois vides ni rogner la fin de
+  // liste. Un mois sans dossier actionnable mais avec des dossiers traités est conservé : c'est
+  // lui que la navigation latérale coche.
   if (tousLesMois) {
-    return result.filter(({ data }) => Array.isArray(data) && data.length > 0);
+    return result.filter(
+      ({ data, treated_count }) => (Array.isArray(data) && data.length > 0) || (treated_count ?? 0) > 0
+    );
   }
 
   const sevenLastMonth = getSevenLastMonth();
@@ -1975,7 +1978,7 @@ export async function getAllEffectifsParMois(
       fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
       // Sous-onglet unique de la liste ruptures : à traiter et à recontacter dans les mêmes mois.
       // Propre à l'espace ML : côté organisme, un dossier n'est jamais « à recontacter ».
-      estMissionLocale ? fetchByType(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER) : [],
+      estMissionLocale ? fetchByType(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER, true) : [],
     ]);
 
   return { a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable, a_traiter_ou_recontacter };

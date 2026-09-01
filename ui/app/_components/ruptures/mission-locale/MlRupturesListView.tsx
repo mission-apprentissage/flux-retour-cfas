@@ -3,6 +3,7 @@
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
+import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { API_EFFECTIF_LISTE } from "shared";
 
@@ -12,8 +13,9 @@ import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import {
   anchorFromLabel,
-  formatMonthAndYear,
-  get180DaysAgo,
+  estMoisRecent,
+  estMoisToutTraite,
+  formatMoisAbrege,
   matchesPostalCodes,
   PostalCodeOption,
   sortDataByMonthDescending,
@@ -60,6 +62,7 @@ export function MlRupturesListView({
   const [sousOnglet, setSousOnglet] = useState<SousOnglet>(sousOngletDepuisStatut(initialStatut ?? null));
   const [activeAnchor, setActiveAnchor] = useState("");
   const [anneesOuvertes, setAnneesOuvertes] = useState<string[]>([String(new Date().getFullYear())]);
+  const [anciensOuverts, setAnciensOuverts] = useState(false);
   const {
     recherche: searchTerm,
     setRecherche: setSearchTerm,
@@ -101,10 +104,11 @@ export function MlRupturesListView({
 
   const estTraites = sousOnglet === SOUS_ONGLETS.TRAITES;
   const moisAffiches = estTraites ? moisTraites : moisATraiter;
-  // Les dossiers traités des années repliées ne sont pas rendus : la liste couvre plusieurs années.
+  // La liste ne rend que ce que la navigation montre : années repliées côté traités, mois de plus
+  // d'un an côté à traiter. Un mois entièrement traité n'a pas de bloc, seulement sa coche.
   const moisRendus = estTraites
     ? moisAffiches.filter((m) => anneesOuvertes.includes(String(new Date(m.month).getFullYear())))
-    : moisAffiches;
+    : moisAffiches.filter((m) => m.data.length > 0 && (anciensOuverts || estMoisRecent(m.month)));
 
   const countVisibleInMonth = useCallback(
     (monthItem: MonthItem) =>
@@ -125,54 +129,56 @@ export function MlRupturesListView({
   const totalTraites = useMemo(() => countVisible(moisTraites), [moisTraites, countVisible]);
   const totalAffiche = estTraites ? totalTraites : totalATraiter;
 
-  const buildMonthLabel = useCallback(
-    (month: string) =>
-      month === "plus-de-180-j"
-        ? { labelElement: "+ de 180j", labelString: month, sousTitre: "En abandon" }
-        : { labelElement: formatMonthAndYear(month), labelString: month, sousTitre: null },
-    []
-  );
-
   const handleAnchorClick = useCallback((anchorId: string) => {
     setActiveAnchor(anchorId);
     document.getElementById(anchorId)?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  // Deep-link ?rupture=<date> : ouvre le mois correspondant (ou le bucket +180j).
   useEffect(() => {
     if (!initialRuptureDate) return;
-    const parsed = new Date(initialRuptureDate);
-    const ancre = parsed < get180DaysAgo() ? anchorFromLabel("plus-de-180-j") : anchorFromLabel(initialRuptureDate);
-    requestAnimationFrame(() => handleAnchorClick(ancre));
+    requestAnimationFrame(() => handleAnchorClick(anchorFromLabel(initialRuptureDate)));
   }, [initialRuptureDate, handleAnchorClick]);
+
+  // Le filtre critères vide `data` : le « tout traité » se lit sur les mois non filtrés.
+  const moisToutTraites = useMemo(
+    () => new Set((data.a_traiter_ou_recontacter ?? []).filter(estMoisToutTraite).map(({ month }) => month)),
+    [data.a_traiter_ou_recontacter]
+  );
 
   const itemMois = useCallback(
     (monthItem: MonthItem) => {
       const monthCount = countVisibleInMonth(monthItem);
-      const { labelElement, labelString, sousTitre } = buildMonthLabel(monthItem.month);
-      const anchorId = anchorFromLabel(labelString);
+      const anchorId = anchorFromLabel(monthItem.month);
+      const toutTraite = moisToutTraites.has(monthItem.month);
       return {
-        // Libellés en graisse normale, avec « En abandon » en sous-titre du bucket +180j (maquette).
         text: (
-          <span className={styles.moisItem}>
+          <span className={`${styles.moisItem} ${toutTraite ? styles.moisToutTraite : ""}`}>
             <span>
-              {labelElement}
-              {monthCount > 0 ? ` (${monthCount})` : ""}
+              {formatMoisAbrege(monthItem.month)}
+              {!toutTraite && ` (${monthCount})`}
             </span>
-            {sousTitre && <span className={styles.moisSousTitre}>{sousTitre}</span>}
+            {toutTraite && (
+              <Tooltip
+                kind="hover"
+                title="Vous avez traité tous les dossiers de jeunes en difficulté reçus sur ce mois."
+              >
+                <i className="fr-icon-checkbox-circle-fill fr-icon--sm" aria-label="Mois entièrement traité" />
+              </Tooltip>
+            )}
           </span>
         ),
+        // Un mois entièrement traité n'a pas de bloc dans la liste : rien vers quoi naviguer.
         linkProps: {
-          href: `#${anchorId}`,
+          href: toutTraite ? "#" : `#${anchorId}`,
           onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
             e.preventDefault();
-            handleAnchorClick(anchorId);
+            if (!toutTraite) handleAnchorClick(anchorId);
           },
         },
-        isActive: activeAnchor === anchorId,
+        isActive: !toutTraite && activeAnchor === anchorId,
       };
     },
-    [countVisibleInMonth, buildMonthLabel, handleAnchorClick, activeAnchor]
+    [countVisibleInMonth, handleAnchorClick, activeAnchor, moisToutTraites]
   );
 
   const sideMenuItems = useMemo(() => {
@@ -216,8 +222,35 @@ export function MlRupturesListView({
           };
         });
     }
-    return moisAffiches.map(itemMois);
-  }, [estTraites, moisAffiches, itemMois, countVisibleInMonth, anneesOuvertes]);
+    // À traiter : les douze derniers mois, puis un regroupement dépliable pour les plus anciens.
+    const recents = moisAffiches.filter(({ month }) => estMoisRecent(month));
+    const anciens = moisAffiches.filter(({ month }) => !estMoisRecent(month));
+    if (anciens.length === 0) return recents.map(itemMois);
+
+    const totalAnciens = anciens.reduce((somme, m) => somme + countVisibleInMonth(m), 0);
+    const libelleAnciens = <strong>Il y a + d&apos;1 an ({totalAnciens})</strong>;
+
+    return [
+      ...recents.map(itemMois),
+      anciensOuverts
+        ? { text: libelleAnciens, expandedByDefault: true, items: anciens.map(itemMois) }
+        : {
+            text: (
+              <span className={styles.anneeFermee}>
+                {libelleAnciens}
+                <span className={styles.anneeLienAfficher}>Afficher plus</span>
+              </span>
+            ),
+            linkProps: {
+              href: "#",
+              onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+                e.preventDefault();
+                setAnciensOuverts(true);
+              },
+            },
+          },
+    ];
+  }, [estTraites, moisAffiches, itemMois, countVisibleInMonth, anneesOuvertes, anciensOuverts]);
 
   const estVide = moisRendus.every((month) => month.data.length === 0);
 

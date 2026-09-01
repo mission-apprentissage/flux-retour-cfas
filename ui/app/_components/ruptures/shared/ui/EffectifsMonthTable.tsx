@@ -59,7 +59,10 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
             <span className={notificationStyles.notificationDot} title="Nouvelle information de la Mission Locale" />
           )}
           <div className={`fr-text--bold ${styles.monthTableNameContainer}`}>
-            {`${effectif.nom} ${effectif.prenom}`}
+            <span className={styles.identite}>
+              <span>{effectif.prenom}</span>
+              <span className={styles.identiteNom}>{effectif.nom}</span>
+            </span>
           </div>
         </div>
       </div>

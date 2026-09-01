@@ -17,13 +17,35 @@ export const sortDataByMonthDescending = (data: MonthItem[]): MonthItem[] => {
   return [...data].sort((a, b) => new Date(b.month).getTime() - new Date(a.month).getTime());
 };
 
-export const anchorFromLabel = (label: string): string => {
-  return label.replace(/\s/g, "-").toLowerCase();
+const MOIS_ABREGES = [
+  "Janv.",
+  "Fév.",
+  "Mars",
+  "Avril",
+  "Mai",
+  "Juin",
+  "Juil.",
+  "Août",
+  "Sept.",
+  "Oct.",
+  "Nov.",
+  "Déc.",
+];
+
+export const formatMoisAbrege = (dateString: string): string => {
+  const date = new Date(dateString);
+  return `${MOIS_ABREGES[date.getMonth()]} ${date.getFullYear()}`;
 };
 
-export const get180DaysAgo = () => {
-  const now = new Date();
-  return new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+export const estMoisRecent = (month: string, now: Date = new Date()): boolean =>
+  new Date(month) >= new Date(now.getFullYear() - 1, now.getMonth(), 1);
+
+/** Un mois dont tous les dossiers reçus ont été traités : la navigation le grise et le coche. */
+export const estMoisToutTraite = (monthItem: MonthItem): boolean =>
+  monthItem.data.length === 0 && (monthItem.treated_count ?? 0) > 0;
+
+export const anchorFromLabel = (label: string): string => {
+  return label.replace(/\s/g, "-").toLowerCase();
 };
 
 export const getPriorityLabel = (listType: IMissionLocaleEffectifList): string => {

@@ -10,8 +10,8 @@ interface MlListeHeaderProps {
   titre: string;
   intro: ReactNode;
   sources: ReactNode;
-  blocTitre: string;
-  blocContenu: ReactNode;
+  blocTitre?: string;
+  blocContenu?: ReactNode;
 }
 
 export function MlListeHeader({ titre, intro, sources, blocTitre, blocContenu }: MlListeHeaderProps) {
@@ -22,20 +22,24 @@ export function MlListeHeader({ titre, intro, sources, blocTitre, blocContenu }:
       <h1 className={styles.titre}>{titre}</h1>
       <p className={styles.intro}>{intro}</p>
       <p className={styles.sources}>{sources}</p>
-      <DsfrLink
-        href="#"
-        arrow="none"
-        size="sm"
-        onClick={(e) => {
-          e.preventDefault();
-          setOuvert((open) => !open);
-        }}
-        className={`fr-link--icon-right ${ouvert ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"}`}
-        aria-expanded={ouvert}
-      >
-        {blocTitre}
-      </DsfrLink>
-      {ouvert && <div className={styles.blocContenu}>{blocContenu}</div>}
+      {blocTitre && (
+        <>
+          <DsfrLink
+            href="#"
+            arrow="none"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              setOuvert((open) => !open);
+            }}
+            className={`fr-link--icon-right ${ouvert ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"}`}
+            aria-expanded={ouvert}
+          >
+            {blocTitre}
+          </DsfrLink>
+          {ouvert && <div className={styles.blocContenu}>{blocContenu}</div>}
+        </>
+      )}
     </div>
   );
 }
