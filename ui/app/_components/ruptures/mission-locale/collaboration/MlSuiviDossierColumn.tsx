@@ -181,6 +181,10 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
         if (values.rdvPris === null) errors.rdvPris = "Requis";
         if (values.rdvPris === false && values.situationNon === null) errors.situationNon = "Requis";
         if (values.situationJeune === null) errors.situationJeune = "Requis";
+        // Un RDV pris sur une collaboration doit revenir au CFA avec les prochaines actions.
+        if (values.rdvPris === true && !isStandaloneMode && !values.commentaire.trim()) {
+          errors.commentaire = "Requis";
+        }
       }
       if (values.contactReussi === false) {
         if (showRecontacterForm) {
@@ -221,6 +225,11 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
   });
 
   const { contactReussi } = formik.values;
+  const commentaireRequis = contactReussi === true && formik.values.rdvPris === true && !isStandaloneMode;
+  const commentaireEnErreur = formik.submitCount > 0 && !!formik.errors.commentaire;
+  // Le bouton ne reste bloqué que sur les questions du tunnel : le commentaire manquant doit
+  // pouvoir être soumis pour que le champ se signale.
+  const questionsIncompletes = Object.keys(formik.errors).some((champ) => champ !== "commentaire");
   const isFormExpanded = (showForm || showRecontacterForm) && contactReussi !== null;
 
   return (
@@ -618,14 +627,18 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
               </div>
 
               {formik.values.problemeRecontact === "autre" && (
-                <textarea
-                  name="commentaire"
-                  className={styles.commentaireTextarea}
-                  placeholder="Précisez le problème rencontré"
-                  aria-label="Précisez le problème rencontré"
-                  value={formik.values.commentaire}
-                  onChange={formik.handleChange}
-                />
+                <>
+                  <textarea
+                    name="commentaire"
+                    className={`${styles.commentaireTextarea} ${commentaireEnErreur ? styles.commentaireTextareaErreur : ""}`}
+                    placeholder="Précisez le problème rencontré"
+                    aria-label="Précisez le problème rencontré"
+                    aria-invalid={commentaireEnErreur}
+                    value={formik.values.commentaire}
+                    onChange={formik.handleChange}
+                  />
+                  {commentaireEnErreur && <p className={styles.formError}>Précisez le problème rencontré.</p>}
+                </>
               )}
 
               {formik.values.problemeRecontact !== null && (
@@ -914,20 +927,38 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
 
                 <p className={styles.dossierFormLegend}>
                   <span aria-hidden="true">{"📝 "}</span>
-                  <strong>Un commentaire à ajouter ?</strong> <em className={styles.facultatif}>Facultatif</em>
+                  {commentaireRequis ? (
+                    <>
+                      <strong>Détaillez les premières pistes d&apos;actions envisagées</strong>
+                      <span className={styles.required}>*</span>
+                    </>
+                  ) : (
+                    <>
+                      <strong>Un commentaire à ajouter ?</strong> <em className={styles.facultatif}>Facultatif</em>
+                    </>
+                  )}
                 </p>
 
                 <textarea
                   name="commentaire"
-                  className={styles.commentaireTextarea}
-                  placeholder="Quelques mots sur la situation"
+                  className={`${styles.commentaireTextarea} ${commentaireEnErreur ? styles.commentaireTextareaErreur : ""}`}
+                  placeholder={
+                    commentaireRequis
+                      ? "Prochaines actions prévues, date de rendez-vous..."
+                      : "Quelques mots sur la situation"
+                  }
                   aria-label="Commentaire sur la situation"
+                  aria-invalid={commentaireEnErreur}
                   value={formik.values.commentaire}
                   onChange={formik.handleChange}
                   onBlur={(e) => {
                     if (e.target.value.trim()) trackPlausibleEvent("ml_form_commentaire_saisi");
                   }}
                 />
+
+                {commentaireEnErreur && (
+                  <p className={styles.formError}>Précisez les prochaines actions prévues pour le CFA.</p>
+                )}
 
                 <div className={styles.commentaireCallout}>
                   {isStandaloneMode ? (
@@ -944,15 +975,25 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                     <>
                       <p className={styles.commentaireCalloutTitle}>
                         <i className="fr-icon-lightbulb-line fr-icon--sm" aria-hidden="true" />{" "}
-                        <strong>Ajoutez un commentaire pour le CFA</strong>
+                        <strong>
+                          {commentaireRequis
+                            ? "Précisez les prochaines actions prévues pour le CFA"
+                            : "Ajoutez un commentaire pour le CFA"}
+                        </strong>
                       </p>
                       <p className={styles.commentaireCalloutBody}>
                         Ce dossier vous a été transmis par le CFA{" "}
                         <strong>{effectif.organisme?.nom || effectif.organisme?.raison_sociale || ""}</strong>
                         .
                         <br />
-                        <span aria-hidden="true">{"💡 "}</span>Ajoutez un commentaire à votre saisie est un plus pour la
-                        collaboration.
+                        {commentaireRequis ? (
+                          "Précisez au CFA les prochaines actions prévues, comme la date du rendez-vous prévu par exemple."
+                        ) : (
+                          <>
+                            <span aria-hidden="true">{"💡 "}</span>Ajoutez un commentaire à votre saisie est un plus
+                            pour la collaboration.
+                          </>
+                        )}
                       </p>
                     </>
                   )}
@@ -968,9 +1009,9 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
 
               <Button
                 type="submit"
-                disabled={!formik.isValid || mutation.isPending}
+                disabled={questionsIncompletes || mutation.isPending}
                 priority={formik.isValid ? "primary" : "secondary"}
-                className={`${styles.dossierFormButton} ${!formik.isValid || mutation.isPending ? styles.dossierFormButtonDisabled : ""}`}
+                className={`${styles.dossierFormButton} ${questionsIncompletes || mutation.isPending ? styles.dossierFormButtonDisabled : ""}`}
               >
                 {mutation.isPending
                   ? "Envoi en cours..."

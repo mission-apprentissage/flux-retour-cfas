@@ -382,6 +382,11 @@
   margin-bottom: 1rem;
 }
 
+.commentaireTextareaErreur {
+  border-bottom-color: var(--border-plain-error);
+  background: var(--background-contrast-error);
+}
+
 .commentaireTextarea::placeholder {
   color: var(--text-mention-grey);
   font-style: italic;
