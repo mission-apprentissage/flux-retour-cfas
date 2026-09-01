@@ -107,9 +107,12 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
   const { user } = useAuth();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const timeline = buildSuiviTimeline(effectif, { userId: user?._id });
-  const isDossierTraite = timeline.some((e) => e.icon === "traite" || e.icon === "injoignable");
+  // Statut courant du dossier : côté serveur uniquement. Le déduire de l'historique classait comme
+  // traité tout dossier repassé « à recontacter » après un premier traitement.
+  const isRecontacter = effectif.injoignable === true;
+  const isDossierTraite = !effectif.a_traiter && !isRecontacter;
+  // L'historique reste la source du nombre de tentatives, qui aiguille vers la 2e ou la 3e relance.
   const recontacterCount = timeline.filter((e) => e.icon === "recontacter").length;
-  const isRecontacter = recontacterCount > 0 && !isDossierTraite;
 
   const mutation = useMlUpdateEffectif();
   const commentMutation = useMlUpdateEffectif();
