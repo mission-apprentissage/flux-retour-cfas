@@ -113,6 +113,11 @@ function getAllPriorityBadges(
   return badges;
 }
 
+export const aDesBadgesDePriorite = (
+  effectif: EffectifStatusBadgeProps["effectif"],
+  { includeFinDeFormation = false }: { includeFinDeFormation?: boolean } = {}
+): boolean => getAllPriorityBadges(effectif, { fontSize: "", iconSize: "", includeFinDeFormation }).length > 0;
+
 function getPermanentBadges(
   effectif: EffectifStatusBadgeProps["effectif"],
   { fontSize, iconSize, includeFinDeFormation = false }: BadgeBuilderOptions
