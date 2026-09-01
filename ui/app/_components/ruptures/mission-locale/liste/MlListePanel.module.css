@@ -1,8 +1,3 @@
-.panel {
-  background: var(--background-default-grey);
-  padding: 1.5rem;
-}
-
 .panelHeader {
   display: flex;
   flex-wrap: wrap;

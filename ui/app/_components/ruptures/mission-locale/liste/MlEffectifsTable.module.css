@@ -23,6 +23,7 @@
 }
 
 .tableWrapper {
+  margin-bottom: 0;
   overflow-x: auto;
 }
 

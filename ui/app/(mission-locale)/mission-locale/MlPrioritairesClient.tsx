@@ -10,6 +10,7 @@ import { MlListeFilters } from "@/app/_components/ruptures/mission-locale/liste/
 import { MlListeHeader } from "@/app/_components/ruptures/mission-locale/liste/MlListeHeader";
 import { MlListePanel } from "@/app/_components/ruptures/mission-locale/liste/MlListePanel";
 import { MlListeSkeleton } from "@/app/_components/ruptures/mission-locale/liste/MlListeSkeleton";
+import tabsStyles from "@/app/_components/ruptures/mission-locale/liste/MlTabs.module.css";
 import { useMlListeFiltres } from "@/app/_components/ruptures/mission-locale/liste/useMlListeFiltres";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import type { MlListeEffectif } from "@/common/types/ruptures";
@@ -71,6 +72,7 @@ function MlPrioritairesListe() {
       />
 
       <Tabs
+        className={tabsStyles.tabs}
         tabs={[
           {
             tabId: NOM_LISTE,

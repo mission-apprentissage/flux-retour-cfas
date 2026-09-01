@@ -25,6 +25,7 @@ import { matchesSearchTerm } from "../shared/utils/searchUtils";
 
 import { MlListeDownloadButton } from "./liste/MlListeDownloadButton";
 import { MlListeFilters } from "./liste/MlListeFilters";
+import tabsStyles from "./liste/MlTabs.module.css";
 import { useMlListeFiltres } from "./liste/useMlListeFiltres";
 import styles from "./MlRupturesListView.module.css";
 
@@ -300,6 +301,7 @@ export function MlRupturesListView({
         onCriteresChange={setCriteres}
       />
       <Tabs
+        className={tabsStyles.tabs}
         selectedTabId={sousOnglet}
         onTabChange={(id) => {
           setSousOnglet(id as SousOnglet);

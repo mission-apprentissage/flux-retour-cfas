@@ -46,7 +46,7 @@ export function MlListePanel({
   }
 
   return (
-    <div className={styles.panel}>
+    <div>
       {erreurTelechargement && (
         <Alert
           closable
