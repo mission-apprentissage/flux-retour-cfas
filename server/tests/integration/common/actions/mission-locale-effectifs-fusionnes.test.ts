@@ -3,6 +3,7 @@ import { ML_SITUATION_DOSSIER, STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationMissionLocale } from "shared/models";
 import {
   API_EFFECTIF_LISTE,
+  CFA_RISQUE_RUPTURE_ENUM,
   CFA_SITUATION_TYPE_ENUM,
   SITUATION_ENUM,
 } from "shared/models/data/missionLocaleEffectif.model";
@@ -302,8 +303,27 @@ describe("getEffectifsFusionnesByMissionLocaleId", () => {
       },
       {
         nom: "BESOINAIDE",
-        overrides: { organisme_data: collabData({ situation_type: CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT }) },
+        overrides: {
+          organisme_data: collabData({
+            situation_type: CFA_SITUATION_TYPE_ENUM.EN_CONTRAT,
+            risque_rupture: CFA_RISQUE_RUPTURE_ENUM.FAIBLE,
+          }),
+        },
         attendu: ML_SITUATION_DOSSIER.BESOIN_AIDE_HORS_RUPTURE,
+      },
+      {
+        nom: "SANSCONTRAT",
+        overrides: { organisme_data: collabData({ situation_type: CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT }) },
+        attendu: ML_SITUATION_DOSSIER.INSCRIT_SANS_CONTRAT,
+      },
+      {
+        // le statut ERP ne doit pas l'emporter sur la qualification du CFA
+        nom: "RUPTUREMAINTENUCFA",
+        overrides: {
+          organisme_data: collabData({ still_at_cfa: true }),
+          current_status: { value: STATUT_APPRENANT.INSCRIT, date: daysAgo(30) },
+        },
+        attendu: ML_SITUATION_DOSSIER.RUPTURE,
       },
       {
         nom: "ABANDONCFA",

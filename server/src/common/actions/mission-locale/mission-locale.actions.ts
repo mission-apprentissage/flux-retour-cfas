@@ -17,6 +17,7 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
   IEmailStatusEnum,
   API_EFFECTIF_LISTE,
+  CFA_RISQUE_RUPTURE_ENUM,
   CFA_SITUATION_TYPE_ENUM,
   CONNAISSANCE_ML_ENUM,
   IMissionLocaleEffectif,
@@ -807,12 +808,22 @@ const addSituationDossierField = () => [
         $switch: {
           branches: [
             {
+              // « Faible, pas de rupture en vue, mais ce jeune a besoin d'un accompagnement »
+              case: {
+                $and: [
+                  { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+                  { $eq: ["$organisme_data.risque_rupture", CFA_RISQUE_RUPTURE_ENUM.FAIBLE] },
+                ],
+              },
+              then: ML_SITUATION_DOSSIER.BESOIN_AIDE_HORS_RUPTURE,
+            },
+            {
               case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
               then: ML_SITUATION_DOSSIER.PREVENTION_RUPTURE,
             },
             {
               case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT] },
-              then: ML_SITUATION_DOSSIER.BESOIN_AIDE_HORS_RUPTURE,
+              then: ML_SITUATION_DOSSIER.INSCRIT_SANS_CONTRAT,
             },
             {
               case: {
@@ -822,6 +833,11 @@ const addSituationDossierField = () => [
                 ],
               },
               then: ML_SITUATION_DOSSIER.ABANDON,
+            },
+            {
+              // La qualification du CFA prime sur le statut ERP, comme côté organisme.
+              case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE] },
+              then: ML_SITUATION_DOSSIER.RUPTURE,
             },
             {
               case: { $eq: ["$current_status.value", STATUT_APPRENANT.ABANDON] },
