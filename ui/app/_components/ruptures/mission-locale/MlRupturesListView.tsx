@@ -67,6 +67,7 @@ export function MlRupturesListView({
     changerCodesPostaux: handlePostalCodesChange,
     criteres,
     changerCriteres: setCriteres,
+    reinitialiserFiltres,
   } = useMlListeFiltres();
 
   useEffect(() => {
@@ -299,6 +300,7 @@ export function MlRupturesListView({
         onCodesPostauxChange={handlePostalCodesChange}
         criteres={criteres}
         onCriteresChange={setCriteres}
+        onReinitialiser={reinitialiserFiltres}
       />
       <Tabs
         className={tabsStyles.tabs}

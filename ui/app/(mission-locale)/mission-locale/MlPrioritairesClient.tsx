@@ -69,6 +69,7 @@ function MlPrioritairesListe() {
         onCodesPostauxChange={filtres.changerCodesPostaux}
         criteres={filtres.criteres}
         onCriteresChange={filtres.changerCriteres}
+        onReinitialiser={filtres.reinitialiserFiltres}
       />
 
       <Tabs

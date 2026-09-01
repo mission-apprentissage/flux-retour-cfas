@@ -62,6 +62,12 @@ export function useMlListeFiltres() {
     [synchroniserUrl]
   );
 
+  const reinitialiserFiltres = useCallback(() => {
+    setCodesPostaux([]);
+    setCriteres([]);
+    synchroniserUrl({ cp: undefined, criteres: undefined });
+  }, [synchroniserUrl]);
+
   const changerTri = useCallback(
     (colonne: ML_TRI_COLONNE) => {
       const suivant = triSuivant(tri, colonne);
@@ -85,6 +91,7 @@ export function useMlListeFiltres() {
     changerCodesPostaux,
     criteres,
     changerCriteres,
+    reinitialiserFiltres,
     tri,
     changerTri,
     filtresQuery,

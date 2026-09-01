@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { useEffect, useState } from "react";
 
 import { MultiSelectDropdown } from "@/app/_components/common/MultiSelectDropdown";
@@ -26,6 +25,9 @@ const CRITERE_OPTIONS: { value: MlCritere; label: string }[] = [
 
 const TOUS_LES_CRITERES = CRITERE_OPTIONS.map(({ value }) => value);
 
+export const libelleCritere = (critere: MlCritere): string =>
+  CRITERE_OPTIONS.find(({ value }) => value === critere)?.label ?? critere;
+
 type MlCriteresFilterProps = {
   value: MlCritere[];
   onChange: (value: MlCritere[]) => void;
@@ -41,45 +43,30 @@ export function MlCriteresFilter({ value, onChange }: MlCriteresFilterProps) {
   const isDraftEmpty = draft.length === 0;
 
   return (
-    <div className={styles.container}>
-      <MultiSelectDropdown
-        options={CRITERE_OPTIONS}
-        value={draft}
-        onChange={setDraft}
-        placeholder="Critères priorité"
-        fitContent
-        enableSelectAll
-        // fermeture sans valider = abandon
-        onClose={() => setDraft(value.length > 0 ? value : TOUS_LES_CRITERES)}
-        renderFooter={({ close }) => (
-          <Button
-            priority="primary"
-            size="small"
-            disabled={isDraftEmpty}
-            onClick={() => {
-              // tous cochés = pas de filtre
-              onChange(draft.length === TOUS_LES_CRITERES.length ? [] : (draft as MlCritere[]));
-              close();
-            }}
-            className={styles.submitButton}
-          >
-            Valider
-          </Button>
-        )}
-      />
-      {value.length > 0 && (
-        <div className={styles.tagsRow}>
-          {value.map((critere) => (
-            <Tag
-              key={critere}
-              dismissible
-              nativeButtonProps={{ onClick: () => onChange(value.filter((v) => v !== critere)) }}
-            >
-              {CRITERE_OPTIONS.find(({ value: v }) => v === critere)?.label ?? critere}
-            </Tag>
-          ))}
-        </div>
+    <MultiSelectDropdown
+      options={CRITERE_OPTIONS}
+      value={draft}
+      onChange={setDraft}
+      placeholder="Critères priorité"
+      fitContent
+      enableSelectAll
+      // fermeture sans valider = abandon
+      onClose={() => setDraft(value.length > 0 ? value : TOUS_LES_CRITERES)}
+      renderFooter={({ close }) => (
+        <Button
+          priority="primary"
+          size="small"
+          disabled={isDraftEmpty}
+          onClick={() => {
+            // tous cochés = pas de filtre
+            onChange(draft.length === TOUS_LES_CRITERES.length ? [] : (draft as MlCritere[]));
+            close();
+          }}
+          className={styles.submitButton}
+        >
+          Valider
+        </Button>
       )}
-    </div>
+    />
   );
 }
