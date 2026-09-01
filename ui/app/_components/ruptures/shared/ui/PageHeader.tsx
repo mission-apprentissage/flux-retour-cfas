@@ -78,7 +78,7 @@ export function PageHeader({
           arrow="none"
           className={`fr-link--icon-left fr-icon-arrow-left-s-line ${styles.pageHeaderLink}`}
         >
-          Précédent
+          Dossier précédent
         </DsfrLink>
       ) : (
         <div />
@@ -113,7 +113,7 @@ export function PageHeader({
           arrow="none"
           className={`fr-link--icon-right fr-icon-arrow-right-s-line ${styles.pageHeaderLink}`}
         >
-          Suivant
+          Dossier suivant
         </DsfrLink>
       ) : (
         <div />
