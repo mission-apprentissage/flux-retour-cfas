@@ -61,8 +61,7 @@
 
 .tipIcon {
   flex-shrink: 0;
-  font-size: 1.25rem;
-  line-height: 1.5;
+  color: var(--text-default-grey);
 }
 
 .tipText {
