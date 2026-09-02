@@ -55,7 +55,11 @@ export function CfaCollaborationBadge({
         </Button>
       );
     case "collab_demandee":
-      return <Badge severity="info">Demande collab envoyée</Badge>;
+      return (
+        <Badge severity="info" small className={styles.collabDemandeeBadge}>
+          Demande collab envoyée
+        </Badge>
+      );
     case "contacte_par_ml_hors_collab":
       return (
         <span className={`${styles.horsCollabContainer} ${inline ? styles.horsCollabContainerInline : ""}`}>

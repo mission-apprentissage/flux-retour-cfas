@@ -35,7 +35,7 @@ function MlCard({ ml, showInactiveMessage }: { ml: MlOrg; showInactiveMessage?: 
         </p>
       )}
       {ml.activated_at ? (
-        <Badge as="span" severity="success">
+        <Badge as="span" severity="success" small>
           Utilise le Tableau de bord
         </Badge>
       ) : showInactiveMessage ? (

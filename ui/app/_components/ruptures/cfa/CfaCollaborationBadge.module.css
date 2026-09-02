@@ -1,3 +1,9 @@
+/* .fr-badge porte une marge que les étiquettes maison n'ont pas : sans elle, les lignes du tableau
+   ne s'alignent pas entre un badge DSFR et une étiquette. */
+.collabDemandeeBadge {
+  margin: 0;
+}
+
 .contacteBadge,
 .traiteBadge {
   display: inline-flex;
