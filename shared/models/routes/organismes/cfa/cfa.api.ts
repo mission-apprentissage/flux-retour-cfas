@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { IMlSituationDossier } from "../../../../constants/missionLocale";
+
 export const zDeclareCfaRuptureApi = z.object({
   date_rupture: z
     .string()
@@ -117,6 +119,8 @@ export interface ICfaEffectif {
   collab_status: CfaCollaborationStatus | null;
   has_unread_notification: boolean;
   situation?: CfaEffectifSituation | null;
+  /** Situation du dossier telle qu'affichée côté ML : renseignée par les listes de suivi ML. */
+  situation_dossier?: IMlSituationDossier | null;
   mission_locale?: ICfaEffectifMissionLocale | null;
 }
 

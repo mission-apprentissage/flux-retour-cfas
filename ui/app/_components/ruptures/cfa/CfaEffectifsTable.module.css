@@ -50,11 +50,6 @@
   flex-shrink: 0;
 }
 
-.enRuptureOui {
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
 .alertRow,
 .alertRow td {
   padding: 0 !important;

@@ -50,8 +50,8 @@ const zCfaSuiviMissionLocaleQuery = {
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(100),
   search: z.string().optional(),
-  sort: z.enum(["nom", "formation", "date_rupture", "collab_status"]).default("date_rupture"),
-  order: z.enum(["asc", "desc"]).default("desc"),
+  sort: z.enum(["nom", "formation", "situation", "collab_status"]).default("nom"),
+  order: z.enum(["asc", "desc"]).default("asc"),
   collab_status: z.string().optional(),
   formation: z.string().optional(),
 };

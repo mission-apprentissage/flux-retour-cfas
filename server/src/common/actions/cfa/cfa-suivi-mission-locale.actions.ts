@@ -11,6 +11,7 @@ import {
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
 import {
+  addSituationDossierField,
   buildCollabStatusOrderField,
   buildCollabStatusSwitch,
   buildContactedByMlExpr,
@@ -34,15 +35,15 @@ export interface CfaSuiviMissionLocaleQueryParams {
 
 function getSuiviSortField(sort: string): string {
   switch (sort) {
-    case "nom":
-      return "_nom";
     case "formation":
       return "_libelle_formation";
     case "collab_status":
       return "collab_status_order";
-    case "date_rupture":
+    case "situation":
+      return "situation_dossier";
+    case "nom":
     default:
-      return "date_rupture";
+      return "_nom";
   }
 }
 
@@ -99,6 +100,7 @@ function buildSuiviBasePipeline(
       },
     },
     { $addFields: { collab_status_order: buildCollabStatusOrderField() } },
+    ...addSituationDossierField(),
     // Univers "Tous" : uniquement les jeunes contactés (collab OU hors-collab contacté), jamais les non-contactés.
     { $match: { $or: [{ is_collab: true }, { is_hors_collab_contacted: true }] } }
   );
@@ -147,6 +149,7 @@ const SUIVI_PROJECT_STAGE = {
     libelle_formation: "$_libelle_formation",
     formation_niveau_libelle: { $ifNull: ["$effectif_snapshot.formation.niveau_libelle", null] },
     collab_status: 1,
+    situation_dossier: 1,
     has_unread_notification: { $ifNull: ["$organisme_data.has_unread_notification", false] },
   },
 };

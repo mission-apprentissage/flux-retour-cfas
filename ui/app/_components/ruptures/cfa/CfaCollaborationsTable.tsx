@@ -2,16 +2,19 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ML_SITUATION_DOSSIER_LABEL } from "shared/constants";
 
 import type { ICfaEffectif } from "@/common/types/cfaRuptures";
 
+import { SituationCell } from "../shared/ui/SituationCell";
+import { ML_SITUATION_TOOLTIPS } from "../shared/ui/situationTooltips";
 import sharedStyles from "../shared/ui/SortableTable.module.css";
-import { DateRuptureCell, SortableHeader } from "../shared/ui/SortableTableParts";
+import { SortableHeader } from "../shared/ui/SortableTableParts";
 
 import { CfaCollaborationBadge } from "./CfaCollaborationBadge";
 import styles from "./CfaEffectifsTable.module.css";
 
-type SortKey = "nom" | "formation" | "date_rupture" | "collab_status";
+type SortKey = "nom" | "formation" | "situation" | "collab_status";
 
 interface CfaCollaborationsTableProps {
   effectifs: ICfaEffectif[];
@@ -35,20 +38,19 @@ export function CfaCollaborationsTable({ effectifs, sort, order, onSort }: CfaCo
             <th>
               <SortableHeader label="Prénom Nom" sortKey="nom" currentSort={sort} currentDir={order} onSort={onSort} />
             </th>
-            <th>En rupture</th>
             <th>
               <SortableHeader
-                label="Formation"
-                sortKey="formation"
+                label="Situation"
+                sortKey="situation"
                 currentSort={sort}
                 currentDir={order}
                 onSort={onSort}
               />
             </th>
-            <th className={sharedStyles.centerHeader}>
+            <th>
               <SortableHeader
-                label="Date de rupture"
-                sortKey="date_rupture"
+                label="Formation"
+                sortKey="formation"
                 currentSort={sort}
                 currentDir={order}
                 onSort={onSort}
@@ -95,7 +97,10 @@ export function CfaCollaborationsTable({ effectifs, sort, order, onSort }: CfaCo
                 </div>
               </td>
               <td>
-                <span className={styles.enRuptureOui}>Oui</span>
+                <SituationCell
+                  label={e.situation_dossier ? ML_SITUATION_DOSSIER_LABEL[e.situation_dossier] : null}
+                  tooltip={e.situation_dossier ? ML_SITUATION_TOOLTIPS[e.situation_dossier] : undefined}
+                />
               </td>
               <td>
                 <div className={sharedStyles.formationCell}>
@@ -103,11 +108,6 @@ export function CfaCollaborationsTable({ effectifs, sort, order, onSort }: CfaCo
                   {e.formation_niveau_libelle && (
                     <span className={sharedStyles.formationNiveau}>{e.formation_niveau_libelle}</span>
                   )}
-                </div>
-              </td>
-              <td>
-                <div className={sharedStyles.dateCell}>
-                  {e.date_rupture ? <DateRuptureCell dateStr={e.date_rupture} /> : <span>—</span>}
                 </div>
               </td>
               <td onClick={(event) => event.stopPropagation()}>

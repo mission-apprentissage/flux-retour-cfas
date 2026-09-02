@@ -1,5 +1,9 @@
-import { STATUT_APPRENANT } from "shared/constants";
-import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { ML_SITUATION_DOSSIER, STATUT_APPRENANT } from "shared/constants";
+import {
+  CFA_RISQUE_RUPTURE_ENUM,
+  CFA_SITUATION_TYPE_ENUM,
+  SITUATION_ENUM,
+} from "shared/models/data/missionLocaleEffectif.model";
 import { USER_RESPONSE_TYPE } from "shared/models/data/whatsappContact.model";
 import { CFA_COLLAB_STATUS } from "shared/models/routes/organismes/cfa";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
@@ -160,6 +164,61 @@ export function buildCollabStatusSwitch(docPrefix?: string) {
     },
   };
 }
+
+/** Qualification du tunnel CFA si elle existe, sinon statut ERP/DECA. Risque faible = besoin d'aide hors rupture. */
+export const addSituationDossierField = () => [
+  {
+    $addFields: {
+      situation_dossier: {
+        $switch: {
+          branches: [
+            {
+              // « Faible, pas de rupture en vue, mais ce jeune a besoin d'un accompagnement »
+              case: {
+                $and: [
+                  { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+                  { $eq: ["$organisme_data.risque_rupture", CFA_RISQUE_RUPTURE_ENUM.FAIBLE] },
+                ],
+              },
+              then: ML_SITUATION_DOSSIER.BESOIN_AIDE_HORS_RUPTURE,
+            },
+            {
+              case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+              then: ML_SITUATION_DOSSIER.PREVENTION_RUPTURE,
+            },
+            {
+              case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT] },
+              then: ML_SITUATION_DOSSIER.INSCRIT_SANS_CONTRAT,
+            },
+            {
+              case: {
+                $and: [
+                  { $eq: ["$organisme_data.acc_conjoint", true] },
+                  { $ne: [{ $ifNull: ["$organisme_data.date_abandon", null] }, null] },
+                ],
+              },
+              then: ML_SITUATION_DOSSIER.ABANDON,
+            },
+            {
+              // La qualification du CFA prime sur le statut ERP, comme côté organisme.
+              case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE] },
+              then: ML_SITUATION_DOSSIER.RUPTURE,
+            },
+            {
+              case: { $eq: ["$current_status.value", STATUT_APPRENANT.ABANDON] },
+              then: ML_SITUATION_DOSSIER.ABANDON,
+            },
+            {
+              case: { $eq: ["$current_status.value", STATUT_APPRENANT.INSCRIT] },
+              then: ML_SITUATION_DOSSIER.INSCRIT_SANS_CONTRAT,
+            },
+          ],
+          default: ML_SITUATION_DOSSIER.RUPTURE,
+        },
+      },
+    },
+  },
+];
 
 /**
  * Expression MongoDB renvoyant un ordinal métier pour trier la colonne "Collaboration avec la ML".
