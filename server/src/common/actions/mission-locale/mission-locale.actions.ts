@@ -1272,8 +1272,11 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema,
   userId?: ObjectId,
   /** Chaque mois réel sur toutes les années, sans bucket +180j : navigation par année. */
-  tousLesMois = false
+  tousLesMois = false,
+  /** Regrouper et trier sur la réception du dossier plutôt que sur sa date de rupture. */
+  parDateReception = false
 ) => {
+  const champDate = parDateReception ? "$date_reception" : "$date_reference";
   const { type } = effectifsParMoisFiltersMissionLocale;
 
   // Les listes de dossiers non traités affichent, par mois, le nombre de dossiers déjà traités.
@@ -1376,7 +1379,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
   organismeMissionLocaleAggregation.push(
     {
       $sort: {
-        date_reference: -1,
+        [parDateReception ? "date_reception" : "date_reference"]: -1,
       },
     },
     ...lookUpOrganisme(),
@@ -1386,7 +1389,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
           ? {
               $dateToString: {
                 date: {
-                  $dateFromParts: { year: { $year: "$date_reference" }, month: { $month: "$date_reference" } },
+                  $dateFromParts: { year: { $year: champDate }, month: { $month: champDate } },
                 },
               },
             }
@@ -1974,12 +1977,13 @@ export async function getAllEffectifsParMois(
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   userId?: ObjectId
 ) {
-  const fetchByType = (type: API_EFFECTIF_LISTE, tousLesMois = false) =>
+  const fetchByType = (type: API_EFFECTIF_LISTE, tousLesMois = false, parDateReception = false) =>
     getEffectifsParMoisByMissionLocaleId(
       organisation,
       { type } as IEffectifsParMoisFiltersMissionLocaleSchema,
       userId,
-      tousLesMois
+      tousLesMois,
+      parDateReception
     );
 
   // La liste ML des dossiers traités se navigue par année : elle a besoin de tous les mois.
@@ -1988,13 +1992,13 @@ export async function getAllEffectifsParMois(
   const [a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable, a_traiter_ou_recontacter] =
     await Promise.all([
       fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
-      fetchByType(API_EFFECTIF_LISTE.TRAITE, estMissionLocale),
+      fetchByType(API_EFFECTIF_LISTE.TRAITE, estMissionLocale, estMissionLocale),
       getEffectifARisqueByMissionLocaleId(organisation, API_EFFECTIF_LISTE.PRIORITAIRE),
       getEffectifARisqueByMissionLocaleId(organisation, API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE),
       fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
       // Sous-onglet unique de la liste ruptures : à traiter et à recontacter dans les mêmes mois.
       // Propre à l'espace ML : côté organisme, un dossier n'est jamais « à recontacter ».
-      estMissionLocale ? fetchByType(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER, true) : [],
+      estMissionLocale ? fetchByType(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER, true, true) : [],
     ]);
 
   return { a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable, a_traiter_ou_recontacter };

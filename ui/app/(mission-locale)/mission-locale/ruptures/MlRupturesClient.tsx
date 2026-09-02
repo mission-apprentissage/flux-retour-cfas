@@ -64,6 +64,8 @@ export default function MlRupturesClient() {
             parcours d&apos;apprentissage. Cette liste contient l&apos;ensemble des jeunes identifiés en rupture sur le
             territoire via les ERP des CFA et la base DECA, mais aussi les jeunes pour lesquels les CFA utilisateurs du
             Tableau de bord ont sollicité une collaboration avec votre Mission Locale.
+            <br />
+            Les dossiers sont triés par date de réception.
           </>
         }
         sources={
