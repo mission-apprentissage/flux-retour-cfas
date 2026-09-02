@@ -57,10 +57,12 @@
   margin: 0 0 0.25rem 0;
 }
 
+/* Le statut n'est pas modifiable ici : le clic ouvre la modale qui l'explique, sur toute la zone
+   du toggle. Neutraliser les évènements réservait ce clic au seul input, décalé à gauche. */
 .ruptureBlock :global(.fr-toggle__btn),
+.ruptureBlock :global(.fr-toggle__input),
 .ruptureBlock :global(.fr-toggle__label) {
-  cursor: not-allowed;
-  pointer-events: none;
+  cursor: pointer;
 }
 
 .collaborationColumn {

@@ -2,16 +2,13 @@
 
 import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { IEffectifMissionLocale } from "shared";
 
-import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
-import { CfaDeclareDateRuptureModal, declareDateRuptureModal } from "../../cfa/CfaDeclareDateRuptureModal";
 import { CfaRuptureInfoModal, ruptureInfoModal } from "../../cfa/CfaRuptureInfoModal";
 import { getCfaListeInfo } from "../../cfa/ficheOrigine";
-import { useDeclareCfaRupture } from "../../cfa/hooks/useCfaMutations";
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
 import { CfaCollaborationColumn } from "./CfaCollaborationColumn";
@@ -27,9 +24,6 @@ interface CfaCollaborationDetailProps {
 
 export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   const { effectif } = data;
-  const { user } = useAuth();
-  const organismeId = user?.organisation?.organisme_id;
-  const { mutateAsync: declareRupture } = useDeclareCfaRupture();
   const pageRef = useRef<HTMLDivElement>(null);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const searchParams = useSearchParams();
@@ -41,27 +35,6 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
     pageRef.current?.scrollIntoView({ behavior: "instant" });
     trackPlausibleEvent("cfa_fiche_ouverte", undefined, { effectifId: String(effectif.id) });
   }, [effectif.id]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleToggleRupture = useCallback(() => {
-    if (effectif.date_rupture) {
-      ruptureInfoModal.open();
-    } else {
-      declareDateRuptureModal.open();
-    }
-  }, [effectif.date_rupture]);
-
-  const handleDeclareRupture = useCallback(
-    async (dateRupture: string) => {
-      if (!organismeId) return;
-      await declareRupture({
-        organismeId,
-        effectifId: String(effectif.id),
-        dateRupture,
-        source: effectif.source === "DECA" ? "effectifsDECA" : "effectifs",
-      });
-    },
-    [organismeId, effectif.id, effectif.source, declareRupture]
-  );
 
   const effectifName = `${effectif.prenom} ${effectif.nom}`;
 
@@ -82,12 +55,11 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
       />
 
       <div className={styles.columns}>
-        <CfaEffectifInfoColumn effectif={effectif} onToggleRupture={handleToggleRupture} />
+        <CfaEffectifInfoColumn effectif={effectif} onToggleRupture={() => ruptureInfoModal.open()} />
         <CfaCollaborationColumn effectif={effectif} />
         <CfaSuiviDossierColumn effectif={effectif} />
       </div>
 
-      <CfaDeclareDateRuptureModal effectifName={effectifName} onConfirm={handleDeclareRupture} />
       <CfaRuptureInfoModal />
     </div>
   );
