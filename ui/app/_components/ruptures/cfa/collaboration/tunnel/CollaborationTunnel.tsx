@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { Formik, useFormikContext } from "formik";
+import { Formik, FormikErrors, useFormikContext } from "formik";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ACC_CONJOINT_MOTIF_ENUM, IEffectifMissionLocale } from "shared";
 import { CFA_SITUATION_TYPE_ENUM, RQTH_DECLARE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
@@ -15,10 +15,10 @@ import { ObjectifsSection } from "../sections/ObjectifsSection";
 import { FormValues } from "../types";
 import {
   buildAdresseRue,
-  isContactValid,
-  isDatesRuptureValid,
-  isObjectifsValid,
-  isRentreeSansContratValid,
+  contactErrors,
+  datesRuptureErrors,
+  objectifsErrors,
+  rentreeSansContratErrors,
 } from "../utils";
 
 import { Step1DatesRupture } from "./steps/Step1DatesRupture";
@@ -37,6 +37,36 @@ interface CollaborationTunnelProps {
   effectif: IEffectifMissionLocale["effectif"];
   onSuccess: () => void;
   onCancel: () => void;
+}
+
+/** Chemins Formik des champs en erreur, `commentaires_par_motif.<motif>` compris. */
+function cheminsDesErreurs(errors: object, prefixe = ""): string[] {
+  return Object.entries(errors).flatMap(([cle, valeur]) => {
+    const chemin = prefixe ? `${prefixe}.${cle}` : cle;
+    return valeur && typeof valeur === "object" ? cheminsDesErreurs(valeur, chemin) : [chemin];
+  });
+}
+
+/** Manques d'une étape, sous forme de messages : bloque « Continuer » et alimente les erreurs de champ. */
+function erreursEtape(step: StepId, values: FormValues): FormikErrors<FormValues> {
+  switch (step) {
+    case "situation":
+      return values.situation_type === null ? { situation_type: "Sélectionnez une situation" } : {};
+    case "risqueRupture":
+      return values.risque_rupture === null ? { risque_rupture: "Sélectionnez un niveau de risque" } : {};
+    case "maintienFormation":
+      return values.still_at_cfa === null ? { still_at_cfa: "Ce champ est obligatoire" } : {};
+    case "datesRupture":
+      return datesRuptureErrors(values);
+    case "rentreeSansContrat":
+      return rentreeSansContratErrors(values);
+    case "objectifs":
+      return objectifsErrors(values);
+    case "contact":
+      return contactErrors(values);
+    case "recap":
+      return {};
+  }
 }
 
 export function CollaborationTunnel({ effectif, onSuccess, onCancel }: CollaborationTunnelProps) {
@@ -64,6 +94,17 @@ export function CollaborationTunnel({ effectif, onSuccess, onCancel }: Collabora
 
   return (
     <Formik<FormValues>
+      // Sans cela, `errors` reste vide tant que rien n'a changé : cliquer sur un « Continuer »
+      // grisé n'aurait alors aucun message à révéler.
+      validateOnMount
+      // Seules les étapes de la branche empruntée sont validées : les champs des autres branches
+      // restent vides et bloqueraient l'envoi final.
+      validate={(values) =>
+        buildTunnelSteps(values).reduce<FormikErrors<FormValues>>(
+          (errors, step) => ({ ...errors, ...erreursEtape(step, values) }),
+          {}
+        )
+      }
       initialValues={{
         situation_type: null,
         risque_rupture: null,
@@ -175,7 +216,7 @@ interface TunnelInnerProps {
 }
 
 function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedRef }: TunnelInnerProps) {
-  const { values, setValues, submitForm } = useFormikContext<FormValues>();
+  const { values, setValues, setFieldTouched, submitForm } = useFormikContext<FormValues>();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const [currentStep, setCurrentStep] = useState<StepId>("situation");
 
@@ -203,25 +244,10 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
     if (previous) setCurrentStep(previous);
   };
 
-  const canContinue = (): boolean => {
-    switch (currentStep) {
-      case "situation":
-        return values.situation_type !== null;
-      case "risqueRupture":
-        return values.risque_rupture !== null;
-      case "maintienFormation":
-        return values.still_at_cfa !== null;
-      case "datesRupture":
-        return isDatesRuptureValid(values);
-      case "rentreeSansContrat":
-        return isRentreeSansContratValid(values);
-      case "objectifs":
-        return isObjectifsValid(values);
-      case "contact":
-        return isContactValid(values);
-      case "recap":
-        return true;
-    }
+  const canContinue = (): boolean => Object.keys(erreursEtape(currentStep, values)).length === 0;
+
+  const revelerChampsManquants = () => {
+    cheminsDesErreurs(erreursEtape(currentStep, values)).forEach((chemin) => setFieldTouched(chemin, true, false));
   };
 
   const titre = (): string | undefined => {
@@ -330,9 +356,13 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
         </Button>
       </>
     ) : (
-      <Button priority="primary" onClick={goNext} disabled={!canContinue()}>
-        Continuer
-      </Button>
+      // Un bouton désactivé n'émet pas de clic : la zone qui l'entoure le capte pour révéler les
+      // champs qui manquent, sinon rien n'explique pourquoi « Continuer » reste grisé.
+      <span onClick={canContinue() ? undefined : revelerChampsManquants}>
+        <Button priority="primary" onClick={goNext} disabled={!canContinue()}>
+          Continuer
+        </Button>
+      </span>
     );
 
   return (
