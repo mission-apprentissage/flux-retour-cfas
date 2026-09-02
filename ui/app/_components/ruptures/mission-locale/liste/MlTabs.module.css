@@ -1,0 +1,23 @@
+/* Panneau sans cadre : DSFR répartit fond et bordures sur `.fr-tabs`, son
+   pseudo-élément et les onglets. */
+.tabs {
+  box-shadow: none;
+}
+
+.tabs::before {
+  margin-top: 0;
+  background-color: var(--background-default-grey);
+  box-shadow: none;
+}
+
+.tabs :global(.fr-tabs__tab) {
+  box-shadow: none;
+}
+
+.tabs :global(.fr-tabs__tab:not([aria-selected="true"])) {
+  background-size:
+    0 2px,
+    1px 0,
+    1px 0,
+    0 1px;
+}

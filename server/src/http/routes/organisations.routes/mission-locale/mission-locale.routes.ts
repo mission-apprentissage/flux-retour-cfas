@@ -1,6 +1,7 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
+import { ML_SITUATION_DOSSIER_LABEL } from "shared/constants";
 import {
   API_EFFECTIF_LISTE,
   IMissionLocaleEffectif,
@@ -11,6 +12,7 @@ import {
 import { httpUrlSchema } from "shared/models/data/organisations.model";
 import {
   effectifMissionLocaleListe,
+  effectifsFusionnesQuerySchema,
   effectifsParMoisFiltersMissionLocaleAPISchema,
 } from "shared/models/routes/mission-locale/missionLocale.api";
 import { z } from "zod";
@@ -18,6 +20,7 @@ import { z } from "zod";
 import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
+  getEffectifsFusionnesByMissionLocaleId,
   getEffectifsListByMissionLocaleId,
   getPostalCodesByMissionLocaleId,
   missionLocaleBaseAggregation,
@@ -33,6 +36,7 @@ import { returnResult } from "@/http/middlewares/helpers";
 export default () => {
   const router = express.Router();
   router.get("/effectif/:id", returnResult(getEffectifMissionLocale));
+  router.get("/effectifs", returnResult(getEffectifsFusionnesMissionLocale));
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.get("/villes", returnResult(getVillesMissionLocale));
   router.get("/export/effectifs", returnResult(exportEffectifMissionLocale));
@@ -112,6 +116,20 @@ const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
   return await getAllEffectifsParMois(missionLocale, userId);
 };
 
+const getEffectifsFusionnesMissionLocale = async (req, { locals }) => {
+  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  if (!missionLocale) {
+    throw Boom.forbidden("No mission locale in session");
+  }
+
+  const { nom_liste, tri, ordre } = await validateFullZodObjectSchema(req.query, effectifsFusionnesQuerySchema);
+  return await getEffectifsFusionnesByMissionLocaleId(
+    missionLocale,
+    nom_liste,
+    tri ? { colonne: tri, ordre: ordre ?? "asc" } : null
+  );
+};
+
 const getVillesMissionLocale = async (_req, { locals }) => {
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
   if (!missionLocale) {
@@ -121,13 +139,23 @@ const getVillesMissionLocale = async (_req, { locals }) => {
 };
 
 const getEffectifMissionLocale = async (req, { locals }) => {
-  const { nom_liste, code_postal } = await validateFullZodObjectSchema(req.query, effectifMissionLocaleListe);
+  const { nom_liste, code_postal, tri, ordre } = await validateFullZodObjectSchema(
+    req.query,
+    effectifMissionLocaleListe
+  );
   const effectifId = req.params.id;
   const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
 
   const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
   const codesPostaux = code_postal ? code_postal.split(",").filter(Boolean) : undefined;
-  return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste, userId, codesPostaux);
+  return await getEffectifFromMissionLocaleId(
+    missionLocale,
+    effectifId,
+    nom_liste,
+    userId,
+    codesPostaux,
+    tri ? { colonne: tri, ordre: ordre ?? "asc" } : null
+  );
 };
 
 const exportEffectifMissionLocale = async (req, res) => {
@@ -137,7 +165,13 @@ const exportEffectifMissionLocale = async (req, res) => {
   const computeFileInfo = async (types: Array<API_EFFECTIF_LISTE>, month?: string) => {
     const dataArr: Array<{
       worksheetName: string;
-      logsTag: "ml_a_traiter" | "ml_traite" | "ml_injoignable";
+      logsTag:
+        | "ml_a_traiter"
+        | "ml_traite"
+        | "ml_injoignable"
+        | "ml_a_traiter_ou_recontacter"
+        | "ml_collab_a_traiter_ou_recontacter"
+        | "ml_collab_traite";
       data: Array<Record<string, string>>;
     }> = [];
     for (const type of types) {
@@ -167,8 +201,30 @@ const exportEffectifMissionLocale = async (req, res) => {
             data: effectifsList,
           });
           break;
+        case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+          dataArr.push({
+            worksheetName: "À traiter ou recontacter",
+            logsTag: "ml_a_traiter_ou_recontacter" as const,
+            data: effectifsList,
+          });
+          break;
+        case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
+          dataArr.push({
+            // Excel tronque au-delà de 31 caractères : garder ce libellé court.
+            worksheetName: "Collab. à traiter/recontacter",
+            logsTag: "ml_collab_a_traiter_ou_recontacter" as const,
+            data: effectifsList,
+          });
+          break;
+        case API_EFFECTIF_LISTE.COLLAB_TRAITE:
+          dataArr.push({
+            worksheetName: "Collab. traités",
+            logsTag: "ml_collab_traite" as const,
+            data: effectifsList,
+          });
+          break;
         default:
-          throw new Error(`Unhandled API_EFFECTIF_LISTE: ${type}`);
+          throw Boom.badRequest(`Type de liste non exportable: ${type}`);
       }
     }
 
@@ -194,6 +250,19 @@ const exportEffectifMissionLocale = async (req, res) => {
     { name: "Age", id: "date_de_naissance", transform: getAgeFromDate },
     { name: "RQTH", id: "rqth", transform: (d) => (d ? "OUI" : "NON") },
     { name: "Collaboration CFA", id: "collaboration_cfa", transform: (d) => (d ? "OUI" : "NON") },
+    {
+      name: "Situation",
+      id: "situation_dossier",
+      transform: (val) => (val ? (ML_SITUATION_DOSSIER_LABEL[val] ?? val) : ""),
+      listValues: Object.values(ML_SITUATION_DOSSIER_LABEL),
+    },
+    { name: "Date de réception du dossier", id: "date_reception", transform: (d) => (d ? new Date(d) : "") },
+    {
+      name: "À recontacter depuis le",
+      id: "date_dernier_passage_a_recontacter",
+      transform: (d) => (d ? new Date(d) : ""),
+    },
+    { name: "Date de traitement", id: "date_traitement", transform: (d) => (d ? new Date(d) : "") },
     { name: "Disponible WhatsApp", id: "disponible_whatsapp", transform: (d) => (d ? "OUI" : "NON") },
     { name: "Ville de résidence", id: "commune" },
     { name: "Code postal de résidence", id: "code_postal" },

@@ -134,6 +134,12 @@ const plausibleGoals = [
   "cfa_form_confirmation_vue",
   "cfa_form_abandonne",
 
+  // ML — Navigation entre les vues
+  "ml_onglet_prioritaires_ouvert",
+  "ml_onglet_collaborations_ouvert",
+  "ml_onglet_ruptures_ouvert",
+  "ml_filtre_criteres_applique",
+
   // ML — Fiche jeune
   "ml_liste_a_traiter_ouverte",
   "ml_fiche_ouverte",

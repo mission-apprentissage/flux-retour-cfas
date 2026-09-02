@@ -1,7 +1,7 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "bson";
-import { SITUATION_ENUM } from "shared";
-import { CONNAISSANCE_ML_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { ML_SITUATION_DOSSIER, ML_TRI_COLONNE, SITUATION_ENUM } from "shared";
+import { API_EFFECTIF_LISTE, CONNAISSANCE_ML_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { it, expect, describe, beforeEach, vi } from "vitest";
 
 import { updateOrDeleteMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
@@ -140,6 +140,192 @@ describe("Mission Locale Routes", () => {
     });
   });
 
+  describe("Listes fusionnées (dossiers prioritaires et collaborations CFA)", () => {
+    const ingestRupturant = async (nom: string, prenom: string) => {
+      const payload = createRupturantEffectifPayload({
+        etablissement_formateur_uai: UAI,
+        etablissement_formateur_siret: SIRET,
+        etablissement_responsable_uai: UAI,
+        etablissement_responsable_siret: SIRET,
+        code_postal_apprenant: "75001",
+        nom_apprenant: nom,
+        prenom_apprenant: prenom,
+      });
+      const { insertedId } = await effectifsQueueDb().insertOne({
+        _id: new ObjectId(),
+        created_at: new Date(),
+        ...payload,
+      });
+      await processEffectifsQueue();
+      const effQ = await effectifsQueueDb().findOne({ _id: insertedId }, { projection: { effectif_id: 1 } });
+      return effQ?.effectif_id as ObjectId;
+    };
+
+    const getListe = (nomListe: string) =>
+      requestAsOrganisation(ML_DATA, "get", `/api/v1/organisation/mission-locale/effectifs?nom_liste=${nomListe}`);
+
+    it("renvoie les dossiers à traiter ou à recontacter avec leurs compteurs", async () => {
+      await ingestRupturant("PRIORITAIRE", "Test");
+
+      const res = await getListe(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER);
+
+      expect(res.status).toBe(200);
+      expect(res.data.effectifs).toHaveLength(1);
+      expect(res.data.effectifs[0]).toMatchObject({
+        nom: "PRIORITAIRE",
+        a_traiter: true,
+        injoignable: false,
+        situation_dossier: ML_SITUATION_DOSSIER.RUPTURE,
+        relance_urgente: false,
+      });
+      expect(res.data.effectifs[0].date_reception).toBeDefined();
+      expect(res.data.counts).toEqual({ a_traiter_ou_recontacter: 1, traite: 0 });
+    });
+
+    it("ne renvoie que les dossiers de collaboration sur la liste collaborations", async () => {
+      const rupturantId = await ingestRupturant("RUPTUREPURE", "Test");
+      const collabId = await ingestRupturant("AVECCOLLAB", "Test");
+      await requestAsOrganisation(
+        { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+        "put",
+        `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectif/${collabId.toString()}`,
+        { rupture: true, acc_conjoint: true }
+      );
+
+      const res = await getListe(API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER);
+
+      expect(res.status).toBe(200);
+      expect(res.data.effectifs.map((e) => e.nom)).toEqual(["AVECCOLLAB"]);
+      expect(res.data.effectifs[0].acc_conjoint).toBe(true);
+      expect(rupturantId).toBeDefined();
+    });
+
+    it("rejette une liste non fusionnée", async () => {
+      const res = await getListe(API_EFFECTIF_LISTE.PRIORITAIRE);
+      expect(res.status).toBe(400);
+    });
+
+    it("refuse l'accès hors Mission Locale", async () => {
+      const res = await requestAsOrganisation(
+        { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+        "get",
+        `/api/v1/organisation/mission-locale/effectifs?nom_liste=${API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER}`
+      );
+      expect(res.status).toBe(403);
+    });
+
+    it("renvoie les collaborations traitées sur le sous-onglet Traités", async () => {
+      const collabId = await ingestRupturant("COLLABTRAITE", "Test");
+      await requestAsOrganisation(
+        { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+        "put",
+        `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectif/${collabId.toString()}`,
+        { rupture: true, acc_conjoint: true }
+      );
+      await requestAsOrganisation(ML_DATA, "post", `/api/v1/organisation/mission-locale/effectif/${collabId}`, {
+        situation: SITUATION_ENUM.RDV_PRIS,
+      });
+
+      const res = await getListe(API_EFFECTIF_LISTE.COLLAB_TRAITE);
+
+      expect(res.status).toBe(200);
+      expect(res.data.effectifs.map((e) => e.nom)).toEqual(["COLLABTRAITE"]);
+      expect(res.data.effectifs[0].a_traiter).toBe(false);
+      expect(res.data.effectifs[0].injoignable).toBe(false);
+      expect(res.data.effectifs[0].date_traitement).toBeDefined();
+      expect(res.data.counts).toEqual({ a_traiter_ou_recontacter: 0, traite: 1 });
+    });
+
+    it("aligne le précédent/suivant de la fiche sur l'ordre de la liste", async () => {
+      await ingestRupturant("ALPHA", "Test");
+      await ingestRupturant("BETA", "Test");
+      await ingestRupturant("GAMMA", "Test");
+
+      const liste = await getListe(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER);
+      const ordre = liste.data.effectifs.map((e) => e.nom);
+      expect(ordre).toHaveLength(3);
+
+      const premier = liste.data.effectifs[0];
+      const fiche = await requestAsOrganisation(
+        ML_DATA,
+        "get",
+        `/api/v1/organisation/mission-locale/effectif/${premier.id}?nom_liste=${API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER}`
+      );
+
+      expect(fiche.status).toBe(200);
+      expect(fiche.data.total).toBe(3);
+      expect(fiche.data.currentIndex).toBe(0);
+      expect(fiche.data.next.nom).toBe(ordre[1]);
+      // navigation circulaire : le précédent du premier est le dernier de la liste
+      expect(fiche.data.previous.nom).toBe(ordre[2]);
+    });
+
+    describe("Tri par colonne", () => {
+      const NOM_LISTE = API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER;
+      const trier = (tri: string, ordre: string) =>
+        requestAsOrganisation(
+          ML_DATA,
+          "get",
+          `/api/v1/organisation/mission-locale/effectifs?nom_liste=${NOM_LISTE}&tri=${tri}&ordre=${ordre}`
+        );
+
+      it("trie par nom dans les deux sens", async () => {
+        await ingestRupturant("CHARLIE", "Test");
+        await ingestRupturant("ALPHA", "Test");
+        await ingestRupturant("BRAVO", "Test");
+
+        const asc = await trier(ML_TRI_COLONNE.NOM, "asc");
+        expect(asc.status).toBe(200);
+        expect(asc.data.effectifs.map((e) => e.nom)).toEqual(["ALPHA", "BRAVO", "CHARLIE"]);
+
+        const desc = await trier(ML_TRI_COLONNE.NOM, "desc");
+        expect(desc.data.effectifs.map((e) => e.nom)).toEqual(["CHARLIE", "BRAVO", "ALPHA"]);
+      });
+
+      it("sans tri demandé, garde l'ordre de priorité du serveur", async () => {
+        await ingestRupturant("ZULU", "Test");
+        const collabId = await ingestRupturant("ALPHA", "Test");
+        await requestAsOrganisation(
+          { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+          "put",
+          `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectif/${collabId.toString()}`,
+          { rupture: true, acc_conjoint: true }
+        );
+
+        // la collaboration CFA prime, même si son nom est premier dans l'alphabet
+        const parDefaut = await getListe(NOM_LISTE);
+        expect(parDefaut.data.effectifs.map((e) => e.nom)).toEqual(["ALPHA", "ZULU"]);
+
+        const parNom = await trier(ML_TRI_COLONNE.NOM, "desc");
+        expect(parNom.data.effectifs.map((e) => e.nom)).toEqual(["ZULU", "ALPHA"]);
+      });
+
+      it("aligne le précédent/suivant de la fiche sur la colonne triée", async () => {
+        await ingestRupturant("CHARLIE", "Test");
+        await ingestRupturant("ALPHA", "Test");
+        await ingestRupturant("BRAVO", "Test");
+
+        const liste = await trier(ML_TRI_COLONNE.NOM, "asc");
+        const premier = liste.data.effectifs[0];
+
+        const fiche = await requestAsOrganisation(
+          ML_DATA,
+          "get",
+          `/api/v1/organisation/mission-locale/effectif/${premier.id}?nom_liste=${NOM_LISTE}&tri=${ML_TRI_COLONNE.NOM}&ordre=asc`
+        );
+
+        expect(fiche.status).toBe(200);
+        expect(fiche.data.currentIndex).toBe(0);
+        expect(fiche.data.next.nom).toBe("BRAVO");
+      });
+
+      it("rejette une colonne de tri inconnue", async () => {
+        const res = await trier("age", "asc");
+        expect(res.status).toBe(400);
+      });
+    });
+  });
+
   describe("CFA activé", async () => {
     beforeEach(async () => {
       await missionLocaleEffectifsDb().deleteMany({});
@@ -193,6 +379,8 @@ describe("Mission Locale Routes", () => {
       );
 
       expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      // Le sous-onglet fusionné est propre à l'espace ML : rien à exposer côté organisme.
+      expect(res.data.a_traiter_ou_recontacter).toStrictEqual([]);
     });
 
     it("Le CFA ne voit pas l'effectif qui a retrouvé un nouveau contrat", async () => {
@@ -628,6 +816,93 @@ describe("Mission Locale Routes", () => {
         expect(effectif?.situation).toBe(SITUATION_ENUM.RDV_PRIS);
         expect(effectif?.deja_connu).toBe(true);
         expect(effectif?.connaissance_ml).toBe(CONNAISSANCE_ML_ENUM.CONNU_NON_ACCOMPAGNE);
+      });
+    });
+
+    describe("Dates de suivi du dossier (À traiter / À recontacter / Traité)", () => {
+      const postSituation = (body: Record<string, unknown>) =>
+        requestAsOrganisation(ML_DATA, "post", `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`, body);
+
+      it("une situation traitée pose date_traitement et date_derniere_action_ml", async () => {
+        const res = await postSituation({ situation: SITUATION_ENUM.RDV_PRIS });
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_traitement).toBeInstanceOf(Date);
+        expect(effectif?.date_derniere_action_ml).toBeInstanceOf(Date);
+        expect(effectif?.date_dernier_passage_a_recontacter ?? null).toBeNull();
+      });
+
+      it("le passage à CONTACTE_SANS_RETOUR pose la date de recontact et annule date_traitement", async () => {
+        await postSituation({ situation: SITUATION_ENUM.RDV_PRIS });
+        await postSituation({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR });
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_dernier_passage_a_recontacter).toBeInstanceOf(Date);
+        expect(effectif?.date_traitement).toBeNull();
+      });
+
+      it("un dossier repassé de recontact à traité reprend une date_traitement", async () => {
+        await postSituation({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR });
+        await postSituation({ situation: SITUATION_ENUM.REORIENTATION });
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_traitement).toBeInstanceOf(Date);
+        // la trace du dernier passage à recontacter est conservée
+        expect(effectif?.date_dernier_passage_a_recontacter).toBeInstanceOf(Date);
+      });
+
+      it("une écriture sans situation ne touche que date_derniere_action_ml", async () => {
+        await postSituation({ situation: SITUATION_ENUM.RDV_PRIS });
+        const before = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        await postSituation({ commentaires: "relance téléphonique" });
+
+        const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(after?.date_traitement?.getTime()).toBe(before?.date_traitement?.getTime());
+        expect(after?.date_derniere_action_ml?.getTime()).toBeGreaterThan(
+          before?.date_derniere_action_ml?.getTime() ?? Infinity
+        );
+      });
+
+      it("l'admin qui pose une situation via le back-office pose aussi les dates", async () => {
+        const res = await requestAsOrganisation(
+          { type: "ADMINISTRATEUR" },
+          "put",
+          "/api/v1/admin/mission-locale/effectif",
+          {
+            mission_locale_id: ML_ID.toString(),
+            effectif_id: EFFECTIF_ID.toString(),
+            situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+          }
+        );
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_dernier_passage_a_recontacter).toBeInstanceOf(Date);
+        expect(effectif?.date_derniere_action_ml).toBeInstanceOf(Date);
+      });
+
+      it("le reset admin efface les trois dates de suivi", async () => {
+        await postSituation({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR });
+        await postSituation({ situation: SITUATION_ENUM.RDV_PRIS });
+
+        const res = await requestAsOrganisation(
+          { type: "ADMINISTRATEUR" },
+          "post",
+          "/api/v1/admin/mission-locale/effectif/reset",
+          {
+            mission_locale_id: ML_ID.toString(),
+            effectif_id: EFFECTIF_ID.toString(),
+          }
+        );
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_traitement).toBeUndefined();
+        expect(effectif?.date_dernier_passage_a_recontacter).toBeUndefined();
+        expect(effectif?.date_derniere_action_ml).toBeUndefined();
       });
     });
   });

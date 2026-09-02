@@ -36,7 +36,12 @@ export function CollaborationReceivedView({ effectif }: { effectif: IEffectifMis
       </div>
 
       <div className={styles.sentBubble}>
-        <DossierSituationBlock organismeData={od} prenom={prenom} dateRupture={effectif.date_rupture} />
+        <DossierSituationBlock
+          organismeData={od}
+          prenom={prenom}
+          dateRupture={effectif.date_rupture}
+          situationDossier={effectif.situation_dossier}
+        />
 
         {motifs.length > 0 && (
           <div className={styles.sentBubbleSection}>

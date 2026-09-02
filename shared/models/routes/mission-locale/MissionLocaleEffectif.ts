@@ -2,6 +2,7 @@ import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
 import { SourceApprenantEnum } from "shared/constants/effectifs";
+import { zMlSituationDossier } from "shared/constants/missionLocale";
 import zMissionLocaleEffectif, {
   zSituationEnum,
   zProblemeTypeEnum,
@@ -142,6 +143,11 @@ const zEffectifMissionLocale = z
     contact_opportun: z.boolean().nullish(),
     acc_conjoint: z.boolean().nullish(),
     rqth: z.boolean().nullish(),
+    situation_dossier: zMlSituationDossier.nullish().describe("Situation du dossier affichée côté Mission Locale"),
+    date_reception: z.date().nullish().describe("Date de réception du dossier par la Mission Locale"),
+    date_traitement: z.date().nullish(),
+    date_dernier_passage_a_recontacter: z.date().nullish(),
+    date_derniere_action_ml: z.date().nullish(),
     mission_locale_logs: z.array(zMissionLocaleEffectifLogWithUnread).nullish(),
     unread_by_current_user: z
       .boolean()

@@ -87,6 +87,10 @@ function getAllPriorityBadges(
 ): JSX.Element[] {
   const badges: JSX.Element[] = [];
 
+  // Ordre d'affichage aligné sur l'ordre de priorité : CFA, souhaite un RDV, mineur, RQTH.
+  if (effectif.acc_conjoint) {
+    badges.push(<AccConjointBadge key="acc_conjoint" fontSize={fontSize} />);
+  }
   if (effectif.souhaite_rdv) {
     badges.push(<SouhaiteRdvBadge key="souhaite_rdv" fontSize={fontSize} />);
   }
@@ -102,9 +106,6 @@ function getAllPriorityBadges(
   if (effectif.a_contacter) {
     badges.push(<AContacterBadge key="a_contacter" iconSize={iconSize} fontSize={fontSize} />);
   }
-  if (effectif.acc_conjoint) {
-    badges.push(<AccConjointBadge key="acc_conjoint" fontSize={fontSize} />);
-  }
   if (includeFinDeFormation && effectif.fin_de_formation) {
     badges.push(<FinDeFormationBadge key="fin_de_formation" fontSize={fontSize} />);
   }
@@ -112,20 +113,25 @@ function getAllPriorityBadges(
   return badges;
 }
 
+export const aDesBadgesDePriorite = (
+  effectif: EffectifStatusBadgeProps["effectif"],
+  { includeFinDeFormation = false }: { includeFinDeFormation?: boolean } = {}
+): boolean => getAllPriorityBadges(effectif, { fontSize: "", iconSize: "", includeFinDeFormation }).length > 0;
+
 function getPermanentBadges(
   effectif: EffectifStatusBadgeProps["effectif"],
   { fontSize, iconSize, includeFinDeFormation = false }: BadgeBuilderOptions
 ): JSX.Element[] {
   const badges: JSX.Element[] = [];
 
+  if (effectif.acc_conjoint) {
+    badges.push(<AccConjointBadge key="acc_conjoint" fontSize={fontSize} />);
+  }
   if (effectif.mineur) {
     badges.push(<MineurBadge key="mineur" iconSize={iconSize} fontSize={fontSize} />);
   }
   if (effectif.rqth) {
     badges.push(<RQTHBadge key="rqth" iconSize={iconSize} fontSize={fontSize} />);
-  }
-  if (effectif.acc_conjoint) {
-    badges.push(<AccConjointBadge key="acc_conjoint" fontSize={fontSize} />);
   }
   if (includeFinDeFormation && effectif.fin_de_formation) {
     badges.push(<FinDeFormationBadge key="fin_de_formation" fontSize={fontSize} />);
@@ -181,7 +187,7 @@ function AccConjointBadge({ fontSize }: { fontSize: string }) {
       style={{ fontSize }}
     >
       <i className="ri-school-fill fr-icon--xs" aria-hidden="true" />
-      Collaboration CFA
+      CFA
     </span>
   );
 }

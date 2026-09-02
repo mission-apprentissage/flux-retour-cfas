@@ -17,6 +17,7 @@ import {
 
 import { createEffectifMissionLocaleLog } from "../../mission-locale/mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "../../mission-locale/mission-locale-stats.actions";
+import { computeSuiviDatesSet } from "../../mission-locale/mission-locale-suivi-dates";
 import { getMissionLocaleStat } from "../../mission-locale/mission-locale.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../../organisations.actions";
 
@@ -103,6 +104,7 @@ export const setEffectifMissionLocaleDataAdmin = async (
 
   await createEffectifMissionLocaleLog(mlEff?._id, logPayload, user, missionLocaleId);
 
+  const now = new Date();
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
     {
       effectif_id: new ObjectId(effectifId),
@@ -111,7 +113,8 @@ export const setEffectifMissionLocaleDataAdmin = async (
     {
       $set: {
         ...setObject,
-        updated_at: new Date(),
+        ...computeSuiviDatesSet(situation, Object.keys(setObject).length > 0, now),
+        updated_at: now,
       },
       ...(shouldClearStaleConnaissanceMl ? { $unset: { connaissance_ml: 1 } } : {}),
     },
@@ -165,6 +168,9 @@ export const resetEffectifMissionLocaleDataAdmin = async (
         deja_connu: 1,
         connaissance_ml: 1,
         commentaires: 1,
+        date_traitement: 1,
+        date_dernier_passage_a_recontacter: 1,
+        date_derniere_action_ml: 1,
       },
     }
   );

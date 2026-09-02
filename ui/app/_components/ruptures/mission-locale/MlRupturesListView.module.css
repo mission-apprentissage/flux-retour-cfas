@@ -1,0 +1,53 @@
+.anneeFermee {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.anneeLienAfficher {
+  font-weight: 400;
+  text-decoration: underline;
+  color: var(--text-action-high-blue-france);
+}
+
+.moisItem {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 400;
+}
+
+.moisToutTraite {
+  color: var(--text-mention-grey);
+}
+
+/* En-tête du panneau : titre à gauche, effectif et téléchargement à droite, filet de séparation. */
+.panneauEntete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-default-grey);
+}
+
+.panneauTitre {
+  color: var(--text-title-blue-france);
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.panneauActions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.panneauCompteur {
+  color: var(--text-mention-grey);
+  white-space: nowrap;
+}

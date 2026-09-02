@@ -5,6 +5,7 @@ export * from "./effectifs";
 export * from "./fiabilisation";
 export * from "./franceTravail";
 export * from "./indicateurs";
+export * from "./missionLocale";
 export * from "./organisme";
 export * from "./organismes";
 export * from "./organisations";

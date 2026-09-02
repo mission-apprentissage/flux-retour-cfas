@@ -16,8 +16,9 @@ import { isMissionLocaleUser } from "../utils";
 import { matchesSearchTerm } from "../utils/searchUtils";
 
 import { CommuneCell } from "./CommuneCell";
-import { EffectifPriorityBadgeMultiple, EffectifStatusBadge } from "./EffectifStatusBadge";
+import { EffectifPriorityBadgeMultiple } from "./EffectifStatusBadge";
 import styles from "./PriorityTable.module.css";
+import { StatutDateCell } from "./StatutDateCell";
 
 type EffectifsPriorityTableProps = {
   priorityData?: EffectifPriorityData[];
@@ -122,7 +123,7 @@ export function EffectifsPriorityTable({
           id: effectif.id,
           badge: (
             <div style={{ display: "flex", alignItems: "end", width: "100%", justifyContent: "flex-end" }}>
-              <EffectifStatusBadge effectif={effectif} />
+              <StatutDateCell effectif={effectif} />
             </div>
           ),
           name: (

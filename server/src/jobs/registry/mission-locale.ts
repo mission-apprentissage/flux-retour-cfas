@@ -24,6 +24,7 @@ import {
   updateMissionLocaleSnapshotFromLastStatus,
   updateNotActivatedMissionLocaleEffectifSnapshot,
 } from "../hydrate/mission-locale/hydrate-mission-locale";
+import { backfillMlSuiviDates } from "../migration/backfill-ml-suivi-dates";
 import { migrateAutreSituations } from "../migration/migrate-autre-situations";
 import { seedMlRdvUrl } from "../tmp/seed-ml-rdv-url";
 
@@ -90,6 +91,11 @@ export const missionLocaleJobs = {
   "tmp:migrate:mission-locale-current-status": {
     handler: async () => {
       return updateMissionLocaleEffectifCurrentStatus();
+    },
+  },
+  "tmp:migrate:ml-suivi-dates": {
+    handler: async () => {
+      return backfillMlSuiviDates();
     },
   },
   "tmp:migrate:mission-locale-effectif-snapshot": {

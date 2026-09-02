@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import type { CfaEffectifSituation, ICfaEffectif } from "@/common/types/cfaRuptures";
 import { CFA_EFFECTIF_SITUATION, SITUATION_LABELS } from "@/common/types/cfaRuptures";
 
+import { SituationCell } from "../shared/ui/SituationCell";
 import sharedStyles from "../shared/ui/SortableTable.module.css";
 import { SortableHeader } from "../shared/ui/SortableTableParts";
 
@@ -32,9 +33,9 @@ const SITUATION_TOOLTIPS: Partial<Record<CfaEffectifSituation, string>> = {
   [CFA_EFFECTIF_SITUATION.SANS_CONTRAT]: "Ce jeune est inscrit en formation mais n'a pas de contrat d'apprentissage.",
 };
 
-function SituationCell({ effectif, dimmed }: { effectif: ICfaEffectif; dimmed?: boolean }) {
+function CfaSituationCell({ effectif, dimmed }: { effectif: ICfaEffectif; dimmed?: boolean }) {
   if (!effectif.situation) {
-    return <span className={`${styles.emptyCell} ${dimmed ? styles.dimmed : ""}`}>—</span>;
+    return <SituationCell dimmed={dimmed} />;
   }
 
   const dateRupture = effectif.date_rupture
@@ -45,24 +46,16 @@ function SituationCell({ effectif, dimmed }: { effectif: ICfaEffectif; dimmed?: 
       })
     : null;
 
-  const tooltip = SITUATION_TOOLTIPS[effectif.situation];
   const showDateRupture =
     effectif.situation === CFA_EFFECTIF_SITUATION.RUPTURE || effectif.situation === CFA_EFFECTIF_SITUATION.RUPTURE_DECA;
 
   return (
-    <div className={styles.situationCell}>
-      <span className={styles.situationLabel}>
-        <span className={dimmed ? styles.dimmed : undefined}>{SITUATION_LABELS[effectif.situation]}</span>
-        {tooltip && (
-          <span className={`${styles.situationTooltip} ${dimmed ? styles.situationTooltipDimmed : ""}`}>
-            <Tooltip kind="hover" title={tooltip} />
-          </span>
-        )}
-      </span>
-      {showDateRupture && dateRupture && (
-        <span className={`${styles.situationDetail} ${dimmed ? styles.dimmed : ""}`}>depuis le {dateRupture}</span>
-      )}
-    </div>
+    <SituationCell
+      label={SITUATION_LABELS[effectif.situation]}
+      tooltip={SITUATION_TOOLTIPS[effectif.situation]}
+      detail={showDateRupture && dateRupture ? `depuis le ${dateRupture}` : null}
+      dimmed={dimmed}
+    />
   );
 }
 
@@ -162,7 +155,7 @@ export function CfaTousEffectifsTable({ effectifs, sort, order, onSort }: CfaTou
                   </div>
                 </td>
                 <td>
-                  <SituationCell effectif={effectif} dimmed={isOutOfRange} />
+                  <CfaSituationCell effectif={effectif} dimmed={isOutOfRange} />
                 </td>
                 <td>
                   <div className={`${sharedStyles.formationCell} ${rowClass ?? ""}`}>
