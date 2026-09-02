@@ -2,13 +2,7 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationOrganismeFormation } from "shared/models";
-import { CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
-import {
-  CFA_EFFECTIF_SITUATION,
-  CfaEffectifSource,
-  ICfaEffectif,
-  ICfaEffectifsResponse,
-} from "shared/models/routes/organismes/cfa";
+import { CfaEffectifSource, ICfaEffectif, ICfaEffectifsResponse } from "shared/models/routes/organismes/cfa";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { ensureMissionLocaleEffectifRecord } from "@/common/actions/mission-locale/mission-locale-record.actions";
@@ -236,32 +230,6 @@ export async function getCfaEffectifs(
         has_unread_notification_computed: {
           $ifNull: ["$ml_doc.organisme_data.has_unread_notification", false],
         },
-        situation: {
-          $switch: {
-            branches: [
-              // Ordre : la rupture DECA doit précéder la rupture ERP, et la prévention doit suivre
-              // les deux (un jeune déclaré en prévention puis réellement rupturé affiche "Rupture").
-              {
-                case: { $and: ["$en_rupture", { $eq: ["$source_collection", "effectifsDECA"] }] },
-                then: CFA_EFFECTIF_SITUATION.RUPTURE_DECA,
-              },
-              { case: "$en_rupture", then: CFA_EFFECTIF_SITUATION.RUPTURE },
-              {
-                case: { $eq: ["$ml_doc.organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
-                then: CFA_EFFECTIF_SITUATION.PREVENTION_RUPTURE,
-              },
-              {
-                case: { $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.ABANDON] },
-                then: CFA_EFFECTIF_SITUATION.ABANDON,
-              },
-              {
-                case: { $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.INSCRIT] },
-                then: CFA_EFFECTIF_SITUATION.SANS_CONTRAT,
-              },
-            ],
-            default: null,
-          },
-        },
       },
     }
   );
@@ -346,7 +314,6 @@ export async function getCfaEffectifs(
             has_unread_notification: {
               $ifNull: ["$ml_doc.organisme_data.has_unread_notification", false],
             },
-            situation: 1,
             mission_locale: 1,
           },
         },

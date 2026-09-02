@@ -1,8 +1,5 @@
 import { ObjectId } from "mongodb";
-import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationOrganismeFormation } from "shared/models";
-import { CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
-import { CFA_EFFECTIF_SITUATION } from "shared/models/routes/organismes/cfa";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { describe, it, beforeEach, expect } from "vitest";
 
@@ -166,7 +163,6 @@ describe("CFA Effectifs Actions", () => {
       expect(result.pagination.total).toBe(2);
       const rupture = result.effectifs.find((e) => e.nom === "RUPTURE");
       expect(rupture?.en_rupture).toBe(true);
-      expect(rupture?.situation).toBe("rupture");
     });
 
     it("expose la Mission Locale de rattachement du dossier ML", async () => {
@@ -573,63 +569,6 @@ describe("CFA Effectifs Actions", () => {
 
       expect((result.effectif as any).situation?.situation).toBe("INJOIGNABLE_APRES_RELANCES");
       expect((result.effectif as any).situation?.commentaires).toBe("déjà traité par la ML");
-    });
-  });
-
-  describe("colonne situation", () => {
-    it("distingue une rupture issue de DECA", async () => {
-      const decaEffectif = {
-        _id: new ObjectId(),
-        deca_raw_id: new ObjectId(),
-        ...(await createSampleEffectif({
-          organisme: sampleOrganisme,
-          annee_scolaire: ANNEE_SCOLAIRE,
-          apprenant: { nom: "DECARUPT", prenom: "Test" },
-          source: "DECA" as any,
-        })),
-        organisme_id: organismeId,
-        is_deca_compatible: true,
-      };
-      decaEffectif._computed = {
-        ...decaEffectif._computed,
-        statut: { ...decaEffectif._computed?.statut, en_cours: STATUT_APPRENANT.RUPTURANT },
-      } as any;
-      await effectifsDECADb().insertOne(decaEffectif as any);
-
-      const result = await getCfaEffectifs(organisation, true, defaultParams);
-
-      expect(result.effectifs[0].situation).toBe(CFA_EFFECTIF_SITUATION.RUPTURE_DECA);
-    });
-
-    it("affiche la prévention de rupture pour un dossier envoyé sur un jeune en contrat", async () => {
-      const effectif = await insertEffectif({ apprenant: { nom: "PREVENTION", prenom: "Test" } });
-      await missionLocaleEffectifsDb().insertOne(
-        createMlEffectifDoc(effectif, {
-          organisme_data: { acc_conjoint: true, situation_type: CFA_SITUATION_TYPE_ENUM.EN_CONTRAT },
-        }) as any
-      );
-
-      const result = await getCfaEffectifs(organisation, false, defaultParams);
-
-      expect(result.effectifs[0].situation).toBe(CFA_EFFECTIF_SITUATION.PREVENTION_RUPTURE);
-    });
-
-    it("affiche la rupture plutôt que la prévention si le jeune a effectivement rompu", async () => {
-      const effectif = await insertEffectif({ apprenant: { nom: "RUPTUREAPRES", prenom: "Test" } });
-      await missionLocaleEffectifsDb().insertOne(
-        createMlEffectifDoc(effectif, {
-          organisme_data: { acc_conjoint: true, situation_type: CFA_SITUATION_TYPE_ENUM.EN_CONTRAT },
-          cfa_rupture_declaration: {
-            date_rupture: new Date("2026-05-04"),
-            declared_at: new Date(),
-            declared_by: userId,
-          },
-        }) as any
-      );
-
-      const result = await getCfaEffectifs(organisation, false, defaultParams);
-
-      expect(result.effectifs[0].situation).toBe(CFA_EFFECTIF_SITUATION.RUPTURE);
     });
   });
 
