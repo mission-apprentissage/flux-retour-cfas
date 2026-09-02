@@ -39,6 +39,8 @@ export function FeedbackBubble({ log, effectif, styles, variant, showCurrentUser
   const rdvPris = log.situation === SITUATION_ENUM.RDV_PRIS;
   const isRecontacter = log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR;
   const isInjoignable = log.situation === SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES;
+  // Réponse reçue par message : ce n'est pas une absence de réponse.
+  const isRefusRecontact = log.situation === SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE;
 
   const creatorName = [log.created_by_user?.prenom, log.created_by_user?.nom].filter(Boolean).join(" ");
   const isCurrent = showCurrentUser ? isCurrentUserId(log.created_by, user?._id) : false;
@@ -65,12 +67,18 @@ export function FeedbackBubble({ log, effectif, styles, variant, showCurrentUser
       <div className={styles[cls.bubble]}>
         <div className={styles.sentBubbleSection}>
           <p className={styles.sentSectionTitle}>Situation</p>
-          <BooleanLine
-            label="Jeune contacté"
-            labelFaux="Pas de réponse du jeune"
-            value={contactReussi}
-            className={styles.feedbackLine}
-          />
+          {!contactReussi && isRefusRecontact ? (
+            <p className={styles.feedbackLine}>
+              ❌ <strong>Ne souhaite pas être recontacté</strong>
+            </p>
+          ) : (
+            <BooleanLine
+              label="Jeune contacté"
+              labelFaux="Pas de réponse du jeune"
+              value={contactReussi}
+              className={styles.feedbackLine}
+            />
+          )}
           {!contactReussi && log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR && (
             <p className={styles.feedbackLine}>
               {"🔄 "}

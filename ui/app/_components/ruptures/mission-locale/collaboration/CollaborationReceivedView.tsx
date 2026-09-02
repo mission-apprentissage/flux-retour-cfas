@@ -16,7 +16,6 @@ const styles = withSharedStyles(localStyles);
 
 export function CollaborationReceivedView({ effectif }: { effectif: IEffectifMissionLocale["effectif"] }) {
   const od = effectif.organisme_data;
-  const prenom = effectif.prenom;
 
   const organismeName = effectif.organisme?.nom || effectif.organisme?.raison_sociale || "";
 
@@ -29,6 +28,9 @@ export function CollaborationReceivedView({ effectif }: { effectif: IEffectifMis
   const hasRecherche = motifs.includes(ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI);
   const hasReorientation = motifs.includes(ACC_CONJOINT_MOTIF_ENUM.REORIENTATION);
 
+  const motifCommentaire = (motif: ACC_CONJOINT_MOTIF_ENUM) =>
+    commentaires?.[motif] ? <span className={styles.sentMotifComment}> {commentaires[motif]}</span> : null;
+
   return (
     <>
       <div className={styles.sentHeader}>
@@ -38,14 +40,13 @@ export function CollaborationReceivedView({ effectif }: { effectif: IEffectifMis
       <div className={styles.sentBubble}>
         <DossierSituationBlock
           organismeData={od}
-          prenom={prenom}
           dateRupture={effectif.date_rupture}
           situationDossier={effectif.situation_dossier}
         />
 
         {motifs.length > 0 && (
           <div className={styles.sentBubbleSection}>
-            <p className={styles.sentSectionTitle}>Quel accompagnement attendu ?</p>
+            <p className={styles.sentSectionTitle}>Objectif de l&apos;accompagnement</p>
 
             {hasRecherche && (
               <p className={styles.sentMotifInline}>
@@ -53,9 +54,7 @@ export function CollaborationReceivedView({ effectif }: { effectif: IEffectifMis
                   L&apos;aider dans sa recherche d&apos;entreprise{" "}
                   {MOTIF_EMOJIS[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]}
                 </strong>
-                {commentaires?.[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] && (
-                  <> — {commentaires[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]}</>
-                )}
+                {motifCommentaire(ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI)}
               </p>
             )}
 
@@ -64,36 +63,32 @@ export function CollaborationReceivedView({ effectif }: { effectif: IEffectifMis
                 <strong>
                   Frein de {MOTIF_LABELS[motif] || motif} {MOTIF_EMOJIS[motif] || ""}
                 </strong>
-                {commentaires?.[motif] && <> — {commentaires[motif]}</>}
+                {motifCommentaire(motif)}
               </p>
             ))}
 
             {hasReorientation && (
               <p className={styles.sentMotifInline}>
-                <strong>
-                  L&apos;aider dans sa réorientation {MOTIF_EMOJIS[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]}
-                </strong>
-                {commentaires?.[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION] && (
-                  <> — {commentaires[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]}</>
-                )}
+                <strong>Réorientation {MOTIF_EMOJIS[ACC_CONJOINT_MOTIF_ENUM.REORIENTATION]}</strong>
+                {motifCommentaire(ACC_CONJOINT_MOTIF_ENUM.REORIENTATION)}
               </p>
             )}
           </div>
         )}
 
-        <ResponsableLegalBlock organismeData={od} />
-
-        {od?.note_complementaire && (
-          <div className={styles.sentBubbleSection}>
-            <p className={styles.sentSectionTitle}>Note complémentaire</p>
-            <p className={styles.sentBody}>{od.note_complementaire}</p>
-          </div>
-        )}
+        <ResponsableLegalBlock organismeData={od} dateDeNaissance={effectif.date_de_naissance} />
 
         {od?.referent_coordonnees && (
           <div className={styles.sentBubbleSection}>
-            <p className={styles.sentSectionTitle}>Référent(e) à contacter</p>
+            <p className={styles.sentSectionTitle}>Référent(es) au CFA à contacter</p>
             <ReferentCoordonnees value={od.referent_coordonnees} />
+          </div>
+        )}
+
+        {od?.note_complementaire && (
+          <div className={styles.sentBubbleSection}>
+            <p className={styles.sentSectionTitle}>Message</p>
+            <p className={styles.sentBody}>{od.note_complementaire}</p>
           </div>
         )}
       </div>
@@ -101,11 +96,11 @@ export function CollaborationReceivedView({ effectif }: { effectif: IEffectifMis
       {od?.reponse_at && (
         <div className={styles.sentFooter}>
           <span className={`fr-icon-send-plane-fill fr-icon--sm ${styles.sentBadgeIcon}`} aria-hidden="true" />
-          <span>
+          <span className={styles.sentFooterLabel}>
             Dossier envoyé par le CFA{organismeName ? ` ${organismeName}` : ""}
-            {effectif.contact_cfa && ` par ${effectif.contact_cfa.prenom} ${effectif.contact_cfa.nom}`}{" "}
-            <span className={styles.sentFooterDate}>le {formatDate(od.reponse_at)}</span>
+            {effectif.contact_cfa && `, par ${effectif.contact_cfa.prenom} ${effectif.contact_cfa.nom}`}
           </span>
+          <span className={styles.sentFooterDate}>{formatDate(od.reponse_at)}</span>
         </div>
       )}
     </>

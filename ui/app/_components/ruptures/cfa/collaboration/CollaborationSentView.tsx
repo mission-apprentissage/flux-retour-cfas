@@ -118,7 +118,7 @@ export function CollaborationSentView({
 
       {hasBubbleContent && (
         <div className={styles.sentBubble}>
-          <DossierSituationBlock organismeData={od} prenom={prenom} dateRupture={effectif.date_rupture} />
+          <DossierSituationBlock organismeData={od} dateRupture={effectif.date_rupture} />
 
           {motifs.length > 0 && (
             <div className={styles.sentBubbleSection}>

@@ -338,23 +338,11 @@ a.mlCoordLink::after {
 
 .sentBubbleSection {
   padding: 0;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .sentBubbleSection:last-child {
   margin-bottom: 0;
-}
-
-.situationEncadre {
-  display: inline-flex;
-  gap: 0.25rem;
-  align-items: center;
-  width: fit-content;
-  padding: 0.25rem 0.75rem;
-  margin: 0 0 0.5rem 0;
-  font-weight: 500;
-  color: var(--text-default-grey);
-  border: 1px solid var(--border-default-grey);
 }
 
 .sentSectionTitle {
@@ -364,6 +352,47 @@ a.mlCoordLink::after {
   line-height: 1.25rem;
   color: var(--text-mention-grey);
   margin: 0 0 0.25rem 0;
+}
+
+.situationTag {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  height: 2rem;
+  margin-bottom: 0.25rem;
+  padding: 0 0.5rem;
+  font-family: Marianne, sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text-default-grey);
+  border: 1px solid var(--border-contrast-grey);
+  border-radius: 4px;
+}
+
+.sentSituationLine {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  font-family: Marianne, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  color: var(--text-default-grey);
+  margin: 0;
+}
+
+.sentSituationLine :global([class^="fr-icon-"]),
+.sentSituationLine :global([class^="ri-"]) {
+  flex-shrink: 0;
+  align-self: center;
+  color: var(--blue-france-main-525);
+}
+
+.sentSituationLineError :global([class^="fr-icon-"]) {
+  color: var(--text-default-error);
+}
+
+.sentSituationDate {
+  font-weight: 400;
 }
 
 .sentMotifInline {
@@ -379,6 +408,10 @@ a.mlCoordLink::after {
   font-weight: 700;
 }
 
+.sentMotifComment {
+  color: var(--text-mention-grey);
+}
+
 .sentBody {
   font-family: Marianne, sans-serif;
   font-weight: 400;
@@ -386,15 +419,6 @@ a.mlCoordLink::after {
   line-height: 1.5rem;
   color: var(--text-title-grey);
   margin: 0 0 0.125rem 0;
-}
-
-.sentStillAtCfa {
-  font-family: Marianne, sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
-  line-height: 1.5rem;
-  color: var(--text-title-grey);
-  margin: 0;
 }
 
 .sentFooter :global([class^="fr-icon-"]) {
