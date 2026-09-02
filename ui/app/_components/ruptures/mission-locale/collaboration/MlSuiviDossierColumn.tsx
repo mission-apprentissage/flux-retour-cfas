@@ -987,25 +987,15 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                     <>
                       <p className={styles.commentaireCalloutTitle}>
                         <i className="fr-icon-lightbulb-line fr-icon--sm" aria-hidden="true" />{" "}
-                        <strong>
-                          {commentaireRequis
-                            ? "Précisez les prochaines actions prévues pour le CFA"
-                            : "Ajoutez un commentaire pour le CFA"}
-                        </strong>
+                        <strong>Ajoutez un commentaire pour le CFA</strong>
                       </p>
                       <p className={styles.commentaireCalloutBody}>
                         Ce dossier vous a été transmis par le CFA{" "}
                         <strong>{effectif.organisme?.nom || effectif.organisme?.raison_sociale || ""}</strong>
                         .
                         <br />
-                        {commentaireRequis ? (
-                          "Précisez au CFA les prochaines actions prévues, comme la date du rendez-vous prévu par exemple."
-                        ) : (
-                          <>
-                            <span aria-hidden="true">{"💡 "}</span>Ajoutez un commentaire à votre saisie est un plus
-                            pour la collaboration.
-                          </>
-                        )}
+                        <span aria-hidden="true">{"💡 "}</span>Ajoutez un commentaire à votre saisie est un plus pour la
+                        collaboration.
                       </p>
                     </>
                   )}
