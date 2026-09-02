@@ -5,6 +5,15 @@
   align-items: flex-start;
 }
 
+.identite {
+  display: flex;
+  flex-direction: column;
+}
+
+.identiteNom {
+  text-transform: uppercase;
+}
+
 .statutHeader {
   text-align: right;
 }

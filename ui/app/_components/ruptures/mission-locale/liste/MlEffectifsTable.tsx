@@ -105,7 +105,10 @@ export function MlEffectifsTable({
                   <div className={styles.nameCell}>
                     <EffectifPriorityBadgeMultiple effectif={effectif} isHeader />
                     <Link href={href} className={sharedStyles.nameText} onClick={(event) => event.stopPropagation()}>
-                      {effectif.prenom} {effectif.nom}
+                      <span className={styles.identite}>
+                        <span>{effectif.prenom}</span>
+                        <span className={styles.identiteNom}>{effectif.nom}</span>
+                      </span>
                     </Link>
                   </div>
                 </td>
