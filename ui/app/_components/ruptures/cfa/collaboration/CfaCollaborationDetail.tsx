@@ -1,6 +1,7 @@
 "use client";
 
 import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 import { IEffectifMissionLocale } from "shared";
 
@@ -9,6 +10,7 @@ import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 import { CfaDeclareDateRuptureModal, declareDateRuptureModal } from "../../cfa/CfaDeclareDateRuptureModal";
 import { CfaRuptureInfoModal, ruptureInfoModal } from "../../cfa/CfaRuptureInfoModal";
+import { getCfaListeInfo } from "../../cfa/ficheOrigine";
 import { useDeclareCfaRupture } from "../../cfa/hooks/useCfaMutations";
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
@@ -30,6 +32,8 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   const { mutateAsync: declareRupture } = useDeclareCfaRupture();
   const pageRef = useRef<HTMLDivElement>(null);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
+  const searchParams = useSearchParams();
+  const liste = getCfaListeInfo(searchParams?.get("origine"), searchParams?.get("category"));
 
   // Dépend de effectif.id : la navigation Précédent/Suivant change l'[id] sans démonter le composant
   // (data servie depuis le cache react-query), il faut donc re-scroller et re-tracker à chaque dossier.
@@ -67,9 +71,9 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
         currentPageLabel={effectifName}
         segments={[
           {
-            label: "Collaborations avec les Missions Locales",
+            label: liste.label,
             linkProps: {
-              href: "/cfa",
+              href: liste.href,
               onClick: () => trackPlausibleEvent("cfa_fiche_retour_liste"),
             },
           },

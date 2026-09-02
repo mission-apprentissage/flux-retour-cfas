@@ -13,6 +13,7 @@ import { SortableHeader } from "../shared/ui/SortableTableParts";
 
 import { CfaCollaborationBadge } from "./CfaCollaborationBadge";
 import styles from "./CfaTousEffectifsTable.module.css";
+import { CFA_FICHE_ORIGINE, cfaFicheHref } from "./ficheOrigine";
 
 type SortKey = "nom" | "formation" | "mission_locale" | "collab_status";
 
@@ -123,14 +124,16 @@ export function CfaTousEffectifsTable({ effectifs, sort, order, onSort }: CfaTou
               <tr
                 key={effectif.id}
                 className={isOutOfRange ? undefined : sharedStyles.clickableRow}
-                onClick={isOutOfRange ? undefined : () => router.push(`/cfa/${effectif.id}`)}
+                onClick={
+                  isOutOfRange ? undefined : () => router.push(cfaFicheHref(effectif.id, CFA_FICHE_ORIGINE.EFFECTIFS))
+                }
                 onKeyDown={
                   isOutOfRange
                     ? undefined
                     : (event) => {
                         // n'agir que lorsque la ligne elle-même a le focus (pas un contrôle interne)
                         if (event.target !== event.currentTarget) return;
-                        if (event.key === "Enter") router.push(`/cfa/${effectif.id}`);
+                        if (event.key === "Enter") router.push(cfaFicheHref(effectif.id, CFA_FICHE_ORIGINE.EFFECTIFS));
                       }
                 }
                 tabIndex={isOutOfRange ? undefined : 0}
@@ -145,7 +148,7 @@ export function CfaTousEffectifsTable({ effectifs, sort, order, onSort }: CfaTou
                       </span>
                     ) : (
                       <Link
-                        href={`/cfa/${effectif.id}`}
+                        href={cfaFicheHref(effectif.id, CFA_FICHE_ORIGINE.EFFECTIFS)}
                         className={sharedStyles.nameText}
                         onClick={(event) => event.stopPropagation()}
                       >

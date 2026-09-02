@@ -140,7 +140,13 @@ export function CfaCollaborationsList({
         <p className={cardStyles.emptyMessage}>Aucun dossier trouvé.</p>
       ) : (
         <>
-          <CfaCollaborationsTable effectifs={effectifs} sort={sort} order={order} onSort={handleSort} />
+          <CfaCollaborationsTable
+            effectifs={effectifs}
+            sort={sort}
+            order={order}
+            onSort={handleSort}
+            category={category}
+          />
           {data && data.pagination.totalPages > 1 && (
             <div className={cardStyles.paginationContainer}>
               <Pagination

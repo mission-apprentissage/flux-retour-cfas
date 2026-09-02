@@ -13,6 +13,7 @@ import { SortableHeader } from "../shared/ui/SortableTableParts";
 
 import { CfaCollaborationBadge } from "./CfaCollaborationBadge";
 import styles from "./CfaEffectifsTable.module.css";
+import { CFA_FICHE_ORIGINE, cfaFicheHref } from "./ficheOrigine";
 
 type SortKey = "nom" | "formation" | "situation" | "collab_status";
 
@@ -21,9 +22,11 @@ interface CfaCollaborationsTableProps {
   sort: string;
   order: "asc" | "desc";
   onSort: (key: SortKey) => void;
+  /** Onglet courant, conservé pour y revenir depuis le fil d'Ariane de la fiche. */
+  category: string;
 }
 
-export function CfaCollaborationsTable({ effectifs, sort, order, onSort }: CfaCollaborationsTableProps) {
+export function CfaCollaborationsTable({ effectifs, sort, order, onSort, category }: CfaCollaborationsTableProps) {
   const router = useRouter();
 
   if (effectifs.length === 0) {
@@ -68,55 +71,58 @@ export function CfaCollaborationsTable({ effectifs, sort, order, onSort }: CfaCo
           </tr>
         </thead>
         <tbody>
-          {effectifs.map((e) => (
-            <tr
-              key={e.id}
-              className={sharedStyles.clickableRow}
-              onClick={() => router.push(`/cfa/${e.id}`)}
-              onKeyDown={(event) => {
-                // n'agir que lorsque la ligne elle-même a le focus (pas un contrôle interne)
-                if (event.target !== event.currentTarget) return;
-                if (event.key === "Enter") router.push(`/cfa/${e.id}`);
-              }}
-              tabIndex={0}
-              role="link"
-              aria-label={`Voir le dossier de ${e.prenom} ${e.nom}`}
-            >
-              <td>
-                <div className={sharedStyles.nameCell}>
-                  <Link
-                    href={`/cfa/${e.id}`}
-                    className={sharedStyles.nameText}
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    {e.prenom} {e.nom}
-                  </Link>
-                  {e.has_unread_notification && (
-                    <span className={styles.unreadDot} role="status" aria-label="Nouveau retour de la Mission Locale" />
-                  )}
-                </div>
-              </td>
-              <td>
-                <SituationCell
-                  label={e.situation_dossier ? ML_SITUATION_DOSSIER_LABEL[e.situation_dossier] : null}
-                  tooltip={e.situation_dossier ? ML_SITUATION_TOOLTIPS[e.situation_dossier] : undefined}
-                />
-              </td>
-              <td>
-                <div className={sharedStyles.formationCell}>
-                  <span>{e.libelle_formation}</span>
-                  {e.formation_niveau_libelle && (
-                    <span className={sharedStyles.formationNiveau}>{e.formation_niveau_libelle}</span>
-                  )}
-                </div>
-              </td>
-              <td onClick={(event) => event.stopPropagation()}>
-                <div className={sharedStyles.collabCell}>
-                  {e.collab_status && <CfaCollaborationBadge status={e.collab_status} effectifId={e.id} />}
-                </div>
-              </td>
-            </tr>
-          ))}
+          {effectifs.map((e) => {
+            const href = cfaFicheHref(e.id, CFA_FICHE_ORIGINE.COLLABORATIONS, category);
+            return (
+              <tr
+                key={e.id}
+                className={sharedStyles.clickableRow}
+                onClick={() => router.push(href)}
+                onKeyDown={(event) => {
+                  // n'agir que lorsque la ligne elle-même a le focus (pas un contrôle interne)
+                  if (event.target !== event.currentTarget) return;
+                  if (event.key === "Enter") router.push(href);
+                }}
+                tabIndex={0}
+                role="link"
+                aria-label={`Voir le dossier de ${e.prenom} ${e.nom}`}
+              >
+                <td>
+                  <div className={sharedStyles.nameCell}>
+                    <Link href={href} className={sharedStyles.nameText} onClick={(event) => event.stopPropagation()}>
+                      {e.prenom} {e.nom}
+                    </Link>
+                    {e.has_unread_notification && (
+                      <span
+                        className={styles.unreadDot}
+                        role="status"
+                        aria-label="Nouveau retour de la Mission Locale"
+                      />
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <SituationCell
+                    label={e.situation_dossier ? ML_SITUATION_DOSSIER_LABEL[e.situation_dossier] : null}
+                    tooltip={e.situation_dossier ? ML_SITUATION_TOOLTIPS[e.situation_dossier] : undefined}
+                  />
+                </td>
+                <td>
+                  <div className={sharedStyles.formationCell}>
+                    <span>{e.libelle_formation}</span>
+                    {e.formation_niveau_libelle && (
+                      <span className={sharedStyles.formationNiveau}>{e.formation_niveau_libelle}</span>
+                    )}
+                  </div>
+                </td>
+                <td onClick={(event) => event.stopPropagation()}>
+                  <div className={sharedStyles.collabCell}>
+                    {e.collab_status && <CfaCollaborationBadge status={e.collab_status} effectifId={e.id} />}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
