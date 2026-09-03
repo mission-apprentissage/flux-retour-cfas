@@ -207,7 +207,7 @@ export function CfaCollaborationsList({
 
         <div className={filterStyles.filtersRow}>
           <span className={filterStyles.filterLabel}>Filtrer</span>
-          <div className={filterStyles.selectFieldWide}>
+          <div className={filterStyles.selectFieldAuto}>
             <MultiSelectDropdown
               options={collabOptions}
               value={collabStatuses}
@@ -217,7 +217,7 @@ export function CfaCollaborationsList({
               placeholder="Statut suivi ML"
             />
           </div>
-          <div className={filterStyles.selectFieldWide}>
+          <div className={filterStyles.selectFieldAuto}>
             <MultiSelectDropdown
               options={formationOptions}
               value={formations}
