@@ -12,8 +12,7 @@
   font-weight: 700;
   font-size: 32px;
   line-height: 40px;
-  /* Bleu de la maquette : aucun token de texte ne porte cette valeur, seuls ceux de bordure
-     et d'illustration, d'où le recours au token de palette. */
+  /* Aucun token de texte ne porte ce bleu, d'où le recours au token de palette. */
   color: var(--blue-france-main-525);
 }
 

@@ -41,10 +41,6 @@ export function formatAdresseDisplay(info: VerifiedInfo): string {
 
 const CHAMP_OBLIGATOIRE = "Ce champ est obligatoire";
 
-/**
- * Chaque étape décrit ses manques sous forme de messages, et non d'un simple booléen : la même
- * source alimente le blocage du bouton « Continuer » et les messages affichés sous les champs.
- */
 export function objectifsErrors(v: FormValues): FormikErrors<FormValues> {
   const errors: FormikErrors<FormValues> = {};
   if (v.motifs.length === 0) {

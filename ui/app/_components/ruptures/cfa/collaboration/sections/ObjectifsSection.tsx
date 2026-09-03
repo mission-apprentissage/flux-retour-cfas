@@ -50,8 +50,7 @@ export function ObjectifsSection({ prenom, sansContrat = false }: ObjectifsSecti
   const hasReorientation = values.motifs.includes(ACC_CONJOINT_MOTIF_ENUM.REORIENTATION);
   const showFreinsSection = freinsOpen || values.motifs.some((m) => FREINS_MOTIFS.includes(m));
 
-  // Les motifs et leurs commentaires changent ensemble : deux `setFieldValue` successifs
-  // feraient valider le second sur des motifs pas encore à jour.
+  // Deux `setFieldValue` successifs feraient valider le second sur des motifs pas encore à jour.
   const toggleMotif = (motif: ACC_CONJOINT_MOTIF_ENUM, checked: boolean) => {
     if (checked) {
       if (FREINS_MOTIFS.includes(motif)) {

@@ -101,7 +101,6 @@ function buildSuiviBasePipeline(
     },
     { $addFields: { collab_status_order: buildCollabStatusOrderField() } },
     ...addSituationDossierField(),
-    // Date affichée sous le badge de la colonne « Dernière activité ».
     { $addFields: { last_activity_at: { $max: ["$updated_at", "$created_at", "$organisme_data.reponse_at"] } } },
     // Univers "Tous" : uniquement les jeunes contactés (collab OU hors-collab contacté), jamais les non-contactés.
     { $match: { $or: [{ is_collab: true }, { is_hors_collab_contacted: true }] } }
@@ -110,10 +109,7 @@ function buildSuiviBasePipeline(
   return stages;
 }
 
-/**
- * Mission Locale du dossier : celle rattachée explicitement, sinon celle du code postal du jeune.
- * Jointure coûteuse, réservée à la page affichée ou au tri sur cette colonne.
- */
+/** ML rattachée explicitement, sinon celle du code postal du jeune. */
 const missionLocaleStages: Record<string, unknown>[] = [
   {
     $lookup: {

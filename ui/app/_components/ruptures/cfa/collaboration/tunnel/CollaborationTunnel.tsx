@@ -94,11 +94,9 @@ export function CollaborationTunnel({ effectif, onSuccess, onCancel }: Collabora
 
   return (
     <Formik<FormValues>
-      // Sans cela, `errors` reste vide tant que rien n'a changé : cliquer sur un « Continuer »
-      // grisé n'aurait alors aucun message à révéler.
+      // Sans cela, `errors` reste vide tant que rien n'a changé : rien à révéler au clic.
       validateOnMount
-      // Seules les étapes de la branche empruntée sont validées : les champs des autres branches
-      // restent vides et bloqueraient l'envoi final.
+      // Hors branche empruntée, les champs restent vides et bloqueraient l'envoi final.
       validate={(values) =>
         buildTunnelSteps(values).reduce<FormikErrors<FormValues>>(
           (errors, step) => ({ ...errors, ...erreursEtape(step, values) }),
@@ -363,8 +361,7 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
         </Button>
       </>
     ) : (
-      // Un bouton désactivé n'émet pas de clic : la zone qui l'entoure le capte pour révéler les
-      // champs qui manquent, sinon rien n'explique pourquoi « Continuer » reste grisé.
+      // Un bouton désactivé n'émet pas de clic : la zone qui l'entoure le capte.
       <span onClick={canContinue() ? undefined : revelerChampsManquants}>
         <Button priority="primary" onClick={goNext} disabled={!canContinue()}>
           Continuer

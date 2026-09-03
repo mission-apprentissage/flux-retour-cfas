@@ -21,7 +21,6 @@ interface CfaCollaborationBadgeProps {
   sansTagHorsCollab?: boolean;
 }
 
-/** Étiquette « Hors collab » et son infobulle, rendue seule quand elle accompagne une date. */
 export function CfaHorsCollabTag() {
   return (
     <span className={styles.horsCollabTag}>

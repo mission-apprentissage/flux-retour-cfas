@@ -35,7 +35,6 @@
   min-width: 260px;
 }
 
-/* Filtre ajusté à son contenu plutôt qu'étiré sur la largeur disponible. */
 .selectFieldAuto {
   flex: 0 0 auto;
   min-width: 17rem;

@@ -84,7 +84,6 @@
   color: var(--text-mention-grey);
 }
 
-/* En-tête sans tri : la colonne « Situation » porte une infobulle plutôt qu'un bouton de tri. */
 .plainHeader {
   display: inline-flex;
   align-items: center;
@@ -124,7 +123,6 @@
   min-width: 200px;
 }
 
-/* Date et étiquette « Hors collab » sur une même ligne, sous le badge. */
 .derniereActiviteLigne {
   display: inline-flex;
   align-items: center;
