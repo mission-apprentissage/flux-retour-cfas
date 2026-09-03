@@ -62,3 +62,11 @@
     line-height: 28px;
   }
 }
+
+/* Sur-titre du bloc de résultats, au-dessus du terme recherché. */
+.resultatsLabel {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  color: var(--text-default-grey);
+}

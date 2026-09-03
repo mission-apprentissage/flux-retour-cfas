@@ -64,6 +64,7 @@ export default function CfaEffectifsClient() {
         data={data ?? null}
         isAllowedDeca={data?.isAllowedDeca ?? false}
         searchInput={searchInput}
+        searchApplique={search}
         onSearchChange={setSearchInput}
         sort={sort}
         order={order as "asc" | "desc"}

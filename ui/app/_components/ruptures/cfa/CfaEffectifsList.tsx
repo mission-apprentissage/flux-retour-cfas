@@ -23,6 +23,8 @@ interface CfaEffectifsListProps {
   data: ICfaEffectifsResponse | null;
   isAllowedDeca: boolean;
   searchInput: string;
+  /** Terme réellement appliqué aux résultats : le titre suivrait sinon la frappe en cours. */
+  searchApplique: string;
   onSearchChange: (value: string) => void;
   sort: string;
   order: "asc" | "desc";
@@ -35,6 +37,7 @@ export function CfaEffectifsList({
   data,
   isAllowedDeca,
   searchInput,
+  searchApplique,
   onSearchChange,
   sort,
   order,
@@ -68,6 +71,7 @@ export function CfaEffectifsList({
   );
 
   const hasActiveFilters = collabStatuses.length > 0 || formations.length > 0;
+  const rechercheActive = searchApplique.trim().length > 0;
 
   const { handleSort, handlePageChange } = useSortablePagination(sort, order, onParamsChange);
 
@@ -194,9 +198,18 @@ export function CfaEffectifsList({
       {data && (
         <section className={cardStyles.card}>
           <div className={cardStyles.cardHeader}>
-            <h2 className={cardStyles.cardTitle}>Tous les effectifs</h2>
+            {rechercheActive ? (
+              <div>
+                <p className={styles.resultatsLabel}>Résultat(s) pour votre recherche</p>
+                <h2 className={cardStyles.cardTitle}>&ldquo;{searchApplique}&rdquo;</h2>
+              </div>
+            ) : (
+              <h2 className={cardStyles.cardTitle}>Tous les effectifs</h2>
+            )}
             <span className={cardStyles.cardCount}>
-              {data.pagination.total} effectif{data.pagination.total !== 1 ? "s" : ""}
+              {rechercheActive
+                ? `${data.pagination.total} résultat${data.pagination.total !== 1 ? "s" : ""}`
+                : `${data.pagination.total} effectif${data.pagination.total !== 1 ? "s" : ""}`}
             </span>
           </div>
 
