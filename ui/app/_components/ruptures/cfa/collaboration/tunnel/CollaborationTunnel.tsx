@@ -2,7 +2,7 @@
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Formik, FormikErrors, useFormikContext } from "formik";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { ACC_CONJOINT_MOTIF_ENUM, IEffectifMissionLocale } from "shared";
 import { CFA_SITUATION_TYPE_ENUM, RQTH_DECLARE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 
@@ -250,10 +250,17 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
     cheminsDesErreurs(erreursEtape(currentStep, values)).forEach((chemin) => setFieldTouched(chemin, true, false));
   };
 
-  const titre = (): string | undefined => {
+  const titre = (): ReactNode => {
     switch (STEP_NUMBER[currentStep]) {
       case 1:
-        return `La situation de ${prenom} ${nom}`;
+        return (
+          <>
+            La situation de{" "}
+            <span className={styles.stepTitleName}>
+              {prenom} {nom}
+            </span>
+          </>
+        );
       case 2:
         return "Objectif de l'accompagnement de la Mission Locale";
       default:

@@ -9,7 +9,7 @@ import styles from "./Tunnel.module.css";
 interface TunnelLayoutProps {
   tips: ReactNode[];
   stepNumber: 1 | 2 | 3;
-  title?: string;
+  title?: ReactNode;
   nextStepLabel?: string;
   onBack?: () => void;
   backLabel?: string;
