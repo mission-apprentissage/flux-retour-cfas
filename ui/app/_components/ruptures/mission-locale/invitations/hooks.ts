@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { ICfaToInvite, IInviteCfaMissionLocaleApi } from "shared/models/routes/mission-locale/missionLocale.api";
 
 import { _get, _post } from "@/common/httpClient";
@@ -10,14 +10,10 @@ export const cfaInvitationQueryKeys = {
 };
 
 export function useCfaInvitations() {
-  return useQuery<ICfaToInvite[]>(
-    cfaInvitationQueryKeys.all,
-    () => _get(`/api/v1/organisation/mission-locale/cfa-invitations`),
-    {
-      suspense: true,
-      useErrorBoundary: true,
-    }
-  );
+  return useSuspenseQuery<ICfaToInvite[]>({
+    queryKey: cfaInvitationQueryKeys.all,
+    queryFn: () => _get(`/api/v1/organisation/mission-locale/cfa-invitations`),
+  });
 }
 
 export function useInviteCfa() {

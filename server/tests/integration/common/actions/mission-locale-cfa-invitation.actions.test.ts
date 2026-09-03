@@ -1,9 +1,10 @@
+import { randomUUID } from "node:crypto";
+
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationMissionLocale } from "shared/models";
 import { CFA_INVITATION_STATUT } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
-import { v4 as uuidv4 } from "uuid";
 import { describe, it, beforeEach, expect, vi } from "vitest";
 
 import {
@@ -107,7 +108,7 @@ async function createMlEffectifDoc(overrides: Record<string, any> = {}) {
     date_rupture: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000),
     current_status: { value: STATUT_APPRENANT.RUPTURANT, date: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000) },
     created_at: now,
-    brevo: { token: uuidv4(), token_created_at: now },
+    brevo: { token: randomUUID(), token_created_at: now },
     ...overrides,
   };
 }
