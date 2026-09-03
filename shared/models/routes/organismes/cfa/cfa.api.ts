@@ -110,6 +110,8 @@ export interface ICfaEffectif {
   has_unread_notification: boolean;
   /** Situation du dossier telle qu'affichée côté ML : renseignée par les listes de suivi ML. */
   situation_dossier?: IMlSituationDossier | null;
+  /** Date du dernier événement du dossier, affichée sous le badge de « Dernière activité ». */
+  last_activity_at?: string | null;
   mission_locale?: ICfaEffectifMissionLocale | null;
 }
 

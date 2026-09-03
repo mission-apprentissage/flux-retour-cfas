@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 
@@ -18,6 +17,23 @@ interface CfaCollaborationBadgeProps {
   // Renseigné quand la collaboration est impossible : le CTA est rendu inactif et la raison
   // est affichée en infobulle.
   unavailableReason?: string;
+  // Le tag "Hors collab" est alors rendu par l'appelant, sur la ligne de la date.
+  sansTagHorsCollab?: boolean;
+}
+
+/** Étiquette « Hors collab » et son infobulle, rendue seule quand elle accompagne une date. */
+export function CfaHorsCollabTag() {
+  return (
+    <span className={styles.horsCollabTag}>
+      Hors collab
+      <span className={styles.horsCollabInfo}>
+        <Tooltip
+          kind="hover"
+          title="Ce jeune a été contacté par la Mission Locale en dehors d'une collaboration : son dossier lui a été transmis automatiquement 45 jours après la rupture."
+        />
+      </span>
+    </span>
+  );
 }
 
 export function CfaCollaborationBadge({
@@ -25,6 +41,7 @@ export function CfaCollaborationBadge({
   effectifId,
   inline = false,
   unavailableReason,
+  sansTagHorsCollab = false,
 }: CfaCollaborationBadgeProps) {
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
@@ -56,28 +73,26 @@ export function CfaCollaborationBadge({
       );
     case "collab_demandee":
       return (
-        <Badge severity="info" small className={styles.collabDemandeeBadge}>
+        <span className={styles.demandeEnvoyeeBadge}>
+          <i className="fr-icon-send-plane-fill fr-icon--sm" />
           Demande collab envoyée
-        </Badge>
-      );
-    case "contacte_par_ml_hors_collab":
-      return (
-        <span className={`${styles.horsCollabContainer} ${inline ? styles.horsCollabContainerInline : ""}`}>
-          <span className={styles.contacteBadge}>
-            <i className="fr-icon-message-2-fill fr-icon--sm" />
-            Contacté par la ML
-          </span>
-          <span className={styles.horsCollabTag}>
-            Hors collab
-            <span className={styles.horsCollabInfo}>
-              <Tooltip
-                kind="hover"
-                title="Ce jeune a été contacté par la Mission Locale en dehors d'une collaboration : son dossier lui a été transmis automatiquement 45 jours après la rupture."
-              />
-            </span>
-          </span>
         </span>
       );
+    case "contacte_par_ml_hors_collab": {
+      const contacte = (
+        <span className={styles.contacteBadge}>
+          <i className="fr-icon-message-2-fill fr-icon--sm" />
+          Contacté par la ML
+        </span>
+      );
+      if (sansTagHorsCollab) return contacte;
+      return (
+        <span className={`${styles.horsCollabContainer} ${inline ? styles.horsCollabContainerInline : ""}`}>
+          {contacte}
+          <CfaHorsCollabTag />
+        </span>
+      );
+    }
     case "traite_par_ml":
       return (
         <span className={styles.traiteBadge}>

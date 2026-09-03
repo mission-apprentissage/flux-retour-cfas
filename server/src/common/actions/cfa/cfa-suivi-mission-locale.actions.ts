@@ -37,10 +37,10 @@ function getSuiviSortField(sort: string): string {
   switch (sort) {
     case "formation":
       return "_libelle_formation";
-    case "collab_status":
-      return "collab_status_order";
-    case "situation":
-      return "situation_dossier";
+    case "mission_locale":
+      return "mission_locale.nom";
+    case "last_activity":
+      return "last_activity_at";
     case "nom":
     default:
       return "_nom";
@@ -101,12 +101,49 @@ function buildSuiviBasePipeline(
     },
     { $addFields: { collab_status_order: buildCollabStatusOrderField() } },
     ...addSituationDossierField(),
+    // Date affichée sous le badge de la colonne « Dernière activité ».
+    { $addFields: { last_activity_at: { $max: ["$updated_at", "$created_at", "$organisme_data.reponse_at"] } } },
     // Univers "Tous" : uniquement les jeunes contactés (collab OU hors-collab contacté), jamais les non-contactés.
     { $match: { $or: [{ is_collab: true }, { is_hors_collab_contacted: true }] } }
   );
 
   return stages;
 }
+
+/**
+ * Mission Locale du dossier : celle rattachée explicitement, sinon celle du code postal du jeune.
+ * Jointure coûteuse, réservée à la page affichée ou au tri sur cette colonne.
+ */
+const missionLocaleStages: Record<string, unknown>[] = [
+  {
+    $lookup: {
+      from: "organisations",
+      localField: "mission_locale_id",
+      foreignField: "_id",
+      as: "ml_organisation_by_id",
+      pipeline: [{ $project: { _id: 0, nom: 1, commune: { $ifNull: ["$adresse.commune", null] } } }],
+    },
+  },
+  {
+    $lookup: {
+      from: "organisations",
+      localField: "effectif_snapshot.apprenant.adresse.mission_locale_id",
+      foreignField: "ml_id",
+      as: "ml_organisation_by_adresse",
+      pipeline: [
+        { $match: { type: "MISSION_LOCALE" } },
+        { $project: { _id: 0, nom: 1, commune: { $ifNull: ["$adresse.commune", null] } } },
+      ],
+    },
+  },
+  {
+    $addFields: {
+      mission_locale: {
+        $ifNull: [{ $first: "$ml_organisation_by_id" }, { $first: "$ml_organisation_by_adresse" }, null],
+      },
+    },
+  },
+];
 
 function buildSuiviUserFilterStages(params: {
   search?: string;
@@ -150,6 +187,8 @@ const SUIVI_PROJECT_STAGE = {
     formation_niveau_libelle: { $ifNull: ["$effectif_snapshot.formation.niveau_libelle", null] },
     collab_status: 1,
     situation_dossier: 1,
+    last_activity_at: 1,
+    mission_locale: 1,
     has_unread_notification: { $ifNull: ["$organisme_data.has_unread_notification", false] },
   },
 };
@@ -169,9 +208,13 @@ export async function getCfaSuiviMissionLocale(
   const countFilterStages = buildSuiviUserFilterStages({ search, formation });
   const sortField = getSuiviSortField(sort);
   const sortStage = { $sort: { [sortField]: sortDirection, _id: 1 as const } };
+  // Trier sur le nom de la ML impose de résoudre la jointure sur tout l'ensemble filtré ; sinon
+  // elle n'est faite que sur la page demandée.
+  const trieSurMissionLocale = sort === "mission_locale";
 
   const pipeline = [
     ...buildSuiviBasePipeline(organisation, isAllowedDeca),
+    ...(trieSurMissionLocale ? missionLocaleStages : []),
     {
       $facet: {
         effectifs: [
@@ -180,6 +223,7 @@ export async function getCfaSuiviMissionLocale(
           sortStage,
           { $skip: skip },
           { $limit: limit },
+          ...(trieSurMissionLocale ? [] : missionLocaleStages),
           SUIVI_PROJECT_STAGE,
         ],
         // Total de la page (catégorie + tous les filtres, collab_status inclus) → pagination.

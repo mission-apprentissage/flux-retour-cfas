@@ -13,7 +13,7 @@ import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 const VALID_CATEGORIES = Object.values(CFA_SUIVI_CATEGORY) as string[];
 // Doit rester aligné sur l'enum `sort` de la route : une URL partagée avant le retrait de la
 // colonne « Date de rupture » porte encore `sort=date_rupture`, que le serveur refuserait.
-const VALID_SORTS = ["nom", "formation", "situation", "collab_status"];
+const VALID_SORTS = ["nom", "formation", "mission_locale", "last_activity"];
 
 export default function CfaCollaborationsClient() {
   const { user } = useAuth();
