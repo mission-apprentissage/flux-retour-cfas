@@ -1,5 +1,6 @@
 .contacteBadge,
-.traiteBadge {
+.traiteBadge,
+.demandeEnvoyeeBadge {
   display: inline-flex;
   align-items: center;
   height: 20px;
@@ -21,6 +22,11 @@
 .traiteBadge {
   color: var(--text-inverted-success);
   background-color: var(--background-flat-success);
+}
+
+.demandeEnvoyeeBadge {
+  color: var(--text-action-high-blue-france);
+  background-color: var(--background-contrast-blue-france);
 }
 
 /* Statut "Contacté par la ML — Hors collab" : badge vert empilé avec une sous-étiquette "Hors collab" */

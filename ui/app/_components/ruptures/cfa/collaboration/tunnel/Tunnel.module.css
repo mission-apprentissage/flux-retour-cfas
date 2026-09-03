@@ -1,17 +1,17 @@
+/* Dégradé inverse de celui du layout de détail, conformément à la maquette du tunnel. */
 .page {
   min-height: 100vh;
-  background: var(--background-alt-blue-france);
+  background: linear-gradient(180deg, #f5f5fe 5.73%, #f6f6f6 41.13%);
   padding-bottom: 4rem;
 }
 
+/* Même grille que la fiche du dossier d'un jeune. */
 .layout {
   display: grid;
   grid-template-columns: 22rem 1fr;
   gap: 3rem;
-  max-width: 78rem;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 0;
-  align-items: start;
+  padding: 2rem 3rem 0 0;
+  align-items: stretch;
 }
 
 @media (max-width: 62em) {
@@ -26,16 +26,21 @@
   }
 
   .sidebar {
-    position: static;
+    border-right: none;
+    padding: 0 1rem;
+  }
+
+  .layout {
+    padding: 2rem 1rem 0;
   }
 }
 
 .sidebar {
-  position: sticky;
-  top: 2rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  border-right: 2px solid var(--border-default-grey);
+  padding: 0 2rem 2rem 3rem;
 }
 
 .cancelButton {
@@ -54,15 +59,14 @@
   display: flex;
   gap: 0.75rem;
   background: white;
+  border: 1px solid var(--border-default-grey);
   border-radius: 8px;
   padding: 1rem 1.25rem;
-  box-shadow: 0 2px 6px rgb(0 0 18 / 8%);
 }
 
 .tipIcon {
   flex-shrink: 0;
-  font-size: 1.25rem;
-  line-height: 1.5;
+  color: var(--text-default-grey);
 }
 
 .tipText {
@@ -77,9 +81,8 @@
 }
 
 .content {
-  background: white;
-  border-radius: 8px;
-  padding: 2.5rem;
+  padding: 0.5rem 0 2.5rem;
+  max-width: 44rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -101,6 +104,10 @@
   font-size: 1.5rem;
   line-height: 1.3;
   color: var(--text-title-blue-france);
+}
+
+.stepTitleName {
+  color: var(--blue-france-main-525);
 }
 
 .progressSegments {

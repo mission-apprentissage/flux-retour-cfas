@@ -9,7 +9,7 @@ import styles from "./Tunnel.module.css";
 interface TunnelLayoutProps {
   tips: ReactNode[];
   stepNumber: 1 | 2 | 3;
-  title?: string;
+  title?: ReactNode;
   nextStepLabel?: string;
   onBack?: () => void;
   backLabel?: string;
@@ -53,9 +53,7 @@ export function TunnelLayout({
 
           {tips.map((tip, index) => (
             <div key={index} className={styles.tipCard}>
-              <span className={styles.tipIcon} aria-hidden="true">
-                💡
-              </span>
+              <i className={`fr-icon-lightbulb-line fr-icon--sm ${styles.tipIcon}`} aria-hidden="true" />
               <p className={styles.tipText}>{tip}</p>
             </div>
           ))}

@@ -1,3 +1,4 @@
+import { FormikErrors } from "formik";
 import { ACC_CONJOINT_MOTIF_ENUM } from "shared";
 
 import { isValidPhone } from "@/app/_utils/phone.utils";
@@ -38,29 +39,74 @@ export function formatAdresseDisplay(info: VerifiedInfo): string {
   return parts.join(", ");
 }
 
-export function isObjectifsValid(v: FormValues): boolean {
-  if (v.motifs.length === 0) return false;
-  const commentaireRequis = [ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI, ...FREINS_MOTIFS];
-  return commentaireRequis.every((m) => !v.motifs.includes(m) || !!v.commentaires_par_motif[m]?.trim());
+const CHAMP_OBLIGATOIRE = "Ce champ est obligatoire";
+
+export function objectifsErrors(v: FormValues): FormikErrors<FormValues> {
+  const errors: FormikErrors<FormValues> = {};
+  if (v.motifs.length === 0) {
+    errors.motifs = "Sélectionnez au moins un objectif";
+  }
+
+  const commentaires: Partial<Record<ACC_CONJOINT_MOTIF_ENUM, string>> = {};
+  for (const motif of FREINS_MOTIFS) {
+    if (v.motifs.includes(motif) && !v.commentaires_par_motif[motif]?.trim()) {
+      commentaires[motif] = "Précisez le contexte pour la Mission Locale";
+    }
+  }
+  if (
+    v.motifs.includes(ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI) &&
+    !v.commentaires_par_motif[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI]?.trim()
+  ) {
+    commentaires[ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI] = "Précisez votre demande d'aide";
+  }
+  if (Object.keys(commentaires).length > 0) {
+    errors.commentaires_par_motif = commentaires;
+  }
+
+  return errors;
 }
 
-export function isDatesRuptureValid(v: FormValues): boolean {
-  if (!v.date_rupture) return false;
-  if (v.still_at_cfa === false && !v.date_abandon) return false;
-  if (v.date_abandon && v.date_abandon < v.date_rupture) return false;
-  return !!v.cause_rupture.trim();
+export function datesRuptureErrors(v: FormValues): FormikErrors<FormValues> {
+  const errors: FormikErrors<FormValues> = {};
+  if (!v.date_rupture) errors.date_rupture = CHAMP_OBLIGATOIRE;
+  if (v.still_at_cfa === false && !v.date_abandon) errors.date_abandon = CHAMP_OBLIGATOIRE;
+  if (v.date_abandon && v.date_abandon < v.date_rupture) {
+    errors.date_abandon = "La date d'abandon ne peut pas précéder la date de rupture";
+  }
+  if (!v.cause_rupture.trim()) errors.cause_rupture = CHAMP_OBLIGATOIRE;
+  return errors;
 }
 
-export function isRentreeSansContratValid(v: FormValues): boolean {
-  return !!v.date_debut_formation && !!v.recherche_entreprise.trim();
+export function rentreeSansContratErrors(v: FormValues): FormikErrors<FormValues> {
+  const errors: FormikErrors<FormValues> = {};
+  if (!v.date_debut_formation) errors.date_debut_formation = CHAMP_OBLIGATOIRE;
+  if (!v.recherche_entreprise.trim()) errors.recherche_entreprise = CHAMP_OBLIGATOIRE;
+  return errors;
 }
 
-export function isContactValid(v: FormValues): boolean {
+export function contactErrors(v: FormValues): FormikErrors<FormValues> {
+  const errors: FormikErrors<FormValues> = {};
   const info = v.verified_info;
-  if (!info.telephone.trim() || !isValidPhone(info.telephone)) return false;
-  if (info.courriel.trim() && !isValidEmail(info.courriel)) return false;
-  if (!info.adresse_code_postal.trim() || !info.adresse_commune.trim()) return false;
-  if (v.referent_type === null) return false;
-  if (v.referent_type === "other" && !v.referent_details.trim()) return false;
-  return true;
+
+  const infoErrors: FormikErrors<VerifiedInfo> = {};
+  if (!info.telephone.trim()) infoErrors.telephone = CHAMP_OBLIGATOIRE;
+  else if (!isValidPhone(info.telephone)) infoErrors.telephone = "Numéro de téléphone invalide";
+  if (info.courriel.trim() && !isValidEmail(info.courriel)) infoErrors.courriel = "Adresse email invalide";
+  if (!info.adresse_code_postal.trim()) infoErrors.adresse_code_postal = CHAMP_OBLIGATOIRE;
+  if (!info.adresse_commune.trim()) infoErrors.adresse_commune = CHAMP_OBLIGATOIRE;
+  if (Object.keys(infoErrors).length > 0) errors.verified_info = infoErrors;
+
+  if (v.referent_type === null) errors.referent_type = "Veuillez indiquer un contact";
+  if (v.referent_type === "other" && !v.referent_details.trim()) {
+    errors.referent_details = "Veuillez indiquer les coordonnées du référent";
+  }
+
+  return errors;
 }
+
+const sansErreur = (errors: FormikErrors<FormValues>): boolean => Object.keys(errors).length === 0;
+
+export const isObjectifsValid = (v: FormValues): boolean => sansErreur(objectifsErrors(v));
+export const isDatesRuptureValid = (v: FormValues): boolean => sansErreur(datesRuptureErrors(v));
+export const isRentreeSansContratValid = (v: FormValues): boolean => sansErreur(rentreeSansContratErrors(v));
+export const isContactValid = (v: FormValues): boolean => sansErreur(contactErrors(v));

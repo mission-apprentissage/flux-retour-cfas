@@ -35,6 +35,18 @@
   min-width: 260px;
 }
 
+.selectFieldAuto {
+  flex: 0 0 auto;
+  min-width: 17rem;
+  max-width: 22rem;
+}
+
+@media (max-width: 768px) {
+  .selectFieldAuto {
+    max-width: none;
+  }
+}
+
 .tagsRow {
   display: flex;
   flex-wrap: wrap;

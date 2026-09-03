@@ -12,8 +12,8 @@
   font-weight: 700;
   font-size: 32px;
   line-height: 40px;
-  color: var(--text-action-high-blue-france);
-  opacity: 0.6;
+  /* Aucun token de texte ne porte ce bleu, d'où le recours au token de palette. */
+  color: var(--blue-france-main-525);
 }
 
 .sources {
