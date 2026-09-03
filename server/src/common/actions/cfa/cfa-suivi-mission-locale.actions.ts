@@ -12,7 +12,6 @@ import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
 import {
   addSituationDossierField,
-  buildCollabStatusOrderField,
   buildCollabStatusSwitch,
   buildContactedByMlExpr,
   buildCsvInConditions,
@@ -99,7 +98,6 @@ function buildSuiviBasePipeline(
         is_moins_16: { $gt: ["$effectif_snapshot.apprenant.date_de_naissance", moins16Cutoff] },
       },
     },
-    { $addFields: { collab_status_order: buildCollabStatusOrderField() } },
     ...addSituationDossierField(),
     { $addFields: { last_activity_at: { $max: ["$updated_at", "$created_at", "$organisme_data.reponse_at"] } } },
     // Univers "Tous" : uniquement les jeunes contactés (collab OU hors-collab contacté), jamais les non-contactés.
