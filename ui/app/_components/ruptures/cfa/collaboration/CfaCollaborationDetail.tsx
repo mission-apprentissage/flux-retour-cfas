@@ -14,7 +14,6 @@ import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 import { CfaCollaborationColumn } from "./CfaCollaborationColumn";
 import localStyles from "./CfaCollaborationDetail.module.css";
 import { CfaEffectifInfoColumn } from "./CfaEffectifInfoColumn";
-import { CfaSuiviDossierColumn } from "./CfaSuiviDossierColumn";
 
 const styles = withSharedStyles(localStyles);
 
@@ -57,7 +56,6 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
       <div className={styles.columns}>
         <CfaEffectifInfoColumn effectif={effectif} onToggleRupture={() => ruptureInfoModal.open()} />
         <CfaCollaborationColumn effectif={effectif} />
-        <CfaSuiviDossierColumn effectif={effectif} />
       </div>
 
       <CfaRuptureInfoModal />
