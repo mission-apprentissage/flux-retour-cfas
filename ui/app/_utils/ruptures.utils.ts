@@ -44,6 +44,24 @@ export const estMoisRecent = (month: string, now: Date = new Date()): boolean =>
 export const estMoisToutTraite = (monthItem: MonthItem): boolean =>
   monthItem.data.length === 0 && (monthItem.treated_count ?? 0) > 0;
 
+/** Le filtre critères vide `data` sans toucher `treated_count` : à lire sur les mois non filtrés. */
+export const moisToutTraitesDepuis = (months: MonthItem[]): Set<string> =>
+  new Set(months.filter(estMoisToutTraite).map(({ month }) => month));
+
+/**
+ * Mois affichés dans la liste à traiter : ceux qui ont des dossiers et ceux entièrement traités.
+ * Les mois de plus d'un an restent masqués tant qu'ils ne sont pas dépliés.
+ */
+export const filtrerMoisATraiter = (
+  months: MonthItem[],
+  moisToutTraites: ReadonlySet<string>,
+  anciensOuverts: boolean,
+  now: Date = new Date()
+): MonthItem[] =>
+  months.filter(
+    (m) => (m.data.length > 0 || moisToutTraites.has(m.month)) && (anciensOuverts || estMoisRecent(m.month, now))
+  );
+
 export const anchorFromLabel = (label: string): string => {
   return label.replace(/\s/g, "-").toLowerCase();
 };

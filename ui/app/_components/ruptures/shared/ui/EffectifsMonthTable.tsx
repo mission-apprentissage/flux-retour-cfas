@@ -12,9 +12,10 @@ import {
   formatMonthAndYear,
   anchorFromLabel,
   DEFAULT_ITEMS_TO_SHOW,
+  estMoisToutTraite,
   matchesPostalCodes,
 } from "@/app/_utils/ruptures.utils";
-import { EffectifData, MonthItem, SelectedSection } from "@/common/types/ruptures";
+import { EffectifData, MonthItem } from "@/common/types/ruptures";
 
 import { matchesSearchTerm } from "../utils/searchUtils";
 
@@ -27,7 +28,7 @@ import { StatutDateCell } from "./StatutDateCell";
 type EffectifsMonthTableProps = {
   monthItem: MonthItem;
   searchTerm: string;
-  handleSectionChange?: (section: SelectedSection) => void;
+  onVoirDossiersTraites?: (month: string) => void;
   listType: IMissionLocaleEffectifList;
   selectedPostalCodes?: string[];
 };
@@ -87,7 +88,7 @@ function buildMonthLabel(month: string) {
 export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   monthItem,
   searchTerm,
-  handleSectionChange,
+  onVoirDossiersTraites,
   listType,
   selectedPostalCodes = [],
 }: EffectifsMonthTableProps) {
@@ -161,6 +162,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   };
 
   const monthHeaderClassName = styles.monthSection;
+  const toutTraite = estMoisToutTraite(monthItem);
 
   return (
     <div id={anchorId} style={{ marginBottom: "3rem" }}>
@@ -169,12 +171,19 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
           <div className={monthHeaderClassName}>
             <div className={styles.monthHeader}>
               <h4 className={styles.monthTitle}>{labelElement}</h4>
-              <span className={styles.monthCount}>0 jeune</span>
+              {toutTraite ? (
+                <i
+                  className={`fr-icon-checkbox-circle-fill ${styles.monthDoneIcon}`}
+                  aria-label="Mois entièrement traité"
+                />
+              ) : (
+                <span className={styles.monthCount}>0 jeune</span>
+              )}
             </div>
           </div>
           <div style={{ marginTop: "1rem" }}>
-            {monthItem.treated_count && monthItem.treated_count > 0 ? (
-              <MlSuccessCard handleSectionChange={handleSectionChange} />
+            {toutTraite ? (
+              <MlSuccessCard onVoirDossiersTraites={() => onVoirDossiersTraites?.(monthItem.month)} />
             ) : (
               <p className={styles.monthTableEmptyText}>Pas de rupturant à afficher ce mois-ci</p>
             )}

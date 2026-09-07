@@ -6,10 +6,12 @@ import {
   dePrenom,
   estMoisRecent,
   estMoisToutTraite,
+  filtrerMoisATraiter,
   formatDateSuivi,
   formatMoisAbrege,
   isDelaiRelanceDepasse,
   matchesPostalCodes,
+  moisToutTraitesDepuis,
 } from "./ruptures.utils";
 
 const makeEffectif = (overrides: Partial<EffectifData> = {}): EffectifData => ({
@@ -121,6 +123,47 @@ describe("estMoisToutTraite", () => {
     expect(estMoisToutTraite({ month: "2025-08-01", data: [], treated_count: 0 })).toBe(false);
     expect(estMoisToutTraite({ month: "2025-08-01", data: [], treated_count: undefined })).toBe(false);
     expect(estMoisToutTraite({ month: "2025-08-01", data: [makeEffectif()], treated_count: 4 })).toBe(false);
+  });
+});
+
+describe("moisToutTraitesDepuis", () => {
+  it("ne retient que les mois sans dossier actionnable mais avec des traités", () => {
+    const mois = moisToutTraitesDepuis([
+      { month: "2026-08-01", data: [], treated_count: 4 },
+      { month: "2026-07-01", data: [makeEffectif()], treated_count: 4 },
+      { month: "2026-06-01", data: [], treated_count: 0 },
+    ]);
+    expect([...mois]).toEqual(["2026-08-01"]);
+  });
+});
+
+describe("filtrerMoisATraiter", () => {
+  const now = new Date("2026-08-15T00:00:00.000Z");
+  const avecDossiers = { month: "2026-08-01", data: [makeEffectif()] };
+  const toutTraite = { month: "2026-07-01", data: [], treated_count: 4 };
+  // Le filtre critères vide `data` en laissant `treated_count` : indiscernable d'un mois tout traité.
+  const videParFiltre = { month: "2026-06-01", data: [], treated_count: 4 };
+  const ancienToutTraite = { month: "2025-01-01", data: [], treated_count: 4 };
+
+  const moisToutTraites = new Set(["2026-07-01", "2025-01-01"]);
+
+  it("garde les mois avec dossiers et les mois entièrement traités", () => {
+    const rendus = filtrerMoisATraiter([avecDossiers, toutTraite], moisToutTraites, false, now);
+    expect(rendus.map((m) => m.month)).toEqual(["2026-08-01", "2026-07-01"]);
+  });
+
+  it("écarte un mois vidé par les filtres, absent des mois tout traités", () => {
+    const rendus = filtrerMoisATraiter([videParFiltre], moisToutTraites, false, now);
+    expect(rendus).toEqual([]);
+  });
+
+  it("replie les mois de plus d'un an tant qu'ils ne sont pas dépliés", () => {
+    expect(filtrerMoisATraiter([ancienToutTraite], moisToutTraites, false, now)).toEqual([]);
+    expect(filtrerMoisATraiter([ancienToutTraite], moisToutTraites, true, now)).toEqual([ancienToutTraite]);
+  });
+
+  it("n'affiche aucun bloc « tout traité » quand la liste n'en déclare pas", () => {
+    expect(filtrerMoisATraiter([toutTraite], new Set(), false, now)).toEqual([]);
   });
 });
 
