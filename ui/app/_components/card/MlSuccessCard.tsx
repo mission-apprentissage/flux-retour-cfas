@@ -1,37 +1,24 @@
-import Image from "next/image";
 import React from "react";
-
-import { SelectedSection } from "../../../common/types/ruptures";
 
 import styles from "./MlSuccessCard.module.css";
 
-export const MlSuccessCard = ({
-  handleSectionChange,
-}: {
-  handleSectionChange?: (section: SelectedSection) => void;
-}) => {
+export const MlSuccessCard = ({ onVoirDossiersTraites }: { onVoirDossiersTraites?: () => void }) => {
   return (
     <div className={styles.mlSuccessCardContainer}>
-      <Image
-        src="/images/mission-locale-valid-tick.svg"
-        alt=""
-        width={50}
-        height={50}
-        className={styles.mlSuccessCardImage}
-      />
+      <i className={`fr-icon-checkbox-circle-fill ${styles.mlSuccessCardIcon}`} aria-hidden="true" />
 
       <div>
         <p className={`fr-text--bold ${styles.mlSuccessCardTitle}`}>
-          Tous les jeunes en rupture ce mois-ci ont été contactés !
+          Tous les dossiers de jeunes reçus sur ce mois ont été contactés&nbsp;!
         </p>
-        <p className={`fr-text--sm ${styles.mlSuccessCardText}`}>
+        <p className={styles.mlSuccessCardText}>
           Retrouvez-les dans la liste{" "}
           <button
             type="button"
-            className={`fr-link ${styles.mlSuccessCardLink}`}
-            onClick={() => handleSectionChange?.("deja-traite")}
+            className={`fr-link fr-icon-arrow-right-line fr-link--icon-right ${styles.mlSuccessCardLink}`}
+            onClick={onVoirDossiersTraites}
           >
-            des dossiers déjà traités →
+            des dossiers déjà traités
           </button>
         </p>
       </div>

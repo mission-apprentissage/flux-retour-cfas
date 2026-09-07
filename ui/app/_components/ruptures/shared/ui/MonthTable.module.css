@@ -72,3 +72,11 @@
   font-size: 0.875rem;
   white-space: nowrap;
 }
+
+.monthDoneIcon {
+  color: var(--text-mention-grey);
+}
+
+.monthDoneIcon::before {
+  --icon-size: 1.25rem;
+}
