@@ -2,6 +2,9 @@
    pseudo-élément et les onglets. */
 .tabs {
   box-shadow: none;
+  /* `.fr-tabs` est en `overflow: hidden` : ce conteneur de défilement neutralise le
+     `position: sticky` du menu de mois. `clip` coupe pareil sans en créer un. */
+  overflow: clip visible;
 }
 
 .tabs::before {

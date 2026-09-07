@@ -261,6 +261,7 @@ export function MlRupturesListView({
           align="left"
           burgerMenuButtonText="Dans cette rubrique"
           sticky
+          classes={{ root: styles.moisNav }}
           items={sideMenuItems}
           style={{ paddingRight: 0 }}
         />
