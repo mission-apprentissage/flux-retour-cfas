@@ -10,6 +10,11 @@
   color: var(--text-action-high-blue-france);
 }
 
+/* Le sticky DSFR colle au bord exact de la fenêtre. */
+.moisNav {
+  top: 1.5rem;
+}
+
 .moisItem {
   display: flex;
   gap: 0.5rem;

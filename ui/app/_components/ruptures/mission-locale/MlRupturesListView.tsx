@@ -14,9 +14,10 @@ import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import {
   anchorFromLabel,
   estMoisRecent,
-  estMoisToutTraite,
+  filtrerMoisATraiter,
   formatMoisAbrege,
   matchesPostalCodes,
+  moisToutTraitesDepuis,
   PostalCodeOption,
   sortDataByMonthDescending,
 } from "@/app/_utils/ruptures.utils";
@@ -38,6 +39,8 @@ const SOUS_ONGLETS = {
 } as const;
 
 type SousOnglet = (typeof SOUS_ONGLETS)[keyof typeof SOUS_ONGLETS];
+
+const AUCUN_MOIS: ReadonlySet<string> = new Set();
 
 /** Les anciens liens (emails de récap) ciblent un statut : « déjà traité » ouvre l'onglet Traités. */
 const sousOngletDepuisStatut = (statut: string | null): SousOnglet =>
@@ -63,6 +66,7 @@ export function MlRupturesListView({
   const [activeAnchor, setActiveAnchor] = useState("");
   const [anneesOuvertes, setAnneesOuvertes] = useState<string[]>([String(new Date().getFullYear())]);
   const [anciensOuverts, setAnciensOuverts] = useState(false);
+  const [ancreApresBascule, setAncreApresBascule] = useState<string | null>(null);
   const {
     recherche: searchTerm,
     setRecherche: setSearchTerm,
@@ -71,6 +75,7 @@ export function MlRupturesListView({
     criteres,
     changerCriteres: setCriteres,
     reinitialiserFiltres,
+    filtresActifs,
   } = useMlListeFiltres();
 
   useEffect(() => {
@@ -102,13 +107,24 @@ export function MlRupturesListView({
     [data.traite, appliquerCriteres]
   );
 
+  const moisToutTraites = useMemo(
+    () => moisToutTraitesDepuis(data.a_traiter_ou_recontacter ?? []),
+    [data.a_traiter_ou_recontacter]
+  );
+
   const estTraites = sousOnglet === SOUS_ONGLETS.TRAITES;
+  // Le Set ne décrit que la liste à traiter, et sous filtre annoncer « tout est traité » serait faux.
+  const moisToutTraitesAffiches = estTraites || filtresActifs ? AUCUN_MOIS : moisToutTraites;
   const moisAffiches = estTraites ? moisTraites : moisATraiter;
   // La liste ne rend que ce que la navigation montre : années repliées côté traités, mois de plus
-  // d'un an côté à traiter. Un mois entièrement traité n'a pas de bloc, seulement sa coche.
-  const moisRendus = estTraites
-    ? moisAffiches.filter((m) => anneesOuvertes.includes(String(new Date(m.month).getFullYear())))
-    : moisAffiches.filter((m) => m.data.length > 0 && (anciensOuverts || estMoisRecent(m.month)));
+  // d'un an côté à traiter.
+  const moisRendus = useMemo(
+    () =>
+      estTraites
+        ? moisAffiches.filter((m) => anneesOuvertes.includes(String(new Date(m.month).getFullYear())))
+        : filtrerMoisATraiter(moisAffiches, moisToutTraitesAffiches, anciensOuverts),
+    [estTraites, moisAffiches, anneesOuvertes, moisToutTraitesAffiches, anciensOuverts]
+  );
 
   const countVisibleInMonth = useCallback(
     (monthItem: MonthItem) =>
@@ -139,17 +155,27 @@ export function MlRupturesListView({
     requestAnimationFrame(() => handleAnchorClick(anchorFromLabel(initialRuptureDate)));
   }, [initialRuptureDate, handleAnchorClick]);
 
-  // Le filtre critères vide `data` : le « tout traité » se lit sur les mois non filtrés.
-  const moisToutTraites = useMemo(
-    () => new Set((data.a_traiter_ou_recontacter ?? []).filter(estMoisToutTraite).map(({ month }) => month)),
-    [data.a_traiter_ou_recontacter]
-  );
+  // La bascule d'onglet remonte le panneau : l'ancre visée n'existe qu'au rendu suivant.
+  useEffect(() => {
+    if (!ancreApresBascule) return;
+    handleAnchorClick(ancreApresBascule);
+    setAncreApresBascule(null);
+  }, [ancreApresBascule, handleAnchorClick]);
+
+  const allerVersTraites = useCallback((month: string) => {
+    setSousOnglet(SOUS_ONGLETS.TRAITES);
+    const annee = String(new Date(month).getFullYear());
+    setAnneesOuvertes((precedentes) => (precedentes.includes(annee) ? precedentes : [...precedentes, annee]));
+    setAncreApresBascule(anchorFromLabel(month));
+  }, []);
 
   const itemMois = useCallback(
     (monthItem: MonthItem) => {
       const monthCount = countVisibleInMonth(monthItem);
       const anchorId = anchorFromLabel(monthItem.month);
-      const toutTraite = moisToutTraites.has(monthItem.month);
+      const toutTraite = !estTraites && moisToutTraites.has(monthItem.month);
+      // Un mois dont le bloc n'est pas rendu (masqué par un filtre) n'a rien vers quoi naviguer.
+      const aUnBloc = estTraites || monthItem.data.length > 0 || moisToutTraitesAffiches.has(monthItem.month);
       return {
         text: (
           <span className={`${styles.moisItem} ${toutTraite ? styles.moisToutTraite : ""}`}>
@@ -167,18 +193,17 @@ export function MlRupturesListView({
             )}
           </span>
         ),
-        // Un mois entièrement traité n'a pas de bloc dans la liste : rien vers quoi naviguer.
         linkProps: {
-          href: toutTraite ? "#" : `#${anchorId}`,
+          href: aUnBloc ? `#${anchorId}` : "#",
           onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
             e.preventDefault();
-            if (!toutTraite) handleAnchorClick(anchorId);
+            if (aUnBloc) handleAnchorClick(anchorId);
           },
         },
-        isActive: !toutTraite && activeAnchor === anchorId,
+        isActive: aUnBloc && activeAnchor === anchorId,
       };
     },
-    [countVisibleInMonth, handleAnchorClick, activeAnchor, moisToutTraites]
+    [countVisibleInMonth, handleAnchorClick, activeAnchor, estTraites, moisToutTraites, moisToutTraitesAffiches]
   );
 
   const sideMenuItems = useMemo(() => {
@@ -252,7 +277,7 @@ export function MlRupturesListView({
     ];
   }, [estTraites, moisAffiches, itemMois, countVisibleInMonth, anneesOuvertes, anciensOuverts]);
 
-  const estVide = moisRendus.every((month) => month.data.length === 0);
+  const estVide = moisRendus.every((month) => month.data.length === 0 && !moisToutTraitesAffiches.has(month.month));
 
   const contenu = (
     <div className="fr-grid-row">
@@ -261,6 +286,7 @@ export function MlRupturesListView({
           align="left"
           burgerMenuButtonText="Dans cette rubrique"
           sticky
+          classes={{ root: styles.moisNav }}
           items={sideMenuItems}
           style={{ paddingRight: 0 }}
         />
@@ -315,6 +341,7 @@ export function MlRupturesListView({
                 searchTerm={searchTerm}
                 listType={sousOnglet}
                 selectedPostalCodes={selectedPostalCodes}
+                onVoirDossiersTraites={allerVersTraites}
               />
             </SuspenseWrapper>
           </>

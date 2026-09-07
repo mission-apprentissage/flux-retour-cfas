@@ -3,7 +3,7 @@
 import { memo } from "react";
 import { IMissionLocaleEffectifList } from "shared";
 
-import { EffectifPriorityData, MonthItem, SelectedSection } from "@/common/types/ruptures";
+import { EffectifPriorityData, MonthItem } from "@/common/types/ruptures";
 
 import { EffectifsMonthTable } from "./EffectifsMonthTable";
 import { EffectifsPriorityTable } from "./EffectifsPriorityTable";
@@ -15,7 +15,7 @@ type EffectifsSearchableTableProps = {
   hadEffectifsPrioritaires?: boolean;
   isTraite: boolean;
   searchTerm: string;
-  handleSectionChange?: (section: SelectedSection) => void;
+  onVoirDossiersTraites?: (month: string) => void;
   listType: IMissionLocaleEffectifList;
   selectedPostalCodes?: string[];
 };
@@ -26,7 +26,7 @@ export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
   hadEffectifsPrioritaires,
   isTraite,
   searchTerm,
-  handleSectionChange,
+  onVoirDossiersTraites,
   listType,
   selectedPostalCodes = [],
 }: EffectifsSearchableTableProps) {
@@ -48,7 +48,7 @@ export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
           key={monthItem.month}
           monthItem={monthItem}
           searchTerm={searchTerm}
-          handleSectionChange={handleSectionChange}
+          onVoirDossiersTraites={onVoirDossiersTraites}
           listType={listType}
           selectedPostalCodes={selectedPostalCodes}
         />

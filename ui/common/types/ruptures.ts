@@ -53,8 +53,6 @@ export type MonthItem = {
   treated_count?: number;
 };
 
-export type SelectedSection = "a-traiter" | "deja-traite" | "injoignable" | "prioritaire";
-
 export type MonthsData = {
   a_traiter: MonthItem[];
   prioritaire: { hadEffectifsPrioritaires: boolean; effectifs: EffectifData[] };
