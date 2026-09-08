@@ -80,7 +80,7 @@ export function CollaborationReceivedView({ effectif }: { effectif: IEffectifMis
 
         {od?.referent_coordonnees && (
           <div className={styles.sentBubbleSection}>
-            <p className={styles.sentSectionTitle}>Référent(es) au CFA à contacter</p>
+            <p className={styles.sentSectionTitle}>Référent(e)s au CFA à contacter</p>
             <ReferentCoordonnees value={od.referent_coordonnees} />
           </div>
         )}

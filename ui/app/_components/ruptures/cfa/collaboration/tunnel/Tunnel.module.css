@@ -3,6 +3,8 @@
   min-height: 100vh;
   background: linear-gradient(180deg, #f5f5fe 5.73%, #f6f6f6 41.13%);
   padding-bottom: 4rem;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Même grille que la fiche du dossier d'un jeune. */
@@ -12,35 +14,18 @@
   gap: 3rem;
   padding: 2rem 3rem 0 0;
   align-items: stretch;
+  flex: 1 0 auto;
 }
 
-@media (max-width: 62em) {
-  .layout {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  /* En mono-colonne, l'illustration décorative repousse la question sous la ligne de flottaison. */
-  .illustration {
-    display: none;
-  }
-
-  .sidebar {
-    border-right: none;
-    padding: 0 1rem;
-  }
-
-  .layout {
-    padding: 2rem 1rem 0;
-  }
-}
-
+/* Marges négatives compensées par le padding : le filet court jusqu'aux bords de la page. */
 .sidebar {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  border-right: 2px solid var(--border-default-grey);
-  padding: 0 2rem 2rem 3rem;
+  border-right: 1px solid var(--border-default-grey);
+  padding: 2rem 2rem 6rem 3rem;
+  margin-top: -2rem;
+  margin-bottom: -4rem;
 }
 
 .cancelButton {
@@ -53,6 +38,26 @@
   max-width: 18rem;
   height: auto;
   align-self: center;
+}
+
+@media (max-width: 62em) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 2rem 1rem 0;
+  }
+
+  /* En mono-colonne, l'illustration décorative repousse la question sous la ligne de flottaison. */
+  .illustration {
+    display: none;
+  }
+
+  .sidebar {
+    border-right: none;
+    padding: 0 1rem 1.5rem;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
 }
 
 .tipCard {
@@ -164,10 +169,24 @@
   padding-top: 1rem;
 }
 
+/* Classe doublée pour passer devant `.fr-btn` ; --hover/--active car la règle de survol du DSFR
+   (`button:not(:disabled):hover`) est trop spécifique pour être surchargée. */
+.buttonFauxDesactive.buttonFauxDesactive {
+  background-color: var(--background-disabled-grey);
+  color: var(--text-disabled-grey);
+  cursor: not-allowed;
+  --hover: var(--background-disabled-grey);
+  --active: var(--background-disabled-grey);
+}
+
 .radioGroup {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.radioGroupError .radioCard {
+  border-color: var(--border-plain-error);
 }
 
 .radioCard {
