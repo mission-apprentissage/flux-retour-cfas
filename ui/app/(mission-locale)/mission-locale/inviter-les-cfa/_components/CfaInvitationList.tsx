@@ -12,7 +12,13 @@ interface Props {
   onInvite: (cfa: ICfaToInvite) => void;
 }
 
+// Maquette : l'encart de remerciement s'intercale après les deux premières cartes de la liste.
+const ENGAGEMENT_CALLOUT_AFTER_INDEX = 1;
+
 export function CfaInvitationList({ invitations, showEngagementCallout, onInvite }: Props) {
+  // Borné pour rester visible quand la liste est plus courte que la position prévue.
+  const calloutAfterIndex = Math.min(ENGAGEMENT_CALLOUT_AFTER_INDEX, invitations.length - 1);
+
   return (
     <section className={styles.invitationsSection}>
       <h2 className={styles.sectionTitle}>Invitez les CFA de votre territoire</h2>
@@ -28,7 +34,7 @@ export function CfaInvitationList({ invitations, showEngagementCallout, onInvite
           {invitations.map((cfa, index) => (
             <Fragment key={cfa.organisme_id}>
               <CfaInvitationCard cfa={cfa} onInvite={onInvite} />
-              {showEngagementCallout && index === 0 && <EngagementCallout />}
+              {showEngagementCallout && index === calloutAfterIndex && <EngagementCallout />}
             </Fragment>
           ))}
         </div>
