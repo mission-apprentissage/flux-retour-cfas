@@ -7,3 +7,27 @@
   margin: 0;
   text-align: center;
 }
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.actions {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.actionsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.alert {
+  margin-top: 2rem;
+}

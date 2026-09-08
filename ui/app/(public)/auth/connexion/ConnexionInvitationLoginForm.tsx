@@ -4,7 +4,6 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { Link, Stack } from "@mui/material";
 import { Field, Form, Formik } from "formik";
 import NextLink from "next/link";
 import React from "react";
@@ -13,6 +12,7 @@ import { useLocalStorage } from "usehooks-ts";
 import { OrganismeCard, type ConnexionInvitationInfo } from "@/app/_components/onboarding";
 import { getApiErrorMessage, isRateLimited } from "@/common/rateLimit";
 
+import styles from "./Connexion.module.scss";
 import { type AuthConnexionValues, submitLogin, validateAuthConnexion } from "./login.schema";
 
 type ConnexionInvitationLoginFormProps = {
@@ -43,7 +43,7 @@ export function ConnexionInvitationLoginForm({ invitation }: ConnexionInvitation
     >
       {({ status = {} }) => (
         <Form noValidate>
-          <Stack>
+          <div className={styles.form}>
             <Field name="email">
               {({ field, meta }: any) => (
                 <Input
@@ -103,21 +103,21 @@ export function ConnexionInvitationLoginForm({ invitation }: ConnexionInvitation
               )}
             </Field>
 
-            <Stack direction="column" alignItems="center" spacing={fr.spacing("2w")} sx={{ mt: fr.spacing("2w") }}>
+            <div className={styles.actionsColumn}>
               <Button type="submit" iconId="ri-arrow-right-line" iconPosition="right">
                 Me connecter
               </Button>
-              <Link component={NextLink} href="/auth/mot-de-passe-oublie">
+              <NextLink href="/auth/mot-de-passe-oublie" className={fr.cx("fr-link")}>
                 Mot de passe oublié ?
-              </Link>
-            </Stack>
+              </NextLink>
+            </div>
 
             {status.error && (
-              <Stack sx={{ mt: fr.spacing("4w") }}>
+              <div className={styles.alert}>
                 <Alert severity={status.severity ?? "error"} small description={status.error} />
-              </Stack>
+              </div>
             )}
-          </Stack>
+          </div>
         </Form>
       )}
     </Formik>

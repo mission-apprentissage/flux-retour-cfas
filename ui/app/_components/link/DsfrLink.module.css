@@ -1,0 +1,5 @@
+.link {
+  color: var(--text-action-high-blue-france);
+  text-decoration: underline;
+  text-underline-position: under;
+}
