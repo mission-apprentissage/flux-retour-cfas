@@ -39,7 +39,11 @@ export default function CfaEffectifsClient() {
 
   useEffect(() => {
     if (debouncedSearch !== search) {
-      updateParams({ search: debouncedSearch || undefined, page: "1" });
+      updateParams({
+        search: debouncedSearch || undefined,
+        page: "1",
+        ...(debouncedSearch ? { collab_status: undefined, formation: undefined } : {}),
+      });
     }
   }, [debouncedSearch, search, updateParams]);
 
