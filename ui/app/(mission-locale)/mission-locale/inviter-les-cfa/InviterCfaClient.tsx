@@ -12,8 +12,18 @@ import { CfaInvitationList } from "./_components/CfaInvitationList";
 import { InviteCfaModal, inviteCfaModal } from "./_components/InviteCfaModal";
 import { InviterCfaHeader } from "./_components/InviterCfaHeader";
 
-export default function InviterCfaClient() {
+function InviterCfaContenu({ onInvite }: { onInvite: (cfa: ICfaToInvite) => void }) {
   const { data } = useCfaInvitations();
+
+  const invitations = data ?? [];
+  const showEngagementCallout = invitations.some((c) => c.statut === CFA_INVITATION_STATUT.INVITATION_ENVOYEE);
+
+  return (
+    <CfaInvitationList invitations={invitations} showEngagementCallout={showEngagementCallout} onInvite={onInvite} />
+  );
+}
+
+export default function InviterCfaClient() {
   const inviteCfa = useInviteCfa();
   const { toastSuccess } = useMUIToaster();
   const [selectedCfa, setSelectedCfa] = useState<ICfaToInvite | null>(null);
@@ -29,22 +39,12 @@ export default function InviterCfaClient() {
     toastSuccess(`Invitation envoyée à ${selectedCfa.nom ?? "ce CFA"}.`);
   };
 
-  const invitations = data ?? [];
-  // PRD : l'encart de remerciement apparaît dès qu'au moins une invitation a été envoyée par ce conseiller.
-  const showEngagementCallout = invitations.some((c) => c.statut === CFA_INVITATION_STATUT.INVITATION_ENVOYEE);
-
   return (
     <div>
       <InviterCfaHeader />
       <div className="fr-container">
         <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
-          {data && (
-            <CfaInvitationList
-              invitations={invitations}
-              showEngagementCallout={showEngagementCallout}
-              onInvite={handleInvite}
-            />
-          )}
+          <InviterCfaContenu onInvite={handleInvite} />
         </SuspenseWrapper>
       </div>
       <InviteCfaModal cfa={selectedCfa} onConfirm={handleConfirm} />
