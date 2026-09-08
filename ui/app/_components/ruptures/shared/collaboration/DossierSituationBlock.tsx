@@ -30,9 +30,13 @@ export function DossierSituationBlock({ organismeData, dateRupture, situationDos
   const od = organismeData;
   if (!od) return null;
 
-  // Dossier antérieur au tunnel : pas de situation_type, mais il ne pouvait concerner qu'un rupturant.
-  const situationType = od.situation_type ?? CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE;
+  const situationType = od.situation_type ?? null;
   const enContrat = situationType === CFA_SITUATION_TYPE_ENUM.EN_CONTRAT;
+  // Sans situation_type, on ne déduit rien : les lignes de rupture ne s'affichent que si le
+  // dossier porte lui-même la donnée, jamais sur la seule date de rupture de l'effectif.
+  const rupture =
+    situationType === CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE ||
+    (situationType === null && (od.still_at_cfa != null || !!od.cause_rupture));
   // Risque faible : le CFA demande un accompagnement, pas une prévention de rupture.
   const risque = enContrat && od.risque_rupture !== CFA_RISQUE_RUPTURE_ENUM.FAIBLE ? od.risque_rupture : null;
 
@@ -42,7 +46,7 @@ export function DossierSituationBlock({ organismeData, dateRupture, situationDos
     lignes.push({ icon: "fr-icon-success-fill", label: "En contrat actuellement" });
   }
 
-  if (situationType === CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE) {
+  if (rupture) {
     if (dateRupture) {
       lignes.push({ icon: "fr-icon-error-fill", erreur: true, label: "Rupture de contrat", date: dateRupture });
     }
