@@ -208,12 +208,12 @@ export async function getCfaSuiviMissionLocale(
 
   const pipeline = [
     ...buildSuiviBasePipeline(organisation, isAllowedDeca),
-    ...(trieSurMissionLocale ? missionLocaleStages : []),
     {
       $facet: {
         effectifs: [
           ...listFilterStages,
           ...categoryMatchStage(category),
+          ...(trieSurMissionLocale ? missionLocaleStages : []),
           sortStage,
           { $skip: skip },
           { $limit: limit },
