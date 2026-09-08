@@ -1,11 +1,5 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
-import { Button } from "@codegouvfr/react-dsfr/Button";
-import { ListItemIcon, ListSubheader } from "@mui/material";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import { useState } from "react";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
 import { PAGES } from "@/app/_utils/routes.utils";
@@ -16,10 +10,11 @@ import { COMPTE_ACCOUNT_HREF, COMPTE_SETTINGS_HREF, getCompteSettingsTab } from 
 
 import { useAuth } from "../_context/UserContext";
 
+import { DropdownMenu, DropdownMenuButton, DropdownMenuLink, DropdownMenuSubheader } from "./common/DropdownMenu";
+import styles from "./UserConnectedHeader.module.css";
+
 export const UserConnectedHeader = () => {
   const { user } = useAuth();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
 
   const isCfa = user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION;
   const isMissionLocale = user?.organisation?.type === ORGANISATION_TYPE.MISSION_LOCALE;
@@ -42,13 +37,6 @@ export const UserConnectedHeader = () => {
     window.location.href = "/";
   };
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const hasRight = (entry: string) => {
     const organisationType = user?.organisation?.type;
     switch (entry) {
@@ -61,170 +49,81 @@ export const UserConnectedHeader = () => {
     }
   };
 
+  if (!user) {
+    return null;
+  }
+
   const settingsUrl = settingsTab ? COMPTE_SETTINGS_HREF : undefined;
 
+  const label = showUserNameHeader ? (
+    <span className={styles.userLabel}>
+      <span className={styles.userName}>
+        {`${user.prenom.charAt(0).toUpperCase()}${user.prenom.slice(1)} ${user.nom.charAt(0).toUpperCase()}.`}
+      </span>
+      {organisationLabel && (
+        <span className={styles.organisation} title={organisationLabel}>
+          {organisationLabel}
+        </span>
+      )}
+    </span>
+  ) : (
+    <span className={styles.accountLabel} title={getAccountLabel(user as AuthContext)}>
+      {getAccountLabel(user as AuthContext)}
+    </span>
+  );
+
   return (
-    <>
-      {user && (
+    <DropdownMenu label={label} buttonIconId="ri-account-circle-fill">
+      {() => (
         <>
-          <Button iconId="ri-account-circle-fill" priority="tertiary no outline" onClick={handleClick}>
-            {showUserNameHeader ? (
-              <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", lineHeight: 1.3 }}>
-                <span
-                  style={{ fontWeight: 700 }}
-                >{`${user.prenom.charAt(0).toUpperCase()}${user.prenom.slice(1)} ${user.nom.charAt(0).toUpperCase()}.`}</span>
-                {organisationLabel && (
-                  <span
-                    style={{
-                      fontSize: "0.75rem",
-                      fontWeight: 400,
-                      maxWidth: 200,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                    title={organisationLabel}
-                  >
-                    {organisationLabel}
-                  </span>
-                )}
-              </span>
-            ) : (
-              <span
-                style={{
-                  display: "inline-block",
-                  maxWidth: 200,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  verticalAlign: "middle",
-                }}
-                title={getAccountLabel(user as AuthContext)}
-              >
-                {getAccountLabel(user as AuthContext)}
-              </span>
-            )}
-            <i
-              className={fr.cx(open ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line", "fr-icon--sm")}
-              aria-hidden="true"
-              style={{ marginLeft: "0.25rem" }}
-            />
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            slotProps={{
-              paper: {
-                sx: {
-                  "& a, & .MuiMenuItem-root": {
-                    backgroundImage: "none !important",
-                    color: "var(--text-action-high-blue-france)",
-                    "&:hover": {
-                      backgroundColor: "rgba(0, 0, 0, 0.04)",
-                    },
-                  },
-                  "& .MuiListItemIcon-root": {
-                    color: "var(--text-action-high-blue-france)",
-                    minWidth: 28,
-                  },
-                },
-              },
-            }}
-          >
-            <MenuItem component="a" href={COMPTE_ACCOUNT_HREF} onClick={handleClose}>
-              <ListItemIcon>
-                <i className={fr.cx("ri-account-circle-fill", "fr-icon--sm")}></i>
-              </ListItemIcon>
-              Mon compte
-            </MenuItem>
+          <DropdownMenuLink href={COMPTE_ACCOUNT_HREF} icon="ri-account-circle-fill">
+            Mon compte
+          </DropdownMenuLink>
 
-            {settingsUrl && (
-              <MenuItem component="a" href={settingsUrl} onClick={handleClose}>
-                <ListItemIcon>
-                  <i className={fr.cx("ri-settings-5-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                {settingsTab?.label ?? "Paramètres"}
-              </MenuItem>
-            )}
+          {settingsUrl && (
+            <DropdownMenuLink href={settingsUrl} icon="ri-settings-5-fill">
+              {settingsTab?.label ?? "Paramètres"}
+            </DropdownMenuLink>
+          )}
 
-            {hasRight("ROLES") && (
-              <MenuItem component="a" href="/organisation/membres" target="_self" onClick={handleClose}>
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-team-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                Rôles et habilitations
-              </MenuItem>
-            )}
+          {hasRight("ROLES") && (
+            <DropdownMenuLink href="/organisation/membres" target="_self" icon="fr-icon-team-fill">
+              Rôles et habilitations
+            </DropdownMenuLink>
+          )}
 
-            {hasRight("TRANSMISSIONS") && (
-              <MenuItem component="a" href="/transmissions" onClick={handleClose}>
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-send-plane-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                Transmissions
-              </MenuItem>
-            )}
+          {hasRight("TRANSMISSIONS") && (
+            <DropdownMenuLink href="/transmissions" icon="fr-icon-send-plane-fill">
+              Transmissions
+            </DropdownMenuLink>
+          )}
 
-            {isCfa && (user?.organisation_role === "admin" || user?.impersonating === true) && (
-              <MenuItem component="a" href="/cfa/roles-habilitations" onClick={handleClose}>
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-team-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
-                Rôles et habilitations
-              </MenuItem>
-            )}
+          {isCfa && (user?.organisation_role === "admin" || user?.impersonating === true) && (
+            <DropdownMenuLink href="/cfa/roles-habilitations" icon="fr-icon-team-fill">
+              Rôles et habilitations
+            </DropdownMenuLink>
+          )}
 
-            {isCfa && [
-              <ListSubheader
-                key="cfa-aide-header"
-                component="div"
-                sx={{ fontWeight: "bold", color: "var(--text-action-high-blue-france)" }}
-              >
-                Aide et ressources
-              </ListSubheader>,
-              <MenuItem key="cfa-aide-centre" component="a" href={CRISP_FAQ} target="_blank" onClick={handleClose}>
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-question-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
+          {isCfa && (
+            <>
+              <DropdownMenuSubheader>Aide et ressources</DropdownMenuSubheader>
+              <DropdownMenuLink href={CRISP_FAQ} target="_blank" icon="fr-icon-question-fill">
                 Centre d&apos;aide
-              </MenuItem>,
-              <MenuItem
-                key="cfa-aide-glossaire"
-                component="a"
-                href={PAGES.static.glossaire.getPath()}
-                onClick={handleClose}
-              >
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-book-2-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
+              </DropdownMenuLink>
+              <DropdownMenuLink href={PAGES.static.glossaire.getPath()} icon="fr-icon-book-2-fill">
                 Glossaire
-              </MenuItem>,
-              <MenuItem
-                key="cfa-aide-referencement"
-                component="a"
-                href={PAGES.static.referencementOrganisme.getPath()}
-                onClick={handleClose}
-              >
-                <ListItemIcon>
-                  <i className={fr.cx("fr-icon-building-fill", "fr-icon--sm")}></i>
-                </ListItemIcon>
+              </DropdownMenuLink>
+              <DropdownMenuLink href={PAGES.static.referencementOrganisme.getPath()} icon="fr-icon-building-fill">
                 Référencement organisme
-              </MenuItem>,
-            ]}
+              </DropdownMenuLink>
+            </>
+          )}
 
-            <MenuItem onClick={logout} sx={{ borderTop: "1px solid var(--border-default-grey)", mt: 1, pt: 1 }}>
-              <ListItemIcon>
-                <i
-                  className={fr.cx("fr-icon-logout-box-r-fill", "fr-icon--sm")}
-                  style={{ color: "var(--text-default-error)" }}
-                ></i>
-              </ListItemIcon>
-              <span style={{ color: "var(--text-default-error)" }}>Déconnexion</span>
-            </MenuItem>
-          </Menu>
+          <DropdownMenuButton onClick={logout} icon="fr-icon-logout-box-r-fill" separator danger>
+            Déconnexion
+          </DropdownMenuButton>
         </>
       )}
-    </>
+    </DropdownMenu>
   );
 };
