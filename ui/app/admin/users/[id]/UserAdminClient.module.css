@@ -1,0 +1,41 @@
+.page {
+  padding-left: 1rem;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 48rem;
+}
+
+.title {
+  margin: 0;
+}
+
+.meta {
+  color: var(--text-mention-grey);
+}
+
+.metaLine {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.roleCard {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-default-grey);
+  border-radius: 4px;
+}
+
+.roleCardTitle {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+}
+
+.roleCardRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}

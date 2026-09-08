@@ -1,0 +1,44 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.body {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.caption {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+}
+
+.captionPlain {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.link {
+  color: var(--text-action-high-blue-france);
+  text-decoration: none;
+  background-image: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.rowActions {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+}

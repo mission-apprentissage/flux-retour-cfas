@@ -1,0 +1,36 @@
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.statusLabel {
+  margin: 0;
+}
+
+.statusAction {
+  margin-left: 1rem;
+}
+
+.statusActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: 1rem;
+}
+
+.footer {
+  padding-top: 2rem;
+}
+
+.footerActions {
+  display: flex;
+  gap: 1rem;
+}

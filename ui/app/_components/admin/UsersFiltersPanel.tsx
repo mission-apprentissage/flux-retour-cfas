@@ -1,11 +1,11 @@
 "use client";
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { Box, Typography } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useCallback } from "react";
 import { DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, TYPES_ORGANISATION } from "shared";
 
+import { MultiSelectDropdown } from "@/app/_components/common/MultiSelectDropdown";
 import { useTeteDeReseaux } from "@/app/_hooks/useTeteDeReseaux";
 import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 import {
@@ -15,7 +15,14 @@ import {
   parseUsersFiltersFromQuery,
 } from "@/modules/admin/users/models/users-filters";
 
-import { MultiSelectDropdown } from "./MultiSelectDropdown";
+import styles from "./UsersFiltersPanel.module.css";
+
+function resumeSelection(selected: string[], options: OptionItem[], placeholder: string): string {
+  if (selected.length === 0) return placeholder;
+  if (selected.length === 1) return options.find((opt) => opt.value === selected[0])?.label || placeholder;
+  if (selected.length <= 3) return selected.map((v) => options.find((opt) => opt.value === v)?.label || v).join(", ");
+  return `${selected.length} sélectionnés`;
+}
 
 interface FilterConfig {
   key: keyof UsersFilters;
@@ -152,67 +159,32 @@ export const UsersFiltersPanel = () => {
   ).length;
 
   return (
-    <Box
-      sx={{
-        border: "1px solid var(--border-default-grey)",
-        borderRadius: "var(--spacing-1v)",
-        p: { xs: 2, sm: 3 },
-        backgroundColor: "var(--background-alt-grey)",
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-          flexDirection: { xs: "column", sm: "row" },
-          gap: { xs: 2, sm: 0 },
-        }}
-      >
-        <Typography variant="h6" sx={{ fontSize: "1rem", fontWeight: 700 }}>
-          Filtres {activeFiltersCount > 0 && `(${activeFiltersCount})`}
-        </Typography>
+    <div className={styles.panel}>
+      <div className={styles.header}>
+        <h6 className={styles.title}>Filtres {activeFiltersCount > 0 && `(${activeFiltersCount})`}</h6>
 
         {activeFiltersCount > 0 && (
           <Button onClick={resetFilters} priority="secondary" size="small" iconId="fr-icon-refresh-line">
             Réinitialiser
           </Button>
         )}
-      </Box>
+      </div>
 
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            sm: "repeat(2, 1fr)",
-            md: "repeat(3, 1fr)",
-            lg: "repeat(5, 1fr)",
-          },
-          gap: 2,
-          "@media (max-width: 480px)": {
-            gridTemplateColumns: "1fr",
-          },
-        }}
-      >
+      <div className={styles.grid}>
         {filtersConfig.map((filter) => (
-          <Box
-            key={filter.key}
-            sx={{
-              overflow: "hidden",
-            }}
-          >
+          <div key={filter.key} className={styles.cell}>
             <MultiSelectDropdown
               label={filter.label}
               options={filter.options}
               value={usersFilters[filter.key] || []}
               onChange={(values) => updateFilters({ [filter.key]: values })}
               placeholder={filter.key === "reseaux" && isLoadingReseaux ? "Chargement..." : filter.placeholder}
+              getDisplayText={resumeSelection}
+              enableSelectAll
             />
-          </Box>
+          </div>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };

@@ -5,7 +5,6 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { Box, Stack, Typography } from "@mui/material";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
@@ -14,6 +13,8 @@ import UserForm from "@/app/_components/admin/UserForm";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get, _put } from "@/common/httpClient";
+
+import styles from "./UserAdminClient.module.css";
 
 interface UserAdminClientProps {
   id: string;
@@ -92,7 +93,7 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
           ? `Voulez-vous vraiment promouvoir ${user?.email} en administrateur ? Cette personne pourra gérer les utilisateurs de l'établissement.`
           : `Voulez-vous vraiment retirer le rôle administrateur à ${user?.email} ? Cette personne ne pourra plus gérer les utilisateurs.`}
       </adminRoleChangeModal.Component>
-      <Box sx={{ pl: 2 }}>
+      <div className={styles.page}>
         <Breadcrumb
           currentPageLabel="Fiche utilisateur"
           segments={[
@@ -110,33 +111,21 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
             },
           ]}
         />
-        <Stack spacing={1} sx={{ maxWidth: "48rem" }}>
-          <Typography variant="h1" component="h1">
+        <div className={styles.content}>
+          <h1 className={styles.title}>
             {user.prenom} {user.nom}
-          </Typography>
-          <Box sx={{ color: "text.secondary" }}>
-            <Typography variant="body2">
-              Date de création du compte : {new Date(user.created_at).toLocaleString()}
-            </Typography>
-            <Typography variant="body2">
+          </h1>
+          <div className={styles.meta}>
+            <p className={styles.metaLine}>Date de création du compte : {new Date(user.created_at).toLocaleString()}</p>
+            <p className={styles.metaLine}>
               Date de dernière connexion :{" "}
               {user.last_connection ? new Date(user.last_connection).toLocaleString() : "jamais connecté"}
-            </Typography>
-          </Box>
+            </p>
+          </div>
           {isCfa && (
-            <Box
-              sx={{
-                mt: 2,
-                p: 2,
-                border: "1px solid",
-                borderColor: "divider",
-                borderRadius: 1,
-              }}
-            >
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
-                Rôle au sein du CFA
-              </Typography>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <div className={styles.roleCard}>
+              <p className={styles.roleCardTitle}>Rôle au sein du CFA</p>
+              <div className={styles.roleCardRow}>
                 <Badge noIcon severity={currentRole === "admin" ? "info" : "new"}>
                   {currentRole === "admin" ? "Administrateur" : "Non-administrateur"}
                 </Badge>
@@ -148,7 +137,7 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
                 >
                   {currentRole === "admin" ? "Retirer le rôle administrateur" : "Promouvoir administrateur"}
                 </Button>
-              </Box>
+              </div>
               {roleChangeSuccess && (
                 <Alert
                   severity="success"
@@ -160,11 +149,11 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
                   className="fr-mt-2w"
                 />
               )}
-            </Box>
+            </div>
           )}
           <UserForm user={user} onUpdate={() => refetchUser} onDelete={() => router.push("/admin/users")} />
-        </Stack>
-      </Box>
+        </div>
+      </div>
     </SuspenseWrapper>
   );
 }

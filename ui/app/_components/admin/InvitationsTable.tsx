@@ -5,7 +5,6 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
-import { Box, Stack, Typography } from "@mui/material";
 import { SortingState } from "@tanstack/react-table";
 import NavLink from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -14,6 +13,8 @@ import { FullTable } from "@/app/_components/table/FullTable";
 import { ColumnData } from "@/app/_components/table/types";
 import { AdminInvitation, useAdminInvitations } from "@/app/_hooks/useAdminInvitations";
 import { _delete, _post } from "@/common/httpClient";
+
+import styles from "./InvitationsTable.module.css";
 
 interface InvitationsTableProps {
   status: "pending" | "consumed";
@@ -154,45 +155,27 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
         },
         element: {
           recipient: (
-            <Stack spacing={0.25}>
-              <Typography variant="body2" fontWeight={500}>
-                {[inv.prenom, inv.nom].filter(Boolean).join(" ") || "—"}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {inv.email}
-              </Typography>
-            </Stack>
+            <div className={styles.cell}>
+              <p className={styles.body}>{[inv.prenom, inv.nom].filter(Boolean).join(" ") || "—"}</p>
+              <p className={styles.caption}>{inv.email}</p>
+            </div>
           ),
           organisation: inv.organisation ? (
-            <Stack spacing={0.25}>
+            <div className={styles.cell}>
               {inv.organisation._id ? (
-                <Typography
-                  component={NavLink}
-                  href={`/organismes/${inv.organisation._id}`}
-                  variant="body2"
-                  sx={{
-                    color: "primary.main",
-                    textDecoration: "none",
-                    fontWeight: 500,
-                    "&:hover": { textDecoration: "underline" },
-                  }}
-                >
+                <NavLink href={`/organismes/${inv.organisation._id}`} className={`${styles.body} ${styles.link}`}>
                   {orgaName}
-                </Typography>
+                </NavLink>
               ) : (
-                <Typography variant="body2" fontWeight={500}>
-                  {orgaName}
-                </Typography>
+                <p className={styles.body}>{orgaName}</p>
               )}
-              <Typography variant="caption" color="text.secondary">
+              <p className={styles.caption}>
                 {orgaType}
                 {orgaSiret ? ` • SIRET ${orgaSiret}` : ""}
-              </Typography>
-            </Stack>
+              </p>
+            </div>
           ) : (
-            <Typography variant="caption" color="text.secondary">
-              —
-            </Typography>
+            <p className={styles.caption}>—</p>
           ),
           role: inv.role ? (
             <Badge severity={inv.role === "admin" ? "info" : "new"} small>
@@ -202,14 +185,12 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
             "—"
           ),
           author: inv.author ? (
-            <Stack spacing={0.25}>
-              <Typography variant="caption">
+            <div className={styles.cell}>
+              <p className={styles.captionPlain}>
                 {[inv.author.prenom, inv.author.nom].filter(Boolean).join(" ") || "—"}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {inv.author.email}
-              </Typography>
-            </Stack>
+              </p>
+              <p className={styles.caption}>{inv.author.email}</p>
+            </div>
           ) : (
             "—"
           ),
@@ -222,7 +203,7 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
           delay: describeDelay(inv.created_at),
           actions:
             status === "pending" ? (
-              <Stack direction="row" spacing={0.5} justifyContent="center">
+              <div className={styles.rowActions}>
                 <Button
                   priority="tertiary no outline"
                   size="small"
@@ -251,7 +232,7 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
                 >
                   {""}
                 </Button>
-              </Stack>
+              </div>
             ) : null,
         },
       };
@@ -261,7 +242,7 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
   const columns = status === "pending" ? COLUMNS_PENDING : COLUMNS_CONSUMED;
 
   return (
-    <Stack spacing={2}>
+    <div className={styles.stack}>
       {actionSuccess && (
         <Alert
           severity="success"
@@ -286,13 +267,11 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
           />
         )}
       />
-      <Box>
-        <Typography variant="body2" color="text.secondary">
-          {isLoading
-            ? "Chargement..."
-            : `${pagination.total} invitation${pagination.total > 1 ? "s" : ""} ${status === "pending" ? "en cours" : "consommée" + (pagination.total > 1 ? "s" : "")}`}
-        </Typography>
-      </Box>
+      <p className={styles.caption}>
+        {isLoading
+          ? "Chargement..."
+          : `${pagination.total} invitation${pagination.total > 1 ? "s" : ""} ${status === "pending" ? "en cours" : "consommée" + (pagination.total > 1 ? "s" : "")}`}
+      </p>
       <FullTable
         data={tableData}
         columns={columns}
@@ -360,6 +339,6 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
         Un nouvel email sera envoyé à <strong>{pendingAction?.email}</strong> avec une expiration renouvelée à 96
         heures.
       </resendModal.Component>
-    </Stack>
+    </div>
   );
 }
