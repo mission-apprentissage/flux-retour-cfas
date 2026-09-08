@@ -59,15 +59,7 @@ const brancheB = {
   ...baseObjectifs,
 };
 
-// Situation retirée du service : le payload correspondant doit être refusé.
-const brancheSansContrat = {
-  rupture: false,
-  acc_conjoint: true,
-  situation_type: "SANS_CONTRAT",
-  date_debut_formation: new Date("2026-01-06"),
-  recherche_entreprise: "12 candidatures envoyées, aucune réponse",
-  ...baseObjectifs,
-};
+const brancheSansContrat = { ...brancheA, situation_type: "SANS_CONTRAT" };
 
 const parse = (payload: Record<string, unknown>) => zUpdateMissionLocaleEffectifOrganisme.parseAsync(payload);
 
@@ -154,13 +146,13 @@ describe("Tunnel de collaboration CFA", () => {
       expect(updated?.cfa_rupture_declaration?.declared_by).toEqual(userId);
     });
 
-    it("situation sans contrat : aucun dossier créé, le payload est refusé", async () => {
+    it("situation sans contrat : le stockage refuse l'écriture", async () => {
       await insertEffectif();
 
-      await expect(parse(brancheSansContrat)).rejects.toThrow();
+      await expect(send({ ...brancheA, situation_type: "SANS_CONTRAT" } as any)).rejects.toThrow();
 
       const created = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
-      expect(created).toBeNull();
+      expect(created?.organisme_data?.situation_type).not.toBe("SANS_CONTRAT");
     });
   });
 
@@ -190,7 +182,8 @@ describe("Tunnel de collaboration CFA", () => {
     });
 
     it("R5 : la situation sans contrat n'est plus une valeur acceptée", async () => {
-      await expect(parse(brancheSansContrat)).rejects.toThrow();
+      const erreur = await parse(brancheSansContrat).catch((e) => e);
+      expect(erreur.issues).toEqual([expect.objectContaining({ path: ["situation_type"] })]);
     });
 
     it("R5 : la date de début de formation n'est plus un champ accepté", async () => {

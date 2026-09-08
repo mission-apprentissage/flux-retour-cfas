@@ -50,6 +50,21 @@ describe("Récapitulatif du dossier de collaboration", () => {
     await organismesDb().insertOne(sampleOrganisme);
   });
 
+  it("expose les champs de situation au CFA", async () => {
+    await insertDossier({
+      acc_conjoint: true,
+      situation_type: "RUPTURE_OU_SORTIE",
+      still_at_cfa: true,
+      cause_rupture: "Désaccord avec l'employeur",
+    });
+
+    const { effectif } = await getCfaEffectifDetail(organismeId, effectifId.toString());
+    const od = (effectif as any).organisme_data;
+
+    expect(od.situation_type).toBe("RUPTURE_OU_SORTIE");
+    expect(od.cause_rupture).toBe("Désaccord avec l'employeur");
+  });
+
   it("n'expose jamais le retour sur le formulaire", async () => {
     await insertDossier({
       acc_conjoint: true,
