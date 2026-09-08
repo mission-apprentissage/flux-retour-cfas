@@ -70,7 +70,7 @@ export function datesRuptureErrors(v: FormValues): FormikErrors<FormValues> {
   const errors: FormikErrors<FormValues> = {};
   if (!v.date_rupture) errors.date_rupture = CHAMP_OBLIGATOIRE;
   if (v.still_at_cfa === false && !v.date_abandon) errors.date_abandon = CHAMP_OBLIGATOIRE;
-  if (v.date_abandon && v.date_abandon < v.date_rupture) {
+  if (v.still_at_cfa === false && v.date_abandon && v.date_abandon < v.date_rupture) {
     errors.date_abandon = "La date d'abandon ne peut pas précéder la date de rupture";
   }
   if (!v.cause_rupture.trim()) errors.cause_rupture = CHAMP_OBLIGATOIRE;
