@@ -63,7 +63,7 @@ export const zMissionLocaleEffectifListItem = z.object({
   whatsapp_no_help_responded: z.boolean(),
   souhaite_rdv: z.boolean(),
   situation: zSituationEnum.nullish(),
-  situation_dossier: zMlSituationDossier,
+  situation_dossier: zMlSituationDossier.nullish(),
   relance_urgente: z.boolean(),
   date_reception: z.date().nullish(),
   date_traitement: z.date().nullish(),

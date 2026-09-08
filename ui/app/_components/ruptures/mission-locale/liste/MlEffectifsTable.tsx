@@ -114,8 +114,8 @@ export function MlEffectifsTable({
                 </td>
                 <td>
                   <SituationCell
-                    label={ML_SITUATION_DOSSIER_LABEL[effectif.situation_dossier]}
-                    tooltip={ML_SITUATION_TOOLTIPS[effectif.situation_dossier]}
+                    label={effectif.situation_dossier ? ML_SITUATION_DOSSIER_LABEL[effectif.situation_dossier] : null}
+                    tooltip={effectif.situation_dossier ? ML_SITUATION_TOOLTIPS[effectif.situation_dossier] : undefined}
                   />
                 </td>
                 <td>

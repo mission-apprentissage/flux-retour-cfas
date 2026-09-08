@@ -37,7 +37,7 @@ export type EffectifPriorityData = EffectifData & {
 /** Ligne des listes « Dossiers prioritaires » et « Collaborations CFA ». */
 export type MlListeEffectif = EffectifData & {
   injoignable: boolean;
-  situation_dossier: ML_SITUATION_DOSSIER;
+  situation_dossier: ML_SITUATION_DOSSIER | null;
   relance_urgente: boolean;
   date_rupture?: string | null;
 };

@@ -348,6 +348,11 @@ describe("getEffectifsFusionnesByMissionLocaleId", () => {
         overrides: { current_status: { value: STATUT_APPRENANT.ABANDON, date: daysAgo(30) } },
         attendu: ML_SITUATION_DOSSIER.ABANDON,
       },
+      {
+        nom: "INSCRITERPSANSCOLLAB",
+        overrides: { current_status: { value: STATUT_APPRENANT.INSCRIT, date: daysAgo(30) } },
+        attendu: null,
+      },
     ])("mappe $nom vers $attendu", async ({ nom, overrides, attendu }) => {
       await insertMlRecord(nom, overrides);
 
@@ -357,7 +362,7 @@ describe("getEffectifsFusionnesByMissionLocaleId", () => {
       );
 
       expect(result.effectifs).toHaveLength(1);
-      expect(result.effectifs[0].situation_dossier).toBe(attendu);
+      expect(result.effectifs[0].situation_dossier ?? null).toBe(attendu);
     });
   });
 });

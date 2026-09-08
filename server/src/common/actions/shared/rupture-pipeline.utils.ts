@@ -204,6 +204,10 @@ export const addSituationDossierField = () => [
               case: { $eq: ["$current_status.value", STATUT_APPRENANT.ABANDON] },
               then: ML_SITUATION_DOSSIER.ABANDON,
             },
+            {
+              case: { $eq: ["$current_status.value", STATUT_APPRENANT.INSCRIT] },
+              then: null,
+            },
           ],
           default: ML_SITUATION_DOSSIER.RUPTURE,
         },
