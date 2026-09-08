@@ -17874,17 +17874,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Date de sortie du CFA, uniquement si still_at_cfa est false",
             },
-            "date_debut_formation": {
-              "anyOf": [
-                {
-                  "bsonType": "date",
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-              "description": "Date de début de formation au CFA, pour le calcul du délai des 90 jours côté ML",
-            },
             "form_feedback": {
               "anyOf": [
                 {
@@ -17962,13 +17951,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Note complémentaire facultative pour la ML",
             },
-            "recherche_entreprise": {
-              "bsonType": [
-                "string",
-                "null",
-              ],
-              "description": "Description de la recherche d'entreprise en cours",
-            },
             "referent_coordonnees": {
               "bsonType": [
                 "string",
@@ -18034,7 +18016,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                   "enum": [
                     "EN_CONTRAT",
                     "RUPTURE_OU_SORTIE",
-                    "SANS_CONTRAT",
                   ],
                 },
                 {

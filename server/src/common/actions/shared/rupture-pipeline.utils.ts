@@ -187,10 +187,6 @@ export const addSituationDossierField = () => [
               then: ML_SITUATION_DOSSIER.PREVENTION_RUPTURE,
             },
             {
-              case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT] },
-              then: ML_SITUATION_DOSSIER.INSCRIT_SANS_CONTRAT,
-            },
-            {
               case: {
                 $and: [
                   { $eq: ["$organisme_data.acc_conjoint", true] },
@@ -207,10 +203,6 @@ export const addSituationDossierField = () => [
             {
               case: { $eq: ["$current_status.value", STATUT_APPRENANT.ABANDON] },
               then: ML_SITUATION_DOSSIER.ABANDON,
-            },
-            {
-              case: { $eq: ["$current_status.value", STATUT_APPRENANT.INSCRIT] },
-              then: ML_SITUATION_DOSSIER.INSCRIT_SANS_CONTRAT,
             },
           ],
           default: ML_SITUATION_DOSSIER.RUPTURE,

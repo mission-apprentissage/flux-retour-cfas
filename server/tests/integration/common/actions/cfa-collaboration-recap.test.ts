@@ -50,21 +50,6 @@ describe("Récapitulatif du dossier de collaboration", () => {
     await organismesDb().insertOne(sampleOrganisme);
   });
 
-  it("expose les champs de situation au CFA", async () => {
-    await insertDossier({
-      acc_conjoint: true,
-      situation_type: "SANS_CONTRAT",
-      date_debut_formation: new Date("2026-01-06"),
-      recherche_entreprise: "12 candidatures envoyées",
-    });
-
-    const { effectif } = await getCfaEffectifDetail(organismeId, effectifId.toString());
-    const od = (effectif as any).organisme_data;
-
-    expect(od.situation_type).toBe("SANS_CONTRAT");
-    expect(od.recherche_entreprise).toBe("12 candidatures envoyées");
-  });
-
   it("n'expose jamais le retour sur le formulaire", async () => {
     await insertDossier({
       acc_conjoint: true,

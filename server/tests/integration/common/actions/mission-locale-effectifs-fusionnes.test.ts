@@ -320,11 +320,6 @@ describe("getEffectifsFusionnesByMissionLocaleId", () => {
         attendu: ML_SITUATION_DOSSIER.BESOIN_AIDE_HORS_RUPTURE,
       },
       {
-        nom: "SANSCONTRAT",
-        overrides: { organisme_data: collabData({ situation_type: CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT }) },
-        attendu: ML_SITUATION_DOSSIER.INSCRIT_SANS_CONTRAT,
-      },
-      {
         // le statut ERP ne doit pas l'emporter sur la qualification du CFA
         nom: "RUPTUREMAINTENUCFA",
         overrides: {

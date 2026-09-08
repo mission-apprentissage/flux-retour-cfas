@@ -114,7 +114,6 @@ export const zConnaissanceMlEnum = z.nativeEnum(CONNAISSANCE_ML_ENUM);
 export enum CFA_SITUATION_TYPE_ENUM {
   EN_CONTRAT = "EN_CONTRAT",
   RUPTURE_OU_SORTIE = "RUPTURE_OU_SORTIE",
-  SANS_CONTRAT = "SANS_CONTRAT",
 }
 
 export enum CFA_RISQUE_RUPTURE_ENUM {
@@ -224,11 +223,6 @@ const zMissionLocaleEffectif = z.object({
         .describe("Branche du tunnel choisie par le CFA. Absent : dossier antérieur, à lire comme RUPTURE_OU_SORTIE"),
       risque_rupture: zCfaRisqueRuptureEnum.nullish().describe("Niveau de risque de rupture, jeune encore en contrat"),
       date_abandon: z.date().nullish().describe("Date de sortie du CFA, uniquement si still_at_cfa est false"),
-      date_debut_formation: z
-        .date()
-        .nullish()
-        .describe("Date de début de formation au CFA, pour le calcul du délai des 90 jours côté ML"),
-      recherche_entreprise: z.string().nullish().describe("Description de la recherche d'entreprise en cours"),
       form_feedback: z
         .object({
           note: z.number().int().min(0).max(5).nullish(),

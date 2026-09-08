@@ -36,8 +36,6 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     "situation_type",
     "risque_rupture",
     "date_abandon",
-    "date_debut_formation",
-    "recherche_entreprise",
     "form_feedback",
   ];
 

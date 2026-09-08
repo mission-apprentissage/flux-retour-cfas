@@ -59,8 +59,6 @@ export const updateMissionLocaleEffectifOrganismeApi = {
   risque_rupture: zCfaRisqueRuptureEnum.optional(),
   date_abandon: zPastDate(1).optional(),
   date_rupture: zPastDate(1).optional(),
-  date_debut_formation: zPastDate(4).optional(),
-  recherche_entreprise: z.string().optional(),
   form_feedback: z
     .object({
       note: z.number().int().min(0).max(5).optional(),
@@ -111,12 +109,7 @@ export const zUpdateMissionLocaleEffectifOrganisme = z
           "risque_rupture",
           "Le risque de rupture est obligatoire"
         );
-        forbid(
-          ctx,
-          payload,
-          ["date_rupture", "date_abandon", "date_debut_formation", "recherche_entreprise", "still_at_cfa"],
-          "encore en contrat"
-        );
+        forbid(ctx, payload, ["date_rupture", "date_abandon", "still_at_cfa"], "encore en contrat");
         break;
 
       case CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE:
@@ -146,22 +139,6 @@ export const zUpdateMissionLocaleEffectifOrganisme = z
             message: "La date de sortie du CFA ne peut pas précéder la date de rupture",
           });
         }
-        break;
-
-      case CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT:
-        requireField(
-          ctx,
-          payload.date_debut_formation !== undefined,
-          "date_debut_formation",
-          "La date de début de formation est obligatoire"
-        );
-        requireField(
-          ctx,
-          !isBlank(payload.recherche_entreprise),
-          "recherche_entreprise",
-          "La description de la recherche d'entreprise est obligatoire"
-        );
-        forbid(ctx, payload, ["still_at_cfa", "date_rupture", "date_abandon", "cause_rupture"], "sans contrat");
         break;
     }
 

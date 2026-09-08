@@ -59,10 +59,11 @@ const brancheB = {
   ...baseObjectifs,
 };
 
-const brancheC = {
+// Situation retirée du service : le payload correspondant doit être refusé.
+const brancheSansContrat = {
   rupture: false,
   acc_conjoint: true,
-  situation_type: CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT,
+  situation_type: "SANS_CONTRAT",
   date_debut_formation: new Date("2026-01-06"),
   recherche_entreprise: "12 candidatures envoyées, aucune réponse",
   ...baseObjectifs,
@@ -153,17 +154,13 @@ describe("Tunnel de collaboration CFA", () => {
       expect(updated?.cfa_rupture_declaration?.declared_by).toEqual(userId);
     });
 
-    it("branche C : dossier créé avec la recherche d'entreprise", async () => {
+    it("situation sans contrat : aucun dossier créé, le payload est refusé", async () => {
       await insertEffectif();
 
-      await send(await parse(brancheC));
+      await expect(parse(brancheSansContrat)).rejects.toThrow();
 
       const created = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
-      expect(created?.organisme_data?.situation_type).toBe(CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT);
-      expect(created?.organisme_data?.date_debut_formation).toEqual(new Date("2026-01-06"));
-      expect(created?.organisme_data?.recherche_entreprise).toBe("12 candidatures envoyées, aucune réponse");
-      expect(created?.date_rupture).toBeNull();
-      expect(created?.cfa_rupture_declaration).toBeUndefined();
+      expect(created).toBeNull();
     });
   });
 
@@ -192,12 +189,16 @@ describe("Tunnel de collaboration CFA", () => {
       await expect(parse({ ...brancheB, date_abandon: new Date("2026-05-06") })).rejects.toThrow();
     });
 
-    it("R5 : branche C sans recherche d'entreprise", async () => {
-      await expect(parse({ ...brancheC, recherche_entreprise: "" })).rejects.toThrow();
+    it("R5 : la situation sans contrat n'est plus une valeur acceptée", async () => {
+      await expect(parse(brancheSansContrat)).rejects.toThrow();
     });
 
-    it("R5 : branche C avec une cause de rupture", async () => {
-      await expect(parse({ ...brancheC, cause_rupture: "Peu importe" })).rejects.toThrow();
+    it("R5 : la date de début de formation n'est plus un champ accepté", async () => {
+      await expect(parse({ ...brancheA, date_debut_formation: new Date("2026-01-06") })).rejects.toThrow();
+    });
+
+    it("R5 : la recherche d'entreprise n'est plus un champ accepté", async () => {
+      await expect(parse({ ...brancheA, recherche_entreprise: "12 candidatures" })).rejects.toThrow();
     });
 
     it("R6 : aucun objectif d'accompagnement", async () => {

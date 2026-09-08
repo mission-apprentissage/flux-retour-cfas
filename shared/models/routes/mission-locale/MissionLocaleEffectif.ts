@@ -135,8 +135,6 @@ const zEffectifMissionLocale = z
         situation_type: zCfaSituationTypeEnum.nullish(),
         risque_rupture: zCfaRisqueRuptureEnum.nullish(),
         date_abandon: z.date().nullish(),
-        date_debut_formation: z.date().nullish(),
-        recherche_entreprise: z.string().nullish(),
       })
       .nullish(),
     mineur: z.boolean().nullish(),
