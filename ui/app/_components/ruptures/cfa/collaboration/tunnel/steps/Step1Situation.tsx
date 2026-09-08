@@ -27,11 +27,6 @@ export function Step1Situation({ onChange }: Step1SituationProps) {
             value: CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE,
             label: "Non, le jeune est en rupture ou a quitté le CFA",
           },
-          {
-            value: CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT,
-            label: "Non, le jeune a fait sa rentrée au CFA sans contrat en entreprise",
-            hint: "Pour les jeunes inscrits à la rentrée dans votre CFA sans contrat d'apprentissage",
-          },
         ]}
       />
     </>

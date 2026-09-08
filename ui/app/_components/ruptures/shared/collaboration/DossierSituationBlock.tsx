@@ -54,15 +54,7 @@ export function DossierSituationBlock({ organismeData, dateRupture, situationDos
     }
   }
 
-  if (situationType === CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT) {
-    lignes.push({
-      icon: "fr-icon-calendar-fill",
-      label: "Date de début de formation",
-      date: od.date_debut_formation,
-    });
-  }
-
-  const detail = situationType === CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT ? od.recherche_entreprise : od.cause_rupture;
+  const detail = od.cause_rupture;
 
   if (!situationDossier && !risque && lignes.length === 0 && !detail) return null;
 

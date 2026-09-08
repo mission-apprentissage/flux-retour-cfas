@@ -13,17 +13,10 @@ import { isMineur } from "@/app/_utils/ruptures.utils";
 import { useSubmitCollaborationForm, VerifiedInfo } from "../hooks";
 import { ObjectifsSection } from "../sections/ObjectifsSection";
 import { FormValues } from "../types";
-import {
-  buildAdresseRue,
-  contactErrors,
-  datesRuptureErrors,
-  objectifsErrors,
-  rentreeSansContratErrors,
-} from "../utils";
+import { buildAdresseRue, contactErrors, datesRuptureErrors, objectifsErrors } from "../utils";
 
 import { Step1DatesRupture } from "./steps/Step1DatesRupture";
 import { Step1MaintienFormation } from "./steps/Step1MaintienFormation";
-import { Step1RentreeSansContrat } from "./steps/Step1RentreeSansContrat";
 import { Step1RisqueRupture } from "./steps/Step1RisqueRupture";
 import { Step1Situation } from "./steps/Step1Situation";
 import { Step3Contact } from "./steps/Step3Contact";
@@ -58,8 +51,6 @@ function erreursEtape(step: StepId, values: FormValues): FormikErrors<FormValues
       return values.still_at_cfa === null ? { still_at_cfa: "Ce champ est obligatoire" } : {};
     case "datesRupture":
       return datesRuptureErrors(values);
-    case "rentreeSansContrat":
-      return rentreeSansContratErrors(values);
     case "objectifs":
       return objectifsErrors(values);
     case "contact":
@@ -109,8 +100,6 @@ export function CollaborationTunnel({ effectif, onSuccess, onCancel }: Collabora
         still_at_cfa: null,
         date_rupture: "",
         date_abandon: "",
-        date_debut_formation: "",
-        recherche_entreprise: "",
         motifs: [],
         commentaires_par_motif: {},
         cause_rupture: "",
@@ -177,12 +166,6 @@ export function CollaborationTunnel({ effectif, onSuccess, onCancel }: Collabora
                 ...(values.still_at_cfa === false ? { date_abandon: values.date_abandon } : {}),
               }
             : {}),
-          ...(branche === CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT
-            ? {
-                date_debut_formation: values.date_debut_formation,
-                recherche_entreprise: values.recherche_entreprise.trim(),
-              }
-            : {}),
           ...(values.feedback_note !== null
             ? {
                 form_feedback: {
@@ -242,7 +225,6 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
   const prenom = effectif.prenom as string;
   const nom = effectif.nom as string;
   const mlName = effectif.mission_locale_organisation?.nom;
-  const sansContrat = values.situation_type === CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT;
 
   const goNext = () => {
     const next = steps[currentIndex + 1];
@@ -300,10 +282,8 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
         return <Step1MaintienFormation />;
       case "datesRupture":
         return <Step1DatesRupture />;
-      case "rentreeSansContrat":
-        return <Step1RentreeSansContrat prenom={prenom} />;
       case "objectifs":
-        return <ObjectifsSection prenom={prenom} sansContrat={sansContrat} />;
+        return <ObjectifsSection prenom={prenom} />;
       case "contact":
         return <Step3Contact prenom={prenom} nom={nom} isMineur={isMineur(effectif.date_de_naissance)} />;
       case "recap":
@@ -329,10 +309,6 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
       case "datesRupture":
         return [
           "Quelques mots sur la rupture suffisent à la Mission Locale pour mieux appréhender la situation du jeune au moment où elle prend contact avec lui ou elle pour lui proposer un accompagnement.",
-        ];
-      case "rentreeSansContrat":
-        return [
-          "La date de début de formation permet à la Mission Locale de savoir combien de temps il reste au jeune dans le délai de 90 jours prévu par le dispositif de l'apprentissage pour trouver une entreprise après la rentrée en CFA.",
         ];
       case "objectifs":
         return [

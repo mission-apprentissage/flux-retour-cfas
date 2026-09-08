@@ -13,14 +13,13 @@ export type VerifiedInfo = { [_K in keyof Omit<IVerifiedInfo, "rqth_declare" | "
 
 type CollaborationFormPayload = Omit<
   IUpdateMissionLocaleEffectifOrganisme,
-  "rupture" | "acc_conjoint" | "verified_info" | "date_rupture" | "date_abandon" | "date_debut_formation"
+  "rupture" | "acc_conjoint" | "verified_info" | "date_rupture" | "date_abandon"
 > & {
   situation_type: CFA_SITUATION_TYPE_ENUM;
   verified_info: Record<string, unknown>;
   // Les dates transitent en ISO court (input type=date), le serveur les coerce.
   date_rupture?: string;
   date_abandon?: string;
-  date_debut_formation?: string;
 };
 
 export function useCfaEffectifDetail(id: string) {

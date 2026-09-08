@@ -10,7 +10,6 @@ import {
   isContactValid,
   isDatesRuptureValid,
   isObjectifsValid,
-  isRentreeSansContratValid,
   isValidPhone,
   isValidEmail,
 } from "./utils";
@@ -32,8 +31,6 @@ function makeValues(overrides: Partial<FormValues> = {}): FormValues {
     still_at_cfa: true,
     date_rupture: "2026-05-04",
     date_abandon: "",
-    date_debut_formation: "",
-    recherche_entreprise: "",
     motifs: [ACC_CONJOINT_MOTIF_ENUM.REORIENTATION],
     commentaires_par_motif: {},
     cause_rupture: "Raison de la rupture",
@@ -152,16 +149,6 @@ describe("buildTunnelSteps", () => {
     ).toEqual(["situation", "maintienFormation", "datesRupture", "objectifs", "contact", "recap"]);
   });
 
-  it("branche C : pas d'écran intermédiaire de statut", () => {
-    expect(buildTunnelSteps(makeValues({ situation_type: CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT }))).toEqual([
-      "situation",
-      "rentreeSansContrat",
-      "objectifs",
-      "contact",
-      "recap",
-    ]);
-  });
-
   it("s'arrête au premier écran tant que la branche n'est pas choisie", () => {
     expect(buildTunnelSteps(makeValues({ situation_type: null }))).toEqual(["situation"]);
   });
@@ -221,17 +208,6 @@ describe("isDatesRuptureValid", () => {
 
   it("ignore une date d'abandon résiduelle quand le jeune est maintenu en formation", () => {
     expect(isDatesRuptureValid(makeValues({ still_at_cfa: true, date_abandon: "2026-05-01" }))).toBe(true);
-  });
-});
-
-describe("isRentreeSansContratValid", () => {
-  it("exige la date de début de formation et la recherche d'entreprise", () => {
-    expect(isRentreeSansContratValid(makeValues())).toBe(false);
-    expect(
-      isRentreeSansContratValid(
-        makeValues({ date_debut_formation: "2026-01-06", recherche_entreprise: "12 candidatures" })
-      )
-    ).toBe(true);
   });
 });
 

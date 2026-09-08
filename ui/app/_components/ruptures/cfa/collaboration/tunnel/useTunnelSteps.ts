@@ -16,9 +16,6 @@ export function buildTunnelSteps(values: FormValues): StepId[] {
     case CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE:
       steps.push("maintienFormation", "datesRupture");
       break;
-    case CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT:
-      steps.push("rentreeSansContrat");
-      break;
     default:
       return steps;
   }
@@ -34,6 +31,4 @@ export const EMPTY_BRANCH_VALUES = {
   date_rupture: "",
   date_abandon: "",
   cause_rupture: "",
-  date_debut_formation: "",
-  recherche_entreprise: "",
 } satisfies Partial<FormValues>;

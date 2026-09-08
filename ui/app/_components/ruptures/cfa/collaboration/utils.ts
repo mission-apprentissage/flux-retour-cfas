@@ -77,13 +77,6 @@ export function datesRuptureErrors(v: FormValues): FormikErrors<FormValues> {
   return errors;
 }
 
-export function rentreeSansContratErrors(v: FormValues): FormikErrors<FormValues> {
-  const errors: FormikErrors<FormValues> = {};
-  if (!v.date_debut_formation) errors.date_debut_formation = CHAMP_OBLIGATOIRE;
-  if (!v.recherche_entreprise.trim()) errors.recherche_entreprise = CHAMP_OBLIGATOIRE;
-  return errors;
-}
-
 export function contactErrors(v: FormValues): FormikErrors<FormValues> {
   const errors: FormikErrors<FormValues> = {};
   const info = v.verified_info;
@@ -108,5 +101,4 @@ const sansErreur = (errors: FormikErrors<FormValues>): boolean => Object.keys(er
 
 export const isObjectifsValid = (v: FormValues): boolean => sansErreur(objectifsErrors(v));
 export const isDatesRuptureValid = (v: FormValues): boolean => sansErreur(datesRuptureErrors(v));
-export const isRentreeSansContratValid = (v: FormValues): boolean => sansErreur(rentreeSansContratErrors(v));
 export const isContactValid = (v: FormValues): boolean => sansErreur(contactErrors(v));

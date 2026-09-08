@@ -230,11 +230,6 @@
   gap: 0.25rem;
 }
 
-.radioHint {
-  font-size: 0.875rem;
-  color: var(--text-mention-grey);
-}
-
 .recapTitle {
   margin: 0;
   font-size: 1.5rem;

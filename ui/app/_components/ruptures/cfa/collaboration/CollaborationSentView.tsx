@@ -43,7 +43,6 @@ export function CollaborationSentView({
   const hasBubbleContent =
     motifs.length > 0 ||
     !!od?.cause_rupture ||
-    !!od?.recherche_entreprise ||
     !!od?.risque_rupture ||
     od?.still_at_cfa != null ||
     !!od?.verified_info?.responsable_legal ||

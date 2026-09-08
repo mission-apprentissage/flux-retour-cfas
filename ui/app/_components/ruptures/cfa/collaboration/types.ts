@@ -13,8 +13,6 @@ export type FormValues = {
   still_at_cfa: boolean | null;
   date_rupture: string;
   date_abandon: string;
-  date_debut_formation: string;
-  recherche_entreprise: string;
   motifs: ACC_CONJOINT_MOTIF_ENUM[];
   commentaires_par_motif: Partial<Record<ACC_CONJOINT_MOTIF_ENUM, string>>;
   cause_rupture: string;
