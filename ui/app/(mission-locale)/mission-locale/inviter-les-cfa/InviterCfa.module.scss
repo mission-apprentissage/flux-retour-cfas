@@ -5,7 +5,7 @@
   padding-top: 3rem;
   padding-bottom: 2rem;
   margin-bottom: 2.5rem;
-  background-color: #f5f5fe;
+  background-color: var(--background-alt-blue-france);
 }
 
 .heroTitle {
@@ -48,7 +48,7 @@
 }
 
 .accent {
-  color: #6a6af4;
+  color: var(--text-active-blue-france);
 }
 
 .argList {
@@ -133,13 +133,13 @@
   margin-top: auto;
   margin-bottom: auto;
   font-size: 1.5rem;
-  color: #000091;
+  color: var(--text-action-high-blue-france);
 }
 
 .cardName {
   margin: 0;
   font-weight: 700;
-  color: #161616;
+  color: var(--text-title-grey);
   text-transform: uppercase;
 }
 
@@ -159,12 +159,12 @@
 .statNumber {
   font-size: 0.875rem;
   font-weight: 700;
-  color: #161616;
+  color: var(--text-title-grey);
 }
 
 .statLabel {
   font-size: 0.875rem;
-  color: #3a3a3a;
+  color: var(--text-default-grey);
 }
 
 .cardCta {
