@@ -218,6 +218,10 @@ describe("isDatesRuptureValid", () => {
   it("invalide si l'abandon précède la rupture", () => {
     expect(isDatesRuptureValid(makeValues({ still_at_cfa: false, date_abandon: "2026-05-01" }))).toBe(false);
   });
+
+  it("ignore une date d'abandon résiduelle quand le jeune est maintenu en formation", () => {
+    expect(isDatesRuptureValid(makeValues({ still_at_cfa: true, date_abandon: "2026-05-01" }))).toBe(true);
+  });
 });
 
 describe("isRentreeSansContratValid", () => {

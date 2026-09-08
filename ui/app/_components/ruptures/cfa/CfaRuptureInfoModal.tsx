@@ -13,7 +13,8 @@ export function CfaRuptureInfoModal() {
       title="Modifier le statut de rupture"
       buttons={[
         {
-          children: "Fermer",
+          // « Fermer » ferait doublon avec la croix du DSFR, qui porte déjà ce libellé.
+          children: "J'ai compris",
           doClosesModal: true,
           priority: "primary" as const,
         },

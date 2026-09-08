@@ -182,9 +182,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
         if (values.rdvPris === false && values.situationNon === null) errors.situationNon = "Requis";
         if (values.situationJeune === null) errors.situationJeune = "Requis";
         // Un RDV pris sur une collaboration doit revenir au CFA avec les prochaines actions.
-        if (values.rdvPris === true && !isStandaloneMode && !values.commentaire.trim()) {
-          errors.commentaire = "Requis";
-        }
+        if (collabStarted && values.rdvPris === true && !values.commentaire.trim()) errors.commentaire = "Requis";
       }
       if (values.contactReussi === false) {
         if (showRecontacterForm) {
@@ -225,7 +223,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
   });
 
   const { contactReussi } = formik.values;
-  const commentaireRequis = contactReussi === true && formik.values.rdvPris === true && !isStandaloneMode;
+  const commentaireRequis = collabStarted && contactReussi === true && formik.values.rdvPris === true;
   const commentaireEnErreur = formik.submitCount > 0 && !!formik.errors.commentaire;
   // Le bouton ne reste bloqué que sur les questions du tunnel : le commentaire manquant doit
   // pouvoir être soumis pour que le champ se signale.
@@ -497,7 +495,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                       trackPlausibleEvent("ml_form_contact_non_situation", undefined, { motif: "tentative_relancer" });
                     }}
                   />
-                  <span aria-hidden="true">🔄</span> Tentative de contact, à relancer
+                  <span aria-hidden="true">🔄</span> À recontacter plus tard
                 </label>
 
                 {formik.values.situationNonContact === "tentative_relancer" && !tentativeCalloutDismissed && (
@@ -930,7 +928,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                   {commentaireRequis ? (
                     <>
                       <strong>Détaillez les premières pistes d&apos;actions envisagées</strong>
-                      <span className={styles.required}>*</span>
+                      <span className={styles.required}> *</span>
                     </>
                   ) : (
                     <>
@@ -971,29 +969,33 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                         Ajoutez un commentaire pour garder une trace de votre suivi.
                       </p>
                     </>
-                  ) : (
+                  ) : commentaireRequis ? (
                     <>
                       <p className={styles.commentaireCalloutTitle}>
                         <i className="fr-icon-lightbulb-line fr-icon--sm" aria-hidden="true" />{" "}
-                        <strong>
-                          {commentaireRequis
-                            ? "Précisez les prochaines actions prévues pour le CFA"
-                            : "Ajoutez un commentaire pour le CFA"}
-                        </strong>
+                        <strong>Précisez les prochaines actions prévues pour le CFA</strong>
                       </p>
                       <p className={styles.commentaireCalloutBody}>
                         Ce dossier vous a été transmis par le CFA{" "}
                         <strong>{effectif.organisme?.nom || effectif.organisme?.raison_sociale || ""}</strong>
                         .
                         <br />
-                        {commentaireRequis ? (
-                          "Précisez au CFA les prochaines actions prévues, comme la date du rendez-vous prévu par exemple."
-                        ) : (
-                          <>
-                            <span aria-hidden="true">{"💡 "}</span>Ajoutez un commentaire à votre saisie est un plus
-                            pour la collaboration.
-                          </>
-                        )}
+                        Précisez au CFA les prochaines actions prévues, comme la date du rendez-vous prévu par exemple.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className={styles.commentaireCalloutTitle}>
+                        <i className="fr-icon-lightbulb-line fr-icon--sm" aria-hidden="true" />{" "}
+                        <strong>Ajoutez un commentaire pour le CFA</strong>
+                      </p>
+                      <p className={styles.commentaireCalloutBody}>
+                        Ce dossier vous a été transmis par le CFA{" "}
+                        <strong>{effectif.organisme?.nom || effectif.organisme?.raison_sociale || ""}</strong>
+                        .
+                        <br />
+                        <span aria-hidden="true">{"💡 "}</span>Ajoutez un commentaire à votre saisie est un plus pour la
+                        collaboration.
                       </p>
                     </>
                   )}

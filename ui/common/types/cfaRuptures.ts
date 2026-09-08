@@ -1,6 +1,5 @@
 export type {
   CfaCollaborationStatus,
-  CfaEffectifSituation,
   CfaSuiviCategory,
   ICfaEffectif,
   ICfaEffectifsResponse,
@@ -9,10 +8,10 @@ export type {
   ICfaSuiviMissionLocaleResponse,
 } from "shared/models/routes/organismes/cfa";
 
-import { CFA_COLLAB_STATUS, CFA_EFFECTIF_SITUATION, CFA_SUIVI_CATEGORY } from "shared/models/routes/organismes/cfa";
-import type { CfaCollaborationStatus, CfaEffectifSituation } from "shared/models/routes/organismes/cfa";
+import { CFA_COLLAB_STATUS, CFA_SUIVI_CATEGORY } from "shared/models/routes/organismes/cfa";
+import type { CfaCollaborationStatus } from "shared/models/routes/organismes/cfa";
 
-export { CFA_COLLAB_STATUS, CFA_EFFECTIF_SITUATION, CFA_SUIVI_CATEGORY };
+export { CFA_COLLAB_STATUS, CFA_SUIVI_CATEGORY };
 
 // Libellés des badges affichés dans la colonne "Collaboration avec la ML".
 export const COLLAB_STATUS_LABELS: Record<CfaCollaborationStatus, string> = {
@@ -42,14 +41,6 @@ export const ACTIVE_COLLAB_STATUS_LABELS: Partial<Record<CfaCollaborationStatus,
   [CFA_COLLAB_STATUS.COLLAB_DEMANDEE]: "Demande collab envoyée",
   [CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB]: "Contacté par la ML hors collaboration",
   [CFA_COLLAB_STATUS.TRAITE_PAR_ML]: "Traité par la ML",
-};
-
-export const SITUATION_LABELS: Record<CfaEffectifSituation, string> = {
-  [CFA_EFFECTIF_SITUATION.RUPTURE]: "Rupture",
-  [CFA_EFFECTIF_SITUATION.RUPTURE_DECA]: "Rupture sur DECA",
-  [CFA_EFFECTIF_SITUATION.PREVENTION_RUPTURE]: "Prévention de rupture",
-  [CFA_EFFECTIF_SITUATION.ABANDON]: "Abandon",
-  [CFA_EFFECTIF_SITUATION.SANS_CONTRAT]: "Sans contrat",
 };
 
 export const DECA_TOOLTIP_TEXT =
