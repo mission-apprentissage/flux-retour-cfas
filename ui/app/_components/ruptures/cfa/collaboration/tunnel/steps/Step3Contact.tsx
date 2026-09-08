@@ -68,7 +68,7 @@ export function Step3Contact({ prenom, nom, isMineur }: Step3ContactProps) {
   return (
     <div className={styles.fields}>
       <div className={styles.minorBanner}>
-        <span aria-hidden="true">💡</span>
+        <i className="fr-icon-lightbulb-line fr-icon--sm" aria-hidden="true" />
         <span>
           <strong>Merci de vérifier si les coordonnées du jeune sont correctes.</strong> Sinon, merci de les corriger
           afin que la Mission Locale puisse contacter le jeune dans les plus brefs délais.
@@ -118,7 +118,7 @@ export function Step3Contact({ prenom, nom, isMineur }: Step3ContactProps) {
         <>
           <p className={styles.blockTitle}>Coordonnées des responsables légaux du jeune</p>
           <div className={styles.minorBanner}>
-            <span aria-hidden="true">💡</span>
+            <i className="fr-icon-lightbulb-line fr-icon--sm" aria-hidden="true" />
             <span>
               <strong>
                 {prenom} {nom} a moins de 18 ans. Si vous les connaissez, renseignez les coordonnées de ses responsables

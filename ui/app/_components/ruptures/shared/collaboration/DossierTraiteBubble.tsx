@@ -24,7 +24,12 @@ export function DossierTraiteBubble({ log }: DossierTraiteBubbleProps) {
     <div className={styles.dossierTraiteBubble}>
       <div className={styles.sentBubbleSection}>
         <p className={styles.sentSectionTitle}>Situation</p>
-        <BooleanLine label="Jeune contacté" value={contactReussi} className={styles.dossierTraiteLine} />
+        <BooleanLine
+          label="Jeune contacté"
+          labelFaux="Pas de réponse du jeune"
+          value={contactReussi}
+          className={styles.dossierTraiteLine}
+        />
         {!contactReussi && log.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR && (
           <p className={styles.dossierTraiteLine}>
             {"🔄 "}

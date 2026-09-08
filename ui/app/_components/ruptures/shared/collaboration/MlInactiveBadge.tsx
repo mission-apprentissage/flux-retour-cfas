@@ -4,7 +4,7 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 // Symétrique du tag affiché côté ML pour un CFA non utilisateur (même style DSFR error, même libellé).
 export function MlInactiveBadge() {
   return (
-    <Badge as="span" severity="error">
+    <Badge as="span" severity="error" small>
       N&apos;utilise pas encore le Tableau de bord
     </Badge>
   );

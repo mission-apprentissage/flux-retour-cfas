@@ -49,10 +49,30 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
 
     if (organisationType === ORGANISATION_TYPE.MISSION_LOCALE) {
       baseItems.push({
-        text: "Mon tableau de bord",
+        text: "Dossiers prioritaires",
+        isActive: pathname === "/mission-locale",
         linkProps: {
           href: "/mission-locale",
           target: "_self",
+          onClick: () => trackPlausibleEvent("ml_onglet_prioritaires_ouvert"),
+        },
+      });
+      baseItems.push({
+        text: "Collaborations CFA",
+        isActive: pathname?.startsWith("/mission-locale/collaborations"),
+        linkProps: {
+          href: "/mission-locale/collaborations",
+          target: "_self",
+          onClick: () => trackPlausibleEvent("ml_onglet_collaborations_ouvert"),
+        },
+      });
+      baseItems.push({
+        text: "Tous les dossiers",
+        isActive: pathname?.startsWith("/mission-locale/ruptures"),
+        linkProps: {
+          href: "/mission-locale/ruptures",
+          target: "_self",
+          onClick: () => trackPlausibleEvent("ml_onglet_ruptures_ouvert"),
         },
       });
     } else if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION) {

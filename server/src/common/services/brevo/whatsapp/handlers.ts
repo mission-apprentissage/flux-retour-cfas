@@ -101,6 +101,9 @@ async function handleCallbackSideEffects(effectif: IMissionLocaleEffectif): Prom
         situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
         a_traiter: false,
         injoignable: true,
+        // passage automatique : daté, mais sans date_derniere_action_ml (pas une action ML)
+        date_dernier_passage_a_recontacter: now,
+        date_traitement: null,
         whatsapp_callback_requested: true,
         whatsapp_callback_requested_at: now,
         souhaite_rdv: true,
@@ -152,6 +155,8 @@ async function handleNoHelpSideEffects(effectif: IMissionLocaleEffectif): Promis
         a_traiter: false,
         injoignable: false,
         situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
+        // Traitement automatique : le dossier est considéré traité par le TBA à cette date.
+        date_traitement: now,
         whatsapp_no_help_responded: true,
         whatsapp_no_help_responded_at: now,
         updated_at: now,
@@ -200,6 +205,8 @@ async function handlePrequalifYesSideEffects(effectif: IMissionLocaleEffectif): 
         souhaite_rdv_source: "whatsapp_prequalif",
         injoignable: false,
         a_traiter: true,
+        // Le dossier redevient « à traiter » : une date de traitement antérieure est obsolète.
+        ...(shouldUnsetSituation ? { date_traitement: null } : {}),
         updated_at: now,
       },
       $unset: shouldUnsetSituation
@@ -266,6 +273,8 @@ async function handlePrequalifNoSideEffects(effectif: IMissionLocaleEffectif): P
         situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
         a_traiter: false,
         injoignable: false,
+        // Traitement automatique : le dossier est considéré traité par le TBA à cette date.
+        date_traitement: now,
         updated_at: now,
       },
       $unset: {

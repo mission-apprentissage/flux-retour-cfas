@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 import { ORGANISATION_TYPE } from "shared";
 
+import fond from "@/app/_components/layouts/fond.module.css";
 import { getSession } from "@/app/_utils/session.utils";
-
-import styles from "./organismes-fond.module.css";
 
 export default async function OrganismesLayout({ children }: { children: React.ReactNode }) {
   const user = await getSession();
@@ -13,5 +12,5 @@ export default async function OrganismesLayout({ children }: { children: React.R
     redirect("/");
   }
 
-  return <div className={styles.fond}>{children}</div>;
+  return <div className={fond.fond}>{children}</div>;
 }

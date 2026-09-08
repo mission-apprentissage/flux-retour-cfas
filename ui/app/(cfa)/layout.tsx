@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { ConnectedHeader } from "../_components/ConnectedHeader";
 import { UserContextProvider } from "../_components/context/UserContext";
 import { Footer } from "../_components/Footer";
+import fond from "../_components/layouts/fond.module.css";
 import { CfaInviteBanner } from "../_components/ruptures/cfa/CfaInviteBanner";
 import { CfaUpdateBanner } from "../_components/ruptures/cfa/CfaUpdateBanner";
 import { getSession } from "../_utils/session.utils";
@@ -23,7 +24,7 @@ export default async function RootLayout({ children }: { children: JSX.Element }
           <CfaUpdateBanner />
           <CfaInviteBanner />
         </div>
-        <main id="contenu" tabIndex={-1} className={styles.content}>
+        <main id="contenu" tabIndex={-1} className={fond.fond}>
           {children}
         </main>
         <Footer />

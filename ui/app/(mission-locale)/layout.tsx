@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { ConnectedHeader } from "../_components/ConnectedHeader";
 import { UserContextProvider } from "../_components/context/UserContext";
 import { Footer } from "../_components/Footer";
+import fond from "../_components/layouts/fond.module.css";
 import { getSession } from "../_utils/session.utils";
 import { Providers } from "../providers";
 
@@ -14,16 +15,13 @@ export default async function RootLayout({ children }: { children: JSX.Element }
   return (
     <Providers>
       <UserContextProvider user={user}>
-        <ConnectedHeader />
-        <div
-          style={{
-            flex: 1,
-            background: "var(--background-default-grey)",
-          }}
-        >
-          {children}
+        <div className={fond.page}>
+          <ConnectedHeader />
+          <main id="contenu" tabIndex={-1} className={fond.fond}>
+            {children}
+          </main>
+          <Footer />
         </div>
-        <Footer />
         <CrispChatNoSSR />
       </UserContextProvider>
     </Providers>
