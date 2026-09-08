@@ -1,0 +1,24 @@
+.statutCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+/* Un libellé de statut coupé en deux (« À / RECONTACTER ») double la hauteur de la ligne. */
+.statutCell :global(.fr-badge) {
+  white-space: nowrap;
+}
+
+.derniereActivite {
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--text-mention-grey);
+  white-space: nowrap;
+}
+
+.derniereActiviteAlerte {
+  composes: derniereActivite;
+  font-weight: 700;
+  color: var(--text-default-warning);
+}

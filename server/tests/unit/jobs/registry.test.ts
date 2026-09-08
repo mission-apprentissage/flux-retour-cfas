@@ -121,6 +121,7 @@ describe("registre des jobs", () => {
       "tmp:migrate:effectifs-queue",
       "tmp:migrate:mission-locale-current-status",
       "tmp:migrate:mission-locale-effectif-snapshot",
+      "tmp:migrate:ml-suivi-dates",
       "tmp:migrate:statuts-then-ml-current-status",
       "tmp:migration:dedoublon-organisation",
       "tmp:migration:ml-activation-date",

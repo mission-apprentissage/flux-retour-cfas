@@ -3,8 +3,9 @@ import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
 import { AggregationCursor, MongoServerError } from "mongodb";
-import { STATUT_APPRENANT } from "shared/constants";
+import { ML_DELAI_RELANCE_JOURS, ML_TRI_COLONNE, STATUT_APPRENANT } from "shared/constants";
 import { CFA_COLLAB_AUTO_SEND_DELAI_DAYS } from "shared/constants/collaboration";
+import type { MlTri } from "shared/constants/missionLocale";
 import {
   IEffectif,
   IOrganisationMissionLocale,
@@ -45,6 +46,7 @@ import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
 import {
   DATE_START_RUPTURES,
   STATUTS_SORTIE_RUPTURE,
+  addSituationDossierField,
   buildEffRuptureAgeFilter,
   buildVisibilityWindowMatch,
   createDernierStatutFieldPipeline as createDernierStatutFieldPipelineShared,
@@ -53,6 +55,7 @@ import {
 
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
+import { computeSuiviDatesSet } from "./mission-locale-suivi-dates";
 import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "./mission-locale.constants";
 
 const DECA_RUPTURE_DATE_DEBUT = new Date("2025-11-01");
@@ -201,6 +204,18 @@ const matchTraitementEffectifPipelineMl = (
           },
         },
       ];
+    case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+      return [{ $match: { $or: [{ a_traiter: true }, { injoignable: true }] } }];
+    case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
+      return [
+        {
+          $match: {
+            $and: [{ "organisme_data.acc_conjoint": true }, { $or: [{ a_traiter: true }, { injoignable: true }] }],
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.COLLAB_TRAITE:
+      return [{ $match: { a_traiter: false, injoignable: false, "organisme_data.acc_conjoint": true } }];
   }
 
   const WHATSAPP_CALLBACK_INJOIGNABLE = { whatsapp_callback_requested: true, injoignable: true };
@@ -706,6 +721,11 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
           souhaite_rdv_at: "$souhaite_rdv_at",
           mineur: "$a_risque_mineur",
           acc_conjoint: "$a_risque_accompagnement_conjoint",
+          situation_dossier: "$situation_dossier",
+          date_reception: "$date_reception",
+          date_traitement: "$date_traitement",
+          date_dernier_passage_a_recontacter: "$date_dernier_passage_a_recontacter",
+          date_derniere_action_ml: "$date_derniere_action_ml",
         }
       : {
           unread_by_current_user: "$unread_by_current_user",
@@ -724,6 +744,128 @@ const addDateReferenceField = () => [
     $addFields: {
       date_reference: { $ifNull: ["$date_rupture", "$organisme_data.reponse_at", "$created_at"] },
     },
+  },
+];
+
+/** Réception du dossier par la ML : envoi du CFA si collaboration, sinon création. Jamais la date de rupture. */
+const addDateReceptionField = () => [
+  {
+    $addFields: {
+      date_reception: {
+        $cond: [
+          { $eq: ["$organisme_data.acc_conjoint", true] },
+          { $ifNull: ["$organisme_data.reponse_at", "$created_at"] },
+          "$created_at",
+        ],
+      },
+    },
+  },
+];
+
+/**
+ * Remonte en tête les dossiers à recontacter et les collaborations CFA sans action ML depuis
+ * ML_DELAI_RELANCE_JOURS. À placer après addFieldTraitementStatus et addDateReceptionField.
+ */
+const addNudgeFields = () => [
+  {
+    $addFields: {
+      derniere_activite_ml: { $ifNull: ["$date_derniere_action_ml", "$date_reception"] },
+    },
+  },
+  {
+    $addFields: {
+      relance_urgente: {
+        $cond: [
+          {
+            $and: [
+              {
+                $or: [
+                  { $eq: ["$injoignable", true] },
+                  { $and: [{ $eq: ["$a_traiter", true] }, { $eq: ["$organisme_data.acc_conjoint", true] }] },
+                ],
+              },
+              {
+                $lte: [
+                  "$derniere_activite_ml",
+                  { $dateSubtract: { startDate: "$$NOW", unit: "day", amount: ML_DELAI_RELANCE_JOURS } },
+                ],
+              },
+            ],
+          },
+          true,
+          false,
+        ],
+      },
+    },
+  },
+];
+
+/** À utiliser partout où l'on trie ces listes (liste et précédent/suivant) pour un ordre identique. */
+const getSortPrerequisiteStages = (nom_liste: API_EFFECTIF_LISTE) => {
+  switch (nom_liste) {
+    case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+    case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
+    case API_EFFECTIF_LISTE.COLLAB_TRAITE:
+      return addNudgeFields();
+    default:
+      return [];
+  }
+};
+
+/**
+ * Champs de tri par colonne : le nom concaténé et minusculisé, et le rang du statut dérivé.
+ * `situation_dossier` vient d'addSituationDossierField(), à appeler avant le $sort.
+ */
+const addTriColonneFields = () => [
+  {
+    $addFields: {
+      tri_nom: {
+        $toLower: {
+          $concat: [
+            { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom", ""] },
+            " ",
+            { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom", ""] },
+          ],
+        },
+      },
+      tri_statut: {
+        $switch: {
+          branches: [
+            { case: "$a_traiter", then: 0 },
+            { case: "$injoignable", then: 1 },
+          ],
+          default: 2,
+        },
+      },
+    },
+  },
+];
+
+/** Tri demandé par le conseiller. `_id` ferme chaque tri pour garder le précédent/suivant déterministe. */
+const getTriColonneRules = (colonne: ML_TRI_COLONNE, ordre: 1 | -1) => {
+  switch (colonne) {
+    case ML_TRI_COLONNE.NOM:
+      return { tri_nom: ordre, _id: 1 };
+    case ML_TRI_COLONNE.SITUATION:
+      return { situation_dossier: ordre, tri_nom: 1, _id: 1 };
+    case ML_TRI_COLONNE.FORMATION:
+      return { "effectif_snapshot.formation.libelle_long": ordre, tri_nom: 1, _id: 1 };
+    case ML_TRI_COLONNE.COMMUNE:
+      return { "effectif_snapshot.apprenant.adresse.commune": ordre, tri_nom: 1, _id: 1 };
+    case ML_TRI_COLONNE.STATUT:
+      return { tri_statut: ordre, date_reference: -1, _id: 1 };
+    default:
+      throw Boom.badRequest(`Colonne de tri inconnue: ${colonne}`);
+  }
+};
+
+/** Étages de tri d'une liste ML : ordre de priorité par défaut, colonne demandée sinon. */
+const getTriStages = (nom_liste: API_EFFECTIF_LISTE, tri?: MlTri | null) => [
+  ...getSortPrerequisiteStages(nom_liste),
+  ...addSituationDossierField(),
+  ...(tri ? addTriColonneFields() : []),
+  {
+    $sort: tri ? getTriColonneRules(tri.colonne, tri.ordre === "desc" ? -1 : 1) : getSortedRulesByListeType(nom_liste),
   },
 ];
 
@@ -762,6 +904,25 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
         a_risque_whatsapp_callback: -1,
         a_contacter: -1,
       };
+    // Listes fusionnées : nudge en tête, puis les critères de priorité (Collaboration CFA,
+    // Souhaite un RDV, Mineur, RQTH — dissociés), puis À recontacter avant À traiter.
+    // `_id` en dernier pour un ordre déterministe (précédent/suivant de la fiche).
+    case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+    case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
+      return {
+        relance_urgente: -1,
+        a_risque_accompagnement_conjoint: -1,
+        a_risque_souhaite_rdv: -1,
+        a_risque_mineur: -1,
+        a_risque_rqth: -1,
+        injoignable: -1,
+        date_reference: -1,
+        _id: 1,
+      };
+    case API_EFFECTIF_LISTE.COLLAB_TRAITE:
+      return { date_traitement: -1, date_reference: -1, _id: 1 };
+    default:
+      throw Boom.badRequest(`Liste inconnue: ${nom_liste}`);
   }
 };
 
@@ -999,6 +1160,7 @@ export const missionLocaleBaseAggregation = async (
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(organisation.type),
     ...addDateReferenceField(),
+    ...addDateReceptionField(),
   ];
 };
 
@@ -1006,7 +1168,8 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifId: ObjectId,
   nom_liste: API_EFFECTIF_LISTE,
-  codesPostaux?: string[]
+  codesPostaux?: string[],
+  tri?: MlTri | null
 ) => {
   const aggregation = [
     ...(await missionLocaleBaseAggregation(organisation)),
@@ -1015,9 +1178,8 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
     ...(codesPostaux && codesPostaux.length > 0
       ? [{ $match: { "effectif_snapshot.apprenant.adresse.code_postal": { $in: codesPostaux } } }]
       : []),
-    {
-      $sort: getSortedRulesByListeType(nom_liste),
-    },
+    // Même tri que la liste, sinon la numérotation « dossier n°X sur N » ne lui correspond plus.
+    ...getTriStages(nom_liste, tri),
     {
       $project: {
         _id: 0,
@@ -1053,11 +1215,17 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
 export const getEffectifsParMoisByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema,
-  userId?: ObjectId
+  userId?: ObjectId,
+  /** Chaque mois réel sur toutes les années, sans bucket +180j : navigation par année. */
+  tousLesMois = false,
+  /** Regrouper et trier sur la réception du dossier plutôt que sur sa date de rupture. */
+  parDateReception = false
 ) => {
+  const champDate = parDateReception ? "$date_reception" : "$date_reference";
   const { type } = effectifsParMoisFiltersMissionLocale;
 
-  const aTraiter = type === API_EFFECTIF_LISTE.A_TRAITER;
+  // Les listes de dossiers non traités affichent, par mois, le nombre de dossiers déjà traités.
+  const aTraiter = type === API_EFFECTIF_LISTE.A_TRAITER || type === API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER;
 
   const getSevenLastMonth = () => {
     return [
@@ -1091,6 +1259,15 @@ export const getEffectifsParMoisByMissionLocaleId = async (
       case API_EFFECTIF_LISTE.A_TRAITER:
         return {
           $and: [{ $eq: ["$$ROOT.a_traiter", true] }, { $eq: ["$$ROOT.in_activation_range", true] }],
+        };
+      // Sous-onglet unique « À traiter ou recontacter » de la liste ruptures : les deux statuts
+      // sont mélangés dans les mêmes buckets mensuels.
+      case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+        return {
+          $or: [
+            { $and: [{ $eq: ["$$ROOT.a_traiter", true] }, { $eq: ["$$ROOT.in_activation_range", true] }] },
+            { $eq: ["$$ROOT.injoignable", true] },
+          ],
         };
       case API_EFFECTIF_LISTE.PRIORITAIRE:
         return {
@@ -1141,18 +1318,27 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     ...addFieldFromActivationDate(),
     ...addFieldTraitementStatus(organisation.type),
     ...addDateReferenceField(),
+    ...addDateReceptionField(),
   ];
 
   organismeMissionLocaleAggregation.push(
     {
       $sort: {
-        date_reference: -1,
+        [parDateReception ? "date_reception" : "date_reference"]: -1,
       },
     },
     ...lookUpOrganisme(),
     {
       $addFields: {
-        firstDayOfMonth: buildFirstDayOfMonthExpr(),
+        firstDayOfMonth: tousLesMois
+          ? {
+              $dateToString: {
+                date: {
+                  $dateFromParts: { year: { $year: champDate }, month: { $month: champDate } },
+                },
+              },
+            }
+          : buildFirstDayOfMonthExpr(),
       },
     },
     {
@@ -1183,6 +1369,10 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 injoignable: "$$ROOT.injoignable",
                 nouveau_contrat: "$nouveau_contrat",
                 situation: "$$ROOT.situation",
+                date_reception: "$$ROOT.date_reception",
+                date_traitement: "$$ROOT.date_traitement",
+                date_dernier_passage_a_recontacter: "$$ROOT.date_dernier_passage_a_recontacter",
+                date_derniere_action_ml: "$$ROOT.date_derniere_action_ml",
                 whatsapp_callback_requested: { $ifNull: ["$$ROOT.whatsapp_callback_requested", false] },
                 whatsapp_no_help_responded: { $ifNull: ["$$ROOT.whatsapp_no_help_responded", false] },
                 souhaite_rdv: { $ifNull: ["$$ROOT.souhaite_rdv", false] },
@@ -1209,7 +1399,15 @@ export const getEffectifsParMoisByMissionLocaleId = async (
           ? {
               treated_count: {
                 $sum: {
-                  $cond: [{ $eq: ["$$ROOT.a_traiter", false] }, 1, 0],
+                  $cond: [
+                    // Sur la liste fusionnée, un dossier à recontacter reste actionnable :
+                    // il est affiché dans le mois et ne doit pas compter comme traité.
+                    type === API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER
+                      ? { $and: [{ $eq: ["$$ROOT.a_traiter", false] }, { $eq: ["$$ROOT.injoignable", false] }] }
+                      : { $eq: ["$$ROOT.a_traiter", false] },
+                    1,
+                    0,
+                  ],
                 },
               },
             }
@@ -1233,6 +1431,16 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     }
   );
   const result = await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
+
+  // On renvoie les mois réellement présents, sans compléter les mois vides ni rogner la fin de
+  // liste. Un mois sans dossier actionnable mais avec des dossiers traités est conservé : c'est
+  // lui que la navigation latérale coche.
+  if (tousLesMois) {
+    return result.filter(
+      ({ data, treated_count }) => (Array.isArray(data) && data.length > 0) || (treated_count ?? 0) > 0
+    );
+  }
+
   const sevenLastMonth = getSevenLastMonth();
   const mapped = sevenLastMonth.map((data) => {
     const found = result.find(({ month }) => {
@@ -1258,7 +1466,8 @@ export const getEffectifFromMissionLocaleId = async (
   effectifId: string,
   nom_liste: API_EFFECTIF_LISTE,
   userId?: ObjectId,
-  codesPostaux?: string[]
+  codesPostaux?: string[],
+  tri?: MlTri | null
 ) => {
   const aggregation = [
     ...(await generateOrganisationMatchStage(organisation)),
@@ -1269,6 +1478,8 @@ export const getEffectifFromMissionLocaleId = async (
       },
     },
     ...addFieldTraitementStatus(organisation.type),
+    ...addDateReceptionField(),
+    ...addSituationDossierField(),
     ...createDernierStatutFieldPipelineML(),
     ...lookUpOrganisme(true),
     {
@@ -1372,7 +1583,8 @@ export const getEffectifFromMissionLocaleId = async (
     organisation,
     new ObjectId(effectifId),
     nom_liste,
-    codesPostaux
+    codesPostaux,
+    tri
   );
   return { effectif, ...next };
 };
@@ -1403,6 +1615,7 @@ export const getEffectifsListByMissionLocaleId = async (
   const effectifsMissionLocaleAggregation = [
     ...(await missionLocaleBaseAggregation(organisation)),
     ...matchTraitementEffectifPipelineMl(type, organisation.type),
+    ...addSituationDossierField(),
     ...lookUpOrganisme(true),
     ...computeMonthParams(),
     {
@@ -1487,6 +1700,10 @@ export const getEffectifsListByMissionLocaleId = async (
         collaboration_cfa: "$a_risque_accompagnement_conjoint",
         disponible_whatsapp: { $ifNull: ["$whatsapp_callback_requested", false] },
         effectif_choice: "$_effectif_choice_label",
+        situation_dossier: "$situation_dossier",
+        date_reception: "$date_reception",
+        date_traitement: "$date_traitement",
+        date_dernier_passage_a_recontacter: "$date_dernier_passage_a_recontacter",
         ml_situation: "$situation",
         ml_deja_connu: "$deja_connu",
         ml_commentaires: "$commentaires",
@@ -1580,6 +1797,10 @@ export const getEffectifARisqueByMissionLocaleId = async (
               whatsapp_callback_requested: { $ifNull: ["$whatsapp_callback_requested", false] },
               whatsapp_no_help_responded: { $ifNull: ["$whatsapp_no_help_responded", false] },
               souhaite_rdv: { $ifNull: ["$souhaite_rdv", false] },
+              date_reception: "$date_reception",
+              date_traitement: "$date_traitement",
+              date_dernier_passage_a_recontacter: "$date_dernier_passage_a_recontacter",
+              date_derniere_action_ml: "$date_derniere_action_ml",
             },
           },
         ],
@@ -1598,22 +1819,134 @@ export const getEffectifARisqueByMissionLocaleId = async (
   return result;
 };
 
+type NomListeFusionnee =
+  | API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER
+  | API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER
+  | API_EFFECTIF_LISTE.COLLAB_TRAITE;
+
+/** Listes plates de l'espace ML, triées serveur, avec les compteurs des sous-onglets. */
+export const getEffectifsFusionnesByMissionLocaleId = async (
+  organisation: IOrganisationMissionLocale,
+  nomListe: NomListeFusionnee,
+  tri?: MlTri | null
+) => {
+  const isCollab = nomListe !== API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER;
+
+  const pipeline = [
+    ...(await missionLocaleBaseAggregation(organisation)),
+    ...(isCollab ? [{ $match: { "organisme_data.acc_conjoint": true } }] : []),
+    {
+      $facet: {
+        liste: [
+          ...matchTraitementEffectifPipelineMl(nomListe, organisation.type),
+          ...getTriStages(nomListe, tri),
+          ...lookUpOrganisme(),
+          {
+            $project: {
+              _id: 0,
+              id: "$effectif_snapshot._id",
+              nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
+              prenom: { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom"] },
+              libelle_formation: "$effectif_snapshot.formation.libelle_long",
+              commune: "$effectif_snapshot.apprenant.adresse.commune",
+              code_postal: "$effectif_snapshot.apprenant.adresse.code_postal",
+              organisme_nom: "$organisme.nom",
+              organisme_raison_sociale: "$organisme.raison_sociale",
+              organisme_enseigne: "$organisme.enseigne",
+              prioritaire: "$a_risque",
+              date_rupture: "$date_rupture",
+              a_traiter: "$a_traiter",
+              injoignable: "$injoignable",
+              nouveau_contrat: "$nouveau_contrat",
+              mineur: "$a_risque_mineur",
+              acc_conjoint: "$a_risque_accompagnement_conjoint",
+              rqth: "$effectif_snapshot.apprenant.rqth",
+              whatsapp_callback_requested: { $ifNull: ["$whatsapp_callback_requested", false] },
+              whatsapp_no_help_responded: { $ifNull: ["$whatsapp_no_help_responded", false] },
+              souhaite_rdv: { $ifNull: ["$souhaite_rdv", false] },
+              situation: "$situation",
+              situation_dossier: 1,
+              relance_urgente: 1,
+              date_reception: 1,
+              date_traitement: 1,
+              date_dernier_passage_a_recontacter: 1,
+              date_derniere_action_ml: 1,
+            },
+          },
+        ],
+        counts: [
+          {
+            $group: {
+              _id: null,
+              a_traiter_ou_recontacter: {
+                $sum: {
+                  $cond: [{ $or: [{ $eq: ["$a_traiter", true] }, { $eq: ["$injoignable", true] }] }, 1, 0],
+                },
+              },
+              traite: {
+                $sum: {
+                  $cond: [{ $and: [{ $eq: ["$a_traiter", false] }, { $eq: ["$injoignable", false] }] }, 1, 0],
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        effectifs: "$liste",
+        // $let force l'évaluation comme expression : sans lui, le document serait interprété
+        // comme une projection imbriquée du tableau produit par le $facet.
+        counts: {
+          $let: {
+            vars: { compteurs: { $arrayElemAt: ["$counts", 0] } },
+            in: {
+              a_traiter_ou_recontacter: { $ifNull: ["$$compteurs.a_traiter_ou_recontacter", 0] },
+              traite: { $ifNull: ["$$compteurs.traite", 0] },
+            },
+          },
+        },
+      },
+    },
+  ];
+
+  const [result] = await missionLocaleEffectifsDb().aggregate(pipeline).toArray();
+  return result as {
+    effectifs: Array<Record<string, unknown>>;
+    counts: { a_traiter_ou_recontacter: number; traite: number };
+  };
+};
+
 export async function getAllEffectifsParMois(
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   userId?: ObjectId
 ) {
-  const fetchByType = (type: API_EFFECTIF_LISTE) =>
-    getEffectifsParMoisByMissionLocaleId(organisation, { type } as IEffectifsParMoisFiltersMissionLocaleSchema, userId);
+  const fetchByType = (type: API_EFFECTIF_LISTE, tousLesMois = false, parDateReception = false) =>
+    getEffectifsParMoisByMissionLocaleId(
+      organisation,
+      { type } as IEffectifsParMoisFiltersMissionLocaleSchema,
+      userId,
+      tousLesMois,
+      parDateReception
+    );
 
-  const [a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable] = await Promise.all([
-    fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
-    fetchByType(API_EFFECTIF_LISTE.TRAITE),
-    getEffectifARisqueByMissionLocaleId(organisation, API_EFFECTIF_LISTE.PRIORITAIRE),
-    getEffectifARisqueByMissionLocaleId(organisation, API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE),
-    fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
-  ]);
+  // La liste ML des dossiers traités se navigue par année : elle a besoin de tous les mois.
+  const estMissionLocale = organisation.type === "MISSION_LOCALE";
 
-  return { a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable };
+  const [a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable, a_traiter_ou_recontacter] =
+    await Promise.all([
+      fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
+      fetchByType(API_EFFECTIF_LISTE.TRAITE, estMissionLocale, estMissionLocale),
+      getEffectifARisqueByMissionLocaleId(organisation, API_EFFECTIF_LISTE.PRIORITAIRE),
+      getEffectifARisqueByMissionLocaleId(organisation, API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE),
+      fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
+      // Sous-onglet unique de la liste ruptures : à traiter et à recontacter dans les mêmes mois.
+      // Propre à l'espace ML : côté organisme, un dossier n'est jamais « à recontacter ».
+      estMissionLocale ? fetchByType(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER, true, true) : [],
+    ]);
+
+  return { a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable, a_traiter_ou_recontacter };
 }
 
 export const getMissionLocaleRupturantToCheckMail = async (): Promise<Array<string>> => {
@@ -2263,6 +2596,7 @@ export const setEffectifMissionLocaleData = async (
     effectif_id: new ObjectId(effectifId),
   });
 
+  const now = new Date();
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
     {
       mission_locale_id: missionLocaleId,
@@ -2271,7 +2605,8 @@ export const setEffectifMissionLocaleData = async (
     {
       $set: {
         ...dbSetObject,
-        updated_at: new Date(),
+        ...computeSuiviDatesSet(effectifFields.situation, Object.keys(dbSetObject).length > 0, now),
+        updated_at: now,
         ...(effectif?.organisme_data?.acc_conjoint
           ? {
               "organisme_data.has_unread_notification": true,
@@ -2891,6 +3226,10 @@ export const getMissionLocaleStat = async (
 const MERGEABLE_FIELDS = [
   "situation",
   "situation_autre",
+  // dates de suivi : sans elles, le keeper hérite d'une situation sans sa date (sous-texte et tri faussés)
+  "date_traitement",
+  "date_dernier_passage_a_recontacter",
+  "date_derniere_action_ml",
   "commentaires",
   "deja_connu",
   "connaissance_ml",

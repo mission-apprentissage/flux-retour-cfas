@@ -672,6 +672,10 @@ describe("WhatsApp Service", () => {
       expect((effectif as any)?.a_traiter).toBe(false);
       expect((effectif as any)?.injoignable).toBe(true);
       expect(effectif?.whatsapp_no_help_responded).toBeUndefined();
+      // passage automatique à « À recontacter » : daté pour l'affichage, sans action ML
+      expect(effectif?.date_dernier_passage_a_recontacter).toBeInstanceOf(Date);
+      expect(effectif?.date_traitement).toBeNull();
+      expect(effectif?.date_derniere_action_ml ?? null).toBeNull();
       expect(sendEmail).toHaveBeenCalledWith(
         "conseiller@ml.fr",
         "whatsapp_callback_notification",
@@ -690,6 +694,9 @@ describe("WhatsApp Service", () => {
       expect((effectif as any)?.a_traiter).toBe(false);
       expect(effectif?.whatsapp_no_help_responded).toBe(true);
       expect(effectif?.whatsapp_callback_requested).toBeUndefined();
+      // traitement automatique : le dossier est daté traité, sans action ML
+      expect(effectif?.date_traitement).toBeInstanceOf(Date);
+      expect(effectif?.date_derniere_action_ml ?? null).toBeNull();
 
       // Vérifie qu'un log a été créé
       const logs = await missionLocaleEffectifsLogDb().find({ mission_locale_effectif_id: effectifId }).toArray();
@@ -727,6 +734,9 @@ describe("WhatsApp Service", () => {
       expect((effectif as any)?.injoignable).toBe(true);
       expect(effectif?.whatsapp_callback_requested).toBe(true);
       expect(effectif?.whatsapp_no_help_responded).toBeUndefined();
+      // le retour à « À recontacter » annule la date de traitement automatique du no_help
+      expect(effectif?.date_traitement).toBeNull();
+      expect(effectif?.date_dernier_passage_a_recontacter).toBeInstanceOf(Date);
       expect(sendEmail).toHaveBeenCalledWith(
         "conseiller@ml.fr",
         "whatsapp_callback_notification",

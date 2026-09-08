@@ -103,6 +103,9 @@ export enum API_EFFECTIF_LISTE {
   INJOIGNABLE_PRIORITAIRE = "injoignable_prioritaire",
   A_TRAITER_PRIORITAIRE = "a_traiter_prioritaire",
   TRAITE_PRIORITAIRE = "traite_prioritaire",
+  A_TRAITER_OU_RECONTACTER = "a_traiter_ou_recontacter",
+  COLLAB_A_TRAITER_OU_RECONTACTER = "collab_a_traiter_ou_recontacter",
+  COLLAB_TRAITE = "collab_traite",
 }
 
 export const zSituationEnum = z.nativeEnum(SITUATION_ENUM);
@@ -265,6 +268,22 @@ const zMissionLocaleEffectif = z.object({
   a_traiter: z.boolean().nullish(),
   injoignable: z.boolean().nullish(),
   nouveau_contrat: z.boolean().nullish(),
+  date_traitement: z
+    .date()
+    .nullish()
+    .describe(
+      "Date à laquelle le dossier a été traité (situation posée hors CONTACTE_SANS_RETOUR). Remise à null si le dossier repasse à traiter ou à recontacter"
+    ),
+  date_dernier_passage_a_recontacter: z
+    .date()
+    .nullish()
+    .describe("Date du dernier passage manuel du dossier au statut « À recontacter » (situation CONTACTE_SANS_RETOUR)"),
+  date_derniere_action_ml: z
+    .date()
+    .nullish()
+    .describe(
+      "Date de la dernière écriture d'un utilisateur ML sur le dossier (référence du nudge). Les événements automatiques (WhatsApp, refresh de snapshot) ne la mettent pas à jour"
+    ),
   current_status: z.object({
     value: zStatutApprenantEnum.nullish(),
     date: z.date().nullish(),

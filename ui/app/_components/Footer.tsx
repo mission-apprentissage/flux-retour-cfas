@@ -23,11 +23,10 @@ export function Footer() {
             alt="Un service proposé par numerique.gouv"
             className="footer-operator-logo"
           />
-          Mandatée par le Ministère du Travail, de l&apos;Emploi et de l&apos;Insertion, le Ministère de la
-          Transformation et de la Fonction publiques, le Ministère de l&apos;Éducation Nationale, de la Jeunesse et des
-          Sports, le Ministère de la Recherche, de l&apos;Enseignement Supérieur et de l&apos;Innovation, la Mission
-          interministérielle pour l&apos;apprentissage développe plusieurs services destinés à faciliter les entrées en
-          apprentissage.
+          Le Tableau de bord est la plateforme qui outille la collaboration entre les acteurs de l&apos;apprentissage et
+          le service public à l&apos;emploi. Le Tableau de bord participe à la prévention de rupture et à la lutte
+          contre le décrochage après une rupture de contrat d&apos;apprentissage en permettant à chaque jeune de
+          bénéficier d&apos;un accompagnement du service public dans les moments clés de son parcours.
         </>
       }
       bottomItems={[
@@ -40,7 +39,7 @@ export function Footer() {
           linkProps: { href: PAGES.static.mentionsLegales.getPath() },
         },
         {
-          text: "Conditions générales d’utilisation",
+          text: "CGU",
           linkProps: { href: PAGES.static.cgu.getPath() },
         },
         {
@@ -52,21 +51,13 @@ export function Footer() {
           },
         },
         {
-          text: "Politique de confidentialité",
+          text: "Données personnelles",
           linkProps: { href: PAGES.static.politiqueConfidentialite.getPath() },
         },
         {
           text: "À propos",
           linkProps: {
             href: "https://beta.gouv.fr/startups/tdb-apprentissage.html",
-            target: "_blank",
-            rel: "noopener noreferrer",
-          },
-        },
-        {
-          text: "Journal des évolutions",
-          linkProps: {
-            href: "https://www.notion.so/mission-apprentissage/Journal-des-volutions-5c9bec4ae3c3451da671f3f684ee994f",
             target: "_blank",
             rel: "noopener noreferrer",
           },

@@ -2,20 +2,21 @@
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import Image from "next/image";
-import { ReactNode } from "react";
+import { ReactNode, Ref } from "react";
 
 import styles from "./Tunnel.module.css";
 
 interface TunnelLayoutProps {
   tips: ReactNode[];
   stepNumber: 1 | 2 | 3;
-  title?: string;
+  title?: ReactNode;
   nextStepLabel?: string;
   onBack?: () => void;
   backLabel?: string;
   onCancel: () => void;
   children: ReactNode;
   footer: ReactNode;
+  contentRef?: Ref<HTMLDivElement>;
 }
 
 export function TunnelLayout({
@@ -28,6 +29,7 @@ export function TunnelLayout({
   onCancel,
   children,
   footer,
+  contentRef,
 }: TunnelLayoutProps) {
   return (
     <div className={styles.page}>
@@ -53,15 +55,13 @@ export function TunnelLayout({
 
           {tips.map((tip, index) => (
             <div key={index} className={styles.tipCard}>
-              <span className={styles.tipIcon} aria-hidden="true">
-                💡
-              </span>
+              <i className={`fr-icon-lightbulb-line fr-icon--sm ${styles.tipIcon}`} aria-hidden="true" />
               <p className={styles.tipText}>{tip}</p>
             </div>
           ))}
         </aside>
 
-        <div className={styles.content}>
+        <div className={styles.content} ref={contentRef}>
           {onBack && (
             <Button
               priority="tertiary no outline"

@@ -11,11 +11,6 @@
   align-items: center;
 }
 
-.content {
-  flex: 1;
-  background: linear-gradient(180deg, #f6f6f6 5.73%, #f5f5fe 41.13%);
-}
-
 @media (max-width: 60em) {
   .bannerSlot:has(> *) {
     min-height: 9.75rem;

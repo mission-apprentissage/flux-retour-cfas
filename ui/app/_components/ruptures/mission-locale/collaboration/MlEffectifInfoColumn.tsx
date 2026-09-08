@@ -5,6 +5,7 @@ import { IEffectifMissionLocale } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import {
+  aDesBadgesDePriorite,
   EffectifPriorityBadgeMultiple,
   EffectifStatusBadge,
 } from "@/app/_components/ruptures/shared/ui/EffectifStatusBadge";
@@ -31,6 +32,8 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
   const age = getAge(effectif.date_de_naissance);
   const isMineur = typeof age === "number" && age < 18;
   const organismeName = effectif.organisme?.nom || effectif.organisme?.raison_sociale || "Organisme non renseigné";
+  const badgeNouveauContrat = effectif.nouveau_contrat && (effectif.a_traiter || effectif.injoignable);
+  const aDesBadges = badgeNouveauContrat || aDesBadgesDePriorite(effectif, { includeFinDeFormation: true });
 
   return (
     <div className={styles.infoColumn}>
@@ -43,14 +46,16 @@ export function MlEffectifInfoColumn({ effectif }: MlEffectifInfoColumnProps) {
 
       <hr className={styles.separator} />
 
-      <div className={styles.badgesGroup}>
-        {effectif.nouveau_contrat && (effectif.a_traiter || effectif.injoignable) && (
-          <EffectifStatusBadge effectif={effectif} />
-        )}
-        <EffectifPriorityBadgeMultiple effectif={effectif} organisation="MISSION_LOCALE" />
-      </div>
+      {aDesBadges && (
+        <>
+          <div className={styles.badgesGroup}>
+            {badgeNouveauContrat && <EffectifStatusBadge effectif={effectif} />}
+            <EffectifPriorityBadgeMultiple effectif={effectif} organisation="MISSION_LOCALE" />
+          </div>
 
-      <hr className={styles.separator} />
+          <hr className={styles.separator} />
+        </>
+      )}
 
       <p className={styles.sectionTitle}>Infos et coordonnées</p>
 

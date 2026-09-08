@@ -40,42 +40,49 @@ export function CfaEffectifInfoColumn({ effectif, onToggleRupture }: CfaEffectif
         </h1>
       </div>
 
-      <hr className={styles.separator} />
+      {/* Hors rupture, le statut n'a pas à être posé sur la fiche : la qualification passe par le tunnel. */}
+      {enRupture && (
+        <>
+          <hr className={styles.separator} />
 
-      <div className={styles.ruptureBlock}>
-        <p className={styles.ruptureLabel}>
-          En rupture de contrat ?
-          {enRupture && (
-            <span style={{ marginLeft: "0.25rem" }}>
-              <Tooltip
-                kind="hover"
-                title={
-                  <>
-                    Sur la version actuelle du Tableau de bord vous ne pouvez pas supprimer le statut &quot;En
-                    rupture&quot; sur le dossier d&apos;un jeune. Si le problème persiste ou que vous souhaitez nous
-                    faire part d&apos;une recommandation{" "}
-                    <a href="https://cfas.apprentissage.beta.gouv.fr/contact" target="_blank" rel="noopener noreferrer">
-                      Écrivez-nous directement
-                    </a>
-                    , l&apos;équipe du service reste disponible.
-                  </>
-                }
-              />
-            </span>
-          )}
-        </p>
-        <ToggleSwitch
-          inputTitle="En rupture de contrat"
-          label=""
-          labelPosition="left"
-          checked={enRupture}
-          onChange={() => {
-            if (enRupture) trackPlausibleEvent("cfa_rupture_contestee");
-            onToggleRupture?.();
-          }}
-          showCheckedHint={false}
-        />
-      </div>
+          <div className={styles.ruptureBlock}>
+            <p className={styles.ruptureLabel}>
+              En rupture de contrat ?
+              <span style={{ marginLeft: "0.25rem" }}>
+                <Tooltip
+                  kind="hover"
+                  title={
+                    <>
+                      Sur la version actuelle du Tableau de bord vous ne pouvez pas supprimer le statut &quot;En
+                      rupture&quot; sur le dossier d&apos;un jeune. Si le problème persiste ou que vous souhaitez nous
+                      faire part d&apos;une recommandation{" "}
+                      <a
+                        href="https://cfas.apprentissage.beta.gouv.fr/contact"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Écrivez-nous directement
+                      </a>
+                      , l&apos;équipe du service reste disponible.
+                    </>
+                  }
+                />
+              </span>
+            </p>
+            <ToggleSwitch
+              inputTitle="En rupture de contrat"
+              label=""
+              labelPosition="left"
+              checked
+              onChange={() => {
+                trackPlausibleEvent("cfa_rupture_contestee");
+                onToggleRupture?.();
+              }}
+              showCheckedHint={false}
+            />
+          </div>
+        </>
+      )}
 
       <hr className={styles.separator} />
 

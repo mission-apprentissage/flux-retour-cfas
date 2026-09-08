@@ -1,23 +1,24 @@
 "use client";
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { Formik, useFormikContext } from "formik";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Formik, FormikErrors, useFormikContext } from "formik";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { ACC_CONJOINT_MOTIF_ENUM, IEffectifMissionLocale } from "shared";
 import { CFA_SITUATION_TYPE_ENUM, RQTH_DECLARE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 
 import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { isMineur } from "@/app/_utils/ruptures.utils";
 
 import { useSubmitCollaborationForm, VerifiedInfo } from "../hooks";
 import { ObjectifsSection } from "../sections/ObjectifsSection";
 import { FormValues } from "../types";
 import {
   buildAdresseRue,
-  isContactValid,
-  isDatesRuptureValid,
-  isObjectifsValid,
-  isRentreeSansContratValid,
+  contactErrors,
+  datesRuptureErrors,
+  objectifsErrors,
+  rentreeSansContratErrors,
 } from "../utils";
 
 import { Step1DatesRupture } from "./steps/Step1DatesRupture";
@@ -32,17 +33,40 @@ import { TunnelLayout } from "./TunnelLayout";
 import { StepId, STEP_NUMBER } from "./types";
 import { buildTunnelSteps, EMPTY_BRANCH_VALUES } from "./useTunnelSteps";
 
-const isMineur = (dateDeNaissance: unknown): boolean => {
-  if (!dateDeNaissance) return false;
-  const majorite = new Date(dateDeNaissance as string);
-  majorite.setFullYear(majorite.getFullYear() + 18);
-  return majorite > new Date();
-};
-
 interface CollaborationTunnelProps {
   effectif: IEffectifMissionLocale["effectif"];
   onSuccess: () => void;
   onCancel: () => void;
+}
+
+/** Chemins Formik des champs en erreur, `commentaires_par_motif.<motif>` compris. */
+function cheminsDesErreurs(errors: object, prefixe = ""): string[] {
+  return Object.entries(errors).flatMap(([cle, valeur]) => {
+    const chemin = prefixe ? `${prefixe}.${cle}` : cle;
+    return valeur && typeof valeur === "object" ? cheminsDesErreurs(valeur, chemin) : [chemin];
+  });
+}
+
+/** Manques d'une étape, sous forme de messages : bloque « Continuer » et alimente les erreurs de champ. */
+function erreursEtape(step: StepId, values: FormValues): FormikErrors<FormValues> {
+  switch (step) {
+    case "situation":
+      return values.situation_type === null ? { situation_type: "Sélectionnez une situation" } : {};
+    case "risqueRupture":
+      return values.risque_rupture === null ? { risque_rupture: "Sélectionnez un niveau de risque" } : {};
+    case "maintienFormation":
+      return values.still_at_cfa === null ? { still_at_cfa: "Ce champ est obligatoire" } : {};
+    case "datesRupture":
+      return datesRuptureErrors(values);
+    case "rentreeSansContrat":
+      return rentreeSansContratErrors(values);
+    case "objectifs":
+      return objectifsErrors(values);
+    case "contact":
+      return contactErrors(values);
+    case "recap":
+      return {};
+  }
 }
 
 export function CollaborationTunnel({ effectif, onSuccess, onCancel }: CollaborationTunnelProps) {
@@ -70,6 +94,15 @@ export function CollaborationTunnel({ effectif, onSuccess, onCancel }: Collabora
 
   return (
     <Formik<FormValues>
+      // Sans cela, `errors` reste vide tant que rien n'a changé : rien à révéler au clic.
+      validateOnMount
+      // Hors branche empruntée, les champs restent vides et bloqueraient l'envoi final.
+      validate={(values) =>
+        buildTunnelSteps(values).reduce<FormikErrors<FormValues>>(
+          (errors, step) => ({ ...errors, ...erreursEtape(step, values) }),
+          {}
+        )
+      }
       initialValues={{
         situation_type: null,
         risque_rupture: null,
@@ -181,9 +214,11 @@ interface TunnelInnerProps {
 }
 
 function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedRef }: TunnelInnerProps) {
-  const { values, setValues, submitForm } = useFormikContext<FormValues>();
+  const { values, setValues, setFieldTouched, submitForm } = useFormikContext<FormValues>();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const [currentStep, setCurrentStep] = useState<StepId>("situation");
+  const [tentativesBloquees, setTentativesBloquees] = useState(0);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     return () => {
@@ -192,6 +227,15 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
       }
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (tentativesBloquees === 0) return;
+    const cible = contentRef.current?.querySelector<HTMLElement>(".fr-input--error, .fr-error-text");
+    cible?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (cible instanceof HTMLInputElement || cible instanceof HTMLTextAreaElement) {
+      cible.focus({ preventScroll: true });
+    }
+  }, [tentativesBloquees]);
 
   const steps = buildTunnelSteps(values);
   const currentIndex = steps.indexOf(currentStep);
@@ -209,31 +253,28 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
     if (previous) setCurrentStep(previous);
   };
 
-  const canContinue = (): boolean => {
-    switch (currentStep) {
-      case "situation":
-        return values.situation_type !== null;
-      case "risqueRupture":
-        return values.risque_rupture !== null;
-      case "maintienFormation":
-        return values.still_at_cfa !== null;
-      case "datesRupture":
-        return isDatesRuptureValid(values);
-      case "rentreeSansContrat":
-        return isRentreeSansContratValid(values);
-      case "objectifs":
-        return isObjectifsValid(values);
-      case "contact":
-        return isContactValid(values);
-      case "recap":
-        return true;
+  const canContinue = (): boolean => Object.keys(erreursEtape(currentStep, values)).length === 0;
+
+  const onContinuer = () => {
+    if (canContinue()) {
+      goNext();
+      return;
     }
+    cheminsDesErreurs(erreursEtape(currentStep, values)).forEach((chemin) => setFieldTouched(chemin, true, false));
+    setTentativesBloquees((n) => n + 1);
   };
 
-  const titre = (): string | undefined => {
+  const titre = (): ReactNode => {
     switch (STEP_NUMBER[currentStep]) {
       case 1:
-        return `La situation de ${prenom} ${nom}`;
+        return (
+          <>
+            La situation de{" "}
+            <span className={styles.stepTitleName}>
+              {prenom} {nom}
+            </span>
+          </>
+        );
       case 2:
         return "Objectif de l'accompagnement de la Mission Locale";
       default:
@@ -336,7 +377,13 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
         </Button>
       </>
     ) : (
-      <Button priority="primary" onClick={goNext} disabled={!canContinue()}>
+      <Button
+        priority="primary"
+        type="button"
+        onClick={onContinuer}
+        className={canContinue() ? undefined : styles.buttonFauxDesactive}
+        nativeButtonProps={canContinue() ? undefined : { "aria-disabled": true }}
+      >
         Continuer
       </Button>
     );
@@ -351,6 +398,7 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
       backLabel={currentStep === "recap" ? "Modifier la saisie" : "Question précédente"}
       onCancel={onCancel}
       footer={footer}
+      contentRef={contentRef}
     >
       {stepContent()}
     </TunnelLayout>

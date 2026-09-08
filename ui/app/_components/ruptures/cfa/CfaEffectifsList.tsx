@@ -23,6 +23,8 @@ interface CfaEffectifsListProps {
   data: ICfaEffectifsResponse | null;
   isAllowedDeca: boolean;
   searchInput: string;
+  /** Terme réellement appliqué aux résultats : le titre suivrait sinon la frappe en cours. */
+  searchApplique: string;
   onSearchChange: (value: string) => void;
   sort: string;
   order: "asc" | "desc";
@@ -35,6 +37,7 @@ export function CfaEffectifsList({
   data,
   isAllowedDeca,
   searchInput,
+  searchApplique,
   onSearchChange,
   sort,
   order,
@@ -68,6 +71,7 @@ export function CfaEffectifsList({
   );
 
   const hasActiveFilters = collabStatuses.length > 0 || formations.length > 0;
+  const rechercheActive = searchApplique.trim().length > 0;
 
   const { handleSort, handlePageChange } = useSortablePagination(sort, order, onParamsChange);
 
@@ -105,98 +109,109 @@ export function CfaEffectifsList({
         </DsfrLink>
       </section>
 
-      <div className={filterStyles.filtersSection}>
-        <div className={`${filterStyles.filtersRow} ${styles.filtersRow}`}>
-          <span className={filterStyles.filterLabel}>Filtrer</span>
+      {!rechercheActive && (
+        <div className={filterStyles.filtersSection}>
+          <div className={`${filterStyles.filtersRow} ${styles.filtersRow}`}>
+            <span className={filterStyles.filterLabel}>Filtrer</span>
 
-          <div className={styles.filterField}>
-            <MultiSelectDropdown
-              options={formationOptions}
-              value={formations}
-              onChange={(v) =>
-                onParamsChange({
-                  formation: v.length > 0 ? v.join(",") : undefined,
-                  page: "1",
-                })
-              }
-              placeholder="Toutes les formations"
-            />
+            <div className={styles.filterField}>
+              <MultiSelectDropdown
+                options={formationOptions}
+                value={formations}
+                onChange={(v) =>
+                  onParamsChange({
+                    formation: v.length > 0 ? v.join(",") : undefined,
+                    page: "1",
+                  })
+                }
+                placeholder="Toutes les formations"
+              />
+            </div>
+
+            <div className={styles.filterField}>
+              <MultiSelectDropdown
+                options={collabOptions}
+                value={collabStatuses}
+                onChange={(v) =>
+                  onParamsChange({
+                    collab_status: v.length > 0 ? v.join(",") : undefined,
+                    page: "1",
+                  })
+                }
+                placeholder="Statut de la collaboration avec la ML"
+              />
+            </div>
           </div>
 
-          <div className={styles.filterField}>
-            <MultiSelectDropdown
-              options={collabOptions}
-              value={collabStatuses}
-              onChange={(v) =>
-                onParamsChange({
-                  collab_status: v.length > 0 ? v.join(",") : undefined,
-                  page: "1",
-                })
-              }
-              placeholder="Statut de la collaboration avec la ML"
-            />
-          </div>
+          {hasActiveFilters && (
+            <div className={filterStyles.tagsRow}>
+              {collabStatuses.map((status) => (
+                <Tag
+                  key={status}
+                  pressed
+                  nativeButtonProps={{
+                    onClick: () => {
+                      const next = collabStatuses.filter((s) => s !== status);
+                      onParamsChange({
+                        collab_status: next.length > 0 ? next.join(",") : undefined,
+                        page: "1",
+                      });
+                    },
+                  }}
+                >
+                  {COLLAB_STATUS_FILTER_LABELS[status as CfaCollaborationStatus] ?? status}
+                </Tag>
+              ))}
+              {formations.map((f) => (
+                <Tag
+                  key={f}
+                  pressed
+                  nativeButtonProps={{
+                    onClick: () => {
+                      const next = formations.filter((v) => v !== f);
+                      onParamsChange({
+                        formation: next.length > 0 ? next.join(",") : undefined,
+                        page: "1",
+                      });
+                    },
+                  }}
+                >
+                  {f}
+                </Tag>
+              ))}
+              <button
+                type="button"
+                className={filterStyles.resetButton}
+                onClick={() =>
+                  onParamsChange({
+                    collab_status: undefined,
+                    formation: undefined,
+                    page: "1",
+                  })
+                }
+              >
+                Réinitialiser les filtres
+              </button>
+            </div>
+          )}
         </div>
-
-        {hasActiveFilters && (
-          <div className={filterStyles.tagsRow}>
-            {collabStatuses.map((status) => (
-              <Tag
-                key={status}
-                pressed
-                nativeButtonProps={{
-                  onClick: () => {
-                    const next = collabStatuses.filter((s) => s !== status);
-                    onParamsChange({
-                      collab_status: next.length > 0 ? next.join(",") : undefined,
-                      page: "1",
-                    });
-                  },
-                }}
-              >
-                {COLLAB_STATUS_FILTER_LABELS[status as CfaCollaborationStatus] ?? status}
-              </Tag>
-            ))}
-            {formations.map((f) => (
-              <Tag
-                key={f}
-                pressed
-                nativeButtonProps={{
-                  onClick: () => {
-                    const next = formations.filter((v) => v !== f);
-                    onParamsChange({
-                      formation: next.length > 0 ? next.join(",") : undefined,
-                      page: "1",
-                    });
-                  },
-                }}
-              >
-                {f}
-              </Tag>
-            ))}
-            <button
-              type="button"
-              className={filterStyles.resetButton}
-              onClick={() =>
-                onParamsChange({
-                  collab_status: undefined,
-                  formation: undefined,
-                  page: "1",
-                })
-              }
-            >
-              Réinitialiser les filtres
-            </button>
-          </div>
-        )}
-      </div>
+      )}
 
       {data && (
         <section className={cardStyles.card}>
           <div className={cardStyles.cardHeader}>
-            <h2 className={cardStyles.cardTitle}>Tous les effectifs</h2>
+            {rechercheActive ? (
+              <div>
+                <p className={styles.resultatsLabel}>Résultat(s) pour votre recherche</p>
+                <h2 className={cardStyles.cardTitle}>&ldquo;{searchApplique}&rdquo;</h2>
+              </div>
+            ) : (
+              <h2 className={cardStyles.cardTitle}>Tous les effectifs</h2>
+            )}
             <span className={cardStyles.cardCount}>
-              {data.pagination.total} effectif{data.pagination.total !== 1 ? "s" : ""}
+              {rechercheActive
+                ? `${data.pagination.total} résultat${data.pagination.total !== 1 ? "s" : ""}`
+                : `${data.pagination.total} effectif${data.pagination.total !== 1 ? "s" : ""}`}
             </span>
           </div>
 
