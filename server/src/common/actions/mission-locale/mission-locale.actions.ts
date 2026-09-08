@@ -3,7 +3,7 @@ import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
 import { AggregationCursor, MongoServerError } from "mongodb";
-import { ML_DELAI_RELANCE_JOURS, ML_SITUATION_DOSSIER, ML_TRI_COLONNE, STATUT_APPRENANT } from "shared/constants";
+import { ML_DELAI_RELANCE_JOURS, ML_TRI_COLONNE, STATUT_APPRENANT } from "shared/constants";
 import { CFA_COLLAB_AUTO_SEND_DELAI_DAYS } from "shared/constants/collaboration";
 import type { MlTri } from "shared/constants/missionLocale";
 import {
@@ -17,7 +17,6 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
   IEmailStatusEnum,
   API_EFFECTIF_LISTE,
-  CFA_RISQUE_RUPTURE_ENUM,
   CFA_SITUATION_TYPE_ENUM,
   CONNAISSANCE_ML_ENUM,
   IMissionLocaleEffectif,
@@ -47,6 +46,7 @@ import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
 import {
   DATE_START_RUPTURES,
   STATUTS_SORTIE_RUPTURE,
+  addSituationDossierField,
   buildEffRuptureAgeFilter,
   buildVisibilityWindowMatch,
   createDernierStatutFieldPipeline as createDernierStatutFieldPipelineShared,
@@ -795,61 +795,6 @@ const addNudgeFields = () => [
           true,
           false,
         ],
-      },
-    },
-  },
-];
-
-/** Qualification du tunnel CFA si elle existe, sinon statut ERP/DECA. Risque faible = besoin d'aide hors rupture. */
-const addSituationDossierField = () => [
-  {
-    $addFields: {
-      situation_dossier: {
-        $switch: {
-          branches: [
-            {
-              // « Faible, pas de rupture en vue, mais ce jeune a besoin d'un accompagnement »
-              case: {
-                $and: [
-                  { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
-                  { $eq: ["$organisme_data.risque_rupture", CFA_RISQUE_RUPTURE_ENUM.FAIBLE] },
-                ],
-              },
-              then: ML_SITUATION_DOSSIER.BESOIN_AIDE_HORS_RUPTURE,
-            },
-            {
-              case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
-              then: ML_SITUATION_DOSSIER.PREVENTION_RUPTURE,
-            },
-            {
-              case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.SANS_CONTRAT] },
-              then: ML_SITUATION_DOSSIER.INSCRIT_SANS_CONTRAT,
-            },
-            {
-              case: {
-                $and: [
-                  { $eq: ["$organisme_data.acc_conjoint", true] },
-                  { $ne: [{ $ifNull: ["$organisme_data.date_abandon", null] }, null] },
-                ],
-              },
-              then: ML_SITUATION_DOSSIER.ABANDON,
-            },
-            {
-              // La qualification du CFA prime sur le statut ERP, comme côté organisme.
-              case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE] },
-              then: ML_SITUATION_DOSSIER.RUPTURE,
-            },
-            {
-              case: { $eq: ["$current_status.value", STATUT_APPRENANT.ABANDON] },
-              then: ML_SITUATION_DOSSIER.ABANDON,
-            },
-            {
-              case: { $eq: ["$current_status.value", STATUT_APPRENANT.INSCRIT] },
-              then: ML_SITUATION_DOSSIER.INSCRIT_SANS_CONTRAT,
-            },
-          ],
-          default: ML_SITUATION_DOSSIER.RUPTURE,
-        },
       },
     },
   },

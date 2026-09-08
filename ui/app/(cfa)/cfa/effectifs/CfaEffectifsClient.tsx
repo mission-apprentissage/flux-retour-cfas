@@ -39,9 +39,17 @@ export default function CfaEffectifsClient() {
 
   useEffect(() => {
     if (debouncedSearch !== search) {
-      updateParams({ search: debouncedSearch || undefined, page: "1" });
+      updateParams({
+        search: debouncedSearch || undefined,
+        page: "1",
+        ...(debouncedSearch ? { collab_status: undefined, formation: undefined } : {}),
+      });
     }
   }, [debouncedSearch, search, updateParams]);
+
+  // Les filtres sont masqués pendant une recherche : les ignorer aussi côté requête, sinon une URL
+  // portant les deux (lien partagé, marque-page) restreindrait les résultats sans rien afficher.
+  const rechercheActive = debouncedSearch.trim().length > 0;
 
   const { data, isLoading } = useCfaEffectifs(organismeId, {
     page,
@@ -49,8 +57,8 @@ export default function CfaEffectifsClient() {
     search: debouncedSearch || undefined,
     sort,
     order,
-    collab_status,
-    formation,
+    collab_status: rechercheActive ? undefined : collab_status,
+    formation: rechercheActive ? undefined : formation,
   });
 
   if (!data && isLoading) {
@@ -64,6 +72,7 @@ export default function CfaEffectifsClient() {
         data={data ?? null}
         isAllowedDeca={data?.isAllowedDeca ?? false}
         searchInput={searchInput}
+        searchApplique={search}
         onSearchChange={setSearchInput}
         sort={sort}
         order={order as "asc" | "desc"}

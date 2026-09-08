@@ -4,15 +4,14 @@ import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import type { CfaEffectifSituation, ICfaEffectif } from "@/common/types/cfaRuptures";
-import { CFA_EFFECTIF_SITUATION, SITUATION_LABELS } from "@/common/types/cfaRuptures";
+import type { ICfaEffectif } from "@/common/types/cfaRuptures";
 
-import { SituationCell } from "../shared/ui/SituationCell";
 import sharedStyles from "../shared/ui/SortableTable.module.css";
 import { SortableHeader } from "../shared/ui/SortableTableParts";
 
 import { CfaCollaborationBadge } from "./CfaCollaborationBadge";
 import styles from "./CfaTousEffectifsTable.module.css";
+import { CFA_FICHE_ORIGINE, cfaFicheHref } from "./ficheOrigine";
 
 type SortKey = "nom" | "formation" | "mission_locale" | "collab_status";
 
@@ -21,42 +20,6 @@ interface CfaTousEffectifsTableProps {
   sort: string;
   order: "asc" | "desc";
   onSort: (key: SortKey) => void;
-}
-
-const SITUATION_TOOLTIPS: Partial<Record<CfaEffectifSituation, string>> = {
-  [CFA_EFFECTIF_SITUATION.RUPTURE]: "Ce jeune est en rupture de contrat d'après votre source de données.",
-  [CFA_EFFECTIF_SITUATION.RUPTURE_DECA]:
-    "Cette rupture provient de la base DECA (contrats déposés par les OPCO et les DDETS), et non de votre ERP.",
-  [CFA_EFFECTIF_SITUATION.PREVENTION_RUPTURE]:
-    "Vous avez envoyé un dossier à la Mission Locale pour ce jeune encore en contrat, afin de prévenir une rupture.",
-  [CFA_EFFECTIF_SITUATION.ABANDON]: "Ce jeune a abandonné sa formation d'après votre source de données.",
-  [CFA_EFFECTIF_SITUATION.SANS_CONTRAT]: "Ce jeune est inscrit en formation mais n'a pas de contrat d'apprentissage.",
-};
-
-function CfaSituationCell({ effectif, dimmed }: { effectif: ICfaEffectif; dimmed?: boolean }) {
-  if (!effectif.situation) {
-    return <SituationCell dimmed={dimmed} />;
-  }
-
-  const dateRupture = effectif.date_rupture
-    ? new Date(effectif.date_rupture).toLocaleDateString("fr-FR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-    : null;
-
-  const showDateRupture =
-    effectif.situation === CFA_EFFECTIF_SITUATION.RUPTURE || effectif.situation === CFA_EFFECTIF_SITUATION.RUPTURE_DECA;
-
-  return (
-    <SituationCell
-      label={SITUATION_LABELS[effectif.situation]}
-      tooltip={SITUATION_TOOLTIPS[effectif.situation]}
-      detail={showDateRupture && dateRupture ? `depuis le ${dateRupture}` : null}
-      dimmed={dimmed}
-    />
-  );
 }
 
 export function CfaTousEffectifsTable({ effectifs, sort, order, onSort }: CfaTousEffectifsTableProps) {
@@ -73,17 +36,6 @@ export function CfaTousEffectifsTable({ effectifs, sort, order, onSort }: CfaTou
           <tr>
             <th>
               <SortableHeader label="Prénom Nom" sortKey="nom" currentSort={sort} currentDir={order} onSort={onSort} />
-            </th>
-            <th>
-              <span className={styles.plainHeader}>
-                Situation
-                <span className={styles.headerTooltip}>
-                  <Tooltip
-                    kind="hover"
-                    title="Situation de l'apprenant : rupture de contrat, prévention de rupture après l'envoi d'un dossier, abandon de formation, ou inscription sans contrat."
-                  />
-                </span>
-              </span>
             </th>
             <th>
               <SortableHeader
@@ -123,14 +75,16 @@ export function CfaTousEffectifsTable({ effectifs, sort, order, onSort }: CfaTou
               <tr
                 key={effectif.id}
                 className={isOutOfRange ? undefined : sharedStyles.clickableRow}
-                onClick={isOutOfRange ? undefined : () => router.push(`/cfa/${effectif.id}`)}
+                onClick={
+                  isOutOfRange ? undefined : () => router.push(cfaFicheHref(effectif.id, CFA_FICHE_ORIGINE.EFFECTIFS))
+                }
                 onKeyDown={
                   isOutOfRange
                     ? undefined
                     : (event) => {
                         // n'agir que lorsque la ligne elle-même a le focus (pas un contrôle interne)
                         if (event.target !== event.currentTarget) return;
-                        if (event.key === "Enter") router.push(`/cfa/${effectif.id}`);
+                        if (event.key === "Enter") router.push(cfaFicheHref(effectif.id, CFA_FICHE_ORIGINE.EFFECTIFS));
                       }
                 }
                 tabIndex={isOutOfRange ? undefined : 0}
@@ -145,7 +99,7 @@ export function CfaTousEffectifsTable({ effectifs, sort, order, onSort }: CfaTou
                       </span>
                     ) : (
                       <Link
-                        href={`/cfa/${effectif.id}`}
+                        href={cfaFicheHref(effectif.id, CFA_FICHE_ORIGINE.EFFECTIFS)}
                         className={sharedStyles.nameText}
                         onClick={(event) => event.stopPropagation()}
                       >
@@ -153,9 +107,6 @@ export function CfaTousEffectifsTable({ effectifs, sort, order, onSort }: CfaTou
                       </Link>
                     )}
                   </div>
-                </td>
-                <td>
-                  <CfaSituationCell effectif={effectif} dimmed={isOutOfRange} />
                 </td>
                 <td>
                   <div className={`${sharedStyles.formationCell} ${rowClass ?? ""}`}>
