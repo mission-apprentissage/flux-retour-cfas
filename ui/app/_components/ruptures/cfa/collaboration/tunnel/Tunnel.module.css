@@ -169,10 +169,24 @@
   padding-top: 1rem;
 }
 
+/* Classe doublée pour passer devant `.fr-btn` ; --hover/--active car la règle de survol du DSFR
+   (`button:not(:disabled):hover`) est trop spécifique pour être surchargée. */
+.buttonFauxDesactive.buttonFauxDesactive {
+  background-color: var(--background-disabled-grey);
+  color: var(--text-disabled-grey);
+  cursor: not-allowed;
+  --hover: var(--background-disabled-grey);
+  --active: var(--background-disabled-grey);
+}
+
 .radioGroup {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.radioGroupError .radioCard {
+  border-color: var(--border-plain-error);
 }
 
 .radioCard {

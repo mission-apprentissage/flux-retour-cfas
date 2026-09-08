@@ -217,6 +217,8 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
   const { values, setValues, setFieldTouched, submitForm } = useFormikContext<FormValues>();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const [currentStep, setCurrentStep] = useState<StepId>("situation");
+  const [tentativesBloquees, setTentativesBloquees] = useState(0);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     return () => {
@@ -225,6 +227,15 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
       }
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (tentativesBloquees === 0) return;
+    const cible = contentRef.current?.querySelector<HTMLElement>(".fr-input--error, .fr-error-text");
+    cible?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (cible instanceof HTMLInputElement || cible instanceof HTMLTextAreaElement) {
+      cible.focus({ preventScroll: true });
+    }
+  }, [tentativesBloquees]);
 
   const steps = buildTunnelSteps(values);
   const currentIndex = steps.indexOf(currentStep);
@@ -244,8 +255,13 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
 
   const canContinue = (): boolean => Object.keys(erreursEtape(currentStep, values)).length === 0;
 
-  const revelerChampsManquants = () => {
+  const onContinuer = () => {
+    if (canContinue()) {
+      goNext();
+      return;
+    }
     cheminsDesErreurs(erreursEtape(currentStep, values)).forEach((chemin) => setFieldTouched(chemin, true, false));
+    setTentativesBloquees((n) => n + 1);
   };
 
   const titre = (): ReactNode => {
@@ -361,12 +377,15 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
         </Button>
       </>
     ) : (
-      // Un bouton désactivé n'émet pas de clic : la zone qui l'entoure le capte.
-      <span onClick={canContinue() ? undefined : revelerChampsManquants}>
-        <Button priority="primary" onClick={goNext} disabled={!canContinue()}>
-          Continuer
-        </Button>
-      </span>
+      <Button
+        priority="primary"
+        type="button"
+        onClick={onContinuer}
+        className={canContinue() ? undefined : styles.buttonFauxDesactive}
+        nativeButtonProps={canContinue() ? undefined : { "aria-disabled": true }}
+      >
+        Continuer
+      </Button>
     );
 
   return (
@@ -379,6 +398,7 @@ function TunnelInner({ effectif, onCancel, isSubmitting, hasError, hasSubmittedR
       backLabel={currentStep === "recap" ? "Modifier la saisie" : "Question précédente"}
       onCancel={onCancel}
       footer={footer}
+      contentRef={contentRef}
     >
       {stepContent()}
     </TunnelLayout>

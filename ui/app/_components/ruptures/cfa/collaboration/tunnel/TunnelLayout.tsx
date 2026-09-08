@@ -2,7 +2,7 @@
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import Image from "next/image";
-import { ReactNode } from "react";
+import { ReactNode, Ref } from "react";
 
 import styles from "./Tunnel.module.css";
 
@@ -16,6 +16,7 @@ interface TunnelLayoutProps {
   onCancel: () => void;
   children: ReactNode;
   footer: ReactNode;
+  contentRef?: Ref<HTMLDivElement>;
 }
 
 export function TunnelLayout({
@@ -28,6 +29,7 @@ export function TunnelLayout({
   onCancel,
   children,
   footer,
+  contentRef,
 }: TunnelLayoutProps) {
   return (
     <div className={styles.page}>
@@ -59,7 +61,7 @@ export function TunnelLayout({
           ))}
         </aside>
 
-        <div className={styles.content}>
+        <div className={styles.content} ref={contentRef}>
           {onBack && (
             <Button
               priority="tertiary no outline"
