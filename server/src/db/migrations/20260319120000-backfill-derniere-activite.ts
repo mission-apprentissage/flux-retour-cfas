@@ -1,3 +1,4 @@
+import logger from "@/common/logger";
 import { getDatabase } from "@/common/mongodb";
 
 export const up = async () => {
@@ -35,7 +36,7 @@ export const up = async () => {
     ])
     .toArray();
 
-  console.log(`Found derniere_activite for ${results.length} Mission Locales`);
+  logger.info({ count: results.length }, "[Migration] derniere_activite trouvée pour des Missions Locales");
 
   if (results.length === 0) return;
 
@@ -47,5 +48,8 @@ export const up = async () => {
   }));
 
   const bulkResult = await organisations.bulkWrite(bulkOps);
-  console.log(`Updated derniere_activite for ${bulkResult.modifiedCount} Mission Locales`);
+  logger.info(
+    { modifiedCount: bulkResult.modifiedCount },
+    "[Migration] derniere_activite mise à jour pour des Missions Locales"
+  );
 };

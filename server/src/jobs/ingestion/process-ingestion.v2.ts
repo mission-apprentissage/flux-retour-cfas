@@ -172,7 +172,7 @@ export async function migrateEffectifs() {
     await migrateEffectif(effectif, organismeLookup);
     counter++;
     if (counter % 1_000 === 0) {
-      console.log(`${new Date().toJSON()}: Migrated ${counter} effectifs`);
+      logger.info({ count: counter }, "Effectifs migrés");
     }
   }
 }

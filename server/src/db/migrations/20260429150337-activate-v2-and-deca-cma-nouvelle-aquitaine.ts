@@ -1,3 +1,4 @@
+import logger from "@/common/logger";
 import { getDatabase } from "@/common/mongodb";
 
 const ETABLISSEMENTS = [
@@ -29,7 +30,10 @@ export const up = async () => {
   const flagResult = await db
     .collection("organismes")
     .updateMany({ $or: orConditions }, { $set: { is_allowed_deca: true, is_allowed_collab: true } });
-  console.log(`Organismes flaggés DECA+COLLAB: ${flagResult.matchedCount}/${ETABLISSEMENTS.length}`);
+  logger.info(
+    { matchedCount: flagResult.matchedCount, expectedCount: ETABLISSEMENTS.length },
+    "[Migration] Organismes flaggés DECA+COLLAB"
+  );
 
   const organismes = await db
     .collection("organismes")
@@ -39,7 +43,10 @@ export const up = async () => {
   const organismeIds = organismes.map((o) => o._id.toString());
 
   if (organismeIds.length !== ETABLISSEMENTS.length) {
-    console.warn(`Attention: ${organismeIds.length} organismes trouvés sur ${ETABLISSEMENTS.length} attendus`);
+    logger.warn(
+      { foundCount: organismeIds.length, expectedCount: ETABLISSEMENTS.length },
+      "[Migration] Nombre d'organismes trouvés différent de celui attendu"
+    );
   }
 
   const orgResult = await db.collection("organisations").updateMany(
@@ -50,7 +57,7 @@ export const up = async () => {
     },
     { $set: { ml_beta_activated_at: now } }
   );
-  console.log(`Organisations v2 CFA activées: ${orgResult.modifiedCount}`);
+  logger.info({ modifiedCount: orgResult.modifiedCount }, "[Migration] Organisations v2 CFA activées");
 };
 
 export const down = async () => {
@@ -71,7 +78,7 @@ export const down = async () => {
       },
       { $unset: { ml_beta_activated_at: "" } }
     );
-    console.log(`Organisations désactivées: ${orgResult.modifiedCount}`);
+    logger.info({ modifiedCount: orgResult.modifiedCount }, "[Migration] Organisations désactivées");
   }
 
   await db

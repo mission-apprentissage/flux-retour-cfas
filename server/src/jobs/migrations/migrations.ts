@@ -3,6 +3,7 @@ import path from "path";
 
 import { config, create as mcreate, status as mstatus, up as mup } from "migrate-mongo";
 
+import logger from "@/common/logger";
 import { getMongodbClient } from "@/common/mongodb";
 import { __dirname } from "@/common/utils/esmUtils";
 
@@ -55,7 +56,7 @@ export async function status(): Promise<number> {
 
   // @ts-ignore
   const migrationStatus = await mstatus(client.db());
-  migrationStatus.forEach(({ fileName, appliedAt }) => console.log(fileName, ":", appliedAt));
+  migrationStatus.forEach(({ fileName, appliedAt }) => logger.info({ fileName, appliedAt }, "Statut de migration"));
 
   return migrationStatus.filter(({ appliedAt }) => appliedAt === "PENDING").length;
 }
@@ -77,5 +78,5 @@ export async function create({ description }: { description: string }) {
 ${content.replaceAll("async (db, client)", "async (db: Db)").replace(/\nexport const down =[\s\S]+/, "")}`;
 
   await writeFile(file, newContent, { encoding: "utf-8" });
-  console.log("Created:", fileName);
+  logger.info({ fileName }, "Migration créée");
 }

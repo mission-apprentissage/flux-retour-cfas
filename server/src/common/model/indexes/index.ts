@@ -15,7 +15,7 @@ export const createIndexes = async () => {
         try {
           await getDbCollection(descriptor.collectionName).createIndex(index, options);
         } catch (err) {
-          console.error(`Error creating indexes for ${descriptor.collectionName}: ${err}`);
+          logger.error({ err, collectionName: descriptor.collectionName }, "Erreur lors de la création des index");
           captureException(new Error(`Error creating indexes for ${descriptor.collectionName}`, { cause: err }));
         }
       })

@@ -3,6 +3,7 @@ import type { IEffectifV2, IPersonV2 } from "shared/models";
 import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
+import logger from "@/common/logger";
 import { personV2Db } from "@/common/model/collections";
 
 export type IIngestPersonUsedFields = "nom_apprenant" | "prenom_apprenant" | "date_de_naissance_apprenant";
@@ -88,6 +89,6 @@ export async function updateParcoursPersonV2(person_id: ObjectId, effectifV2: IE
       }
     );
   } catch (e) {
-    console.log(JSON.stringify(e, null, 2));
+    logger.error({ err: e, personId: person_id }, "Erreur lors de la mise à jour du parcours de la personne");
   }
 }

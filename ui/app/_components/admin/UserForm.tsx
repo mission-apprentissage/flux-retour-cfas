@@ -66,7 +66,6 @@ const UserForm = ({
             throw err;
           });
           if (result?.ok) {
-            console.log({ body });
             setAlert({
               message: "Utilisateur mis à jour",
               severity: "success",

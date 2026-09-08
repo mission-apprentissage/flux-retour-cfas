@@ -13,6 +13,7 @@ import {
   getAffelnetVoeuxNonConcretise,
 } from "@/common/actions/affelnet.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
+import logger from "@/common/logger";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { requireOrganismeRegional, returnResult } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
@@ -193,7 +194,7 @@ const exportNonConcretisee = async (req, { locals }) => {
     return csv;
   } catch (error) {
     captureException(error);
-    console.error("Error exporting non-concretise:", error);
+    logger.error({ err: error }, "Échec de l'export des voeux non concrétisés");
     throw Boom.internal("Failed to export non-concretise");
   }
 };
@@ -248,7 +249,7 @@ const exportConcretisee = async (req, { locals }) => {
     return csv;
   } catch (error) {
     captureException(error);
-    console.error("Error exporting concretise:", error);
+    logger.error({ err: error }, "Échec de l'export des voeux concrétisés");
     throw Boom.internal("Failed to export concretise");
   }
 };
