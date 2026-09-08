@@ -2,7 +2,7 @@
 
 import { PieChart } from "@mui/x-charts/PieChart";
 
-import { Skeleton } from "../ui/Skeleton";
+import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import { ItemChartTooltip } from "./ChartTooltip";
 import styles from "./DejaConnuMiniChart.module.css";

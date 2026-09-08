@@ -3,8 +3,9 @@
 import { PieChart } from "@mui/x-charts/PieChart";
 import type { IWhatsAppStats } from "shared/models/data/nationalStats.model";
 
+import { Skeleton } from "@/app/_components/common/Skeleton";
+
 import { WHATSAPP_OUTCOMES_COLORS, WHATSAPP_OUTCOMES_LABELS } from "../constants";
-import { Skeleton } from "../ui/Skeleton";
 
 import { ChartLegend } from "./ChartLegend";
 import { ItemChartTooltip } from "./ChartTooltip";

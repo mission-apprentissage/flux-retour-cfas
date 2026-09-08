@@ -1,35 +1,37 @@
 "use client";
 
-import { Box, Skeleton, Stack } from "@mui/material";
+import { Skeleton } from "@/app/_components/common/Skeleton";
+
+import styles from "./MlListeSkeleton.module.css";
 
 /** Reprend le layout réel de la vue pour éviter le saut de mise en page au chargement. */
 export function MlListeSkeleton({ nbOnglets = 1 }: { nbOnglets?: number }) {
   return (
-    <Box sx={{ width: "100%" }}>
-      <Stack spacing={2} sx={{ my: 3 }}>
-        <Skeleton animation="wave" variant="rectangular" height={40} sx={{ maxWidth: 544 }} />
-        <Stack direction="row" spacing={2}>
-          <Skeleton animation="wave" variant="rectangular" width={99} height={40} />
-          <Skeleton animation="wave" variant="rectangular" width={181} height={40} />
-        </Stack>
-      </Stack>
+    <div>
+      <div className={styles.filters}>
+        <Skeleton height={40} className={styles.search} />
+        <div className={styles.filtersRow}>
+          <Skeleton width={99} height={40} />
+          <Skeleton width={181} height={40} />
+        </div>
+      </div>
 
-      <Stack direction="row" spacing={1} sx={{ mb: 0 }}>
+      <div className={styles.tabs}>
         {[...Array(nbOnglets)].map((_, i) => (
-          <Skeleton key={i} animation="wave" variant="rectangular" width={264} height={40} />
+          <Skeleton key={i} width={264} height={40} />
         ))}
-      </Stack>
+      </div>
 
-      <Box sx={{ p: 3, background: "var(--background-default-grey)" }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Skeleton animation="wave" variant="rectangular" width="40%" height={32} />
-          <Skeleton animation="wave" variant="rectangular" width={200} height={32} />
-        </Stack>
-        <Skeleton animation="wave" variant="rectangular" height={58} sx={{ mb: 1 }} />
+      <div className={styles.panel}>
+        <div className={styles.panelHeader}>
+          <Skeleton width="40%" height={32} />
+          <Skeleton width={200} height={32} />
+        </div>
+        <Skeleton height={58} className="fr-mb-1w" />
         {[...Array(6)].map((_, i) => (
-          <Skeleton key={i} animation="wave" variant="rectangular" height={84} sx={{ mb: 1 }} />
+          <Skeleton key={i} height={84} className="fr-mb-1w" />
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

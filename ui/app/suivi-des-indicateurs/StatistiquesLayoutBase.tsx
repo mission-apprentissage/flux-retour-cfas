@@ -2,8 +2,8 @@
 
 import { SideMenu, type SideMenuProps } from "@codegouvfr/react-dsfr/SideMenu";
 
+import { Skeleton } from "@/app/_components/common/Skeleton";
 import { DecaAlert } from "@/app/_components/statistiques/ui/DecaAlert";
-import { Skeleton } from "@/app/_components/statistiques/ui/Skeleton";
 
 import styles from "./StatistiquesMLLayoutClient.module.css";
 

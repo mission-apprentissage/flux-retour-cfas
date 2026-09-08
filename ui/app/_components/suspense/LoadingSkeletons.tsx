@@ -1,43 +1,44 @@
 "use client";
 
-import { Skeleton, Stack, Box } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import { Skeleton } from "@/app/_components/common/Skeleton";
+
+import styles from "./LoadingSkeletons.module.css";
 
 export function TableSkeleton() {
   return (
-    <Box sx={{ width: "100%", mb: 4 }}>
-      <Skeleton animation="wave" variant="rectangular" width="40%" height={28} sx={{ mb: 2 }} />
-      <Skeleton animation="wave" variant="rectangular" width="100%" height={52} sx={{ mb: 1 }} />
+    <div className={styles.table}>
+      <Skeleton width="40%" height={28} className="fr-mb-2w" />
+      <Skeleton height={52} className="fr-mb-1w" />
       {[...Array(5)].map((_, i) => (
-        <Skeleton animation="wave" key={i} variant="rectangular" width="100%" height={52} sx={{ mb: 1 }} />
+        <Skeleton key={i} height={52} className="fr-mb-1w" />
       ))}
-    </Box>
+    </div>
   );
 }
 
 export function ContentSkeleton() {
   return (
     <div className="fr-container">
-      <Skeleton animation="wave" variant="rectangular" width="40%" height={32} sx={{ mb: 3 }} />
-      <Skeleton animation="wave" variant="rectangular" width="100%" height={56} sx={{ mb: 2, maxWidth: 720 }} />
-      <Skeleton animation="wave" variant="rectangular" width={160} height={40} />
+      <Skeleton width="40%" height={32} className="fr-mb-3w" />
+      <Skeleton height={56} className={styles.field} />
+      <Skeleton width={160} height={40} />
     </div>
   );
 }
 
 export function PageWithSidebarSkeleton() {
   return (
-    <Grid container spacing={2}>
-      <Grid size={3}>
-        <Skeleton animation="wave" variant="rectangular" width="100%" height={400} />
-      </Grid>
-      <Grid size={9}>
-        <Stack spacing={3}>
-          <Skeleton animation="wave" variant="rectangular" width="100%" height={60} />
-          <Skeleton animation="wave" variant="rectangular" width="100%" height={200} />
-          <Skeleton animation="wave" variant="rectangular" width="100%" height={300} />
-        </Stack>
-      </Grid>
-    </Grid>
+    <div className="fr-grid-row fr-grid-row--gutters">
+      <div className="fr-col-12 fr-col-md-3">
+        <Skeleton height={400} />
+      </div>
+      <div className="fr-col-12 fr-col-md-9">
+        <div className={styles.stack}>
+          <Skeleton height={60} />
+          <Skeleton height={200} />
+          <Skeleton height={300} />
+        </div>
+      </div>
+    </div>
   );
 }

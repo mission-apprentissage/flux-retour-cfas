@@ -3,9 +3,10 @@
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import type { ITraitementRegionStats, StatsPeriod } from "shared/models/data/nationalStats.model";
 
+import { TableSkeleton } from "@/app/_components/common/Skeleton";
+
 import { useSortableTable } from "../hooks/useSortableTable";
 import { useTraitementRegionsStats } from "../hooks/useStatsQueries";
-import { TableSkeleton } from "../ui/Skeleton";
 import { formatMlActives, formatPercentageBadgeSimple } from "../utils";
 
 import { SortableTableHeader } from "./SortableTableHeader";

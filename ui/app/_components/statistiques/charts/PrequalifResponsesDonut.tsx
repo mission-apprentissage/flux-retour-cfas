@@ -3,7 +3,7 @@
 import { PieChart } from "@mui/x-charts/PieChart";
 import type { IPrequalifStats } from "shared/models/data/nationalStats.model";
 
-import { Skeleton } from "../ui/Skeleton";
+import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import { ChartLegend } from "./ChartLegend";
 import { ItemChartTooltip } from "./ChartTooltip";

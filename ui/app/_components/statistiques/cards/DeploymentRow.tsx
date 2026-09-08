@@ -1,6 +1,6 @@
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 
-import { Skeleton } from "../ui/Skeleton";
+import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import styles from "./DeploymentRow.module.css";
 

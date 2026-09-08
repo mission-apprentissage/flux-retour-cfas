@@ -1,11 +1,11 @@
 "use client";
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { Skeleton } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IEffectifMissionLocale } from "shared";
 
+import { Skeleton } from "@/app/_components/common/Skeleton";
 import styles from "@/app/_components/ruptures/cfa/collaboration/CollaborationForm.module.css";
 import { useCfaEffectifDetail } from "@/app/_components/ruptures/cfa/collaboration/hooks";
 import { CollaborationTunnel } from "@/app/_components/ruptures/cfa/collaboration/tunnel/CollaborationTunnel";
@@ -40,7 +40,7 @@ export default function CollaborationFormPage({ id }: { id: string }) {
   if (isLoading || !data || shouldRedirect) {
     return (
       <div style={{ padding: "2rem", maxWidth: "78rem", margin: "0 auto" }}>
-        <Skeleton variant="rectangular" height={400} />
+        <Skeleton height={400} />
       </div>
     );
   }

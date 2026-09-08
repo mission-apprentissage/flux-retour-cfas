@@ -1,8 +1,8 @@
 "use client";
 
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
-import { Skeleton } from "@mui/material";
 
+import { Skeleton } from "@/app/_components/common/Skeleton";
 import type { ICfaEffectif, ICfaEffectifsResponse } from "@/common/types/cfaRuptures";
 
 import { CfaEffectifsTable } from "./CfaEffectifsTable";
@@ -32,12 +32,12 @@ export function CfaSearchResults({
     return (
       <section className={`${cardStyles.card} ${styles.section}`}>
         <div className={cardStyles.cardHeader}>
-          <Skeleton animation="wave" variant="rectangular" width={280} height={32} />
-          <Skeleton animation="wave" variant="rectangular" width={100} height={24} />
+          <Skeleton width={280} height={32} />
+          <Skeleton width={100} height={24} />
         </div>
-        <Skeleton animation="wave" variant="rectangular" width="100%" height={44} sx={{ mb: 0.5 }} />
+        <Skeleton height={44} className="fr-mb-1v" />
         {[...Array(5)].map((_, i) => (
-          <Skeleton animation="wave" key={i} variant="rectangular" width="100%" height={52} sx={{ mb: 0.5 }} />
+          <Skeleton key={i} height={52} className="fr-mb-1v" />
         ))}
       </section>
     );

@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 
+import { TableSkeleton } from "@/app/_components/common/Skeleton";
+
 import { DeploymentRow } from "../cards/DeploymentRow";
 import { calculatePercentage, getPercentageColor } from "../constants";
 import { useDeploymentStats, useSyntheseRegionsStats } from "../hooks/useStatsQueries";
 import { RegionTable } from "../tables/RegionTable";
 import { FranceMapSVG } from "../ui/FranceMapSVGLazy";
 import { PeriodSelector, type Period } from "../ui/PeriodSelector";
-import { TableSkeleton } from "../ui/Skeleton";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import styles from "./DeploymentSection.module.css";

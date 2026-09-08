@@ -5,7 +5,7 @@ import { Table } from "@codegouvfr/react-dsfr/Table";
 import Link from "next/link";
 import { useState } from "react";
 
-import { Skeleton } from "../ui/Skeleton";
+import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import styles from "./RegionTable.module.css";
 import { SortableTableHeader } from "./SortableTableHeader";

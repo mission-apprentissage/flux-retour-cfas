@@ -3,8 +3,9 @@
 import { PieChart } from "@mui/x-charts/PieChart";
 import { IRupturantsSummary } from "shared/models/data/nationalStats.model";
 
+import { Skeleton } from "@/app/_components/common/Skeleton";
+
 import { getVariationColorFromString, RUPTURANTS_COLORS, RUPTURANTS_LABELS } from "../constants";
-import { Skeleton } from "../ui/Skeleton";
 
 import { ChartLegend } from "./ChartLegend";
 import { ItemChartTooltip } from "./ChartTooltip";

@@ -9,7 +9,7 @@ import { ChartsYAxis } from "@mui/x-charts/ChartsYAxis";
 import { useXScale, useYScale } from "@mui/x-charts/hooks";
 import { IAccompagnementConjointMotifs } from "shared/models/data/nationalStats.model";
 
-import { Skeleton } from "../ui/Skeleton";
+import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import tooltipStyles from "./ChartTooltip.module.css";
 import styles from "./MotifsBarChart.module.css";

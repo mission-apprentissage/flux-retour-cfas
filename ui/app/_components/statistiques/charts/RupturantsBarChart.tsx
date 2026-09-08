@@ -8,8 +8,9 @@ import { ChartsYAxis } from "@mui/x-charts/ChartsYAxis";
 import { LinePlot, MarkPlot } from "@mui/x-charts/LineChart";
 import { ITimeSeriesPoint } from "shared/models/data/nationalStats.model";
 
+import { Skeleton } from "@/app/_components/common/Skeleton";
+
 import { calculatePercentage, getPercentageColor, RUPTURANTS_COLORS, RUPTURANTS_LABELS } from "../constants";
-import { Skeleton } from "../ui/Skeleton";
 
 import { ChartLegend } from "./ChartLegend";
 import { AxisChartTooltip } from "./ChartTooltip";

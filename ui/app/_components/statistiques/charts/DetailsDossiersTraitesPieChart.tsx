@@ -3,8 +3,9 @@
 import { PieChart } from "@mui/x-charts/PieChart";
 import { IDetailsDossiersTraitesV2 } from "shared/models/data/nationalStats.model";
 
+import { Skeleton } from "@/app/_components/common/Skeleton";
+
 import { DOSSIERS_TRAITES_V2_COLORS, DOSSIERS_TRAITES_V2_LABELS, getVariationColorFromString } from "../constants";
-import { Skeleton } from "../ui/Skeleton";
 
 import { ItemChartTooltip } from "./ChartTooltip";
 import { DejaConnuMiniChart } from "./DejaConnuMiniChart";

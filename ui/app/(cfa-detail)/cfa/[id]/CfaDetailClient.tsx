@@ -1,8 +1,8 @@
 "use client";
 
-import { Skeleton } from "@mui/material";
 import { useEffect, useRef } from "react";
 
+import { Skeleton } from "@/app/_components/common/Skeleton";
 import { CfaCollaborationDetail } from "@/app/_components/ruptures/cfa/collaboration/CfaCollaborationDetail";
 import { useCfaEffectifDetail } from "@/app/_components/ruptures/cfa/collaboration/hooks";
 import { useMarkNotificationAsRead } from "@/app/_components/ruptures/shared/hooks/useNotificationMutations";
@@ -30,8 +30,8 @@ export default function CfaDetailClient({ id }: { id: string }) {
   if (isLoading || !data) {
     return (
       <div className="fr-container fr-py-4w">
-        <Skeleton variant="rectangular" height={60} className="fr-mb-2w" />
-        <Skeleton variant="rectangular" height={400} />
+        <Skeleton height={60} className="fr-mb-2w" />
+        <Skeleton height={400} />
       </div>
     );
   }

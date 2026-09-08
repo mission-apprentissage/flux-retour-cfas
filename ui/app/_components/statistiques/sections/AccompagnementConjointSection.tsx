@@ -6,6 +6,8 @@ import { useMemo, useState } from "react";
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 import { IAccompagnementConjointStats } from "shared/models/data/nationalStats.model";
 
+import { Skeleton } from "@/app/_components/common/Skeleton";
+
 import { ItemChartTooltip } from "../charts/ChartTooltip";
 import { DejaConnuMiniChart } from "../charts/DejaConnuMiniChart";
 import { MotifsBarChart } from "../charts/MotifsBarChart";
@@ -14,7 +16,6 @@ import { useAccompagnementConjointStats } from "../hooks/useStatsQueries";
 import { FranceMapSVG } from "../ui/FranceMapSVGLazy";
 import { NoDataMessage } from "../ui/NoDataMessage";
 import { RegionSVG } from "../ui/RegionSVG";
-import { Skeleton } from "../ui/Skeleton";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import styles from "./AccompagnementConjointSection.module.css";
