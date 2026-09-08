@@ -130,8 +130,10 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
       ) : (
         <>
           <p>
-            L’invitation sera envoyée directement au CFA. Nous avons préparé un message automatique que vous pouvez
-            compléter avec une note ou votre message de recommandation si vous le souhaitez.
+            L’invitation sera envoyée directement{" "}
+            {cfa?.destinataire_nom ? <strong>à {cfa.destinataire_nom}</strong> : "au CFA"}. Nous avons préparé un
+            message automatique que vous pouvez compléter avec une note ou votre message de recommandation si vous le
+            souhaitez.
           </p>
           <Input
             textArea
