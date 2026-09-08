@@ -13,7 +13,6 @@ import { FormValues } from "../types";
 
 interface ObjectifsSectionProps {
   prenom: string;
-  // Branche C (jeune sans contrat) : deux objectifs changent de formulation.
 }
 
 function MotifCommentaire({

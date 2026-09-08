@@ -8,7 +8,6 @@ import styles from "./Tunnel.module.css";
 export interface RadioCardOption<T extends string | boolean> {
   value: T;
   label: ReactNode;
-  hint?: string;
 }
 
 interface RadioCardGroupProps<T extends string | boolean> {
@@ -41,7 +40,6 @@ export function RadioCardGroup<T extends string | boolean>({ name, options, valu
             />
             <span className={styles.radioLabelText}>
               <span>{option.label}</span>
-              {option.hint && <span className={styles.radioHint}>{option.hint}</span>}
             </span>
           </label>
         ))}
