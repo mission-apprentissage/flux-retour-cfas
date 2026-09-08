@@ -113,6 +113,8 @@ export interface ICfaToInvite {
   nom: string | null;
   adresse: string | null;
   nb_jeunes_rupture: number;
+  // Sous-ensemble des jeunes en rupture soumis à l'obligation de formation (16-18 ans)
+  nb_jeunes_obligation_formation: number;
   statut: CFA_INVITATION_STATUT;
   // Nom complet du contact CFA s'il existe déjà dans usersMigration (sinon null → salutation générique)
   destinataire_nom: string | null;

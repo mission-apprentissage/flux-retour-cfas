@@ -83,12 +83,12 @@ const eligibleResult = {
   organisme: null,
 };
 
-async function createMlEffectifDoc(overrides: Record<string, any> = {}) {
+async function createMlEffectifDoc(overrides: Record<string, any> = {}, ageAnnees = 20) {
   const now = new Date();
   const snapshot = await createSampleEffectif({
     organisme: sampleOrganisme,
     annee_scolaire: anneeScolaire,
-    apprenant: { date_de_naissance: new Date(now.getFullYear() - 20, 0, 1) },
+    apprenant: { date_de_naissance: new Date(now.getFullYear() - ageAnnees, 0, 1) },
   });
 
   return {
@@ -196,8 +196,20 @@ describe("getCfaListToInviteForMissionLocale", () => {
       siret: "19040492100016",
       nom: "CAMPUS DU LAC",
       nb_jeunes_rupture: 2,
+      nb_jeunes_obligation_formation: 0,
       statut: CFA_INVITATION_STATUT.INVITER,
     });
+  });
+
+  it("compte séparément les jeunes en obligation de formation (16-18 ans)", async () => {
+    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc({}, 17)) as any);
+
+    const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].nb_jeunes_rupture).toBe(2);
+    expect(result[0].nb_jeunes_obligation_formation).toBe(1);
   });
 
   it("renvoie INVITATION_ENVOYEE quand ce conseiller a déjà invité ce CFA", async () => {
