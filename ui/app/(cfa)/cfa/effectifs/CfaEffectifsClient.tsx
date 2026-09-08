@@ -47,14 +47,18 @@ export default function CfaEffectifsClient() {
     }
   }, [debouncedSearch, search, updateParams]);
 
+  // Les filtres sont masqués pendant une recherche : les ignorer aussi côté requête, sinon une URL
+  // portant les deux (lien partagé, marque-page) restreindrait les résultats sans rien afficher.
+  const rechercheActive = debouncedSearch.trim().length > 0;
+
   const { data, isLoading } = useCfaEffectifs(organismeId, {
     page,
     limit,
     search: debouncedSearch || undefined,
     sort,
     order,
-    collab_status,
-    formation,
+    collab_status: rechercheActive ? undefined : collab_status,
+    formation: rechercheActive ? undefined : formation,
   });
 
   if (!data && isLoading) {
