@@ -737,7 +737,7 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
 
 /**
  * Date de rattachement d'un dossier ML. Un dossier de collaboration ouvert en prévention ou pour
- * un jeune sans contrat n'a pas de date de rupture : il est rattaché au mois de son envoi.
+ * un dossier de prévention n'a pas de date de rupture : il est rattaché au mois de son envoi.
  */
 const addDateReferenceField = () => [
   {
@@ -3272,6 +3272,25 @@ export function sortKeeperPriority(
 }
 
 /**
+ * Un donneur antérieur à la migration peut porter la situation « sans contrat » et ses champs,
+ * absents du modèle : recopiés tels quels sur le survivant, la validation stricte rejetterait
+ * l'écriture et interromprait toute la passe de déduplication.
+ */
+const sansChampsRetires = (organismeData: unknown): unknown => {
+  if (!organismeData || typeof organismeData !== "object") return organismeData;
+  const {
+    situation_type,
+    date_debut_formation: _dateDebutFormation,
+    recherche_entreprise: _rechercheEntreprise,
+    ...reste
+  } = organismeData as Record<string, unknown>;
+  return {
+    ...reste,
+    ...(situation_type !== undefined && situation_type !== "SANS_CONTRAT" ? { situation_type } : {}),
+  };
+};
+
+/**
  * Fusionne les champs utilisateur des doublons vers le keeper, puis soft-delete les doublons.
  *
  * - Réassigne les logs `missionLocaleEffectifLog` du donor vers le keeper (préserve l'historique côté UI).
@@ -3292,7 +3311,7 @@ export async function mergeAndSoftDeleteDuplicates(keeperId: ObjectId, duplicate
     if (keeper[field] == null) {
       const donor = duplicates.find((d) => d[field] != null);
       if (donor) {
-        mergeUpdate[field] = donor[field];
+        mergeUpdate[field] = field === "organisme_data" ? sansChampsRetires(donor[field]) : donor[field];
       }
     }
   }
