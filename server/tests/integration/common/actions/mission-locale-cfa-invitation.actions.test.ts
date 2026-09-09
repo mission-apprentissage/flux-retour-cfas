@@ -380,6 +380,31 @@ describe("sendCfaInvitationFromMissionLocale", () => {
     );
   });
 
+  it("renvoie vers la connexion quand le contact du CFA a déjà un compte", async () => {
+    // Le parcours d'inscription refuserait cet email : le lien d'inscription serait inutilisable.
+    await usersMigrationDb().insertOne({
+      _id: new ObjectId(),
+      account_status: "CONFIRMED",
+      password_updated_at: new Date(),
+      connection_history: [],
+      emails: [],
+      created_at: new Date(),
+      nom: "Durand",
+      prenom: "Camille",
+      email: "DIRECTEUR@campus-lac.fr",
+      telephone: "",
+      password: testPasswordHash,
+      has_accept_cgu_version: "v0.1",
+      organisation_id: new ObjectId(),
+    } as any);
+
+    await sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString());
+
+    const params = vi.mocked(sendTransactionalEmail).mock.calls.at(-1)?.[2] as Record<string, unknown>;
+    expect(params.LIEN_INVITATION).toContain("/auth/connexion");
+    expect(params.LIEN_INVITATION).not.toContain("invitationToken");
+  });
+
   it("échoue si le CFA n'a aucun email de contact", async () => {
     await organismesDb().updateOne({ _id: organismeId }, { $set: { contacts_from_referentiel: [] } });
 

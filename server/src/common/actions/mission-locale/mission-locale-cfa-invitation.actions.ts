@@ -24,6 +24,7 @@ import {
   INVITATION_EXPIRATION_MS,
 } from "../organisations.actions";
 import { checkActivationEligibility, findEligibleOrganismes } from "../organismes/deca-cfa-eligibility";
+import { isEmailAlreadyUsed } from "../users.actions";
 
 import { missionLocaleBaseAggregation } from "./mission-locale.actions";
 
@@ -347,6 +348,10 @@ export async function sendCfaInvitationFromMissionLocale(
   // Nom du contact s'il a déjà un compte (usersMigration), pour personnaliser la salutation de l'email.
   const destinataireNom = (await getDestinataireNomsByEmail([email_destinataire])).get(email_destinataire) ?? "";
 
+  // Le parcours d'inscription refuse un email déjà rattaché à un compte : dans ce cas le lien
+  // d'inscription serait inutilisable, on renvoie donc le destinataire vers la connexion.
+  const aDejaUnCompte = await isEmailAlreadyUsed(email_destinataire);
+
   // ID du template Brevo (variable d'environnement, varie selon l'environnement). Vérifié avant toute
   // écriture, pour échouer proprement si la configuration manque.
   const templateId = config.brevo.templateInvitationCfaId;
@@ -370,7 +375,9 @@ export async function sendCfaInvitationFromMissionLocale(
       PRENOM_CONSEILLER: user.prenom ?? "",
       NOM_CONSEILLER: user.nom ?? "",
       NOTE_RECOMMANDATION: note ?? "",
-      LIEN_INVITATION: getPublicUrl(`/auth/inscription-cfa?invitationToken=${invitationToken}`),
+      LIEN_INVITATION: aDejaUnCompte
+        ? getPublicUrl("/auth/connexion")
+        : getPublicUrl(`/auth/inscription-cfa?invitationToken=${invitationToken}`),
       NB_ML_PARTENAIRES: mlNoms.length,
       NOMS_ML: mlNoms.join(", "),
       NOM_DESTINATAIRE: destinataireNom,
