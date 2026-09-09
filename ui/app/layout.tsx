@@ -1,9 +1,6 @@
-// eslint-disable-next-line import/no-named-as-default
-import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
 import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
 import { getHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import Link from "next/link";
 import PlausibleProvider from "next-plausible";
 
@@ -42,16 +39,10 @@ export default async function RootLayout({ children }: { children: JSX.Element }
         <PlausibleProvider domain={publicConfig.host} />
       </head>
       <body>
-        {
-          <AppRouterCacheProvider>
-            <DsfrProvider>
-              <MuiDsfrThemeProvider>
-                <RateLimitBanner />
-                {children}
-              </MuiDsfrThemeProvider>
-            </DsfrProvider>
-          </AppRouterCacheProvider>
-        }
+        <DsfrProvider>
+          <RateLimitBanner />
+          {children}
+        </DsfrProvider>
       </body>
     </html>
   );
