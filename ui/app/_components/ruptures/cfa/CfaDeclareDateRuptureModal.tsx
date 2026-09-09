@@ -1,6 +1,6 @@
 "use client";
 
-import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { createModal, ModalProps } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useCallback, useState } from "react";
 
@@ -44,7 +44,7 @@ export function CfaDeclareDateRuptureModal({ effectifName, onConfirm }: CfaDecla
 
   useIsModalOpen(modal, { onConceal: resetState });
 
-  const buttons =
+  const buttons: [ModalProps.ActionAreaButtonProps, ...ModalProps.ActionAreaButtonProps[]] =
     status === "error"
       ? [
           {
@@ -77,7 +77,7 @@ export function CfaDeclareDateRuptureModal({ effectifName, onConfirm }: CfaDecla
         ];
 
   return (
-    <modal.Component title="Déclarer cet effectif en rupture" buttons={buttons as [any, ...any[]]}>
+    <modal.Component title="Déclarer cet effectif en rupture" buttons={buttons}>
       <p>
         Vous allez déclarer <strong>{effectifName}</strong> en rupture de contrat.
       </p>

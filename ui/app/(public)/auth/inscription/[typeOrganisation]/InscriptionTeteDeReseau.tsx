@@ -5,7 +5,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { useQuery } from "@tanstack/react-query";
-import { Field, Form, Formik } from "formik";
+import { Field, FieldProps, Form, Formik, FormikHelpers } from "formik";
 import { useRouter } from "next/navigation";
 import type { IReseau } from "shared";
 
@@ -38,14 +38,14 @@ export function InscriptionTeteDeReseau({
 
   const isAutreReseau = organisation?.type === "TETE_DE_RESEAU" && (organisation?.reseau as string) === AUTRE_RESEAU;
 
-  const submitUnknownNetwork = async (values: ReseauFormValues, { setStatus }: any) => {
+  const submitUnknownNetwork = async (values: ReseauFormValues, { setStatus }: FormikHelpers<ReseauFormValues>) => {
     try {
       await _post("/api/v1/auth/register-unknown-network", {
         email: values.email,
         unknownNetwork: values.nomReseau,
       });
       router.push(PAGES.static.authInscriptionReseauAutre.getPath());
-    } catch (err: any) {
+    } catch (err) {
       setStatus({ error: getApiErrorMessage(err) });
     }
   };
@@ -84,7 +84,7 @@ export function InscriptionTeteDeReseau({
           {({ status = {}, isSubmitting }) => (
             <Form noValidate>
               <Field name="nomReseau">
-                {({ field, meta }: any) => (
+                {({ field, meta }: FieldProps) => (
                   <Input
                     label={
                       <>
@@ -106,7 +106,7 @@ export function InscriptionTeteDeReseau({
               </Field>
 
               <Field name="email">
-                {({ field, meta }: any) => (
+                {({ field, meta }: FieldProps) => (
                   <Input
                     label={
                       <>

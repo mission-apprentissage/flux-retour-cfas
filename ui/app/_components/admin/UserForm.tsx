@@ -10,6 +10,8 @@ import { toFormikValidationSchema } from "zod-formik-adapter";
 
 import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 import { _delete, _put, _post } from "@/common/httpClient";
+import { getApiErrorMessage, getServerErrorMessage } from "@/common/rateLimit";
+import { UserNormalized } from "@/modules/admin/users/models/users";
 
 import userSchema from "../../../modules/admin/userSchema";
 
@@ -20,16 +22,22 @@ const deleteUserModal = createModal({
   isOpenedByDefault: false,
 });
 
+interface UserFormResult {
+  ok?: boolean;
+  error?: string;
+  _id?: string;
+}
+
 const UserForm = ({
   user,
   onCreate,
   onDelete,
   onUpdate,
 }: {
-  user: any;
-  onCreate?: any;
-  onDelete?: any;
-  onUpdate?: any;
+  user: UserNormalized | null;
+  onCreate?: (user: { _id: string }) => void;
+  onDelete?: () => void;
+  onUpdate?: () => void;
 }) => {
   const [alert, setAlert] = useState<{
     message: string;
@@ -47,7 +55,7 @@ const UserForm = ({
       telephone: user?.telephone || "",
     },
     onSubmit: async ({ civility, nom, prenom, email, fonction, telephone }, { setSubmitting }) => {
-      let result;
+      let result: UserFormResult | undefined;
 
       try {
         if (user) {
@@ -59,7 +67,7 @@ const UserForm = ({
             fonction,
             telephone,
           };
-          result = await _put(`/api/v1/admin/users/${user._id}`, body).catch((err) => {
+          result = await _put<UserFormResult>(`/api/v1/admin/users/${user._id}`, body).catch((err) => {
             if (err.statusCode === 409) {
               return { error: "Cet email est déjà utilisé par un autre utilisateur" };
             }
@@ -95,7 +103,7 @@ const UserForm = ({
             fonction,
             telephone,
           };
-          result = await _post("/api/v1/admin/users", body).catch((err) => {
+          result = await _post<unknown, UserFormResult>("/api/v1/admin/users", body).catch((err) => {
             if (err.statusCode === 409) {
               return { error: "Cet utilisateur existe déjà" };
             }
@@ -106,7 +114,7 @@ const UserForm = ({
               severity: "success",
             });
             resetForm();
-            onCreate?.(result);
+            onCreate?.({ _id: result._id });
           } else if (result?.error) {
             setAlert({
               message: result.error,
@@ -120,10 +128,10 @@ const UserForm = ({
             });
           }
         }
-      } catch (e: any) {
+      } catch (e) {
         console.error(e);
         setAlert({
-          message: e?.json?.data?.message || e?.message || "Une erreur est survenue",
+          message: getApiErrorMessage(e, "Une erreur est survenue"),
           severity: "error",
         });
       }
@@ -132,7 +140,8 @@ const UserForm = ({
   });
 
   const performDelete = async () => {
-    const result = await _delete(`/api/v1/admin/users/${user._id}`);
+    if (!user) return;
+    const result = await _delete<{ ok?: boolean }>(`/api/v1/admin/users/${user._id}`);
     if (result?.ok) {
       setAlert({
         message: "Utilisateur supprimé",
@@ -149,7 +158,8 @@ const UserForm = ({
     return onDelete?.();
   };
 
-  const confirmUserAccess = async (validate) => {
+  const confirmUserAccess = async (validate: boolean) => {
+    if (!user) return;
     if (
       !confirm(
         `Voulez-vous vraiment ${validate ? "valider" : "rejeter"} l'accès de cet utilisateur sur l'organisation ${
@@ -166,26 +176,27 @@ const UserForm = ({
         severity: "success",
       });
       validate ? onUpdate?.() : onDelete?.();
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
       setAlert({
-        message: e?.json?.data?.message || "Erreur lors de la validation de l'accès.",
+        message: getServerErrorMessage(e, "Erreur lors de la validation de l'accès."),
         severity: "error",
       });
     }
   };
 
   const resendConfirmationEmail = async () => {
+    if (!user) return;
     try {
       await _post(`/api/v1/admin/users/${user._id}/resend-confirmation-email`);
       setAlert({
         message: "L'email de confirmation a été renvoyé.",
         severity: "success",
       });
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
       setAlert({
-        message: e?.json?.data?.message || "Erreur lors de l'envoi de l'email.",
+        message: getServerErrorMessage(e, "Erreur lors de l'envoi de l'email."),
         severity: "error",
       });
     }
@@ -310,7 +321,9 @@ const UserForm = ({
           <>
             <div className={styles.statusRow}>
               <p className={styles.statusLabel}>Statut du compte</p>
-              <Badge severity="info">{USER_STATUS_LABELS[user.account_status] || user.account_status}</Badge>
+              <Badge severity="info">
+                {USER_STATUS_LABELS[user.account_status as keyof typeof USER_STATUS_LABELS] || user.account_status}
+              </Badge>
 
               {user.account_status === "PENDING_EMAIL_VALIDATION" && (
                 <div className={styles.statusAction}>

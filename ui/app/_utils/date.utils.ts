@@ -1,9 +1,9 @@
-export function formatDate(dateString) {
+export function formatDate(dateString: string | Date | null | undefined) {
   if (!dateString) return "";
   return new Date(dateString).toLocaleDateString("fr-FR");
 }
 
-export function getAge(dateString) {
+export function getAge(dateString: string | Date | null | undefined) {
   if (!dateString) return "";
   const now = new Date();
   const dob = new Date(dateString);

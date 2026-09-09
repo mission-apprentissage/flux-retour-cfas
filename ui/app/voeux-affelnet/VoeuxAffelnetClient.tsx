@@ -12,7 +12,7 @@ import { AUTRE_AFFELNET_LINK } from "shared";
 
 import { StatCard } from "@/app/_components/statistiques/cards/StatCard";
 import { StatisticsSection } from "@/app/_components/statistiques/sections/StatisticsSection";
-import { _get, _getBlob } from "@/common/httpClient";
+import { _get, _getBlob, HTTPError } from "@/common/httpClient";
 import { getApiErrorMessage } from "@/common/rateLimit";
 import { downloadObject } from "@/common/utils/browser";
 
@@ -61,7 +61,7 @@ export default function VoeuxAffelnetClient() {
     data: affelnetCount,
     isLoading,
     error,
-  } = useQuery<AffelnetCount, any>({
+  } = useQuery<AffelnetCount, HTTPError>({
     queryKey: ["affelnet/national/count", { departements, year }],
     queryFn: () => {
       const params = new URLSearchParams({ year: String(year) });
@@ -78,7 +78,7 @@ export default function VoeuxAffelnetClient() {
     try {
       const { data } = await _getBlob(`/api/v1/affelnet/export/${kind}?year=${year}`);
       downloadObject(data, `voeux_affelnet_${kind.replace("-", "_")}.csv`, "text/plain");
-    } catch (err: any) {
+    } catch (err) {
       setExportError(getApiErrorMessage(err, "Le téléchargement a échoué."));
     } finally {
       setIsExporting(false);

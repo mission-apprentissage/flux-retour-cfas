@@ -8,6 +8,7 @@ import { useCallback, useState } from "react";
 
 import { _get, _post } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
+import { getServerErrorMessage } from "@/common/rateLimit";
 
 import { CheckLine, EligibilityCheck, EtatBadge } from "./EligibilityBadges";
 import styles from "./encart-admin.module.scss";
@@ -97,10 +98,10 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
       });
       decaCfaPilotConfirmModal.close();
       await refetch();
-    } catch (err: any) {
+    } catch (err) {
       setFeedback({
         severity: "error",
-        message: err?.json?.data?.message || "Une erreur est survenue",
+        message: getServerErrorMessage(err, "Une erreur est survenue"),
       });
       decaCfaPilotConfirmModal.close();
     }

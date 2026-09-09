@@ -10,9 +10,15 @@ import { toEffectifsQueue } from "@/common/utils/televersement";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
 
-interface ProcessedDataType {
-  [key: string]: any;
+export interface ProcessedDataType {
+  [key: string]: unknown;
   errors: { key: string; message: string }[];
+}
+
+interface ValidationIssue {
+  path: Array<string | number>;
+  message: string;
+  code?: string;
 }
 
 interface StateType {
@@ -79,7 +85,7 @@ const useExcelFileProcessor = (organismeId: string) => {
         const worksheet = workbook.Sheets[worksheetName];
         const rawJsonData = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1 }) as unknown[][];
 
-        const filteredJsonData = rawJsonData.filter((row: any[]) =>
+        const filteredJsonData = rawJsonData.filter((row: unknown[]) =>
           row.some((cell) => typeof cell === "string" && cell.trim() !== "")
         );
 
@@ -118,11 +124,11 @@ const useExcelFileProcessor = (organismeId: string) => {
             const index = headerMap[header];
             if (index !== undefined) {
               const config = televersementHeaders[header];
-              const cellValue = (row as any[])[index];
+              const cellValue = (row as unknown[])[index];
 
               if (config) {
                 if (config.type === "date") {
-                  rowObject[header] = parseExcelDate(cellValue);
+                  rowObject[header] = parseExcelDate(cellValue as string | number | null | undefined);
                 } else if (config.type === "boolean") {
                   rowObject[header] = parseExcelBoolean(cellValue);
                 } else {
@@ -141,7 +147,10 @@ const useExcelFileProcessor = (organismeId: string) => {
           return rowObject;
         });
 
-        const res = await _post(`/api/v1/organismes/${organismeId}/upload/validate`, toEffectifsQueue(jsonData));
+        const res = await _post<
+          unknown,
+          { error?: { issues?: ValidationIssue[] }; warnings?: Record<string, unknown> }
+        >(`/api/v1/organismes/${organismeId}/upload/validate`, toEffectifsQueue(jsonData));
 
         const errors = res.error?.issues || [];
         setState((prevState) => ({
@@ -159,8 +168,8 @@ const useExcelFileProcessor = (organismeId: string) => {
           missingHeaders: missingMandatoryHeaders,
         }));
 
-        const errorsByRow = errors.reduce((acc: Record<number, { message: string; key: string }[]>, error: any) => {
-          const row = error.path[0];
+        const errorsByRow = errors.reduce((acc: Record<number, { message: string; key: string }[]>, error) => {
+          const row = Number(error.path[0]);
           let message = error.message;
 
           if (error.code === "invalid_type") {
@@ -170,15 +179,15 @@ const useExcelFileProcessor = (organismeId: string) => {
           if (!acc[row]) acc[row] = [];
           acc[row].push({
             message,
-            key: error.path[1],
+            key: String(error.path[1]),
           });
           return acc;
         }, {});
 
-        const columnsWithErrorsArray = errors.map((e: any) => e.path[1]);
+        const columnsWithErrorsArray = errors.map((e) => String(e.path[1]));
         const uniqueColumnsWithErrors = Array.from(new Set(columnsWithErrorsArray));
 
-        const rows = jsonData.map((row: any, index: number) => {
+        const rows = jsonData.map((row, index) => {
           const rowErrors = errorsByRow[index] || [];
           return { ...row, errors: rowErrors };
         });

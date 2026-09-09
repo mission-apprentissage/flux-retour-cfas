@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { IOrganisationIndicateursOrganismes, IOrganismesCount, normalize } from "shared";
 
-import { _get, _post, _put } from "@/common/httpClient";
+import { _get, _post, _put, HTTPError } from "@/common/httpClient";
 import { Organisme, OrganismeNormalized } from "@/common/internal/Organisme";
 
 // récupère un organisme
@@ -12,7 +12,7 @@ export function useOrganisme(organismeId: string | undefined | null) {
     isLoading,
     error,
     refetch,
-  } = useQuery<Organisme, any>({
+  } = useQuery<Organisme, HTTPError>({
     queryKey: ["organisme", organismeId],
     queryFn: () => _get(`/api/v1/organismes/${organismeId}`),
     enabled: !!organismeId,
@@ -22,7 +22,7 @@ export function useOrganisme(organismeId: string | undefined | null) {
 
   const { mutateAsync: generateApiKey, isPending: isGeneratingApiKey } = useMutation({
     mutationFn: async () => {
-      const { apiKey } = await _post(`${endpoint}/api-key`);
+      const { apiKey } = await _post<unknown, { apiKey: string }>(`${endpoint}/api-key`);
       await refetch();
       return apiKey;
     },
@@ -58,7 +58,7 @@ export function useOrganisationOrganisme(enabled?: boolean) {
     isLoading,
     refetch,
     error,
-  } = useQuery<Organisme & { organismesCount: IOrganismesCount }, any>({
+  } = useQuery<Organisme & { organismesCount: IOrganismesCount }, HTTPError>({
     queryKey: ["organisation/organisme"],
     queryFn: () => _get("/api/v1/organisation/organisme"),
     enabled: enabled ?? true,
@@ -78,7 +78,7 @@ export function useOrganisationOrganismes(enabled?: boolean) {
     data: organismes,
     isLoading,
     error,
-  } = useQuery<Organisme[], any>({
+  } = useQuery<Organisme[], HTTPError>({
     queryKey: ["organisation/organismes"],
     queryFn: () => _get("/api/v1/organisation/organismes"),
     enabled: enabled ?? true,
@@ -92,7 +92,7 @@ export function useOrganisationOrganismes(enabled?: boolean) {
 }
 
 export function useOrganisationIndicateursOrganismes(enabled = true) {
-  const { data, isLoading, error } = useQuery<IOrganisationIndicateursOrganismes, any>({
+  const { data, isLoading, error } = useQuery<IOrganisationIndicateursOrganismes, HTTPError>({
     queryKey: ["organisation/organismes/indicateurs"],
     queryFn: () => _get("/api/v1/organisation/organismes/indicateurs"),
     enabled,
@@ -157,7 +157,7 @@ export function useOrganismesNormalizedLists(organismes: Organisme[]) {
 }
 
 export function useOrganismesDuplicatsLists() {
-  const { data: organismesDuplicats, isLoading } = useQuery<Organisme[], any>({
+  const { data: organismesDuplicats, isLoading } = useQuery<Organisme[], HTTPError>({
     queryKey: ["admin/organismes-duplicates"],
     queryFn: () => _get("/api/v1/admin/organismes-duplicates"),
   });

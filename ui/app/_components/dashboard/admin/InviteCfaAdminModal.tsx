@@ -11,6 +11,7 @@ import { useState } from "react";
 import { z } from "zod";
 
 import { _post } from "@/common/httpClient";
+import { getApiErrorMessage, getErrorStatusCode } from "@/common/rateLimit";
 
 import styles from "./encart-admin.module.scss";
 
@@ -77,7 +78,7 @@ export function InviteCfaAdminModal({ siret, uai, organismeNom, onSuccess }: Inv
       setServerError(null);
       setPendingConflict(null);
       try {
-        const res = await _post<any, InviteResponse>("/api/v1/admin/users/cfa/admin-invite", {
+        const res = await _post<unknown, InviteResponse>("/api/v1/admin/users/cfa/admin-invite", {
           email: values.email.trim().toLowerCase(),
           siret,
           ...(uai ? { uai } : {}),
@@ -90,9 +91,9 @@ export function InviteCfaAdminModal({ siret, uai, organismeNom, onSuccess }: Inv
         );
         formik.resetForm();
         inviteCfaAdminModal.close();
-      } catch (err: any) {
-        const msg: string = err?.json?.data?.message || err?.message || "Une erreur est survenue";
-        const statusCode = err?.json?.status ?? err?.status;
+      } catch (err) {
+        const msg: string = getApiErrorMessage(err, "Une erreur est survenue");
+        const statusCode = getErrorStatusCode(err);
         if (statusCode === 409 && msg.toLowerCase().includes("invitation")) {
           setPendingConflict({ email: values.email.trim().toLowerCase() });
         }
@@ -106,7 +107,7 @@ export function InviteCfaAdminModal({ siret, uai, organismeNom, onSuccess }: Inv
     setResending(true);
     setServerError(null);
     try {
-      const res = await _post<any, InviteResponse>("/api/v1/admin/users/cfa/admin-invite/resend", {
+      const res = await _post<unknown, InviteResponse>("/api/v1/admin/users/cfa/admin-invite/resend", {
         email: pendingConflict.email,
         siret,
         ...(uai ? { uai } : {}),
@@ -116,8 +117,8 @@ export function InviteCfaAdminModal({ siret, uai, organismeNom, onSuccess }: Inv
       formik.resetForm();
       setPendingConflict(null);
       inviteCfaAdminModal.close();
-    } catch (err: any) {
-      setServerError(err?.json?.data?.message || err?.message || "Échec du renvoi");
+    } catch (err) {
+      setServerError(getApiErrorMessage(err, "Échec du renvoi"));
     } finally {
       setResending(false);
     }

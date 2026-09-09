@@ -156,7 +156,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
       return `/cfa/${rawData.id}?nom_liste=${listType}${cpQuery}`;
     }
 
-    return user.organisation.type === "ADMINISTRATEUR" && mlId
+    return user?.organisation.type === "ADMINISTRATEUR" && mlId
       ? `/admin/mission-locale/${mlId}/edit/${rawData.id}/?nom_liste=${listType}${cpQuery}`
       : `/mission-locale/${rawData.id}?nom_liste=${listType}${cpQuery}${criteresQuery}${origineQuery}`;
   };

@@ -8,7 +8,6 @@ import { Select } from "@codegouvfr/react-dsfr/Select";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
-import { IErp } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { PageHeader } from "@/app/_components/page-header/PageHeader";
@@ -19,7 +18,7 @@ import { _delete, _post, _put } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { formatDateDayMonthYear, formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import { useOrganisationOrganisme } from "@/hooks/organismes";
-import { useErp } from "@/hooks/useErp";
+import { Erp, useErp } from "@/hooks/useErp";
 
 import styles from "./parametres.module.scss";
 
@@ -63,7 +62,7 @@ export default function ParametresClient({
     "none"
   );
   const [selectedERPId, setSelectedERPId] = useState("");
-  const [selectedERP, setSelectedERP] = useState({} as IErp);
+  const [selectedERP, setSelectedERP] = useState({} as Erp);
   const [unsupportedERPName, setUnsupportedERPName] = useState("");
   const [regeneratedApiKey, setRegeneratedApiKey] = useState<string | null>(null);
   const [regeneratedKeyCopied, setRegeneratedKeyCopied] = useState(false);
@@ -177,7 +176,9 @@ export default function ParametresClient({
                                 <Button
                                   className="fr-mt-2w"
                                   onClick={async () => {
-                                    const { apiKey } = await _post(`/api/v1/organismes/${organisme._id}/api-key`);
+                                    const { apiKey } = await _post<unknown, { apiKey: string }>(
+                                      `/api/v1/organismes/${organisme._id}/api-key`
+                                    );
                                     setRegeneratedApiKey(apiKey);
                                     await refetchOrganisme();
                                   }}
@@ -308,7 +309,7 @@ export default function ParametresClient({
                 <option value="" disabled selected>
                   ERP...
                 </option>
-                {erps
+                {(erps ?? [])
                   .filter(({ disabled }) => !disabled)
                   .sort((a, b) => {
                     const indexA = desiredOrder.indexOf(a.unique_id);
@@ -435,11 +436,11 @@ export default function ParametresClient({
 interface ConfigurationERPV3Props {
   erpId: string;
   organisme: Organisme;
-  onGenerateKey: () => any;
-  onConfigurationMismatch: () => any;
-  onBack: () => any;
-  onSubmit: () => any;
-  erpsById: any;
+  onGenerateKey: () => void;
+  onConfigurationMismatch: () => void;
+  onBack: () => void;
+  onSubmit: () => void;
+  erpsById: Record<string, Erp>;
 }
 function ConfigurationERPV3(props: ConfigurationERPV3Props) {
   const [copied, setCopied] = useState(false);

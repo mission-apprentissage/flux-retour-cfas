@@ -3,11 +3,12 @@
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { FieldArray, Form, Formik, FormikHelpers } from "formik";
+import { FieldArray, Form, Formik, FormikErrors, FormikHelpers, FormikTouched } from "formik";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { z, ZodError } from "zod";
 
 import { _post } from "@/common/httpClient";
+import { getServerErrorMessage } from "@/common/rateLimit";
 
 import styles from "./InvitationSidePanel.module.css";
 
@@ -35,7 +36,7 @@ const initialValues: FormValues = {
 };
 
 function validate(values: FormValues) {
-  const errors: Record<string, any> = {};
+  const errors: Record<string, unknown> = {};
   const entryErrors: Record<number, { email?: string }> = {};
 
   values.entries.forEach((entry, index) => {
@@ -159,11 +160,11 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
 
         resetForm({
           values: { entries: failedEntries.length > 0 ? failedEntries : initialValues.entries },
-          errors: { entries: failedErrors } as any,
-          touched: { entries: failedTouched } as any,
+          errors: { entries: failedErrors } as FormikErrors<FormValues>,
+          touched: { entries: failedTouched } as FormikTouched<FormValues>,
         });
-      } catch (err: any) {
-        setFeedbacks([{ severity: "error", message: err?.json?.data?.message || "Une erreur est survenue" }]);
+      } catch (err) {
+        setFeedbacks([{ severity: "error", message: getServerErrorMessage(err, "Une erreur est survenue") }]);
       } finally {
         setSubmitting(false);
       }

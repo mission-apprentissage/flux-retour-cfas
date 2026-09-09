@@ -36,7 +36,8 @@ export default function SecteurClient() {
   const secteurLabel = secteurExists?.libelle_secteur;
 
   const departementsOptions = useMemo(() => {
-    const codeRegion = user?.organisation?.code_region;
+    const organisation = user?.organisation;
+    const codeRegion = organisation && "code_region" in organisation ? organisation.code_region : undefined;
     if (!codeRegion) return [];
     const depts = getDepartementsByRegion(codeRegion);
     return depts;

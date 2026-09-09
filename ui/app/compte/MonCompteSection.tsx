@@ -4,12 +4,13 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { Field, Form, Formik, FormikErrors, FormikHelpers } from "formik";
+import { Field, FieldProps, Form, Formik, FormikErrors, FormikHelpers } from "formik";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z, ZodError } from "zod";
 
 import { _put } from "@/common/httpClient";
+import { getApiErrorMessage } from "@/common/rateLimit";
 
 import { TrackFormDirty } from "../_components/UnsavedChangesContext";
 import { useAuth } from "../_context/UserContext";
@@ -46,8 +47,8 @@ export function MonCompteSection() {
       // Le user est injecté côté serveur (getSession) dans le layout : on rafraîchit pour répercuter la modif.
       router.refresh();
       setAlert({ severity: "success", message: "Vos informations ont été enregistrées." });
-    } catch (err: any) {
-      const message = err?.json?.data?.message || err?.message || "Erreur lors de l'enregistrement";
+    } catch (err) {
+      const message = getApiErrorMessage(err, "Erreur lors de l'enregistrement");
       setAlert({ severity: "error", message });
     } finally {
       setSubmitting(false);
@@ -121,7 +122,7 @@ export function MonCompteSection() {
             />
 
             <Field name="prenom">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <Input
                   label="Prénom"
                   state={meta.touched && meta.error ? "error" : "default"}
@@ -132,7 +133,7 @@ export function MonCompteSection() {
             </Field>
 
             <Field name="nom">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <Input
                   label="Nom"
                   state={meta.touched && meta.error ? "error" : "default"}
@@ -143,7 +144,9 @@ export function MonCompteSection() {
             </Field>
 
             <Field name="telephone">
-              {({ field }: any) => <Input label="Numéro de téléphone" nativeInputProps={{ ...field, type: "tel" }} />}
+              {({ field }: FieldProps) => (
+                <Input label="Numéro de téléphone" nativeInputProps={{ ...field, type: "tel" }} />
+              )}
             </Field>
 
             <Input

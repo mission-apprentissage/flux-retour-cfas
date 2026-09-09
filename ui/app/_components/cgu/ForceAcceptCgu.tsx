@@ -9,6 +9,7 @@ import { CGU_VERSION } from "shared/constants";
 import { CguArticles } from "@/app/(public)/cgu/CguArticles";
 import { _put } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
+import { getServerErrorMessage } from "@/common/rateLimit";
 
 import styles from "./ForceAcceptCgu.module.scss";
 
@@ -37,8 +38,8 @@ export function ForceAcceptCgu({ user }: { user?: AuthContext | null }) {
     try {
       await _put(`/api/v1/profile/cgu/accept/${CGU_VERSION}`);
       router.refresh();
-    } catch (err: any) {
-      setError(err?.json?.data?.message || "Une erreur est survenue, veuillez réessayer.");
+    } catch (err) {
+      setError(getServerErrorMessage(err, "Une erreur est survenue, veuillez réessayer."));
       setIsSubmitting(false);
     }
   };

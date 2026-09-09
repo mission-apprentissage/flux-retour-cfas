@@ -16,12 +16,12 @@ import {
 export const franceTravailQueryKeys = {
   all: ["france-travail"] as const,
   arborescence: () => [...franceTravailQueryKeys.all, "arborescence"] as const,
-  effectifsBySecteur: (codeSecteur: number, params: Record<string, any>) =>
+  effectifsBySecteur: (codeSecteur: number, params: Record<string, unknown>) =>
     [...franceTravailQueryKeys.all, "effectifs", "secteur", codeSecteur, params] as const,
-  effectifDetail: (id: string, params: Record<string, any>) =>
+  effectifDetail: (id: string, params: Record<string, unknown>) =>
     [...franceTravailQueryKeys.all, "effectif", id, params] as const,
   moisTraites: () => [...franceTravailQueryKeys.all, "mois-traites"] as const,
-  effectifsTraitesParMois: (mois: string, params: Record<string, any>) =>
+  effectifsTraitesParMois: (mois: string, params: Record<string, unknown>) =>
     [...franceTravailQueryKeys.all, "effectifs", "traites", "mois", mois, params] as const,
   departementCounts: (codeSecteur: number) =>
     [...franceTravailQueryKeys.all, "departement-counts", codeSecteur] as const,
@@ -33,7 +33,7 @@ const fetchArborescence = async (): Promise<IArborescenceResponse> => {
 
 const fetchEffectifsBySecteur = async (
   codeSecteur: number,
-  params: Record<string, any>
+  params: Record<string, unknown>
 ): Promise<IEffectifsBySecteurResponse> => {
   return _get(`/api/v1/organisation/france-travail/effectifs/a-traiter/${codeSecteur}`, { params });
 };
@@ -168,7 +168,7 @@ export function useMoisTraites() {
 
 const fetchEffectifsTraitesParMois = async (
   mois: string,
-  params: Record<string, any>
+  params: Record<string, unknown>
 ): Promise<IEffectifsTraitesParMoisResponse> => {
   return _get(`/api/v1/organisation/france-travail/effectifs/traite/mois/${mois}`, { params });
 };

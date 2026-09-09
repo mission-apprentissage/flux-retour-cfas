@@ -13,6 +13,7 @@ import { FullTable } from "@/app/_components/table/FullTable";
 import { ColumnData } from "@/app/_components/table/types";
 import { AdminInvitation, useAdminInvitations } from "@/app/_hooks/useAdminInvitations";
 import { _delete, _post } from "@/common/httpClient";
+import { getServerErrorMessage } from "@/common/rateLimit";
 
 import styles from "./InvitationsTable.module.css";
 
@@ -113,8 +114,8 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
       cancelModal.close();
       setPendingAction(null);
       await refetch();
-    } catch (err: any) {
-      setActionError(err?.json?.data?.message || "Erreur lors de l'annulation");
+    } catch (err) {
+      setActionError(getServerErrorMessage(err, "Erreur lors de l'annulation"));
     }
   }, [pendingAction, refetch]);
 
@@ -122,7 +123,7 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
     if (!pendingAction) return;
     setActionError(null);
     try {
-      const res = await _post<any, { email: string; expiresAt: string }>(
+      const res = await _post<unknown, { email: string; expiresAt: string }>(
         `/api/v1/admin/invitations/${pendingAction.id}/resend`,
         {}
       );
@@ -132,8 +133,8 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
       resendModal.close();
       setPendingAction(null);
       await refetch();
-    } catch (err: any) {
-      setActionError(err?.json?.data?.message || "Erreur lors du renvoi");
+    } catch (err) {
+      setActionError(getServerErrorMessage(err, "Erreur lors du renvoi"));
     }
   }, [pendingAction, refetch]);
 

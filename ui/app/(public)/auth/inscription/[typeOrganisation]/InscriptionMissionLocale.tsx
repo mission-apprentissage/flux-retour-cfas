@@ -104,7 +104,10 @@ export function InscriptionMissionLocale({ setOrganisation }: Pick<InscriptionFo
           }}
           options={Object.keys(departementList)
             .sort()
-            .map((code) => ({ value: code, label: `${code} - ${DEPARTEMENTS_BY_CODE[code].nom}` }))}
+            .map((code) => ({
+              value: code,
+              label: `${code} - ${DEPARTEMENTS_BY_CODE[code as keyof typeof DEPARTEMENTS_BY_CODE].nom}`,
+            }))}
         />
       )}
 

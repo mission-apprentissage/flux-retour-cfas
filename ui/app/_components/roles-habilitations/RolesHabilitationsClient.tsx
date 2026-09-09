@@ -18,6 +18,7 @@ import { DataTable } from "@/app/_components/table/DataTable";
 import { ColumnData } from "@/app/_components/table/types";
 import { useCfaAdmin } from "@/app/_hooks/useCfaAdmin";
 import { _delete, _get, _post, _put } from "@/common/httpClient";
+import { getServerErrorMessage } from "@/common/rateLimit";
 
 import InvitationSidePanel from "./InvitationSidePanel";
 import { InviteMissionLocaleSection } from "./InviteMissionLocaleSection";
@@ -152,8 +153,8 @@ export default function RolesHabilitationsClient({
       await _delete(`/api/v1/organisation/membres/${pending.userId}`);
       await refetchMembres();
       setFeedback({ severity: "success", message: "L'utilisateur a été supprimé" });
-    } catch (err: any) {
-      setFeedback({ severity: "error", message: err?.json?.data?.message || "Une erreur est survenue" });
+    } catch (err) {
+      setFeedback({ severity: "error", message: getServerErrorMessage(err, "Une erreur est survenue") });
     }
   }, [refetchMembres]);
 
@@ -161,8 +162,8 @@ export default function RolesHabilitationsClient({
     try {
       await _post(`/api/v1/organisation/invitations/${invitationId}/resend`);
       setFeedback({ severity: "success", message: "L'email d'invitation a été renvoyé" });
-    } catch (err: any) {
-      setFeedback({ severity: "error", message: err?.json?.data?.message || "Une erreur est survenue" });
+    } catch (err) {
+      setFeedback({ severity: "error", message: getServerErrorMessage(err, "Une erreur est survenue") });
     }
   }, []);
 
@@ -172,8 +173,8 @@ export default function RolesHabilitationsClient({
         await _post(`/api/v1/organisation/membres/${userId}/validate`);
         await refetchMembres();
         setFeedback({ severity: "success", message: "Le membre a été validé" });
-      } catch (err: any) {
-        setFeedback({ severity: "error", message: err?.json?.data?.message || "Une erreur est survenue" });
+      } catch (err) {
+        setFeedback({ severity: "error", message: getServerErrorMessage(err, "Une erreur est survenue") });
       }
     },
     [refetchMembres]
@@ -185,8 +186,8 @@ export default function RolesHabilitationsClient({
         await _post(`/api/v1/organisation/membres/${userId}/reject`);
         await refetchMembres();
         setFeedback({ severity: "success", message: "Le membre a été refusé" });
-      } catch (err: any) {
-        setFeedback({ severity: "error", message: err?.json?.data?.message || "Une erreur est survenue" });
+      } catch (err) {
+        setFeedback({ severity: "error", message: getServerErrorMessage(err, "Une erreur est survenue") });
       }
     },
     [refetchMembres]
@@ -204,8 +205,8 @@ export default function RolesHabilitationsClient({
       await _delete(`/api/v1/organisation/invitations/${invitationId}`);
       await refetchInvitations();
       setFeedback({ severity: "success", message: "L'invitation a été annulée" });
-    } catch (err: any) {
-      setFeedback({ severity: "error", message: err?.json?.data?.message || "Une erreur est survenue" });
+    } catch (err) {
+      setFeedback({ severity: "error", message: getServerErrorMessage(err, "Une erreur est survenue") });
     }
   }, [refetchInvitations]);
 
@@ -230,8 +231,8 @@ export default function RolesHabilitationsClient({
             ? "L'utilisateur a été promu administrateur"
             : "L'utilisateur n'est plus administrateur",
       });
-    } catch (err: any) {
-      setRoleChangeError(err?.json?.data?.message || "Une erreur est survenue");
+    } catch (err) {
+      setRoleChangeError(getServerErrorMessage(err, "Une erreur est survenue"));
     }
   }, [pendingRoleChange, refetchMembres]);
 

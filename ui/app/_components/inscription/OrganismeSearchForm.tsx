@@ -4,7 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { Field, Form, Formik } from "formik";
+import { Field, FieldProps, Form, Formik } from "formik";
 import { useState } from "react";
 import { natureOrganismeDeFormationLabel, SUPPORT_PAGE_ACCUEIL, type IOrganisme } from "shared";
 
@@ -69,7 +69,12 @@ function OrganismeDetails({ organisme }: { organisme: SearchedOrganisme }) {
         UAI : <b>{organisme.uai || "Inconnu"}</b>
       </p>
       <p>
-        Nature : <b>{(organisme.nature && natureOrganismeDeFormationLabel[organisme.nature]) || "Inconnue"}</b>
+        Nature :{" "}
+        <b>
+          {(organisme.nature &&
+            natureOrganismeDeFormationLabel[organisme.nature as keyof typeof natureOrganismeDeFormationLabel]) ||
+            "Inconnue"}
+        </b>
       </p>
       <p>
         SIRET :{" "}
@@ -140,7 +145,9 @@ export function OrganismeSearchForm({
       }}
       onSubmit={async (values, actions) => {
         try {
-          const found = await _post(config.endpoint, { [kind]: values[kind] });
+          const found = await _post<Record<string, string>, SearchedOrganisme[]>(config.endpoint, {
+            [kind]: values[kind],
+          });
           await sleep(500); // attente pour ne pas paraitre trop instantané...
           setOrganismes(found);
         } catch (err) {
@@ -153,7 +160,7 @@ export function OrganismeSearchForm({
       {(form) => (
         <Form noValidate>
           <Field name={kind}>
-            {({ field, meta }: any) => (
+            {({ field, meta }: FieldProps) => (
               <Input
                 label={
                   <>

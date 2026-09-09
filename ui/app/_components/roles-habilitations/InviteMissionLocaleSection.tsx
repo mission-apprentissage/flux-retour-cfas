@@ -10,6 +10,7 @@ import { IOrganisationMissionLocale } from "shared";
 import { z } from "zod";
 
 import { _get, _post } from "@/common/httpClient";
+import { getServerErrorMessage } from "@/common/rateLimit";
 
 import styles from "./InviteMissionLocaleSection.module.css";
 
@@ -92,10 +93,10 @@ export function InviteMissionLocaleSection() {
       });
       setEmail("");
       setFeedback({ severity: "success", message: "Un email d'invitation a été envoyé au destinataire." });
-    } catch (err: any) {
+    } catch (err) {
       setFeedback({
         severity: "error",
-        message: err?.json?.data?.message || "Oups, une erreur est survenue, merci de réessayer plus tard",
+        message: getServerErrorMessage(err, "Oups, une erreur est survenue, merci de réessayer plus tard"),
       });
     } finally {
       setIsSubmitting(false);

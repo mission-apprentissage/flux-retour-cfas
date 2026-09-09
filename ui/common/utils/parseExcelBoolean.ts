@@ -1,4 +1,4 @@
-const parseExcelBoolean = (input: any): boolean | null => {
+const parseExcelBoolean = (input: unknown): boolean | null => {
   if (input === null) return null;
   if (typeof input === "boolean") return input;
   if (typeof input === "number") return input === 1;

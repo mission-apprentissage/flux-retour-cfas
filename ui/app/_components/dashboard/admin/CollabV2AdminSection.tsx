@@ -8,6 +8,7 @@ import { useCallback, useState } from "react";
 
 import { _get, _post } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
+import { getServerErrorMessage } from "@/common/rateLimit";
 
 import { CheckLine, EligibilityCheck, EtatBadge } from "./EligibilityBadges";
 import styles from "./encart-admin.module.scss";
@@ -88,10 +89,10 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
       });
       collabV2ConfirmModal.close();
       await refetch();
-    } catch (err: any) {
+    } catch (err) {
       setFeedback({
         severity: "error",
-        message: err?.json?.data?.message || "Une erreur est survenue",
+        message: getServerErrorMessage(err, "Une erreur est survenue"),
       });
       collabV2ConfirmModal.close();
     }

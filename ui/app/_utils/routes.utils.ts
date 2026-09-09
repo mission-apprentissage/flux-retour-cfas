@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 
 export interface IPage {
-  getPath: (args?: any) => string;
+  getPath: () => string;
   title: string;
-  getMetadata: (args?: any) => Metadata;
+  getMetadata: () => Metadata;
 }
 
 interface IPages {
   static: Record<string, IPage>;
-  dynamic: Record<string, (props: any) => IPage>;
+  dynamic: Record<string, (props: never) => IPage>;
 }
 
 const SITE_NAME = "Tableau de bord de l'apprentissage";

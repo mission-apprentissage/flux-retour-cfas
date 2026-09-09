@@ -4,7 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { Formik, Form, Field, FormikErrors } from "formik";
+import { Field, FieldProps, Form, Formik, FormikErrors, FormikHelpers } from "formik";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { z, ZodError } from "zod";
@@ -28,14 +28,17 @@ export default function ForgotPasswordClient() {
   const router = useRouter();
   const [statusMessage, setStatusMessage] = React.useState<string | null>(null);
 
-  const handleSubmit = async (values: ForgotPasswordType, { setStatus, setSubmitting }: any) => {
+  const handleSubmit = async (
+    values: ForgotPasswordType,
+    { setStatus, setSubmitting }: FormikHelpers<ForgotPasswordType>
+  ) => {
     try {
       await _post("/api/v1/password/forgotten-password", { ...values });
       setStatusMessage(
         "Si cette adresse existe, vous allez recevoir un e-mail contenant un lien pour réinitialiser votre mot de passe."
       );
       setTimeout(() => router.push("/"), REDIRECT_TIMEOUT);
-    } catch (err: any) {
+    } catch (err) {
       setStatus({ error: getApiErrorMessage(err), severity: isRateLimited(err) ? "warning" : "error" });
     } finally {
       setSubmitting(false);
@@ -75,7 +78,7 @@ export default function ForgotPasswordClient() {
         {({ status = {}, isSubmitting }) => (
           <Form noValidate>
             <Field name="email">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <Input
                   label="Email (votre identifiant)"
                   state={meta.touched && meta.error ? "error" : "default"}

@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 // TODO [tech] TO REMOVE
-export const prettyPrintDate = (date) => {
+export const prettyPrintDate = (date: string | number | Date) => {
   const event = new Date(date);
   const options = {
     hour: "2-digit" as const,

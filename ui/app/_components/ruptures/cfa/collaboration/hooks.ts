@@ -8,6 +8,7 @@ import { IUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/orga
 import { cfaQueryKeys } from "@/app/_components/ruptures/cfa/hooks/useCfaQueries";
 import { useAuth } from "@/app/_context/UserContext";
 import { _get, _put } from "@/common/httpClient";
+import { getUserOrganismeId } from "@/common/internal/AuthContext";
 
 export type VerifiedInfo = { [_K in keyof Omit<IVerifiedInfo, "rqth_declare" | "responsable_legal">]-?: string };
 
@@ -30,9 +31,7 @@ export function useCfaEffectifDetail(id: string) {
 
     queryFn: async () => {
       if (!id) return null;
-      return await _get<IEffectifMissionLocale>(
-        `/api/v1/organismes/${user?.organisation?.organisme_id}/cfa/effectif/${id}`
-      );
+      return await _get<IEffectifMissionLocale>(`/api/v1/organismes/${getUserOrganismeId(user)}/cfa/effectif/${id}`);
     },
   });
 }
@@ -43,7 +42,7 @@ export function useSubmitCollaborationForm(effectifId: string, onSuccess: () => 
 
   return useMutation({
     mutationFn: async (payload: CollaborationFormPayload) => {
-      const organismeId = user?.organisation?.organisme_id;
+      const organismeId = getUserOrganismeId(user);
       return _put(`/api/v1/organismes/${organismeId}/mission-locale/effectif/${effectifId}`, {
         rupture: payload.situation_type === CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE,
         acc_conjoint: true,

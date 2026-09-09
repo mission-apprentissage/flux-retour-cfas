@@ -7,7 +7,6 @@
       "@/*": ["./*"],
       "shared": ["../shared"]
     },
-    "noImplicitAny": false,
     "target": "ES2017"
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

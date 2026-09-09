@@ -8,10 +8,11 @@ import { CfaWelcomeCard } from "@/app/_components/ruptures/cfa/CfaWelcomeCard";
 import { useCfaEffectifs, useCfaUrlParams } from "@/app/_components/ruptures/cfa/hooks";
 import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { getUserOrganismeId } from "@/common/internal/AuthContext";
 
 export default function CfaEffectifsClient() {
   const { user } = useAuth();
-  const organismeId = user?.organisation?.organisme_id;
+  const organismeId = getUserOrganismeId(user);
   const { searchParams, updateParams } = useCfaUrlParams("/cfa/effectifs");
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 

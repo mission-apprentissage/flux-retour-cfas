@@ -169,7 +169,7 @@ export function FTEffectifsTraitesTable({
           hasPagination={true}
           onRowClick={(rowData) => {
             trackPlausibleEvent("isc_fiche_traitee_ouverte");
-            onEffectifClick(rowData._id);
+            if (rowData._id) onEffectifClick(rowData._id);
           }}
         />
       )}

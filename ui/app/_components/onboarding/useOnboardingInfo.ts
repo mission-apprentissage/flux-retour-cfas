@@ -4,6 +4,7 @@ import { captureException } from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 
 import { _get } from "@/common/httpClient";
+import { getApiErrorMessage } from "@/common/rateLimit";
 
 export type OnboardingResourceState<T> =
   | { status: "idle" }
@@ -33,10 +34,10 @@ export function useOnboardingInfo<T>(url: string | null): OnboardingResourceStat
       try {
         const data = (await _get(url)) as T;
         if (!cancelled) setState({ status: "success", data });
-      } catch (e: any) {
+      } catch (e) {
         captureException(e);
         if (!cancelled) {
-          const message = e?.json?.data?.message || e?.message || DEFAULT_ERROR;
+          const message = getApiErrorMessage(e, DEFAULT_ERROR);
           setState({ status: "error", message });
         }
       }

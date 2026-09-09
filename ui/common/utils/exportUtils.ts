@@ -9,7 +9,7 @@ export interface ExportColumn {
 
 export function exportDataAsXlsx<Columns extends ReadonlyArray<ExportColumn>>(
   filename: string,
-  rows: Record<Columns[number]["key"], any>[],
+  rows: Record<string, unknown>[],
   exportColumns: Columns
 ) {
   const workbook = utils.book_new();
@@ -19,7 +19,7 @@ export function exportDataAsXlsx<Columns extends ReadonlyArray<ExportColumn>>(
   for (const row of rows) {
     for (const column of columnsWithXlsxType) {
       if (column.xlsxType === "date" && row[column.key]) {
-        row[column.key] = new Date(row[column.key]);
+        row[column.key] = new Date(row[column.key] as string | number | Date);
       } else if (column.xlsxType === "string" && row[column.key]) {
         row[column.key] = {
           v: row[column.key],

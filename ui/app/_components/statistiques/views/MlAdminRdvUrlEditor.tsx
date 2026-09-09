@@ -6,6 +6,8 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useState } from "react";
 import { z } from "zod";
 
+import { getApiErrorMessage } from "@/common/rateLimit";
+
 import { useUpdateMlParametresAdmin } from "../hooks/useStatsQueries";
 
 import styles from "./MlAdminRdvUrlEditor.module.css";
@@ -50,10 +52,10 @@ export function MlAdminRdvUrlEditor({ mlId, rdvUrl }: Props) {
       setFeedback({ severity: "success", message: "Lien RDV enregistré." });
       setEditing(false);
       setError(null);
-    } catch (err: any) {
+    } catch (err) {
       setFeedback({
         severity: "error",
-        message: err?.json?.data?.message || err?.message || "Erreur lors de l'enregistrement",
+        message: getApiErrorMessage(err, "Erreur lors de l'enregistrement"),
       });
     }
   };

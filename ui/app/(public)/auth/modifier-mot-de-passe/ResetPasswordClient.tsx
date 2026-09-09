@@ -3,7 +3,7 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { Field, Form, Formik } from "formik";
+import { Field, FieldProps, Form, Formik, FormikHelpers } from "formik";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -36,12 +36,15 @@ export default function ResetPasswordClient() {
     return error ? { newPassword: error } : {};
   };
 
-  const handleSubmit = async ({ newPassword }: ResetPasswordValues, { setStatus, setSubmitting }: any) => {
+  const handleSubmit = async (
+    { newPassword }: ResetPasswordValues,
+    { setStatus, setSubmitting }: FormikHelpers<ResetPasswordValues>
+  ) => {
     try {
       await _post("/api/v1/password/reset-password", { passwordToken, password: newPassword.trim() });
       setIsDone(true);
       setTimeout(() => router.push("/auth/connexion"), REDIRECT_TIMEOUT);
-    } catch (err: any) {
+    } catch (err) {
       if (isRateLimited(err)) {
         setStatus({ error: getApiErrorMessage(err), severity: "warning" });
         return;
@@ -76,7 +79,7 @@ export default function ResetPasswordClient() {
           {({ status = {}, isSubmitting }) => (
             <Form noValidate>
               <Field name="newPassword">
-                {({ field, meta }: any) => (
+                {({ field, meta }: FieldProps) => (
                   <PasswordField
                     label="Nouveau mot de passe"
                     id={field.name}

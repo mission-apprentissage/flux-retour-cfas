@@ -1,6 +1,6 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
+import { fr, FrIconClassName } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
@@ -154,7 +154,7 @@ function Step2({
         fonction: fonction.trim(),
         password: password.trim(),
       });
-    } catch (err: any) {
+    } catch (err) {
       setError(getApiErrorMessage(err, "Une erreur est survenue"));
       setSubmitting(false);
     }
@@ -365,7 +365,7 @@ function Step3({ email }: { email: string }) {
           message: "Un nouveau courriel vient de vous être envoyé.",
         });
       }
-    } catch (err: any) {
+    } catch (err) {
       setFeedback({
         severity: isRateLimited(err) ? "warning" : "error",
         message: isRateLimited(err)
@@ -379,7 +379,7 @@ function Step3({ email }: { email: string }) {
 
   return (
     <div className={styles.step3}>
-      <i className={`${fr.cx("fr-icon-mail-unread-fill" as any)} ${styles.step3Icon}`} />
+      <i className={`${fr.cx("fr-icon-mail-unread-fill" as FrIconClassName)} ${styles.step3Icon}`} />
       <h2 className={styles.step3Heading}>Confirmez votre adresse courriel</h2>
       <p className={styles.step3Line}>Nous vous avons envoyé un courriel à l&apos;adresse</p>
       <p className={styles.step3Email}>{maskEmail(email)}</p>

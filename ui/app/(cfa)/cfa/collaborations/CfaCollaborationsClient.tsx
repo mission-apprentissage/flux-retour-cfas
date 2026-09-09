@@ -9,6 +9,7 @@ import { CfaEffectifsSkeleton } from "@/app/_components/ruptures/cfa/CfaEffectif
 import { useCfaSuiviMissionLocale, useCfaUrlParams } from "@/app/_components/ruptures/cfa/hooks";
 import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { getUserOrganismeId } from "@/common/internal/AuthContext";
 
 const VALID_CATEGORIES = Object.values(CFA_SUIVI_CATEGORY) as string[];
 // Doit rester aligné sur l'enum `sort` de la route : une URL partagée avant le retrait de la
@@ -17,7 +18,7 @@ const VALID_SORTS = ["nom", "formation", "mission_locale", "last_activity"];
 
 export default function CfaCollaborationsClient() {
   const { user } = useAuth();
-  const organismeId = user?.organisation?.organisme_id;
+  const organismeId = getUserOrganismeId(user);
   const { searchParams, updateParams } = useCfaUrlParams("/cfa/collaborations");
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 

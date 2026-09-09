@@ -6,7 +6,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { Field, Form, Formik, type FormikErrors } from "formik";
+import { Field, FieldProps, Form, Formik, type FormikErrors, FormikHelpers } from "formik";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { IOrganisationJson } from "shared";
@@ -71,10 +71,12 @@ export default function ProfilClient() {
     if (invitationToken) {
       (async () => {
         try {
-          const invitation: any = await _get(`/api/v1/invitations/${invitationToken}`);
+          const invitation = await _get<{ organisation: IOrganisationJson; email: string }>(
+            `/api/v1/invitations/${invitationToken}`
+          );
           setOrganisation(invitation.organisation);
           setFixedEmail(invitation.email);
-        } catch (err: any) {
+        } catch (err) {
           setLoadError(getApiErrorMessage(err));
         }
       })();
@@ -129,9 +131,9 @@ export default function ProfilClient() {
     return errors;
   };
 
-  const handleSubmit = async (values: ProfilValues, { setStatus, setSubmitting }: any) => {
+  const handleSubmit = async (values: ProfilValues, { setStatus, setSubmitting }: FormikHelpers<ProfilValues>) => {
     try {
-      const { account_status } = await _post("/api/v1/auth/register", {
+      const { account_status } = await _post<unknown, { account_status: string }>("/api/v1/auth/register", {
         user: {
           email: values.email,
           civility: values.civility,
@@ -150,7 +152,7 @@ export default function ProfilClient() {
       } else {
         router.push(PAGES.static.authInscriptionBravo.getPath());
       }
-    } catch (err: any) {
+    } catch (err) {
       const message = getApiErrorMessage(err);
       setStatus({
         error: message === "Aucun organisme trouvé" ? "Ce code UAI n'existe pas. Veuillez vérifier à nouveau" : message,
@@ -186,7 +188,7 @@ export default function ProfilClient() {
         {({ status = {}, isSubmitting, setFieldValue }) => (
           <Form noValidate>
             <Field name="email">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <Input
                   label={
                     <>
@@ -211,7 +213,7 @@ export default function ProfilClient() {
             </Field>
 
             <Field name="civility">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <RadioButtons
                   legend={
                     <>
@@ -246,7 +248,7 @@ export default function ProfilClient() {
               { name: "telephone", label: "Téléphone", placeholder: "Ex : 06 89 10 11 12", required: false },
             ].map((input) => (
               <Field key={input.name} name={input.name}>
-                {({ field, meta }: any) => (
+                {({ field, meta }: FieldProps) => (
                   <Input
                     label={
                       input.required ? (
@@ -273,7 +275,7 @@ export default function ProfilClient() {
             ))}
 
             <Field name="password">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <PasswordField
                   label={
                     <>
@@ -293,7 +295,7 @@ export default function ProfilClient() {
             </Field>
 
             <Field name="password_confirmation">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <PasswordField
                   label={
                     <>
@@ -316,7 +318,7 @@ export default function ProfilClient() {
 
             <div className={styles.consents}>
               <Field name="has_accepted_cgu">
-                {({ field, meta }: any) => (
+                {({ field, meta }: FieldProps) => (
                   <Checkbox
                     className={styles.checkbox}
                     state={meta.touched && meta.error ? "error" : "default"}
@@ -349,7 +351,7 @@ export default function ProfilClient() {
 
               {showConsentOf && (
                 <Field name="consent_of">
-                  {({ field, meta }: any) => (
+                  {({ field, meta }: FieldProps) => (
                     <Checkbox
                       className={styles.checkbox}
                       state={meta.touched && meta.error ? "error" : "default"}

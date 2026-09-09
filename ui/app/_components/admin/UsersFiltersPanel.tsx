@@ -36,7 +36,7 @@ interface OptionItem {
   label: string;
 }
 
-const createOptionsFromObject = (obj: Record<string, any>): OptionItem[] =>
+const createOptionsFromObject = (obj: Record<string, { nom?: string } | string | number>): OptionItem[] =>
   Object.entries(obj)
     .map(([code, item]) => ({
       value: code,
@@ -73,7 +73,7 @@ export const UsersFiltersPanel = () => {
   const reseauxOptions = useMemo(() => {
     if (!reseaux) return [];
     return reseaux
-      .map((reseau: any) => ({
+      .map((reseau) => ({
         value: reseau.key,
         label: reseau.nom,
       }))

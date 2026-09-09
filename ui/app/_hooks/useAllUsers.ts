@@ -6,6 +6,11 @@ import { _get } from "@/common/httpClient";
 import { toUserNormalized } from "@/modules/admin/users/models/users";
 import { UsersFilters } from "@/modules/admin/users/models/users-filters";
 
+interface UsersPaginatedResponse {
+  data: Parameters<typeof toUserNormalized>[0][];
+  pagination: { total: number; page: number; lastPage: number; limit: number; globalTotal?: number };
+}
+
 export function useAllUsers(
   page = 1,
   limit = 20,
@@ -16,7 +21,7 @@ export function useAllUsers(
   const queryClient = useQueryClient();
 
   const queryParams = useMemo(() => {
-    const params: Record<string, any> = {
+    const params: Record<string, string | number> = {
       page,
       limit,
       sort: sorting.length > 0 ? `${sorting[0].id}:${sorting[0].desc ? "-1" : "1"}` : "created_at:-1",
@@ -40,7 +45,7 @@ export function useAllUsers(
     isFetching,
   } = useQuery({
     queryKey: ["admin/users", queryParams],
-    queryFn: () => _get("/api/v1/admin/users/", { params: queryParams }),
+    queryFn: () => _get<UsersPaginatedResponse>("/api/v1/admin/users/", { params: queryParams }),
     placeholderData: (previousData) => previousData,
     staleTime: 5 * 60 * 1000,
   });
@@ -58,7 +63,7 @@ export function useAllUsers(
 
         queryClient.prefetchQuery({
           queryKey: ["admin/users", nextPageParams],
-          queryFn: () => _get("/api/v1/admin/users/", { params: nextPageParams }),
+          queryFn: () => _get<UsersPaginatedResponse>("/api/v1/admin/users/", { params: nextPageParams }),
           staleTime: 5 * 60 * 1000,
         });
       }
@@ -67,7 +72,7 @@ export function useAllUsers(
 
   return useMemo(() => {
     const users = usersPaginated?.data?.map(toUserNormalized) ?? [];
-    const paginationData = usersPaginated?.pagination ?? usersPaginated ?? {};
+    const paginationData: Partial<UsersPaginatedResponse["pagination"]> = usersPaginated?.pagination ?? {};
 
     return {
       users,

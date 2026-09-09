@@ -346,7 +346,7 @@ export function FTEffectifsTable({
           hasPagination={true}
           onRowClick={(rowData) => {
             trackPlausibleEvent("isc_liste_dossier_ouvert");
-            onEffectifClick(rowData._id);
+            if (rowData._id) onEffectifClick(rowData._id);
           }}
         />
       )}

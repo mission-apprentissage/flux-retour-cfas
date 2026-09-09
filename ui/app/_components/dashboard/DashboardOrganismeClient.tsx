@@ -2,7 +2,8 @@
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { useQueries } from "@tanstack/react-query";
-import { STATUT_FIABILISATION_ORGANISME } from "shared";
+import type { ComponentProps } from "react";
+import { IndicateursEffectifs, IOrganisationJson, STATUT_FIABILISATION_ORGANISME } from "shared";
 
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { useAuth } from "@/app/_context/UserContext";
@@ -18,6 +19,8 @@ import { OrganismeIdentite } from "./OrganismeIdentite";
 import { OrganismeNavTabs } from "./OrganismeNavTabs";
 import { SuggestFeature } from "./SuggestFeature";
 
+type OrganismeContact = NonNullable<ComponentProps<typeof OrganismeIdentite>["contacts"]>[number];
+
 interface DashboardOrganismeClientProps {
   organisme: Organisme;
 }
@@ -31,13 +34,15 @@ function useOrganismeData(organisme: Organisme) {
       {
         queryKey: ["organismes", organismeId, "indicateurs/effectifs"],
         queryFn: () =>
-          _get(`/api/v1/organismes/${organismeId}/indicateurs/effectifs`, { params: { date: new Date() } }),
+          _get<IndicateursEffectifs>(`/api/v1/organismes/${organismeId}/indicateurs/effectifs`, {
+            params: { date: new Date() },
+          }),
         // Les indicateurs ne sont rendus que par IndicateursApercu, remplacé par les collaborations ML dès que manageEffectifs.
         enabled: !!organismeId && !!permissions?.indicateursEffectifs && !permissions?.manageEffectifs,
       },
       {
         queryKey: ["organismes", organismeId, "contacts"],
-        queryFn: () => _get(`/api/v1/organismes/${organismeId}/contacts`),
+        queryFn: () => _get<OrganismeContact[]>(`/api/v1/organismes/${organismeId}/contacts`),
         enabled: !!organismeId && !!permissions?.viewContacts,
       },
     ],
@@ -47,7 +52,7 @@ function useOrganismeData(organisme: Organisme) {
 export function DashboardOrganismeClient({ organisme }: DashboardOrganismeClientProps) {
   const { user } = useAuth();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
-  const organisation = user?.organisation as any;
+  const organisation = user?.organisation;
   const organisationType = organisation?.type;
   const isAdmin = organisationType === "ADMINISTRATEUR";
 
@@ -55,8 +60,8 @@ export function DashboardOrganismeClient({ organisme }: DashboardOrganismeClient
 
   if (!organisme) return null;
 
-  const indicateursEffectifs = indicateursEffectifsQuery.data as any;
-  const contacts = contactsQuery.data as any[] | undefined;
+  const indicateursEffectifs = indicateursEffectifsQuery.data;
+  const contacts = contactsQuery.data;
 
   const isFiable = organisme.fiabilisation_statut === STATUT_FIABILISATION_ORGANISME.FIABLE;
   const indicateursEffectifsPartielsMessage =
@@ -145,7 +150,7 @@ export function DashboardOrganismeClient({ organisme }: DashboardOrganismeClient
   );
 }
 
-function getForbiddenErrorText(organisation: any): string {
+function getForbiddenErrorText(organisation: IOrganisationJson | null | undefined): string {
   switch (organisation?.type) {
     case "ORGANISME_FORMATION":
       return "Vous n'avez pas accès aux données de cet organisme.";
@@ -166,7 +171,10 @@ function getForbiddenErrorText(organisation: any): string {
  * Retourne le type de restriction si l'organisme contient au moins un organisme formateur
  * hors du territoire / réseau de l'utilisateur authentifié.
  */
-function getIndicateursEffectifsPartielsMessage(organisation: any, organisme: Organisme): false | string {
+function getIndicateursEffectifsPartielsMessage(
+  organisation: IOrganisationJson | null | undefined,
+  organisme: Organisme
+): false | string {
   if (!organisme?.organismesFormateurs || organisme.organismesFormateurs.length === 0) return false;
 
   switch (organisation?.type) {

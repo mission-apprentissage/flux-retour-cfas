@@ -4,7 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { Field, Form, Formik } from "formik";
+import { Field, FieldProps, Form, Formik, FormikHelpers } from "formik";
 import NextLink from "next/link";
 import React from "react";
 import { useLocalStorage } from "usehooks-ts";
@@ -18,13 +18,13 @@ export function StandardLoginForm() {
   const [originConnexionUrl, setOriginConnexionUrl] = useLocalStorage("originConnexionUrl", "");
   const [show, setShow] = React.useState(false);
 
-  const handleSubmit = async (values: AuthConnexionValues, { setStatus }: any) => {
+  const handleSubmit = async (values: AuthConnexionValues, { setStatus }: FormikHelpers<AuthConnexionValues>) => {
     try {
       await submitLogin(values, {
         originConnexionUrl,
         clearOriginConnexionUrl: () => setOriginConnexionUrl(""),
       });
-    } catch (err: any) {
+    } catch (err) {
       setStatus({ error: getApiErrorMessage(err), severity: isRateLimited(err) ? "warning" : "error" });
     }
   };
@@ -39,7 +39,7 @@ export function StandardLoginForm() {
         <Form noValidate>
           <div className={styles.form}>
             <Field name="email">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <Input
                   label="Email (votre identifiant)"
                   state={meta.touched && meta.error ? "error" : "default"}
@@ -58,7 +58,7 @@ export function StandardLoginForm() {
             </Field>
 
             <Field name="password">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <Input
                   label="Mot de passe"
                   state={meta.touched && meta.error ? "error" : "default"}

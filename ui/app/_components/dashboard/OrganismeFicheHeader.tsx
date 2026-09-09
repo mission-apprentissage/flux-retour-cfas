@@ -3,7 +3,7 @@
 import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useQuery } from "@tanstack/react-query";
-import { IOrganisationCreate } from "shared";
+import { DuplicateEffectifGroupPagination, IndicateursEffectifs, IOrganisationCreate } from "shared";
 
 import { InfoTransmissionDonnees } from "@/app/_components/organismes/InfoTransmissionDonnees";
 import { useAuth } from "@/app/_context/UserContext";
@@ -30,20 +30,23 @@ function getListeOrganismesLabel(organisationType?: string): string {
 
 export function OrganismeFicheHeader({ organismeId }: { organismeId: string }) {
   const { user } = useAuth();
-  const organisationType = (user?.organisation as any)?.type;
+  const organisationType = user?.organisation?.type;
   const isAdmin = organisationType === "ADMINISTRATEUR";
 
   const { organisme } = useOrganisme(organismeId);
 
-  const { data: duplicates } = useQuery<any>({
+  const { data: duplicates } = useQuery<DuplicateEffectifGroupPagination>({
     queryKey: ["organismes", organismeId, "duplicates"],
-    queryFn: () => _get(`/api/v1/organismes/${organismeId}/duplicates`),
+    queryFn: () => _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${organismeId}/duplicates`),
     enabled: !!organismeId,
   });
 
-  const { data: indicateursEffectifs } = useQuery<any>({
+  const { data: indicateursEffectifs } = useQuery<IndicateursEffectifs>({
     queryKey: ["organismes", organismeId, "indicateurs/effectifs"],
-    queryFn: () => _get(`/api/v1/organismes/${organismeId}/indicateurs/effectifs`, { params: { date: new Date() } }),
+    queryFn: () =>
+      _get<IndicateursEffectifs>(`/api/v1/organismes/${organismeId}/indicateurs/effectifs`, {
+        params: { date: new Date() },
+      }),
     // Seul InfoTransmissionDecaTag les consomme, et il n'est rendu que pour les organismes hors cible de transmission.
     enabled:
       !!organismeId && !!organisme?.permissions?.indicateursEffectifs && organisme?.is_transmission_target === false,
@@ -84,7 +87,7 @@ export function OrganismeFicheHeader({ organismeId }: { organismeId: string }) {
             {organisme.fiabilisation_statut && (
               <InfoFiabilisationTag fiabilisationStatut={organisme.fiabilisation_statut} />
             )}
-            {duplicates?.totalItems > 0 && <AlertDuplicatsTag />}
+            {(duplicates?.totalItems ?? 0) > 0 && <AlertDuplicatsTag />}
           </div>
         </div>
         {isAdmin && (

@@ -1,11 +1,13 @@
 "use client";
 
 import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
+import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { usePathname } from "next/navigation";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
 import { PAGES } from "@/app/_utils/routes.utils";
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
+import { getUserOrganismeId } from "@/common/internal/AuthContext";
 
 import { useAuth } from "../_context/UserContext";
 import { usePlausibleAppTracking } from "../_hooks/plausible";
@@ -21,7 +23,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const isCfa = user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION;
-  const { data: unreadData } = useCfaUnreadNotificationsCount(isCfa ? user?.organisation?.organisme_id : undefined);
+  const { data: unreadData } = useCfaUnreadNotificationsCount(isCfa ? getUserOrganismeId(user) : undefined);
   const unreadCount = unreadData?.count ?? 0;
 
   const getMesOrganismesLabel = (type: string) => {
@@ -45,7 +47,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
     if (!withNav) return undefined;
 
     const organisationType = user?.organisation?.type;
-    const baseItems: any[] = [];
+    const baseItems: MainNavigationProps["items"] = [];
 
     if (organisationType === ORGANISATION_TYPE.MISSION_LOCALE) {
       baseItems.push({

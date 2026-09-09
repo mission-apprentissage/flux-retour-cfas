@@ -10,7 +10,7 @@ import { z } from "zod";
 
 import { useAuth } from "@/app/_context/UserContext";
 import { PAGES } from "@/app/_utils/routes.utils";
-import { _get, _post } from "@/common/httpClient";
+import { _get, _post, HTTPError } from "@/common/httpClient";
 
 import styles from "./connexion-api.module.scss";
 
@@ -74,7 +74,7 @@ function NotConnected() {
 }
 
 function VerifyUser({ organismeId, query }: { organismeId: string; query: ConnexionApiQuery }) {
-  const { data, error } = useQuery<{ message?: string }, any>({
+  const { data, error } = useQuery<{ message?: string }, HTTPError>({
     queryKey: ["verify-user", organismeId],
     queryFn: () => _post(`/api/v1/organismes/${organismeId}/verify-user`, query),
     retry: false,
@@ -121,7 +121,7 @@ function VerifyUser({ organismeId, query }: { organismeId: string; query: Connex
 
 function ConfiguredOrganisme({ query }: { query: ConnexionApiQuery }) {
   const router = useRouter();
-  const { data: organisme, isLoading } = useQuery<{ _id: string; api_key?: string }, any>({
+  const { data: organisme, isLoading } = useQuery<{ _id: string; api_key?: string }, HTTPError>({
     queryKey: ["organisation/organisme"],
     queryFn: () => _get("/api/v1/organisation/organisme"),
   });

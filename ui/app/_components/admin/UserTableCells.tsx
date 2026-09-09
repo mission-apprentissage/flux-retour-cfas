@@ -2,11 +2,12 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import NavLink from "next/link";
 
 import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
+import { UserNormalized } from "@/modules/admin/users/models/users";
 
 import styles from "./UserTableCells.module.css";
 
 interface UserTableCellsProps {
-  user: any;
+  user: UserNormalized;
   displayName: string;
 }
 
@@ -80,7 +81,7 @@ export function CreatedAtCell({ user }: Pick<UserTableCellsProps, "user">) {
 export function StatusCell({ user }: Pick<UserTableCellsProps, "user">) {
   return (
     <Badge severity={user.account_status === "CONFIRMED" ? "success" : "warning"} small className={styles.badge}>
-      {USER_STATUS_LABELS[user.account_status] || user.account_status}
+      {USER_STATUS_LABELS[user.account_status as keyof typeof USER_STATUS_LABELS] || user.account_status}
     </Badge>
   );
 }

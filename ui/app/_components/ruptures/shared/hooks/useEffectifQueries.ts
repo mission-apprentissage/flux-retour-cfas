@@ -5,7 +5,7 @@ import { _get, _post, _put } from "@/common/httpClient";
 export const effectifQueryKeys = {
   all: ["effectifs"] as const,
   detail: (id: string) => [...effectifQueryKeys.all, "detail", id] as const,
-  list: (params: Record<string, any>) => [...effectifQueryKeys.all, "list", params] as const,
+  list: (params: Record<string, unknown>) => [...effectifQueryKeys.all, "list", params] as const,
   bannerStats: () => ["ml-banner-stats"] as const,
   mlParametres: () => ["ml-parametres"] as const,
 };

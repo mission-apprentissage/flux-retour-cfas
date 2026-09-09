@@ -170,7 +170,7 @@ export function EffectifsPriorityTable({
       {priorityData.length > 0 && (
         <div className={styles.content}>
           <h3 className={styles.title}>Dossiers à traiter en priorité ({filteredData.length})</h3>
-          {isMissionLocaleUser(user.organisation.type) && (
+          {user && isMissionLocaleUser(user.organisation.type) && (
             <div className={styles.infoBlock}>
               <DsfrLink
                 href="#"
@@ -193,7 +193,7 @@ export function EffectifsPriorityTable({
               )}
             </div>
           )}
-          {user.organisation.type !== "MISSION_LOCALE" && (
+          {user?.organisation.type !== "MISSION_LOCALE" && (
             <div className={styles.staticInfo}>
               <p className={styles.infoIntro}>Nous affichons dans cette liste :</p>
               <ul className={styles.staticList}>{PRIORITY_LIST_ITEMS}</ul>
@@ -206,7 +206,7 @@ export function EffectifsPriorityTable({
             getRowLink={(rowData) => {
               // Transmet le filtre villes à la fiche pour un précédent/suivant cohérent avec le filtre.
               const cpQuery = selectedPostalCodes.length > 0 ? `&cp=${selectedPostalCodes.join(",")}` : "";
-              return user.organisation.type === "ADMINISTRATEUR" && mlId
+              return user?.organisation.type === "ADMINISTRATEUR" && mlId
                 ? `/admin/mission-locale/${mlId}/edit/${rowData.id}/?nom_liste=${PRIORITY_LIST_NAME}${cpQuery}`
                 : `/mission-locale/${rowData.id}?nom_liste=${PRIORITY_LIST_NAME}${cpQuery}`;
             }}

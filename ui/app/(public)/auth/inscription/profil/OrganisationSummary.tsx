@@ -4,7 +4,7 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { useQuery } from "@tanstack/react-query";
 import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, type IOrganisationJson } from "shared";
 
-import { _post } from "@/common/httpClient";
+import { _post, HTTPError } from "@/common/httpClient";
 
 import styles from "./profil.module.scss";
 
@@ -13,7 +13,7 @@ function OrganismeFormationSummary({
 }: {
   organisation: IOrganisationJson & { type: "ORGANISME_FORMATION" };
 }) {
-  const { data, error, isLoading } = useQuery<{ raison_sociale?: string; enseigne?: string }, any>({
+  const { data, error, isLoading } = useQuery<{ raison_sociale?: string; enseigne?: string }, HTTPError>({
     queryKey: ["organisme-by-uai-siret", organisation.uai, organisation.siret],
     queryFn: () => _post("/api/v1/organismes/get-by-uai-siret", { uai: organisation.uai, siret: organisation.siret }),
     retry: false,
