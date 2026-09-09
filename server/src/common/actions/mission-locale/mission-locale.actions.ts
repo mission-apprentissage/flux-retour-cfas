@@ -2,7 +2,7 @@ import { captureException } from "@sentry/node";
 import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
-import { AggregationCursor, MongoServerError } from "mongodb";
+import { AggregationCursor, Document, MongoServerError } from "mongodb";
 import { ML_DELAI_RELANCE_JOURS, ML_TRI_COLONNE, STATUT_APPRENANT } from "shared/constants";
 import { CFA_COLLAB_AUTO_SEND_DELAI_DAYS } from "shared/constants/collaboration";
 import type { MlTri } from "shared/constants/missionLocale";
@@ -277,7 +277,7 @@ const filterByActivationDatePipelineMl = () => {
   ];
 };
 
-const matchDernierStatutPipelineMl = (): any => {
+const matchDernierStatutPipelineMl = (): Document => {
   return {
     $match: {
       $and: [
@@ -1311,7 +1311,7 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     }
   };
 
-  const organismeMissionLocaleAggregation: any[] = [
+  const organismeMissionLocaleAggregation: Document[] = [
     ...(await generateOrganisationMatchStage(organisation)),
     ...buildEffMissionLocaleFilter(),
     ...filterByDernierStatutPipelineMl(),
@@ -2637,7 +2637,7 @@ export const setEffectifMissionLocaleData = async (
 const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
   try {
     // Détection des incohérences
-    const parcours = (effectif._computed as any)?.parcours || [];
+    const parcours = effectif._computed?.statut?.parcours ?? [];
     const inconsistencies: string[] = [];
 
     if (parcours.length > 0) {
@@ -2645,12 +2645,12 @@ const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
 
       // Statut actif selon les dates vs dernier du parcours
       const currentStatusML =
-        parcours.filter((statut: any) => new Date(statut.date) <= today).slice(-1)[0] || parcours.slice(-1)[0];
+        parcours.filter((statut) => new Date(statut.date) <= today).slice(-1)[0] || parcours.slice(-1)[0];
       const lastParcoursStatus = parcours[parcours.length - 1];
 
-      if (currentStatusML && lastParcoursStatus && currentStatusML.statut !== lastParcoursStatus.statut) {
+      if (currentStatusML && lastParcoursStatus && currentStatusML.valeur !== lastParcoursStatus.valeur) {
         inconsistencies.push(
-          `Statut actif (${currentStatusML.statut}) != dernier parcours (${lastParcoursStatus.statut})`
+          `Statut actif (${currentStatusML.valeur}) != dernier parcours (${lastParcoursStatus.valeur})`
         );
       }
 
@@ -2659,13 +2659,13 @@ const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
         const daysFuture = Math.floor(
           (new Date(currentStatusML.date).getTime() - today.getTime()) / (1000 * 3600 * 24)
         );
-        inconsistencies.push(`Statut futur activé (${currentStatusML.statut} dans ${daysFuture} jours)`);
+        inconsistencies.push(`Statut futur activé (${currentStatusML.valeur} dans ${daysFuture} jours)`);
       }
 
       // Rupture sans RUPTURANT après la date
-      const hasRuptureDate = effectif.contrats?.some((c: any) => c.date_rupture && new Date(c.date_rupture) <= today);
-      if (hasRuptureDate && currentStatusML?.statut !== "RUPTURANT") {
-        inconsistencies.push(`Contrat rompu mais statut != RUPTURANT (${currentStatusML?.statut})`);
+      const hasRuptureDate = effectif.contrats?.some((c) => c.date_rupture && new Date(c.date_rupture) <= today);
+      if (hasRuptureDate && currentStatusML?.valeur !== "RUPTURANT") {
+        inconsistencies.push(`Contrat rompu mais statut != RUPTURANT (${currentStatusML?.valeur})`);
       }
 
       if (inconsistencies.length > 0) {
@@ -2674,15 +2674,15 @@ const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
             effectifId: effectif._id,
             apprenant: `${effectif.apprenant?.prenom} ${effectif.apprenant?.nom}`,
             inconsistencies,
-            parcours: parcours.map((p: any) => ({ statut: p.statut, date: p.date })),
+            parcours: parcours.map((p) => ({ statut: p.valeur, date: p.date })),
             contrats:
-              effectif.contrats?.map((c: any) => ({
+              effectif.contrats?.map((c) => ({
                 debut: c.date_debut,
                 fin: c.date_fin,
                 rupture: c.date_rupture,
               })) || [],
             currentStatusWillBe: {
-              statut: currentStatusML?.statut,
+              statut: currentStatusML?.valeur,
               date: currentStatusML?.date,
             },
           },
@@ -3157,7 +3157,7 @@ export const getMissionLocaleStat = async (
   };
   const rqthCondition = { $eq: ["$effectif_snapshot.apprenant.rqth", true] };
 
-  const withCondition = (cond?: any) => {
+  const withCondition = (cond?: Document) => {
     if (!mineur && !rqth) {
       return { $sum: cond ? { $cond: [cond, 1, 0] } : 1 };
     }
