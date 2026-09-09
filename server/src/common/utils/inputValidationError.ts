@@ -18,7 +18,7 @@ export class InputValidationError extends Error {
   }
 }
 
-export function validateArrayInput(value: unknown, maxLength: number): any[] {
+export function validateArrayInput(value: unknown, maxLength: number): unknown[] {
   if (!Array.isArray(value)) {
     throw new InputValidationError([{ message: '"value" must be an array', path: [], type: "array.base" }]);
   }

@@ -40,7 +40,10 @@ export function mergeIgnoringNullPreferringNewArray<GenericObject extends { [key
     }
 
     // Fusionne récursivement les objets
-    result[key] = mergeIgnoringNullPreferringNewArray((result[key] ?? null) as any, v);
+    result[key] = mergeIgnoringNullPreferringNewArray(
+      (result[key] ?? null) as { [key: string]: unknown } | null,
+      v as { [key: string]: unknown }
+    );
   });
 
   return result as GenericObject;

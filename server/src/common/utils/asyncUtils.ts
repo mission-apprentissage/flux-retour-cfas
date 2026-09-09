@@ -1,6 +1,6 @@
-export function timeout(promise, millis) {
+export function timeout<T>(promise: Promise<T>, millis: number): Promise<T> {
   let timeout: NodeJS.Timeout;
-  const timeoutPromise = new Promise((resolve, reject) => {
+  const timeoutPromise = new Promise<never>((_resolve, reject) => {
     timeout = setTimeout(() => reject(`Timed out after ${millis} ms.`), millis);
   });
   return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeout));

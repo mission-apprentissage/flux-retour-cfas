@@ -1,6 +1,6 @@
 import logger from "@/common/logger";
 
-let cache: { [key: string]: Promise<any> } = {};
+let cache: { [key: string]: Promise<unknown> } = {};
 
 /**
  * Met en cache le résultat d'une fonction.
@@ -10,7 +10,7 @@ export async function tryCachedExecution<T>(
   expiration: number,
   serviceFunc: () => Promise<T>
 ): Promise<T> {
-  let cachedResult: Promise<T> = cache[cacheKey];
+  let cachedResult = cache[cacheKey] as Promise<T> | undefined;
   if (!cachedResult) {
     logger.debug({ cacheKey, expiration }, "set cache");
     cachedResult = cache[cacheKey] = serviceFunc();

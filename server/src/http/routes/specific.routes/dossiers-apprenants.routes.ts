@@ -25,7 +25,7 @@ export default () => {
    */
   router.post("/", async ({ user, body }, res) => {
     const bodyItems = validateArrayInput(body, POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH).map((e) =>
-      stripNullProperties(e)
+      stripNullProperties(e as Record<string, unknown>)
     );
     const validationSchema = dossierApprenantSchemaV3Input;
 
@@ -88,7 +88,7 @@ export default () => {
           : undefined,
         data: effectifsToQueue,
       });
-    } catch (e: any) {
+    } catch (e) {
       const err = formatError(e);
       logger.error({ err }, "POST /dossiers-apprenants error");
       captureException(new Error("POST /dossiers-apprenants error", { cause: err }));

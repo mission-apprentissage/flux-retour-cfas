@@ -1,7 +1,7 @@
 class AppError extends Error {
-  details: any;
+  details: unknown;
 
-  constructor(message: string, options: any) {
+  constructor(message: string, options?: ErrorOptions) {
     super(message, options);
   }
 
@@ -16,14 +16,17 @@ class AppError extends Error {
  * @param error
  * @returns
  */
-export const formatError = (error: any) => {
-  if (error.message === "Document failed validation") {
+export const getErrorMessage = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+
+export const formatError = (error: unknown): Error & { details?: unknown } => {
+  if (error instanceof Error && error.message === "Document failed validation") {
     const newError = new AppError("Document failed validation", { cause: error });
     newError.name = "DocumentFailedValidation";
     // details are only provided with insertOne (not insertMany, bulkWrite, etc.)
-    newError.details = error?.errInfo?.details?.schemaRulesNotSatisfied;
+    const errInfo = (error as { errInfo?: { details?: { schemaRulesNotSatisfied?: unknown } } }).errInfo;
+    newError.details = errInfo?.details?.schemaRulesNotSatisfied;
     return newError;
   }
 
-  return error;
+  return error instanceof Error ? error : new Error(String(error));
 };

@@ -70,8 +70,8 @@ export const analyzeSearchTerm = (
 
 export const buildFiltersFromQuery = (queryParams: UsersFiltersParams) => {
   const { q, account_status, type_utilisateur, reseaux, departements, regions } = queryParams;
-  const query: any = {};
-  const organizationFilters: any = {};
+  const query: Record<string, unknown> = {};
+  const organizationFilters: Record<string, unknown> = {};
   const searchTerm = q?.trim();
 
   if (searchTerm && searchTerm.length >= 2) {
@@ -89,7 +89,7 @@ export const buildFiltersFromQuery = (queryParams: UsersFiltersParams) => {
   const departementValues = parseStringToArray(departements);
   const regionValues = parseStringToArray(regions);
 
-  const orgAndFilters: any[] = [];
+  const orgAndFilters: Record<string, unknown>[] = [];
 
   if (typeValues.length > 0) {
     orgAndFilters.push({
