@@ -15,7 +15,7 @@ export function logMiddleware(req: Request, res: Response, next: NextFunction) {
         method: req.method,
         url: req.originalUrl,
         statusCode: res.statusCode,
-        requestId: (req as any).requestId,
+        requestId: req.requestId,
         user: req.user?._id,
         // via error serializer
         // err: error,

@@ -1,4 +1,5 @@
 import fs from "fs";
+import type { IncomingMessage } from "node:http";
 
 import * as Sentry from "@sentry/node";
 import { zUai } from "api-alternance-sdk/internal";
@@ -259,7 +260,7 @@ export default async function createServer(): Promise<Application> {
   app.use(
     express.json({
       limit: config.bodyParserLimit,
-      verify: (req: any, _res, buf) => {
+      verify: (req: IncomingMessage & { rawBody?: Buffer }, _res, buf) => {
         // Conserver le body brut pour la vérification HMAC des webhooks
         req.rawBody = buf;
       },
@@ -529,10 +530,10 @@ function setupRoutes(app: Application) {
       try {
         const organisme = await getOrganismeByAPIKey(res.locals.token, req.query);
 
-        (req.user as any) = {
+        req.user = {
           source: SOURCE_APPRENANT.ERP,
           source_organisme_id: organisme._id.toString(),
-        };
+        } as unknown as AuthContext;
 
         void clearIngestionAuthCounter(req.ip);
 

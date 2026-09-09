@@ -123,7 +123,7 @@ function build({ tier, store, config: tierConfig, getKey }: BuildOpts): express.
           tier,
           key,
           ip: req.ip,
-          userId: (req.user as any)?._id?.toString?.(),
+          userId: req.user?._id?.toString(),
           route: req.originalUrl,
           retryAfter: Math.ceil(err.msBeforeNext / 1000),
           enforced,
@@ -171,13 +171,13 @@ const byEmailLowercased: BuildOpts["getKey"] = (req) => {
 };
 
 const byUserId: BuildOpts["getKey"] = (req) => {
-  const id = (req.user as any)?._id;
+  const id = req.user?._id;
   if (id) return id.toString();
   return req.ip || "unknown";
 };
 
 const byOrganismeSource: BuildOpts["getKey"] = (req) => {
-  const id = (req.user as any)?.source_organisme_id;
+  const id = req.user?.source_organisme_id;
   if (typeof id === "string" && id) return id;
   return req.ip || "unknown";
 };

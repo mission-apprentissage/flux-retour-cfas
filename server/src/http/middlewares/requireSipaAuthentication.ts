@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
 import { sipaUsersDb } from "@/common/model/collections";
+import { AuthContext } from "@/common/model/internal/AuthContext";
 import config from "@/config";
 
 export default function requireSipaAuthentication() {
@@ -13,7 +14,7 @@ export default function requireSipaAuthentication() {
       if (!header?.startsWith("Bearer ")) return next(Boom.unauthorized("Token manquant"));
       if (!config.auth.sipa.jwtSecret) return next(Boom.unauthorized("Token invalide ou expiré"));
 
-      let decoded: any;
+      let decoded: string | jwt.JwtPayload;
       try {
         decoded = jwt.verify(header.slice(7), config.auth.sipa.jwtSecret, {
           issuer: config.appName,
@@ -22,11 +23,11 @@ export default function requireSipaAuthentication() {
       } catch {
         return next(Boom.unauthorized("Token invalide ou expiré"));
       }
-      if (decoded.scope !== "sipa") return next(Boom.forbidden("Scope invalide"));
+      if (typeof decoded === "string" || decoded.scope !== "sipa") return next(Boom.forbidden("Scope invalide"));
 
       const user = await sipaUsersDb().findOne({ username: decoded.sub });
       if (!user) return next(Boom.unauthorized("Token invalide ou expiré"));
-      (req.user as any) = { _id: user._id, username: user.username };
+      req.user = { _id: user._id, username: user.username } as unknown as AuthContext;
       Sentry.setUser({
         segment: "sipa",
         ip_address: req.ip,

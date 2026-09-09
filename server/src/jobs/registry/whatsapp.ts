@@ -6,11 +6,13 @@ import config from "@/config";
 import { sendWhatsAppInjoignables } from "../whatsapp/send-whatsapp-injoignables";
 import { sendWhatsAppPrequalif } from "../whatsapp/send-whatsapp-prequalif";
 
+import { payloadBoolean, payloadNumber } from "./payload";
+
 export const whatsappJobs = {
   "tmp:whatsapp:send-injoignables": {
     handler: async (job) => {
-      const dryRun = (job.payload as any)?.dryRun ?? false;
-      const limit = (job.payload as any)?.limit;
+      const dryRun = payloadBoolean(job.payload, "dryRun") ?? false;
+      const limit = payloadNumber(job.payload, "limit");
       return sendWhatsAppInjoignables({ dryRun, limit });
     },
   },

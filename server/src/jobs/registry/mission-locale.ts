@@ -28,6 +28,8 @@ import { backfillMlSuiviDates } from "../migration/backfill-ml-suivi-dates";
 import { migrateAutreSituations } from "../migration/migrate-autre-situations";
 import { seedMlRdvUrl } from "../tmp/seed-ml-rdv-url";
 
+import { payloadDate } from "./payload";
+
 export const missionLocaleJobs = {
   "hydrate:mission-locale-effectif-snapshot": {
     handler: async (job) => {
@@ -100,7 +102,10 @@ export const missionLocaleJobs = {
   },
   "tmp:migrate:mission-locale-effectif-snapshot": {
     handler: async (job) => {
-      const jobDate = (job.payload as any)?.date;
+      const jobDate = payloadDate(job.payload, "date");
+      if (!jobDate) {
+        throw new Error('Paramètre "date" manquant');
+      }
       return updateMissionLocaleEffectifSnapshot(jobDate);
     },
   },

@@ -1,11 +1,10 @@
 import Boom from "boom";
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 // Bearer API_KEY
 
-// TODO FIXME req: any instead of Request overload
 export default function requireBearerAuthentication() {
-  return async (req: any, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
       let token: string | undefined = req.headers.authorization;
       if (!token) {

@@ -7,10 +7,12 @@ import {
 } from "../hydrate/affelnet/hydrate-voeux-effectifs";
 import { seedSipaTestNancy } from "../tmp/seed-sipa-test-nancy";
 
+import { payloadString } from "./payload";
+
 export const voeuxAffelnetJobs = {
   "hydrate:voeux-effectifs-relations": {
     handler: async (job) => {
-      const anneeScolaireRentree = (job.payload as any)?.anneeScolaireRentree as string | undefined;
+      const anneeScolaireRentree = payloadString(job.payload, "anneeScolaireRentree");
       await hydrateVoeuxEffectifsRelations(anneeScolaireRentree);
       await hydrateVoeuxEffectifsDECARelations(anneeScolaireRentree);
       return;
