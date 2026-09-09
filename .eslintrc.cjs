@@ -91,8 +91,8 @@ module.exports = {
     {
       files: [
         "server/src/**",
+        "server/tests/**",
         "server/scripts/**",
-        "server/tests/data/**",
         "shared/constants/**",
         "shared/models/apis/**",
         "shared/models/fixtures/**",
@@ -101,7 +101,6 @@ module.exports = {
         "shared/utils/**",
         "ui/**",
       ],
-      excludedFiles: ["**/*.test.ts", "**/*.test.tsx"],
       rules: {
         "@typescript-eslint/no-explicit-any": "error",
       },
