@@ -688,6 +688,50 @@ export const getAllMissionsLocales = async (): Promise<IOrganisationMissionLocal
   return organisations;
 };
 
+/**
+ * Missions Locales actives (déjà activées sur le Tableau de bord) situées dans les régions données.
+ * Mutualisé entre l'email d'invitation CFA et l'onboarding CFA, qui listent les ML du même territoire.
+ */
+export const getActiveMissionLocalesByRegions = async (regions: string[]): Promise<IOrganisationMissionLocale[]> => {
+  const codesRegion = [...new Set(regions.filter(Boolean))];
+  if (codesRegion.length === 0) {
+    return [];
+  }
+  return organisationsDb()
+    .find<IOrganisationMissionLocale>({
+      type: "MISSION_LOCALE",
+      "adresse.region": { $in: codesRegion },
+      activated_at: { $exists: true, $ne: null },
+    })
+    .toArray();
+};
+
+/**
+ * Dates d'activation « mission locale » (`ml_beta_activated_at`) des organismes de formation donnés,
+ * lues en direct sur les organisations (source vivante, contrairement au snapshot dénormalisé des effectifs).
+ * Clé de la map = `organisme_id` (string) ; absent ⇒ CFA non activé. S'appuie sur l'index
+ * `{ organisme_id, type, ml_beta_activated_at }`.
+ */
+export const getMlBetaActivationDatesByOrganismeIds = async (organismeIds: string[]): Promise<Map<string, Date>> => {
+  const map = new Map<string, Date>();
+  const ids = [...new Set(organismeIds.filter(Boolean))];
+  if (ids.length === 0) {
+    return map;
+  }
+  const organisations = await organisationsDb()
+    .find<IOrganisationOrganismeFormation>(
+      { type: "ORGANISME_FORMATION", organisme_id: { $in: ids }, ml_beta_activated_at: { $exists: true, $ne: null } },
+      { projection: { organisme_id: 1, ml_beta_activated_at: 1 } }
+    )
+    .toArray();
+  for (const organisation of organisations) {
+    if (organisation.organisme_id && organisation.ml_beta_activated_at) {
+      map.set(organisation.organisme_id, organisation.ml_beta_activated_at);
+    }
+  }
+  return map;
+};
+
 export const getAllARML = async (): Promise<IOrganisationARML[]> => {
   const organisations = await organisationsDb().find<IOrganisationARML>({ type: "ARML" }).toArray();
   if (!organisations) {

@@ -75,6 +75,14 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           onClick: () => trackPlausibleEvent("ml_onglet_ruptures_ouvert"),
         },
       });
+      baseItems.push({
+        text: "Inviter les CFA",
+        isActive: pathname?.startsWith("/mission-locale/inviter-les-cfa"),
+        linkProps: {
+          href: "/mission-locale/inviter-les-cfa",
+          target: "_self",
+        },
+      });
     } else if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION) {
       baseItems.push({
         text: "Effectifs de l'établissement",
