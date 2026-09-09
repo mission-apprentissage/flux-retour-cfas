@@ -9,7 +9,7 @@ import { write, utils } from "xlsx";
 
 const fakerFr = new Faker({ locale: [fr] });
 
-function optional(data) {
+function optional(data: string | null) {
   return fakerFr.helpers.arrayElement([data, ""]);
 }
 
@@ -134,9 +134,9 @@ export default function registerCommand(program: Command, getClient: () => Mongo
         throw new Error("OF not found");
       }
 
-      const formations: IFormationCatalogue[] = (await client
+      const formations = await client
         .db("flux-retour-cfas")
-        .collection("formationsCatalogue")
+        .collection<IFormationCatalogue>("formationsCatalogue")
         .find({
           $and: [
             { published: true },
@@ -145,13 +145,13 @@ export default function registerCommand(program: Command, getClient: () => Mongo
             },
           ],
         })
-        .toArray()) as any;
+        .toArray();
 
       if (formations.length === 0) {
         throw new Error("Formation not found");
       }
 
-      const data: any[] = [];
+      const data: ReturnType<typeof fakeEffectif>[] = [];
       for (let i = 0; i < Number(count); i += 1) {
         data.push(fakeEffectif(formateur, fakerEn.helpers.arrayElement(formations)));
       }

@@ -19,8 +19,8 @@ export type IHydrateEffectifsComputedTypesResult = {
 };
 
 export const hydrateEffectifsComputedTypesGenerique = async (
-  options?,
-  signal?
+  options?: Parameters<typeof hydrateEffectifsComputedTypes>[0],
+  signal?: AbortSignal
 ): Promise<IHydrateEffectifsComputedTypesResult> => {
   const effectifsResult = await hydrateEffectifsComputedTypes(options, effectifsDb, signal);
   if (effectifsResult.aborted) {

@@ -1,6 +1,7 @@
 import { captureException } from "@sentry/node";
 import { addDays } from "date-fns";
 import { getAnneesScolaireListFromDate, CODES_STATUT_APPRENANT } from "shared";
+import type { IEffectif } from "shared/models";
 
 import {
   abandonsIndicator,
@@ -18,7 +19,7 @@ const filterStages = [{ $match: { annee_scolaire: { $in: getAnneesScolaireListFr
  * @param {*} nbJours
  * @returns
  */
-const getAggregateNbJoursDepuisStatutStages = (nbJours) => [
+const getAggregateNbJoursDepuisStatutStages = (nbJours: number) => [
   {
     $addFields: {
       nb_jours_depuis_statut: {
@@ -116,7 +117,7 @@ export const transformRupturantsToAbandonsDepuis = async (nbJours = 180) => {
  * @param {*} effectif
  * @param {*} abandonDate
  */
-const updateEffectifToAbandon = async (effectif, abandonDate) => {
+const updateEffectifToAbandon = async (effectif: IEffectif, abandonDate: Date) => {
   try {
     // Ajout d'une entrée manuelle "ABANDON" à la date
     effectif.apprenant.historique_statut.push({

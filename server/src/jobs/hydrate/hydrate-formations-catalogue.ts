@@ -36,7 +36,7 @@ export const hydrateFormationsCatalogue = async () => {
     },
   });
 
-  const queriesInProgress: Promise<any>[] = [];
+  const queriesInProgress: Promise<unknown>[] = [];
   let totalFormations = 0;
   let pendingFormations: IFormationCatalogue[] = [];
 
