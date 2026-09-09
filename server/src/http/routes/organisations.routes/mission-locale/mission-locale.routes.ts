@@ -1,7 +1,7 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
-import { ML_SITUATION_DOSSIER_LABEL } from "shared/constants";
+import { ML_SITUATION_DOSSIER, ML_SITUATION_DOSSIER_LABEL } from "shared/constants";
 import {
   API_EFFECTIF_LISTE,
   IMissionLocaleEffectif,
@@ -29,7 +29,7 @@ import { createTelechargementListeNomLog } from "@/common/actions/telechargement
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { getAgeFromDate } from "@/common/utils/miscUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
-import { addSheetToXlscFile } from "@/common/utils/xlsxUtils";
+import { addSheetToXlscFile, XlsxColumn } from "@/common/utils/xlsxUtils";
 import { MissionLocaleLocals, returnResult, RouteHandler } from "@/http/middlewares/helpers";
 
 export default () => {
@@ -233,35 +233,36 @@ const exportEffectifMissionLocale: RouteHandler<MissionLocaleLocals> = async (re
   const worksheetsInfo = await computeFileInfo(filters.type, filters.month);
   const fileName = `Rupturants_TBA_${new Date().toISOString().split("T")[0]}.xlsx`;
 
-  const columns = [
+  const columns: XlsxColumn[] = [
     {
       name: "Date transmission données",
       id: "transmitted_at",
-      transform: (d) => (d ? new Date(d) : "Plus de 2 semaines"),
+      transform: (d) => (d ? new Date(d as string) : "Plus de 2 semaines"),
     },
     { name: "Source données", id: "source" },
     { name: "NOM", id: "nom" },
     { name: "Prénom", id: "prenom" },
-    { name: "Date rupture contrat", id: "contrat_date_rupture", transform: (d) => (d ? new Date(d) : "") },
-    { name: "Date début contrat", id: "contrat_date_debut", transform: (d) => (d ? new Date(d) : "") },
-    { name: "Date fin de contrat", id: "contrat_date_fin", transform: (d) => (d ? new Date(d) : "") },
-    { name: "Date de naissance", id: "date_de_naissance", transform: (d) => new Date(d) },
-    { name: "Age", id: "date_de_naissance", transform: getAgeFromDate },
+    { name: "Date rupture contrat", id: "contrat_date_rupture", transform: (d) => (d ? new Date(d as string) : "") },
+    { name: "Date début contrat", id: "contrat_date_debut", transform: (d) => (d ? new Date(d as string) : "") },
+    { name: "Date fin de contrat", id: "contrat_date_fin", transform: (d) => (d ? new Date(d as string) : "") },
+    { name: "Date de naissance", id: "date_de_naissance", transform: (d) => new Date(d as string) },
+    { name: "Age", id: "date_de_naissance", transform: (d) => getAgeFromDate(d as Date) },
     { name: "RQTH", id: "rqth", transform: (d) => (d ? "OUI" : "NON") },
     { name: "Collaboration CFA", id: "collaboration_cfa", transform: (d) => (d ? "OUI" : "NON") },
     {
       name: "Situation",
       id: "situation_dossier",
-      transform: (val) => (val ? (ML_SITUATION_DOSSIER_LABEL[val] ?? val) : ""),
+      transform: (val) =>
+        typeof val === "string" ? (ML_SITUATION_DOSSIER_LABEL[val as ML_SITUATION_DOSSIER] ?? val) : "",
       listValues: Object.values(ML_SITUATION_DOSSIER_LABEL),
     },
-    { name: "Date de réception du dossier", id: "date_reception", transform: (d) => (d ? new Date(d) : "") },
+    { name: "Date de réception du dossier", id: "date_reception", transform: (d) => (d ? new Date(d as string) : "") },
     {
       name: "À recontacter depuis le",
       id: "date_dernier_passage_a_recontacter",
-      transform: (d) => (d ? new Date(d) : ""),
+      transform: (d) => (d ? new Date(d as string) : ""),
     },
-    { name: "Date de traitement", id: "date_traitement", transform: (d) => (d ? new Date(d) : "") },
+    { name: "Date de traitement", id: "date_traitement", transform: (d) => (d ? new Date(d as string) : "") },
     { name: "Disponible WhatsApp", id: "disponible_whatsapp", transform: (d) => (d ? "OUI" : "NON") },
     { name: "Ville de résidence", id: "commune" },
     { name: "Code postal de résidence", id: "code_postal" },

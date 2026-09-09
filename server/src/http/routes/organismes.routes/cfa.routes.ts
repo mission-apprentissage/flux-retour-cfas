@@ -18,7 +18,7 @@ import {
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import { missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
-import { formatJsonToXlsx } from "@/common/utils/xlsxUtils";
+import { formatJsonToXlsx, XlsxColumn } from "@/common/utils/xlsxUtils";
 import { OrganismeLocals, returnResult, RouteHandler } from "@/http/middlewares/helpers";
 
 const zCfaEffectifsQuery = {
@@ -125,12 +125,12 @@ export default () => {
       const { organisme, isAllowedDeca } = await getOrganismeWithDeca(res.locals);
       const rows = await getCfaSuiviMissionLocaleExportRows(organisme, isAllowedDeca);
 
-      const columns = [
+      const columns: XlsxColumn[] = [
         { name: "Prénom", id: "prenom" },
         { name: "Nom", id: "nom" },
         { name: "En rupture", id: "en_rupture" },
         { name: "Intitulé de la formation", id: "libelle_formation" },
-        { name: "Date de rupture", id: "date_rupture", transform: (d: Date | null) => (d ? new Date(d) : "") },
+        { name: "Date de rupture", id: "date_rupture", transform: (d) => (d ? new Date(d as Date) : "") },
         { name: "Statut de collaboration avec la ML", id: "collab_status_label" },
         { name: "Catégorie", id: "categorie" },
         { name: "Mission Locale de rattachement", id: "mission_locale_nom" },

@@ -1,6 +1,6 @@
 import Boom from "boom";
 import express from "express";
-import { FRANCE_TRAVAIL_SITUATION_LABELS, TOUS_LES_SECTEURS_CODE } from "shared/constants";
+import { FRANCE_TRAVAIL_SITUATION_LABELS, FranceTravailSituationKey, TOUS_LES_SECTEURS_CODE } from "shared/constants";
 import { API_EFFECTIF_LISTE } from "shared/models";
 import { zFranceTravailSituationEnum } from "shared/models/data/franceTravailEffectif.model";
 import {
@@ -24,7 +24,7 @@ import {
 import { getSecteurActivitesByCode } from "@/common/actions/rome/rome.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { getAgeFromDate } from "@/common/utils/miscUtils";
-import { addSheetToXlscFile } from "@/common/utils/xlsxUtils";
+import { addSheetToXlscFile, XlsxColumn } from "@/common/utils/xlsxUtils";
 import {
   DefaultParams,
   DefaultQuery,
@@ -177,12 +177,12 @@ const exportEffectifByCodeSecteur: RouteHandler<
 
   const fileName = `inscrit-sans-contrats-TBA-${new Date().toISOString().split("T")[0]}.xlsx`;
 
-  const columns = [
+  const columns: XlsxColumn[] = [
     { name: "Prénom", id: "prenom" },
     { name: "Nom", id: "nom" },
     { name: "RQTH", id: "rqth", transform: (d) => (d ? "OUI" : "NON") },
     { name: "Ville de résidence", id: "commune" },
-    { name: "Age", id: "date_de_naissance", transform: getAgeFromDate },
+    { name: "Age", id: "date_de_naissance", transform: (d) => getAgeFromDate(d as Date) },
     { name: "Téléphone", id: "telephone" },
     { name: "Email", id: "email" },
     { name: "Téléphone responsable légal 1", id: "telephone_responsable_1" },
@@ -197,12 +197,12 @@ const exportEffectifByCodeSecteur: RouteHandler<
     { name: "Email du CFA (données publique)", array: "organisme_contacts", id: "email" },
     { name: "Intitulé de la formation", id: "libelle_formation" },
     { name: "Niveau de la formation", id: "niveau_formation" },
-    { name: "Date d'inscription", id: "date_inscription", transform: (d) => new Date(d) },
+    { name: "Date d'inscription", id: "date_inscription", transform: (d) => new Date(d as string) },
     {
       name: "Durée sans contrat /90j",
       id: "date_inscription",
       transform: (d) => {
-        const diffTime = Math.abs(new Date().getTime() - new Date(d).getTime());
+        const diffTime = Math.abs(new Date().getTime() - new Date(d as string).getTime());
         return Math.floor(diffTime / (1000 * 60 * 60 * 24));
       },
     },
@@ -251,12 +251,12 @@ const exportEffectifsTraites: RouteHandler<
     ? `dossiers-traites-${mois}-${new Date().toISOString().split("T")[0]}.xlsx`
     : `dossiers-traites-${new Date().toISOString().split("T")[0]}.xlsx`;
 
-  const columns = [
+  const columns: XlsxColumn[] = [
     { name: "Prénom", id: "prenom" },
     { name: "Nom", id: "nom" },
     { name: "RQTH", id: "rqth", transform: (d) => (d ? "OUI" : "NON") },
     { name: "Ville de résidence", id: "commune" },
-    { name: "Age", id: "date_de_naissance", transform: getAgeFromDate },
+    { name: "Age", id: "date_de_naissance", transform: (d) => getAgeFromDate(d as Date) },
     { name: "Téléphone", id: "telephone" },
     { name: "Email", id: "email" },
     { name: "Téléphone responsable légal 1", id: "telephone_responsable_1" },
@@ -271,9 +271,14 @@ const exportEffectifsTraites: RouteHandler<
     { name: "Email du CFA (données publique)", array: "organisme_contacts", id: "email" },
     { name: "Intitulé de la formation", id: "libelle_formation" },
     { name: "Niveau de la formation", id: "niveau_formation" },
-    { name: "Date d'inscription", id: "date_inscription", transform: (d) => new Date(d) },
-    { name: "Date de traitement", id: "date_traitement", transform: (d) => new Date(d) },
-    { name: "Situation", id: "situation", transform: (d) => (d ? FRANCE_TRAVAIL_SITUATION_LABELS[d] || d : "") },
+    { name: "Date d'inscription", id: "date_inscription", transform: (d) => new Date(d as string) },
+    { name: "Date de traitement", id: "date_traitement", transform: (d) => new Date(d as string) },
+    {
+      name: "Situation",
+      id: "situation",
+      transform: (d) =>
+        typeof d === "string" ? FRANCE_TRAVAIL_SITUATION_LABELS[d as FranceTravailSituationKey] || d : "",
+    },
     { name: "Commentaire", id: "commentaire" },
   ];
 
