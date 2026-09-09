@@ -61,6 +61,9 @@ const affelnetQuery = z.object({
 type AffelnetQuery = z.infer<typeof affelnetQuery>;
 type AffelnetHandler = RouteHandler<RegionalLocals, DefaultParams, AffelnetQuery>;
 
+type ContratDates = { date_debut_contrat: Date | string; date_fin_contrat: Date | string };
+type ContratConcretise = { date_debut: Date | string; date_fin: Date | string };
+
 const computeFields = (data: Array<{ contrats?: unknown[] | null; contrats_deca?: unknown[] | null }>) => {
   const maxContrats = Math.max(...data.map((d) => (d.contrats ? d.contrats.length : 0)));
   const extraFields: Array<{ label: string; value: string }> = [];
@@ -160,14 +163,14 @@ const exportNonConcretisee: AffelnetHandler = async (req, { locals }) => {
       formations_demandees: formations_demandees.join(", "),
       contrat_signe: contrats && contrats.length ? "Oui" : "Non",
       contrat_deca_signe: contrats_deca && contrats_deca.length ? "Oui" : "Non",
-      ...contrats.reduce((acc, curr, index) => {
+      ...contrats.reduce((acc: Record<string, string>, curr: ContratDates, index: number) => {
         return {
           ...acc,
           [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
           [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
         };
       }, {}),
-      ...contrats_deca.reduce((acc, curr, index) => {
+      ...contrats_deca.reduce((acc: Record<string, string>, curr: ContratDates, index: number) => {
         return {
           ...acc,
           [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
@@ -214,14 +217,14 @@ const exportConcretisee: AffelnetHandler = async (req, { locals }) => {
       formations_demandees: formations_demandees.join(", "),
       contrat_signe: contrats && contrats.length ? "Oui" : "Non",
       contrat_deca_signe: contrats_deca && contrats_deca.length ? "Oui" : "Non",
-      ...contrats.reduce((acc, curr, index) => {
+      ...contrats.reduce((acc: Record<string, string>, curr: ContratConcretise, index: number) => {
         return {
           ...acc,
           [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut), "dd/MM/yyyy"),
           [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin), "dd/MM/yyyy"),
         };
       }, {}),
-      ...contrats_deca.reduce((acc, curr, index) => {
+      ...contrats_deca.reduce((acc: Record<string, string>, curr: ContratConcretise, index: number) => {
         return {
           ...acc,
           [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut), "dd/MM/yyyy"),
