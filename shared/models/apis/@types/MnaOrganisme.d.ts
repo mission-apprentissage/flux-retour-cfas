@@ -1,7 +1,7 @@
 type MnaOrganisme = {
   siret: string;
   _meta: {
-    anomalies: Array<any>;
+    anomalies: Array<unknown>;
     date_import: string;
     date_dernier_import: string;
     date_collecte: string;
@@ -72,7 +72,7 @@ type MnaOrganisme = {
     sources: Array<string>;
     date_collecte: string;
   }>;
-  reseaux: Array<any>;
+  reseaux: Array<unknown>;
   uai_potentiels: Array<{
     uai: string;
     sources: Array<string>;

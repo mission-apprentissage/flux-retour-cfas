@@ -1,4 +1,5 @@
 import { captureException } from "@sentry/node";
+import Boom from "boom";
 import express from "express";
 import { ObjectId } from "mongodb";
 import { dossierApprenantSchemaV3Input, stripModelAdditionalKeys } from "shared/models/parts/dossierApprenantSchemaV3";
@@ -29,6 +30,9 @@ export default () => {
     const validationSchema = dossierApprenantSchemaV3Input;
 
     const source = user.source;
+    if (!source) {
+      throw Boom.unauthorized("Source de transmission inconnue");
+    }
     const effectifsToQueue = bodyItems.map((dossierApprenant) => {
       const result = validationSchema.safeParse({
         ...dossierApprenant,
@@ -46,6 +50,7 @@ export default () => {
       const processedAt = new Date();
       return {
         ...rest,
+        _id: new ObjectId(),
         has_nir: Boolean(nir_apprenant),
         ...defaultValuesEffectifQueue(),
         ...(prettyValidationError ? { processed_at: processedAt } : {}),

@@ -33,7 +33,7 @@ export const zOrganismeReferentiel = z.object({
           type: z.string(),
           geometry: z.object({
             type: z.string(),
-            coordinates: z.array(z.any()),
+            coordinates: z.array(z.unknown()),
           }),
           properties: z
             .object({

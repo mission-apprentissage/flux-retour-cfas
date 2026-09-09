@@ -59,7 +59,7 @@ export const zUsersMigration = z.object({
         .object({
           token: z.string(),
           templateName: z.string(),
-          payload: z.any().optional(),
+          payload: z.unknown().optional(),
           sendDates: z.array(z.date()),
           openDate: z.date().optional(),
           messageIds: z.array(z.string()).optional(),

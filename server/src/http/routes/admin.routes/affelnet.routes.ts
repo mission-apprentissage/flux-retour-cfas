@@ -201,7 +201,7 @@ const createVoeux: RouteHandler = async (req, res) => {
 
       voeu.organisme_formateur_id = orgaFormateur._id;
       voeu.organisme_responsable_id = orgaResponsable._id;
-      voeu.academie_code = getAcademieById(voeuRaw.academie)?.code;
+      voeu.academie_code = voeuRaw.academie ? getAcademieById(voeuRaw.academie)?.code : undefined;
 
       const previous = await voeuxAffelnetDb().findOne({
         "raw.ine": voeuRaw.ine,

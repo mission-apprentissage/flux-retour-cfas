@@ -6450,7 +6450,17 @@ exports[`validation-schema > should create validation schema for effectifsDECA >
       "additionalProperties": false,
       "bsonType": "object",
       "properties": {
-        "adresse": {},
+        "adresse": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "bsonType": "object",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+        },
         "adresse_naissance": {
           "anyOf": [
             {
@@ -15847,7 +15857,17 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               "additionalProperties": false,
               "bsonType": "object",
               "properties": {
-                "adresse": {},
+                "adresse": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": true,
+                      "bsonType": "object",
+                    },
+                    {
+                      "bsonType": "null",
+                    },
+                  ],
+                },
                 "adresse_naissance": {
                   "anyOf": [
                     {
@@ -21546,499 +21566,375 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
             "bsonType": "object",
             "properties": {
               "academie": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "adresse_1": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "adresse_2": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "adresse_3": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "adresse_4": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "annee_scolaire_rentree": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "bareme": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "candidature_internat": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "cle_ministere_educatif": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "code_enseignement": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "code_lv1": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "code_lv2": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "code_mef": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "code_mef_origine": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "code_offre_formation": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "code_origine_1": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "code_origine_2": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "code_postal": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "code_specialite_offre_formation": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "code_uai_cio_origine": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "code_uai_etab_accueil": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "code_uai_etab_origine": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "demande_code_lv1": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "demande_code_lv2": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "demande_libelle_lv1": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "demande_libelle_lv2": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "ine": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "libelle_cio_origine": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "libelle_enseignement": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "libelle_etab_accueil": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "libelle_etab_origine": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "libelle_formation": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "libelle_formation_origine": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "libelle_lv1": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "libelle_lv2": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "libelle_option_1": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "libelle_option_2": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "libelle_public_etablissement": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "mail_responsable_1": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "mail_responsable_2": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "mnemonique_mef_offre_formation": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "mnemonique_mef_origine": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "nom": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "pays": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "prenom_1": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "prenom_2": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "prenom_3": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "rang": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "siret_uai_gestionnaire": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "telephone": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "telephone_portable": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "telephone_pro": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "telephone_responsable_1": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "telephone_responsable_2": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "type_etab_accueil": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "type_etab_origine": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "uai_cio_etab_accueil": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "uai_etablissement_responsable": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "uai_etatblissement_formateur": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "ville": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "ville_etab_accueil": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
               "ville_etab_origine": {
-                "anyOf": [
-                  {},
-                  {
-                    "bsonType": "null",
-                  },
+                "bsonType": [
+                  "string",
+                  "null",
                 ],
               },
             },
@@ -22083,499 +21979,375 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
       "bsonType": "object",
       "properties": {
         "academie": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "adresse_1": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "adresse_2": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "adresse_3": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "adresse_4": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "annee_scolaire_rentree": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "bareme": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "candidature_internat": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "cle_ministere_educatif": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "code_enseignement": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "code_lv1": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "code_lv2": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "code_mef": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "code_mef_origine": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "code_offre_formation": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "code_origine_1": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "code_origine_2": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "code_postal": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "code_specialite_offre_formation": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "code_uai_cio_origine": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "code_uai_etab_accueil": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "code_uai_etab_origine": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "demande_code_lv1": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "demande_code_lv2": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "demande_libelle_lv1": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "demande_libelle_lv2": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "ine": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "libelle_cio_origine": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "libelle_enseignement": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "libelle_etab_accueil": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "libelle_etab_origine": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "libelle_formation": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "libelle_formation_origine": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "libelle_lv1": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "libelle_lv2": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "libelle_option_1": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "libelle_option_2": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "libelle_public_etablissement": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "mail_responsable_1": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "mail_responsable_2": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "mnemonique_mef_offre_formation": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "mnemonique_mef_origine": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "nom": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "pays": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "prenom_1": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "prenom_2": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "prenom_3": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "rang": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "siret_uai_gestionnaire": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "telephone": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "telephone_portable": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "telephone_pro": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "telephone_responsable_1": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "telephone_responsable_2": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "type_etab_accueil": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "type_etab_origine": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "uai_cio_etab_accueil": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "uai_etablissement_responsable": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "uai_etatblissement_formateur": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "ville": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "ville_etab_accueil": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
         "ville_etab_origine": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
+          "bsonType": [
+            "string",
+            "null",
           ],
         },
       },

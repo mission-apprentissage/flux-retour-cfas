@@ -9,7 +9,7 @@ Mesures faites le 09/09/2026 sur la branche `complete-summer-refacto` (post-supp
 | 0   | ESLint `warn` + overrides `error`, `ts-ignore` interdit, flags ui gratuits | **livré 09/09/2026** (pas de ratchet ni de script commité, décision D4)                                           |
 | 1   | Modules sans types (`@types/*`, `.d.ts`)                                   | **livré 09/09/2026** (24 → 0 TS7016)                                                                              |
 | 2   | Socle HTTP serveur (`returnResult`, validation, middlewares, filtres)      | **livré 09/09/2026** sauf 2.4 (`filters.ts`, `effectifs-filters.ts`) et 2.5 (`catch (e: any)`), reportés au lot 4 |
-| 3   | `shared` (modèles Zod, primitives)                                         | à faire                                                                                                           |
+| 3   | `shared` (modèles Zod, primitives)                                         | **livré 09/09/2026** (98 → 2 : `is_lock` ×2 conservés, décision D6)                                               |
 | 4   | `server/src` actions / jobs / utils                                        | à faire                                                                                                           |
 | 5   | `ui` (httpClient, hooks, composants, utils)                                | à faire                                                                                                           |
 | 6   | Tests serveur (factories typées)                                           | à faire                                                                                                           |
@@ -146,7 +146,23 @@ Plan initial :
 - **2.4 `filters.ts`** : helper `zCommaSeparated(schema)` avec `preprocess((v: unknown) => …)` et garde `typeof v === "string"`, réutilisé dans `effectifs-filters.ts` (14 implicites). ⚠️ Changement de comportement assumé : une valeur non-string renvoyait un 500 (`.split` sur `undefined`), elle renverra un 400 Zod. À mentionner dans la PR.
 - **2.5 `catch (e: any)` ×22** → `unknown` + helper `getErrorMessage(err: unknown)` / `Boom.isBoom`.
 
-### Lot 3 — `shared` (98 explicites, 1 j + validation données)
+### Lot 3 — `shared` (livré le 09/09, 98 → 2)
+
+Ce qui a été fait :
+
+- `voeuxAffelnet.model.ts` : les 62 `z.any().nullish()` de `raw` passent en `z.string().nullish()` après relevé sur `tdb-preprod-copy` (370 518 documents, `raw` et `history[].raw` : 100 % `string`, `annee_scolaire_rentree` parfois absent). Côté Mongo, le validateur passe de `{}` à `bsonType: ["string", "null"]` sur ces champs.
+- `effectifsDECA.apprenant.adresse` : `z.record(z.unknown()).nullish()` (preprod : 4 207 729 objets, 2 absents, aucun `null`). `organismesReferentiel.geojson.geometry.coordinates` : `z.array(z.unknown())` car la preprod contient des `Polygon`/`MultiPolygon` (tableaux imbriqués) en plus des `Point`.
+- `auditLogs.data` et `usersMigration.emails[].payload` : `z.unknown()`. Vérifié avec `zodToMongoSchema` : `z.unknown()` produit le même validateur que `z.any()` (`{}`), `z.array(z.unknown())` ajoute seulement `items: {}`.
+- `zodPrimitives.ts` : tous les `preprocess` en `(v: unknown)` ; `code_naf` et `code_rncp` narrowés par `typeof` (une valeur non-string ne plante plus le preprocess, elle tombe en erreur de validation) ; les `as any` sur les exemples OpenAPI étaient inutiles.
+- `dossierApprenantSchemaV3.ts` : `stripModelAdditionalKeys<T>` générique (`Omit<Partial<T>, "_id">`), `nir_apprenant` en `z.unknown()`.
+- `.d.ts` API Entreprise / MNA : `string | null` et `Array<unknown>` ; `deployedRegions`, `territoires` (`ACADEMIES_DEPARTEMENT_MAP` typé), `sortAlphabeticallyBy` (`Record<Key, unknown>` + `String()`, identique au comportement de `Intl.Collator`), `zodHelper`.
+- Retombées côté server : `infoSiret.actions` (`complement_adresse ?? undefined`), `affelnet.routes` admin (garde sur `raw.academie`), `dossiers-apprenants.routes` (`_id` explicite dans la queue, garde `user.source` → 401 si absent, jamais atteint en pratique).
+
+- Snapshot `validationSchema.test.ts.snap` mis à jour pour 3 collections (`voeuxAffelnet`, `effectifsDECA`, `missionLocaleEffectif`) : seuls `raw.*`, `history[].raw.*` et `apprenant.adresse` changent. Suite serveur : 1 409 tests verts.
+
+Conservé : `is_lock: z.any()` dans `effectifs.model.ts` et `effectifsDECA.model.ts` (décision D6).
+
+Plan initial :
 
 - **3.1 `voeuxAffelnet.model.ts` (62 `z.any()`)** : ce schéma **est** appliqué comme validation Mongo (`configureDbSchemaValidation` au boot, `validationLevel: strict`, `validationAction: error`), donc un typage strict peut faire rejeter des inserts en prod. Démarche : `collection-schema` via MCP sur `tdb-preprod-copy` pour relever les types réels champ par champ, typer en `z.string().nullish()` / `z.coerce.date().nullish()` selon relevé, rejouer `hydrate-voeux-effectifs` sur la copie preprod, livrer dans une PR isolée avec rollback trivial. Voir D1.
 - **3.2 `zodPrimitives.ts` (21)** : `(v: any)` → `unknown` avec narrowing ; idem `dossierApprenantSchemaV3.ts` (4), `zodHelper.ts` (2).
@@ -201,7 +217,7 @@ Règles transverses : `Record<string, any>` (60) → `Record<string, unknown>` o
 | baseline               |                                 1 155 |                     449 |
 | 1 (réel)               |                                 1 153 |                     412 |
 | 2 (réel, sans 2.4/2.5) | 1 124 (server 833, ui 193, shared 98) | 278 (server 230, ui 48) |
-| 3                      |                                   995 |                     200 |
+| 3 (réel)               |  1 028 (server 833, ui 193, shared 2) |                     278 |
 | 4                      |                                   745 |                     140 |
 | 5                      |                                   550 |                      90 |
 | 6                      |                                  < 50 |                       0 |
@@ -223,4 +239,5 @@ Ces valeurs sont des ordres de grandeur ; le script du lot 0 fait foi.
 - **D2 — Origine des types de réponse API côté ui** : `z.infer` sur les modèles `shared` + quelques types manuels dans `ui/common/api/` (recommandé, simple, pas de génération) ou `openapi-typescript` depuis `server/static/open-api.json` (dépend de la couverture réelle de l'OpenAPI, à vérifier ; aujourd'hui surtout v3 ingestion et v2 SIPA).
 - **D3 — Tolérance en tests** : objectif zéro avec factories typées (recommandé) ou `warn` permanent sur `tests/`.
 - **D4 — Garde-fou** : **tranché le 09/09 (Yohann)** : pas de script ni de job CI versionnés ; eslint `warn` + overrides `error` seulement, le compteur reste un outil de chantier hors repo.
+- **D6 — `is_lock`** : forme récursive (booléens imbriqués qui miment l'arbre de l'effectif), consommée dans 11 fichiers. Un `z.lazy` récursif n'est pas garanti côté `zodToMongoSchema` (validateur strict au boot) ; un `z.record(z.unknown())` casserait les 11 consommateurs. Reco : traiter dans le lot 4 « effectifs » avec un type TS dédié (`IsLock`) et un schéma Zod non récursif à deux niveaux, testé sur la copie preprod.
 - **D5 — Priorité entre 4, 5 et 6** selon disponibilité front / back ; le lot 6 est le meilleur candidat pour du travail en parallèle ou en fond de sprint.

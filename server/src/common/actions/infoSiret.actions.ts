@@ -80,7 +80,7 @@ export const findDataFromSiret = async (providedSiret): Promise<InfoSiret> => {
       type_voie: etablissementApiInfo.adresse.type_voie,
       nom_voie: etablissementApiInfo.adresse.libelle_voie,
       voie_complete: (etablissementApiInfo.adresse.type_voie ?? "") + (etablissementApiInfo.adresse.libelle_voie ?? ""),
-      complement_adresse: etablissementApiInfo.adresse.complement_adresse,
+      complement_adresse: etablissementApiInfo.adresse.complement_adresse ?? undefined,
       code_postal: etablissementApiInfo.adresse.code_postal,
       num_departement: code_dept,
       num_academie: num_academie,

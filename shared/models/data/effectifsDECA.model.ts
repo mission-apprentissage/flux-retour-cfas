@@ -86,7 +86,7 @@ const zodOverride = {
     situation_avant_contrat: z.number().nullish(),
     telephone: z.string().nullish(),
     nationalite: z.number().nullish(),
-    adresse: z.any(),
+    adresse: z.record(z.unknown()).nullish(),
   }),
   formation: z.object({
     cfd: z.string().nullish(),

@@ -90,8 +90,12 @@ module.exports = {
   overrides: [
     {
       files: [
-        "shared/models/routes/**",
+        "shared/constants/**",
+        "shared/models/apis/**",
         "shared/models/fixtures/**",
+        "shared/models/parts/**",
+        "shared/models/routes/**",
+        "shared/utils/**",
         "server/tests/data/**",
         "ui/app/(cfa)/**",
         "ui/app/(cfa-detail)/**",

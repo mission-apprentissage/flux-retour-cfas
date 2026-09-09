@@ -1465,7 +1465,7 @@ const ACADEMIES = [
   { nom: "Normandie", code: "70", id: "NORMANDIE" },
 ] as const;
 
-export const ACADEMIES_DEPARTEMENT_MAP: Record<any, Array<any>> = DEPARTEMENTS.reduce(
+export const ACADEMIES_DEPARTEMENT_MAP: Record<IAcademieCode, Array<IDepartmentCode>> = DEPARTEMENTS.reduce(
   (acc, curr) => {
     return {
       ...acc,
