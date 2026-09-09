@@ -7,7 +7,7 @@ import { FullTableProps } from "@/app/_components/table/types";
 
 import styles from "./data-table.module.scss";
 
-export function DataTable(props: FullTableProps) {
+export function DataTable<R>(props: FullTableProps<R>) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isScrollable, setIsScrollable] = useState(false);
 

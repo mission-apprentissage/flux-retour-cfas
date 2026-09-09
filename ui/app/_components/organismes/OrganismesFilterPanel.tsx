@@ -59,8 +59,8 @@ export function OrganismesFilterPanel(props: OrganismesFilterPanelProps) {
   const type = organisation?.type as IOrganisationType | undefined;
 
   const departements = DEPARTEMENTS_SORTED.filter((departement) => {
-    if (type === "DREETS") return departement.region.code === (organisation as any)?.code_region;
-    if (type === "ACADEMIE") return departement.academie.code === (organisation as any)?.code_academie;
+    if (organisation?.type === "DREETS") return departement.region.code === organisation.code_region;
+    if (organisation?.type === "ACADEMIE") return departement.academie.code === organisation.code_academie;
     return true;
   });
 

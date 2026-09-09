@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { OrganismeSupportInfoJson } from "shared";
 
-import { _get } from "@/common/httpClient";
+import { _get, HTTPError } from "@/common/httpClient";
 
 import styles from "./reseau-organismes.module.scss";
 
@@ -23,7 +23,7 @@ export function OrganismeAutocomplete({ onSelect }: { onSelect: (organisme: Orga
   const [query, setQuery] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const { data, isFetching, error } = useQuery<OrganismeSearchResult[], any>({
+  const { data, isFetching, error } = useQuery<OrganismeSearchResult[], HTTPError>({
     queryKey: ["admin", "reseaux", "organismes", "search", query],
     queryFn: ({ signal }) => _get(`/api/v1/admin/reseaux/organismes/search/${encodeURIComponent(query)}`, { signal }),
     enabled: query.length >= MIN_QUERY_LENGTH,

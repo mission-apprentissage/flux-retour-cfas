@@ -27,7 +27,7 @@ import {
   ReferentielBadge,
 } from "@/app/admin/_components/OrganismeStatusBadges";
 import { TransmissionTag } from "@/app/admin/_components/TransmissionTag";
-import { _get } from "@/common/httpClient";
+import { _get, HTTPError } from "@/common/httpClient";
 
 import styles from "./gestion-organismes.module.scss";
 
@@ -221,11 +221,13 @@ function mergeOrganismesByIdentity(organismes: IArchivableOrganismesResponseJson
   return [...byOrganisme.values()];
 }
 
-function formatErrorDetail(error: any) {
-  const serverMessage = typeof error?.messages === "string" ? error.messages : error?.messages?.message;
-  const message = serverMessage ?? error?.prettyMessage ?? error?.message ?? "erreur inconnue";
+function formatErrorDetail(error: unknown) {
+  const { messages, prettyMessage, message, statusCode } = (error ?? {}) as Partial<HTTPError>;
+  const serverMessage =
+    typeof messages === "string" ? messages : (messages as { message?: string } | null | undefined)?.message;
+  const detail = serverMessage ?? prettyMessage ?? message ?? "erreur inconnue";
 
-  return [message, error?.statusCode ? `code ${error.statusCode}` : null].filter(Boolean).join(" — ");
+  return [detail, statusCode ? `code ${statusCode}` : null].filter(Boolean).join(" — ");
 }
 
 export default function GestionOrganismesClient() {
@@ -239,7 +241,7 @@ export default function GestionOrganismesClient() {
     data: organismes,
     error,
     isLoading,
-  } = useQuery<IArchivableOrganismesResponseJson, any>({
+  } = useQuery<IArchivableOrganismesResponseJson, HTTPError>({
     queryKey: ["admin", "organismes-archivables"],
     queryFn: ({ signal }) => _get("/api/v1/admin/organismes/archivables", { signal }),
   });
@@ -267,8 +269,8 @@ export default function GestionOrganismesClient() {
 
     const direction = criterion.desc ? -1 : 1;
     return [...filteredRows].sort((a, b) => {
-      const left = a.rawData[criterion.id];
-      const right = b.rawData[criterion.id];
+      const left = (a.rawData as Record<string, unknown>)[criterion.id];
+      const right = (b.rawData as Record<string, unknown>)[criterion.id];
       if (typeof left === "number" && typeof right === "number") return direction * (left - right);
       return direction * String(left ?? "").localeCompare(String(right ?? ""));
     });

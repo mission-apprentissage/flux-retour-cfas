@@ -9,7 +9,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { SortingState } from "@tanstack/react-table";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { DuplicateEffectifGroupPagination, EFFECTIFS_GROUP, getAnneeScolaireFromDate, getStatut } from "shared";
+import { DuplicateEffectifGroupPagination, EFFECTIFS_GROUP, getAnneeScolaireFromDate, getStatut, Statut } from "shared";
 
 import { EffectifDetail } from "@/app/_components/effectifs/detail/EffectifDetail";
 import { FilterCheckboxMenu } from "@/app/_components/filters/FilterCheckboxMenu";
@@ -22,6 +22,8 @@ import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { capitalizeWords } from "@/common/utils/stringUtils";
+
+import { EffectifValidationError } from "../detail/effectifFields";
 
 import styles from "./effectifs-liste.module.scss";
 
@@ -41,13 +43,35 @@ const parseArrayParam = (raw: string | null): string[] => {
   }
 };
 
+interface OrganismeEffectif {
+  id: string;
+  id_erp_apprenant?: string;
+  organisme_id?: string;
+  annee_scolaire?: string;
+  source?: string;
+  validation_errors?: EffectifValidationError[];
+  formation?: { libelle_long?: string; cfd?: string; rncp?: string; annee?: number; niveau?: string };
+  nom?: string;
+  prenom?: string;
+  date_de_naissance?: string;
+  historique_statut?: unknown[];
+  statut?: Statut;
+  transmitted_at?: Date | null;
+}
+
+interface OrganismeEffectifsResponse {
+  filters?: Record<string, string[]>;
+  organismesEffectifs?: OrganismeEffectif[];
+  total?: number;
+}
+
 const requiredHeader = (label: string) => (
   <>
     {label} <span className={styles.requiredMark}>*</span>
   </>
 );
 
-function CellValue({ effectif, fieldName, value }: { effectif: any; fieldName: string; value: string }) {
+function CellValue({ effectif, fieldName, value }: { effectif: OrganismeEffectif; fieldName: string; value?: string }) {
   const validationError = effectif.validation_errors?.find((error) => error.fieldName === fieldName);
   if (validationError) {
     return <span className={styles.cellError}>{validationError.inputValue || "VIDE"}</span>;
@@ -55,7 +79,7 @@ function CellValue({ effectif, fieldName, value }: { effectif: any; fieldName: s
   return <>{value}</>;
 }
 
-function StatutCell({ effectif }: { effectif: any }) {
+function StatutCell({ effectif }: { effectif: OrganismeEffectif }) {
   const parcours = effectif.statut?.parcours ?? [];
   const now = new Date();
   const current = [...parcours]
@@ -119,7 +143,7 @@ export function EffectifsListeClient({ organisme, modePublique }: { organisme: O
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["organismes", organisme._id, "effectifs", { page, limit, sortId, sortOrder, search, filters }],
     queryFn: async () =>
-      _get(`/api/v1/organismes/${organisme._id}/effectifs`, {
+      _get<OrganismeEffectifsResponse>(`/api/v1/organismes/${organisme._id}/effectifs`, {
         params: {
           page,
           limit,
@@ -141,11 +165,11 @@ export function EffectifsListeClient({ organisme, modePublique }: { organisme: O
   });
 
   const availableFilters: Record<string, string[]> = data?.filters ?? {};
-  const effectifs: any[] = data?.organismesEffectifs ?? [];
+  const effectifs: OrganismeEffectif[] = data?.organismesEffectifs ?? [];
   const total: number = data?.total ?? 0;
 
   const visibleEffectifs = showOnlyErrors
-    ? effectifs.filter((effectif) => effectif.validation_errors?.length > 0)
+    ? effectifs.filter((effectif) => (effectif.validation_errors?.length ?? 0) > 0)
     : effectifs;
 
   const rows = visibleEffectifs.map((effectif) => ({

@@ -12,15 +12,15 @@ interface ColumnData {
   numeric?: boolean;
 }
 
-interface SimpleTableRowData {
-  rawData: any;
+interface SimpleTableRowData<R> {
+  rawData: R;
   element: Record<string, ReactNode>;
 }
 
-interface SimpleTableProps {
-  data: SimpleTableRowData[];
+interface SimpleTableProps<R> {
+  data: SimpleTableRowData<R>[];
   columns: ColumnData[];
-  getRowLink?: (rawData: any) => string;
+  getRowLink?: (rawData: R) => string;
   emptyMessage?: string;
   className?: string;
 }
@@ -34,16 +34,16 @@ function getGridTemplateColumns(columns: ColumnData[]): string {
     .join(" ");
 }
 
-export function SimpleTable({
+export function SimpleTable<R>({
   data,
   columns,
   getRowLink,
   emptyMessage = "Aucun élément à afficher",
   className,
-}: SimpleTableProps) {
+}: SimpleTableProps<R>) {
   const router = useRouter();
 
-  const handleRowClick = (rawData: any) => {
+  const handleRowClick = (rawData: R) => {
     if (getRowLink) {
       router.push(getRowLink(rawData));
     }

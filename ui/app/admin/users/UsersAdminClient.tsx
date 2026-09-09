@@ -24,7 +24,9 @@ import { FullTable } from "@/app/_components/table/FullTable";
 import { useAllUsers } from "@/app/_hooks/useAllUsers";
 import { usersExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
+import type { User } from "@/common/internal/User";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
+import { UserNormalized } from "@/modules/admin/users/models/users";
 import { UsersFiltersQuery, parseUsersFiltersFromQuery } from "@/modules/admin/users/models/users-filters";
 
 import styles from "./UsersAdminClient.module.css";
@@ -64,7 +66,7 @@ const USERS_TABLE_COLUMNS = [
   },
 ];
 
-function transformUserToTableData(user: any) {
+function transformUserToTableData(user: UserNormalized) {
   const displayName = user.organisation?.organisme?.nom || user.organisation?.label || "Aucune organisation";
 
   return {
@@ -213,7 +215,7 @@ export default function UsersAdminClient() {
       setIsExporting(true);
       setExportError(null);
 
-      const params: Record<string, any> = {
+      const params: Record<string, string> = {
         sort: sorting.length > 0 ? `${sorting[0].id}:${sorting[0].desc ? "-1" : "1"}` : "created_at:-1",
       };
 
@@ -225,14 +227,14 @@ export default function UsersAdminClient() {
         }
       });
 
-      const allUsersData = await _get("/api/v1/admin/users/export", { params });
+      const allUsersData = await _get<User[]>("/api/v1/admin/users/export", { params });
 
       if (!allUsersData || allUsersData.length === 0) {
         setExportError("Aucun utilisateur ne correspond aux critères de recherche.");
         return;
       }
 
-      const exportData = allUsersData.map((user: any) => {
+      const exportData = allUsersData.map((user) => {
         let deptCode: string | undefined;
         let regionCode: string | undefined;
         let codeRegionValue = "";

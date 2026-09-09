@@ -11,7 +11,7 @@ import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { DataTable } from "@/app/_components/table/DataTable";
 import { formatDate } from "@/app/_utils/date.utils";
 import { PAGES } from "@/app/_utils/routes.utils";
-import { _get, _put } from "@/common/httpClient";
+import { _get, _put, HTTPError } from "@/common/httpClient";
 import { useOrganisationOrganisme, useOrganisme } from "@/hooks/organismes";
 
 import styles from "./transmissions.module.scss";
@@ -63,7 +63,7 @@ export default function TransmissionsClient({ modePublique = false, organismeId 
     data,
     error,
     isLoading: isLoadingTransmissions,
-  } = useQuery<TransmissionsByDayResponse, any>({
+  } = useQuery<TransmissionsByDayResponse, HTTPError>({
     queryKey: ["transmissions", organisme?._id, page, limit],
     queryFn: ({ signal }) =>
       _get(`/api/v1/organismes/${organisme?._id}/transmission`, { params: { page, limit }, signal }),

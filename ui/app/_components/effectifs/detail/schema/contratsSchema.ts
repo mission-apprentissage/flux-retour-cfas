@@ -61,7 +61,7 @@ export const contratsSchema = {
         pattern: "^\\d*$",
       },
     ],
-    validate: ({ value }) => {
+    validate: ({ value }: { value: number }) => {
       if (value > 9999999) return { error: "Le nombre de salariés ne peut excéder 9999999" };
     },
   },

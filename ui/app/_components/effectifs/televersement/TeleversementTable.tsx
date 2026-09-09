@@ -8,30 +8,32 @@ import { normalize } from "shared";
 import { DataTable } from "@/app/_components/table/DataTable";
 import { televersementHeaders } from "@/common/constants/televersementHeaders";
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
+import { ProcessedDataType } from "@/hooks/useExcelFileProcessor";
 
 import headerTooltips from "./headerTooltips";
 import styles from "./televersement.module.scss";
 
 interface TeleversementTableProps {
-  data: any[];
+  data: ProcessedDataType[];
   headers: string[];
   columnsWithErrors: string[];
   showOnlyColumnsAndLinesWithErrors: boolean;
 }
 
-function fromIsoLikeDateStringToFrenchDate(date: string) {
-  if (!date || String(date) !== date) return date;
+function fromIsoLikeDateStringToFrenchDate(date: unknown) {
+  if (!date || typeof date !== "string") return date;
   if (date.match(/^(\d{4})-(\d{2})-(\d{2})$/)) {
     return formatDateNumericDayMonthYear(date);
   }
 }
 
 function HeaderLabel({ header }: { header: string }) {
-  if (headerTooltips[header]) {
+  const tooltip = headerTooltips[header as keyof typeof headerTooltips];
+  if (tooltip) {
     return (
       <span className={styles.headerWithTooltip}>
         {header}
-        <Tooltip kind="click" title={headerTooltips[header]} />
+        <Tooltip kind="click" title={tooltip} />
       </span>
     );
   }
@@ -73,8 +75,8 @@ export function TeleversementTable({
     const { id, desc } = sorting[0];
 
     return [...filteredData].sort((a, b) => {
-      const fieldA = a[id];
-      const fieldB = b[id];
+      const fieldA = (a as Record<string, unknown>)[id];
+      const fieldB = (b as Record<string, unknown>)[id];
 
       if (fieldA === fieldB) return 0;
 
@@ -137,18 +139,19 @@ export function TeleversementTable({
     };
     const rawData: Record<string, unknown> = { lineNumber: row.lineNumber, status: row.status };
 
+    const values = row as Record<string, unknown>;
     for (const header of filteredHeaders) {
-      let value = row[header];
+      let value = values[header];
       if (televersementHeaders[header]?.type === "boolean") {
         value = value === true ? "Oui" : value === false ? "Non" : "";
       } else if (isDateField(header)) {
         value = fromIsoLikeDateStringToFrenchDate(value);
       }
-      const error = row.errors.find((e: any) => e.key === header);
-      rawData[header] = row[header];
+      const error = row.errors.find((e) => e.key === header);
+      rawData[header] = values[header];
       cells[header] = (
         <span>
-          <span>{value}</span>
+          <span>{typeof value === "string" || typeof value === "number" ? value : null}</span>
           {error && <span className={styles.cellError}> {error.message.replace("String", "Texte")}</span>}
         </span>
       );
@@ -172,7 +175,7 @@ export function TeleversementTable({
       <div className={styles.televersementTable}>
         <DataTable
           data={tableData}
-          columns={columns as any}
+          columns={columns}
           tableLabel="Contenu du fichier téléversé"
           sorting={sorting}
           onSortingChange={setSorting}

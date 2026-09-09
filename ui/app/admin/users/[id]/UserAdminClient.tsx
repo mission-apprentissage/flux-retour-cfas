@@ -13,6 +13,8 @@ import UserForm from "@/app/_components/admin/UserForm";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import { _get, _put } from "@/common/httpClient";
+import { getServerErrorMessage } from "@/common/rateLimit";
+import { UserNormalized } from "@/modules/admin/users/models/users";
 
 import styles from "./UserAdminClient.module.css";
 
@@ -33,7 +35,7 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
 
   const { data, refetch: refetchUser } = useSuspenseQuery({
     queryKey: ["user", id],
-    queryFn: () => _get(`/api/v1/admin/users/${id}`),
+    queryFn: () => _get<{ user: UserNormalized }>(`/api/v1/admin/users/${id}`),
   });
 
   const user = data?.user;
@@ -58,8 +60,8 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
       setRoleChangeSuccess(
         newRole === "admin" ? "L'utilisateur a été promu administrateur" : "L'utilisateur n'est plus administrateur"
       );
-    } catch (err: any) {
-      setRoleChangeError(err?.json?.data?.message || "Une erreur est survenue");
+    } catch (err) {
+      setRoleChangeError(getServerErrorMessage(err, "Une erreur est survenue"));
     }
   }, [id, pendingRole, refetchUser]);
 

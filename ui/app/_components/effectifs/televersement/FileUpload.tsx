@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
+import { DropzoneState } from "react-dropzone";
 
 import styles from "./televersement.module.scss";
 
@@ -11,8 +12,8 @@ export function FileUpload({
   isDragActive,
 }: {
   isSubmitting: boolean;
-  getRootProps: any;
-  getInputProps: any;
+  getRootProps: DropzoneState["getRootProps"];
+  getInputProps: DropzoneState["getInputProps"];
   isDragActive: boolean;
 }) {
   return (

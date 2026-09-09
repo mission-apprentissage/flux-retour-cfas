@@ -2,7 +2,7 @@
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { DuplicateEffectifDetail, getStatut } from "shared";
+import { DuplicateEffectifDetail, DuplicateEffectifGroup, getStatut, StatutApprenant } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { formatPhoneNumber } from "@/app/_utils/phone.utils";
@@ -10,6 +10,10 @@ import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import { getNestedValue } from "@/common/utils/misc";
 
 import styles from "./doublons.module.scss";
+
+type DuplicateWithStatut = DuplicateEffectifDetail & {
+  statut?: { parcours?: Array<{ date: string; valeur: StatutApprenant }> };
+};
 
 interface GroupItem {
   label: string;
@@ -62,9 +66,7 @@ const formationDetails: GroupItem[] = [
 ];
 
 const hasDifferences = (duplicates: DuplicateEffectifDetail[], attributeKey: string): boolean => {
-  const values = duplicates.map((duplicate) =>
-    attributeKey.includes(".") ? getNestedValue(duplicate, attributeKey) : duplicate[attributeKey]
-  );
+  const values = duplicates.map((duplicate) => getNestedValue(duplicate, attributeKey));
   const serializedValues = values.map((value) => (Array.isArray(value) ? JSON.stringify(value.sort()) : value));
   return new Set(serializedValues).size > 1;
 };
@@ -87,7 +89,7 @@ export function DoublonsDetailTable({
   group,
   onRequestDelete,
 }: {
-  group: any;
+  group: DuplicateEffectifGroup;
   onRequestDelete: (duplicate: DuplicateEffectifDetail) => void;
 }) {
   const { trackPlausibleEvent } = usePlausibleAppTracking();
@@ -96,8 +98,8 @@ export function DoublonsDetailTable({
   const processedDuplicates = duplicates.map((duplicate) => ({
     ...duplicate,
     statut: {
-      ...(duplicate as any).statut,
-      parcours: (duplicate as any).statut?.parcours?.slice().reverse() || [],
+      ...(duplicate as DuplicateWithStatut).statut,
+      parcours: (duplicate as DuplicateWithStatut).statut?.parcours?.slice().reverse() || [],
     },
   }));
   const maxStatutParcoursLength = Math.max(...processedDuplicates.map((dup) => dup.statut?.parcours?.length || 0));
@@ -122,12 +124,9 @@ export function DoublonsDetailTable({
           >
             <td>{attribute.label}</td>
             {duplicates.map((duplicate, index) => {
-              const value = attribute.render
-                ? attribute.render(duplicate)
-                : attribute.key.includes(".")
-                  ? getNestedValue(duplicate, attribute.key)
-                  : duplicate[attribute.key];
-              const displayValue = attribute.isDate && value ? formatDateDayMonthYear(value) : value;
+              const value = attribute.render ? attribute.render(duplicate) : getNestedValue(duplicate, attribute.key);
+              const displayValue =
+                attribute.isDate && value ? formatDateDayMonthYear(value as string | Date) : (value as React.ReactNode);
               return <td key={`${attribute.key}-${index}`}>{displayValue}</td>;
             })}
           </tr>

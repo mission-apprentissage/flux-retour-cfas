@@ -8,7 +8,7 @@ import { useMemo, useState } from "react";
 import { normalize, type IOrganisationMissionLocale } from "shared";
 
 import type { SetOrganisation } from "@/app/_components/inscription/types";
-import { _get } from "@/common/httpClient";
+import { _get, HTTPError } from "@/common/httpClient";
 import { getApiErrorMessage } from "@/common/rateLimit";
 
 import styles from "./impostures.module.scss";
@@ -25,7 +25,7 @@ export function MissionLocaleSearch({ setOrganisation }: { setOrganisation: SetO
     data: missionLocales,
     isLoading,
     error,
-  } = useQuery<MissionLocaleEntry[], any>({
+  } = useQuery<MissionLocaleEntry[], HTTPError>({
     queryKey: ["admin", "mission-locale"],
     queryFn: () => _get("/api/v1/admin/mission-locale"),
   });

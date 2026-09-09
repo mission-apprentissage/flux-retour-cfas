@@ -10,14 +10,15 @@ import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { DataTable } from "@/app/_components/table/DataTable";
+import type { PaginationInfo } from "@/app/_components/table/types";
 import { useAuth } from "@/app/_context/UserContext";
 import { formatDate } from "@/app/_utils/date.utils";
 import { PAGES } from "@/app/_utils/routes.utils";
-import { _get } from "@/common/httpClient";
+import { _get, HTTPError } from "@/common/httpClient";
 import { formatDateHourMinutesSecondsMs } from "@/common/utils/dateUtils";
 import { useOrganisationOrganisme, useOrganisme } from "@/hooks/organismes";
 
-import { EffectifQueueItemDetail } from "./EffectifQueueItemDetail";
+import { EffectifQueueItem, EffectifQueueItemDetail } from "./EffectifQueueItemDetail";
 import styles from "./transmissions.module.scss";
 import { TransmissionsErrorSummary } from "./TransmissionsErrorSummary";
 
@@ -45,6 +46,23 @@ interface TransmissionsDetailsClientProps {
   organismeId?: string;
 }
 
+interface TransmissionItem extends EffectifQueueItem {
+  prenom_apprenant?: string;
+  nom_apprenant?: string;
+  date_de_naissance_apprenant?: string;
+  formation_cfd?: string;
+  formation_rncp?: string;
+  processed_at: string;
+  organisme?: { _id: string; nom: string } | null;
+}
+
+interface TransmissionsDetailsResponse {
+  data?: TransmissionItem[];
+  pagination?: PaginationInfo;
+  summary?: Record<string, number>;
+  totalEffectifs?: number;
+}
+
 export default function TransmissionsDetailsClient({
   date,
   modePublique = false,
@@ -66,20 +84,20 @@ export default function TransmissionsDetailsClient({
   const organisme = modePublique ? organismePublique : organisationOrganisme;
   const organismeLoadError = modePublique ? organismeError : organisationError;
 
-  const errorsQuery = useQuery<any, any>({
+  const errorsQuery = useQuery<TransmissionsDetailsResponse, HTTPError>({
     queryKey: ["transmissions-details", organisme?._id, date, errorPage, errorLimit],
     queryFn: ({ signal }) =>
-      _get(`/api/v1/organismes/${organisme?._id}/transmission/${date}/error`, {
+      _get<TransmissionsDetailsResponse>(`/api/v1/organismes/${organisme?._id}/transmission/${date}/error`, {
         params: { page: errorPage, limit: errorLimit },
         signal,
       }),
     enabled: !!organisme,
   });
 
-  const successQuery = useQuery<any, any>({
+  const successQuery = useQuery<TransmissionsDetailsResponse, HTTPError>({
     queryKey: ["transmissions-details-success", organisme?._id, date, successPage, successLimit],
     queryFn: ({ signal }) =>
-      _get(`/api/v1/organismes/${organisme?._id}/transmission/${date}/success`, {
+      _get<TransmissionsDetailsResponse>(`/api/v1/organismes/${organisme?._id}/transmission/${date}/success`, {
         params: { page: successPage, limit: successLimit },
         signal,
       }),
@@ -104,7 +122,7 @@ export default function TransmissionsDetailsClient({
     );
   }
 
-  const errorRows = (errorsQuery.data?.data ?? []).map((item: any) => ({
+  const errorRows = (errorsQuery.data?.data ?? []).map((item) => ({
     rawData: item,
     element: {
       apprenant: `${item.prenom_apprenant} ${item.nom_apprenant}`,
@@ -116,7 +134,7 @@ export default function TransmissionsDetailsClient({
     },
   }));
 
-  const successRows = (successQuery.data?.data ?? []).map((item: any) => ({
+  const successRows = (successQuery.data?.data ?? []).map((item) => ({
     rawData: item,
     element: {
       apprenant: `${item.prenom_apprenant} ${item.nom_apprenant}`,

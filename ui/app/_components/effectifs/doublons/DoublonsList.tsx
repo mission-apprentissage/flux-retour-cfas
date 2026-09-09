@@ -48,7 +48,7 @@ export function DoublonsList({
     return {
       rawData: item,
       element: {
-        annee_scolaire: (item as any)._id?.annee_scolaire,
+        annee_scolaire: (item as DuplicateEffectifGroup & { _id?: { annee_scolaire?: string } })._id?.annee_scolaire,
         nom_complet: transformNomPrenomToPascalCase(
           mostRecentDuplicate.apprenant?.nom || "",
           mostRecentDuplicate.apprenant?.prenom || ""
@@ -73,7 +73,9 @@ export function DoublonsList({
       pageSize={pageSize}
       emptyMessage="Aucun duplicat d’effectif à afficher"
       expandMode="single"
-      renderSubComponent={(rowData) => <DoublonsDetailTable group={rowData} onRequestDelete={onRequestDelete} />}
+      renderSubComponent={(rowData) => (
+        <DoublonsDetailTable group={rowData as DuplicateEffectifGroup} onRequestDelete={onRequestDelete} />
+      )}
     />
   );
 }

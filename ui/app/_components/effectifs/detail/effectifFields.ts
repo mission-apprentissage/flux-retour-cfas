@@ -5,6 +5,21 @@ import { formatPhoneNumber } from "@/app/_utils/phone.utils";
 
 import { effectifFieldsSchema } from "./schema";
 
+export interface EffectifValidationError {
+  fieldName: string;
+  inputValue?: string;
+}
+
+export type EffectifFormData = Record<string, unknown>;
+
+interface EffectifFieldSchema {
+  label?: string;
+  description?: string;
+  showInfo?: boolean;
+  fieldType?: string;
+  options?: Array<{ value: unknown; label: string }>;
+}
+
 export interface EffectifFieldView {
   name: string;
   label: string;
@@ -15,7 +30,7 @@ export interface EffectifFieldView {
 
 const NON_RENSEIGNE = "Non renseigné";
 
-const formatValue = (fieldSchema: any, rawValue: any): string => {
+const formatValue = (fieldSchema: EffectifFieldSchema | undefined, rawValue: unknown): string => {
   if (rawValue === undefined || rawValue === null || rawValue === "") return NON_RENSEIGNE;
 
   if (Array.isArray(fieldSchema?.options)) {
@@ -39,11 +54,15 @@ const formatValue = (fieldSchema: any, rawValue: any): string => {
  * Le schéma du moteur porte les libellés, les options et les infobulles de chaque champ :
  * il reste la source de vérité de l'affichage, la machinerie de saisie en moins.
  */
-const buildFieldView = (effectif: any, name: string, validationErrors: any[] = []): EffectifFieldView | null => {
-  const fieldSchema = effectifFieldsSchema[name];
+const buildFieldView = (
+  effectif: EffectifFormData,
+  name: string,
+  validationErrors: EffectifValidationError[] = []
+): EffectifFieldView | null => {
+  const fieldSchema: EffectifFieldSchema | undefined = effectifFieldsSchema[name];
   if (!fieldSchema) return null;
 
-  const data = get(effectif, name);
+  const data = get(effectif, name) as { value?: unknown; description?: string } | undefined;
   const validationError = validationErrors.find((error) => error.fieldName === name);
 
   return {
@@ -55,7 +74,12 @@ const buildFieldView = (effectif: any, name: string, validationErrors: any[] = [
   };
 };
 
-export const buildFieldViews = (effectif: any, names: string[], validationErrors: any[] = []): EffectifFieldView[] =>
+export const buildFieldViews = (
+  effectif: EffectifFormData,
+  names: string[],
+  validationErrors: EffectifValidationError[] = []
+): EffectifFieldView[] =>
   names.map((name) => buildFieldView(effectif, name, validationErrors)).filter(Boolean) as EffectifFieldView[];
 
-export const getRawValue = (effectif: any, name: string) => get(effectif, name)?.value;
+export const getRawValue = (effectif: EffectifFormData, name: string): unknown =>
+  (get(effectif, name) as { value?: unknown } | undefined)?.value;

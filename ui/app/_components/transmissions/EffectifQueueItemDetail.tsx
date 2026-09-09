@@ -1,6 +1,7 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import type { ReactNode } from "react";
 import { SOURCE_APPRENANT, TD_MANUEL_ELEMENT_LINK } from "shared";
 import { dossierApprenantSchemaV3Base } from "shared/models/parts/dossierApprenantSchemaV3";
 import { z } from "zod";
@@ -80,13 +81,22 @@ const attributes = [
   },
 ];
 
-const buildValidationError = (validation_errors: Array<{ message: string; path: string[] }>) => {
-  return (validation_errors ?? []).reduce((acc, { message, path }) => {
+export interface EffectifQueueItem {
+  [key: string]: unknown;
+  validation_errors?: Array<{ message: string; path: string[] }>;
+  error?: string | null;
+  source?: string;
+}
+
+const renderQueueValue = (value: unknown) => (typeof value === "string" || typeof value === "number" ? value : null);
+
+const buildValidationError = (validation_errors?: Array<{ message: string; path: string[] }>) => {
+  return (validation_errors ?? []).reduce<Record<string, ReactNode[]>>((acc, { message, path }) => {
     return {
       ...acc,
-      ...path.reduce((acc2, pathValue) => {
+      ...path.reduce<Record<string, ReactNode[]>>((acc2, pathValue) => {
         const key = `${message}:${pathValue}`;
-        const specialMessage = ErrorMessages[key];
+        const specialMessage = ErrorMessages[key as keyof typeof ErrorMessages];
         const errorMessage = specialMessage || message;
         return {
           ...acc2,
@@ -98,13 +108,16 @@ const buildValidationError = (validation_errors: Array<{ message: string; path: 
 };
 
 const RequiredMark = ({ value }: { value: string }) =>
-  !(dossierApprenantSchemaV3Base.shape[value] instanceof z.ZodOptional) ? (
+  !(
+    dossierApprenantSchemaV3Base.shape[value as keyof typeof dossierApprenantSchemaV3Base.shape] instanceof
+    z.ZodOptional
+  ) ? (
     <span role="presentation" aria-hidden="true" className={styles.requiredMark}>
       *
     </span>
   ) : null;
 
-export function EffectifQueueItemDetail({ effectifQueueItem }: { effectifQueueItem: any }) {
+export function EffectifQueueItemDetail({ effectifQueueItem }: { effectifQueueItem: EffectifQueueItem }) {
   const validationErrorFormated = buildValidationError(effectifQueueItem.validation_errors);
   const hasValidationErrors = Boolean(effectifQueueItem.validation_errors?.length);
 
@@ -154,8 +167,8 @@ export function EffectifQueueItemDetail({ effectifQueueItem }: { effectifQueueIt
                   />
                 ) : null}
                 {rowItem.value === "tel_apprenant"
-                  ? formatPhoneNumber(effectifQueueItem[rowItem.value]) || "-"
-                  : effectifQueueItem[rowItem.value]}
+                  ? formatPhoneNumber(String(effectifQueueItem[rowItem.value] ?? "")) || "-"
+                  : renderQueueValue(effectifQueueItem[rowItem.value])}
                 {validationErrorFormated[rowItem.value] ? (
                   <ul className={styles.detailErrorList}>
                     {validationErrorFormated[rowItem.value].map((err, i) => (

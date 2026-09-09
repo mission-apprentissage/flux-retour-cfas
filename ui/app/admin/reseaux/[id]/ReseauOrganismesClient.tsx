@@ -24,7 +24,7 @@ import {
   filterOrganismesArrayFromOrganismesFilters,
   parseOrganismesFiltersFromQuery,
 } from "@/common/filters/organismes-filters";
-import { _delete, _get, _put } from "@/common/httpClient";
+import { _delete, _get, _put, HTTPError } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 
@@ -96,7 +96,7 @@ export default function ReseauOrganismesClient({ id }: { id: string }) {
     error,
     isLoading,
     refetch,
-  } = useQuery<ReseauWithOrganismes, any>({
+  } = useQuery<ReseauWithOrganismes, HTTPError>({
     queryKey: ["admin", "reseau", id],
     queryFn: ({ signal }) => _get(`/api/v1/admin/reseaux/${id}`, { signal }),
   });

@@ -13,7 +13,7 @@ import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { PAGES } from "@/app/_utils/routes.utils";
 import { AdminPageHeader } from "@/app/admin/_components/AdminPageHeader";
 import { AdminUsersTable } from "@/app/admin/_components/AdminUsersTable";
-import { _get } from "@/common/httpClient";
+import { _get, HTTPError } from "@/common/httpClient";
 
 import { EtablissementComparison } from "../_components/EtablissementComparison";
 import { FormationsTable } from "../_components/FormationsTable";
@@ -32,7 +32,7 @@ export default function OrganismeSupportClient({ siret }: { siret: string }) {
     data: organismes,
     error,
     isLoading,
-  } = useQuery<OrganismeSupportInfoJson[], any>({
+  } = useQuery<OrganismeSupportInfoJson[], HTTPError>({
     queryKey: ["admin", "organismes-support", siret],
     queryFn: ({ signal }) => _get(`/api/v1/admin/organismes/search/${encodeURIComponent(siret)}`, { signal }),
   });

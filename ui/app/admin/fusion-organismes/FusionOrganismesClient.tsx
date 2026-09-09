@@ -12,7 +12,7 @@ import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { AdminPageHeader } from "@/app/admin/_components/AdminPageHeader";
 import { AdminTable } from "@/app/admin/_components/AdminTable";
 import { NATURE_ORGANISME } from "@/common/constants/organismes";
-import { _get, _post } from "@/common/httpClient";
+import { _get, _post, HTTPError } from "@/common/httpClient";
 
 import styles from "./fusion-organismes.module.scss";
 
@@ -87,7 +87,7 @@ export default function FusionOrganismesClient() {
     error,
     isLoading,
     refetch,
-  } = useQuery<DuplicateGroup[], any>({
+  } = useQuery<DuplicateGroup[], HTTPError>({
     queryKey: ["admin", "organismes-duplicates"],
     queryFn: ({ signal }) => _get("/api/v1/admin/organismes-duplicates", { signal }),
   });

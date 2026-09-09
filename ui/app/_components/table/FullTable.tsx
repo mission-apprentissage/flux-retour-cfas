@@ -21,6 +21,10 @@ import styles from "./FullTable.module.css";
 import { useTableData, useTableColumns } from "./hooks";
 import { FullTableProps, TableRowData } from "./types";
 
+function toRowData<R>(row: TableRowData): R & { _id?: string } {
+  return row as unknown as R & { _id?: string };
+}
+
 function SortIcon({ isSorted }: { isSorted: false | "asc" | "desc" }) {
   const iconClass = isSorted === "desc" ? "ri-arrow-down-line" : "ri-arrow-up-line";
 
@@ -108,7 +112,7 @@ function PageSizeSelector({
   );
 }
 
-export function FullTable({
+export function FullTable<R>({
   data,
   columns,
   pagination,
@@ -130,7 +134,7 @@ export function FullTable({
   expandedByDefault = false,
   expandMode = "multiple",
   tableLabel,
-}: FullTableProps) {
+}: FullTableProps<R>) {
   const tableRef = useRef<HTMLDivElement>(null);
   const tableData = useTableData(data);
   const tableColumns = useTableColumns(columns);
@@ -187,7 +191,7 @@ export function FullTable({
       ? {
           onExpandedChange: handleExpandedChange,
           getExpandedRowModel: getExpandedRowModel(),
-          getRowCanExpand: (row) => (getRowCanExpand ? getRowCanExpand(row.original) : true),
+          getRowCanExpand: (row) => (getRowCanExpand ? getRowCanExpand(toRowData(row.original)) : true),
         }
       : {}),
     enableSorting: true,
@@ -232,8 +236,7 @@ export function FullTable({
 
       const sortedRows = table.getSortedRowModel().rows;
       if (sortedRows[rowIndex]) {
-        const rowData = sortedRows[rowIndex].original;
-        onRowClick(rowData);
+        onRowClick(toRowData(sortedRows[rowIndex].original));
       }
     };
 
@@ -309,7 +312,9 @@ export function FullTable({
                       </tr>
                       {row.getIsExpanded() && row.getCanExpand() && (
                         <tr>
-                          <td colSpan={row.getVisibleCells().length + 1}>{renderSubComponent!(row.original)}</td>
+                          <td colSpan={row.getVisibleCells().length + 1}>
+                            {renderSubComponent?.(toRowData(row.original))}
+                          </td>
                         </tr>
                       )}
                     </Fragment>

@@ -11,7 +11,7 @@ import { formatDate } from "@/app/_utils/date.utils";
 import { PAGES } from "@/app/_utils/routes.utils";
 import { AdminPageHeader } from "@/app/admin/_components/AdminPageHeader";
 import { AdminTable } from "@/app/admin/_components/AdminTable";
-import { _get } from "@/common/httpClient";
+import { _get, HTTPError } from "@/common/httpClient";
 
 import styles from "./transmissions.module.scss";
 
@@ -83,7 +83,7 @@ export default function TransmissionsAdminClient() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
 
-  const { data, error, isLoading } = useQuery<TransmissionsByDayResponse, any>({
+  const { data, error, isLoading } = useQuery<TransmissionsByDayResponse, HTTPError>({
     queryKey: ["admin", "transmissions", page, limit],
     queryFn: ({ signal }) => _get("/api/v1/admin/transmissions", { params: { page, limit }, signal }),
   });

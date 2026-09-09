@@ -56,7 +56,10 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
     }
     setSubmitError(null);
     setIsSubmitting(true);
-    const res = await _post(`/api/v1/organismes/${organismeId}/upload/import/v3`, toEffectifsQueue(processedData));
+    const res = await _post<unknown, { error?: unknown }>(
+      `/api/v1/organismes/${organismeId}/upload/import/v3`,
+      toEffectifsQueue(processedData)
+    );
     setStatus(res.error ? "import_failure" : "import_success");
     setIsSubmitting(false);
   };

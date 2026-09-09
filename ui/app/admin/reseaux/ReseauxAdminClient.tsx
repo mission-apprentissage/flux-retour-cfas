@@ -10,7 +10,7 @@ import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { PAGES } from "@/app/_utils/routes.utils";
 import { AdminPageHeader } from "@/app/admin/_components/AdminPageHeader";
 import { AdminTable } from "@/app/admin/_components/AdminTable";
-import { _get } from "@/common/httpClient";
+import { _get, HTTPError } from "@/common/httpClient";
 
 interface Reseau {
   _id: string;
@@ -36,7 +36,7 @@ export default function ReseauxAdminClient() {
     data: reseaux,
     error,
     isLoading,
-  } = useQuery<Reseau[], any>({
+  } = useQuery<Reseau[], HTTPError>({
     queryKey: ["admin", "reseaux"],
     queryFn: ({ signal }) => _get("/api/v1/admin/reseaux", { signal }),
   });

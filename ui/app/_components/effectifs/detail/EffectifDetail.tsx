@@ -11,7 +11,7 @@ import { prettyPrintDate } from "@/common/utils/dateUtils";
 
 import styles from "./effectif-detail.module.scss";
 import { EffectifFieldList } from "./EffectifFieldList";
-import { buildFieldViews, getRawValue } from "./effectifFields";
+import { buildFieldViews, EffectifFormData, EffectifValidationError, getRawValue } from "./effectifFields";
 
 const APPRENANT_IDENTITE = [
   "apprenant.ine",
@@ -107,7 +107,7 @@ interface EffectifDetailProps {
   organismeId: string;
   parcours: Statut["parcours"];
   transmissionDate: Date | null;
-  validationErrors: any[];
+  validationErrors: EffectifValidationError[];
 }
 
 function AccordionLabel({ title, errorCount }: { title: string; errorCount: number }) {
@@ -132,7 +132,7 @@ export function EffectifDetail({
 }: EffectifDetailProps) {
   const { data: effectif, isLoading } = useQuery({
     queryKey: ["effectif", effectifId],
-    queryFn: () => _get(`/api/v1/effectif/${effectifId}`),
+    queryFn: () => _get<EffectifFormData>(`/api/v1/effectif/${effectifId}`),
   });
 
   if (isLoading || !effectif) {
@@ -163,10 +163,10 @@ export function EffectifDetail({
   const showRepresentantLegalAdresse =
     showRepresentantLegal && getRawValue(effectif, "apprenant.representant_legal.meme_adresse") === false;
 
-  const adresseComplete = getRawValue(effectif, "apprenant.adresse.complete");
-  const typeCfa = getRawValue(effectif, "apprenant.type_cfa");
+  const adresseComplete = getRawValue(effectif, "apprenant.adresse.complete") as string | undefined;
+  const typeCfa = getRawValue(effectif, "apprenant.type_cfa") as string | undefined;
 
-  const contrats: any[] = effectif.contrats?.value ?? [];
+  const contrats: unknown[] = (effectif.contrats as { value?: unknown[] } | undefined)?.value ?? [];
 
   return (
     <div className={styles.detail}>

@@ -5,7 +5,13 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { CRISP_FAQ, DuplicateEffectifDetail, DuplicateEffectifGroup, SUPPORT_PAGE_ACCUEIL } from "shared";
+import {
+  CRISP_FAQ,
+  DuplicateEffectifDetail,
+  DuplicateEffectifGroup,
+  DuplicateEffectifGroupPagination,
+  SUPPORT_PAGE_ACCUEIL,
+} from "shared";
 
 import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
@@ -36,7 +42,7 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
   const { data: duplicates, isLoading } = useQuery<DuplicateEffectifGroup[]>({
     queryKey: [`duplicates-effectifs`, organismeId, page, pageSize],
     queryFn: async () => {
-      const response = await _get(`/api/v1/organismes/${organismeId}/duplicates`, {
+      const response = await _get<DuplicateEffectifGroupPagination>(`/api/v1/organismes/${organismeId}/duplicates`, {
         params: { page, limit: pageSize },
       });
       setTotalCount(response.totalItems);

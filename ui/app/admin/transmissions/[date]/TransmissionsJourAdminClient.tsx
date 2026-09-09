@@ -10,7 +10,7 @@ import { formatDate } from "@/app/_utils/date.utils";
 import { PAGES } from "@/app/_utils/routes.utils";
 import { AdminPageHeader } from "@/app/admin/_components/AdminPageHeader";
 import { AdminTable } from "@/app/admin/_components/AdminTable";
-import { _get } from "@/common/httpClient";
+import { _get, HTTPError } from "@/common/httpClient";
 
 import styles from "./transmissions-jour.module.scss";
 
@@ -69,7 +69,7 @@ export default function TransmissionsJourAdminClient({ date }: { date: string })
 
   const formattedDate = Number.isNaN(new Date(date).getTime()) ? null : formatDate(date);
 
-  const { data, error, isLoading } = useQuery<TransmissionsByOrganismeResponse, any>({
+  const { data, error, isLoading } = useQuery<TransmissionsByOrganismeResponse, HTTPError>({
     queryKey: ["admin", "transmissions", date, page, limit],
     queryFn: ({ signal }) => _get(`/api/v1/admin/transmissions/${date}/error`, { params: { page, limit }, signal }),
   });

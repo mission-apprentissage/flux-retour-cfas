@@ -54,7 +54,7 @@ interface OrganismesTableClientProps extends OrganismeFiltersListVisibilityProps
   totalPerimetre?: number;
 }
 
-function isSortingState(value: any): value is SortingState {
+function isSortingState(value: unknown): value is SortingState {
   return Array.isArray(value) && value.every((item) => typeof item === "object" && "id" in item && "desc" in item);
 }
 
@@ -392,7 +392,9 @@ export function OrganismesTableClient(props: OrganismesTableClientProps) {
     element: {
       normalizedName: (
         <span
-          className={(organisme as any).prominent ? "organisme-prominent" : undefined}
+          className={
+            (organisme as OrganismeNormalized & { prominent?: boolean }).prominent ? "organisme-prominent" : undefined
+          }
           title={organisme.enseigne ?? organisme.raison_sociale}
         >
           <DsfrLink
@@ -483,7 +485,7 @@ export function OrganismesTableClient(props: OrganismesTableClientProps) {
       <div className={styles.organismesTable}>
         <DataTable
           data={tableData}
-          columns={columns as any}
+          columns={columns}
           tableLabel="Liste des organismes"
           sorting={sort}
           onSortingChange={setSort}

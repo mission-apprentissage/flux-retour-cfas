@@ -99,7 +99,7 @@ export default function ImposturesClient() {
       .then(() => {
         window.location.href = "/";
       })
-      .catch((err: any) => {
+      .catch((err) => {
         setError(getApiErrorMessage(err));
         setOrganisation(null);
       });
