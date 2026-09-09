@@ -1,5 +1,6 @@
 import { addJob, type JobDef } from "job-processor";
 
+import { modelDescriptors } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 
 import { findInvalidDocuments } from "../db/findInvalidDocuments";
@@ -7,25 +8,37 @@ import { recreateIndexes } from "../db/recreateIndexes";
 import { validateModels } from "../db/schemaValidation";
 import { create as createMigration, status as statusMigration, up as upMigration } from "../migrations/migrations";
 
+const requireStringPayload = (payload: Record<string, unknown> | null | undefined, key: string): string => {
+  const value = payload?.[key];
+  if (typeof value !== "string" || !value) {
+    throw new Error(`Paramètre "${key}" manquant`);
+  }
+  return value;
+};
+
+const isDropRequested = (payload: Record<string, unknown> | null | undefined) =>
+  payload?.drop === true || payload?.drop === "true";
+
 export const dbMaintenanceJobs = {
   "db:find-invalid-documents": {
     handler: async (job) => {
-      return findInvalidDocuments((job.payload as any)?.collection);
+      return findInvalidDocuments(requireStringPayload(job.payload, "collection"));
     },
   },
   "indexes:create": {
     handler: async (job) => {
-      return recreateIndexes((job.payload as any)?.drop);
+      return recreateIndexes({ drop: isDropRequested(job.payload) });
     },
   },
   "indexes:recreate": {
     handler: async (job) => {
-      return recreateIndexes((job.payload as any)?.drop);
+      return recreateIndexes({ drop: isDropRequested(job.payload) });
     },
   },
   "indexes:collection:create": {
     handler: async (job) => {
-      return createCollectionIndexes((job.payload as any)?.collection);
+      const collectionName = requireStringPayload(job.payload, "collection");
+      return createCollectionIndexes(modelDescriptors.find((d) => d.collectionName === collectionName));
     },
   },
   "db:validate": {
@@ -50,8 +63,7 @@ export const dbMaintenanceJobs = {
   },
   "migrations:create": {
     handler: async (job) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return createMigration(job.payload as any);
+      return createMigration({ description: requireStringPayload(job.payload, "description") });
     },
   },
 } satisfies Record<string, JobDef>;

@@ -1,7 +1,9 @@
+import { MongoServerError } from "mongodb";
+
 import logger from "@/common/logger";
 import { getDbCollectionSchema, getDbCollection } from "@/common/mongodb";
 
-export const findInvalidDocuments = async (name) => {
+export const findInvalidDocuments = async (name: string) => {
   logger.info("Search invalid documents...");
   var schema = await getDbCollectionSchema(name);
   if (!schema) {
@@ -20,10 +22,9 @@ export const findInvalidDocuments = async (name) => {
     try {
       // trick to update the document, trigger the schema validation and get the error (and finally not update the doc)
       await getDbCollection(name).updateOne({ _id: document._id }, { $set: { invalidDoc: true } });
-    } catch (error: any) {
-      logger.info(
-        ` #${i + 1} ${name} ${document._id}: ${JSON.stringify(error.errInfo.details.schemaRulesNotSatisfied)}`
-      );
+    } catch (error) {
+      const details = error instanceof MongoServerError ? error.errInfo?.details?.schemaRulesNotSatisfied : error;
+      logger.info(` #${i + 1} ${name} ${document._id}: ${JSON.stringify(details)}`);
     }
   }
 };
