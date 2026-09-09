@@ -3178,6 +3178,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/adm-zip@npm:^0.5.8":
+  version: 0.5.8
+  resolution: "@types/adm-zip@npm:0.5.8"
+  dependencies:
+    "@types/node": "*"
+  checksum: 3a3ca24d0e982d324de4f94523363f14b98d534bd8d041d4f2daf42b89cb4906f4e8bf1207829a8d6f8883d5207fe0050d4fc96a10ed4e1f2062d6d45cc78646
+  languageName: node
+  linkType: hard
+
 "@types/body-parser@npm:*":
   version: 1.19.2
   resolution: "@types/body-parser@npm:1.19.2"
@@ -3210,6 +3219,24 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: fe81351470f2d3165e8b12ce33542eef89ea893e36dd62e8f7d72566dfb7e448376ae962f9f3ea888547ce8b55a40020ca0e01d637fab5d99567673084542641
+  languageName: node
+  linkType: hard
+
+"@types/cookie-parser@npm:^1.4.10":
+  version: 1.4.10
+  resolution: "@types/cookie-parser@npm:1.4.10"
+  peerDependencies:
+    "@types/express": "*"
+  checksum: 1f37b5a4115dbfd4b7bbea2d874fbf9495eca8c3e8c87fa7e38c50f9fff66222377c911cfdc7a1ea08855e822919c5534ebbcc4bf25b596bc6f7270e403483d9
+  languageName: node
+  linkType: hard
+
+"@types/cors@npm:^2.8.19":
+  version: 2.8.19
+  resolution: "@types/cors@npm:2.8.19"
+  dependencies:
+    "@types/node": "*"
+  checksum: 9545cc532c9218754443f48a0c98c1a9ba4af1fe54a3425c95de75ff3158147bb39e666cb7c6bf98cc56a9c6dc7b4ce5b2cbdae6b55d5942e50c81b76ed6b825
   languageName: node
   linkType: hard
 
@@ -3282,6 +3309,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/ejs@npm:^3.1.5":
+  version: 3.1.5
+  resolution: "@types/ejs@npm:3.1.5"
+  checksum: e142266283051f27a7f79329871b311687dede19ae20268d882e4de218c65e1311d28a300b85579ca67157a8d601b7234daa50c2f99b252b121d27b4e5b21468
+  languageName: node
+  linkType: hard
+
 "@types/estree@npm:*, @types/estree@npm:1.0.8, @types/estree@npm:^1.0.0":
   version: 1.0.8
   resolution: "@types/estree@npm:1.0.8"
@@ -3336,10 +3370,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/json2csv@npm:^5.0.7":
+  version: 5.0.7
+  resolution: "@types/json2csv@npm:5.0.7"
+  dependencies:
+    "@types/node": "*"
+  checksum: 8b354f11f8efa1a8af6f7ca9d5ef091409ade121df790c7f97ba556c47b60cb9d7ae732876a9405c827132ee5d38ba351d4fb6c56693a31482e727ece07ed349
+  languageName: node
+  linkType: hard
+
 "@types/json5@npm:^0.0.29":
   version: 0.0.29
   resolution: "@types/json5@npm:0.0.29"
   checksum: e60b153664572116dfea673c5bda7778dbff150498f44f998e34b5886d8afc47f16799280e4b6e241c0472aef1bc36add771c569c68fc5125fc2ae519a3eb9ac
+  languageName: node
+  linkType: hard
+
+"@types/jsonwebtoken@npm:^9.0.10":
+  version: 9.0.10
+  resolution: "@types/jsonwebtoken@npm:9.0.10"
+  dependencies:
+    "@types/ms": "*"
+    "@types/node": "*"
+  checksum: 370e60879902d769c3dd86dc94cda0bf6149c3514762fa8ed6de873d10de7f0952edf960796a4b89ebc5d81f45abcff21430c1e956b165962ad42c836f3e88c8
   languageName: node
   linkType: hard
 
@@ -3352,10 +3405,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/lodash.get@npm:^4.4.9":
+  version: 4.4.9
+  resolution: "@types/lodash.get@npm:4.4.9"
+  dependencies:
+    "@types/lodash": "*"
+  checksum: d7e071d267e3d1bab58db14b6ce63fc51ca3c9c9697d3548cd5c0f16c08a7ce2188cff75dff1858b5623c3bd070836857211ebef4f364c53b82e31f3190fe0b4
+  languageName: node
+  linkType: hard
+
 "@types/lodash@npm:*":
   version: 4.17.16
   resolution: "@types/lodash@npm:4.17.16"
   checksum: 915618c5735b10007e0ed7d06fdce6b344f88fc721d492b189a69064bfd046d2382e1ba61d683eeb61cad60ca0286cd110e6fe0fa4ab2e99066a40478376831d
+  languageName: node
+  linkType: hard
+
+"@types/luxon@npm:^3.7.5":
+  version: 3.7.5
+  resolution: "@types/luxon@npm:3.7.5"
+  checksum: 77d3f351b218513c6b243c6af4d235a99519e0b579b83ccc2a7813ab5dcddc85128b015ab64b1118fcb15560bf704294488d7b888efd01c93969328686e930b1
   languageName: node
   linkType: hard
 
@@ -3379,6 +3448,13 @@ __metadata:
   version: 1.2.2
   resolution: "@types/minimist@npm:1.2.2"
   checksum: b8da83c66eb4aac0440e64674b19564d9d86c80ae273144db9681e5eeff66f238ade9515f5006ffbfa955ceff8b89ad2bd8ec577d7caee74ba101431fb07045d
+  languageName: node
+  linkType: hard
+
+"@types/ms@npm:*":
+  version: 2.1.0
+  resolution: "@types/ms@npm:2.1.0"
+  checksum: 532d2ebb91937ccc4a89389715e5b47d4c66e708d15942fe6cc25add6dc37b2be058230a327dd50f43f89b8b6d5d52b74685a9e8f70516edfc9bdd6be910eff4
   languageName: node
   linkType: hard
 
@@ -3427,6 +3503,15 @@ __metadata:
   dependencies:
     undici-types: ~7.18.0
   checksum: e3f2142e02dd7b44885bf16d5438e7d510c5917a272011ac594665fe38f453dea810cb4c8cd989d6cbaf769d46dbaf017eee4bdbf4246737f2b6c6774e093332
+  languageName: node
+  linkType: hard
+
+"@types/nodemailer@npm:^8.0.1":
+  version: 8.0.1
+  resolution: "@types/nodemailer@npm:8.0.1"
+  dependencies:
+    "@types/node": "*"
+  checksum: d06cfd8dd9437a1b788d5954ec2a364f30974954af462a7f399330112716b2515f08d8fc2f5ec362190fc7fe01e1c68348b0b18ffbdafd1adba7034403626153
   languageName: node
   linkType: hard
 
@@ -3503,7 +3588,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/serve-static@npm:^2":
+"@types/serve-static@npm:*, @types/serve-static@npm:^2":
   version: 2.2.0
   resolution: "@types/serve-static@npm:2.2.0"
   dependencies:
@@ -3529,6 +3614,16 @@ __metadata:
     "@types/node": "*"
     "@types/stream-chain": "*"
   checksum: 5ab30cb5c478bec6969b788343293fb5d268a2164947617a8550b336f80a1e85d354e510e823e0a4b4dd21c932f921f7146ef426a87df8834a5984a1d943ed1e
+  languageName: node
+  linkType: hard
+
+"@types/swagger-ui-express@npm:^4.1.8":
+  version: 4.1.8
+  resolution: "@types/swagger-ui-express@npm:4.1.8"
+  dependencies:
+    "@types/express": "*"
+    "@types/serve-static": "*"
+  checksum: bf4d84fb21c11e820238685cdc102f8d5e82d4382df9450a358bf80f70f5f0699c87645a291c52beee1eba5c0ee594e03714b236f1a0737272941a8708218f8f
   languageName: node
   linkType: hard
 
@@ -15017,16 +15112,24 @@ __metadata:
     "@sentry/node": ^7.119.2
     "@sentry/types": ^7.114.0
     "@supercharge/promise-pool": ^2.4.0
+    "@types/adm-zip": ^0.5.8
     "@types/boom": ^7.3.5
     "@types/bunyan": ^1.8.11
+    "@types/cookie-parser": ^1.4.10
+    "@types/cors": ^2.8.19
+    "@types/ejs": ^3.1.5
     "@types/express": ^5.0.6
+    "@types/json2csv": ^5.0.7
+    "@types/jsonwebtoken": ^9.0.10
     "@types/lodash-es": ^4.17.12
     "@types/multer": ^2.2.0
     "@types/netmask": ^2.0.6
     "@types/node": ^24.0.0
+    "@types/nodemailer": ^8.0.1
     "@types/sax": ^1.2.7
     "@types/stream-chain": ^2.1.0
     "@types/stream-json": ^1.7.7
+    "@types/swagger-ui-express": ^4.1.8
     adm-zip: ^0.5.16
     api-alternance-sdk: 2.14.0
     axios: 1.15.2
@@ -16957,6 +17060,8 @@ __metadata:
     "@tanstack/react-query": ^5.101.4
     "@tanstack/react-table": ^8.20.5
     "@tsconfig/next": ^2.0.3
+    "@types/lodash.get": ^4.4.9
+    "@types/luxon": ^3.7.5
     "@types/node": ^24.0.0
     "@types/qs": ^6.9.18
     "@types/react": ^18.3.11
