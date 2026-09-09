@@ -73,7 +73,7 @@ export function DonutChart({
           offset={8}
           allowEscapeViewBox={{ x: true, y: true }}
           isAnimationActive={false}
-          wrapperStyle={{ outline: "none" }}
+          wrapperStyle={{ outline: "none", zIndex: 1500 }}
         />
       </PieChart>
     </div>

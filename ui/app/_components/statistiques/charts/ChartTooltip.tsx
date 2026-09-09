@@ -70,7 +70,9 @@ export function ItemChartTooltip({ active, payload }: Partial<TooltipContentProp
 }
 
 export function AxisChartTooltip({ active, payload, label }: Partial<TooltipContentProps>) {
-  if (!active || !payload || payload.length === 0) {
+  const entries = (payload ?? []).filter((entry) => entry.type !== "none");
+
+  if (!active || entries.length === 0) {
     return null;
   }
 
@@ -78,7 +80,7 @@ export function AxisChartTooltip({ active, payload, label }: Partial<TooltipCont
     <div className={styles.tooltipContainer}>
       <div className={styles.axisTooltipItems}>
         <div className={styles.axisTooltipTitle}>{String(label ?? "")}</div>
-        {[...payload].reverse().map((entry, index) => (
+        {[...entries].reverse().map((entry, index) => (
           <div key={index} className={styles.tooltipContent}>
             <div className={styles.tooltipLeftContent}>
               <div className={styles.tooltipColorDot} style={{ backgroundColor: entryColor(entry) }} />
