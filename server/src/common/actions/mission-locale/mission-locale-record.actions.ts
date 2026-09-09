@@ -1,7 +1,7 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import { MongoServerError } from "mongodb";
-import { IEffectif, IOrganisationMissionLocale } from "shared/models";
+import { IEffectif, IMissionLocaleEffectif, IOrganisationMissionLocale } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { CfaEffectifSource } from "shared/models/routes/organismes/cfa";
 
@@ -56,7 +56,7 @@ export interface IEnsureMissionLocaleEffectifRecordResult {
   created: boolean;
 }
 
-function applyDottedSet(target: Record<string, any>, set: Record<string, unknown>) {
+function applyDottedSet(target: Record<string, unknown>, set: Record<string, unknown>) {
   for (const [path, value] of Object.entries(set)) {
     const keys = path.split(".");
     let cursor = target;
@@ -64,7 +64,7 @@ function applyDottedSet(target: Record<string, any>, set: Record<string, unknown
       if (typeof cursor[key] !== "object" || cursor[key] === null) {
         cursor[key] = {};
       }
-      cursor = cursor[key];
+      cursor = cursor[key] as Record<string, unknown>;
     }
     cursor[keys[keys.length - 1]] = value;
   }
@@ -274,7 +274,7 @@ export async function ensureMissionLocaleEffectifRecord(
   const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
   const organisme = await organismesDb().findOne({ _id: organismeId }, { projection: { is_allowed_collab: 1 } });
 
-  const document: Record<string, any> = {
+  const document: Record<string, unknown> = {
     mission_locale_id: mlOrganisation._id,
     effectif_id: newEffectifId,
     effectif_snapshot: { ...effectif, _id: effectif._id },
@@ -300,7 +300,7 @@ export async function ensureMissionLocaleEffectifRecord(
   applyDottedSet(document, extraSet);
 
   try {
-    const { insertedId } = await missionLocaleEffectifsDb().insertOne(document as any);
+    const { insertedId } = await missionLocaleEffectifsDb().insertOne(document as IMissionLocaleEffectif);
     scoreEffectifInBackground(insertedId, effectif);
     return { recordId: insertedId, created: true };
   } catch (error) {

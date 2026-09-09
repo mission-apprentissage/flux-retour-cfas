@@ -4,7 +4,7 @@ import { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { subMonths } from "date-fns";
 import type { Request } from "express";
-import { ObjectId, WithId } from "mongodb";
+import { Document, ObjectId, WithId } from "mongodb";
 import {
   getAnneesScolaireListFromDate,
   Acl,
@@ -44,11 +44,12 @@ import { listContactsMlOrganisme } from "../mission-locale/mission-locale.action
 /**
  * Méthode de récupération d'un organisme depuis un UAI et un SIRET
  */
-export const findOrganismeByUaiAndSiret = async (uai?: string, siret?: string, projection = {}) => {
+export const findOrganismeByUaiAndSiret = async (uai?: string | null, siret?: string | null, projection = {}) => {
   if (!uai && !siret) {
     throw new Error("missing parameter `uai` or `siret`");
   }
-  return await organismesDb().findOne({ uai, siret } as any, { projection });
+  const filter: Document = { uai, siret };
+  return await organismesDb().findOne(filter, { projection });
 };
 
 /**
@@ -540,7 +541,7 @@ export async function findOrganismesByUAI(uai: string): Promise<IOrganisme[]> {
 
 export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: string): Promise<WithId<IOrganisme> | null> {
   return await organismesDb().findOne({
-    uai: uai as any,
+    uai,
     siret: siret,
   });
 }
@@ -551,7 +552,7 @@ export async function getPublicOrganismeByUAIAndSIRET(
 ): Promise<Partial<WithId<IOrganisme>> | null> {
   return await organismesDb().findOne(
     {
-      uai: uai as any,
+      uai,
       siret: siret,
     },
     {
@@ -630,7 +631,7 @@ export async function resetConfigurationERP(organismeId: ObjectId): Promise<void
   );
 }
 
-export async function verifyOrganismeAPIKeyToUser(organismeId: ObjectId, verif: IReqPostVerifyUser): Promise<any> {
+export async function verifyOrganismeAPIKeyToUser(organismeId: ObjectId, verif: IReqPostVerifyUser): Promise<void> {
   const organisme = (await organismesDb().findOne({ _id: organismeId })) as WithId<IOrganisme>;
   if (!organisme) {
     throw Boom.notFound("Aucun organisme trouvé");
@@ -718,7 +719,7 @@ export async function listOrganisationOrganismesPaginated(acl: Acl, params: List
   const oneMonthAgo = subMonths(now, 1);
   const threeMonthsAgo = subMonths(now, 3);
 
-  const matchFilters: any[] = [buildOrganismePerimetreMongoFilters(acl.viewContacts)];
+  const matchFilters: Document[] = [buildOrganismePerimetreMongoFilters(acl.viewContacts)];
 
   if (params.departements?.length) matchFilters.push({ "adresse.departement": { $in: params.departements } });
   if (params.regions?.length) matchFilters.push({ "adresse.region": { $in: params.regions } });
@@ -735,7 +736,7 @@ export async function listOrganisationOrganismesPaginated(acl: Acl, params: List
     matchFilters.push(params.etatUAI.includes(true) ? { uai: { $ne: null } } : { uai: null });
   }
   if (params.transmission?.length) {
-    const transmissionConditions: any[] = [];
+    const transmissionConditions: Document[] = [];
     for (const state of params.transmission) {
       switch (state) {
         case "recent":
@@ -780,7 +781,7 @@ export async function listOrganisationOrganismesPaginated(acl: Acl, params: List
   }
 
   const direction = params.order === "desc" ? -1 : 1;
-  const sortStages: any[] = [];
+  const sortStages: Document[] = [];
   switch (params.sort) {
     case "nature":
       sortStages.push(
@@ -928,9 +929,7 @@ async function getInfoTransmissionEffectifsCondition(ctx: AuthContext) {
 /**
  * Retourne la projection d'un organisme selon les permissions.
  */
-export function getOrganismeProjection(
-  permissionsOrganisme: PermissionsOrganisme
-): Partial<WithId<OrganismeWithPermissions>> {
+export function getOrganismeProjection(permissionsOrganisme: PermissionsOrganisme): Document {
   return cleanProjection<IOrganisme>({
     _id: 1,
     siret: 1,
@@ -974,8 +973,8 @@ export function getOrganismeProjection(
  * Retourne la projection d'un organisme utilisé dans une liste selon les permissions.
  */
 function getOrganismeListProjection(
-  infoTransmissionEffectifsCondition: any
-): Partial<WithId<OrganismeWithPermissions>> {
+  infoTransmissionEffectifsCondition: Awaited<ReturnType<typeof getInfoTransmissionEffectifsCondition>>
+): Document {
   return cleanProjection<WithId<OrganismeWithPermissions>>({
     _id: 1,
     siret: 1,

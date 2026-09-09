@@ -1,7 +1,8 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
-import { IOrganisationOrganismeFormation } from "shared/models";
+import { IEffectif, IOrganisationOrganismeFormation, IOrganisme } from "shared/models";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { CfaEffectifSource, ICfaEffectif, ICfaEffectifsResponse } from "shared/models/routes/organismes/cfa";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
@@ -338,26 +339,31 @@ export async function getCfaEffectifs(
 }
 
 async function formatRawEffectif(
-  raw: { _id: ObjectId; apprenant?: any; formation?: any; contrats?: any; source?: any; transmitted_at?: any },
-  organisme: any
+  raw: { _id: ObjectId } & (
+    | Partial<Pick<IEffectif, "apprenant" | "formation" | "contrats" | "source" | "transmitted_at">>
+    | Partial<Pick<IEffectifDECA, "apprenant" | "formation" | "contrats" | "source" | "transmitted_at">>
+  ),
+  organisme: IOrganisme | null
 ) {
   // Projection alignée sur le $lookup de buildMlAggregation : le front ne doit connaître
   // qu'une seule forme de mission_locale_organisation.
-  const missionLocaleOrganisation = raw.apprenant?.adresse?.mission_locale_id
-    ? await organisationsDb().findOne(
-        { type: "MISSION_LOCALE", ml_id: raw.apprenant.adresse.mission_locale_id },
-        {
-          projection: {
-            _id: 1,
-            nom: 1,
-            email: 1,
-            telephone: 1,
-            activated_at: 1,
-            adresse: { commune: 1, code_postal: 1 },
-          },
-        }
-      )
-    : null;
+  const missionLocaleId = raw.apprenant?.adresse?.mission_locale_id;
+  const missionLocaleOrganisation =
+    typeof missionLocaleId === "number"
+      ? await organisationsDb().findOne(
+          { type: "MISSION_LOCALE", ml_id: missionLocaleId },
+          {
+            projection: {
+              _id: 1,
+              nom: 1,
+              email: 1,
+              telephone: 1,
+              activated_at: 1,
+              adresse: { commune: 1, code_postal: 1 },
+            },
+          }
+        )
+      : null;
 
   return {
     id: raw._id,

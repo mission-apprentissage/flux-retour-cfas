@@ -5,7 +5,7 @@ import express from "express";
 import { ObjectId } from "mongodb";
 import multer from "multer";
 import { getAcademieById } from "shared/constants";
-import { IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelnet.model";
+import { IVoeuAffelnet, IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelnet.model";
 
 import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
@@ -126,7 +126,7 @@ const createVoeux: RouteHandler = async (req, res) => {
   await PromisePool.withConcurrency(100)
     .for(parsedCSV)
     .process(async (voeuRaw: IVoeuAffelnetRaw) => {
-      const voeu: any = {
+      const voeu: IVoeuAffelnet = {
         _id: new ObjectId(),
         organisme_formateur_id: null,
         organisme_responsable_id: null,

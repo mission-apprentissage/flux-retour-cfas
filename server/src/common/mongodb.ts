@@ -1,5 +1,6 @@
 import { CollectionInfo, Document, MongoClient } from "mongodb";
 import { zodToMongoSchema } from "shared/models";
+import type { ZodTypeAny } from "zod";
 
 import logger from "@/common/logger";
 import config from "@/config";
@@ -28,7 +29,7 @@ export const getBALMongodbUri = (dbName: string) => {
  * @param  {string} uri
  * @returns client
  */
-export const connectToMongodb = async (uri) => {
+export const connectToMongodb = async (uri: string) => {
   if (mongodbClient) {
     return mongodbClient;
   }
@@ -69,11 +70,11 @@ export const getCollectionList = () => {
   return ensureInitialization(mongodbClient).db().listCollections().toArray();
 };
 
-export const getDbCollection = <TSchema extends Document>(name) => {
+export const getDbCollection = <TSchema extends Document>(name: string) => {
   return ensureInitialization(mongodbClient).db().collection<TSchema>(name);
 };
 
-export const getDbCollectionSchema = async (name) => {
+export const getDbCollectionSchema = async (name: string) => {
   const collectionInfo: CollectionInfo | null = await ensureInitialization(mongodbClient)
     .db()
     .listCollections({ name })
@@ -85,7 +86,7 @@ export const getDbCollectionSchema = async (name) => {
  * Création d'une collection si elle n'existe pas
  * @param {string} collectionName
  */
-const createCollectionIfDoesNotExist = async (collectionName) => {
+const createCollectionIfDoesNotExist = async (collectionName: string) => {
   const db = getDatabase();
   const collectionsInDb = await db.listCollections().toArray();
   const collectionExistsInDb = collectionsInDb.map(({ name }) => name).includes(collectionName);
@@ -99,7 +100,9 @@ const createCollectionIfDoesNotExist = async (collectionName) => {
  * Config de la validation
  * @param {*} modelDescriptors
  */
-export const configureDbSchemaValidation = async (modelDescriptors) => {
+export const configureDbSchemaValidation = async (
+  modelDescriptors: ReadonlyArray<{ collectionName: string; zod?: ZodTypeAny | null }>
+) => {
   const db = getDatabase();
   await Promise.all(
     modelDescriptors.map(async ({ collectionName, zod }) => {

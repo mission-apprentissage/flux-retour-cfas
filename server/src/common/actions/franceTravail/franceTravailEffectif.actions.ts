@@ -39,7 +39,7 @@ const parseMoisToDateRange = (mois: string): { startDate: Date; endDate: Date } 
   return { startDate, endDate };
 };
 
-const buildEffectifsPipeline = (query: Record<string, any>, codeRegion: string) => {
+const buildEffectifsPipeline = (query: Document, codeRegion: string) => {
   const now = new Date();
 
   const pipeline: Document[] = [
@@ -347,9 +347,9 @@ export const getFranceTravailEffectifsByCodeSecteur = async (
   }
 ) => {
   try {
-    const query: Record<string, any> = {};
+    const query: Document = {};
 
-    let additionalPipelineStages: Array<Record<string, any>> = [];
+    let additionalPipelineStages: Array<Document> = [];
 
     switch (type) {
       case API_EFFECTIF_LISTE.A_TRAITER:
@@ -446,9 +446,9 @@ const getEffectifNavigation = async (
     departements?: string;
   }
 ) => {
-  const query: Record<string, any> = {};
+  const query: Document = {};
 
-  let additionalPipelineStages: Array<Record<string, any>> = [];
+  let additionalPipelineStages: Array<Document> = [];
 
   const defaultSort = nom_liste === API_EFFECTIF_LISTE.TRAITE ? "date_traitement" : "jours_sans_contrat";
   const sort = options?.sort ?? defaultSort;
@@ -1081,7 +1081,7 @@ export const getFranceTravailEffectifsTraitesParMois = async (
 export const getDepartementCountsBySecteur = async (codeRegion: string, codeSecteur?: number) => {
   try {
     const now = new Date();
-    const query: Record<string, any> = {
+    const query: Document = {
       code_region: codeRegion,
       soft_deleted: { $ne: true },
     };

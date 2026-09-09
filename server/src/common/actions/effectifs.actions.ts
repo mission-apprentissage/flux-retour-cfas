@@ -1,7 +1,8 @@
 import type { ICertification } from "api-alternance-sdk";
 import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
-import { ObjectId, type WithoutId } from "mongodb";
+import { Collection, ObjectId, type WithoutId } from "mongodb";
+import { MOTIF_SUPPRESSION } from "shared/constants";
 import { IOpcos, IRncp } from "shared/models";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -50,7 +51,7 @@ export const mergeEffectifWithDefaults = (
 /**
  * Méthode de mise à jour d'un effectif depuis son id
  */
-const updateEffectif = async (_id: ObjectId, data: any, opt = { keepPreviousErrors: false }) => {
+const updateEffectif = async (_id: ObjectId, data: Partial<IEffectif>, opt = { keepPreviousErrors: false }) => {
   const effectif = await effectifsDb().findOne({ _id });
   if (!effectif) {
     throw new Error(`Unable to find effectif ${_id.toString()}`);
@@ -184,9 +185,10 @@ export const withComputedFields = async <T extends WithoutId<IEffectif | IEffect
   };
 };
 
-export async function getEffectifByIdWithCollection(
-  effectifId: ObjectId
-): Promise<{ effectif: IEffectif | IEffectifDECA; collection: any } | null> {
+export async function getEffectifByIdWithCollection(effectifId: ObjectId): Promise<{
+  effectif: IEffectif | IEffectifDECA;
+  collection: () => Collection<IEffectif> | Collection<IEffectifDECA>;
+} | null> {
   let effectif: IEffectif | IEffectifDECA | null;
 
   effectif = await effectifsDb().findOne({ _id: effectifId });
@@ -202,17 +204,31 @@ export async function getEffectifByIdWithCollection(
   return null;
 }
 
-export async function getEffectifForm(effectifId: ObjectId): Promise<any> {
+export async function getEffectifForm(effectifId: ObjectId) {
   let effectif: IEffectif | IEffectifDECA | null = await effectifsDb().findOne({ _id: effectifId });
 
   if (!effectif) {
     effectif = await effectifsDECADb().findOne({ _id: effectifId });
   }
+  if (!effectif) {
+    throw Boom.notFound(`Unable to find effectif ${effectifId.toString()}`);
+  }
 
   return buildEffectifResult(effectif);
 }
 
-export async function updateEffectifFromForm(effectifId: ObjectId, body: any): Promise<any> {
+export interface EffectifFormBody {
+  inputNames: string[];
+  is_lock?: unknown;
+  nouveau_statut?: {
+    valeur_statut: IEffectif["apprenant"]["historique_statut"][number]["valeur_statut"];
+    date_statut: string | Date;
+  };
+  nouveau_contrat?: NonNullable<IEffectif["contrats"]>[number];
+  [key: string]: unknown;
+}
+
+export async function updateEffectifFromForm(effectifId: ObjectId, body: EffectifFormBody) {
   const { inputNames, ...data } = body; // TODO JOI (inputNames used to track user actions)
 
   const effectifDb = await effectifsDb().findOne({ _id: effectifId });
@@ -226,17 +242,18 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
     merge(effectifDb, stripEmptyFields(restData));
 
   // TODO WEIRD MONGO VALIDATION ISSUE ONLY ON THOSE
-  if (dataToUpdate.formation.date_entree) {
-    dataToUpdate.formation.date_entree = new Date(dataToUpdate.formation.date_entree);
+  const formation = dataToUpdate.formation;
+  if (formation?.date_entree) {
+    formation.date_entree = new Date(formation.date_entree);
   }
-  if (dataToUpdate.formation.date_fin) {
-    dataToUpdate.formation.date_fin = new Date(dataToUpdate.formation.date_fin);
+  if (formation?.date_fin) {
+    formation.date_fin = new Date(formation.date_fin);
   }
-  if (dataToUpdate.formation.date_inscription) {
-    dataToUpdate.formation.date_inscription = new Date(dataToUpdate.formation.date_inscription);
+  if (formation?.date_inscription) {
+    formation.date_inscription = new Date(formation.date_inscription);
   }
-  if (dataToUpdate.formation.date_obtention_diplome) {
-    dataToUpdate.formation.date_obtention_diplome = new Date(dataToUpdate.formation.date_obtention_diplome);
+  if (formation?.date_obtention_diplome) {
+    formation.date_obtention_diplome = new Date(formation.date_obtention_diplome);
   }
   if (dataToUpdate.apprenant.date_rqth) {
     dataToUpdate.apprenant.date_rqth = new Date(dataToUpdate.apprenant.date_rqth);
@@ -247,9 +264,10 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
 
   // Le numero d'adresse est parfois envoyé en string, bloquant toute la mise à jour de l'effectif
   // Si le numéro est présent, forcer le numéro a un nombre
-  if (dataToUpdate.apprenant.adresse.numero) {
-    const numero = Number(dataToUpdate.apprenant.adresse.numero);
-    dataToUpdate.apprenant.adresse.numero = !isNaN(numero) ? numero : null;
+  const adresse = dataToUpdate.apprenant.adresse;
+  if (adresse?.numero) {
+    const numero = Number(adresse.numero);
+    adresse.numero = !isNaN(numero) ? numero : undefined;
   }
 
   dataToUpdate.apprenant.historique_statut = dataToUpdate.apprenant.historique_statut
@@ -272,7 +290,7 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
     });
   }
 
-  dataToUpdate.contrats = dataToUpdate.contrats
+  dataToUpdate.contrats = (dataToUpdate.contrats ?? [])
     .filter((e) => e) // Remove empty values
     .map((c) => {
       const contrat = stripEmptyFields(c);
@@ -291,9 +309,9 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
     dataToUpdate.contrats.push(nouveau_contrat);
   }
 
-  let validation_errors: any[] = [];
-  for (const validation_error of dataToUpdate.validation_errors) {
-    if (!inputNames.includes(validation_error.fieldName)) {
+  const validation_errors: IEffectif["validation_errors"] = [];
+  for (const validation_error of dataToUpdate.validation_errors ?? []) {
+    if (!validation_error.fieldName || !inputNames.includes(validation_error.fieldName)) {
       validation_errors.push(validation_error);
     }
   }
@@ -306,6 +324,9 @@ export async function updateEffectifFromForm(effectifId: ObjectId, body: any): P
     source,
     validation_errors,
   });
+  if (!effectifUpdated) {
+    throw Boom.notFound(`Unable to find effectif ${effectifId.toString()}`);
+  }
 
   return buildEffectifResult(effectifUpdated);
 }
@@ -317,11 +338,14 @@ export async function softDeleteEffectif(
     motif,
     description,
   }: {
-    motif: string;
+    motif: MOTIF_SUPPRESSION;
     description: string | null | undefined;
   }
 ) {
-  const effectif: any = await effectifsDb().findOne({ _id: new ObjectId(effectifId) });
+  const effectif = await effectifsDb().findOne({ _id: new ObjectId(effectifId) });
+  if (!effectif) {
+    throw Boom.notFound(`Unable to find effectif ${effectifId.toString()}`);
+  }
   await effectifsArchiveDb().insertOne({
     ...effectif,
     _id: new ObjectId(),
@@ -335,7 +359,7 @@ export async function softDeleteEffectif(
   await effectifsDb().deleteOne({ _id: new ObjectId(effectifId) });
 }
 
-function buildEffectifResult(effectif) {
+function buildEffectifResult(effectif: (IEffectif | IEffectifDECA) & { lieu_de_formation?: unknown }) {
   const { properties: effectifSchema } = legacySchema;
 
   if (!effectif.is_lock) {
@@ -346,7 +370,7 @@ function buildEffectifResult(effectif) {
     };
   }
 
-  function customizer(objValue, srcValue) {
+  function customizer(objValue: Record<string, unknown> | undefined, srcValue: unknown) {
     if (objValue !== undefined) {
       return {
         ...objValue,
@@ -356,12 +380,12 @@ function buildEffectifResult(effectif) {
     }
   }
 
-  function customizerLock(objValue, srcValue) {
+  function customizerLock(objValue: Record<string, unknown> | undefined, srcValue: unknown) {
     if (objValue !== undefined) {
       return { ...objValue, locked: srcValue };
     }
   }
-  function customizerPath(objValue, srcValue) {
+  function customizerPath(objValue: Record<string, unknown> | undefined, srcValue: unknown) {
     if (objValue !== undefined) {
       return { ...objValue, path: srcValue };
     }
@@ -483,10 +507,14 @@ function buildEffectifResult(effectif) {
   };
 }
 
-const flattenKeys = (obj: any, path: any = []) =>
+const flattenKeys = (obj: unknown, path: string[] = []): Record<string, unknown> =>
   !isObject(obj)
     ? { [path.join(".")]: obj }
-    : reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
+    : reduce(
+        obj as Record<string, unknown>,
+        (cum: Record<string, unknown>, next, key) => merge(cum, flattenKeys(next, [...path, key])),
+        {}
+      );
 
 export const updateEffectifComputedFromRNCP = async (rncp: IRncp, opco: IOpcos) => {
   return (

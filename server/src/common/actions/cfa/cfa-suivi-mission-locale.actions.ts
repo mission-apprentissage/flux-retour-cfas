@@ -316,6 +316,8 @@ export async function getCfaSuiviMissionLocaleExportRows(
     collab_status_label: SUIVI_COLLAB_STATUS_EXPORT_LABELS[r.collab_status] ?? r.collab_status ?? "",
     categorie: r.is_collab ? "Collaboration CFA" : "Hors collaboration",
     mission_locale_nom: r.mission_locale_nom ?? null,
-    situation_label: r.situation ? (SITUATION_LABEL_ENUM[r.situation] ?? r.situation) : "Aucun retour",
+    situation_label: r.situation
+      ? (SITUATION_LABEL_ENUM[r.situation as keyof typeof SITUATION_LABEL_ENUM] ?? r.situation)
+      : "Aucun retour",
   }));
 }

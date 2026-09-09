@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import type { Document } from "mongodb";
 
 import { auditLogsDb, effectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { getEffectifsDuplicatesFromOrganismes } from "@/jobs/fiabilisation/uai-siret/update.utils";
@@ -103,13 +104,14 @@ export const mergeOrganismeSansUaiDansOrganismeFiable = async (
     await Promise.all(
       duplicatesForFiableAndNonFiable.map(async ({ duplicatesInfo }) => {
         if (duplicatesInfo.length > 1) {
-          const effectifIdToKeep = duplicatesInfo.reduce((a, b) => (a.created_at > b.created_at ? a : b))?.id ?? null;
+          const effectifIdToKeep =
+            duplicatesInfo.reduce((a: Document, b: Document) => (a.created_at > b.created_at ? a : b))?.id ?? null;
 
           if (effectifIdToKeep) {
             // Suppression des doublons les plus anciens
             const effectifsIdToRemove = duplicatesInfo
-              .filter((item) => item.id !== effectifIdToKeep)
-              .map((item) => item.id);
+              .filter((item: Document) => item.id !== effectifIdToKeep)
+              .map((item: Document) => item.id);
 
             const { deletedCount } = await effectifsDb().deleteMany({ _id: { $in: effectifsIdToRemove } });
             deletedDuplicates += deletedCount;

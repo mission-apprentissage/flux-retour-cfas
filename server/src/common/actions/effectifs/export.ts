@@ -1,10 +1,11 @@
+import type { Document } from "mongodb";
 import { getStatutApprenantNameFromCode } from "shared";
 
 type FieldExport = {
   label: string;
   csvField: string;
   projectedMongoField?: string;
-  valueGetter: (item: any) => any;
+  valueGetter: (item: Document) => unknown;
 };
 
 const exportedFields: FieldExport[] = [
@@ -90,16 +91,18 @@ const exportedFields: FieldExport[] = [
     csvField: "historique_statut_apprenant",
     valueGetter: (item) =>
       JSON.stringify(
-        item.apprenant.historique_statut.map((item) => ({
-          date: item.date_statut,
-          statut: getStatutApprenantNameFromCode(item.valeur_statut),
-        }))
+        item.apprenant.historique_statut.map(
+          (item: { date_statut: Date; valeur_statut: Parameters<typeof getStatutApprenantNameFromCode>[0] }) => ({
+            date: item.date_statut,
+            statut: getStatutApprenantNameFromCode(item.valeur_statut),
+          })
+        )
       ),
   },
 ];
 
-export function mapMongoObjectToCSVObject(item) {
-  return exportedFields.reduce((acc, exportedField) => {
+export function mapMongoObjectToCSVObject(item: Document) {
+  return exportedFields.reduce<Record<string, unknown>>((acc, exportedField) => {
     acc[exportedField.csvField] = exportedField.valueGetter(item);
     return acc;
   }, {});

@@ -36,7 +36,7 @@ import { getUserById } from "./users.actions";
 export const INVITATION_EXPIRATION_MS = 96 * 60 * 60 * 1000;
 
 export async function createOrganisation(organisation: IOrganisationCreate): Promise<ObjectId> {
-  const formatOrganisme = async (organisation) => {
+  const formatOrganisme = async (organisation: Extract<IOrganisationCreate, { type: "ORGANISME_FORMATION" }>) => {
     const organisme = await organismesDb().findOne({
       siret: organisation.siret,
       ...(organisation.uai ? { uai: organisation.uai } : {}),
@@ -131,7 +131,7 @@ export async function listContactsOrganisation(organisationId: ObjectId): Promis
     .toArray();
 }
 
-export async function listOrganisationPendingInvitations(ctx: AuthContext): Promise<any[]> {
+export async function listOrganisationPendingInvitations(ctx: AuthContext) {
   return await invitationsDb()
     .find({ organisation_id: ctx.organisation_id }, { projection: { token: 0 } })
     .toArray();
@@ -561,7 +561,7 @@ export const getOrganisationOrganismeByOrganismeId = async (
   return found as WithId<IOrganisationOrganismeFormation>;
 };
 
-export async function getInvitationByToken(token: string): Promise<any> {
+export async function getInvitationByToken(token: string) {
   const invitation = await invitationsDb().findOne({
     token,
   });

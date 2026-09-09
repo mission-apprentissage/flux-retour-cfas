@@ -2,10 +2,12 @@ import { captureException } from "@sentry/node";
 import { formatISO } from "date-fns";
 import { cloneDeep, isEqual } from "lodash-es";
 import { MongoServerError, UpdateFilter } from "mongodb";
+import type { Collection } from "mongodb";
 import { IContratV2, IEffectifV2 } from "shared/models";
 import type { IContrat } from "shared/models/data/effectifs/contrat.part";
 import type { IFormationEffectif } from "shared/models/data/effectifs/formation.part";
 import { IEffectif, IEffectifApprenant, IEffectifComputedStatut } from "shared/models/data/effectifs.model";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { IEffectifGenerique } from "@/jobs/hydrate/effectifs/hydrate-effectifs-computed-types";
 import { buildEffectifStatus } from "@/jobs/ingestion/status/effectif_status.builder";
@@ -25,7 +27,7 @@ type ICreateComputedStatutObjectParams = Readonly<{
 export async function updateEffectifStatut(
   effectif: IEffectifGenerique,
   evaluationDate: Date,
-  collection,
+  collection: Collection<IEffectif> | Collection<IEffectifDECA>,
   { touchUpdatedAt = true }: { touchUpdatedAt?: boolean } = {}
 ): Promise<boolean> {
   if (!shouldUpdateStatut(effectif)) {
@@ -39,7 +41,10 @@ export async function updateEffectifStatut(
     }
 
     const updateObj = createUpdateObject(computedStatut, touchUpdatedAt);
-    const { modifiedCount } = await collection.updateOne({ _id: effectif._id }, updateObj);
+    const { modifiedCount } = await (collection as Collection<IEffectifGenerique>).updateOne(
+      { _id: effectif._id },
+      updateObj
+    );
     return modifiedCount > 0;
   } catch (err) {
     handleUpdateError(err, effectif);
@@ -233,16 +238,16 @@ function determineNewStatutFromHistorique(
   return buildEffectifStatus(params, evaluationDate ?? new Date());
 }
 
-export const getCurrentAndNextStatus = (
-  parcours?: Array<{ date: Date | string; valeur: any }>,
+export const getCurrentAndNextStatus = <V>(
+  parcours?: Array<{ date: Date | string; valeur: V }>,
   now = new Date()
-): { current: { date: Date; valeur: any } | null; next: { date: Date; valeur: any } | null } => {
+): { current: { date: Date; valeur: V } | null; next: { date: Date; valeur: V } | null } => {
   if (!parcours || parcours.length === 0) {
     return { current: null, next: null };
   }
 
-  let current: { date: Date; valeur: any } | null = null;
-  let next: { date: Date; valeur: any } | null = null;
+  let current: { date: Date; valeur: V } | null = null;
+  let next: { date: Date; valeur: V } | null = null;
 
   for (let i = 0; i < parcours.length; i++) {
     const sDate = new Date(parcours[i].date);

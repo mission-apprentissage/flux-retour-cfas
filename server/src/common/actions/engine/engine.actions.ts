@@ -1,6 +1,6 @@
 import { isEqual } from "date-fns";
 import { cloneDeep } from "lodash-es";
-import { Collection } from "mongodb";
+import { Collection, Filter } from "mongodb";
 import { CODES_STATUT_APPRENANT } from "shared/constants";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -111,16 +111,21 @@ export const completeEffectifAddress = async <T extends { apprenant: Partial<IEf
 
 export const checkIfEffectifExists = async <E extends IEffectif | IEffectifDECA>(
   effectif: Pick<E, "id_erp_apprenant" | "organisme_id" | "annee_scolaire">,
-  db: Collection<any>
+  db: Collection<E>
 ): Promise<E | null> => {
-  return db.findOne({
+  const filter = {
     id_erp_apprenant: effectif.id_erp_apprenant,
     organisme_id: effectif.organisme_id,
     annee_scolaire: effectif.annee_scolaire,
-  });
+  } as Filter<E>;
+  return (await db.findOne(filter)) as E | null;
 };
 
-const getAbandonDate = (statut_apprenant, date_metier_mise_a_jour_statut, date_exclusion_formation) => {
+const getAbandonDate = (
+  statut_apprenant: number | null | undefined,
+  date_metier_mise_a_jour_statut: Date | null | undefined,
+  date_exclusion_formation: Date | null | undefined
+) => {
   if (date_exclusion_formation) {
     return date_exclusion_formation;
   }

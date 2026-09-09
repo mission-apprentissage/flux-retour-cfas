@@ -1,5 +1,6 @@
 import Boom from "boom";
 import { ObjectId } from "mongodb";
+import type { IOrganisationMissionLocale } from "shared/models";
 import { IInvitation } from "shared/models/data/invitations.model";
 
 import logger from "@/common/logger";
@@ -399,9 +400,9 @@ export async function getCfaOnboardingInfo(token: string) {
         .toArray()
     : [];
 
-  const cfaBetaOrganismeIds = cfaBetaOrganisations
-    .filter((o: any) => o.organisme_id)
-    .map((o: any) => new ObjectId(o.organisme_id));
+  const cfaBetaOrganismeIds = cfaBetaOrganisations.flatMap((o) =>
+    "organisme_id" in o && o.organisme_id ? [new ObjectId(o.organisme_id)] : []
+  );
 
   const cfaConnectesCount =
     cfaBetaOrganismeIds.length > 0
@@ -427,12 +428,12 @@ export async function getCfaOnboardingInfo(token: string) {
       departement,
     },
     missionsLocales: missionsLocales.map((ml) => {
-      const mlAny = ml as any;
+      const details = ml as IOrganisationMissionLocale;
       return {
         _id: ml._id,
-        nom: mlAny.nom as string,
-        commune: mlAny.adresse?.commune as string | undefined,
-        codePostal: mlAny.adresse?.code_postal as string | undefined,
+        nom: details.nom,
+        commune: details.adresse?.commune,
+        codePostal: details.adresse?.code_postal,
       };
     }),
     cfaConnectesCount,

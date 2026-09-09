@@ -1,5 +1,5 @@
 import Boom from "boom";
-import { ObjectId } from "mongodb";
+import { Document, ObjectId } from "mongodb";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants";
 import { IContrat } from "shared/models/data/effectifs/contrat.part";
 import { SIPA_PASSWORD_MAX_LENGTH, SIPA_PASSWORD_MIN_LENGTH, zSipaUsername } from "shared/models/data/sipaUsers.model";
@@ -199,6 +199,7 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
 
   const [result] = await effectifsDb().aggregate(pipeline, { allowDiskUse: true }).toArray();
   const totalElements = result?.total?.[0]?.count ?? 0;
+  const effectifs: Document[] = result?.effectifs ?? [];
 
   return {
     metadonnees: {
@@ -206,7 +207,7 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
       totalPages: Math.ceil(totalElements / SIPA_PAGE_SIZE),
       totalElements,
     },
-    effectifs: (result?.effectifs ?? []).map(serializeSipaEffectif),
+    effectifs: effectifs.map(serializeSipaEffectif),
   };
 }
 
@@ -225,7 +226,7 @@ function dernierContrat(contrats: IContrat[] | null | undefined) {
   };
 }
 
-function serializeSipaEffectif(doc: any) {
+function serializeSipaEffectif(doc: Document) {
   const organisme = doc._organisme?.[0];
   const adresseConcat =
     [organisme?.adresse?.numero, organisme?.adresse?.voie, organisme?.adresse?.code_postal, organisme?.adresse?.commune]

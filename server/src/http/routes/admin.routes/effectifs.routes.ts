@@ -1,5 +1,6 @@
 import Boom from "boom";
 import express from "express";
+import { Document } from "mongodb";
 import { z } from "zod";
 
 import { getAllEffectifs, getDetailedEffectifById } from "@/common/actions/effectifs/effectifs.actions";
@@ -25,7 +26,7 @@ export default () => {
     }),
     async (req, res) => {
       const { page, limit, sort, q, filter } = req.query as ListSchema;
-      const query: any = filter || {};
+      const query: Document = filter || {};
       if (q) {
         query.$text = { $search: q };
       }

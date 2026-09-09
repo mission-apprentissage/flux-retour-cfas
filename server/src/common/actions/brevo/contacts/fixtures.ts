@@ -15,7 +15,7 @@ export const resetFixtureCounters = () => {
   userCounter = 0;
 };
 
-export const buildOrgaOf = (override: Record<string, any> = {}) => ({
+export const buildOrgaOf = (override: Record<string, unknown> = {}) => ({
   _id: new ObjectId(),
   type: "ORGANISME_FORMATION" as const,
   siret: `${++siretCounter}`,
@@ -24,7 +24,7 @@ export const buildOrgaOf = (override: Record<string, any> = {}) => ({
   ...override,
 });
 
-export const buildOrgaMl = (nom: string, override: Record<string, any> = {}) => ({
+export const buildOrgaMl = (nom: string, override: Record<string, unknown> = {}) => ({
   _id: new ObjectId(),
   type: "MISSION_LOCALE" as const,
   nom,
@@ -35,7 +35,7 @@ export const buildOrgaMl = (nom: string, override: Record<string, any> = {}) => 
 
 export const buildOrganisme = (
   orgaOf: { siret: string; uai: string | null; organisme_id?: string },
-  override: Record<string, any> = {}
+  override: Record<string, unknown> = {}
 ) => {
   const organisme = {
     _id: new ObjectId(),
@@ -58,7 +58,7 @@ export const buildOrganisme = (
   return organisme;
 };
 
-export const buildUser = (orgaOf: { _id: ObjectId }, override: Record<string, any> = {}) => ({
+export const buildUser = (orgaOf: { _id: ObjectId }, override: Record<string, unknown> = {}) => ({
   _id: new ObjectId(),
   email: `user-${++userCounter}@example.com`,
   password: "hashed",
@@ -74,7 +74,7 @@ export const buildUser = (orgaOf: { _id: ObjectId }, override: Record<string, an
   ...override,
 });
 
-export const buildRupturant = (organismeId: ObjectId, mlId: ObjectId, override: Record<string, any> = {}) => ({
+export const buildRupturant = (organismeId: ObjectId, mlId: ObjectId, override: Record<string, unknown> = {}) => ({
   _id: new ObjectId(),
   mission_locale_id: mlId,
   effectif_id: new ObjectId(),

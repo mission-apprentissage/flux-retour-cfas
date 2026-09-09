@@ -33,7 +33,7 @@ const getSanitizedNomPrenomPipeline = (
   },
 ];
 
-const getBasePipeline = (organisme_id) => [
+const getBasePipeline = (organisme_id: ObjectId) => [
   { $match: { organisme_id, annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } } },
   ...getSanitizedNomPrenomPipeline(),
   {

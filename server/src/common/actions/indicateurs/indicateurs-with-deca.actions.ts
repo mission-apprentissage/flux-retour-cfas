@@ -7,7 +7,7 @@ import { EffectifsFiltersTerritoire } from "../helpers/filters";
 
 import { getOrganismeIndicateursEffectifsGenerique } from "./indicateurs.actions";
 
-export const buildDECAFilter = (decaMode) => (decaMode ? { is_deca_compatible: true } : {});
+export const buildDECAFilter = (decaMode: boolean) => (decaMode ? { is_deca_compatible: true } : {});
 
 export const getOrganismeIndicateursEffectifs = async (
   ctx: AuthContext,

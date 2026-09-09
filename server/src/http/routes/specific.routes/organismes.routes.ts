@@ -1,6 +1,7 @@
 import express from "express";
 import { pick } from "lodash-es";
 import { Filter } from "mongodb";
+import { IOrganisme } from "shared/models";
 import { z } from "zod";
 
 import { organismesDb } from "@/common/model/collections";
@@ -28,7 +29,7 @@ export default () => {
       const limit = Number(params.limit ?? 50);
       const skip = (page - 1) * limit;
 
-      const jsonQuery: Filter<any> = JSON.parse(query);
+      const jsonQuery: Filter<IOrganisme> = JSON.parse(query);
       const allData = await organismesDb().find(jsonQuery).skip(skip).limit(limit).toArray();
       const count = await organismesDb().countDocuments(jsonQuery);
       const omittedData = allData.map((item) =>

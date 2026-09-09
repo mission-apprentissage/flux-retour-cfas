@@ -1,5 +1,6 @@
 import { Collection, ObjectId } from "mongodb";
-import { IndicateursEffectifs, STATUT_APPRENANT } from "shared";
+import { IEffectif, IndicateursEffectifs, STATUT_APPRENANT } from "shared";
+import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { EffectifsFiltersTerritoire, combineFilters } from "@/common/actions/helpers/filters";
 import { findOrganismesFormateursIdsOfOrganisme } from "@/common/actions/helpers/permissions";
@@ -98,7 +99,7 @@ export async function getOrganismeIndicateursEffectifsGenerique(
   ctx: AuthContext,
   organismeId: ObjectId,
   filters: EffectifsFiltersTerritoire,
-  db: Collection<any>,
+  db: Collection<IEffectif> | Collection<IEffectifDECA>,
   decaMode: boolean = false
 ): Promise<IndicateursEffectifs> {
   const indicateurs = (await db

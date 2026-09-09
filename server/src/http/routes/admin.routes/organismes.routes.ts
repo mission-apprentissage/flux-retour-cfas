@@ -1,5 +1,6 @@
 import Boom from "boom";
 import express from "express";
+import { Document } from "mongodb";
 import { SIRET_REGEX, UAI_REGEX } from "shared/constants/validations";
 import { z } from "zod";
 
@@ -48,7 +49,7 @@ export default () => {
     }),
     async (req, res) => {
       const { page, limit, sort, q, filter } = req.query as ListSchema;
-      const query: any = filter || {};
+      const query: Document = filter || {};
       if (q) {
         query.$text = { $search: q };
       }

@@ -1,5 +1,5 @@
 import Boom from "boom";
-import { ObjectId, WithId } from "mongodb";
+import { Document, ObjectId, WithId } from "mongodb";
 import { getOrganisationLabel } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
@@ -193,12 +193,12 @@ async function findMatchingOrganisationIds(searchTerm: string): Promise<ObjectId
 }
 
 function buildUsersAggregationPipeline(
-  userQuery: { [key: string]: any },
-  organizationFilters: { [key: string]: any },
+  userQuery: Document,
+  organizationFilters: Document,
   sort: { [key: string]: number },
   searchMode: "user" | "org" | "email-exact" | "phone" | "email-domain" | "standard" = "standard"
 ) {
-  const pipeline: any[] = [];
+  const pipeline: Document[] = [];
 
   const hasTextSearch = userQuery._hasTextSearch;
   const searchTerm = userQuery._searchTerm;
@@ -301,7 +301,7 @@ function buildUsersAggregationPipeline(
     }
   );
 
-  const postLookupFilters: any[] = [];
+  const postLookupFilters: Document[] = [];
 
   if (hasTextSearch && searchTerm && searchMode === "standard") {
     const trimmedTerm = searchTerm.trim();
@@ -309,7 +309,7 @@ function buildUsersAggregationPipeline(
     if (trimmedTerm.length >= 2 && trimmedTerm.length <= 100) {
       const escapedTerm = escapeRegex(trimmedTerm);
 
-      const searchConditions: any[] = [
+      const searchConditions: Document[] = [
         { nom: { $regex: escapedTerm, $options: "i" } },
         { prenom: { $regex: escapedTerm, $options: "i" } },
         { nomComplet: { $regex: escapedTerm, $options: "i" } },
@@ -348,7 +348,7 @@ function buildUsersAggregationPipeline(
 }
 
 export const getAllUsers = async (
-  query: { [key: string]: any } = {},
+  query: Document = {},
   {
     page = 1,
     limit = 10,
@@ -434,7 +434,7 @@ export const getAllUsers = async (
     ])
     .next();
 
-  result?.data?.forEach((user) => {
+  result?.data?.forEach((user: Document) => {
     if (user?.organisation) {
       user.organisation.label = getOrganisationLabel(user.organisation);
     }
@@ -449,7 +449,7 @@ export const getAllUsers = async (
 };
 
 export const getAllUsersForExport = async (
-  query: { [key: string]: any } = {},
+  query: Document = {},
   { sort = { created_at: -1 } }: { sort?: { [key: string]: number } } = {}
 ) => {
   return getAllUsers(query, { sort, forExport: true });
@@ -460,7 +460,7 @@ export const getAllUsersForExport = async (
  * @param {string} _idStr
  * @returns
  */
-export const removeUser = async (_idStr) => {
+export const removeUser = async (_idStr: string | ObjectId) => {
   const _id = new ObjectId(_idStr);
   const user = await usersMigrationDb().findOne({ _id });
 
