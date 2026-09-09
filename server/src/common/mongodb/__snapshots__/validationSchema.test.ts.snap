@@ -18333,6 +18333,7 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                     "delivered",
                     "read",
                     "failed",
+                    "failed_send",
                   ],
                 },
                 {
