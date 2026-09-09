@@ -87,18 +87,11 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
       });
       baseItems.push({
         text: (
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+          <span className={styles.navLabel}>
             Collaboration et suivi Missions Locales
             {unreadCount > 0 && (
               <span
-                style={{
-                  display: "inline-block",
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  backgroundColor: "var(--text-default-error)",
-                  flexShrink: 0,
-                }}
+                className={styles.unreadDot}
                 role="status"
                 aria-label={`${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}`}
               />

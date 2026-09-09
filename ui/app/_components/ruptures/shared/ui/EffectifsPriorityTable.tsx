@@ -37,8 +37,8 @@ function PriorityBadge({
 }) {
   const label = listType ? getPriorityLabel(listType) : "À TRAITER EN PRIORITÉ";
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-      <p className="fr-badge fr-badge--red" style={{ gap: "0.5rem" }}>
+    <div className={styles.badgeRow}>
+      <p className={`fr-badge fr-badge--red ${styles.badge}`}>
         <i className="fr-icon-fire-fill fr-icon--sm" /> {label} ({priorityData.length})
       </p>
     </div>
@@ -122,12 +122,12 @@ export function EffectifsPriorityTable({
         element: {
           id: effectif.id,
           badge: (
-            <div style={{ display: "flex", alignItems: "end", width: "100%", justifyContent: "flex-end" }}>
+            <div className={styles.cellBadge}>
               <StatutDateCell effectif={effectif} />
             </div>
           ),
           name: (
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div className={styles.cellName}>
               <EffectifPriorityBadgeMultiple effectif={effectif} isHeader />
               <strong>{effectif.nom}</strong>
               <strong>{effectif.prenom}</strong>
@@ -136,7 +136,7 @@ export function EffectifsPriorityTable({
           formation: <span className="line-clamp-2">{effectif.libelle_formation}</span>,
           commune: <CommuneCell commune={effectif.commune} code_postal={effectif.code_postal} />,
           arrow: (
-            <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <div className={styles.cellArrow}>
               <i className="fr-icon-arrow-right-line fr-icon--sm" />
             </div>
           ),
@@ -150,44 +150,28 @@ export function EffectifsPriorityTable({
   }
 
   return (
-    <div
-      id={`priority-${listType}`}
-      style={{
-        padding: "16px",
-        marginTop: "32px",
-        background: "var(--background-alt-blue-france)",
-      }}
-      className={styles.priorityContainer}
-    >
+    <div id={`priority-${listType}`} className={styles.priorityContainer}>
       {priorityData.length === 0 && hadEffectifsPrioritaires && (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div className={styles.emptyHeader}>
           <div>
             <PriorityBadge priorityData={priorityData} listType={listType} />
-            <p style={{ fontWeight: "bold", margin: "0", fontSize: "14px" }}>
-              Tous les jeunes de cette liste ont été contactés !
-            </p>
+            <p className={styles.emptyMessage}>Tous les jeunes de cette liste ont été contactés !</p>
           </div>
           <Image
             src="/images/mission-locale-valid-tick.svg"
             alt=""
             width={50}
             height={50}
-            style={{
-              width: "50px",
-              height: "auto",
-              userSelect: "none",
-            }}
+            className={styles.emptyIllustration}
           />
         </div>
       )}
 
       {priorityData.length > 0 && (
-        <div style={{ padding: "1rem" }}>
-          <h3 style={{ color: "var(--text-title-blue-france)" }}>
-            Dossiers à traiter en priorité ({filteredData.length})
-          </h3>
+        <div className={styles.content}>
+          <h3 className={styles.title}>Dossiers à traiter en priorité ({filteredData.length})</h3>
           {isMissionLocaleUser(user.organisation.type) && (
-            <div style={{ marginBottom: "16px" }}>
+            <div className={styles.infoBlock}>
               <DsfrLink
                 href="#"
                 arrow="none"
@@ -202,17 +186,17 @@ export function EffectifsPriorityTable({
               </DsfrLink>
 
               {infoOpen && (
-                <div style={{ marginTop: "12px", fontSize: "14px", lineHeight: "1.4" }}>
-                  <p style={{ margin: "0 0 8px 0" }}>Nous affichons dans cette liste :</p>
-                  <ul style={{ margin: "0 0 12px 20px", padding: "0" }}>{PRIORITY_LIST_ITEMS}</ul>
+                <div className={styles.infoDetails}>
+                  <p className={styles.infoIntro}>Nous affichons dans cette liste :</p>
+                  <ul className={styles.infoList}>{PRIORITY_LIST_ITEMS}</ul>
                 </div>
               )}
             </div>
           )}
           {user.organisation.type !== "MISSION_LOCALE" && (
-            <div style={{ margin: "0 0 16px 0", fontSize: "14px", lineHeight: "1.4" }}>
-              <p style={{ margin: "0 0 8px 0" }}>Nous affichons dans cette liste :</p>
-              <ul style={{ margin: "0 0 0 20px", padding: "0" }}>{PRIORITY_LIST_ITEMS}</ul>
+            <div className={styles.staticInfo}>
+              <p className={styles.infoIntro}>Nous affichons dans cette liste :</p>
+              <ul className={styles.staticList}>{PRIORITY_LIST_ITEMS}</ul>
             </div>
           )}
           <SimpleTable
@@ -228,7 +212,7 @@ export function EffectifsPriorityTable({
             }}
           />
           {hasMoreItems && !isFiltering && (
-            <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}>
+            <div className={styles.moreRow}>
               <Button
                 iconId={isExpanded ? "ri-subtract-line" : "ri-add-line"}
                 iconPosition="right"

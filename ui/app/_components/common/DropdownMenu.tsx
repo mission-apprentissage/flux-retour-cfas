@@ -32,21 +32,24 @@ export function DropdownMenu({ label, buttonIconId, ariaLabel, children }: Dropd
       }
     };
 
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      focusTrigger();
+    };
+
     document.addEventListener("mousedown", handlePointerDown);
-    return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, [open]);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [open, focusTrigger]);
 
   const items = () => Array.from(containerRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (!open) return;
-
-    if (event.key === "Escape") {
-      event.preventDefault();
-      setOpen(false);
-      focusTrigger();
-      return;
-    }
 
     if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
 

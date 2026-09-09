@@ -288,10 +288,9 @@ export function MlRupturesListView({
           sticky
           classes={{ root: styles.moisNav }}
           items={sideMenuItems}
-          style={{ paddingRight: 0 }}
         />
       </div>
-      <div className="fr-col-12 fr-col-md-9" style={{ paddingLeft: "2rem" }}>
+      <div className={`fr-col-12 fr-col-md-9 ${styles.colonneListe}`}>
         {downloadError && (
           <Alert
             severity="error"

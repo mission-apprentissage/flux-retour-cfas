@@ -1,3 +1,5 @@
+import styles from "./headerTooltips.module.css";
+
 const headerTooltips = {
   Ligne: (
     <>
@@ -8,7 +10,7 @@ const headerTooltips = {
   type_cfa: (
     <>
       <p>2 chiffres attendus. Indiquer au choix&nbsp;:</p>
-      <ul style={{ marginTop: "1em", marginBottom: "1em", listStyleType: "none" }}>
+      <ul className={styles.liste}>
         <li>
           <strong>01</strong>&nbsp;: CFA public (éducation nationale)
         </li>

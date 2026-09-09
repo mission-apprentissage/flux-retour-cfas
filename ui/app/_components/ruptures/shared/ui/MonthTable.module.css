@@ -1,28 +1,28 @@
 .monthTableEmpty {
-  margin-top: 1rem;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 2rem;
+  align-items: flex-start;
+  margin-top: 1rem;
 }
 
 .monthTableTitle {
+  margin: 0;
   color: var(--text-title-blue-france);
   text-align: left;
-  margin: 0;
 }
 
 .monthTableEmptyText {
-  color: var(--text-disabled-grey);
-  font-style: italic;
-  text-align: left;
   margin: 0;
+  font-style: italic;
+  color: var(--text-disabled-grey);
+  text-align: left;
 }
 
 .monthTableNameContainer {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .identite {
@@ -49,27 +49,27 @@
 
 .monthHeader {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
 .monthTitle {
-  color: var(--text-title-blue-france);
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
+  color: var(--text-title-blue-france);
 }
 
 .monthHeaderActions {
   display: flex;
-  align-items: center;
   gap: 1rem;
+  align-items: center;
 }
 
 /* Effectif du mois, en retrait du titre (maquette). */
 .monthCount {
-  color: var(--text-mention-grey);
   font-size: 0.875rem;
+  color: var(--text-mention-grey);
   white-space: nowrap;
 }
 
@@ -79,4 +79,36 @@
 
 .monthDoneIcon::before {
   --icon-size: 1.25rem;
+}
+
+.monthBlock {
+  margin-bottom: 3rem;
+}
+
+.monthBody {
+  margin-top: 1rem;
+}
+
+.moreRow {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.cellBadge {
+  display: flex;
+  align-items: end;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.cellName {
+  display: flex;
+  flex-direction: column;
+}
+
+.cellArrow {
+  display: flex;
+  align-items: center;
+  height: 100%;
 }

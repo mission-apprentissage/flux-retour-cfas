@@ -12,6 +12,8 @@ import { CollaborationTunnel } from "@/app/_components/ruptures/cfa/collaboratio
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { dePrenom } from "@/app/_utils/ruptures.utils";
 
+import pageStyles from "./CollaborationFormPage.module.css";
+
 export default function CollaborationFormPage({ id }: { id: string }) {
   const { data, isLoading } = useCfaEffectifDetail(id);
   const router = useRouter();
@@ -39,7 +41,7 @@ export default function CollaborationFormPage({ id }: { id: string }) {
 
   if (isLoading || !data || shouldRedirect) {
     return (
-      <div style={{ padding: "2rem", maxWidth: "78rem", margin: "0 auto" }}>
+      <div className={pageStyles.page}>
         <Skeleton height={400} />
       </div>
     );
@@ -55,7 +57,7 @@ export default function CollaborationFormPage({ id }: { id: string }) {
       {effectif ? (
         <CollaborationTunnel effectif={effectif} onSuccess={handleSuccess} onCancel={() => router.back()} />
       ) : (
-        <div style={{ padding: "2rem", maxWidth: "78rem", margin: "0 auto" }}>
+        <div className={pageStyles.page}>
           <p>Effectif introuvable.</p>
         </div>
       )}
@@ -64,11 +66,7 @@ export default function CollaborationFormPage({ id }: { id: string }) {
         <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-labelledby="modal-success-title">
           <div className={styles.modalCard}>
             <div className={styles.modalCheckIcon}>
-              <span
-                className="fr-icon-checkbox-circle-line"
-                aria-hidden="true"
-                style={{ fontSize: "40px", color: "var(--text-action-high-blue-france)" }}
-              />
+              <span className={`fr-icon-checkbox-circle-line ${pageStyles.iconeSucces}`} aria-hidden="true" />
             </div>
             <p id="modal-success-title" className={styles.modalText}>
               Le dossier <span className={styles.modalHighlight}>{dePrenom(`${prenom} ${nom}`)}</span> a bien été envoyé

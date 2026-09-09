@@ -56,7 +56,7 @@ export function CfaEffectifsTable({
                 currentDir={order}
                 onSort={onSort}
               />
-              <span style={{ marginLeft: "0.25rem" }}>
+              <span className="fr-ml-1v">
                 <Tooltip
                   kind="hover"
                   title={

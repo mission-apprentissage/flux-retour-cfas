@@ -79,11 +79,7 @@ export function CreatedAtCell({ user }: Pick<UserTableCellsProps, "user">) {
 
 export function StatusCell({ user }: Pick<UserTableCellsProps, "user">) {
   return (
-    <Badge
-      severity={user.account_status === "CONFIRMED" ? "success" : "warning"}
-      small
-      style={{ fontSize: "0.625rem" }}
-    >
+    <Badge severity={user.account_status === "CONFIRMED" ? "success" : "warning"} small className={styles.badge}>
       {USER_STATUS_LABELS[user.account_status] || user.account_status}
     </Badge>
   );

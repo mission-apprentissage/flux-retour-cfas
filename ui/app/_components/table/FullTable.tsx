@@ -23,11 +23,10 @@ import { FullTableProps, TableRowData } from "./types";
 
 function SortIcon({ isSorted }: { isSorted: false | "asc" | "desc" }) {
   const iconClass = isSorted === "desc" ? "ri-arrow-down-line" : "ri-arrow-up-line";
-  const color = isSorted ? "#000" : "#999";
 
   return (
-    <span style={{ display: "flex", alignItems: "center", marginLeft: "0.5rem" }}>
-      <i className={iconClass} style={{ color }} />
+    <span className={`${styles.sortIcon} ${isSorted ? styles.sortIconActive : ""}`}>
+      <i className={iconClass} />
     </span>
   );
 }
@@ -37,7 +36,7 @@ function TableHeaderCell({ header }: { header: Header<TableRowData, unknown> }) 
 
   return (
     <div
-      style={{ cursor: canSort ? "pointer" : "default", display: "flex" }}
+      className={`${styles.headerCell} ${canSort ? styles.headerCellSortable : ""}`}
       onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
     >
       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -47,15 +46,7 @@ function TableHeaderCell({ header }: { header: Header<TableRowData, unknown> }) 
 }
 
 function TableBodyCell({ cell }: { cell: Cell<TableRowData, unknown> }) {
-  return (
-    <div
-      style={{
-        maxWidth: "500px",
-      }}
-    >
-      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-    </div>
-  );
+  return <div className={styles.bodyCell}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>;
 }
 
 function TablePagination({
@@ -68,7 +59,7 @@ function TablePagination({
   onPageChange: (page: number) => void;
 }) {
   return (
-    <div style={{ flex: "none" }}>
+    <div className={styles.paginationWrapper}>
       <Pagination
         key={currentPage}
         count={totalPages}
@@ -268,10 +259,8 @@ export function FullTable({
             `}</style>
           )}
           {(caption || headerAction) && (
-            <div
-              style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}
-            >
-              {caption && <h4 style={{ margin: 0 }}>{caption}</h4>}
+            <div className={styles.captionRow}>
+              {caption && <h4 className={styles.caption}>{caption}</h4>}
               {headerAction && <div>{headerAction}</div>}
             </div>
           )}
@@ -340,16 +329,9 @@ export function FullTable({
             />
           )}
           {hasPagination && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: "1rem",
-              }}
-            >
+            <div className={styles.paginationRow}>
               <TablePagination totalPages={totalPages} currentPage={currentPage} onPageChange={handlePageChange} />
-              <div style={{ width: "150px" }}>
+              <div className={styles.pageSizeSelector}>
                 <PageSizeSelector pageSize={pageSize} onPageSizeChange={handlePageSizeChange} />
               </div>
             </div>

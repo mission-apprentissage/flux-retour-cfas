@@ -26,7 +26,7 @@
 
 .panelHeader {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 1rem;
 }

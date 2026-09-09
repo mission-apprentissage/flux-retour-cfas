@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { MlCard } from "@/app/_components/card/MlCard";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 
+import colStyles from "./ValidationPrioritaireClient.module.css";
+
 export default function ValidationPrioritaireClient() {
   const router = useRouter();
 
@@ -16,10 +18,7 @@ export default function ValidationPrioritaireClient() {
           Retour à la liste
         </DsfrLink>
       </div>
-      <div
-        className="fr-col-12 fr-col-md-9"
-        style={{ paddingLeft: "1rem", borderLeft: "1px solid var(--border-default-grey)" }}
-      >
+      <div className={`fr-col-12 fr-col-md-9 ${colStyles.colonne}`}>
         <MlCard
           title="Félicitations"
           subtitle="Vous avez traité tous les dossiers prioritaires."

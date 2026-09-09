@@ -8,6 +8,8 @@ import { z } from "zod";
 
 import { useUpdateMlParametresAdmin } from "../hooks/useStatsQueries";
 
+import styles from "./MlAdminRdvUrlEditor.module.css";
+
 interface Props {
   mlId: string;
   rdvUrl: string | null | undefined;
@@ -100,7 +102,7 @@ export function MlAdminRdvUrlEditor({ mlId, rdvUrl }: Props) {
   }
 
   return (
-    <div style={{ marginTop: "0.5rem" }}>
+    <div className={styles.bloc}>
       <Input
         label=""
         state={error ? "error" : "default"}
@@ -115,7 +117,7 @@ export function MlAdminRdvUrlEditor({ mlId, rdvUrl }: Props) {
           },
         }}
       />
-      <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+      <div className={styles.actions}>
         <Button priority="primary" size="small" onClick={handleSave} disabled={isLoading}>
           Enregistrer
         </Button>

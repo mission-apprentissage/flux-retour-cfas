@@ -6,6 +6,7 @@ import { FullTable } from "@/app/_components/table/FullTable";
 import { ColumnData } from "@/app/_components/table/types";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
+import badges from "./FTBadges.module.css";
 import styles from "./FTEffectifsTraitesTable.module.css";
 import { IEffectifFranceTravail, ISecteurArborescence } from "./types";
 import { formatTraitementDate } from "./utils/dateFormatting";
@@ -99,7 +100,7 @@ export function FTEffectifsTraitesTable({
               {rqth && (
                 <p className="fr-badge fr-badge--red" aria-label="Effectif RQTH">
                   <i className="fr-icon-fire-fill fr-icon--sm" />
-                  <span style={{ marginLeft: "5px", fontSize: "12px", fontWeight: 700 }}>RQTH</span>
+                  <span className={badges.badgeTexte}>RQTH</span>
                 </p>
               )}
               <div className={styles.nomText}>
@@ -112,11 +113,11 @@ export function FTEffectifsTraitesTable({
               {secteurActivite}
             </span>
           ),
-          dateTraitement: <span style={{ color: "var(--text-default-grey)" }}>{dateTraitementFormatted}</span>,
+          dateTraitement: <span className={badges.dateTraitement}>{dateTraitementFormatted}</span>,
           statut: (
             <div className={styles.centeredBadge}>
-              <p className="fr-badge fr-badge--success" style={{ margin: 0 }}>
-                <span style={{ fontSize: "12px", fontWeight: 700 }}>TRAITÉ</span>
+              <p className={`fr-badge fr-badge--success ${badges.badgePlat}`}>
+                <span className={badges.badgeTexteSeul}>TRAITÉ</span>
               </p>
             </div>
           ),

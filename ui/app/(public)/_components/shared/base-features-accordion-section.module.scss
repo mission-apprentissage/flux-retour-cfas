@@ -150,3 +150,10 @@
     display: none;
   }
 }
+
+.pauseButtonAligne {
+  flex-shrink: 0;
+  margin-top: auto;
+  margin-left: auto;
+  white-space: nowrap;
+}

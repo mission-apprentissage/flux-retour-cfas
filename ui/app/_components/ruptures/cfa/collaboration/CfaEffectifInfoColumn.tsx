@@ -48,7 +48,7 @@ export function CfaEffectifInfoColumn({ effectif, onToggleRupture }: CfaEffectif
           <div className={styles.ruptureBlock}>
             <p className={styles.ruptureLabel}>
               En rupture de contrat ?
-              <span style={{ marginLeft: "0.25rem" }}>
+              <span className="fr-ml-1v">
                 <Tooltip
                   kind="hover"
                   title={

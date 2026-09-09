@@ -1,6 +1,8 @@
 import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 
+import styles from "@/app/_components/layouts/pageContainer.module.css";
+
 import { ConnectedHeader } from "../_components/ConnectedHeader";
 import { UserContextProvider } from "../_components/context/UserContext";
 import { Footer } from "../_components/Footer";
@@ -20,7 +22,7 @@ export default async function RootLayout({ children }: { children: JSX.Element }
     <Providers>
       <UserContextProvider user={user}>
         <ConnectedHeader />
-        <div style={{ flex: 1 }}>{children}</div>
+        <div className={styles.grow}>{children}</div>
         <Footer />
         <CrispChatNoSSR />
       </UserContextProvider>

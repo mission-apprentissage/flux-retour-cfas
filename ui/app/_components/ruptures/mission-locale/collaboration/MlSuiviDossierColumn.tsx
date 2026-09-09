@@ -707,7 +707,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                   width={0}
                   height={0}
                   sizes="100%"
-                  style={{ width: "100%", height: "auto" }}
+                  className={localStyles.illustrationFluide}
                 />
               </div>
 

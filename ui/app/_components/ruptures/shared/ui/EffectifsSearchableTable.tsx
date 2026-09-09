@@ -33,7 +33,7 @@ export const EffectifsSearchableTable = memo(function EffectifsSearchableTable({
   return (
     <div>
       {!isTraite && (priorityData || hadEffectifsPrioritaires) && (
-        <div style={{ marginBottom: "2rem" }}>
+        <div className="fr-mb-4w">
           <EffectifsPriorityTable
             priorityData={priorityData}
             searchTerm={searchTerm}

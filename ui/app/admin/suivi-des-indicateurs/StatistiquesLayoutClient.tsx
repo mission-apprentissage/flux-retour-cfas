@@ -41,26 +41,14 @@ const NationalLabel = ({ isActive, collapsed }: { isActive: boolean; collapsed?:
 
 const MissionLocaleLabel = ({ isActive, collapsed }: { isActive: boolean; collapsed?: boolean }) => (
   <>
-    <i
-      className={`ri-school-fill ${styles.syntheseIcon}`}
-      style={{
-        fontSize: "22px",
-        color: isActive ? "#000091" : "#CECECE",
-      }}
-    />
+    <i className={`ri-school-fill ${styles.syntheseIcon} ${styles.mlIcon} ${isActive ? styles.mlIconActive : ""}`} />
     {!collapsed && "Par Mission Locale"}
   </>
 );
 
 const RegionsLabel = ({ isActive, collapsed }: { isActive: boolean; collapsed?: boolean }) => (
   <>
-    <div
-      className={styles.regionsIcon}
-      style={{
-        filter: isActive ? "none" : "grayscale(100%)",
-        opacity: isActive ? 1 : 0.6,
-      }}
-    >
+    <div className={`${styles.regionsIcon} ${isActive ? "" : styles.regionsIconInactive}`}>
       <FranceMapSVG regionsActives={[...REGION_CODES_WITH_SVG]} />
     </div>
     {!collapsed && "Par région"}

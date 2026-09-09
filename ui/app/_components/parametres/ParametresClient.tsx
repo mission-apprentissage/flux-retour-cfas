@@ -630,11 +630,7 @@ interface StepItemProps {
 
 function StepItem({ children, active = false }: StepItemProps) {
   if (active) {
-    return (
-      <li className="fr-text--bold" style={{ color: "var(--text-label-blue-france)" }}>
-        {children}
-      </li>
-    );
+    return <li className={`fr-text--bold ${styles.pucePartage}`}>{children}</li>;
   }
   return <li className="fr-pl-3w">{children}</li>;
 }

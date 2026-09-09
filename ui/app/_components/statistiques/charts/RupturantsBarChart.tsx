@@ -14,6 +14,7 @@ import { calculatePercentage, getPercentageColor, RUPTURANTS_COLORS, RUPTURANTS_
 
 import { ChartLegend } from "./ChartLegend";
 import { AxisChartTooltip } from "./ChartTooltip";
+import styles from "./RupturantsBarChart.module.css";
 
 interface RupturantsBarChartProps {
   data: ITimeSeriesPoint[];
@@ -26,7 +27,7 @@ export function RupturantsBarChart({ data, loading, loadingVariation }: Rupturan
     return (
       <>
         <Skeleton height="260px" width="100%" />
-        <div style={{ marginTop: "16px" }}>
+        <div className={styles.legendSkeleton}>
           <Skeleton height="60px" width="100%" />
         </div>
       </>
@@ -57,7 +58,7 @@ export function RupturantsBarChart({ data, loading, loadingVariation }: Rupturan
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div className={styles.chart}>
       <ChartContainer
         xAxis={[
           {
@@ -112,7 +113,7 @@ export function RupturantsBarChart({ data, loading, loadingVariation }: Rupturan
         <ChartsYAxis />
         <AxisChartTooltip />
       </ChartContainer>
-      <div style={{ marginTop: "auto" }}>
+      <div className={styles.legend}>
         <ChartLegend
           items={[
             { label: RUPTURANTS_LABELS.a_traiter, color: RUPTURANTS_COLORS.a_traiter, value: totalATraiter },

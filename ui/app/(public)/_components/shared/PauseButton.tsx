@@ -1,22 +1,19 @@
-import type { CSSProperties } from "react";
-
 import styles from "./pause-button.module.scss";
 
 export function PauseButton({
   isPaused,
   togglePause,
-  style,
+  className,
 }: {
   isPaused: boolean;
   togglePause: () => void;
-  style?: CSSProperties;
+  className?: string;
 }) {
   return (
     <button
       type="button"
       onClick={togglePause}
-      className={styles.pauseButton}
-      style={style}
+      className={`${styles.pauseButton} ${className || ""}`}
       aria-pressed={isPaused}
       aria-label={isPaused ? "Reprendre l’animation" : "Mettre en pause l’animation"}
     >

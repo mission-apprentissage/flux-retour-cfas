@@ -23,15 +23,15 @@
 }
 
 .organisation {
-  margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.3;
+  -webkit-box-orient: vertical;
 }
 
 .organisationLink {
@@ -46,7 +46,11 @@
 
 .actions {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   background-image: none;
+}
+
+.badge {
+  font-size: 0.625rem;
 }

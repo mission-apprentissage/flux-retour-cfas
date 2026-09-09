@@ -43,12 +43,12 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
   return {
     id: effectif.id,
     badge: (
-      <div style={{ display: "flex", alignItems: "end", width: "100%", justifyContent: "flex-end" }}>
+      <div className={styles.cellBadge}>
         <StatutDateCell effectif={effectif} organisation={isCfaPage ? "ORGANISME_FORMATION" : "MISSION_LOCALE"} />
       </div>
     ),
     name: (
-      <div style={{ display: "flex", flexDirection: "column" }}>
+      <div className={styles.cellName}>
         <EffectifPriorityBadgeMultiple
           effectif={effectif}
           isHeader
@@ -71,7 +71,7 @@ function buildRowData(effectif: EffectifData, listType: IMissionLocaleEffectifLi
     formation: <span className="line-clamp-2">{effectif.libelle_formation}</span>,
     commune: <CommuneCell commune={effectif.commune} code_postal={effectif.code_postal} />,
     icon: (
-      <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
+      <div className={styles.cellArrow}>
         <i className="fr-icon-arrow-right-line fr-icon--sm" />
       </div>
     ),
@@ -165,7 +165,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
   const toutTraite = estMoisToutTraite(monthItem);
 
   return (
-    <div id={anchorId} style={{ marginBottom: "3rem" }}>
+    <div id={anchorId} className={styles.monthBlock}>
       {monthItem.data.length === 0 ? (
         <>
           <div className={monthHeaderClassName}>
@@ -181,7 +181,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
               )}
             </div>
           </div>
-          <div style={{ marginTop: "1rem" }}>
+          <div className={styles.monthBody}>
             {toutTraite ? (
               <MlSuccessCard onVoirDossiersTraites={() => onVoirDossiersTraites?.(monthItem.month)} />
             ) : (
@@ -199,7 +199,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
               </span>
             </div>
           </div>
-          <div style={{ marginTop: "1rem" }}>
+          <div className={styles.monthBody}>
             <SimpleTable
               data={dataRows}
               columns={columns}
@@ -207,7 +207,7 @@ export const EffectifsMonthTable = memo(function EffectifsMonthTable({
               emptyMessage="Aucun élément à afficher"
             />
             {hasMoreItems && !isFiltering && (
-              <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}>
+              <div className={styles.moreRow}>
                 <Button
                   iconId={isExpanded ? "ri-subtract-line" : "ri-add-line"}
                   iconPosition="right"

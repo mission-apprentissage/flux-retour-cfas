@@ -84,11 +84,7 @@ export function HeroSection() {
               Démonstration sans son : interface du Tableau de bord pour les CFA présentant la liste des apprenants en
               rupture de contrat, l’ouverture d’une fiche navette et un échange de messages avec une Mission Locale.
             </p>
-            <PauseButton
-              isPaused={isPaused}
-              togglePause={togglePause}
-              style={{ position: "absolute", bottom: "1.5rem", right: "1.5rem" }}
-            />
+            <PauseButton isPaused={isPaused} togglePause={togglePause} className={styles.pauseButtonFlottant} />
           </div>
         </div>
       </div>

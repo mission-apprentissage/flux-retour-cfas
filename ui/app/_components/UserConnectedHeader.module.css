@@ -13,9 +13,9 @@
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
   font-size: 0.75rem;
   font-weight: 400;
+  white-space: nowrap;
 }
 
 .accountLabel {
@@ -23,6 +23,6 @@
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
   vertical-align: middle;
+  white-space: nowrap;
 }

@@ -215,7 +215,7 @@ function SouhaiteRdvBadge() {
       className={`fr-badge fr-badge--sm ${badgeStyles.whatsappBadgeCallback}`}
       aria-label="Effectif souhaite un RDV"
     >
-      <i className="ri-chat-check-fill fr-icon--sm" style={{ color: "#18753C" }} />
+      <i className={`ri-chat-check-fill fr-icon--sm ${styles.rdvIcon}`} />
       <span className={styles.availabilityDot} aria-hidden="true">
         <span className={styles.availabilityDotOuter} />
         <span className={styles.availabilityDotInner} />
@@ -225,8 +225,8 @@ function SouhaiteRdvBadge() {
         kind="hover"
         title={
           <div className={styles.tooltipContent}>
-            <span className={styles.tooltipIcon} style={{ display: "inline-flex", alignItems: "center" }}>
-              <i className="ri-chat-check-fill fr-icon--sm" style={{ color: "#18753C" }} />
+            <span className={`${styles.tooltipIcon} ${styles.tooltipIconInline}`}>
+              <i className={`ri-chat-check-fill fr-icon--sm ${styles.rdvIcon}`} />
               <span className={styles.availabilityDot} aria-hidden="true">
                 <span className={styles.availabilityDotOuter} />
                 <span className={styles.availabilityDotInner} />
@@ -248,7 +248,7 @@ function SouhaiteRdvBadge() {
 export function SouhaiteRdvBadgeInline() {
   return (
     <span className={`fr-badge fr-badge--sm ${badgeStyles.whatsappBadgeCallback}`} aria-label="Souhaite un RDV">
-      <i className="ri-message-3-fill fr-icon--sm" style={{ color: "#18753C" }} />
+      <i className={`ri-message-3-fill fr-icon--sm ${styles.rdvIcon}`} />
       <span className={styles.availabilityDot} aria-hidden="true">
         <span className={styles.availabilityDotOuter} />
         <span className={styles.availabilityDotInner} />

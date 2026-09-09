@@ -23,8 +23,8 @@
 }
 
 .roleCard {
-  margin-top: 1rem;
   padding: 1rem;
+  margin-top: 1rem;
   border: 1px solid var(--border-default-grey);
   border-radius: 4px;
 }
@@ -36,6 +36,6 @@
 
 .roleCardRow {
   display: flex;
-  align-items: center;
   gap: 1rem;
+  align-items: center;
 }

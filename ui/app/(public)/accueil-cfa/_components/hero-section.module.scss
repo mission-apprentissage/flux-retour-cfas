@@ -233,3 +233,9 @@
 .srOnly {
   @extend %landing-sr-only;
 }
+
+.pauseButtonFlottant {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.5rem;
+}

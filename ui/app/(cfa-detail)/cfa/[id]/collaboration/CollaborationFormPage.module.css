@@ -1,0 +1,10 @@
+.page {
+  max-width: 78rem;
+  padding: 2rem;
+  margin: 0 auto;
+}
+
+.iconeSucces {
+  font-size: 40px;
+  color: var(--text-action-high-blue-france);
+}

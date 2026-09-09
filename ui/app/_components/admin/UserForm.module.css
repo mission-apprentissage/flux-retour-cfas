@@ -7,8 +7,8 @@
 
 .statusRow {
   display: flex;
-  align-items: center;
   gap: 1rem;
+  align-items: center;
   margin: 1rem 0;
 }
 

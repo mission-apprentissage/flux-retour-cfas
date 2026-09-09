@@ -28,8 +28,6 @@ interface CfaRuptureTableProps {
 
 // Largeurs figées (proportions maquette : 215/191/200/161/295 sur ~1062px) pour que les deux
 // sous-tableaux — avant et après le bandeau "+45j" — gardent des colonnes parfaitement alignées.
-const COLUMN_WIDTHS = ["20%", "18%", "19%", "15%", "28%"];
-
 function TransmisAutoBanner() {
   const [isExpanded, setIsExpanded] = useState(false);
   return (
@@ -86,7 +84,7 @@ export function CfaRuptureTable({ effectifs, sort, order, onSort }: CfaRuptureTa
         </th>
         <th>
           En rupture ?
-          <span style={{ marginLeft: "0.25rem" }}>
+          <span className="fr-ml-1v">
             <Tooltip
               kind="hover"
               title={
@@ -204,9 +202,11 @@ export function CfaRuptureTable({ effectifs, sort, order, onSort }: CfaRuptureTa
     <div className="fr-table">
       <table className={styles.fixedTable}>
         <colgroup>
-          {COLUMN_WIDTHS.map((width, i) => (
-            <col key={i} style={{ width }} />
-          ))}
+          <col />
+          <col />
+          <col />
+          <col />
+          <col />
         </colgroup>
         {showHeader && renderHeader()}
         <tbody>{rows.map(renderRow)}</tbody>

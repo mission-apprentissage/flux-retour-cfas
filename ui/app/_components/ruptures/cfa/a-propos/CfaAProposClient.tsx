@@ -107,7 +107,7 @@ export function CfaAProposClient() {
                 linkProps: { href: `#${id}` },
                 isActive: activeSection === id,
               }))}
-              style={{ maxHeight: "none", overflow: "visible" }}
+              classes={{ root: styles.sideMenu }}
             />
           </nav>
 

@@ -1,16 +1,16 @@
 .panel {
-  border: 1px solid var(--border-default-grey);
-  border-radius: var(--spacing-1v);
   padding: 1rem;
   background-color: var(--background-alt-grey);
+  border: 1px solid var(--border-default-grey);
+  border-radius: var(--spacing-1v);
 }
 
 .header {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
@@ -26,8 +26,10 @@
   gap: 1rem;
 }
 
-.cell {
+.cell button > span:first-child {
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (min-width: 600px) {

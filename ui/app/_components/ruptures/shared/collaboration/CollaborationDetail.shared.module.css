@@ -4,8 +4,8 @@
 }
 
 .detailNav {
-  margin-left: -3rem;
   margin-right: -3rem;
+  margin-left: -3rem;
   background: var(--light-decisions-background-background-default-grey-active, #ededed);
 }
 
@@ -16,52 +16,52 @@
 }
 
 .infoColumn {
-  border-right: 2px solid var(--border-default-grey);
-  padding-left: 3rem;
-  padding-right: 2rem;
-  margin-top: -2rem;
   padding-top: 2rem;
-  margin-bottom: -2rem;
+  padding-right: 2rem;
   padding-bottom: 2rem;
+  padding-left: 3rem;
+  margin-top: -2rem;
+  margin-bottom: -2rem;
   overflow-y: auto;
+  border-right: 2px solid var(--border-default-grey);
 }
 
 @media (max-width: 991px) {
   .infoColumn {
-    border-right: none;
-    padding-left: 1rem;
     padding-right: 1rem;
-    border-bottom: 1px solid var(--border-default-grey);
     padding-bottom: 2rem;
+    padding-left: 1rem;
+    border-right: none;
+    border-bottom: 1px solid var(--border-default-grey);
   }
 }
 
 .avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background-color: var(--border-action-low-blue-france);
-  color: var(--blue-france-main-525);
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  width: 48px;
+  height: 48px;
   font-size: 0.875rem;
-  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--blue-france-main-525);
+  background-color: var(--border-action-low-blue-france);
+  border-radius: 50%;
 }
 
 .nameRow {
   display: flex;
-  align-items: center;
   gap: 1rem;
+  align-items: center;
   margin-bottom: 1rem;
 }
 
 .nameRow h4 {
   margin: 0;
   font-family: Marianne, sans-serif;
-  font-weight: 700;
   font-size: 2rem;
+  font-weight: 700;
   line-height: 2.5rem;
   color: var(--text-default-grey);
 }
@@ -74,47 +74,47 @@
 }
 
 .separator {
-  border: none;
   height: 4px;
   padding: 0;
-  background: var(--background-alt-grey);
   margin: 0.75rem -2rem 0.75rem -3rem;
+  background: var(--background-alt-grey);
+  border: none;
 }
 
 .mineurNotice {
   display: flex;
-  align-items: flex-start;
   gap: 0.5rem;
-  background: #f5f5fe;
-  border-radius: 4px;
+  align-items: flex-start;
   padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
   font-size: 0.875rem;
   color: #000091;
-  margin-bottom: 0.75rem;
+  background: #f5f5fe;
+  border-radius: 4px;
 }
 
 .sectionTitle {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
   font-family: Marianne, sans-serif;
-  font-weight: 700;
   font-size: 0.75rem;
+  font-weight: 700;
   line-height: 1.25rem;
   color: var(--text-default-grey);
-  margin-bottom: 0.75rem;
-  margin-top: 0;
 }
 
 .infoLine {
   display: flex;
-  align-items: flex-start;
   gap: 0.5rem;
+  align-items: flex-start;
   margin: 0.25rem 0;
   font-size: 0.875rem;
 }
 
 .infoLine i,
 .mlName i {
-  color: var(--text-mention-grey);
   flex-shrink: 0;
+  color: var(--text-mention-grey);
 }
 
 .infoLine strong {
@@ -123,8 +123,8 @@
 }
 
 .rqthLine {
-  font-size: 0.875rem;
   margin: 0.25rem 0;
+  font-size: 0.875rem;
 }
 
 .rqthLine strong {
@@ -133,40 +133,40 @@
 }
 
 .formationLevel {
-  font-size: 0.875rem;
   margin: 0.25rem 0;
+  font-size: 0.875rem;
   color: var(--text-mention-grey);
 }
 
 .noData {
-  color: var(--text-mention-grey);
   font-style: italic;
+  color: var(--text-mention-grey);
 }
 
 .mlName {
   display: flex;
-  align-items: flex-start;
   gap: 0.5rem;
-  font-size: 0.875rem;
+  align-items: flex-start;
   margin: 0.25rem 0;
+  font-size: 0.875rem;
 }
 
 /* a.… : MUI (DsfrLink) applique ses propres classes et écrasait le gras demandé ici.
    La taille, elle, vient de la prop size="sm" du composant : DSFR la pose en !important. */
 a.mlCoordLink {
-  font-weight: 700;
   /* inline-flex : le chevron DSFR est rendu en ::after et se calait sous la ligne de base
      (vertical-align négatif) avec un écart de 8px, ce qui le détachait du libellé. */
   display: inline-flex;
-  align-items: center;
   gap: 0.25rem;
+  align-items: center;
   margin-bottom: 1rem;
+  font-weight: 700;
 }
 
 /* a.… : même spécificité que la règle DSFR .fr-link--icon-right::after, l'élément la départage. */
 a.mlCoordLink::after {
-  margin-left: 0;
   flex-shrink: 0;
+  margin-left: 0;
 }
 
 .mlContactDetails {
@@ -179,95 +179,95 @@ a.mlCoordLink::after {
 }
 
 .sourceFooter {
-  font-size: 0.75rem;
-  color: var(--text-mention-grey);
-  font-style: italic;
   margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-style: italic;
   line-height: 1.4;
+  color: var(--text-mention-grey);
 }
 
 .collabBlock {
-  background: var(--background-alt-blue-france);
-  border-radius: 4px;
   padding: 1.5rem;
+  background: var(--background-alt-blue-france);
   background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='4' ry='4' stroke='%23C1C1FB' stroke-width='2' stroke-dasharray='14%2c 10' stroke-linecap='square'/%3e%3c/svg%3e");
+  border-radius: 4px;
 }
 
 .collabQuestion {
-  font-family: Marianne, sans-serif;
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.5rem;
   margin: 0 0 1.5rem 0;
+  font-family: Marianne, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5rem;
 }
 
 .mlCallOut {
-  border-left: 4px solid var(--blue-france-main-525);
   padding: 0.75rem 1rem;
   margin-bottom: 0;
+  border-left: 4px solid var(--blue-france-main-525);
 }
 
 .mlCallOutTitle {
-  font-weight: 700;
-  font-size: 1rem;
   margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .mlCallOutLocation {
+  margin: 0 0 0.5rem 0;
   font-size: 0.875rem;
   color: var(--text-mention-grey);
-  margin: 0 0 0.5rem 0;
 }
 
 .collabCta {
-  margin-top: 1rem;
   display: flex;
   justify-content: flex-end;
+  margin-top: 1rem;
 }
 
 .collabDisabledMessage {
   font-size: 0.875rem;
-  color: var(--text-mention-grey);
   font-style: italic;
+  color: var(--text-mention-grey);
 }
 
 .emptyTimeline {
   font-size: 0.875rem;
-  color: var(--text-mention-grey);
   font-style: italic;
+  color: var(--text-mention-grey);
 }
 
 .sentHeader {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border-default-grey);
-  margin: -2rem -2rem 1rem -1.5rem;
+  justify-content: space-between;
   padding: 0.75rem 1.5rem;
+  margin: -2rem -2rem 1rem -1.5rem;
+  border-bottom: 1px solid var(--border-default-grey);
 }
 
 .sentHeaderTitle {
   font-family: Marianne, sans-serif;
-  font-weight: 700;
   font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-mention-grey);
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  color: var(--text-mention-grey);
 }
 
 .sentBadge {
   display: flex;
-  align-items: center;
   gap: 0.25rem;
+  align-items: center;
+  padding: 0 0.5rem;
   font-family: Marianne, sans-serif;
   font-size: 0.6875rem;
   font-weight: 700;
+  color: var(--text-action-high-blue-france);
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  color: var(--text-action-high-blue-france);
   white-space: nowrap;
   background: var(--background-action-low-blue-france-hover);
-  padding: 0 0.5rem;
   border-radius: 4px;
 }
 
@@ -276,50 +276,50 @@ a.mlCoordLink::after {
 }
 
 .sentCallout {
-  background: var(--background-alt-blue-france);
   padding: 1rem 1.25rem;
-  margin: -1rem -2rem 0 -1.5rem;
-  padding-left: 1.5rem;
   padding-right: 2rem;
+  padding-left: 1.5rem;
+  margin: -1rem -2rem 0 -1.5rem;
   font-size: 0.8125rem;
   line-height: 1.55;
   color: var(--text-default-grey);
+  background: var(--background-alt-blue-france);
 }
 
 .sentCalloutTitle {
-  font-weight: 700;
-  margin: 0 0 0.375rem 0;
   display: flex;
-  align-items: flex-start;
   gap: 0.375rem;
+  align-items: flex-start;
+  margin: 0 0 0.375rem 0;
+  font-weight: 700;
 }
 
 .sentCalloutTitle :global([class^="fr-icon-"]) {
-  color: var(--text-mention-grey);
   flex-shrink: 0;
   margin-top: 1px;
+  color: var(--text-mention-grey);
 }
 
 .sentCalloutBody {
-  font-weight: 400;
   margin: 0 0 0.75rem 0;
   font-size: 0.75rem;
-  color: var(--text-mention-grey);
+  font-weight: 400;
   line-height: 1.5;
+  color: var(--text-mention-grey);
 }
 
 .sentContactToggle {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  padding: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-action-high-blue-france);
+  text-decoration: underline;
+  cursor: pointer;
   background: none;
   border: none;
-  color: var(--text-action-high-blue-france);
-  font-weight: 700;
-  font-size: 0.8125rem;
-  cursor: pointer;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  text-decoration: underline;
 }
 
 .sentContactToggle:hover {
@@ -327,8 +327,8 @@ a.mlCoordLink::after {
 }
 
 .sentContactDetails {
-  color: var(--text-default-grey);
   margin-top: 0.375rem;
+  color: var(--text-default-grey);
 }
 
 .sentContactDetails p {
@@ -346,12 +346,12 @@ a.mlCoordLink::after {
 }
 
 .sentSectionTitle {
+  margin: 0 0 0.25rem 0;
   font-family: Marianne, sans-serif;
-  font-weight: 700;
   font-size: 0.75rem;
+  font-weight: 700;
   line-height: 1.25rem;
   color: var(--text-mention-grey);
-  margin: 0 0 0.25rem 0;
 }
 
 .situationTag {
@@ -359,11 +359,11 @@ a.mlCoordLink::after {
   gap: 0.25rem;
   align-items: center;
   height: 2rem;
-  margin-bottom: 0.25rem;
   padding: 0 0.5rem;
+  margin-bottom: 0.25rem;
   font-family: Marianne, sans-serif;
-  font-weight: 500;
   font-size: 0.875rem;
+  font-weight: 500;
   color: var(--text-default-grey);
   border: 1px solid var(--border-contrast-grey);
   border-radius: 4px;
@@ -373,11 +373,11 @@ a.mlCoordLink::after {
   display: flex;
   gap: 0.5rem;
   align-items: baseline;
+  margin: 0;
   font-family: Marianne, sans-serif;
   font-size: 0.875rem;
   line-height: 1.5rem;
   color: var(--text-default-grey);
-  margin: 0;
 }
 
 .sentSituationLine :global([class^="fr-icon-"]),
@@ -396,12 +396,12 @@ a.mlCoordLink::after {
 }
 
 .sentMotifInline {
+  margin: 0 0 0.25rem 0;
   font-family: Marianne, sans-serif;
-  font-weight: 400;
   font-size: 1rem;
+  font-weight: 400;
   line-height: 1.5rem;
   color: var(--text-title-grey);
-  margin: 0 0 0.25rem 0;
 }
 
 .sentMotifInline strong {
@@ -413,19 +413,19 @@ a.mlCoordLink::after {
 }
 
 .sentBody {
+  margin: 0 0 0.125rem 0;
   font-family: Marianne, sans-serif;
-  font-weight: 400;
   font-size: 1rem;
+  font-weight: 400;
   line-height: 1.5rem;
   color: var(--text-title-grey);
-  margin: 0 0 0.125rem 0;
 }
 
 .sentFooter :global([class^="fr-icon-"]) {
   flex-shrink: 0;
+  margin-top: 1px;
   font-size: 0.875rem;
   color: var(--blue-france-main-525);
-  margin-top: 1px;
 }
 
 .sentFooterDate {
@@ -433,30 +433,30 @@ a.mlCoordLink::after {
 }
 
 .feedbackLine {
+  margin: 0.375rem 0;
   font-family: Marianne, sans-serif;
-  font-weight: 400;
   font-size: 1rem;
+  font-weight: 400;
   line-height: 1.5rem;
   color: var(--text-title-grey);
-  margin: 0.375rem 0;
 }
 
 .feedbackCommentaire {
+  margin: 0;
   font-family: Marianne, sans-serif;
-  font-weight: 400;
   font-size: 1rem;
+  font-weight: 400;
   line-height: 1.5rem;
   color: var(--text-title-grey);
-  margin: 0;
 }
 
 .mlInactiveBanner {
-  background: var(--background-alt-grey);
-  padding: 1rem 1.5rem;
-  margin: 1rem -2rem 0 -1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  margin: 1rem -2rem 0 -1.5rem;
+  background: var(--background-alt-grey);
 }
 
 .mlInactiveNotice {
@@ -466,34 +466,48 @@ a.mlCoordLink::after {
 }
 
 .mlInactiveNoticeTitle {
+  display: flex;
+  gap: 0.375rem;
+  align-items: flex-start;
+  margin: 0;
   font-family: Marianne, sans-serif;
-  font-weight: 700;
   font-size: 0.875rem;
+  font-weight: 700;
   line-height: 1.375rem;
   color: var(--text-default-grey);
-  margin: 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.375rem;
 }
 
 .mlInactiveNoticeTitle :global([class^="fr-icon-"]) {
-  color: var(--text-title-blue-france);
   flex-shrink: 0;
   margin-top: 1px;
+  color: var(--text-title-blue-france);
 }
 
 .mlInactiveNoticeBody {
+  margin: 0;
   font-family: Marianne, sans-serif;
-  font-weight: 400;
   font-size: 0.75rem;
+  font-weight: 400;
   line-height: 1.5;
   color: var(--text-mention-grey);
-  margin: 0;
 }
 
 .nouveauContratIcon {
   color: #679e3b;
+}
+
+.finDeFormationIcon {
+  color: #666;
+}
+
+.whatsappYesIcon {
+  font-size: 18px;
+  color: #18753c;
+}
+
+.whatsappNoIcon {
+  font-size: 18px;
+  color: #666;
 }
 
 .recontacterIcon {
@@ -505,11 +519,11 @@ a.mlCoordLink::after {
 }
 
 .suiviCommentText {
+  margin: 0.25rem 0 0 0;
   font-family: Marianne, sans-serif;
   font-size: 0.875rem;
-  color: var(--text-default-grey);
-  margin: 0.25rem 0 0 0;
   line-height: 1.5;
+  color: var(--text-default-grey);
 }
 
 .recommendedLabel {
@@ -519,17 +533,17 @@ a.mlCoordLink::after {
 }
 
 .detailToggle {
-  background: none;
-  border: none;
+  display: inline-flex;
+  gap: 0.125rem;
+  align-items: center;
   padding: 0;
-  color: var(--text-action-high-blue-france);
   font-family: Marianne, sans-serif;
   font-size: 0.75rem;
-  cursor: pointer;
+  color: var(--text-action-high-blue-france);
   text-decoration: underline;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.125rem;
+  cursor: pointer;
+  background: none;
+  border: none;
 }
 
 .detailToggle:hover {
@@ -537,35 +551,35 @@ a.mlCoordLink::after {
 }
 
 .dossierTraiteBubble {
+  padding: 1rem 1.25rem;
+  margin-top: 0.75rem;
   background: #eeeeee;
   border: 1px solid var(--border-default-grey);
   border-radius: 8px;
-  padding: 1rem 1.25rem;
-  margin-top: 0.75rem;
 }
 
 .dossierTraiteLine {
+  margin: 0.25rem 0;
   font-family: Marianne, sans-serif;
-  font-weight: 400;
   font-size: 0.875rem;
+  font-weight: 400;
   line-height: 1.375rem;
   color: var(--text-title-grey);
-  margin: 0.25rem 0;
 }
 
 .dossierTraiteCommentaire {
+  margin: 0;
   font-family: Marianne, sans-serif;
-  font-weight: 400;
   font-size: 0.875rem;
+  font-weight: 400;
   line-height: 1.375rem;
   color: var(--text-title-grey);
-  margin: 0;
 }
 
 .nouveauContratBanner {
-  background: #eeeeee;
   padding: 0.75rem 1.25rem;
   margin: 1rem -2rem 1rem -1.5rem;
+  background: #eeeeee;
 }
 
 .nouveauContratBannerTag {
@@ -580,8 +594,8 @@ a.mlCoordLink::after {
 
 .nouveauContratBannerRow {
   display: flex;
-  align-items: center;
   gap: 0.5rem;
+  align-items: center;
 }
 
 .nouveauContratBannerIcon {
@@ -590,8 +604,8 @@ a.mlCoordLink::after {
 
 .nouveauContratBannerTitle {
   font-family: Marianne, sans-serif;
-  font-weight: 700;
   font-size: 0.875rem;
+  font-weight: 700;
   color: var(--text-default-grey);
 }
 
@@ -603,8 +617,8 @@ a.mlCoordLink::after {
 }
 
 .nouveauContratBannerSubtext {
+  margin: 0.25rem 0 0 0;
   font-family: Marianne, sans-serif;
   font-size: 0.75rem;
   color: var(--text-mention-grey);
-  margin: 0.25rem 0 0 0;
 }

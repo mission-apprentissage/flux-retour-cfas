@@ -12,6 +12,7 @@ import { ColumnData } from "@/app/_components/table/types";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { publicConfig } from "@/config.public";
 
+import badges from "./FTBadges.module.css";
 import styles from "./FTEffectifsTable.module.css";
 import { IEffectifFranceTravail } from "./types";
 import { getDureeBadgeProps } from "./utils";
@@ -204,7 +205,7 @@ export function FTEffectifsTable({
               {rqth && (
                 <p className="fr-badge fr-badge--red" aria-label="Effectif RQTH">
                   <i className="fr-icon-fire-fill fr-icon--sm" />
-                  <span style={{ marginLeft: "5px", fontSize: "12px", fontWeight: 700 }}>RQTH</span>
+                  <span className={badges.badgeTexte}>RQTH</span>
                 </p>
               )}
               <div className={styles.nomText}>
@@ -247,7 +248,7 @@ export function FTEffectifsTable({
               <div className={styles.centeredBadge}>
                 <p className={badgeClassName} style={badgeProps.customStyle} aria-label={ariaLabel}>
                   <i className={`${badgeProps.icon} fr-icon--sm`} />
-                  <span style={{ marginLeft: "2px", fontSize: "12px", fontWeight: 700 }}>{badgeProps.label}</span>
+                  <span className={badges.badgeTexteSerre}>{badgeProps.label}</span>
                 </p>
               </div>
             );

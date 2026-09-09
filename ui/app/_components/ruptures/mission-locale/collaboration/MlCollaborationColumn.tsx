@@ -33,7 +33,7 @@ function ContactCfaButton({
   if (!contact?.email) return null;
 
   return (
-    <div style={{ display: "flex", justifyContent: "flex-end", margin: "1rem 0" }}>
+    <div className={localStyles.actionsRow}>
       <Button
         priority="primary"
         iconId="fr-icon-send-plane-fill"
