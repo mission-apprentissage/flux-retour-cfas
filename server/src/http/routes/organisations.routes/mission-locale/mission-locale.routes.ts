@@ -5,7 +5,6 @@ import { ML_SITUATION_DOSSIER_LABEL } from "shared/constants";
 import {
   API_EFFECTIF_LISTE,
   IMissionLocaleEffectif,
-  IOrganisationMissionLocale,
   SITUATION_LABEL_ENUM,
   updateMissionLocaleEffectifApi,
 } from "shared/models";
@@ -31,7 +30,7 @@ import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collec
 import { getAgeFromDate } from "@/common/utils/miscUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { addSheetToXlscFile } from "@/common/utils/xlsxUtils";
-import { returnResult } from "@/http/middlewares/helpers";
+import { MissionLocaleLocals, returnResult, RouteHandler } from "@/http/middlewares/helpers";
 
 export default () => {
   const router = express.Router();
@@ -47,8 +46,8 @@ export default () => {
   return router;
 };
 
-const getMlBannerStats = async (_req, { locals }) => {
-  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+const getMlBannerStats: RouteHandler<MissionLocaleLocals> = async (_req, { locals }) => {
+  const missionLocale = locals.missionLocale;
   // Le compteur du bandeau doit refléter exactement ce que le conseiller retrouve dans la liste.
   // On réutilise donc le pipeline de visibilité (mêmes filtres âge / année scolaire / activation que
   // la liste et le récap hebdo) plutôt qu'un countDocuments brut : ce dernier comptait aussi des jeunes
@@ -72,13 +71,13 @@ const zMlParametresBody = z.object({
   rdv_url: httpUrlSchema.nullable(),
 });
 
-const getMlParametres = async (_req, { locals }) => {
-  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+const getMlParametres: RouteHandler<MissionLocaleLocals> = async (_req, { locals }) => {
+  const missionLocale = locals.missionLocale;
   return { rdv_url: missionLocale.rdv_url ?? null };
 };
 
-const updateMlParametres = async (req, { locals }) => {
-  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+const updateMlParametres: RouteHandler<MissionLocaleLocals> = async (req, { locals }) => {
+  const missionLocale = locals.missionLocale;
   const body = zMlParametresBody.parse(req.body);
 
   await organisationsDb().updateOne(
@@ -89,10 +88,10 @@ const updateMlParametres = async (req, { locals }) => {
   return { rdv_url: body.rdv_url };
 };
 
-const updateEffectifMissionLocaleData = async (req, { locals }) => {
+const updateEffectifMissionLocaleData: RouteHandler<MissionLocaleLocals> = async (req, { locals }) => {
   const effectifId = req.params.id;
   const user = req.user;
-  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  const missionLocale = locals.missionLocale;
   const data = await validateFullZodObjectSchema(req.body, updateMissionLocaleEffectifApi);
 
   const effectif: IMissionLocaleEffectif | null = await missionLocaleEffectifsDb().findOne({
@@ -103,10 +102,10 @@ const updateEffectifMissionLocaleData = async (req, { locals }) => {
   if (!effectif) {
     throw Boom.notFound("Effectif introuvable");
   }
-  return await setEffectifMissionLocaleData(missionLocale._id, effectifId, data, user);
+  return await setEffectifMissionLocaleData(missionLocale._id, new ObjectId(effectifId), data, user);
 };
 
-const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
+const getEffectifsParMoisMissionLocale: RouteHandler<MissionLocaleLocals> = async (req, { locals }) => {
   const missionLocale = locals.missionLocale;
   if (!missionLocale) {
     throw Boom.forbidden("No mission locale in session");
@@ -116,8 +115,8 @@ const getEffectifsParMoisMissionLocale = async (req, { locals }) => {
   return await getAllEffectifsParMois(missionLocale, userId);
 };
 
-const getEffectifsFusionnesMissionLocale = async (req, { locals }) => {
-  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+const getEffectifsFusionnesMissionLocale: RouteHandler<MissionLocaleLocals> = async (req, { locals }) => {
+  const missionLocale = locals.missionLocale;
   if (!missionLocale) {
     throw Boom.forbidden("No mission locale in session");
   }
@@ -130,21 +129,21 @@ const getEffectifsFusionnesMissionLocale = async (req, { locals }) => {
   );
 };
 
-const getVillesMissionLocale = async (_req, { locals }) => {
-  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+const getVillesMissionLocale: RouteHandler<MissionLocaleLocals> = async (_req, { locals }) => {
+  const missionLocale = locals.missionLocale;
   if (!missionLocale) {
     throw Boom.forbidden("No mission locale in session");
   }
   return await getPostalCodesByMissionLocaleId(missionLocale);
 };
 
-const getEffectifMissionLocale = async (req, { locals }) => {
+const getEffectifMissionLocale: RouteHandler<MissionLocaleLocals> = async (req, { locals }) => {
   const { nom_liste, code_postal, tri, ordre } = await validateFullZodObjectSchema(
     req.query,
     effectifMissionLocaleListe
   );
   const effectifId = req.params.id;
-  const missionLocale = locals.missionLocale as IOrganisationMissionLocale;
+  const missionLocale = locals.missionLocale;
 
   const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
   const codesPostaux = code_postal ? code_postal.split(",").filter(Boolean) : undefined;
@@ -158,9 +157,9 @@ const getEffectifMissionLocale = async (req, { locals }) => {
   );
 };
 
-const exportEffectifMissionLocale = async (req, res) => {
+const exportEffectifMissionLocale: RouteHandler<MissionLocaleLocals> = async (req, res) => {
   const filters = await validateFullZodObjectSchema(req.query, effectifsParMoisFiltersMissionLocaleAPISchema);
-  const missionLocale = res.locals.missionLocale as IOrganisationMissionLocale;
+  const missionLocale = res.locals.missionLocale;
 
   const computeFileInfo = async (types: Array<API_EFFECTIF_LISTE>, month?: string) => {
     const dataArr: Array<{

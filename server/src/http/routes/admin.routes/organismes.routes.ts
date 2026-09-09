@@ -150,7 +150,7 @@ export default () => {
     async ({ params }, res) => {
       const { id } = params;
 
-      const organisme = await findOrganismeById(id as string, {
+      const organisme = await findOrganismeById(id, {
         last_transmission_date: 1,
         erps: 1,
         api_key: 1,

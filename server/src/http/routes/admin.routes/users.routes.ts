@@ -93,8 +93,8 @@ export default () => {
     async ({ body, params }, res) => {
       const { id } = params;
 
-      await updateUser(id as string, body);
-      const user = await getDetailedUserById(id as string);
+      await updateUser(id, body);
+      const user = await getDetailedUserById(id);
       if (!user) {
         throw Boom.notFound(`User with id ${id} not found`);
       }
@@ -110,7 +110,7 @@ export default () => {
     }),
     async ({ params }, res) => {
       const { id } = params;
-      const user = await getDetailedUserById(id as string);
+      const user = await getDetailedUserById(id);
       if (!user) {
         throw Boom.notFound(`User with id ${id} not found`);
       }
@@ -141,7 +141,7 @@ export default () => {
       params: objectIdSchema("id"),
     }),
     returnResult(async (req) => {
-      await resendConfirmationEmail(req.params.id as string, { bypassCooldown: true });
+      await resendConfirmationEmail(req.params.id, { bypassCooldown: true });
     })
   );
 

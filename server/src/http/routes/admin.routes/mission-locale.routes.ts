@@ -6,7 +6,7 @@ import {
   IUpdateMissionLocaleEffectif,
   updateMissionLocaleEffectifApi,
 } from "shared/models";
-import { zStatsPeriod, StatsPeriod } from "shared/models/data/nationalStats.model";
+import { zStatsPeriod } from "shared/models/data/nationalStats.model";
 import { httpUrlSchema } from "shared/models/data/organisations.model";
 import { extensions } from "shared/models/parts/zodPrimitives";
 import { effectifMissionLocaleListe } from "shared/models/routes/mission-locale/missionLocale.api";
@@ -39,150 +39,104 @@ import {
 import { getMissionsLocales } from "@/common/apis/apiAlternance/apiAlternance";
 import { organisationsDb, organismesDb } from "@/common/model/collections";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
-import { returnResult } from "@/http/middlewares/helpers";
+import { DefaultParams, DefaultQuery, returnResult, RouteHandler } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
+
+const mlIdSchema = z.string().regex(/^[0-9a-f]{24}$/);
+const statsAdminQuery = z.object({ arml: z.array(mlIdSchema).optional().default([]) });
+const activateBody = z.object({ date: z.coerce.date(), missionLocaleId: mlIdSchema });
+const updateEffectifBody = z.object({
+  ...updateMissionLocaleEffectifApi,
+  mission_locale_id: extensions.objectIdString(),
+  effectif_id: extensions.objectIdString(),
+});
+const resetEffectifBody = z.object({
+  mission_locale_id: extensions.objectIdString(),
+  effectif_id: extensions.objectIdString(),
+});
+const activateOrganismesBody = z.object({
+  date: z.coerce.date(),
+  organismes_ids_list: z.array(extensions.objectIdString()),
+});
+const nationalStatsQuery = z.object({
+  period: zStatsPeriod.optional(),
+  region: z.string().optional(),
+  ml_id: mlIdSchema.optional(),
+});
+const periodQuery = z.object({ period: zStatsPeriod.optional() });
+const traitementMlQuery = z.object({
+  period: zStatsPeriod.optional(),
+  region: z.string().optional(),
+  page: z.coerce.number().min(1).optional().default(1),
+  limit: z.coerce.number().min(1).max(100).optional().default(10),
+  sort_by: z.string().optional().default("total_jeunes"),
+  sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
+  search: z.string().optional(),
+});
+const accompagnementQuery = z.object({ region: z.string().optional(), ml_id: mlIdSchema.optional() });
+const mlIdParams = z.object({ id: mlIdSchema });
+const parametresBody = z.object({ rdv_url: httpUrlSchema.nullable() });
+const mlStatsQuery = z.object({
+  rqth_only: z.enum(["true", "false"]).optional(),
+  mineur_only: z.enum(["true", "false"]).optional(),
+});
+
+type AdminHandler<TQuery = DefaultQuery, TParams = DefaultParams, TBody = unknown> = RouteHandler<
+  Record<string, unknown>,
+  TParams,
+  TQuery,
+  TBody
+>;
 
 export default () => {
   const router = express.Router();
 
   router.get("/", returnResult(getAllMls));
-  router.get(
-    "/stats",
-    validateRequestMiddleware({
-      query: z.object({
-        arml: z
-          .array(
-            z
-              .string()
-              .regex(/^[0-9a-f]{24}$/)
-              .optional()
-          )
-          .optional()
-          .default([]),
-      }),
-    }),
-    returnResult(getAllMlsStats)
-  );
-
-  router.post(
-    "/activate",
-    validateRequestMiddleware({
-      body: z.object({ date: z.coerce.date(), missionLocaleId: z.string().regex(/^[0-9a-f]{24}$/) }),
-    }),
-    returnResult(activateMLAtDate)
-  );
-
+  router.get("/stats", validateRequestMiddleware({ query: statsAdminQuery }), returnResult(getAllMlsStats));
+  router.post("/activate", validateRequestMiddleware({ body: activateBody }), returnResult(activateMLAtDate));
   router.put(
     "/effectif",
-    validateRequestMiddleware({
-      body: z.object({
-        ...updateMissionLocaleEffectifApi,
-        mission_locale_id: extensions.objectIdString(),
-        effectif_id: extensions.objectIdString(),
-      }),
-    }),
+    validateRequestMiddleware({ body: updateEffectifBody }),
     returnResult(updateMissionLocaleEffectif)
   );
-
   router.post(
     "/effectif/reset",
-    validateRequestMiddleware({
-      body: z.object({
-        mission_locale_id: extensions.objectIdString(),
-        effectif_id: extensions.objectIdString(),
-      }),
-    }),
+    validateRequestMiddleware({ body: resetEffectifBody }),
     returnResult(resetMissionLocaleEffectif)
   );
-
   router.post(
     "/organismes/activate",
-    validateRequestMiddleware({
-      body: z.object({
-        date: z.coerce.date(),
-        organismes_ids_list: z.array(extensions.objectIdString()),
-      }),
-    }),
+    validateRequestMiddleware({ body: activateOrganismesBody }),
     returnResult(activateOrganismeAtDate)
   );
-
   router.get(
     "/stats/national/rupturants",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-        region: z.string().optional(),
-        ml_id: z
-          .string()
-          .regex(/^[0-9a-f]{24}$/)
-          .optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: nationalStatsQuery }),
     returnResult(getRupturantsRoute)
   );
-
   router.get(
     "/stats/national/dossiers-traites",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-        region: z.string().optional(),
-        ml_id: z
-          .string()
-          .regex(/^[0-9a-f]{24}$/)
-          .optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: nationalStatsQuery }),
     returnResult(getDossiersTraitesRoute)
   );
-
   router.get(
     "/stats/national/couverture-regions",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: periodQuery }),
     returnResult(getCouvertureRegionsRoute)
   );
-
   router.get(
     "/stats/traitement/ml",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-        region: z.string().optional(),
-        page: z.coerce.number().min(1).optional().default(1),
-        limit: z.coerce.number().min(1).max(100).optional().default(10),
-        sort_by: z.string().optional().default("total_jeunes"),
-        sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
-        search: z.string().optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: traitementMlQuery }),
     returnResult(getTraitementMLRoute)
   );
-
   router.get(
     "/stats/traitement/regions",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: periodQuery }),
     returnResult(getTraitementRegionsRoute)
   );
-
   router.get(
     "/stats/accompagnement-conjoint",
-    validateRequestMiddleware({
-      query: z.object({
-        region: z.string().optional(),
-        ml_id: z
-          .string()
-          .regex(/^[0-9a-f]{24}$/)
-          .optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: accompagnementQuery }),
     returnResult(getAccompagnementConjointRoute)
   );
 
@@ -191,22 +145,10 @@ export default () => {
   router.get("/:id/membres", returnResult(getMlMembres));
   router.put(
     "/:id/parametres",
-    validateRequestMiddleware({
-      params: z.object({ id: z.string().regex(/^[0-9a-f]{24}$/) }),
-      body: z.object({ rdv_url: httpUrlSchema.nullable() }),
-    }),
+    validateRequestMiddleware({ params: mlIdParams, body: parametresBody }),
     returnResult(updateMlParametresAdmin)
   );
-  router.get(
-    "/:id/stats",
-    validateRequestMiddleware({
-      query: z.object({
-        rqth_only: z.enum(["true", "false"]).optional(),
-        mineur_only: z.enum(["true", "false"]).optional(),
-      }),
-    }),
-    returnResult(getMlStats)
-  );
+  router.get("/:id/stats", validateRequestMiddleware({ query: mlStatsQuery }), returnResult(getMlStats));
   router.get("/:id/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.get("/:id/effectif/:effectiId", returnResult(getEffectifMissionLocale));
 
@@ -225,13 +167,13 @@ const getAllMls = async () => {
     .filter((ml) => ml.externalML);
 };
 
-const getAllMlsStats = async ({ query }) => {
-  const { arml }: { arml: Array<string> } = query;
+const getAllMlsStats: AdminHandler<z.infer<typeof statsAdminQuery>> = async ({ query }) => {
+  const { arml } = query;
   const mls = await getMissionsLocalesStatsAdmin(arml);
   return mls;
 };
 
-const getMl = async (req) => {
+const getMl: AdminHandler = async (req) => {
   const id = req.params.id;
   const organisationMl = await getMlFromOrganisations(id);
   if (!organisationMl) {
@@ -240,7 +182,7 @@ const getMl = async (req) => {
   return organisationMl;
 };
 
-const getMlStats = async ({ params, query }) => {
+const getMlStats: AdminHandler<z.infer<typeof mlStatsQuery>> = async ({ params, query }) => {
   const id = params.id;
   const organisationMl = await getMlFromOrganisations(id);
   if (!organisationMl) {
@@ -256,7 +198,7 @@ const getMlStats = async ({ params, query }) => {
   };
 };
 
-export const getEffectifsParMoisMissionLocale = async (req) => {
+export const getEffectifsParMoisMissionLocale: AdminHandler = async (req) => {
   const id = req.params.id;
   if (!id) {
     throw Boom.badRequest("Missing id");
@@ -270,7 +212,7 @@ export const getEffectifsParMoisMissionLocale = async (req) => {
   return await getAllEffectifsParMois(missionLocale);
 };
 
-const getEffectifMissionLocale = async (req) => {
+const getEffectifMissionLocale: AdminHandler = async (req) => {
   const { nom_liste } = await validateFullZodObjectSchema(req.query, effectifMissionLocaleListe);
   const mlId = req.params.id;
   const effectifId = req.params.effectiId;
@@ -283,7 +225,11 @@ const getEffectifMissionLocale = async (req) => {
   return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste);
 };
 
-const updateMissionLocaleEffectif = async (req) => {
+const updateMissionLocaleEffectif: AdminHandler<
+  DefaultQuery,
+  DefaultParams,
+  z.infer<typeof updateEffectifBody>
+> = async (req) => {
   const { mission_locale_id, effectif_id, ...rest } = req.body;
   return await setEffectifMissionLocaleDataAdmin(
     new ObjectId(mission_locale_id),
@@ -293,18 +239,24 @@ const updateMissionLocaleEffectif = async (req) => {
   );
 };
 
-const resetMissionLocaleEffectif = async (req) => {
+const resetMissionLocaleEffectif: AdminHandler<DefaultQuery, DefaultParams, z.infer<typeof resetEffectifBody>> = async (
+  req
+) => {
   const { mission_locale_id, effectif_id } = req.body;
 
   return resetEffectifMissionLocaleDataAdmin(new ObjectId(mission_locale_id), new ObjectId(effectif_id), req.user);
 };
 
-const activateMLAtDate = ({ body }) => {
+const activateMLAtDate: AdminHandler<DefaultQuery, DefaultParams, z.infer<typeof activateBody>> = ({ body }) => {
   const { date, missionLocaleId } = body;
-  return activateMissionLocale(missionLocaleId, date);
+  return activateMissionLocale(new ObjectId(missionLocaleId), date);
 };
 
-export const activateOrganismeAtDate = async (req) => {
+export const activateOrganismeAtDate: AdminHandler<
+  DefaultQuery,
+  DefaultParams,
+  z.infer<typeof activateOrganismesBody>
+> = async (req) => {
   const { date, organismes_ids_list } = req.body;
 
   const organismes = await organismesDb()
@@ -322,39 +274,31 @@ export const activateOrganismeAtDate = async (req) => {
   }
 };
 
-const getRupturantsRoute = async (req) => {
+const getRupturantsRoute: AdminHandler<z.infer<typeof nationalStatsQuery>> = async (req) => {
   const { period, region, ml_id } = req.query;
-  return await getRupturantsStats(
-    (period as StatsPeriod) || "30days",
-    region as string | undefined,
-    ml_id as string | undefined
-  );
+  return await getRupturantsStats(period || "30days", region, ml_id);
 };
 
-const getDossiersTraitesRoute = async (req) => {
+const getDossiersTraitesRoute: AdminHandler<z.infer<typeof nationalStatsQuery>> = async (req) => {
   const { period, region, ml_id } = req.query;
-  return await getDossiersTraitesStats(
-    (period as StatsPeriod) || "30days",
-    region as string | undefined,
-    ml_id as string | undefined
-  );
+  return await getDossiersTraitesStats(period || "30days", region, ml_id);
 };
 
-const getCouvertureRegionsRoute = async (req) => {
+const getCouvertureRegionsRoute: AdminHandler<z.infer<typeof periodQuery>> = async (req) => {
   const { period } = req.query;
-  return await getCouvertureRegionsStats((period as StatsPeriod) || "30days");
+  return await getCouvertureRegionsStats(period || "30days");
 };
 
-const getTraitementMLRoute = async (req) => {
+const getTraitementMLRoute: AdminHandler<z.infer<typeof traitementMlQuery>> = async (req) => {
   const { period, region, page, limit, sort_by, sort_order, search } = req.query;
   return await getTraitementStatsByMissionLocale({
-    period: (period as StatsPeriod) || "30days",
-    region: region as string | undefined,
+    period: period || "30days",
+    region,
     page: Number(page) || 1,
     limit: Number(limit) || 10,
-    sort_by: (sort_by as string) || "total_jeunes",
-    sort_order: (sort_order as "asc" | "desc") || "desc",
-    search: search as string | undefined,
+    sort_by: sort_by || "total_jeunes",
+    sort_order: sort_order || "desc",
+    search,
   });
 };
 
@@ -362,12 +306,12 @@ const getTraitementRegionsRoute = async () => {
   return await getSuiviTraitementByRegion();
 };
 
-const getAccompagnementConjointRoute = async (req) => {
+const getAccompagnementConjointRoute: AdminHandler<z.infer<typeof accompagnementQuery>> = async (req) => {
   const { region, ml_id } = req.query;
-  return await getAccompagnementConjointStats(region as string | undefined, ml_id as string | undefined);
+  return await getAccompagnementConjointStats(region, ml_id);
 };
 
-const getMlDetail = async (req) => {
+const getMlDetail: AdminHandler = async (req) => {
   const id = req.params.id;
   return getMissionLocaleDetail(new ObjectId(id));
 };
@@ -376,7 +320,11 @@ const getMlDetail = async (req) => {
  * Met à jour les paramètres ML côté admin.
  * Mirror de la route user `PUT /api/v1/organisation/mission-locale/parametres` (§8.1).
  */
-const updateMlParametresAdmin = async (req) => {
+const updateMlParametresAdmin: AdminHandler<
+  DefaultQuery,
+  z.infer<typeof mlIdParams>,
+  z.infer<typeof parametresBody>
+> = async (req) => {
   const id = req.params.id;
   const { rdv_url } = req.body;
 
@@ -392,7 +340,7 @@ const updateMlParametresAdmin = async (req) => {
   return { rdv_url };
 };
 
-const getMlMembres = async (req) => {
+const getMlMembres: AdminHandler = async (req) => {
   const id = req.params.id;
   const organisationMl = await getMlFromOrganisations(id);
   if (!organisationMl) {

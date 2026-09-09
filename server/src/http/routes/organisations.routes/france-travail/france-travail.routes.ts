@@ -1,14 +1,12 @@
 import Boom from "boom";
 import express from "express";
 import { FRANCE_TRAVAIL_SITUATION_LABELS, TOUS_LES_SECTEURS_CODE } from "shared/constants";
-import { API_EFFECTIF_LISTE, IOrganisationFranceTravail } from "shared/models";
+import { API_EFFECTIF_LISTE } from "shared/models";
 import { zFranceTravailSituationEnum } from "shared/models/data/franceTravailEffectif.model";
 import {
   codeSecteurSchema,
   effectifFranceTravailQuerySchema,
   franceTravailEffectifsQuerySchema,
-  IEffectifFranceTravailQuery,
-  IFranceTravailEffectifsQuery,
 } from "shared/models/routes/france-travail/franceTravail.api";
 import { z } from "zod";
 
@@ -27,8 +25,34 @@ import { getSecteurActivitesByCode } from "@/common/actions/rome/rome.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { getAgeFromDate } from "@/common/utils/miscUtils";
 import { addSheetToXlscFile } from "@/common/utils/xlsxUtils";
-import { returnResult } from "@/http/middlewares/helpers";
+import {
+  DefaultParams,
+  DefaultQuery,
+  FranceTravailLocals,
+  returnResult,
+  RouteHandler,
+} from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
+
+const codeSecteurParams = z.object({ code_secteur: codeSecteurSchema });
+const moisParams = z.object({ mois: z.string().regex(/^\d{4}-\d{2}$/, "Invalid month format: expected YYYY-MM") });
+const idParams = z.object({ id: z.string().min(1) });
+const exportQuery = z.object({
+  departements: z.string().optional().describe("Codes départements séparés par des virgules"),
+});
+const exportTraitesQuery = z.object({
+  mois: z
+    .string()
+    .regex(/^\d{4}-\d{2}$/, "Invalid month format: expected YYYY-MM")
+    .optional(),
+});
+const updateEffectifParams = z.object({ id: z.string().describe("ID de l'effectif France Travail") });
+const updateEffectifBody = z.object({
+  commentaire: z.string().nullable().describe("Commentaire à ajouter ou mettre à jour"),
+  situation: zFranceTravailSituationEnum.describe("Situation actuelle de l'effectif"),
+  code_secteur: z.number(),
+});
+type EffectifsQuery = z.infer<typeof franceTravailEffectifsQuerySchema>;
 
 export default () => {
   const router = express.Router();
@@ -36,41 +60,26 @@ export default () => {
   router.get("/arborescence", returnResult(getArborescence));
   router.get(
     "/departement-counts/:code_secteur",
-    validateRequestMiddleware({
-      params: z.object({
-        code_secteur: codeSecteurSchema,
-      }),
-    }),
-    returnResult(async (req, { locals }) => {
-      const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
+    validateRequestMiddleware({ params: codeSecteurParams }),
+    returnResult<FranceTravailLocals, z.infer<typeof codeSecteurParams>>(async (req, { locals }) => {
       const code_secteur = Number(req.params.code_secteur);
-      return getDepartementCountsBySecteur(ftOrga.code_region, code_secteur);
+      return getDepartementCountsBySecteur(locals.franceTravail.code_region, code_secteur);
     })
   );
   router.get("/effectifs/traite/mois", returnResult(getEffectifsTraitesMois));
   router.get(
     "/effectifs/traite/mois/:mois",
-    validateRequestMiddleware({
-      params: z.object({
-        mois: z.string().regex(/^\d{4}-\d{2}$/, "Invalid month format: expected YYYY-MM"),
-      }),
-      query: franceTravailEffectifsQuerySchema,
-    }),
+    validateRequestMiddleware({ params: moisParams, query: franceTravailEffectifsQuerySchema }),
     returnResult(getEffectifsTraitesParMois)
   );
 
   router.get(
     "/effectifs/a-traiter/:code_secteur",
-    validateRequestMiddleware({
-      params: z.object({
-        code_secteur: codeSecteurSchema,
-      }),
-      query: franceTravailEffectifsQuerySchema,
-    }),
-    returnResult(async (req, { locals }) => {
-      const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
+    validateRequestMiddleware({ params: codeSecteurParams, query: franceTravailEffectifsQuerySchema }),
+    returnResult<FranceTravailLocals, z.infer<typeof codeSecteurParams>, EffectifsQuery>(async (req, { locals }) => {
+      const ftOrga = locals.franceTravail;
       const code_secteur = Number(req.params.code_secteur);
-      const { page, limit, search, sort, order, departements } = req.query as IFranceTravailEffectifsQuery;
+      const { page, limit, search, sort, order, departements } = req.query;
 
       return getFranceTravailEffectifsByCodeSecteur(ftOrga.code_region, API_EFFECTIF_LISTE.A_TRAITER, code_secteur, {
         page,
@@ -84,67 +93,43 @@ export default () => {
   );
   router.get(
     "/effectif/:id",
-    validateRequestMiddleware({
-      params: z.object({
-        id: z.string().min(1),
-      }),
-      query: effectifFranceTravailQuerySchema,
-    }),
+    validateRequestMiddleware({ params: idParams, query: effectifFranceTravailQuerySchema }),
     returnResult(getEffectifById)
   );
 
   router.get(
     "/export/effectifs/:code_secteur",
-    validateRequestMiddleware({
-      params: z.object({
-        code_secteur: codeSecteurSchema,
-      }),
-      query: z.object({
-        departements: z.string().optional().describe("Codes départements séparés par des virgules"),
-      }),
-    }),
+    validateRequestMiddleware({ params: codeSecteurParams, query: exportQuery }),
     returnResult(exportEffectifByCodeSecteur)
   );
 
   router.get(
     "/export/effectifs-traites",
-    validateRequestMiddleware({
-      query: z.object({
-        mois: z
-          .string()
-          .regex(/^\d{4}-\d{2}$/, "Invalid month format: expected YYYY-MM")
-          .optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: exportTraitesQuery }),
     returnResult(exportEffectifsTraites)
   );
 
   router.put(
     "/effectif/:id",
-    validateRequestMiddleware({
-      params: z.object({
-        id: z.string().describe("ID de l'effectif France Travail"),
-      }),
-      body: z.object({
-        commentaire: z.string().nullable().describe("Commentaire à ajouter ou mettre à jour"),
-        situation: zFranceTravailSituationEnum.describe("Situation actuelle de l'effectif"),
-        code_secteur: z.number(),
-      }),
-    }),
+    validateRequestMiddleware({ params: updateEffectifParams, body: updateEffectifBody }),
     returnResult(updateEffectifById)
   );
 
   return router;
 };
 
-const getArborescence = async (_req, { locals }) => {
-  const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
+const getArborescence: RouteHandler<FranceTravailLocals> = async (_req, { locals }) => {
+  const ftOrga = locals.franceTravail;
   return getEffectifSecteurActivitesArboresence(ftOrga.code_region);
 };
 
-const getEffectifById = async (req, { locals }) => {
-  const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
-  const { nom_liste, code_secteur, search, sort, order, mois, departements } = req.query as IEffectifFranceTravailQuery;
+const getEffectifById: RouteHandler<
+  FranceTravailLocals,
+  z.infer<typeof idParams>,
+  z.infer<typeof effectifFranceTravailQuerySchema>
+> = async (req, { locals }) => {
+  const ftOrga = locals.franceTravail;
+  const { nom_liste, code_secteur, search, sort, order, mois, departements } = req.query;
   const effectifId = req.params.id;
 
   return await getEffectifFromFranceTravailId(ftOrga.code_region, code_secteur, effectifId, nom_liste, {
@@ -156,7 +141,12 @@ const getEffectifById = async (req, { locals }) => {
   });
 };
 
-const updateEffectifById = async (req) => {
+const updateEffectifById: RouteHandler<
+  FranceTravailLocals,
+  z.infer<typeof updateEffectifParams>,
+  DefaultQuery,
+  z.infer<typeof updateEffectifBody>
+> = async (req) => {
   const effectifId = req.params.id;
   const user = req.user;
   const body = req.body;
@@ -164,10 +154,14 @@ const updateEffectifById = async (req) => {
   await updateFranceTravailData(effectifId, body.commentaire, body.situation, body.code_secteur, user._id);
 };
 
-const exportEffectifByCodeSecteur = async (req, res) => {
-  const ftOrga = res.locals.franceTravail as IOrganisationFranceTravail;
+const exportEffectifByCodeSecteur: RouteHandler<
+  FranceTravailLocals,
+  z.infer<typeof codeSecteurParams>,
+  z.infer<typeof exportQuery>
+> = async (req, res) => {
+  const ftOrga = res.locals.franceTravail;
   const code_secteur = Number(req.params.code_secteur);
-  const departements = req.query.departements as string | undefined;
+  const departements = req.query.departements;
 
   let secteurLibelle: string;
 
@@ -245,9 +239,13 @@ const exportEffectifByCodeSecteur = async (req, res) => {
   return templateFile?.xlsx.writeBuffer();
 };
 
-const exportEffectifsTraites = async (req, res) => {
-  const ftOrga = res.locals.franceTravail as IOrganisationFranceTravail;
-  const mois = req.query.mois as string | undefined;
+const exportEffectifsTraites: RouteHandler<
+  FranceTravailLocals,
+  DefaultParams,
+  z.infer<typeof exportTraitesQuery>
+> = async (req, res) => {
+  const ftOrga = res.locals.franceTravail;
+  const mois = req.query.mois;
 
   const fileName = mois
     ? `dossiers-traites-${mois}-${new Date().toISOString().split("T")[0]}.xlsx`
@@ -313,14 +311,18 @@ const exportEffectifsTraites = async (req, res) => {
   return templateFile?.xlsx.writeBuffer();
 };
 
-const getEffectifsTraitesMois = async (_req, { locals }) => {
-  const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
+const getEffectifsTraitesMois: RouteHandler<FranceTravailLocals> = async (_req, { locals }) => {
+  const ftOrga = locals.franceTravail;
   return getFranceTravailEffectifsTraitesMois(ftOrga.code_region);
 };
 
-const getEffectifsTraitesParMois = async (req, { locals }) => {
-  const ftOrga = locals.franceTravail as IOrganisationFranceTravail;
-  const { page, limit, search, sort, order, departements } = req.query as IFranceTravailEffectifsQuery;
+const getEffectifsTraitesParMois: RouteHandler<
+  FranceTravailLocals,
+  z.infer<typeof moisParams>,
+  EffectifsQuery
+> = async (req, { locals }) => {
+  const ftOrga = locals.franceTravail;
+  const { page, limit, search, sort, order, departements } = req.query;
   const mois = req.params.mois;
 
   return getFranceTravailEffectifsTraitesParMois(ftOrga.code_region, mois, {

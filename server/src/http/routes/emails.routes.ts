@@ -1,5 +1,5 @@
 import Boom from "boom";
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import passport from "passport";
 import { Strategy as LocalAPIKeyStrategy } from "passport-localapikey";
 import { z } from "zod";
@@ -32,7 +32,7 @@ function checkWebhookKey() {
 export default () => {
   const router = express.Router(); // eslint-disable-line new-cap
 
-  async function checkEmailToken(req, res, next) {
+  async function checkEmailToken(req: Request<{ token: string }>, res: Response, next: NextFunction) {
     const { token } = req.params;
     if (!(await checkIfEmailExists(token))) {
       return next(Boom.notFound());

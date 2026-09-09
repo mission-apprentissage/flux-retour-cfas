@@ -170,7 +170,7 @@ export const getTransmissionStatusByOrganismeGroupedByDate = async (
 
 export const getErrorsTransmissionStatusDetailsForAGivenDay = async (
   organismeId: string,
-  day: string,
+  day: string | Date,
   page: number = 1,
   limit: number = 20
 ) => {
@@ -399,7 +399,7 @@ export const getErrorsTransmissionStatusDetailsForAGivenDay = async (
 
 export const getSuccessfulTransmissionStatusDetailsForAGivenDay = async (
   organismeId: string,
-  day: string,
+  day: string | Date,
   page: number = 1,
   limit: number = 20
 ) => {

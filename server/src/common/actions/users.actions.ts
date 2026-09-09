@@ -597,7 +597,7 @@ export interface ResendConfirmationEmailResult {
  *   - `activation_user` sinon (flow legacy)
  */
 export async function resendConfirmationEmail(
-  userId: string,
+  userId: string | ObjectId,
   opts?: { bypassCooldown?: boolean }
 ): Promise<ResendConfirmationEmailResult> {
   const user = await getUserById(new ObjectId(userId));

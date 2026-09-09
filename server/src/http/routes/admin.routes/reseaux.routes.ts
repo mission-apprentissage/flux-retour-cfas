@@ -6,24 +6,20 @@ import { z } from "zod";
 import { getReseauById } from "@/common/actions/reseaux/reseaux.actions";
 import { organismesDb, reseauxDb } from "@/common/model/collections";
 import objectIdSchema from "@/common/validation/objectIdSchema";
-import { returnResult } from "@/http/middlewares/helpers";
+import { DefaultParams, DefaultQuery, returnResult, RouteHandler } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 import { updateComputedFieldForOrganisme } from "@/jobs/computed/update-computed";
+
+const reseauBody = z.object({
+  nom: z.string(),
+  responsable: z.boolean(),
+});
 
 export default () => {
   const router = express.Router();
 
   router.get("/", returnResult(getAllReseaux));
-  router.post(
-    "/",
-    validateRequestMiddleware({
-      body: z.object({
-        nom: z.string(),
-        responsable: z.boolean(),
-      }),
-    }),
-    returnResult(createReseau)
-  );
+  router.post("/", validateRequestMiddleware({ body: reseauBody }), returnResult(createReseau));
   router.get(
     "/:id",
     validateRequestMiddleware({
@@ -68,9 +64,9 @@ export default () => {
     }),
     async ({ params, body }, res) => {
       const { id } = params;
-      const { organismeId } = body;
+      const { organismeId } = body as { organismeId?: unknown };
 
-      if (!organismeId) {
+      if (typeof organismeId !== "string" || !organismeId) {
         throw Boom.badRequest("organismeId is required in the request body");
       }
 
@@ -81,13 +77,13 @@ export default () => {
         throw Boom.badRequest("Invalid organismeId format. Must be a valid ObjectId.");
       }
 
-      const reseau = await getReseauById(id as string);
+      const reseau = await getReseauById(id);
       if (!reseau) {
         throw Boom.notFound(`Reseau with id ${id} not found`);
       }
 
       const result = await reseauxDb().findOneAndUpdate(
-        { _id: new ObjectId(id as string) },
+        { _id: new ObjectId(id) },
         {
           $push: { organismes_ids: organismeObjectId },
         },
@@ -127,14 +123,14 @@ export default () => {
       const { id, organismeId } = params;
 
       try {
-        const reseau = await getReseauById(id as string);
+        const reseau = await getReseauById(id);
         if (!reseau) {
           throw Boom.notFound(`Reseau with id ${id} not found`);
         }
 
         const result = await reseauxDb().findOneAndUpdate(
-          { _id: new ObjectId(id as string) },
-          { $pull: { organismes_ids: organismeId as ObjectId } },
+          { _id: new ObjectId(id) },
+          { $pull: { organismes_ids: organismeId } },
           { returnDocument: "after" }
         );
 
@@ -196,9 +192,13 @@ export const getAllReseaux = async () => {
     .toArray();
 };
 
-export const createReseau = async ({ body }) => {
-  const nom: string = body.nom;
-  const responsable: boolean = body.responsable;
+export const createReseau: RouteHandler<
+  Record<string, unknown>,
+  DefaultParams,
+  DefaultQuery,
+  z.infer<typeof reseauBody>
+> = async ({ body }) => {
+  const { nom, responsable } = body;
   const key = nom.toUpperCase().replace(/ /g, "_");
 
   const date = new Date();

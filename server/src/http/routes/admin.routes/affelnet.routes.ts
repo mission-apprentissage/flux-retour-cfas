@@ -10,7 +10,7 @@ import { IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelnet.model";
 import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
-import { returnResult } from "@/http/middlewares/helpers";
+import { returnResult, RouteHandler } from "@/http/middlewares/helpers";
 
 const AFFELNET_HEADER = [
   "academie",
@@ -114,9 +114,9 @@ const parseCsvFile = async (buffer: Buffer) => {
   return records;
 };
 
-const createVoeux = async (req, res) => {
+const createVoeux: RouteHandler = async (req, res) => {
   const file = req.file;
-  if (!req.file) {
+  if (!file) {
     return res.status(400).send("No file uploaded.");
   }
 

@@ -1,35 +1,29 @@
-import { NextFunction, RequestHandler } from "express";
-import { ZodEffects, ZodError, ZodSchema } from "zod";
+import { RequestHandler } from "express";
+import { ZodError, ZodType, ZodTypeDef } from "zod";
 
-declare type RequestValidation<TParams, TQuery, TBody> = {
-  params?: ZodSchema<TParams>;
-  query?: ZodSchema<TQuery>;
-  body?: ZodSchema<TBody>;
+import { DefaultParams, DefaultQuery } from "@/http/middlewares/helpers";
+
+type RequestValidation<TParams, TQuery, TBody> = {
+  params?: ZodType<TParams, ZodTypeDef, unknown>;
+  query?: ZodType<TQuery, ZodTypeDef, unknown>;
+  body?: ZodType<TBody, ZodTypeDef, unknown>;
 };
 
-declare type RequestProcessing<TParams, TQuery, TBody> = {
-  params?: ZodEffects<any, TParams>;
-  query?: ZodEffects<any, TQuery>;
-  body?: ZodEffects<any, TBody>;
-};
+export type ValidationErrorItem = { type: "Query" | "Params" | "Body"; errors: ZodError };
 
-type ErrorListItem = { type: "Query" | "Params" | "Body"; errors: ZodError<any> };
+export function isValidationErrorList(error: unknown): error is ValidationErrorItem[] {
+  return Array.isArray(error) && error.length > 0 && error[0]?.errors instanceof ZodError;
+}
 
 /**
  * Forked from https://github.com/Aquila169/zod-express-middleware/blob/c434943b385eca214533f6c38caf83d513477dc8/src/index.ts#L50
  * so we can control the error handling
  */
-function validateRequestMiddleware<TParams = any, TQuery = any, TBody = any>(
-  schemas: RequestProcessing<TParams, TQuery, TBody>
-): RequestHandler<TParams, any, TBody, TQuery>;
-function validateRequestMiddleware<TParams = any, TQuery = any, TBody = any>(
+function validateRequestMiddleware<TParams = DefaultParams, TQuery = DefaultQuery, TBody = unknown>(
   schemas: RequestValidation<TParams, TQuery, TBody>
-): RequestHandler<TParams, any, TBody, TQuery>;
-function validateRequestMiddleware<TParams = any, TQuery = any, TBody = any>(
-  schemas: RequestValidation<TParams, TQuery, TBody> | RequestProcessing<TParams, TQuery, TBody>
-): RequestHandler<TParams, any, TBody, TQuery> {
-  return (req, res, next: NextFunction) => {
-    const errors: Array<ErrorListItem> = [];
+): RequestHandler<TParams, unknown, TBody, TQuery> {
+  return (req, _res, next) => {
+    const errors: ValidationErrorItem[] = [];
     if (schemas.params) {
       const parsed = schemas.params.safeParse(req.params);
       if (parsed.success) {
@@ -57,7 +51,7 @@ function validateRequestMiddleware<TParams = any, TQuery = any, TBody = any>(
       }
     }
     if (errors.length > 0) {
-      return (next as any)(errors, req, res);
+      return next(errors);
     }
     return next();
   };

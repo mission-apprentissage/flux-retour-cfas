@@ -125,6 +125,7 @@ import {
   returnResult,
   requireFranceTravail,
   requireIndicateursMlAccess,
+  OrganismeLocals,
 } from "./middlewares/helpers";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import { proxyIpVerification } from "./middlewares/proxyIpVerification";
@@ -600,21 +601,24 @@ function setupRoutes(app: Application) {
     "/api/v1/organismes/:id",
     validateRequestMiddleware({ params: objectIdSchema("id") }),
     (req, res, next) => {
-      res.locals.organismeId = new ObjectId((req.params as any).id);
+      res.locals.organismeId = new ObjectId(req.params.id);
       next();
-    },
+    }
+  );
+  authRouter.use(
+    "/api/v1/organismes/:id",
     express
       .Router()
       .get(
         "",
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           return await getOrganismeDetails(req.user, res.locals.organismeId);
         })
       )
       .get(
         "/indicateurs/effectifs",
         requireOrganismePermission("indicateursEffectifs"),
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersTerritoireSchema);
           return await getOrganismeIndicateursEffectifs(req.user, res.locals.organismeId, filters);
         })
@@ -622,22 +626,22 @@ function setupRoutes(app: Application) {
       .get(
         "/contacts",
         requireOrganismePermission("viewContacts"),
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           return await listContactsOrganisme(res.locals.organismeId);
         })
       )
       .get(
         "/organismes",
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           return await listOrganismesFormateurs(req.user, res.locals.organismeId);
         })
       )
       .get(
         "/duplicates",
         requireOrganismePermission("manageEffectifs"),
-        returnResult(async (req, res) => {
-          const page = parseInt(req.query.page, 10) || 1;
-          const limit = parseInt(req.query.limit, 10) || 5;
+        returnResult<OrganismeLocals>(async (req, res) => {
+          const page = parseInt(String(req.query.page), 10) || 1;
+          const limit = parseInt(String(req.query.limit), 10) || 5;
 
           let duplicates = await getDuplicatesEffectifsForOrganismeIdWithPagination(
             res.locals.organismeId,
@@ -651,14 +655,14 @@ function setupRoutes(app: Application) {
       .delete(
         "/duplicates",
         requireOrganismePermission("manageEffectifs"),
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           await deleteOldestDuplicates(res.locals.organismeId);
         })
       )
       .put(
         "/configure-erp",
         requireOrganismePermission("configurerModeTransmission"),
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
           await configureOrganismeERP(req.user, res.locals.organismeId, conf);
         })
@@ -666,14 +670,14 @@ function setupRoutes(app: Application) {
       .delete(
         "/configure-erp",
         requireOrganismePermission("configurerModeTransmission"),
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           await resetConfigurationERP(res.locals.organismeId);
         })
       )
       .post(
         "/verify-user",
         requireOrganismePermission("configurerModeTransmission"),
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           // POST /api/v1/organismes/:id/verify-user { siret=XXXXX, uai=YYYYY, erp=ZZZZ , api_key=TTTTT }
           const verif = await validateFullZodObjectSchema(req.body, SReqPostVerifyUser);
           await verifyOrganismeAPIKeyToUser(res.locals.organismeId, verif);
@@ -698,7 +702,7 @@ function setupRoutes(app: Application) {
                 .safeParseAsync(
                   Array.isArray(req.body) ? req.body.map((dossier) => stripNullProperties(dossier)) : req.body
                 );
-              const warnings = computeWarningsForDossierApprenantSchemaV3(req.body);
+              const warnings = computeWarningsForDossierApprenantSchemaV3(Array.isArray(req.body) ? req.body : []);
               return { ...data, warnings };
             })
           )
@@ -720,14 +724,14 @@ function setupRoutes(app: Application) {
           .Router()
           .get(
             "/",
-            returnResult(async (req, res) => {
+            returnResult<OrganismeLocals>(async (req, res) => {
               const organisme = await getOrganismeById(res.locals.organismeId);
               return { apiKey: organisme.api_key };
             })
           )
           .post(
             "/",
-            returnResult(async (req, res) => {
+            returnResult<OrganismeLocals>(async (req, res) => {
               const generatedApiKey = await generateApiKeyForOrg(res.locals.organismeId);
               return { apiKey: generatedApiKey };
             })
@@ -822,7 +826,7 @@ function setupRoutes(app: Application) {
           description: zEffectifArchive.shape.suppression.shape.description,
         });
 
-        await softDeleteEffectif(req.params.id, req.user._id, { motif, description });
+        await softDeleteEffectif(new ObjectId(req.params.id), req.user._id, { motif, description });
       })
     )
     .delete(
@@ -902,11 +906,8 @@ function setupRoutes(app: Application) {
       .post(
         "/membres",
         returnResult(async (req) => {
-          await inviteUserToOrganisation(
-            req.user,
-            req.body.email.toLowerCase(),
-            (req.user as AuthContext).organisation_id
-          );
+          const { email } = z.object({ email: z.string() }).parse(req.body);
+          await inviteUserToOrganisation(req.user, email.toLowerCase(), (req.user as AuthContext).organisation_id);
         })
       )
       .post(
@@ -1062,7 +1063,9 @@ function setupRoutes(app: Application) {
       .post(
         "/fusion-organismes",
         returnResult(async (req) => {
-          const { organismeFiableId, organismeSansUaiId } = req.body;
+          const { organismeFiableId, organismeSansUaiId } = z
+            .object({ organismeFiableId: z.string(), organismeSansUaiId: z.string() })
+            .parse(req.body);
 
           await mergeOrganismeSansUaiDansOrganismeFiable(
             new ObjectId(organismeSansUaiId),
