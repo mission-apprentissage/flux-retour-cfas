@@ -18,8 +18,11 @@ module.exports = {
   },
   plugins: ["@typescript-eslint", "simple-import-sort", "import", "unused-imports"],
   rules: {
-    "@typescript-eslint/no-explicit-any": 0,
-    "@typescript-eslint/ban-ts-comment": 0,
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/ban-ts-comment": [
+      "error",
+      { "ts-ignore": true, "ts-nocheck": true, "ts-expect-error": false, "ts-check": false },
+    ],
     "@typescript-eslint/no-empty-function": 0,
     "@typescript-eslint/no-unused-vars": [
       "error",
@@ -84,6 +87,29 @@ module.exports = {
       },
     ],
   },
+  overrides: [
+    {
+      files: [
+        "shared/models/routes/**",
+        "shared/models/fixtures/**",
+        "server/tests/data/**",
+        "ui/app/(cfa)/**",
+        "ui/app/(cfa-detail)/**",
+        "ui/app/(ml-detail)/**",
+        "ui/app/(organisme)/**",
+        "ui/app/(france-travail)/**",
+        "ui/app/(decommissionnement)/**",
+        "ui/app/suivi-des-indicateurs/**",
+        "ui/common/constants/**",
+        "ui/common/domain/**",
+        "ui/common/filters/**",
+        "ui/common/types/**",
+      ],
+      rules: {
+        "@typescript-eslint/no-explicit-any": "error",
+      },
+    },
+  ],
   settings: {
     "import/extensions": [".js", ".ts"],
     "import/parsers": {

@@ -49,11 +49,9 @@ export async function up() {
 
 // Show migration status and returns number of pending migrations
 export async function status(): Promise<number> {
-  // @ts-ignore
   config.set(myConfig);
   const client = getMongodbClient();
 
-  // @ts-ignore
   const migrationStatus = await mstatus(client.db());
   migrationStatus.forEach(({ fileName, appliedAt }) => console.log(fileName, ":", appliedAt));
 
