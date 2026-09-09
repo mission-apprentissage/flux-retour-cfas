@@ -1,7 +1,7 @@
 "use client";
 
+import { fr } from "@codegouvfr/react-dsfr";
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
-import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import {
   useReactTable,
@@ -11,19 +11,22 @@ import {
   Cell,
   getSortedRowModel,
   getFilteredRowModel,
+  getExpandedRowModel,
+  type ExpandedState,
+  type OnChangeFn,
 } from "@tanstack/react-table";
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useRef, useEffect, useId, useState, Fragment } from "react";
 
+import styles from "./FullTable.module.css";
 import { useTableData, useTableColumns } from "./hooks";
 import { FullTableProps, TableRowData } from "./types";
 
 function SortIcon({ isSorted }: { isSorted: false | "asc" | "desc" }) {
   const iconClass = isSorted === "desc" ? "ri-arrow-down-line" : "ri-arrow-up-line";
-  const color = isSorted ? "#000" : "#999";
 
   return (
-    <span style={{ display: "flex", alignItems: "center", marginLeft: "0.5rem" }}>
-      <i className={iconClass} style={{ color }} />
+    <span className={`${styles.sortIcon} ${isSorted ? styles.sortIconActive : ""}`}>
+      <i className={iconClass} />
     </span>
   );
 }
@@ -33,7 +36,7 @@ function TableHeaderCell({ header }: { header: Header<TableRowData, unknown> }) 
 
   return (
     <div
-      style={{ cursor: canSort ? "pointer" : "default", display: "flex" }}
+      className={`${styles.headerCell} ${canSort ? styles.headerCellSortable : ""}`}
       onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
     >
       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -43,15 +46,7 @@ function TableHeaderCell({ header }: { header: Header<TableRowData, unknown> }) 
 }
 
 function TableBodyCell({ cell }: { cell: Cell<TableRowData, unknown> }) {
-  return (
-    <div
-      style={{
-        maxWidth: "500px",
-      }}
-    >
-      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-    </div>
-  );
+  return <div className={styles.bodyCell}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>;
 }
 
 function TablePagination({
@@ -64,7 +59,7 @@ function TablePagination({
   onPageChange: (page: number) => void;
 }) {
   return (
-    <div style={{ flex: "none" }}>
+    <div className={styles.paginationWrapper}>
       <Pagination
         key={currentPage}
         count={totalPages}
@@ -89,19 +84,27 @@ function PageSizeSelector({
   pageSize: number;
   onPageSizeChange: (pageSize: number) => void;
 }) {
+  const selectId = useId();
   const pageSizeOptions = [5, 10, 20, 50];
+
   return (
-    <Select
-      label=""
-      options={pageSizeOptions.map((size) => ({
-        value: size.toString(),
-        label: `Voir par ${size}`,
-      }))}
-      nativeSelectProps={{
-        value: pageSize.toString(),
-        onChange: (e) => onPageSizeChange(Number(e.target.value)),
-      }}
-    />
+    <div className={fr.cx("fr-select-group")}>
+      <label className={fr.cx("fr-label", "fr-sr-only")} htmlFor={selectId}>
+        Nombre de résultats par page
+      </label>
+      <select
+        id={selectId}
+        className={fr.cx("fr-select")}
+        value={pageSize.toString()}
+        onChange={(event) => onPageSizeChange(Number(event.target.value))}
+      >
+        {pageSizeOptions.map((size) => (
+          <option key={size} value={size.toString()}>
+            Voir par {size}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
 
@@ -121,10 +124,33 @@ export function FullTable({
   headerAction = null,
   hasPagination = true,
   onRowClick,
+  renderSubComponent,
+  getRowCanExpand,
+  expandColumnLabel = "Détail",
+  expandedByDefault = false,
+  expandMode = "multiple",
+  tableLabel,
 }: FullTableProps) {
   const tableRef = useRef<HTMLDivElement>(null);
   const tableData = useTableData(data);
   const tableColumns = useTableColumns(columns);
+  const [expanded, setExpanded] = useState<ExpandedState>(expandedByDefault ? true : {});
+  const isExpandable = Boolean(renderSubComponent);
+
+  const handleExpandedChange = useCallback<OnChangeFn<ExpandedState>>(
+    (updater) => {
+      setExpanded((previous) => {
+        const next = typeof updater === "function" ? updater(previous) : updater;
+        if (expandMode !== "single" || typeof next !== "object" || next === null) {
+          return next;
+        }
+        const previousState = typeof previous === "object" && previous !== null ? previous : {};
+        const justOpened = Object.keys(next).find((rowId) => next[rowId] && !previousState[rowId]);
+        return justOpened ? { [justOpened]: true } : next;
+      });
+    },
+    [expandMode]
+  );
 
   const scrollToTop = useCallback(() => {
     if (tableRef.current) {
@@ -143,18 +169,26 @@ export function FullTable({
     }
   }, []);
 
-  const table = useReactTable({
+  const table = useReactTable<TableRowData>({
     data: tableData,
     columns: tableColumns,
     state: {
       sorting,
       columnFilters,
+      ...(isExpandable ? { expanded } : {}),
     },
     onSortingChange: onSortingChange || (() => {}),
     onColumnFiltersChange: onColumnFiltersChange || (() => {}),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    ...(isExpandable
+      ? {
+          onExpandedChange: handleExpandedChange,
+          getExpandedRowModel: getExpandedRowModel(),
+          getRowCanExpand: (row) => (getRowCanExpand ? getRowCanExpand(row.original) : true),
+        }
+      : {}),
     enableSorting: true,
     enableColumnFilters: true,
     manualSorting: false,
@@ -184,7 +218,7 @@ export function FullTable({
   const currentPage = pagination?.page || 1;
 
   useEffect(() => {
-    if (!onRowClick || !tableRef.current) return;
+    if (!onRowClick || isExpandable || !tableRef.current) return;
 
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -207,14 +241,16 @@ export function FullTable({
       tableElement.addEventListener("click", handleClick);
       return () => tableElement.removeEventListener("click", handleClick);
     }
-  }, [data, onRowClick, table]);
+  }, [data, onRowClick, table, isExpandable]);
+
+  const headerCells = table.getHeaderGroups()[0]?.headers ?? [];
 
   return (
     <>
       {isEmpty ? (
         <p>{emptyMessage}</p>
       ) : (
-        <div ref={tableRef} className={onRowClick ? "clickable-table" : ""}>
+        <div ref={tableRef} className={`${styles.tableContainer} ${onRowClick ? "clickable-table" : ""}`}>
           {onRowClick && (
             <style>{`
               .clickable-table tbody tr {
@@ -223,34 +259,79 @@ export function FullTable({
             `}</style>
           )}
           {(caption || headerAction) && (
-            <div
-              style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}
-            >
-              {caption && <h4 style={{ margin: 0 }}>{caption}</h4>}
+            <div className={styles.captionRow}>
+              {caption && <h4 className={styles.caption}>{caption}</h4>}
               {headerAction && <div>{headerAction}</div>}
             </div>
           )}
-          <Table
-            headers={
-              table
-                .getHeaderGroups()[0]
-                ?.headers.map((header) => <TableHeaderCell key={header.id} header={header} />) || []
-            }
-            data={table
-              .getSortedRowModel()
-              .rows.map((row) => row.getVisibleCells().map((cell) => <TableBodyCell key={cell.id} cell={cell} />))}
-          />
+          {isExpandable ? (
+            <div className="fr-table">
+              <table>
+                {tableLabel && <caption className={fr.cx("fr-sr-only")}>{tableLabel}</caption>}
+                <thead>
+                  <tr>
+                    <th scope="col">
+                      <span className="fr-sr-only">{expandColumnLabel}</span>
+                    </th>
+                    {headerCells.map((header) => (
+                      <th key={header.id} scope="col">
+                        <TableHeaderCell header={header} />
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {table.getRowModel().rows.map((row) => (
+                    <Fragment key={row.id}>
+                      <tr>
+                        <td>
+                          {row.getCanExpand() && (
+                            <button
+                              type="button"
+                              aria-expanded={row.getIsExpanded()}
+                              aria-label={`${expandColumnLabel} : ${row.getIsExpanded() ? "replier" : "déplier"}`}
+                              onClick={row.getToggleExpandedHandler()}
+                              className={fr.cx(
+                                "fr-btn",
+                                "fr-btn--tertiary-no-outline",
+                                "fr-btn--sm",
+                                row.getIsExpanded() ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"
+                              )}
+                            />
+                          )}
+                        </td>
+                        {row.getVisibleCells().map((cell) => (
+                          <td key={cell.id}>
+                            <TableBodyCell cell={cell} />
+                          </td>
+                        ))}
+                      </tr>
+                      {row.getIsExpanded() && row.getCanExpand() && (
+                        <tr>
+                          <td colSpan={row.getVisibleCells().length + 1}>{renderSubComponent!(row.original)}</td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <Table
+              caption={tableLabel}
+              noCaption
+              headers={headerCells.map((header) => (
+                <TableHeaderCell key={header.id} header={header} />
+              ))}
+              data={table
+                .getSortedRowModel()
+                .rows.map((row) => row.getVisibleCells().map((cell) => <TableBodyCell key={cell.id} cell={cell} />))}
+            />
+          )}
           {hasPagination && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: "1rem",
-              }}
-            >
+            <div className={styles.paginationRow}>
               <TablePagination totalPages={totalPages} currentPage={currentPage} onPageChange={handlePageChange} />
-              <div style={{ width: "150px" }}>
+              <div className={styles.pageSizeSelector}>
                 <PageSizeSelector pageSize={pageSize} onPageSizeChange={handlePageSizeChange} />
               </div>
             </div>

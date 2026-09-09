@@ -15,6 +15,7 @@ import { sleep } from "./common/utils/asyncUtils";
 import config from "./config";
 import createServer from "./http/server";
 import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
+import { crons, registry } from "./jobs/registry";
 
 async function startJobProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
@@ -477,6 +478,32 @@ program
       userId: options.userId,
       queued: options.queued ?? false,
     });
+  });
+
+program
+  .command("jobs:list")
+  .description("Affiche les jobs et crons enregistrés, groupés par domaine (horaires Europe/Paris)")
+  .action(() => {
+    /* eslint-disable no-console */
+    for (const [domain, def] of Object.entries(registry)) {
+      console.log(`\n[${domain}] ${Object.keys(def.jobs).length} jobs`);
+      for (const name of Object.keys(def.jobs)) {
+        console.log(`  ${name}`);
+      }
+    }
+    const dailyMinute = (cronString: string) => {
+      const [minute, hour] = cronString.split(" ");
+      const parsed = Number(hour) * 60 + Number(minute);
+      return Number.isFinite(parsed) ? parsed : Number.MAX_SAFE_INTEGER;
+    };
+    const sortedCrons = Object.entries(crons).sort(
+      ([nameA, a], [nameB, b]) => dailyMinute(a.cron_string) - dailyMinute(b.cron_string) || nameA.localeCompare(nameB)
+    );
+    console.log(`\nCrons (${sortedCrons.length}) — cron_string interprété en Europe/Paris :`);
+    for (const [name, def] of sortedCrons) {
+      console.log(`  ${def.cron_string.padEnd(12)} ${name}`);
+    }
+    /* eslint-enable no-console */
   });
 
 program

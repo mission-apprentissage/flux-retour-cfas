@@ -1,0 +1,45 @@
+.nameCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+}
+
+.identite {
+  display: flex;
+  flex-direction: column;
+}
+
+.identiteNom {
+  text-transform: uppercase;
+}
+
+.statutHeader {
+  text-align: right;
+}
+
+/* Libellé et bouton de tri alignés, sans césure du libellé (maquette). */
+.headerContenu {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.emptyMessage {
+  color: var(--text-mention-grey);
+  margin: 1.5rem 0;
+}
+
+.tableWrapper {
+  margin-bottom: 0;
+  overflow-x: auto;
+}
+
+/* `.fr-table > table` (DSFR) l'emporte sur une simple classe : on cible le conteneur. */
+:global(.fr-table) > .table {
+  display: table;
+  width: 100%;
+  min-width: 48rem;
+  overflow: visible;
+}

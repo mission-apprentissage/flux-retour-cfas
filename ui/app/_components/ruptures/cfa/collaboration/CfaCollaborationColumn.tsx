@@ -35,7 +35,7 @@ function MlCard({ ml, showInactiveMessage }: { ml: MlOrg; showInactiveMessage?: 
         </p>
       )}
       {ml.activated_at ? (
-        <Badge as="span" severity="success">
+        <Badge as="span" severity="success" small>
           Utilise le Tableau de bord
         </Badge>
       ) : showInactiveMessage ? (
@@ -63,11 +63,7 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
     <div className={styles.collaborationColumn}>
       {!dossierTraité && <p className={styles.columnHeader}>Collaboration avec la Mission Locale</p>}
 
-      {!effectif.date_rupture ? (
-        <p className={styles.collabDisabledMessage}>
-          La collaboration avec une Mission Locale n&apos;est possible que pour les jeunes en rupture de contrat.
-        </p>
-      ) : !dossierTraité ? (
+      {!dossierTraité ? (
         <>
           {ml ? (
             <>
@@ -103,7 +99,7 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
           ))}
           <CommentBubbles effectif={effectif} styles={styles} variant="received" />
           {mlContactUser?.email && (
-            <div style={{ display: "flex", justifyContent: "flex-end", margin: "1rem 0" }}>
+            <div className={localStyles.actionsRow}>
               <Button
                 priority="primary"
                 iconId="fr-icon-send-plane-fill"

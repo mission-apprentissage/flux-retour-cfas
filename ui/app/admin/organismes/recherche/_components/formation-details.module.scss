@@ -1,0 +1,18 @@
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem 0;
+
+  :global(.fr-table) {
+    margin-bottom: 0;
+  }
+}
+
+.code {
+  padding: 0.125rem 0.375rem;
+  font-family: monospace;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+  background-color: var(--background-contrast-grey);
+}

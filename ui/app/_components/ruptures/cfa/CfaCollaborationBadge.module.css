@@ -1,5 +1,6 @@
 .contacteBadge,
-.traiteBadge {
+.traiteBadge,
+.demandeEnvoyeeBadge {
   display: inline-flex;
   align-items: center;
   height: 20px;
@@ -23,12 +24,17 @@
   background-color: var(--background-flat-success);
 }
 
+.demandeEnvoyeeBadge {
+  color: var(--text-action-high-blue-france);
+  background-color: var(--background-contrast-blue-france);
+}
+
 /* Statut "Contacté par la ML — Hors collab" : badge vert empilé avec une sous-étiquette "Hors collab" */
 .horsCollabContainer {
   display: inline-flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 /* Variante bandeau : étiquettes côte à côte plutôt qu'empilées */
@@ -55,4 +61,13 @@
 
 .horsCollabInfo {
   color: var(--text-mention-grey);
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
+.unavailableCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }

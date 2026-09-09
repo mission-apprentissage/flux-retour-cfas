@@ -1,18 +1,16 @@
 "use client";
 
-import { BarPlot } from "@mui/x-charts/BarChart";
-import { ChartContainer } from "@mui/x-charts/ChartContainer";
-import { ChartsGrid } from "@mui/x-charts/ChartsGrid";
-import { ChartsXAxis } from "@mui/x-charts/ChartsXAxis";
-import { ChartsYAxis } from "@mui/x-charts/ChartsYAxis";
-import { LinePlot, MarkPlot } from "@mui/x-charts/LineChart";
+import { Bar, CartesianGrid, ComposedChart, Line, Tooltip, XAxis, YAxis } from "recharts";
 import { ITimeSeriesPoint } from "shared/models/data/nationalStats.model";
 
+import { Skeleton } from "@/app/_components/common/Skeleton";
+
 import { calculatePercentage, getPercentageColor, RUPTURANTS_COLORS, RUPTURANTS_LABELS } from "../constants";
-import { Skeleton } from "../ui/Skeleton";
 
 import { ChartLegend } from "./ChartLegend";
 import { AxisChartTooltip } from "./ChartTooltip";
+import styles from "./RupturantsBarChart.module.css";
+import { niceTicks } from "./ticks";
 
 interface RupturantsBarChartProps {
   data: ITimeSeriesPoint[];
@@ -20,98 +18,110 @@ interface RupturantsBarChartProps {
   loadingVariation?: boolean;
 }
 
+const ANIMATION = {
+  animationBegin: 0,
+  animationDuration: 300,
+  animationEasing: "cubic-bezier(0.66, 0, 0.34, 1)",
+} as const;
+
+const TICK_STYLE = { fontSize: 12, fill: "#161616" };
+
+const formatDate = (value: Date) => {
+  const date = new Date(value);
+  return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}`;
+};
+
+const formatYAxis = (value: number) => {
+  if (value >= 1000) {
+    return `${(value / 1000).toFixed(1).replace(/\.0$/, "")}k`;
+  }
+  return value.toString();
+};
+
 export function RupturantsBarChart({ data, loading, loadingVariation }: RupturantsBarChartProps) {
   if (loading || !data || data.length === 0) {
     return (
       <>
         <Skeleton height="260px" width="100%" />
-        <div style={{ marginTop: "16px" }}>
+        <div className={styles.legendSkeleton}>
           <Skeleton height="60px" width="100%" />
         </div>
       </>
     );
   }
 
-  const dates = data.map((point) => {
-    const date = new Date(point.date);
-    return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}`;
-  });
+  const rows = data.map((point) => ({
+    date: formatDate(point.date),
+    a_traiter: point.stats[0]?.total_a_traiter || 0,
+    traites: point.stats[0]?.total_traites || 0,
+  }));
 
-  const aTraiterData = data.map((point) => point.stats[0]?.total_a_traiter || 0);
-  const traitesData = data.map((point) => point.stats[0]?.total_traites || 0);
+  const last = rows[rows.length - 1];
+  const totalATraiter = last.a_traiter;
+  const totalTraites = last.traites;
 
-  const lastIndex = data.length - 1;
-  const totalATraiter = lastIndex >= 0 ? aTraiterData[lastIndex] : 0;
-  const totalTraites = lastIndex >= 0 ? traitesData[lastIndex] : 0;
+  const yTicks = niceTicks(Math.max(...rows.map((row) => row.a_traiter + row.traites)), 5);
 
-  const firstTraites = data.length > 0 ? traitesData[0] : 0;
+  const firstTraites = rows[0].traites;
   const variationTraites = calculatePercentage(totalTraites, firstTraites);
   const variationColor = getPercentageColor(totalTraites, firstTraites);
 
-  const formatYAxis = (value: number) => {
-    if (value >= 1000) {
-      return `${(value / 1000).toFixed(1).replace(/\.0$/, "")}k`;
-    }
-    return value.toString();
-  };
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <ChartContainer
-        xAxis={[
-          {
-            id: "x-axis",
-            scaleType: "band",
-            data: dates,
-            disableLine: true,
-            disableTicks: true,
-            categoryGapRatio: 0.75,
-            barGapRatio: 0.2,
-          },
-        ]}
-        yAxis={[
-          {
-            id: "y-axis",
-            disableLine: true,
-            disableTicks: false,
-            valueFormatter: formatYAxis,
-          },
-        ]}
-        series={[
-          {
-            type: "bar",
-            data: traitesData,
-            label: RUPTURANTS_LABELS.traites,
-            stack: "total",
-            color: RUPTURANTS_COLORS.traites,
-          },
-          {
-            type: "bar",
-            data: aTraiterData,
-            label: RUPTURANTS_LABELS.a_traiter,
-            stack: "total",
-            color: RUPTURANTS_COLORS.a_traiter,
-          },
-          {
-            type: "line",
-            data: traitesData,
-            color: RUPTURANTS_COLORS.traites,
-            showMark: true,
-            disableHighlight: true,
-          },
-        ]}
+    <div className={styles.chart}>
+      <ComposedChart
+        responsive
+        width="100%"
         height={320}
-        margin={{ right: -5, left: -10, bottom: 10 }}
+        data={rows}
+        margin={{ top: 12, right: 5, bottom: 10, left: 0 }}
+        barCategoryGap="37.5%"
       >
-        <ChartsGrid horizontal />
-        <BarPlot />
-        <LinePlot />
-        <MarkPlot slotProps={{ mark: { r: 3 } }} />
-        <ChartsXAxis />
-        <ChartsYAxis />
-        <AxisChartTooltip />
-      </ChartContainer>
-      <div style={{ marginTop: "auto" }}>
+        <CartesianGrid horizontal vertical={false} stroke="#ddd" />
+        <XAxis dataKey="date" axisLine={false} tickLine={false} tick={TICK_STYLE} />
+        <YAxis
+          axisLine={false}
+          tickLine={{ stroke: "#161616" }}
+          tick={TICK_STYLE}
+          tickFormatter={formatYAxis}
+          width={45}
+          ticks={yTicks}
+          domain={[0, yTicks[yTicks.length - 1]]}
+          niceTicks="none"
+        />
+        <Bar
+          dataKey="traites"
+          name={RUPTURANTS_LABELS.traites}
+          stackId="total"
+          fill={RUPTURANTS_COLORS.traites}
+          {...ANIMATION}
+        />
+        <Bar
+          dataKey="a_traiter"
+          name={RUPTURANTS_LABELS.a_traiter}
+          stackId="total"
+          fill={RUPTURANTS_COLORS.a_traiter}
+          {...ANIMATION}
+        />
+        <Line
+          dataKey="traites"
+          stroke={RUPTURANTS_COLORS.traites}
+          strokeWidth={2}
+          dot={{ r: 3, fill: "#fff", strokeWidth: 2 }}
+          activeDot={false}
+          tooltipType="none"
+          legendType="none"
+          {...ANIMATION}
+        />
+        <Tooltip
+          content={<AxisChartTooltip />}
+          cursor={false}
+          offset={8}
+          allowEscapeViewBox={{ x: true, y: true }}
+          isAnimationActive={false}
+          wrapperStyle={{ outline: "none", zIndex: 1500 }}
+        />
+      </ComposedChart>
+      <div className={styles.legend}>
         <ChartLegend
           items={[
             { label: RUPTURANTS_LABELS.a_traiter, color: RUPTURANTS_COLORS.a_traiter, value: totalATraiter },

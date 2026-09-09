@@ -5,6 +5,7 @@ import { ACC_CONJOINT_MOTIF_ENUM } from "shared";
 
 import { MOTIF_EMOJIS, MOTIF_LABELS } from "@/app/_components/ruptures/shared/constants";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { dePrenom } from "@/app/_utils/ruptures.utils";
 
 import styles from "../CollaborationForm.module.css";
 import { FREINS_MOTIFS } from "../constants";
@@ -39,7 +40,7 @@ function MotifCommentaire({
 }
 
 export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
-  const { values, setFieldValue } = useFormikContext<FormValues>();
+  const { values, setValues } = useFormikContext<FormValues>();
   const [freinsOpen, setFreinsOpen] = useState(false);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
@@ -47,9 +48,9 @@ export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
   const hasReorientation = values.motifs.includes(ACC_CONJOINT_MOTIF_ENUM.REORIENTATION);
   const showFreinsSection = freinsOpen || values.motifs.some((m) => FREINS_MOTIFS.includes(m));
 
+  // Deux `setFieldValue` successifs feraient valider le second sur des motifs pas encore à jour.
   const toggleMotif = (motif: ACC_CONJOINT_MOTIF_ENUM, checked: boolean) => {
     if (checked) {
-      setFieldValue("motifs", [...values.motifs, motif]);
       if (FREINS_MOTIFS.includes(motif)) {
         trackPlausibleEvent("cfa_form_frein_selectionne", undefined, { frein: motif });
       } else if (motif === ACC_CONJOINT_MOTIF_ENUM.REORIENTATION) {
@@ -57,20 +58,21 @@ export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
       } else {
         trackPlausibleEvent("cfa_form_objectif_selectionne", undefined, { objectif: motif });
       }
-      if (
-        FREINS_MOTIFS.includes(motif) ||
-        motif === ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI ||
-        motif === ACC_CONJOINT_MOTIF_ENUM.REORIENTATION
-      ) {
-        setFieldValue(`commentaires_par_motif.${motif}`, values.commentaires_par_motif[motif] ?? "");
-      }
+      const attendUnCommentaire = FREINS_MOTIFS.includes(motif) || motif === ACC_CONJOINT_MOTIF_ENUM.RECHERCHE_EMPLOI;
+      setValues({
+        ...values,
+        motifs: [...values.motifs, motif],
+        commentaires_par_motif: attendUnCommentaire
+          ? { ...values.commentaires_par_motif, [motif]: values.commentaires_par_motif[motif] ?? "" }
+          : values.commentaires_par_motif,
+      });
     } else {
       const { [motif]: _removed, ...restCommentaires } = values.commentaires_par_motif;
-      setFieldValue(
-        "motifs",
-        values.motifs.filter((m) => m !== motif)
-      );
-      setFieldValue("commentaires_par_motif", restCommentaires);
+      setValues({
+        ...values,
+        motifs: values.motifs.filter((m) => m !== motif),
+        commentaires_par_motif: restCommentaires,
+      });
     }
   };
 
@@ -82,17 +84,20 @@ export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
     setFreinsOpen(false);
     const restCommentaires = { ...values.commentaires_par_motif };
     FREINS_MOTIFS.forEach((m) => delete restCommentaires[m]);
-    setFieldValue(
-      "motifs",
-      values.motifs.filter((m) => !FREINS_MOTIFS.includes(m))
-    );
-    setFieldValue("commentaires_par_motif", restCommentaires);
+    setValues({
+      ...values,
+      motifs: values.motifs.filter((m) => !FREINS_MOTIFS.includes(m)),
+      commentaires_par_motif: restCommentaires,
+    });
   };
 
   return (
     <div className={styles.sectionInner}>
       <p className={styles.sectionLabel}>
-        Quel est l&apos;objectif de l&apos;accompagnement de {prenom} ?<span className={styles.required}>*</span>
+        Quel est l&apos;objectif de l&apos;accompagnement {dePrenom(prenom)} ?<span className={styles.required}>*</span>
+      </p>
+      <p className={styles.sectionHint}>
+        Vous pouvez sélectionner plusieurs objectifs. Détaillez les besoins spécifiques du jeune pour chacun.
       </p>
 
       <div className={`${styles.objectifCard} ${hasRecherche ? styles.objectifCardActive : ""}`}>
@@ -189,19 +194,6 @@ export function ObjectifsSection({ prenom }: ObjectifsSectionProps) {
             },
           ]}
         />
-        {hasReorientation && (
-          <div className={styles.subSection}>
-            <p className={styles.subSectionLabel}>
-              Le jeune a quitté le CFA ou souhaite se réorienter ? Précisez la situation actuelle en quelques mots
-              <span className={styles.required}>*</span>
-            </p>
-            <MotifCommentaire
-              motif={ACC_CONJOINT_MOTIF_ENUM.REORIENTATION}
-              placeholder="Précisez la situation actuelle en quelques mots"
-              rows={3}
-            />
-          </div>
-        )}
       </div>
 
       <ErrorMessage name="motifs" component="p" className="fr-error-text" />

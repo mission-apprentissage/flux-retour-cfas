@@ -51,11 +51,11 @@ export function getEventIcon(icon: EventIconType, styles: Record<string, string>
     case "nouveau-contrat":
       return <span className={`fr-icon-file-text-line fr-icon--sm ${styles.nouveauContratIcon}`} aria-hidden="true" />;
     case "fin-de-formation":
-      return <i className="fr-icon-information-fill fr-icon--sm" style={{ color: "#666666" }} aria-hidden="true" />;
+      return <i className={`fr-icon-information-fill fr-icon--sm ${styles.finDeFormationIcon}`} aria-hidden="true" />;
     case "whatsapp-yes":
-      return <i className="ri-chat-check-fill" style={{ color: "#18753C", fontSize: "18px" }} aria-hidden="true" />;
+      return <i className={`ri-chat-check-fill ${styles.whatsappYesIcon}`} aria-hidden="true" />;
     case "whatsapp-no":
-      return <i className="ri-chat-delete-fill" style={{ color: "#666666", fontSize: "18px" }} aria-hidden="true" />;
+      return <i className={`ri-chat-delete-fill ${styles.whatsappNoIcon}`} aria-hidden="true" />;
     case "traite":
     default:
       return <Image src="/images/parcours-dossier-traite.svg" alt="" width={18} height={18} />;

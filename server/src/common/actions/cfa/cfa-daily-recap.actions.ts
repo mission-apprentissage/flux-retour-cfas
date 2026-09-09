@@ -44,11 +44,10 @@ interface ICfaDailyStats {
 export async function getCfaEffectifsWithMlActionsLast24h(): Promise<ICfaDailyStats[]> {
   const yesterday = subHours(new Date(), 24);
 
-  const cfasPilotes = await organisationsDb()
+  const cfas = await organisationsDb()
     .find(
       {
         type: "ORGANISME_FORMATION",
-        ml_beta_activated_at: { $exists: true },
       },
       {
         projection: {
@@ -58,10 +57,10 @@ export async function getCfaEffectifsWithMlActionsLast24h(): Promise<ICfaDailySt
       }
     )
     .toArray();
-  if (cfasPilotes.length === 0) {
+  if (cfas.length === 0) {
     return [];
   }
-  const cfaOrganismeIds = cfasPilotes
+  const cfaOrganismeIds = cfas
     .map((cfa) => (cfa as any).organisme_id)
     .filter((id) => id)
     .map((id) => new ObjectId(id));
@@ -170,7 +169,7 @@ export async function getCfaEffectifsWithMlActionsLast24h(): Promise<ICfaDailySt
   return results as ICfaDailyStats[];
 }
 
-export async function getCfaPiloteUsers(
+export async function getCfaUsers(
   cfaOrganismeId: ObjectId,
   userId?: ObjectId
 ): Promise<{
@@ -180,7 +179,6 @@ export async function getCfaPiloteUsers(
   const organisation = await organisationsDb().findOne({
     organisme_id: cfaOrganismeId.toString(),
     type: "ORGANISME_FORMATION",
-    ml_beta_activated_at: { $exists: true },
   });
 
   if (!organisation) {

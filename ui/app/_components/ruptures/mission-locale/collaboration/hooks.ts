@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { API_EFFECTIF_LISTE, IEffectifMissionLocale, IUpdateMissionLocaleEffectif } from "shared";
 
@@ -24,24 +24,24 @@ export function useMlUpdateEffectif() {
 export function useMlEffectifDetail(id: string) {
   const searchParams = useSearchParams();
   const nomListe = (searchParams?.get("nom_liste") as API_EFFECTIF_LISTE) || API_EFFECTIF_LISTE.A_TRAITER;
-  // Filtre villes transmis pour que le backend calcule précédent/suivant sur le sous-ensemble filtré.
+  // Filtre villes et tri transmis pour que le backend calcule précédent/suivant sur la liste
+  // telle qu'elle était affichée.
   const codePostal = searchParams?.get("cp") || undefined;
+  const tri = searchParams?.get("tri") || undefined;
+  const ordre = searchParams?.get("ordre") || undefined;
 
-  return useQuery(
-    [...effectifQueryKeys.detail(id), nomListe, codePostal],
-    async () => {
+  return useSuspenseQuery({
+    queryKey: [...effectifQueryKeys.detail(id), nomListe, codePostal, tri, ordre],
+
+    queryFn: async () => {
       if (!id) return null;
       return await _get<IEffectifMissionLocale>(`/api/v1/organisation/mission-locale/effectif/${id}`, {
         params: {
           nom_liste: nomListe,
           ...(codePostal ? { code_postal: codePostal } : {}),
+          ...(tri ? { tri, ordre: ordre ?? "asc" } : {}),
         },
       });
     },
-    {
-      enabled: !!id,
-      suspense: true,
-      useErrorBoundary: true,
-    }
-  );
+  });
 }

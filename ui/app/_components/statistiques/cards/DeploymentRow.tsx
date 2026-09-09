@@ -1,6 +1,6 @@
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 
-import { Skeleton } from "../ui/Skeleton";
+import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import styles from "./DeploymentRow.module.css";
 
@@ -49,6 +49,7 @@ export function DeploymentRow({
         <div className={percentage ? styles.deploymentValueWithPercentage : undefined}>
           <p className={styles.deploymentValue}>{value}</p>
           {percentage &&
+            percentage !== "0%" &&
             (loadingPercentage ? (
               <Skeleton width="40px" height="20px" />
             ) : (

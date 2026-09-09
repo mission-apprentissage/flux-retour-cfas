@@ -2,9 +2,8 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { Box, Stack, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
 import { useFormik } from "formik";
 import React, { useState } from "react";
 import { toFormikValidationSchema } from "zod-formik-adapter";
@@ -13,6 +12,13 @@ import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 import { _delete, _put, _post } from "@/common/httpClient";
 
 import userSchema from "../../../modules/admin/userSchema";
+
+import styles from "./UserForm.module.css";
+
+const deleteUserModal = createModal({
+  id: "admin-user-delete",
+  isOpenedByDefault: false,
+});
 
 const UserForm = ({
   user,
@@ -125,25 +131,22 @@ const UserForm = ({
     },
   });
 
-  const onDeleteClicked = async (e) => {
-    e.preventDefault();
-    if (confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) {
-      const result = await _delete(`/api/v1/admin/users/${user._id}`);
-      if (result?.ok) {
-        setAlert({
-          message: "Utilisateur supprimé",
-          severity: "success",
-        });
-      } else {
-        setAlert({
-          message: "Erreur lors de la suppression de l'utilisateur.",
-          severity: "error",
-          description: " Merci de réessayer plus tard",
-        });
-      }
-
-      return onDelete?.();
+  const performDelete = async () => {
+    const result = await _delete(`/api/v1/admin/users/${user._id}`);
+    if (result?.ok) {
+      setAlert({
+        message: "Utilisateur supprimé",
+        severity: "success",
+      });
+    } else {
+      setAlert({
+        message: "Erreur lors de la suppression de l'utilisateur.",
+        severity: "error",
+        description: " Merci de réessayer plus tard",
+      });
     }
+
+    return onDelete?.();
   };
 
   const confirmUserAccess = async (validate) => {
@@ -202,9 +205,9 @@ const UserForm = ({
           }}
         />
       )}
-      <Stack spacing={3} sx={{ my: 4 }}>
-        <Grid container spacing={2} columns={12}>
-          <Grid size={6}>
+      <div className={styles.sections}>
+        <div className="fr-grid-row fr-grid-row--gutters">
+          <div className="fr-col-6">
             <Input
               label="Nom"
               nativeInputProps={{
@@ -217,8 +220,8 @@ const UserForm = ({
               state={errors.nom && touched.nom ? "error" : "default"}
               stateRelatedMessage={errors.nom && touched.nom ? (errors.nom as string) : undefined}
             />
-          </Grid>
-          <Grid size={6}>
+          </div>
+          <div className="fr-col-6">
             <Input
               label="Prénom"
               nativeInputProps={{
@@ -231,8 +234,8 @@ const UserForm = ({
               state={errors.prenom && touched.prenom ? "error" : "default"}
               stateRelatedMessage={errors.prenom && touched.prenom ? (errors.prenom as string) : undefined}
             />
-          </Grid>
-          <Grid size={6}>
+          </div>
+          <div className="fr-col-6">
             <RadioButtons
               legend="Civilité"
               name="civility"
@@ -258,8 +261,8 @@ const UserForm = ({
               state={errors.civility && touched.civility ? "error" : "default"}
               stateRelatedMessage={errors.civility && touched.civility ? (errors.civility as string) : undefined}
             />
-          </Grid>
-          <Grid size={6}>
+          </div>
+          <div className="fr-col-6">
             <Input
               label="Email"
               nativeInputProps={{
@@ -272,8 +275,8 @@ const UserForm = ({
               state={errors.email && touched.email ? "error" : "default"}
               stateRelatedMessage={errors.email && touched.email ? (errors.email as string) : undefined}
             />
-          </Grid>
-          <Grid size={6}>
+          </div>
+          <div className="fr-col-6">
             <Input
               label="Fonction"
               nativeInputProps={{
@@ -286,8 +289,8 @@ const UserForm = ({
               state={errors.fonction && touched.fonction ? "error" : "default"}
               stateRelatedMessage={errors.fonction && touched.fonction ? (errors.fonction as string) : undefined}
             />
-          </Grid>
-          <Grid size={6}>
+          </div>
+          <div className="fr-col-6">
             <Input
               label="Téléphone"
               nativeInputProps={{
@@ -300,59 +303,83 @@ const UserForm = ({
               state={errors.telephone && touched.telephone ? "error" : "default"}
               stateRelatedMessage={errors.telephone && touched.telephone ? (errors.telephone as string) : undefined}
             />
-          </Grid>
-        </Grid>
+          </div>
+        </div>
 
         {user && (
           <>
-            <Stack direction="row" spacing={2} alignItems="center" sx={{ my: 2 }}>
-              <Typography variant="body1">Statut du compte</Typography>
+            <div className={styles.statusRow}>
+              <p className={styles.statusLabel}>Statut du compte</p>
               <Badge severity="info">{USER_STATUS_LABELS[user.account_status] || user.account_status}</Badge>
 
               {user.account_status === "PENDING_EMAIL_VALIDATION" && (
-                <Box sx={{ ml: 2 }}>
+                <div className={styles.statusAction}>
                   <Button priority="primary" onClick={() => resendConfirmationEmail()}>
                     Renvoyer l&apos;email de confirmation
                   </Button>
-                </Box>
+                </div>
               )}
-            </Stack>
+            </div>
 
-            <Stack direction="row" spacing={2} alignItems="center" sx={{ my: 2 }}>
-              <Typography variant="body1">Type de compte</Typography>
+            <div className={styles.statusRow}>
+              <p className={styles.statusLabel}>Type de compte</p>
               <Badge severity="new">{user.organisation.label}</Badge>
 
               {user.account_status !== "CONFIRMED" && (
-                <Stack direction="row" spacing={1} sx={{ ml: 2 }}>
+                <div className={styles.statusActions}>
                   <Button priority="primary" onClick={() => confirmUserAccess(true)}>
                     Confirmer
                   </Button>
                   <Button priority="secondary" onClick={() => confirmUserAccess(false)}>
                     Rejeter
                   </Button>
-                </Stack>
+                </div>
               )}
-            </Stack>
+            </div>
           </>
         )}
 
         {user ? (
-          <Box sx={{ pt: 4 }}>
-            <Stack direction="row" spacing={2}>
+          <div className={styles.footer}>
+            <div className={styles.footerActions}>
               <Button type="submit" priority="primary" disabled={!dirty}>
                 Enregistrer
               </Button>
-              <Button priority="secondary" onClick={onDeleteClicked}>
+              <Button type="button" priority="secondary" onClick={() => deleteUserModal.open()}>
                 Supprimer l&apos;utilisateur
               </Button>
-            </Stack>
-          </Box>
+            </div>
+            <deleteUserModal.Component
+              title="Supprimer l'utilisateur"
+              buttons={[
+                {
+                  children: "Annuler",
+                  doClosesModal: true,
+                  priority: "secondary",
+                },
+                {
+                  children: "Supprimer définitivement",
+                  doClosesModal: true,
+                  priority: "primary",
+                  onClick: performDelete,
+                },
+              ]}
+            >
+              <p>
+                Vous allez supprimer le compte de{" "}
+                <strong>
+                  {user.prenom} {user.nom}
+                </strong>{" "}
+                ({user.email}). Cette action est irréversible.
+              </p>
+            </deleteUserModal.Component>
+          </div>
         ) : (
           <Button type="submit" priority="primary">
             Créer l&apos;utilisateur
           </Button>
         )}
-      </Stack>
+      </div>
     </form>
   );
 };

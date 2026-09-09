@@ -215,6 +215,11 @@ export const zOrganisme = z
     is_allowed_deca: z
       .boolean({ description: "Organisme du programme DECA-CFA (effectifs DECA visibles côté CFA)" })
       .nullish(),
+    has_account: z
+      .boolean({
+        description: "Indique qu'au moins un compte utilisateur est attaché à l'organisation de cet organisme",
+      })
+      .nullish(),
   })
   .strict();
 

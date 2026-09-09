@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 
@@ -15,13 +14,48 @@ interface CfaCollaborationBadgeProps {
   // Affiche les étiquettes "Contacté par la ML" / "Hors collab" côte à côte (contexte bandeau)
   // au lieu de l'empilement vertical utilisé dans le tableau.
   inline?: boolean;
+  // Renseigné quand la collaboration est impossible : le CTA est rendu inactif et la raison
+  // est affichée en infobulle.
+  unavailableReason?: string;
+  // Le tag "Hors collab" est alors rendu par l'appelant, sur la ligne de la date.
+  sansTagHorsCollab?: boolean;
 }
 
-export function CfaCollaborationBadge({ status, effectifId, inline = false }: CfaCollaborationBadgeProps) {
+export function CfaHorsCollabTag() {
+  return (
+    <span className={styles.horsCollabTag}>
+      Hors collab
+      <span className={styles.horsCollabInfo}>
+        <Tooltip
+          kind="hover"
+          title="Ce jeune a été contacté par la Mission Locale en dehors d'une collaboration : son dossier lui a été transmis automatiquement 45 jours après la rupture."
+        />
+      </span>
+    </span>
+  );
+}
+
+export function CfaCollaborationBadge({
+  status,
+  effectifId,
+  inline = false,
+  unavailableReason,
+  sansTagHorsCollab = false,
+}: CfaCollaborationBadgeProps) {
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   switch (status) {
     case "demarrer_collab":
+      if (unavailableReason) {
+        return (
+          <span className={styles.unavailableCta}>
+            <Button priority="primary" size="small" disabled>
+              Démarrer une collab
+            </Button>
+            <Tooltip kind="hover" title={unavailableReason} />
+          </span>
+        );
+      }
       return (
         <Button
           priority="primary"
@@ -29,7 +63,7 @@ export function CfaCollaborationBadge({ status, effectifId, inline = false }: Cf
           iconId="fr-icon-arrow-right-line"
           iconPosition="right"
           linkProps={{
-            href: `/cfa/${effectifId}`,
+            href: `/cfa/${effectifId}/collaboration`,
             onClick: () => trackPlausibleEvent("cfa_liste_demarrer_collab", undefined, { effectifId }),
           }}
         >
@@ -37,25 +71,27 @@ export function CfaCollaborationBadge({ status, effectifId, inline = false }: Cf
         </Button>
       );
     case "collab_demandee":
-      return <Badge severity="info">Demande collab envoyée</Badge>;
-    case "contacte_par_ml_hors_collab":
       return (
-        <span className={`${styles.horsCollabContainer} ${inline ? styles.horsCollabContainerInline : ""}`}>
-          <span className={styles.contacteBadge}>
-            <i className="fr-icon-message-2-fill fr-icon--sm" />
-            Contacté par la ML
-          </span>
-          <span className={styles.horsCollabTag}>
-            Hors collab
-            <span className={styles.horsCollabInfo}>
-              <Tooltip
-                kind="hover"
-                title="Ce jeune a été contacté par la Mission Locale en dehors d'une collaboration : son dossier a été transmis automatiquement à partir de 45 jours après la rupture."
-              />
-            </span>
-          </span>
+        <span className={styles.demandeEnvoyeeBadge}>
+          <i className="fr-icon-send-plane-fill fr-icon--sm" />
+          Demande collab envoyée
         </span>
       );
+    case "contacte_par_ml_hors_collab": {
+      const contacte = (
+        <span className={styles.contacteBadge}>
+          <i className="fr-icon-message-2-fill fr-icon--sm" />
+          Contacté par la ML
+        </span>
+      );
+      if (sansTagHorsCollab) return contacte;
+      return (
+        <span className={`${styles.horsCollabContainer} ${inline ? styles.horsCollabContainerInline : ""}`}>
+          {contacte}
+          <CfaHorsCollabTag />
+        </span>
+      );
+    }
     case "traite_par_ml":
       return (
         <span className={styles.traiteBadge}>

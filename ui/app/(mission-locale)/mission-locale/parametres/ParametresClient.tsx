@@ -1,6 +1,5 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
@@ -11,6 +10,8 @@ import { z, ZodError } from "zod";
 import { useMlParametres, useUpdateMlParametres } from "@/app/_components/ruptures/shared/hooks";
 import { ContentSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { TrackFormDirty } from "@/app/_components/UnsavedChangesContext";
+
+import formStyles from "./ParametresClient.module.css";
 
 const URL_ERROR = "Veuillez saisir une URL publique valide (ex: https://www.exemple.fr/rdv)";
 
@@ -104,7 +105,7 @@ export default function ParametresClient() {
         onSubmit={handleSubmit}
       >
         {({ isSubmitting, dirty, isValid }) => (
-          <Form noValidate style={{ maxWidth: 720 }}>
+          <Form noValidate className={formStyles.formulaire}>
             <TrackFormDirty dirty={dirty} />
             <Field name="rdv_url">
               {({ field, meta }: any) => (
@@ -126,7 +127,7 @@ export default function ParametresClient() {
               )}
             </Field>
 
-            <Button type="submit" disabled={isSubmitting || !dirty || !isValid} style={{ marginTop: fr.spacing("2w") }}>
+            <Button type="submit" disabled={isSubmitting || !dirty || !isValid} className={formStyles.boutonSoumettre}>
               Enregistrer
             </Button>
           </Form>

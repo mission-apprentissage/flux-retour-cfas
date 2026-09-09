@@ -1,0 +1,227 @@
+"use client";
+
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { EFFECTIFS_GROUP, ORGANISATION_TYPE } from "shared";
+
+import { DsfrLink } from "@/app/_components/link/DsfrLink";
+import { PageHeader } from "@/app/_components/page-header/PageHeader";
+import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
+import { DataTable } from "@/app/_components/table/DataTable";
+import { useAuth } from "@/app/_context/UserContext";
+import { formatDate } from "@/app/_utils/date.utils";
+import { PAGES } from "@/app/_utils/routes.utils";
+import { _get } from "@/common/httpClient";
+import { formatDateHourMinutesSecondsMs } from "@/common/utils/dateUtils";
+import { useOrganisationOrganisme, useOrganisme } from "@/hooks/organismes";
+
+import { EffectifQueueItemDetail } from "./EffectifQueueItemDetail";
+import styles from "./transmissions.module.scss";
+import { TransmissionsErrorSummary } from "./TransmissionsErrorSummary";
+
+const ERROR_COLUMNS = [
+  { label: "Apprenant", dataKey: "apprenant", width: "24%", sortable: false },
+  { label: "Date de naissance", dataKey: "birthdate", sortable: false },
+  { label: "Code Diplôme", dataKey: "code_diplome", sortable: false },
+  { label: "RNCP", dataKey: "code_rncp", sortable: false },
+  { label: "Heure d'envoi", dataKey: "processed_at", sortable: false },
+  { label: "Erreurs", dataKey: "errors", sortable: false },
+];
+
+const SUCCESS_COLUMNS = [
+  { label: "Apprenant", dataKey: "apprenant", width: "22%", sortable: false },
+  { label: "Date de naissance", dataKey: "birthdate", sortable: false },
+  { label: "Code Diplôme", dataKey: "code_diplome", sortable: false },
+  { label: "RNCP", dataKey: "code_rncp", sortable: false },
+  { label: "Heure d'envoi", dataKey: "processed_at", sortable: false },
+  { label: "Établissement d'affectation", dataKey: "organisme_name", width: "24%", sortable: false },
+];
+
+interface TransmissionsDetailsClientProps {
+  date: string;
+  modePublique?: boolean;
+  organismeId?: string;
+}
+
+export default function TransmissionsDetailsClient({
+  date,
+  modePublique = false,
+  organismeId,
+}: TransmissionsDetailsClientProps) {
+  const { user } = useAuth();
+  const canOpenFicheOrganisme =
+    user?.organisation?.type === ORGANISATION_TYPE.ADMINISTRATEUR ||
+    user?.organisation?.type === ORGANISATION_TYPE.TETE_DE_RESEAU;
+
+  const [errorPage, setErrorPage] = useState(1);
+  const [errorLimit, setErrorLimit] = useState(20);
+  const [successPage, setSuccessPage] = useState(1);
+  const [successLimit, setSuccessLimit] = useState(20);
+
+  const { organisme: organisationOrganisme, error: organisationError } = useOrganisationOrganisme(!modePublique);
+  const { organisme: organismePublique, error: organismeError } = useOrganisme(modePublique ? organismeId : null);
+
+  const organisme = modePublique ? organismePublique : organisationOrganisme;
+  const organismeLoadError = modePublique ? organismeError : organisationError;
+
+  const errorsQuery = useQuery<any, any>({
+    queryKey: ["transmissions-details", organisme?._id, date, errorPage, errorLimit],
+    queryFn: ({ signal }) =>
+      _get(`/api/v1/organismes/${organisme?._id}/transmission/${date}/error`, {
+        params: { page: errorPage, limit: errorLimit },
+        signal,
+      }),
+    enabled: !!organisme,
+  });
+
+  const successQuery = useQuery<any, any>({
+    queryKey: ["transmissions-details-success", organisme?._id, date, successPage, successLimit],
+    queryFn: ({ signal }) =>
+      _get(`/api/v1/organismes/${organisme?._id}/transmission/${date}/success`, {
+        params: { page: successPage, limit: successLimit },
+        signal,
+      }),
+    enabled: !!organisme,
+  });
+
+  const errorCount = errorsQuery.data?.pagination?.total ?? 0;
+  const successCount = successQuery.data?.totalEffectifs ?? 0;
+
+  const backHref =
+    modePublique && organismeId
+      ? PAGES.dynamic.organismeTransmissions({ organismeId }).getPath()
+      : PAGES.static.transmissions.getPath();
+
+  if (organismeLoadError) {
+    return (
+      <Alert
+        severity="error"
+        title="Accès refusé"
+        description="Vous ne disposez pas des droits nécessaires pour visualiser cette page."
+      />
+    );
+  }
+
+  const errorRows = (errorsQuery.data?.data ?? []).map((item: any) => ({
+    rawData: item,
+    element: {
+      apprenant: `${item.prenom_apprenant} ${item.nom_apprenant}`,
+      birthdate: formatDate(item.date_de_naissance_apprenant),
+      code_diplome: item.formation_cfd,
+      code_rncp: item.formation_rncp,
+      processed_at: formatDateHourMinutesSecondsMs(item.processed_at),
+      errors: (item.validation_errors?.length || 0) + (item.error && item.error.trim().length > 0 ? 1 : 0),
+    },
+  }));
+
+  const successRows = (successQuery.data?.data ?? []).map((item: any) => ({
+    rawData: item,
+    element: {
+      apprenant: `${item.prenom_apprenant} ${item.nom_apprenant}`,
+      birthdate: formatDate(item.date_de_naissance_apprenant),
+      code_diplome: item.formation_cfd,
+      code_rncp: item.formation_rncp,
+      processed_at: formatDateHourMinutesSecondsMs(item.processed_at),
+      organisme_name: !item.organisme ? (
+        "—"
+      ) : canOpenFicheOrganisme ? (
+        <DsfrLink href={`/organismes/${item.organisme._id}`} arrow="none">
+          {item.organisme.nom}
+        </DsfrLink>
+      ) : (
+        item.organisme.nom
+      ),
+    },
+  }));
+
+  return (
+    <div>
+      <PageHeader
+        backLink={{ href: backHref, label: "Retour au tableau des rapports" }}
+        title={`Rapport du ${formatDate(date)}`}
+        titleAs={modePublique ? "h2" : "h1"}
+        intro={`${modePublique ? "Les" : "Mes"} erreurs de transmissions du ${formatDate(date)}`}
+      />
+
+      <Tabs
+        tabs={[
+          {
+            label: `Effectifs en échec (${errorCount})`,
+            content: errorsQuery.error ? (
+              <Alert
+                severity="error"
+                title="Impossible de charger les effectifs en échec"
+                description="Une erreur est survenue lors du chargement. Veuillez réessayer ultérieurement."
+              />
+            ) : !organisme || errorsQuery.isLoading ? (
+              <TableSkeleton />
+            ) : (
+              <>
+                <TransmissionsErrorSummary
+                  summary={errorsQuery.data?.summary ?? {}}
+                  isLoading={errorsQuery.isFetching}
+                />
+                <p className="fr-my-3w">Cliquez sur une ligne d’apprenant pour identifier les données en erreur.</p>
+                <DataTable
+                  data={errorRows}
+                  columns={ERROR_COLUMNS}
+                  tableLabel="Effectifs en échec"
+                  pagination={errorsQuery.data?.pagination ?? null}
+                  onPageChange={setErrorPage}
+                  onPageSizeChange={setErrorLimit}
+                  pageSize={errorLimit}
+                  emptyMessage="Aucun effectif en échec pour cette journée"
+                  expandMode="single"
+                  renderSubComponent={(rowData) => <EffectifQueueItemDetail effectifQueueItem={rowData} />}
+                />
+              </>
+            ),
+          },
+          {
+            label: `Effectifs transmis (${successCount})`,
+            content: successQuery.error ? (
+              <Alert
+                severity="error"
+                title="Impossible de charger les effectifs transmis"
+                description="Une erreur est survenue lors du chargement. Veuillez réessayer ultérieurement."
+              />
+            ) : !organisme || successQuery.isLoading ? (
+              <TableSkeleton />
+            ) : (
+              <>
+                <div className="fr-my-3w">
+                  <p>
+                    Cliquez sur une ligne d’apprenant pour consulter l’ensemble des données transmises et identifier
+                    l’établissement vers lequel l’effectif a été affecté.
+                  </p>
+                  <p className={styles.detailNotice}>
+                    <i className="fr-icon-info-fill fr-icon--sm" aria-hidden="true" /> Les établissements d’affectation
+                    sont rattachés aux vôtres. Si vous avez une question, ou constatez une anomalie, veuillez{" "}
+                    <a href={EFFECTIFS_GROUP} target="_blank" rel="noopener noreferrer" className="fr-link">
+                      nous contacter
+                    </a>
+                    .
+                  </p>
+                </div>
+                <DataTable
+                  data={successRows}
+                  columns={SUCCESS_COLUMNS}
+                  tableLabel="Effectifs transmis"
+                  pagination={successQuery.data?.pagination ?? null}
+                  onPageChange={setSuccessPage}
+                  onPageSizeChange={setSuccessLimit}
+                  pageSize={successLimit}
+                  emptyMessage="Aucun effectif transmis pour cette journée"
+                  expandMode="single"
+                  renderSubComponent={(rowData) => <EffectifQueueItemDetail effectifQueueItem={rowData} />}
+                />
+              </>
+            ),
+          },
+        ]}
+      />
+    </div>
+  );
+}

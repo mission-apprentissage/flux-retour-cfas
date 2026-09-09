@@ -99,7 +99,7 @@ function fakeEffectif(formateur: IOrganisme, formation: IFormationCatalogue) {
     email_referent_handicap_formation: "",
     contrat_date_debut: "",
     contrat_date_fin: "",
-    siret_employeur: optional(fakerEn.helpers.replaceSymbolWithNumber("##############")),
+    siret_employeur: optional(fakerEn.string.numeric(14)),
     contrat_date_rupture: "",
     cause_rupture_contrat: "",
     contrat_date_debut_2: "",

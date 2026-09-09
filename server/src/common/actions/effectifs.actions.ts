@@ -75,7 +75,7 @@ const updateEffectif = async (_id: ObjectId, data: any, opt = { keepPreviousErro
     { returnDocument: "after" }
   );
 
-  return updated.value;
+  return updated;
 };
 
 export function flatPathsWithoutEmpty<T>(object: T): Paths<T>[] {
@@ -127,7 +127,11 @@ export const lockEffectif = async (effectif: IEffectif) => {
     { returnDocument: "after" }
   );
 
-  return updated.value as IEffectif;
+  if (!updated) {
+    throw new Error(`Unable to find effectif ${effectif._id.toString()}`);
+  }
+
+  return updated;
 };
 
 export const addComputedFields = async <T extends WithoutId<IEffectif | IEffectifDECA>>({

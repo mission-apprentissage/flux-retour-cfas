@@ -176,7 +176,7 @@ describe("tbaContactsContactList", () => {
           UAI_SIRET: `${orgaOf.uai}_${orgaOf.siret}`,
           STATUT_SIRET: "ouvert",
           ORGANISME_ID: String(organisme._id),
-          URL_TBA: `http://localhost:3000/organismes/${String(organisme._id)}`,
+          URL_TBA: "http://localhost:3000/cfa",
           CFA_NATURE: null,
           CFA_NB_FORMATEURS: 3,
           CFA_ERP_OU_DECA: "ERP",

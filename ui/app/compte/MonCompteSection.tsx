@@ -1,6 +1,5 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
@@ -14,6 +13,8 @@ import { _put } from "@/common/httpClient";
 
 import { TrackFormDirty } from "../_components/UnsavedChangesContext";
 import { useAuth } from "../_context/UserContext";
+
+import formStyles from "./MonCompteSection.module.css";
 
 const profilSchema = z.object({
   civility: z.enum(["Monsieur", "Madame"]).optional(),
@@ -55,10 +56,8 @@ export function MonCompteSection() {
 
   return (
     <div>
-      <h1 className="fr-h3" style={{ color: "var(--text-title-blue-france)" }}>
-        Mes informations
-      </h1>
-      <p className="fr-text--sm fr-mb-3w" style={{ color: "var(--text-mention-grey)" }}>
+      <h1 className={`fr-h3 ${formStyles.titre}`}>Mes informations</h1>
+      <p className={`fr-text--sm fr-mb-3w ${formStyles.sousTitre}`}>
         Vos informations personnelles relatives à votre compte Tableau de bord de l&apos;apprentissage
       </p>
 
@@ -99,7 +98,7 @@ export function MonCompteSection() {
         onSubmit={handleSubmit}
       >
         {({ values, isSubmitting, dirty, isValid, handleChange }) => (
-          <Form noValidate style={{ maxWidth: 720 }}>
+          <Form noValidate className={formStyles.formulaire}>
             <TrackFormDirty dirty={dirty} />
             <RadioButtons
               legend="Civilité"
@@ -153,7 +152,7 @@ export function MonCompteSection() {
               nativeInputProps={{ value: user?.email ?? "", disabled: true, readOnly: true }}
             />
 
-            <Button type="submit" disabled={isSubmitting || !dirty || !isValid} style={{ marginTop: fr.spacing("2w") }}>
+            <Button type="submit" disabled={isSubmitting || !dirty || !isValid} className={formStyles.boutonSoumettre}>
               Enregistrer les modifications
             </Button>
           </Form>

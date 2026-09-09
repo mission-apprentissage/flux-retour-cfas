@@ -3,16 +3,6 @@
  * @param  {any[]} array2
  * @returns  {boolean}
  */
-export const arraysContainSameValues = (array1, array2) => {
-  if (!Array.isArray(array1) || !Array.isArray(array2) || array1.length !== array2.length) {
-    return false;
-  }
-
-  array1.forEach((item) => {
-    if (!array2.includes(item)) return false;
-  });
-  return true;
-};
 
 export function stripEmptyFields<T extends object>(object: T): T {
   return Object.entries(object).reduce((acc, [key, value]) => {

@@ -1,0 +1,25 @@
+.panelHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panelTitre {
+  color: var(--text-title-blue-france);
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.panelActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.compteur {
+  color: var(--text-mention-grey);
+  white-space: nowrap;
+}

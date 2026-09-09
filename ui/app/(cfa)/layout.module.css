@@ -1,0 +1,24 @@
+.bannerSlot {
+  display: grid;
+}
+
+.bannerSlot:has(> *) {
+  min-height: 8.5rem;
+}
+
+.bannerSlot > * {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 60em) {
+  .bannerSlot:has(> *) {
+    min-height: 9.75rem;
+  }
+}
+
+@media (max-width: 48em) {
+  .bannerSlot:has(> *) {
+    min-height: 0;
+  }
+}

@@ -1,20 +1,20 @@
 .syntheseIcon {
-  margin-left: 4px;
-  margin-right: 5px;
+  flex-shrink: 0;
   min-width: 22px;
   min-height: 22px;
-  flex-shrink: 0;
+  margin-right: 5px;
+  margin-left: 4px;
 }
 
 .regionsIcon {
-  width: 22px;
-  height: 22px;
-  margin-left: 4px;
-  margin-right: 5px;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin-right: 5px;
+  margin-left: 4px;
 }
 
 .regionsIcon svg {
@@ -23,14 +23,14 @@
 }
 
 .regionItemIcon {
-  width: 22px;
-  height: 22px;
-  margin-left: 4px;
-  margin-right: 5px;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin-right: 5px;
+  margin-left: 4px;
   vertical-align: middle;
 }
 
@@ -40,31 +40,31 @@
 }
 
 .bannerContainer {
-  background-color: #f6f6f6;
-  padding: 34px 0;
-  margin-bottom: 32px;
-  margin-top: -2.5rem;
+  position: relative;
+  right: 50%;
+  left: 50%;
 
   /* Full-bleed technique : pas le plus propre mais le plus simple */
   width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
+  padding: 34px 0;
+  margin-top: -2.5rem;
   margin-right: -50vw;
+  margin-bottom: 32px;
+  margin-left: -50vw;
+  background-color: #f6f6f6;
 }
 
 .bannerContent {
-  margin: auto;
   max-width: 1232px;
   padding: 0 24px;
+  margin: auto;
 }
 
 .bannerTitle {
+  margin: 0;
   font-size: 24px;
   font-weight: 700;
   color: #000091;
-  margin: 0;
 }
 
 .mainContainer {
@@ -72,8 +72,8 @@
 }
 
 .sideMenuColumn {
-  border-right: 1px solid #dddddd;
   min-height: 100%;
+  border-right: 1px solid #dddddd;
 }
 
 .contentColumn {
@@ -82,8 +82,8 @@
 
 .sideMenuContainer {
   max-height: none;
-  overflow: visible;
   padding-right: 0;
+  overflow: visible;
 }
 
 @media (min-width: 48em) {
@@ -120,8 +120,8 @@
 .sideMenuCollapsed :global(.fr-sidemenu__list) {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .sideMenuCollapsed :global(.fr-sidemenu__item) {
@@ -129,6 +129,20 @@
 }
 
 .sideMenuCollapsed :global(.fr-sidemenu__link) {
-  padding: 8px;
   justify-content: center;
+  padding: 8px;
+}
+
+.mlIcon {
+  font-size: 22px;
+  color: #cecece;
+}
+
+.mlIconActive {
+  color: #000091;
+}
+
+.regionsIconInactive {
+  opacity: 0.6;
+  filter: grayscale(100%);
 }

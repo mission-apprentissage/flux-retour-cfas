@@ -55,18 +55,6 @@
   margin-top: 0.25rem;
 }
 
-.closeButton,
-.closeButton:hover {
-  background: none !important;
-  background-image: none !important;
-  border: none;
-  color: white !important;
-  cursor: pointer;
-  padding: 0.25rem;
-  flex-shrink: 0;
-  line-height: 1;
-}
-
 @media (max-width: 48em) {
   .banner {
     padding: 0.75rem 0;

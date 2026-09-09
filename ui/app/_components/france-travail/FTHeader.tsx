@@ -62,7 +62,7 @@ export const FTHeader = ({
               src="/images/france-travail-select-secteur.png"
               alt="Illustration - Sélectionner un secteur d'activité"
               fill
-              style={{ objectFit: "contain" }}
+              className={styles.logo}
             />
           </div>
         </div>

@@ -1,8 +1,8 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
-import { API_EFFECTIF_LISTE, IMissionLocaleEffectif } from "shared/models";
-import { updateMissionLocaleEffectifOrganismeApi } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
+import { API_EFFECTIF_LISTE } from "shared/models";
+import { zUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
 import { z } from "zod";
 
 import {
@@ -15,7 +15,6 @@ import {
   markEffectifNotificationAsRead,
 } from "@/common/actions/organismes/mission-locale.actions";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
-import { missionLocaleEffectifsDb } from "@/common/model/collections";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { returnResult } from "@/http/middlewares/helpers";
 
@@ -55,16 +54,7 @@ const updateEffectifMissionLocaleData = async (req, { locals }) => {
     throw Boom.forbidden("No organisme found for the provided ID");
   }
 
-  const data = await validateFullZodObjectSchema(req.body, updateMissionLocaleEffectifOrganismeApi);
-
-  const effectif: IMissionLocaleEffectif | null = await missionLocaleEffectifsDb().findOne({
-    effectif_id: new ObjectId(effectifId),
-    "effectif_snapshot.organisme_id": new ObjectId(organisme._id),
-  });
-
-  if (!effectif) {
-    throw Boom.notFound("Effectif introuvable");
-  }
+  const data = await zUpdateMissionLocaleEffectifOrganisme.parseAsync(req.body);
 
   const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
   return await setEffectifMissionLocaleDataFromOrganisme(organisme._id, effectifId, data, userId);

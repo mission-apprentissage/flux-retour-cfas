@@ -4,6 +4,7 @@
   gap: 5px;
   background: var(--background-contrast-blue-france, #ececfe);
   color: #3a3a3a;
+  white-space: nowrap;
 }
 
 .whatsappBadgeNoHelp {
@@ -12,4 +13,5 @@
   gap: 5px;
   background-color: #ffe9e6;
   color: #ce0500;
+  white-space: nowrap;
 }

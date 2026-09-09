@@ -3,7 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import { _get } from "@/common/httpClient";
 
 export const useErp = () => {
-  const { data: erps, isLoading, error, refetch } = useQuery<any, any>(["erps"], () => _get("/api/v1/erps"));
+  const {
+    data: erps,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["erps"],
+    queryFn: () => _get("/api/v1/erps"),
+  });
 
   const erpsById = erps
     ? erps.reduce((acc, erp) => {

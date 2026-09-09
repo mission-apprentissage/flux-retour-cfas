@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
@@ -10,7 +10,7 @@ export const up = async () => {
     if (mlEff) {
       await missionLocaleEffectifsDb().updateOne(
         { _id: mlEff._id },
-        { $set: { "brevo.token": uuidv4(), "brevo.token_created_at": date } }
+        { $set: { "brevo.token": randomUUID(), "brevo.token_created_at": date } }
       );
     }
   }

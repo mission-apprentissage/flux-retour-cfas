@@ -6,6 +6,7 @@ import { useFormik } from "formik";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { IEffectifMissionLocale, SITUATION_ENUM } from "shared";
+import { CFA_COLLAB_AUTO_SEND_DELAI_DAYS } from "shared/constants/collaboration";
 
 import { EffectifStatusBadge } from "@/app/_components/ruptures/shared/ui/EffectifStatusBadge";
 import { useAuth } from "@/app/_context/UserContext";
@@ -106,9 +107,12 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
   const { user } = useAuth();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const timeline = buildSuiviTimeline(effectif, { userId: user?._id });
-  const isDossierTraite = timeline.some((e) => e.icon === "traite" || e.icon === "injoignable");
+  // Statut courant du dossier : côté serveur uniquement. Le déduire de l'historique classait comme
+  // traité tout dossier repassé « à recontacter » après un premier traitement.
+  const isRecontacter = effectif.injoignable === true;
+  const isDossierTraite = !effectif.a_traiter && !isRecontacter;
+  // L'historique reste la source du nombre de tentatives, qui aiguille vers la 2e ou la 3e relance.
   const recontacterCount = timeline.filter((e) => e.icon === "recontacter").length;
-  const isRecontacter = recontacterCount > 0 && !isDossierTraite;
 
   const mutation = useMlUpdateEffectif();
   const commentMutation = useMlUpdateEffectif();
@@ -127,7 +131,6 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
 
   const collabStarted = effectif.organisme_data?.acc_conjoint === true;
   const cfaIsTdbUser = !!effectif.organisme?.ml_beta_activated_at;
-  const isDecaCfa = !!effectif.organisme?.is_allowed_deca;
   const daysSinceRupture = effectif.date_rupture
     ? (Date.now() - new Date(effectif.date_rupture).getTime()) / (1000 * 60 * 60 * 24)
     : 0;
@@ -136,9 +139,12 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
   // - collab active (CFA a envoyé le dossier)
   // - CFA non utilisateur TDB (pas de collab possible)
   // - effectif grandfathéré (créé avant l'activation du CFA sur TDB)
-  // - CFA est à la fois TDB et DECA uniquement, et 45j écoulés depuis la rupture (délai de grâce)
+  // - délai de grâce écoulé depuis la rupture : même seuil que la visibilité côté ML
   const canProcessDossier =
-    collabStarted || !cfaIsTdbUser || !!effectif.is_grandfathered || (isDecaCfa && daysSinceRupture >= 45);
+    collabStarted ||
+    !cfaIsTdbUser ||
+    !!effectif.is_grandfathered ||
+    daysSinceRupture >= CFA_COLLAB_AUTO_SEND_DELAI_DAYS;
   const isStandaloneMode = canProcessDossier && !collabStarted;
 
   const showForm = canProcessDossier && !isDossierTraite && !isRecontacter && !mutation.isSuccess;
@@ -175,6 +181,8 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
         if (values.rdvPris === null) errors.rdvPris = "Requis";
         if (values.rdvPris === false && values.situationNon === null) errors.situationNon = "Requis";
         if (values.situationJeune === null) errors.situationJeune = "Requis";
+        // Un RDV pris sur une collaboration doit revenir au CFA avec les prochaines actions.
+        if (collabStarted && values.rdvPris === true && !values.commentaire.trim()) errors.commentaire = "Requis";
       }
       if (values.contactReussi === false) {
         if (showRecontacterForm) {
@@ -215,6 +223,11 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
   });
 
   const { contactReussi } = formik.values;
+  const commentaireRequis = collabStarted && contactReussi === true && formik.values.rdvPris === true;
+  const commentaireEnErreur = formik.submitCount > 0 && !!formik.errors.commentaire;
+  // Le bouton ne reste bloqué que sur les questions du tunnel : le commentaire manquant doit
+  // pouvoir être soumis pour que le champ se signale.
+  const questionsIncompletes = Object.keys(formik.errors).some((champ) => champ !== "commentaire");
   const isFormExpanded = (showForm || showRecontacterForm) && contactReussi !== null;
 
   return (
@@ -303,8 +316,8 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
             <Button
               type="button"
               priority={postComment.trim() ? "primary" : "secondary"}
-              disabled={!postComment.trim() || commentMutation.isLoading}
-              className={`${styles.dossierFormButton} ${!postComment.trim() || commentMutation.isLoading ? styles.dossierFormButtonDisabled : ""}`}
+              disabled={!postComment.trim() || commentMutation.isPending}
+              className={`${styles.dossierFormButton} ${!postComment.trim() || commentMutation.isPending ? styles.dossierFormButtonDisabled : ""}`}
               onClick={() => {
                 commentMutation.mutate(
                   { effectifId: effectif.id.toString(), data: { commentaires: postComment.trim() } },
@@ -317,7 +330,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                 );
               }}
             >
-              {commentMutation.isLoading ? "Envoi en cours..." : "Envoyer le commentaire"}
+              {commentMutation.isPending ? "Envoi en cours..." : "Envoyer le commentaire"}
             </Button>
           </div>
         </div>
@@ -482,7 +495,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                       trackPlausibleEvent("ml_form_contact_non_situation", undefined, { motif: "tentative_relancer" });
                     }}
                   />
-                  <span aria-hidden="true">🔄</span> Tentative de contact, à relancer
+                  <span aria-hidden="true">🔄</span> À recontacter plus tard
                 </label>
 
                 {formik.values.situationNonContact === "tentative_relancer" && !tentativeCalloutDismissed && (
@@ -612,14 +625,18 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
               </div>
 
               {formik.values.problemeRecontact === "autre" && (
-                <textarea
-                  name="commentaire"
-                  className={styles.commentaireTextarea}
-                  placeholder="Précisez le problème rencontré"
-                  aria-label="Précisez le problème rencontré"
-                  value={formik.values.commentaire}
-                  onChange={formik.handleChange}
-                />
+                <>
+                  <textarea
+                    name="commentaire"
+                    className={`${styles.commentaireTextarea} ${commentaireEnErreur ? styles.commentaireTextareaErreur : ""}`}
+                    placeholder="Précisez le problème rencontré"
+                    aria-label="Précisez le problème rencontré"
+                    aria-invalid={commentaireEnErreur}
+                    value={formik.values.commentaire}
+                    onChange={formik.handleChange}
+                  />
+                  {commentaireEnErreur && <p className={styles.formError}>Précisez le problème rencontré.</p>}
+                </>
               )}
 
               {formik.values.problemeRecontact !== null && (
@@ -690,7 +707,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                   width={0}
                   height={0}
                   sizes="100%"
-                  style={{ width: "100%", height: "auto" }}
+                  className={localStyles.illustrationFluide}
                 />
               </div>
 
@@ -701,7 +718,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                   type="button"
                   priority="primary"
                   className={styles.dossierFormButton}
-                  disabled={mutation.isLoading}
+                  disabled={mutation.isPending}
                   onClick={() => {
                     hasSubmittedRef.current = true;
                     mutation.mutate({
@@ -710,7 +727,7 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                     });
                   }}
                 >
-                  {mutation.isLoading ? "Envoi en cours..." : "Confirmer et marquer comme traité"}
+                  {mutation.isPending ? "Envoi en cours..." : "Confirmer et marquer comme traité"}
                 </Button>
                 <Button
                   type="button"
@@ -908,20 +925,38 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
 
                 <p className={styles.dossierFormLegend}>
                   <span aria-hidden="true">{"📝 "}</span>
-                  <strong>Un commentaire à ajouter ?</strong> <em className={styles.facultatif}>Facultatif</em>
+                  {commentaireRequis ? (
+                    <>
+                      <strong>Détaillez les premières pistes d&apos;actions envisagées</strong>
+                      <span className={styles.required}> *</span>
+                    </>
+                  ) : (
+                    <>
+                      <strong>Un commentaire à ajouter ?</strong> <em className={styles.facultatif}>Facultatif</em>
+                    </>
+                  )}
                 </p>
 
                 <textarea
                   name="commentaire"
-                  className={styles.commentaireTextarea}
-                  placeholder="Quelques mots sur la situation"
+                  className={`${styles.commentaireTextarea} ${commentaireEnErreur ? styles.commentaireTextareaErreur : ""}`}
+                  placeholder={
+                    commentaireRequis
+                      ? "Prochaines actions prévues, date de rendez-vous..."
+                      : "Quelques mots sur la situation"
+                  }
                   aria-label="Commentaire sur la situation"
+                  aria-invalid={commentaireEnErreur}
                   value={formik.values.commentaire}
                   onChange={formik.handleChange}
                   onBlur={(e) => {
                     if (e.target.value.trim()) trackPlausibleEvent("ml_form_commentaire_saisi");
                   }}
                 />
+
+                {commentaireEnErreur && (
+                  <p className={styles.formError}>Précisez les prochaines actions prévues pour le CFA.</p>
+                )}
 
                 <div className={styles.commentaireCallout}>
                   {isStandaloneMode ? (
@@ -932,6 +967,20 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
                       </p>
                       <p className={styles.commentaireCalloutBody}>
                         Ajoutez un commentaire pour garder une trace de votre suivi.
+                      </p>
+                    </>
+                  ) : commentaireRequis ? (
+                    <>
+                      <p className={styles.commentaireCalloutTitle}>
+                        <i className="fr-icon-lightbulb-line fr-icon--sm" aria-hidden="true" />{" "}
+                        <strong>Précisez les prochaines actions prévues pour le CFA</strong>
+                      </p>
+                      <p className={styles.commentaireCalloutBody}>
+                        Ce dossier vous a été transmis par le CFA{" "}
+                        <strong>{effectif.organisme?.nom || effectif.organisme?.raison_sociale || ""}</strong>
+                        .
+                        <br />
+                        Précisez au CFA les prochaines actions prévues, comme la date du rendez-vous prévu par exemple.
                       </p>
                     </>
                   ) : (
@@ -962,11 +1011,11 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
 
               <Button
                 type="submit"
-                disabled={!formik.isValid || mutation.isLoading}
+                disabled={questionsIncompletes || mutation.isPending}
                 priority={formik.isValid ? "primary" : "secondary"}
-                className={`${styles.dossierFormButton} ${!formik.isValid || mutation.isLoading ? styles.dossierFormButtonDisabled : ""}`}
+                className={`${styles.dossierFormButton} ${questionsIncompletes || mutation.isPending ? styles.dossierFormButtonDisabled : ""}`}
               >
-                {mutation.isLoading
+                {mutation.isPending
                   ? "Envoi en cours..."
                   : mutation.isSuccess
                     ? "Enregistré"

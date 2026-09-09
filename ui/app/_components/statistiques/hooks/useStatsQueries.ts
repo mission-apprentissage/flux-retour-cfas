@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import type {
   IAccompagnementConjointStats,
@@ -61,14 +61,14 @@ const ONE_HOUR = 60 * 60 * 1000;
 
 export const STATS_QUERY_CONFIG = {
   staleTime: THIRTY_MINUTES,
-  cacheTime: ONE_HOUR,
+  gcTime: ONE_HOUR,
   retry: 3,
   refetchOnWindowFocus: false,
 } as const;
 
 export const STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA = {
   ...STATS_QUERY_CONFIG,
-  keepPreviousData: true,
+  placeholderData: keepPreviousData,
 } as const;
 
 function buildStatsParams(params: {
@@ -127,63 +127,67 @@ function buildTraitementMLRequestParams(params: TraitementMLParams): Record<stri
 }
 
 export function useTraitementStats(period: Period, region?: string) {
-  return useQuery<ITraitementStatsResponse>(
-    statsQueryKeys.traitement(period, region),
-    () =>
+  return useQuery<ITraitementStatsResponse>({
+    queryKey: statsQueryKeys.traitement(period, region),
+
+    queryFn: () =>
       _get("/api/v1/mission-locale/stats/traitement", {
         params: { period, ...(region && { region }) },
       }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
 export function useDeploymentStats(period: Period) {
-  return useQuery<IDeploymentStatsResponse>(
-    statsQueryKeys.deployment(period),
-    () => _get("/api/v1/mission-locale/stats/synthese/deployment", { params: { period } }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+  return useQuery<IDeploymentStatsResponse>({
+    queryKey: statsQueryKeys.deployment(period),
+    queryFn: () => _get("/api/v1/mission-locale/stats/synthese/deployment", { params: { period } }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
 export function useSyntheseRegionsStats(period: Period) {
-  return useQuery<ISyntheseRegionsStatsResponse>(
-    statsQueryKeys.syntheseRegions(period),
-    () => _get("/api/v1/mission-locale/stats/synthese/regions", { params: { period } }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+  return useQuery<ISyntheseRegionsStatsResponse>({
+    queryKey: statsQueryKeys.syntheseRegions(period),
+    queryFn: () => _get("/api/v1/mission-locale/stats/synthese/regions", { params: { period } }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
 export function useRupturantsStats(period: Period, region?: string, mlId?: string, national?: boolean) {
-  return useQuery<IRupturantsStatsResponse>(
-    [...statsQueryKeys.rupturants(period, region, mlId), national] as const,
-    () =>
+  return useQuery<IRupturantsStatsResponse>({
+    queryKey: [...statsQueryKeys.rupturants(period, region, mlId), national] as const,
+
+    queryFn: () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/rupturants", {
         params: buildStatsParams({ period, region, mlId, national }),
       }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
 export function useDossiersTraitesStats(period: Period, region?: string, mlId?: string, national?: boolean) {
-  return useQuery<IDossiersTraitesStatsResponse>(
-    [...statsQueryKeys.dossiersTraites(period, region, mlId), national] as const,
-    () =>
+  return useQuery<IDossiersTraitesStatsResponse>({
+    queryKey: [...statsQueryKeys.dossiersTraites(period, region, mlId), national] as const,
+
+    queryFn: () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/dossiers-traites", {
         params: buildStatsParams({ period, region, mlId, national }),
       }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
 export function useCouvertureRegionsStats(period: Period, national?: boolean) {
-  return useQuery<ICouvertureRegionsStatsResponse>(
-    [...statsQueryKeys.couvertureRegions(period), national] as const,
-    () =>
+  return useQuery<ICouvertureRegionsStatsResponse>({
+    queryKey: [...statsQueryKeys.couvertureRegions(period), national] as const,
+
+    queryFn: () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/couverture-regions", {
         params: buildStatsParams({ period, national }),
       }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
 export function useTraitementMLStats(params: TraitementMLParams) {
@@ -217,25 +221,27 @@ export function usePrefetchTraitementML() {
 }
 
 export function useTraitementRegionsStats(period: Period, national?: boolean) {
-  return useQuery<ITraitementRegionStats[]>(
-    [...statsQueryKeys.traitementRegions(period), national] as const,
-    () =>
+  return useQuery<ITraitementRegionStats[]>({
+    queryKey: [...statsQueryKeys.traitementRegions(period), national] as const,
+
+    queryFn: () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/traitement/regions", {
         params: buildStatsParams({ period, national }),
       }),
-    STATS_QUERY_CONFIG
-  );
+    ...STATS_QUERY_CONFIG,
+  });
 }
 
 export function useAccompagnementConjointStats(region?: string, mlId?: string, national?: boolean) {
-  return useQuery<IAccompagnementConjointStats>(
-    [...statsQueryKeys.accompagnementConjoint(region, mlId), national] as const,
-    () =>
+  return useQuery<IAccompagnementConjointStats>({
+    queryKey: [...statsQueryKeys.accompagnementConjoint(region, mlId), national] as const,
+
+    queryFn: () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/accompagnement-conjoint", {
         params: buildStatsParams({ region, mlId, national }),
       }),
-    STATS_QUERY_CONFIG
-  );
+    ...STATS_QUERY_CONFIG,
+  });
 }
 
 export interface IMissionLocaleMemberResponse {
@@ -271,14 +277,12 @@ export interface IMissionLocaleDetailResponse {
 }
 
 export function useMissionLocaleDetail(mlId: string) {
-  return useQuery<IMissionLocaleDetailResponse>(
-    statsQueryKeys.missionLocaleDetail(mlId),
-    () => _get(`/api/v1/organisation/indicateurs-ml/mission-locale/${mlId}/detail`),
-    {
-      ...STATS_QUERY_CONFIG,
-      enabled: !!mlId,
-    }
-  );
+  return useQuery<IMissionLocaleDetailResponse>({
+    queryKey: statsQueryKeys.missionLocaleDetail(mlId),
+    queryFn: () => _get(`/api/v1/organisation/indicateurs-ml/mission-locale/${mlId}/detail`),
+    ...STATS_QUERY_CONFIG,
+    enabled: !!mlId,
+  });
 }
 
 export function useUpdateMlParametresAdmin(mlId: string) {
@@ -292,37 +296,37 @@ export function useUpdateMlParametresAdmin(mlId: string) {
 }
 
 export function useMissionLocaleMembres(mlId: string) {
-  return useQuery<IMissionLocaleMemberResponse[]>(
-    statsQueryKeys.missionLocaleMembres(mlId),
-    () => _get(`/api/v1/organisation/indicateurs-ml/mission-locale/${mlId}/membres`),
-    {
-      ...STATS_QUERY_CONFIG,
-      enabled: !!mlId,
-    }
-  );
+  return useQuery<IMissionLocaleMemberResponse[]>({
+    queryKey: statsQueryKeys.missionLocaleMembres(mlId),
+    queryFn: () => _get(`/api/v1/organisation/indicateurs-ml/mission-locale/${mlId}/membres`),
+    ...STATS_QUERY_CONFIG,
+    enabled: !!mlId,
+  });
 }
 
 export function useWhatsAppStats(period: Period) {
-  return useQuery<IWhatsAppStats>(
-    statsQueryKeys.whatsapp(period),
-    () =>
+  return useQuery<IWhatsAppStats>({
+    queryKey: statsQueryKeys.whatsapp(period),
+
+    queryFn: () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/whatsapp", {
         params: { period },
       }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
 /**
  * Indicateurs préqualif WhatsApp (admin-only).
  */
 export function usePrequalifStats(period: Period = "all") {
-  return useQuery<IPrequalifStats>(
-    statsQueryKeys.prequalif(period),
-    () =>
+  return useQuery<IPrequalifStats>({
+    queryKey: statsQueryKeys.prequalif(period),
+
+    queryFn: () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/prequalif", {
         params: { period },
       }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }

@@ -1,0 +1,77 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  padding: 2rem 0 4rem;
+}
+
+.title {
+  margin-bottom: 0.5rem;
+  color: var(--text-title-blue-france);
+}
+
+.intro {
+  margin-bottom: 2rem;
+  color: var(--text-mention-grey);
+}
+
+.yearSelect {
+  min-width: 8rem;
+  margin-bottom: 0;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+
+  > div {
+    height: 150px;
+  }
+}
+
+@media (max-width: 62em) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 36em) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.exportError {
+  margin-top: 1.5rem;
+}
+
+.exports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.chart {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: center;
+}
+
+.chartLegend {
+  flex: 1 1 18rem;
+  max-width: 26rem;
+}
+
+.contact {
+  padding-top: 1.5rem;
+  margin-top: 1rem;
+  color: var(--text-mention-grey);
+  border-top: 1px solid var(--border-default-grey);
+}

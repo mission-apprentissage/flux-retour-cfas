@@ -1,5 +1,6 @@
+import { randomUUID } from "node:crypto";
+
 import { captureException } from "@sentry/node";
-import { v4 as uuidv4 } from "uuid";
 
 import logger from "@/common/logger";
 import { usersMigrationDb } from "@/common/model/collections";
@@ -123,7 +124,7 @@ export async function sendStoredEmail<T extends TemplateName>(
   template: any,
   options?: SendEmailOptions
 ): Promise<void> {
-  const emailToken = uuidv4();
+  const emailToken = randomUUID();
   try {
     template.data.token = emailToken;
     await addEmail(recipient, emailToken, templateName, payload);

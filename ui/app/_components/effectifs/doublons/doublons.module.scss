@@ -1,0 +1,116 @@
+.intro {
+  max-width: 66%;
+  margin-bottom: 2rem;
+
+  p {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.introTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.rougeSignal {
+  font-weight: 700;
+  color: var(--text-default-error);
+}
+
+.detailWrapper {
+  padding: 1.25rem;
+  overflow-x: auto;
+  border: 1px solid var(--border-default-grey);
+}
+
+.detailTable {
+  min-width: 1130px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    min-width: 440px;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    vertical-align: top;
+    text-align: left;
+  }
+
+  th:first-child,
+  td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+    font-weight: 700;
+    background-color: var(--background-default-grey);
+  }
+}
+
+.duplicateHeaderRow {
+  border-bottom: 3px solid var(--border-plain-blue-france);
+
+  th {
+    background-color: var(--background-default-grey);
+  }
+}
+
+.duplicateHeaderCell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.groupHeaderRow {
+  th,
+  td {
+    padding: 0.75rem;
+    font-weight: 700;
+    background-color: var(--background-contrast-blue-france);
+  }
+
+  i {
+    margin-right: 0.25rem;
+  }
+}
+
+.rowEven {
+  td {
+    background-color: var(--background-alt-grey);
+  }
+
+  td:first-child {
+    background-color: var(--background-alt-grey);
+  }
+}
+
+.rowOdd {
+  td {
+    background-color: var(--background-default-grey);
+  }
+}
+
+.diffRow {
+  td {
+    font-weight: 700;
+    color: var(--text-default-error);
+    background-color: var(--background-contrast-error);
+  }
+
+  td:first-child {
+    background-color: var(--background-contrast-error);
+  }
+}
+
+.mutedCell {
+  color: var(--text-mention-grey);
+}
+
+.cellSub {
+  display: block;
+  font-size: 0.75rem;
+}

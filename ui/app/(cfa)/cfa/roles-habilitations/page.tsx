@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
-import { CfaContainer } from "../CfaContainer";
+import RolesHabilitationsClient from "@/app/_components/roles-habilitations/RolesHabilitationsClient";
 
-import RolesHabilitationsClient from "./RolesHabilitationsClient";
+import { CfaContainer } from "../CfaContainer";
 
 export const metadata: Metadata = {
   title: "Rôles et habilitations | Tableau de bord de l'apprentissage",
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function RolesHabilitationsPage() {
   return (
     <CfaContainer>
-      <RolesHabilitationsClient />
+      <RolesHabilitationsClient requireCfaAdmin />
     </CfaContainer>
   );
 }

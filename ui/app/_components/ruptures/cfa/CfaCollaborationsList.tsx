@@ -140,7 +140,13 @@ export function CfaCollaborationsList({
         <p className={cardStyles.emptyMessage}>Aucun dossier trouvé.</p>
       ) : (
         <>
-          <CfaCollaborationsTable effectifs={effectifs} sort={sort} order={order} onSort={handleSort} />
+          <CfaCollaborationsTable
+            effectifs={effectifs}
+            sort={sort}
+            order={order}
+            onSort={handleSort}
+            category={category}
+          />
           {data && data.pagination.totalPages > 1 && (
             <div className={cardStyles.paginationContainer}>
               <Pagination
@@ -166,7 +172,7 @@ export function CfaCollaborationsList({
   return (
     <div>
       <div className={styles.pageHeader}>
-        <h1 className={styles.title}>Suivi Missions Locales</h1>
+        <h1 className={styles.title}>Collaboration et suivi Missions Locales</h1>
         {organismeId && (
           <div className={styles.exportButtonWrap}>
             <CfaSuiviExportButton organismeId={organismeId} />
@@ -201,7 +207,7 @@ export function CfaCollaborationsList({
 
         <div className={filterStyles.filtersRow}>
           <span className={filterStyles.filterLabel}>Filtrer</span>
-          <div className={filterStyles.selectFieldWide}>
+          <div className={filterStyles.selectFieldAuto}>
             <MultiSelectDropdown
               options={collabOptions}
               value={collabStatuses}
@@ -211,7 +217,7 @@ export function CfaCollaborationsList({
               placeholder="Statut suivi ML"
             />
           </div>
-          <div className={filterStyles.selectFieldWide}>
+          <div className={filterStyles.selectFieldAuto}>
             <MultiSelectDropdown
               options={formationOptions}
               value={formations}

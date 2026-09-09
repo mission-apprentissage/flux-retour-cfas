@@ -1,5 +1,9 @@
-import { STATUT_APPRENANT } from "shared/constants";
-import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { ML_SITUATION_DOSSIER, STATUT_APPRENANT } from "shared/constants";
+import {
+  CFA_RISQUE_RUPTURE_ENUM,
+  CFA_SITUATION_TYPE_ENUM,
+  SITUATION_ENUM,
+} from "shared/models/data/missionLocaleEffectif.model";
 import { USER_RESPONSE_TYPE } from "shared/models/data/whatsappContact.model";
 import { CFA_COLLAB_STATUS } from "shared/models/routes/organismes/cfa";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
@@ -7,9 +11,6 @@ import { getAnneeScolaireListFromDateRange } from "shared/utils";
 import { escapeRegex, parseStringToArray } from "@/common/utils/usersFiltersUtils";
 
 export const DATE_START_RUPTURES = new Date("2025-01-01");
-
-/** Délai au-delà duquel un dossier d'un CFA en collab part automatiquement à la ML. */
-export const CFA_COLLAB_AUTO_SEND_DELAI_DAYS = 45;
 
 /**
  * Statuts courants traduisant une sortie de rupture : retour en contrat ou arrivée au terme
@@ -62,9 +63,9 @@ export const getCurrentStatutFromParcours = <T extends { date: Date }>(
 
 export const buildEffRuptureAgeFilter = () => {
   const now = new Date();
-  return [
-    {
-      $match: {
+  const ageConditions = {
+    $and: [
+      {
         $or: [
           {
             "effectif_snapshot.apprenant.date_de_naissance": {
@@ -73,10 +74,26 @@ export const buildEffRuptureAgeFilter = () => {
           },
           { "effectif_snapshot.apprenant.rqth": true },
         ],
-        soft_deleted: { $ne: true },
+      },
+      {
         "effectif_snapshot.apprenant.date_de_naissance": {
           $lte: new Date(new Date(now).setFullYear(now.getFullYear() - 16)),
         },
+      },
+    ],
+  };
+
+  return [
+    {
+      $match: {
+        // Hors du $or : le soft-delete ne doit jamais être contourné.
+        soft_deleted: { $ne: true },
+        $or: [
+          ageConditions,
+          // Un dossier de collaboration envoyé par le CFA ne disparaît plus pour un motif d'âge
+          // (ex : le jeune atteint 26 ans pendant le suivi).
+          { "organisme_data.acc_conjoint": true },
+        ],
       },
     },
   ];
@@ -147,6 +164,57 @@ export function buildCollabStatusSwitch(docPrefix?: string) {
     },
   };
 }
+
+/** Qualification du tunnel CFA si elle existe, sinon statut ERP/DECA. Risque faible = besoin d'aide hors rupture. */
+export const addSituationDossierField = () => [
+  {
+    $addFields: {
+      situation_dossier: {
+        $switch: {
+          branches: [
+            {
+              // « Faible, pas de rupture en vue, mais ce jeune a besoin d'un accompagnement »
+              case: {
+                $and: [
+                  { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+                  { $eq: ["$organisme_data.risque_rupture", CFA_RISQUE_RUPTURE_ENUM.FAIBLE] },
+                ],
+              },
+              then: ML_SITUATION_DOSSIER.BESOIN_AIDE_HORS_RUPTURE,
+            },
+            {
+              case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+              then: ML_SITUATION_DOSSIER.PREVENTION_RUPTURE,
+            },
+            {
+              case: {
+                $and: [
+                  { $eq: ["$organisme_data.acc_conjoint", true] },
+                  { $ne: [{ $ifNull: ["$organisme_data.date_abandon", null] }, null] },
+                ],
+              },
+              then: ML_SITUATION_DOSSIER.ABANDON,
+            },
+            {
+              // La qualification du CFA prime sur le statut ERP, comme côté organisme.
+              case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE] },
+              then: ML_SITUATION_DOSSIER.RUPTURE,
+            },
+            {
+              case: { $eq: ["$current_status.value", STATUT_APPRENANT.ABANDON] },
+              then: ML_SITUATION_DOSSIER.ABANDON,
+            },
+            {
+              case: { $eq: ["$current_status.value", STATUT_APPRENANT.INSCRIT] },
+              then: null,
+            },
+          ],
+          default: ML_SITUATION_DOSSIER.RUPTURE,
+        },
+      },
+    },
+  },
+];
 
 /**
  * Expression MongoDB renvoyant un ordinal métier pour trier la colonne "Collaboration avec la ML".

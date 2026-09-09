@@ -5,8 +5,8 @@ import { SideMenu, type SideMenuProps } from "@codegouvfr/react-dsfr/SideMenu";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-import CfaParametresClient from "@/app/(cfa)/cfa/parametres/ParametresClient";
 import MlParametresClient from "@/app/(mission-locale)/mission-locale/parametres/ParametresClient";
+import CfaParametresClient from "@/app/_components/parametres/ParametresClient";
 import { _post } from "@/common/httpClient";
 import {
   COMPTE_ACCOUNT_HREF,
@@ -161,7 +161,9 @@ function CompteHub() {
 
         <div className="fr-col-12 fr-col-md-9">
           {activeTab === "parametres" && settingsTab?.kind === "mission-locale" && <MlParametresClient />}
-          {activeTab === "parametres" && settingsTab?.kind === "cfa-erp" && <CfaParametresClient />}
+          {activeTab === "parametres" && settingsTab?.kind === "cfa-erp" && (
+            <CfaParametresClient effectifsHref="/cfa" erpV3CleanupHref={COMPTE_SETTINGS_HREF} />
+          )}
           {activeTab === "mon-compte" && <MonCompteSection />}
         </div>
       </div>

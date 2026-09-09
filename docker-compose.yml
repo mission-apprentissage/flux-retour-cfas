@@ -6,7 +6,7 @@ services:
     ports:
       - "127.0.0.1:27017:27017"
     volumes:
-      - tdb_mongodb_data:/data
+      - tdb_mongodb_data:/data/db
     healthcheck:
       test: ["CMD", "mongosh", "--eval", '''db.runCommand("ping").ok''', "--quiet"]
       interval: 10s

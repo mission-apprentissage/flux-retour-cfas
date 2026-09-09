@@ -1,6 +1,6 @@
 "use client";
 
-import { Skeleton, Box } from "@mui/material";
+import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import styles from "./CfaDashboardSkeleton.module.css";
 
@@ -8,15 +8,15 @@ function SegmentSkeleton({ rows }: { rows: number }) {
   return (
     <div className={styles.segment}>
       <div className={styles.segmentHeader}>
-        <Skeleton animation="wave" variant="rectangular" width={180} height={32} />
-        <Skeleton animation="wave" variant="rectangular" width={100} height={24} />
+        <Skeleton width={180} height={32} />
+        <Skeleton width={100} height={24} />
       </div>
-      <Box sx={{ width: "100%" }}>
-        <Skeleton animation="wave" variant="rectangular" width="100%" height={44} sx={{ mb: 0.5 }} />
+      <div>
+        <Skeleton height={44} className="fr-mb-1v" />
         {[...Array(rows)].map((_, i) => (
-          <Skeleton animation="wave" key={i} variant="rectangular" width="100%" height={52} sx={{ mb: 0.5 }} />
+          <Skeleton key={i} height={52} className="fr-mb-1v" />
         ))}
-      </Box>
+      </div>
     </div>
   );
 }
@@ -25,15 +25,15 @@ export function CfaDashboardSkeleton() {
   return (
     <div className="fr-container">
       <div className={styles.header}>
-        <Skeleton animation="wave" variant="rectangular" width={500} height={36} sx={{ mb: 1 }} />
-        <Skeleton animation="wave" variant="rectangular" width={600} height={20} />
+        <Skeleton width={500} height={36} className="fr-mb-1w" />
+        <Skeleton width={600} height={20} />
       </div>
 
       <div className={styles.filters}>
-        <Skeleton animation="wave" variant="rectangular" width={500} height={40} sx={{ mb: 1, borderRadius: "4px" }} />
+        <Skeleton width={500} height={40} className="fr-mb-1w" />
         <div className={styles.filtersRow}>
-          <Skeleton animation="wave" variant="rectangular" width={320} height={40} sx={{ borderRadius: "4px" }} />
-          <Skeleton animation="wave" variant="rectangular" width={320} height={40} sx={{ borderRadius: "4px" }} />
+          <Skeleton width={320} height={40} />
+          <Skeleton width={320} height={40} />
         </div>
       </div>
 

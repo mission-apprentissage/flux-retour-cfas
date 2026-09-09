@@ -2,7 +2,6 @@ import express from "express";
 import { zStatsPeriod, StatsPeriod } from "shared/models/data/nationalStats.model";
 import { z } from "zod";
 
-import { getLbaTrainingLinksWithCustomUtm } from "@/common/actions/lba/lba.actions";
 import {
   getTraitementStats,
   getDeploymentStats,
@@ -17,19 +16,6 @@ export default () => {
 
   router.get("/", returnResult(getAllML));
   router.get("/arml", returnResult(getARML));
-  router.get(
-    "/lba",
-    validateRequestMiddleware({
-      query: z.object({
-        utm_source: z.string(),
-        utm_medium: z.string(),
-        utm_campaign: z.string(),
-        rncp: z.string().optional(),
-        cfd: z.string().optional(),
-      }),
-    }),
-    getLbaLink
-  );
 
   router.get(
     "/stats/traitement",
@@ -71,21 +57,6 @@ const getAllML = async () => {
 
 const getARML = async () => {
   return await getAllARML();
-};
-
-const getLbaLink = async (req, res, next) => {
-  try {
-    const { utm_campaign, utm_medium, utm_source, rncp, cfd } = req.query;
-    const lbaUrl = await getLbaTrainingLinksWithCustomUtm(cfd, rncp, {
-      source: utm_source,
-      medium: utm_medium,
-      campaign: utm_campaign,
-    });
-
-    res.redirect(302, lbaUrl);
-  } catch (error) {
-    next(error);
-  }
 };
 
 const getTraitementRoute = async (req) => {

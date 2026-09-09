@@ -1,8 +1,9 @@
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
-import { Box, Stack, Typography } from "@mui/material";
 import NavLink from "next/link";
 
 import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
+
+import styles from "./UserTableCells.module.css";
 
 interface UserTableCellsProps {
   user: any;
@@ -11,15 +12,15 @@ interface UserTableCellsProps {
 
 export function UserNameCell({ user }: Pick<UserTableCellsProps, "user">) {
   return (
-    <Stack spacing={0.5}>
-      <Typography variant="body1" sx={{ lineHeight: 1.3 }}>
+    <div className={styles.cell}>
+      <p className={styles.name}>
         {user.prenom} {user.nom}
-      </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.2 }}>
+      </p>
+      <p className={styles.caption}>
         {user.email}
         {user.fonction ? ` - ${user.fonction}` : ""}
-      </Typography>
-    </Stack>
+      </p>
+    </div>
   );
 }
 
@@ -36,106 +37,49 @@ export function OrganisationCell({ user, displayName }: UserTableCellsProps) {
   }
 
   return (
-    <Stack spacing={0.5}>
+    <div className={styles.cell}>
       {organisationId ? (
-        <Typography
-          component={NavLink}
+        <NavLink
           href={`/organismes/${organisationId}`}
-          variant="body2"
-          sx={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            lineHeight: 1.3,
-            fontSize: "0.875rem",
-            fontWeight: 500,
-            textDecoration: "none",
-            color: "primary.main",
-            "&:hover": {
-              textDecoration: "underline",
-            },
-          }}
+          className={`${styles.organisation} ${styles.organisationLink}`}
           title={displayName}
         >
           {displayName}
-        </Typography>
+        </NavLink>
       ) : (
-        <Typography
-          variant="body2"
-          sx={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            lineHeight: 1.3,
-            fontSize: "0.875rem",
-            fontWeight: 500,
-          }}
-          title={displayName}
-        >
+        <p className={styles.organisation} title={displayName}>
           {displayName}
-        </Typography>
+        </p>
       )}
       {isOrganismeFormation && identifiants.length > 0 ? (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            fontSize: "0.75rem",
-            lineHeight: 1.2,
-          }}
-        >
-          {identifiants.join(" • ")}
-        </Typography>
+        <p className={`${styles.caption} ${styles.captionEllipsis}`}>{identifiants.join(" • ")}</p>
       ) : (
         user.organisation?.type && (
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              fontSize: "0.75rem",
-              lineHeight: 1.2,
-            }}
-          >
-            {user.organisation.type}
-          </Typography>
+          <p className={`${styles.caption} ${styles.captionEllipsis}`}>{user.organisation.type}</p>
         )
       )}
-    </Stack>
+    </div>
   );
 }
 
 export function CreatedAtCell({ user }: Pick<UserTableCellsProps, "user">) {
   return (
-    <Stack spacing={0.5}>
-      <Typography variant="body1">
+    <div className={styles.cell}>
+      <p className={styles.name}>
         Créé le {user.created_at ? new Date(user.created_at).toLocaleDateString("fr-FR") : "N/A"}
-      </Typography>
-      <Typography variant="caption" color="var(--text-default-grey)" sx={{ fontSize: "0.75rem", lineHeight: 1.2 }}>
+      </p>
+      <p className={styles.caption}>
         {user.last_connection
           ? `Dernière connexion le ${new Date(user.last_connection).toLocaleDateString("fr-FR")}`
           : "Jamais connecté"}
-      </Typography>
-    </Stack>
+      </p>
+    </div>
   );
 }
 
 export function StatusCell({ user }: Pick<UserTableCellsProps, "user">) {
   return (
-    <Badge
-      severity={user.account_status === "CONFIRMED" ? "success" : "warning"}
-      small
-      style={{ fontSize: "0.625rem" }}
-    >
+    <Badge severity={user.account_status === "CONFIRMED" ? "success" : "warning"} small className={styles.badge}>
       {USER_STATUS_LABELS[user.account_status] || user.account_status}
     </Badge>
   );
@@ -143,17 +87,8 @@ export function StatusCell({ user }: Pick<UserTableCellsProps, "user">) {
 
 export function ActionsCell({ user }: Pick<UserTableCellsProps, "user">) {
   return (
-    <Box
-      component={NavLink}
-      href={`/admin/users/${user._id}`}
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundImage: "none",
-      }}
-    >
+    <NavLink href={`/admin/users/${user._id}`} className={styles.actions}>
       <i className="ri-arrow-right-line arrow-icon" />
-    </Box>
+    </NavLink>
   );
 }

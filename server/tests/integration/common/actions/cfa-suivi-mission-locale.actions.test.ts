@@ -1,13 +1,14 @@
+import { randomUUID } from "node:crypto";
+
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationOrganismeFormation } from "shared/models";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
-import { v4 as uuidv4 } from "uuid";
 import { describe, it, beforeEach, expect } from "vitest";
 
 import { getCfaSuiviMissionLocale } from "@/common/actions/cfa/cfa-suivi-mission-locale.actions";
 import { DATE_START_RUPTURES } from "@/common/actions/shared/rupture-pipeline.utils";
-import { missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
+import { missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { id } from "@tests/utils/testUtils";
@@ -64,7 +65,7 @@ async function createMlEffectif(overrides: Record<string, any> = {}) {
     date_rupture: dateRupture,
     current_status: { value: STATUT_APPRENANT.RUPTURANT, date: dateRupture },
     created_at: now,
-    brevo: { token: uuidv4(), token_created_at: now },
+    brevo: { token: randomUUID(), token_created_at: now },
     ...(overrides.situation ? { situation: overrides.situation } : {}),
     ...(overrides.organisme_data ? { organisme_data: overrides.organisme_data } : {}),
     ...(overrides.whatsapp_contact ? { whatsapp_contact: overrides.whatsapp_contact } : {}),
@@ -127,5 +128,45 @@ describe("getCfaSuiviMissionLocale", () => {
     const horsCollab = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "hors_collab" });
     expect(horsCollab.pagination.total).toBe(1);
     expect(horsCollab.effectifs[0].collab_status).toBe("contacte_par_ml_hors_collab");
+  });
+
+  it("trie sur le nom de la Mission Locale sans perdre les filtres", async () => {
+    const autreMlId = new ObjectId(id(3));
+    await organisationsDb().insertMany([
+      {
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        nom: "ML ZEBRE",
+        ml_id: 4242,
+        adresse: { commune: "Mérignac" },
+        created_at: new Date(),
+      },
+      {
+        _id: autreMlId,
+        type: "MISSION_LOCALE",
+        nom: "ML ALPHA",
+        ml_id: 4243,
+        adresse: { commune: "Albi" },
+        created_at: new Date(),
+      },
+    ] as any[]);
+
+    const [zebre, alpha, exclu] = await Promise.all([
+      createMlEffectif({ situation: "RDV_PRIS", apprenant: { nom: "MARTIN", prenom: "Zoe" } }),
+      createMlEffectif({ situation: "RDV_PRIS", apprenant: { nom: "MARTIN", prenom: "Alex" } }),
+      createMlEffectif({ situation: "RDV_PRIS", apprenant: { nom: "DUPONT", prenom: "Chris" } }),
+    ]);
+    await missionLocaleEffectifsDb().insertMany([zebre, { ...alpha, mission_locale_id: autreMlId }, exclu] as any[]);
+
+    const result = await getCfaSuiviMissionLocale(organisation, true, {
+      ...baseParams,
+      category: "tous",
+      sort: "mission_locale",
+      order: "asc",
+      search: "martin",
+    });
+
+    expect(result.effectifs.map((e) => e.mission_locale?.nom)).toEqual(["ML ALPHA", "ML ZEBRE"]);
+    expect(result.pagination.total).toBe(2);
   });
 });

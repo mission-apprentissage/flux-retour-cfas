@@ -15,7 +15,7 @@ export function useTableData(data: TableRowData[]) {
 }
 
 export function useTableColumns(columns: ColumnData[]) {
-  return useMemo<ColumnDef<any>[]>(
+  return useMemo<ColumnDef<TableRowData, any>[]>(
     () =>
       columns.map((col) => ({
         accessorKey: col.dataKey,

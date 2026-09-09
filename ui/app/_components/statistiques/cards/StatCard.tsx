@@ -1,7 +1,8 @@
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 
+import { CardSkeleton, Skeleton } from "@/app/_components/common/Skeleton";
+
 import { calculatePercentage, COLORS, getPercentageColor } from "../constants";
-import { CardSkeleton, Skeleton } from "../ui/Skeleton";
 
 import styles from "./StatCard.module.css";
 
@@ -59,7 +60,8 @@ export function StatCard({
               {loadingPercentage ? (
                 <Skeleton width="40px" height="20px" />
               ) : (
-                percentage && (
+                percentage &&
+                percentage !== "0%" && (
                   <p className={styles.cardPercentage} style={{ color: percentageColor }}>
                     {percentage}
                   </p>

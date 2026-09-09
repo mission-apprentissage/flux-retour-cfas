@@ -16,7 +16,7 @@ export const metadata = PAGES.static.accueilCfa.getMetadata();
 
 export default function AccueilCfaPage() {
   return (
-    <main id="accueil-cfa-content" className={landingStyles.mainContainer}>
+    <main className={landingStyles.mainContainer}>
       <HeroSection />
       <SponsorsSection />
       <EtablissementsConnectesSection />

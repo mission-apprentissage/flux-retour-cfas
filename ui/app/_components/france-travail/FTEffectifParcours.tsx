@@ -7,6 +7,7 @@ import { formatDate } from "@/app/_utils/date.utils";
 
 import styles from "../ruptures/shared/ui/EffectifParcours.module.css";
 
+import ftStyles from "./FTEffectifParcours.module.css";
 import { IEffectifDetail } from "./types";
 
 const TIMELINE_EVENTS = {
@@ -97,22 +98,12 @@ const getIcon = (type: TimelineEventType) => {
   }
   if (type === TIMELINE_EVENTS.DEMARRAGE_FORMATION) {
     return (
-      <div
-        style={{
-          width: "20px",
-          height: "20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <i className="ri-calendar-event-line" style={{ fontSize: "20px" }} />
+      <div className={ftStyles.iconeEvenement}>
+        <i className={`ri-calendar-event-line ${ftStyles.iconeCalendrier}`} />
       </div>
     );
   }
-  return (
-    <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "var(--text-disabled-grey)" }} />
-  );
+  return <div className={ftStyles.pastille} />;
 };
 
 export const FTEffectifParcours = memo(function FTEffectifParcours({ effectif, className }: FTEffectifParcoursProps) {
@@ -133,14 +124,7 @@ export const FTEffectifParcours = memo(function FTEffectifParcours({ effectif, c
               <p className={styles.timelineText}>
                 Le {formatDate(event.date)} : <strong>{event.label}</strong>
               </p>
-              {event.subtitle && (
-                <p
-                  className={styles.timelineText}
-                  style={{ fontStyle: "italic", marginTop: "0.25rem", fontSize: "0.75rem" }}
-                >
-                  {event.subtitle}
-                </p>
-              )}
+              {event.subtitle && <p className={`${styles.timelineText} ${ftStyles.sousTitre}`}>{event.subtitle}</p>}
             </div>
           </div>
         ))}

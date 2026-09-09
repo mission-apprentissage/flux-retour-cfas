@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { captureException } from "@sentry/node";
 import { ObjectId } from "mongodb";
 import { IMissionLocaleEffectif, SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
@@ -9,7 +11,6 @@ import {
   CONVERSATION_STATE,
   USER_RESPONSE_TYPE,
 } from "shared/models/data/whatsappContact.model";
-import { v4 as uuidv4 } from "uuid";
 
 import logger from "@/common/logger";
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
@@ -17,6 +18,7 @@ import config from "@/config";
 
 import { sendWhatsAppMessage } from "./brevoApi";
 import { updateWhatsAppContact, getMissionLocaleInfo, getMissionLocaleInfoFull } from "./database";
+import { isExcludedByCfaCollab } from "./eligibility";
 import {
   buildAutoReplyMessage,
   buildCallbackMessage,
@@ -99,6 +101,9 @@ async function handleCallbackSideEffects(effectif: IMissionLocaleEffectif): Prom
         situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
         a_traiter: false,
         injoignable: true,
+        // passage automatique : daté, mais sans date_derniere_action_ml (pas une action ML)
+        date_dernier_passage_a_recontacter: now,
+        date_traitement: null,
         whatsapp_callback_requested: true,
         whatsapp_callback_requested_at: now,
         souhaite_rdv: true,
@@ -150,6 +155,8 @@ async function handleNoHelpSideEffects(effectif: IMissionLocaleEffectif): Promis
         a_traiter: false,
         injoignable: false,
         situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
+        // Traitement automatique : le dossier est considéré traité par le TBA à cette date.
+        date_traitement: now,
         whatsapp_no_help_responded: true,
         whatsapp_no_help_responded_at: now,
         updated_at: now,
@@ -179,24 +186,6 @@ async function handlePrequalifYesSideEffects(effectif: IMissionLocaleEffectif): 
 
   const alreadyClosed = effectif.whatsapp_contact?.conversation_state === CONVERSATION_STATE.CLOSED;
 
-  const cfaWentV2 = effectif.computed?.organisme?.is_allowed_collab === true;
-  const cfaAccConjoint = effectif.organisme_data?.acc_conjoint === true;
-  if (cfaWentV2 || cfaAccConjoint) {
-    logger.warn(
-      {
-        effectifId: effectif._id,
-        cfaWentV2,
-        cfaAccConjoint,
-      },
-      "Préqualif YES reçu mais CFA bascule V2 / acc_conjoint entre envoi et réponse — souhaite_rdv NON posé (exclusion PRD)"
-    );
-    captureException(new Error("Prequalif YES skipped: CFA went V2 between send and reply"), {
-      tags: { feature: "whatsapp_prequalif", step: "yes_skipped_cfa_v2" },
-      extra: { effectifId: effectif._id.toString() },
-    });
-    return;
-  }
-
   // Idempotence : si la conversation est déjà CLOSED, le premier YES a été traité.
   // Re-appliquer le $set réécraserait `souhaite_rdv_at` avec un `now` ultérieur (drift métier).
   // La notif ML conserve sa propre garde (`prequalif_notif_sent_at`).
@@ -216,6 +205,8 @@ async function handlePrequalifYesSideEffects(effectif: IMissionLocaleEffectif): 
         souhaite_rdv_source: "whatsapp_prequalif",
         injoignable: false,
         a_traiter: true,
+        // Le dossier redevient « à traiter » : une date de traitement antérieure est obsolète.
+        ...(shouldUnsetSituation ? { date_traitement: null } : {}),
         updated_at: now,
       },
       $unset: shouldUnsetSituation
@@ -282,6 +273,8 @@ async function handlePrequalifNoSideEffects(effectif: IMissionLocaleEffectif): P
         situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
         a_traiter: false,
         injoignable: false,
+        // Traitement automatique : le dossier est considéré traité par le TBA à cette date.
+        date_traitement: now,
         updated_at: now,
       },
       $unset: {
@@ -515,6 +508,36 @@ async function handlePrequalifYes(
   inboundHistory: IWhatsAppMessageHistory,
   prenom: string
 ): Promise<void> {
+  // Exclusion PRD (race send/réponse) : le dossier est passé côté collab CFA depuis l'envoi.
+  // Aucun souhaite_rdv, aucune notif ML — donc surtout pas de message promettant un rappel.
+  // On enregistre l'entrant et on clôt la conversation pour rester idempotent sur les répétitions.
+  if (isExcludedByCfaCollab(effectif)) {
+    if (effectif.whatsapp_contact?.conversation_state !== CONVERSATION_STATE.CLOSED) {
+      logger.warn(
+        {
+          effectifId: effectif._id,
+          cfaWentV2: effectif.computed?.organisme?.is_allowed_collab === true,
+          cfaAccConjoint: effectif.organisme_data?.acc_conjoint === true,
+        },
+        "Préqualif YES reçu mais CFA bascule V2 / acc_conjoint entre envoi et réponse — souhaite_rdv NON posé (exclusion PRD)"
+      );
+    }
+    const now = new Date();
+    await updateWhatsAppContact(
+      effectif._id,
+      {
+        user_response: USER_RESPONSE_TYPE.PREQUALIF_YES,
+        user_response_at: now,
+        user_response_raw: text,
+        conversation_state: CONVERSATION_STATE.CLOSED,
+        message_status: "read",
+        status_updated_at: now,
+      },
+      [inboundHistory]
+    );
+    return;
+  }
+
   await handlePrequalifYesSideEffects(effectif);
 
   const ml = await getMissionLocaleInfoFull(effectif.mission_locale_id);
@@ -528,7 +551,7 @@ async function handlePrequalifYes(
 
   let message: string;
   if (ml.rdv_url) {
-    const token = uuidv4();
+    const token = randomUUID();
     const now = new Date();
     await missionLocaleEffectifsDb().updateOne(
       { _id: effectif._id },

@@ -1,0 +1,31 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+  padding: clamp(1.5rem, 4vw, 4rem) 1rem;
+}
+
+.card {
+  width: 100%;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  background-color: var(--background-default-grey);
+  border: 1px solid var(--border-default-grey);
+}
+
+.title {
+  margin: 0 0 1.5rem;
+  font-size: clamp(1.375rem, 3vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-title-grey);
+}
+
+.footer {
+  padding-top: 1.5rem;
+  margin-top: 2rem;
+  color: var(--text-mention-grey);
+  border-top: 1px solid var(--border-default-grey);
+
+  p {
+    margin: 0;
+  }
+}

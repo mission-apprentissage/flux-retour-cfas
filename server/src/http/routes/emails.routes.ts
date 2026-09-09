@@ -1,8 +1,8 @@
 import Boom from "boom";
 import express from "express";
-import Joi from "joi";
 import passport from "passport";
 import { Strategy as LocalAPIKeyStrategy } from "passport-localapikey";
+import { z } from "zod";
 
 import {
   checkIfEmailExists,
@@ -57,12 +57,13 @@ export default () => {
   });
 
   router.post("/webhook", checkWebhookKey(), async (req, res) => {
-    const parameters = await Joi.object({
-      event: Joi.string().required(), //https://developers.sendinblue.com/docs/transactional-webhooks
-      "message-id": Joi.string().required(),
-    })
-      .unknown()
-      .validateAsync(req.body, { abortEarly: false });
+    const parameters = await z
+      .object({
+        event: z.string(), //https://developers.sendinblue.com/docs/transactional-webhooks
+        "message-id": z.string(),
+      })
+      .passthrough()
+      .parseAsync(req.body);
 
     if (parameters.event === "delivered") {
       markEmailAsDelivered(parameters["message-id"]);

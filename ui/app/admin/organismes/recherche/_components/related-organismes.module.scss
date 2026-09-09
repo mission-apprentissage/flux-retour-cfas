@@ -1,0 +1,16 @@
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.identity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  align-items: center;
+  color: var(--text-mention-grey);
+}
+
+.missingValue {
+  color: var(--text-default-error);
+}

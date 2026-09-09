@@ -20,7 +20,7 @@ export function BrevoSyncSettingsPanel() {
 
   // Hors production, les synchronisations sont inopérantes (garde serveur) :
   // les toggles sont affichés mais désactivés.
-  const disabled = !isProd || isLoading || setSetting.isLoading;
+  const disabled = !isProd || isLoading || setSetting.isPending;
 
   return (
     <section className={styles.settingsPanel}>

@@ -1,12 +1,13 @@
 "use client";
 
-import format from "date-fns/format/index";
-import formatDistanceToNow from "date-fns/formatDistanceToNow/index";
+import { format } from "date-fns/format";
+import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { fr } from "date-fns/locale";
+
+import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import commonStyles from "./tables/common.module.css";
 import styles from "./tables/TraitementTable.module.css";
-import { Skeleton } from "./ui/Skeleton";
 
 export function formatPercentageBadge(percentage: number, evolution?: string, loadingEvolution?: boolean) {
   let badgeClass = styles.percentageBadgeMedium;

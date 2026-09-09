@@ -1,0 +1,7 @@
+.link {
+  width: fit-content;
+  color: var(--text-action-high-blue-france);
+  text-decoration: underline;
+  text-underline-position: under;
+  background-image: none;
+}

@@ -1,5 +1,5 @@
 import { format, startOfWeek, endOfWeek } from "date-fns";
-import fr from "date-fns/locale/fr/index.js";
+import { fr } from "date-fns/locale/fr";
 import { IOrganisationMissionLocale } from "shared/models";
 
 import { getMissionLocaleEffectifsStats } from "@/common/actions/mission-locale/mission-locale-weekly-recap.actions";

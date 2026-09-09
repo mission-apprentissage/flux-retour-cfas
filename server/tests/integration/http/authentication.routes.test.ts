@@ -3,12 +3,14 @@ import { strict as assert } from "assert";
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
-import { it, describe, beforeEach } from "vitest";
+import { it, describe, beforeEach, vi } from "vitest";
 
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { setTime } from "@/common/utils/timeUtils";
 import { useMongo } from "@tests/jest/setupMongo";
 import { id, initTestApp, testPasswordHash } from "@tests/utils/testUtils";
+
+vi.mock("@/common/services/mailer/mailer");
 
 const date = "2022-10-10T00:00:00.000Z";
 
@@ -181,6 +183,52 @@ describe("Authentification", () => {
         error: "Forbidden",
         message: "Votre compte n'est pas encore validé.",
       });
+    });
+  });
+
+  describe("POST /v1/auth/register - règles de mot de passe", () => {
+    const registrationBody = (password: string, organisation: object = { type: "DREETS", code_region: "53" }) => ({
+      user: {
+        email: "nouveau@tdb.local",
+        civility: "Madame",
+        nom: "Dupont",
+        prenom: "Jeanne",
+        fonction: "Responsable administratif",
+        telephone: "0102030405",
+        password,
+        has_accept_cgu_version: "v0.4",
+      },
+      organisation,
+    });
+
+    it.each([
+      ["trop court", "Abcdef1!"],
+      ["sans majuscule", "abcdefghijk1!"],
+      ["sans minuscule", "ABCDEFGHIJK1!"],
+      ["sans chiffre", "Abcdefghijkl!"],
+      ["sans caractère spécial", "Abcdefghijk12"],
+    ])("Refuse un mot de passe %s", async (_label, password) => {
+      const response = await httpClient.post("/api/v1/auth/register", registrationBody(password));
+
+      assert.strictEqual(response.status, 400);
+      assert.strictEqual(await usersMigrationDb().countDocuments({}), 0);
+    });
+
+    it("Accepte un mot de passe conforme", async () => {
+      const response = await httpClient.post("/api/v1/auth/register", registrationBody("Abcdefghijk1!"));
+
+      assert.strictEqual(response.status, 200);
+      assert.strictEqual(await usersMigrationDb().countDocuments({ email: "nouveau@tdb.local" }), 1);
+    });
+
+    it("Exige 20 caractères pour une organisation ADMINISTRATEUR", async () => {
+      const response = await httpClient.post(
+        "/api/v1/auth/register",
+        registrationBody("Abcdefghijk1!", { type: "ADMINISTRATEUR" })
+      );
+
+      assert.strictEqual(response.status, 400);
+      assert.strictEqual(await usersMigrationDb().countDocuments({}), 0);
     });
   });
 });

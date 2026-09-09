@@ -1,0 +1,56 @@
+.cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.name {
+  margin: 0;
+  line-height: 1.3;
+}
+
+.caption {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--text-mention-grey);
+}
+
+.captionEllipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.organisation {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+}
+
+.organisationLink {
+  color: var(--text-action-high-blue-france);
+  text-decoration: none;
+  background-image: none;
+}
+
+.organisationLink:hover {
+  text-decoration: underline;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: none;
+}
+
+.badge {
+  font-size: 0.625rem;
+}

@@ -16,9 +16,9 @@ export const BREVO_CONTACTS_QUERY_CONFIG = {
 } as const;
 
 export function useBrevoContactLists() {
-  return useQuery<ContactListSummary[]>(
-    brevoContactsQueryKeys.lists(),
-    () => _get<ContactListSummary[]>("/api/v1/admin/brevo-contacts"),
-    BREVO_CONTACTS_QUERY_CONFIG
-  );
+  return useQuery<ContactListSummary[]>({
+    queryKey: brevoContactsQueryKeys.lists(),
+    queryFn: () => _get<ContactListSummary[]>("/api/v1/admin/brevo-contacts"),
+    ...BREVO_CONTACTS_QUERY_CONFIG,
+  });
 }

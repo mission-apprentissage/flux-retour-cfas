@@ -1,7 +1,6 @@
 "use client";
 
-import { Skeleton } from "@mui/material";
-
+import { Skeleton } from "@/app/_components/common/Skeleton";
 import { MlCollaborationDetail, useMlEffectifDetail } from "@/app/_components/ruptures/mission-locale/collaboration";
 
 export default function MissionLocaleDetailClient({ id }: { id: string }) {
@@ -10,8 +9,8 @@ export default function MissionLocaleDetailClient({ id }: { id: string }) {
   if (isLoading || !data) {
     return (
       <div className="fr-container fr-py-4w">
-        <Skeleton variant="rectangular" height={60} className="fr-mb-2w" />
-        <Skeleton variant="rectangular" height={400} />
+        <Skeleton height={60} className="fr-mb-2w" />
+        <Skeleton height={400} />
       </div>
     );
   }

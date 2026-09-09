@@ -1,15 +1,34 @@
-export function BooleanLine({ label, value, className }: { label: string; value: boolean; className: string }) {
+export function BooleanLine({
+  label,
+  labelFaux,
+  value,
+  className,
+}: {
+  label: string;
+  /** phrase autonome pour le cas négatif, à la place de « {label} Non » */
+  labelFaux?: string;
+  value: boolean;
+  className: string;
+}) {
+  if (!value && labelFaux) {
+    return (
+      <p className={className}>
+        {labelFaux} <span aria-hidden="true">{"❌"}</span>
+      </p>
+    );
+  }
+
   return (
     <p className={className}>
       {label}{" "}
       <strong>
         {value ? (
           <>
-            Oui <span aria-hidden="true">{"\u2705"}</span>
+            Oui <span aria-hidden="true">{"✅"}</span>
           </>
         ) : (
           <>
-            Non <span aria-hidden="true">{"\u274C"}</span>
+            Non <span aria-hidden="true">{"❌"}</span>
           </>
         )}
       </strong>

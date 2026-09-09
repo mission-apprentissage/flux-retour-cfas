@@ -33,13 +33,13 @@ const FEATURES: readonly [FeatureAccordionFeature, ...FeatureAccordionFeature[]]
         <li>
           La liste complète s’affiche groupée par mois de rupture, mais nous vous indiquons les dossiers prioritaires :
         </li>
-        <li style={{ marginLeft: "16px" }}>
+        <li className="fr-ml-2w">
           Les mineurs (16-18ans) en <strong>obligation de formation</strong>
         </li>
-        <li style={{ marginLeft: "16px" }}>
+        <li className="fr-ml-2w">
           Les <strong>collaborations directes avec les CFA</strong>
         </li>
-        <li style={{ marginLeft: "16px" }}>
+        <li className="fr-ml-2w">
           Les jeunes <strong>les + susceptibles de répondre</strong> et d’avoir besoin de votre aide
         </li>
       </ul>
@@ -51,13 +51,13 @@ const FEATURES: readonly [FeatureAccordionFeature, ...FeatureAccordionFeature[]]
     description: (
       <ul>
         <li>Pour chaque jeune vous retrouvez :</li>
-        <li style={{ marginLeft: "16px" }}>
+        <li className="fr-ml-2w">
           <strong>Ses coordonnées :</strong> téléphone, email.
         </li>
-        <li style={{ marginLeft: "16px" }}>
+        <li className="fr-ml-2w">
           <strong>Les coordonnées de son CFA :</strong> pour faciliter la prise de contact.
         </li>
-        <li style={{ marginLeft: "16px" }}>
+        <li className="fr-ml-2w">
           <strong>Les détails du contrat :</strong> date de début, date de rupture, formation suivie.
         </li>
       </ul>

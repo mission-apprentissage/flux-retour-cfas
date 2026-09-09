@@ -55,7 +55,7 @@ const ROWS: Row[] = [
     title:
       "+100 accompagnements démarrés chaque semaine grâce à la collaboration des CFA et des Missions Locales sur le service",
     description: "Découvrez les chiffres de l’impact du service Tableau de bord de l’apprentissage.",
-    secondary: { label: "Voir les indicateurs d’impact", href: "/stats" },
+    secondary: { label: "Voir les indicateurs d’impact", href: "/suivi-des-indicateurs" },
     variant: "stats",
   },
 ];

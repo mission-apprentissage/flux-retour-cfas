@@ -1,0 +1,80 @@
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+
+  .searchField,
+  .filterField {
+    margin-bottom: 0;
+  }
+
+  .searchField {
+    flex: 1 1 22rem;
+  }
+
+  .filterField {
+    flex: 0 1 18rem;
+  }
+}
+
+.organismeName {
+  display: block;
+  font-weight: 700;
+  background-image: none;
+}
+
+.organismeIds {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+  white-space: nowrap;
+}
+
+.missingValue {
+  color: var(--text-default-error);
+}
+
+.zero {
+  color: var(--text-disabled-grey);
+}
+
+.delegations {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+}
+
+.delegationsDate {
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+  white-space: nowrap;
+}
+
+.tableContainer :global(.fr-badge) {
+  white-space: nowrap;
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem;
+  background-color: var(--background-alt-blue-france);
+
+  :global(.fr-table) {
+    margin-bottom: 0;
+  }
+
+  :global(.fr-table caption) {
+    font-size: 1rem;
+  }
+}
+
+.errorDetail {
+  margin-bottom: 0;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}

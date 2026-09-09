@@ -1,13 +1,14 @@
 "use client";
 
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useState } from "react";
 import { z } from "zod";
 
-import useToaster from "@/hooks/useToaster";
-
 import { useUpdateMlParametresAdmin } from "../hooks/useStatsQueries";
+
+import styles from "./MlAdminRdvUrlEditor.module.css";
 
 interface Props {
   mlId: string;
@@ -34,10 +35,11 @@ export function MlAdminRdvUrlEditor({ mlId, rdvUrl }: Props) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(rdvUrl ?? "");
   const [error, setError] = useState<string | null>(null);
-  const { toastSuccess, toastError } = useToaster();
-  const { mutateAsync, isLoading } = useUpdateMlParametresAdmin(mlId);
+  const [feedback, setFeedback] = useState<{ severity: "success" | "error"; message: string } | null>(null);
+  const { mutateAsync, isPending: isLoading } = useUpdateMlParametresAdmin(mlId);
 
   const handleSave = async () => {
+    setFeedback(null);
     const parsed = rdvUrlSchema.safeParse(value);
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "URL invalide");
@@ -45,11 +47,14 @@ export function MlAdminRdvUrlEditor({ mlId, rdvUrl }: Props) {
     }
     try {
       await mutateAsync({ rdv_url: value === "" ? null : value });
-      toastSuccess("Lien RDV enregistré.");
+      setFeedback({ severity: "success", message: "Lien RDV enregistré." });
       setEditing(false);
       setError(null);
     } catch (err: any) {
-      toastError(err?.json?.data?.message || err?.message || "Erreur lors de l'enregistrement");
+      setFeedback({
+        severity: "error",
+        message: err?.json?.data?.message || err?.message || "Erreur lors de l'enregistrement",
+      });
     }
   };
 
@@ -58,6 +63,18 @@ export function MlAdminRdvUrlEditor({ mlId, rdvUrl }: Props) {
     setError(null);
     setEditing(false);
   };
+
+  const feedbackAlert = feedback && (
+    <Alert
+      severity={feedback.severity}
+      title={feedback.message}
+      description=""
+      small
+      closable
+      onClose={() => setFeedback(null)}
+      className="fr-mt-1w"
+    />
+  );
 
   if (!editing) {
     return (
@@ -69,15 +86,23 @@ export function MlAdminRdvUrlEditor({ mlId, rdvUrl }: Props) {
         ) : (
           "—"
         )}{" "}
-        <Button priority="tertiary no outline" size="small" onClick={() => setEditing(true)}>
+        <Button
+          priority="tertiary no outline"
+          size="small"
+          onClick={() => {
+            setFeedback(null);
+            setEditing(true);
+          }}
+        >
           Modifier
         </Button>
+        {feedbackAlert}
       </>
     );
   }
 
   return (
-    <div style={{ marginTop: "0.5rem" }}>
+    <div className={styles.bloc}>
       <Input
         label=""
         state={error ? "error" : "default"}
@@ -92,7 +117,7 @@ export function MlAdminRdvUrlEditor({ mlId, rdvUrl }: Props) {
           },
         }}
       />
-      <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+      <div className={styles.actions}>
         <Button priority="primary" size="small" onClick={handleSave} disabled={isLoading}>
           Enregistrer
         </Button>
@@ -100,6 +125,7 @@ export function MlAdminRdvUrlEditor({ mlId, rdvUrl }: Props) {
           Annuler
         </Button>
       </div>
+      {feedbackAlert}
     </div>
   );
 }

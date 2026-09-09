@@ -1,0 +1,53 @@
+.tableContainer table {
+  font-variant-numeric: tabular-nums;
+}
+
+.sortIcon {
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  color: #999;
+}
+
+.sortIconActive {
+  color: #000;
+}
+
+.headerCell {
+  display: flex;
+  cursor: default;
+}
+
+.headerCellSortable {
+  cursor: pointer;
+}
+
+.bodyCell {
+  max-width: 500px;
+}
+
+.paginationWrapper {
+  flex: none;
+}
+
+.captionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.caption {
+  margin: 0;
+}
+
+.paginationRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.pageSizeSelector {
+  width: 150px;
+}

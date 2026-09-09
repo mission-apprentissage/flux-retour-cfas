@@ -28,6 +28,7 @@ import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkele
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
 import styles from "./EffectifDetailClient.module.css";
+import detailStyles from "./EffectifDetailClient.module.css";
 import { FTEffectifForm } from "./FTEffectifForm";
 
 const SUCCESS_DISPLAY_DURATION = 1000;
@@ -258,7 +259,7 @@ export default function EffectifDetailClient() {
               <h2 className={styles.formTitle}>Suivi France Travail</h2>
               <p className="fr-badge fr-badge--yellow-tournesol" aria-label="Effectif à traiter">
                 <i className="fr-icon-flashlight-fill fr-icon--sm" />
-                <span style={{ marginLeft: "5px" }}>À TRAITER</span>
+                <span className={detailStyles.badgeTexte}>À TRAITER</span>
               </p>
             </div>
             <FTEffectifForm

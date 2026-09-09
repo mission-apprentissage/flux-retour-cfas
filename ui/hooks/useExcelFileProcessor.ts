@@ -8,8 +8,6 @@ import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
 import { toEffectifsQueue } from "@/common/utils/televersement";
 
-import useToaster from "./useToaster";
-
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
 
 interface ProcessedDataType {
@@ -42,7 +40,6 @@ const initialState: StateType = {
 };
 
 const useExcelFileProcessor = (organismeId: string) => {
-  const { toastError } = useToaster();
   const [state, setState] = useState<StateType>(initialState);
 
   const resetState = () => {
@@ -55,7 +52,6 @@ const useExcelFileProcessor = (organismeId: string) => {
     const file = acceptedFiles[0];
     if (!file) {
       const errorMsg = "No file provided";
-      toastError(errorMsg);
       setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
       return;
     }
@@ -64,7 +60,6 @@ const useExcelFileProcessor = (organismeId: string) => {
     reader.onload = async (e) => {
       if (!e.target?.result) {
         const errorMsg = "Erreur lors de la lecture du fichier, veuillez réessayer.";
-        toastError(errorMsg);
         setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
         return;
       }
@@ -74,8 +69,11 @@ const useExcelFileProcessor = (organismeId: string) => {
         const workbook = XLSX.read(data, { type: "array" });
         const worksheetName = workbook.SheetNames[0];
         if (!worksheetName) {
-          toastError("Impossible de charger la première feuille du fichier Excel");
-          setState((prevState) => ({ ...prevState, status: "idle" }));
+          setState((prevState) => ({
+            ...prevState,
+            error: "Impossible de charger la première feuille du fichier Excel",
+            status: "idle",
+          }));
           return;
         }
         const worksheet = workbook.Sheets[worksheetName];
@@ -87,7 +85,6 @@ const useExcelFileProcessor = (organismeId: string) => {
 
         if (filteredJsonData.length - 1 > POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH) {
           const errorMsg = `Pour des raisons techniques et de sécurité, votre fichier ne doit pas dépasser ${POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} lignes. Veuillez téléverser un premier fichier de ${POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} lignes/effectifs et renouveler l'opération avec un deuxième fichier comprenant le nombre de lignes restantes.`;
-          toastError(errorMsg);
           setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
           return;
         }
@@ -110,7 +107,6 @@ const useExcelFileProcessor = (organismeId: string) => {
         if (Object.keys(headerMap).length === 0) {
           const errorMsg =
             "Le format de votre fichier n'est pas conforme. Veuillez respecter celui du fichier-modèle Excel téléchargeable.";
-          toastError(errorMsg);
           setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
           return;
         }
@@ -196,14 +192,12 @@ const useExcelFileProcessor = (organismeId: string) => {
       } catch (error) {
         console.error("Erreur de traitement du fichier:", error);
         const errorMsg = "Erreur de traitement du fichier";
-        toastError(errorMsg);
         setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
       }
     };
 
     reader.onerror = () => {
       const errorMsg = "Erreur de lecture du fichier";
-      toastError(errorMsg);
       setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
     };
 
@@ -217,8 +211,11 @@ const useExcelFileProcessor = (organismeId: string) => {
     },
     onDrop,
     onDropRejected: (rejections) => {
-      toastError(`Ce fichier ne peut pas être déposé : ${rejections?.[0]?.errors?.[0]?.message}`);
-      setState((prevState) => ({ ...prevState, status: "idle" }));
+      setState((prevState) => ({
+        ...prevState,
+        error: `Ce fichier ne peut pas être déposé : ${rejections?.[0]?.errors?.[0]?.message}`,
+        status: "idle",
+      }));
     },
   });
 

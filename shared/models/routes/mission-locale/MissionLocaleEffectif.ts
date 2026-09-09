@@ -2,10 +2,13 @@ import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
 import { SourceApprenantEnum } from "shared/constants/effectifs";
+import { zMlSituationDossier } from "shared/constants/missionLocale";
 import zMissionLocaleEffectif, {
   zSituationEnum,
   zProblemeTypeEnum,
   zAccConjointMotifEnum,
+  zCfaRisqueRuptureEnum,
+  zCfaSituationTypeEnum,
   zConnaissanceMlEnum,
   zVerifiedInfo,
 } from "shared/models/data/missionLocaleEffectif.model";
@@ -81,6 +84,7 @@ const zEffectifMissionLocale = z
         .optional(),
       is_allowed_deca: z.boolean().describe("Organisme du programme DECA-CFA").nullish(),
       ml_beta_activated_at: z.date().describe("Date d'activation ML beta du CFA").nullish(),
+      has_account: z.boolean().describe("Au moins un compte utilisateur confirmé sur l'organisation du CFA").nullish(),
     }),
     source: SourceApprenantEnum,
     a_traiter: z.boolean(),
@@ -128,12 +132,20 @@ const zEffectifMissionLocale = z
         referent_coordonnees: z.string().nullish(),
         note_complementaire: z.string().nullish(),
         verified_info: zVerifiedInfo.nullish(),
+        situation_type: zCfaSituationTypeEnum.nullish(),
+        risque_rupture: zCfaRisqueRuptureEnum.nullish(),
+        date_abandon: z.date().nullish(),
       })
       .nullish(),
     mineur: z.boolean().nullish(),
     contact_opportun: z.boolean().nullish(),
     acc_conjoint: z.boolean().nullish(),
     rqth: z.boolean().nullish(),
+    situation_dossier: zMlSituationDossier.nullish().describe("Situation du dossier affichée côté Mission Locale"),
+    date_reception: z.date().nullish().describe("Date de réception du dossier par la Mission Locale"),
+    date_traitement: z.date().nullish(),
+    date_dernier_passage_a_recontacter: z.date().nullish(),
+    date_derniere_action_ml: z.date().nullish(),
     mission_locale_logs: z.array(zMissionLocaleEffectifLogWithUnread).nullish(),
     unread_by_current_user: z
       .boolean()

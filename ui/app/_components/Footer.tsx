@@ -3,12 +3,14 @@
 import { Footer as DsfrFooter } from "@codegouvfr/react-dsfr/Footer";
 import { CRISP_FAQ } from "shared";
 
+import { PAGES } from "@/app/_utils/routes.utils";
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 
 export function Footer() {
   return (
     <DsfrFooter
       accessibility="non compliant"
+      accessibilityLinkProps={{ href: PAGES.static.accessibilite.getPath() }}
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
       homeLinkProps={{
         href: "/",
@@ -21,11 +23,10 @@ export function Footer() {
             alt="Un service proposé par numerique.gouv"
             className="footer-operator-logo"
           />
-          Mandatée par le Ministère du Travail, de l&apos;Emploi et de l&apos;Insertion, le Ministère de la
-          Transformation et de la Fonction publiques, le Ministère de l&apos;Éducation Nationale, de la Jeunesse et des
-          Sports, le Ministère de la Recherche, de l&apos;Enseignement Supérieur et de l&apos;Innovation, la Mission
-          interministérielle pour l&apos;apprentissage développe plusieurs services destinés à faciliter les entrées en
-          apprentissage.
+          Le Tableau de bord est la plateforme qui outille la collaboration entre les acteurs de l&apos;apprentissage et
+          le service public à l&apos;emploi. Le Tableau de bord participe à la prévention de rupture et à la lutte
+          contre le décrochage après une rupture de contrat d&apos;apprentissage en permettant à chaque jeune de
+          bénéficier d&apos;un accompagnement du service public dans les moments clés de son parcours.
         </>
       }
       bottomItems={[
@@ -34,20 +35,12 @@ export function Footer() {
           linkProps: { href: "/sitemap.xml" },
         },
         {
-          text: "Accessibilité : non conforme",
-          linkProps: { href: "/accessibilite" },
-        },
-        {
           text: "Mentions légales",
-          linkProps: { href: "/mentions-legales" },
+          linkProps: { href: PAGES.static.mentionsLegales.getPath() },
         },
         {
-          text: "Conditions générales d’utilisation",
-          linkProps: { href: "/cgu" },
-        },
-        {
-          text: "Statistiques",
-          linkProps: { href: "/stats" },
+          text: "CGU",
+          linkProps: { href: PAGES.static.cgu.getPath() },
         },
         {
           text: "Centre d’aide",
@@ -58,21 +51,13 @@ export function Footer() {
           },
         },
         {
-          text: "Politique de confidentialité",
-          linkProps: { href: "/politique-de-confidentialite" },
+          text: "Données personnelles",
+          linkProps: { href: PAGES.static.politiqueConfidentialite.getPath() },
         },
         {
           text: "À propos",
           linkProps: {
             href: "https://beta.gouv.fr/startups/tdb-apprentissage.html",
-            target: "_blank",
-            rel: "noopener noreferrer",
-          },
-        },
-        {
-          text: "Journal des évolutions",
-          linkProps: {
-            href: "https://www.notion.so/mission-apprentissage/Journal-des-volutions-5c9bec4ae3c3451da671f3f684ee994f",
             target: "_blank",
             rel: "noopener noreferrer",
           },

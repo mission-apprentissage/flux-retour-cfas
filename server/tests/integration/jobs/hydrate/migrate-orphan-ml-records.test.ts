@@ -442,7 +442,7 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
     expect(after?.situation).toBe(SITUATION_ENUM.RDV_PRIS);
   });
 
-  it("squatter ERP soft-deleted : ressuscite, merge orphan, préserve logs et brevo.history", async () => {
+  it("squatter ERP soft-deleted : ressuscite, merge orphan, préserve les logs", async () => {
     const ddn = new Date("2005-06-15T00:00:00Z");
     const { mlRecord: orphanMlRecord, sampleOrganisme } = await seedDecaWithOrphanMlRecord({
       nom: "LEROY",
@@ -523,9 +523,10 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
     // identifiant_normalise backfillé depuis l'orphan (squatter n'en avait pas).
     expect(squatterAfter?.identifiant_normalise?.nom).toBe("LEROY");
 
-    // brevo.token courant conservé sur le squatter, token de l'orphan archivé en history.
+    // brevo est un champ legacy (flux campagne ML abandonné) : la dédup n'y touche plus.
+    // Le brevo du squatter reste intact et aucun history n'est archivé depuis l'orphan.
     expect(squatterAfter?.brevo?.token).toBe(squatterToken);
-    expect(squatterAfter?.brevo?.history?.some((h) => h.token === orphanToken)).toBe(true);
+    expect(squatterAfter?.brevo?.history ?? []).toHaveLength(0);
 
     // Orphan soft-deleted, identifiant_normalise unset.
     const orphanAfter = await missionLocaleEffectifsDb().findOne({ _id: orphanMlRecord._id });

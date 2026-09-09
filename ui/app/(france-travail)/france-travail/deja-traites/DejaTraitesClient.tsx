@@ -1,6 +1,5 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
@@ -121,7 +120,7 @@ export default function DejaTraitesClient() {
 
   if (moisError) {
     return (
-      <div style={{ ...fr.spacing("padding", { topBottom: "4v" }) }}>
+      <div className="fr-py-4v">
         <Alert
           severity="error"
           title="Erreur de chargement"
@@ -133,7 +132,7 @@ export default function DejaTraitesClient() {
 
   if (moisLoading) {
     return (
-      <div style={{ ...fr.spacing("padding", { topBottom: "4v" }) }}>
+      <div className="fr-py-4v">
         <p>Chargement...</p>
       </div>
     );

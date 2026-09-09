@@ -2761,18 +2761,6 @@ const BASSINS_EMPLOI = [
   },
 ];
 
-type IBassinsEmplois = typeof BASSINS_EMPLOI;
-type IBassinsEmploi = IBassinsEmplois[number];
-type IBassinsEmploiCode = IBassinsEmploi["code"];
-
-export const BASSIN_EMPLOI_BY_CODE = BASSINS_EMPLOI.reduce(
-  (acc, bassinEmploi) => {
-    acc[bassinEmploi.code] = bassinEmploi;
-    return acc;
-  },
-  {} as Record<IBassinsEmploiCode, IBassinsEmploi>
-);
-
 export const REGIONS_SORTED = sortAlphabeticallyBy("nom", REGIONS).map((region) => {
   return { ...region, type: TERRITOIRE_TYPE.REGION };
 });

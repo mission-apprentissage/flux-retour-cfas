@@ -66,9 +66,8 @@ export function CfaDashboard({
           {isAllowedDeca && (
             <>
               {" "}
-              ainsi que de la base de données{" "}
-              <strong style={{ color: "var(--text-action-high-blue-france)" }}>DECA</strong>
-              <span style={{ marginLeft: "0.25rem" }}>
+              ainsi que de la base de données <strong className={styles.decaLabel}>DECA</strong>
+              <span className="fr-ml-1v">
                 <Tooltip kind="hover" title={DECA_TOOLTIP_TEXT} />
               </span>
             </>

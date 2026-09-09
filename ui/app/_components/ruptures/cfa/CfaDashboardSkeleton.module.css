@@ -12,15 +12,21 @@
 }
 
 .segment {
+  padding: 32px;
   margin-bottom: 2rem;
   background: var(--background-raised-grey);
   border-radius: 4px;
-  padding: 32px;
 }
 
 .segmentHeader {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 32px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
 }

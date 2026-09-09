@@ -1,5 +1,3 @@
-import type { ObjectId } from "mongodb";
-
 export interface IndicateursEffectifs {
   apprenants: number;
   apprentis: number;
@@ -9,15 +7,6 @@ export interface IndicateursEffectifs {
 }
 
 export type IndicateursEffectifsAvecDepartement = IndicateursEffectifs & { departement: string };
-
-export type IndicateursEffectifsAvecOrganisme = IndicateursEffectifs & {
-  _id: ObjectId;
-  organisme_id: string;
-  nom: string;
-  nature: string;
-  siret: string;
-  uai: string;
-};
 
 export type IndicateursEffectifsAvecFormation = IndicateursEffectifs & {
   rncp_code: string | null;

@@ -2,6 +2,8 @@ import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import type { ReactNode } from "react";
 
+import { PAGES } from "@/app/_utils/routes.utils";
+
 import styles from "./faq-section.module.scss";
 
 export type Question = { label: string; answer: NonNullable<ReactNode> };
@@ -44,7 +46,7 @@ export function BaseFAQSection({ questions }: { questions: Array<Question> }) {
               >
                 Consulter le centre d’aide
               </Button>
-              <Button priority="secondary" linkProps={{ href: "/contact" }}>
+              <Button priority="secondary" linkProps={{ href: PAGES.static.contact.getPath() }}>
                 Contacter l’équipe du service
               </Button>
             </div>
