@@ -1,7 +1,10 @@
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationMissionLocale } from "shared/models";
+import type { IMissionLocaleEffectif } from "shared/models";
+import type { IEffectif } from "shared/models/data/effectifs.model";
 import { API_EFFECTIF_LISTE, CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { describe, it, beforeEach, expect } from "vitest";
 
@@ -14,7 +17,7 @@ import {
 import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id } from "@tests/utils/testUtils";
+import { id, testDoc } from "@tests/utils/testUtils";
 
 const ANNEE_SCOLAIRE = getAnneesScolaireListFromDate(new Date())[0];
 const organismeId = new ObjectId(id(1));
@@ -42,9 +45,13 @@ const monthsAgo = (months: number) => {
 
 const monthKeyOf = (date: Date) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)).toISOString();
 
-const flatten = (result: Array<{ data: Array<{ nom: string }> }>) => result.flatMap(({ data }) => data);
+const flatten = (result: Awaited<ReturnType<typeof getEffectifsParMoisByMissionLocaleId>>) =>
+  result.flatMap(({ data }) => data);
 
-async function insertMlRecord(overrides: Record<string, any> = {}, apprenantOverrides: Record<string, any> = {}) {
+async function insertMlRecord(
+  overrides: Record<string, unknown> = {},
+  apprenantOverrides: Record<string, unknown> = {}
+) {
   const snapshot = await createSampleEffectif({
     organisme: sampleOrganisme,
     annee_scolaire: ANNEE_SCOLAIRE,
@@ -75,11 +82,11 @@ async function insertMlRecord(overrides: Record<string, any> = {}, apprenantOver
     current_status: { value: STATUT_APPRENANT.INSCRIT, date: new Date() },
     ...overrides,
   };
-  await missionLocaleEffectifsDb().insertOne(doc as any);
+  await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
   return doc;
 }
 
-const collabDossier = (reponseAt: Date, extra: Record<string, any> = {}) => ({
+const collabDossier = (reponseAt: Date, extra: Record<string, unknown> = {}) => ({
   organisme_data: { acc_conjoint: true, reponse_at: reponseAt },
   ...extra,
 });
@@ -92,7 +99,7 @@ describe("Visibilité mission locale des dossiers sans date de rupture", () => {
     await organisationsDb().deleteMany({});
     await organismesDb().deleteMany({});
     await organismesDb().insertOne(sampleOrganisme);
-    await organisationsDb().insertOne(missionLocale as any);
+    await organisationsDb().insertOne(testDoc<IOrganisation>(missionLocale));
   });
 
   it("rend visible un dossier de collaboration sans date de rupture dans la liste à traiter", async () => {
@@ -100,7 +107,7 @@ describe("Visibilité mission locale des dossiers sans date de rupture", () => {
 
     const result = await getEffectifsParMoisByMissionLocaleId(missionLocale, { type: API_EFFECTIF_LISTE.A_TRAITER });
 
-    expect(flatten(result as any)).toHaveLength(1);
+    expect(flatten(result)).toHaveLength(1);
   });
 
   it("le rattache au mois de son envoi", async () => {
@@ -129,7 +136,7 @@ describe("Visibilité mission locale des dossiers sans date de rupture", () => {
 
     const result = await getEffectifsParMoisByMissionLocaleId(missionLocale, { type: API_EFFECTIF_LISTE.A_TRAITER });
 
-    expect(flatten(result as any)).toHaveLength(1);
+    expect(flatten(result)).toHaveLength(1);
   });
 
   it("laisse hors de la liste un dossier de plus de 26 ans sans collaboration", async () => {
@@ -140,7 +147,7 @@ describe("Visibilité mission locale des dossiers sans date de rupture", () => {
 
     const result = await getEffectifsParMoisByMissionLocaleId(missionLocale, { type: API_EFFECTIF_LISTE.A_TRAITER });
 
-    expect(flatten(result as any)).toHaveLength(0);
+    expect(flatten(result)).toHaveLength(0);
   });
 
   it("laisse hors de la liste un dossier sans rupture ni collaboration", async () => {
@@ -148,7 +155,7 @@ describe("Visibilité mission locale des dossiers sans date de rupture", () => {
 
     const result = await getEffectifsParMoisByMissionLocaleId(missionLocale, { type: API_EFFECTIF_LISTE.A_TRAITER });
 
-    expect(flatten(result as any)).toHaveLength(0);
+    expect(flatten(result)).toHaveLength(0);
   });
 
   it("ne présente pas un dossier de prévention comme un nouveau contrat", async () => {
@@ -167,7 +174,7 @@ describe("Visibilité mission locale des dossiers sans date de rupture", () => {
       API_EFFECTIF_LISTE.A_TRAITER
     );
 
-    expect((effectif as any).nouveau_contrat).toBe(false);
+    expect(effectif.nouveau_contrat).toBe(false);
   });
 
   it("n'élargit pas le curseur d'hydratation sur la collection effectifs", async () => {
@@ -182,7 +189,7 @@ describe("Visibilité mission locale des dossiers sans date de rupture", () => {
         adresse: { mission_locale_id: 42 },
       },
     });
-    await effectifsDb().insertOne({ ...effectif, _id: new ObjectId(), organisme_id: organismeId } as any);
+    await effectifsDb().insertOne(testDoc<IEffectif>({ ...effectif, _id: new ObjectId(), organisme_id: organismeId }));
 
     const cursor = getAllEffectifForMissionLocaleCursor(42);
 

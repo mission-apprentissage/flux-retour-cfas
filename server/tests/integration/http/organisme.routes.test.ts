@@ -255,7 +255,7 @@ describe("Routes /organismes/:id", () => {
             expect(response.status).toStrictEqual(403);
           } else {
             expect(response.status).toStrictEqual(200);
-            const expected = keys.reduce(
+            const expected = keys.reduce<Record<string, unknown>>(
               (acc, key) => {
                 if (organismesByLabel["OF cible"][key] !== undefined) {
                   acc[key] = organismesByLabel["OF cible"][key];
@@ -264,7 +264,7 @@ describe("Routes /organismes/:id", () => {
                 return acc;
               },
               {
-                permissions: permissionsByOrganisation[organisationLabel as string],
+                permissions: permissionsByOrganisation[organisationLabel as keyof typeof permissionsByOrganisation],
               }
             );
 

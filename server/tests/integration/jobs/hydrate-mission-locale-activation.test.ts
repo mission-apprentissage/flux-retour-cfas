@@ -1,5 +1,7 @@
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
+import type { IMissionLocaleEffectif } from "shared/models";
+import type { IEffectif } from "shared/models/data/effectifs.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -10,7 +12,7 @@ import {
 } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id } from "@tests/utils/testUtils";
+import { id, testDoc } from "@tests/utils/testUtils";
 
 const ANNEE_SCOLAIRE = getAnneesScolaireListFromDate(new Date())[0];
 const organismeId = new ObjectId(id(1));
@@ -22,7 +24,7 @@ const sampleOrganisme = { _id: organismeId, ...createRandomOrganisme({ siret: "1
  * Crée un effectif INSCRIT (donc ni rupturant ni en abandon) et son dossier ML : sans les gardes
  * du lot B2b, `updateOrDeleteMissionLocaleSnapshot` soft-delete ce dossier au passage du job.
  */
-async function creerDossier(organismeData: Record<string, any> | null, extra: Record<string, any> = {}) {
+async function creerDossier(organismeData: Record<string, unknown> | null, extra: Record<string, unknown> = {}) {
   const effectifId = new ObjectId();
   const snapshot = await createSampleEffectif({
     organisme: sampleOrganisme,
@@ -41,21 +43,23 @@ async function creerDossier(organismeData: Record<string, any> | null, extra: Re
       },
     },
   };
-  await effectifsDb().insertOne(effectif as any);
+  await effectifsDb().insertOne(testDoc<IEffectif>(effectif));
 
   const dossierId = new ObjectId();
-  await missionLocaleEffectifsDb().insertOne({
-    _id: dossierId,
-    mission_locale_id: mlOrganisationId,
-    effectif_id: effectifId,
-    effectif_snapshot: effectif,
-    effectif_snapshot_date: new Date(),
-    date_rupture: null,
-    created_at: new Date(),
-    current_status: { value: STATUT_APPRENANT.INSCRIT, date: new Date("2026-01-01") },
-    ...(organismeData ? { organisme_data: organismeData } : {}),
-    ...extra,
-  } as any);
+  await missionLocaleEffectifsDb().insertOne(
+    testDoc<IMissionLocaleEffectif>({
+      _id: dossierId,
+      mission_locale_id: mlOrganisationId,
+      effectif_id: effectifId,
+      effectif_snapshot: effectif,
+      effectif_snapshot_date: new Date(),
+      date_rupture: null,
+      created_at: new Date(),
+      current_status: { value: STATUT_APPRENANT.INSCRIT, date: new Date("2026-01-01") },
+      ...(organismeData ? { organisme_data: organismeData } : {}),
+      ...extra,
+    })
+  );
 
   return dossierId;
 }

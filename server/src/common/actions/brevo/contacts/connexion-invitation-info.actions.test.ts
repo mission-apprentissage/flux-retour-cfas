@@ -1,7 +1,12 @@
+import type { IMissionLocaleEffectif } from "shared/models";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IOrganisme } from "shared/models/data/organismes.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { missionLocaleEffectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc } from "@tests/utils/testUtils";
 
 import { getConnexionInvitationInfoByEmail } from "./connexion-invitation-info.actions";
 import {
@@ -35,8 +40,8 @@ describe("getConnexionInvitationInfoByEmail", () => {
   it("retourne email + organisme:null + missionsLocales:[] pour un user non-OF (ML, ARML, …)", async () => {
     const orgaMl = buildOrgaMl("ML PARIS");
     const user = buildUser(orgaMl, { email: "agent@ml-paris.fr" });
-    await organisationsDb().insertOne(orgaMl as any);
-    await usersMigrationDb().insertOne(user as any);
+    await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
 
     const result = await getConnexionInvitationInfoByEmail("agent@ml-paris.fr");
 
@@ -51,9 +56,9 @@ describe("getConnexionInvitationInfoByEmail", () => {
     const orgaOf = buildOrgaOf();
     const organisme = buildOrganisme(orgaOf);
     const user = buildUser(orgaOf, { email: "sandrine@cfa.fr" });
-    await organisationsDb().insertOne(orgaOf as any);
-    await organismesDb().insertOne(organisme as any);
-    await usersMigrationDb().insertOne(user as any);
+    await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+    await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
 
     const result = await getConnexionInvitationInfoByEmail("sandrine@cfa.fr");
 
@@ -73,8 +78,8 @@ describe("getConnexionInvitationInfoByEmail", () => {
   it("retourne email + organisme: null si pas de match dans organismes (référentiel)", async () => {
     const orgaOf = buildOrgaOf();
     const user = buildUser(orgaOf, { email: "sandrine@cfa.fr" });
-    await organisationsDb().insertOne(orgaOf as any);
-    await usersMigrationDb().insertOne(user as any);
+    await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
 
     const result = await getConnexionInvitationInfoByEmail("sandrine@cfa.fr");
 
@@ -93,18 +98,23 @@ describe("getConnexionInvitationInfoByEmail", () => {
     const mlB = buildOrgaMl("ML B", { adresse: { commune: "Mérignac", code_postal: "33700" } });
     const mlC = buildOrgaMl("ML C", { adresse: { commune: "Bordeaux", code_postal: "33000" } });
 
-    await organisationsDb().insertMany([orgaOf as any, mlA as any, mlB as any, mlC as any]);
-    await organismesDb().insertOne(organisme as any);
-    await usersMigrationDb().insertOne(user as any);
+    await organisationsDb().insertMany([
+      testDoc<IOrganisation>(orgaOf),
+      testDoc<IOrganisation>(mlA),
+      testDoc<IOrganisation>(mlB),
+      testDoc<IOrganisation>(mlC),
+    ]);
+    await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
     // ML A : 3 rupturants, ML B : 2, ML C : 1 — counts strictement décroissants
     await missionLocaleEffectifsDb().insertMany(
       [
-        buildRupturant(organisme._id, mlA._id) as any,
-        buildRupturant(organisme._id, mlA._id) as any,
-        buildRupturant(organisme._id, mlA._id) as any,
-        buildRupturant(organisme._id, mlB._id) as any,
-        buildRupturant(organisme._id, mlB._id) as any,
-        buildRupturant(organisme._id, mlC._id) as any,
+        testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlA._id)),
+        testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlA._id)),
+        testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlA._id)),
+        testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlB._id)),
+        testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlB._id)),
+        testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlC._id)),
       ],
       { bypassDocumentValidation: true }
     );
@@ -130,9 +140,9 @@ describe("getConnexionInvitationInfoByEmail", () => {
     const { nom: _ignored, ...organisme } = buildOrganisme(orgaOf);
     void _ignored;
     const user = buildUser(orgaOf, { email: "sandrine@cfa.fr" });
-    await organisationsDb().insertOne(orgaOf as any);
-    await organismesDb().insertOne(organisme as any);
-    await usersMigrationDb().insertOne(user as any);
+    await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+    await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
 
     const result = await getConnexionInvitationInfoByEmail("sandrine@cfa.fr");
 

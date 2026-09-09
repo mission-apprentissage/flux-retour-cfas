@@ -1,16 +1,18 @@
 import { strict as assert } from "assert";
 
+import type { IEffectif } from "shared/models/data/effectifs.model";
 import { it, describe } from "vitest";
 
 import { effectifsDb } from "@/common/model/collections";
 import { formatError } from "@/common/utils/errorUtils";
 import { useMongo } from "@tests/jest/setupMongo";
+import { invalidDoc, testDoc } from "@tests/utils/testUtils";
 
 describe("ErrorUtils", () => {
   useMongo();
   it("display details for Document failed validation on one document", async () => {
     try {
-      await effectifsDb().insertOne({} as any);
+      await effectifsDb().insertOne(testDoc<IEffectif>({}));
     } catch (error) {
       const newError = formatError(error);
       assert.deepEqual(newError.message, "Document failed validation");
@@ -23,7 +25,10 @@ describe("ErrorUtils", () => {
 
   it("doesn't display details for Document failed validation on many documents", async () => {
     try {
-      await effectifsDb().insertMany([{ name: "test1" }, { name: "test2" }] as any[]);
+      await effectifsDb().insertMany([
+        invalidDoc<IEffectif>({ name: "test1" }),
+        invalidDoc<IEffectif>({ name: "test2" }),
+      ]);
     } catch (error) {
       const newError = formatError(error);
       assert.deepEqual(newError.message, "Document failed validation");

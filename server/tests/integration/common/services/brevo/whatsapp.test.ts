@@ -2,7 +2,11 @@ import { strict as assert } from "assert";
 
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
+import type { IEffectif } from "shared/models";
 import { IMissionLocaleEffectif, SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { USER_RESPONSE_TYPE, CONVERSATION_STATE } from "shared/models/data/whatsappContact.model";
 import { it, describe, beforeEach, afterEach, vi, expect } from "vitest";
 
@@ -41,6 +45,7 @@ import { sendEmail } from "@/common/services/mailer/mailer";
 import config from "@/config";
 import { sendWhatsAppPrequalif } from "@/jobs/whatsapp/send-whatsapp-prequalif";
 import { useMongo } from "@tests/jest/setupMongo";
+import { DeepPartial, testDoc, testDocs } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/mailer/mailer");
 
@@ -310,7 +315,7 @@ describe("WhatsApp Service", () => {
         is_lock: false,
         created_at: new Date(),
         updated_at: new Date(),
-      } as any,
+      } as unknown as IEffectif,
     };
 
     it("retourne true pour un effectif éligible", () => {
@@ -387,7 +392,7 @@ describe("WhatsApp Service", () => {
         is_lock: false,
         created_at: new Date(),
         updated_at: new Date(),
-      } as any,
+      } as unknown as IEffectif,
     } as IMissionLocaleEffectif;
 
     beforeEach(async () => {
@@ -397,26 +402,30 @@ describe("WhatsApp Service", () => {
     });
 
     it("envoie un email avec le template whatsapp_nohelp_notification", async () => {
-      await missionLocaleEffectifsLogDb().insertOne({
-        _id: new ObjectId(),
-        mission_locale_effectif_id: effectifId,
-        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
-        created_at: new Date(),
-        created_by: userId,
-        read_by: [],
-      } as any);
+      await missionLocaleEffectifsLogDb().insertOne(
+        testDoc<IMissionLocaleEffectifLog>({
+          _id: new ObjectId(),
+          mission_locale_effectif_id: effectifId,
+          situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+          created_at: new Date(),
+          created_by: userId,
+          read_by: [],
+        })
+      );
 
-      await usersMigrationDb().insertOne({
-        _id: userId,
-        email: "conseiller@ml.fr",
-        nom: "Martin",
-        prenom: "Sophie",
-        civility: "Madame",
-        password: "hashedpassword",
-        account_status: "CONFIRMED",
-        organisation_id: missionLocaleId,
-        created_at: new Date(),
-      } as any);
+      await usersMigrationDb().insertOne(
+        testDoc<IUsersMigration>({
+          _id: userId,
+          email: "conseiller@ml.fr",
+          nom: "Martin",
+          prenom: "Sophie",
+          civility: "Madame",
+          password: "hashedpassword",
+          account_status: "CONFIRMED",
+          organisation_id: missionLocaleId,
+          created_at: new Date(),
+        })
+      );
 
       await notifyMLUserOnNoHelp(mockEffectif);
 
@@ -460,7 +469,7 @@ describe("WhatsApp Service", () => {
 
       // Créer l'organisation Mission Locale
       await organisationsDb().insertOne(
-        {
+        testDoc<IOrganisation>({
           _id: missionLocaleId,
           type: "MISSION_LOCALE",
           nom: "ML Test",
@@ -469,13 +478,13 @@ describe("WhatsApp Service", () => {
           site_web: "https://www.ml-test.fr",
           adresse: { commune: "Paris" },
           created_at: new Date(),
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
 
       // Créer l'effectif avec whatsapp_contact
       await missionLocaleEffectifsDb().insertOne(
-        {
+        testDoc<IMissionLocaleEffectif>({
           _id: effectifId,
           mission_locale_id: missionLocaleId,
           effectif_id: new ObjectId(),
@@ -512,26 +521,26 @@ describe("WhatsApp Service", () => {
               },
             ],
           },
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
 
       // Créer un log ML (pour les notifications)
       await missionLocaleEffectifsLogDb().insertOne(
-        {
+        testDoc<IMissionLocaleEffectifLog>({
           _id: new ObjectId(),
           mission_locale_effectif_id: effectifId,
           situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
           created_at: new Date(),
           created_by: userId,
           read_by: [],
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
 
       // Créer l'utilisateur ML
       await usersMigrationDb().insertOne(
-        {
+        testDoc<IUsersMigration>({
           _id: userId,
           email: "conseiller@ml.fr",
           nom: "Martin",
@@ -541,7 +550,7 @@ describe("WhatsApp Service", () => {
           account_status: "CONFIRMED",
           organisation_id: missionLocaleId,
           created_at: new Date(),
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
     });
@@ -570,7 +579,7 @@ describe("WhatsApp Service", () => {
       expect(effectif?.whatsapp_contact?.auto_reply_sent_at).toBeInstanceOf(Date);
 
       const autoReplyMsg = effectif?.whatsapp_contact?.messages_history?.find(
-        (m: any) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
+        (m) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
       );
       expect(autoReplyMsg).toBeDefined();
       expect(autoReplyMsg?.content).toContain("ML Test");
@@ -584,7 +593,7 @@ describe("WhatsApp Service", () => {
 
       const afterFirst = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       const autoReplyCountFirst = afterFirst?.whatsapp_contact?.messages_history?.filter(
-        (m: any) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
+        (m) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
       ).length;
       expect(autoReplyCountFirst).toBe(1);
 
@@ -593,7 +602,7 @@ describe("WhatsApp Service", () => {
 
       const afterSecond = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       const autoReplyCountSecond = afterSecond?.whatsapp_contact?.messages_history?.filter(
-        (m: any) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
+        (m) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
       ).length;
       expect(autoReplyCountSecond).toBe(1);
     });
@@ -622,7 +631,7 @@ describe("WhatsApp Service", () => {
       const afterFail = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       expect(afterFail?.whatsapp_contact?.auto_reply_sent).toBe(false);
       const autoReplyAfterFail = afterFail?.whatsapp_contact?.messages_history?.filter(
-        (m: any) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
+        (m) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
       );
       expect(autoReplyAfterFail?.length ?? 0).toBe(0);
 
@@ -633,7 +642,7 @@ describe("WhatsApp Service", () => {
       const afterRetry = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       expect(afterRetry?.whatsapp_contact?.auto_reply_sent).toBe(true);
       const autoReplyAfterRetry = afterRetry?.whatsapp_contact?.messages_history?.filter(
-        (m: any) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
+        (m) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
       );
       expect(autoReplyAfterRetry?.length).toBe(1);
     });
@@ -646,7 +655,7 @@ describe("WhatsApp Service", () => {
       const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       // L'historique ne doit contenir qu'une seule entrée inbound avec ce message ID
       const inboundMessages = effectif?.whatsapp_contact?.messages_history?.filter(
-        (m: any) => m.direction === "inbound" && m.brevo_message_id === "msg-dedup"
+        (m) => m.direction === "inbound" && m.brevo_message_id === "msg-dedup"
       );
       expect(inboundMessages?.length).toBe(1);
     });
@@ -657,8 +666,8 @@ describe("WhatsApp Service", () => {
       const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       expect(effectif?.whatsapp_contact?.opted_out).toBe(true);
       expect(effectif?.whatsapp_contact?.conversation_state).toBe(CONVERSATION_STATE.CLOSED);
-      expect((effectif as any)?.a_traiter).toBe(false);
-      expect((effectif as any)?.injoignable).toBe(false);
+      expect(effectif?.a_traiter).toBe(false);
+      expect(effectif?.injoignable).toBe(false);
     });
 
     it("gère une réponse callback (1) : marque callback_requested + notification + reset situation", async () => {
@@ -669,8 +678,8 @@ describe("WhatsApp Service", () => {
       expect(effectif?.whatsapp_contact?.conversation_state).toBe(CONVERSATION_STATE.CALLBACK_REQUESTED);
       expect(effectif?.whatsapp_callback_requested).toBe(true);
       expect(effectif?.situation).toBe(SITUATION_ENUM.CONTACTE_SANS_RETOUR);
-      expect((effectif as any)?.a_traiter).toBe(false);
-      expect((effectif as any)?.injoignable).toBe(true);
+      expect(effectif?.a_traiter).toBe(false);
+      expect(effectif?.injoignable).toBe(true);
       expect(effectif?.whatsapp_no_help_responded).toBeUndefined();
       // passage automatique à « À recontacter » : daté pour l'affichage, sans action ML
       expect(effectif?.date_dernier_passage_a_recontacter).toBeInstanceOf(Date);
@@ -691,7 +700,7 @@ describe("WhatsApp Service", () => {
       expect(effectif?.whatsapp_contact?.user_response).toBe("no_help");
       expect(effectif?.whatsapp_contact?.conversation_state).toBe(CONVERSATION_STATE.CLOSED);
       expect(effectif?.situation).toBe(SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE);
-      expect((effectif as any)?.a_traiter).toBe(false);
+      expect(effectif?.a_traiter).toBe(false);
       expect(effectif?.whatsapp_no_help_responded).toBe(true);
       expect(effectif?.whatsapp_callback_requested).toBeUndefined();
       // traitement automatique : le dossier est daté traité, sans action ML
@@ -700,7 +709,7 @@ describe("WhatsApp Service", () => {
 
       // Vérifie qu'un log a été créé
       const logs = await missionLocaleEffectifsLogDb().find({ mission_locale_effectif_id: effectifId }).toArray();
-      const noHelpLog = logs.find((l: any) => l.situation === SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE);
+      const noHelpLog = logs.find((l) => l.situation === SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE);
       expect(noHelpLog).toBeDefined();
       expect(noHelpLog?.created_by).toBeNull();
 
@@ -719,7 +728,7 @@ describe("WhatsApp Service", () => {
       let effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       expect(effectif?.situation).toBe(SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE);
       expect(effectif?.whatsapp_no_help_responded).toBe(true);
-      expect((effectif as any)?.a_traiter).toBe(false);
+      expect(effectif?.a_traiter).toBe(false);
 
       vi.mocked(sendEmail).mockClear();
 
@@ -730,8 +739,8 @@ describe("WhatsApp Service", () => {
       expect(effectif?.whatsapp_contact?.user_response).toBe("callback");
       expect(effectif?.whatsapp_contact?.conversation_state).toBe(CONVERSATION_STATE.CALLBACK_REQUESTED);
       expect(effectif?.situation).toBe(SITUATION_ENUM.CONTACTE_SANS_RETOUR);
-      expect((effectif as any)?.a_traiter).toBe(false);
-      expect((effectif as any)?.injoignable).toBe(true);
+      expect(effectif?.a_traiter).toBe(false);
+      expect(effectif?.injoignable).toBe(true);
       expect(effectif?.whatsapp_callback_requested).toBe(true);
       expect(effectif?.whatsapp_no_help_responded).toBeUndefined();
       // le retour à « À recontacter » annule la date de traitement automatique du no_help
@@ -751,7 +760,7 @@ describe("WhatsApp Service", () => {
 
       let effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       expect(effectif?.whatsapp_callback_requested).toBe(true);
-      expect((effectif as any)?.injoignable).toBe(true);
+      expect(effectif?.injoignable).toBe(true);
 
       vi.mocked(sendEmail).mockClear();
 
@@ -762,8 +771,8 @@ describe("WhatsApp Service", () => {
       expect(effectif?.whatsapp_contact?.user_response).toBe("no_help");
       expect(effectif?.whatsapp_contact?.conversation_state).toBe(CONVERSATION_STATE.CLOSED);
       expect(effectif?.situation).toBe(SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE);
-      expect((effectif as any)?.a_traiter).toBe(false);
-      expect((effectif as any)?.injoignable).toBe(false);
+      expect(effectif?.a_traiter).toBe(false);
+      expect(effectif?.injoignable).toBe(false);
       expect(effectif?.whatsapp_no_help_responded).toBe(true);
       expect(effectif?.whatsapp_callback_requested).toBeUndefined();
       expect(sendEmail).toHaveBeenCalledWith(
@@ -804,7 +813,7 @@ describe("WhatsApp Service", () => {
         is_lock: false,
         created_at: new Date(),
         updated_at: new Date(),
-      } as any,
+      } as unknown as IEffectif,
     } as IMissionLocaleEffectif;
 
     beforeEach(async () => {
@@ -815,27 +824,31 @@ describe("WhatsApp Service", () => {
 
     it("envoie un email à l'utilisateur ML qui a traité le dossier", async () => {
       // Créer le log ML
-      await missionLocaleEffectifsLogDb().insertOne({
-        _id: new ObjectId(),
-        mission_locale_effectif_id: effectifId,
-        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
-        created_at: new Date(),
-        created_by: userId,
-        read_by: [],
-      } as any);
+      await missionLocaleEffectifsLogDb().insertOne(
+        testDoc<IMissionLocaleEffectifLog>({
+          _id: new ObjectId(),
+          mission_locale_effectif_id: effectifId,
+          situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+          created_at: new Date(),
+          created_by: userId,
+          read_by: [],
+        })
+      );
 
       // Créer l'utilisateur ML
-      await usersMigrationDb().insertOne({
-        _id: userId,
-        email: "conseiller@ml.fr",
-        nom: "Martin",
-        prenom: "Sophie",
-        civility: "Madame",
-        password: "hashedpassword",
-        account_status: "CONFIRMED",
-        organisation_id: missionLocaleId,
-        created_at: new Date(),
-      } as any);
+      await usersMigrationDb().insertOne(
+        testDoc<IUsersMigration>({
+          _id: userId,
+          email: "conseiller@ml.fr",
+          nom: "Martin",
+          prenom: "Sophie",
+          civility: "Madame",
+          password: "hashedpassword",
+          account_status: "CONFIRMED",
+          organisation_id: missionLocaleId,
+          created_at: new Date(),
+        })
+      );
 
       await notifyMLUserOnCallback(mockEffectif);
 
@@ -858,14 +871,16 @@ describe("WhatsApp Service", () => {
     });
 
     it("n'envoie pas d'email si le log n'a pas de created_by", async () => {
-      await missionLocaleEffectifsLogDb().insertOne({
-        _id: new ObjectId(),
-        mission_locale_effectif_id: effectifId,
-        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
-        created_at: new Date(),
-        created_by: null,
-        read_by: [],
-      } as any);
+      await missionLocaleEffectifsLogDb().insertOne(
+        testDoc<IMissionLocaleEffectifLog>({
+          _id: new ObjectId(),
+          mission_locale_effectif_id: effectifId,
+          situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+          created_at: new Date(),
+          created_by: null,
+          read_by: [],
+        })
+      );
 
       await notifyMLUserOnCallback(mockEffectif);
 
@@ -873,14 +888,16 @@ describe("WhatsApp Service", () => {
     });
 
     it("n'envoie pas d'email si l'utilisateur ML n'existe pas", async () => {
-      await missionLocaleEffectifsLogDb().insertOne({
-        _id: new ObjectId(),
-        mission_locale_effectif_id: effectifId,
-        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
-        created_at: new Date(),
-        created_by: userId,
-        read_by: [],
-      } as any);
+      await missionLocaleEffectifsLogDb().insertOne(
+        testDoc<IMissionLocaleEffectifLog>({
+          _id: new ObjectId(),
+          mission_locale_effectif_id: effectifId,
+          situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+          created_at: new Date(),
+          created_by: userId,
+          read_by: [],
+        })
+      );
 
       // Pas d'utilisateur créé
 
@@ -894,50 +911,56 @@ describe("WhatsApp Service", () => {
       const newUserId = new ObjectId();
 
       // Log ancien
-      await missionLocaleEffectifsLogDb().insertOne({
-        _id: new ObjectId(),
-        mission_locale_effectif_id: effectifId,
-        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
-        created_at: new Date("2024-01-01"),
-        created_by: oldUserId,
-        read_by: [],
-      } as any);
+      await missionLocaleEffectifsLogDb().insertOne(
+        testDoc<IMissionLocaleEffectifLog>({
+          _id: new ObjectId(),
+          mission_locale_effectif_id: effectifId,
+          situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+          created_at: new Date("2024-01-01"),
+          created_by: oldUserId,
+          read_by: [],
+        })
+      );
 
       // Log récent
-      await missionLocaleEffectifsLogDb().insertOne({
-        _id: new ObjectId(),
-        mission_locale_effectif_id: effectifId,
-        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
-        created_at: new Date("2024-06-01"),
-        created_by: newUserId,
-        read_by: [],
-      } as any);
+      await missionLocaleEffectifsLogDb().insertOne(
+        testDoc<IMissionLocaleEffectifLog>({
+          _id: new ObjectId(),
+          mission_locale_effectif_id: effectifId,
+          situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+          created_at: new Date("2024-06-01"),
+          created_by: newUserId,
+          read_by: [],
+        })
+      );
 
       // Créer les deux utilisateurs
-      await usersMigrationDb().insertMany([
-        {
-          _id: oldUserId,
-          email: "old@ml.fr",
-          nom: "Ancien",
-          prenom: "User",
-          civility: "Monsieur",
-          password: "hashedpassword",
-          account_status: "CONFIRMED",
-          organisation_id: missionLocaleId,
-          created_at: new Date(),
-        },
-        {
-          _id: newUserId,
-          email: "new@ml.fr",
-          nom: "Nouveau",
-          prenom: "User",
-          civility: "Monsieur",
-          password: "hashedpassword",
-          account_status: "CONFIRMED",
-          organisation_id: missionLocaleId,
-          created_at: new Date(),
-        },
-      ] as any[]);
+      await usersMigrationDb().insertMany(
+        testDocs<IUsersMigration>([
+          {
+            _id: oldUserId,
+            email: "old@ml.fr",
+            nom: "Ancien",
+            prenom: "User",
+            civility: "Monsieur",
+            password: "hashedpassword",
+            account_status: "CONFIRMED",
+            organisation_id: missionLocaleId,
+            created_at: new Date(),
+          },
+          {
+            _id: newUserId,
+            email: "new@ml.fr",
+            nom: "Nouveau",
+            prenom: "User",
+            civility: "Monsieur",
+            password: "hashedpassword",
+            account_status: "CONFIRMED",
+            organisation_id: missionLocaleId,
+            created_at: new Date(),
+          },
+        ])
+      );
 
       await notifyMLUserOnCallback(mockEffectif);
 
@@ -989,21 +1012,21 @@ describe("WhatsApp Service", () => {
     it("met à jour le statut d'un message existant", async () => {
       const effectifId = new ObjectId();
       await missionLocaleEffectifsDb().insertOne(
-        {
+        testDoc<IMissionLocaleEffectif>({
           _id: effectifId,
           mission_locale_id: new ObjectId(),
           effectif_id: new ObjectId(),
           created_at: new Date(),
           brevo: {},
           current_status: {},
-          effectif_snapshot: {} as any,
+          effectif_snapshot: {} as unknown as IEffectif,
           whatsapp_contact: {
             phone_normalized: "+33612345678",
             message_id: "brevo-msg-123",
             message_status: "sent",
             last_message_sent_at: new Date(),
           },
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
 
@@ -1017,21 +1040,21 @@ describe("WhatsApp Service", () => {
     it("met à jour le statut en 'read'", async () => {
       const effectifId = new ObjectId();
       await missionLocaleEffectifsDb().insertOne(
-        {
+        testDoc<IMissionLocaleEffectif>({
           _id: effectifId,
           mission_locale_id: new ObjectId(),
           effectif_id: new ObjectId(),
           created_at: new Date(),
           brevo: {},
           current_status: {},
-          effectif_snapshot: {} as any,
+          effectif_snapshot: {} as unknown as IEffectif,
           whatsapp_contact: {
             phone_normalized: "+33612345678",
             message_id: "brevo-msg-456",
             message_status: "delivered",
             last_message_sent_at: new Date(),
           },
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
 
@@ -1044,21 +1067,21 @@ describe("WhatsApp Service", () => {
     it("met à jour le statut en 'failed'", async () => {
       const effectifId = new ObjectId();
       await missionLocaleEffectifsDb().insertOne(
-        {
+        testDoc<IMissionLocaleEffectif>({
           _id: effectifId,
           mission_locale_id: new ObjectId(),
           effectif_id: new ObjectId(),
           created_at: new Date(),
           brevo: {},
           current_status: {},
-          effectif_snapshot: {} as any,
+          effectif_snapshot: {} as unknown as IEffectif,
           whatsapp_contact: {
             phone_normalized: "+33612345678",
             message_id: "brevo-msg-789",
             message_status: "sent",
             last_message_sent_at: new Date(),
           },
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
 
@@ -1101,7 +1124,7 @@ describe("WhatsApp Service", () => {
         is_lock: false,
         created_at: new Date(),
         updated_at: new Date(),
-      } as any,
+      } as unknown as IEffectif,
     };
 
     beforeEach(async () => {
@@ -1160,7 +1183,7 @@ describe("WhatsApp Service", () => {
         is_lock: false,
         created_at: new Date(),
         updated_at: new Date(),
-      } as any,
+      } as unknown as IEffectif,
     };
 
     it("retourne true pour un effectif éligible (score ≥ 0.75)", () => {
@@ -1279,9 +1302,13 @@ describe("WhatsApp Service", () => {
       assert.strictEqual(await isPhoneAlreadyContacted("+33611111111", effectifId), false);
     });
 
-    const insertMockEffectifWithPhone = (id: ObjectId, phone: string, extra: any = {}) =>
+    const insertMockEffectifWithPhone = (
+      id: ObjectId,
+      phone: string,
+      extra: DeepPartial<IMissionLocaleEffectif> = {}
+    ) =>
       missionLocaleEffectifsDb().insertOne(
-        {
+        testDoc<IMissionLocaleEffectif>({
           _id: id,
           mission_locale_id: new ObjectId(),
           effectif_id: new ObjectId(),
@@ -1302,7 +1329,7 @@ describe("WhatsApp Service", () => {
           },
           whatsapp_contact: { phone_normalized: phone, last_message_sent_at: new Date(), opted_out: false },
           ...extra,
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
 
@@ -1337,10 +1364,10 @@ describe("WhatsApp Service", () => {
       await missionLocaleEffectifsDb().deleteMany({});
     });
 
-    const setupEffectif = async (overrides: Partial<IMissionLocaleEffectif> = {}): Promise<ObjectId> => {
+    const setupEffectif = async (overrides: DeepPartial<IMissionLocaleEffectif> = {}): Promise<ObjectId> => {
       const id = new ObjectId();
       await missionLocaleEffectifsDb().insertOne(
-        {
+        testDoc<IMissionLocaleEffectif>({
           _id: id,
           mission_locale_id: new ObjectId(),
           effectif_id: new ObjectId(),
@@ -1360,7 +1387,7 @@ describe("WhatsApp Service", () => {
             updated_at: new Date(),
           },
           ...overrides,
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
       return id;
@@ -1381,7 +1408,7 @@ describe("WhatsApp Service", () => {
     it("skip si phone déjà contacté sur un autre effectif (Verrou 2)", async () => {
       const otherId = await setupEffectif({
         whatsapp_contact: { phone_normalized: "+33655555555", last_message_sent_at: new Date(), opted_out: false },
-      } as any);
+      });
       const currentId = await setupEffectif();
       assert.strictEqual(await isPhoneAlreadyContacted("+33655555555", currentId), true);
       assert.notStrictEqual(otherId, currentId);
@@ -1390,7 +1417,7 @@ describe("WhatsApp Service", () => {
     it("re-run sur le même effectif est idempotent (Verrou 1)", async () => {
       const id = await setupEffectif({
         whatsapp_contact: { phone_normalized: "+33666666666", last_message_sent_at: new Date(), opted_out: false },
-      } as any);
+      });
       const result = await reserveAndSendPrequalif({
         effectifId: id,
         targetPhone: "+33677777777",
@@ -1416,22 +1443,22 @@ describe("WhatsApp Service", () => {
       await organisationsDb().deleteMany({});
     });
 
-    const setupPrequalifEffectif = async (overrides: any = {}) => {
+    const setupPrequalifEffectif = async (overrides: DeepPartial<IMissionLocaleEffectif> = {}) => {
       const mlId = new ObjectId();
       await organisationsDb().insertOne(
-        {
+        testDoc<IOrganisation>({
           _id: mlId,
           type: "MISSION_LOCALE",
           nom: "ML Test",
           ml_id: 1,
           created_at: new Date(),
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
 
       const effectifId = new ObjectId();
       await missionLocaleEffectifsDb().insertOne(
-        {
+        testDoc<IMissionLocaleEffectif>({
           _id: effectifId,
           mission_locale_id: mlId,
           effectif_id: new ObjectId(),
@@ -1461,7 +1488,7 @@ describe("WhatsApp Service", () => {
             updated_at: new Date(),
           },
           ...overrides,
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
 
@@ -1633,35 +1660,37 @@ describe("WhatsApp Service", () => {
           is_lock: false,
           created_at: new Date(),
           updated_at: new Date(),
-        } as any,
+        } as unknown as IEffectif,
       }) as IMissionLocaleEffectif;
 
     it("broadcast à TOUS les users CONFIRMED de la ML", async () => {
       const mlId = new ObjectId();
-      await usersMigrationDb().insertMany([
-        {
-          _id: new ObjectId(),
-          email: "user1@ml.fr",
-          nom: "Alpha",
-          prenom: "User",
-          civility: "Madame",
-          password: "x",
-          account_status: "CONFIRMED",
-          organisation_id: mlId,
-          created_at: new Date(),
-        },
-        {
-          _id: new ObjectId(),
-          email: "user2@ml.fr",
-          nom: "Beta",
-          prenom: "User",
-          civility: "Monsieur",
-          password: "x",
-          account_status: "CONFIRMED",
-          organisation_id: mlId,
-          created_at: new Date(),
-        },
-      ] as any[]);
+      await usersMigrationDb().insertMany(
+        testDocs<IUsersMigration>([
+          {
+            _id: new ObjectId(),
+            email: "user1@ml.fr",
+            nom: "Alpha",
+            prenom: "User",
+            civility: "Madame",
+            password: "x",
+            account_status: "CONFIRMED",
+            organisation_id: mlId,
+            created_at: new Date(),
+          },
+          {
+            _id: new ObjectId(),
+            email: "user2@ml.fr",
+            nom: "Beta",
+            prenom: "User",
+            civility: "Monsieur",
+            password: "x",
+            account_status: "CONFIRMED",
+            organisation_id: mlId,
+            created_at: new Date(),
+          },
+        ])
+      );
 
       await notifyMLUsersOnPrequalifYes(buildEffectif(mlId));
 
@@ -1679,17 +1708,19 @@ describe("WhatsApp Service", () => {
 
     it("n'envoie aucun email si la ML n'a aucun user CONFIRMED", async () => {
       const mlId = new ObjectId();
-      await usersMigrationDb().insertOne({
-        _id: new ObjectId(),
-        email: "pending@ml.fr",
-        nom: "X",
-        prenom: "Y",
-        civility: "Madame",
-        password: "x",
-        account_status: "PENDING",
-        organisation_id: mlId,
-        created_at: new Date(),
-      } as any);
+      await usersMigrationDb().insertOne(
+        testDoc<IUsersMigration>({
+          _id: new ObjectId(),
+          email: "pending@ml.fr",
+          nom: "X",
+          prenom: "Y",
+          civility: "Madame",
+          password: "x",
+          account_status: "PENDING_EMAIL_VALIDATION",
+          organisation_id: mlId,
+          created_at: new Date(),
+        })
+      );
 
       await notifyMLUsersOnPrequalifYes(buildEffectif(mlId));
 
@@ -1699,30 +1730,32 @@ describe("WhatsApp Service", () => {
     it("ne notifie QUE les users de la ML de l'effectif (isolation)", async () => {
       const mlA = new ObjectId();
       const mlB = new ObjectId();
-      await usersMigrationDb().insertMany([
-        {
-          _id: new ObjectId(),
-          email: "ml-a@example.fr",
-          nom: "A",
-          prenom: "User",
-          civility: "Madame",
-          password: "x",
-          account_status: "CONFIRMED",
-          organisation_id: mlA,
-          created_at: new Date(),
-        },
-        {
-          _id: new ObjectId(),
-          email: "ml-b@example.fr",
-          nom: "B",
-          prenom: "User",
-          civility: "Madame",
-          password: "x",
-          account_status: "CONFIRMED",
-          organisation_id: mlB,
-          created_at: new Date(),
-        },
-      ] as any[]);
+      await usersMigrationDb().insertMany(
+        testDocs<IUsersMigration>([
+          {
+            _id: new ObjectId(),
+            email: "ml-a@example.fr",
+            nom: "A",
+            prenom: "User",
+            civility: "Madame",
+            password: "x",
+            account_status: "CONFIRMED",
+            organisation_id: mlA,
+            created_at: new Date(),
+          },
+          {
+            _id: new ObjectId(),
+            email: "ml-b@example.fr",
+            nom: "B",
+            prenom: "User",
+            civility: "Madame",
+            password: "x",
+            account_status: "CONFIRMED",
+            organisation_id: mlB,
+            created_at: new Date(),
+          },
+        ])
+      );
 
       await notifyMLUsersOnPrequalifYes(buildEffectif(mlA));
 
@@ -1780,7 +1813,7 @@ describe("WhatsApp Service", () => {
     it("limite messages_history aux 50 dernières entrées via $slice", async () => {
       const effectifId = new ObjectId();
       await missionLocaleEffectifsDb().insertOne(
-        {
+        testDoc<IMissionLocaleEffectif>({
           _id: effectifId,
           mission_locale_id: new ObjectId(),
           effectif_id: new ObjectId(),
@@ -1788,24 +1821,28 @@ describe("WhatsApp Service", () => {
           brevo: {},
           current_status: {},
           whatsapp_contact: { phone_normalized: "+33611111111" },
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
 
       for (let i = 0; i < 60; i++) {
-        await updateWhatsAppContact(effectifId, {}, {
-          direction: "inbound",
-          message_id: `msg-${i}`,
-          content: `body-${i}`,
-          received_at: new Date(),
-        } as any);
+        await updateWhatsAppContact(
+          effectifId,
+          {},
+          {
+            direction: "inbound",
+            brevo_message_id: `msg-${i}`,
+            content: `body-${i}`,
+            sent_at: new Date(),
+          }
+        );
       }
 
       const after = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       const history = after?.whatsapp_contact?.messages_history ?? [];
       assert.strictEqual(history.length, 50, "history doit être capé à 50");
-      assert.strictEqual((history[0] as any).message_id, "msg-10", "doit garder les 50 dernières (msg-10 → msg-59)");
-      assert.strictEqual((history[49] as any).message_id, "msg-59");
+      assert.strictEqual(history[0].brevo_message_id, "msg-10", "doit garder les 50 dernières (msg-10 → msg-59)");
+      assert.strictEqual(history[49].brevo_message_id, "msg-59");
     });
   });
 
@@ -1826,14 +1863,14 @@ describe("WhatsApp Service", () => {
     it("YES rejoué après CLOSED → ne réécrase pas souhaite_rdv_at + ne duplique pas le log", async () => {
       const mlId = new ObjectId();
       await organisationsDb().insertOne(
-        { _id: mlId, type: "MISSION_LOCALE", nom: "ML", ml_id: 1, created_at: new Date() } as any,
+        testDoc<IOrganisation>({ _id: mlId, type: "MISSION_LOCALE", nom: "ML", ml_id: 1, created_at: new Date() }),
         { bypassDocumentValidation: true }
       );
 
       const effectifId = new ObjectId();
       const initialSouhaiteRdvAt = new Date(Date.now() - 60_000);
       await missionLocaleEffectifsDb().insertOne(
-        {
+        testDoc<IMissionLocaleEffectif>({
           _id: effectifId,
           mission_locale_id: mlId,
           effectif_id: new ObjectId(),
@@ -1866,7 +1903,7 @@ describe("WhatsApp Service", () => {
             created_at: new Date(),
             updated_at: new Date(),
           },
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
 
@@ -1929,7 +1966,7 @@ describe("WhatsApp Service", () => {
     const insertCandidate = async (phone = "0688888888") => {
       const id = new ObjectId();
       await missionLocaleEffectifsDb().insertOne(
-        {
+        testDoc<IMissionLocaleEffectif>({
           _id: id,
           mission_locale_id: new ObjectId(),
           effectif_id: new ObjectId(),
@@ -1948,7 +1985,7 @@ describe("WhatsApp Service", () => {
             created_at: new Date(),
             updated_at: new Date(),
           },
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
       return id;
@@ -1985,7 +2022,7 @@ describe("WhatsApp Service", () => {
 
       const otherId = new ObjectId();
       await missionLocaleEffectifsDb().insertOne(
-        {
+        testDoc<IMissionLocaleEffectif>({
           _id: otherId,
           mission_locale_id: new ObjectId(),
           effectif_id: new ObjectId(),
@@ -1997,7 +2034,7 @@ describe("WhatsApp Service", () => {
             last_message_sent_at: new Date(),
             opted_out: false,
           },
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
 
@@ -2010,7 +2047,7 @@ describe("WhatsApp Service", () => {
 
       const otherId = new ObjectId();
       await missionLocaleEffectifsDb().insertOne(
-        {
+        testDoc<IMissionLocaleEffectif>({
           _id: otherId,
           mission_locale_id: new ObjectId(),
           effectif_id: new ObjectId(),
@@ -2022,7 +2059,7 @@ describe("WhatsApp Service", () => {
             last_message_sent_at: new Date(),
             opted_out: false,
           },
-        } as any,
+        }),
         { bypassDocumentValidation: true }
       );
 
@@ -2035,7 +2072,7 @@ describe("WhatsApp Service", () => {
 
       const mlId = new ObjectId();
       await organisationsDb().insertOne(
-        { _id: mlId, type: "MISSION_LOCALE", nom: "ML", ml_id: 1, created_at: new Date() } as any,
+        testDoc<IOrganisation>({ _id: mlId, type: "MISSION_LOCALE", nom: "ML", ml_id: 1, created_at: new Date() }),
         { bypassDocumentValidation: true }
       );
 
@@ -2049,7 +2086,7 @@ describe("WhatsApp Service", () => {
         [newerId, newerSentAt],
       ] as const) {
         await missionLocaleEffectifsDb().insertOne(
-          {
+          testDoc<IMissionLocaleEffectif>({
             _id: id,
             mission_locale_id: mlId,
             effectif_id: new ObjectId(),
@@ -2077,7 +2114,7 @@ describe("WhatsApp Service", () => {
               message_status: "sent",
               conversation_state: CONVERSATION_STATE.INITIAL_SENT,
             },
-          } as any,
+          }),
           { bypassDocumentValidation: true }
         );
       }

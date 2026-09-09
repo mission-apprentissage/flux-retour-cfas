@@ -1,5 +1,7 @@
 import { ObjectId } from "bson";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
+import type { IEffectif } from "shared/models/data/effectifs.model";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { generateFormationCatalogueFixture } from "shared/models/fixtures/formationsCatalogue.fixture";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
@@ -9,6 +11,7 @@ import { describe, expect, it } from "vitest";
 import { checkCollabV2Eligibility } from "@/common/actions/organismes/collab-v2-eligibility";
 import { effectifsDb, effectifsDECADb, formationsCatalogueDb, organismesDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc } from "@tests/utils/testUtils";
 
 useMongo();
 
@@ -27,9 +30,9 @@ async function insertOrganisme(overrides: Partial<IOrganisme> = {}) {
   });
   for (const [key, value] of Object.entries(overrides)) {
     if (value === undefined) {
-      delete (base as any)[key];
+      Reflect.deleteProperty(base, key);
     } else {
-      (base as any)[key] = value;
+      Object.assign(base, { [key]: value });
     }
   }
   await organismesDb().insertOne(base, { bypassDocumentValidation: true });
@@ -37,13 +40,13 @@ async function insertOrganisme(overrides: Partial<IOrganisme> = {}) {
 }
 
 async function insertEffectif(organisme_id: ObjectId, annee_scolaire: string) {
-  await effectifsDb().insertOne({ _id: new ObjectId(), organisme_id, annee_scolaire } as any, {
+  await effectifsDb().insertOne(testDoc<IEffectif>({ _id: new ObjectId(), organisme_id, annee_scolaire }), {
     bypassDocumentValidation: true,
   });
 }
 
 async function insertEffectifDECA(organisme_id: ObjectId, annee_scolaire: string) {
-  await effectifsDECADb().insertOne({ _id: new ObjectId(), organisme_id, annee_scolaire } as any, {
+  await effectifsDECADb().insertOne(testDoc<IEffectifDECA>({ _id: new ObjectId(), organisme_id, annee_scolaire }), {
     bypassDocumentValidation: true,
   });
 }

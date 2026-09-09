@@ -1,8 +1,12 @@
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IOrganisme } from "shared/models/data/organismes.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { ensureBrevoAttributes, importContactsToBrevoList } from "@/common/services/brevo/brevo";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc } from "@tests/utils/testUtils";
 
 import { buildOrganisme, buildOrgaOf, buildUser } from "./fixtures";
 import { getOrCreateContactList } from "./list.actions";
@@ -33,8 +37,8 @@ const isActiveMock = vi.mocked(isBrevoInstantSyncActive);
 
 const seedCfa = async () => {
   const orgaOf = buildOrgaOf();
-  await organisationsDb().insertOne(orgaOf as any);
-  await organismesDb().insertOne(buildOrganisme(orgaOf) as any);
+  await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+  await organismesDb().insertOne(testDoc<IOrganisme>(buildOrganisme(orgaOf)));
   return orgaOf;
 };
 
@@ -51,7 +55,7 @@ describe("syncSingleContact", () => {
     const orgaOf = await seedCfa();
     const u1 = buildUser(orgaOf);
     const u2 = buildUser(orgaOf);
-    await usersMigrationDb().insertMany([u1 as any, u2 as any]);
+    await usersMigrationDb().insertMany([testDoc<IUsersMigration>(u1), testDoc<IUsersMigration>(u2)]);
 
     const result = await syncSingleContact(u1._id);
 
@@ -66,7 +70,7 @@ describe("syncSingleContact", () => {
   it("accepte un userId fourni sous forme de string", async () => {
     const orgaOf = await seedCfa();
     const u1 = buildUser(orgaOf);
-    await usersMigrationDb().insertOne(u1 as any);
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(u1));
 
     const result = await syncSingleContact(u1._id.toString());
 
@@ -76,7 +80,7 @@ describe("syncSingleContact", () => {
   it("synchronise un compte PENDING (statut élargi)", async () => {
     const orgaOf = await seedCfa();
     const u1 = buildUser(orgaOf, { account_status: "PENDING_EMAIL_VALIDATION" });
-    await usersMigrationDb().insertOne(u1 as any);
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(u1));
 
     const result = await syncSingleContact(u1._id);
 
@@ -87,7 +91,7 @@ describe("syncSingleContact", () => {
   it("no-op si l'utilisateur est hors-périmètre (unsubscribe) : import d'un tableau vide", async () => {
     const orgaOf = await seedCfa();
     const u = buildUser(orgaOf, { unsubscribe: true });
-    await usersMigrationDb().insertOne(u as any);
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(u));
 
     const result = await syncSingleContact(u._id);
 
@@ -99,7 +103,7 @@ describe("syncSingleContact", () => {
     isActiveMock.mockResolvedValue(false);
     const orgaOf = await seedCfa();
     const u = buildUser(orgaOf);
-    await usersMigrationDb().insertOne(u as any);
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(u));
 
     const result = await syncSingleContact(u._id);
 

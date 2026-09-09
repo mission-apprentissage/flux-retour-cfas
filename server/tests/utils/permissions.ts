@@ -259,7 +259,7 @@ type TestFunc<ExpectedResult> = (
   organisation: IOrganisationCreate,
   expectedResult: ExpectedResult,
   organisationLabel?: ProfilLabel
-) => Promise<any>;
+) => Promise<unknown>;
 
 /**
  * Utilitaire pour exécuter un test avec tous les profils d'organisation
@@ -269,7 +269,7 @@ export function testPermissions<ExpectedResult, ExcludedCases extends ProfilLabe
   testFunc: TestFunc<ExpectedResult>
 ) {
   Object.entries(permissionsConfig).forEach(([label, allowed]) => {
-    const conf = profilsPermissionByLabel[label];
+    const conf = profilsPermissionByLabel[label as ProfilLabel];
     it(`${label} - ${allowed ? "ALLOWED" : "FORBIDDEN"}`, async () => {
       await testFunc(conf, allowed as ExpectedResult, label as ProfilLabel);
     });

@@ -5,15 +5,15 @@ import { mergeIgnoringNullPreferringNewArray } from "@/common/utils/mergeIgnorin
 
 describe("mergeIgnoringNullPreferringNewArray", () => {
   it("returns an empty object when given an empty object", async () => {
-    const input: any = {};
-    const expectedResult: any = {};
+    const input: Record<string, unknown> = {};
+    const expectedResult: Record<string, unknown> = {};
     const result = mergeIgnoringNullPreferringNewArray(input, {});
 
     expect(result).toStrictEqual(expectedResult);
   });
 
   it("returns an object merged by given key", async () => {
-    const input: any = {
+    const input: Record<string, unknown> = {
       id: 123,
       apples: 10,
     };
@@ -28,7 +28,7 @@ describe("mergeIgnoringNullPreferringNewArray", () => {
   });
 
   it("should not merge null values", async () => {
-    const input: any = {
+    const input: Record<string, unknown> = {
       id: 123,
       apples: 10,
       kiwis: 90,
@@ -45,7 +45,7 @@ describe("mergeIgnoringNullPreferringNewArray", () => {
   });
 
   it("should work with Date and ObjectId", async () => {
-    const input: any = {
+    const input: Record<string, unknown> = {
       id: 123,
       date: new Date("2021-09-28T04:05:47.647Z"),
       oid: new ObjectId("6152d7d3e6b5a5a5a5a5a5a5"),
@@ -63,7 +63,7 @@ describe("mergeIgnoringNullPreferringNewArray", () => {
   });
 
   it("shoud work with nested objects", async () => {
-    const input: any = {
+    const input: Record<string, unknown> = {
       id: 123,
       apples: 10,
       nested: {
@@ -89,7 +89,7 @@ describe("mergeIgnoringNullPreferringNewArray", () => {
   });
 
   it("should not merge array and prefer new one", async () => {
-    const input: any = {
+    const input: Record<string, unknown> = {
       id: 123,
       apples: 10,
       nested: {

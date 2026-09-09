@@ -1,7 +1,9 @@
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationMissionLocale } from "shared/models";
+import type { IMissionLocaleEffectif } from "shared/models";
 import { API_EFFECTIF_LISTE, SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { describe, it, beforeEach, expect } from "vitest";
 
@@ -9,7 +11,7 @@ import { getEffectifsParMoisByMissionLocaleId } from "@/common/actions/mission-l
 import { missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id } from "@tests/utils/testUtils";
+import { id, testDoc } from "@tests/utils/testUtils";
 
 const ANNEE_SCOLAIRE = getAnneesScolaireListFromDate(new Date())[0];
 const organismeId = new ObjectId(id(1));
@@ -37,7 +39,7 @@ const monthsAgo = (months: number) => {
 
 const monthKeyOf = (date: Date) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)).toISOString();
 
-async function insertMlRecord(overrides: Record<string, any> = {}) {
+async function insertMlRecord(overrides: Record<string, unknown> = {}) {
   const snapshot = await createSampleEffectif({
     organisme: sampleOrganisme,
     annee_scolaire: ANNEE_SCOLAIRE,
@@ -66,7 +68,7 @@ async function insertMlRecord(overrides: Record<string, any> = {}) {
     current_status: { value: STATUT_APPRENANT.RUPTURANT, date: new Date() },
     ...overrides,
   };
-  await missionLocaleEffectifsDb().insertOne(doc as any);
+  await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
   return doc;
 }
 
@@ -78,7 +80,7 @@ describe("getEffectifsParMoisByMissionLocaleId", () => {
     await organisationsDb().deleteMany({});
     await organismesDb().deleteMany({});
     await organismesDb().insertOne(sampleOrganisme);
-    await organisationsDb().insertOne(missionLocale as any);
+    await organisationsDb().insertOne(testDoc<IOrganisation>(missionLocale));
   });
 
   it("regroupe un dossier rupturant sur le mois de sa date de rupture", async () => {
@@ -145,7 +147,7 @@ describe("getEffectifsParMoisByMissionLocaleId", () => {
 
       const bucket = result.find(({ month }) => month === monthKeyOf(dateRupture));
       expect(bucket?.data).toHaveLength(2);
-      expect(bucket?.data.map((e: any) => e.injoignable).sort()).toEqual([false, true]);
+      expect(bucket?.data.map((e: { injoignable?: boolean | null }) => e.injoignable).sort()).toEqual([false, true]);
     });
 
     it("ne compte pas les dossiers à recontacter comme traités", async () => {
@@ -177,7 +179,7 @@ describe("getEffectifsParMoisByMissionLocaleId", () => {
       });
 
       const bucket = result.find(({ month }) => month === monthKeyOf(dateRupture));
-      const dossier: any = bucket?.data[0];
+      const dossier = bucket?.data[0];
       expect(dossier.date_dernier_passage_a_recontacter).toEqual(dateRecontact);
       // « reçu le » se base sur la réception du dossier, jamais sur la date de rupture
       expect(dossier.date_reception).not.toEqual(dateRupture);

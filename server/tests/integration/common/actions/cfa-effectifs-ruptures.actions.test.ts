@@ -2,9 +2,11 @@ import { randomUUID } from "node:crypto";
 
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
-import { IOrganisationOrganismeFormation } from "shared/models";
+import type { StatutApprenant } from "shared/constants";
+import { IEffectif, IMissionLocaleEffectif, IOrganisationOrganismeFormation } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
+import type { PartialDeep } from "type-fest";
 import { describe, it, beforeEach, expect } from "vitest";
 
 import { getCfaEffectifsEnRupture } from "@/common/actions/cfa/cfa-effectifs-ruptures.actions";
@@ -12,7 +14,7 @@ import { DATE_START_RUPTURES } from "@/common/actions/shared/rupture-pipeline.ut
 import { missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id } from "@tests/utils/testUtils";
+import { id, testDoc, testDocs } from "@tests/utils/testUtils";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -34,7 +36,18 @@ const organisation: IOrganisationOrganismeFormation = {
   created_at: new Date(),
 };
 
-async function createMlEffectif(overrides: Record<string, any> = {}) {
+interface MlEffectifOverrides {
+  date_rupture?: Date | null;
+  apprenant?: PartialDeep<IEffectif["apprenant"]>;
+  _computed_override?: PartialDeep<IEffectif>;
+  statut_en_cours?: StatutApprenant;
+  current_status?: IMissionLocaleEffectif["current_status"];
+  cfa_rupture_declaration?: IMissionLocaleEffectif["cfa_rupture_declaration"];
+  soft_deleted?: boolean;
+  situation?: IMissionLocaleEffectif["situation"];
+}
+
+async function createMlEffectif(overrides: MlEffectifOverrides = {}) {
   const now = new Date();
   const dateRupture = overrides.date_rupture ?? new Date(now.getTime() - 20 * DAY);
 
@@ -101,7 +114,7 @@ describe("getCfaEffectifsEnRupture", () => {
       createMlEffectif({ date_rupture: new Date(now.getTime() - 60 * DAY) }),
       createMlEffectif({ date_rupture: new Date(now.getTime() - 120 * DAY) }),
     ]);
-    await missionLocaleEffectifsDb().insertMany(docs as any[]);
+    await missionLocaleEffectifsDb().insertMany(testDocs<IMissionLocaleEffectif>(docs));
 
     const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 
@@ -114,7 +127,7 @@ describe("getCfaEffectifsEnRupture", () => {
   it("exclut les ruptures de plus de 180 jours", async () => {
     const now = new Date();
     const doc = await createMlEffectif({ date_rupture: new Date(now.getTime() - 200 * DAY) });
-    await missionLocaleEffectifsDb().insertOne(doc as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
 
     const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 
@@ -135,7 +148,7 @@ describe("getCfaEffectifsEnRupture", () => {
         declared_by: new ObjectId(),
       },
     });
-    await missionLocaleEffectifsDb().insertOne(doc as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
 
     const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 
@@ -155,7 +168,7 @@ describe("getCfaEffectifsEnRupture", () => {
         current_status: { value: STATUT_APPRENANT.FIN_DE_FORMATION, date: now },
       }),
     ]);
-    await missionLocaleEffectifsDb().insertMany(docs as any[]);
+    await missionLocaleEffectifsDb().insertMany(testDocs<IMissionLocaleEffectif>(docs));
 
     const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 
@@ -185,7 +198,7 @@ describe("getCfaEffectifsEnRupture", () => {
         current_status: { value: STATUT_APPRENANT.FIN_DE_FORMATION, date: now },
       }),
     ]);
-    await missionLocaleEffectifsDb().insertMany(docs as any[]);
+    await missionLocaleEffectifsDb().insertMany(testDocs<IMissionLocaleEffectif>(docs));
 
     const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 
@@ -201,7 +214,7 @@ describe("getCfaEffectifsEnRupture", () => {
       current_status: { value: STATUT_APPRENANT.FIN_DE_FORMATION, date: now },
       cfa_rupture_declaration: { date_rupture: dateRupture, declared_at: now, declared_by: new ObjectId() },
     });
-    await missionLocaleEffectifsDb().insertOne(doc as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
 
     const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 
@@ -228,7 +241,7 @@ describe("getCfaEffectifsEnRupture", () => {
         current_status: { value: STATUT_APPRENANT.APPRENTI, date: now },
       }),
     ]);
-    await missionLocaleEffectifsDb().insertMany(docs as any[]);
+    await missionLocaleEffectifsDb().insertMany(testDocs<IMissionLocaleEffectif>(docs));
 
     const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 
@@ -237,7 +250,7 @@ describe("getCfaEffectifsEnRupture", () => {
 
   it("exclut les effectifs soft_deleted", async () => {
     const doc = await createMlEffectif({ soft_deleted: true });
-    await missionLocaleEffectifsDb().insertOne(doc as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
 
     const result = await getCfaEffectifsEnRupture(organisation, true, baseParams);
 

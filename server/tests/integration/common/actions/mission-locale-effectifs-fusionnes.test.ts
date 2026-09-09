@@ -1,12 +1,14 @@
 import { ObjectId } from "mongodb";
 import { ML_SITUATION_DOSSIER, STATUT_APPRENANT } from "shared/constants";
 import { IOrganisationMissionLocale } from "shared/models";
+import type { IMissionLocaleEffectif } from "shared/models";
 import {
   API_EFFECTIF_LISTE,
   CFA_RISQUE_RUPTURE_ENUM,
   CFA_SITUATION_TYPE_ENUM,
   SITUATION_ENUM,
 } from "shared/models/data/missionLocaleEffectif.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { describe, it, beforeEach, expect } from "vitest";
 
@@ -17,7 +19,7 @@ import {
 import { missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id } from "@tests/utils/testUtils";
+import { id, testDoc } from "@tests/utils/testUtils";
 
 const ANNEE_SCOLAIRE = getAnneesScolaireListFromDate(new Date())[0];
 const organismeId = new ObjectId(id(1));
@@ -46,8 +48,8 @@ const yearsAgo = (years: number) => {
 
 async function insertMlRecord(
   nom: string,
-  overrides: Record<string, any> = {},
-  apprenantOverrides: Record<string, any> = {}
+  overrides: Record<string, unknown> = {},
+  apprenantOverrides: Record<string, unknown> = {}
 ) {
   const snapshot = await createSampleEffectif({
     organisme: sampleOrganisme,
@@ -80,11 +82,11 @@ async function insertMlRecord(
     current_status: { value: STATUT_APPRENANT.RUPTURANT, date: daysAgo(30) },
     ...overrides,
   };
-  await missionLocaleEffectifsDb().insertOne(doc as any);
+  await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
   return doc;
 }
 
-const collabData = (overrides: Record<string, any> = {}) => ({
+const collabData = (overrides: Record<string, unknown> = {}) => ({
   acc_conjoint: true,
   reponse_at: daysAgo(2),
   has_unread_notification: false,
@@ -102,7 +104,7 @@ describe("getEffectifsFusionnesByMissionLocaleId", () => {
     await organisationsDb().deleteMany({});
     await organismesDb().deleteMany({});
     await organismesDb().insertOne(sampleOrganisme);
-    await organisationsDb().insertOne(missionLocale as any);
+    await organisationsDb().insertOne(testDoc<IOrganisation>(missionLocale));
   });
 
   describe("liste fusionnée (dossiers prioritaires)", () => {

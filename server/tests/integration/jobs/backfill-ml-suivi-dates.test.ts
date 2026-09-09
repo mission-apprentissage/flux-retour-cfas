@@ -1,12 +1,15 @@
 import { ObjectId } from "bson";
+import type { IMissionLocaleEffectif } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { MISSION_LOCALE_LOG_EVENT } from "shared/models/data/missionLocaleEffectifLog.model";
+import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
 import { it, expect, describe, beforeEach } from "vitest";
 
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 import { backfillMlSuiviDates } from "@/jobs/migration/backfill-ml-suivi-dates";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc, testDocs } from "@tests/utils/testUtils";
 
 const ML_ID = new ObjectId();
 
@@ -26,7 +29,12 @@ function createMlEffectifDoc(overrides: Record<string, unknown> = {}) {
 
 function createLogDoc(
   effectifDocId: ObjectId,
-  overrides: { situation?: SITUATION_ENUM | null; event?: string; created_at: Date; created_by?: ObjectId | null }
+  overrides: {
+    situation?: SITUATION_ENUM | null;
+    event?: IMissionLocaleEffectifLog["event"];
+    created_at: Date;
+    created_by?: ObjectId | null;
+  }
 ) {
   return {
     _id: new ObjectId(),
@@ -35,7 +43,7 @@ function createLogDoc(
     ...(overrides.event ? { event: overrides.event } : {}),
     created_at: overrides.created_at,
     created_by: overrides.created_by ?? new ObjectId(),
-    read_by: [],
+    read_by: [] as ObjectId[],
   };
 }
 
@@ -48,18 +56,20 @@ describe("backfillMlSuiviDates", () => {
 
   it("recalcule les trois dates depuis les logs d'un dossier traité", async () => {
     const doc = createMlEffectifDoc({ situation: SITUATION_ENUM.RDV_PRIS });
-    await missionLocaleEffectifsDb().insertOne(doc as any);
-    await missionLocaleEffectifsLogDb().insertMany([
-      createLogDoc(doc._id, { situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR, created_at: daysAgo(20) }),
-      createLogDoc(doc._id, { situation: SITUATION_ENUM.RDV_PRIS, created_at: daysAgo(10) }),
-      // événement WhatsApp postérieur : ne compte pas comme action ML
-      createLogDoc(doc._id, {
-        situation: null,
-        event: MISSION_LOCALE_LOG_EVENT.WHATSAPP_YES_HELP,
-        created_at: daysAgo(1),
-        created_by: null,
-      }),
-    ] as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
+    await missionLocaleEffectifsLogDb().insertMany(
+      testDocs<IMissionLocaleEffectifLog>([
+        createLogDoc(doc._id, { situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR, created_at: daysAgo(20) }),
+        createLogDoc(doc._id, { situation: SITUATION_ENUM.RDV_PRIS, created_at: daysAgo(10) }),
+        // événement WhatsApp postérieur : ne compte pas comme action ML
+        createLogDoc(doc._id, {
+          situation: null,
+          event: MISSION_LOCALE_LOG_EVENT.WHATSAPP_YES_HELP,
+          created_at: daysAgo(1),
+          created_by: null,
+        }),
+      ])
+    );
 
     await backfillMlSuiviDates();
 
@@ -71,11 +81,13 @@ describe("backfillMlSuiviDates", () => {
 
   it("ne pose pas date_traitement sur un dossier actuellement à recontacter", async () => {
     const doc = createMlEffectifDoc({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR });
-    await missionLocaleEffectifsDb().insertOne(doc as any);
-    await missionLocaleEffectifsLogDb().insertMany([
-      createLogDoc(doc._id, { situation: SITUATION_ENUM.RDV_PRIS, created_at: daysAgo(15) }),
-      createLogDoc(doc._id, { situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR, created_at: daysAgo(5) }),
-    ] as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
+    await missionLocaleEffectifsLogDb().insertMany(
+      testDocs<IMissionLocaleEffectifLog>([
+        createLogDoc(doc._id, { situation: SITUATION_ENUM.RDV_PRIS, created_at: daysAgo(15) }),
+        createLogDoc(doc._id, { situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR, created_at: daysAgo(5) }),
+      ])
+    );
 
     await backfillMlSuiviDates();
 
@@ -89,12 +101,14 @@ describe("backfillMlSuiviDates", () => {
     // le reset admin `$unset` la situation : le champ est absent, là où un retour à « à traiter »
     // par le conseiller la laisse à null
     const doc = createMlEffectifDoc();
-    await missionLocaleEffectifsDb().insertOne(doc as any);
-    await missionLocaleEffectifsLogDb().insertMany([
-      createLogDoc(doc._id, { situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR, created_at: daysAgo(20) }),
-      createLogDoc(doc._id, { situation: SITUATION_ENUM.RDV_PRIS, created_at: daysAgo(10) }),
-      createLogDoc(doc._id, { situation: null, created_at: daysAgo(2) }),
-    ] as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
+    await missionLocaleEffectifsLogDb().insertMany(
+      testDocs<IMissionLocaleEffectifLog>([
+        createLogDoc(doc._id, { situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR, created_at: daysAgo(20) }),
+        createLogDoc(doc._id, { situation: SITUATION_ENUM.RDV_PRIS, created_at: daysAgo(10) }),
+        createLogDoc(doc._id, { situation: null, created_at: daysAgo(2) }),
+      ])
+    );
 
     await backfillMlSuiviDates();
 
@@ -107,7 +121,7 @@ describe("backfillMlSuiviDates", () => {
 
   it("laisse un dossier à traiter sans logs intact", async () => {
     const doc = createMlEffectifDoc({ situation: null });
-    await missionLocaleEffectifsDb().insertOne(doc as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
 
     await backfillMlSuiviDates();
 
@@ -119,7 +133,7 @@ describe("backfillMlSuiviDates", () => {
 
   it("replie date_traitement sur updated_at pour un dossier traité sans log", async () => {
     const doc = createMlEffectifDoc({ situation: SITUATION_ENUM.NOUVEAU_CONTRAT, updated_at: daysAgo(12) });
-    await missionLocaleEffectifsDb().insertOne(doc as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
 
     await backfillMlSuiviDates();
 
@@ -130,14 +144,16 @@ describe("backfillMlSuiviDates", () => {
 
   it("un traitement automatique WhatsApp pose date_traitement mais pas la date d'action ML", async () => {
     const doc = createMlEffectifDoc({ situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE });
-    await missionLocaleEffectifsDb().insertOne(doc as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
     await missionLocaleEffectifsLogDb().insertOne(
-      createLogDoc(doc._id, {
-        situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
-        event: MISSION_LOCALE_LOG_EVENT.WHATSAPP_NO_HELP,
-        created_at: daysAgo(3),
-        created_by: null,
-      }) as any
+      testDoc<IMissionLocaleEffectifLog>(
+        createLogDoc(doc._id, {
+          situation: SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE,
+          event: MISSION_LOCALE_LOG_EVENT.WHATSAPP_NO_HELP,
+          created_at: daysAgo(3),
+          created_by: null,
+        })
+      )
     );
 
     await backfillMlSuiviDates();
@@ -154,9 +170,11 @@ describe("backfillMlSuiviDates", () => {
       date_traitement: dateRuntime,
       date_derniere_action_ml: dateRuntime,
     });
-    await missionLocaleEffectifsDb().insertOne(doc as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
     await missionLocaleEffectifsLogDb().insertOne(
-      createLogDoc(doc._id, { situation: SITUATION_ENUM.RDV_PRIS, created_at: daysAgo(40) }) as any
+      testDoc<IMissionLocaleEffectifLog>(
+        createLogDoc(doc._id, { situation: SITUATION_ENUM.RDV_PRIS, created_at: daysAgo(40) })
+      )
     );
 
     await backfillMlSuiviDates();
@@ -168,9 +186,11 @@ describe("backfillMlSuiviDates", () => {
 
   it("est idempotent", async () => {
     const doc = createMlEffectifDoc({ situation: SITUATION_ENUM.RDV_PRIS });
-    await missionLocaleEffectifsDb().insertOne(doc as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
     await missionLocaleEffectifsLogDb().insertOne(
-      createLogDoc(doc._id, { situation: SITUATION_ENUM.RDV_PRIS, created_at: daysAgo(10) }) as any
+      testDoc<IMissionLocaleEffectifLog>(
+        createLogDoc(doc._id, { situation: SITUATION_ENUM.RDV_PRIS, created_at: daysAgo(10) })
+      )
     );
 
     await backfillMlSuiviDates();

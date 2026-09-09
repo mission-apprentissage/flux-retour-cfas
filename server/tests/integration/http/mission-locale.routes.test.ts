@@ -1,6 +1,9 @@
+import type { AxiosResponse } from "axios";
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "bson";
 import { ML_SITUATION_DOSSIER, ML_TRI_COLONNE, SITUATION_ENUM } from "shared";
+import { SOURCE_APPRENANT, STATUT_APPRENANT, StatutApprenant } from "shared/constants";
+import type { IEffectif, IMissionLocaleEffectif } from "shared/models";
 import { API_EFFECTIF_LISTE, CONNAISSANCE_ML_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { it, expect, describe, beforeEach, vi } from "vitest";
 
@@ -19,7 +22,13 @@ import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
 import { createRupturantEffectifPayload, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";
-import { initTestApp, RequestAsOrganisationFunc, expectUnauthorizedError } from "@tests/utils/testUtils";
+import {
+  initTestApp,
+  RequestAsOrganisationFunc,
+  expectUnauthorizedError,
+  testDoc,
+  testDocs,
+} from "@tests/utils/testUtils";
 
 const mockScoreEffectifs = vi.fn().mockResolvedValue({ model: "2026-03-16", scores: [0.85] });
 
@@ -81,9 +90,11 @@ describe("Mission Locale Routes", () => {
         "get",
         `/api/v1/organisation/mission-locale/effectifs-per-month`
       );
-      expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      expect(
+        res.data.a_traiter.reduce((acc: number, curr: { data: unknown[] }) => acc + (curr.data.length || 0), 0)
+      ).toStrictEqual(1);
 
-      const effectifs = res.data.a_traiter.flatMap((curr) => curr.data);
+      const effectifs = res.data.a_traiter.flatMap((curr: { data: unknown[] }) => curr.data);
       expect(effectifs).toHaveLength(1);
       expect(effectifs[0]).toMatchObject({ commune: "Paris", code_postal: "75001" });
     });
@@ -136,7 +147,9 @@ describe("Mission Locale Routes", () => {
         "get",
         `/api/v1/organisation/mission-locale/effectifs-per-month`
       );
-      expect(res.data.traite.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      expect(
+        res.data.traite.reduce((acc: number, curr: { data: unknown[] }) => acc + (curr.data.length || 0), 0)
+      ).toStrictEqual(1);
     });
   });
 
@@ -195,7 +208,7 @@ describe("Mission Locale Routes", () => {
       const res = await getListe(API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER);
 
       expect(res.status).toBe(200);
-      expect(res.data.effectifs.map((e) => e.nom)).toEqual(["AVECCOLLAB"]);
+      expect(res.data.effectifs.map((e: { nom: string }) => e.nom)).toEqual(["AVECCOLLAB"]);
       expect(res.data.effectifs[0].acc_conjoint).toBe(true);
       expect(rupturantId).toBeDefined();
     });
@@ -229,7 +242,7 @@ describe("Mission Locale Routes", () => {
       const res = await getListe(API_EFFECTIF_LISTE.COLLAB_TRAITE);
 
       expect(res.status).toBe(200);
-      expect(res.data.effectifs.map((e) => e.nom)).toEqual(["COLLABTRAITE"]);
+      expect(res.data.effectifs.map((e: { nom: string }) => e.nom)).toEqual(["COLLABTRAITE"]);
       expect(res.data.effectifs[0].a_traiter).toBe(false);
       expect(res.data.effectifs[0].injoignable).toBe(false);
       expect(res.data.effectifs[0].date_traitement).toBeDefined();
@@ -242,7 +255,7 @@ describe("Mission Locale Routes", () => {
       await ingestRupturant("GAMMA", "Test");
 
       const liste = await getListe(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER);
-      const ordre = liste.data.effectifs.map((e) => e.nom);
+      const ordre = liste.data.effectifs.map((e: { nom: string }) => e.nom);
       expect(ordre).toHaveLength(3);
 
       const premier = liste.data.effectifs[0];
@@ -276,10 +289,10 @@ describe("Mission Locale Routes", () => {
 
         const asc = await trier(ML_TRI_COLONNE.NOM, "asc");
         expect(asc.status).toBe(200);
-        expect(asc.data.effectifs.map((e) => e.nom)).toEqual(["ALPHA", "BRAVO", "CHARLIE"]);
+        expect(asc.data.effectifs.map((e: { nom: string }) => e.nom)).toEqual(["ALPHA", "BRAVO", "CHARLIE"]);
 
         const desc = await trier(ML_TRI_COLONNE.NOM, "desc");
-        expect(desc.data.effectifs.map((e) => e.nom)).toEqual(["CHARLIE", "BRAVO", "ALPHA"]);
+        expect(desc.data.effectifs.map((e: { nom: string }) => e.nom)).toEqual(["CHARLIE", "BRAVO", "ALPHA"]);
       });
 
       it("sans tri demandé, garde l'ordre de priorité du serveur", async () => {
@@ -294,10 +307,10 @@ describe("Mission Locale Routes", () => {
 
         // la collaboration CFA prime, même si son nom est premier dans l'alphabet
         const parDefaut = await getListe(NOM_LISTE);
-        expect(parDefaut.data.effectifs.map((e) => e.nom)).toEqual(["ALPHA", "ZULU"]);
+        expect(parDefaut.data.effectifs.map((e: { nom: string }) => e.nom)).toEqual(["ALPHA", "ZULU"]);
 
         const parNom = await trier(ML_TRI_COLONNE.NOM, "desc");
-        expect(parNom.data.effectifs.map((e) => e.nom)).toEqual(["ZULU", "ALPHA"]);
+        expect(parNom.data.effectifs.map((e: { nom: string }) => e.nom)).toEqual(["ZULU", "ALPHA"]);
       });
 
       it("aligne le précédent/suivant de la fiche sur la colonne triée", async () => {
@@ -378,7 +391,9 @@ describe("Mission Locale Routes", () => {
         `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
       );
 
-      expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      expect(
+        res.data.a_traiter.reduce((acc: number, curr: { data: unknown[] }) => acc + (curr.data.length || 0), 0)
+      ).toStrictEqual(1);
       // Le sous-onglet fusionné est propre à l'espace ML : rien à exposer côté organisme.
       expect(res.data.a_traiter_ou_recontacter).toStrictEqual([]);
     });
@@ -401,7 +416,9 @@ describe("Mission Locale Routes", () => {
         "get",
         `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
       );
-      expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(0);
+      expect(
+        res.data.a_traiter.reduce((acc: number, curr: { data: unknown[] }) => acc + (curr.data.length || 0), 0)
+      ).toStrictEqual(0);
     });
 
     describe("Le CFA traite un jeune", () => {
@@ -446,7 +463,9 @@ describe("Mission Locale Routes", () => {
           "get",
           `/api/v1/organisation/mission-locale/effectifs-per-month`
         );
-        expect(res2.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+        expect(
+          res2.data.a_traiter.reduce((acc: number, curr: { data: unknown[] }) => acc + (curr.data.length || 0), 0)
+        ).toStrictEqual(1);
       });
 
       // Flux v2 : dès que verified_info est fourni, le téléphone est obligatoire et son format validé.
@@ -541,10 +560,10 @@ describe("Mission Locale Routes", () => {
           {
             $push: {
               "_computed.statut.parcours": {
-                valeur: "APPRENTI",
+                valeur: STATUT_APPRENANT.APPRENTI,
                 date: newContractDate,
               },
-            } as any,
+            },
           }
         );
 
@@ -567,8 +586,8 @@ describe("Mission Locale Routes", () => {
           { _id: EFFECTIF_ID },
           {
             $push: {
-              "_computed.statut.parcours": { valeur: "FIN_DE_FORMATION", date: new Date() },
-            } as any,
+              "_computed.statut.parcours": { valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: new Date() },
+            },
           }
         );
 
@@ -586,8 +605,8 @@ describe("Mission Locale Routes", () => {
           { _id: EFFECTIF_ID },
           {
             $push: {
-              "_computed.statut.parcours": { valeur: "FIN_DE_FORMATION", date: new Date() },
-            } as any,
+              "_computed.statut.parcours": { valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: new Date() },
+            },
           }
         );
 
@@ -599,7 +618,9 @@ describe("Mission Locale Routes", () => {
           "get",
           `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
         );
-        expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(0);
+        expect(
+          res.data.a_traiter.reduce((acc: number, curr: { data: unknown[] }) => acc + (curr.data.length || 0), 0)
+        ).toStrictEqual(0);
 
         const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
         expect(after?.soft_deleted).toBeFalsy();
@@ -611,8 +632,8 @@ describe("Mission Locale Routes", () => {
           { _id: EFFECTIF_ID },
           {
             $push: {
-              "_computed.statut.parcours": { valeur: "APPRENTI", date: new Date() },
-            } as any,
+              "_computed.statut.parcours": { valeur: STATUT_APPRENANT.APPRENTI, date: new Date() },
+            },
           }
         );
 
@@ -929,13 +950,13 @@ describe("Mission Locale Routes", () => {
       isAllowedCollab?: boolean;
       mlBeta?: boolean;
       ruptureDaysAgo?: number;
-      statusValue?: string;
-      enCours?: string;
+      statusValue?: StatutApprenant;
+      enCours?: StatutApprenant;
       mlActivatedDaysAgo?: number;
     }) => {
       const snapshotId = new ObjectId();
       const ruptureDate = dayAgo(ruptureDaysAgo);
-      const doc = {
+      const doc = testDoc<IMissionLocaleEffectif>({
         _id: new ObjectId(),
         mission_locale_id: ML_ID,
         effectif_id: new ObjectId(),
@@ -955,7 +976,7 @@ describe("Mission Locale Routes", () => {
           _id: snapshotId,
           organisme_id: ORGANISME_ID,
           id_erp_apprenant: "x",
-          source: "test",
+          source: SOURCE_APPRENANT.ERP,
           annee_scolaire: "2025-2026",
           apprenant: {
             nom: "DOE",
@@ -969,12 +990,14 @@ describe("Mission Locale Routes", () => {
           created_at: new Date(),
           updated_at: new Date(),
         },
-      };
+      });
       return { snapshotId, doc };
     };
 
-    const insertDoc = async (doc: object) => {
-      await missionLocaleEffectifsDb().insertOne(doc as any, { bypassDocumentValidation: true });
+    const insertDoc = async (doc: IMissionLocaleEffectif) => {
+      await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc), {
+        bypassDocumentValidation: true,
+      });
     };
 
     const getPerMonth = () =>
@@ -998,8 +1021,11 @@ describe("Mission Locale Routes", () => {
     // GET /villes : options du filtre "Villes" construites sur TOUS les effectifs de la ML
     // (distinct par code postal, trié, dédupliqué, codes postaux absents ignorés).
     it("GET /villes : liste distincte, triée, dédupliquée, sans code postal absent", async () => {
-      const withAdresse = (doc: object, adresse: Record<string, string>) => {
-        (doc as any).effectif_snapshot.apprenant.adresse = adresse;
+      const withAdresse = (
+        doc: IMissionLocaleEffectif,
+        adresse: Partial<NonNullable<IEffectif["apprenant"]["adresse"]>>
+      ) => {
+        doc.effectif_snapshot.apprenant.adresse = adresse;
         return doc;
       };
 
@@ -1022,7 +1048,7 @@ describe("Mission Locale Routes", () => {
     // prioritaire (jeune en abandon +180j) → la ML doit toujours le voir. »
     it("Demande de collaboration + rupture > 180j : visible ET prioritaire", async () => {
       const { snapshotId, doc } = makeDoc({ accConjoint: true, ruptureDaysAgo: 200 });
-      (doc as any).effectif_snapshot.apprenant.adresse = { commune: "Marseille", code_postal: "13001" };
+      doc.effectif_snapshot.apprenant.adresse = { commune: "Marseille", code_postal: "13001" };
       await insertDoc(doc);
 
       const res = await getPerMonth();
@@ -1097,11 +1123,11 @@ describe("Mission Locale Routes", () => {
 
       // Souhaite un RDV uniquement
       const rdv = makeDoc({ accConjoint: false, ruptureDaysAgo: 60 });
-      (rdv.doc as any).souhaite_rdv = true;
+      rdv.doc.souhaite_rdv = true;
 
       // Mineur uniquement (16-18 ans)
       const mineur = makeDoc({ accConjoint: false, ruptureDaysAgo: 60 });
-      (mineur.doc as any).effectif_snapshot.apprenant.date_de_naissance = new Date(
+      mineur.doc.effectif_snapshot.apprenant.date_de_naissance = new Date(
         new Date().setFullYear(new Date().getFullYear() - 17)
       );
 
@@ -1141,7 +1167,7 @@ describe("Mission Locale Routes", () => {
         statusValue: "FIN_DE_FORMATION",
         enCours: "FIN_DE_FORMATION",
       });
-      (doc as any).souhaite_rdv = true;
+      doc.souhaite_rdv = true;
       await insertDoc(doc);
 
       const res = await getPerMonth();
@@ -1152,7 +1178,7 @@ describe("Mission Locale Routes", () => {
 
     it("Souhaite un RDV + rupture > 180j : visible ET prioritaire", async () => {
       const { snapshotId, doc } = makeDoc({ accConjoint: false, isAllowedCollab: false, ruptureDaysAgo: 200 });
-      (doc as any).souhaite_rdv = true;
+      doc.souhaite_rdv = true;
       await insertDoc(doc);
 
       const res = await getPerMonth();
@@ -1168,7 +1194,7 @@ describe("Mission Locale Routes", () => {
         ruptureDaysAgo: 300,
         mlActivatedDaysAgo: 10,
       });
-      (doc as any).souhaite_rdv = true;
+      doc.souhaite_rdv = true;
       await insertDoc(doc);
 
       const res = await getPerMonth();
@@ -1216,7 +1242,7 @@ describe("Mission Locale Routes", () => {
       expect(res.data).toEqual({ rdv_url: "https://calendly.com/ml" });
 
       const orga = await organisationsDb().findOne({ _id: ML_ID });
-      expect((orga as any)?.rdv_url).toBe("https://calendly.com/ml");
+      expect(orga).toMatchObject({ rdv_url: "https://calendly.com/ml" });
     });
 
     it("PUT rejette une URL javascript: (httpUrlSchema)", async () => {
@@ -1310,10 +1336,10 @@ describe("Mission Locale Routes", () => {
           created_at: new Date(),
           updated_at: new Date(),
         },
-      }) as any;
+      }) as unknown as IMissionLocaleEffectif;
 
     const insertBannerDocs = (docs: object[]) =>
-      missionLocaleEffectifsDb().insertMany(docs as any, { bypassDocumentValidation: true });
+      missionLocaleEffectifsDb().insertMany(testDocs<IMissionLocaleEffectif>(docs), { bypassDocumentValidation: true });
 
     it("compte les effectifs souhaite_rdv=true visibles de la ML courante", async () => {
       // 2 effectifs souhaite_rdv=true (dans le périmètre) + 1 false → count attendu = 2
@@ -1337,7 +1363,7 @@ describe("Mission Locale Routes", () => {
     // à FIN_DE_FORMATION (contrat arrivé à son terme, aucune rupture transmise). Le dossier sort des
     // listes sans qu'aucune donnée ne soit réécrite — et y revient seul si une rupture arrive plus tard.
     describe("masquage des sortants requalifiés (FIN_DE_FORMATION)", () => {
-      const countIn = (res: any, bucket: string) =>
+      const countIn = (res: AxiosResponse, bucket: string) =>
         (res.data[bucket] ?? []).reduce((acc: number, curr: { data?: unknown[] }) => acc + (curr.data?.length ?? 0), 0);
 
       it("sort un dossier jamais traité de la liste à traiter", async () => {
@@ -2584,7 +2610,9 @@ describe("Priorité de tri de la liste prioritaire (PRIORITAIRE)", () => {
     );
 
     // Présent dans la liste « à traiter » (donc bien visible et pris en charge)...
-    const aTraiterIds = res.data.a_traiter.flatMap((m: { data: { id: string }[] }) => m.data).map((e) => e.id);
+    const aTraiterIds = res.data.a_traiter
+      .flatMap((m: { data: { id: string }[] }) => m.data)
+      .map((e: { id: string }) => e.id);
     expect(aTraiterIds).toContain(contactOpportunId.toString());
 
     // ... mais absent du bloc prioritaire.

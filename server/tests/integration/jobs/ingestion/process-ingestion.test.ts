@@ -334,7 +334,8 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.validation_errors).toBeUndefined();
         expect(updatedInput?.processed_at).toBeInstanceOf(Date);
 
-        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id as any });
+        if (!updatedInput?.effectif_id) throw new Error("IEffectif non trouvé");
+        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput.effectif_id });
         if (!effectifForInput) throw new Error("IEffectif non trouvé");
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput._id);
@@ -510,7 +511,7 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.validation_errors).toBeUndefined();
         expect(updatedInput?.processed_at).toBeInstanceOf(Date);
 
-        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id as any });
+        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id ?? undefined });
 
         expect(updatedInput?.organisme_id).toStrictEqual(organismeForInput?._id);
         expect(updatedInput?.effectif_id).toStrictEqual(effectifForInput?._id);
@@ -575,7 +576,8 @@ describe("Processus d'ingestion", () => {
         expect(updatedInput?.validation_errors).toBeUndefined();
         expect(updatedInput?.processed_at).toBeInstanceOf(Date);
 
-        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput?.effectif_id as any });
+        if (!updatedInput?.effectif_id) throw new Error("IEffectif non trouvé");
+        const effectifForInput = await effectifsDb().findOne({ _id: updatedInput.effectif_id });
         if (!effectifForInput) throw new Error("IEffectif non trouvé");
 
         expect(result).toStrictEqual({

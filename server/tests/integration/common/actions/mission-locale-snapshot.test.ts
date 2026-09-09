@@ -1,14 +1,16 @@
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
+import type { IEffectif, IMissionLocaleEffectif } from "shared/models";
 import { RQTH_DECLARE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
+import type { PartialDeep } from "type-fest";
 import { describe, it, beforeEach, expect } from "vitest";
 
 import { updateOrDeleteMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import { missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id } from "@tests/utils/testUtils";
+import { DeepPartial, id, testDoc } from "@tests/utils/testUtils";
 
 const ANNEE_SCOLAIRE = getAnneesScolaireListFromDate(new Date())[0];
 const organismeId = new ObjectId(id(1));
@@ -20,7 +22,7 @@ const sampleOrganisme = {
   ...createRandomOrganisme({ siret: "19040492100016" }),
 };
 
-async function buildEffectif(overrides: Record<string, any> = {}) {
+async function buildEffectif(overrides: { apprenant?: PartialDeep<IEffectif["apprenant"]> } = {}) {
   const effectif = await createSampleEffectif({
     organisme: sampleOrganisme,
     annee_scolaire: ANNEE_SCOLAIRE,
@@ -44,10 +46,10 @@ async function buildEffectif(overrides: Record<string, any> = {}) {
         parcours: [{ valeur: STATUT_APPRENANT.INSCRIT, date: new Date("2026-01-01") }],
       },
     },
-  } as any;
+  } as IEffectif;
 }
 
-async function insertMlRecord(overrides: Record<string, any> = {}) {
+async function insertMlRecord(overrides: DeepPartial<IMissionLocaleEffectif> = {}) {
   const snapshot = await buildEffectif();
   const doc = {
     _id: new ObjectId(),
@@ -60,7 +62,7 @@ async function insertMlRecord(overrides: Record<string, any> = {}) {
     current_status: { value: null, date: null },
     ...overrides,
   };
-  await missionLocaleEffectifsDb().insertOne(doc as any);
+  await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc));
   return doc;
 }
 

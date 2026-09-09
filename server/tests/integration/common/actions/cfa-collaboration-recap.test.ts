@@ -1,4 +1,6 @@
 import { ObjectId } from "mongodb";
+import type { IMissionLocaleEffectif } from "shared/models";
+import type { IEffectif } from "shared/models/data/effectifs.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { describe, it, beforeEach, expect } from "vitest";
 
@@ -6,7 +8,7 @@ import { getCfaEffectifDetail } from "@/common/actions/cfa/cfa-effectifs.actions
 import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id } from "@tests/utils/testUtils";
+import { id, testDoc } from "@tests/utils/testUtils";
 
 const ANNEE_SCOLAIRE = getAnneesScolaireListFromDate(new Date())[0];
 const organismeId = new ObjectId(id(1));
@@ -15,7 +17,7 @@ const effectifId = new ObjectId(id(4));
 
 const sampleOrganisme = { _id: organismeId, ...createRandomOrganisme({ siret: "19040492100016" }) };
 
-async function insertDossier(organismeData: Record<string, any>) {
+async function insertDossier(organismeData: Record<string, unknown>) {
   const snapshot = await createSampleEffectif({
     organisme: sampleOrganisme,
     annee_scolaire: ANNEE_SCOLAIRE,
@@ -25,18 +27,20 @@ async function insertDossier(organismeData: Record<string, any>) {
       date_de_naissance: new Date(new Date().getFullYear() - 20, 0, 1),
     },
   });
-  await effectifsDb().insertOne({ ...snapshot, _id: effectifId, organisme_id: organismeId } as any);
-  await missionLocaleEffectifsDb().insertOne({
-    _id: new ObjectId(),
-    mission_locale_id: mlOrganisationId,
-    effectif_id: effectifId,
-    effectif_snapshot: { ...snapshot, _id: effectifId, organisme_id: organismeId },
-    effectif_snapshot_date: new Date(),
-    date_rupture: null,
-    created_at: new Date(),
-    current_status: { value: null, date: null },
-    organisme_data: organismeData,
-  } as any);
+  await effectifsDb().insertOne(testDoc<IEffectif>({ ...snapshot, _id: effectifId, organisme_id: organismeId }));
+  await missionLocaleEffectifsDb().insertOne(
+    testDoc<IMissionLocaleEffectif>({
+      _id: new ObjectId(),
+      mission_locale_id: mlOrganisationId,
+      effectif_id: effectifId,
+      effectif_snapshot: { ...snapshot, _id: effectifId, organisme_id: organismeId },
+      effectif_snapshot_date: new Date(),
+      date_rupture: null,
+      created_at: new Date(),
+      current_status: { value: null, date: null },
+      organisme_data: organismeData,
+    })
+  );
 }
 
 describe("Récapitulatif du dossier de collaboration", () => {
@@ -59,7 +63,7 @@ describe("Récapitulatif du dossier de collaboration", () => {
     });
 
     const { effectif } = await getCfaEffectifDetail(organismeId, effectifId.toString());
-    const od = (effectif as any).organisme_data;
+    const od = effectif.organisme_data;
 
     expect(od.situation_type).toBe("RUPTURE_OU_SORTIE");
     expect(od.cause_rupture).toBe("Désaccord avec l'employeur");
@@ -74,7 +78,7 @@ describe("Récapitulatif du dossier de collaboration", () => {
     });
 
     const { effectif } = await getCfaEffectifDetail(organismeId, effectifId.toString());
-    const od = (effectif as any).organisme_data;
+    const od = effectif.organisme_data;
 
     expect(od.risque_rupture).toBe("MODERE");
     expect(od.form_feedback).toBeUndefined();

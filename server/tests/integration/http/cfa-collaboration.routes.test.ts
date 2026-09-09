@@ -1,6 +1,9 @@
 import { ObjectId } from "mongodb";
 import { ACC_CONJOINT_MOTIF_ENUM } from "shared";
+import type { IEffectif } from "shared/models/data/effectifs.model";
 import { CFA_RISQUE_RUPTURE_ENUM, CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IOrganisme } from "shared/models/data/organismes.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -8,7 +11,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { initTestApp, RequestAsOrganisationFunc } from "@tests/utils/testUtils";
+import { RequestAsOrganisationFunc, initTestApp, testDoc } from "@tests/utils/testUtils";
 
 const ANNEE_SCOLAIRE = getAnneesScolaireListFromDate(new Date())[0];
 const SIRET = "19040492100016";
@@ -62,7 +65,7 @@ async function insertEffectif(id: ObjectId, organisme = organismeId) {
       adresse: { mission_locale_id: ML_NUMERIC_ID },
     },
   });
-  await effectifsDb().insertOne({ ...effectif, _id: id, organisme_id: organisme } as any);
+  await effectifsDb().insertOne(testDoc<IEffectif>({ ...effectif, _id: id, organisme_id: organisme }));
 }
 
 const url = (effectifId: ObjectId) => `/api/v1/organismes/${organismeId}/mission-locale/effectif/${effectifId}`;
@@ -74,14 +77,18 @@ describe("PUT /organismes/:id/mission-locale/effectif/:id", () => {
     const app = await initTestApp();
     requestAsOrganisation = app.requestAsOrganisation;
 
-    await organismesDb().insertOne(generateOrganismeFixture({ _id: organismeId, siret: SIRET, uai: UAI }) as any);
-    await organisationsDb().insertOne({
-      _id: mlOrganisationId,
-      type: "MISSION_LOCALE",
-      ml_id: ML_NUMERIC_ID,
-      nom: "ML Test",
-      created_at: new Date(),
-    } as any);
+    await organismesDb().insertOne(
+      testDoc<IOrganisme>(generateOrganismeFixture({ _id: organismeId, siret: SIRET, uai: UAI }))
+    );
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        ml_id: ML_NUMERIC_ID,
+        nom: "ML Test",
+        created_at: new Date(),
+      })
+    );
   });
 
   it("crée le dossier et renvoie 200 pour un jeune en contrat (branche A)", async () => {
@@ -124,7 +131,7 @@ describe("PUT /organismes/:id/mission-locale/effectif/:id", () => {
     expect(res.status).toBe(400);
     expect(res.data.message).toBe("Erreur de validation");
     // Le front s'appuie sur ce chemin pour afficher l'erreur sous le bon champ.
-    expect(res.data.issues.map((i) => i.path.join("."))).toContain("date_rupture");
+    expect(res.data.issues.map((i: { path: string[] }) => i.path.join("."))).toContain("date_rupture");
   });
 
   it("renvoie 400 quand l'adresse du jeune est incomplète", async () => {
@@ -137,7 +144,7 @@ describe("PUT /organismes/:id/mission-locale/effectif/:id", () => {
     });
 
     expect(res.status).toBe(400);
-    expect(res.data.issues.map((i) => i.path.join("."))).toContain("verified_info.adresse_commune");
+    expect(res.data.issues.map((i: { path: string[] }) => i.path.join("."))).toContain("verified_info.adresse_commune");
   });
 
   it("renvoie 409 sur un second envoi (RG2)", async () => {
@@ -170,6 +177,6 @@ describe("PUT /organismes/:id/mission-locale/effectif/:id", () => {
     });
 
     expect(res.status).toBe(400);
-    expect(res.data.issues.map((i) => i.path.join("."))).toContain("motif");
+    expect(res.data.issues.map((i: { path: string[] }) => i.path.join("."))).toContain("motif");
   });
 });

@@ -593,7 +593,7 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
             const val = target[prop as keyof typeof target];
             return typeof val === "function" ? val.bind(target) : val;
           },
-        }) as any;
+        }) as typeof realDb;
       });
 
       const erpEffectif = createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_C", "Prenomc", 20) });
@@ -630,7 +630,7 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
             const val = target[prop as keyof typeof target];
             return typeof val === "function" ? val.bind(target) : val;
           },
-        }) as any;
+        }) as typeof realDb;
       });
 
       // L'ERP va soft-delete le DECA mais l'upsert va échouer
@@ -936,7 +936,7 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
           nom: "TESTNOM_L",
           prenom: "Prenoml",
           date_de_naissance: new Date("2007-10-17T00:00:00Z"),
-          telephone: null as any,
+          telephone: null,
           courriel: "prenoml@iloud.com",
           historique_statut: [],
           has_nir: false,

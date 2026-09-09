@@ -4,6 +4,8 @@ import { randomUUID } from "node:crypto";
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
 import { RateLimiterMongo } from "rate-limiter-flexible";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { afterEach, beforeEach, describe, it, vi } from "vitest";
 
@@ -15,7 +17,7 @@ import config from "@/config";
 import { _resetLimitersForTests, isPrivateIp } from "@/http/middlewares/rateLimit";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id, initTestApp } from "@tests/utils/testUtils";
+import { id, initTestApp, testDoc } from "@tests/utils/testUtils";
 
 let httpClient: AxiosInstance;
 
@@ -439,30 +441,34 @@ describe("Rate limiting", { timeout: 60_000 }, () => {
       await organismesDb().insertOne(
         generateOrganismeFixture({ _id: cfaOrganismeId, siret: SIRET, uai: UAI, nom: "CAMPUS DU LAC" })
       );
-      await organisationsDb().insertOne({
-        _id: cfaOrganisationId,
-        created_at: new Date(),
-        type: "ORGANISME_FORMATION",
-        siret: SIRET,
-        uai: UAI,
-        organisme_id: cfaOrganismeId.toString(),
-      } as any);
-      await usersMigrationDb().insertOne({
-        _id: new ObjectId(id(10)),
-        account_status: "CONFIRMED",
-        created_at: new Date(),
-        password_updated_at: new Date(),
-        connection_history: [],
-        emails: [],
-        email: adminEmail,
-        nom: "Admin",
-        prenom: "Alice",
-        fonction: "Directrice",
-        password: TEST_PASSWORD_HASH,
-        organisation_id: cfaOrganisationId,
-        organisation_role: "admin",
-        has_accept_cgu_version: "v1",
-      } as any);
+      await organisationsDb().insertOne(
+        testDoc<IOrganisation>({
+          _id: cfaOrganisationId,
+          created_at: new Date(),
+          type: "ORGANISME_FORMATION",
+          siret: SIRET,
+          uai: UAI,
+          organisme_id: cfaOrganismeId.toString(),
+        })
+      );
+      await usersMigrationDb().insertOne(
+        testDoc<IUsersMigration>({
+          _id: new ObjectId(id(10)),
+          account_status: "CONFIRMED",
+          created_at: new Date(),
+          password_updated_at: new Date(),
+          connection_history: [],
+          emails: [],
+          email: adminEmail,
+          nom: "Admin",
+          prenom: "Alice",
+          fonction: "Directrice",
+          password: TEST_PASSWORD_HASH,
+          organisation_id: cfaOrganisationId,
+          organisation_role: "admin",
+          has_accept_cgu_version: "v1",
+        })
+      );
       const token = await createSession(adminEmail);
       return `${COOKIE_NAME}=${token}`;
     }

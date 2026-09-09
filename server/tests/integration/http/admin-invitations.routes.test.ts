@@ -1,5 +1,8 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
+import type { IInvitationArchive } from "shared/models/data/invitationsArchive.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { vi, it, expect, describe, beforeEach } from "vitest";
 
@@ -13,7 +16,14 @@ import {
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { setTime } from "@/common/utils/timeUtils";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id, initTestApp, RequestAsOrganisationFunc, testPasswordHash } from "@tests/utils/testUtils";
+import {
+  RequestAsOrganisationFunc,
+  id,
+  initTestApp,
+  testDoc,
+  testDocs,
+  testPasswordHash,
+} from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/mailer/mailer");
 
@@ -36,32 +46,36 @@ async function seedCfaOrganisation(organisationId: ObjectId, organismeId: Object
       adresse: { departement: "33", region: "75", academie: "04", commune: "Bordeaux", code_postal: "33300" },
     })
   );
-  await organisationsDb().insertOne({
-    _id: organisationId,
-    created_at: new Date(now),
-    type: "ORGANISME_FORMATION",
-    siret: SIRET,
-    uai: UAI,
-    organisme_id: organismeId.toString(),
-  } as any);
+  await organisationsDb().insertOne(
+    testDoc<IOrganisation>({
+      _id: organisationId,
+      created_at: new Date(now),
+      type: "ORGANISME_FORMATION",
+      siret: SIRET,
+      uai: UAI,
+      organisme_id: organismeId.toString(),
+    })
+  );
 }
 
 async function seedAuthor(email = "author@tdb.fr") {
   const _id = new ObjectId();
-  await usersMigrationDb().insertOne({
-    _id,
-    account_status: "CONFIRMED",
-    email,
-    password: testPasswordHash,
-    nom: "Author",
-    prenom: "Alice",
-    fonction: "Support",
-    organisation_id: new ObjectId(id(99)),
-    created_at: new Date(),
-    password_updated_at: new Date(),
-    connection_history: [],
-    emails: [],
-  } as any);
+  await usersMigrationDb().insertOne(
+    testDoc<IUsersMigration>({
+      _id,
+      account_status: "CONFIRMED",
+      email,
+      password: testPasswordHash,
+      nom: "Author",
+      prenom: "Alice",
+      fonction: "Support",
+      organisation_id: new ObjectId(id(99)),
+      created_at: new Date(),
+      password_updated_at: new Date(),
+      connection_history: [],
+      emails: [],
+    })
+  );
   return _id;
 }
 
@@ -115,13 +129,15 @@ describe("Admin invitations routes", () => {
       await seedCfaOrganisation(cfaOrgId, organismeId);
 
       const mlOrgId = new ObjectId(id(10));
-      await organisationsDb().insertOne({
-        _id: mlOrgId,
-        created_at: new Date(now),
-        type: "MISSION_LOCALE",
-        nom: "ML Test",
-        ml_id: 1234,
-      } as any);
+      await organisationsDb().insertOne(
+        testDoc<IOrganisation>({
+          _id: mlOrgId,
+          created_at: new Date(now),
+          type: "MISSION_LOCALE",
+          nom: "ML Test",
+          ml_id: 1234,
+        })
+      );
 
       await invitationsDb().insertMany([
         {
@@ -159,13 +175,15 @@ describe("Admin invitations routes", () => {
       const otherOrgId = new ObjectId(id(5));
       const organismeId = new ObjectId(id(2));
       await seedCfaOrganisation(cfaOrgId, organismeId);
-      await organisationsDb().insertOne({
-        _id: otherOrgId,
-        created_at: new Date(now),
-        type: "ORGANISME_FORMATION",
-        siret: "99999999999999",
-        uai: "9999999A",
-      } as any);
+      await organisationsDb().insertOne(
+        testDoc<IOrganisation>({
+          _id: otherOrgId,
+          created_at: new Date(now),
+          type: "ORGANISME_FORMATION",
+          siret: "99999999999999",
+          uai: "9999999A",
+        })
+      );
 
       await invitationsDb().insertMany([
         {
@@ -230,14 +248,16 @@ describe("Admin invitations routes", () => {
       const cfaOrgId = new ObjectId(id(1));
       const organismeId = new ObjectId(id(2));
       await seedCfaOrganisation(cfaOrgId, organismeId);
-      await invitationsArchiveDb().insertOne({
-        _id: new ObjectId(),
-        organisation_id: cfaOrgId,
-        email: "consumed@x.fr",
-        token: "told",
-        author_id: new ObjectId(),
-        created_at: new Date(now),
-      } as any);
+      await invitationsArchiveDb().insertOne(
+        testDoc<IInvitationArchive>({
+          _id: new ObjectId(),
+          organisation_id: cfaOrgId,
+          email: "consumed@x.fr",
+          token: "told",
+          author_id: new ObjectId(),
+          created_at: new Date(now),
+        })
+      );
 
       const response = await requestAsOrganisation(
         { type: "ADMINISTRATEUR" },
@@ -250,7 +270,7 @@ describe("Admin invitations routes", () => {
 
     it("403 si non-admin plateforme", async () => {
       const response = await requestAsOrganisation(
-        { type: "ORGANISME_FORMATION", siret: SIRET, uai: UAI } as any,
+        { type: "ORGANISME_FORMATION", siret: SIRET, uai: UAI },
         "get",
         "/api/v1/admin/invitations?status=pending"
       );
@@ -389,35 +409,37 @@ describe("Admin invitations routes", () => {
       const cfaOrgId = new ObjectId(id(1));
       const organismeId = new ObjectId(id(2));
       await seedCfaOrganisation(cfaOrgId, organismeId);
-      await usersMigrationDb().insertMany([
-        {
-          _id: new ObjectId(),
-          account_status: "CONFIRMED",
-          email: "a@x.fr",
-          password: testPasswordHash,
-          nom: "N",
-          prenom: "P",
-          organisation_id: cfaOrgId,
-          organisation_role: "admin",
-          created_at: new Date(),
-          password_updated_at: new Date(),
-          connection_history: [],
-          emails: [],
-        },
-        {
-          _id: new ObjectId(),
-          account_status: "CONFIRMED",
-          email: "b@x.fr",
-          password: testPasswordHash,
-          nom: "N",
-          prenom: "P",
-          organisation_id: cfaOrgId,
-          created_at: new Date(),
-          password_updated_at: new Date(),
-          connection_history: [],
-          emails: [],
-        },
-      ] as any);
+      await usersMigrationDb().insertMany(
+        testDocs<IUsersMigration>([
+          {
+            _id: new ObjectId(),
+            account_status: "CONFIRMED",
+            email: "a@x.fr",
+            password: testPasswordHash,
+            nom: "N",
+            prenom: "P",
+            organisation_id: cfaOrgId,
+            organisation_role: "admin",
+            created_at: new Date(),
+            password_updated_at: new Date(),
+            connection_history: [],
+            emails: [],
+          },
+          {
+            _id: new ObjectId(),
+            account_status: "CONFIRMED",
+            email: "b@x.fr",
+            password: testPasswordHash,
+            nom: "N",
+            prenom: "P",
+            organisation_id: cfaOrgId,
+            created_at: new Date(),
+            password_updated_at: new Date(),
+            connection_history: [],
+            emails: [],
+          },
+        ])
+      );
       await invitationsDb().insertOne({
         _id: new ObjectId(),
         organisation_id: cfaOrgId,

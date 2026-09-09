@@ -10,14 +10,17 @@ const jsonEtablissementDataDir = path.join(
   __dirname(import.meta.url),
   `../../data/entreprise.api.gouv.fr/etablissements`
 );
-const realEtablissementDataBySiret = readdirSync(jsonEtablissementDataDir).reduce((acc, jsonFilename) => {
-  acc[jsonFilename.replace(".json", "")] = JSON.parse(
-    readFileSync(`${jsonEtablissementDataDir}/${jsonFilename}`).toString()
-  );
-  return acc;
-}, {});
+const realEtablissementDataBySiret = readdirSync(jsonEtablissementDataDir).reduce<Record<string, unknown>>(
+  (acc, jsonFilename) => {
+    acc[jsonFilename.replace(".json", "")] = JSON.parse(
+      readFileSync(`${jsonEtablissementDataDir}/${jsonFilename}`).toString()
+    );
+    return acc;
+  },
+  {}
+);
 
-export const nockGetEtablissement = (callback?: any) => {
+export const nockGetEtablissement = (callback?: (siret: string) => unknown) => {
   nock(API_ENDPOINT)
     .persist()
     .get(new RegExp("\\/insee\\/sirene\\/etablissements\\/diffusibles.*"))

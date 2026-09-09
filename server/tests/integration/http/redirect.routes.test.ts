@@ -2,12 +2,14 @@ import { randomUUID } from "node:crypto";
 
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
+import type { IMissionLocaleEffectif } from "shared/models";
+import type { IOrganisation } from "shared/models/data/organisations.model";
 import { it, expect, describe, beforeEach, vi } from "vitest";
 
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 import { useMongo } from "@tests/jest/setupMongo";
-import { initTestApp } from "@tests/utils/testUtils";
+import { initTestApp, testDoc } from "@tests/utils/testUtils";
 
 const FALLBACK_ML_URL = "https://www.unml.info/";
 
@@ -17,14 +19,14 @@ let httpClient: AxiosInstance;
 const insertMlOrga = async (rdvUrl?: string | null): Promise<ObjectId> => {
   const id = new ObjectId();
   await organisationsDb().insertOne(
-    {
+    testDoc<IOrganisation>({
       _id: id,
       type: "MISSION_LOCALE",
       nom: "ML Test",
       ml_id: 42,
       ...(rdvUrl !== undefined ? { rdv_url: rdvUrl } : {}),
       created_at: new Date(),
-    } as any,
+    }),
     { bypassDocumentValidation: true }
   );
   return id;
@@ -37,7 +39,7 @@ const insertEffectifWithToken = async (
 ): Promise<ObjectId> => {
   const id = new ObjectId();
   await missionLocaleEffectifsDb().insertOne(
-    {
+    testDoc<IMissionLocaleEffectif>({
       _id: id,
       mission_locale_id: mlId,
       effectif_id: new ObjectId(),
@@ -63,7 +65,7 @@ const insertEffectifWithToken = async (
         rdv_clicks: [],
       },
       ...(overrides.softDeleted ? { soft_deleted: true } : {}),
-    } as any,
+    }),
     { bypassDocumentValidation: true }
   );
   return id;

@@ -1,11 +1,17 @@
 import { ObjectId } from "mongodb";
 import { ACC_CONJOINT_MOTIF_ENUM } from "shared";
+import type { IMissionLocaleEffectif } from "shared/models";
+import type { IEffectif } from "shared/models/data/effectifs.model";
 import {
   CFA_RISQUE_RUPTURE_ENUM,
   CFA_SITUATION_TYPE_ENUM,
   RQTH_DECLARE_ENUM,
 } from "shared/models/data/missionLocaleEffectif.model";
-import { zUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import {
+  IUpdateMissionLocaleEffectifOrganisme,
+  zUpdateMissionLocaleEffectifOrganisme,
+} from "shared/models/routes/organismes/mission-locale/missions-locale.api";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { describe, it, beforeEach, expect } from "vitest";
 
@@ -13,7 +19,7 @@ import { setEffectifMissionLocaleDataFromOrganisme } from "@/common/actions/orga
 import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id } from "@tests/utils/testUtils";
+import { id, invalidDoc, testDoc } from "@tests/utils/testUtils";
 
 const ANNEE_SCOLAIRE = getAnneesScolaireListFromDate(new Date())[0];
 const organismeId = new ObjectId(id(1));
@@ -63,7 +69,7 @@ const brancheSansContrat = { ...brancheA, situation_type: "SANS_CONTRAT" };
 
 const parse = (payload: Record<string, unknown>) => zUpdateMissionLocaleEffectifOrganisme.parseAsync(payload);
 
-async function insertEffectif(apprenantOverrides: Record<string, any> = {}) {
+async function insertEffectif(apprenantOverrides: Record<string, unknown> = {}) {
   const effectif = await createSampleEffectif({
     organisme: sampleOrganisme,
     annee_scolaire: ANNEE_SCOLAIRE,
@@ -75,12 +81,12 @@ async function insertEffectif(apprenantOverrides: Record<string, any> = {}) {
       ...apprenantOverrides,
     },
   });
-  await effectifsDb().insertOne({ ...effectif, _id: effectifId, organisme_id: organismeId } as any);
+  await effectifsDb().insertOne(testDoc<IEffectif>({ ...effectif, _id: effectifId, organisme_id: organismeId }));
   return effectif;
 }
 
-const send = (payload: Record<string, unknown>) =>
-  setEffectifMissionLocaleDataFromOrganisme(organismeId, effectifId, payload as any, userId);
+const send = (payload: IUpdateMissionLocaleEffectifOrganisme) =>
+  setEffectifMissionLocaleDataFromOrganisme(organismeId, effectifId, payload, userId);
 
 describe("Tunnel de collaboration CFA", () => {
   useMongo();
@@ -91,13 +97,15 @@ describe("Tunnel de collaboration CFA", () => {
     await organisationsDb().deleteMany({});
     await organismesDb().deleteMany({});
     await organismesDb().insertOne(sampleOrganisme);
-    await organisationsDb().insertOne({
-      _id: mlOrganisationId,
-      type: "MISSION_LOCALE",
-      ml_id: 42,
-      nom: "ML Test",
-      created_at: new Date(),
-    } as any);
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        ml_id: 42,
+        nom: "ML Test",
+        created_at: new Date(),
+      })
+    );
   });
 
   describe("envoi par branche", () => {
@@ -127,16 +135,18 @@ describe("Tunnel de collaboration CFA", () => {
 
     it("branche B : la date déclarée est enregistrée même si le dossier existe déjà", async () => {
       const effectif = await insertEffectif();
-      await missionLocaleEffectifsDb().insertOne({
-        _id: new ObjectId(),
-        mission_locale_id: mlOrganisationId,
-        effectif_id: effectifId,
-        effectif_snapshot: { ...effectif, _id: effectifId, organisme_id: organismeId },
-        effectif_snapshot_date: new Date(),
-        date_rupture: new Date("2026-01-10"),
-        created_at: new Date(),
-        current_status: { value: null, date: null },
-      } as any);
+      await missionLocaleEffectifsDb().insertOne(
+        testDoc<IMissionLocaleEffectif>({
+          _id: new ObjectId(),
+          mission_locale_id: mlOrganisationId,
+          effectif_id: effectifId,
+          effectif_snapshot: { ...effectif, _id: effectifId, organisme_id: organismeId },
+          effectif_snapshot_date: new Date(),
+          date_rupture: new Date("2026-01-10"),
+          created_at: new Date(),
+          current_status: { value: null, date: null },
+        })
+      );
 
       await send(await parse(brancheB));
 
@@ -149,7 +159,9 @@ describe("Tunnel de collaboration CFA", () => {
     it("situation sans contrat : le stockage refuse l'écriture", async () => {
       await insertEffectif();
 
-      await expect(send({ ...brancheA, situation_type: "SANS_CONTRAT" } as any)).rejects.toThrow();
+      await expect(
+        send(invalidDoc<IUpdateMissionLocaleEffectifOrganisme>({ ...brancheA, situation_type: "SANS_CONTRAT" }))
+      ).rejects.toThrow();
 
       const created = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
       expect(created?.organisme_data?.situation_type).not.toBe("SANS_CONTRAT");

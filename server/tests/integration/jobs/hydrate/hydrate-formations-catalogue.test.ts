@@ -154,7 +154,7 @@ describe("Job hydrateFormationsCatalogue", () => {
   });
 
   // type issue with arrayOfOrNull and bson-schema-to-typescript
-  const formationsCatalogueCompletes: WithStringId<any>[] = [
+  const formationsCatalogueCompletes: Record<string, unknown>[] = [
     {
       _id: id(1),
       cle_ministere_educatif: "082581P012X1300279230016313002792300171-33063#L01",

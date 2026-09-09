@@ -2,6 +2,12 @@ import { randomUUID } from "node:crypto";
 
 import { ObjectId } from "mongodb";
 import { ACC_CONJOINT_MOTIF_ENUM, STATUT_APPRENANT } from "shared";
+import { SOURCE_APPRENANT } from "shared/constants";
+import type { IMissionLocaleEffectif } from "shared/models";
+import type { IEffectif } from "shared/models/data/effectifs.model";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { describe, it, beforeEach, expect } from "vitest";
 
@@ -19,7 +25,7 @@ import {
 } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id } from "@tests/utils/testUtils";
+import { id, testDoc } from "@tests/utils/testUtils";
 
 const ANNEE_SCOLAIRE = getAnneesScolaireListFromDate(new Date())[0];
 const organismeId = new ObjectId(id(1));
@@ -32,7 +38,7 @@ const sampleOrganisme = {
   ...createRandomOrganisme({ siret: "19040492100016" }),
 };
 
-async function insertErpEffectif(apprenant: Record<string, any> = { mission_locale_id: 42 }) {
+async function insertErpEffectif(apprenant: Record<string, unknown> = { mission_locale_id: 42 }) {
   const effectif = await createSampleEffectif({
     organisme: sampleOrganisme,
     annee_scolaire: ANNEE_SCOLAIRE,
@@ -43,7 +49,7 @@ async function insertErpEffectif(apprenant: Record<string, any> = { mission_loca
       adresse: apprenant.adresse ?? { mission_locale_id: 42 },
     },
   });
-  await effectifsDb().insertOne({ ...effectif, _id: effectifId, organisme_id: organismeId } as any);
+  await effectifsDb().insertOne(testDoc<IEffectif>({ ...effectif, _id: effectifId, organisme_id: organismeId }));
   return effectif;
 }
 
@@ -51,7 +57,7 @@ async function insertDecaEffectif() {
   const effectif = await createSampleEffectif({
     organisme: sampleOrganisme,
     annee_scolaire: ANNEE_SCOLAIRE,
-    source: "DECA" as any,
+    source: SOURCE_APPRENANT.DECA,
     apprenant: {
       nom: "COLLABDECA",
       prenom: "Test",
@@ -59,17 +65,19 @@ async function insertDecaEffectif() {
       adresse: { mission_locale_id: 42 },
     },
   });
-  await effectifsDECADb().insertOne({
-    ...effectif,
-    _id: effectifId,
-    deca_raw_id: new ObjectId(),
-    organisme_id: organismeId,
-    is_deca_compatible: true,
-  } as any);
+  await effectifsDECADb().insertOne(
+    testDoc<IEffectifDECA>({
+      ...effectif,
+      _id: effectifId,
+      deca_raw_id: new ObjectId(),
+      organisme_id: organismeId,
+      is_deca_compatible: true,
+    })
+  );
   return effectif;
 }
 
-async function createMlEffectifDoc(overrides: Record<string, any> = {}) {
+async function createMlEffectifDoc(overrides: Record<string, unknown> = {}) {
   const now = new Date();
   const snapshot = await createSampleEffectif({
     organisme: sampleOrganisme,
@@ -109,17 +117,19 @@ describe("setEffectifMissionLocaleDataFromOrganisme", () => {
     await organisationsDb().deleteMany({});
     await organismesDb().deleteMany({});
     await organismesDb().insertOne(sampleOrganisme);
-    await organisationsDb().insertOne({
-      _id: mlOrganisationId,
-      type: "MISSION_LOCALE",
-      ml_id: 42,
-      nom: "ML Test",
-      created_at: new Date(),
-    } as any);
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        ml_id: 42,
+        nom: "ML Test",
+        created_at: new Date(),
+      })
+    );
   });
 
   it("met à jour organisme_data avec les champs de base", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
 
     await setEffectifMissionLocaleDataFromOrganisme(
       organismeId,
@@ -137,7 +147,7 @@ describe("setEffectifMissionLocaleDataFromOrganisme", () => {
   });
 
   it("met à jour les champs optionnels (motif, commentaires, etc.)", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
 
     await setEffectifMissionLocaleDataFromOrganisme(
       organismeId,
@@ -183,15 +193,17 @@ describe("setEffectifMissionLocaleDataFromOrganisme", () => {
 
   it("ne remplace pas les champs existants non envoyés (merge partiel)", async () => {
     await missionLocaleEffectifsDb().insertOne(
-      (await createMlEffectifDoc({
-        organisme_data: {
-          rupture: true,
-          acc_conjoint: true,
-          note_complementaire: "Note existante",
-          cause_rupture: "Ancienne raison",
-          reponse_at: new Date("2026-01-01"),
-        },
-      })) as any
+      testDoc<IMissionLocaleEffectif>(
+        await createMlEffectifDoc({
+          organisme_data: {
+            rupture: true,
+            acc_conjoint: true,
+            note_complementaire: "Note existante",
+            cause_rupture: "Ancienne raison",
+            reponse_at: new Date("2026-01-01"),
+          },
+        })
+      )
     );
 
     await setEffectifMissionLocaleDataFromOrganisme(
@@ -208,7 +220,7 @@ describe("setEffectifMissionLocaleDataFromOrganisme", () => {
   });
 
   it("n'inclut pas les champs optionnels undefined", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
 
     await setEffectifMissionLocaleDataFromOrganisme(
       organismeId,
@@ -231,9 +243,11 @@ describe("setEffectifMissionLocaleDataFromOrganisme", () => {
 
   it("rejette un second envoi sur un dossier déjà en collaboration (RG2)", async () => {
     await missionLocaleEffectifsDb().insertOne(
-      (await createMlEffectifDoc({
-        organisme_data: { rupture: true, acc_conjoint: true, acc_conjoint_by: userId },
-      })) as any
+      testDoc<IMissionLocaleEffectif>(
+        await createMlEffectifDoc({
+          organisme_data: { rupture: true, acc_conjoint: true, acc_conjoint_by: userId },
+        })
+      )
     );
 
     await expect(
@@ -275,7 +289,7 @@ describe("setEffectifMissionLocaleDataFromOrganisme", () => {
       await setEffectifMissionLocaleDataFromOrganisme(
         organismeId,
         effectifId,
-        { rupture: true, acc_conjoint: true, still_at_cfa: false, date_rupture: dateRupture } as any,
+        { rupture: true, acc_conjoint: true, still_at_cfa: false, date_rupture: dateRupture },
         userId
       );
 
@@ -343,7 +357,7 @@ describe("setEffectifMissionLocaleDataFromOrganisme", () => {
     it("ressuscite un dossier soft-deleted au lieu d'échouer", async () => {
       await insertErpEffectif();
       const softDeleted = await createMlEffectifDoc({ soft_deleted: true });
-      await missionLocaleEffectifsDb().insertOne(softDeleted as any);
+      await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(softDeleted));
 
       await setEffectifMissionLocaleDataFromOrganisme(
         organismeId,
@@ -373,22 +387,26 @@ describe("markEffectifNotificationAsRead", () => {
   it("marque les notifications comme lues", async () => {
     const mlEffectifId = new ObjectId();
     await missionLocaleEffectifsDb().insertOne(
-      (await createMlEffectifDoc({
-        _id: mlEffectifId,
-        organisme_data: {
-          acc_conjoint: true,
-          acc_conjoint_by: userId,
-          has_unread_notification: true,
-        },
-      })) as any
+      testDoc<IMissionLocaleEffectif>(
+        await createMlEffectifDoc({
+          _id: mlEffectifId,
+          organisme_data: {
+            acc_conjoint: true,
+            acc_conjoint_by: userId,
+            has_unread_notification: true,
+          },
+        })
+      )
     );
 
-    await missionLocaleEffectifsLogDb().insertOne({
-      _id: new ObjectId(),
-      mission_locale_effectif_id: mlEffectifId,
-      read_by: [],
-      created_at: new Date(),
-    } as any);
+    await missionLocaleEffectifsLogDb().insertOne(
+      testDoc<IMissionLocaleEffectifLog>({
+        _id: new ObjectId(),
+        mission_locale_effectif_id: mlEffectifId,
+        read_by: [],
+        created_at: new Date(),
+      })
+    );
 
     await markEffectifNotificationAsRead(organismeId, effectifId, userId);
 

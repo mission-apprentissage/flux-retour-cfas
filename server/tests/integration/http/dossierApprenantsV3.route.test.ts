@@ -1,12 +1,13 @@
 import { randomUUID } from "node:crypto";
 
 import { AxiosInstance } from "axiosist";
+import type { IOrganisme } from "shared/models";
 import { it, expect, describe, beforeEach } from "vitest";
 
 import { organismesDb } from "@/common/model/collections";
 import { createRandomOrganisme, createRandomDossierApprenantApiInputV3 } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { initTestApp } from "@tests/utils/testUtils";
+import { initTestApp, testDoc } from "@tests/utils/testUtils";
 
 const API_ENDPOINT_URL = "/api/v3/dossiers-apprenants";
 let httpClient: AxiosInstance;
@@ -17,11 +18,11 @@ const api_key = randomUUID();
 
 describe("Dossier Apprenants Route V3", () => {
   useMongo();
-  let randomOrganisme;
+  let randomOrganisme: ReturnType<typeof createRandomOrganisme>;
   beforeEach(async () => {
     const app = await initTestApp();
     randomOrganisme = createRandomOrganisme({ uai, siret, api_key });
-    await organismesDb().insertOne(randomOrganisme);
+    await organismesDb().insertOne(testDoc<IOrganisme>(randomOrganisme));
     httpClient = app.httpClient;
   });
 
