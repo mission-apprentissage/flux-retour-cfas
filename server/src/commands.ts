@@ -7,6 +7,8 @@ import { addJob, startJobProcessor as startJobProcessorFn } from "job-processor"
 import HttpTerminator from "lil-http-terminator";
 import { ObjectId } from "mongodb";
 
+import { getErrorMessage } from "@/common/utils/errorUtils";
+
 import { createSipaUser, deleteSipaUser } from "./common/actions/sipa.actions";
 import logger from "./common/logger";
 import { closeMongodbConnection } from "./common/mongodb";
@@ -161,13 +163,12 @@ program
   });
 
 function createJobAction(name: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return async (options: any) => {
+  return async (options: Record<string, unknown>) => {
     try {
-      const { queued = false, ...payload } = options;
+      const { queued, ...payload } = options;
       const exitCode = await addJob({
         name,
-        queued,
+        queued: queued === true,
         payload,
       });
 
@@ -229,8 +230,8 @@ program
     const finalPassword = password ?? crypto.randomBytes(24).toString("base64url");
     try {
       await createSipaUser(username, finalPassword);
-    } catch (err: any) {
-      program.error(err.message || "Command failed", { exitCode: 2 });
+    } catch (err) {
+      program.error(getErrorMessage(err) || "Command failed", { exitCode: 2 });
     }
     // eslint-disable-next-line no-console
     console.log(`Compte SIPA créé : ${username}`);
@@ -247,8 +248,8 @@ program
   .action(async ({ username }) => {
     try {
       await deleteSipaUser(username);
-    } catch (err: any) {
-      program.error(err.message || "Command failed", { exitCode: 2 });
+    } catch (err) {
+      program.error(getErrorMessage(err) || "Command failed", { exitCode: 2 });
     }
     // eslint-disable-next-line no-console
     console.log(`Compte SIPA supprimé : ${username}`);

@@ -37,7 +37,7 @@ async function main() {
   const arboPrincipaleSheet = workbook.Sheets[arboPrincipaleSheetName];
 
   const rawJsonData = utils
-    .sheet_to_json<Record<"familleMetier" | "domaineProfessionnel" | "numeroOrdre" | "name" | "codeOGR", any>>(
+    .sheet_to_json<Record<"familleMetier" | "domaineProfessionnel" | "numeroOrdre" | "name" | "codeOGR", string>>(
       arboPrincipaleSheet,
       {
         // exemple : A	11	01	Chauffeur / Chauffeuse de machines agricoles 11987
