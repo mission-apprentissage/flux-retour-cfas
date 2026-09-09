@@ -10,6 +10,7 @@ import { calculatePercentage, getPercentageColor, RUPTURANTS_COLORS, RUPTURANTS_
 import { ChartLegend } from "./ChartLegend";
 import { AxisChartTooltip } from "./ChartTooltip";
 import styles from "./RupturantsBarChart.module.css";
+import { niceTicks } from "./ticks";
 
 interface RupturantsBarChartProps {
   data: ITimeSeriesPoint[];
@@ -28,30 +29,6 @@ const TICK_STYLE = { fontSize: 12, fill: "#161616" };
 const formatDate = (value: Date) => {
   const date = new Date(value);
   return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}`;
-};
-
-const tickIncrement = (max: number, count: number) => {
-  const step = max / count;
-  const power = Math.floor(Math.log10(step));
-  const error = step / 10 ** power;
-  const factor = error >= Math.sqrt(50) ? 10 : error >= Math.sqrt(10) ? 5 : error >= Math.sqrt(2) ? 2 : 1;
-  return factor * 10 ** power;
-};
-
-const niceTicks = (max: number, count = 5): number[] => {
-  if (max <= 0) return [0, 1];
-  let niceMax = max;
-  for (let i = 0; i < 10; i++) {
-    const next = Math.ceil(niceMax / tickIncrement(niceMax, count)) * tickIncrement(niceMax, count);
-    if (next === niceMax) break;
-    niceMax = next;
-  }
-  const step = tickIncrement(niceMax, count);
-  const ticks: number[] = [];
-  for (let value = 0; value <= niceMax + step / 2; value += step) {
-    ticks.push(Number(value.toFixed(10)));
-  }
-  return ticks;
 };
 
 const formatYAxis = (value: number) => {
@@ -83,7 +60,7 @@ export function RupturantsBarChart({ data, loading, loadingVariation }: Rupturan
   const totalATraiter = last.a_traiter;
   const totalTraites = last.traites;
 
-  const yTicks = niceTicks(Math.max(...rows.map((row) => row.a_traiter + row.traites)));
+  const yTicks = niceTicks(Math.max(...rows.map((row) => row.a_traiter + row.traites)), 5);
 
   const firstTraites = rows[0].traites;
   const variationTraites = calculatePercentage(totalTraites, firstTraites);
@@ -109,6 +86,7 @@ export function RupturantsBarChart({ data, loading, loadingVariation }: Rupturan
           width={45}
           ticks={yTicks}
           domain={[0, yTicks[yTicks.length - 1]]}
+          niceTicks="none"
         />
         <Bar
           dataKey="traites"
