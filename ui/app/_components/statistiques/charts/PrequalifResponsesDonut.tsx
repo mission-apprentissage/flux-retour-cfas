@@ -1,12 +1,11 @@
 "use client";
 
-import { PieChart } from "@mui/x-charts/PieChart";
 import type { IPrequalifStats } from "shared/models/data/nationalStats.model";
 
 import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import { ChartLegend } from "./ChartLegend";
-import { ItemChartTooltip } from "./ChartTooltip";
+import { DonutChart } from "./DonutChart";
 import styles from "./PrequalifResponsesDonut.module.css";
 
 const COLORS = {
@@ -44,21 +43,7 @@ export function PrequalifResponsesDonut({ data, loading }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.chartSection}>
-        <PieChart
-          series={[
-            {
-              data: pieData,
-              innerRadius: 55,
-              outerRadius: 95,
-              paddingAngle: 1,
-              highlightScope: { highlight: "item" },
-            },
-          ]}
-          height={240}
-          margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-          slots={{ legend: () => null, tooltip: ItemChartTooltip }}
-          sx={{ width: "100%", maxWidth: "280px", "& .MuiChartsLegend-root": { display: "none" } }}
-        />
+        <DonutChart data={pieData} height={240} maxWidth={280} innerRadius={55} outerRadius={95} paddingAngle={1} />
       </div>
       <div className={styles.legendSection}>
         <ChartLegend

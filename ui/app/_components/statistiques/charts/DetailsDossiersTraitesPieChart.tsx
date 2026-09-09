@@ -1,15 +1,14 @@
 "use client";
 
-import { PieChart } from "@mui/x-charts/PieChart";
 import { IDetailsDossiersTraitesV2 } from "shared/models/data/nationalStats.model";
 
 import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import { DOSSIERS_TRAITES_V2_COLORS, DOSSIERS_TRAITES_V2_LABELS, getVariationColorFromString } from "../constants";
 
-import { ItemChartTooltip } from "./ChartTooltip";
 import { DejaConnuMiniChart } from "./DejaConnuMiniChart";
 import styles from "./DetailsDossiersTraitesPieChart.module.css";
+import { DonutChart } from "./DonutChart";
 
 interface DetailsDossiersTraitesPieChartProps {
   data?: IDetailsDossiersTraitesV2;
@@ -54,29 +53,14 @@ export function DetailsDossiersTraitesPieChart({
 
       <div className={styles.content}>
         <div className={styles.chartWrapper}>
-          <PieChart
-            series={[
-              {
-                data: pieData,
-                highlightScope: { highlight: "item" },
-                valueFormatter: (item) => {
-                  const pct = totalCurrent > 0 ? Math.round((item.value / totalCurrent) * 100) : 0;
-                  return `${item.value.toLocaleString("fr-FR")} (${pct}%)`;
-                },
-              },
-            ]}
+          <DonutChart
+            data={pieData}
             height={250}
-            margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
-            slots={{
-              legend: () => null,
-              tooltip: ItemChartTooltip,
-            }}
-            sx={{
-              width: "100%",
-              maxWidth: "250px",
-              "& .MuiChartsLegend-root": {
-                display: "none",
-              },
+            maxWidth={250}
+            margin={5}
+            valueFormatter={(item) => {
+              const pct = totalCurrent > 0 ? Math.round((item.value / totalCurrent) * 100) : 0;
+              return `${item.value.toLocaleString("fr-FR")} (${pct}%)`;
             }}
           />
         </div>

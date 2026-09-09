@@ -1,6 +1,5 @@
 "use client";
 
-import { PieChart } from "@mui/x-charts/PieChart";
 import { IRupturantsSummary } from "shared/models/data/nationalStats.model";
 
 import { Skeleton } from "@/app/_components/common/Skeleton";
@@ -8,7 +7,7 @@ import { Skeleton } from "@/app/_components/common/Skeleton";
 import { getVariationColorFromString, RUPTURANTS_COLORS, RUPTURANTS_LABELS } from "../constants";
 
 import { ChartLegend } from "./ChartLegend";
-import { ItemChartTooltip } from "./ChartTooltip";
+import { DonutChart } from "./DonutChart";
 import styles from "./RupturantsPieChart.module.css";
 
 interface RupturantsPieChartProps {
@@ -44,27 +43,7 @@ export function RupturantsPieChart({ data, loading, loadingVariation }: Rupturan
   return (
     <div className={styles.container}>
       <div className={styles.chartSection}>
-        <PieChart
-          series={[
-            {
-              data: pieData,
-              highlightScope: { highlight: "item" },
-            },
-          ]}
-          height={280}
-          margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-          slots={{
-            legend: () => null,
-            tooltip: ItemChartTooltip,
-          }}
-          sx={{
-            width: "100%",
-            maxWidth: "280px",
-            "& .MuiChartsLegend-root": {
-              display: "none",
-            },
-          }}
-        />
+        <DonutChart data={pieData} height={280} maxWidth={280} />
       </div>
       <div className={styles.legendSection}>
         <ChartLegend

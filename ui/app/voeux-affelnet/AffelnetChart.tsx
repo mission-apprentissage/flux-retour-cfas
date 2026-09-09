@@ -1,9 +1,7 @@
 "use client";
 
-import { PieChart } from "@mui/x-charts/PieChart";
-
 import { ChartLegend } from "@/app/_components/statistiques/charts/ChartLegend";
-import { ItemChartTooltip } from "@/app/_components/statistiques/charts/ChartTooltip";
+import { DonutChart } from "@/app/_components/statistiques/charts/DonutChart";
 import { COLOR_PALETTE } from "@/app/_components/statistiques/constants";
 
 import styles from "./voeux-affelnet.module.scss";
@@ -23,29 +21,17 @@ export function AffelnetChart({
 
   return (
     <div className={styles.chart}>
-      <PieChart
-        series={[
-          {
-            data: [
-              { id: "concretise", value: apprenantsConcretises, label: "Vœu concrétisé", color: CONCRETISE_COLOR },
-              {
-                id: "non-concretise",
-                value: nonConcretises,
-                label: "Vœu non concrétisé",
-                color: NON_CONCRETISE_COLOR,
-              },
-            ],
-            innerRadius: 55,
-            outerRadius: 95,
-            paddingAngle: 1,
-            highlightScope: { highlight: "item" },
-            valueFormatter: (item) => `${item.value.toLocaleString("fr-FR")} (${share(item.value)} %)`,
-          },
+      <DonutChart
+        data={[
+          { id: "concretise", value: apprenantsConcretises, label: "Vœu concrétisé", color: CONCRETISE_COLOR },
+          { id: "non-concretise", value: nonConcretises, label: "Vœu non concrétisé", color: NON_CONCRETISE_COLOR },
         ]}
         height={240}
-        margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-        slots={{ legend: () => null, tooltip: ItemChartTooltip }}
-        sx={{ width: "100%", maxWidth: "280px", "& .MuiChartsLegend-root": { display: "none" } }}
+        maxWidth={280}
+        innerRadius={55}
+        outerRadius={95}
+        paddingAngle={1}
+        valueFormatter={(item) => `${item.value.toLocaleString("fr-FR")} (${share(item.value)} %)`}
       />
       <div className={styles.chartLegend}>
         <ChartLegend
