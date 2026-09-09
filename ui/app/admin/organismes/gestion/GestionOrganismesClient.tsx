@@ -72,10 +72,8 @@ function plural(count: number) {
   return count > 1 ? "s" : "";
 }
 
-function hasDetail(rowData: { detail: RowDetail }) {
-  return (
-    rowData.detail.delegations.length > 0 || rowData.detail.users.length > 0 || rowData.detail.duplicats.length > 0
-  );
+function hasDetail({ detail }: { detail?: RowDetail }) {
+  return Boolean(detail && (detail.delegations.length > 0 || detail.users.length > 0 || detail.duplicats.length > 0));
 }
 
 function Count({ value }: { value: number }) {

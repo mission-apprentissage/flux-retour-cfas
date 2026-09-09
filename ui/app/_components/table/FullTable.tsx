@@ -177,8 +177,9 @@ export function FullTable({
       columnFilters,
       ...(isExpandable ? { expanded } : {}),
     },
-    onSortingChange: onSortingChange || (() => {}),
-    onColumnFiltersChange: onColumnFiltersChange || (() => {}),
+    onSortingChange: (updater) => onSortingChange?.(typeof updater === "function" ? updater(sorting) : updater),
+    onColumnFiltersChange: (updater) =>
+      onColumnFiltersChange?.(typeof updater === "function" ? updater(columnFilters) : updater),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
