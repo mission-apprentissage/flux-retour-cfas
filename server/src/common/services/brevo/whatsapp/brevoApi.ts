@@ -3,10 +3,14 @@ import axios from "axios";
 import axiosRetry from "axios-retry";
 
 import logger from "@/common/logger";
+import { getErrorMessage } from "@/common/utils/errorUtils";
 import config from "@/config";
 
 import { maskPhone } from "./phone";
 import { WhatsAppSendResult, WhatsAppTemplateParams } from "./types";
+
+const getBrevoErrorMessage = (error: unknown): string =>
+  (axios.isAxiosError(error) && error.response?.data?.message) || getErrorMessage(error) || "Unknown error";
 
 const BREVO_CONVERSATIONS_API = "https://api.brevo.com/v3/conversations";
 const BREVO_CONTACTS_API = "https://api.brevo.com/v3/contacts";
@@ -55,8 +59,8 @@ export async function sendWhatsAppMessage(visitorId: string, message: string): P
       success: true,
       messageId,
     };
-  } catch (error: any) {
-    const errorMessage = error.response?.data?.message || error.message || "Unknown error";
+  } catch (error) {
+    const errorMessage = getBrevoErrorMessage(error);
     logger.error({ visitorId, error: errorMessage }, "Failed to send WhatsApp message");
     captureException(error);
 
@@ -97,10 +101,14 @@ export async function upsertBrevoContact(phoneNumber: string, attributes: Record
       }
     );
     logger.debug({ phoneNumber: maskPhone(formattedPhone) }, "Brevo contact upserted");
-  } catch (error: any) {
+  } catch (error) {
     // Ne pas bloquer l'envoi du template WhatsApp si l'upsert contact échoue
     logger.error(
-      { phoneNumber: maskPhone(formattedPhone), status: error?.response?.status, error: error.message },
+      {
+        phoneNumber: maskPhone(formattedPhone),
+        status: axios.isAxiosError(error) ? error.response?.status : undefined,
+        error: getErrorMessage(error),
+      },
       "Failed to upsert Brevo contact — template will be sent without custom attributes"
     );
     captureException(error);
@@ -167,8 +175,8 @@ export async function sendWhatsAppTemplate(
       success: true,
       messageId,
     };
-  } catch (error: any) {
-    const errorMessage = error.response?.data?.message || error.message || "Unknown error";
+  } catch (error) {
+    const errorMessage = getBrevoErrorMessage(error);
     logger.error(
       {
         phoneNumber: maskPhone(phoneNumber),

@@ -1,8 +1,10 @@
+import type { AxiosInstance } from "axios";
 import axiosRetry from "axios-retry";
 import ApiEntEtablissement from "shared/models/apis/@types/ApiEntEtablissement";
 
 import logger from "@/common/logger";
 import { ApiError, apiRateLimiter } from "@/common/utils/apiUtils";
+import { getErrorMessage } from "@/common/utils/errorUtils";
 import config from "@/config";
 
 import getApiClient from "./client";
@@ -36,7 +38,7 @@ const apiParams = {
  */
 export const getEtablissement = async (siret: string): Promise<ApiEntEtablissement> => {
   return executeWithRateLimiting(async (client) => {
-    axiosRetry(client, { retries: 3 });
+    axiosRetry(client as unknown as AxiosInstance, { retries: 3 });
 
     try {
       let response = await client.get(`insee/sirene/etablissements/diffusibles/${siret}`, {
@@ -47,8 +49,9 @@ export const getEtablissement = async (siret: string): Promise<ApiEntEtablisseme
         throw new ApiError("Api Entreprise", "No etablissement data received");
       }
       return response.data.data;
-    } catch (e: any) {
-      throw new ApiError("Api Entreprise getEtablissement", e.message, e.code || e.response?.status);
+    } catch (e) {
+      const { code, response } = e as { code?: string; response?: { status?: number } };
+      throw new ApiError("Api Entreprise getEtablissement", getErrorMessage(e), code || response?.status);
     }
   });
 };

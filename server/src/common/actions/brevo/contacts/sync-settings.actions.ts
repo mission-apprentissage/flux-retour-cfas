@@ -1,4 +1,5 @@
 import Boom from "boom";
+import { MongoServerError } from "mongodb";
 import type { IBrevoSyncSettings } from "shared/models/data/brevoSyncSettings.model";
 
 import { brevoSyncSettingsDb } from "@/common/model/collections";
@@ -67,10 +68,10 @@ export const setBrevoSyncSetting = async (
       { upsert: true, returnDocument: "after" }
     );
     return toSettings(res);
-  } catch (err: any) {
+  } catch (err) {
     // Race E11000 : un autre upsert a créé le document en parallèle (index unique
     // sur `key`). Le document existe désormais → simple update sans upsert.
-    if (err?.code !== 11000) throw err;
+    if (!(err instanceof MongoServerError) || err.code !== 11000) throw err;
     const res = await brevoSyncSettingsDb().findOneAndUpdate(
       { key: SETTINGS_KEY },
       { $set: set },

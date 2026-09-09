@@ -64,6 +64,16 @@ export type EnsureBrevoAttributesReport = {
  * attribut existant avec un type différent : signale le conflit dans le
  * rapport, l'admin doit aligner manuellement.
  */
+interface BrevoErrorShape {
+  message?: string;
+  statusCode?: number;
+  body?: { message?: string; code?: string };
+  response?: { statusCode?: number; body?: { message?: string; code?: string } };
+}
+
+const asBrevoError = (error: unknown): BrevoErrorShape =>
+  (typeof error === "object" && error !== null ? error : {}) as BrevoErrorShape;
+
 export const ensureBrevoAttributes = async (
   schema: Record<string, BrevoAttributeType>
 ): Promise<EnsureBrevoAttributesReport> => {
@@ -81,10 +91,11 @@ export const ensureBrevoAttributes = async (
   let existing: Array<{ name?: string; category?: string; type?: string }> = [];
   try {
     const res = await ContactInstance.getAttributes();
-    existing = ((res?.body as any)?.attributes ?? []) as typeof existing;
-  } catch (e: any) {
-    captureException(e);
-    const brevoMsg = e?.response?.body?.message ?? e?.message ?? "unknown error";
+    existing = (res?.body?.attributes ?? []) as unknown as typeof existing;
+  } catch (error) {
+    captureException(error);
+    const e = asBrevoError(error);
+    const brevoMsg = e.response?.body?.message ?? e.message ?? "unknown error";
     throw new Error(`Brevo API error when listing attributes: ${brevoMsg}`);
   }
   const existingByLowerName = new Map(
@@ -112,15 +123,16 @@ export const ensureBrevoAttributes = async (
       continue;
     }
     const attr = new brevo.CreateAttribute();
-    attr.type = type as any;
+    attr.type = type as unknown as brevo.CreateAttribute.TypeEnum;
     try {
       await ContactInstance.createAttribute("normal", name, attr);
       report.created.push(name);
-    } catch (e: any) {
+    } catch (error) {
       // Brevo répond de plusieurs façons sur un doublon (casse différente non
       // détectée par le GET, race condition). On tolère tous les signaux connus.
-      const brevoCode = e?.response?.body?.code;
-      const brevoMsg = e?.response?.body?.message ?? "";
+      const e = asBrevoError(error);
+      const brevoCode = e.response?.body?.code;
+      const brevoMsg = e.response?.body?.message ?? "";
       const isDuplicate =
         brevoCode === "duplicate_parameter" ||
         brevoCode === "unique_attribute_name" ||
@@ -149,12 +161,13 @@ export const createBrevoList = async (params: { name: string; folderId: number }
   contactList.folderId = params.folderId;
   try {
     return await ContactInstance.createList(contactList);
-  } catch (e: any) {
-    captureException(e);
+  } catch (error) {
+    captureException(error);
     // Propage le message Brevo réel (folderId invalide, clé API erronée, quota, …).
-    const brevoBody = e?.response?.body ?? e?.body;
-    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e?.message ?? "unknown error";
-    const status = e?.response?.statusCode ?? e?.statusCode ?? "?";
+    const e = asBrevoError(error);
+    const brevoBody = e.response?.body ?? e.body;
+    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e.message ?? "unknown error";
+    const status = e.response?.statusCode ?? e.statusCode ?? "?";
     throw new Error(
       `Brevo API error [${status}] when creating list "${params.name}" (folderId=${params.folderId}): ${brevoMsg}`
     );
@@ -323,11 +336,12 @@ export const sendBrevoEvent = async (payload: BrevoEventPayload) => {
 
   try {
     return await EventInstance.createEvent(event);
-  } catch (e: any) {
-    captureException(e);
-    const brevoBody = e?.response?.body ?? e?.body;
-    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e?.message ?? "unknown error";
-    const status = e?.response?.statusCode ?? e?.statusCode ?? "?";
+  } catch (error) {
+    captureException(error);
+    const e = asBrevoError(error);
+    const brevoBody = e.response?.body ?? e.body;
+    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e.message ?? "unknown error";
+    const status = e.response?.statusCode ?? e.statusCode ?? "?";
     throw new Error(`Brevo API error [${status}] when creating event "${payload.eventName}": ${brevoMsg}`);
   }
 };

@@ -350,7 +350,7 @@ export async function handleInboundWhatsAppMessage(
     return;
   }
 
-  const setFields: Record<string, any> = { updated_at: new Date() };
+  const setFields: Record<string, unknown> = { updated_at: new Date() };
   if (visitorId) {
     setFields["whatsapp_contact.brevo_visitor_id"] = visitorId;
   }

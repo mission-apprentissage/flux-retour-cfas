@@ -95,10 +95,13 @@ export const getOrCreateConnexionInvitationsByEmails = async (
   const failedIndices = new Set<number>();
   if (newDocs.length > 0) {
     try {
-      await db.insertMany(newDocs as any, { ordered: false });
-    } catch (err: any) {
-      const writeErrors: Array<{ code?: number; index?: number }> = err.writeErrors ?? [];
-      const allDupKey = err.code === 11000 || (writeErrors.length > 0 && writeErrors.every((e) => e.code === 11000));
+      await db.insertMany(newDocs, { ordered: false });
+    } catch (err) {
+      const { code, writeErrors = [] } = err as {
+        code?: number;
+        writeErrors?: Array<{ code?: number; index?: number }>;
+      };
+      const allDupKey = code === 11000 || (writeErrors.length > 0 && writeErrors.every((e) => e.code === 11000));
       if (!allDupKey) throw err;
       for (const we of writeErrors) {
         if (typeof we.index === "number") failedIndices.add(we.index);

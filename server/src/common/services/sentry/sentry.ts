@@ -1,6 +1,7 @@
 import { CaptureConsole, ExtraErrorData } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import type { Integration } from "@sentry/types";
+import type { Express } from "express";
 
 import config from "../../../config";
 
@@ -36,12 +37,9 @@ function getSentryOptions(extraIntegrations: Integration[]): Sentry.NodeOptions 
     integrations: [
       new Sentry.Integrations.Http({ tracing: true }),
       new Sentry.Integrations.Mongo({ useMongoose: false }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      new CaptureConsole({ levels: ["error"] }) as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      new ExtraErrorData({ depth: 16 }) as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      new Sentry.Integrations.Anr({ captureStackTrace: true }) as any,
+      new CaptureConsole({ levels: ["error"] }) as Integration,
+      new ExtraErrorData({ depth: 16 }) as Integration,
+      new Sentry.Integrations.Anr({ captureStackTrace: true }) as Integration,
       ...extraIntegrations,
     ],
   };
@@ -55,6 +53,6 @@ export async function closeSentry(): Promise<void> {
   await Sentry.close(2_000);
 }
 
-export function initSentryExpress(app): void {
+export function initSentryExpress(app: Express): void {
   Sentry.init(getSentryOptions([new Sentry.Integrations.Express({ app })]));
 }
