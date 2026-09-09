@@ -27,3 +27,6 @@ export interface AuthContext<IOrganisation extends IOrganisationJson = IOrganisa
 }
 
 // contexte côté UI
+
+export const getUserOrganismeId = (user: AuthContext | null | undefined): string | undefined =>
+  user?.organisation?.type === "ORGANISME_FORMATION" ? (user.organisation.organisme_id ?? undefined) : undefined;

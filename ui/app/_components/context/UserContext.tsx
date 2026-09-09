@@ -9,7 +9,7 @@ export type IUserContext = {
   user?: AuthContext | null;
 };
 
-export const UserContext = createContext<any>(null);
+export const UserContext = createContext<IUserContext | null>(null);
 
 export function UserContextProvider(props: PropsWithChildren<IUserContext>) {
   return (

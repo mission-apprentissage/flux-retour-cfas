@@ -11,11 +11,11 @@ if (publicConfig.env === "local") {
 }
 
 class AuthError extends Error {
-  json: any;
-  statusCode: any;
-  prettyMessage: any;
+  json: AxiosResponse;
+  statusCode: number;
+  prettyMessage: string;
 
-  constructor(json, statusCode) {
+  constructor(json: AxiosResponse, statusCode: number) {
     super(`Request rejected with status code ${statusCode}`);
     this.json = json;
     this.statusCode = statusCode;
@@ -24,12 +24,12 @@ class AuthError extends Error {
 }
 
 export class HTTPError extends Error {
-  json: any;
-  messages: any;
-  statusCode: any;
-  prettyMessage: any;
+  json: AxiosResponse;
+  messages: unknown;
+  statusCode: number;
+  prettyMessage: string;
 
-  constructor(message, json, statusCode, messages = null) {
+  constructor(message: string, json: AxiosResponse, statusCode: number, messages: unknown = null) {
     super(message);
     this.json = json;
     this.messages = messages;
@@ -39,7 +39,7 @@ export class HTTPError extends Error {
   }
 }
 
-const handleResponse = <T = any>(path: string, response: AxiosResponse): T => {
+const handleResponse = <T = unknown>(path: string, response: AxiosResponse): T => {
   const statusCode = response.status;
   if (statusCode >= 400 && statusCode < 600) {
     emitter.emit("http:error", response);
@@ -70,7 +70,7 @@ const getHeaders = (contentType: string | null = "application/json") => {
  * Récupère un fichier exposé par l'UI.
  * Nécessaire pour l'environnement local, car les ports sont maintenant exposés.
  */
-export const _getUI = async <T = any>(path: string, options?: AxiosRequestConfig<any>): Promise<T> => {
+export const _getUI = async <T = unknown>(path: string, options?: AxiosRequestConfig): Promise<T> => {
   const response = await axios.get(path, {
     headers: getHeaders(),
     validateStatus: () => true,
@@ -79,7 +79,7 @@ export const _getUI = async <T = any>(path: string, options?: AxiosRequestConfig
   return handleResponse<T>(path, response);
 };
 
-export const _get = async <T = any>(path: string, options?: AxiosRequestConfig<any>): Promise<T> => {
+export const _get = async <T = unknown>(path: string, options?: AxiosRequestConfig): Promise<T> => {
   const response = await axios.get(`${publicConfig.baseUrl}${path}`, {
     headers: getHeaders(),
     validateStatus: () => true,
@@ -88,7 +88,7 @@ export const _get = async <T = any>(path: string, options?: AxiosRequestConfig<a
   return handleResponse<T>(path, response);
 };
 
-export const _getBlob = async (path: string, options?: AxiosRequestConfig<any>) => {
+export const _getBlob = async (path: string, options?: AxiosRequestConfig) => {
   const response = await axios.get(`${publicConfig.baseUrl}${path}`, {
     headers: getHeaders(),
     validateStatus: () => true,
@@ -97,15 +97,15 @@ export const _getBlob = async (path: string, options?: AxiosRequestConfig<any>) 
   });
   const contentType = response.headers["content-type"];
   return {
-    data: handleResponse(path, response),
+    data: handleResponse<Blob>(path, response),
     extension: typeof contentType === "string" ? mime.getExtension(contentType) : null,
   };
 };
 
-export const _post = async <RequestBody = any, ResponseBody = any>(
+export const _post = async <RequestBody = unknown, ResponseBody = unknown>(
   path: string,
   body?: RequestBody,
-  options?: AxiosRequestConfig<any>
+  options?: AxiosRequestConfig
 ): Promise<ResponseBody> => {
   const response = await axios.post(`${publicConfig.baseUrl}${path}`, body, {
     headers: getHeaders(),
@@ -115,20 +115,20 @@ export const _post = async <RequestBody = any, ResponseBody = any>(
   return handleResponse<ResponseBody>(path, response);
 };
 
-export const _put = async (path: string, body = {}, options?: AxiosRequestConfig<any>) => {
+export const _put = async <ResponseBody = unknown>(path: string, body: unknown = {}, options?: AxiosRequestConfig) => {
   const response = await axios.put(`${publicConfig.baseUrl}${path}`, body, {
     headers: getHeaders(),
     validateStatus: () => true,
     ...options,
   });
-  return handleResponse(path, response);
+  return handleResponse<ResponseBody>(path, response);
 };
 
-export const _delete = async (path: string, options?: AxiosRequestConfig<any>) => {
+export const _delete = async <ResponseBody = unknown>(path: string, options?: AxiosRequestConfig) => {
   const response = await axios.delete(`${publicConfig.baseUrl}${path}`, {
     headers: getHeaders(),
     validateStatus: () => true,
     ...options,
   });
-  return handleResponse(path, response);
+  return handleResponse<ResponseBody>(path, response);
 };
