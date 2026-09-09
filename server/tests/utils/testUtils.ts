@@ -98,7 +98,7 @@ export function id(i: number): string {
 
 export type Method = "get" | "post" | "put" | "patch" | "delete";
 
-export function expectUnauthorizedError(response: any) {
+export function expectUnauthorizedError(response: AxiosResponse) {
   assert.strictEqual(response.status, 401);
   assert.deepStrictEqual(response.data, {
     error: "Unauthorized",
@@ -106,7 +106,7 @@ export function expectUnauthorizedError(response: any) {
   });
 }
 
-export function expectForbiddenError(response: any) {
+export function expectForbiddenError(response: AxiosResponse) {
   assert.strictEqual(response.status, 403);
   assert.deepStrictEqual(response.data, {
     error: "Forbidden",
@@ -120,4 +120,29 @@ export async function generate<T>(amount: number, callback: () => Promise<T>): P
       .fill(1)
       .map(async () => await callback())
   );
+}
+
+/**
+ * Construit un document de test typé à partir d'un sous-ensemble de champs
+ * (les tests insèrent des documents partiels avec bypassDocumentValidation).
+ */
+export type DeepPartial<T> = T extends Date | ObjectId | ((...args: never[]) => unknown)
+  ? T
+  : T extends Array<infer U>
+    ? Array<DeepPartial<U>>
+    : T extends object
+      ? { [K in keyof T]?: DeepPartial<T[K]> }
+      : T;
+
+export function testDoc<T extends { _id: ObjectId }>(doc: DeepPartial<T>): T {
+  return { _id: new ObjectId(), ...doc } as T;
+}
+
+export function testDocs<T extends { _id: ObjectId }>(docs: DeepPartial<T>[]): T[] {
+  return docs.map((doc) => testDoc<T>(doc));
+}
+
+/** Document volontairement invalide, pour tester la validation Mongo. */
+export function invalidDoc<T>(doc: object): T {
+  return doc as T;
 }
