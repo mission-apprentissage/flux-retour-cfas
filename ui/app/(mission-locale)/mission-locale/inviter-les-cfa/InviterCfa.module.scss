@@ -92,6 +92,26 @@
   color: var(--text-mention-grey);
 }
 
+.faq {
+  margin-bottom: 1.5rem;
+}
+
+.faqToggle {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.faqContent {
+  max-width: 760px;
+  margin-top: 0.75rem;
+  color: var(--text-default-grey);
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+
 .empty {
   color: var(--text-mention-grey);
 }
@@ -124,7 +144,6 @@
   background-color: var(--background-alt-grey);
 }
 
-// CFA non invitable : l'en-tête est atténué, les compteurs restent lisibles.
 .cardInfo {
   display: flex;
   flex: 1 1 40%;
