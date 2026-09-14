@@ -5,10 +5,10 @@ import { CFA_INVITATION_STATUT, ICfaToInvite } from "shared/models/routes/missio
 
 import { useMUIToaster } from "@/app/_components/MUIToaster";
 import { useCfaInvitations, useInviteCfa } from "@/app/_components/ruptures/mission-locale/invitations/hooks";
-import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 
 import { CfaInvitationList } from "./_components/CfaInvitationList";
+import { CfaInvitationListSkeleton } from "./_components/CfaInvitationListSkeleton";
 import { InviteCfaModal, inviteCfaModal } from "./_components/InviteCfaModal";
 import { InviterCfaHeader } from "./_components/InviterCfaHeader";
 
@@ -48,7 +48,7 @@ export default function InviterCfaClient() {
     <div>
       <InviterCfaHeader />
       <div className="fr-container">
-        <SuspenseWrapper fallback={<PageWithSidebarSkeleton />}>
+        <SuspenseWrapper fallback={<CfaInvitationListSkeleton />}>
           <InviterCfaContenu onInvite={handleInvite} />
         </SuspenseWrapper>
       </div>
