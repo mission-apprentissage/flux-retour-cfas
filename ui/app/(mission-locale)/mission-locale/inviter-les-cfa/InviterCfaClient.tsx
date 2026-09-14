@@ -35,8 +35,13 @@ export default function InviterCfaClient() {
 
   const handleConfirm = async (note: string) => {
     if (!selectedCfa) return;
-    await inviteCfa.mutateAsync({ organisme_id: selectedCfa.organisme_id, note: note || undefined });
-    toastSuccess(`Invitation envoyée à ${selectedCfa.nom ?? "ce CFA"}.`);
+    const { nb_destinataires } = await inviteCfa.mutateAsync({
+      organisme_id: selectedCfa.organisme_id,
+      note: note || undefined,
+    });
+    toastSuccess(
+      `Invitation envoyée à ${nb_destinataires} personne${nb_destinataires > 1 ? "s" : ""} chez ${selectedCfa.nom ?? "ce CFA"}.`
+    );
   };
 
   return (

@@ -3,30 +3,19 @@ import { ObjectId } from "mongodb";
 import { IOrganisationMissionLocale } from "shared/models";
 import { CFA_INVITATION_STATUT, ICfaToInvite } from "shared/models/routes/mission-locale/missionLocale.api";
 
-import {
-  invitationsDb,
-  missionLocaleCfaInvitationsDb,
-  missionLocaleEffectifsDb,
-  organismesDb,
-  usersMigrationDb,
-} from "@/common/model/collections";
+import logger from "@/common/logger";
+import { missionLocaleCfaInvitationsDb, missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
-import { generateKey } from "@/common/utils/cryptoUtils";
 import { getPublicUrl } from "@/common/utils/emailsUtils";
 import { formatListeTronquee } from "@/common/utils/listUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 import config from "@/config";
 
+import { getOrCreateConnexionInvitationsByEmails } from "../brevo/contacts/connexion-invitations.actions";
+import { formatEmail } from "../brevo/contacts/formatters";
 import { fetchRupturantsStatsByOrgId } from "../brevo/contacts/tba-contacts";
-import {
-  getActiveMissionLocalesByRegions,
-  getCfaAccountsByOrganismeIds,
-  getOrganisationOrganismeByOrganismeId,
-  ICfaAccounts,
-  INVITATION_EXPIRATION_MS,
-} from "../organisations.actions";
-import { isEmailAlreadyUsed } from "../users.actions";
+import { getActiveMissionLocalesByRegions, getCfaAccountsByOrganismeIds, ICfaAccounts } from "../organisations.actions";
 
 import { missionLocaleBaseAggregation } from "./mission-locale.actions";
 
@@ -49,7 +38,6 @@ interface CfaAggRow {
       commune?: string | null;
       region?: string | null;
     } | null;
-    contacts_from_referentiel?: Array<{ email?: string | null; confirmation_referentiel?: boolean | null }> | null;
     first_transmission_date?: Date | null;
   };
   invited_by_me: boolean;
@@ -80,37 +68,6 @@ async function getMlNomsByRegion(regions: string[]): Promise<Map<string, string[
   return map;
 }
 
-/** Email de contact retenu pour un CFA : un email confirmé dans le référentiel en priorité, sinon le premier. */
-function pickContactEmail(
-  contacts?: Array<{ email?: string | null; confirmation_referentiel?: boolean | null }> | null
-): string | null {
-  const list = contacts ?? [];
-  return list.find((c) => c?.confirmation_referentiel && c.email)?.email ?? list.find((c) => c?.email)?.email ?? null;
-}
-
-/**
- * Nom complet (" Prénom Nom ") des contacts CFA déjà présents dans usersMigration, indexés par email.
- * Permet de personnaliser la salutation de l'email quand le directeur a déjà un compte (ex. inscription en cours).
- */
-async function getDestinataireNomsByEmail(emails: string[]): Promise<Map<string, string>> {
-  const map = new Map<string, string>();
-  const valides = [...new Set(emails.filter(Boolean))];
-  if (valides.length === 0) {
-    return map;
-  }
-  const users = (await usersMigrationDb()
-    .find({ email: { $in: valides } }, { projection: { email: 1, prenom: 1, nom: 1 } })
-    .toArray()) as Array<{ email: string; prenom?: string; nom?: string }>;
-
-  for (const u of users) {
-    const nomComplet = [u.prenom, u.nom].filter(Boolean).join(" ");
-    if (nomComplet) {
-      map.set(u.email, nomComplet);
-    }
-  }
-  return map;
-}
-
 /**
  * Un CFA est invitable s'il transmet ses effectifs au Tableau de bord et si au moins une personne
  * y dispose d'un compte actif
@@ -120,6 +77,17 @@ export function isCfaInvitable(
   accounts?: Pick<ICfaAccounts, "destinataires">
 ): boolean {
   return Boolean(organisme.first_transmission_date) && (accounts?.destinataires.length ?? 0) > 0;
+}
+
+/**
+ * Destinataires effectivement servis parmi les comptes du CFA. Hors production tous les emails sont
+ * redirigés vers le testeur : on n'en garde qu'un, sinon il reçoit autant de copies identiques que
+ * le CFA a de comptes.
+ */
+export function selectInvitationDestinataires(
+  destinataires: ICfaAccounts["destinataires"]
+): ICfaAccounts["destinataires"] {
+  return config.env === "production" ? destinataires : destinataires.slice(0, 1);
 }
 
 /**
@@ -213,7 +181,6 @@ export async function getCfaListToInviteForMissionLocale(
             raison_sociale: "$organisme.raison_sociale",
             enseigne: "$organisme.enseigne",
             adresse: "$organisme.adresse",
-            contacts_from_referentiel: "$organisme.contacts_from_referentiel",
             first_transmission_date: "$organisme.first_transmission_date",
           },
           invited_by_me: { $gt: [{ $size: "$_my_invitation" }, 0] },
@@ -247,7 +214,6 @@ export async function getCfaListToInviteForMissionLocale(
               raison_sociale: 1,
               enseigne: 1,
               adresse: 1,
-              contacts_from_referentiel: 1,
               first_transmission_date: 1,
             },
           }
@@ -273,15 +239,9 @@ export async function getCfaListToInviteForMissionLocale(
   // Missions Locales actives du territoire (par région du CFA) affichées dans l'email d'invitation.
   const mlNomsByRegion = await getMlNomsByRegion(rows.map((row) => row.organisme.adresse?.region ?? ""));
 
-  // Nom des contacts CFA déjà présents dans usersMigration (via l'email de contact du référentiel).
-  const destinataireNomsByEmail = await getDestinataireNomsByEmail(
-    rows.map((row) => pickContactEmail(row.organisme.contacts_from_referentiel) ?? "")
-  );
-
   return rows
     .map((row) => {
       const noms = mlNomsByRegion.get(row.organisme.adresse?.region ?? "") ?? [];
-      const contactEmail = pickContactEmail(row.organisme.contacts_from_referentiel);
       return {
         organisme_id: row.organisme_id.toString(),
         siret: row.organisme.siret ?? null,
@@ -294,7 +254,7 @@ export async function getCfaListToInviteForMissionLocale(
           mlBetaActivatedAt: mlBetaActivatedAt(row.organisme_id.toString()),
           invitedByMe: row.invited_by_me,
         }),
-        destinataire_nom: contactEmail ? (destinataireNomsByEmail.get(contactEmail) ?? null) : null,
+        nb_destinataires: accountsByOrganismeId.get(row.organisme_id.toString())?.destinataires.length ?? 0,
         ml_partenaires: { count: noms.length, noms },
       };
     })
@@ -302,10 +262,11 @@ export async function getCfaListToInviteForMissionLocale(
 }
 
 /**
- * Envoie une invitation à un CFA au nom de la Mission Locale :
- * - crée une invitation `invitations` (token du parcours d'inscription CFA existant) ;
- * - journalise l'envoi dans `missionLocaleCfaInvitations` (trace durable, badge relatif au conseiller) ;
- * - envoie l'email transactionnel Brevo (variables peuplées par le code) avec le conseiller en copie.
+ * Envoie une invitation à tous les comptes TBA d'un CFA au nom de la Mission Locale, puis journalise
+ * l'envoi dans `missionLocaleCfaInvitations` (trace durable, badge relatif au conseiller).
+ *
+ * Un email par destinataire : la salutation et le lien de connexion sont personnalisés, et les
+ * adresses des collègues ne sont pas exposées entre elles.
  *
  * Aucune déduplication : plusieurs conseillers d'une même ML peuvent inviter le même CFA (PRD).
  */
@@ -314,7 +275,7 @@ export async function sendCfaInvitationFromMissionLocale(
   user: AuthContext,
   organismeId: string,
   note?: string
-): Promise<{ email_destinataire: string; organisme_nom: string }> {
+): Promise<{ nb_destinataires: number; organisme_nom: string }> {
   const organisme = await organismesDb().findOne({ _id: new ObjectId(organismeId) });
   if (!organisme) {
     throw Boom.notFound("CFA introuvable");
@@ -322,22 +283,10 @@ export async function sendCfaInvitationFromMissionLocale(
 
   // Cohérence avec la liste : mêmes critères d'invitabilité que ceux qui décident de son affichage.
   const accounts = (await getCfaAccountsByOrganismeIds([organismeId])).get(organismeId);
-  if (!isCfaInvitable(organisme, accounts)) {
+  if (!accounts || !isCfaInvitable(organisme, accounts)) {
     throw Boom.badRequest(
       "Ce CFA ne peut pas être invité : il ne transmet pas ses effectifs ou n'a aucun compte actif."
     );
-  }
-
-  // Email de contact du directeur : on privilégie un email confirmé dans le référentiel.
-  const email_destinataire = pickContactEmail(organisme.contacts_from_referentiel);
-  if (!email_destinataire) {
-    throw Boom.badRequest("Aucun email de contact connu pour ce CFA.");
-  }
-
-  // Organisation ORGANISME_FORMATION (créée si elle n'existe pas encore).
-  const organisation = await getOrganisationOrganismeByOrganismeId(organisme._id);
-  if (!organisation) {
-    throw Boom.internal("Impossible de créer l'organisation pour ce CFA");
   }
 
   const organismeNom = organisme.nom || organisme.enseigne || organisme.raison_sociale || "Organisme";
@@ -351,77 +300,74 @@ export async function sendCfaInvitationFromMissionLocale(
   const nbJeunesEnRupture =
     (await fetchRupturantsStatsByOrgId([organisme._id])).get(String(organisme._id))?.nb_jeunes_rupture ?? 0;
 
-  // Nom du contact s'il a déjà un compte (usersMigration), pour personnaliser la salutation de l'email.
-  const destinataireNom = (await getDestinataireNomsByEmail([email_destinataire])).get(email_destinataire) ?? "";
-
-  // Le parcours d'inscription refuse un email déjà rattaché à un compte : dans ce cas le lien
-  // d'inscription serait inutilisable, on renvoie donc le destinataire vers la connexion.
-  const aDejaUnCompte = await isEmailAlreadyUsed(email_destinataire);
-
-  // ID du template Brevo (variable d'environnement, varie selon l'environnement). Vérifié avant toute
-  // écriture, pour échouer proprement si la configuration manque.
   const templateId = config.brevo.templateInvitationCfaId;
   if (!templateId) {
     throw Boom.internal("Template Brevo d'invitation CFA non configuré (MNA_TDB_BREVO_TEMPLATE_INVITATION_CFA_ID)");
   }
 
-  // Token du parcours d'inscription CFA existant (réutilisé tel quel) : généré ici pour construire le
-  // lien d'invitation, mais persisté seulement après confirmation de l'envoi (cf. plus bas).
-  const invitationToken = generateKey(50, "hex");
+  const destinataires = selectInvitationDestinataires(accounts.destinataires);
 
-  // Email transactionnel Brevo.
-  // `sendTransactionalEmail` capture les erreurs Brevo et renvoie `undefined` en cas d'échec.
-  const sent = await sendTransactionalEmail(
-    email_destinataire,
-    templateId,
-    {
-      NOM_CFA: organismeNom,
-      NOM_MISSION_LOCALE: missionLocale.nom,
-      PRENOM_CONSEILLER: user.prenom ?? "",
-      NOM_CONSEILLER: user.nom ?? "",
-      NOTE_RECOMMANDATION: note ?? "",
-      LIEN_INVITATION: aDejaUnCompte
-        ? getPublicUrl("/auth/connexion")
-        : getPublicUrl(`/auth/inscription-cfa?invitationToken=${invitationToken}`),
-      NB_ML_PARTENAIRES: mlNoms.length,
-      NOMS_ML: formatListeTronquee(mlNoms),
-      NOM_DESTINATAIRE: destinataireNom,
-      CFA_NB_JEUNES_EN_RUPTURE: nbJeunesEnRupture,
-    },
-    // Hors production, l'email part au conseiller/admin connecté (même en impersonation) plutôt qu'au CFA.
-    { cc: user.email ? [user.email] : undefined, redirectRecipientInNonProdTo: user.email }
+  // Lien de connexion personnalisé (le token pré-remplit l'email, il n'authentifie pas).
+  const tokenByEmail = await getOrCreateConnexionInvitationsByEmails(
+    destinataires.map((d) => d.email),
+    { source: "invitation-ml" }
   );
-  if (!sent) {
+
+  logger.info(
+    { missionLocaleId: String(missionLocale._id), organismeId, nbDestinataires: destinataires.length },
+    "Invitation CFA : envoi aux comptes de l'établissement"
+  );
+
+  // Séquentiel : jusqu'à une trentaine de comptes pour un seul clic.
+  const envoyes: Array<{ user_id: ObjectId; email: string }> = [];
+  for (const destinataire of destinataires) {
+    const token = tokenByEmail.get(formatEmail(destinataire.email));
+    const sent = await sendTransactionalEmail(
+      destinataire.email,
+      templateId,
+      {
+        NOM_CFA: organismeNom,
+        NOM_MISSION_LOCALE: missionLocale.nom,
+        PRENOM_CONSEILLER: user.prenom ?? "",
+        NOM_CONSEILLER: user.nom ?? "",
+        NOTE_RECOMMANDATION: note ?? "",
+        LIEN_INVITATION: token
+          ? getPublicUrl(`/auth/connexion?invitationToken=${token}`)
+          : getPublicUrl("/auth/connexion"),
+        NB_ML_PARTENAIRES: mlNoms.length,
+        NOMS_ML: formatListeTronquee(mlNoms),
+        NOM_DESTINATAIRE: destinataire.nom ?? "",
+        CFA_NB_JEUNES_EN_RUPTURE: nbJeunesEnRupture,
+      },
+      {
+        // Une seule copie au conseiller, sinon il reçoit autant de doubles que de destinataires.
+        cc: envoyes.length === 0 && user.email ? [user.email] : undefined,
+        // Hors production, l'email part au conseiller/admin connecté (même en impersonation).
+        redirectRecipientInNonProdTo: user.email,
+      }
+    );
+    if (sent) {
+      envoyes.push({ user_id: destinataire.user_id, email: destinataire.email });
+    }
+  }
+
+  if (envoyes.length === 0) {
     throw Boom.badGateway("L'envoi de l'email d'invitation au CFA a échoué. Aucune invitation n'a été enregistrée.");
   }
 
-  // L'email est parti : on persiste le token d'inscription (réutilisé par le parcours CFA existant)...
-  await invitationsDb().insertOne({
-    _id: new ObjectId(),
-    organisation_id: organisation._id,
-    email: email_destinataire,
-    token: invitationToken,
-    author_id: user._id,
-    role: "admin",
-    created_at: getCurrentTime(),
-    expires_at: new Date(Date.now() + INVITATION_EXPIRATION_MS),
-  });
-
-  // ...puis la trace durable de la recommandation (pilote les badges, jamais supprimée).
   await missionLocaleCfaInvitationsDb().insertOne({
     _id: new ObjectId(),
     mission_locale_id: new ObjectId(missionLocale._id),
     author_id: user._id,
     organisme_id: organisme._id,
-    organisation_id: organisation._id,
+    organisation_id: accounts.organisation_id,
     siret: organisme.siret,
     uai: organisme.uai ?? null,
-    email_destinataire,
+    destinataires: envoyes,
     note: note ?? null,
-    invitation_token: invitationToken,
     cc_email: user.email ?? null,
     created_at: getCurrentTime(),
   });
 
-  return { email_destinataire, organisme_nom: organismeNom };
+  return { nb_destinataires: envoyes.length, organisme_nom: organismeNom };
 }

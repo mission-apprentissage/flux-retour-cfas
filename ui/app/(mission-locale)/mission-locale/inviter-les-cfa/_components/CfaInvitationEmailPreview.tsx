@@ -10,7 +10,6 @@ interface Props {
   note: string;
   nbMl: number;
   mlNoms: string[];
-  destinataireNom: string | null;
 }
 
 const ARGUMENTS = [
@@ -53,7 +52,6 @@ export function CfaInvitationEmailPreview({
   note,
   nbMl,
   mlNoms,
-  destinataireNom,
 }: Props) {
   const mlLabel = mlNom || "votre Mission Locale";
   const conseiller = [conseillerPrenom, conseillerNom].filter(Boolean).join(" ");
@@ -79,7 +77,8 @@ export function CfaInvitationEmailPreview({
         </span>
       </header>
       <section className={styles.messageBlock}>
-        <p className={styles.hello}>Bonjour{destinataireNom ? ` ${destinataireNom}` : ""},</p>
+        {/* Chaque destinataire reçoit son propre prénom : l'aperçu reste générique. */}
+        <p className={styles.hello}>Bonjour,</p>
         <p className={styles.introLabel}>La Mission Locale</p>
         <p className={styles.introMLName}>{mlLabel}</p>
         <p className={styles.introInvite}>vous invite à utiliser le Tableau de bord de l’apprentissage.</p>

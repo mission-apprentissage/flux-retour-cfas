@@ -12418,13 +12418,25 @@ exports[`validation-schema > should create validation schema for missionLocaleCf
       "bsonType": "date",
       "description": "Date de création en base de données",
     },
-    "email_destinataire": {
-      "bsonType": "string",
-      "description": "Email de contact du CFA utilisé pour l'envoi",
-    },
-    "invitation_token": {
-      "bsonType": "string",
-      "description": "Token de l'entrée \`invitations\` créée pour le parcours d'inscription du CFA",
+    "destinataires": {
+      "bsonType": "array",
+      "description": "Comptes TBA du CFA auxquels l'invitation a effectivement été envoyée",
+      "items": {
+        "additionalProperties": false,
+        "bsonType": "object",
+        "properties": {
+          "email": {
+            "bsonType": "string",
+          },
+          "user_id": {
+            "bsonType": "objectId",
+          },
+        },
+        "required": [
+          "user_id",
+          "email",
+        ],
+      },
     },
     "mission_locale_id": {
       "bsonType": "objectId",
@@ -12464,8 +12476,7 @@ exports[`validation-schema > should create validation schema for missionLocaleCf
     "organisme_id",
     "organisation_id",
     "siret",
-    "email_destinataire",
-    "invitation_token",
+    "destinataires",
     "created_at",
   ],
 }

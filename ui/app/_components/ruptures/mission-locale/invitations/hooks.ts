@@ -19,9 +19,8 @@ export function useCfaInvitations() {
 export function useInviteCfa() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (body: IInviteCfaMissionLocaleApi) =>
-      _post(`/api/v1/organisation/mission-locale/cfa-invitations`, body),
+  return useMutation<{ nb_destinataires: number; organisme_nom: string }, Error, IInviteCfaMissionLocaleApi>({
+    mutationFn: (body) => _post(`/api/v1/organisation/mission-locale/cfa-invitations`, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cfaInvitationQueryKeys.all });
     },

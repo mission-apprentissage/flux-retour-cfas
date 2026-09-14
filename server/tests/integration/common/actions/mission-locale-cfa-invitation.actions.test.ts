@@ -11,10 +11,12 @@ import {
   computeCfaInvitationStatut,
   getCfaListToInviteForMissionLocale,
   isCfaInvitable,
+  selectInvitationDestinataires,
   sendCfaInvitationFromMissionLocale,
 } from "@/common/actions/mission-locale/mission-locale-cfa-invitation.actions";
 import { DATE_START_RUPTURES } from "@/common/actions/shared/rupture-pipeline.utils";
 import {
+  connexionInvitationsDb,
   invitationsDb,
   missionLocaleCfaInvitationsDb,
   missionLocaleEffectifsDb,
@@ -24,6 +26,7 @@ import {
 } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
+import { getPublicUrl } from "@/common/utils/emailsUtils";
 import config from "@/config";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -80,6 +83,17 @@ const cfaOrganisation = {
   organisme_id: organismeId.toString(),
   created_at: new Date(),
 };
+
+/** Hors production l'envoi est volontairement limité à un destinataire. */
+async function enProduction<T>(fn: () => Promise<T>): Promise<T> {
+  const env = config.env;
+  config.env = "production";
+  try {
+    return await fn();
+  } finally {
+    config.env = env;
+  }
+}
 
 /** Compte CFA : c'est sa présence en `CONFIRMED` qui rend le CFA invitable. */
 function cfaAccount(overrides: Record<string, any> = {}) {
@@ -148,6 +162,22 @@ describe("computeCfaInvitationStatut", () => {
     expect(computeCfaInvitationStatut({ mlBetaActivatedAt: null, invitedByMe: false })).toBe(
       CFA_INVITATION_STATUT.INVITER
     );
+  });
+});
+
+describe("selectInvitationDestinataires", () => {
+  const destinataires = [
+    { user_id: new ObjectId(), email: "a@cfa.fr", nom: "A" },
+    { user_id: new ObjectId(), email: "b@cfa.fr", nom: "B" },
+  ];
+
+  it("garde tous les comptes en production", async () => {
+    expect(await enProduction(async () => selectInvitationDestinataires(destinataires))).toEqual(destinataires);
+  });
+
+  it("n'en garde qu'un hors production", () => {
+    expect(selectInvitationDestinataires(destinataires)).toEqual([destinataires[0]]);
+    expect(selectInvitationDestinataires([])).toEqual([]);
   });
 });
 
@@ -241,8 +271,7 @@ describe("getCfaListToInviteForMissionLocale", () => {
       organisme_id: organismeId,
       organisation_id: new ObjectId(),
       siret: "19040492100016",
-      email_destinataire: "directeur@campus-lac.fr",
-      invitation_token: "token-test",
+      destinataires: [{ user_id: new ObjectId(), email: "camille.durand@campus-lac.fr" }],
       created_at: new Date(),
     } as any);
 
@@ -281,38 +310,19 @@ describe("getCfaListToInviteForMissionLocale", () => {
     expect(result[0].ml_partenaires.count).toBe(1);
   });
 
-  it("récupère le nom du contact CFA depuis usersMigration via l'email de contact", async () => {
+  it("compte tous les comptes actifs du CFA comme destinataires", async () => {
     await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
-    // L'email de contact du référentiel correspond à un utilisateur existant (inscription en cours)
-    await usersMigrationDb().insertOne({
-      _id: new ObjectId(),
-      account_status: "CONFIRMED",
-      password_updated_at: new Date(),
-      connection_history: [],
-      emails: [],
-      created_at: new Date(),
-      civility: "Madame",
-      nom: "Durand",
-      prenom: "Camille",
-      fonction: "Directrice",
-      email: "directeur@campus-lac.fr",
-      telephone: "",
-      password: testPasswordHash,
-      has_accept_cgu_version: "v0.1",
-      organisation_id: new ObjectId(),
-    } as any);
+    await usersMigrationDb().insertMany([
+      cfaAccount({ email: "second@campus-lac.fr" }),
+      // Compte non confirmé : ne sera pas destinataire.
+      cfaAccount({ email: "troisieme@campus-lac.fr", account_status: "PENDING_ADMIN_VALIDATION" }),
+      // Compte d'une autre organisation : hors périmètre.
+      cfaAccount({ email: "ailleurs@autre-cfa.fr", organisation_id: new ObjectId() }),
+    ] as any);
 
     const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
 
-    expect(result[0].destinataire_nom).toBe("Camille Durand");
-  });
-
-  it("laisse destinataire_nom à null si aucun utilisateur ne correspond à l'email de contact", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
-
-    const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
-
-    expect(result[0].destinataire_nom).toBeNull();
+    expect(result[0].nb_destinataires).toBe(2);
   });
 
   it("affiche CFA_ACTIF pour un CFA invité par ce conseiller et désormais actif, même hors liste-rupture", async () => {
@@ -325,8 +335,7 @@ describe("getCfaListToInviteForMissionLocale", () => {
       organisme_id: organismeId,
       organisation_id: new ObjectId(),
       siret: "19040492100016",
-      email_destinataire: "directeur@campus-lac.fr",
-      invitation_token: "token-actif",
+      destinataires: [{ user_id: new ObjectId(), email: "camille.durand@campus-lac.fr" }],
       created_at: new Date(),
     } as any);
     await organisationsDb().updateOne({ _id: cfaOrganisationId }, { $set: { ml_beta_activated_at: new Date() } });
@@ -345,6 +354,7 @@ describe("sendCfaInvitationFromMissionLocale", () => {
   beforeEach(async () => {
     vi.mocked(sendTransactionalEmail).mockResolvedValue({ messageId: "test-message-id" } as any);
     await invitationsDb().deleteMany({});
+    await connexionInvitationsDb().deleteMany({});
     await missionLocaleCfaInvitationsDb().deleteMany({});
     await organisationsDb().deleteMany({});
     await organismesDb().deleteMany({});
@@ -354,7 +364,7 @@ describe("sendCfaInvitationFromMissionLocale", () => {
     await usersMigrationDb().insertOne(cfaAccount() as any);
   });
 
-  it("crée l'invitation, journalise et envoie l'email Brevo avec le conseiller en copie", async () => {
+  it("journalise et envoie l'email Brevo avec le conseiller en copie", async () => {
     const result = await sendCfaInvitationFromMissionLocale(
       missionLocale,
       user,
@@ -362,70 +372,92 @@ describe("sendCfaInvitationFromMissionLocale", () => {
       "Je recommande ce CFA"
     );
 
-    expect(result.email_destinataire).toBe("directeur@campus-lac.fr");
-    expect(result.organisme_nom).toBe("CAMPUS DU LAC");
-
-    const invitation = await invitationsDb().findOne({ email: "directeur@campus-lac.fr" });
-    expect(invitation).toMatchObject({ role: "admin", author_id: userId });
-    expect(invitation?.token).toBeTruthy();
+    expect(result).toEqual({ nb_destinataires: 1, organisme_nom: "CAMPUS DU LAC" });
 
     const log = await missionLocaleCfaInvitationsDb().findOne({ organisme_id: organismeId });
     expect(log).toMatchObject({
       mission_locale_id: mlOrganisationId,
       author_id: userId,
-      email_destinataire: "directeur@campus-lac.fr",
+      organisation_id: cfaOrganisationId,
+      destinataires: [{ email: "camille.durand@campus-lac.fr" }],
       note: "Je recommande ce CFA",
       cc_email: "conseiller@ml.fr",
     });
-    expect(log?.invitation_token).toBe(invitation?.token);
 
     expect(vi.mocked(sendTransactionalEmail)).toHaveBeenCalledWith(
-      "directeur@campus-lac.fr",
+      "camille.durand@campus-lac.fr",
       config.brevo.templateInvitationCfaId,
       expect.objectContaining({
         NOM_CFA: "CAMPUS DU LAC",
         NOM_MISSION_LOCALE: "ML Test",
         NOTE_RECOMMANDATION: "Je recommande ce CFA",
-        LIEN_INVITATION: expect.stringContaining(`invitationToken=${invitation?.token}`),
+        NOM_DESTINATAIRE: "Camille Durand",
       }),
       { cc: ["conseiller@ml.fr"], redirectRecipientInNonProdTo: "conseiller@ml.fr" }
     );
   });
 
-  it("renvoie vers la connexion quand le contact du CFA a déjà un compte", async () => {
-    // Le parcours d'inscription refuserait cet email : le lien d'inscription serait inutilisable.
-    await usersMigrationDb().insertOne({
-      _id: new ObjectId(),
-      account_status: "CONFIRMED",
-      password_updated_at: new Date(),
-      connection_history: [],
-      emails: [],
-      created_at: new Date(),
-      nom: "Durand",
-      prenom: "Camille",
-      email: "DIRECTEUR@campus-lac.fr",
-      telephone: "",
-      password: testPasswordHash,
-      has_accept_cgu_version: "v0.1",
-      organisation_id: new ObjectId(),
-    } as any);
-
+  it("envoie un lien de connexion personnalisé, jamais un lien d'inscription", async () => {
     await sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString());
 
+    const token = await connexionInvitationsDb().findOne({ email: "camille.durand@campus-lac.fr" });
+    expect(token?.source).toBe("invitation-ml");
+
     const params = vi.mocked(sendTransactionalEmail).mock.calls.at(-1)?.[2] as Record<string, unknown>;
-    expect(params.LIEN_INVITATION).toContain("/auth/connexion");
-    expect(params.LIEN_INVITATION).not.toContain("invitationToken");
+    expect(params.LIEN_INVITATION).toBe(getPublicUrl(`/auth/connexion?invitationToken=${token?.token}`));
+    expect(params.LIEN_INVITATION).not.toContain("inscription-cfa");
+    expect(await invitationsDb().countDocuments({})).toBe(0);
   });
 
-  it("échoue si le CFA n'a aucun email de contact", async () => {
-    await organismesDb().updateOne({ _id: organismeId }, { $set: { contacts_from_referentiel: [] } });
+  it("écrit à chaque compte du CFA, et ne met le conseiller en copie qu'une fois", async () => {
+    await usersMigrationDb().insertMany([
+      cfaAccount({ email: "second@campus-lac.fr", prenom: "Bruno", nom: "Petit" }),
+      cfaAccount({ email: "troisieme@campus-lac.fr", prenom: "Awa", nom: "Sow" }),
+    ] as any);
 
-    await expect(sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString())).rejects.toThrow(
-      /email de contact/i
+    const result = await enProduction(() =>
+      sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString())
     );
 
-    expect(await missionLocaleCfaInvitationsDb().countDocuments({})).toBe(0);
-    expect(vi.mocked(sendTransactionalEmail)).not.toHaveBeenCalled();
+    expect(result.nb_destinataires).toBe(3);
+
+    const calls = vi.mocked(sendTransactionalEmail).mock.calls;
+    expect(calls.map((c) => c[0]).sort()).toEqual([
+      "camille.durand@campus-lac.fr",
+      "second@campus-lac.fr",
+      "troisieme@campus-lac.fr",
+    ]);
+    expect(calls.filter((c) => c[3]?.cc?.length)).toHaveLength(1);
+    // Chaque destinataire reçoit son propre lien.
+    expect(new Set(calls.map((c) => c[2].LIEN_INVITATION)).size).toBe(3);
+
+    const log = await missionLocaleCfaInvitationsDb().findOne({ organisme_id: organismeId });
+    expect(log?.destinataires).toHaveLength(3);
+  });
+
+  it("n'envoie qu'un seul email hors production", async () => {
+    await usersMigrationDb().insertMany([
+      cfaAccount({ email: "second@campus-lac.fr" }),
+      cfaAccount({ email: "troisieme@campus-lac.fr" }),
+    ] as any);
+
+    const result = await sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString());
+
+    expect(result.nb_destinataires).toBe(1);
+    expect(vi.mocked(sendTransactionalEmail)).toHaveBeenCalledTimes(1);
+  });
+
+  it("ne journalise que les destinataires effectivement servis", async () => {
+    await usersMigrationDb().insertOne(cfaAccount({ email: "second@campus-lac.fr" }) as any);
+    vi.mocked(sendTransactionalEmail).mockResolvedValueOnce(undefined as any);
+
+    const result = await enProduction(() =>
+      sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString())
+    );
+
+    expect(result.nb_destinataires).toBe(1);
+    const log = await missionLocaleCfaInvitationsDb().findOne({ organisme_id: organismeId });
+    expect(log?.destinataires).toHaveLength(1);
   });
 
   it("échoue si le CFA ne transmet pas ses effectifs", async () => {

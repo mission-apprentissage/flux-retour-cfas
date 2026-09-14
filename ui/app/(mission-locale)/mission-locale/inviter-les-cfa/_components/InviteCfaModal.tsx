@@ -30,6 +30,7 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const nbDestinataires = cfa?.nb_destinataires ?? 0;
 
   const resetState = useCallback(() => {
     setNote("");
@@ -110,8 +111,8 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
           className="fr-mb-2w"
           description={
             <>
-              Environnement de test (<strong>{publicConfig.env}</strong>) : cette invitation ne sera pas envoyée au CFA,
-              mais à votre adresse <strong>{user.email}</strong>.
+              Environnement de test (<strong>{publicConfig.env}</strong>) : cette invitation ne sera pas envoyée au CFA.
+              Un seul email partira, vers votre adresse <strong>{user.email}</strong>.
             </>
           }
         />
@@ -125,15 +126,18 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
           note={note}
           nbMl={cfa?.ml_partenaires?.count ?? 0}
           mlNoms={cfa?.ml_partenaires?.noms ?? []}
-          destinataireNom={cfa?.destinataire_nom ?? null}
         />
       ) : (
         <>
           <p>
-            L’invitation sera envoyée directement{" "}
-            {cfa?.destinataire_nom ? <strong>à {cfa.destinataire_nom}</strong> : "au CFA"}. Nous avons préparé un
-            message automatique que vous pouvez compléter avec une note ou votre message de recommandation si vous le
-            souhaitez.
+            L’invitation sera envoyée{" "}
+            <strong>
+              {nbDestinataires > 1
+                ? `aux ${nbDestinataires} personnes disposant d’un compte pour ce CFA`
+                : "à la personne disposant d’un compte pour ce CFA"}
+            </strong>
+            . Nous avons préparé un message automatique que vous pouvez compléter avec une note ou votre message de
+            recommandation si vous le souhaitez.
           </p>
           <Input
             textArea

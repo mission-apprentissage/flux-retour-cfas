@@ -19,9 +19,10 @@ const zMissionLocaleCfaInvitation = z.object({
   organisation_id: zObjectId.describe("Organisation ORGANISME_FORMATION liée (= invitations.organisation_id)"),
   siret: z.string().describe("SIRET du CFA au moment de l'envoi (dénormalisé pour traçabilité)"),
   uai: z.string().nullish().describe("UAI du CFA au moment de l'envoi (dénormalisé)"),
-  email_destinataire: z.string().describe("Email de contact du CFA utilisé pour l'envoi"),
+  destinataires: z
+    .array(z.object({ user_id: zObjectId, email: z.string() }))
+    .describe("Comptes TBA du CFA auxquels l'invitation a effectivement été envoyée"),
   note: z.string().nullish().describe("Note de recommandation facultative rédigée par le conseiller"),
-  invitation_token: z.string().describe("Token de l'entrée `invitations` créée pour le parcours d'inscription du CFA"),
   cc_email: z.string().nullish().describe("Email du conseiller mis en copie de l'invitation"),
   created_at: z.date({ description: "Date de création en base de données" }),
 });

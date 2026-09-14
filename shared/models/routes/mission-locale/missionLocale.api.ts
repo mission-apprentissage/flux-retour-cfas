@@ -114,8 +114,8 @@ export interface ICfaToInvite {
   // Sous-ensemble des jeunes en rupture soumis à l'obligation de formation (16-18 ans)
   nb_jeunes_obligation_formation: number;
   statut: CFA_INVITATION_STATUT;
-  // Nom complet du contact CFA s'il existe déjà dans usersMigration (sinon null → salutation générique)
-  destinataire_nom: string | null;
+  // Nombre de comptes TBA du CFA qui recevront l'invitation
+  nb_destinataires: number;
   // Missions Locales actives de la région du CFA, affichées dans l'email d'invitation
   ml_partenaires: {
     count: number;
