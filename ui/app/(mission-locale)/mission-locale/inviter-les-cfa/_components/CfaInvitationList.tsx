@@ -23,12 +23,14 @@ export function CfaInvitationList({ invitations, showEngagementCallout, onInvite
     <section className={styles.invitationsSection}>
       <h2 className={styles.sectionTitle}>Invitez les CFA de votre territoire</h2>
       <p className={styles.sectionIntro}>
-        Pour inviter un CFA à rejoindre le Tableau de bord de l’apprentissage cliquez sur “Inviter ce CFA”, vous pourrez
-        ajouter votre propre message de recommandation. L’invitation sera directement envoyée au CFA.
+        Pour inviter un CFA à collaborer avec vous sur le Tableau de bord de l’apprentissage cliquez sur “Inviter ce
+        CFA”, vous pourrez ajouter votre propre message de recommandation. L’invitation sera directement envoyée au CFA.
       </p>
 
       {invitations.length === 0 ? (
-        <p className={styles.empty}>Aucun CFA à inviter pour le moment.</p>
+        <p className={styles.empty}>
+          Aucun CFA de votre territoire ne dispose encore d’un compte sur le Tableau de bord de l’apprentissage.
+        </p>
       ) : (
         <div className={styles.invitationsList}>
           {invitations.map((cfa, index) => (

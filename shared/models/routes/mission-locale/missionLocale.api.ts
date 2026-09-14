@@ -102,8 +102,6 @@ export enum CFA_INVITATION_STATUT {
   INVITATION_ENVOYEE = "INVITATION_ENVOYEE",
   // Le CFA a un compte actif sur le Tableau de bord.
   CFA_ACTIF = "CFA_ACTIF",
-  // CFA non éligible techniquement ou sans email de contact connu : non invitable pour le moment.
-  BIENTOT_DISPONIBLE = "BIENTOT_DISPONIBLE",
 }
 
 export interface ICfaToInvite {

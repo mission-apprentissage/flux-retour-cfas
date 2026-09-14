@@ -11,7 +11,6 @@ interface Props {
 
 const CARD_STATUT_CLASSNAME: Partial<Record<CFA_INVITATION_STATUT, string>> = {
   [CFA_INVITATION_STATUT.CFA_ACTIF]: styles.cardActive,
-  [CFA_INVITATION_STATUT.BIENTOT_DISPONIBLE]: styles.cardSoon,
 };
 
 export function CfaInvitationCard({ cfa, onInvite }: Props) {
@@ -24,11 +23,6 @@ export function CfaInvitationCard({ cfa, onInvite }: Props) {
         <div>
           <p className={styles.cardName}>{cfa.nom ?? "CFA"}</p>
           {cfa.adresse && <p className={styles.cardAddress}>{cfa.adresse}</p>}
-          {cfa.statut === CFA_INVITATION_STATUT.BIENTOT_DISPONIBLE && (
-            <p className={styles.cardUnavailableReason}>
-              Pour des raisons techniques, ce CFA ne peut pas encore être invité à utiliser le Tableau de bord
-            </p>
-          )}
         </div>
       </div>
       <div className={styles.cardStats}>

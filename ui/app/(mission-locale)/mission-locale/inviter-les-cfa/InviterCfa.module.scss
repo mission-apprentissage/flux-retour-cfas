@@ -125,15 +125,6 @@
 }
 
 // CFA non invitable : l'en-tête est atténué, les compteurs restent lisibles.
-.cardSoon {
-  .cardIcon,
-  .cardName,
-  .cardAddress,
-  .cardUnavailableReason {
-    color: var(--text-disabled-grey);
-  }
-}
-
 .cardInfo {
   display: flex;
   flex: 1 1 40%;
@@ -158,13 +149,6 @@
 }
 
 .cardAddress {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--text-mention-grey);
-}
-
-.cardUnavailableReason {
-  max-width: 30rem;
   margin: 0;
   font-size: 0.875rem;
   color: var(--text-mention-grey);
@@ -226,11 +210,6 @@
 .statusSent {
   color: var(--artwork-major-blue-france);
   background-color: var(--background-contrast-blue-france);
-}
-
-.statusSoon {
-  color: var(--pink-tuile-main-556);
-  background-color: var(--background-contrast-orange-terre-battue);
 }
 
 .statusText {

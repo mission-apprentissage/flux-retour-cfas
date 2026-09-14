@@ -706,29 +706,69 @@ export const getActiveMissionLocalesByRegions = async (regions: string[]): Promi
     .toArray();
 };
 
+export interface ICfaAccounts {
+  organisation_id: ObjectId;
+  /** Date d'activation « mission locale » du CFA, ou `null` s'il n'a pas encore activé la collaboration. */
+  ml_beta_activated_at: Date | null;
+  /** Utilisateurs du CFA disposant d'un compte actif (`CONFIRMED`), destinataires d'une invitation. */
+  destinataires: Array<{ user_id: ObjectId; email: string; nom: string | null }>;
+}
+
 /**
- * Dates d'activation « mission locale » (`ml_beta_activated_at`) des organismes de formation donnés,
- * lues en direct sur les organisations (source vivante, contrairement au snapshot dénormalisé des effectifs).
- * Clé de la map = `organisme_id` (string) ; absent ⇒ CFA non activé. S'appuie sur l'index
- * `{ organisme_id, type, ml_beta_activated_at }`.
+ * Comptes actifs et état d'activation des organismes de formation donnés, lus en direct sur les
+ * organisations.
  */
-export const getMlBetaActivationDatesByOrganismeIds = async (organismeIds: string[]): Promise<Map<string, Date>> => {
-  const map = new Map<string, Date>();
+export const getCfaAccountsByOrganismeIds = async (organismeIds: string[]): Promise<Map<string, ICfaAccounts>> => {
+  const map = new Map<string, ICfaAccounts>();
   const ids = [...new Set(organismeIds.filter(Boolean))];
   if (ids.length === 0) {
     return map;
   }
+
   const organisations = await organisationsDb()
     .find<IOrganisationOrganismeFormation>(
-      { type: "ORGANISME_FORMATION", organisme_id: { $in: ids }, ml_beta_activated_at: { $exists: true, $ne: null } },
+      { type: "ORGANISME_FORMATION", organisme_id: { $in: ids } },
       { projection: { organisme_id: 1, ml_beta_activated_at: 1 } }
     )
     .toArray();
+
+  const organismeIdByOrganisationId = new Map<string, string>();
   for (const organisation of organisations) {
-    if (organisation.organisme_id && organisation.ml_beta_activated_at) {
-      map.set(organisation.organisme_id, organisation.ml_beta_activated_at);
+    if (!organisation.organisme_id) {
+      continue;
     }
+    organismeIdByOrganisationId.set(organisation._id.toString(), organisation.organisme_id);
+    map.set(organisation.organisme_id, {
+      organisation_id: organisation._id,
+      ml_beta_activated_at: organisation.ml_beta_activated_at ?? null,
+      destinataires: [],
+    });
   }
+
+  if (organisations.length === 0) {
+    return map;
+  }
+
+  const users = await usersMigrationDb()
+    .find(
+      { organisation_id: { $in: organisations.map((o) => o._id) }, account_status: "CONFIRMED" },
+      { projection: { _id: 1, email: 1, prenom: 1, nom: 1, organisation_id: 1 } }
+    )
+    .toArray();
+
+  for (const user of users) {
+    const organismeId = organismeIdByOrganisationId.get(user.organisation_id.toString());
+    const entry = organismeId ? map.get(organismeId) : undefined;
+    if (!entry) {
+      continue;
+    }
+    entry.destinataires.push({
+      user_id: user._id,
+      email: user.email,
+      nom: [user.prenom, user.nom].filter(Boolean).join(" ") || null,
+    });
+  }
+
   return map;
 };
 

@@ -26,16 +26,6 @@ export function CfaInvitationStatusCta({ cfa, onInvite }: Props) {
         </span>
       );
 
-    case CFA_INVITATION_STATUT.BIENTOT_DISPONIBLE:
-      return (
-        <>
-          <span className={`fr-badge ${styles.statusBadge} ${styles.statusSoon}`}>
-            <i className="fr-icon-pause-circle-fill fr-icon--sm" aria-hidden="true" />
-            <span className={styles.statusText}>CFA bientôt disponible</span>
-          </span>
-        </>
-      );
-
     case CFA_INVITATION_STATUT.INVITER:
     default:
       return (

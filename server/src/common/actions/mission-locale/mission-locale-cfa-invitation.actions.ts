@@ -21,11 +21,11 @@ import config from "@/config";
 import { fetchRupturantsStatsByOrgId } from "../brevo/contacts/tba-contacts";
 import {
   getActiveMissionLocalesByRegions,
-  getMlBetaActivationDatesByOrganismeIds,
+  getCfaAccountsByOrganismeIds,
   getOrganisationOrganismeByOrganismeId,
+  ICfaAccounts,
   INVITATION_EXPIRATION_MS,
 } from "../organisations.actions";
-import { checkActivationEligibility, findEligibleOrganismes } from "../organismes/deca-cfa-eligibility";
 import { isEmailAlreadyUsed } from "../users.actions";
 
 import { missionLocaleBaseAggregation } from "./mission-locale.actions";
@@ -50,6 +50,7 @@ interface CfaAggRow {
       region?: string | null;
     } | null;
     contacts_from_referentiel?: Array<{ email?: string | null; confirmation_referentiel?: boolean | null }> | null;
+    first_transmission_date?: Date | null;
   };
   invited_by_me: boolean;
 }
@@ -111,14 +112,25 @@ async function getDestinataireNomsByEmail(emails: string[]): Promise<Map<string,
 }
 
 /**
+ * Un CFA est invitable s'il transmet ses effectifs au Tableau de bord et si au moins une personne
+ * y dispose d'un compte actif
+ */
+export function isCfaInvitable(
+  organisme: { first_transmission_date?: Date | null },
+  accounts?: Pick<ICfaAccounts, "destinataires">
+): boolean {
+  return Boolean(organisme.first_transmission_date) && (accounts?.destinataires.length ?? 0) > 0;
+}
+
+/**
  * Détermine le statut d'invitation d'un CFA pour le conseiller connecté.
- * Priorité : CFA actif > déjà invité par ce conseiller > invitable > bientôt disponible.
+ * Priorité : CFA actif > déjà invité par ce conseiller > invitable.
+ *
+ * Tous les CFA remontés sont invitables par construction (cf. `isCfaInvitable`)
  */
 export function computeCfaInvitationStatut(params: {
   mlBetaActivatedAt?: Date | null;
   invitedByMe: boolean;
-  hasContactEmail: boolean;
-  isEligible: boolean;
 }): CFA_INVITATION_STATUT {
   if (params.mlBetaActivatedAt) {
     return CFA_INVITATION_STATUT.CFA_ACTIF;
@@ -126,9 +138,7 @@ export function computeCfaInvitationStatut(params: {
   if (params.invitedByMe) {
     return CFA_INVITATION_STATUT.INVITATION_ENVOYEE;
   }
-  return params.hasContactEmail && params.isEligible
-    ? CFA_INVITATION_STATUT.INVITER
-    : CFA_INVITATION_STATUT.BIENTOT_DISPONIBLE;
+  return CFA_INVITATION_STATUT.INVITER;
 }
 
 /**
@@ -204,6 +214,7 @@ export async function getCfaListToInviteForMissionLocale(
             enseigne: "$organisme.enseigne",
             adresse: "$organisme.adresse",
             contacts_from_referentiel: "$organisme.contacts_from_referentiel",
+            first_transmission_date: "$organisme.first_transmission_date",
           },
           invited_by_me: { $gt: [{ $size: "$_my_invitation" }, 0] },
         },
@@ -218,15 +229,12 @@ export async function getCfaListToInviteForMissionLocale(
   const myInvitedOrganismeIds = new Set(myInvitedDocs.map((doc) => doc.organisme_id.toString()));
 
   const ruptureIds = new Set(ruptureRows.map((row) => row.organisme_id.toString()));
-  const activatedAtByOrganismeId = await getMlBetaActivationDatesByOrganismeIds([
-    ...ruptureIds,
-    ...myInvitedOrganismeIds,
-  ]);
+  const accountsByOrganismeId = await getCfaAccountsByOrganismeIds([...ruptureIds, ...myInvitedOrganismeIds]);
+  const mlBetaActivatedAt = (organismeId: string) =>
+    accountsByOrganismeId.get(organismeId)?.ml_beta_activated_at ?? null;
 
   // CFA invités par ce conseiller, désormais actifs mais absents de la liste-rupture → rajoutés en CFA_ACTIF.
-  const extraActiveInvitedIds = [...myInvitedOrganismeIds].filter(
-    (id) => activatedAtByOrganismeId.has(id) && !ruptureIds.has(id)
-  );
+  const extraActiveInvitedIds = [...myInvitedOrganismeIds].filter((id) => mlBetaActivatedAt(id) && !ruptureIds.has(id));
   const extraOrganismes = extraActiveInvitedIds.length
     ? await organismesDb()
         .find(
@@ -240,6 +248,7 @@ export async function getCfaListToInviteForMissionLocale(
               enseigne: 1,
               adresse: 1,
               contacts_from_referentiel: 1,
+              first_transmission_date: 1,
             },
           }
         )
@@ -253,12 +262,12 @@ export async function getCfaListToInviteForMissionLocale(
     organisme: organisme as unknown as CfaAggRow["organisme"],
   }));
 
-  const rows = [...ruptureRows, ...extraRows];
-
-  // Ensemble des organismes éligibles techniquement à la collaboration. On restreint le calcul
-  // aux organismes concernés (déjà connus via `rows`) au lieu de scanner toute la base.
-  const eligibleIds = new Set(
-    (await findEligibleOrganismes(rows.map((row) => row.organisme_id))).map((o) => o._id.toString())
+  // Un CFA n'est proposé que s'il est invitable, ou s'il a déjà activé la collaboration — on garde
+  // alors sa carte pour que le conseiller voie le résultat de son invitation.
+  const rows = [...ruptureRows, ...extraRows].filter(
+    (row) =>
+      isCfaInvitable(row.organisme, accountsByOrganismeId.get(row.organisme_id.toString())) ||
+      mlBetaActivatedAt(row.organisme_id.toString())
   );
 
   // Missions Locales actives du territoire (par région du CFA) affichées dans l'email d'invitation.
@@ -282,10 +291,8 @@ export async function getCfaListToInviteForMissionLocale(
         nb_jeunes_rupture: row.nb_jeunes_rupture,
         nb_jeunes_obligation_formation: row.nb_jeunes_obligation_formation,
         statut: computeCfaInvitationStatut({
-          mlBetaActivatedAt: activatedAtByOrganismeId.get(row.organisme_id.toString()) ?? null,
+          mlBetaActivatedAt: mlBetaActivatedAt(row.organisme_id.toString()),
           invitedByMe: row.invited_by_me,
-          hasContactEmail: (row.organisme.contacts_from_referentiel ?? []).some((c) => Boolean(c?.email)),
-          isEligible: eligibleIds.has(row.organisme_id.toString()),
         }),
         destinataire_nom: contactEmail ? (destinataireNomsByEmail.get(contactEmail) ?? null) : null,
         ml_partenaires: { count: noms.length, noms },
@@ -313,16 +320,12 @@ export async function sendCfaInvitationFromMissionLocale(
     throw Boom.notFound("CFA introuvable");
   }
 
-  // Cohérence avec la liste : on vérifie les critères techniques d'éligibilité (hors "déjà actif",
-  // qui correspond au statut CFA_ACTIF côté liste).
-  const eligibility = await checkActivationEligibility(organismeId);
-  const technicallyEligible =
-    eligibility.checks.exists_with_siret_uai.passed &&
-    eligibility.checks.nature.passed &&
-    eligibility.checks.no_formateurs_tiers.passed &&
-    eligibility.checks.has_effectifs.passed;
-  if (!technicallyEligible) {
-    throw Boom.badRequest("Ce CFA n'est pas encore éligible à l'invitation.");
+  // Cohérence avec la liste : mêmes critères d'invitabilité que ceux qui décident de son affichage.
+  const accounts = (await getCfaAccountsByOrganismeIds([organismeId])).get(organismeId);
+  if (!isCfaInvitable(organisme, accounts)) {
+    throw Boom.badRequest(
+      "Ce CFA ne peut pas être invité : il ne transmet pas ses effectifs ou n'a aucun compte actif."
+    );
   }
 
   // Email de contact du directeur : on privilégie un email confirmé dans le référentiel.

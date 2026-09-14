@@ -10,9 +10,9 @@ import { describe, it, beforeEach, expect, vi } from "vitest";
 import {
   computeCfaInvitationStatut,
   getCfaListToInviteForMissionLocale,
+  isCfaInvitable,
   sendCfaInvitationFromMissionLocale,
 } from "@/common/actions/mission-locale/mission-locale-cfa-invitation.actions";
-import { checkActivationEligibility, findEligibleOrganismes } from "@/common/actions/organismes/deca-cfa-eligibility";
 import { DATE_START_RUPTURES } from "@/common/actions/shared/rupture-pipeline.utils";
 import {
   invitationsDb,
@@ -30,19 +30,20 @@ import { useMongo } from "@tests/jest/setupMongo";
 import { id, testPasswordHash } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/brevo/brevo");
-vi.mock("@/common/actions/organismes/deca-cfa-eligibility");
 
 const anneeScolaire = getAnneeScolaireListFromDateRange(DATE_START_RUPTURES, new Date())[0];
 
 const organismeId = new ObjectId(id(1));
 const mlOrganisationId = new ObjectId(id(2));
 const userId = new ObjectId(id(3));
+const cfaOrganisationId = new ObjectId(id(4));
 
 const sampleOrganisme = {
   _id: organismeId,
   ...createRandomOrganisme({ siret: "19040492100016" }),
   uai: "0755805C",
   nom: "CAMPUS DU LAC",
+  first_transmission_date: new Date("2025-09-01"),
   adresse: {
     departement: "33",
     region: "75",
@@ -70,18 +71,35 @@ const user = {
   prenom: "Alexandra",
 } as unknown as AuthContext;
 
-const eligibleResult = {
-  eligible: true,
-  alreadyActive: false,
-  checks: {
-    exists_with_siret_uai: { passed: true },
-    nature: { passed: true },
-    no_formateurs_tiers: { passed: true },
-    has_effectifs: { passed: true },
-    not_already_active: { passed: true },
-  },
-  organisme: null,
+/** Organisation ORGANISME_FORMATION du CFA : sans elle, aucun compte ne peut lui être rattaché. */
+const cfaOrganisation = {
+  _id: cfaOrganisationId,
+  type: "ORGANISME_FORMATION",
+  siret: "19040492100016",
+  uai: "0755805C",
+  organisme_id: organismeId.toString(),
+  created_at: new Date(),
 };
+
+/** Compte CFA : c'est sa présence en `CONFIRMED` qui rend le CFA invitable. */
+function cfaAccount(overrides: Record<string, any> = {}) {
+  return {
+    _id: new ObjectId(),
+    account_status: "CONFIRMED",
+    password_updated_at: new Date(),
+    connection_history: [],
+    emails: [],
+    created_at: new Date(),
+    nom: "Durand",
+    prenom: "Camille",
+    email: "camille.durand@campus-lac.fr",
+    telephone: "",
+    password: testPasswordHash,
+    has_accept_cgu_version: "v0.1",
+    organisation_id: cfaOrganisationId,
+    ...overrides,
+  };
+}
 
 async function createMlEffectifDoc(overrides: Record<string, any> = {}, ageAnnees = 20) {
   const now = new Date();
@@ -115,58 +133,38 @@ async function createMlEffectifDoc(overrides: Record<string, any> = {}, ageAnnee
 
 describe("computeCfaInvitationStatut", () => {
   it("retourne CFA_ACTIF dès que le CFA est activé (prioritaire)", () => {
-    expect(
-      computeCfaInvitationStatut({
-        mlBetaActivatedAt: new Date(),
-        invitedByMe: true,
-        hasContactEmail: false,
-        isEligible: false,
-      })
-    ).toBe(CFA_INVITATION_STATUT.CFA_ACTIF);
+    expect(computeCfaInvitationStatut({ mlBetaActivatedAt: new Date(), invitedByMe: true })).toBe(
+      CFA_INVITATION_STATUT.CFA_ACTIF
+    );
   });
 
   it("retourne INVITATION_ENVOYEE si ce conseiller a déjà invité", () => {
-    expect(
-      computeCfaInvitationStatut({
-        mlBetaActivatedAt: null,
-        invitedByMe: true,
-        hasContactEmail: true,
-        isEligible: true,
-      })
-    ).toBe(CFA_INVITATION_STATUT.INVITATION_ENVOYEE);
+    expect(computeCfaInvitationStatut({ mlBetaActivatedAt: null, invitedByMe: true })).toBe(
+      CFA_INVITATION_STATUT.INVITATION_ENVOYEE
+    );
   });
 
-  it("retourne INVITER si éligible et email connu", () => {
-    expect(
-      computeCfaInvitationStatut({
-        mlBetaActivatedAt: null,
-        invitedByMe: false,
-        hasContactEmail: true,
-        isEligible: true,
-      })
-    ).toBe(CFA_INVITATION_STATUT.INVITER);
+  it("retourne INVITER sinon", () => {
+    expect(computeCfaInvitationStatut({ mlBetaActivatedAt: null, invitedByMe: false })).toBe(
+      CFA_INVITATION_STATUT.INVITER
+    );
+  });
+});
+
+describe("isCfaInvitable", () => {
+  const destinataires = [{ user_id: new ObjectId(), email: "a@cfa.fr", nom: "A" }];
+
+  it("est invitable s'il transmet et a au moins un compte actif", () => {
+    expect(isCfaInvitable({ first_transmission_date: new Date() }, { destinataires })).toBe(true);
   });
 
-  it("retourne BIENTOT_DISPONIBLE sans email de contact", () => {
-    expect(
-      computeCfaInvitationStatut({
-        mlBetaActivatedAt: null,
-        invitedByMe: false,
-        hasContactEmail: false,
-        isEligible: true,
-      })
-    ).toBe(CFA_INVITATION_STATUT.BIENTOT_DISPONIBLE);
+  it("n'est pas invitable s'il ne transmet pas", () => {
+    expect(isCfaInvitable({ first_transmission_date: null }, { destinataires })).toBe(false);
   });
 
-  it("retourne BIENTOT_DISPONIBLE si non éligible techniquement", () => {
-    expect(
-      computeCfaInvitationStatut({
-        mlBetaActivatedAt: null,
-        invitedByMe: false,
-        hasContactEmail: true,
-        isEligible: false,
-      })
-    ).toBe(CFA_INVITATION_STATUT.BIENTOT_DISPONIBLE);
+  it("n'est pas invitable sans compte actif", () => {
+    expect(isCfaInvitable({ first_transmission_date: new Date() }, { destinataires: [] })).toBe(false);
+    expect(isCfaInvitable({ first_transmission_date: new Date() }, undefined)).toBe(false);
   });
 });
 
@@ -174,14 +172,14 @@ describe("getCfaListToInviteForMissionLocale", () => {
   useMongo();
 
   beforeEach(async () => {
-    vi.mocked(findEligibleOrganismes).mockResolvedValue([{ _id: organismeId } as any]);
     await missionLocaleEffectifsDb().deleteMany({});
     await missionLocaleCfaInvitationsDb().deleteMany({});
     await organisationsDb().deleteMany({});
     await organismesDb().deleteMany({});
     await usersMigrationDb().deleteMany({});
     await organismesDb().insertOne(sampleOrganisme as any);
-    await organisationsDb().insertOne(missionLocale as any);
+    await organisationsDb().insertMany([missionLocale, cfaOrganisation] as any);
+    await usersMigrationDb().insertOne(cfaAccount() as any);
   });
 
   it("compte les jeunes en rupture par CFA et renvoie le statut INVITER", async () => {
@@ -210,6 +208,28 @@ describe("getCfaListToInviteForMissionLocale", () => {
     expect(result).toHaveLength(1);
     expect(result[0].nb_jeunes_rupture).toBe(2);
     expect(result[0].nb_jeunes_obligation_formation).toBe(1);
+  });
+
+  it("exclut un CFA qui ne transmet pas ses effectifs", async () => {
+    await organismesDb().updateOne({ _id: organismeId }, { $unset: { first_transmission_date: "" } });
+    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+
+    expect(await getCfaListToInviteForMissionLocale(missionLocale, userId)).toHaveLength(0);
+  });
+
+  it("exclut un CFA sans aucun compte actif sur le Tableau de bord", async () => {
+    await usersMigrationDb().deleteMany({});
+    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+
+    expect(await getCfaListToInviteForMissionLocale(missionLocale, userId)).toHaveLength(0);
+  });
+
+  it("exclut un CFA dont les comptes ne sont pas encore confirmés", async () => {
+    await usersMigrationDb().deleteMany({});
+    await usersMigrationDb().insertOne(cfaAccount({ account_status: "PENDING_EMAIL_VALIDATION" }) as any);
+    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+
+    expect(await getCfaListToInviteForMissionLocale(missionLocale, userId)).toHaveLength(0);
   });
 
   it("renvoie INVITATION_ENVOYEE quand ce conseiller a déjà invité ce CFA", async () => {
@@ -309,15 +329,7 @@ describe("getCfaListToInviteForMissionLocale", () => {
       invitation_token: "token-actif",
       created_at: new Date(),
     } as any);
-    await organisationsDb().insertOne({
-      _id: new ObjectId(),
-      type: "ORGANISME_FORMATION",
-      siret: "19040492100016",
-      uai: "0755805C",
-      organisme_id: organismeId.toString(),
-      ml_beta_activated_at: new Date(),
-      created_at: new Date(),
-    } as any);
+    await organisationsDb().updateOne({ _id: cfaOrganisationId }, { $set: { ml_beta_activated_at: new Date() } });
 
     const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
 
@@ -332,14 +344,14 @@ describe("sendCfaInvitationFromMissionLocale", () => {
 
   beforeEach(async () => {
     vi.mocked(sendTransactionalEmail).mockResolvedValue({ messageId: "test-message-id" } as any);
-    vi.mocked(checkActivationEligibility).mockResolvedValue(eligibleResult as any);
     await invitationsDb().deleteMany({});
     await missionLocaleCfaInvitationsDb().deleteMany({});
     await organisationsDb().deleteMany({});
     await organismesDb().deleteMany({});
     await usersMigrationDb().deleteMany({});
     await organismesDb().insertOne(sampleOrganisme as any);
-    await organisationsDb().insertOne(missionLocale as any);
+    await organisationsDb().insertMany([missionLocale, cfaOrganisation] as any);
+    await usersMigrationDb().insertOne(cfaAccount() as any);
   });
 
   it("crée l'invitation, journalise et envoie l'email Brevo avec le conseiller en copie", async () => {
@@ -416,14 +428,21 @@ describe("sendCfaInvitationFromMissionLocale", () => {
     expect(vi.mocked(sendTransactionalEmail)).not.toHaveBeenCalled();
   });
 
-  it("échoue si le CFA n'est pas éligible techniquement", async () => {
-    vi.mocked(checkActivationEligibility).mockResolvedValue({
-      ...eligibleResult,
-      checks: { ...eligibleResult.checks, has_effectifs: { passed: false } },
-    } as any);
+  it("échoue si le CFA ne transmet pas ses effectifs", async () => {
+    await organismesDb().updateOne({ _id: organismeId }, { $unset: { first_transmission_date: "" } });
 
     await expect(sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString())).rejects.toThrow(
-      /éligible/i
+      /ne peut pas être invité/i
+    );
+
+    expect(vi.mocked(sendTransactionalEmail)).not.toHaveBeenCalled();
+  });
+
+  it("échoue si le CFA n'a plus aucun compte actif", async () => {
+    await usersMigrationDb().deleteMany({});
+
+    await expect(sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString())).rejects.toThrow(
+      /ne peut pas être invité/i
     );
 
     expect(vi.mocked(sendTransactionalEmail)).not.toHaveBeenCalled();
