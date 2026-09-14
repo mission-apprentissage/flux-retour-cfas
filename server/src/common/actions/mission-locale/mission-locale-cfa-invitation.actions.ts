@@ -14,9 +14,11 @@ import { AuthContext } from "@/common/model/internal/AuthContext";
 import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
 import { generateKey } from "@/common/utils/cryptoUtils";
 import { getPublicUrl } from "@/common/utils/emailsUtils";
+import { formatListeTronquee } from "@/common/utils/listUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 import config from "@/config";
 
+import { fetchRupturantsStatsByOrgId } from "../brevo/contacts/tba-contacts";
 import {
   getActiveMissionLocalesByRegions,
   getMlBetaActivationDatesByOrganismeIds,
@@ -86,7 +88,7 @@ function pickContactEmail(
 }
 
 /**
- * Nom complet (« Prénom Nom ») des contacts CFA déjà présents dans usersMigration, indexés par email.
+ * Nom complet (" Prénom Nom ") des contacts CFA déjà présents dans usersMigration, indexés par email.
  * Permet de personnaliser la salutation de l'email quand le directeur a déjà un compte (ex. inscription en cours).
  */
 async function getDestinataireNomsByEmail(emails: string[]): Promise<Map<string, string>> {
@@ -209,15 +211,12 @@ export async function getCfaListToInviteForMissionLocale(
     ])
     .toArray()) as CfaAggRow[];
 
-  // CFA déjà invités par ce conseiller (journal durable) : on les affiche en permanence s'ils sont
-  // désormais actifs, même s'ils ont quitté la liste-rupture (PRD : « CFA activé grâce à vous »).
+  // CFA déjà invités par ce conseiller
   const myInvitedDocs = await missionLocaleCfaInvitationsDb()
     .find({ mission_locale_id: missionLocaleId, author_id: userId }, { projection: { organisme_id: 1 } })
     .toArray();
   const myInvitedOrganismeIds = new Set(myInvitedDocs.map((doc) => doc.organisme_id.toString()));
 
-  // Activation « ml_beta » lue en direct sur les organisations (source vivante, et non le snapshot retardé)
-  // pour tous les organismes concernés : liste-rupture ∪ invités par ce conseiller.
   const ruptureIds = new Set(ruptureRows.map((row) => row.organisme_id.toString()));
   const activatedAtByOrganismeId = await getMlBetaActivationDatesByOrganismeIds([
     ...ruptureIds,
@@ -345,6 +344,10 @@ export async function sendCfaInvitationFromMissionLocale(
     ? ((await getMlNomsByRegion([organisme.adresse.region])).get(organisme.adresse.region) ?? [])
     : [];
 
+  // Jeunes en rupture de l'établissement (toutes ML confondues)
+  const nbJeunesEnRupture =
+    (await fetchRupturantsStatsByOrgId([organisme._id])).get(String(organisme._id))?.nb_jeunes_rupture ?? 0;
+
   // Nom du contact s'il a déjà un compte (usersMigration), pour personnaliser la salutation de l'email.
   const destinataireNom = (await getDestinataireNomsByEmail([email_destinataire])).get(email_destinataire) ?? "";
 
@@ -363,9 +366,8 @@ export async function sendCfaInvitationFromMissionLocale(
   // lien d'invitation, mais persisté seulement après confirmation de l'envoi (cf. plus bas).
   const invitationToken = generateKey(50, "hex");
 
-  // Email transactionnel Brevo (template géré par l'UX, on ne fait que fournir les variables).
-  // `sendTransactionalEmail` capture les erreurs Brevo et renvoie `undefined` en cas d'échec : on teste
-  // donc la valeur de retour pour ne PAS journaliser (badge « Invitation envoyée ») un email jamais parti.
+  // Email transactionnel Brevo.
+  // `sendTransactionalEmail` capture les erreurs Brevo et renvoie `undefined` en cas d'échec.
   const sent = await sendTransactionalEmail(
     email_destinataire,
     templateId,
@@ -379,8 +381,9 @@ export async function sendCfaInvitationFromMissionLocale(
         ? getPublicUrl("/auth/connexion")
         : getPublicUrl(`/auth/inscription-cfa?invitationToken=${invitationToken}`),
       NB_ML_PARTENAIRES: mlNoms.length,
-      NOMS_ML: mlNoms.join(", "),
+      NOMS_ML: formatListeTronquee(mlNoms),
       NOM_DESTINATAIRE: destinataireNom,
+      CFA_NB_JEUNES_EN_RUPTURE: nbJeunesEnRupture,
     },
     // Hors production, l'email part au conseiller/admin connecté (même en impersonation) plutôt qu'au CFA.
     { cc: user.email ? [user.email] : undefined, redirectRecipientInNonProdTo: user.email }

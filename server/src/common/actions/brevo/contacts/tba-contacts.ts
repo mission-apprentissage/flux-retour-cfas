@@ -28,6 +28,7 @@ import {
 } from "@/common/model/collections";
 import { BrevoContact, BrevoContactAttributeValue } from "@/common/services/brevo/brevo";
 import { normalizePhoneNumber } from "@/common/services/brevo/whatsapp/phone";
+import { formatListeAvecReste } from "@/common/utils/listUtils";
 import config from "@/config";
 
 import { getOrCreateConnexionInvitationsByEmails } from "./connexion-invitations.actions";
@@ -451,7 +452,9 @@ type CfaRupturantsStats = {
  * sur `effectifs[DECA]`) : ici on croise avec `missionLocaleEffectifs` pour ne
  * remonter que les jeunes en rupture qui sont suivis par une ML partenaire.
  */
-const fetchRupturantsStatsByOrgId = async (organismeIds: ObjectId[]): Promise<Map<string, CfaRupturantsStats>> => {
+export const fetchRupturantsStatsByOrgId = async (
+  organismeIds: ObjectId[]
+): Promise<Map<string, CfaRupturantsStats>> => {
   if (organismeIds.length === 0) return new Map();
 
   // Phase 1 — Filtrage "en rupture" selon la définition métier partagée avec
@@ -546,14 +549,6 @@ const fetchRupturantsStatsByOrgId = async (organismeIds: ObjectId[]): Promise<Ma
     });
   }
   return byOrgId;
-};
-
-// "ML A" / "ML A, ML B" / "ML A, ML B et 3 autres"
-const formatMlList = (names: string[], others: number): string => {
-  const cleaned = names.filter(Boolean);
-  if (cleaned.length === 0) return "";
-  if (others === 0) return cleaned.join(", ");
-  return `${cleaned.join(", ")} et ${others} autre${others > 1 ? "s" : ""}`;
 };
 
 type MlStats = { total: number; a_traiter: number; traite: number };
@@ -757,7 +752,7 @@ const buildAttributes = (
     CFA_NB_MISSIONS_LOCALES_PARTENAIRES: isCfa ? (rupturantsStats?.nb_ml_total ?? 0) : null,
     CFA_LISTE_MISSIONS_LOCALES: isCfa
       ? rupturantsStats
-        ? formatMlList(rupturantsStats.ml_names_top, rupturantsStats.nb_ml_others)
+        ? formatListeAvecReste(rupturantsStats.ml_names_top, rupturantsStats.nb_ml_others)
         : ""
       : null,
 
