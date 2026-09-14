@@ -135,7 +135,7 @@
 
   @include respond-from(md) {
     display: grid;
-    grid-template-columns: 5fr 2fr 2fr;
+    grid-template-columns: 1fr auto;
     padding: 1.5rem 1rem;
   }
 }
@@ -171,34 +171,6 @@
   margin: 0;
   font-size: 0.875rem;
   color: var(--text-mention-grey);
-}
-
-.cardStats {
-  display: flex;
-  flex: 1 1 30%;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.statRow {
-  display: flex;
-  gap: 0.5rem;
-  align-items: baseline;
-  margin: 0;
-}
-
-.statNumber {
-  // Colonne étroite alignée à droite : les deux nombres se superposent comme sur la maquette.
-  min-width: 3ch;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--text-title-grey);
-  text-align: right;
-}
-
-.statLabel {
-  font-size: 0.875rem;
-  color: var(--text-default-grey);
 }
 
 .cardCta {

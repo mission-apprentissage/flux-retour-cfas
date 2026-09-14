@@ -110,9 +110,8 @@ export interface ICfaToInvite {
   uai: string | null;
   nom: string | null;
   adresse: string | null;
+  // Plus affiché sur les cartes : sert au tri de la liste et à l'aperçu de l'email.
   nb_jeunes_rupture: number;
-  // Sous-ensemble des jeunes en rupture soumis à l'obligation de formation (16-18 ans)
-  nb_jeunes_obligation_formation: number;
   statut: CFA_INVITATION_STATUT;
   // Nombre de comptes TBA du CFA qui recevront l'invitation
   nb_destinataires: number;

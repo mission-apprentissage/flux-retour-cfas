@@ -115,12 +115,12 @@ function cfaAccount(overrides: Record<string, any> = {}) {
   };
 }
 
-async function createMlEffectifDoc(overrides: Record<string, any> = {}, ageAnnees = 20) {
+async function createMlEffectifDoc(overrides: Record<string, any> = {}, organisme = sampleOrganisme) {
   const now = new Date();
   const snapshot = await createSampleEffectif({
-    organisme: sampleOrganisme,
+    organisme,
     annee_scolaire: anneeScolaire,
-    apprenant: { date_de_naissance: new Date(now.getFullYear() - ageAnnees, 0, 1) },
+    apprenant: { date_de_naissance: new Date(now.getFullYear() - 20, 0, 1) },
   });
 
   return {
@@ -130,7 +130,7 @@ async function createMlEffectifDoc(overrides: Record<string, any> = {}, ageAnnee
     effectif_snapshot: {
       ...snapshot,
       _id: new ObjectId(),
-      organisme_id: organismeId,
+      organisme_id: organisme._id,
       _computed: {
         ...snapshot._computed,
         statut: { ...snapshot._computed?.statut, en_cours: STATUT_APPRENANT.RUPTURANT },
@@ -224,20 +224,33 @@ describe("getCfaListToInviteForMissionLocale", () => {
       siret: "19040492100016",
       nom: "CAMPUS DU LAC",
       nb_jeunes_rupture: 2,
-      nb_jeunes_obligation_formation: 0,
       statut: CFA_INVITATION_STATUT.INVITER,
     });
   });
 
-  it("compte séparément les jeunes en obligation de formation (16-18 ans)", async () => {
+  it("classe les CFA par volume de jeunes en rupture décroissant", async () => {
+    // Le compteur n'est plus affiché sur les cartes mais reste la clé de tri de la liste.
+    const autreOrganisme = {
+      ...sampleOrganisme,
+      _id: new ObjectId(id(5)),
+      siret: "19040492100024",
+      uai: "0755805D",
+      nom: "AUTRE CFA",
+    };
+    const autreOrganisation = { ...cfaOrganisation, _id: new ObjectId(id(6)), siret: autreOrganisme.siret };
+    await organismesDb().insertOne(autreOrganisme as any);
+    await organisationsDb().insertOne({ ...autreOrganisation, organisme_id: autreOrganisme._id.toString() } as any);
+    await usersMigrationDb().insertOne(
+      cfaAccount({ email: "autre@cfa.fr", organisation_id: autreOrganisation._id }) as any
+    );
+
+    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc({}, autreOrganisme)) as any);
+    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc({}, autreOrganisme)) as any);
     await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc({}, 17)) as any);
 
     const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
 
-    expect(result).toHaveLength(1);
-    expect(result[0].nb_jeunes_rupture).toBe(2);
-    expect(result[0].nb_jeunes_obligation_formation).toBe(1);
+    expect(result.map((c) => c.nom)).toEqual(["AUTRE CFA", "CAMPUS DU LAC"]);
   });
 
   it("exclut un CFA qui ne transmet pas ses effectifs", async () => {

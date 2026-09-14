@@ -25,7 +25,6 @@ import { missionLocaleBaseAggregation } from "./mission-locale.actions";
 interface CfaAggRow {
   organisme_id: ObjectId;
   nb_jeunes_rupture: number;
-  nb_jeunes_obligation_formation: number;
   organisme: {
     siret?: string | null;
     uai?: string | null;
@@ -132,9 +131,6 @@ export async function getCfaListToInviteForMissionLocale(
         $group: {
           _id: "$effectif_snapshot.organisme_id",
           nb_jeunes_rupture: { $sum: 1 },
-          // `a_risque_mineur` (16-18 ans, cf. obligation de formation) est déjà posé par
-          // `missionLocaleBaseAggregation` pour une organisation de type MISSION_LOCALE.
-          nb_jeunes_obligation_formation: { $sum: { $cond: ["$a_risque_mineur", 1, 0] } },
         },
       },
       {
@@ -173,7 +169,6 @@ export async function getCfaListToInviteForMissionLocale(
           _id: 0,
           organisme_id: "$_id",
           nb_jeunes_rupture: 1,
-          nb_jeunes_obligation_formation: 1,
           organisme: {
             siret: "$organisme.siret",
             uai: "$organisme.uai",
@@ -223,7 +218,6 @@ export async function getCfaListToInviteForMissionLocale(
   const extraRows: CfaAggRow[] = extraOrganismes.map((organisme) => ({
     organisme_id: organisme._id,
     nb_jeunes_rupture: 0,
-    nb_jeunes_obligation_formation: 0,
     invited_by_me: true,
     organisme: organisme as unknown as CfaAggRow["organisme"],
   }));
@@ -249,7 +243,6 @@ export async function getCfaListToInviteForMissionLocale(
         nom: row.organisme.nom ?? row.organisme.raison_sociale ?? row.organisme.enseigne ?? null,
         adresse: formatAdresse(row.organisme.adresse),
         nb_jeunes_rupture: row.nb_jeunes_rupture,
-        nb_jeunes_obligation_formation: row.nb_jeunes_obligation_formation,
         statut: computeCfaInvitationStatut({
           mlBetaActivatedAt: mlBetaActivatedAt(row.organisme_id.toString()),
           invitedByMe: row.invited_by_me,

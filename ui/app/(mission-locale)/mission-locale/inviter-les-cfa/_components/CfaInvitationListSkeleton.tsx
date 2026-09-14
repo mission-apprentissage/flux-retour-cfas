@@ -5,7 +5,7 @@ import { Skeleton } from "@mui/material";
 import styles from "../InviterCfa.module.scss";
 
 const NB_CARTES_FANTOMES = 4;
-const HAUTEUR_CARTE = 118;
+const HAUTEUR_CARTE = 96;
 
 export function CfaInvitationListSkeleton() {
   return (
