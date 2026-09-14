@@ -52,26 +52,40 @@ export interface SendTransactionalEmailOptions {
   cc?: string[];
   /**
    * Hors production, redirige l'email vers cette adresse (l'utilisateur connecté qui teste) au lieu
-   * du vrai destinataire. Permet de tester les envois (ex. invitation CFA via impersonation d'une ML)
-   * sans écrire aux vrais destinataires. Sans aucun effet en production.
+   * du vrai destinataire. Sans aucun effet en production.
+   *
+   * Obligatoire : Brevo est une API externe, joignable avec la même clé depuis n'importe quel
+   * environnement — contrairement au mailer SMTP, rien n'empêche structurellement un envoi réel
+   * depuis le local, la recette ou la preprod. Hors production, une valeur vide bloque l'envoi
+   * plutôt que d'écrire au vrai destinataire.
    */
-  redirectRecipientInNonProdTo?: string;
+  redirectRecipientInNonProdTo: string | undefined;
 }
 
 export const sendTransactionalEmail = async (
   recipientEmail: string,
   templateId: number,
   params: Record<string, unknown>,
-  options?: SendTransactionalEmailOptions
+  options: SendTransactionalEmailOptions
 ) => {
   if (!EmailInstance) {
     throw Boom.internal("Brevo instance not initialized");
   }
 
-  const emailParams = params;
+  const isProduction = config.env === "production";
 
   // Garde-fou hors production : on n'écrit jamais au vrai destinataire mais à l'utilisateur qui teste.
-  const redirectTo = config.env !== "production" ? options?.redirectRecipientInNonProdTo : undefined;
+  // Sans adresse de repli, on refuse d'envoyer : mieux vaut un email manquant qu'un email parti à un
+  // vrai destinataire depuis un environnement de test.
+  const redirectTo = isProduction ? undefined : options.redirectRecipientInNonProdTo;
+  if (!isProduction && !redirectTo) {
+    logger.warn(
+      { templateId, realRecipient: recipientEmail, env: config.env },
+      "Email Brevo non envoyé : aucune adresse de redirection fournie hors production"
+    );
+    return;
+  }
+
   const finalRecipient = redirectTo || recipientEmail;
   const isRedirected = finalRecipient !== recipientEmail;
 
@@ -86,17 +100,24 @@ export const sendTransactionalEmail = async (
   sendSmtpEmail.templateId = templateId;
   sendSmtpEmail.to = [{ email: finalRecipient }];
   // En mode redirigé, on expose le vrai destinataire dans les variables pour information du testeur.
-  sendSmtpEmail.params = isRedirected
-    ? { ...(emailParams as Record<string, unknown>), DESTINATAIRE_REEL: recipientEmail }
-    : emailParams;
+  sendSmtpEmail.params = isRedirected ? { ...params, DESTINATAIRE_REEL: recipientEmail } : params;
   // Pas de CC quand l'email est redirigé (le testeur est déjà le destinataire principal).
   if (options?.cc?.length && !isRedirected) {
     sendSmtpEmail.cc = options.cc.map((email) => ({ email }));
   }
   try {
     return await EmailInstance.sendTransacEmail(sendSmtpEmail);
-  } catch (e) {
+  } catch (e: any) {
     captureException(e);
+    // Sans ce log, l'appelant ne voit qu'un `undefined` : la cause renvoyée par Brevo (template
+    // inexistant, IP non autorisée, quota...) serait perdue dès que Sentry n'est pas actif.
+    const brevoBody = e?.response?.body ?? e?.body;
+    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e?.message ?? "unknown error";
+    const status = e?.response?.statusCode ?? e?.statusCode ?? "?";
+    logger.error(
+      { templateId, recipient: finalRecipient, status, brevoMsg },
+      "Échec d'envoi de l'email transactionnel Brevo"
+    );
     return;
   }
 };
