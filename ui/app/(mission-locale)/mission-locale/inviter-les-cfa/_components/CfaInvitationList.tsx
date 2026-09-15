@@ -47,7 +47,7 @@ export function CfaInvitationList({ invitations, showEngagementCallout, onInvite
           <div id="cfa-invitation-faq" className={styles.faqContent}>
             <p>
               À cause de certaines contraintes techniques, nous ne pouvons pas encore ouvrir la possibilité de la
-              collaboration à certains CFA (cela peut-être à cause de leur ERP utilisé ou tout simplement de leur
+              collaboration à certains CFA (cela peut être à cause de leur ERP utilisé ou tout simplement de leur
               organisation administrative que nous ne sommes pas encore en capacité de traiter).
             </p>
             <p>
