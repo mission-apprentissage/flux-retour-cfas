@@ -72,20 +72,18 @@ export type ICollaborationStatsResponse = {
   }>;
 };
 
-async function attachActivationDates(
-  eligible: IEligibleOrganismeRow[],
+export async function fetchActivationDatesByOrgId(
+  organismeIds: ObjectId[],
   endExclusive: Date
-): Promise<ICompatibleOrganisme[]> {
-  if (eligible.length === 0) return [];
-
-  const orgIdStrings = eligible.map((o) => o._id.toString());
+): Promise<Map<string, Date>> {
+  if (organismeIds.length === 0) return new Map();
 
   const activations = await organisationsDb()
     .aggregate<{ _id: string; date_activation: Date }>([
       {
         $match: {
           type: "ORGANISME_FORMATION",
-          organisme_id: { $in: orgIdStrings },
+          organisme_id: { $in: organismeIds.map((id) => id.toString()) },
           ml_beta_activated_at: { $type: "date", $lt: endExclusive },
         },
       },
@@ -93,7 +91,52 @@ async function attachActivationDates(
     ])
     .toArray();
 
-  const activationByOrgId = new Map(activations.map((a) => [a._id, a.date_activation]));
+  return new Map(activations.map((a) => [a._id, a.date_activation]));
+}
+
+export function buildDossierEnvoyeMatch(endExclusive: Date, organismeIds?: ObjectId[]): Record<string, unknown> {
+  return {
+    soft_deleted: { $ne: true },
+    ...(organismeIds ? { "effectif_snapshot.organisme_id": { $in: organismeIds } } : {}),
+    "organisme_data.acc_conjoint": true,
+    "organisme_data.reponse_at": { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive },
+  };
+}
+
+export type ICollaborationsByOrg = { nb: number; last: Date };
+
+export async function fetchCollaborationsByOrgId(
+  organismeIds: ObjectId[],
+  endExclusive: Date
+): Promise<Map<string, ICollaborationsByOrg>> {
+  if (organismeIds.length === 0) return new Map();
+
+  const rows = await missionLocaleEffectifsDb()
+    .aggregate<{ _id: ObjectId; nb: number; last: Date }>([
+      { $match: buildDossierEnvoyeMatch(endExclusive, organismeIds) },
+      {
+        $group: {
+          _id: "$effectif_snapshot.organisme_id",
+          nb: { $sum: 1 },
+          last: { $max: "$organisme_data.reponse_at" },
+        },
+      },
+    ])
+    .toArray();
+
+  return new Map(rows.map((r) => [r._id.toString(), { nb: r.nb, last: r.last }]));
+}
+
+async function attachActivationDates(
+  eligible: IEligibleOrganismeRow[],
+  endExclusive: Date
+): Promise<ICompatibleOrganisme[]> {
+  if (eligible.length === 0) return [];
+
+  const activationByOrgId = await fetchActivationDatesByOrgId(
+    eligible.map((o) => o._id),
+    endExclusive
+  );
 
   return eligible.map((org) => ({
     _id: org._id,
