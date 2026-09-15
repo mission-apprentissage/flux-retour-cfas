@@ -45,7 +45,7 @@ export const buildOrgaMl = (nom: string, override: DeepPartial<IOrganisationMiss
   }) satisfies DeepPartial<IOrganisationMissionLocale>;
 
 export const buildOrganisme = (
-  orgaOf: { siret: string; uai: string | null; organisme_id?: string },
+  orgaOf: { siret: string; uai: string | null; organisme_id?: string | null },
   override: DeepPartial<IOrganisme> = {}
 ) => {
   const organisme = {
