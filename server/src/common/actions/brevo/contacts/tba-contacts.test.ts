@@ -1,6 +1,8 @@
 import { ObjectId } from "bson";
+import { addDaysUTC, normalizeToUTCDay } from "shared/utils/date";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { computeStatsForDate } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
 import {
   connexionInvitationsDb,
   effectifsDb,
@@ -104,6 +106,25 @@ const buildMlStatsDoc = (
   created_at: NOW,
   ...override,
 });
+
+const ACTIVATED_AT = new Date("2026-03-01T00:00:00.000Z");
+
+const insertCfa = async (opts: { eligible?: boolean; activatedAt?: Date; organisme?: Record<string, any> } = {}) => {
+  const orgaOf = buildOrgaOf(opts.activatedAt ? { ml_beta_activated_at: opts.activatedAt } : {});
+  const organisme = buildOrganisme(orgaOf, { nature: "responsable_formateur", ...opts.organisme });
+  await organisationsDb().insertOne(orgaOf as any);
+  await organismesDb().insertOne(organisme as any);
+  await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
+  if (opts.eligible !== false) {
+    await effectifsDb().insertMany([buildEffectif(organisme._id, "APPRENTI") as any], {
+      bypassDocumentValidation: true,
+    });
+  }
+  return { orgaOf, organisme };
+};
+
+const buildCollab = (organismeId: ObjectId, mlId: ObjectId, reponseAt: Date, override: Record<string, any> = {}) =>
+  buildRupturant(organismeId, mlId, { organisme_data: { acc_conjoint: true, reponse_at: reponseAt }, ...override });
 
 describe("tbaContactsContactList", () => {
   beforeEach(() => {
@@ -586,16 +607,9 @@ describe("tbaContactsContactList", () => {
     });
   });
 
-  describe("fetchContacts - CFA_STATUT_V2 (éligibilité activation V2)", () => {
-    it("'oui' quand l'organisme est éligible et que son organisation porte ml_beta_activated_at", async () => {
-      const orgaOf = buildOrgaOf({ ml_beta_activated_at: new Date("2026-03-01T00:00:00.000Z") });
-      const organisme = buildOrganisme(orgaOf, { nature: "responsable_formateur" });
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
-      await effectifsDb().insertMany([buildEffectif(organisme._id, "APPRENTI") as any], {
-        bypassDocumentValidation: true,
-      });
+  describe("fetchContacts - CFA_STATUT_V2 (activation V2, définition du tableau de bord)", () => {
+    it("'oui' quand l'organisme est éligible et activé (ml_beta_activated_at), sans is_allowed_deca", async () => {
+      await insertCfa({ activatedAt: ACTIVATED_AT });
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -603,17 +617,8 @@ describe("tbaContactsContactList", () => {
       expect(contacts[0].attributes.CFA_STATUT_V2).toBe("oui");
     });
 
-    it("'activable' quand l'organisme passe les 5 checks d'éligibilité mais pas encore actif", async () => {
-      const orgaOf = buildOrgaOf();
-      // nature ∈ NATURES_ELIGIBLES + ferme false (défaut) + siret/uai (défaut) +
-      // pas de formationsCatalogue (rien inséré) + effectifs présents ↓
-      const organisme = buildOrganisme(orgaOf, { nature: "responsable_formateur" });
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
-      await effectifsDb().insertMany([buildEffectif(organisme._id, "APPRENTI") as any], {
-        bypassDocumentValidation: true,
-      });
+    it("'activable' quand l'organisme est éligible sans date d'activation", async () => {
+      await insertCfa();
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -621,15 +626,18 @@ describe("tbaContactsContactList", () => {
       expect(contacts[0].attributes.CFA_STATUT_V2).toBe("activable");
     });
 
+    it("'exclu' quand is_allowed_deca=true et activé mais plus éligible (aucun effectif)", async () => {
+      await insertCfa({ eligible: false, activatedAt: ACTIVATED_AT, organisme: { is_allowed_deca: true } });
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0].attributes.CFA_STATUT_V2).toBe("exclu");
+      expect(contacts[0].attributes.CFA_DATE_ACTIVATION_V2).toBeNull();
+    });
+
     it("'exclu' quand l'organisme est fermé (ferme=true)", async () => {
-      const orgaOf = buildOrgaOf();
-      const organisme = buildOrganisme(orgaOf, { nature: "responsable_formateur", ferme: true });
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
-      await effectifsDb().insertMany([buildEffectif(organisme._id, "APPRENTI") as any], {
-        bypassDocumentValidation: true,
-      });
+      await insertCfa({ activatedAt: ACTIVATED_AT, organisme: { ferme: true } });
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -646,9 +654,130 @@ describe("tbaContactsContactList", () => {
 
       expect(contacts).toHaveLength(1);
       expect(contacts[0].attributes.CFA_STATUT_V2).toBeNull();
+      expect(contacts[0].attributes.CFA_DATE_ACTIVATION_V2).toBeNull();
     });
   });
 
+  describe("fetchContacts - CFA_DATE_ACTIVATION_V2", () => {
+    it("retient la plus ancienne ml_beta_activated_at parmi les organisations de l'organisme", async () => {
+      const { organisme } = await insertCfa({ activatedAt: ACTIVATED_AT });
+      await organisationsDb().insertOne(
+        buildOrgaOf({
+          organisme_id: String(organisme._id),
+          ml_beta_activated_at: new Date("2026-02-10T00:00:00.000Z"),
+        }) as any
+      );
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0].attributes.CFA_STATUT_V2).toBe("oui");
+      expect(contacts[0].attributes.CFA_DATE_ACTIVATION_V2).toEqual(new Date("2026-02-10T00:00:00.000Z"));
+    });
+
+    it("null quand l'organisme est 'activable'", async () => {
+      await insertCfa();
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts[0].attributes.CFA_STATUT_V2).toBe("activable");
+      expect(contacts[0].attributes.CFA_DATE_ACTIVATION_V2).toBeNull();
+    });
+  });
+
+  describe("fetchContacts - CFA_NB_COLLABORATIONS / CFA_DATE_DERNIERE_COLLABORATION", () => {
+    it("compte les dossiers acc_conjoint envoyés depuis le 01/01/2026 et retient la date la plus récente", async () => {
+      const { organisme } = await insertCfa({ activatedAt: ACTIVATED_AT });
+      const mlId = new ObjectId();
+      await missionLocaleEffectifsDb().insertMany(
+        [
+          buildCollab(organisme._id, mlId, new Date("2026-02-01T00:00:00.000Z")),
+          buildCollab(organisme._id, mlId, new Date("2026-04-15T00:00:00.000Z")),
+          buildCollab(organisme._id, mlId, new Date("2025-12-31T23:59:59.000Z")),
+          buildCollab(organisme._id, mlId, new Date("2026-05-01T00:00:00.000Z"), { soft_deleted: true }),
+          buildRupturant(organisme._id, mlId, {
+            organisme_data: { acc_conjoint: false, reponse_at: new Date("2026-05-02T00:00:00.000Z") },
+          }),
+        ] as any[],
+        { bypassDocumentValidation: true }
+      );
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0].attributes.CFA_NB_COLLABORATIONS).toBe(2);
+      expect(contacts[0].attributes.CFA_DATE_DERNIERE_COLLABORATION).toEqual(new Date("2026-04-15T00:00:00.000Z"));
+    });
+
+    it("0 et null quand aucun dossier n'a été envoyé", async () => {
+      const { organisme } = await insertCfa({ activatedAt: ACTIVATED_AT });
+      await missionLocaleEffectifsDb().insertOne(buildRupturant(organisme._id, new ObjectId()) as any, {
+        bypassDocumentValidation: true,
+      });
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts[0].attributes.CFA_NB_COLLABORATIONS).toBe(0);
+      expect(contacts[0].attributes.CFA_DATE_DERNIERE_COLLABORATION).toBeNull();
+    });
+
+    it("null côté ML (réservé aux OF)", async () => {
+      const orgaMl = buildOrgaMl("ML PARIS");
+      await organisationsDb().insertOne(orgaMl as any);
+      await usersMigrationDb().insertOne(buildUser(orgaMl) as any);
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts[0].attributes.CFA_NB_COLLABORATIONS).toBeNull();
+      expect(contacts[0].attributes.CFA_DATE_DERNIERE_COLLABORATION).toBeNull();
+    });
+  });
+
+  describe("fetchContacts - parité avec le tableau de bord de collaboration", () => {
+    it("les attributs agrégés par ORGANISME_ID retrouvent cfa_actives, cfa_compatibles et cfa_with_collab", async () => {
+      const mlId = new ObjectId();
+      const a = await insertCfa({ activatedAt: ACTIVATED_AT });
+      const b = await insertCfa({ activatedAt: ACTIVATED_AT });
+      const c = await insertCfa();
+      const d = await insertCfa({ activatedAt: ACTIVATED_AT, organisme: { ferme: true } });
+      const e = await insertCfa();
+      await usersMigrationDb().insertOne(buildUser(e.orgaOf) as any);
+      await missionLocaleEffectifsDb().insertMany(
+        [
+          buildCollab(a.organisme._id, mlId, new Date("2026-02-01T00:00:00.000Z")),
+          buildCollab(a.organisme._id, mlId, new Date("2026-03-01T00:00:00.000Z")),
+          buildCollab(a.organisme._id, mlId, new Date("2025-11-01T00:00:00.000Z")),
+          buildCollab(c.organisme._id, mlId, new Date("2026-03-01T00:00:00.000Z")),
+          buildCollab(d.organisme._id, mlId, new Date("2026-03-01T00:00:00.000Z")),
+          buildRupturant(b.organisme._id, mlId),
+        ] as any[],
+        { bypassDocumentValidation: true }
+      );
+
+      const [contacts, stats] = await Promise.all([
+        tbaContactsContactList.fetchContacts(),
+        computeStatsForDate(addDaysUTC(normalizeToUTCDay(NOW), 1)),
+      ]);
+
+      const byStatut = { oui: new Set<string>(), activable: new Set<string>(), exclu: new Set<string>() };
+      const ouiWithCollab = new Set<string>();
+      for (const contact of contacts) {
+        const organismeId = contact.attributes.ORGANISME_ID as string;
+        const statut = contact.attributes.CFA_STATUT_V2 as keyof typeof byStatut;
+        byStatut[statut].add(organismeId);
+        if (statut === "oui" && (contact.attributes.CFA_NB_COLLABORATIONS as number) > 0) {
+          ouiWithCollab.add(organismeId);
+        }
+      }
+
+      expect(contacts).toHaveLength(6);
+      expect(stats.national.activation).toEqual({ cfa_compatibles: 4, cfa_actives: 2, cfa_with_collab: 1 });
+      expect(byStatut.oui.size).toBe(stats.national.activation.cfa_actives);
+      expect(byStatut.oui.size + byStatut.activable.size).toBe(stats.national.activation.cfa_compatibles);
+      expect(ouiWithCollab.size).toBe(stats.national.activation.cfa_with_collab);
+      expect(byStatut.exclu).toEqual(new Set([String(d.organisme._id)]));
+    });
+  });
   describe("fetchContacts - effet de bord sur connexionInvitations", () => {
     it("sync réelle : crée une invitation de connexion par user en DB, source=tba-contacts", async () => {
       const orgaOf = buildOrgaOf();
