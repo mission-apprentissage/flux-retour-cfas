@@ -1,8 +1,9 @@
 "use client";
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
-import { Snackbar } from "@mui/material";
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
+
+import styles from "./MUIToaster.module.css";
 
 const AUTO_HIDE_MS = 5000;
 
@@ -25,11 +26,7 @@ interface MUIToasterContextValue {
 
 const MUIToasterContext = createContext<MUIToasterContextValue | null>(null);
 
-/**
- * Snackbar MUI pour le positionnement, contenu en Alert DSFR. Remplace `useToaster` (Chakra), non
- * monté en App Router. L'auto-hide est géré à la main : l'`autoHideDuration` de MUI est peu fiable
- * avec un enfant custom et un `onClose` recréé à chaque render.
- */
+/** Alert DSFR épinglée en bas à droite. Remplace `useToaster` (Chakra), non monté en App Router. */
 export function MUIToasterProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<ToastState>({ open: false, message: "", severity: "success", nonce: 0 });
 
@@ -62,25 +59,9 @@ export function MUIToasterProvider({ children }: { children: ReactNode }) {
   return (
     <MUIToasterContext.Provider value={value}>
       {children}
-      <Snackbar
-        open={toast.open}
-        onClose={(_event, reason) => {
-          if (reason !== "clickaway") {
-            closeToast();
-          }
-        }}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <div>
-          <div
-            style={{
-              maxWidth: 420,
-              overflow: "hidden",
-              borderRadius: "0.25rem",
-              backgroundColor: "var(--background-default-grey, #ffffff)",
-              boxShadow: "0 4px 12px rgba(0, 0, 18, 0.16)",
-            }}
-          >
+      {toast.open && (
+        <div className={styles.viewport} role="status" aria-live="polite">
+          <div className={styles.toast}>
             <Alert
               key={toast.nonce}
               severity={toast.severity}
@@ -91,7 +72,7 @@ export function MUIToasterProvider({ children }: { children: ReactNode }) {
             />
           </div>
         </div>
-      </Snackbar>
+      )}
     </MUIToasterContext.Provider>
   );
 }
