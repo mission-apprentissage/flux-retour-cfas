@@ -1,4 +1,4 @@
-import { COLLABORATION_CUTOFF_DATE, REPONDU_SITUATIONS } from "shared/constants/collaboration";
+import { REPONDU_SITUATIONS } from "shared/constants/collaboration";
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type { ICollaborationExportResponseSchema } from "shared/models/routes/admin/collaboration-stats.api";
@@ -6,7 +6,11 @@ import { addDaysUTC, normalizeToUTCDay } from "shared/utils/date";
 
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
-import { fetchCompatibleOrganismes, type ICompatibleOrganisme } from "./collaboration-stats.actions";
+import {
+  buildDossierEnvoyeMatch,
+  fetchCompatibleOrganismes,
+  type ICompatibleOrganisme,
+} from "./collaboration-stats.actions";
 
 const REGION_NON_RENSEIGNEE = "Non renseigné";
 
@@ -34,13 +38,7 @@ type CollaborationDetailRow = {
 async function fetchCollaborationDetails(endExclusive: Date): Promise<CollaborationDetailRow[]> {
   return missionLocaleEffectifsDb()
     .aggregate<CollaborationDetailRow>([
-      {
-        $match: {
-          soft_deleted: { $ne: true },
-          "organisme_data.acc_conjoint": true,
-          "organisme_data.reponse_at": { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive },
-        },
-      },
+      { $match: buildDossierEnvoyeMatch(endExclusive) },
       {
         $lookup: {
           from: "organismes",
