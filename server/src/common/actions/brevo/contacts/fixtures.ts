@@ -33,23 +33,30 @@ export const buildOrgaMl = (nom: string, override: Record<string, any> = {}) => 
   ...override,
 });
 
-export const buildOrganisme = (orgaOf: { siret: string; uai: string | null }, override: Record<string, any> = {}) => ({
-  _id: new ObjectId(),
-  siret: orgaOf.siret,
-  uai: orgaOf.uai,
-  nom: "Mon CFA",
-  raison_sociale: "Mon CFA SARL",
-  enseigne: "Mon CFA",
-  adresse: { region: "11", departement: "75", commune: "Paris" },
-  reseaux: ["CMA"],
-  fiabilisation_statut: "FIABLE",
-  ferme: false,
-  formations_count: 0,
-  contacts_from_referentiel: [],
-  updated_at: NOW,
-  created_at: NOW,
-  ...override,
-});
+export const buildOrganisme = (
+  orgaOf: { siret: string; uai: string | null; organisme_id?: string },
+  override: Record<string, any> = {}
+) => {
+  const organisme = {
+    _id: new ObjectId(),
+    siret: orgaOf.siret,
+    uai: orgaOf.uai,
+    nom: "Mon CFA",
+    raison_sociale: "Mon CFA SARL",
+    enseigne: "Mon CFA",
+    adresse: { region: "11", departement: "75", commune: "Paris" },
+    reseaux: ["CMA"],
+    fiabilisation_statut: "FIABLE",
+    ferme: false,
+    formations_count: 0,
+    contacts_from_referentiel: [],
+    updated_at: NOW,
+    created_at: NOW,
+    ...override,
+  };
+  orgaOf.organisme_id = String(organisme._id);
+  return organisme;
+};
 
 export const buildUser = (orgaOf: { _id: ObjectId }, override: Record<string, any> = {}) => ({
   _id: new ObjectId(),

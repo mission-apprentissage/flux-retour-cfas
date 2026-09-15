@@ -587,12 +587,15 @@ describe("tbaContactsContactList", () => {
   });
 
   describe("fetchContacts - CFA_STATUT_V2 (éligibilité activation V2)", () => {
-    it("'oui' quand l'organisme est déjà actif V2 (is_allowed_deca=true)", async () => {
-      const orgaOf = buildOrgaOf();
-      const organisme = buildOrganisme(orgaOf, { is_allowed_deca: true });
+    it("'oui' quand l'organisme est éligible et que son organisation porte ml_beta_activated_at", async () => {
+      const orgaOf = buildOrgaOf({ ml_beta_activated_at: new Date("2026-03-01T00:00:00.000Z") });
+      const organisme = buildOrganisme(orgaOf, { nature: "responsable_formateur" });
       await organisationsDb().insertOne(orgaOf as any);
       await organismesDb().insertOne(organisme as any);
       await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
+      await effectifsDb().insertMany([buildEffectif(organisme._id, "APPRENTI") as any], {
+        bypassDocumentValidation: true,
+      });
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
