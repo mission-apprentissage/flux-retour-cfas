@@ -30,7 +30,6 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const nbDestinataires = cfa?.nb_destinataires ?? 0;
 
   const resetState = useCallback(() => {
     setNote("");
@@ -132,9 +131,8 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
           <p>
             L’invitation sera envoyée{" "}
             <strong>
-              {nbDestinataires > 1
-                ? `aux ${nbDestinataires} personnes disposant d’un compte pour ce CFA`
-                : "à la personne disposant d’un compte pour ce CFA"}
+              directement aux personnes qui ont un compte sur le Tableau de bord de l’apprentissage dans cet
+              établissement
             </strong>
             . Nous avons préparé un message automatique que vous pouvez compléter avec une note ou votre message de
             recommandation si vous le souhaitez.

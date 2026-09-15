@@ -22,7 +22,7 @@ export function CfaInvitationStatusCta({ cfa, onInvite }: Props) {
       return (
         <span className={`fr-badge ${styles.statusBadge} ${styles.statusActive}`}>
           <i className="fr-icon-checkbox-circle-fill fr-icon--sm" aria-hidden="true" />
-          <span className={styles.statusText}>CFA déjà actif</span>
+          <span className={styles.statusText}>Ce CFA a démarré les collaborations</span>
         </span>
       );
 
