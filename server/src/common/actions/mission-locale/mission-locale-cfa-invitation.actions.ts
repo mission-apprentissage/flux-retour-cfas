@@ -276,8 +276,7 @@ export async function sendCfaInvitationFromMissionLocale(
     throw Boom.notFound("CFA introuvable");
   }
 
-  const nbJeunesEnRuptureMl = await countJeunesEnRupturePourMl(missionLocale, organisme._id);
-  if (nbJeunesEnRuptureMl === 0) {
+  if ((await countJeunesEnRupturePourMl(missionLocale, organisme._id)) === 0) {
     throw Boom.forbidden("Ce CFA n'accueille aucun jeune en rupture rattaché à votre Mission Locale.");
   }
 
@@ -337,7 +336,6 @@ export async function sendCfaInvitationFromMissionLocale(
         NOMS_ML: formatListeTronquee(mlNoms),
         NOM_DESTINATAIRE: destinataire.nom ?? "",
         CFA_NB_JEUNES_EN_RUPTURE: nbJeunesEnRupture,
-        CFA_NB_JEUNES_EN_RUPTURE_ML: nbJeunesEnRuptureMl,
       },
       {
         // Une seule copie au conseiller, sinon il reçoit autant de doubles que de destinataires.

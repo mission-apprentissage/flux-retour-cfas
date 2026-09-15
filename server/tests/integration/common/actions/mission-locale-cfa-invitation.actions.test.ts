@@ -436,7 +436,6 @@ describe("sendCfaInvitationFromMissionLocale", () => {
       expect.objectContaining({
         NOM_CFA: "CAMPUS DU LAC",
         NOM_MISSION_LOCALE: "ML Test",
-        CFA_NB_JEUNES_EN_RUPTURE_ML: 1,
         NOTE_RECOMMANDATION: "Je recommande ce CFA",
         NOM_DESTINATAIRE: "Camille Durand",
       }),

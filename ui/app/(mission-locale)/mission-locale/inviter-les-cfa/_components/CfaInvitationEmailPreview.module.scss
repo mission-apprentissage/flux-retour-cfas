@@ -126,14 +126,8 @@
   background: linear-gradient(180deg, #000091 -15.71%, #6a6af4 65.11%);
 }
 
-.stats {
-  display: flex;
-  flex: 1;
-  gap: 1.5rem;
-}
-
 .stat {
-  flex: 1;
+  max-width: 15rem;
 }
 
 .statNumber {
@@ -223,9 +217,10 @@
 }
 
 .compteImg {
-  flex-shrink: 0;
+  display: block;
+  width: 100%;
   height: auto;
-  margin-top: -12rem;
+  margin: 1.5rem auto 0;
 }
 
 .blockNote {

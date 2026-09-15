@@ -112,7 +112,7 @@ export interface ICfaToInvite {
   uai: string | null;
   nom: string | null;
   adresse: string | null;
-  // Périmètre de cette ML : sert au tri de la liste et à l'aperçu de l'email.
+  // Périmètre de cette ML : clé de tri de la liste.
   nb_jeunes_rupture: number;
   // Toutes ML confondues : c'est le chiffre que le CFA lira dans l'email.
   nb_jeunes_rupture_etablissement: number;

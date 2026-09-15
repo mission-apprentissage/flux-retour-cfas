@@ -3,7 +3,6 @@ import Image from "next/image";
 import styles from "./CfaInvitationEmailPreview.module.scss";
 
 interface Props {
-  nbJeunesRupture: number;
   nbJeunesRuptureEtablissement: number;
   mlNom: string;
   conseillerPrenom: string;
@@ -44,7 +43,6 @@ function Cta({ light = false }: { light?: boolean }) {
  * template Brevo, les deux dérivent de la même maquette et doivent être modifiés de pair.
  */
 export function CfaInvitationEmailPreview({
-  nbJeunesRupture,
   nbJeunesRuptureEtablissement,
   mlNom,
   conseillerPrenom,
@@ -77,8 +75,10 @@ export function CfaInvitationEmailPreview({
         </span>
       </header>
       <section className={styles.messageBlock}>
-        {/* Chaque destinataire reçoit son propre prénom : l'aperçu reste générique. */}
-        <p className={styles.hello}>Bonjour,</p>
+        {/* Chaque destinataire reçoit son propre nom : l'aperçu montre le gabarit. */}
+        <p className={styles.hello}>
+          Bonjour <span className={styles.accent}>Prénom Nom</span>,
+        </p>
         <p className={styles.introLabel}>La Mission Locale</p>
         <p className={styles.introMLName}>{mlLabel}</p>
         <p className={styles.introInvite}>vous invite à utiliser le Tableau de bord de l’apprentissage.</p>
@@ -98,15 +98,9 @@ export function CfaInvitationEmailPreview({
         )}
       </section>
       <section className={styles.statsBlock}>
-        <div className={styles.stats}>
-          <div className={styles.stat}>
-            <div className={styles.statNumber}>{nbJeunesRuptureEtablissement}</div>
-            <div className={styles.statLabel}>jeunes en rupture de contrat dans votre établissement en ce moment*</div>
-          </div>
-          <div className={styles.stat}>
-            <div className={styles.statNumber}>{nbJeunesRupture}</div>
-            <div className={styles.statLabel}>dépendent de la Mission Locale {mlLabel}</div>
-          </div>
+        <div className={styles.stat}>
+          <div className={styles.statNumber}>{nbJeunesRuptureEtablissement}</div>
+          <div className={styles.statLabel}>jeunes en rupture de contrat dans votre établissement en ce moment*</div>
         </div>
         <Image
           src="/images/mission-locale/email/contrat-rompu.png"
@@ -123,8 +117,9 @@ export function CfaInvitationEmailPreview({
       <section className={styles.block}>
         <p className={styles.blockTitle}>
           Le Tableau de bord de l’apprentissage vous permet de{" "}
-          <span className={styles.accent}>collaborer avec les Missions Locales de votre territoire</span> en quelque
-          clics.
+          <span className={styles.accent}>
+            collaborer avec les Missions Locales de votre territoire en quelque clics.
+          </span>
         </p>
         <ul className={styles.argList}>
           {ARGUMENTS.map((arg) => (
