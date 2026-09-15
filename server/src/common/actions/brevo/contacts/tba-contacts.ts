@@ -3,7 +3,13 @@ import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, STATUT_APPREN
 import type { IDepartmentCode } from "shared/constants/territoires";
 import { getOrganisationLabel, type IOrganisationCreate } from "shared/models/data/organisations.model";
 import { getAnneesScolaireListFromDate, getAnneeScolaireListFromDateRange } from "shared/utils";
+import { addDaysUTC, normalizeToUTCDay } from "shared/utils/date";
 
+import {
+  fetchActivationDatesByOrgId,
+  fetchCollaborationsByOrgId,
+  type ICollaborationsByOrg,
+} from "@/common/actions/admin/collaborations/collaboration-stats.actions";
 import { findEligibleOrganismes } from "@/common/actions/organismes/deca-cfa-eligibility";
 import {
   buildEffRuptureAgeFilter,
@@ -94,6 +100,9 @@ export type TbaContactAttributeName =
   | "CFA_NB_RUPTURANTS_ERP"
   | "CFA_NB_RUPTURANTS_DECA"
   | "CFA_STATUT_V2"
+  | "CFA_DATE_ACTIVATION_V2"
+  | "CFA_NB_COLLABORATIONS"
+  | "CFA_DATE_DERNIERE_COLLABORATION"
   | "ML_DATE_ACTIVATION_ML"
   | "ML_NB_RUPTURANTS_TOTAL"
   | "ML_NB_RUPTURANTS_A_TRAITER"
@@ -149,6 +158,9 @@ export const tbaContactsAttributesSchema: Record<TbaContactAttributeName, BrevoA
   CFA_NB_RUPTURANTS_ERP: "float",
   CFA_NB_RUPTURANTS_DECA: "float",
   CFA_STATUT_V2: "text",
+  CFA_DATE_ACTIVATION_V2: "date",
+  CFA_NB_COLLABORATIONS: "float",
+  CFA_DATE_DERNIERE_COLLABORATION: "date",
   ML_DATE_ACTIVATION_ML: "date",
   ML_NB_RUPTURANTS_TOTAL: "float",
   ML_NB_RUPTURANTS_A_TRAITER: "float",
@@ -202,7 +214,6 @@ type TbaUserContext = {
     adresse?: TbaAdresse | null;
     reseaux?: string[];
     ferme?: boolean;
-    is_allowed_deca?: boolean | null;
   };
 };
 
@@ -314,7 +325,6 @@ const selectTbaContacts = async (filter?: FetchContactsFilter): Promise<TbaUserC
             adresse: 1,
             reseaux: 1,
             ferme: 1,
-            is_allowed_deca: 1,
           },
         }
       )
@@ -337,7 +347,6 @@ const selectTbaContacts = async (filter?: FetchContactsFilter): Promise<TbaUserC
         adresse: o.adresse,
         reseaux: o.reseaux,
         ferme: o.ferme,
-        is_allowed_deca: o.is_allowed_deca,
       });
     }
   }
@@ -605,25 +614,34 @@ const deriveCfaErpOuDeca = (
   return null;
 };
 
-// Statut V2 (cf. MDD) : "oui" = déjà activé V2, "activable" = passe les 5 checks
-// de `findEligibleOrganismes` sans encore l'être, "exclu" sinon.
+// Statut V2 (cf. MDD), même définition que le tableau de bord
+// `/admin/suivi-des-indicateurs` : "oui" = compatible (`findEligibleOrganismes`)
+// et activé (`organisations.ml_beta_activated_at`), "activable" = compatible
+// sans date d'activation, "exclu" sinon.
 const deriveCfaStatutV2 = (
   organisme: TbaUserContext["organisme"] | undefined,
-  eligibleOrgIds: Set<string>
+  eligibleOrgIds: Set<string>,
+  activationDate: Date | undefined
 ): "oui" | "activable" | "exclu" | null => {
   if (!organisme?._id) return "exclu";
-  if (organisme.is_allowed_deca === true) return "oui";
-  return eligibleOrgIds.has(String(organisme._id)) ? "activable" : "exclu";
+  if (!eligibleOrgIds.has(String(organisme._id))) return "exclu";
+  return activationDate ? "oui" : "activable";
+};
+
+type CfaOrgStats = {
+  decaCounts?: { apprenants: number; rupturants: number };
+  erpRupturants?: number;
+  transmissionErrors?: TransmissionReport;
+  rupturantsStats?: CfaRupturantsStats;
+  activationDate?: Date;
+  collaborations?: ICollaborationsByOrg;
 };
 
 const buildAttributes = (
   user: TbaUserContext,
   lienConnexionPersonnalise: string,
-  decaCounts: { apprenants: number; rupturants: number } | undefined,
-  erpRupturants: number | undefined,
-  transmissionErrors: TransmissionReport | undefined,
+  { decaCounts, erpRupturants, transmissionErrors, rupturantsStats, activationDate, collaborations }: CfaOrgStats,
   mlStats: MlStats | undefined,
-  rupturantsStats: CfaRupturantsStats | undefined,
   eligibleOrgIds: Set<string>
 ): TbaContactAttributes => {
   const isCfa = user.organisation.type === "ORGANISME_FORMATION";
@@ -666,6 +684,7 @@ const buildAttributes = (
   const transmetsParErp = (user.organisme?.mode_de_transmission ?? null) === "API";
   const nbErreursTransmission =
     transmetsParErp && transmissionErrors?.error_count ? transmissionErrors.error_count : null;
+  const statutV2 = isCfa ? deriveCfaStatutV2(user.organisme, eligibleOrgIds, activationDate) : null;
 
   return {
     CIVILITE: formatCivilite(user.civility),
@@ -720,7 +739,10 @@ const buildAttributes = (
     // l'historique des contrats rupturés).
     CFA_NB_RUPTURANTS_ERP: isCfa ? nbRupturantsErp : null,
     CFA_NB_RUPTURANTS_DECA: isCfa ? nbRupturantsDeca : null,
-    CFA_STATUT_V2: isCfa ? deriveCfaStatutV2(user.organisme, eligibleOrgIds) : null,
+    CFA_STATUT_V2: statutV2,
+    CFA_DATE_ACTIVATION_V2: statutV2 === "oui" ? (activationDate ?? null) : null,
+    CFA_NB_COLLABORATIONS: isCfa ? (collaborations?.nb ?? 0) : null,
+    CFA_DATE_DERNIERE_COLLABORATION: isCfa ? (collaborations?.last ?? null) : null,
 
     // Fix retour recette (28/05) : ce champ doit être renseigné uniquement sur
     // les contacts ML — sur les OF c'était la date d'activation de la collab
@@ -781,6 +803,8 @@ const fetchContacts = async (filter?: FetchContactsFilter): Promise<BrevoContact
 
   const mlIds = users.filter((u) => u.organisation.type === "MISSION_LOCALE").map((u) => u.organisation._id);
 
+  const endExclusive = addDaysUTC(normalizeToUTCDay(new Date()), 1);
+
   const [
     decaCountsByOrgId,
     erpRupturantsByOrgId,
@@ -789,6 +813,8 @@ const fetchContacts = async (filter?: FetchContactsFilter): Promise<BrevoContact
     mlStatsByMlId,
     lienByEmail,
     eligibleOrgsRows,
+    activationDateByOrgId,
+    collaborationsByOrgId,
   ] = await Promise.all([
     fetchCfaDecaCountsByOrgId(cfaOrgIds),
     fetchCfaErpRupturantsByOrgId(cfaOrgIds),
@@ -797,31 +823,30 @@ const fetchContacts = async (filter?: FetchContactsFilter): Promise<BrevoContact
     fetchMlStatsByMlId(mlIds),
     buildLienByEmail(users),
     findEligibleOrganismes(cfaOrgIds),
+    fetchActivationDatesByOrgId(cfaOrgIds, endExclusive),
+    fetchCollaborationsByOrgId(cfaOrgIds, endExclusive),
   ]);
 
   const eligibleOrgIds = new Set(eligibleOrgsRows.map((o) => String(o._id)));
 
   return users.map((user): BrevoContact => {
     const organismeId = user.organisme?._id ? String(user.organisme._id) : null;
-    const decaCounts = organismeId ? decaCountsByOrgId.get(organismeId) : undefined;
-    const erpRupturants = organismeId ? erpRupturantsByOrgId.get(organismeId) : undefined;
-    const transmissionErrors = organismeId ? transmissionErrorsByOrgId.get(organismeId) : undefined;
-    const rupturantsStats = organismeId ? rupturantsStatsByOrgId.get(organismeId) : undefined;
+    const orgStats: CfaOrgStats = organismeId
+      ? {
+          decaCounts: decaCountsByOrgId.get(organismeId),
+          erpRupturants: erpRupturantsByOrgId.get(organismeId),
+          transmissionErrors: transmissionErrorsByOrgId.get(organismeId),
+          rupturantsStats: rupturantsStatsByOrgId.get(organismeId),
+          activationDate: activationDateByOrgId.get(organismeId),
+          collaborations: collaborationsByOrgId.get(organismeId),
+        }
+      : {};
     const mlStats =
       user.organisation.type === "MISSION_LOCALE" ? mlStatsByMlId.get(String(user.organisation._id)) : undefined;
     const lien = lienByEmail.get(formatEmail(user.email)) ?? "";
     return {
       email: formatEmail(user.email),
-      attributes: buildAttributes(
-        user,
-        lien,
-        decaCounts,
-        erpRupturants,
-        transmissionErrors,
-        mlStats,
-        rupturantsStats,
-        eligibleOrgIds
-      ),
+      attributes: buildAttributes(user, lien, orgStats, mlStats, eligibleOrgIds),
     };
   });
 };
