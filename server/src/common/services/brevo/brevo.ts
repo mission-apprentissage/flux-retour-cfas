@@ -51,13 +51,9 @@ const EventInstance: brevo.EventsApi | null = initEventApi();
 export interface SendTransactionalEmailOptions {
   cc?: string[];
   /**
-   * Hors production, redirige l'email vers cette adresse (l'utilisateur connecté qui teste) au lieu
-   * du vrai destinataire. Sans aucun effet en production.
-   *
-   * Obligatoire : Brevo est une API externe, joignable avec la même clé depuis n'importe quel
-   * environnement — contrairement au mailer SMTP, rien n'empêche structurellement un envoi réel
-   * depuis le local, la recette ou la preprod. Hors production, une valeur vide bloque l'envoi
-   * plutôt que d'écrire au vrai destinataire.
+   * Hors production, redirige l'email vers cette adresse au lieu du vrai destinataire ; sans effet
+   * en production. Obligatoire : la même clé Brevo joint l'API depuis tous les environnements, donc
+   * rien n'empêche structurellement un envoi réel. Une valeur vide bloque l'envoi hors production.
    */
   redirectRecipientInNonProdTo: string | undefined;
 }
@@ -74,9 +70,7 @@ export const sendTransactionalEmail = async (
 
   const isProduction = config.env === "production";
 
-  // Garde-fou hors production : on n'écrit jamais au vrai destinataire mais à l'utilisateur qui teste.
-  // Sans adresse de repli, on refuse d'envoyer : mieux vaut un email manquant qu'un email parti à un
-  // vrai destinataire depuis un environnement de test.
+  // Sans adresse de repli hors production : mieux vaut un email manquant qu'un email parti au CFA.
   const redirectTo = isProduction ? undefined : options.redirectRecipientInNonProdTo;
   if (!isProduction && !redirectTo) {
     logger.warn(

@@ -36,6 +36,7 @@ import { getAgeFromDate } from "@/common/utils/miscUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { addSheetToXlscFile, XlsxColumn } from "@/common/utils/xlsxUtils";
 import { MissionLocaleLocals, returnResult, RouteHandler } from "@/http/middlewares/helpers";
+import { heavyLimiter } from "@/http/middlewares/rateLimit";
 
 export default () => {
   const router = express.Router();
@@ -49,7 +50,8 @@ export default () => {
   router.put("/parametres", returnResult(updateMlParametres));
   router.get("/banner-stats", returnResult(getMlBannerStats));
   router.get("/cfa-invitations", returnResult(getCfaInvitationsList));
-  router.post("/cfa-invitations", returnResult(inviteCfaFromMissionLocale));
+  // Un envoi déclenche jusqu'à une trentaine d'emails réels : on plafonne les appels par conseiller.
+  router.post("/cfa-invitations", heavyLimiter, returnResult(inviteCfaFromMissionLocale));
   return router;
 };
 

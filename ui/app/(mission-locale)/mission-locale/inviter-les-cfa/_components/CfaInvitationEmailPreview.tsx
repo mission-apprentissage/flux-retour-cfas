@@ -4,6 +4,7 @@ import styles from "./CfaInvitationEmailPreview.module.scss";
 
 interface Props {
   nbJeunesRupture: number;
+  nbJeunesRuptureEtablissement: number;
   mlNom: string;
   conseillerPrenom: string;
   conseillerNom: string;
@@ -39,13 +40,12 @@ function Cta({ light = false }: { light?: boolean }) {
 }
 
 /**
- * Aperçu de l'email d'invitation reçu par le CFA, reconstruit fidèlement depuis la maquette
- * Figma (node 30194:15885). Les variables (Mission Locale, conseiller, nombre de jeunes, note)
- * sont injectées côté front. Ce n'est pas le rendu exact du template Brevo, mais les deux
- * dérivent de la même maquette.
+ * Reconstruction de l'email côté front (maquette Figma 30194:15885) : ce n'est pas le rendu du
+ * template Brevo, les deux dérivent de la même maquette et doivent être modifiés de pair.
  */
 export function CfaInvitationEmailPreview({
   nbJeunesRupture,
+  nbJeunesRuptureEtablissement,
   mlNom,
   conseillerPrenom,
   conseillerNom,
@@ -100,7 +100,7 @@ export function CfaInvitationEmailPreview({
       <section className={styles.statsBlock}>
         <div className={styles.stats}>
           <div className={styles.stat}>
-            <div className={styles.statNumber}>{nbJeunesRupture}</div>
+            <div className={styles.statNumber}>{nbJeunesRuptureEtablissement}</div>
             <div className={styles.statLabel}>jeunes en rupture de contrat dans votre établissement en ce moment*</div>
           </div>
           <div className={styles.stat}>
@@ -202,7 +202,7 @@ export function CfaInvitationEmailPreview({
         />
         <Cta />
       </section>
-      <section className={styles.preFinalBlock}>
+      <section>
         <Image
           src="/images/mission-locale/email/illustration-finale.png"
           alt=""
@@ -236,7 +236,7 @@ export function CfaInvitationEmailPreview({
             d’intérêt public du Ministère du Travail.
           </strong>
         </p>
-        <hr className={styles.footerSep} />
+        <hr className={styles.separator} />
         <p className={styles.footerText}>Vous ne souhaitez plus recevoir ce genre de courrier ?</p>
         <span className={styles.unsubscribeLink}>
           Demander à ne plus recevoir ces courriels de la part de l’outil professionnel Tableau de Bord de

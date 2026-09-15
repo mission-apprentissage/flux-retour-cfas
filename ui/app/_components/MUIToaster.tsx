@@ -26,12 +26,9 @@ interface MUIToasterContextValue {
 const MUIToasterContext = createContext<MUIToasterContextValue | null>(null);
 
 /**
- * Toaster global : le Snackbar MUI gère uniquement le positionnement/portail et l'ouverture, et le contenu
- * est une alerte au thème DSFR (`@codegouvfr/react-dsfr/Alert`). Fonctionnel en App Router, contrairement à
- * `useToaster` (Chakra non monté). Monté une fois dans `Providers`, exposé via `useMUIToaster()`.
- *
- * L'auto-hide est géré manuellement (timer + `nonce`) car l'`autoHideDuration` de MUI est peu fiable avec
- * un enfant custom et un `onClose` recréé à chaque render (notamment en StrictMode).
+ * Snackbar MUI pour le positionnement, contenu en Alert DSFR. Remplace `useToaster` (Chakra), non
+ * monté en App Router. L'auto-hide est géré à la main : l'`autoHideDuration` de MUI est peu fiable
+ * avec un enfant custom et un `onClose` recréé à chaque render.
  */
 export function MUIToasterProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<ToastState>({ open: false, message: "", severity: "success", nonce: 0 });
@@ -44,7 +41,6 @@ export function MUIToasterProvider({ children }: { children: ReactNode }) {
 
   const closeToast = useCallback(() => setToast((current) => ({ ...current, open: false })), []);
 
-  // Auto-hide : un timer relancé à chaque nouveau toast (via `nonce`), nettoyé proprement.
   useEffect(() => {
     if (!toast.open) {
       return;

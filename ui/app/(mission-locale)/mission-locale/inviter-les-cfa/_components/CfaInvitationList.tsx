@@ -14,7 +14,6 @@ interface Props {
   onInvite: (cfa: ICfaToInvite) => void;
 }
 
-// Maquette : l'encart de remerciement s'intercale après les deux premières cartes de la liste.
 const ENGAGEMENT_CALLOUT_AFTER_INDEX = 1;
 
 export function CfaInvitationList({ invitations, showEngagementCallout, onInvite }: Props) {

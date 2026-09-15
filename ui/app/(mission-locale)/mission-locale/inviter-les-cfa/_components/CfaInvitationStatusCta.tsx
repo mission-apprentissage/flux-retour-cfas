@@ -10,11 +10,19 @@ interface Props {
 
 export function CfaInvitationStatusCta({ cfa, onInvite }: Props) {
   switch (cfa.statut) {
-    case CFA_INVITATION_STATUT.CFA_ACTIF:
+    case CFA_INVITATION_STATUT.CFA_ACTIF_APRES_INVITATION:
       return (
         <span className={`fr-badge ${styles.statusBadge} ${styles.statusActive}`}>
           <i className="fr-icon-checkbox-circle-fill fr-icon--sm" aria-hidden="true" />
           <span className={styles.statusText}>CFA activé grâce à vous !</span>
+        </span>
+      );
+
+    case CFA_INVITATION_STATUT.CFA_ACTIF:
+      return (
+        <span className={`fr-badge ${styles.statusBadge} ${styles.statusActive}`}>
+          <i className="fr-icon-checkbox-circle-fill fr-icon--sm" aria-hidden="true" />
+          <span className={styles.statusText}>CFA déjà actif</span>
         </span>
       );
 

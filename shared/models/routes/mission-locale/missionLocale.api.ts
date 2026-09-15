@@ -100,8 +100,10 @@ export enum CFA_INVITATION_STATUT {
   INVITER = "INVITER",
   // Ce conseiller a déjà envoyé une invitation pour ce CFA.
   INVITATION_ENVOYEE = "INVITATION_ENVOYEE",
-  // Le CFA a un compte actif sur le Tableau de bord.
+  // Le CFA a activé la collaboration de lui-même.
   CFA_ACTIF = "CFA_ACTIF",
+  // Le CFA a activé la collaboration après une invitation de ce conseiller.
+  CFA_ACTIF_APRES_INVITATION = "CFA_ACTIF_APRES_INVITATION",
 }
 
 export interface ICfaToInvite {
@@ -110,8 +112,10 @@ export interface ICfaToInvite {
   uai: string | null;
   nom: string | null;
   adresse: string | null;
-  // Plus affiché sur les cartes : sert au tri de la liste et à l'aperçu de l'email.
+  // Périmètre de cette ML : sert au tri de la liste et à l'aperçu de l'email.
   nb_jeunes_rupture: number;
+  // Toutes ML confondues : c'est le chiffre que le CFA lira dans l'email.
+  nb_jeunes_rupture_etablissement: number;
   statut: CFA_INVITATION_STATUT;
   // Nombre de comptes TBA du CFA qui recevront l'invitation
   nb_destinataires: number;

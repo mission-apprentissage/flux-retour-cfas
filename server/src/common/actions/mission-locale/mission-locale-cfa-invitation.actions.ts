@@ -19,9 +19,7 @@ import { getActiveMissionLocalesByRegions, getCfaAccountsByOrganismeIds, ICfaAcc
 
 import { missionLocaleBaseAggregation } from "./mission-locale.actions";
 
-/**
- * Une ligne brute issue de l'agrégation : un CFA chez qui la ML a des jeunes en rupture.
- */
+/** Un CFA chez qui la ML a des jeunes en rupture. */
 interface CfaAggRow {
   organisme_id: ObjectId;
   nb_jeunes_rupture: number;
@@ -49,10 +47,7 @@ const formatAdresse = (adresse?: CfaAggRow["organisme"]["adresse"]): string | nu
   return parts.length ? parts.join(" ") : null;
 };
 
-/**
- * Noms des Missions Locales actives par région (territoire du CFA), affichées dans l'email d'invitation.
- * Seules les ML déjà activées sur le Tableau de bord (`activated_at`) sont retenues.
- */
+/** Seules les ML déjà activées sur le Tableau de bord (`activated_at`) sont retenues. */
 async function getMlNomsByRegion(regions: string[]): Promise<Map<string, string[]>> {
   const map = new Map<string, string[]>();
   const mls = await getActiveMissionLocalesByRegions(regions);
@@ -67,10 +62,6 @@ async function getMlNomsByRegion(regions: string[]): Promise<Map<string, string[
   return map;
 }
 
-/**
- * Un CFA est invitable s'il transmet ses effectifs au Tableau de bord et si au moins une personne
- * y dispose d'un compte actif
- */
 export function isCfaInvitable(
   organisme: { first_transmission_date?: Date | null },
   accounts?: Pick<ICfaAccounts, "destinataires">
@@ -79,9 +70,8 @@ export function isCfaInvitable(
 }
 
 /**
- * Destinataires effectivement servis parmi les comptes du CFA. Hors production tous les emails sont
- * redirigés vers le testeur : on n'en garde qu'un, sinon il reçoit autant de copies identiques que
- * le CFA a de comptes.
+ * Hors production tous les emails sont redirigés vers le testeur : n'en garder qu'un lui évite
+ * autant de copies identiques que le CFA a de comptes.
  */
 export function selectInvitationDestinataires(
   destinataires: ICfaAccounts["destinataires"]
@@ -89,18 +79,13 @@ export function selectInvitationDestinataires(
   return config.env === "production" ? destinataires : destinataires.slice(0, 1);
 }
 
-/**
- * Détermine le statut d'invitation d'un CFA pour le conseiller connecté.
- * Priorité : CFA actif > déjà invité par ce conseiller > invitable.
- *
- * Tous les CFA remontés sont invitables par construction (cf. `isCfaInvitable`)
- */
+/** Statut relatif au conseiller connecté : les CFA remontés sont tous invitables par construction. */
 export function computeCfaInvitationStatut(params: {
   mlBetaActivatedAt?: Date | null;
   invitedByMe: boolean;
 }): CFA_INVITATION_STATUT {
   if (params.mlBetaActivatedAt) {
-    return CFA_INVITATION_STATUT.CFA_ACTIF;
+    return params.invitedByMe ? CFA_INVITATION_STATUT.CFA_ACTIF_APRES_INVITATION : CFA_INVITATION_STATUT.CFA_ACTIF;
   }
   if (params.invitedByMe) {
     return CFA_INVITATION_STATUT.INVITATION_ENVOYEE;
@@ -109,12 +94,8 @@ export function computeCfaInvitationStatut(params: {
 }
 
 /**
- * Liste des CFA du territoire d'une Mission Locale (ceux où des jeunes rattachés à cette ML
- * sont en rupture), triés par volume de jeunes décroissant, avec un statut d'invitation
- * relatif au conseiller connecté.
- *
- * Réutilise `missionLocaleBaseAggregation` pour que le décompte de jeunes en rupture soit
- * cohérent avec ce que la ML voit dans son tableau de bord.
+ * CFA chez qui la ML a des jeunes en rupture, triés par volume décroissant. Réutilise
+ * `missionLocaleBaseAggregation` pour que le décompte colle à celui du tableau de bord ML.
  */
 export async function getCfaListToInviteForMissionLocale(
   missionLocale: IOrganisationMissionLocale,
@@ -184,7 +165,6 @@ export async function getCfaListToInviteForMissionLocale(
     ])
     .toArray()) as CfaAggRow[];
 
-  // CFA déjà invités par ce conseiller
   const myInvitedDocs = await missionLocaleCfaInvitationsDb()
     .find({ mission_locale_id: missionLocaleId, author_id: userId }, { projection: { organisme_id: 1 } })
     .toArray();
@@ -222,16 +202,17 @@ export async function getCfaListToInviteForMissionLocale(
     organisme: organisme as unknown as CfaAggRow["organisme"],
   }));
 
-  // Un CFA n'est proposé que s'il est invitable, ou s'il a déjà activé la collaboration — on garde
-  // alors sa carte pour que le conseiller voie le résultat de son invitation.
+  // Un CFA déjà activé reste affiché : le conseiller doit voir le résultat de son invitation.
   const rows = [...ruptureRows, ...extraRows].filter(
     (row) =>
       isCfaInvitable(row.organisme, accountsByOrganismeId.get(row.organisme_id.toString())) ||
       mlBetaActivatedAt(row.organisme_id.toString())
   );
 
-  // Missions Locales actives du territoire (par région du CFA) affichées dans l'email d'invitation.
   const mlNomsByRegion = await getMlNomsByRegion(rows.map((row) => row.organisme.adresse?.region ?? ""));
+
+  // Chiffre repris tel quel dans l'email, donc dans l'aperçu que le conseiller valide.
+  const statsEtablissement = await fetchRupturantsStatsByOrgId(rows.map((row) => row.organisme_id));
 
   return rows
     .map((row) => {
@@ -243,6 +224,8 @@ export async function getCfaListToInviteForMissionLocale(
         nom: row.organisme.nom ?? row.organisme.raison_sociale ?? row.organisme.enseigne ?? null,
         adresse: formatAdresse(row.organisme.adresse),
         nb_jeunes_rupture: row.nb_jeunes_rupture,
+        nb_jeunes_rupture_etablissement:
+          statsEtablissement.get(row.organisme_id.toString())?.nb_jeunes_rupture ?? row.nb_jeunes_rupture,
         statut: computeCfaInvitationStatut({
           mlBetaActivatedAt: mlBetaActivatedAt(row.organisme_id.toString()),
           invitedByMe: row.invited_by_me,
@@ -252,6 +235,25 @@ export async function getCfaListToInviteForMissionLocale(
       };
     })
     .sort((a, b) => b.nb_jeunes_rupture - a.nb_jeunes_rupture || (a.nom ?? "").localeCompare(b.nom ?? ""));
+}
+
+/**
+ * Jeunes en rupture de cette ML chez ce CFA, avec le pipeline de visibilité de la liste. Un zéro
+ * vaut hors périmètre : sans ce contrôle, un conseiller peut faire écrire à n'importe quel CFA.
+ */
+async function countJeunesEnRupturePourMl(
+  missionLocale: IOrganisationMissionLocale,
+  organismeId: ObjectId
+): Promise<number> {
+  const baseAggregation = await missionLocaleBaseAggregation(missionLocale);
+  const row = await missionLocaleEffectifsDb()
+    .aggregate<{ total: number }>([
+      { $match: { "effectif_snapshot.organisme_id": organismeId } },
+      ...baseAggregation,
+      { $count: "total" },
+    ])
+    .next();
+  return row?.total ?? 0;
 }
 
 /**
@@ -274,7 +276,12 @@ export async function sendCfaInvitationFromMissionLocale(
     throw Boom.notFound("CFA introuvable");
   }
 
-  // Cohérence avec la liste : mêmes critères d'invitabilité que ceux qui décident de son affichage.
+  const nbJeunesEnRuptureMl = await countJeunesEnRupturePourMl(missionLocale, organisme._id);
+  if (nbJeunesEnRuptureMl === 0) {
+    throw Boom.forbidden("Ce CFA n'accueille aucun jeune en rupture rattaché à votre Mission Locale.");
+  }
+
+  // Mêmes critères que ceux qui décident de son affichage dans la liste.
   const accounts = (await getCfaAccountsByOrganismeIds([organismeId])).get(organismeId);
   if (!accounts || !isCfaInvitable(organisme, accounts)) {
     throw Boom.badRequest(
@@ -284,12 +291,11 @@ export async function sendCfaInvitationFromMissionLocale(
 
   const organismeNom = organisme.nom || organisme.enseigne || organisme.raison_sociale || "Organisme";
 
-  // Missions Locales actives du territoire (même région que le CFA) listées dans l'email.
   const mlNoms = organisme.adresse?.region
     ? ((await getMlNomsByRegion([organisme.adresse.region])).get(organisme.adresse.region) ?? [])
     : [];
 
-  // Jeunes en rupture de l'établissement (toutes ML confondues)
+  // Toutes ML confondues, contrairement au `nb_jeunes_rupture` de la liste, restreint à cette ML.
   const nbJeunesEnRupture =
     (await fetchRupturantsStatsByOrgId([organisme._id])).get(String(organisme._id))?.nb_jeunes_rupture ?? 0;
 
@@ -331,6 +337,7 @@ export async function sendCfaInvitationFromMissionLocale(
         NOMS_ML: formatListeTronquee(mlNoms),
         NOM_DESTINATAIRE: destinataire.nom ?? "",
         CFA_NB_JEUNES_EN_RUPTURE: nbJeunesEnRupture,
+        CFA_NB_JEUNES_EN_RUPTURE_ML: nbJeunesEnRuptureMl,
       },
       {
         // Une seule copie au conseiller, sinon il reçoit autant de doubles que de destinataires.

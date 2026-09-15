@@ -708,16 +708,11 @@ export const getActiveMissionLocalesByRegions = async (regions: string[]): Promi
 
 export interface ICfaAccounts {
   organisation_id: ObjectId;
-  /** Date d'activation « mission locale » du CFA, ou `null` s'il n'a pas encore activé la collaboration. */
   ml_beta_activated_at: Date | null;
-  /** Utilisateurs du CFA disposant d'un compte actif (`CONFIRMED`), destinataires d'une invitation. */
+  /** Utilisateurs du CFA dont le compte est `CONFIRMED`. */
   destinataires: Array<{ user_id: ObjectId; email: string; nom: string | null }>;
 }
 
-/**
- * Comptes actifs et état d'activation des organismes de formation donnés, lus en direct sur les
- * organisations.
- */
 export const getCfaAccountsByOrganismeIds = async (organismeIds: string[]): Promise<Map<string, ICfaAccounts>> => {
   const map = new Map<string, ICfaAccounts>();
   const ids = [...new Set(organismeIds.filter(Boolean))];

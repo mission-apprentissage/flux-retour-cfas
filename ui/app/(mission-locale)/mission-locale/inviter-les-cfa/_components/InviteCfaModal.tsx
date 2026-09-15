@@ -120,6 +120,7 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
       {showPreview ? (
         <CfaInvitationEmailPreview
           nbJeunesRupture={cfa?.nb_jeunes_rupture ?? 0}
+          nbJeunesRuptureEtablissement={cfa?.nb_jeunes_rupture_etablissement ?? 0}
           mlNom={user?.organisation?.nom ?? ""}
           conseillerPrenom={user?.prenom ?? ""}
           conseillerNom={user?.nom ?? ""}

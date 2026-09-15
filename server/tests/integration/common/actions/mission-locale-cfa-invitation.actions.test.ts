@@ -146,8 +146,11 @@ async function createMlEffectifDoc(overrides: Record<string, any> = {}, organism
 }
 
 describe("computeCfaInvitationStatut", () => {
-  it("retourne CFA_ACTIF dès que le CFA est activé (prioritaire)", () => {
+  it("distingue un CFA activé après invitation d'un CFA activé de lui-même", () => {
     expect(computeCfaInvitationStatut({ mlBetaActivatedAt: new Date(), invitedByMe: true })).toBe(
+      CFA_INVITATION_STATUT.CFA_ACTIF_APRES_INVITATION
+    );
+    expect(computeCfaInvitationStatut({ mlBetaActivatedAt: new Date(), invitedByMe: false })).toBe(
       CFA_INVITATION_STATUT.CFA_ACTIF
     );
   });
@@ -338,7 +341,24 @@ describe("getCfaListToInviteForMissionLocale", () => {
     expect(result[0].nb_destinataires).toBe(2);
   });
 
-  it("affiche CFA_ACTIF pour un CFA invité par ce conseiller et désormais actif, même hors liste-rupture", async () => {
+  it("n'attribue pas l'activation au conseiller quand le CFA s'est activé seul", async () => {
+    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await organisationsDb().updateOne({ _id: cfaOrganisationId }, { $set: { ml_beta_activated_at: new Date() } });
+
+    const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
+
+    expect(result[0].statut).toBe(CFA_INVITATION_STATUT.CFA_ACTIF);
+  });
+
+  it("expose le nombre de jeunes en rupture toutes ML confondues, repris dans l'email", async () => {
+    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+
+    const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
+
+    expect(result[0].nb_jeunes_rupture_etablissement).toBeGreaterThanOrEqual(result[0].nb_jeunes_rupture);
+  });
+
+  it("affiche CFA_ACTIF_APRES_INVITATION pour un CFA invité par ce conseiller et désormais actif, même hors liste-rupture", async () => {
     // Aucun effectif en rupture pour ce CFA → absent de la liste-rupture. Mais ce conseiller l'a invité
     // (journal) et le CFA est désormais actif (organisation ORGANISME_FORMATION avec ml_beta_activated_at).
     await missionLocaleCfaInvitationsDb().insertOne({
@@ -356,7 +376,7 @@ describe("getCfaListToInviteForMissionLocale", () => {
     const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
 
     const cfa = result.find((c) => c.organisme_id === organismeId.toString());
-    expect(cfa?.statut).toBe(CFA_INVITATION_STATUT.CFA_ACTIF);
+    expect(cfa?.statut).toBe(CFA_INVITATION_STATUT.CFA_ACTIF_APRES_INVITATION);
     expect(cfa?.nb_jeunes_rupture).toBe(0);
   });
 });
@@ -375,6 +395,19 @@ describe("sendCfaInvitationFromMissionLocale", () => {
     await organismesDb().insertOne(sampleOrganisme as any);
     await organisationsDb().insertMany([missionLocale, cfaOrganisation] as any);
     await usersMigrationDb().insertOne(cfaAccount() as any);
+    await missionLocaleEffectifsDb().deleteMany({});
+    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+  });
+
+  it("refuse un CFA sans jeune en rupture rattaché à cette Mission Locale", async () => {
+    await missionLocaleEffectifsDb().deleteMany({});
+
+    await expect(sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString())).rejects.toThrow(
+      /aucun jeune en rupture rattaché/i
+    );
+
+    expect(vi.mocked(sendTransactionalEmail)).not.toHaveBeenCalled();
+    expect(await missionLocaleCfaInvitationsDb().countDocuments({})).toBe(0);
   });
 
   it("journalise et envoie l'email Brevo avec le conseiller en copie", async () => {
@@ -403,6 +436,7 @@ describe("sendCfaInvitationFromMissionLocale", () => {
       expect.objectContaining({
         NOM_CFA: "CAMPUS DU LAC",
         NOM_MISSION_LOCALE: "ML Test",
+        CFA_NB_JEUNES_EN_RUPTURE_ML: 1,
         NOTE_RECOMMANDATION: "Je recommande ce CFA",
         NOM_DESTINATAIRE: "Camille Durand",
       }),
