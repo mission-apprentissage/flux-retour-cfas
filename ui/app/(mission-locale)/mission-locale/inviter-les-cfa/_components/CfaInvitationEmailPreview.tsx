@@ -118,7 +118,7 @@ export function CfaInvitationEmailPreview({
         <p className={styles.blockTitle}>
           Le Tableau de bord de l’apprentissage vous permet de{" "}
           <span className={styles.accent}>
-            collaborer avec les Missions Locales de votre territoire en quelque clics.
+            collaborer avec les Missions Locales de votre territoire en quelques clics.
           </span>
         </p>
         <ul className={styles.argList}>
