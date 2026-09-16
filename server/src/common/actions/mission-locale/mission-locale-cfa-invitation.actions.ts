@@ -12,7 +12,10 @@ import { formatListeTronquee } from "@/common/utils/listUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 import config from "@/config";
 
-import { getOrCreateConnexionInvitationsByEmails } from "../brevo/contacts/connexion-invitations.actions";
+import {
+  getOrCreateConnexionInvitationByEmail,
+  getOrCreateConnexionInvitationsByEmails,
+} from "../brevo/contacts/connexion-invitations.actions";
 import { formatEmail } from "../brevo/contacts/formatters";
 import { fetchRupturantsStatsByOrgId } from "../brevo/contacts/tba-contacts";
 import { getActiveMissionLocalesByRegions, getCfaAccountsByOrganismeIds, ICfaAccounts } from "../organisations.actions";
@@ -237,6 +240,21 @@ export async function getCfaListToInviteForMissionLocale(
     .sort((a, b) => b.nb_jeunes_rupture - a.nb_jeunes_rupture || (a.nom ?? "").localeCompare(b.nom ?? ""));
 }
 
+const INVITATION_SOURCE = "invitation-ml";
+
+/** Sans token, le destinataire devrait ressaisir son adresse : on retente plutôt un token unitaire. */
+async function buildLienInvitation(email: string, tokenByEmail: Map<string, string>): Promise<string> {
+  let token = tokenByEmail.get(formatEmail(email));
+  if (!token) {
+    try {
+      token = await getOrCreateConnexionInvitationByEmail({ email, source: INVITATION_SOURCE });
+    } catch (err) {
+      logger.error({ err }, "Invitation CFA : token de connexion indisponible, envoi du lien générique");
+    }
+  }
+  return token ? getPublicUrl(`/auth/connexion?invitationToken=${token}`) : getPublicUrl("/auth/connexion");
+}
+
 /**
  * Jeunes en rupture de cette ML chez ce CFA, avec le pipeline de visibilité de la liste. Un zéro
  * vaut hors périmètre : sans ce contrôle, un conseiller peut faire écrire à n'importe quel CFA.
@@ -308,7 +326,7 @@ export async function sendCfaInvitationFromMissionLocale(
   // Lien de connexion personnalisé (le token pré-remplit l'email, il n'authentifie pas).
   const tokenByEmail = await getOrCreateConnexionInvitationsByEmails(
     destinataires.map((d) => d.email),
-    { source: "invitation-ml" }
+    { source: INVITATION_SOURCE }
   );
 
   logger.info(
@@ -319,7 +337,7 @@ export async function sendCfaInvitationFromMissionLocale(
   // Séquentiel : jusqu'à une trentaine de comptes pour un seul clic.
   const envoyes: Array<{ user_id: ObjectId; email: string }> = [];
   for (const destinataire of destinataires) {
-    const token = tokenByEmail.get(formatEmail(destinataire.email));
+    const lienInvitation = await buildLienInvitation(destinataire.email, tokenByEmail);
     const sent = await sendTransactionalEmail(
       destinataire.email,
       templateId,
@@ -329,9 +347,7 @@ export async function sendCfaInvitationFromMissionLocale(
         PRENOM_CONSEILLER: user.prenom ?? "",
         NOM_CONSEILLER: user.nom ?? "",
         NOTE_RECOMMANDATION: note ?? "",
-        LIEN_INVITATION: token
-          ? getPublicUrl(`/auth/connexion?invitationToken=${token}`)
-          : getPublicUrl("/auth/connexion"),
+        LIEN_INVITATION: lienInvitation,
         NB_ML_PARTENAIRES: mlNoms.length,
         NOMS_ML: formatListeTronquee(mlNoms),
         NOM_DESTINATAIRE: destinataire.nom ?? "",
