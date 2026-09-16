@@ -1,6 +1,6 @@
 import Boom from "boom";
 import express from "express";
-import { Document } from "mongodb";
+import { Document, ObjectId } from "mongodb";
 import { SIRET_REGEX, UAI_REGEX } from "shared/constants/validations";
 import { z } from "zod";
 
@@ -10,10 +10,11 @@ import { findOrganismeById, getAllOrganismes } from "@/common/actions/organismes
 import {
   activateCollabV2,
   activateDecaCfaPilotBatch,
-  deactivateCollabV2,
   deactivateDecaCfaPilotBatch,
   getArchivableOrganismes,
+  resumeCollab,
   searchOrganismesSupportInfoBySiret,
+  suspendCollab,
 } from "@/common/actions/organismes/organismes.admin.actions";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import organismesFilterSchema from "@/common/validation/organismesFilterSchema";
@@ -133,13 +134,24 @@ export default () => {
   );
 
   router.post(
-    "/:id/collab-v2/deactivate",
+    "/:id/collab-v2/suspend",
     validateRequestMiddleware({
-      params: z.object({ id: z.string().regex(/^[0-9a-f]{24}$/) }),
+      params: objectIdSchema("id"),
     }),
     async (req, res) => {
-      const result = await deactivateCollabV2(req.params.id, req.user._id.toString());
-      res.json(result);
+      const status = await suspendCollab(new ObjectId(req.params.id), { userId: req.user._id });
+      res.json({ status, organismeId: req.params.id });
+    }
+  );
+
+  router.post(
+    "/:id/collab-v2/resume",
+    validateRequestMiddleware({
+      params: objectIdSchema("id"),
+    }),
+    async (req, res) => {
+      const status = await resumeCollab(new ObjectId(req.params.id), { reason: "admin", userId: req.user._id });
+      res.json({ status, organismeId: req.params.id });
     }
   );
 

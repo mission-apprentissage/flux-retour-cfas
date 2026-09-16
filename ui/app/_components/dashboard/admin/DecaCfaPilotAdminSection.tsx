@@ -189,8 +189,8 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
         ]}
       >
         {action === "activate"
-          ? `Activer le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Les flags is_allowed_deca / is_allowed_collab seront posés et la date d'activation ML sera propagée.`
-          : `Désactiver le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Les flags et la date d'activation ML seront retirés. Les snapshots déjà transmis restent inchangés.`}
+          ? `Activer le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_deca sera posé : les effectifs DECA deviennent visibles côté CFA. La collaboration n'est pas modifiée.`
+          : `Désactiver le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_deca sera retiré. La collaboration, la date d'activation ML et les snapshots déjà transmis restent inchangés.`}
       </decaCfaPilotConfirmModal.Component>
     </>
   );

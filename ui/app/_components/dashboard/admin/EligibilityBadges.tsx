@@ -21,7 +21,7 @@ export function EtatBadge({ active, suspendedAt }: { active: boolean; suspendedA
   if (active && suspendedAt) {
     return (
       <Badge severity="warning" small>
-        Suspendue pour inactivité depuis le {formatDate(suspendedAt)}
+        Suspendue depuis le {formatDate(suspendedAt)}
       </Badge>
     );
   }

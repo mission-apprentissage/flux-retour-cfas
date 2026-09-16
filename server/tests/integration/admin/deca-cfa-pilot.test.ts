@@ -124,7 +124,7 @@ describe("activateDecaCfaPilotBatch", () => {
     expect(result.counts).toEqual({ activated: 1, already_active: 1, not_eligible: 1, not_found: 1 });
   });
 
-  it("propagates flags + ml_beta_activated_at + computed missionLocaleEffectif", async () => {
+  it("poses only is_allowed_deca : collaboration flag, ml_beta_activated_at and computed untouched", async () => {
     const { id } = await seedOrganisme({
       siret: "10000000000004",
       uai: "0010004D",
@@ -136,55 +136,6 @@ describe("activateDecaCfaPilotBatch", () => {
 
     const organisme = await organismesDb().findOne({ _id: id });
     expect(organisme?.is_allowed_deca).toBe(true);
-    expect(organisme?.is_allowed_collab).toBe(true);
-
-    const organisation = (await organisationsDb().findOne({
-      organisme_id: id.toHexString(),
-    })) as IOrganisationOrganismeFormation | null;
-    expect(organisation?.ml_beta_activated_at).toBeInstanceOf(Date);
-
-    const mlEffectif = await missionLocaleEffectifsDb().findOne({ "effectif_snapshot.organisme_id": id });
-    expect(mlEffectif?.computed?.organisme?.ml_beta_activated_at).toBeInstanceOf(Date);
-  });
-
-  it("preserves the initial ml_beta_activated_at on replay", async () => {
-    const initialDate = new Date("2026-01-15T10:00:00.000Z");
-    const { id } = await seedOrganisme({
-      siret: "10000000000005",
-      uai: "0010005E",
-      mlBetaActivatedAt: initialDate,
-      insertMlEffectif: true,
-    });
-    // organisme not yet flagged
-    const result = await activateDecaCfaPilotBatch([{ siret: "10000000000005", uai: "0010005E" }], ADMIN_USER_ID);
-    expect(result.items[0].status).toBe("already_active");
-    expect(result.items[0].mlBetaActivatedAt).toEqual(initialDate);
-
-    const organisation = (await organisationsDb().findOne({
-      organisme_id: id.toHexString(),
-    })) as IOrganisationOrganismeFormation | null;
-    expect(organisation?.ml_beta_activated_at).toEqual(initialDate);
-
-    const mlEffectif = await missionLocaleEffectifsDb().findOne({ "effectif_snapshot.organisme_id": id });
-    expect(mlEffectif?.computed?.organisme?.ml_beta_activated_at).toEqual(initialDate);
-  });
-});
-
-describe("deactivateDecaCfaPilotBatch", () => {
-  it("unsets flags, ml_beta_activated_at, and computed missionLocaleEffectif (symétrique)", async () => {
-    const { id } = await seedOrganisme({
-      siret: "10000000000006",
-      uai: "0010006F",
-      insertMlEffectif: true,
-    });
-    await activateDecaCfaPilotBatch([{ siret: "10000000000006", uai: "0010006F" }], ADMIN_USER_ID);
-
-    const result = await deactivateDecaCfaPilotBatch([{ siret: "10000000000006", uai: "0010006F" }], ADMIN_USER_ID);
-    expect(result.items[0].status).toBe("deactivated");
-    expect(result.counts).toEqual({ deactivated: 1 });
-
-    const organisme = await organismesDb().findOne({ _id: id });
-    expect(organisme?.is_allowed_deca).toBeUndefined();
     expect(organisme?.is_allowed_collab).toBeUndefined();
 
     const organisation = (await organisationsDb().findOne({
@@ -194,6 +145,50 @@ describe("deactivateDecaCfaPilotBatch", () => {
 
     const mlEffectif = await missionLocaleEffectifsDb().findOne({ "effectif_snapshot.organisme_id": id });
     expect(mlEffectif?.computed?.organisme?.ml_beta_activated_at).toBeUndefined();
+  });
+
+  it("preserves an existing ml_beta_activated_at on activation", async () => {
+    const initialDate = new Date("2026-01-15T10:00:00.000Z");
+    const { id } = await seedOrganisme({
+      siret: "10000000000005",
+      uai: "0010005E",
+      mlBetaActivatedAt: initialDate,
+      insertMlEffectif: true,
+    });
+    const result = await activateDecaCfaPilotBatch([{ siret: "10000000000005", uai: "0010005E" }], ADMIN_USER_ID);
+    expect(result.items[0].status).toBe("activated");
+
+    const organisation = (await organisationsDb().findOne({
+      organisme_id: id.toHexString(),
+    })) as IOrganisationOrganismeFormation | null;
+    expect(organisation?.ml_beta_activated_at).toEqual(initialDate);
+  });
+});
+
+describe("deactivateDecaCfaPilotBatch", () => {
+  it("unsets only is_allowed_deca : collaboration flag and ml_beta_activated_at preserved", async () => {
+    const initialDate = new Date("2026-01-15T10:00:00.000Z");
+    const { id } = await seedOrganisme({
+      siret: "10000000000006",
+      uai: "0010006F",
+      mlBetaActivatedAt: initialDate,
+      insertMlEffectif: true,
+    });
+    await organismesDb().updateOne({ _id: id }, { $set: { is_allowed_collab: true } });
+    await activateDecaCfaPilotBatch([{ siret: "10000000000006", uai: "0010006F" }], ADMIN_USER_ID);
+
+    const result = await deactivateDecaCfaPilotBatch([{ siret: "10000000000006", uai: "0010006F" }], ADMIN_USER_ID);
+    expect(result.items[0].status).toBe("deactivated");
+    expect(result.counts).toEqual({ deactivated: 1 });
+
+    const organisme = await organismesDb().findOne({ _id: id });
+    expect(organisme?.is_allowed_deca).toBeUndefined();
+    expect(organisme?.is_allowed_collab).toBe(true);
+
+    const organisation = (await organisationsDb().findOne({
+      organisme_id: id.toHexString(),
+    })) as IOrganisationOrganismeFormation | null;
+    expect(organisation?.ml_beta_activated_at).toEqual(initialDate);
   });
 
   it("returns not_active when the organisme is not flagged, and not_found for unknown siret/uai", async () => {
@@ -217,17 +212,14 @@ describe("deactivateDecaCfaPilotBatch", () => {
     });
     const r1 = await activateDecaCfaPilotBatch([{ siret: "10000000000008", uai: "0010008H" }], ADMIN_USER_ID);
     expect(r1.items[0].status).toBe("activated");
-    const firstDate = r1.items[0].mlBetaActivatedAt;
 
     const r2 = await deactivateDecaCfaPilotBatch([{ siret: "10000000000008", uai: "0010008H" }], ADMIN_USER_ID);
     expect(r2.items[0].status).toBe("deactivated");
 
     const r3 = await activateDecaCfaPilotBatch([{ siret: "10000000000008", uai: "0010008H" }], ADMIN_USER_ID);
-    // re-activation : ml_beta_activated_at was unset, so this is a fresh activation
     expect(r3.items[0].status).toBe("activated");
 
     const organisme = await organismesDb().findOne({ _id: id });
     expect(organisme?.is_allowed_deca).toBe(true);
-    expect(r3.items[0].mlBetaActivatedAt).not.toEqual(firstDate);
   });
 });
