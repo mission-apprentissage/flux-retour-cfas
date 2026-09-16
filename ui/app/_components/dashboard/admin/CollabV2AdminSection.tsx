@@ -85,7 +85,7 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
       const isOk = ["activated", "already_active", "deactivated"].includes(result?.status ?? "");
       setFeedback({
         severity: isOk ? "success" : "error",
-        message: `${verb} collaboration v2 — statut : ${result?.status ?? "erreur"}`,
+        message: `${verb} — statut : ${result?.status ?? "erreur"}`,
       });
       collabV2ConfirmModal.close();
       await refetch();
@@ -104,7 +104,7 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
     <>
       <p className={styles.sectionTitle}>
         <i className="ri-team-line" aria-hidden="true" />
-        Collaboration v2 (ERP, sans visibilité DECA)
+        Collaboration active
       </p>
 
       <div className={styles.row}>
@@ -144,8 +144,9 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
             iconId="ri-user-unfollow-line"
             onClick={() => openConfirm("deactivate")}
             disabled={!siret || !uai || deactivateMutation.isPending || isFetching}
+            nativeButtonProps={{ "aria-describedby": "collab-on-hint" }}
           >
-            Désactiver collaboration v2
+            Désactiver
           </Button>
         ) : (
           <Button
@@ -154,14 +155,19 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
             onClick={() => openConfirm("activate")}
             disabled={!eligible || !siret || !uai || activateMutation.isPending || isFetching}
             title={!eligible ? "Tous les critères d'éligibilité doivent être satisfaits" : undefined}
+            nativeButtonProps={{ "aria-describedby": "collab-on-hint" }}
           >
-            Activer collaboration v2
+            Activer
           </Button>
         )}
       </div>
+      <p id="collab-on-hint" className="fr-hint-text">
+        En activant cette option, la Mission Locale ne recevra plus les dossiers avant 45 jours pour les dossiers en
+        rupture non collaborés avec le CFA.
+      </p>
 
       <collabV2ConfirmModal.Component
-        title={action === "activate" ? "Activer collaboration v2" : "Désactiver collaboration v2"}
+        title={action === "activate" ? "Activer la collaboration" : "Désactiver la collaboration"}
         buttons={[
           { children: "Annuler", priority: "secondary", doClosesModal: true },
           {
@@ -175,8 +181,8 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
         ]}
       >
         {action === "activate"
-          ? `Activer l'interface v2/collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_collab et la date d'activation ML seront posés. Les effectifs DECA ne seront PAS rendus visibles (is_allowed_deca non posé).`
-          : `Désactiver l'interface v2/collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_collab sera retiré. Si l'organisme est aussi pilote DECA-CFA, la date d'activation ML et la visibilité DECA sont conservées.`}
+          ? `Activer la collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_collab et la date d'activation ML seront posés. Les dossiers en rupture non collaborés ne seront transmis à la Mission Locale qu'après 45 jours. Les effectifs DECA ne seront PAS rendus visibles (is_allowed_deca non posé).`
+          : `Désactiver la collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_collab sera retiré et la Mission Locale reverra les dossiers en rupture dès la rupture. Si l'organisme est aussi pilote DECA-CFA, la date d'activation ML et la visibilité DECA sont conservées : seuls les dossiers envoyés explicitement remonteront à la Mission Locale.`}
       </collabV2ConfirmModal.Component>
     </>
   );
