@@ -422,3 +422,137 @@ describe("markEffectifNotificationAsRead", () => {
     expect(result).toBeNull();
   });
 });
+
+describe("auto-activation Collab ON à la première collab", () => {
+  useMongo();
+
+  beforeEach(async () => {
+    await missionLocaleEffectifsDb().deleteMany({});
+    await organisationsDb().deleteMany({});
+    await organismesDb().deleteMany({});
+    await organismesDb().insertOne(sampleOrganisme);
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        ml_id: 42,
+        nom: "ML Test",
+        created_at: new Date(),
+      })
+    );
+  });
+
+  const findCfaOrganisation = () =>
+    organisationsDb().findOne({ type: "ORGANISME_FORMATION", organisme_id: organismeId.toString() }) as Promise<
+      (IOrganisation & { ml_beta_activated_at?: Date }) | null
+    >;
+
+  it("pose is_allowed_collab, la date ML et computed.organisme à la première collab", async () => {
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
+
+    await setEffectifMissionLocaleDataFromOrganisme(
+      organismeId,
+      effectifId,
+      { rupture: true, acc_conjoint: true },
+      userId
+    );
+
+    const organisme = await organismesDb().findOne({ _id: organismeId });
+    expect(organisme?.is_allowed_collab).toBe(true);
+
+    const organisation = await findCfaOrganisation();
+    expect(organisation?.ml_beta_activated_at).toBeInstanceOf(Date);
+
+    const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+    expect(dossier?.organisme_data?.acc_conjoint).toBe(true);
+    expect(dossier?.computed?.organisme).toEqual({
+      is_allowed_collab: true,
+      ml_beta_activated_at: organisation?.ml_beta_activated_at,
+    });
+  });
+
+  it("ne re-date pas un organisme déjà en Collab ON", async () => {
+    const activatedAt = new Date("2026-01-10");
+    await organismesDb().updateOne({ _id: organismeId }, { $set: { is_allowed_collab: true } });
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        type: "ORGANISME_FORMATION",
+        siret: sampleOrganisme.siret,
+        uai: sampleOrganisme.uai,
+        organisme_id: organismeId.toString(),
+        ml_beta_activated_at: activatedAt,
+        created_at: new Date(),
+      })
+    );
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
+
+    await setEffectifMissionLocaleDataFromOrganisme(
+      organismeId,
+      effectifId,
+      { rupture: true, acc_conjoint: true },
+      userId
+    );
+
+    const organisation = await findCfaOrganisation();
+    expect(organisation?.ml_beta_activated_at).toEqual(activatedAt);
+    const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+    expect(dossier?.computed).toBeUndefined();
+  });
+
+  it("pose le flag sans re-dater un organisme activé ML sans flag", async () => {
+    const activatedAt = new Date("2025-11-03");
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        type: "ORGANISME_FORMATION",
+        siret: sampleOrganisme.siret,
+        uai: sampleOrganisme.uai,
+        organisme_id: organismeId.toString(),
+        ml_beta_activated_at: activatedAt,
+        created_at: new Date(),
+      })
+    );
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
+
+    await setEffectifMissionLocaleDataFromOrganisme(
+      organismeId,
+      effectifId,
+      { rupture: true, acc_conjoint: true },
+      userId
+    );
+
+    const organisme = await organismesDb().findOne({ _id: organismeId });
+    expect(organisme?.is_allowed_collab).toBe(true);
+    const organisation = await findCfaOrganisation();
+    expect(organisation?.ml_beta_activated_at).toEqual(activatedAt);
+    const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+    expect(dossier?.computed?.organisme).toEqual({ is_allowed_collab: true, ml_beta_activated_at: activatedAt });
+  });
+
+  it("n'active rien sans acc_conjoint", async () => {
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
+
+    await setEffectifMissionLocaleDataFromOrganisme(
+      organismeId,
+      effectifId,
+      { rupture: true, acc_conjoint: false },
+      userId
+    );
+
+    const organisme = await organismesDb().findOne({ _id: organismeId });
+    expect(organisme?.is_allowed_collab).toBeUndefined();
+    expect(await findCfaOrganisation()).toBeNull();
+  });
+
+  it("écrit la collab même si l'activation échoue", async () => {
+    await organismesDb().updateOne({ _id: organismeId }, { $unset: { siret: "" } }, { bypassDocumentValidation: true });
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
+
+    await expect(
+      setEffectifMissionLocaleDataFromOrganisme(organismeId, effectifId, { rupture: true, acc_conjoint: true }, userId)
+    ).resolves.toBeDefined();
+
+    const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+    expect(dossier?.organisme_data?.acc_conjoint).toBe(true);
+    expect(await findCfaOrganisation()).toBeNull();
+  });
+});

@@ -1,8 +1,10 @@
+import { captureException } from "@sentry/node";
 import Boom from "boom";
 import { ObjectId } from "bson";
 import { RQTH_DECLARE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { IUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
 
+import logger from "@/common/logger";
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
 
 import {
@@ -10,6 +12,8 @@ import {
   resolveCfaEffectifSource,
 } from "../mission-locale/mission-locale-record.actions";
 import { createOrUpdateMissionLocaleStats } from "../mission-locale/mission-locale-stats.actions";
+
+import { ensureCollabOnAfterCollaboration } from "./organismes.admin.actions";
 
 const isMineur = (dateDeNaissance: Date) => {
   const majorite = new Date(dateDeNaissance);
@@ -136,6 +140,16 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     throw new Error("Effectif not found or update failed");
   }
   await createOrUpdateMissionLocaleStats(updated.mission_locale_id);
+
+  if (data.acc_conjoint === true) {
+    try {
+      await ensureCollabOnAfterCollaboration(organismeId, { userId, effectifId: effectifObjectId });
+    } catch (err) {
+      logger.error({ err, organismeId, effectifId: effectifObjectId }, "collab-on auto-activation failed");
+      captureException(err);
+    }
+  }
+
   return updated;
 };
 

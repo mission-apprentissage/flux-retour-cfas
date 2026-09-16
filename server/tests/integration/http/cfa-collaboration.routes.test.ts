@@ -106,6 +106,26 @@ describe("PUT /organismes/:id/mission-locale/effectif/:id", () => {
     expect(dossier?.cfa_rupture_declaration).toBeUndefined();
   });
 
+  it("bascule l'organisme en Collab ON à la première collab", async () => {
+    const effectifId = new ObjectId();
+    await insertEffectif(effectifId);
+
+    const res = await requestAsOrganisation(ORGANISATION_CFA, "put", url(effectifId), brancheA);
+    expect(res.status).toBe(200);
+
+    const organisme = await organismesDb().findOne({ _id: organismeId });
+    expect(organisme?.is_allowed_collab).toBe(true);
+
+    const organisation = (await organisationsDb().findOne({
+      type: "ORGANISME_FORMATION",
+      organisme_id: organismeId.toString(),
+    })) as (IOrganisation & { ml_beta_activated_at?: Date }) | null;
+    expect(organisation?.ml_beta_activated_at).toBeInstanceOf(Date);
+
+    const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+    expect(dossier?.computed?.organisme?.is_allowed_collab).toBe(true);
+  });
+
   it("enregistre la déclaration de rupture pour la branche B", async () => {
     const effectifId = new ObjectId();
     await insertEffectif(effectifId);

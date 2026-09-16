@@ -702,31 +702,63 @@ export async function activateCollabV2(
 
   try {
     await organismesDb().updateOne({ _id }, { $set: { is_allowed_collab: true } });
-    await updateMissionLocaleEffectifComputedCollab(_id, true);
-
-    const existingOrg = (await organisationsDb().findOne(
-      { type: "ORGANISME_FORMATION", organisme_id: organismeId },
-      { projection: { ml_beta_activated_at: 1 } }
-    )) as Pick<IOrganisationOrganismeFormation, "ml_beta_activated_at"> | null;
-
-    if (!existingOrg?.ml_beta_activated_at) {
-      await activateOrganisme(now, _id);
-      logger.info({ adminUserId, organismeId, status: "activated" }, "collab-v2 activate");
-      return { status: "activated", organismeId, eligibility, mlBetaActivatedAt: now };
-    }
-
-    await updateMissionLocaleEffectifComputedOrganisme(existingOrg.ml_beta_activated_at, _id);
-    logger.info({ adminUserId, organismeId, status: "already_active" }, "collab-v2 activate");
-    return {
-      status: "already_active",
-      organismeId,
-      eligibility,
-      mlBetaActivatedAt: existingOrg.ml_beta_activated_at,
-    };
+    const { mlBetaActivatedAt, activated } = await applyCollabActivation(_id, now);
+    const status: CollabV2ActivateStatus = activated ? "activated" : "already_active";
+    logger.info({ adminUserId, organismeId, status }, "collab-v2 activate");
+    return { status, organismeId, eligibility, mlBetaActivatedAt };
   } catch (err) {
     logger.error({ err, organismeId }, "collab-v2 activate failed");
     return { status: "partial_failure", organismeId, eligibility, error: (err as Error).message };
   }
+}
+
+async function applyCollabActivation(
+  _id: ObjectId,
+  now: Date
+): Promise<{ mlBetaActivatedAt: Date; activated: boolean }> {
+  await updateMissionLocaleEffectifComputedCollab(_id, true);
+
+  const existingOrg = (await organisationsDb().findOne(
+    { type: "ORGANISME_FORMATION", organisme_id: _id.toString() },
+    { projection: { ml_beta_activated_at: 1 } }
+  )) as Pick<IOrganisationOrganismeFormation, "ml_beta_activated_at"> | null;
+
+  if (!existingOrg?.ml_beta_activated_at) {
+    await activateOrganisme(now, _id);
+    return { mlBetaActivatedAt: now, activated: true };
+  }
+
+  await updateMissionLocaleEffectifComputedOrganisme(existingOrg.ml_beta_activated_at, _id);
+  return { mlBetaActivatedAt: existingOrg.ml_beta_activated_at, activated: false };
+}
+
+export type CollabOnAfterCollaborationStatus = "activated" | "already_on";
+
+export async function ensureCollabOnAfterCollaboration(
+  organismeId: ObjectId,
+  context: { userId?: ObjectId; effectifId: ObjectId }
+): Promise<CollabOnAfterCollaborationStatus> {
+  const now = new Date();
+
+  const { modifiedCount } = await organismesDb().updateOne(
+    { _id: organismeId, is_allowed_collab: { $ne: true } },
+    { $set: { is_allowed_collab: true } }
+  );
+  if (modifiedCount === 0) {
+    return "already_on";
+  }
+
+  const { mlBetaActivatedAt } = await applyCollabActivation(organismeId, now);
+  logger.info(
+    {
+      organismeId: organismeId.toString(),
+      userId: context.userId?.toString(),
+      effectifId: context.effectifId.toString(),
+      mlBetaActivatedAt,
+    },
+    "collab-on auto-activation"
+  );
+  return "activated";
 }
 
 export async function deactivateCollabV2(
