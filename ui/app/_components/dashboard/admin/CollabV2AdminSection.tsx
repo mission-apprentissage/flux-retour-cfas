@@ -6,6 +6,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 
+import { formatDate } from "@/app/_utils/date.utils";
 import { _get, _post } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { getServerErrorMessage } from "@/common/rateLimit";
@@ -33,6 +34,8 @@ type EligibilityResult = {
     uai: string | null;
     nature?: string;
     is_allowed_collab?: boolean | null;
+    collab_suspended_at?: string | null;
+    collab_inactivity_email_sent_at?: string | null;
   } | null;
 };
 
@@ -64,6 +67,8 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
   const checks = data?.checks;
   const eligible = data?.eligible === true;
   const alreadyActive = data?.alreadyActive === true;
+  const suspendedAt = data?.organisme?.collab_suspended_at ?? null;
+  const inactivityEmailSentAt = data?.organisme?.collab_inactivity_email_sent_at ?? null;
   const siret = organisme.siret;
   const uai = organisme.uai;
 
@@ -108,9 +113,12 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
       </p>
 
       <div className={styles.row}>
-        <EtatBadge active={alreadyActive} />
+        <EtatBadge active={alreadyActive} suspendedAt={suspendedAt} />
         {!uai && <span className={styles.muted}>UAI manquant, activation/désactivation impossible</span>}
       </div>
+      {alreadyActive && inactivityEmailSentAt && (
+        <span className={styles.muted}>Relance d&apos;inactivité envoyée le {formatDate(inactivityEmailSentAt)}</span>
+      )}
 
       {isLoading ? (
         <span className={styles.muted}>Calcul de l&apos;éligibilité…</span>
@@ -139,15 +147,27 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
 
       <div className={styles.row}>
         {alreadyActive ? (
-          <Button
-            priority="secondary"
-            iconId="ri-user-unfollow-line"
-            onClick={() => openConfirm("deactivate")}
-            disabled={!siret || !uai || deactivateMutation.isPending || isFetching}
-            nativeButtonProps={{ "aria-describedby": "collab-on-hint" }}
-          >
-            Désactiver
-          </Button>
+          <>
+            {suspendedAt && (
+              <Button
+                priority="primary"
+                iconId="ri-user-follow-line"
+                onClick={() => openConfirm("activate")}
+                disabled={!siret || !uai || activateMutation.isPending || isFetching}
+              >
+                Réactiver
+              </Button>
+            )}
+            <Button
+              priority="secondary"
+              iconId="ri-user-unfollow-line"
+              onClick={() => openConfirm("deactivate")}
+              disabled={!siret || !uai || deactivateMutation.isPending || isFetching}
+              nativeButtonProps={{ "aria-describedby": "collab-on-hint" }}
+            >
+              Désactiver
+            </Button>
+          </>
         ) : (
           <Button
             priority="primary"
@@ -167,7 +187,13 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
       </p>
 
       <collabV2ConfirmModal.Component
-        title={action === "activate" ? "Activer la collaboration" : "Désactiver la collaboration"}
+        title={
+          action === "activate"
+            ? suspendedAt
+              ? "Réactiver la collaboration"
+              : "Activer la collaboration"
+            : "Désactiver la collaboration"
+        }
         buttons={[
           { children: "Annuler", priority: "secondary", doClosesModal: true },
           {
@@ -181,7 +207,9 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
         ]}
       >
         {action === "activate"
-          ? `Activer la collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_collab et la date d'activation ML seront posés. Les dossiers en rupture non collaborés ne seront transmis à la Mission Locale qu'après 45 jours. Les effectifs DECA ne seront PAS rendus visibles (is_allowed_deca non posé).`
+          ? suspendedAt
+            ? `Réactiver la collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? La suspension pour inactivité sera levée : les dossiers déjà visibles de la Mission Locale le restent, les nouveaux dossiers en rupture suivront à nouveau le délai de 45 jours.`
+            : `Activer la collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_collab et la date d'activation ML seront posés. Les dossiers en rupture non collaborés ne seront transmis à la Mission Locale qu'après 45 jours. Les effectifs DECA ne seront PAS rendus visibles (is_allowed_deca non posé).`
           : `Désactiver la collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_collab sera retiré et la Mission Locale reverra les dossiers en rupture dès la rupture. Si l'organisme est aussi pilote DECA-CFA, la date d'activation ML et la visibilité DECA sont conservées : seuls les dossiers envoyés explicitement remonteront à la Mission Locale.`}
       </collabV2ConfirmModal.Component>
     </>

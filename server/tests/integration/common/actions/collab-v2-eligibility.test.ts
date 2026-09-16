@@ -141,6 +141,22 @@ describe("checkCollabV2Eligibility", () => {
     });
   });
 
+  describe("état d'inactivité exposé", () => {
+    it("renvoie collab_suspended_at et collab_inactivity_email_sent_at", async () => {
+      const suspendedAt = new Date("2026-09-01T07:00:00.000Z");
+      const emailSentAt = new Date("2026-08-27T07:00:00.000Z");
+      const organisme = await insertOrganisme({
+        is_allowed_collab: true,
+        collab_suspended_at: suspendedAt,
+        collab_inactivity_email_sent_at: emailSentAt,
+      });
+      const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
+      expect(result.alreadyActive).toBe(true);
+      expect(result.organisme?.collab_suspended_at).toEqual(suspendedAt);
+      expect(result.organisme?.collab_inactivity_email_sent_at).toEqual(emailSentAt);
+    });
+  });
+
   describe("not_already_active", () => {
     it("is false and alreadyActive=true when is_allowed_collab is true", async () => {
       const organisme = await insertOrganisme({ is_allowed_collab: true });

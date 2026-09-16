@@ -66,7 +66,8 @@ const DELAI_MIN_RUPTURE_FIN_FORMATION_DAYS = 90;
  * Deux cas (V2 collab) :
  *  - explicitement, via une demande de collaboration (`organisme_data.acc_conjoint`) ;
  *  - automatiquement, pour un CFA en collab (`is_allowed_collab`) dès que la rupture
- *    dépasse 45 jours — sauf si l'effectif est depuis arrivé au terme de sa formation.
+ *    dépasse 45 jours, ou immédiatement si sa collaboration est suspendue (`collab_suspended_at`) —
+ *    sauf si l'effectif est depuis arrivé au terme de sa formation.
  * L'envoi explicite force la visibilité même si l'effectif sortirait sinon de l'outil
  * (jeune en fin de formation, en abandon +180j, ou non visible pour une autre raison).
  */
@@ -78,9 +79,14 @@ const cfaForceVisibleExpr = () => ({
         { $eq: [{ $ifNull: ["$computed.organisme.is_allowed_collab", false] }, true] },
         { $ne: [{ $ifNull: ["$date_rupture", null] }, null] },
         {
-          $lte: [
-            "$date_rupture",
-            { $dateSubtract: { startDate: "$$NOW", unit: "day", amount: CFA_COLLAB_AUTO_SEND_DELAI_DAYS } },
+          $or: [
+            {
+              $lte: [
+                "$date_rupture",
+                { $dateSubtract: { startDate: "$$NOW", unit: "day", amount: CFA_COLLAB_AUTO_SEND_DELAI_DAYS } },
+              ],
+            },
+            { $ne: [{ $ifNull: ["$computed.organisme.collab_suspended_at", null] }, null] },
           ],
         },
         { $ne: [{ $ifNull: ["$current_status.value", null] }, STATUT_APPRENANT.FIN_DE_FORMATION] },
@@ -419,13 +425,17 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
       {
         $ne: [{ $ifNull: ["$situation", null] }, null],
       },
-      // Antériorité : un dossier créé avant l'activation ML de son organisme reste visible,
-      // quel que soit l'état de collaboration. Évite qu'activer un organisme retire aux ML
-      // des dossiers qu'elles voyaient déjà.
+      // Antériorité : un dossier créé avant l'activation ML de son organisme ou avant sa dernière
+      // reprise après suspension reste visible. Activer ou réactiver ne retire rien aux ML.
       {
         $and: [
           { $ne: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null] },
-          { $lt: ["$created_at", "$computed.organisme.ml_beta_activated_at"] },
+          {
+            $lt: [
+              "$created_at",
+              { $max: ["$computed.organisme.ml_beta_activated_at", "$computed.organisme.collab_resumed_at"] },
+            ],
+          },
         ],
       },
     ],
@@ -664,7 +674,13 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
     transmitted_at: "$effectif_snapshot.transmitted_at",
     source: "$effectif_snapshot.source",
     organisme: {
-      $mergeObjects: ["$organisme", { ml_beta_activated_at: "$organisme_organisation.ml_beta_activated_at" }],
+      $mergeObjects: [
+        "$organisme",
+        {
+          ml_beta_activated_at: "$organisme_organisation.ml_beta_activated_at",
+          collab_suspended_at: "$computed.organisme.collab_suspended_at",
+        },
+      ],
     },
     contrats: "$effectif_snapshot.contrats",
     "situation.situation": "$situation",
@@ -699,7 +715,12 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
         {
           $and: [
             { $ne: [{ $ifNull: ["$organisme_organisation.ml_beta_activated_at", null] }, null] },
-            { $lt: ["$created_at", "$organisme_organisation.ml_beta_activated_at"] },
+            {
+              $lt: [
+                "$created_at",
+                { $max: ["$organisme_organisation.ml_beta_activated_at", "$computed.organisme.collab_resumed_at"] },
+              ],
+            },
           ],
         },
         true,
@@ -3029,7 +3050,7 @@ export const createMissionLocaleSnapshot = async (
   const organisation = await getOrganisationOrganismeByOrganismeId(effectif.organisme_id);
   const organisme = await organismesDb().findOne(
     { _id: effectif.organisme_id },
-    { projection: { is_allowed_collab: 1 } }
+    { projection: { is_allowed_collab: 1, collab_suspended_at: 1, collab_resumed_at: 1 } }
   );
 
   let mongoInfo;
@@ -3055,6 +3076,8 @@ export const createMissionLocaleSnapshot = async (
             organisme: {
               ml_beta_activated_at: organisation?.ml_beta_activated_at,
               is_allowed_collab: organisme?.is_allowed_collab ?? false,
+              ...(organisme?.collab_suspended_at ? { collab_suspended_at: organisme.collab_suspended_at } : {}),
+              ...(organisme?.collab_resumed_at ? { collab_resumed_at: organisme.collab_resumed_at } : {}),
             },
             ...(mlData.activated_at ? { mission_locale: { activated_at: mlData.activated_at } } : {}),
           },

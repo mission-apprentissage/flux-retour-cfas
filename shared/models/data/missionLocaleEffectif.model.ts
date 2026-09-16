@@ -288,6 +288,8 @@ const zMissionLocaleEffectif = z.object({
         .object({
           ml_beta_activated_at: z.date().nullish(),
           is_allowed_collab: z.boolean().nullish(),
+          collab_suspended_at: z.date().nullish(),
+          collab_resumed_at: z.date().nullish(),
         })
         .nullish(),
       mission_locale: z

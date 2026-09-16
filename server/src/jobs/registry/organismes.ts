@@ -7,6 +7,7 @@ import { hydrateOrganismesFormationsCount } from "../hydrate/organismes/hydrate-
 import { hydrateOrganismesRelations } from "../hydrate/organismes/hydrate-organismes-relations";
 import { cleanupOrganismes } from "../hydrate/organismes/organisme-cleanup";
 import { createAllMissingOrganismeOrganisation, hydrateOrganismesHasAccount } from "../organisations/organisation.job";
+import { collabInactiviteCfaJob } from "../organismes/collab-inactivite-cfa";
 import { revokeStaleApiKeysJob } from "../organismes/revoke-stale-api-keys";
 
 export const organismesJobs = {
@@ -56,6 +57,12 @@ export const organismesJobs = {
       });
     },
   },
+  "collab:inactivite-cfa": {
+    handler: async (job) => {
+      const payload = job.payload as { dryRun?: boolean; limit?: number } | undefined;
+      return collabInactiviteCfaJob({ dryRun: payload?.dryRun ?? false, limit: payload?.limit });
+    },
+  },
 } satisfies Record<string, JobDef>;
 
 export const organismesCrons = {
@@ -72,4 +79,12 @@ export const organismesCrons = {
       return 0;
     },
   },
+  // 07h00 Paris — relance puis suspension de la collaboration des CFA inactifs.
+  // "Relance et suspension de la collaboration des CFA inactifs, tous les jours à 7h": {
+  //   cron_string: "0 7 * * *",
+  //   handler: async () => {
+  //     await addJob({ name: "collab:inactivite-cfa", queued: true });
+  //     return 0;
+  //   },
+  // },
 } satisfies Record<string, CronDef>;

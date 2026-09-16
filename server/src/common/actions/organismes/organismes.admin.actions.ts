@@ -19,6 +19,7 @@ import { getEtablissement } from "@/common/apis/ApiEntreprise";
 import { fetchOrganismeReferentielBySiret } from "@/common/apis/apiReferentielMna";
 import logger from "@/common/logger";
 import {
+  auditLogsDb,
   effectifsDb,
   formationsCatalogueDb,
   missionLocaleEffectifsDb,
@@ -666,7 +667,18 @@ export async function activateCollabV2(
   const organisme = await organismesDb().findOne(
     { _id },
     {
-      projection: { _id: 1, siret: 1, uai: 1, nature: 1, is_allowed_collab: 1, nom: 1, raison_sociale: 1, enseigne: 1 },
+      projection: {
+        _id: 1,
+        siret: 1,
+        uai: 1,
+        nature: 1,
+        is_allowed_collab: 1,
+        nom: 1,
+        raison_sociale: 1,
+        enseigne: 1,
+        collab_suspended_at: 1,
+        collab_inactivity_email_sent_at: 1,
+      },
     }
   );
 
@@ -687,6 +699,9 @@ export async function activateCollabV2(
       await updateMissionLocaleEffectifComputedCollab(_id, true);
       if (mlBetaActivatedAt) {
         await updateMissionLocaleEffectifComputedOrganisme(mlBetaActivatedAt, _id);
+      }
+      if (organisme.collab_suspended_at || organisme.collab_inactivity_email_sent_at) {
+        await resumeCollab(_id, { reason: "activation_admin", userId: adminUserId });
       }
       logger.info({ adminUserId, organismeId, status: "already_active" }, "collab-v2 activate");
       return { status: "already_active", organismeId, eligibility, mlBetaActivatedAt };
@@ -732,6 +747,53 @@ async function applyCollabActivation(
   return { mlBetaActivatedAt: existingOrg.ml_beta_activated_at, activated: false };
 }
 
+export type CollabResumeReason = "reconnexion" | "collaboration_envoyee" | "activation_admin";
+export type CollabResumeStatus = "resumed" | "email_lock_cleared" | "nothing_to_resume" | "not_found";
+
+export async function resumeCollab(
+  organismeId: ObjectId,
+  context: { reason: CollabResumeReason; userId?: ObjectId | string }
+): Promise<CollabResumeStatus> {
+  const now = new Date();
+  const organisme = await organismesDb().findOne(
+    { _id: organismeId },
+    { projection: { collab_suspended_at: 1, collab_inactivity_email_sent_at: 1 } }
+  );
+  if (!organisme) {
+    return "not_found";
+  }
+  const wasSuspended = !!organisme.collab_suspended_at;
+  if (!wasSuspended && !organisme.collab_inactivity_email_sent_at) {
+    return "nothing_to_resume";
+  }
+
+  await organismesDb().updateOne(
+    { _id: organismeId },
+    {
+      $unset: { collab_suspended_at: "", collab_inactivity_email_sent_at: "" },
+      ...(wasSuspended ? { $set: { collab_resumed_at: now } } : {}),
+    }
+  );
+  if (!wasSuspended) {
+    return "email_lock_cleared";
+  }
+
+  await missionLocaleEffectifsDb().updateMany(
+    { "effectif_snapshot.organisme_id": organismeId },
+    { $unset: { "computed.organisme.collab_suspended_at": "" }, $set: { "computed.organisme.collab_resumed_at": now } }
+  );
+  await auditLogsDb().insertOne({
+    action: "collab_resumed",
+    date: now,
+    data: { organisme_id: organismeId, reason: context.reason, user_id: context.userId?.toString() ?? null },
+  });
+  logger.info(
+    { organismeId: organismeId.toString(), reason: context.reason, userId: context.userId?.toString() },
+    "collab resumed"
+  );
+  return "resumed";
+}
+
 export type CollabOnAfterCollaborationStatus = "activated" | "already_on";
 
 export async function ensureCollabOnAfterCollaboration(
@@ -739,6 +801,14 @@ export async function ensureCollabOnAfterCollaboration(
   context: { userId?: ObjectId; effectifId: ObjectId }
 ): Promise<CollabOnAfterCollaborationStatus> {
   const now = new Date();
+
+  const current = await organismesDb().findOne(
+    { _id: organismeId },
+    { projection: { collab_suspended_at: 1, collab_inactivity_email_sent_at: 1 } }
+  );
+  if (current?.collab_suspended_at || current?.collab_inactivity_email_sent_at) {
+    await resumeCollab(organismeId, { reason: "collaboration_envoyee", userId: context.userId });
+  }
 
   const { modifiedCount } = await organismesDb().updateOne(
     { _id: organismeId, is_allowed_collab: { $ne: true } },
@@ -786,8 +856,22 @@ export async function deactivateCollabV2(
   }
 
   try {
-    await organismesDb().updateOne({ _id }, { $unset: { is_allowed_collab: "" } });
+    await organismesDb().updateOne(
+      { _id },
+      {
+        $unset: {
+          is_allowed_collab: "",
+          collab_suspended_at: "",
+          collab_inactivity_email_sent_at: "",
+          collab_resumed_at: "",
+        },
+      }
+    );
     await updateMissionLocaleEffectifComputedCollab(_id, false);
+    await missionLocaleEffectifsDb().updateMany(
+      { "effectif_snapshot.organisme_id": _id },
+      { $unset: { "computed.organisme.collab_suspended_at": "", "computed.organisme.collab_resumed_at": "" } }
+    );
 
     if (organisme.is_allowed_deca !== true) {
       await organisationsDb().updateMany(

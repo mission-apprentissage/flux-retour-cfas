@@ -5,6 +5,7 @@ import { ML_SITUATION_DOSSIER, ML_TRI_COLONNE, SITUATION_ENUM } from "shared";
 import { SOURCE_APPRENANT, STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import type { IEffectif, IMissionLocaleEffectif } from "shared/models";
 import { API_EFFECTIF_LISTE, CONNAISSANCE_ML_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
 import { it, expect, describe, beforeEach, vi } from "vitest";
 
 import { updateOrDeleteMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
@@ -945,6 +946,9 @@ describe("Mission Locale Routes", () => {
       statusValue = "RUPTURANT",
       enCours = "RUPTURANT",
       mlActivatedDaysAgo,
+      collabSuspended = false,
+      collabResumedDaysAgo,
+      createdDaysAgo,
     }: {
       accConjoint?: boolean;
       isAllowedCollab?: boolean;
@@ -953,6 +957,9 @@ describe("Mission Locale Routes", () => {
       statusValue?: StatutApprenant;
       enCours?: StatutApprenant;
       mlActivatedDaysAgo?: number;
+      collabSuspended?: boolean;
+      collabResumedDaysAgo?: number;
+      createdDaysAgo?: number;
     }) => {
       const snapshotId = new ObjectId();
       const ruptureDate = dayAgo(ruptureDaysAgo);
@@ -960,7 +967,7 @@ describe("Mission Locale Routes", () => {
         _id: new ObjectId(),
         mission_locale_id: ML_ID,
         effectif_id: new ObjectId(),
-        created_at: new Date(),
+        created_at: createdDaysAgo !== undefined ? dayAgo(createdDaysAgo) : new Date(),
         brevo: {},
         current_status: { value: statusValue, date: ruptureDate },
         date_rupture: ruptureDate,
@@ -969,6 +976,8 @@ describe("Mission Locale Routes", () => {
           organisme: {
             ...(mlBeta ? { ml_beta_activated_at: dayAgo(120) } : {}),
             is_allowed_collab: isAllowedCollab,
+            ...(collabSuspended ? { collab_suspended_at: dayAgo(1) } : {}),
+            ...(collabResumedDaysAgo !== undefined ? { collab_resumed_at: dayAgo(collabResumedDaysAgo) } : {}),
           },
           ...(mlActivatedDaysAgo !== undefined ? { mission_locale: { activated_at: dayAgo(mlActivatedDaysAgo) } } : {}),
         },
@@ -1100,6 +1109,115 @@ describe("Mission Locale Routes", () => {
       const id = snapshotId.toString();
       expect(isVisible(res, id)).toBe(true);
       expect(isInPrioritaire(res, id)).toBe(false);
+    });
+
+    it("CFA en V2 sans demande de collab + rupture < 45j : non visible (délai en cours)", async () => {
+      const { snapshotId, doc } = makeDoc({ accConjoint: false, isAllowedCollab: true, ruptureDaysAgo: 10 });
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      expect(isVisible(res, snapshotId.toString())).toBe(false);
+    });
+
+    // RG8 : collaboration suspendue pour inactivité → le délai de 45 j ne s'applique plus.
+    it("CFA suspendu pour inactivité + rupture < 45j : visible MAIS non prioritaire", async () => {
+      const { snapshotId, doc } = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: true,
+        ruptureDaysAgo: 10,
+        collabSuspended: true,
+      });
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(true);
+      expect(isInPrioritaire(res, id)).toBe(false);
+    });
+
+    it("CFA suspendu + jeune en fin de formation : non visible", async () => {
+      const { snapshotId, doc } = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: true,
+        ruptureDaysAgo: 10,
+        collabSuspended: true,
+        statusValue: STATUT_APPRENANT.FIN_DE_FORMATION,
+        enCours: STATUT_APPRENANT.FIN_DE_FORMATION,
+      });
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      expect(isVisible(res, snapshotId.toString())).toBe(false);
+    });
+
+    // RG9 : à la reprise, la ML garde ce qu'elle voyait (antériorité sur collab_resumed_at).
+    it("CFA repris après suspension : dossier créé avant la reprise visible, dossier créé après masqué", async () => {
+      const avant = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: true,
+        ruptureDaysAgo: 20,
+        createdDaysAgo: 20,
+        collabResumedDaysAgo: 10,
+      });
+      const apres = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: true,
+        ruptureDaysAgo: 5,
+        createdDaysAgo: 5,
+        collabResumedDaysAgo: 10,
+      });
+      await insertDoc(avant.doc);
+      await insertDoc(apres.doc);
+
+      const res = await getPerMonth();
+      expect(isVisible(res, avant.snapshotId.toString())).toBe(true);
+      expect(isVisible(res, apres.snapshotId.toString())).toBe(false);
+    });
+
+    it("fiche détail : is_grandfathered vrai pour un dossier créé avant la reprise, collab_suspended_at exposé", async () => {
+      await organisationsDb().insertOne(
+        testDoc<IOrganisation>({
+          type: "ORGANISME_FORMATION",
+          siret: SIRET,
+          uai: UAI,
+          organisme_id: ORGANISME_ID.toString(),
+          ml_beta_activated_at: dayAgo(120),
+          created_at: new Date(),
+        })
+      );
+      const repris = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: true,
+        ruptureDaysAgo: 20,
+        createdDaysAgo: 20,
+        collabResumedDaysAgo: 10,
+      });
+      const suspendu = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: true,
+        ruptureDaysAgo: 10,
+        collabSuspended: true,
+      });
+      await insertDoc(repris.doc);
+      await insertDoc(suspendu.doc);
+
+      const ficheRepris = await requestAsOrganisation(
+        ML_DATA,
+        "get",
+        `/api/v1/organisation/mission-locale/effectif/${repris.snapshotId}?nom_liste=${API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER}`
+      );
+      expect(ficheRepris.status).toBe(200);
+      expect(ficheRepris.data.effectif.is_grandfathered).toBe(true);
+      expect(ficheRepris.data.effectif.organisme.collab_suspended_at).toBeUndefined();
+
+      const ficheSuspendu = await requestAsOrganisation(
+        ML_DATA,
+        "get",
+        `/api/v1/organisation/mission-locale/effectif/${suspendu.snapshotId}?nom_liste=${API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER}`
+      );
+      expect(ficheSuspendu.status).toBe(200);
+      expect(ficheSuspendu.data.effectif.is_grandfathered).toBe(false);
+      expect(ficheSuspendu.data.effectif.organisme.collab_suspended_at).toBeTruthy();
     });
 
     // Garde-fou : un CFA hors V2 collab ne doit PAS voir ses ruptures remonter à la ML

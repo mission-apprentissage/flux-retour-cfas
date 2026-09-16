@@ -3,6 +3,8 @@
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { ReactNode } from "react";
 
+import { formatDate } from "@/app/_utils/date.utils";
+
 import styles from "./encart-admin.module.scss";
 
 export type EligibilityCheck = {
@@ -15,7 +17,14 @@ export type EligibilityCheck = {
   };
 };
 
-export function EtatBadge({ active }: { active: boolean }) {
+export function EtatBadge({ active, suspendedAt }: { active: boolean; suspendedAt?: string | Date | null }) {
+  if (active && suspendedAt) {
+    return (
+      <Badge severity="warning" small>
+        Suspendue pour inactivité depuis le {formatDate(suspendedAt)}
+      </Badge>
+    );
+  }
   return active ? (
     <Badge severity="success" small>
       Activé

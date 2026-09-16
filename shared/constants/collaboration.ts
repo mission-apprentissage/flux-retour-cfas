@@ -26,3 +26,15 @@ export const REPONDU_SITUATIONS: ReadonlyArray<SITUATION_ENUM> = [
  * le traiter. Visibilité et capacité de traitement partagent ce seuil.
  */
 export const CFA_COLLAB_AUTO_SEND_DELAI_DAYS = 45;
+
+/**
+ * Jours sans connexion d'un membre du CFA (ou depuis son activation ML) après lesquels
+ * la relance d'inactivité est envoyée à un CFA en collaboration.
+ */
+export const CFA_COLLAB_INACTIVITE_RELANCE_DAYS = 30;
+
+/**
+ * Jours après la relance d'inactivité, sans reconnexion, après lesquels le délai de
+ * collaboration du CFA est suspendu : ses ruptures remontent immédiatement à la Mission Locale.
+ */
+export const CFA_COLLAB_INACTIVITE_SUSPENSION_DAYS = 5;

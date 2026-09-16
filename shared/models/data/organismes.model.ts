@@ -215,6 +215,15 @@ export const zOrganisme = z
     is_allowed_deca: z
       .boolean({ description: "Organisme du programme DECA-CFA (effectifs DECA visibles côté CFA)" })
       .nullish(),
+    collab_inactivity_email_sent_at: z
+      .date({ description: "Date d'envoi de la relance d'inactivité collaboration (verrou, retiré à la reconnexion)" })
+      .nullish(),
+    collab_suspended_at: z
+      .date({ description: "Date de suspension du délai de collaboration pour inactivité (absent = non suspendu)" })
+      .nullish(),
+    collab_resumed_at: z
+      .date({ description: "Date de la dernière reprise de collaboration après suspension (antériorité ML)" })
+      .nullish(),
     has_account: z
       .boolean({
         description: "Indique qu'au moins un compte utilisateur est attaché à l'organisation de cet organisme",

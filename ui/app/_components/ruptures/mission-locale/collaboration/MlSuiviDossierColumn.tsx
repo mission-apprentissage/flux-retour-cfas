@@ -138,12 +138,14 @@ export function MlSuiviDossierColumn({ effectif }: MlSuiviDossierColumnProps) {
   // ML peut traiter si :
   // - collab active (CFA a envoyé le dossier)
   // - CFA non utilisateur TDB (pas de collab possible)
-  // - effectif grandfathéré (créé avant l'activation du CFA sur TDB)
+  // - effectif grandfathéré (créé avant l'activation du CFA sur TDB ou sa dernière reprise)
+  // - collaboration du CFA suspendue pour inactivité
   // - délai de grâce écoulé depuis la rupture : même seuil que la visibilité côté ML
   const canProcessDossier =
     collabStarted ||
     !cfaIsTdbUser ||
     !!effectif.is_grandfathered ||
+    !!effectif.organisme?.collab_suspended_at ||
     daysSinceRupture >= CFA_COLLAB_AUTO_SEND_DELAI_DAYS;
   const isStandaloneMode = canProcessDossier && !collabStarted;
 

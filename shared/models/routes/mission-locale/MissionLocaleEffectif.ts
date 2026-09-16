@@ -84,6 +84,10 @@ const zEffectifMissionLocale = z
         .optional(),
       is_allowed_deca: z.boolean().describe("Organisme du programme DECA-CFA").nullish(),
       ml_beta_activated_at: z.date().describe("Date d'activation ML beta du CFA").nullish(),
+      collab_suspended_at: z
+        .date()
+        .describe("Date de suspension du délai de collaboration du CFA pour inactivité")
+        .nullish(),
       has_account: z.boolean().describe("Au moins un compte utilisateur confirmé sur l'organisation du CFA").nullish(),
     }),
     source: SourceApprenantEnum,
