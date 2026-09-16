@@ -1,3 +1,7 @@
+import type { IMissionLocaleEffectif } from "shared/models";
+import type { IOrganisation, IOrganisationMissionLocale } from "shared/models/data/organisations.model";
+import type { IOrganisme } from "shared/models/data/organismes.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getConnexionInvitationByToken } from "@/common/actions/brevo/contacts/connexion-invitations.actions";
@@ -15,6 +19,7 @@ import { AuthContext } from "@/common/model/internal/AuthContext";
 import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
 import config from "@/config";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc, testDocs } from "@tests/utils/testUtils";
 
 import { sendCfaInvitationFromMissionLocale } from "./mission-locale-cfa-invitation.actions";
 
@@ -57,15 +62,19 @@ describe("sendCfaInvitationFromMissionLocale", () => {
     ];
     const enAttente = buildUser(orgaOf, { email: "pas-encore@cfa.fr", account_status: "PENDING_EMAIL_VALIDATION" });
 
-    await organisationsDb().insertMany([orgaOf as any, ml as any]);
-    await organismesDb().insertOne(organisme as any);
-    await usersMigrationDb().insertMany([...confirmes, enAttente] as any);
-    await missionLocaleEffectifsDb().insertOne(buildRupturant(organisme._id, ml._id) as any, {
+    await organisationsDb().insertMany([testDoc<IOrganisation>(orgaOf), testDoc<IOrganisation>(ml)]);
+    await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+    await usersMigrationDb().insertMany(testDocs<IUsersMigration>([...confirmes, enAttente]));
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, ml._id)), {
       bypassDocumentValidation: true,
     });
 
     const conseiller = { _id: ml._id, email: "conseiller@ml.fr", prenom: "Nadia", nom: "MARTIN" } as AuthContext;
-    const result = await sendCfaInvitationFromMissionLocale(ml as any, conseiller, String(organisme._id));
+    const result = await sendCfaInvitationFromMissionLocale(
+      testDoc<IOrganisationMissionLocale>(ml),
+      conseiller,
+      String(organisme._id)
+    );
 
     expect(result.nb_destinataires).toBe(3);
     expect(sendTransactionalEmailMock).toHaveBeenCalledTimes(3);

@@ -2,7 +2,10 @@ import { randomUUID } from "node:crypto";
 
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
-import { IOrganisationMissionLocale } from "shared/models";
+import { IMissionLocaleEffectif, IOrganisationMissionLocale, IUsersMigration } from "shared/models";
+import type { IMissionLocaleCfaInvitation } from "shared/models/data/missionLocaleCfaInvitations.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IOrganisme } from "shared/models/data/organismes.model";
 import { CFA_INVITATION_STATUT } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
 import { describe, it, beforeEach, expect, vi } from "vitest";
@@ -30,7 +33,7 @@ import { getPublicUrl } from "@/common/utils/emailsUtils";
 import config from "@/config";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id, testPasswordHash } from "@tests/utils/testUtils";
+import { DeepPartial, id, testDoc, testDocs, testPasswordHash } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/brevo/brevo");
 
@@ -77,7 +80,7 @@ const user = {
 /** Organisation ORGANISME_FORMATION du CFA : sans elle, aucun compte ne peut lui être rattaché. */
 const cfaOrganisation = {
   _id: cfaOrganisationId,
-  type: "ORGANISME_FORMATION",
+  type: "ORGANISME_FORMATION" as const,
   siret: "19040492100016",
   uai: "0755805C",
   organisme_id: organismeId.toString(),
@@ -96,8 +99,8 @@ async function enProduction<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 /** Compte CFA : c'est sa présence en `CONFIRMED` qui rend le CFA invitable. */
-function cfaAccount(overrides: Record<string, any> = {}) {
-  return {
+function cfaAccount(overrides: DeepPartial<IUsersMigration> = {}) {
+  return testDoc<IUsersMigration>({
     _id: new ObjectId(),
     account_status: "CONFIRMED",
     password_updated_at: new Date(),
@@ -112,10 +115,10 @@ function cfaAccount(overrides: Record<string, any> = {}) {
     has_accept_cgu_version: "v0.1",
     organisation_id: cfaOrganisationId,
     ...overrides,
-  };
+  });
 }
 
-async function createMlEffectifDoc(overrides: Record<string, any> = {}, organisme = sampleOrganisme) {
+async function createMlEffectifDoc(overrides: DeepPartial<IMissionLocaleEffectif> = {}, organisme = sampleOrganisme) {
   const now = new Date();
   const snapshot = await createSampleEffectif({
     organisme,
@@ -123,7 +126,7 @@ async function createMlEffectifDoc(overrides: Record<string, any> = {}, organism
     apprenant: { date_de_naissance: new Date(now.getFullYear() - 20, 0, 1) },
   });
 
-  return {
+  return testDoc<IMissionLocaleEffectif>({
     _id: new ObjectId(),
     mission_locale_id: mlOrganisationId,
     effectif_id: new ObjectId(),
@@ -142,7 +145,7 @@ async function createMlEffectifDoc(overrides: Record<string, any> = {}, organism
     created_at: now,
     brevo: { token: randomUUID(), token_created_at: now },
     ...overrides,
-  };
+  });
 }
 
 describe("computeCfaInvitationStatut", () => {
@@ -210,14 +213,14 @@ describe("getCfaListToInviteForMissionLocale", () => {
     await organisationsDb().deleteMany({});
     await organismesDb().deleteMany({});
     await usersMigrationDb().deleteMany({});
-    await organismesDb().insertOne(sampleOrganisme as any);
-    await organisationsDb().insertMany([missionLocale, cfaOrganisation] as any);
-    await usersMigrationDb().insertOne(cfaAccount() as any);
+    await organismesDb().insertOne(testDoc<IOrganisme>(sampleOrganisme));
+    await organisationsDb().insertMany(testDocs<IOrganisation>([missionLocale, cfaOrganisation]));
+    await usersMigrationDb().insertOne(cfaAccount());
   });
 
   it("compte les jeunes en rupture par CFA et renvoie le statut INVITER", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc());
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc());
 
     const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
 
@@ -241,15 +244,15 @@ describe("getCfaListToInviteForMissionLocale", () => {
       nom: "AUTRE CFA",
     };
     const autreOrganisation = { ...cfaOrganisation, _id: new ObjectId(id(6)), siret: autreOrganisme.siret };
-    await organismesDb().insertOne(autreOrganisme as any);
-    await organisationsDb().insertOne({ ...autreOrganisation, organisme_id: autreOrganisme._id.toString() } as any);
-    await usersMigrationDb().insertOne(
-      cfaAccount({ email: "autre@cfa.fr", organisation_id: autreOrganisation._id }) as any
+    await organismesDb().insertOne(testDoc<IOrganisme>(autreOrganisme));
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({ ...autreOrganisation, organisme_id: autreOrganisme._id.toString() })
     );
+    await usersMigrationDb().insertOne(cfaAccount({ email: "autre@cfa.fr", organisation_id: autreOrganisation._id }));
 
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc({}, autreOrganisme)) as any);
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc({}, autreOrganisme)) as any);
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc({}, autreOrganisme));
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc({}, autreOrganisme));
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc());
 
     const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
 
@@ -258,38 +261,40 @@ describe("getCfaListToInviteForMissionLocale", () => {
 
   it("exclut un CFA qui ne transmet pas ses effectifs", async () => {
     await organismesDb().updateOne({ _id: organismeId }, { $unset: { first_transmission_date: "" } });
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc());
 
     expect(await getCfaListToInviteForMissionLocale(missionLocale, userId)).toHaveLength(0);
   });
 
   it("exclut un CFA sans aucun compte actif sur le Tableau de bord", async () => {
     await usersMigrationDb().deleteMany({});
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc());
 
     expect(await getCfaListToInviteForMissionLocale(missionLocale, userId)).toHaveLength(0);
   });
 
   it("exclut un CFA dont les comptes ne sont pas encore confirmés", async () => {
     await usersMigrationDb().deleteMany({});
-    await usersMigrationDb().insertOne(cfaAccount({ account_status: "PENDING_EMAIL_VALIDATION" }) as any);
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await usersMigrationDb().insertOne(cfaAccount({ account_status: "PENDING_EMAIL_VALIDATION" }));
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc());
 
     expect(await getCfaListToInviteForMissionLocale(missionLocale, userId)).toHaveLength(0);
   });
 
   it("renvoie INVITATION_ENVOYEE quand ce conseiller a déjà invité ce CFA", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
-    await missionLocaleCfaInvitationsDb().insertOne({
-      _id: new ObjectId(),
-      mission_locale_id: mlOrganisationId,
-      author_id: userId,
-      organisme_id: organismeId,
-      organisation_id: new ObjectId(),
-      siret: "19040492100016",
-      destinataires: [{ user_id: new ObjectId(), email: "camille.durand@campus-lac.fr" }],
-      created_at: new Date(),
-    } as any);
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc());
+    await missionLocaleCfaInvitationsDb().insertOne(
+      testDoc<IMissionLocaleCfaInvitation>({
+        _id: new ObjectId(),
+        mission_locale_id: mlOrganisationId,
+        author_id: userId,
+        organisme_id: organismeId,
+        organisation_id: new ObjectId(),
+        siret: "19040492100016",
+        destinataires: [{ user_id: new ObjectId(), email: "camille.durand@campus-lac.fr" }],
+        created_at: new Date(),
+      })
+    );
 
     const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
 
@@ -298,26 +303,30 @@ describe("getCfaListToInviteForMissionLocale", () => {
   });
 
   it("renseigne les Missions Locales actives de la même région que le CFA", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc());
     // ML active de la même région que le CFA (région "75" dans sampleOrganisme) → retenue
-    await organisationsDb().insertOne({
-      _id: new ObjectId(),
-      type: "MISSION_LOCALE",
-      ml_id: 99,
-      nom: "ML active territoire",
-      adresse: { region: "75" },
-      activated_at: new Date(),
-      created_at: new Date(),
-    } as any);
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        _id: new ObjectId(),
+        type: "MISSION_LOCALE",
+        ml_id: 99,
+        nom: "ML active territoire",
+        adresse: { region: "75" },
+        activated_at: new Date(),
+        created_at: new Date(),
+      })
+    );
     // ML de la même région mais NON activée → ignorée
-    await organisationsDb().insertOne({
-      _id: new ObjectId(),
-      type: "MISSION_LOCALE",
-      ml_id: 100,
-      nom: "ML inactive territoire",
-      adresse: { region: "75" },
-      created_at: new Date(),
-    } as any);
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        _id: new ObjectId(),
+        type: "MISSION_LOCALE",
+        ml_id: 100,
+        nom: "ML inactive territoire",
+        adresse: { region: "75" },
+        created_at: new Date(),
+      })
+    );
 
     const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
 
@@ -327,14 +336,14 @@ describe("getCfaListToInviteForMissionLocale", () => {
   });
 
   it("compte tous les comptes actifs du CFA comme destinataires", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc());
     await usersMigrationDb().insertMany([
       cfaAccount({ email: "second@campus-lac.fr" }),
       // Compte non confirmé : ne sera pas destinataire.
       cfaAccount({ email: "troisieme@campus-lac.fr", account_status: "PENDING_ADMIN_VALIDATION" }),
       // Compte d'une autre organisation : hors périmètre.
       cfaAccount({ email: "ailleurs@autre-cfa.fr", organisation_id: new ObjectId() }),
-    ] as any);
+    ]);
 
     const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
 
@@ -342,7 +351,7 @@ describe("getCfaListToInviteForMissionLocale", () => {
   });
 
   it("n'attribue pas l'activation au conseiller quand le CFA s'est activé seul", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc());
     await organisationsDb().updateOne({ _id: cfaOrganisationId }, { $set: { ml_beta_activated_at: new Date() } });
 
     const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
@@ -351,7 +360,7 @@ describe("getCfaListToInviteForMissionLocale", () => {
   });
 
   it("expose le nombre de jeunes en rupture toutes ML confondues, repris dans l'email", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc());
 
     const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
 
@@ -361,16 +370,18 @@ describe("getCfaListToInviteForMissionLocale", () => {
   it("affiche CFA_ACTIF_APRES_INVITATION pour un CFA invité par ce conseiller et désormais actif, même hors liste-rupture", async () => {
     // Aucun effectif en rupture pour ce CFA → absent de la liste-rupture. Mais ce conseiller l'a invité
     // (journal) et le CFA est désormais actif (organisation ORGANISME_FORMATION avec ml_beta_activated_at).
-    await missionLocaleCfaInvitationsDb().insertOne({
-      _id: new ObjectId(),
-      mission_locale_id: mlOrganisationId,
-      author_id: userId,
-      organisme_id: organismeId,
-      organisation_id: new ObjectId(),
-      siret: "19040492100016",
-      destinataires: [{ user_id: new ObjectId(), email: "camille.durand@campus-lac.fr" }],
-      created_at: new Date(),
-    } as any);
+    await missionLocaleCfaInvitationsDb().insertOne(
+      testDoc<IMissionLocaleCfaInvitation>({
+        _id: new ObjectId(),
+        mission_locale_id: mlOrganisationId,
+        author_id: userId,
+        organisme_id: organismeId,
+        organisation_id: new ObjectId(),
+        siret: "19040492100016",
+        destinataires: [{ user_id: new ObjectId(), email: "camille.durand@campus-lac.fr" }],
+        created_at: new Date(),
+      })
+    );
     await organisationsDb().updateOne({ _id: cfaOrganisationId }, { $set: { ml_beta_activated_at: new Date() } });
 
     const result = await getCfaListToInviteForMissionLocale(missionLocale, userId);
@@ -385,18 +396,20 @@ describe("sendCfaInvitationFromMissionLocale", () => {
   useMongo();
 
   beforeEach(async () => {
-    vi.mocked(sendTransactionalEmail).mockResolvedValue({ messageId: "test-message-id" } as any);
+    vi.mocked(sendTransactionalEmail).mockResolvedValue({
+      messageId: "test-message-id",
+    } as unknown as Awaited<ReturnType<typeof sendTransactionalEmail>>);
     await invitationsDb().deleteMany({});
     await connexionInvitationsDb().deleteMany({});
     await missionLocaleCfaInvitationsDb().deleteMany({});
     await organisationsDb().deleteMany({});
     await organismesDb().deleteMany({});
     await usersMigrationDb().deleteMany({});
-    await organismesDb().insertOne(sampleOrganisme as any);
-    await organisationsDb().insertMany([missionLocale, cfaOrganisation] as any);
-    await usersMigrationDb().insertOne(cfaAccount() as any);
+    await organismesDb().insertOne(testDoc<IOrganisme>(sampleOrganisme));
+    await organisationsDb().insertMany(testDocs<IOrganisation>([missionLocale, cfaOrganisation]));
+    await usersMigrationDb().insertOne(cfaAccount());
     await missionLocaleEffectifsDb().deleteMany({});
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(await createMlEffectifDoc());
   });
 
   it("refuse un CFA sans jeune en rupture rattaché à cette Mission Locale", async () => {
@@ -459,7 +472,7 @@ describe("sendCfaInvitationFromMissionLocale", () => {
     await usersMigrationDb().insertMany([
       cfaAccount({ email: "second@campus-lac.fr", prenom: "Bruno", nom: "Petit" }),
       cfaAccount({ email: "troisieme@campus-lac.fr", prenom: "Awa", nom: "Sow" }),
-    ] as any);
+    ]);
 
     const result = await enProduction(() =>
       sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString())
@@ -485,7 +498,7 @@ describe("sendCfaInvitationFromMissionLocale", () => {
     await usersMigrationDb().insertMany([
       cfaAccount({ email: "second@campus-lac.fr" }),
       cfaAccount({ email: "troisieme@campus-lac.fr" }),
-    ] as any);
+    ]);
 
     const result = await sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString());
 
@@ -494,8 +507,8 @@ describe("sendCfaInvitationFromMissionLocale", () => {
   });
 
   it("ne journalise que les destinataires effectivement servis", async () => {
-    await usersMigrationDb().insertOne(cfaAccount({ email: "second@campus-lac.fr" }) as any);
-    vi.mocked(sendTransactionalEmail).mockResolvedValueOnce(undefined as any);
+    await usersMigrationDb().insertOne(cfaAccount({ email: "second@campus-lac.fr" }));
+    vi.mocked(sendTransactionalEmail).mockResolvedValueOnce(undefined);
 
     const result = await enProduction(() =>
       sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString())
@@ -528,7 +541,7 @@ describe("sendCfaInvitationFromMissionLocale", () => {
 
   it("n'enregistre aucune invitation si l'envoi de l'email Brevo échoue", async () => {
     // Brevo capture ses erreurs et renvoie `undefined` : l'action doit alors échouer sans rien persister.
-    vi.mocked(sendTransactionalEmail).mockResolvedValueOnce(undefined as any);
+    vi.mocked(sendTransactionalEmail).mockResolvedValueOnce(undefined);
 
     await expect(sendCfaInvitationFromMissionLocale(missionLocale, user, organismeId.toString())).rejects.toThrow(
       /échoué/i

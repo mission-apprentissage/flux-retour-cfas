@@ -1,4 +1,5 @@
 import type { IMissionLocaleEffectif } from "shared/models";
+import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type { IOrganisation } from "shared/models/data/organisations.model";
 import type { IOrganisme } from "shared/models/data/organismes.model";
 import type { IUsersMigration } from "shared/models/data/usersMigration.model";
@@ -139,11 +140,13 @@ describe("getConnexionInvitationInfoByEmail", () => {
     const user = buildUser(orgaOf, { email: "sandrine@cfa.fr" });
     const ml = buildOrgaMl("ML ANCIENNE");
 
-    await organisationsDb().insertMany([orgaOf as any, ml as any]);
-    await organismesDb().insertOne(organisme as any);
-    await usersMigrationDb().insertOne(user as any);
+    await organisationsDb().insertMany([testDoc<IOrganisation>(orgaOf), testDoc<IOrganisation>(ml)]);
+    await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
     await missionLocaleEffectifsDb().insertOne(
-      buildRupturant(organisme._id, ml._id, { date_rupture: new Date("2025-06-01T00:00:00.000Z") }) as any,
+      testDoc<IMissionLocaleEffectif>(
+        buildRupturant(organisme._id, ml._id, { date_rupture: new Date("2025-06-01T00:00:00.000Z") })
+      ),
       { bypassDocumentValidation: true }
     );
 
@@ -158,14 +161,16 @@ describe("getConnexionInvitationInfoByEmail", () => {
     const user = buildUser(orgaOf, { email: "sandrine@cfa.fr" });
     const ml = buildOrgaMl("ML QUI A TRAITE");
 
-    await organisationsDb().insertMany([orgaOf as any, ml as any]);
-    await organismesDb().insertOne(organisme as any);
-    await usersMigrationDb().insertOne(user as any);
+    await organisationsDb().insertMany([testDoc<IOrganisation>(orgaOf), testDoc<IOrganisation>(ml)]);
+    await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
     await missionLocaleEffectifsDb().insertOne(
-      buildRupturant(organisme._id, ml._id, {
-        situation: "DEJA_ACCOMPAGNE",
-        current_status: { value: "APPRENTI", date: NOW },
-      }) as any,
+      testDoc<IMissionLocaleEffectif>(
+        buildRupturant(organisme._id, ml._id, {
+          situation: SITUATION_ENUM.DEJA_ACCOMPAGNE,
+          current_status: { value: "APPRENTI", date: NOW },
+        })
+      ),
       { bypassDocumentValidation: true }
     );
 
@@ -182,11 +187,18 @@ describe("getConnexionInvitationInfoByEmail", () => {
     const { activated_at: _ignored, ...mlInactive } = buildOrgaMl("ML INACTIVE");
     void _ignored;
 
-    await organisationsDb().insertMany([orgaOf as any, mlActive as any, mlInactive as any]);
-    await organismesDb().insertOne(organisme as any);
-    await usersMigrationDb().insertOne(user as any);
+    await organisationsDb().insertMany([
+      testDoc<IOrganisation>(orgaOf),
+      testDoc<IOrganisation>(mlActive),
+      testDoc<IOrganisation>(mlInactive),
+    ]);
+    await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
     await missionLocaleEffectifsDb().insertMany(
-      [buildRupturant(organisme._id, mlActive._id) as any, buildRupturant(organisme._id, mlInactive._id) as any],
+      [
+        testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlActive._id)),
+        testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlInactive._id)),
+      ],
       { bypassDocumentValidation: true }
     );
 

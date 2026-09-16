@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import type { AuthContext } from "@/common/model/internal/AuthContext";
 import { useMongo } from "@tests/jest/setupMongo";
-import { testDoc } from "@tests/utils/testUtils";
+import { testDoc, testDocs } from "@tests/utils/testUtils";
 
 import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
 import { buildOrgaOf, buildUser, NOW } from "./brevo/contacts/fixtures";
@@ -80,12 +80,14 @@ describe("getCfaAccountsByOrganismeIds", () => {
     const organismeId = new ObjectId().toString();
     const orgaSansActivation = buildOrgaOf({ organisme_id: organismeId });
     const orgaActivee = buildOrgaOf({ organisme_id: organismeId, ml_beta_activated_at: NOW });
-    await organisationsDb().insertMany([orgaSansActivation as any, orgaActivee as any]);
-    await usersMigrationDb().insertMany([
-      buildUser(orgaSansActivation, { email: "alice@cfa.fr" }),
-      buildUser(orgaActivee, { email: "bob@cfa.fr" }),
-      buildUser(orgaActivee, { email: "refuse@cfa.fr", account_status: "PENDING_ADMIN_VALIDATION" }),
-    ] as any);
+    await organisationsDb().insertMany(testDocs<IOrganisation>([orgaSansActivation, orgaActivee]));
+    await usersMigrationDb().insertMany(
+      testDocs<IUsersMigration>([
+        buildUser(orgaSansActivation, { email: "alice@cfa.fr" }),
+        buildUser(orgaActivee, { email: "bob@cfa.fr" }),
+        buildUser(orgaActivee, { email: "refuse@cfa.fr", account_status: "PENDING_ADMIN_VALIDATION" }),
+      ])
+    );
 
     const accounts = await getCfaAccountsByOrganismeIds([organismeId]);
 

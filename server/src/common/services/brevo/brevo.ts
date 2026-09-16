@@ -58,6 +58,14 @@ export interface SendTransactionalEmailOptions {
   redirectRecipientInNonProdTo: string | undefined;
 }
 
+/** Forme des erreurs remontées par le SDK Brevo : le corps de la réponse porte la vraie cause. */
+interface BrevoApiError {
+  message?: string;
+  statusCode?: number;
+  body?: { message?: string; code?: string };
+  response?: { statusCode?: number; body?: { message?: string; code?: string } };
+}
+
 export const sendTransactionalEmail = async (
   recipientEmail: string,
   templateId: number,
@@ -101,13 +109,14 @@ export const sendTransactionalEmail = async (
   }
   try {
     return await EmailInstance.sendTransacEmail(sendSmtpEmail);
-  } catch (e: any) {
+  } catch (e) {
     captureException(e);
     // Sans ce log, l'appelant ne voit qu'un `undefined` : la cause renvoyée par Brevo (template
     // inexistant, IP non autorisée, quota...) serait perdue dès que Sentry n'est pas actif.
-    const brevoBody = e?.response?.body ?? e?.body;
-    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e?.message ?? "unknown error";
-    const status = e?.response?.statusCode ?? e?.statusCode ?? "?";
+    const err = e as BrevoApiError;
+    const brevoBody = err?.response?.body ?? err?.body;
+    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? err?.message ?? "unknown error";
+    const status = err?.response?.statusCode ?? err?.statusCode ?? "?";
     logger.error(
       { templateId, recipient: finalRecipient, status, brevoMsg },
       "Échec d'envoi de l'email transactionnel Brevo"

@@ -65,33 +65,27 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
     priority: "primary" as const,
     onClick: handleConfirm,
     disabled: status === "loading",
-    iconId: "fr-icon-send-plane-fill",
+    iconId: "fr-icon-send-plane-fill" as const,
     iconPosition: "right" as const,
   };
 
-  const buttons = showPreview
-    ? [
-        {
-          children: "Modifier le message",
-          doClosesModal: false,
-          priority: "secondary" as const,
-          onClick: () => setShowPreview(false),
-          iconId: "fr-icon-arrow-left-line",
-          iconPosition: "left" as const,
-        },
-        sendButton,
-      ]
-    : [
-        {
-          children: "Prévisualiser l'email",
-          doClosesModal: false,
-          priority: "secondary" as const,
-          onClick: () => setShowPreview(true),
-          iconId: "fr-icon-eye-line",
-          iconPosition: "right" as const,
-        },
-        sendButton,
-      ];
+  const backButton = {
+    children: "Modifier le message",
+    doClosesModal: false,
+    priority: "secondary" as const,
+    onClick: () => setShowPreview(false),
+    iconId: "fr-icon-arrow-left-line" as const,
+    iconPosition: "left" as const,
+  };
+
+  const previewButton = {
+    children: "Prévisualiser l'email",
+    doClosesModal: false,
+    priority: "secondary" as const,
+    onClick: () => setShowPreview(true),
+    iconId: "fr-icon-eye-line" as const,
+    iconPosition: "right" as const,
+  };
 
   return (
     <modal.Component
@@ -101,7 +95,7 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
           ? "Aperçu de l'email envoyé au CFA"
           : `Invitez le CFA ${cfa?.nom ?? ""} à utiliser le Tableau de bord`
       }
-      buttons={buttons as [any, ...any[]]}
+      buttons={showPreview ? [backButton, sendButton] : [previewButton, sendButton]}
     >
       {publicConfig.env !== "production" && user?.email && (
         <Alert
@@ -119,7 +113,7 @@ export function InviteCfaModal({ cfa, onConfirm }: InviteCfaModalProps) {
       {showPreview ? (
         <CfaInvitationEmailPreview
           nbJeunesRuptureEtablissement={cfa?.nb_jeunes_rupture_etablissement ?? 0}
-          mlNom={user?.organisation?.nom ?? ""}
+          mlNom={user?.organisation?.type === "MISSION_LOCALE" ? user.organisation.nom : ""}
           conseillerPrenom={user?.prenom ?? ""}
           conseillerNom={user?.nom ?? ""}
           note={note}
