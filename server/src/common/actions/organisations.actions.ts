@@ -727,17 +727,28 @@ export const getCfaAccountsByOrganismeIds = async (organismeIds: string[]): Prom
     )
     .toArray();
 
+  // Plusieurs organisations peuvent porter le même organisme : fusion sur la plus ancienne activation,
+  // sinon une organisation non activée masque l'activation d'une autre.
   const organismeIdByOrganisationId = new Map<string, string>();
   for (const organisation of organisations) {
     if (!organisation.organisme_id) {
       continue;
     }
     organismeIdByOrganisationId.set(organisation._id.toString(), organisation.organisme_id);
-    map.set(organisation.organisme_id, {
-      organisation_id: organisation._id,
-      ml_beta_activated_at: organisation.ml_beta_activated_at ?? null,
-      destinataires: [],
-    });
+    const existing = map.get(organisation.organisme_id);
+    const activatedAt = organisation.ml_beta_activated_at ?? null;
+    if (!existing) {
+      map.set(organisation.organisme_id, {
+        organisation_id: organisation._id,
+        ml_beta_activated_at: activatedAt,
+        destinataires: [],
+      });
+      continue;
+    }
+    if (activatedAt && (!existing.ml_beta_activated_at || activatedAt < existing.ml_beta_activated_at)) {
+      existing.ml_beta_activated_at = activatedAt;
+      existing.organisation_id = organisation._id;
+    }
   }
 
   if (organisations.length === 0) {
