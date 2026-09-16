@@ -133,6 +133,68 @@ describe("getConnexionInvitationInfoByEmail", () => {
     ]);
   });
 
+  it("liste une ML dont la rupture date de plus de 180 jours", async () => {
+    const orgaOf = buildOrgaOf();
+    const organisme = buildOrganisme(orgaOf);
+    const user = buildUser(orgaOf, { email: "sandrine@cfa.fr" });
+    const ml = buildOrgaMl("ML ANCIENNE");
+
+    await organisationsDb().insertMany([orgaOf as any, ml as any]);
+    await organismesDb().insertOne(organisme as any);
+    await usersMigrationDb().insertOne(user as any);
+    await missionLocaleEffectifsDb().insertOne(
+      buildRupturant(organisme._id, ml._id, { date_rupture: new Date("2025-06-01T00:00:00.000Z") }) as any,
+      { bypassDocumentValidation: true }
+    );
+
+    const result = await getConnexionInvitationInfoByEmail("sandrine@cfa.fr");
+
+    expect(result?.missionsLocales).toEqual([{ nom: "ML ANCIENNE", adresse: null, effectifs_count: 1 }]);
+  });
+
+  it("liste une ML dont le dossier est déjà qualifié", async () => {
+    const orgaOf = buildOrgaOf();
+    const organisme = buildOrganisme(orgaOf);
+    const user = buildUser(orgaOf, { email: "sandrine@cfa.fr" });
+    const ml = buildOrgaMl("ML QUI A TRAITE");
+
+    await organisationsDb().insertMany([orgaOf as any, ml as any]);
+    await organismesDb().insertOne(organisme as any);
+    await usersMigrationDb().insertOne(user as any);
+    await missionLocaleEffectifsDb().insertOne(
+      buildRupturant(organisme._id, ml._id, {
+        situation: "DEJA_ACCOMPAGNE",
+        current_status: { value: "APPRENTI", date: NOW },
+      }) as any,
+      { bypassDocumentValidation: true }
+    );
+
+    const result = await getConnexionInvitationInfoByEmail("sandrine@cfa.fr");
+
+    expect(result?.missionsLocales.map((ml) => ml.nom)).toEqual(["ML QUI A TRAITE"]);
+  });
+
+  it("exclut une ML pas encore activée sur le Tableau de bord", async () => {
+    const orgaOf = buildOrgaOf();
+    const organisme = buildOrganisme(orgaOf);
+    const user = buildUser(orgaOf, { email: "sandrine@cfa.fr" });
+    const mlActive = buildOrgaMl("ML ACTIVE");
+    const { activated_at: _ignored, ...mlInactive } = buildOrgaMl("ML INACTIVE");
+    void _ignored;
+
+    await organisationsDb().insertMany([orgaOf as any, mlActive as any, mlInactive as any]);
+    await organismesDb().insertOne(organisme as any);
+    await usersMigrationDb().insertOne(user as any);
+    await missionLocaleEffectifsDb().insertMany(
+      [buildRupturant(organisme._id, mlActive._id) as any, buildRupturant(organisme._id, mlInactive._id) as any],
+      { bypassDocumentValidation: true }
+    );
+
+    const result = await getConnexionInvitationInfoByEmail("sandrine@cfa.fr");
+
+    expect(result?.missionsLocales.map((ml) => ml.nom)).toEqual(["ML ACTIVE"]);
+  });
+
   it("retombe sur raison_sociale si organisme.nom est absent", async () => {
     const orgaOf = buildOrgaOf();
     // Omission de la propriété `nom` (plutôt que `undefined`) pour passer la

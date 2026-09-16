@@ -1185,6 +1185,21 @@ export const missionLocaleBaseAggregation = async (
   ];
 };
 
+/**
+ * Dossiers d'un organisme tels que les ML les voient, toutes ML confondues : mêmes filtres que
+ * `missionLocaleBaseAggregation`, sans la restriction à une ML donnée ni les `$addFields` de
+ * traitement propres aux listes.
+ */
+export const missionLocaleVisibilityAggregationByOrganisme = (organismeId: ObjectId) => [
+  { $match: { "effectif_snapshot.organisme_id": organismeId } },
+  { $match: buildVisibilityWindowMatch() },
+  ...matchFromJointOrganisme("MISSION_LOCALE"),
+  ...buildEffMissionLocaleFilter(),
+  ...filterByDernierStatutPipelineMl(),
+  ...addFieldFromActivationDate(),
+  ...filterByActivationDatePipelineMl(),
+];
+
 const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifId: ObjectId,

@@ -40,6 +40,7 @@ export const buildOrgaMl = (nom: string, override: DeepPartial<IOrganisationMiss
     type: "MISSION_LOCALE" as const,
     nom,
     ml_id: Math.floor(Math.random() * 100000) + 1,
+    activated_at: NOW,
     created_at: NOW,
     ...override,
   }) satisfies DeepPartial<IOrganisationMissionLocale>;

@@ -1,20 +1,12 @@
-import { STATUT_APPRENANT } from "shared/constants";
-import { getAnneeScolaireListFromDateRange } from "shared/utils";
-
-import {
-  buildEffRuptureAgeFilter,
-  buildRuptureStatusMatch,
-  createDernierStatutFieldPipeline,
-  DATE_START_RUPTURES,
-} from "@/common/actions/shared/rupture-pipeline.utils";
+import { missionLocaleVisibilityAggregationByOrganisme } from "@/common/actions/mission-locale/mission-locale.actions";
 import { missionLocaleEffectifsDb, usersMigrationDb } from "@/common/model/collections";
 
 /**
  * Service de la route `/api/v1/onboarding/connexion-info` (mode invitation
  * enrichi de la page de connexion). Pour un email donné, retourne les infos
- * de son OF (si type OF) + toutes les Missions Locales suivant ses jeunes en
- * rupture. Pour les autres typologies (ML, ARML, …), retourne juste l'email
- * — l'UI affiche le formulaire de connexion sans la card OF.
+ * de son OF (si type OF) + toutes les Missions Locales activées qui suivent
+ * des jeunes de cet OF. Pour les autres typologies (ML, ARML, …), retourne
+ * juste l'email — l'UI affiche le formulaire de connexion sans la card OF.
  *
  * Renvoie `null` uniquement si l'email n'existe pas en DB.
  */
@@ -116,41 +108,14 @@ export const getConnexionInvitationInfoByEmail = async (email: string): Promise<
     return null;
   }
 
-  // Mêmes filtres "en rupture" que `tba-contacts.ts` (dont la même fenêtre de visibilité, sur le
-  // seul millésime). Différence : ici on remonte TOUTES les ML (pas top 2) avec leur adresse.
+  // Même visibilité que les listes ML : un filtre plus restrictif ferait disparaître d'ici la ML
+  // qui vient d'inviter le CFA.
   let missionsLocales: ConnexionInvitationMissionLocale[] = [];
   if (userResult.organisme_id) {
     type RawMlRow = { nom: string | null; adresse: Record<string, unknown> | null; effectifs_count: number };
     const rawMls = (await missionLocaleEffectifsDb()
       .aggregate([
-        { $match: { "effectif_snapshot.organisme_id": userResult.organisme_id } },
-        ...buildEffRuptureAgeFilter(),
-        {
-          $match: {
-            "effectif_snapshot.annee_scolaire": {
-              $in: getAnneeScolaireListFromDateRange(DATE_START_RUPTURES, new Date()),
-            },
-          },
-        },
-        {
-          $addFields: {
-            date_rupture: { $ifNull: ["$date_rupture", "$cfa_rupture_declaration.date_rupture"] },
-          },
-        },
-        ...createDernierStatutFieldPipeline(),
-        {
-          $match: {
-            $or: [
-              {
-                "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
-                date_rupture: { $lte: new Date() },
-              },
-              { cfa_rupture_declaration: { $exists: true } },
-            ],
-          },
-        },
-        { $match: { dernierStatutDureeInDay: { $lte: 180 } } },
-        { $match: buildRuptureStatusMatch() },
+        ...missionLocaleVisibilityAggregationByOrganisme(userResult.organisme_id),
         { $group: { _id: "$mission_locale_id", effectifs_count: { $sum: 1 } } },
         {
           $lookup: {
@@ -158,12 +123,14 @@ export const getConnexionInvitationInfoByEmail = async (email: string): Promise<
             let: { mlId: "$_id" },
             pipeline: [
               { $match: { $expr: { $eq: ["$_id", "$$mlId"] } } },
+              // Une ML pas encore activée ne peut rien recevoir : elle n'est pas « prête à collaborer ».
+              { $match: { activated_at: { $exists: true, $ne: null } } },
               { $project: { _id: 1, nom: 1, adresse: 1 } },
             ],
             as: "ml_info",
           },
         },
-        { $unwind: { path: "$ml_info", preserveNullAndEmptyArrays: true } },
+        { $unwind: { path: "$ml_info", preserveNullAndEmptyArrays: false } },
         // Nom alphabétique en secondaire → ordre stable entre 2 requêtes.
         { $sort: { effectifs_count: -1, "ml_info.nom": 1 } },
         {
