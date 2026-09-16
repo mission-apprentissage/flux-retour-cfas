@@ -7,9 +7,9 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import {
   activateCollabV2,
-  deactivateCollabV2,
   ensureCollabOnAfterCollaboration,
   resumeCollab,
+  suspendCollab,
 } from "@/common/actions/organismes/organismes.admin.actions";
 import { auditLogsDb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
@@ -131,25 +131,48 @@ describe("suspension et reprise de collaboration", () => {
       const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
       expect(dossier?.computed?.organisme?.collab_suspended_at).toBeUndefined();
       const audit = await auditLogsDb().findOne({ action: "collab_resumed" });
-      expect(audit?.data).toMatchObject({ reason: "activation_admin", user_id: adminUserId });
+      expect(audit?.data).toMatchObject({ reason: "admin", user_id: adminUserId });
     });
   });
 
-  describe("deactivateCollabV2", () => {
-    it("retire le flag et les trois champs d'inactivité, sur l'organisme et les dossiers", async () => {
-      await organismesDb().updateOne({ _id: organismeId }, { $set: { collab_resumed_at: new Date("2026-07-01") } });
+  describe("suspendCollab", () => {
+    it("répond already_suspended sur un organisme déjà suspendu", async () => {
+      expect(await suspendCollab(organismeId, { userId: adminUserId })).toBe("already_suspended");
+    });
+
+    it("suspend un organisme en collaboration, dénormalise et audite", async () => {
+      await organismesDb().updateOne(
+        { _id: organismeId },
+        { $unset: { collab_suspended_at: "", collab_inactivity_email_sent_at: "" } }
+      );
       const effectifId = await insertDossier();
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: effectifId },
+        { $unset: { "computed.organisme.collab_suspended_at": "" } }
+      );
 
-      const result = await deactivateCollabV2(organismeId.toString(), adminUserId);
+      const status = await suspendCollab(organismeId, { userId: adminUserId });
 
-      expect(result.status).toBe("deactivated");
+      expect(status).toBe("suspended");
       const updated = await reloadOrganisme();
-      expect(updated?.is_allowed_collab).toBeUndefined();
-      expect(updated?.collab_suspended_at).toBeUndefined();
-      expect(updated?.collab_inactivity_email_sent_at).toBeUndefined();
-      expect(updated?.collab_resumed_at).toBeUndefined();
+      expect(updated?.collab_suspended_at).toBeInstanceOf(Date);
+      expect(updated?.is_allowed_collab).toBe(true);
       const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
-      expect(dossier?.computed?.organisme).toEqual({ is_allowed_collab: false });
+      expect(dossier?.computed?.organisme?.collab_suspended_at).toEqual(updated?.collab_suspended_at);
+      const audit = await auditLogsDb().findOne({ action: "collab_suspended_admin" });
+      expect(audit?.data).toMatchObject({ organisme_id: organismeId, user_id: adminUserId });
+    });
+
+    it("répond not_active hors collaboration", async () => {
+      await organismesDb().updateOne({ _id: organismeId }, { $unset: { is_allowed_collab: "" } });
+      expect(await suspendCollab(organismeId, { userId: adminUserId })).toBe("not_active");
+    });
+
+    it("une suspension admin est levée par la reconnexion comme une suspension pour inactivité", async () => {
+      await organismesDb().updateOne({ _id: organismeId }, { $unset: { collab_inactivity_email_sent_at: "" } });
+
+      expect(await resumeCollab(organismeId, { reason: "reconnexion" })).toBe("resumed");
+      expect((await reloadOrganisme())?.collab_suspended_at).toBeUndefined();
     });
   });
 

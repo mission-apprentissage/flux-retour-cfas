@@ -46,7 +46,7 @@ type ActionResult = {
 };
 
 export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
-  const [action, setAction] = useState<"activate" | "deactivate" | null>(null);
+  const [action, setAction] = useState<"activate" | "suspend" | "resume" | null>(null);
   const [feedback, setFeedback] = useState<{ severity: "success" | "error"; message: string } | null>(null);
 
   const { data, isLoading, isFetching, refetch } = useQuery<EligibilityResult>({
@@ -59,10 +59,17 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
     mutationFn: () =>
       _post<Record<string, never>, ActionResult>(`/api/v1/admin/organismes/${organisme._id}/collab-v2/activate`, {}),
   });
-  const deactivateMutation = useMutation({
+  const suspendMutation = useMutation({
     mutationFn: () =>
-      _post<Record<string, never>, ActionResult>(`/api/v1/admin/organismes/${organisme._id}/collab-v2/deactivate`, {}),
+      _post<Record<string, never>, ActionResult>(`/api/v1/admin/organismes/${organisme._id}/collab-v2/suspend`, {}),
   });
+  const resumeMutation = useMutation({
+    mutationFn: () =>
+      _post<Record<string, never>, ActionResult>(`/api/v1/admin/organismes/${organisme._id}/collab-v2/resume`, {}),
+  });
+  const mutations = { activate: activateMutation, suspend: suspendMutation, resume: resumeMutation };
+  const verbs = { activate: "Activation", suspend: "Suspension", resume: "Reprise" };
+  const isPending = activateMutation.isPending || suspendMutation.isPending || resumeMutation.isPending;
 
   const checks = data?.checks;
   const eligible = data?.eligible === true;
@@ -72,7 +79,7 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
   const siret = organisme.siret;
   const uai = organisme.uai;
 
-  const openConfirm = useCallback((next: "activate" | "deactivate") => {
+  const openConfirm = useCallback((next: "activate" | "suspend" | "resume") => {
     setAction(next);
     setFeedback(null);
     collabV2ConfirmModal.open();
@@ -84,13 +91,11 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
       return;
     }
     try {
-      const mutation = action === "activate" ? activateMutation : deactivateMutation;
-      const result = await mutation.mutateAsync();
-      const verb = action === "activate" ? "Activation" : "Désactivation";
-      const isOk = ["activated", "already_active", "deactivated"].includes(result?.status ?? "");
+      const result = await mutations[action].mutateAsync();
+      const isOk = ["activated", "already_active", "suspended", "resumed"].includes(result?.status ?? "");
       setFeedback({
         severity: isOk ? "success" : "error",
-        message: `${verb} — statut : ${result?.status ?? "erreur"}`,
+        message: `${verbs[action]} — statut : ${result?.status ?? "erreur"}`,
       });
       collabV2ConfirmModal.close();
       await refetch();
@@ -101,7 +106,7 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
       });
       collabV2ConfirmModal.close();
     }
-  }, [action, activateMutation, deactivateMutation, refetch]);
+  }, [action, mutations, refetch]);
 
   const nomAffiche = organisme.nom || organisme.raison_sociale || siret;
 
@@ -146,34 +151,32 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
       )}
 
       <div className={styles.row}>
-        {alreadyActive ? (
-          <>
-            {suspendedAt && (
-              <Button
-                priority="primary"
-                iconId="ri-user-follow-line"
-                onClick={() => openConfirm("activate")}
-                disabled={!siret || !uai || activateMutation.isPending || isFetching}
-              >
-                Réactiver
-              </Button>
-            )}
-            <Button
-              priority="secondary"
-              iconId="ri-user-unfollow-line"
-              onClick={() => openConfirm("deactivate")}
-              disabled={!siret || !uai || deactivateMutation.isPending || isFetching}
-              nativeButtonProps={{ "aria-describedby": "collab-on-hint" }}
-            >
-              Désactiver
-            </Button>
-          </>
+        {alreadyActive && suspendedAt ? (
+          <Button
+            priority="primary"
+            iconId="ri-user-follow-line"
+            onClick={() => openConfirm("resume")}
+            disabled={isPending || isFetching}
+            nativeButtonProps={{ "aria-describedby": "collab-on-hint" }}
+          >
+            Reprendre
+          </Button>
+        ) : alreadyActive ? (
+          <Button
+            priority="secondary"
+            iconId="ri-pause-circle-line"
+            onClick={() => openConfirm("suspend")}
+            disabled={isPending || isFetching}
+            nativeButtonProps={{ "aria-describedby": "collab-on-hint" }}
+          >
+            Suspendre
+          </Button>
         ) : (
           <Button
             priority="primary"
             iconId="ri-user-follow-line"
             onClick={() => openConfirm("activate")}
-            disabled={!eligible || !siret || !uai || activateMutation.isPending || isFetching}
+            disabled={!eligible || !siret || !uai || isPending || isFetching}
             title={!eligible ? "Tous les critères d'éligibilité doivent être satisfaits" : undefined}
             nativeButtonProps={{ "aria-describedby": "collab-on-hint" }}
           >
@@ -189,10 +192,10 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
       <collabV2ConfirmModal.Component
         title={
           action === "activate"
-            ? suspendedAt
-              ? "Réactiver la collaboration"
-              : "Activer la collaboration"
-            : "Désactiver la collaboration"
+            ? "Activer la collaboration"
+            : action === "suspend"
+              ? "Suspendre la collaboration"
+              : "Reprendre la collaboration"
         }
         buttons={[
           { children: "Annuler", priority: "secondary", doClosesModal: true },
@@ -200,17 +203,17 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
             children: "Confirmer",
             priority: "primary",
             doClosesModal: false,
-            disabled: activateMutation.isPending || deactivateMutation.isPending,
+            disabled: isPending,
             nativeButtonProps: { type: "button" },
             onClick: handleConfirm,
           },
         ]}
       >
         {action === "activate"
-          ? suspendedAt
-            ? `Réactiver la collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? La suspension pour inactivité sera levée : les dossiers déjà visibles de la Mission Locale le restent, les nouveaux dossiers en rupture suivront à nouveau le délai de 45 jours.`
-            : `Activer la collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_collab et la date d'activation ML seront posés. Les dossiers en rupture non collaborés ne seront transmis à la Mission Locale qu'après 45 jours. Les effectifs DECA ne seront PAS rendus visibles (is_allowed_deca non posé).`
-          : `Désactiver la collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_collab sera retiré et la Mission Locale reverra les dossiers en rupture dès la rupture. Si l'organisme est aussi pilote DECA-CFA, la date d'activation ML et la visibilité DECA sont conservées : seuls les dossiers envoyés explicitement remonteront à la Mission Locale.`}
+          ? `Activer la collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_collab et la date d'activation ML seront posés. Les dossiers en rupture non collaborés ne seront transmis à la Mission Locale qu'après 45 jours.`
+          : action === "suspend"
+            ? `Suspendre la collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? La Mission Locale reverra les dossiers en rupture dès la rupture. La suspension sera levée automatiquement à la prochaine connexion d'un membre du CFA ou à sa prochaine demande de collaboration, ou manuellement ici.`
+            : `Reprendre la collaboration pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? La suspension sera levée : les dossiers déjà visibles de la Mission Locale le restent, les nouveaux dossiers en rupture suivront à nouveau le délai de 45 jours.`}
       </collabV2ConfirmModal.Component>
     </>
   );
