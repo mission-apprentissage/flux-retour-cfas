@@ -58,6 +58,7 @@ describe("registre des jobs", () => {
       "brevo-contacts:sync-one",
       "brevo-events:track",
       "classifier:score-effectifs",
+      "collab:inactivite-cfa",
       "computed:update",
       "db:find-invalid-documents",
       "db:validate",

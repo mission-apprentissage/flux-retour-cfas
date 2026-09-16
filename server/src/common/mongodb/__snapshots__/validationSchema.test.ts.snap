@@ -12622,6 +12622,26 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
                   "additionalProperties": false,
                   "bsonType": "object",
                   "properties": {
+                    "collab_resumed_at": {
+                      "anyOf": [
+                        {
+                          "bsonType": "date",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
+                    "collab_suspended_at": {
+                      "anyOf": [
+                        {
+                          "bsonType": "date",
+                        },
+                        {
+                          "bsonType": "null",
+                        },
+                      ],
+                    },
                     "is_allowed_collab": {
                       "bsonType": [
                         "bool",
@@ -20258,6 +20278,42 @@ exports[`validation-schema > should create validation schema for organismes > or
         "null",
       ],
       "description": "Version de l'api utilisée (v2 ou v3)",
+    },
+    "collab_inactivity_email_sent_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date d'envoi de la relance d'inactivité collaboration (verrou, retiré à la reconnexion)",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date d'envoi de la relance d'inactivité collaboration (verrou, retiré à la reconnexion)",
+    },
+    "collab_resumed_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de la dernière reprise de collaboration après suspension (antériorité ML)",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de la dernière reprise de collaboration après suspension (antériorité ML)",
+    },
+    "collab_suspended_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de suspension du délai de collaboration pour inactivité (absent = non suspendu)",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de suspension du délai de collaboration pour inactivité (absent = non suspendu)",
     },
     "contacts_from_referentiel": {
       "bsonType": "array",
