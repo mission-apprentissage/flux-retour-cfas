@@ -188,7 +188,7 @@ type TbaUserContext = {
     nom?: string | null;
     siret?: string | null;
     uai?: string | null;
-    ml_beta_activated_at?: Date | null;
+    activated_at?: Date | null;
     adresse?: TbaAdresse;
     // Codes géo/réseau spécifiques aux typologies institutionnelles sans
     // adresse (DDETS, DREETS, CONSEIL_REGIONAL, ACADEMIE, TETE_DE_RESEAU, …).
@@ -281,7 +281,7 @@ const selectTbaContacts = async (filter?: FetchContactsFilter): Promise<TbaUserC
           nom: "$organisation.nom",
           siret: "$organisation.siret",
           uai: "$organisation.uai",
-          ml_beta_activated_at: "$organisation.ml_beta_activated_at",
+          activated_at: "$organisation.activated_at",
           adresse: "$organisation.adresse",
           code_region: "$organisation.code_region",
           code_departement: "$organisation.code_departement",
@@ -747,7 +747,9 @@ const buildAttributes = (
     // Fix retour recette (28/05) : ce champ doit être renseigné uniquement sur
     // les contacts ML — sur les OF c'était la date d'activation de la collab
     // ML côté CFA, ce qui prêtait à confusion.
-    ML_DATE_ACTIVATION_ML: isMl ? (user.organisation.ml_beta_activated_at ?? null) : null,
+    // `activated_at` et non `ml_beta_activated_at` : ce dernier n'existe que sur
+    // les organisations ORGANISME_FORMATION, l'attribut était donc toujours vide.
+    ML_DATE_ACTIVATION_ML: isMl ? (user.organisation.activated_at ?? null) : null,
     ML_NB_RUPTURANTS_TOTAL: isMl ? (mlStats?.total ?? 0) : null,
     ML_NB_RUPTURANTS_A_TRAITER: isMl ? (mlStats?.a_traiter ?? 0) : null,
     ML_NB_RUPTURANTS_TRAITES: isMl ? (mlStats?.traite ?? 0) : null,

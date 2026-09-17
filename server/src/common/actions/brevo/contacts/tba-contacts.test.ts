@@ -468,6 +468,30 @@ describe("tbaContactsContactList", () => {
       expect(contacts).toHaveLength(1);
       expect(contacts[0].attributes.ML_DATE_ACTIVATION_ML).toBeNull();
     });
+
+    // Régression : l'attribut lisait `ml_beta_activated_at`, champ propre aux
+    // organisations OF — il était donc vide pour 100 % des contacts ML.
+    it("ML_DATE_ACTIVATION_ML reprend `activated_at` de l'organisation ML", async () => {
+      const activatedAt = new Date("2026-01-15T10:00:00.000Z");
+      const orgaMl = buildOrgaMl("ML ACTIVE", { activated_at: activatedAt });
+      await organisationsDb().insertOne(orgaMl as any);
+      await usersMigrationDb().insertOne(buildUser(orgaMl) as any);
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0].attributes.ML_DATE_ACTIVATION_ML).toEqual(activatedAt);
+    });
+
+    it("ML_DATE_ACTIVATION_ML null si la ML n'a pas de `activated_at`", async () => {
+      const orgaMl = buildOrgaMl("ML INACTIVE");
+      await organisationsDb().insertOne(orgaMl as any);
+      await usersMigrationDb().insertOne(buildUser(orgaMl) as any);
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts[0].attributes.ML_DATE_ACTIVATION_ML).toBeNull();
+    });
   });
 
   describe("fetchContacts - compteurs CFA APPRENANTS / RUPTURANTS", () => {
