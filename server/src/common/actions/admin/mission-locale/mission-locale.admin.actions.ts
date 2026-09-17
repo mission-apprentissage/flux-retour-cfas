@@ -20,6 +20,24 @@ import { createOrUpdateMissionLocaleStats } from "../../mission-locale/mission-l
 import { getMissionLocaleStat } from "../../mission-locale/mission-locale.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../../organisations.actions";
 
+/**
+ * Une Mission Locale est considérée comme active dès qu'elle a été activée
+ * explicitement (`activated_at`) OU qu'un de ses agents dispose d'un compte
+ * confirmé — les deux chemins existent et ne se recoupent pas toujours
+ * (l'inscription par invitation confirme un compte sans poser `activated_at`).
+ */
+export const isMissionLocaleActivated = async (missionLocaleId: ObjectId): Promise<boolean> => {
+  const ml = await organisationsDb().findOne({ type: "MISSION_LOCALE", _id: missionLocaleId });
+  if (!ml) return false;
+  if ((ml as { activated_at?: Date | null }).activated_at) return true;
+
+  const confirmed = await usersMigrationDb().findOne({
+    organisation_id: missionLocaleId,
+    account_status: "CONFIRMED",
+  });
+  return Boolean(confirmed);
+};
+
 export const activateMissionLocaleAtAdminValidation = async (missionLocaleId: ObjectId, date: Date) => {
   const ml = await organisationsDb().findOne({
     type: "MISSION_LOCALE",
