@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import merge from "lodash-es/merge";
 import { ObjectId } from "mongodb";
 import { IEffectif } from "shared/models/data/effectifs.model";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import type { PartialDeep } from "type-fest";
 import { it, describe, beforeEach } from "vitest";
@@ -15,7 +16,7 @@ import { hash } from "@/common/utils/passwordUtils";
 import config from "@/config";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id, initTestApp } from "@tests/utils/testUtils";
+import { id, initTestApp, testDoc } from "@tests/utils/testUtils";
 
 const SIPA_USERNAME = "sipa-omogen-test";
 const D = (s: string) => new Date(`${s}T00:00:00.000Z`);
@@ -39,19 +40,19 @@ const baseParams = (): PartialDeep<IEffectif> => ({
 async function buildEffectif(organisme: IOrganisme, params: PartialDeep<IEffectif> = {}) {
   return {
     _id: new ObjectId(),
-    ...(await createSampleEffectif(merge({ organisme }, baseParams(), params) as any)),
+    ...(await createSampleEffectif(merge({ organisme }, baseParams(), params))),
   };
 }
 
 async function insertEffectif(organisme: IOrganisme, params: PartialDeep<IEffectif> = {}) {
   const effectif = await buildEffectif(organisme, params);
-  await effectifsDb().insertOne(effectif as any);
+  await effectifsDb().insertOne(testDoc<IEffectif>(effectif));
   return effectif;
 }
 
 async function insertEffectifDECA(organisme: IOrganisme, params: PartialDeep<IEffectif> = {}) {
   const effectif = await buildEffectif(organisme, merge({ source: "DECA" }, params));
-  await effectifsDECADb().insertOne({ ...effectif, deca_raw_id: new ObjectId() } as any);
+  await effectifsDECADb().insertOne(testDoc<IEffectifDECA>({ ...effectif, deca_raw_id: new ObjectId() }));
   return effectif;
 }
 
@@ -151,7 +152,9 @@ describe("GET /api/v2/affelnet/suivi", () => {
       const response = await getSuivi();
 
       assert.strictEqual(response.data.metadonnees.totalElements, 2);
-      const dates = response.data.effectifs.map((e: any) => e.formation.dateDebutFormation).sort();
+      const dates = response.data.effectifs
+        .map((e: { formation: { dateDebutFormation: string } }) => e.formation.dateDebutFormation)
+        .sort();
       assert.deepStrictEqual(dates, ["2025-06-01", "2026-05-31"]);
     });
 
@@ -236,7 +239,7 @@ describe("GET /api/v2/affelnet/suivi", () => {
         apprenant: { nom: "MARTIN", prenom: "Lucas", date_de_naissance: D("2009-04-04"), ine: "" },
       });
       const seul = await getSuivi();
-      const ligneMartin = seul.data.effectifs.find((e: any) => e.apprenant.nom === "MARTIN");
+      const ligneMartin = seul.data.effectifs.find((e: { apprenant: { nom: string } }) => e.apprenant.nom === "MARTIN");
       assert.strictEqual(ligneMartin.apprenant.ine, null);
     });
 
@@ -353,7 +356,7 @@ describe("GET /api/v2/affelnet/suivi", () => {
           { date_debut: D("2025-10-01"), date_fin: D("2027-06-30") },
           { date_debut: D("2025-11-01"), date_fin: D("2027-07-31"), date_rupture: D("2026-01-15") },
           { date_debut: null, date_fin: D("2099-12-31") },
-        ] as any,
+        ],
       });
 
       const { data } = await getSuivi();
@@ -381,7 +384,7 @@ describe("GET /api/v2/affelnet/suivi", () => {
         code_postal: "59000",
         commune: "LILLE",
         departement: "59",
-      } as any;
+      };
       await organismesDb().insertOne(orgSansComplete);
       await insertEffectif(orgSansComplete);
 

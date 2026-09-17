@@ -1,25 +1,9 @@
-import brevo, {
-  AccountApiApiKeys,
-  ContactsApiApiKeys,
-  EventsApiApiKeys,
-  TransactionalEmailsApiApiKeys,
-} from "@getbrevo/brevo";
+import brevo, { AccountApiApiKeys, ContactsApiApiKeys, EventsApiApiKeys } from "@getbrevo/brevo";
 import { captureException } from "@sentry/node";
 import Boom from "boom";
 import { format } from "date-fns";
 
 import config from "@/config";
-
-const initEmailApi = () => {
-  const apiEmailInstance = new brevo.TransactionalEmailsApi();
-  const apiKey = config.brevo.apiKey;
-  if (!apiKey) {
-    captureException(new Error("Brevo API key not set"));
-    return null;
-  }
-  apiEmailInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, apiKey);
-  return apiEmailInstance;
-};
 
 const initContactApi = () => {
   const apiContactInstance = new brevo.ContactsApi();
@@ -43,129 +27,8 @@ const initEventApi = () => {
   return apiEventInstance;
 };
 
-const EmailInstance: brevo.TransactionalEmailsApi | null = initEmailApi();
 const ContactInstance: brevo.ContactsApi | null = initContactApi();
 const EventInstance: brevo.EventsApi | null = initEventApi();
-
-export const sendTransactionalEmail = async (recipientEmail: string, templateId: number) => {
-  if (!EmailInstance) {
-    throw Boom.internal("Brevo instance not initialized");
-  }
-
-  const brevoAttributes = await getContactDetails(recipientEmail);
-
-  if (!brevoAttributes) {
-    throw Boom.internal("No Brevo attributes found");
-  }
-
-  const sendSmtpEmail = new brevo.SendSmtpEmail();
-  sendSmtpEmail.templateId = templateId;
-  sendSmtpEmail.to = [{ email: recipientEmail }];
-  sendSmtpEmail.params = brevoAttributes;
-  try {
-    return await EmailInstance.sendTransacEmail(sendSmtpEmail);
-  } catch (e) {
-    captureException(e);
-    return;
-  }
-};
-
-export const getContactDetails = async (email: string) => {
-  if (!ContactInstance) {
-    throw Boom.internal("Brevo instance not initialized");
-  }
-  try {
-    return (await ContactInstance.getContactInfo(email)).body.attributes;
-  } catch (e) {
-    captureException(e);
-    return;
-  }
-};
-
-export const importContacts = async (
-  listeId: number,
-  contacts: Array<{
-    email: string;
-    prenom: string;
-    nom: string;
-    urls?: Record<string, string> | null;
-    telephone?: string | null;
-    nom_organisme?: string | null;
-    mission_locale_id: string;
-    nom_mission_locale: string;
-    date_de_naissance?: Date | null;
-    date_derniere_rupture?: Date | null;
-  }>
-) => {
-  if (!ContactInstance) {
-    throw Boom.internal("Brevo instance not initialized");
-  }
-
-  const contactImport = new brevo.RequestContactImport();
-  contactImport.listIds = [listeId];
-
-  const contactList = contacts.map((contact) => {
-    const contactData = new brevo.RequestContactImportJsonBodyInner();
-    contactData.email = contact.email;
-    contactData.attributes = {
-      PRENOM: contact.prenom,
-      NOM: contact.nom,
-      ...contact.urls,
-      TELEPHONE: contact.telephone,
-      NOM_ORGANISME: contact.nom_organisme,
-      MISSION_LOCALE_ID: contact.mission_locale_id,
-      MISSION_LOCALE: contact.nom_mission_locale,
-      DATE_DE_NAISSANCE: contact.date_de_naissance && format(contact.date_de_naissance, "yyyy-MM-dd"),
-      DATE_DERNIERE_RUPTURE: contact.date_derniere_rupture && format(contact.date_derniere_rupture, "yyyy-MM-dd"),
-    };
-    return contactData;
-  });
-  contactImport.jsonBody = contactList;
-
-  try {
-    return await ContactInstance.importContacts(contactImport);
-  } catch (e) {
-    captureException(e);
-    return;
-  }
-};
-
-export const removeAllContactFromList = async (listeId: number) => {
-  if (!ContactInstance) {
-    throw Boom.internal("Brevo instance not initialized");
-  }
-
-  const contactList = new brevo.RemoveContactFromList();
-  contactList.all = true;
-
-  try {
-    return await ContactInstance.removeContactFromList(listeId, contactList);
-  } catch (e) {
-    captureException(e);
-    return;
-  }
-};
-
-export const createContactList = async (missionLocaleName: string) => {
-  if (!ContactInstance) {
-    throw Boom.internal("Brevo instance not initialized");
-  }
-
-  const now = new Date();
-  const day = String(now.getDate()).padStart(2, "0");
-  const month = String(now.getMonth() + 1).padStart(2, "0"); // getMonth() is zero-based
-  const ddmm = day + month;
-
-  const contactList = new brevo.CreateList();
-  contactList.name = `${ddmm} -  ${config.env} Rupturant - ${missionLocaleName}`;
-  contactList.folderId = 5; // Folder TBA
-  try {
-    return await ContactInstance.createList(contactList);
-  } catch (e) {
-    captureException(e);
-    return;
-  }
-};
 
 const BREVO_IMPORT_BATCH_SIZE = 500;
 
@@ -201,6 +64,16 @@ export type EnsureBrevoAttributesReport = {
  * attribut existant avec un type différent : signale le conflit dans le
  * rapport, l'admin doit aligner manuellement.
  */
+interface BrevoErrorShape {
+  message?: string;
+  statusCode?: number;
+  body?: { message?: string; code?: string };
+  response?: { statusCode?: number; body?: { message?: string; code?: string } };
+}
+
+const asBrevoError = (error: unknown): BrevoErrorShape =>
+  (typeof error === "object" && error !== null ? error : {}) as BrevoErrorShape;
+
 export const ensureBrevoAttributes = async (
   schema: Record<string, BrevoAttributeType>
 ): Promise<EnsureBrevoAttributesReport> => {
@@ -218,10 +91,11 @@ export const ensureBrevoAttributes = async (
   let existing: Array<{ name?: string; category?: string; type?: string }> = [];
   try {
     const res = await ContactInstance.getAttributes();
-    existing = ((res?.body as any)?.attributes ?? []) as typeof existing;
-  } catch (e: any) {
-    captureException(e);
-    const brevoMsg = e?.response?.body?.message ?? e?.message ?? "unknown error";
+    existing = (res?.body?.attributes ?? []) as unknown as typeof existing;
+  } catch (error) {
+    captureException(error);
+    const e = asBrevoError(error);
+    const brevoMsg = e.response?.body?.message ?? e.message ?? "unknown error";
     throw new Error(`Brevo API error when listing attributes: ${brevoMsg}`);
   }
   const existingByLowerName = new Map(
@@ -249,15 +123,16 @@ export const ensureBrevoAttributes = async (
       continue;
     }
     const attr = new brevo.CreateAttribute();
-    attr.type = type as any;
+    attr.type = type as unknown as brevo.CreateAttribute.TypeEnum;
     try {
       await ContactInstance.createAttribute("normal", name, attr);
       report.created.push(name);
-    } catch (e: any) {
+    } catch (error) {
       // Brevo répond de plusieurs façons sur un doublon (casse différente non
       // détectée par le GET, race condition). On tolère tous les signaux connus.
-      const brevoCode = e?.response?.body?.code;
-      const brevoMsg = e?.response?.body?.message ?? "";
+      const e = asBrevoError(error);
+      const brevoCode = e.response?.body?.code;
+      const brevoMsg = e.response?.body?.message ?? "";
       const isDuplicate =
         brevoCode === "duplicate_parameter" ||
         brevoCode === "unique_attribute_name" ||
@@ -286,12 +161,13 @@ export const createBrevoList = async (params: { name: string; folderId: number }
   contactList.folderId = params.folderId;
   try {
     return await ContactInstance.createList(contactList);
-  } catch (e: any) {
-    captureException(e);
+  } catch (error) {
+    captureException(error);
     // Propage le message Brevo réel (folderId invalide, clé API erronée, quota, …).
-    const brevoBody = e?.response?.body ?? e?.body;
-    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e?.message ?? "unknown error";
-    const status = e?.response?.statusCode ?? e?.statusCode ?? "?";
+    const e = asBrevoError(error);
+    const brevoBody = e.response?.body ?? e.body;
+    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e.message ?? "unknown error";
+    const status = e.response?.statusCode ?? e.statusCode ?? "?";
     throw new Error(
       `Brevo API error [${status}] when creating list "${params.name}" (folderId=${params.folderId}): ${brevoMsg}`
     );
@@ -460,11 +336,12 @@ export const sendBrevoEvent = async (payload: BrevoEventPayload) => {
 
   try {
     return await EventInstance.createEvent(event);
-  } catch (e: any) {
-    captureException(e);
-    const brevoBody = e?.response?.body ?? e?.body;
-    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e?.message ?? "unknown error";
-    const status = e?.response?.statusCode ?? e?.statusCode ?? "?";
+  } catch (error) {
+    captureException(error);
+    const e = asBrevoError(error);
+    const brevoBody = e.response?.body ?? e.body;
+    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e.message ?? "unknown error";
+    const status = e.response?.statusCode ?? e.statusCode ?? "?";
     throw new Error(`Brevo API error [${status}] when creating event "${payload.eventName}": ${brevoMsg}`);
   }
 };

@@ -1,19 +1,12 @@
 import { strict as assert } from "assert";
 
-import Joi from "joi";
-import { it, describe } from "vitest";
+import { describe, it } from "vitest";
 
-const validators = {
-  password: () =>
-    Joi.string().regex(
-      /^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[!"#$€%&'()ç*+,-./:;<=>?@[\]^_`{|}~])[a-zA-Z0-9À-ž!"#$€%&'()ç*+,-./:;<=>?@[\]^_`{|}~]{8,}$/
-    ),
-};
+import { ADMIN_PASSWORD_MIN_LENGTH, zPassword } from "@/common/validation/passwordSchema";
 
 describe("Validators", () => {
   describe("password", () => {
     const validPasswords = [
-      "Abc12e,'",
       "ABCabc123$^éçéàô>!ç",
       "KZ$OR4t$[<PFbhO.",
       "rEIFG~XRMkHj^g2t",
@@ -25,27 +18,29 @@ describe("Validators", () => {
     ];
     validPasswords.forEach((validPassword) => {
       it(`Vérifie que ${validPassword} est un mot de passe valide`, () => {
-        const { error, value } = validators.password().validate(validPassword);
-        assert.equal(error, undefined);
-        assert.equal(value, validPassword);
+        assert.equal(zPassword().safeParse(validPassword).success, true);
       });
     });
+
     const invalidPasswords = [
-      "AAAABBBcccc123",
-      "AAAABBBcccc????",
-      "AAAABBB5555?.?.?.?.?.",
-      "acacacacac5555?.?.?.?.?.",
-      "aA3?;$",
+      "AAAABBBcccc123", // pas de caractère spécial
+      "AAAABBBcccc????", // pas de chiffre
+      "AAAABBB5555?.?.?.?.?.", // pas de minuscule
+      "acacacacac5555?.?.?.?.?.", // pas de majuscule
+      "aA3?;$", // trop court
+      "Abc12e,'", // trop court (8 caractères)
       "",
-      null,
-      123,
     ];
     invalidPasswords.forEach((invalidPassword) => {
-      it(`Vérifie que ${invalidPassword} est un mot de passe invalide`, () => {
-        const { error, value } = validators.password().validate(invalidPassword);
-        assert.notEqual(error, undefined);
-        assert.notEqual(value, undefined);
+      it(`Vérifie que ${invalidPassword} n'est pas un mot de passe valide`, () => {
+        assert.equal(zPassword().safeParse(invalidPassword).success, false);
       });
+    });
+
+    it("Vérifie que la longueur minimale administrateur est plus exigeante", () => {
+      const password = "KZ$OR4t$[<PFbhO."; // 16 caractères, valide pour un compte standard
+      assert.equal(zPassword().safeParse(password).success, true);
+      assert.equal(zPassword(ADMIN_PASSWORD_MIN_LENGTH).safeParse(password).success, false);
     });
   });
 });

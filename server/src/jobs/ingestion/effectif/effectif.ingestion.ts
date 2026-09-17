@@ -207,7 +207,7 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
     statut: buildEffectifStatus(
       {
         session: updateFields.session,
-        contrats: contrats.reduce((acc, contrat) => {
+        contrats: contrats.reduce<Record<string, (typeof contrats)[number]>>((acc, contrat) => {
           acc[`${formatISO(contrat.date_debut, { representation: "date" })}`] = contrat;
           return acc;
         }, {}),
@@ -230,7 +230,7 @@ export async function ingestEffectifV2(input: IIngestEffectifV2Params): Promise<
       },
       $set: {
         ...updateFields,
-        ...contrats.reduce((acc, contrat) => {
+        ...contrats.reduce<Record<string, (typeof contrats)[number]>>((acc, contrat) => {
           acc[`contrats.${formatISO(contrat.date_debut, { representation: "date" })}`] = contrat;
           return acc;
         }, {}),

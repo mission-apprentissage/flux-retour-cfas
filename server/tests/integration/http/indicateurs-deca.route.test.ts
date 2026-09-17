@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
-import { SOURCE_APPRENANT } from "shared/constants";
+import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
 import { IOrganisation, IOrganisme } from "shared/models";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { it, expect, describe, beforeEach } from "vitest";
 
@@ -8,7 +9,7 @@ import { organismesDb, effectifsQueueDb, effectifsDECADb } from "@/common/model/
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
 import { getRandomSourceOrganismeId } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { RequestAsOrganisationFunc, initTestApp } from "@tests/utils/testUtils";
+import { initTestApp, RequestAsOrganisationFunc, testDocs } from "@tests/utils/testUtils";
 
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let requestAsOrganisation: RequestAsOrganisationFunc;
@@ -71,7 +72,7 @@ const organisation = {
   created_at: new Date(),
 };
 
-const createEff = (org) => ({
+const createEff = (org: typeof organismeResponsable) => ({
   _id: new ObjectId(),
   nom_apprenant: new ObjectId().toString(),
   prenom_apprenant: new ObjectId().toString(),
@@ -96,13 +97,13 @@ const createEff = (org) => ({
   created_at: new Date(),
 });
 
-const createEffDECA = (org) => ({
+const createEffDECA = (org: typeof organismeResponsable) => ({
   _id: new ObjectId(),
   deca_raw_id: new ObjectId(),
   apprenant: {
     historique_statut: [
       {
-        valeur_statut: 0,
+        valeur_statut: 0 as const,
         date_statut: new Date("2023-12-28T04:05:47.647Z"),
         date_reception: new Date("2024-04-24T09:23:11.020Z"),
       },
@@ -135,23 +136,23 @@ const createEffDECA = (org) => ({
   validation_errors: [],
   _computed: {
     organisme: {
-      region: org.adresse.region,
-      departement: org.adresse.departement,
-      academie: org.adresse.academie,
-      bassinEmploi: org.adresse.bassinEmploi,
+      region: org.adresse?.region,
+      departement: org.adresse?.departement,
+      academie: org.adresse?.academie,
+      bassinEmploi: org.adresse?.bassinEmploi,
       uai: org.uai,
       siret: org.siret,
       fiable: true,
     },
     statut: {
-      en_cours: "ABANDON",
+      en_cours: STATUT_APPRENANT.ABANDON,
       parcours: [
         {
-          valeur: "INSCRIT",
+          valeur: STATUT_APPRENANT.INSCRIT,
           date: new Date("2023-09-01T00:00:00.000Z"),
         },
         {
-          valeur: "ABANDON",
+          valeur: STATUT_APPRENANT.ABANDON,
           date: new Date("2023-11-30T00:00:00.000Z"),
         },
       ],
@@ -179,12 +180,20 @@ const createEffDECA = (org) => ({
  * @param expected_nbEffF Nombre d'effectif attendu en indicateur chez le formateur
  * @param fromDECA Indique si les données sont cénsées provenir de DECA ou des vrais effectifs
  */
-const testDeca = async (nbEffR, nbEffF, nbEffR_DECA, nbEffF_DECA, expected_nbEffR, expected_nbEffF, fromDECA) => {
+const testDeca = async (
+  nbEffR: number,
+  nbEffF: number,
+  nbEffR_DECA: number,
+  nbEffF_DECA: number,
+  expected_nbEffR: number,
+  expected_nbEffF: number,
+  fromDECA: boolean
+) => {
   const effR = [...new Array(nbEffR)].map(() => createEff(organismeResponsable));
   const effF = [...new Array(nbEffF)].map(() => createEff(organismeFormateur));
 
-  const effRDeca: any[] = [...new Array(nbEffR_DECA)].map(() => createEffDECA(organismeResponsable));
-  const effFDeca: any[] = [...new Array(nbEffF_DECA)].map(() => createEffDECA(organismeFormateur));
+  const effRDeca = testDocs<IEffectifDECA>([...new Array(nbEffR_DECA)].map(() => createEffDECA(organismeResponsable)));
+  const effFDeca = testDocs<IEffectifDECA>([...new Array(nbEffF_DECA)].map(() => createEffDECA(organismeFormateur)));
 
   effR.length && (await effectifsQueueDb().insertMany(effR));
   effF.length && (await effectifsQueueDb().insertMany(effF));

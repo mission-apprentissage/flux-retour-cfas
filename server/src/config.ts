@@ -88,6 +88,7 @@ const config = {
       user: env.get("MNA_TDB_SMTP_AUTH_USER").asString(),
       pass: env.get("MNA_TDB_SMTP_AUTH_PASS").asString(),
     },
+    webhookKey: env.get("MNA_TDB_SMTP_WEBHOOK_KEY").asString(),
   },
   ovh: {
     storage: {

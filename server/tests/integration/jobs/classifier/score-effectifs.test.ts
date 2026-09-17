@@ -1,11 +1,13 @@
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
+import type { IMissionLocaleEffectif } from "shared/models";
 import { it, expect, describe, beforeEach, vi } from "vitest";
 
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 import { scoreExistingEffectifs } from "@/jobs/classifier/score-effectifs";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc, testDocs } from "@tests/utils/testUtils";
 
 const mockScoreEffectifs = vi.fn();
 
@@ -67,7 +69,7 @@ describe("scoreExistingEffectifs", () => {
   });
 
   it("score les effectifs sans classification_reponse_appel", async () => {
-    await missionLocaleEffectifsDb().insertOne(createMlEffectifDoc() as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(createMlEffectifDoc()));
 
     await scoreExistingEffectifs({ dryRun: false });
 
@@ -79,7 +81,9 @@ describe("scoreExistingEffectifs", () => {
   });
 
   it("ignore les effectifs soft_deleted", async () => {
-    await missionLocaleEffectifsDb().insertOne(createMlEffectifDoc({ soft_deleted: true }) as any);
+    await missionLocaleEffectifsDb().insertOne(
+      testDoc<IMissionLocaleEffectif>(createMlEffectifDoc({ soft_deleted: true }))
+    );
 
     await scoreExistingEffectifs({ dryRun: false });
 
@@ -88,9 +92,11 @@ describe("scoreExistingEffectifs", () => {
 
   it("ignore les effectifs qui ont déjà un score", async () => {
     await missionLocaleEffectifsDb().insertOne(
-      createMlEffectifDoc({
-        classification_reponse_appel: { score: 0.5, model: "old", scored_at: new Date() },
-      }) as any
+      testDoc<IMissionLocaleEffectif>(
+        createMlEffectifDoc({
+          classification_reponse_appel: { score: 0.5, model: "old", scored_at: new Date() },
+        })
+      )
     );
 
     await scoreExistingEffectifs({ dryRun: false });
@@ -100,13 +106,15 @@ describe("scoreExistingEffectifs", () => {
 
   it("skip les effectifs sans données suffisantes", async () => {
     await missionLocaleEffectifsDb().insertOne(
-      createMlEffectifDoc({
-        effectif_snapshot: {
-          _id: new ObjectId(),
-          apprenant: { nom: "TEST", prenom: "Test", historique_statut: [] },
-          contrats: [],
-        },
-      }) as any
+      testDoc<IMissionLocaleEffectif>(
+        createMlEffectifDoc({
+          effectif_snapshot: {
+            _id: new ObjectId(),
+            apprenant: { nom: "TEST", prenom: "Test", historique_statut: [] },
+            contrats: [],
+          },
+        })
+      )
     );
 
     await scoreExistingEffectifs({ dryRun: false });
@@ -119,11 +127,9 @@ describe("scoreExistingEffectifs", () => {
   it("respecte l'option limit", async () => {
     mockScoreEffectifs.mockResolvedValue({ model: "2026-03-16", scores: [0.8] });
 
-    await missionLocaleEffectifsDb().insertMany([
-      createMlEffectifDoc(),
-      createMlEffectifDoc(),
-      createMlEffectifDoc(),
-    ] as any);
+    await missionLocaleEffectifsDb().insertMany(
+      testDocs<IMissionLocaleEffectif>([createMlEffectifDoc(), createMlEffectifDoc(), createMlEffectifDoc()])
+    );
 
     await scoreExistingEffectifs({ dryRun: false, limit: 1 });
 
@@ -133,7 +139,7 @@ describe("scoreExistingEffectifs", () => {
   });
 
   it("en dryRun, ne modifie pas la base", async () => {
-    await missionLocaleEffectifsDb().insertOne(createMlEffectifDoc() as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(createMlEffectifDoc()));
 
     await scoreExistingEffectifs({ dryRun: true });
 
@@ -145,7 +151,7 @@ describe("scoreExistingEffectifs", () => {
   it("gère l'erreur du classifier sans crash", async () => {
     mockScoreEffectifs.mockRejectedValue(new Error("Classifier down"));
 
-    await missionLocaleEffectifsDb().insertOne(createMlEffectifDoc() as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(createMlEffectifDoc()));
 
     const result = await scoreExistingEffectifs({ dryRun: false });
 
@@ -155,8 +161,12 @@ describe("scoreExistingEffectifs", () => {
   });
 
   it("ignore les effectifs avec une situation renseignée (déjà traités ou à recontacter)", async () => {
-    await missionLocaleEffectifsDb().insertOne(createMlEffectifDoc({ situation: "CONTACTE_SANS_RETOUR" }) as any);
-    await missionLocaleEffectifsDb().insertOne(createMlEffectifDoc({ situation: "RDV_PRIS" }) as any);
+    await missionLocaleEffectifsDb().insertOne(
+      testDoc<IMissionLocaleEffectif>(createMlEffectifDoc({ situation: "CONTACTE_SANS_RETOUR" }))
+    );
+    await missionLocaleEffectifsDb().insertOne(
+      testDoc<IMissionLocaleEffectif>(createMlEffectifDoc({ situation: "RDV_PRIS" }))
+    );
 
     await scoreExistingEffectifs({ dryRun: false });
 

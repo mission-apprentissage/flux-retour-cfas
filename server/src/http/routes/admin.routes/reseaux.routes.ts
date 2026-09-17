@@ -6,24 +6,20 @@ import { z } from "zod";
 import { getReseauById } from "@/common/actions/reseaux/reseaux.actions";
 import { organismesDb, reseauxDb } from "@/common/model/collections";
 import objectIdSchema from "@/common/validation/objectIdSchema";
-import { returnResult } from "@/http/middlewares/helpers";
+import { DefaultParams, DefaultQuery, returnResult, RouteHandler } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 import { updateComputedFieldForOrganisme } from "@/jobs/computed/update-computed";
+
+const reseauBody = z.object({
+  nom: z.string(),
+  responsable: z.boolean(),
+});
 
 export default () => {
   const router = express.Router();
 
   router.get("/", returnResult(getAllReseaux));
-  router.post(
-    "/",
-    validateRequestMiddleware({
-      body: z.object({
-        nom: z.string(),
-        responsable: z.boolean(),
-      }),
-    }),
-    returnResult(createReseau)
-  );
+  router.post("/", validateRequestMiddleware({ body: reseauBody }), returnResult(createReseau));
   router.get(
     "/:id",
     validateRequestMiddleware({
@@ -68,9 +64,9 @@ export default () => {
     }),
     async ({ params, body }, res) => {
       const { id } = params;
-      const { organismeId } = body;
+      const { organismeId } = body as { organismeId?: unknown };
 
-      if (!organismeId) {
+      if (typeof organismeId !== "string" || !organismeId) {
         throw Boom.badRequest("organismeId is required in the request body");
       }
 
@@ -81,20 +77,20 @@ export default () => {
         throw Boom.badRequest("Invalid organismeId format. Must be a valid ObjectId.");
       }
 
-      const reseau = await getReseauById(id as string);
+      const reseau = await getReseauById(id);
       if (!reseau) {
         throw Boom.notFound(`Reseau with id ${id} not found`);
       }
 
       const result = await reseauxDb().findOneAndUpdate(
-        { _id: new ObjectId(id as string) },
+        { _id: new ObjectId(id) },
         {
           $push: { organismes_ids: organismeObjectId },
         },
         { returnDocument: "after" }
       );
 
-      if (!result.value) {
+      if (!result) {
         throw Boom.internal("Failed to update the organismes_ids array.");
       }
 
@@ -105,7 +101,7 @@ export default () => {
         await updateComputedFieldForOrganisme(updatedOrganisme);
       }
 
-      res.json(result.value);
+      res.json(result);
     }
   );
 
@@ -127,18 +123,18 @@ export default () => {
       const { id, organismeId } = params;
 
       try {
-        const reseau = await getReseauById(id as string);
+        const reseau = await getReseauById(id);
         if (!reseau) {
           throw Boom.notFound(`Reseau with id ${id} not found`);
         }
 
         const result = await reseauxDb().findOneAndUpdate(
-          { _id: new ObjectId(id as string) },
-          { $pull: { organismes_ids: organismeId as ObjectId } },
+          { _id: new ObjectId(id) },
+          { $pull: { organismes_ids: organismeId } },
           { returnDocument: "after" }
         );
 
-        if (!result.value) {
+        if (!result) {
           throw Boom.notFound(`No reseau found with id ${id}`);
         }
 
@@ -149,7 +145,7 @@ export default () => {
           await updateComputedFieldForOrganisme(updatedOrganisme);
         }
 
-        res.json(result.value);
+        res.json(result);
       } catch (error) {
         console.error("Error during deletion:", error);
         throw Boom.internal("Failed to remove organismeId from reseau.");
@@ -178,12 +174,31 @@ export default () => {
 };
 
 export const getAllReseaux = async () => {
-  return reseauxDb().find().sort({ nom: 1 }).toArray();
+  return reseauxDb()
+    .aggregate([
+      { $sort: { nom: 1 } },
+      {
+        $lookup: {
+          from: "organismes",
+          localField: "organismes_ids",
+          foreignField: "_id",
+          as: "organismes",
+          pipeline: [{ $project: { _id: 1 } }],
+        },
+      },
+      { $addFields: { organismes_count: { $size: "$organismes" } } },
+      { $project: { organismes: 0 } },
+    ])
+    .toArray();
 };
 
-export const createReseau = async ({ body }) => {
-  const nom: string = body.nom;
-  const responsable: boolean = body.responsable;
+export const createReseau: RouteHandler<
+  Record<string, unknown>,
+  DefaultParams,
+  DefaultQuery,
+  z.infer<typeof reseauBody>
+> = async ({ body }) => {
+  const { nom, responsable } = body;
   const key = nom.toUpperCase().replace(/ /g, "_");
 
   const date = new Date();

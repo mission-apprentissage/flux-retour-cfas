@@ -120,15 +120,8 @@ describe("Filtres Indicateurs", () => {
       const id1 = new ObjectId();
       const id2 = new ObjectId();
 
-      const result: any = buildOrganismePerimetreMongoFilters({ id: { $in: [id1.toString(), id2.toString()] } });
-      expect(result).toMatchObject({
-        _id: {
-          $in: [expect.anything(), expect.anything()],
-        },
-      });
-
-      expect(id1.equals(result._id.$in[0])).toBe(true);
-      expect(id2.equals(result._id.$in[1])).toBe(true);
+      const result = buildOrganismePerimetreMongoFilters({ id: { $in: [id1.toString(), id2.toString()] } });
+      expect(result).toMatchObject({ _id: { $in: [id1, id2] } });
     });
 
     it("should support scope restriction by reseau", () => {

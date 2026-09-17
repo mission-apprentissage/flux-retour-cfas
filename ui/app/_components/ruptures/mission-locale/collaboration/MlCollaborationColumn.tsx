@@ -33,7 +33,7 @@ function ContactCfaButton({
   if (!contact?.email) return null;
 
   return (
-    <div style={{ display: "flex", justifyContent: "flex-end", margin: "1rem 0" }}>
+    <div className={localStyles.actionsRow}>
       <Button
         priority="primary"
         iconId="fr-icon-send-plane-fill"
@@ -53,7 +53,7 @@ function CfaCard({ effectif }: { effectif: IEffectifMissionLocale["effectif"] })
   const organismeName = effectif.organisme?.nom || effectif.organisme?.raison_sociale || "CFA non renseigné";
   const commune = effectif.organisme?.adresse?.commune;
   const codePostal = effectif.organisme?.adresse?.code_postal;
-  const isTdbUser = !!effectif.organisme?.ml_beta_activated_at;
+  const isTdbUser = !!effectif.organisme?.has_account;
 
   return (
     <div className={styles.mlCallOut}>
@@ -76,7 +76,7 @@ function CfaCard({ effectif }: { effectif: IEffectifMissionLocale["effectif"] })
 
 export function MlCollaborationColumn({ effectif }: MlCollaborationColumnProps) {
   const collabReceived = effectif.organisme_data?.acc_conjoint === true;
-  const cfaIsTdbUser = !!effectif.organisme?.ml_beta_activated_at;
+  const cfaIsTdbUser = !!effectif.organisme?.has_account;
   const situationLogs = getSituationLogs(effectif);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 

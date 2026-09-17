@@ -104,6 +104,7 @@ export function PublicHeader({ withNav = true }: { withNav?: boolean }) {
       }}
       quickAccessItems={getQuickAccessItems()}
       navigation={getNavigationItems()}
+      disableDisplay
     />
   );
 }

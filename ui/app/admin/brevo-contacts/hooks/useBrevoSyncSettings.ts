@@ -15,11 +15,11 @@ export type BrevoSyncSettingField = "dailyFullSyncEnabled" | "instantSyncEnabled
 const syncSettingsQueryKey = [...brevoContactsQueryKeys.all, "sync-settings"] as const;
 
 export function useBrevoSyncSettings() {
-  return useQuery<BrevoSyncSettings>(
-    syncSettingsQueryKey,
-    () => _get<BrevoSyncSettings>("/api/v1/admin/brevo-contacts/sync-settings"),
-    BREVO_CONTACTS_QUERY_CONFIG
-  );
+  return useQuery<BrevoSyncSettings>({
+    queryKey: syncSettingsQueryKey,
+    queryFn: () => _get<BrevoSyncSettings>("/api/v1/admin/brevo-contacts/sync-settings"),
+    ...BREVO_CONTACTS_QUERY_CONFIG,
+  });
 }
 
 export function useSetBrevoSyncSetting() {

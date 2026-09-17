@@ -9,5 +9,5 @@ export const DEPLOYED_REGIONS = {
 export const DEPLOYED_REGION_CODES = Object.values(DEPLOYED_REGIONS);
 
 export function isRegionDeployed(regionCode: string): boolean {
-  return DEPLOYED_REGION_CODES.includes(regionCode as any);
+  return (DEPLOYED_REGION_CODES as readonly string[]).includes(regionCode);
 }

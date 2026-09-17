@@ -1,18 +1,14 @@
 "use client";
 
-import { BarPlot } from "@mui/x-charts/BarChart";
-import { ChartContainer } from "@mui/x-charts/ChartContainer";
-import { ChartsGrid } from "@mui/x-charts/ChartsGrid";
-import { ChartsTooltipContainer, useItemTooltip } from "@mui/x-charts/ChartsTooltip";
-import { ChartsXAxis } from "@mui/x-charts/ChartsXAxis";
-import { ChartsYAxis } from "@mui/x-charts/ChartsYAxis";
-import { useXScale, useYScale } from "@mui/x-charts/hooks";
+import { useLayoutEffect, useRef } from "react";
+import { Bar, BarChart, CartesianGrid, Tooltip, useXAxisScale, useYAxisScale, XAxis, YAxis } from "recharts";
 import { IAccompagnementConjointMotifs } from "shared/models/data/nationalStats.model";
 
-import { Skeleton } from "../ui/Skeleton";
+import { Skeleton } from "@/app/_components/common/Skeleton";
 
-import tooltipStyles from "./ChartTooltip.module.css";
+import { ItemChartTooltip } from "./ChartTooltip";
 import styles from "./MotifsBarChart.module.css";
+import { ticksUpTo } from "./ticks";
 
 interface MotifsBarChartProps {
   data?: IAccompagnementConjointMotifs;
@@ -88,37 +84,34 @@ const MOTIFS_CONFIG = [
 const BAR_COLOR = "#CACAFB";
 const ICON_COLOR = "#000091";
 const ICON_SIZE = 16;
+const TICK_STYLE = { fontSize: 12, fill: "#161616" };
 
-interface IconsOverlayProps {
-  values: number[];
+interface MotifRow {
+  key: string;
+  label: string;
+  value: number;
+  color: string;
+  formatted: string;
 }
 
-function IconsOverlay({ values }: IconsOverlayProps) {
-  const xScale = useXScale<"band">();
-  const yScale = useYScale();
+function IconsOverlay({ rows }: { rows: MotifRow[] }) {
+  const xScale = useXAxisScale();
+  const yScale = useYAxisScale();
 
   if (!xScale || !yScale) return null;
-
-  const bandwidth = xScale.bandwidth?.() || 0;
-  const y0 = yScale(0) ?? 0;
 
   return (
     <g>
       {MOTIFS_CONFIG.map((motif, index) => {
-        const x = xScale(motif.label);
-        if (x === undefined) return null;
-
-        const value = values[index] || 0;
-        const yValue = value > 0 ? (yScale(value) ?? y0) : y0;
-
-        const iconX = x + bandwidth / 2 - ICON_SIZE / 2;
-        const iconY = yValue - ICON_SIZE - 4;
+        const cx = xScale(motif.label, { position: "middle" });
+        const top = yScale(Math.max(rows[index].value, 0));
+        if (cx === undefined || top === undefined) return null;
 
         return (
           <svg
             key={motif.key}
-            x={iconX}
-            y={iconY}
+            x={cx - ICON_SIZE / 2}
+            y={top - ICON_SIZE - 4}
             width={ICON_SIZE}
             height={ICON_SIZE}
             viewBox="0 0 24 24"
@@ -132,35 +125,36 @@ function IconsOverlay({ values }: IconsOverlayProps) {
   );
 }
 
-interface MotifsTooltipProps {
-  labels: string[];
-}
+const MAX_TICK_LABEL_LENGTH = 71;
 
-function MotifsTooltip({ labels }: MotifsTooltipProps) {
-  const tooltipData = useItemTooltip();
+function AngledTick({ x, y, payload }: { x?: number; y?: number; payload?: { value: string } }) {
+  const ref = useRef<SVGTextElement>(null);
+  const value = payload?.value ?? "";
 
-  if (!tooltipData) {
-    return null;
-  }
-
-  const dataIndex = tooltipData.identifier.dataIndex ?? 0;
-  const displayLabel = labels[dataIndex] || "";
-  const rawValue = tooltipData.formattedValue || tooltipData.value;
-  const displayValue = typeof rawValue === "number" ? rawValue.toLocaleString("fr-FR") : String(rawValue);
-  const displayColor = tooltipData.color;
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    let text = value;
+    element.textContent = text;
+    while (text.length > 1 && element.getComputedTextLength() > MAX_TICK_LABEL_LENGTH) {
+      text = text.slice(0, -1);
+      element.textContent = `${text}…`;
+    }
+  }, [value]);
 
   return (
-    <ChartsTooltipContainer trigger="item">
-      <div className={tooltipStyles.tooltipContainer}>
-        <div className={tooltipStyles.tooltipContent}>
-          <div className={tooltipStyles.tooltipLeftContent}>
-            <div className={tooltipStyles.tooltipColorDot} style={{ backgroundColor: displayColor }} />
-            <span className={tooltipStyles.tooltipLabel}>{displayLabel}</span>
-          </div>
-          <span className={tooltipStyles.tooltipValue}>{displayValue}</span>
-        </div>
-      </div>
-    </ChartsTooltipContainer>
+    <text
+      ref={ref}
+      x={x}
+      y={y}
+      dy={4}
+      transform={`rotate(75, ${x}, ${y})`}
+      textAnchor="start"
+      fontSize={12}
+      fill="#161616"
+    >
+      {value}
+    </text>
   );
 }
 
@@ -176,73 +170,75 @@ export function MotifsBarChart({ data, loading }: MotifsBarChartProps) {
     );
   }
 
-  const chartData = MOTIFS_CONFIG.map((motif) => ({
-    motif: motif.label,
-    value: data[motif.key as keyof IAccompagnementConjointMotifs] || 0,
-  }));
-
-  const xLabels = chartData.map((d) => d.motif);
-  const values = chartData.map((d) => d.value);
+  const values = MOTIFS_CONFIG.map((motif) => data[motif.key as keyof IAccompagnementConjointMotifs] || 0);
   const total = values.reduce((sum, v) => sum + v, 0);
-  const maxValue = Math.max(...values);
-  const yAxisMax = Math.ceil(maxValue * 1.2) || 1;
+  const yAxisMax = Math.ceil(Math.max(...values) * 1.2) || 1;
+  const yTicks = ticksUpTo(yAxisMax, 4, 1);
+
+  const rows: MotifRow[] = MOTIFS_CONFIG.map((motif, index) => ({
+    key: motif.key,
+    label: motif.label,
+    value: values[index],
+    color: BAR_COLOR,
+    formatted: `${values[index].toLocaleString("fr-FR")} (${total > 0 ? Math.round((values[index] / total) * 100) : 0}%)`,
+  }));
 
   return (
     <div className={styles.container}>
-      <ChartContainer
-        xAxis={[
-          {
-            scaleType: "band",
-            data: xLabels,
-            categoryGapRatio: 0.7,
-            valueFormatter: (value) => value,
-            tickLabelStyle: {
-              angle: 75,
-              textAnchor: "start",
-              fontSize: 12,
-            },
-          },
-        ]}
-        yAxis={[
-          {
-            tickMinStep: 1,
-            max: yAxisMax,
-          },
-        ]}
-        series={[
-          {
-            type: "bar",
-            data: values,
-            color: BAR_COLOR,
-            valueFormatter: (value) => {
-              if (value === null) return "";
-              const pct = total > 0 ? Math.round((value / total) * 100) : 0;
-              return `${value.toLocaleString("fr-FR")} (${pct}%)`;
-            },
-          },
-        ]}
+      <BarChart
+        responsive
+        width="100%"
         height={350}
-        margin={{ top: 30, bottom: 80, left: -20, right: 10 }}
+        data={rows}
+        margin={{ top: 30, right: 10, bottom: 0, left: 0 }}
+        barCategoryGap="35%"
       >
-        <ChartsGrid horizontal />
-        <BarPlot />
-        <IconsOverlay values={values} />
-        <ChartsXAxis position="bottom" height={80} tickLabelMinGap={0} disableTicks disableLine />
-        <ChartsYAxis />
-        <MotifsTooltip labels={xLabels} />
-      </ChartContainer>
+        <CartesianGrid
+          horizontal
+          vertical={false}
+          stroke="#ddd"
+          horizontalCoordinatesGenerator={({ yAxis }) => {
+            const scale = yAxis?.scale;
+            return scale ? yTicks.map((tick) => scale.map(tick) ?? 0) : [];
+          }}
+        />
+        <XAxis dataKey="label" interval={0} height={80} axisLine={false} tickLine={false} tick={<AngledTick />} />
+        <YAxis
+          axisLine={{ stroke: "#161616" }}
+          tickLine={{ stroke: "#161616" }}
+          tick={TICK_STYLE}
+          width={40}
+          domain={[0, yAxisMax]}
+          ticks={yTicks}
+          niceTicks="none"
+        />
+        <Bar
+          dataKey="value"
+          fill={BAR_COLOR}
+          animationBegin={0}
+          animationDuration={300}
+          animationEasing="cubic-bezier(0.66, 0, 0.34, 1)"
+        />
+        <IconsOverlay rows={rows} />
+        <Tooltip
+          shared={false}
+          content={<ItemChartTooltip />}
+          cursor={false}
+          offset={8}
+          allowEscapeViewBox={{ x: true, y: true }}
+          isAnimationActive={false}
+          wrapperStyle={{ outline: "none", zIndex: 1500 }}
+        />
+      </BarChart>
 
       <div className={styles.legend}>
-        {MOTIFS_CONFIG.map((motif) => {
-          const value = data[motif.key as keyof IAccompagnementConjointMotifs] || 0;
-          return (
-            <div key={motif.key} className={styles.legendItem}>
-              <i className={`${motif.icon} fr-icon--sm ${styles.legendIcon}`} aria-hidden="true" />
-              <span className={styles.legendLabel}>{motif.label}</span>
-              <span className={styles.legendValue}>{value}</span>
-            </div>
-          );
-        })}
+        {MOTIFS_CONFIG.map((motif, index) => (
+          <div key={motif.key} className={styles.legendItem}>
+            <i className={`${motif.icon} fr-icon--sm ${styles.legendIcon}`} aria-hidden="true" />
+            <span className={styles.legendLabel}>{motif.label}</span>
+            <span className={styles.legendValue}>{values[index]}</span>
+          </div>
+        ))}
       </div>
     </div>
   );

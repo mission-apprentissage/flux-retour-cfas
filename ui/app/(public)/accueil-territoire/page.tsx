@@ -16,7 +16,7 @@ export const metadata = PAGES.static.accueilTerritoire.getMetadata();
 
 export default function AccueilTerritoirePage() {
   return (
-    <main id="accueil-territoire-content" className={landingStyles.mainContainer}>
+    <main className={landingStyles.mainContainer}>
       <HeroSection />
       <EtablissementsConnectesSection />
       <MapStatsSection />

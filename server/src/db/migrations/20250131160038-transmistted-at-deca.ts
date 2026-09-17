@@ -1,3 +1,6 @@
+import type { AnyBulkWriteOperation } from "mongodb";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+
 import { effectifsDECADb } from "@/common/model/collections";
 
 export const up = async () => {
@@ -5,7 +8,7 @@ export const up = async () => {
     const cursor = effectifsDECADb().find({});
 
     const CHUNK_SIZE = 1000;
-    let bulkUpdates: Array<{ updateOne: { filter: { _id: any }; update: { $set: { transmitted_at: any } } } }> = [];
+    let bulkUpdates: AnyBulkWriteOperation<IEffectifDECA>[] = [];
     let totalUpdated = 0;
 
     for await (const { _id, updated_at } of cursor) {

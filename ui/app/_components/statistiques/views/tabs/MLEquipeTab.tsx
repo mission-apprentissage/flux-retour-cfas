@@ -2,9 +2,10 @@
 
 import { Table } from "@codegouvfr/react-dsfr/Table";
 
+import { TableSkeleton } from "@/app/_components/common/Skeleton";
+
 import { useMissionLocaleMembres } from "../../hooks/useStatsQueries";
 import { NoDataMessage } from "../../ui/NoDataMessage";
-import { TableSkeleton } from "../../ui/Skeleton";
 import { StatsErrorHandler } from "../../ui/StatsErrorHandler";
 import { formatDateWithRelativeTime } from "../../utils";
 

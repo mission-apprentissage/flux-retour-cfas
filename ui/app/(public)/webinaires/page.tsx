@@ -8,7 +8,7 @@ export const metadata = PAGES.static.webinaires.getMetadata();
 
 export default function WebinairesPage() {
   return (
-    <main id="webinaire-content" className={fr.cx("fr-container", "fr-py-6w")}>
+    <main className={fr.cx("fr-container", "fr-py-6w")}>
       <div className={styles.iframeWrapper}>
         <iframe
           title="Formulaire d'inscription aux webinaires"

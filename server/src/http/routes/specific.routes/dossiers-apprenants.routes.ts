@@ -1,6 +1,6 @@
 import { captureException } from "@sentry/node";
+import Boom from "boom";
 import express from "express";
-import Joi from "joi";
 import { ObjectId } from "mongodb";
 import { dossierApprenantSchemaV3Input, stripModelAdditionalKeys } from "shared/models/parts/dossierApprenantSchemaV3";
 
@@ -10,6 +10,7 @@ import { effectifsQueueDb } from "@/common/model/collections";
 import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model";
 import { formatDateYYYYMMDD } from "@/common/utils/dateUtils";
 import { formatError } from "@/common/utils/errorUtils";
+import { validateArrayInput } from "@/common/utils/inputValidationError";
 import stripNullProperties from "@/common/utils/stripNullProperties";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
@@ -23,12 +24,15 @@ export default () => {
    * Une validation plus complete est effectuée lors du traitement des données par process-effectifs-queue
    */
   router.post("/", async ({ user, body }, res) => {
-    const bodyItems = (
-      await Joi.array().max(POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH).validateAsync(body, { abortEarly: false })
-    ).map((e) => stripNullProperties(e));
+    const bodyItems = validateArrayInput(body, POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH).map((e) =>
+      stripNullProperties(e as Record<string, unknown>)
+    );
     const validationSchema = dossierApprenantSchemaV3Input;
 
     const source = user.source;
+    if (!source) {
+      throw Boom.unauthorized("Source de transmission inconnue");
+    }
     const effectifsToQueue = bodyItems.map((dossierApprenant) => {
       const result = validationSchema.safeParse({
         ...dossierApprenant,
@@ -46,6 +50,7 @@ export default () => {
       const processedAt = new Date();
       return {
         ...rest,
+        _id: new ObjectId(),
         has_nir: Boolean(nir_apprenant),
         ...defaultValuesEffectifQueue(),
         ...(prettyValidationError ? { processed_at: processedAt } : {}),
@@ -83,7 +88,7 @@ export default () => {
           : undefined,
         data: effectifsToQueue,
       });
-    } catch (e: any) {
+    } catch (e) {
       const err = formatError(e);
       logger.error({ err }, "POST /dossiers-apprenants error");
       captureException(new Error("POST /dossiers-apprenants error", { cause: err }));

@@ -14,6 +14,12 @@ import { writeFileSync } from "fs";
 import axios from "axios";
 import { read, utils } from "xlsx";
 
+interface RomeNode {
+  id: string;
+  name: string;
+  children?: Record<string, RomeNode>;
+}
+
 async function main() {
   const res = await axios.get("https://www.pole-emploi.fr/files/live/sites/PE/files/ROME_ArboPrincipale.xlsx", {
     responseType: "arraybuffer",
@@ -31,7 +37,7 @@ async function main() {
   const arboPrincipaleSheet = workbook.Sheets[arboPrincipaleSheetName];
 
   const rawJsonData = utils
-    .sheet_to_json<Record<"familleMetier" | "domaineProfessionnel" | "numeroOrdre" | "name" | "codeOGR", any>>(
+    .sheet_to_json<Record<"familleMetier" | "domaineProfessionnel" | "numeroOrdre" | "name" | "codeOGR", string>>(
       arboPrincipaleSheet,
       {
         // exemple : A	11	01	Chauffeur / Chauffeuse de machines agricoles 11987
@@ -40,7 +46,7 @@ async function main() {
     )
     .slice(1); // removes the header
 
-  const arborescenceRome = rawJsonData.reduce((acc, row) => {
+  const arborescenceRome = rawJsonData.reduce<Record<string, RomeNode>>((acc, row) => {
     // conditions ordonnées de la plus restrictive à la moins restrictive
     if (row.codeOGR !== " ") {
       // pas besoin des appellations de métiers
@@ -50,13 +56,13 @@ async function main() {
       //   name: row.name,
       // };
     } else if (row.numeroOrdre !== " ") {
-      acc[row.familleMetier].children[row.domaineProfessionnel].children[row.numeroOrdre] = {
+      acc[row.familleMetier].children![row.domaineProfessionnel].children![row.numeroOrdre] = {
         id: `${row.familleMetier}${row.domaineProfessionnel}${row.numeroOrdre}`,
         name: row.name,
         // children: {},
       };
     } else if (row.domaineProfessionnel !== " ") {
-      acc[row.familleMetier].children[row.domaineProfessionnel] = {
+      acc[row.familleMetier].children![row.domaineProfessionnel] = {
         id: `${row.familleMetier}${row.domaineProfessionnel}`,
         name: row.name,
         children: {},
@@ -77,15 +83,15 @@ async function main() {
       const famille = arborescenceRome[key];
       return {
         ...famille,
-        children: Object.keys(famille.children)
+        children: Object.keys(famille.children ?? {})
           .sort()
           .map((key) => {
-            const domaine = famille.children[key];
+            const domaine = famille.children![key];
             return {
               ...domaine,
-              children: Object.keys(domaine.children)
+              children: Object.keys(domaine.children ?? {})
                 .sort()
-                .map((key) => domaine.children[key]),
+                .map((key) => domaine.children![key]),
             };
           }),
       };
@@ -97,9 +103,13 @@ async function main() {
   console.log("Fichier créé : arborescence-rome.json");
 }
 
-function addIdsToNames(node: any) {
+function addIdsToNames(node: {
+  id: string;
+  name: string;
+  children?: Array<{ id: string; name: string; children?: unknown[] }>;
+}) {
   node.name = `${node.id} – ${node.name}`;
-  node.children?.forEach((node) => addIdsToNames(node));
+  node.children?.forEach((child) => addIdsToNames(child as typeof node));
 }
 
 main();

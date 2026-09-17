@@ -1,5 +1,6 @@
 import { subHours } from "date-fns";
-import { ObjectId } from "mongodb";
+import { Filter, ObjectId } from "mongodb";
+import { IOrganisation, IUsersMigration, IMissionLocaleEffectif } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 
 import {
@@ -44,11 +45,10 @@ interface ICfaDailyStats {
 export async function getCfaEffectifsWithMlActionsLast24h(): Promise<ICfaDailyStats[]> {
   const yesterday = subHours(new Date(), 24);
 
-  const cfasPilotes = await organisationsDb()
+  const cfas = await organisationsDb()
     .find(
       {
         type: "ORGANISME_FORMATION",
-        ml_beta_activated_at: { $exists: true },
       },
       {
         projection: {
@@ -58,13 +58,12 @@ export async function getCfaEffectifsWithMlActionsLast24h(): Promise<ICfaDailySt
       }
     )
     .toArray();
-  if (cfasPilotes.length === 0) {
+  if (cfas.length === 0) {
     return [];
   }
-  const cfaOrganismeIds = cfasPilotes
-    .map((cfa) => (cfa as any).organisme_id)
-    .filter((id) => id)
-    .map((id) => new ObjectId(id));
+  const cfaOrganismeIds = cfas.flatMap((cfa) =>
+    "organisme_id" in cfa && cfa.organisme_id ? [new ObjectId(cfa.organisme_id)] : []
+  );
 
   const logsRecents = await missionLocaleEffectifsLogDb()
     .find({
@@ -170,24 +169,23 @@ export async function getCfaEffectifsWithMlActionsLast24h(): Promise<ICfaDailySt
   return results as ICfaDailyStats[];
 }
 
-export async function getCfaPiloteUsers(
+export async function getCfaUsers(
   cfaOrganismeId: ObjectId,
   userId?: ObjectId
 ): Promise<{
-  organisation: any;
-  users: any[];
+  organisation: IOrganisation | null;
+  users: IUsersMigration[];
 }> {
   const organisation = await organisationsDb().findOne({
     organisme_id: cfaOrganismeId.toString(),
     type: "ORGANISME_FORMATION",
-    ml_beta_activated_at: { $exists: true },
   });
 
   if (!organisation) {
     return { organisation: null, users: [] };
   }
 
-  const userQuery: any = {
+  const userQuery: Filter<IUsersMigration> = {
     organisation_id: organisation._id,
     account_status: "CONFIRMED",
   };
@@ -228,7 +226,7 @@ export async function getJeunesForCfaMl(
 
   const effectifIds = logsRecents.map((log) => log.mission_locale_effectif_id);
 
-  const query: any = {
+  const query: Filter<IMissionLocaleEffectif> = {
     _id: { $in: effectifIds },
     "effectif_snapshot.organisme_id": cfaOrganismeId,
     mission_locale_id: missionLocaleId,

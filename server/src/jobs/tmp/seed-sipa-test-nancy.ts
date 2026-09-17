@@ -294,14 +294,16 @@ async function insertRecords(dryRun: boolean): Promise<{ inserted: number; skipp
 
 // Récupère toutes les pages : dès que la rentrée 2026 sera transmise par les ERP, la fenêtre
 // peut dépasser 1000 éléments et les élèves de test tomber au-delà de la page 1.
-async function fetchAllSipaEffectifs(): Promise<{ totalElements: number; effectifs: any[] }> {
+type SipaEffectifs = Awaited<ReturnType<typeof getSuiviSipaEffectifs>>["effectifs"];
+
+async function fetchAllSipaEffectifs(): Promise<{ totalElements: number; effectifs: SipaEffectifs }> {
   const params = {
     dateMin: d(VERIF_DATE_MIN),
     dateMax: d(VERIF_DATE_MAX),
     departementsDb: VERIF_DEPARTEMENTS,
   };
   const first = await getSuiviSipaEffectifs({ ...params, page: 1 });
-  const effectifs: any[] = [...first.effectifs];
+  const effectifs: SipaEffectifs = [...first.effectifs];
   for (let page = 2; page <= first.metadonnees.totalPages; page++) {
     const next = await getSuiviSipaEffectifs({ ...params, page });
     effectifs.push(...next.effectifs);
@@ -323,14 +325,14 @@ async function verify(): Promise<void> {
 
   logger.info({ totalElements, departements: VERIF_DEPARTEMENTS }, "Vérification SIPA — résultat de l'agrégation");
 
-  const byKey = new Map(
-    effectifs.map((e: any) => [verifKey(e.apprenant?.nom, e.apprenant?.prenom, e.apprenant?.dateNaissance), e])
+  const byKey = new Map<string, SipaEffectifs[number]>(
+    effectifs.map((e) => [verifKey(e.apprenant?.nom, e.apprenant?.prenom, e.apprenant?.dateNaissance), e] as const)
   );
   let ok = 0;
   const failures: string[] = [];
 
   for (const record of RECORDS) {
-    const found: any = byKey.get(
+    const found = byKey.get(
       verifKey(record.apprenant.nom, record.apprenant.prenom, record.apprenant.date_de_naissance)
     );
     const expectedDept = record.expectedDepartement.padStart(3, "0");
@@ -363,11 +365,11 @@ async function verify(): Promise<void> {
       logger.info(
         {
           eleve: record.key,
-          departement: found.organismeFormation?.departement,
-          source: found.source,
-          ine: found.apprenant?.ine ?? null,
-          contrat: found.contrats ?? null,
-          etablissement: found.organismeFormation?.denomination,
+          departement: found?.organismeFormation?.departement,
+          source: found?.source,
+          ine: found?.apprenant?.ine ?? null,
+          contrat: found?.contrats ?? null,
+          etablissement: found?.organismeFormation?.denomination,
         },
         "✅ OK"
       );

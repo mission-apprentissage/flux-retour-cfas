@@ -1,21 +1,30 @@
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
+import type { StatutApprenant } from "shared/constants";
+import type { IEffectif } from "shared/models/data/effectifs.model";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
 import { it, expect, describe, beforeEach } from "vitest";
 
 import { effectifsDb, effectifsDECADb, missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 import { updateMissionLocaleEffectifCurrentStatus } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc, testDocs } from "@tests/utils/testUtils";
 
 const ML_ID = new ObjectId();
 
 const dayOffset = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 
-function createEffectifDoc(parcours: Array<{ valeur: string; date: Date }>, _id = new ObjectId()) {
+function createEffectifDoc(parcours: Array<{ valeur: StatutApprenant; date: Date }>, _id = new ObjectId()) {
   return { _id, _computed: { statut: { parcours } } };
 }
 
-function createMlEffectifDoc(effectifId: ObjectId, currentStatus: Record<string, unknown> | null = null) {
+function createMlEffectifDoc(
+  effectifId: ObjectId,
+  currentStatus: IMissionLocaleEffectif["current_status"] | null = null
+) {
   return {
     _id: new ObjectId(),
     mission_locale_id: ML_ID,
@@ -33,28 +42,32 @@ describe("updateMissionLocaleEffectifCurrentStatus", () => {
     await getDatabase().command({ collMod: "effectifs", validationLevel: "off" });
     await getDatabase().command({ collMod: "effectifsDECA", validationLevel: "off" });
 
-    await organisationsDb().insertOne({
-      _id: ML_ID,
-      type: "MISSION_LOCALE",
-      ml_id: 609,
-      nom: "MA MISSION LOCALE",
-      created_at: new Date(),
-    } as any);
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        _id: ML_ID,
+        type: "MISSION_LOCALE",
+        ml_id: 609,
+        nom: "MA MISSION LOCALE",
+        created_at: new Date(),
+      })
+    );
   });
 
   it("rafraîchit current_status depuis le parcours de l'effectif", async () => {
     const effectifId = new ObjectId();
     await effectifsDb().insertOne(
-      createEffectifDoc(
-        [
-          { valeur: STATUT_APPRENANT.APPRENTI, date: dayOffset(-200) },
-          { valeur: STATUT_APPRENANT.RUPTURANT, date: dayOffset(-60) },
-          { valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: dayOffset(-5) },
-        ],
-        effectifId
-      ) as any
+      testDoc<IEffectif>(
+        createEffectifDoc(
+          [
+            { valeur: STATUT_APPRENANT.APPRENTI, date: dayOffset(-200) },
+            { valeur: STATUT_APPRENANT.RUPTURANT, date: dayOffset(-60) },
+            { valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: dayOffset(-5) },
+          ],
+          effectifId
+        )
+      )
     );
-    await missionLocaleEffectifsDb().insertOne(createMlEffectifDoc(effectifId) as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(createMlEffectifDoc(effectifId)));
 
     const result = await updateMissionLocaleEffectifCurrentStatus();
 
@@ -67,10 +80,12 @@ describe("updateMissionLocaleEffectifCurrentStatus", () => {
     const effectifId = new ObjectId();
     const dateRupture = dayOffset(-60);
     await effectifsDb().insertOne(
-      createEffectifDoc([{ valeur: STATUT_APPRENANT.RUPTURANT, date: dateRupture }], effectifId) as any
+      testDoc<IEffectif>(createEffectifDoc([{ valeur: STATUT_APPRENANT.RUPTURANT, date: dateRupture }], effectifId))
     );
     await missionLocaleEffectifsDb().insertOne(
-      createMlEffectifDoc(effectifId, { value: STATUT_APPRENANT.RUPTURANT, date: dateRupture }) as any
+      testDoc<IMissionLocaleEffectif>(
+        createMlEffectifDoc(effectifId, { value: STATUT_APPRENANT.RUPTURANT, date: dateRupture })
+      )
     );
 
     const result = await updateMissionLocaleEffectifCurrentStatus();
@@ -83,15 +98,17 @@ describe("updateMissionLocaleEffectifCurrentStatus", () => {
   it("retombe sur la première étape quand le parcours est entièrement à venir", async () => {
     const effectifId = new ObjectId();
     await effectifsDb().insertOne(
-      createEffectifDoc(
-        [
-          { valeur: STATUT_APPRENANT.INSCRIT, date: dayOffset(30) },
-          { valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: dayOffset(400) },
-        ],
-        effectifId
-      ) as any
+      testDoc<IEffectif>(
+        createEffectifDoc(
+          [
+            { valeur: STATUT_APPRENANT.INSCRIT, date: dayOffset(30) },
+            { valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: dayOffset(400) },
+          ],
+          effectifId
+        )
+      )
     );
-    await missionLocaleEffectifsDb().insertOne(createMlEffectifDoc(effectifId) as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(createMlEffectifDoc(effectifId)));
 
     await updateMissionLocaleEffectifCurrentStatus();
 
@@ -102,13 +119,15 @@ describe("updateMissionLocaleEffectifCurrentStatus", () => {
   it("donne la priorité à l'ERP sur DECA pour un même effectif_id", async () => {
     const effectifId = new ObjectId();
     await effectifsDb().insertOne(
-      createEffectifDoc([{ valeur: STATUT_APPRENANT.RUPTURANT, date: dayOffset(-10) }], effectifId) as any
+      testDoc<IEffectif>(createEffectifDoc([{ valeur: STATUT_APPRENANT.RUPTURANT, date: dayOffset(-10) }], effectifId))
     );
     await effectifsDECADb().insertOne(
-      createEffectifDoc([{ valeur: STATUT_APPRENANT.ABANDON, date: dayOffset(-5) }], effectifId) as any
+      testDoc<IEffectifDECA>(createEffectifDoc([{ valeur: STATUT_APPRENANT.ABANDON, date: dayOffset(-5) }], effectifId))
     );
     await missionLocaleEffectifsDb().insertOne(
-      createMlEffectifDoc(effectifId, { value: STATUT_APPRENANT.APPRENTI, date: dayOffset(-90) }) as any
+      testDoc<IMissionLocaleEffectif>(
+        createMlEffectifDoc(effectifId, { value: STATUT_APPRENANT.APPRENTI, date: dayOffset(-90) })
+      )
     );
 
     await updateMissionLocaleEffectifCurrentStatus();
@@ -125,8 +144,8 @@ describe("updateMissionLocaleEffectifCurrentStatus", () => {
         ml: createMlEffectifDoc(effectifId),
       };
     });
-    await effectifsDb().insertMany(docs.map((d) => d.effectif) as any[]);
-    await missionLocaleEffectifsDb().insertMany(docs.map((d) => d.ml) as any[]);
+    await effectifsDb().insertMany(testDocs<IEffectif>(docs.map((d) => d.effectif)));
+    await missionLocaleEffectifsDb().insertMany(testDocs<IMissionLocaleEffectif>(docs.map((d) => d.ml)));
 
     const result = await updateMissionLocaleEffectifCurrentStatus();
 

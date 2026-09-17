@@ -9,6 +9,7 @@ import {
   maskPhone,
   extractUserResponseText,
 } from "@/common/services/brevo/whatsapp";
+import { getErrorMessage } from "@/common/utils/errorUtils";
 import config from "@/config";
 
 const zConversationMessage = z.object({
@@ -158,9 +159,9 @@ export default () => {
 
       logger.debug({ eventName }, "Unhandled WhatsApp webhook event");
       return res.json({ success: true });
-    } catch (error: any) {
+    } catch (error) {
       logger.error(
-        { error: error.message, eventName: req.body?.eventName || req.body?.event },
+        { error: getErrorMessage(error), eventName: req.body?.eventName || req.body?.event },
         "Error processing WhatsApp webhook"
       );
       captureException(error);

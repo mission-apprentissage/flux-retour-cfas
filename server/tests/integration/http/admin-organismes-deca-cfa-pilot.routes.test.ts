@@ -1,6 +1,8 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
+import type { IEffectif } from "shared/models/data/effectifs.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -8,7 +10,7 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { effectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 import { useMongo } from "@tests/jest/setupMongo";
-import { RequestAsOrganisationFunc, expectUnauthorizedError, initTestApp } from "@tests/utils/testUtils";
+import { RequestAsOrganisationFunc, expectUnauthorizedError, initTestApp, testDoc } from "@tests/utils/testUtils";
 
 useMongo();
 
@@ -42,19 +44,22 @@ async function seedEligibleOrganisme(siret: string, uai: string): Promise<Object
     { bypassDocumentValidation: true }
   );
   await organisationsDb().insertOne(
-    {
+    testDoc<IOrganisation>({
       _id: new ObjectId(),
       type: "ORGANISME_FORMATION",
       siret,
       uai,
       organisme_id: id.toHexString(),
       created_at: new Date(),
-    } as any,
+    }),
     { bypassDocumentValidation: true }
   );
-  await effectifsDb().insertOne({ _id: new ObjectId(), organisme_id: id, annee_scolaire: currentAnnee } as any, {
-    bypassDocumentValidation: true,
-  });
+  await effectifsDb().insertOne(
+    testDoc<IEffectif>({ _id: new ObjectId(), organisme_id: id, annee_scolaire: currentAnnee }),
+    {
+      bypassDocumentValidation: true,
+    }
+  );
   return id;
 }
 

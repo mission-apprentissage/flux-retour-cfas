@@ -11,6 +11,7 @@ import { EffectifPersonalInfo } from "@/app/_components/france-travail/effectif/
 import { FTEffectifPageHeader } from "@/app/_components/france-travail/FTEffectifPageHeader";
 import { FTEffectifParcours } from "@/app/_components/france-travail/FTEffectifParcours";
 import { useEffectifDetail, useArborescence } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
+import type { FranceTravailSituation } from "@/app/_components/france-travail/types";
 import {
   getDureeBadgeProps,
   calculateJoursSansContrat,
@@ -73,7 +74,10 @@ export default function EffectifTraiteDetailClient() {
     const entry = getFirstNonNullFtData(effectif.ft_data);
     if (!entry) return null;
 
-    const [codeSecteur, data] = entry;
+    const [codeSecteur, data] = entry as [
+      string,
+      { created_at?: string; situation?: FranceTravailSituation; commentaire?: string } | null,
+    ];
     const secteurLibelle = getSecteurLibelle(codeSecteur, arborescenceData.a_traiter.secteurs);
 
     return {

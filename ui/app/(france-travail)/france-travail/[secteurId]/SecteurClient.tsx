@@ -1,6 +1,5 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -37,7 +36,8 @@ export default function SecteurClient() {
   const secteurLabel = secteurExists?.libelle_secteur;
 
   const departementsOptions = useMemo(() => {
-    const codeRegion = user?.organisation?.code_region;
+    const organisation = user?.organisation;
+    const codeRegion = organisation && "code_region" in organisation ? organisation.code_region : undefined;
     if (!codeRegion) return [];
     const depts = getDepartementsByRegion(codeRegion);
     return depts;
@@ -108,7 +108,7 @@ export default function SecteurClient() {
 
   if (arborescenceData && !arboLoading && !secteurExists) {
     return (
-      <div style={{ ...fr.spacing("padding", { topBottom: "4v" }) }}>
+      <div className="fr-py-4v">
         <Alert severity="error" title="Secteur introuvable" description="Le secteur d'activité demandé n'existe pas." />
       </div>
     );
@@ -137,7 +137,7 @@ export default function SecteurClient() {
 
   if (error) {
     return (
-      <div style={{ ...fr.spacing("padding", { topBottom: "4v" }) }}>
+      <div className="fr-py-4v">
         <Alert
           severity="error"
           title="Erreur de chargement"

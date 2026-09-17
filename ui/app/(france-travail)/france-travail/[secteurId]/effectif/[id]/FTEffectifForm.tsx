@@ -208,7 +208,7 @@ function renderButtonContent({
   if (isSaving) {
     return (
       <>
-        <Spinner size="1rem" color="currentColor" style={{ marginRight: "0.5rem" }} />
+        <Spinner size="1rem" color="currentColor" className="fr-mr-1w" />
         En cours...
       </>
     );
@@ -216,7 +216,7 @@ function renderButtonContent({
   if (hasSuccess) {
     return (
       <>
-        <i className="fr-icon-check-line" style={{ marginRight: "0.5rem" }} />
+        <i className="fr-icon-check-line fr-mr-1w" />
         Enregistré
       </>
     );

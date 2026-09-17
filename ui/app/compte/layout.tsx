@@ -1,5 +1,7 @@
 import dynamic from "next/dynamic";
 
+import styles from "@/app/_components/layouts/pageContainer.module.css";
+
 import { ConnectedHeader } from "../_components/ConnectedHeader";
 import { UserContextProvider } from "../_components/context/UserContext";
 import { Footer } from "../_components/Footer";
@@ -15,14 +17,7 @@ export default async function CompteLayout({ children }: { children: JSX.Element
     <Providers>
       <UserContextProvider user={user}>
         <ConnectedHeader />
-        <div
-          style={{
-            flex: 1,
-            background: "var(--background-default-grey)",
-          }}
-        >
-          {children}
-        </div>
+        <div className={styles.growGrey}>{children}</div>
         <Footer />
         <CrispChatNoSSR />
       </UserContextProvider>

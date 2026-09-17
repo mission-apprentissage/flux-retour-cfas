@@ -4,7 +4,6 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import config from "../../../config";
 import getApiClient from "../../apis/client";
-import logger from "../../logger";
 
 export interface EffectifScoreInput {
   "apprenant.date_de_naissance": string;
@@ -37,25 +36,6 @@ function getClient(): AxiosCacheInstance {
 export async function scoreEffectifs(data: EffectifScoreInput[]): Promise<ScoreResult> {
   const response = await getClient().post("/model/score", { data }, { cache: false });
   return response.data;
-}
-
-export async function getClassifierVersion(): Promise<string | null> {
-  try {
-    const response = await getClient().get("/model/version", { cache: false });
-    return response.data.model;
-  } catch (error) {
-    logger.error("Failed to get classifier version", error);
-    return null;
-  }
-}
-
-export async function checkClassifierHealth(): Promise<boolean> {
-  try {
-    const response = await getClient().get("/");
-    return response.status === 200;
-  } catch {
-    return false;
-  }
 }
 
 export function extractScoreInput(effectif: IEffectif | IEffectifDECA): EffectifScoreInput | null {

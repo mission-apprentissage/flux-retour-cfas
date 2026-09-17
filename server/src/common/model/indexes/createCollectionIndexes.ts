@@ -1,8 +1,14 @@
 import { captureException } from "@sentry/node";
+import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 import { getDbCollection } from "@/common/mongodb";
 
-export const createCollectionIndexes = async (collectionDescriptor) => {
+interface CollectionDescriptor {
+  collectionName: string;
+  indexes: [IndexSpecification, CreateIndexesOptions][];
+}
+
+export const createCollectionIndexes = async (collectionDescriptor?: CollectionDescriptor) => {
   if (!collectionDescriptor) {
     return;
   }

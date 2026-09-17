@@ -43,13 +43,7 @@ export function NationalLabel({ isActive, collapsed }: MenuLabelProps) {
 export function MissionLocaleLabel({ isActive, collapsed }: MenuLabelProps) {
   return (
     <>
-      <i
-        className={`ri-school-fill ${styles.menuIcon}`}
-        style={{
-          fontSize: "22px",
-          color: isActive ? "#000091" : "#CECECE",
-        }}
-      />
+      <i className={`ri-school-fill ${styles.menuIcon} ${styles.mlIcon} ${isActive ? styles.mlIconActive : ""}`} />
       {!collapsed && "Par Mission Locale"}
     </>
   );
@@ -62,13 +56,7 @@ interface RegionsLabelProps extends MenuLabelProps {
 export function RegionsLabel({ isActive, collapsed, regionCodes }: RegionsLabelProps) {
   return (
     <>
-      <div
-        className={styles.regionsIcon}
-        style={{
-          filter: isActive ? "none" : "grayscale(100%)",
-          opacity: isActive ? 1 : 0.6,
-        }}
-      >
+      <div className={`${styles.regionsIcon} ${isActive ? "" : styles.regionsIconInactive}`}>
         <FranceMapSVG regionsActives={regionCodes} />
       </div>
       {!collapsed && (regionCodes.length === 1 ? "Ma région" : "Mes régions")}

@@ -1,5 +1,7 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { vi, it, expect, describe, beforeEach } from "vitest";
 
@@ -14,7 +16,7 @@ import { sendEmail } from "@/common/services/mailer/mailer";
 import { createActivationToken } from "@/common/utils/jwtUtils";
 import { setTime } from "@/common/utils/timeUtils";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id, initTestApp, testPasswordHash } from "@tests/utils/testUtils";
+import { id, initTestApp, testDoc, testPasswordHash } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/mailer/mailer");
 
@@ -102,30 +104,30 @@ describe("Inscription CFA (onboarding)", () => {
     it("retourne les infos d'onboarding pour un token valide", async () => {
       await seedCfaOrganisation({ organisationId, organismeId });
       await organisationsDb().insertMany([
-        {
+        testDoc<IOrganisation>({
           _id: new ObjectId(id(10)),
           created_at: new Date(now),
           type: "MISSION_LOCALE",
           nom: "du Libournais",
           ml_id: 1001,
           adresse: { departement: "33", code_postal: "33500", commune: "Arveyres" },
-        } as any,
-        {
+        }),
+        testDoc<IOrganisation>({
           _id: new ObjectId(id(11)),
           created_at: new Date(now),
           type: "MISSION_LOCALE",
           nom: "Bordeaux Avenir Jeune",
           ml_id: 1002,
           adresse: { departement: "33", code_postal: "33000", commune: "Bordeaux" },
-        } as any,
-        {
+        }),
+        testDoc<IOrganisation>({
           _id: new ObjectId(id(12)),
           created_at: new Date(now),
           type: "MISSION_LOCALE",
           nom: "Paris Centre",
           ml_id: 1003,
           adresse: { departement: "75", code_postal: "75001", commune: "Paris" },
-        } as any,
+        }),
       ]);
       await seedInvitation({ token: "valid-token-12345", organisationId, role: "admin" });
 
@@ -163,13 +165,15 @@ describe("Inscription CFA (onboarding)", () => {
 
     it("retourne 400 si l'invitation ne concerne pas un CFA", async () => {
       const mlOrgId = new ObjectId(id(3));
-      await organisationsDb().insertOne({
-        _id: mlOrgId,
-        created_at: new Date(now),
-        type: "MISSION_LOCALE",
-        nom: "ML Test",
-        ml_id: 2001,
-      } as any);
+      await organisationsDb().insertOne(
+        testDoc<IOrganisation>({
+          _id: mlOrgId,
+          created_at: new Date(now),
+          type: "MISSION_LOCALE",
+          nom: "ML Test",
+          ml_id: 2001,
+        })
+      );
       await seedInvitation({ token: "ml-token-12345", organisationId: mlOrgId });
 
       const response = await httpClient.get("/api/v1/onboarding/cfa-info?token=ml-token-12345");
@@ -263,16 +267,18 @@ describe("Inscription CFA (onboarding)", () => {
 
     it("retourne 409 et préserve l'invitation si l'email existe déjà", async () => {
       await seedInvitation({ token: "conflict-token-12345", organisationId, role: "admin" });
-      await usersMigrationDb().insertOne({
-        _id: new ObjectId(),
-        account_status: "CONFIRMED",
-        created_at: new Date(now),
-        email: "test-cfa-user@tdb.local",
-        nom: "Existing",
-        prenom: "User",
-        password: testPasswordHash,
-        organisation_id: new ObjectId(id(99)),
-      } as any);
+      await usersMigrationDb().insertOne(
+        testDoc<IUsersMigration>({
+          _id: new ObjectId(),
+          account_status: "CONFIRMED",
+          created_at: new Date(now),
+          email: "test-cfa-user@tdb.local",
+          nom: "Existing",
+          prenom: "User",
+          password: testPasswordHash,
+          organisation_id: new ObjectId(id(99)),
+        })
+      );
 
       const response = await httpClient.post("/api/v1/auth/register-cfa", {
         token: "conflict-token-12345",
@@ -344,20 +350,22 @@ describe("Inscription CFA (onboarding)", () => {
 
     async function seedCfaUser({ role }: { role?: "admin" | "member" }) {
       await seedCfaOrganisation({ organisationId, organismeId });
-      await usersMigrationDb().insertOne({
-        _id: userId,
-        account_status: "PENDING_EMAIL_VALIDATION",
-        created_at: new Date(now),
-        email: "test-cfa-user@tdb.local",
-        nom: "TestNom",
-        prenom: "TestPrenom",
-        password: testPasswordHash,
-        password_updated_at: new Date(now),
-        connection_history: [],
-        emails: [],
-        organisation_id: organisationId,
-        ...(role ? { organisation_role: role } : {}),
-      } as any);
+      await usersMigrationDb().insertOne(
+        testDoc<IUsersMigration>({
+          _id: userId,
+          account_status: "PENDING_EMAIL_VALIDATION",
+          created_at: new Date(now),
+          email: "test-cfa-user@tdb.local",
+          nom: "TestNom",
+          prenom: "TestPrenom",
+          password: testPasswordHash,
+          password_updated_at: new Date(now),
+          connection_history: [],
+          emails: [],
+          organisation_id: organisationId,
+          ...(role ? { organisation_role: role } : {}),
+        })
+      );
     }
 
     it("passe un CFA avec organisation_role en CONFIRMED et envoie l'email de bienvenue", async () => {

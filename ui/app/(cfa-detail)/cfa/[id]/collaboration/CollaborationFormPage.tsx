@@ -1,15 +1,18 @@
 "use client";
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { Skeleton } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IEffectifMissionLocale } from "shared";
 
-import { CollaborationForm } from "@/app/_components/ruptures/cfa/collaboration/CollaborationForm";
+import { Skeleton } from "@/app/_components/common/Skeleton";
 import styles from "@/app/_components/ruptures/cfa/collaboration/CollaborationForm.module.css";
 import { useCfaEffectifDetail } from "@/app/_components/ruptures/cfa/collaboration/hooks";
+import { CollaborationTunnel } from "@/app/_components/ruptures/cfa/collaboration/tunnel/CollaborationTunnel";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { dePrenom } from "@/app/_utils/ruptures.utils";
+
+import pageStyles from "./CollaborationFormPage.module.css";
 
 export default function CollaborationFormPage({ id }: { id: string }) {
   const { data, isLoading } = useCfaEffectifDetail(id);
@@ -28,8 +31,7 @@ export default function CollaborationFormPage({ id }: { id: string }) {
 
   const effectif = data?.effectif;
   const alreadySent = effectif?.organisme_data?.acc_conjoint === true;
-  const noRupture = effectif && !effectif.date_rupture;
-  const shouldRedirect = !isLoading && !showModal && effectif && (alreadySent || noRupture);
+  const shouldRedirect = !isLoading && !showModal && effectif && alreadySent;
 
   useEffect(() => {
     if (shouldRedirect) {
@@ -39,8 +41,8 @@ export default function CollaborationFormPage({ id }: { id: string }) {
 
   if (isLoading || !data || shouldRedirect) {
     return (
-      <div style={{ padding: "2rem", maxWidth: "78rem", margin: "0 auto" }}>
-        <Skeleton variant="rectangular" height={400} />
+      <div className={pageStyles.page}>
+        <Skeleton height={400} />
       </div>
     );
   }
@@ -53,9 +55,9 @@ export default function CollaborationFormPage({ id }: { id: string }) {
   return (
     <>
       {effectif ? (
-        <CollaborationForm effectif={effectif} onSuccess={handleSuccess} onCancel={() => router.back()} />
+        <CollaborationTunnel effectif={effectif} onSuccess={handleSuccess} onCancel={() => router.back()} />
       ) : (
-        <div style={{ padding: "2rem", maxWidth: "78rem", margin: "0 auto" }}>
+        <div className={pageStyles.page}>
           <p>Effectif introuvable.</p>
         </div>
       )}
@@ -64,18 +66,11 @@ export default function CollaborationFormPage({ id }: { id: string }) {
         <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-labelledby="modal-success-title">
           <div className={styles.modalCard}>
             <div className={styles.modalCheckIcon}>
-              <span
-                className="fr-icon-checkbox-circle-line"
-                aria-hidden="true"
-                style={{ fontSize: "40px", color: "var(--text-action-high-blue-france)" }}
-              />
+              <span className={`fr-icon-checkbox-circle-line ${pageStyles.iconeSucces}`} aria-hidden="true" />
             </div>
             <p id="modal-success-title" className={styles.modalText}>
-              Le dossier de{" "}
-              <span className={styles.modalHighlight}>
-                {prenom} {nom}
-              </span>{" "}
-              a bien été envoyé à la{" "}
+              Le dossier <span className={styles.modalHighlight}>{dePrenom(`${prenom} ${nom}`)}</span> a bien été envoyé
+              à la{" "}
               <span className={styles.modalHighlight}>{mlName ? `Mission Locale ${mlName}` : "Mission Locale"}</span>
             </p>
             <div className={styles.modalActions}>

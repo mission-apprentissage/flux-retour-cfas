@@ -42,6 +42,7 @@ export function PeriodSelector({
           value,
           onChange: (e) => onChange(e.target.value as StatsPeriod),
           className,
+          ...(hideLabel ? { "aria-label": "Période" } : {}),
         }}
       />
     </div>

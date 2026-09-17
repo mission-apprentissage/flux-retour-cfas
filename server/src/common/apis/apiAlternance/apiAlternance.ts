@@ -5,9 +5,15 @@ import Boom from "boom";
 import type { CfdInfo, RncpInfo } from "shared/models/apis/@types/ApiAlternance";
 
 import logger from "@/common/logger";
+import { getErrorMessage } from "@/common/utils/errorUtils";
 import config from "@/config";
 
 import { apiAlternanceClient } from "./client";
+
+const describeApiError = (error: unknown) => {
+  const { response } = error as { response?: { data?: unknown } };
+  return response?.data || getErrorMessage(error);
+};
 
 export const getCfdInfo = async (cfd: string): Promise<CfdInfo | null> => {
   try {
@@ -47,11 +53,8 @@ export const getCfdInfo = async (cfd: string): Promise<CfdInfo | null> => {
     }
 
     return data;
-  } catch (error: any) {
-    logger.error(
-      `getCfdInfo: something went wrong while requesting CFD "${cfd}"`,
-      error.response?.data || error.message
-    );
+  } catch (error) {
+    logger.error(`getCfdInfo: something went wrong while requesting CFD "${cfd}"`, describeApiError(error));
     captureException(new Error(`getCfdInfo: something went wrong while requesting CFD "${cfd}"`, { cause: error }));
     return null;
   }
@@ -78,11 +81,8 @@ export const getRncpInfo = async (rncp: string): Promise<RncpInfo | null> => {
     };
 
     return data;
-  } catch (error: any) {
-    logger.error(
-      `getRncpInfo: something went wrong while requesting RNCP "${rncp}"`,
-      error.response?.data || error.message
-    );
+  } catch (error) {
+    logger.error(`getRncpInfo: something went wrong while requesting RNCP "${rncp}"`, describeApiError(error));
     captureException(new Error(`getRncpInfo: something went wrong while requesting RNCP "${rncp}"`, { cause: error }));
     return null;
   }
@@ -155,7 +155,7 @@ export const getMissionsLocales = async (): Promise<IMissionLocale[] | null> => 
   try {
     const result = await apiAlternanceClient.geographie.listMissionLocales({});
     return result;
-  } catch (error: any) {
+  } catch (error) {
     captureException(new Error(`getMissionsLocales: something went wrong while requesting ML `, { cause: error }));
     return null;
   }

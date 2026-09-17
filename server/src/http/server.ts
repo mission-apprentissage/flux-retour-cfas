@@ -1,26 +1,16 @@
-// catch all unhandled promise rejections and call the error middleware
-import "express-async-errors";
-
 import fs from "fs";
+import type { IncomingMessage } from "node:http";
 
 import * as Sentry from "@sentry/node";
 import { zUai } from "api-alternance-sdk/internal";
-import bodyParser from "body-parser";
 import Boom from "boom";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application } from "express";
-import Joi from "joi";
 import { ObjectId } from "mongodb";
 import passport from "passport";
 import { RateLimiterMemory } from "rate-limiter-flexible";
-import {
-  CODE_POSTAL_REGEX,
-  SOURCE_APPRENANT,
-  typesEffectifNominatif,
-  typesOrganismesIndicateurs,
-  zEffectifArchive,
-} from "shared";
+import { CODE_POSTAL_REGEX, SOURCE_APPRENANT, zEffectifArchive } from "shared";
 import {
   computeWarningsForDossierApprenantSchemaV3,
   dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret,
@@ -43,26 +33,9 @@ import {
   deleteOldestDuplicates,
   getDuplicatesEffectifsForOrganismeIdWithPagination,
 } from "@/common/actions/effectifs.duplicates.actions";
-import {
-  dateFiltersSchema,
-  effectifsFiltersTerritoireSchema,
-  fullEffectifsFiltersSchema,
-} from "@/common/actions/helpers/filters";
-import { getIndicateursNational } from "@/common/actions/indicateurs/indicateurs-national.actions";
-import {
-  getEffectifsNominatifsWithoutId,
-  getIndicateursEffectifsParDepartement,
-  getIndicateursEffectifsParOrganisme,
-  getOrganismeIndicateursEffectifs,
-  getOrganismeIndicateursEffectifsParFormation,
-} from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
-import {
-  getIndicateursForRelatedOrganismes,
-  getIndicateursOrganismesParDepartement,
-  getOrganismeIndicateursOrganismes,
-} from "@/common/actions/indicateurs/indicateurs.actions";
+import { effectifsFiltersTerritoireSchema } from "@/common/actions/helpers/filters";
+import { getOrganismeIndicateursEffectifs } from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
-import { findMaintenanceMessages } from "@/common/actions/maintenances.actions";
 import {
   cancelInvitation,
   createOrganisation,
@@ -86,7 +59,6 @@ import {
   generateApiKeyForOrg,
   getInvalidSiretsFromDossierApprenant,
   getInvalidUaisFromDossierApprenant,
-  getOrganisationIndicateursForRelatedOrganismes,
   getOrganisationIndicateursOrganismes,
   getOrganismeByAPIKey,
   getOrganismeById,
@@ -95,6 +67,7 @@ import {
   getStatOrganismes,
   listContactsOrganisme,
   listOrganisationOrganismes,
+  listOrganisationOrganismesPaginated,
   listOrganismesFormateurs,
   resetConfigurationERP,
   verifyOrganismeAPIKeyToUser,
@@ -112,7 +85,6 @@ import {
   parseSuiviQuery,
   zSipaLoginBody,
 } from "@/common/actions/sipa.actions";
-import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import {
   changePassword,
   getUserByEmail,
@@ -129,19 +101,23 @@ import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import stripNullProperties from "@/common/utils/stripNullProperties";
-import { passwordSchema, validateFullObjectSchema, validateFullZodObjectSchema } from "@/common/utils/validationUtils";
+import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
 import objectIdSchema from "@/common/validation/objectIdSchema";
+import { ADMIN_PASSWORD_MIN_LENGTH, zPassword } from "@/common/validation/passwordSchema";
 import { registrationCfaSchema } from "@/common/validation/registrationCfaSchema";
-import { registrationSchema, registrationUnknownNetworkSchema } from "@/common/validation/registrationSchema";
+import {
+  registrationSchema,
+  registrationUnknownNetworkSchema,
+  zRegistration,
+} from "@/common/validation/registrationSchema";
 import userProfileSchema from "@/common/validation/userProfileSchema";
 import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import {
-  requireIndicateursOrganismesAccess,
   requireAdministrator,
   requireCfaAdminIfCfa,
   requireEffectifOrganismePermission,
@@ -150,6 +126,7 @@ import {
   returnResult,
   requireFranceTravail,
   requireIndicateursMlAccess,
+  OrganismeLocals,
 } from "./middlewares/helpers";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import { proxyIpVerification } from "./middlewares/proxyIpVerification";
@@ -182,14 +159,12 @@ import collaborationsAdmin from "./routes/admin.routes/collaborations.routes";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
 import invitationsAdmin from "./routes/admin.routes/invitations.routes";
-import maintenancesAdmin from "./routes/admin.routes/maintenances.routes";
 import missionLocaleRoutesAdmin from "./routes/admin.routes/mission-locale.routes";
 import opcosRoutesAdmin from "./routes/admin.routes/opcos.routes";
 import organismesAdmin from "./routes/admin.routes/organismes.routes";
 import reseauxAdmin from "./routes/admin.routes/reseaux.routes";
 import transmissionRoutesAdmin from "./routes/admin.routes/transmissions.routes";
 import usersAdmin from "./routes/admin.routes/users.routes";
-import campagneRouter from "./routes/campagne.routes/campagne.routes";
 import emails from "./routes/emails.routes";
 import connexionInfoRouter from "./routes/onboarding.routes/connexion-info.route";
 import franceTravailAuthentRoutes from "./routes/organisations.routes/france-travail/france-travail.routes";
@@ -249,6 +224,10 @@ async function sipaSuiviRateLimitMiddleware(req: express.Request, res: express.R
 export default async function createServer(): Promise<Application> {
   const app = express();
 
+  // Express 5 : le parseur de query par défaut est passé de "extended" à "simple".
+  // On force "extended" (qs) car l'UI envoie des paramètres tableau en bracket-notation
+  // (ex. téléchargements mission-locale), qui doivent se parser en tableaux côté serveur.
+  app.set("query parser", "extended");
   app.set("trust proxy", config.trustProxy);
 
   // Configure Sentry
@@ -279,9 +258,9 @@ export default async function createServer(): Promise<Application> {
   }
 
   app.use(
-    bodyParser.json({
+    express.json({
       limit: config.bodyParserLimit,
-      verify: (req: any, _res, buf) => {
+      verify: (req: IncomingMessage & { rawBody?: Buffer }, _res, buf) => {
         // Conserver le body brut pour la vérification HMAC des webhooks
         req.rawBody = buf;
       },
@@ -357,8 +336,8 @@ function setupRoutes(app: Application) {
       "/api/v1/organismes/search-by-uai",
       publicLimiter,
       returnResult(async (req) => {
-        const { uai } = await validateFullObjectSchema(req.body, {
-          uai: Joi.string().required().uppercase(),
+        const { uai } = await validateFullZodObjectSchema(req.body, {
+          uai: z.string().transform((value) => value.toUpperCase()),
         });
         return await findOrganismesByUAI(uai);
       })
@@ -441,7 +420,7 @@ function setupRoutes(app: Application) {
       "/api/v1/auth/register",
       registerLimiter,
       returnResult(async (req) => {
-        const registration = await validateFullZodObjectSchema(req.body, registrationSchema);
+        const registration = await zRegistration.parseAsync(req.body);
         registration.user.email = registration.user.email.toLowerCase();
         return await register(registration);
       })
@@ -518,40 +497,25 @@ function setupRoutes(app: Application) {
       checkPasswordToken(),
       returnResult(async (req) => {
         // TODO ISSUE! DO NOT DISPLAY PASSWORD IN SERVER LOG
-        const { password } = await validateFullObjectSchema(req.body, {
-          passwordToken: Joi.string().required(),
-          password: passwordSchema(req.user.organisation.type === "ADMINISTRATEUR").required(),
+        const { password } = await validateFullZodObjectSchema(req.body, {
+          passwordToken: z.string(),
+          password: zPassword(req.user.organisation.type === "ADMINISTRATEUR" ? ADMIN_PASSWORD_MIN_LENGTH : undefined),
         });
         await changePassword(req.user, password);
-      })
-    )
-    .get(
-      "/api/v1/maintenanceMessages",
-      publicLimiter,
-      returnResult(async () => {
-        return await findMaintenanceMessages();
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/national",
-      publicDashboardLimiter,
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersTerritoireSchema);
-        return await getIndicateursNational(filters);
       })
     )
     .get(
       "/api/v1/invitations/:token",
       publicLimiter,
       returnResult(async (req) => {
-        return await getInvitationByToken(req.params.token);
+        return await getInvitationByToken(req.params.token as string);
       })
     )
     .post(
       "/api/v1/invitations/:token/reject",
       publicLimiter,
       returnResult(async (req) => {
-        await rejectInvitation(req.params.token);
+        await rejectInvitation(req.params.token as string);
       })
     )
     .use("/api/v1/reseaux", publicDashboardLimiter, getAllReseauxRoutes())
@@ -566,10 +530,10 @@ function setupRoutes(app: Application) {
       try {
         const organisme = await getOrganismeByAPIKey(res.locals.token, req.query);
 
-        (req.user as any) = {
+        req.user = {
           source: SOURCE_APPRENANT.ERP,
           source_organisme_id: organisme._id.toString(),
-        };
+        } as unknown as AuthContext;
 
         void clearIngestionAuthCounter(req.ip);
 
@@ -638,105 +602,47 @@ function setupRoutes(app: Application) {
     "/api/v1/organismes/:id",
     validateRequestMiddleware({ params: objectIdSchema("id") }),
     (req, res, next) => {
-      res.locals.organismeId = new ObjectId((req.params as any).id);
+      res.locals.organismeId = new ObjectId(req.params.id);
       next();
-    },
+    }
+  );
+  authRouter.use(
+    "/api/v1/organismes/:id",
     express
       .Router()
       .get(
         "",
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           return await getOrganismeDetails(req.user, res.locals.organismeId);
         })
       )
       .get(
         "/indicateurs/effectifs",
         requireOrganismePermission("indicateursEffectifs"),
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           const filters = await validateFullZodObjectSchema(req.query, effectifsFiltersTerritoireSchema);
           return await getOrganismeIndicateursEffectifs(req.user, res.locals.organismeId, filters);
         })
       )
       .get(
-        "/indicateurs/effectifs/par-organisme",
-        requireOrganismePermission("indicateursEffectifs"),
-        returnResult(async (req, res) => {
-          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-          return await getIndicateursEffectifsParOrganisme(req.user, filters, res.locals.organismeId);
-        })
-      )
-      .get(
-        "/indicateurs/effectifs/par-formation",
-        requireOrganismePermission("indicateursEffectifs"),
-        returnResult(async (req, res) => {
-          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-          return await getOrganismeIndicateursEffectifsParFormation(req.user, res.locals.organismeId, filters);
-        })
-      )
-      .get(
-        "/indicateurs/effectifs/:type",
-        requireOrganismePermission("effectifsNominatifs"),
-        returnResult(async (req, res) => {
-          const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-          const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
-          const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(
-            req.user,
-            filters,
-            type,
-            res.locals.organismeId
-          );
-          await createTelechargementListeNomLog(
-            type,
-            ids.map((id) => id.toString()),
-            new Date(),
-            req.user._id,
-            res.locals.organismeId
-          );
-          return effectifsWithoutIds;
-        })
-      )
-      .get(
-        "/indicateurs/organismes",
-        requireIndicateursOrganismesAccess,
-        returnResult(async (req, res) => {
-          return await getOrganismeIndicateursOrganismes(res.locals.organismeId);
-        })
-      )
-      .get(
-        "/indicateurs/organismes/:type",
-        requireIndicateursOrganismesAccess,
-        returnResult(async (req, res) => {
-          const indicateurs = await getIndicateursForRelatedOrganismes(res.locals.organismeId, req.params.type);
-          const type = await z.enum(typesOrganismesIndicateurs).parseAsync(req.params.type);
-          await createTelechargementListeNomLog(
-            `organismes_${type}`,
-            indicateurs.map(({ _id }) => (_id ? _id.toString() : "")),
-            new Date(),
-            req.user._id,
-            res.locals.organismeId
-          );
-          return indicateurs;
-        })
-      )
-      .get(
         "/contacts",
         requireOrganismePermission("viewContacts"),
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           return await listContactsOrganisme(res.locals.organismeId);
         })
       )
       .get(
         "/organismes",
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           return await listOrganismesFormateurs(req.user, res.locals.organismeId);
         })
       )
       .get(
         "/duplicates",
         requireOrganismePermission("manageEffectifs"),
-        returnResult(async (req, res) => {
-          const page = parseInt(req.query.page, 10) || 1;
-          const limit = parseInt(req.query.limit, 10) || 5;
+        returnResult<OrganismeLocals>(async (req, res) => {
+          const page = parseInt(String(req.query.page), 10) || 1;
+          const limit = parseInt(String(req.query.limit), 10) || 5;
 
           let duplicates = await getDuplicatesEffectifsForOrganismeIdWithPagination(
             res.locals.organismeId,
@@ -750,14 +656,14 @@ function setupRoutes(app: Application) {
       .delete(
         "/duplicates",
         requireOrganismePermission("manageEffectifs"),
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           await deleteOldestDuplicates(res.locals.organismeId);
         })
       )
       .put(
         "/configure-erp",
         requireOrganismePermission("configurerModeTransmission"),
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           const conf = await validateFullZodObjectSchema(req.body, configurationERPSchema);
           await configureOrganismeERP(req.user, res.locals.organismeId, conf);
         })
@@ -765,14 +671,14 @@ function setupRoutes(app: Application) {
       .delete(
         "/configure-erp",
         requireOrganismePermission("configurerModeTransmission"),
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           await resetConfigurationERP(res.locals.organismeId);
         })
       )
       .post(
         "/verify-user",
         requireOrganismePermission("configurerModeTransmission"),
-        returnResult(async (req, res) => {
+        returnResult<OrganismeLocals>(async (req, res) => {
           // POST /api/v1/organismes/:id/verify-user { siret=XXXXX, uai=YYYYY, erp=ZZZZ , api_key=TTTTT }
           const verif = await validateFullZodObjectSchema(req.body, SReqPostVerifyUser);
           await verifyOrganismeAPIKeyToUser(res.locals.organismeId, verif);
@@ -797,7 +703,7 @@ function setupRoutes(app: Application) {
                 .safeParseAsync(
                   Array.isArray(req.body) ? req.body.map((dossier) => stripNullProperties(dossier)) : req.body
                 );
-              const warnings = computeWarningsForDossierApprenantSchemaV3(req.body);
+              const warnings = computeWarningsForDossierApprenantSchemaV3(Array.isArray(req.body) ? req.body : []);
               return { ...data, warnings };
             })
           )
@@ -819,14 +725,14 @@ function setupRoutes(app: Application) {
           .Router()
           .get(
             "/",
-            returnResult(async (req, res) => {
+            returnResult<OrganismeLocals>(async (req, res) => {
               const organisme = await getOrganismeById(res.locals.organismeId);
               return { apiKey: organisme.api_key };
             })
           )
           .post(
             "/",
-            returnResult(async (req, res) => {
+            returnResult<OrganismeLocals>(async (req, res) => {
               const generatedApiKey = await generateApiKeyForOrg(res.locals.organismeId);
               return { apiKey: generatedApiKey };
             })
@@ -838,62 +744,15 @@ function setupRoutes(app: Application) {
       .use("/mission-locale", requireOrganismePermission("manageEffectifs"), missionLocaleOrganismeRoutes())
   );
 
-  /********************************
-   * Indicateurs aggrégés         *
-   ********************************/
-  authRouter
-    .get(
-      "/api/v1/indicateurs/effectifs/par-departement",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
-        return await getIndicateursEffectifsParDepartement(filters, req.user.acl);
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/effectifs/par-organisme",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-        return await getIndicateursEffectifsParOrganisme(req.user, filters);
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/effectifs/:type",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, fullEffectifsFiltersSchema);
-        const type = await z.enum(typesEffectifNominatif).parseAsync(req.params.type);
-        const permissions = req.user.acl.effectifsNominatifs[type];
-        if (permissions === false) {
-          throw Boom.forbidden("Permissions invalides");
-        }
-
-        const { effectifsWithoutIds, ids } = await getEffectifsNominatifsWithoutId(req.user, filters, type);
-        await createTelechargementListeNomLog(
-          type,
-          ids.map((id) => id.toString()),
-          new Date(),
-          req.user._id,
-          undefined,
-          new ObjectId(req.user.organisation_id)
-        );
-        return effectifsWithoutIds;
-      })
-    )
-    .get(
-      "/api/v1/indicateurs/organismes/par-departement",
-      returnResult(async (req) => {
-        const filters = await validateFullZodObjectSchema(req.query, dateFiltersSchema);
-        return await getIndicateursOrganismesParDepartement(filters, req.user.acl);
-      })
-    )
-    .post(
-      "/api/v1/formations/search",
-      returnResult(async (req) => {
-        const { searchTerm } = await validateFullZodObjectSchema(req.body, {
-          searchTerm: z.string().min(3),
-        });
-        return await searchOrganismesFormations(searchTerm);
-      })
-    );
+  authRouter.post(
+    "/api/v1/formations/search",
+    returnResult(async (req) => {
+      const { searchTerm } = await validateFullZodObjectSchema(req.body, {
+        searchTerm: z.string().min(3),
+      });
+      return await searchOrganismesFormations(searchTerm);
+    })
+  );
 
   authRouter.get(
     "/api/v1/rncp/:code_rncp",
@@ -968,7 +827,7 @@ function setupRoutes(app: Application) {
           description: zEffectifArchive.shape.suppression.shape.description,
         });
 
-        await softDeleteEffectif(req.params.id, req.user._id, { motif, description });
+        await softDeleteEffectif(new ObjectId(req.params.id), req.user._id, { motif, description });
       })
     )
     .delete(
@@ -993,24 +852,44 @@ function setupRoutes(app: Application) {
         })
       )
       .get(
-        "/organismes/indicateurs",
+        "/organismes/paginated",
         returnResult(async (req) => {
-          return await getOrganisationIndicateursOrganismes(req.user.acl);
+          const query = await validateFullZodObjectSchema(req.query, {
+            page: z.coerce.number().int().positive().default(1),
+            limit: z.coerce.number().int().positive().max(100).default(20),
+            sort: z.enum(["nom", "nature", "transmission", "formations", "adresse"]).default("nom"),
+            order: z.enum(["asc", "desc"]).default("asc"),
+            search: z.string().optional(),
+            departements: z.string().optional(),
+            regions: z.string().optional(),
+            nature: z.string().optional(),
+            transmission: z.string().optional(),
+            qualiopi: z.string().optional(),
+            ferme: z.string().optional(),
+            etatUAI: z.string().optional(),
+          });
+          const csv = (value?: string) => (value ? value.split(",").filter(Boolean) : undefined);
+          const csvBool = (value?: string) => csv(value)?.map((item) => item === "true");
+          return await listOrganisationOrganismesPaginated(req.user.acl, {
+            page: query.page,
+            limit: query.limit,
+            sort: query.sort,
+            order: query.order,
+            search: query.search,
+            departements: csv(query.departements),
+            regions: csv(query.regions),
+            nature: csv(query.nature),
+            transmission: csv(query.transmission),
+            qualiopi: csvBool(query.qualiopi),
+            ferme: csvBool(query.ferme),
+            etatUAI: csvBool(query.etatUAI),
+          });
         })
       )
       .get(
-        "/organismes/indicateurs/:type",
-        returnResult(async (req, res) => {
-          const indicateurs = await getOrganisationIndicateursForRelatedOrganismes(req.user.acl, req.params.type);
-          const type = await z.enum(typesOrganismesIndicateurs).parseAsync(req.params.type);
-          await createTelechargementListeNomLog(
-            `organismes_${type}`,
-            indicateurs.map(({ _id }) => (_id ? _id.toString() : "")),
-            new Date(),
-            req.user._id,
-            res.locals.organismeId
-          );
-          return indicateurs;
+        "/organismes/indicateurs",
+        returnResult(async (req) => {
+          return await getOrganisationIndicateursOrganismes(req.user.acl);
         })
       )
       .get(
@@ -1028,11 +907,8 @@ function setupRoutes(app: Application) {
       .post(
         "/membres",
         returnResult(async (req) => {
-          await inviteUserToOrganisation(
-            req.user,
-            req.body.email.toLowerCase(),
-            (req.user as AuthContext).organisation_id
-          );
+          const { email } = z.object({ email: z.string() }).parse(req.body);
+          await inviteUserToOrganisation(req.user, email.toLowerCase(), (req.user as AuthContext).organisation_id);
         })
       )
       .post(
@@ -1080,7 +956,7 @@ function setupRoutes(app: Application) {
         requireCfaAdminIfCfa,
         returnResult(async (req) => {
           const { role } = await validateFullZodObjectSchema(req.body, { role: z.enum(["admin", "member"]) });
-          await updateMemberRole(req.user, req.params.userId, role);
+          await updateMemberRole(req.user, req.params.userId as string, role);
         })
       )
       .get(
@@ -1146,7 +1022,6 @@ function setupRoutes(app: Application) {
           return await getStatOrganismes();
         })
       )
-      .use("/maintenanceMessages", maintenancesAdmin())
       .post(
         "/impersonate",
         returnResult(async (req, res) => {
@@ -1189,7 +1064,9 @@ function setupRoutes(app: Application) {
       .post(
         "/fusion-organismes",
         returnResult(async (req) => {
-          const { organismeFiableId, organismeSansUaiId } = req.body;
+          const { organismeFiableId, organismeSansUaiId } = z
+            .object({ organismeFiableId: z.string(), organismeSansUaiId: z.string() })
+            .parse(req.body);
 
           await mergeOrganismeSansUaiDansOrganismeFiable(
             new ObjectId(organismeSansUaiId),
@@ -1199,7 +1076,6 @@ function setupRoutes(app: Application) {
       )
   );
 
-  app.use("/api/v1/campagne", publicDashboardLimiter, campagneRouter());
   app.use("/api/v1/onboarding/connexion-info", publicLimiter, connexionInfoRouter());
   app.use(authRouter);
 }

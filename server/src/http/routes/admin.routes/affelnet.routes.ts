@@ -5,12 +5,12 @@ import express from "express";
 import { ObjectId } from "mongodb";
 import multer from "multer";
 import { getAcademieById } from "shared/constants";
-import { IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelnet.model";
+import { IVoeuAffelnet, IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelnet.model";
 
 import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
-import { returnResult } from "@/http/middlewares/helpers";
+import { returnResult, RouteHandler } from "@/http/middlewares/helpers";
 
 const AFFELNET_HEADER = [
   "academie",
@@ -114,9 +114,9 @@ const parseCsvFile = async (buffer: Buffer) => {
   return records;
 };
 
-const createVoeux = async (req, res) => {
+const createVoeux: RouteHandler = async (req, res) => {
   const file = req.file;
-  if (!req.file) {
+  if (!file) {
     return res.status(400).send("No file uploaded.");
   }
 
@@ -126,7 +126,7 @@ const createVoeux = async (req, res) => {
   await PromisePool.withConcurrency(100)
     .for(parsedCSV)
     .process(async (voeuRaw: IVoeuAffelnetRaw) => {
-      const voeu: any = {
+      const voeu: IVoeuAffelnet = {
         _id: new ObjectId(),
         organisme_formateur_id: null,
         organisme_responsable_id: null,
@@ -201,7 +201,7 @@ const createVoeux = async (req, res) => {
 
       voeu.organisme_formateur_id = orgaFormateur._id;
       voeu.organisme_responsable_id = orgaResponsable._id;
-      voeu.academie_code = getAcademieById(voeuRaw.academie)?.code;
+      voeu.academie_code = voeuRaw.academie ? getAcademieById(voeuRaw.academie)?.code : undefined;
 
       const previous = await voeuxAffelnetDb().findOne({
         "raw.ine": voeuRaw.ine,

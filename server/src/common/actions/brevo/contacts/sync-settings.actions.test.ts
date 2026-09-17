@@ -1,7 +1,9 @@
+import type { IBrevoSyncSettings } from "shared/models";
 import { describe, expect, it } from "vitest";
 
 import { brevoSyncSettingsDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc } from "@tests/utils/testUtils";
 
 import {
   getBrevoSyncSettings,
@@ -39,11 +41,13 @@ describe("sync-settings.actions", () => {
   it("met à jour un seul toggle sans écraser l'autre", async () => {
     // On sème un document avec instantSync déjà actif (insert direct → contourne
     // la garde prod, comme le ferait un toggle activé en production).
-    await brevoSyncSettingsDb().insertOne({
-      key: "brevo-contact-sync",
-      daily_full_sync_enabled: false,
-      instant_sync_enabled: true,
-    } as any);
+    await brevoSyncSettingsDb().insertOne(
+      testDoc<IBrevoSyncSettings>({
+        key: "brevo-contact-sync",
+        daily_full_sync_enabled: false,
+        instant_sync_enabled: true,
+      })
+    );
 
     // On modifie daily : instant doit rester à true.
     const result = await setBrevoSyncSetting("dailyFullSyncEnabled", false, "b@example.com");
@@ -61,12 +65,14 @@ describe("sync-settings.actions", () => {
   });
 
   it("gardes effectives false hors production même si les flags sont true en base (garde 2)", async () => {
-    await brevoSyncSettingsDb().insertOne({
-      key: "brevo-contact-sync",
-      daily_full_sync_enabled: true,
-      instant_sync_enabled: true,
-      events_enabled: true,
-    } as any);
+    await brevoSyncSettingsDb().insertOne(
+      testDoc<IBrevoSyncSettings>({
+        key: "brevo-contact-sync",
+        daily_full_sync_enabled: true,
+        instant_sync_enabled: true,
+        events_enabled: true,
+      })
+    );
 
     expect(await isBrevoDailyFullSyncActive()).toBe(false);
     expect(await isBrevoInstantSyncActive()).toBe(false);

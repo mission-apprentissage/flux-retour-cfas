@@ -16,7 +16,7 @@ export const metadata = PAGES.static.accueilMissionLocale.getMetadata();
 
 export default function AccueilMissionLocalePage() {
   return (
-    <main id="accueil-mission-locale-content" className={landingStyles.mainContainer}>
+    <main className={landingStyles.mainContainer}>
       <HeroSection />
       <SponsorsSection />
       <EtablissementsConnectesSection />

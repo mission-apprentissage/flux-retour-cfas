@@ -1,4 +1,4 @@
-import { Skeleton } from "../ui/Skeleton";
+import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import styles from "./legend.module.css";
 

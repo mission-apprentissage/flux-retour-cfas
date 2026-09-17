@@ -6,6 +6,8 @@ import { _delete } from "@/common/httpClient";
 
 import { useAuth } from "../_context/UserContext";
 
+import styles from "./Impersonate.module.css";
+
 export const Impersonate = () => {
   const { user } = useAuth();
 
@@ -18,11 +20,7 @@ export const Impersonate = () => {
   return (
     <>
       {user && user.impersonating && (
-        <Button
-          iconId="ri-logout-box-line"
-          style={{ backgroundColor: "var(--background-flat-red-marianne)", color: "white" }}
-          onClick={handleImpersonationExit}
-        >
+        <Button iconId="ri-logout-box-line" className={styles.button} onClick={handleImpersonationExit}>
           Imposture en cours
         </Button>
       )}

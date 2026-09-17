@@ -1,7 +1,18 @@
 {
   "extends": ["next", "next/core-web-vitals"],
   "rules": {
-    "react-hooks/exhaustive-deps": 0
+    "react-hooks/exhaustive-deps": 0,
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["@mui/*", "@emotion/*"],
+            "message": "MUI est retiré de ui/ : graphiques via recharts, layout via DSFR + CSS Modules."
+          }
+        ]
+      }
+    ]
   },
   "overrides": [
     {

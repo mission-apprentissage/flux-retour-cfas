@@ -7,5 +7,3 @@ jobs:
   tests:
     if: github.event.pull_request.state == 'open'
     uses: "./.github/workflows/ci.yml"
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

@@ -41,7 +41,7 @@ export default function MissionLocalePage() {
           label="Rechercher une Mission Locale"
           hideLabel
           nativeInputProps={{
-            placeholder: "Rechercher une Mission Locale par nom...",
+            placeholder: "Rechercher une Mission Locale par nom…",
             value: searchInput,
             onChange: (e) => setSearchInput(e.target.value),
             type: "search",

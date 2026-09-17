@@ -44,7 +44,7 @@ export function useTbaContactsExport({ slug, onSuccess, onError }: UseTbaContact
       const ddmmyy = `${String(today.getDate()).padStart(2, "0")}${String(today.getMonth() + 1).padStart(2, "0")}${String(today.getFullYear()).slice(-2)}`;
       const filename = `${slug}-${ddmmyy}.xlsx`;
 
-      exportDataAsXlsx(filename, rows as Record<string, any>[], columns);
+      exportDataAsXlsx(filename, rows as Record<string, unknown>[], columns);
       onSuccess?.();
     } catch (error) {
       onError?.(error instanceof Error ? error : new Error("Le téléchargement a échoué"));

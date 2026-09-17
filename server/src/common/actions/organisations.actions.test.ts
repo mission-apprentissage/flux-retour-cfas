@@ -1,8 +1,12 @@
 import { ObjectId } from "bson";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import type { AuthContext } from "@/common/model/internal/AuthContext";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc } from "@tests/utils/testUtils";
 
 import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
 import { buildOrgaOf, buildUser } from "./brevo/contacts/fixtures";
@@ -23,13 +27,13 @@ const eventMock = vi.mocked(enqueueBrevoEvent);
 // Contexte administrateur : `type === "ADMINISTRATEUR"` court-circuite la vérification
 // de rôle/organisation dans validateMembre/rejectMembre.
 const adminCtx = () =>
-  ({ _id: new ObjectId(), organisation_id: new ObjectId(), organisation: { type: "ADMINISTRATEUR" } }) as any;
+  ({ _id: new ObjectId(), organisation_id: new ObjectId(), organisation: { type: "ADMINISTRATEUR" } }) as AuthContext;
 
 const seedPendingMembre = async () => {
   const orga = buildOrgaOf();
-  await organisationsDb().insertOne(orga as any);
+  await organisationsDb().insertOne(testDoc<IOrganisation>(orga));
   const user = buildUser(orga, { account_status: "PENDING_ADMIN_VALIDATION" });
-  await usersMigrationDb().insertOne(user as any);
+  await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
   return user;
 };
 

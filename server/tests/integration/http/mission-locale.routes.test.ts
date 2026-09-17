@@ -1,7 +1,11 @@
+import type { AxiosResponse } from "axios";
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "bson";
-import { SITUATION_ENUM } from "shared";
-import { CONNAISSANCE_ML_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { ML_SITUATION_DOSSIER, ML_TRI_COLONNE, SITUATION_ENUM } from "shared";
+import { SOURCE_APPRENANT, STATUT_APPRENANT, StatutApprenant } from "shared/constants";
+import type { IEffectif, IMissionLocaleEffectif } from "shared/models";
+import { API_EFFECTIF_LISTE, CONNAISSANCE_ML_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
 import { it, expect, describe, beforeEach, vi } from "vitest";
 
 import { updateOrDeleteMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
@@ -19,7 +23,13 @@ import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
 import { createRupturantEffectifPayload, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";
-import { initTestApp, RequestAsOrganisationFunc, expectUnauthorizedError } from "@tests/utils/testUtils";
+import {
+  initTestApp,
+  RequestAsOrganisationFunc,
+  expectUnauthorizedError,
+  testDoc,
+  testDocs,
+} from "@tests/utils/testUtils";
 
 const mockScoreEffectifs = vi.fn().mockResolvedValue({ model: "2026-03-16", scores: [0.85] });
 
@@ -81,9 +91,11 @@ describe("Mission Locale Routes", () => {
         "get",
         `/api/v1/organisation/mission-locale/effectifs-per-month`
       );
-      expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      expect(
+        res.data.a_traiter.reduce((acc: number, curr: { data: unknown[] }) => acc + (curr.data.length || 0), 0)
+      ).toStrictEqual(1);
 
-      const effectifs = res.data.a_traiter.flatMap((curr) => curr.data);
+      const effectifs = res.data.a_traiter.flatMap((curr: { data: unknown[] }) => curr.data);
       expect(effectifs).toHaveLength(1);
       expect(effectifs[0]).toMatchObject({ commune: "Paris", code_postal: "75001" });
     });
@@ -136,7 +148,195 @@ describe("Mission Locale Routes", () => {
         "get",
         `/api/v1/organisation/mission-locale/effectifs-per-month`
       );
-      expect(res.data.traite.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      expect(
+        res.data.traite.reduce((acc: number, curr: { data: unknown[] }) => acc + (curr.data.length || 0), 0)
+      ).toStrictEqual(1);
+    });
+  });
+
+  describe("Listes fusionnées (dossiers prioritaires et collaborations CFA)", () => {
+    const ingestRupturant = async (nom: string, prenom: string) => {
+      const payload = createRupturantEffectifPayload({
+        etablissement_formateur_uai: UAI,
+        etablissement_formateur_siret: SIRET,
+        etablissement_responsable_uai: UAI,
+        etablissement_responsable_siret: SIRET,
+        code_postal_apprenant: "75001",
+        nom_apprenant: nom,
+        prenom_apprenant: prenom,
+      });
+      const { insertedId } = await effectifsQueueDb().insertOne({
+        _id: new ObjectId(),
+        created_at: new Date(),
+        ...payload,
+      });
+      await processEffectifsQueue();
+      const effQ = await effectifsQueueDb().findOne({ _id: insertedId }, { projection: { effectif_id: 1 } });
+      return effQ?.effectif_id as ObjectId;
+    };
+
+    const getListe = (nomListe: string) =>
+      requestAsOrganisation(ML_DATA, "get", `/api/v1/organisation/mission-locale/effectifs?nom_liste=${nomListe}`);
+
+    it("renvoie les dossiers à traiter ou à recontacter avec leurs compteurs", async () => {
+      await ingestRupturant("PRIORITAIRE", "Test");
+
+      const res = await getListe(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER);
+
+      expect(res.status).toBe(200);
+      expect(res.data.effectifs).toHaveLength(1);
+      expect(res.data.effectifs[0]).toMatchObject({
+        nom: "PRIORITAIRE",
+        a_traiter: true,
+        injoignable: false,
+        situation_dossier: ML_SITUATION_DOSSIER.RUPTURE,
+        relance_urgente: false,
+      });
+      expect(res.data.effectifs[0].date_reception).toBeDefined();
+      expect(res.data.counts).toEqual({ a_traiter_ou_recontacter: 1, traite: 0 });
+    });
+
+    it("ne renvoie que les dossiers de collaboration sur la liste collaborations", async () => {
+      const rupturantId = await ingestRupturant("RUPTUREPURE", "Test");
+      const collabId = await ingestRupturant("AVECCOLLAB", "Test");
+      await requestAsOrganisation(
+        { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+        "put",
+        `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectif/${collabId.toString()}`,
+        { rupture: true, acc_conjoint: true }
+      );
+
+      const res = await getListe(API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER);
+
+      expect(res.status).toBe(200);
+      expect(res.data.effectifs.map((e: { nom: string }) => e.nom)).toEqual(["AVECCOLLAB"]);
+      expect(res.data.effectifs[0].acc_conjoint).toBe(true);
+      expect(rupturantId).toBeDefined();
+    });
+
+    it("rejette une liste non fusionnée", async () => {
+      const res = await getListe(API_EFFECTIF_LISTE.PRIORITAIRE);
+      expect(res.status).toBe(400);
+    });
+
+    it("refuse l'accès hors Mission Locale", async () => {
+      const res = await requestAsOrganisation(
+        { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+        "get",
+        `/api/v1/organisation/mission-locale/effectifs?nom_liste=${API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER}`
+      );
+      expect(res.status).toBe(403);
+    });
+
+    it("renvoie les collaborations traitées sur le sous-onglet Traités", async () => {
+      const collabId = await ingestRupturant("COLLABTRAITE", "Test");
+      await requestAsOrganisation(
+        { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+        "put",
+        `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectif/${collabId.toString()}`,
+        { rupture: true, acc_conjoint: true }
+      );
+      await requestAsOrganisation(ML_DATA, "post", `/api/v1/organisation/mission-locale/effectif/${collabId}`, {
+        situation: SITUATION_ENUM.RDV_PRIS,
+      });
+
+      const res = await getListe(API_EFFECTIF_LISTE.COLLAB_TRAITE);
+
+      expect(res.status).toBe(200);
+      expect(res.data.effectifs.map((e: { nom: string }) => e.nom)).toEqual(["COLLABTRAITE"]);
+      expect(res.data.effectifs[0].a_traiter).toBe(false);
+      expect(res.data.effectifs[0].injoignable).toBe(false);
+      expect(res.data.effectifs[0].date_traitement).toBeDefined();
+      expect(res.data.counts).toEqual({ a_traiter_ou_recontacter: 0, traite: 1 });
+    });
+
+    it("aligne le précédent/suivant de la fiche sur l'ordre de la liste", async () => {
+      await ingestRupturant("ALPHA", "Test");
+      await ingestRupturant("BETA", "Test");
+      await ingestRupturant("GAMMA", "Test");
+
+      const liste = await getListe(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER);
+      const ordre = liste.data.effectifs.map((e: { nom: string }) => e.nom);
+      expect(ordre).toHaveLength(3);
+
+      const premier = liste.data.effectifs[0];
+      const fiche = await requestAsOrganisation(
+        ML_DATA,
+        "get",
+        `/api/v1/organisation/mission-locale/effectif/${premier.id}?nom_liste=${API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER}`
+      );
+
+      expect(fiche.status).toBe(200);
+      expect(fiche.data.total).toBe(3);
+      expect(fiche.data.currentIndex).toBe(0);
+      expect(fiche.data.next.nom).toBe(ordre[1]);
+      // navigation circulaire : le précédent du premier est le dernier de la liste
+      expect(fiche.data.previous.nom).toBe(ordre[2]);
+    });
+
+    describe("Tri par colonne", () => {
+      const NOM_LISTE = API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER;
+      const trier = (tri: string, ordre: string) =>
+        requestAsOrganisation(
+          ML_DATA,
+          "get",
+          `/api/v1/organisation/mission-locale/effectifs?nom_liste=${NOM_LISTE}&tri=${tri}&ordre=${ordre}`
+        );
+
+      it("trie par nom dans les deux sens", async () => {
+        await ingestRupturant("CHARLIE", "Test");
+        await ingestRupturant("ALPHA", "Test");
+        await ingestRupturant("BRAVO", "Test");
+
+        const asc = await trier(ML_TRI_COLONNE.NOM, "asc");
+        expect(asc.status).toBe(200);
+        expect(asc.data.effectifs.map((e: { nom: string }) => e.nom)).toEqual(["ALPHA", "BRAVO", "CHARLIE"]);
+
+        const desc = await trier(ML_TRI_COLONNE.NOM, "desc");
+        expect(desc.data.effectifs.map((e: { nom: string }) => e.nom)).toEqual(["CHARLIE", "BRAVO", "ALPHA"]);
+      });
+
+      it("sans tri demandé, garde l'ordre de priorité du serveur", async () => {
+        await ingestRupturant("ZULU", "Test");
+        const collabId = await ingestRupturant("ALPHA", "Test");
+        await requestAsOrganisation(
+          { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+          "put",
+          `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectif/${collabId.toString()}`,
+          { rupture: true, acc_conjoint: true }
+        );
+
+        // la collaboration CFA prime, même si son nom est premier dans l'alphabet
+        const parDefaut = await getListe(NOM_LISTE);
+        expect(parDefaut.data.effectifs.map((e: { nom: string }) => e.nom)).toEqual(["ALPHA", "ZULU"]);
+
+        const parNom = await trier(ML_TRI_COLONNE.NOM, "desc");
+        expect(parNom.data.effectifs.map((e: { nom: string }) => e.nom)).toEqual(["ZULU", "ALPHA"]);
+      });
+
+      it("aligne le précédent/suivant de la fiche sur la colonne triée", async () => {
+        await ingestRupturant("CHARLIE", "Test");
+        await ingestRupturant("ALPHA", "Test");
+        await ingestRupturant("BRAVO", "Test");
+
+        const liste = await trier(ML_TRI_COLONNE.NOM, "asc");
+        const premier = liste.data.effectifs[0];
+
+        const fiche = await requestAsOrganisation(
+          ML_DATA,
+          "get",
+          `/api/v1/organisation/mission-locale/effectif/${premier.id}?nom_liste=${NOM_LISTE}&tri=${ML_TRI_COLONNE.NOM}&ordre=asc`
+        );
+
+        expect(fiche.status).toBe(200);
+        expect(fiche.data.currentIndex).toBe(0);
+        expect(fiche.data.next.nom).toBe("BRAVO");
+      });
+
+      it("rejette une colonne de tri inconnue", async () => {
+        const res = await trier("age", "asc");
+        expect(res.status).toBe(400);
+      });
     });
   });
 
@@ -192,7 +392,11 @@ describe("Mission Locale Routes", () => {
         `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
       );
 
-      expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+      expect(
+        res.data.a_traiter.reduce((acc: number, curr: { data: unknown[] }) => acc + (curr.data.length || 0), 0)
+      ).toStrictEqual(1);
+      // Le sous-onglet fusionné est propre à l'espace ML : rien à exposer côté organisme.
+      expect(res.data.a_traiter_ou_recontacter).toStrictEqual([]);
     });
 
     it("Le CFA ne voit pas l'effectif qui a retrouvé un nouveau contrat", async () => {
@@ -213,7 +417,9 @@ describe("Mission Locale Routes", () => {
         "get",
         `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
       );
-      expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(0);
+      expect(
+        res.data.a_traiter.reduce((acc: number, curr: { data: unknown[] }) => acc + (curr.data.length || 0), 0)
+      ).toStrictEqual(0);
     });
 
     describe("Le CFA traite un jeune", () => {
@@ -258,7 +464,9 @@ describe("Mission Locale Routes", () => {
           "get",
           `/api/v1/organisation/mission-locale/effectifs-per-month`
         );
-        expect(res2.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(1);
+        expect(
+          res2.data.a_traiter.reduce((acc: number, curr: { data: unknown[] }) => acc + (curr.data.length || 0), 0)
+        ).toStrictEqual(1);
       });
 
       // Flux v2 : dès que verified_info est fourni, le téléphone est obligatoire et son format validé.
@@ -353,10 +561,10 @@ describe("Mission Locale Routes", () => {
           {
             $push: {
               "_computed.statut.parcours": {
-                valeur: "APPRENTI",
+                valeur: STATUT_APPRENANT.APPRENTI,
                 date: newContractDate,
               },
-            } as any,
+            },
           }
         );
 
@@ -379,8 +587,8 @@ describe("Mission Locale Routes", () => {
           { _id: EFFECTIF_ID },
           {
             $push: {
-              "_computed.statut.parcours": { valeur: "FIN_DE_FORMATION", date: new Date() },
-            } as any,
+              "_computed.statut.parcours": { valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: new Date() },
+            },
           }
         );
 
@@ -398,8 +606,8 @@ describe("Mission Locale Routes", () => {
           { _id: EFFECTIF_ID },
           {
             $push: {
-              "_computed.statut.parcours": { valeur: "FIN_DE_FORMATION", date: new Date() },
-            } as any,
+              "_computed.statut.parcours": { valeur: STATUT_APPRENANT.FIN_DE_FORMATION, date: new Date() },
+            },
           }
         );
 
@@ -411,7 +619,9 @@ describe("Mission Locale Routes", () => {
           "get",
           `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectifs-per-month`
         );
-        expect(res.data.a_traiter.reduce((acc, curr) => acc + (curr.data.length || 0), 0)).toStrictEqual(0);
+        expect(
+          res.data.a_traiter.reduce((acc: number, curr: { data: unknown[] }) => acc + (curr.data.length || 0), 0)
+        ).toStrictEqual(0);
 
         const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
         expect(after?.soft_deleted).toBeFalsy();
@@ -423,8 +633,8 @@ describe("Mission Locale Routes", () => {
           { _id: EFFECTIF_ID },
           {
             $push: {
-              "_computed.statut.parcours": { valeur: "APPRENTI", date: new Date() },
-            } as any,
+              "_computed.statut.parcours": { valeur: STATUT_APPRENANT.APPRENTI, date: new Date() },
+            },
           }
         );
 
@@ -630,6 +840,93 @@ describe("Mission Locale Routes", () => {
         expect(effectif?.connaissance_ml).toBe(CONNAISSANCE_ML_ENUM.CONNU_NON_ACCOMPAGNE);
       });
     });
+
+    describe("Dates de suivi du dossier (À traiter / À recontacter / Traité)", () => {
+      const postSituation = (body: Record<string, unknown>) =>
+        requestAsOrganisation(ML_DATA, "post", `/api/v1/organisation/mission-locale/effectif/${EFFECTIF_ID}`, body);
+
+      it("une situation traitée pose date_traitement et date_derniere_action_ml", async () => {
+        const res = await postSituation({ situation: SITUATION_ENUM.RDV_PRIS });
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_traitement).toBeInstanceOf(Date);
+        expect(effectif?.date_derniere_action_ml).toBeInstanceOf(Date);
+        expect(effectif?.date_dernier_passage_a_recontacter ?? null).toBeNull();
+      });
+
+      it("le passage à CONTACTE_SANS_RETOUR pose la date de recontact et annule date_traitement", async () => {
+        await postSituation({ situation: SITUATION_ENUM.RDV_PRIS });
+        await postSituation({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR });
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_dernier_passage_a_recontacter).toBeInstanceOf(Date);
+        expect(effectif?.date_traitement).toBeNull();
+      });
+
+      it("un dossier repassé de recontact à traité reprend une date_traitement", async () => {
+        await postSituation({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR });
+        await postSituation({ situation: SITUATION_ENUM.REORIENTATION });
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_traitement).toBeInstanceOf(Date);
+        // la trace du dernier passage à recontacter est conservée
+        expect(effectif?.date_dernier_passage_a_recontacter).toBeInstanceOf(Date);
+      });
+
+      it("une écriture sans situation ne touche que date_derniere_action_ml", async () => {
+        await postSituation({ situation: SITUATION_ENUM.RDV_PRIS });
+        const before = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        await postSituation({ commentaires: "relance téléphonique" });
+
+        const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(after?.date_traitement?.getTime()).toBe(before?.date_traitement?.getTime());
+        expect(after?.date_derniere_action_ml?.getTime()).toBeGreaterThan(
+          before?.date_derniere_action_ml?.getTime() ?? Infinity
+        );
+      });
+
+      it("l'admin qui pose une situation via le back-office pose aussi les dates", async () => {
+        const res = await requestAsOrganisation(
+          { type: "ADMINISTRATEUR" },
+          "put",
+          "/api/v1/admin/mission-locale/effectif",
+          {
+            mission_locale_id: ML_ID.toString(),
+            effectif_id: EFFECTIF_ID.toString(),
+            situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+          }
+        );
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_dernier_passage_a_recontacter).toBeInstanceOf(Date);
+        expect(effectif?.date_derniere_action_ml).toBeInstanceOf(Date);
+      });
+
+      it("le reset admin efface les trois dates de suivi", async () => {
+        await postSituation({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR });
+        await postSituation({ situation: SITUATION_ENUM.RDV_PRIS });
+
+        const res = await requestAsOrganisation(
+          { type: "ADMINISTRATEUR" },
+          "post",
+          "/api/v1/admin/mission-locale/effectif/reset",
+          {
+            mission_locale_id: ML_ID.toString(),
+            effectif_id: EFFECTIF_ID.toString(),
+          }
+        );
+        expect(res.status).toBe(200);
+
+        const effectif = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+        expect(effectif?.date_traitement).toBeUndefined();
+        expect(effectif?.date_dernier_passage_a_recontacter).toBeUndefined();
+        expect(effectif?.date_derniere_action_ml).toBeUndefined();
+      });
+    });
   });
 
   describe("Collab V2 — visibilité et priorité forcées par le CFA", () => {
@@ -649,22 +946,28 @@ describe("Mission Locale Routes", () => {
       statusValue = "RUPTURANT",
       enCours = "RUPTURANT",
       mlActivatedDaysAgo,
+      collabSuspended = false,
+      collabResumedDaysAgo,
+      createdDaysAgo,
     }: {
       accConjoint?: boolean;
       isAllowedCollab?: boolean;
       mlBeta?: boolean;
       ruptureDaysAgo?: number;
-      statusValue?: string;
-      enCours?: string;
+      statusValue?: StatutApprenant;
+      enCours?: StatutApprenant;
       mlActivatedDaysAgo?: number;
+      collabSuspended?: boolean;
+      collabResumedDaysAgo?: number;
+      createdDaysAgo?: number;
     }) => {
       const snapshotId = new ObjectId();
       const ruptureDate = dayAgo(ruptureDaysAgo);
-      const doc = {
+      const doc = testDoc<IMissionLocaleEffectif>({
         _id: new ObjectId(),
         mission_locale_id: ML_ID,
         effectif_id: new ObjectId(),
-        created_at: new Date(),
+        created_at: createdDaysAgo !== undefined ? dayAgo(createdDaysAgo) : new Date(),
         brevo: {},
         current_status: { value: statusValue, date: ruptureDate },
         date_rupture: ruptureDate,
@@ -673,6 +976,8 @@ describe("Mission Locale Routes", () => {
           organisme: {
             ...(mlBeta ? { ml_beta_activated_at: dayAgo(120) } : {}),
             is_allowed_collab: isAllowedCollab,
+            ...(collabSuspended ? { collab_suspended_at: dayAgo(1) } : {}),
+            ...(collabResumedDaysAgo !== undefined ? { collab_resumed_at: dayAgo(collabResumedDaysAgo) } : {}),
           },
           ...(mlActivatedDaysAgo !== undefined ? { mission_locale: { activated_at: dayAgo(mlActivatedDaysAgo) } } : {}),
         },
@@ -680,7 +985,7 @@ describe("Mission Locale Routes", () => {
           _id: snapshotId,
           organisme_id: ORGANISME_ID,
           id_erp_apprenant: "x",
-          source: "test",
+          source: SOURCE_APPRENANT.ERP,
           annee_scolaire: "2025-2026",
           apprenant: {
             nom: "DOE",
@@ -694,12 +999,14 @@ describe("Mission Locale Routes", () => {
           created_at: new Date(),
           updated_at: new Date(),
         },
-      };
+      });
       return { snapshotId, doc };
     };
 
-    const insertDoc = async (doc: object) => {
-      await missionLocaleEffectifsDb().insertOne(doc as any, { bypassDocumentValidation: true });
+    const insertDoc = async (doc: IMissionLocaleEffectif) => {
+      await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(doc), {
+        bypassDocumentValidation: true,
+      });
     };
 
     const getPerMonth = () =>
@@ -723,8 +1030,11 @@ describe("Mission Locale Routes", () => {
     // GET /villes : options du filtre "Villes" construites sur TOUS les effectifs de la ML
     // (distinct par code postal, trié, dédupliqué, codes postaux absents ignorés).
     it("GET /villes : liste distincte, triée, dédupliquée, sans code postal absent", async () => {
-      const withAdresse = (doc: object, adresse: Record<string, string>) => {
-        (doc as any).effectif_snapshot.apprenant.adresse = adresse;
+      const withAdresse = (
+        doc: IMissionLocaleEffectif,
+        adresse: Partial<NonNullable<IEffectif["apprenant"]["adresse"]>>
+      ) => {
+        doc.effectif_snapshot.apprenant.adresse = adresse;
         return doc;
       };
 
@@ -747,7 +1057,7 @@ describe("Mission Locale Routes", () => {
     // prioritaire (jeune en abandon +180j) → la ML doit toujours le voir. »
     it("Demande de collaboration + rupture > 180j : visible ET prioritaire", async () => {
       const { snapshotId, doc } = makeDoc({ accConjoint: true, ruptureDaysAgo: 200 });
-      (doc as any).effectif_snapshot.apprenant.adresse = { commune: "Marseille", code_postal: "13001" };
+      doc.effectif_snapshot.apprenant.adresse = { commune: "Marseille", code_postal: "13001" };
       await insertDoc(doc);
 
       const res = await getPerMonth();
@@ -801,6 +1111,115 @@ describe("Mission Locale Routes", () => {
       expect(isInPrioritaire(res, id)).toBe(false);
     });
 
+    it("CFA en V2 sans demande de collab + rupture < 45j : non visible (délai en cours)", async () => {
+      const { snapshotId, doc } = makeDoc({ accConjoint: false, isAllowedCollab: true, ruptureDaysAgo: 10 });
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      expect(isVisible(res, snapshotId.toString())).toBe(false);
+    });
+
+    // RG8 : collaboration suspendue pour inactivité → le délai de 45 j ne s'applique plus.
+    it("CFA suspendu pour inactivité + rupture < 45j : visible MAIS non prioritaire", async () => {
+      const { snapshotId, doc } = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: true,
+        ruptureDaysAgo: 10,
+        collabSuspended: true,
+      });
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      const id = snapshotId.toString();
+      expect(isVisible(res, id)).toBe(true);
+      expect(isInPrioritaire(res, id)).toBe(false);
+    });
+
+    it("CFA suspendu + jeune en fin de formation : non visible", async () => {
+      const { snapshotId, doc } = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: true,
+        ruptureDaysAgo: 10,
+        collabSuspended: true,
+        statusValue: STATUT_APPRENANT.FIN_DE_FORMATION,
+        enCours: STATUT_APPRENANT.FIN_DE_FORMATION,
+      });
+      await insertDoc(doc);
+
+      const res = await getPerMonth();
+      expect(isVisible(res, snapshotId.toString())).toBe(false);
+    });
+
+    // RG9 : à la reprise, la ML garde ce qu'elle voyait (antériorité sur collab_resumed_at).
+    it("CFA repris après suspension : dossier créé avant la reprise visible, dossier créé après masqué", async () => {
+      const avant = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: true,
+        ruptureDaysAgo: 20,
+        createdDaysAgo: 20,
+        collabResumedDaysAgo: 10,
+      });
+      const apres = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: true,
+        ruptureDaysAgo: 5,
+        createdDaysAgo: 5,
+        collabResumedDaysAgo: 10,
+      });
+      await insertDoc(avant.doc);
+      await insertDoc(apres.doc);
+
+      const res = await getPerMonth();
+      expect(isVisible(res, avant.snapshotId.toString())).toBe(true);
+      expect(isVisible(res, apres.snapshotId.toString())).toBe(false);
+    });
+
+    it("fiche détail : is_grandfathered vrai pour un dossier créé avant la reprise, collab_suspended_at exposé", async () => {
+      await organisationsDb().insertOne(
+        testDoc<IOrganisation>({
+          type: "ORGANISME_FORMATION",
+          siret: SIRET,
+          uai: UAI,
+          organisme_id: ORGANISME_ID.toString(),
+          ml_beta_activated_at: dayAgo(120),
+          created_at: new Date(),
+        })
+      );
+      const repris = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: true,
+        ruptureDaysAgo: 20,
+        createdDaysAgo: 20,
+        collabResumedDaysAgo: 10,
+      });
+      const suspendu = makeDoc({
+        accConjoint: false,
+        isAllowedCollab: true,
+        ruptureDaysAgo: 10,
+        collabSuspended: true,
+      });
+      await insertDoc(repris.doc);
+      await insertDoc(suspendu.doc);
+
+      const ficheRepris = await requestAsOrganisation(
+        ML_DATA,
+        "get",
+        `/api/v1/organisation/mission-locale/effectif/${repris.snapshotId}?nom_liste=${API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER}`
+      );
+      expect(ficheRepris.status).toBe(200);
+      expect(ficheRepris.data.effectif.is_grandfathered).toBe(true);
+      expect(ficheRepris.data.effectif.organisme.collab_suspended_at).toBeUndefined();
+
+      const ficheSuspendu = await requestAsOrganisation(
+        ML_DATA,
+        "get",
+        `/api/v1/organisation/mission-locale/effectif/${suspendu.snapshotId}?nom_liste=${API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER}`
+      );
+      expect(ficheSuspendu.status).toBe(200);
+      expect(ficheSuspendu.data.effectif.is_grandfathered).toBe(false);
+      expect(ficheSuspendu.data.effectif.organisme.collab_suspended_at).toBeTruthy();
+    });
+
     // Garde-fou : un CFA hors V2 collab ne doit PAS voir ses ruptures remonter à la ML
     // (sinon le bypass collab sur-exposerait des effectifs non concernés).
     it("CFA hors collab + rupture > 45j sans demande : non visible (pas de sur-exposition)", async () => {
@@ -822,11 +1241,11 @@ describe("Mission Locale Routes", () => {
 
       // Souhaite un RDV uniquement
       const rdv = makeDoc({ accConjoint: false, ruptureDaysAgo: 60 });
-      (rdv.doc as any).souhaite_rdv = true;
+      rdv.doc.souhaite_rdv = true;
 
       // Mineur uniquement (16-18 ans)
       const mineur = makeDoc({ accConjoint: false, ruptureDaysAgo: 60 });
-      (mineur.doc as any).effectif_snapshot.apprenant.date_de_naissance = new Date(
+      mineur.doc.effectif_snapshot.apprenant.date_de_naissance = new Date(
         new Date().setFullYear(new Date().getFullYear() - 17)
       );
 
@@ -866,7 +1285,7 @@ describe("Mission Locale Routes", () => {
         statusValue: "FIN_DE_FORMATION",
         enCours: "FIN_DE_FORMATION",
       });
-      (doc as any).souhaite_rdv = true;
+      doc.souhaite_rdv = true;
       await insertDoc(doc);
 
       const res = await getPerMonth();
@@ -877,7 +1296,7 @@ describe("Mission Locale Routes", () => {
 
     it("Souhaite un RDV + rupture > 180j : visible ET prioritaire", async () => {
       const { snapshotId, doc } = makeDoc({ accConjoint: false, isAllowedCollab: false, ruptureDaysAgo: 200 });
-      (doc as any).souhaite_rdv = true;
+      doc.souhaite_rdv = true;
       await insertDoc(doc);
 
       const res = await getPerMonth();
@@ -893,7 +1312,7 @@ describe("Mission Locale Routes", () => {
         ruptureDaysAgo: 300,
         mlActivatedDaysAgo: 10,
       });
-      (doc as any).souhaite_rdv = true;
+      doc.souhaite_rdv = true;
       await insertDoc(doc);
 
       const res = await getPerMonth();
@@ -941,7 +1360,7 @@ describe("Mission Locale Routes", () => {
       expect(res.data).toEqual({ rdv_url: "https://calendly.com/ml" });
 
       const orga = await organisationsDb().findOne({ _id: ML_ID });
-      expect((orga as any)?.rdv_url).toBe("https://calendly.com/ml");
+      expect(orga).toMatchObject({ rdv_url: "https://calendly.com/ml" });
     });
 
     it("PUT rejette une URL javascript: (httpUrlSchema)", async () => {
@@ -1035,10 +1454,10 @@ describe("Mission Locale Routes", () => {
           created_at: new Date(),
           updated_at: new Date(),
         },
-      }) as any;
+      }) as unknown as IMissionLocaleEffectif;
 
     const insertBannerDocs = (docs: object[]) =>
-      missionLocaleEffectifsDb().insertMany(docs as any, { bypassDocumentValidation: true });
+      missionLocaleEffectifsDb().insertMany(testDocs<IMissionLocaleEffectif>(docs), { bypassDocumentValidation: true });
 
     it("compte les effectifs souhaite_rdv=true visibles de la ML courante", async () => {
       // 2 effectifs souhaite_rdv=true (dans le périmètre) + 1 false → count attendu = 2
@@ -1062,7 +1481,7 @@ describe("Mission Locale Routes", () => {
     // à FIN_DE_FORMATION (contrat arrivé à son terme, aucune rupture transmise). Le dossier sort des
     // listes sans qu'aucune donnée ne soit réécrite — et y revient seul si une rupture arrive plus tard.
     describe("masquage des sortants requalifiés (FIN_DE_FORMATION)", () => {
-      const countIn = (res: any, bucket: string) =>
+      const countIn = (res: AxiosResponse, bucket: string) =>
         (res.data[bucket] ?? []).reduce((acc: number, curr: { data?: unknown[] }) => acc + (curr.data?.length ?? 0), 0);
 
       it("sort un dossier jamais traité de la liste à traiter", async () => {
@@ -2309,7 +2728,9 @@ describe("Priorité de tri de la liste prioritaire (PRIORITAIRE)", () => {
     );
 
     // Présent dans la liste « à traiter » (donc bien visible et pris en charge)...
-    const aTraiterIds = res.data.a_traiter.flatMap((m: { data: { id: string }[] }) => m.data).map((e) => e.id);
+    const aTraiterIds = res.data.a_traiter
+      .flatMap((m: { data: { id: string }[] }) => m.data)
+      .map((e: { id: string }) => e.id);
     expect(aTraiterIds).toContain(contactOpportunId.toString());
 
     // ... mais absent du bloc prioritaire.

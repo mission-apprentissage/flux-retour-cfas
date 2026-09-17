@@ -1,19 +1,21 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { Field, Form, Formik, FormikErrors, FormikHelpers } from "formik";
+import { Field, FieldProps, Form, Formik, FormikErrors, FormikHelpers } from "formik";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z, ZodError } from "zod";
 
 import { _put } from "@/common/httpClient";
+import { getApiErrorMessage } from "@/common/rateLimit";
 
 import { TrackFormDirty } from "../_components/UnsavedChangesContext";
 import { useAuth } from "../_context/UserContext";
+
+import formStyles from "./MonCompteSection.module.css";
 
 const profilSchema = z.object({
   civility: z.enum(["Monsieur", "Madame"]).optional(),
@@ -45,8 +47,8 @@ export function MonCompteSection() {
       // Le user est injecté côté serveur (getSession) dans le layout : on rafraîchit pour répercuter la modif.
       router.refresh();
       setAlert({ severity: "success", message: "Vos informations ont été enregistrées." });
-    } catch (err: any) {
-      const message = err?.json?.data?.message || err?.message || "Erreur lors de l'enregistrement";
+    } catch (err) {
+      const message = getApiErrorMessage(err, "Erreur lors de l'enregistrement");
       setAlert({ severity: "error", message });
     } finally {
       setSubmitting(false);
@@ -55,10 +57,8 @@ export function MonCompteSection() {
 
   return (
     <div>
-      <h1 className="fr-h3" style={{ color: "var(--text-title-blue-france)" }}>
-        Mes informations
-      </h1>
-      <p className="fr-text--sm fr-mb-3w" style={{ color: "var(--text-mention-grey)" }}>
+      <h1 className={`fr-h3 ${formStyles.titre}`}>Mes informations</h1>
+      <p className={`fr-text--sm fr-mb-3w ${formStyles.sousTitre}`}>
         Vos informations personnelles relatives à votre compte Tableau de bord de l&apos;apprentissage
       </p>
 
@@ -99,7 +99,7 @@ export function MonCompteSection() {
         onSubmit={handleSubmit}
       >
         {({ values, isSubmitting, dirty, isValid, handleChange }) => (
-          <Form noValidate style={{ maxWidth: 720 }}>
+          <Form noValidate className={formStyles.formulaire}>
             <TrackFormDirty dirty={dirty} />
             <RadioButtons
               legend="Civilité"
@@ -122,7 +122,7 @@ export function MonCompteSection() {
             />
 
             <Field name="prenom">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <Input
                   label="Prénom"
                   state={meta.touched && meta.error ? "error" : "default"}
@@ -133,7 +133,7 @@ export function MonCompteSection() {
             </Field>
 
             <Field name="nom">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <Input
                   label="Nom"
                   state={meta.touched && meta.error ? "error" : "default"}
@@ -144,7 +144,9 @@ export function MonCompteSection() {
             </Field>
 
             <Field name="telephone">
-              {({ field }: any) => <Input label="Numéro de téléphone" nativeInputProps={{ ...field, type: "tel" }} />}
+              {({ field }: FieldProps) => (
+                <Input label="Numéro de téléphone" nativeInputProps={{ ...field, type: "tel" }} />
+              )}
             </Field>
 
             <Input
@@ -153,7 +155,7 @@ export function MonCompteSection() {
               nativeInputProps={{ value: user?.email ?? "", disabled: true, readOnly: true }}
             />
 
-            <Button type="submit" disabled={isSubmitting || !dirty || !isValid} style={{ marginTop: fr.spacing("2w") }}>
+            <Button type="submit" disabled={isSubmitting || !dirty || !isValid} className={formStyles.boutonSoumettre}>
               Enregistrer les modifications
             </Button>
           </Form>

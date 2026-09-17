@@ -1,5 +1,6 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
+import type { IOrganisation } from "shared/models";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { vi, it, expect, describe, beforeEach } from "vitest";
 
@@ -19,6 +20,8 @@ vi.mock("@/common/services/mailer/mailer");
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
 let requestAsOrganisation: RequestAsOrganisationFunc;
+
+const activatedAt = (orga: IOrganisation | null) => (orga?.type === "MISSION_LOCALE" ? orga.activated_at : undefined);
 
 describe("Routes users", () => {
   useMongo();
@@ -105,7 +108,7 @@ describe("Routes users", () => {
       });
 
       const ml = await organisationsDb().findOne({ _id: new ObjectId(id(2)), type: "MISSION_LOCALE" });
-      expect((ml as any)?.activated_at).toBeDefined();
+      expect(ml).toHaveProperty("activated_at");
     });
 
     it("N'active pas une Mission Locale déjà activée", async () => {
@@ -123,7 +126,7 @@ describe("Routes users", () => {
       expect(response.status).toStrictEqual(200);
 
       const mlAfter = await organisationsDb().findOne({ _id: new ObjectId(id(2)), type: "MISSION_LOCALE" });
-      expect((mlAfter as any)?.activated_at).toEqual((mlBefore as any)?.activated_at);
+      expect(activatedAt(mlAfter)).toEqual(activatedAt(mlBefore));
     });
   });
 

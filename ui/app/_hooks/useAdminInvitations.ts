@@ -58,7 +58,7 @@ export function useAdminInvitations({
   enabled = true,
 }: UseAdminInvitationsParams) {
   const queryParams = useMemo(() => {
-    const params: Record<string, any> = {
+    const params: Record<string, string | number> = {
       status,
       page,
       limit,

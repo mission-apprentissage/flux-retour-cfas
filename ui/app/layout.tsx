@@ -1,9 +1,6 @@
-// eslint-disable-next-line import/no-named-as-default
-import MuiDsfrThemeProvider from "@codegouvfr/react-dsfr/mui";
 import { DsfrHead } from "@codegouvfr/react-dsfr/next-appdir/DsfrHead";
 import { DsfrProvider } from "@codegouvfr/react-dsfr/next-appdir/DsfrProvider";
 import { getHtmlAttributes } from "@codegouvfr/react-dsfr/next-appdir/getHtmlAttributes";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import Link from "next/link";
 import PlausibleProvider from "next-plausible";
 
@@ -12,13 +9,16 @@ import { publicConfig } from "@/config.public";
 
 import { defaultColorScheme } from "./_dsfr-setup/default-color-scheme";
 import { StartDsfr } from "./_dsfr-setup/start-dsfr";
+import "remixicon/fonts/remixicon.css";
+import "react-datepicker/dist/react-datepicker.css";
 import "./global.css";
+import "./_styles/month-select.css";
 
 export const dynamic = "force-dynamic";
 
 export default async function RootLayout({ children }: { children: JSX.Element }) {
   return (
-    <html {...getHtmlAttributes({ defaultColorScheme })}>
+    <html {...getHtmlAttributes({ defaultColorScheme, lang: "fr" })}>
       <head>
         <StartDsfr />
         <DsfrHead
@@ -39,16 +39,10 @@ export default async function RootLayout({ children }: { children: JSX.Element }
         <PlausibleProvider domain={publicConfig.host} />
       </head>
       <body>
-        {
-          <AppRouterCacheProvider>
-            <DsfrProvider>
-              <MuiDsfrThemeProvider>
-                <RateLimitBanner />
-                {children}
-              </MuiDsfrThemeProvider>
-            </DsfrProvider>
-          </AppRouterCacheProvider>
-        }
+        <DsfrProvider>
+          <RateLimitBanner />
+          {children}
+        </DsfrProvider>
       </body>
     </html>
   );

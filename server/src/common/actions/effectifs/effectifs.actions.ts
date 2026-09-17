@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import type { Document } from "mongodb";
 
 import { organismeLookup } from "@/common/actions/helpers/filters";
 import { effectifsDb } from "@/common/model/collections";
@@ -34,13 +35,13 @@ export const getAllEffectifs = async (
 
   // difficile de mettre le resultat d'un lookup sur un champ nested dans un array, du coup on le fait programmatiquement
   const organismesById = result?._tmp_organismes?.reduce(
-    (acc, organisme) => ({
+    (acc: Record<string, Document>, organisme: Document) => ({
       [organisme._id]: organisme,
       ...acc,
     }),
     {}
   );
-  result?.data.forEach((effectif) => {
+  result?.data.forEach((effectif: Document) => {
     effectif.organisme = organismesById[effectif.organisme_id];
   });
   delete result?._tmp_organismes;
@@ -52,7 +53,7 @@ export const getAllEffectifs = async (
 };
 
 // Méthode de récupération d'un effectif et de ses détails (formation, doublons, ...) depuis son id
-export const getDetailedEffectifById = async (_id: any) => {
+export const getDetailedEffectifById = async (_id: ObjectId) => {
   const organisme = await effectifsDb()
     .aggregate(
       [

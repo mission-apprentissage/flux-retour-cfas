@@ -1,20 +1,20 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import { PieChart } from "@mui/x-charts/PieChart";
 import { useMemo, useState } from "react";
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 import { IAccompagnementConjointStats } from "shared/models/data/nationalStats.model";
 
-import { ItemChartTooltip } from "../charts/ChartTooltip";
+import { Skeleton } from "@/app/_components/common/Skeleton";
+
 import { DejaConnuMiniChart } from "../charts/DejaConnuMiniChart";
+import { DonutChart } from "../charts/DonutChart";
 import { MotifsBarChart } from "../charts/MotifsBarChart";
 import { DOSSIERS_TRAITES_COLORS, DOSSIERS_TRAITES_LABELS } from "../constants";
 import { useAccompagnementConjointStats } from "../hooks/useStatsQueries";
 import { FranceMapSVG } from "../ui/FranceMapSVGLazy";
 import { NoDataMessage } from "../ui/NoDataMessage";
 import { RegionSVG } from "../ui/RegionSVG";
-import { Skeleton } from "../ui/Skeleton";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import styles from "./AccompagnementConjointSection.module.css";
@@ -128,21 +128,15 @@ function StatutsTraitementPieChart({
   return (
     <div className={styles.pieChartContainer}>
       <div className={styles.pieChartWrapper}>
-        <PieChart
-          series={[
-            {
-              data: pieData,
-              highlightScope: { highlight: "item" },
-              valueFormatter: (item) => {
-                const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
-                return `${item.value.toLocaleString("fr-FR")} (${pct}%)`;
-              },
-            },
-          ]}
+        <DonutChart
+          data={pieData}
           height={200}
-          margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
-          slots={{ legend: () => null, tooltip: ItemChartTooltip }}
-          sx={{ width: "100%", maxWidth: "200px" }}
+          maxWidth={200}
+          margin={5}
+          valueFormatter={(item) => {
+            const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
+            return `${item.value.toLocaleString("fr-FR")} (${pct}%)`;
+          }}
         />
       </div>
 

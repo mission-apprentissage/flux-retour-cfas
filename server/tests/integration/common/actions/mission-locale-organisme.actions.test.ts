@@ -1,7 +1,14 @@
+import { randomUUID } from "node:crypto";
+
 import { ObjectId } from "mongodb";
 import { ACC_CONJOINT_MOTIF_ENUM, STATUT_APPRENANT } from "shared";
+import { SOURCE_APPRENANT } from "shared/constants";
+import type { IMissionLocaleEffectif } from "shared/models";
+import type { IEffectif } from "shared/models/data/effectifs.model";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
-import { v4 as uuidv4 } from "uuid";
 import { describe, it, beforeEach, expect } from "vitest";
 
 import {
@@ -9,6 +16,8 @@ import {
   markEffectifNotificationAsRead,
 } from "@/common/actions/organismes/mission-locale.actions";
 import {
+  effectifsDb,
+  effectifsDECADb,
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogDb,
   organisationsDb,
@@ -16,7 +25,7 @@ import {
 } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id } from "@tests/utils/testUtils";
+import { id, testDoc } from "@tests/utils/testUtils";
 
 const ANNEE_SCOLAIRE = getAnneesScolaireListFromDate(new Date())[0];
 const organismeId = new ObjectId(id(1));
@@ -29,7 +38,46 @@ const sampleOrganisme = {
   ...createRandomOrganisme({ siret: "19040492100016" }),
 };
 
-async function createMlEffectifDoc(overrides: Record<string, any> = {}) {
+async function insertErpEffectif(apprenant: Record<string, unknown> = { mission_locale_id: 42 }) {
+  const effectif = await createSampleEffectif({
+    organisme: sampleOrganisme,
+    annee_scolaire: ANNEE_SCOLAIRE,
+    apprenant: {
+      nom: "COLLAB",
+      prenom: "Test",
+      date_de_naissance: new Date(new Date().getFullYear() - 20, 0, 1),
+      adresse: apprenant.adresse ?? { mission_locale_id: 42 },
+    },
+  });
+  await effectifsDb().insertOne(testDoc<IEffectif>({ ...effectif, _id: effectifId, organisme_id: organismeId }));
+  return effectif;
+}
+
+async function insertDecaEffectif() {
+  const effectif = await createSampleEffectif({
+    organisme: sampleOrganisme,
+    annee_scolaire: ANNEE_SCOLAIRE,
+    source: SOURCE_APPRENANT.DECA,
+    apprenant: {
+      nom: "COLLABDECA",
+      prenom: "Test",
+      date_de_naissance: new Date(new Date().getFullYear() - 20, 0, 1),
+      adresse: { mission_locale_id: 42 },
+    },
+  });
+  await effectifsDECADb().insertOne(
+    testDoc<IEffectifDECA>({
+      ...effectif,
+      _id: effectifId,
+      deca_raw_id: new ObjectId(),
+      organisme_id: organismeId,
+      is_deca_compatible: true,
+    })
+  );
+  return effectif;
+}
+
+async function createMlEffectifDoc(overrides: Record<string, unknown> = {}) {
   const now = new Date();
   const snapshot = await createSampleEffectif({
     organisme: sampleOrganisme,
@@ -56,7 +104,7 @@ async function createMlEffectifDoc(overrides: Record<string, any> = {}) {
     date_rupture: new Date("2026-01-15"),
     current_status: { value: STATUT_APPRENANT.RUPTURANT, date: new Date("2026-01-15") },
     created_at: now,
-    brevo: { token: uuidv4(), token_created_at: now },
+    brevo: { token: randomUUID(), token_created_at: now },
     ...overrides,
   };
 }
@@ -69,17 +117,19 @@ describe("setEffectifMissionLocaleDataFromOrganisme", () => {
     await organisationsDb().deleteMany({});
     await organismesDb().deleteMany({});
     await organismesDb().insertOne(sampleOrganisme);
-    await organisationsDb().insertOne({
-      _id: mlOrganisationId,
-      type: "MISSION_LOCALE",
-      ml_id: 42,
-      nom: "ML Test",
-      created_at: new Date(),
-    } as any);
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        ml_id: 42,
+        nom: "ML Test",
+        created_at: new Date(),
+      })
+    );
   });
 
   it("met à jour organisme_data avec les champs de base", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
 
     await setEffectifMissionLocaleDataFromOrganisme(
       organismeId,
@@ -97,7 +147,7 @@ describe("setEffectifMissionLocaleDataFromOrganisme", () => {
   });
 
   it("met à jour les champs optionnels (motif, commentaires, etc.)", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
 
     await setEffectifMissionLocaleDataFromOrganisme(
       organismeId,
@@ -143,21 +193,23 @@ describe("setEffectifMissionLocaleDataFromOrganisme", () => {
 
   it("ne remplace pas les champs existants non envoyés (merge partiel)", async () => {
     await missionLocaleEffectifsDb().insertOne(
-      (await createMlEffectifDoc({
-        organisme_data: {
-          rupture: true,
-          acc_conjoint: true,
-          note_complementaire: "Note existante",
-          cause_rupture: "Ancienne raison",
-          reponse_at: new Date("2026-01-01"),
-        },
-      })) as any
+      testDoc<IMissionLocaleEffectif>(
+        await createMlEffectifDoc({
+          organisme_data: {
+            rupture: true,
+            acc_conjoint: true,
+            note_complementaire: "Note existante",
+            cause_rupture: "Ancienne raison",
+            reponse_at: new Date("2026-01-01"),
+          },
+        })
+      )
     );
 
     await setEffectifMissionLocaleDataFromOrganisme(
       organismeId,
       effectifId,
-      { rupture: true, acc_conjoint: true, cause_rupture: "Nouvelle raison" },
+      { rupture: true, cause_rupture: "Nouvelle raison" },
       userId
     );
 
@@ -168,7 +220,7 @@ describe("setEffectifMissionLocaleDataFromOrganisme", () => {
   });
 
   it("n'inclut pas les champs optionnels undefined", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc()) as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
 
     await setEffectifMissionLocaleDataFromOrganisme(
       organismeId,
@@ -183,18 +235,142 @@ describe("setEffectifMissionLocaleDataFromOrganisme", () => {
     expect(updated?.organisme_data).not.toHaveProperty("cause_rupture");
   });
 
-  it("throw si effectif non trouvé", async () => {
+  it("throw si l'effectif n'existe ni en ERP ni en DECA", async () => {
     await expect(
       setEffectifMissionLocaleDataFromOrganisme(organismeId, new ObjectId(), { rupture: true })
-    ).rejects.toThrow("Effectif not found or update failed");
+    ).rejects.toThrow("Effectif non trouvé");
   });
 
-  it("throw si effectif soft-deleted", async () => {
-    await missionLocaleEffectifsDb().insertOne((await createMlEffectifDoc({ soft_deleted: true })) as any);
-
-    await expect(setEffectifMissionLocaleDataFromOrganisme(organismeId, effectifId, { rupture: true })).rejects.toThrow(
-      "Effectif not found or update failed"
+  it("rejette un second envoi sur un dossier déjà en collaboration (RG2)", async () => {
+    await missionLocaleEffectifsDb().insertOne(
+      testDoc<IMissionLocaleEffectif>(
+        await createMlEffectifDoc({
+          organisme_data: { rupture: true, acc_conjoint: true, acc_conjoint_by: userId },
+        })
+      )
     );
+
+    await expect(
+      setEffectifMissionLocaleDataFromOrganisme(organismeId, effectifId, { rupture: true, acc_conjoint: true }, userId)
+    ).rejects.toThrow("Un dossier de collaboration a déjà été envoyé pour cet effectif");
+  });
+
+  describe("création du dossier à la volée", () => {
+    beforeEach(async () => {
+      await effectifsDb().deleteMany({});
+      await effectifsDECADb().deleteMany({});
+    });
+
+    it("crée le dossier pour un effectif sans document mission locale", async () => {
+      await insertErpEffectif();
+
+      const result = await setEffectifMissionLocaleDataFromOrganisme(
+        organismeId,
+        effectifId,
+        { rupture: false, acc_conjoint: true, note_complementaire: "Jeune en contrat, risque de rupture" },
+        userId
+      );
+
+      expect(result?.mission_locale_id).toEqual(mlOrganisationId);
+
+      const created = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+      expect(created?.organisme_data?.acc_conjoint).toBe(true);
+      expect(created?.organisme_data?.acc_conjoint_by).toEqual(userId);
+      expect(created?.organisme_data?.note_complementaire).toBe("Jeune en contrat, risque de rupture");
+      expect(created?.date_rupture).toBeNull();
+      expect(created?.cfa_rupture_declaration).toBeUndefined();
+      expect(created?.effectif_snapshot?.organisme_id).toEqual(organismeId);
+    });
+
+    it("crée le dossier avec la déclaration de rupture quand une date est transmise", async () => {
+      await insertErpEffectif();
+      const dateRupture = new Date("2026-05-04");
+
+      await setEffectifMissionLocaleDataFromOrganisme(
+        organismeId,
+        effectifId,
+        { rupture: true, acc_conjoint: true, still_at_cfa: false, date_rupture: dateRupture },
+        userId
+      );
+
+      const created = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+      expect(created?.date_rupture).toEqual(dateRupture);
+      expect(created?.cfa_rupture_declaration?.date_rupture).toEqual(dateRupture);
+      expect(created?.cfa_rupture_declaration?.declared_by).toEqual(userId);
+    });
+
+    it("crée le dossier depuis DECA si l'organisme y a accès", async () => {
+      await organismesDb().updateOne({ _id: organismeId }, { $set: { is_allowed_deca: true } });
+      await insertDecaEffectif();
+
+      await setEffectifMissionLocaleDataFromOrganisme(
+        organismeId,
+        effectifId,
+        { rupture: false, acc_conjoint: true },
+        userId
+      );
+
+      const created = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+      expect(created?.organisme_data?.acc_conjoint).toBe(true);
+    });
+
+    it("refuse de créer depuis DECA si l'organisme n'y a pas accès", async () => {
+      await insertDecaEffectif();
+
+      await expect(
+        setEffectifMissionLocaleDataFromOrganisme(
+          organismeId,
+          effectifId,
+          { rupture: false, acc_conjoint: true },
+          userId
+        )
+      ).rejects.toThrow("Effectif non trouvé");
+    });
+
+    it("throw si la zone mission locale de l'apprenant est inconnue", async () => {
+      await insertErpEffectif({ adresse: {} });
+
+      await expect(
+        setEffectifMissionLocaleDataFromOrganisme(
+          organismeId,
+          effectifId,
+          { rupture: false, acc_conjoint: true },
+          userId
+        )
+      ).rejects.toThrow("zone Mission Locale non identifiée");
+    });
+
+    it("throw si l'organisation mission locale est introuvable", async () => {
+      await organisationsDb().deleteMany({ type: "MISSION_LOCALE" });
+      await insertErpEffectif();
+
+      await expect(
+        setEffectifMissionLocaleDataFromOrganisme(
+          organismeId,
+          effectifId,
+          { rupture: false, acc_conjoint: true },
+          userId
+        )
+      ).rejects.toThrow("organisation Mission Locale non trouvée");
+    });
+
+    it("ressuscite un dossier soft-deleted au lieu d'échouer", async () => {
+      await insertErpEffectif();
+      const softDeleted = await createMlEffectifDoc({ soft_deleted: true });
+      await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(softDeleted));
+
+      await setEffectifMissionLocaleDataFromOrganisme(
+        organismeId,
+        effectifId,
+        { rupture: false, acc_conjoint: true },
+        userId
+      );
+
+      const revived = await missionLocaleEffectifsDb().findOne({ _id: softDeleted._id });
+      expect(revived?.soft_deleted).toBe(false);
+      expect(revived?.organisme_data?.acc_conjoint).toBe(true);
+      expect(await missionLocaleEffectifsDb().countDocuments({ effectif_id: effectifId })).toBe(1);
+    });
   });
 });
 
@@ -211,22 +387,26 @@ describe("markEffectifNotificationAsRead", () => {
   it("marque les notifications comme lues", async () => {
     const mlEffectifId = new ObjectId();
     await missionLocaleEffectifsDb().insertOne(
-      (await createMlEffectifDoc({
-        _id: mlEffectifId,
-        organisme_data: {
-          acc_conjoint: true,
-          acc_conjoint_by: userId,
-          has_unread_notification: true,
-        },
-      })) as any
+      testDoc<IMissionLocaleEffectif>(
+        await createMlEffectifDoc({
+          _id: mlEffectifId,
+          organisme_data: {
+            acc_conjoint: true,
+            acc_conjoint_by: userId,
+            has_unread_notification: true,
+          },
+        })
+      )
     );
 
-    await missionLocaleEffectifsLogDb().insertOne({
-      _id: new ObjectId(),
-      mission_locale_effectif_id: mlEffectifId,
-      read_by: [],
-      created_at: new Date(),
-    } as any);
+    await missionLocaleEffectifsLogDb().insertOne(
+      testDoc<IMissionLocaleEffectifLog>({
+        _id: new ObjectId(),
+        mission_locale_effectif_id: mlEffectifId,
+        read_by: [],
+        created_at: new Date(),
+      })
+    );
 
     await markEffectifNotificationAsRead(organismeId, effectifId, userId);
 
@@ -240,5 +420,139 @@ describe("markEffectifNotificationAsRead", () => {
   it("retourne null si effectif non trouvé", async () => {
     const result = await markEffectifNotificationAsRead(organismeId, effectifId, userId);
     expect(result).toBeNull();
+  });
+});
+
+describe("auto-activation Collab ON à la première collab", () => {
+  useMongo();
+
+  beforeEach(async () => {
+    await missionLocaleEffectifsDb().deleteMany({});
+    await organisationsDb().deleteMany({});
+    await organismesDb().deleteMany({});
+    await organismesDb().insertOne(sampleOrganisme);
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        ml_id: 42,
+        nom: "ML Test",
+        created_at: new Date(),
+      })
+    );
+  });
+
+  const findCfaOrganisation = () =>
+    organisationsDb().findOne({ type: "ORGANISME_FORMATION", organisme_id: organismeId.toString() }) as Promise<
+      (IOrganisation & { ml_beta_activated_at?: Date }) | null
+    >;
+
+  it("pose is_allowed_collab, la date ML et computed.organisme à la première collab", async () => {
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
+
+    await setEffectifMissionLocaleDataFromOrganisme(
+      organismeId,
+      effectifId,
+      { rupture: true, acc_conjoint: true },
+      userId
+    );
+
+    const organisme = await organismesDb().findOne({ _id: organismeId });
+    expect(organisme?.is_allowed_collab).toBe(true);
+
+    const organisation = await findCfaOrganisation();
+    expect(organisation?.ml_beta_activated_at).toBeInstanceOf(Date);
+
+    const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+    expect(dossier?.organisme_data?.acc_conjoint).toBe(true);
+    expect(dossier?.computed?.organisme).toEqual({
+      is_allowed_collab: true,
+      ml_beta_activated_at: organisation?.ml_beta_activated_at,
+    });
+  });
+
+  it("ne re-date pas un organisme déjà en Collab ON", async () => {
+    const activatedAt = new Date("2026-01-10");
+    await organismesDb().updateOne({ _id: organismeId }, { $set: { is_allowed_collab: true } });
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        type: "ORGANISME_FORMATION",
+        siret: sampleOrganisme.siret,
+        uai: sampleOrganisme.uai,
+        organisme_id: organismeId.toString(),
+        ml_beta_activated_at: activatedAt,
+        created_at: new Date(),
+      })
+    );
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
+
+    await setEffectifMissionLocaleDataFromOrganisme(
+      organismeId,
+      effectifId,
+      { rupture: true, acc_conjoint: true },
+      userId
+    );
+
+    const organisation = await findCfaOrganisation();
+    expect(organisation?.ml_beta_activated_at).toEqual(activatedAt);
+    const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+    expect(dossier?.computed).toBeUndefined();
+  });
+
+  it("pose le flag sans re-dater un organisme activé ML sans flag", async () => {
+    const activatedAt = new Date("2025-11-03");
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        type: "ORGANISME_FORMATION",
+        siret: sampleOrganisme.siret,
+        uai: sampleOrganisme.uai,
+        organisme_id: organismeId.toString(),
+        ml_beta_activated_at: activatedAt,
+        created_at: new Date(),
+      })
+    );
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
+
+    await setEffectifMissionLocaleDataFromOrganisme(
+      organismeId,
+      effectifId,
+      { rupture: true, acc_conjoint: true },
+      userId
+    );
+
+    const organisme = await organismesDb().findOne({ _id: organismeId });
+    expect(organisme?.is_allowed_collab).toBe(true);
+    const organisation = await findCfaOrganisation();
+    expect(organisation?.ml_beta_activated_at).toEqual(activatedAt);
+    const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+    expect(dossier?.computed?.organisme).toEqual({ is_allowed_collab: true, ml_beta_activated_at: activatedAt });
+  });
+
+  it("n'active rien sans acc_conjoint", async () => {
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
+
+    await setEffectifMissionLocaleDataFromOrganisme(
+      organismeId,
+      effectifId,
+      { rupture: true, acc_conjoint: false },
+      userId
+    );
+
+    const organisme = await organismesDb().findOne({ _id: organismeId });
+    expect(organisme?.is_allowed_collab).toBeUndefined();
+    expect(await findCfaOrganisation()).toBeNull();
+  });
+
+  it("écrit la collab même si l'activation échoue", async () => {
+    await organismesDb().updateOne({ _id: organismeId }, { $unset: { siret: "" } }, { bypassDocumentValidation: true });
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
+
+    await expect(
+      setEffectifMissionLocaleDataFromOrganisme(organismeId, effectifId, { rupture: true, acc_conjoint: true }, userId)
+    ).resolves.toBeDefined();
+
+    const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+    expect(dossier?.organisme_data?.acc_conjoint).toBe(true);
+    expect(await findCfaOrganisation()).toBeNull();
   });
 });

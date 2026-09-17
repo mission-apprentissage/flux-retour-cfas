@@ -6,9 +6,10 @@ export const MESSAGE_STATUS = {
   DELIVERED: "delivered",
   READ: "read",
   FAILED: "failed",
+  FAILED_SEND: "failed_send",
 } as const;
 
-export const zMessageStatus = z.enum(["pending", "sent", "delivered", "read", "failed"]);
+export const zMessageStatus = z.enum(["pending", "sent", "delivered", "read", "failed", "failed_send"]);
 export type IMessageStatus = z.infer<typeof zMessageStatus>;
 
 export const USER_RESPONSE_TYPE = {

@@ -1,9 +1,11 @@
 import { captureException } from "@sentry/node";
 import { SIRET_REGEX } from "shared";
+import type { IDepartmentCode } from "shared";
 import ApiEntEtablissement from "shared/models/apis/@types/ApiEntEtablissement";
 
 import * as apiEntreprise from "@/common/apis/ApiEntreprise";
 import { getDepartementCodeFromCodeInsee, buildAdresse, findDataByDepartementNum } from "@/common/utils/adresseUtils";
+import { ApiError } from "@/common/utils/apiUtils";
 
 import logger from "../logger";
 
@@ -14,7 +16,7 @@ import { InfoSiret } from "./infoSiret.actions-struct";
  * @param {string} providedSiret
  * @returns
  */
-export const findDataFromSiret = async (providedSiret): Promise<InfoSiret> => {
+export const findDataFromSiret = async (providedSiret: string): Promise<InfoSiret> => {
   // Vérification du format
   if (!providedSiret || !SIRET_REGEX.test(providedSiret.trim())) {
     return {
@@ -31,9 +33,10 @@ export const findDataFromSiret = async (providedSiret): Promise<InfoSiret> => {
   let etablissementApiInfo: ApiEntEtablissement;
   try {
     etablissementApiInfo = await apiEntreprise.getEtablissement(siret);
-  } catch (e: any) {
+  } catch (e) {
     logger.error(e);
-    if (e.reason === 451) {
+    const reason = e instanceof ApiError ? e.reason : undefined;
+    if (reason === 451) {
       return {
         result: {
           siret: siret,
@@ -43,7 +46,7 @@ export const findDataFromSiret = async (providedSiret): Promise<InfoSiret> => {
           api_entreprise_info: `Le Siret ${siret} existe mais est indisponible pour raisons légales`,
         },
       };
-    } else if (/^5[0-9]{2}/.test(`${e.reason}`)) {
+    } else if (/^5[0-9]{2}/.test(`${reason}`)) {
       captureException(e);
       return {
         result: {
@@ -65,7 +68,7 @@ export const findDataFromSiret = async (providedSiret): Promise<InfoSiret> => {
 
   // Récupération des informations de localisation
   let code_dept = getDepartementCodeFromCodeInsee(etablissementApiInfo.adresse.code_commune);
-  const { code_region, num_academie } = findDataByDepartementNum(code_dept);
+  const { code_region, num_academie } = findDataByDepartementNum(code_dept as IDepartmentCode);
 
   return {
     result: {
@@ -80,7 +83,7 @@ export const findDataFromSiret = async (providedSiret): Promise<InfoSiret> => {
       type_voie: etablissementApiInfo.adresse.type_voie,
       nom_voie: etablissementApiInfo.adresse.libelle_voie,
       voie_complete: (etablissementApiInfo.adresse.type_voie ?? "") + (etablissementApiInfo.adresse.libelle_voie ?? ""),
-      complement_adresse: etablissementApiInfo.adresse.complement_adresse,
+      complement_adresse: etablissementApiInfo.adresse.complement_adresse ?? undefined,
       code_postal: etablissementApiInfo.adresse.code_postal,
       num_departement: code_dept,
       num_academie: num_academie,

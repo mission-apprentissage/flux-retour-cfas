@@ -17,7 +17,7 @@ const redirectRateLimiter = new RateLimiterMemory({
 
 async function rateLimitMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
   try {
-    await redirectRateLimiter.consume(req.params.token ?? "no_token");
+    await redirectRateLimiter.consume((req.params.token as string) ?? "no_token");
     next();
   } catch {
     logger.warn({ token: req.params.token }, "RDV redirect rate limited (per-token)");

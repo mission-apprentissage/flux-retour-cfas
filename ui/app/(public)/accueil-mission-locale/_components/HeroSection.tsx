@@ -85,11 +85,7 @@ export function HeroSection() {
               jeunes en rupture de contrat sur le territoire, l’ouverture d’une fiche navette et un échange de messages
               avec un CFA.
             </p>
-            <PauseButton
-              isPaused={isPaused}
-              togglePause={togglePause}
-              style={{ position: "absolute", bottom: "1.5rem", right: "1.5rem" }}
-            />
+            <PauseButton isPaused={isPaused} togglePause={togglePause} className={styles.pauseButtonFlottant} />
           </div>
         </div>
       </div>

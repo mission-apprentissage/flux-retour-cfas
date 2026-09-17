@@ -1,5 +1,7 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { vi, it, expect, describe, beforeEach } from "vitest";
 
@@ -9,7 +11,7 @@ import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { setTime } from "@/common/utils/timeUtils";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id, initTestApp, testPasswordHash } from "@tests/utils/testUtils";
+import { id, initTestApp, testDoc, testPasswordHash } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/mailer/mailer");
 
@@ -36,33 +38,37 @@ async function seedCfaOrganisation() {
       adresse: { departement: "33", region: "75", academie: "04", commune: "Bordeaux", code_postal: "33300" },
     })
   );
-  await organisationsDb().insertOne({
-    _id: cfaOrganisationId,
-    created_at: new Date(now),
-    type: "ORGANISME_FORMATION",
-    siret: SIRET,
-    uai: UAI,
-    organisme_id: cfaOrganismeId.toString(),
-  } as any);
+  await organisationsDb().insertOne(
+    testDoc<IOrganisation>({
+      _id: cfaOrganisationId,
+      created_at: new Date(now),
+      type: "ORGANISME_FORMATION",
+      siret: SIRET,
+      uai: UAI,
+      organisme_id: cfaOrganismeId.toString(),
+    })
+  );
 }
 
 async function seedCfaAdmin() {
-  await usersMigrationDb().insertOne({
-    _id: new ObjectId(id(10)),
-    account_status: "CONFIRMED",
-    created_at: new Date(now),
-    password_updated_at: new Date(now),
-    connection_history: [],
-    emails: [],
-    email: adminEmail,
-    nom: "Admin",
-    prenom: "Alice",
-    fonction: "Directrice",
-    password: testPasswordHash,
-    organisation_id: cfaOrganisationId,
-    organisation_role: "admin",
-    has_accept_cgu_version: "v1",
-  } as any);
+  await usersMigrationDb().insertOne(
+    testDoc<IUsersMigration>({
+      _id: new ObjectId(id(10)),
+      account_status: "CONFIRMED",
+      created_at: new Date(now),
+      password_updated_at: new Date(now),
+      connection_history: [],
+      emails: [],
+      email: adminEmail,
+      nom: "Admin",
+      prenom: "Alice",
+      fonction: "Directrice",
+      password: testPasswordHash,
+      organisation_id: cfaOrganisationId,
+      organisation_role: "admin",
+      has_accept_cgu_version: "v1",
+    })
+  );
   const token = await createSession(adminEmail);
   adminCookie = `${COOKIE_NAME}=${token}`;
 }
@@ -144,16 +150,18 @@ describe("POST /api/v1/organisation/membres/batch", () => {
   });
 
   it("rejette un user déjà membre de la même organisation", async () => {
-    await usersMigrationDb().insertOne({
-      _id: new ObjectId(),
-      account_status: "CONFIRMED",
-      created_at: new Date(now),
-      email: "member@cfa.local",
-      nom: "Existant",
-      prenom: "User",
-      password: testPasswordHash,
-      organisation_id: cfaOrganisationId,
-    } as any);
+    await usersMigrationDb().insertOne(
+      testDoc<IUsersMigration>({
+        _id: new ObjectId(),
+        account_status: "CONFIRMED",
+        created_at: new Date(now),
+        email: "member@cfa.local",
+        nom: "Existant",
+        prenom: "User",
+        password: testPasswordHash,
+        organisation_id: cfaOrganisationId,
+      })
+    );
 
     const response = await batchInvite({ emails: ["member@cfa.local"] });
 
@@ -164,23 +172,27 @@ describe("POST /api/v1/organisation/membres/batch", () => {
 
   it("rejette avec un message spécifique un user existant sur une Mission Locale", async () => {
     const mlOrgId = new ObjectId(id(20));
-    await organisationsDb().insertOne({
-      _id: mlOrgId,
-      created_at: new Date(now),
-      type: "MISSION_LOCALE",
-      nom: "ML Bordeaux",
-      ml_id: 3001,
-    } as any);
-    await usersMigrationDb().insertOne({
-      _id: new ObjectId(),
-      account_status: "CONFIRMED",
-      created_at: new Date(now),
-      email: "conseiller@ml.local",
-      nom: "Conseiller",
-      prenom: "ML",
-      password: testPasswordHash,
-      organisation_id: mlOrgId,
-    } as any);
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        _id: mlOrgId,
+        created_at: new Date(now),
+        type: "MISSION_LOCALE",
+        nom: "ML Bordeaux",
+        ml_id: 3001,
+      })
+    );
+    await usersMigrationDb().insertOne(
+      testDoc<IUsersMigration>({
+        _id: new ObjectId(),
+        account_status: "CONFIRMED",
+        created_at: new Date(now),
+        email: "conseiller@ml.local",
+        nom: "Conseiller",
+        prenom: "ML",
+        password: testPasswordHash,
+        organisation_id: mlOrgId,
+      })
+    );
 
     const response = await batchInvite({ emails: ["conseiller@ml.local"] });
 
@@ -203,24 +215,28 @@ describe("POST /api/v1/organisation/membres/batch", () => {
         nom: "Autre CFA",
       })
     );
-    await organisationsDb().insertOne({
-      _id: otherCfaOrgId,
-      created_at: new Date(now),
-      type: "ORGANISME_FORMATION",
-      siret: "12345678900010",
-      uai: "0000000A",
-      organisme_id: otherCfaOrganismeId.toString(),
-    } as any);
-    await usersMigrationDb().insertOne({
-      _id: new ObjectId(),
-      account_status: "CONFIRMED",
-      created_at: new Date(now),
-      email: "user@autre-cfa.local",
-      nom: "User",
-      prenom: "Autre",
-      password: testPasswordHash,
-      organisation_id: otherCfaOrgId,
-    } as any);
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        _id: otherCfaOrgId,
+        created_at: new Date(now),
+        type: "ORGANISME_FORMATION",
+        siret: "12345678900010",
+        uai: "0000000A",
+        organisme_id: otherCfaOrganismeId.toString(),
+      })
+    );
+    await usersMigrationDb().insertOne(
+      testDoc<IUsersMigration>({
+        _id: new ObjectId(),
+        account_status: "CONFIRMED",
+        created_at: new Date(now),
+        email: "user@autre-cfa.local",
+        nom: "User",
+        prenom: "Autre",
+        password: testPasswordHash,
+        organisation_id: otherCfaOrgId,
+      })
+    );
 
     const response = await batchInvite({ emails: ["user@autre-cfa.local"] });
 
@@ -248,7 +264,9 @@ describe("POST /api/v1/organisation/membres/batch", () => {
     expect(response.status).toBe(200);
     expect(response.data.success).toEqual(["ok@cfa.local"]);
     expect(response.data.errors).toHaveLength(2);
-    expect(response.data.errors.map((e: any) => e.email).sort()).toEqual([adminEmail, "dup@cfa.local"].sort());
+    expect(response.data.errors.map((e: { email: string }) => e.email).sort()).toEqual(
+      [adminEmail, "dup@cfa.local"].sort()
+    );
 
     expect(sendEmail).toHaveBeenCalledTimes(1);
     expect(sendEmail).toHaveBeenCalledWith("ok@cfa.local", "invitation_cfa_member", expect.any(Object));
@@ -256,21 +274,23 @@ describe("POST /api/v1/organisation/membres/batch", () => {
 
   it("refuse l'accès à un member CFA (non admin)", async () => {
     const memberEmail = "member@cfa.local";
-    await usersMigrationDb().insertOne({
-      _id: new ObjectId(id(50)),
-      account_status: "CONFIRMED",
-      created_at: new Date(now),
-      password_updated_at: new Date(now),
-      connection_history: [],
-      emails: [],
-      email: memberEmail,
-      nom: "Member",
-      prenom: "Bob",
-      password: testPasswordHash,
-      organisation_id: cfaOrganisationId,
-      organisation_role: "member",
-      has_accept_cgu_version: "v1",
-    } as any);
+    await usersMigrationDb().insertOne(
+      testDoc<IUsersMigration>({
+        _id: new ObjectId(id(50)),
+        account_status: "CONFIRMED",
+        created_at: new Date(now),
+        password_updated_at: new Date(now),
+        connection_history: [],
+        emails: [],
+        email: memberEmail,
+        nom: "Member",
+        prenom: "Bob",
+        password: testPasswordHash,
+        organisation_id: cfaOrganisationId,
+        organisation_role: "member",
+        has_accept_cgu_version: "v1",
+      })
+    );
     const memberToken = await createSession(memberEmail);
 
     const response = await httpClient.post(

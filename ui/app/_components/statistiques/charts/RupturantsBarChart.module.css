@@ -1,0 +1,13 @@
+.chart {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.legendSkeleton {
+  margin-top: 16px;
+}
+
+.legend {
+  margin-top: auto;
+}

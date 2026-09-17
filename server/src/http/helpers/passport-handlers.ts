@@ -1,9 +1,10 @@
 import * as Sentry from "@sentry/node";
 import Boom from "boom";
-import { compose } from "compose-middleware";
+import { RequestHandler } from "express";
 import { ObjectId } from "mongodb";
 import passport from "passport";
-import { Strategy, ExtractJwt, Strategy as JWTStrategy } from "passport-jwt";
+import { Strategy, ExtractJwt, Strategy as JWTStrategy, VerifiedCallback } from "passport-jwt";
+import type { IOrganisation } from "shared";
 
 import { getAcl } from "@/common/actions/helpers/permissions-organisme";
 import { getOrganisationById } from "@/common/actions/organisations.actions";
@@ -15,10 +16,21 @@ import logger from "@/common/logger";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import config from "@/config";
 
+interface UserJwtPayload {
+  exp: number;
+  email: string;
+  impersonatedOrganisation?: IOrganisation;
+}
+
+interface TokenJwtPayload {
+  exp: number;
+  sub: string;
+}
+
 export const authMiddleware = () => {
   passport.use(
     "jwtStrategy2",
-    new JWTStrategy(
+    new JWTStrategy<UserJwtPayload>(
       {
         jwtFromRequest: (req) => req?.cookies?.[COOKIE_NAME] ?? null,
         secretOrKey: config.auth.user.jwtSecret,
@@ -97,8 +109,10 @@ export const authMiddleware = () => {
     )
   );
 
-  return compose([
-    passport.authenticate("jwtStrategy2", { session: false, failWithError: true }),
+  const authenticate = passport.authenticate("jwtStrategy2", { session: false, failWithError: true });
+
+  return composeMiddlewares([
+    authenticate,
     // TODO stratégie à supprimer pour récupérer la session associée en BDD
     async (req, res, next) => {
       const activeSession = await findSessionByToken(req.cookies[COOKIE_NAME]);
@@ -121,7 +135,7 @@ export const authMiddleware = () => {
 export const checkPasswordToken = () => {
   passport.use(
     "jwt-password",
-    new Strategy(
+    new Strategy<TokenJwtPayload>(
       {
         jwtFromRequest: ExtractJwt.fromBodyField("passwordToken"),
         secretOrKey: config.auth.resetPasswordToken.jwtSecret,
@@ -136,7 +150,7 @@ export const checkPasswordToken = () => {
 export const checkActivationToken = () => {
   passport.use(
     "jwt-activation",
-    new Strategy(
+    new Strategy<TokenJwtPayload>(
       {
         jwtFromRequest: ExtractJwt.fromBodyField("activationToken"),
         secretOrKey: config.auth.activation.jwtSecret,
@@ -148,7 +162,7 @@ export const checkActivationToken = () => {
   return passport.authenticate("jwt-activation", { session: false, failWithError: true });
 };
 
-async function extractUserFromJWT(jwtPayload: any, done: (err?: Error | null, payload?: any) => any) {
+async function extractUserFromJWT(jwtPayload: TokenJwtPayload, done: VerifiedCallback) {
   if (Date.now() > jwtPayload.exp * 1000) {
     done(new Error("Jeton expiré"), false);
     return;
@@ -162,7 +176,34 @@ async function extractUserFromJWT(jwtPayload: any, done: (err?: Error | null, pa
     }
     (user as unknown as AuthContext).organisation = await getOrganisationById(user.organisation_id);
     done(null, user);
-  } catch (err: any) {
+  } catch (err) {
     done(err);
   }
+}
+
+/**
+ * Enchaîne des middlewares Express en un seul : chaque étape n'appelle la suivante que si elle
+ * n'a ni terminé la réponse ni signalé d'erreur.
+ */
+function composeMiddlewares(middlewares: RequestHandler[]): RequestHandler {
+  return (req, res, next) => {
+    let index = -1;
+
+    const run = (i: number, err?: unknown) => {
+      if (err) return next(err);
+      if (i <= index) return next(new Error("next() appelé plusieurs fois"));
+      index = i;
+
+      const middleware = middlewares[i];
+      if (!middleware) return next();
+
+      try {
+        Promise.resolve(middleware(req, res, (nextErr?: unknown) => run(i + 1, nextErr))).catch(next);
+      } catch (error) {
+        next(error);
+      }
+    };
+
+    run(0);
+  };
 }

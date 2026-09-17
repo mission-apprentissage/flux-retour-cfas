@@ -38,7 +38,7 @@ const iso8601Regex = /^([0-9]{4})-([0-9]{2})-([0-9]{2})/;
 export const extensions = {
   emailWithFallback: () =>
     z.preprocess(
-      (v: any) => (v ? String(v).trim() : v),
+      (v: unknown) => (v ? String(v).trim() : v),
       z
         .string()
         .transform((val) => {
@@ -53,7 +53,7 @@ export const extensions = {
 
   siretWithFallback: () =>
     z.preprocess(
-      (v: any) => (v ? String(v).replace(/[\s.-]+/g, "") : v),
+      (v: unknown) => (v ? String(v).replace(/[\s.-]+/g, "") : v),
       z
         .string()
         .transform((val) => {
@@ -67,7 +67,7 @@ export const extensions = {
     ),
 
   numberOrNull: (min?: number, max?: number) =>
-    z.preprocess((v: any) => {
+    z.preprocess((v: unknown) => {
       if (v === null || v === undefined || v === "") return null;
       const num = Number(v);
       if (isNaN(num)) return null;
@@ -78,14 +78,14 @@ export const extensions = {
     }, z.number().int().nullable()),
 
   codePostalOrNull: () =>
-    z.preprocess((v: any) => {
+    z.preprocess((v: unknown) => {
       if (v === null || v === undefined || v === "") return null;
       const str = String(v).trim().padStart(5, "0");
       return CODE_POSTAL_REGEX.test(str) ? str : null;
     }, z.string().nullable()),
 
   siretOrNull: () =>
-    z.preprocess((v: any) => {
+    z.preprocess((v: unknown) => {
       if (v === null || v === undefined || v === "") return null;
       const str = String(v).replace(/[\s.-]+/g, "");
       return SIRET_REGEX.test(str) ? str : null;
@@ -139,19 +139,19 @@ export const extensions = {
   siret: () =>
     z.preprocess(
       // On accepte les tirets, les espaces et les points dans le SIRET (et on les retire silencieusement)
-      (v: any) => (v ? String(v).replace(/[\s.-]+/g, "") : v),
+      (v: unknown) => (v ? String(v).replace(/[\s.-]+/g, "") : v),
       z.string().trim().regex(SIRET_REGEX, "Siret invalide. Format attendu : 14 chiffres") // e.g 01234567890123
     ),
   uai: () => z.string().trim().toUpperCase().regex(UAI_REGEX, "UAI invalide"), // e.g 0123456B
   code_naf: () =>
     z.preprocess(
-      (v: any) => (v ? String(v.replace(".", "")) : v), // parfois, le code naf contient un point
+      (v: unknown) => (typeof v === "string" ? v.replace(".", "") : v), // parfois, le code naf contient un point
       z.string().trim().toUpperCase().regex(CODE_NAF_REGEX, "CODE NAF invalide") // e.g 1071D
     ),
   iso8601Date: () =>
     z
       .preprocess(
-        (v: any) => (typeof v === "string" && v.match(iso8601Regex) ? new Date(v.trim()) : v),
+        (v: unknown) => (typeof v === "string" && v.match(iso8601Regex) ? new Date(v.trim()) : v),
         z.date({
           invalid_type_error: "Date invalide",
           required_error: "Champ obligatoire",
@@ -164,7 +164,7 @@ export const extensions = {
   iso8601Datetime: () =>
     z
       .preprocess(
-        (v: any) => (typeof v === "string" && v.match(iso8601Regex) ? new Date(v.trim()) : v),
+        (v: unknown) => (typeof v === "string" && v.match(iso8601Regex) ? new Date(v.trim()) : v),
         z.date({
           invalid_type_error: "Date invalide",
           required_error: "Champ obligatoire",
@@ -175,7 +175,10 @@ export const extensions = {
         format: "YYYY-MM-DDT00:00:00Z",
       }),
   codeCommuneInsee: () =>
-    z.preprocess((v: any) => (v ? String(v) : v), z.string().regex(/^([0-9]{2}|2A|2B)[0-9]{3}$/, "Format invalide")),
+    z.preprocess(
+      (v: unknown) => (v ? String(v) : v),
+      z.string().regex(/^([0-9]{2}|2A|2B)[0-9]{3}$/, "Format invalide")
+    ),
   objectIdString: () => z.string().regex(/^[0-9a-f]{24}$/),
 };
 
@@ -209,11 +212,11 @@ export const primitivesV1 = {
       description: "Date de dernière mise à jour du statut de l'apprenant, au format ISO-8601",
     }),
     id_erp: z.preprocess(
-      (v: any) => (v ? String(v) : v),
+      (v: unknown) => (v ? String(v) : v),
       z.string().trim().describe("Identifiant de l'apprenant dans l'ERP")
     ),
     ine: z.preprocess(
-      (v: any) => (v ? String(v) : v),
+      (v: unknown) => (v ? String(v) : v),
       z.string().trim().toUpperCase().describe("Identifiant National Élève de l'apprenant")
     ),
     email: z.string().trim().email("Email non valide").describe("Email de l'apprenant").openapi({
@@ -271,7 +274,7 @@ export const primitivesV1 = {
     }),
     adresse: z.string().trim().describe("Adresse du lieu de formation"),
     code_postal: z.preprocess(
-      (v: any) => (v ? String(v).trim().padStart(5, "0") : v),
+      (v: unknown) => (v ? String(v).trim().padStart(5, "0") : v),
       z
         .string()
         .trim()
@@ -284,12 +287,14 @@ export const primitivesV1 = {
     code_rncp: z
       .preprocess(
         // certains organismes n'envoient pas le prefix RNCP
-        (v: any) => {
-          const sanitized = v
-            ?.toString()
-            .trim()
-            .toUpperCase()
-            .replace(/[\s.-]+/g, "");
+        (v: unknown) => {
+          const sanitized =
+            v === null || v === undefined
+              ? undefined
+              : String(v)
+                  .trim()
+                  .toUpperCase()
+                  .replace(/[\s.-]+/g, "");
           return sanitized?.startsWith("RNCP") ? sanitized : `RNCP${sanitized}`;
         },
         z.string().toUpperCase().regex(RNCP_REGEX, "Code RNCP invalide")
@@ -318,11 +323,11 @@ export const primitivesV1 = {
       .describe("Période de la formation, en année (peut être sur plusieurs années)")
       .openapi({
         type: "string",
-        example: `${currentYear - 2}-${currentYear + 1}` as any,
+        example: `${currentYear - 2}-${currentYear + 1}`,
       }),
     annee_scolaire: z.preprocess(
       // On accepte les "/" et espaces dans l'année scolaire (et on les retire silencieusement)
-      (v: any) => (v ? String(v).replace(/\//g, "-").replaceAll(" ", "") : v),
+      (v: unknown) => (v ? String(v).replace(/\//g, "-").replaceAll(" ", "") : v),
       z
         .string()
         .trim()
@@ -345,11 +350,11 @@ export const primitivesV1 = {
         .describe("Période scolaire")
         .openapi({
           type: "string",
-          examples: [`${currentYear - 1}-${currentYear}`, `${currentYear}-${currentYear}`] as any,
+          examples: [`${currentYear - 1}-${currentYear}`, `${currentYear}-${currentYear}`],
         })
     ),
     annee: z.preprocess(
-      (v: any) => (v ? Number(v) : v),
+      (v: unknown) => (v ? Number(v) : v),
       z
         .number()
         .int()
@@ -387,7 +392,7 @@ export const primitivesV3 = {
     has_nir: z.boolean(),
     adresse: z.string().trim().describe("Adresse de l'apprenant"),
     code_postal: z.preprocess(
-      (v: any) => (v ? String(v).trim().padStart(5, "0") : v),
+      (v: unknown) => (v ? String(v).trim().padStart(5, "0") : v),
       z
         .string()
         .trim()
@@ -443,7 +448,7 @@ export const primitivesV3 = {
       example: aMonthAgo.toISOString(),
     }),
     duree_theorique: z.preprocess(
-      (v: any) => (v ? Number(v) : v),
+      (v: unknown) => (v ? Number(v) : v),
       z
         .number()
         .int()
@@ -452,7 +457,7 @@ export const primitivesV3 = {
         .describe("Durée théorique de la formation en années")
     ),
     duree_theorique_mois: z.preprocess(
-      (v: any) => (v ? Number(v) : v),
+      (v: unknown) => (v ? Number(v) : v),
       z
         .number()
         .int()

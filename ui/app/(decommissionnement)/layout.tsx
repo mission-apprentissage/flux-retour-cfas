@@ -1,5 +1,6 @@
-import { fr } from "@codegouvfr/react-dsfr";
 import { Metadata } from "next";
+
+import styles from "@/app/_components/layouts/pageContainer.module.css";
 
 import { UserContextProvider } from "../_components/context/UserContext";
 import { Footer } from "../_components/Footer";
@@ -19,18 +20,7 @@ export default async function DecommissionnementLayout({ children }: { children:
     <Providers>
       <UserContextProvider user={user}>
         <DecommissionnementHeader />
-        <div
-          style={{
-            flex: 1,
-            margin: "auto",
-            maxWidth: 1232,
-            ...fr.spacing("padding", {
-              topBottom: "10v",
-            }),
-          }}
-        >
-          {children}
-        </div>
+        <div className={styles.containerGrow}>{children}</div>
         <Footer />
       </UserContextProvider>
     </Providers>

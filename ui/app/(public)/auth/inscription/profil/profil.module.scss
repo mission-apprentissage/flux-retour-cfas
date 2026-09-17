@@ -1,0 +1,34 @@
+.summary {
+  margin-bottom: 2rem;
+}
+
+.summaryName {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.summaryDetail {
+  margin: 0.25rem 0 0;
+}
+
+.consents {
+  padding-top: 0.5rem;
+  margin-top: 2rem;
+  border-top: 1px solid var(--border-default-grey);
+}
+
+.checkbox {
+  margin-top: 1.5rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.alert {
+  margin-top: 1.5rem;
+}

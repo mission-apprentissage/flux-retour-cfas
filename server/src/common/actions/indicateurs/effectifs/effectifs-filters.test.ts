@@ -209,15 +209,8 @@ describe("Filtres Indicateurs", () => {
       const id1 = new ObjectId();
       const id2 = new ObjectId();
 
-      const result: any = buildEffectifPerimetreMongoFilters({ id: { $in: [id1.toString(), id2.toString()] } });
-      expect(result).toMatchObject({
-        organisme_id: {
-          $in: [expect.anything(), expect.anything()],
-        },
-      });
-
-      expect(id1.equals(result.organisme_id.$in[0])).toBe(true);
-      expect(id2.equals(result.organisme_id.$in[1])).toBe(true);
+      const result = buildEffectifPerimetreMongoFilters({ id: { $in: [id1.toString(), id2.toString()] } });
+      expect(result).toMatchObject({ organisme_id: { $in: [id1, id2] } });
     });
 
     it("should support scope restriction by reseau", () => {

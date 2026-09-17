@@ -1,0 +1,14 @@
+.table {
+  margin-bottom: 2rem;
+}
+
+.field {
+  max-width: 720px;
+  margin-bottom: 1rem;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}

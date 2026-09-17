@@ -14,6 +14,10 @@ export function generateMissionLocaleEffectifFixture(overrides: {
   snapshot_region?: string | null;
   computed_activated_at?: Date | null;
   source?: "ERP" | "DECA";
+  souhaite_rdv?: boolean;
+  date_traitement?: Date | null;
+  date_dernier_passage_a_recontacter?: Date | null;
+  date_derniere_action_ml?: Date | null;
 }): IMissionLocaleEffectif {
   const snapshot: Record<string, unknown> = { organisme_id: overrides.organisme_id };
   if (overrides.source) snapshot.source = overrides.source;
@@ -43,6 +47,9 @@ export function generateMissionLocaleEffectifFixture(overrides: {
     current_status: { value: null, date: null },
     whatsapp_callback_requested: false,
     whatsapp_no_help_responded: false,
-    souhaite_rdv: false,
+    souhaite_rdv: overrides.souhaite_rdv ?? false,
+    date_traitement: overrides.date_traitement ?? null,
+    date_dernier_passage_a_recontacter: overrides.date_dernier_passage_a_recontacter ?? null,
+    date_derniere_action_ml: overrides.date_derniere_action_ml ?? null,
   };
 }

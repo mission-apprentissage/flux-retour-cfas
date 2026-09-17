@@ -1,7 +1,15 @@
 import { captureException } from "@sentry/node";
 import Boom from "boom";
+import { ErrorRequestHandler, Request } from "express";
+import { ZodError } from "zod";
 
 import config from "@/config";
+import { isValidationErrorList } from "@/http/middlewares/validateRequestMiddleware";
+
+interface ErrorPayload extends Boom.Payload {
+  details?: unknown;
+  issues?: unknown;
+}
 
 function shouldLogError(boomError: Boom, req: Request): boolean {
   if (boomError.isServer) {
@@ -12,37 +20,43 @@ function shouldLogError(boomError: Boom, req: Request): boolean {
   return req.url.startsWith("/api/v3/dossiers-apprenants");
 }
 
-export default () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return (rawError, req, res, next) => {
-    req.err = rawError;
+function toError(rawError: unknown): Error {
+  if (rawError instanceof Error) {
+    return rawError;
+  }
+  return new Error(typeof rawError === "string" ? rawError : "Une erreur est survenue");
+}
 
-    let boomError;
+export default (): ErrorRequestHandler => {
+  return (rawError: unknown, req, res, _next) => {
+    const error = toError(rawError);
+    req.err = error;
 
-    if (rawError.isBoom) {
-      boomError = rawError;
-    } else if (rawError.issues) {
-      //This is a Zod validation error
+    let boomError: Boom;
+    const payload = (): ErrorPayload => boomError.output.payload;
+
+    if (Boom.isBoom(error)) {
+      boomError = error;
+    } else if (error instanceof ZodError) {
       boomError = Boom.badRequest("Erreur de validation");
-      boomError.output.payload.issues = rawError.issues;
-      boomError.output.payload.details = rawError.issues[0].message; // compatibility with other error handling
-    } else if (rawError?.[0]?.errors?.name === "ZodError") {
-      //This is a Zod validation error
+      payload().issues = error.issues;
+      payload().details = error.issues[0]?.message; // compatibility with other error handling
+    } else if (isValidationErrorList(rawError)) {
       boomError = Boom.badRequest("Erreur de validation");
-      boomError.output.payload.details = rawError?.[0].errors.issues;
-    } else if (rawError.name === "ValidationError") {
-      //This is a joi validation error
+      payload().details = rawError[0].errors.issues;
+    } else if (error.name === "ValidationError") {
       boomError = Boom.badRequest("Erreur de validation");
-      boomError.output.payload.details = rawError.details;
+      payload().details = "details" in error ? error.details : undefined;
     } else {
-      boomError = Boom.boomify(rawError, {
-        statusCode: rawError.status || 500,
-        ...(!rawError.message ? { message: "Une erreur est survenue" } : {}),
+      const status = "status" in error && typeof error.status === "number" ? error.status : 500;
+      boomError = Boom.boomify(error, {
+        statusCode: status,
+        ...(!error.message ? { message: "Une erreur est survenue" } : {}),
       });
       if (config.env === "local") {
-        boomError.output.payload.details = {
+        payload().details = {
           rawError: {
-            message: rawError.message,
+            message: error.message,
           },
         };
       }
@@ -52,9 +66,9 @@ export default () => {
       captureException(rawError);
     }
 
-    const { error, message, details, issues } = boomError.output.payload;
+    const { error: errorName, message, details, issues } = payload();
     return res.status(boomError.output.statusCode).send({
-      error,
+      error: errorName,
       message,
       details,
       issues,

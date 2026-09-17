@@ -1,8 +1,3 @@
-export interface UsersPaginated {
-  pagination: Pagination;
-  data: User[];
-}
-
 export interface User {
   _id: string;
   account_status: string;
@@ -17,6 +12,7 @@ export interface User {
   has_accept_cgu_version: string;
   organisation_id: string;
   organisation: UserOrganisation;
+  organisation_role?: "admin" | "member";
   last_connection: string;
 }
 
@@ -28,6 +24,13 @@ export interface UserOrganisation {
   siret: string;
   code_departement: string;
   code_region: string;
+  code_academie?: string;
+  reseau?: string;
+  region_list?: string[];
+  adresse?: {
+    departement?: string;
+    region?: string;
+  };
   organisme: UserOrganisme;
   label: string;
 }
@@ -35,7 +38,7 @@ export interface UserOrganisation {
 export interface UserOrganisme {
   _id: string;
   nom: string;
-  reseaux: any[];
+  reseaux: string[];
   nature: string;
   raison_sociale: string;
   adresse?: {

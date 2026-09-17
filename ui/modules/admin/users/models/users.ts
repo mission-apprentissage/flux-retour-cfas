@@ -8,6 +8,7 @@ export type UserNormalized = {
   has_accept_cgu_version: string;
   organisation_id: string;
   organisation: UserOrganisation;
+  organisation_role?: "admin" | "member";
   normalizedNomPrenom: string;
   normalizedEmail: string;
   normalizedOrganismeNom: string;

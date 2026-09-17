@@ -4,28 +4,27 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { IconButton, Link, Stack } from "@mui/material";
-import { Field, Form, Formik } from "formik";
+import { Field, FieldProps, Form, Formik, FormikHelpers } from "formik";
 import NextLink from "next/link";
 import React from "react";
 import { useLocalStorage } from "usehooks-ts";
 
 import { getApiErrorMessage, isRateLimited } from "@/common/rateLimit";
-import { ShowPassword } from "@/theme/components/icons";
 
+import styles from "./Connexion.module.scss";
 import { type AuthConnexionValues, submitLogin, validateAuthConnexion } from "./login.schema";
 
 export function StandardLoginForm() {
   const [originConnexionUrl, setOriginConnexionUrl] = useLocalStorage("originConnexionUrl", "");
   const [show, setShow] = React.useState(false);
 
-  const handleSubmit = async (values: AuthConnexionValues, { setStatus }: any) => {
+  const handleSubmit = async (values: AuthConnexionValues, { setStatus }: FormikHelpers<AuthConnexionValues>) => {
     try {
       await submitLogin(values, {
         originConnexionUrl,
         clearOriginConnexionUrl: () => setOriginConnexionUrl(""),
       });
-    } catch (err: any) {
+    } catch (err) {
       setStatus({ error: getApiErrorMessage(err), severity: isRateLimited(err) ? "warning" : "error" });
     }
   };
@@ -38,9 +37,9 @@ export function StandardLoginForm() {
     >
       {({ status = {} }) => (
         <Form noValidate>
-          <Stack>
+          <div className={styles.form}>
             <Field name="email">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <Input
                   label="Email (votre identifiant)"
                   state={meta.touched && meta.error ? "error" : "default"}
@@ -59,7 +58,7 @@ export function StandardLoginForm() {
             </Field>
 
             <Field name="password">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <Input
                   label="Mot de passe"
                   state={meta.touched && meta.error ? "error" : "default"}
@@ -74,31 +73,31 @@ export function StandardLoginForm() {
                     onBlur: field.onBlur,
                   }}
                   action={
-                    <IconButton
+                    <Button
                       type="button"
+                      priority="tertiary no outline"
+                      iconId={show ? "ri-eye-off-line" : "ri-eye-line"}
+                      title={show ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                       onClick={() => setShow((s) => !s)}
-                      aria-label={show ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-                    >
-                      <ShowPassword />
-                    </IconButton>
+                    />
                   }
                 />
               )}
             </Field>
 
-            <Stack direction="row" spacing={fr.spacing("4w")} alignItems="center" sx={{ mt: fr.spacing("2w") }}>
+            <div className={styles.actions}>
               <Button type="submit">Connexion</Button>
-              <Link component={NextLink} href="/auth/mot-de-passe-oublie">
+              <NextLink href="/auth/mot-de-passe-oublie" className={fr.cx("fr-link")}>
                 Mot de passe oublié
-              </Link>
-            </Stack>
+              </NextLink>
+            </div>
 
             {status.error && (
-              <Stack sx={{ mt: fr.spacing("4w") }}>
+              <div className={styles.alert}>
                 <Alert severity={status.severity ?? "error"} small description={status.error} />
-              </Stack>
+              </div>
             )}
-          </Stack>
+          </div>
         </Form>
       )}
     </Formik>

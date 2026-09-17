@@ -1,7 +1,7 @@
 /**
  * Force the browser to download a file
  */
-export function downloadObject(object: any, filename: string, type: string) {
+export function downloadObject(object: BlobPart, filename: string, type: string) {
   const blob = new Blob([object], {
     type,
   });

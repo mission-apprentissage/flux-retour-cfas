@@ -7,10 +7,11 @@ import Link from "next/link";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import type { StatsPeriod } from "shared/models/data/nationalStats.model";
 
+import { TableSkeleton } from "@/app/_components/common/Skeleton";
+
 import { isLoadingVariation } from "../hooks/useLoadingVariation";
 import { useSortableTable } from "../hooks/useSortableTable";
 import { useTraitementMLStats, usePrefetchTraitementML } from "../hooks/useStatsQueries";
-import { TableSkeleton } from "../ui/Skeleton";
 import { formatActivityDuration, formatPercentageBadge } from "../utils";
 
 import { SortableTableHeader } from "./SortableTableHeader";

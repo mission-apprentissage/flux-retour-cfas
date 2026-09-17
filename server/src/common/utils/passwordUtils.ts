@@ -23,8 +23,8 @@ export function compareWithTimingSafety(password: string, storedHash: string | n
   return ok && storedHash != null;
 }
 
-export function isTooWeak(hash) {
+export function isTooWeak(hash: string) {
   const array = hash.split("$");
   const round = array[2].split("=")[1];
-  return round < config.auth.passwordHashRounds;
+  return Number(round) < config.auth.passwordHashRounds;
 }

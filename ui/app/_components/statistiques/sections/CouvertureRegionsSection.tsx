@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 
+import { TableSkeleton } from "@/app/_components/common/Skeleton";
+
 import { useCouvertureRegionsStats } from "../hooks/useStatsQueries";
 import { NationalRegionTable } from "../tables/NationalRegionTable";
 import { PeriodSelector, type Period } from "../ui/PeriodSelector";
-import { TableSkeleton } from "../ui/Skeleton";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import { StatisticsSection } from "./StatisticsSection";

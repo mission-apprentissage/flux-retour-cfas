@@ -8,7 +8,7 @@ export const up = async () => {
 
   const allReseaux = await reseauxDb().find().toArray();
 
-  const reseauxMap = allReseaux.reduce((acc, curr) => {
+  const reseauxMap = allReseaux.reduce<Record<string, string>>((acc, curr) => {
     return {
       ...acc,
       [curr.nom]: curr.key,

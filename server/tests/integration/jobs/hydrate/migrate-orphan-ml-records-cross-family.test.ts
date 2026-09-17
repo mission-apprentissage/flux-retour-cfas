@@ -1,4 +1,7 @@
 import { ObjectId } from "bson";
+import type { IMissionLocaleEffectif } from "shared/models";
+import type { IEffectif } from "shared/models/data/effectifs.model";
+import type { IOrganisme } from "shared/models/data/organismes.model";
 import { it, expect, describe, beforeAll, beforeEach } from "vitest";
 
 import { effectifsDb, missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
@@ -6,6 +9,7 @@ import { createIndexes } from "@/common/model/indexes";
 import { migrateOrphanMlRecordsCrossFamily } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc } from "@tests/utils/testUtils";
 
 const ANNEE = "2025-2026";
 
@@ -29,7 +33,7 @@ async function setupFamily() {
   };
   formateur.siret = formateurSiret;
 
-  await organismesDb().insertMany([responsable as any, formateur as any]);
+  await organismesDb().insertMany([testDoc<IOrganisme>(responsable), testDoc<IOrganisme>(formateur)]);
   return { responsableId, formateurId };
 }
 
@@ -42,22 +46,22 @@ async function insertEffectif(
   const effectif = {
     _id: new ObjectId(),
     ...(await createSampleEffectif({
-      organisme: sampleOrganisme as any,
+      organisme: sampleOrganisme,
       annee_scolaire: ANNEE,
       apprenant,
     })),
     organisme_id: organismeId,
     updated_at,
   };
-  await effectifsDb().insertOne(effectif as any);
+  await effectifsDb().insertOne(testDoc<IEffectif>(effectif));
   return effectif;
 }
 
 async function insertMlRecord(
-  effectif: any,
+  effectif: Awaited<ReturnType<typeof insertEffectif>>,
   organismeId: ObjectId,
   identifiant: { nom: string; prenom: string; date_de_naissance: Date },
-  overrides: Record<string, any> = {}
+  overrides: Record<string, unknown> = {}
 ) {
   const mlRecord = {
     _id: new ObjectId(),
@@ -73,7 +77,7 @@ async function insertMlRecord(
     brevo: { token: null, token_created_at: null },
     ...overrides,
   };
-  await missionLocaleEffectifsDb().insertOne(mlRecord as any);
+  await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(mlRecord));
   return mlRecord;
 }
 
@@ -102,7 +106,7 @@ describe("migrateOrphanMlRecordsCrossFamily", () => {
       effectif_snapshot: {
         ...oldEffectif,
         organisme_id: responsableId,
-        _computed: { ...(oldEffectif as any)._computed, statut: { en_cours: "RUPTURANT", parcours: [] } },
+        _computed: { ...oldEffectif._computed, statut: { en_cours: "RUPTURANT", parcours: [] } },
       },
     });
 
@@ -176,7 +180,7 @@ describe("migrateOrphanMlRecordsCrossFamily", () => {
     const legacyEffectif = {
       _id: new ObjectId(),
       ...(await createSampleEffectif({
-        organisme: sampleOrganisme as any,
+        organisme: sampleOrganisme,
         annee_scolaire: ANNEE,
         apprenant: {
           nom: "Dupont",
@@ -187,7 +191,7 @@ describe("migrateOrphanMlRecordsCrossFamily", () => {
       organisme_id: formateurId,
       updated_at: new Date("2026-04-01"),
     };
-    await effectifsDb().insertOne(legacyEffectif as any);
+    await effectifsDb().insertOne(testDoc<IEffectif>(legacyEffectif));
 
     const summary = await migrateOrphanMlRecordsCrossFamily();
 
@@ -209,7 +213,7 @@ describe("migrateOrphanMlRecordsCrossFamily", () => {
       effectif_snapshot: {
         ...oldEffectif,
         organisme_id: responsableId,
-        _computed: { ...(oldEffectif as any)._computed, statut: { en_cours: "RUPTURANT", parcours: [] } },
+        _computed: { ...oldEffectif._computed, statut: { en_cours: "RUPTURANT", parcours: [] } },
       },
     });
     await insertEffectif(formateurId, identifiant, new Date("2026-04-01"));

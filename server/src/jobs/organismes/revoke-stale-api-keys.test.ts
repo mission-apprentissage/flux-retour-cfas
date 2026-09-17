@@ -1,4 +1,5 @@
 import { subMonths } from "date-fns";
+import type { ObjectId } from "mongodb";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { describe, it, expect, beforeEach } from "vitest";
 
@@ -49,7 +50,7 @@ const organismes = {
   }),
 };
 
-const reload = (id) => organismesDb().findOne({ _id: id });
+const reload = (id: ObjectId) => organismesDb().findOne({ _id: id });
 
 describe("revokeStaleApiKeysJob", () => {
   beforeEach(async () => {

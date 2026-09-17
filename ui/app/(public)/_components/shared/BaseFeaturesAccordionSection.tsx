@@ -136,16 +136,7 @@ export function BaseFeaturesAccordionSection({ title, features, imgAlt, imgPath 
       <div className={styles.container}>
         <div className={styles.header}>
           <h2 className={styles.title}>{title}</h2>
-          <PauseButton
-            isPaused={!animationActive}
-            togglePause={togglePause}
-            style={{
-              flexShrink: 0,
-              whiteSpace: "nowrap",
-              marginTop: "auto",
-              marginLeft: "auto",
-            }}
-          />
+          <PauseButton isPaused={!animationActive} togglePause={togglePause} className={styles.pauseButtonAligne} />
         </div>
         <div className={styles.content}>
           <div className={`${styles.accordions} fr-accordions-group`}>

@@ -1,0 +1,40 @@
+/* Habillage DSFR du sélecteur de mois react-datepicker (filtre Date des indicateurs). */
+
+.react-datepicker {
+  font-family: Marianne, sans-serif !important;
+  border-color: var(--border-default-grey);
+}
+
+.react-datepicker-popper {
+  z-index: 9999 !important;
+}
+
+.react-datepicker__header {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  text-align: center !important;
+  background-color: var(--background-alt-grey);
+  border-bottom-color: var(--border-default-grey) !important;
+}
+
+.react-datepicker__month .react-datepicker__month-text {
+  width: 96px !important;
+  padding: 4px 8px;
+  margin: 4px !important;
+  font-weight: 400;
+  color: var(--text-default-grey);
+  text-transform: capitalize;
+}
+
+.react-datepicker__month .react-datepicker__month-text:hover {
+  background-color: var(--background-alt-grey-hover);
+}
+
+.react-datepicker__month .react-datepicker__month--selected {
+  color: var(--text-inverted-blue-france);
+  background-color: var(--background-action-high-blue-france);
+}
+
+.react-datepicker__month .react-datepicker__month--disabled {
+  color: var(--text-disabled-grey);
+}

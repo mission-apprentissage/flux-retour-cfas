@@ -1,3 +1,5 @@
+import type { ObjectId } from "mongodb";
+
 import { effectifsDb } from "@/common/model/collections";
 
 /**
@@ -5,7 +7,10 @@ import { effectifsDb } from "@/common/model/collections";
  * @param organismeSource
  * @param organismeWithDuplicates
  */
-export const getEffectifsDuplicatesFromOrganismes = async (organismeSource, organismeWithDuplicates) => {
+export const getEffectifsDuplicatesFromOrganismes = async (
+  organismeSource: ObjectId,
+  organismeWithDuplicates: ObjectId
+) => {
   return await effectifsDb()
     .aggregate([
       { $match: { organisme_id: { $in: [organismeSource, organismeWithDuplicates] } } },

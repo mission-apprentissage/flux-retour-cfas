@@ -20,6 +20,9 @@ export const createTelechargementListeNomLog = async (
     | "ml_a_traiter"
     | "ml_traite"
     | "ml_injoignable"
+    | "ml_a_traiter_ou_recontacter"
+    | "ml_collab_a_traiter_ou_recontacter"
+    | "ml_collab_traite"
     | "arml"
     | "ft_a_traiter"
     | "ft_traite",

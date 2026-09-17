@@ -44,13 +44,13 @@ export function getSituationLabel(situation: FranceTravailSituation): string {
   return SITUATION_LABELS[situation] || situation;
 }
 
-export function getFirstNonNullFtData(ftData: Record<string, any>): [string, any] | null {
+export function getFirstNonNullFtData(ftData: Record<string, unknown>): [string, unknown] | null {
   const entries = Object.entries(ftData).filter(([_, value]) => value !== null);
   return entries[0] || null;
 }
 
 export function mapSecteursFromFtData(
-  ftData: Record<string, any>,
+  ftData: Record<string, unknown>,
   secteurs: ISecteurArborescence[]
 ): Array<{ code: string; libelle: string }> {
   return Object.keys(ftData)

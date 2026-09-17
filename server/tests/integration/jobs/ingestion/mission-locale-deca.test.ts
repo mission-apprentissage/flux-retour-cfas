@@ -456,6 +456,35 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       expect((softDeleted[0].effectif_snapshot as IEffectifDECA)?.is_deca_compatible).toBe(true);
     });
 
+    it("La fusion transporte la situation avec ses dates de suivi", async () => {
+      const decaEffectif = createBaseDecaEffectif({ apprenant: makeApprenant("BERNARD", "Léa", 21) });
+      await createMissionLocaleSnapshot(decaEffectif);
+
+      const dateRecontact = new Date("2026-08-10T09:00:00.000Z");
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: decaEffectif._id },
+        {
+          $set: {
+            situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+            date_dernier_passage_a_recontacter: dateRecontact,
+            date_derniere_action_ml: dateRecontact,
+          },
+        }
+      );
+
+      const erpEffectif = createBaseErpEffectif({
+        _id: new ObjectId(),
+        apprenant: makeApprenant("BERNARD", "Léa", 21),
+      });
+      await createMissionLocaleSnapshot(erpEffectif);
+
+      const keeper = await missionLocaleEffectifsDb().findOne({ effectif_id: erpEffectif._id });
+      expect(keeper?.situation).toBe(SITUATION_ENUM.CONTACTE_SANS_RETOUR);
+      // sans ces dates, le keeper serait « à recontacter » sans date : sous-texte vide et tri faussé
+      expect(keeper?.date_dernier_passage_a_recontacter).toEqual(dateRecontact);
+      expect(keeper?.date_derniere_action_ml).toEqual(dateRecontact);
+    });
+
     it("ERP existe, puis DECA arrive pour même personne → DECA rejeté, ERP intact", async () => {
       const erpEffectif = createBaseErpEffectif({ apprenant: makeApprenant("MARTIN", "Marie", 22) });
       const erpResult = await createMissionLocaleSnapshot(erpEffectif);
@@ -564,7 +593,7 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
             const val = target[prop as keyof typeof target];
             return typeof val === "function" ? val.bind(target) : val;
           },
-        }) as any;
+        }) as typeof realDb;
       });
 
       const erpEffectif = createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_C", "Prenomc", 20) });
@@ -601,7 +630,7 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
             const val = target[prop as keyof typeof target];
             return typeof val === "function" ? val.bind(target) : val;
           },
-        }) as any;
+        }) as typeof realDb;
       });
 
       // L'ERP va soft-delete le DECA mais l'upsert va échouer
@@ -907,7 +936,7 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
           nom: "TESTNOM_L",
           prenom: "Prenoml",
           date_de_naissance: new Date("2007-10-17T00:00:00Z"),
-          telephone: null as any,
+          telephone: null,
           courriel: "prenoml@iloud.com",
           historique_statut: [],
           has_nir: false,

@@ -23,18 +23,18 @@ describe("Brevo WhatsApp Webhook Routes", () => {
   beforeEach(async () => {
     originalEnv = config.env;
     originalWebhookToken = config.brevo.whatsapp?.webhookToken;
-    (config as any).env = "production";
+    Object.assign(config, { env: "production" });
     if (config.brevo.whatsapp) {
-      (config.brevo.whatsapp as any).webhookToken = TEST_WEBHOOK_TOKEN;
+      Object.assign(config.brevo.whatsapp, { webhookToken: TEST_WEBHOOK_TOKEN });
     }
     const app = await initTestApp();
     httpClient = app.httpClient;
   });
 
   afterEach(() => {
-    (config as any).env = originalEnv;
+    Object.assign(config, { env: originalEnv });
     if (config.brevo.whatsapp) {
-      (config.brevo.whatsapp as any).webhookToken = originalWebhookToken;
+      Object.assign(config.brevo.whatsapp, { webhookToken: originalWebhookToken });
     }
   });
 
@@ -168,7 +168,7 @@ describe("Brevo WhatsApp Webhook Routes", () => {
     });
 
     it("retourne 403 hors production", async () => {
-      (config as any).env = "local";
+      Object.assign(config, { env: "local" });
       const app = await initTestApp();
 
       const response = await app.httpClient.post("/api/webhooks/brevo/whatsapp", {});

@@ -3,8 +3,9 @@
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import { useMemo } from "react";
 
+import { TableSkeleton } from "@/app/_components/common/Skeleton";
+
 import { useSortableTable } from "../hooks/useSortableTable";
-import { TableSkeleton } from "../ui/Skeleton";
 import { formatDelta } from "../utils";
 
 import styles from "./CollaborationRegionTable.module.css";

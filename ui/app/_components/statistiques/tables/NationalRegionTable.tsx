@@ -6,8 +6,9 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { IRegionStats } from "shared/models/data/nationalStats.model";
 
+import { Skeleton } from "@/app/_components/common/Skeleton";
+
 import { useSortableTable } from "../hooks/useSortableTable";
-import { Skeleton } from "../ui/Skeleton";
 import { formatDelta, formatVariationBadge } from "../utils";
 
 import styles from "./NationalRegionTable.module.css";

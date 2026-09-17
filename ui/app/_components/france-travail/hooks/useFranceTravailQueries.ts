@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 import { _get, _put } from "@/common/httpClient";
 
@@ -15,12 +16,12 @@ import {
 export const franceTravailQueryKeys = {
   all: ["france-travail"] as const,
   arborescence: () => [...franceTravailQueryKeys.all, "arborescence"] as const,
-  effectifsBySecteur: (codeSecteur: number, params: Record<string, any>) =>
+  effectifsBySecteur: (codeSecteur: number, params: Record<string, unknown>) =>
     [...franceTravailQueryKeys.all, "effectifs", "secteur", codeSecteur, params] as const,
-  effectifDetail: (id: string, params: Record<string, any>) =>
+  effectifDetail: (id: string, params: Record<string, unknown>) =>
     [...franceTravailQueryKeys.all, "effectif", id, params] as const,
   moisTraites: () => [...franceTravailQueryKeys.all, "mois-traites"] as const,
-  effectifsTraitesParMois: (mois: string, params: Record<string, any>) =>
+  effectifsTraitesParMois: (mois: string, params: Record<string, unknown>) =>
     [...franceTravailQueryKeys.all, "effectifs", "traites", "mois", mois, params] as const,
   departementCounts: (codeSecteur: number) =>
     [...franceTravailQueryKeys.all, "departement-counts", codeSecteur] as const,
@@ -32,15 +33,17 @@ const fetchArborescence = async (): Promise<IArborescenceResponse> => {
 
 const fetchEffectifsBySecteur = async (
   codeSecteur: number,
-  params: Record<string, any>
+  params: Record<string, unknown>
 ): Promise<IEffectifsBySecteurResponse> => {
   return _get(`/api/v1/organisation/france-travail/effectifs/a-traiter/${codeSecteur}`, { params });
 };
 
 export function useArborescence() {
-  return useQuery(franceTravailQueryKeys.arborescence(), fetchArborescence, {
+  return useQuery({
+    queryKey: franceTravailQueryKeys.arborescence(),
+    queryFn: fetchArborescence,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     retry: 3,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -51,16 +54,14 @@ export function useEffectifsBySecteur(
   codeSecteur: number | null,
   params: { page?: number; limit?: number; search?: string; departements?: string } = {}
 ) {
-  return useQuery(
-    franceTravailQueryKeys.effectifsBySecteur(codeSecteur!, params),
-    () => fetchEffectifsBySecteur(codeSecteur!, params),
-    {
-      enabled: codeSecteur !== null,
-      staleTime: 30 * 1000,
-      retry: 3,
-      refetchOnWindowFocus: false,
-    }
-  );
+  return useQuery({
+    queryKey: franceTravailQueryKeys.effectifsBySecteur(codeSecteur!, params),
+    queryFn: () => fetchEffectifsBySecteur(codeSecteur!, params),
+    enabled: codeSecteur !== null,
+    staleTime: 30 * 1000,
+    retry: 3,
+    refetchOnWindowFocus: false,
+  });
 }
 
 const fetchEffectifDetail = async (
@@ -92,33 +93,36 @@ export function useEffectifDetail(
 ) {
   const queryClient = useQueryClient();
 
-  const query = useQuery(franceTravailQueryKeys.effectifDetail(id!, params), () => fetchEffectifDetail(id!, params), {
+  const query = useQuery({
+    queryKey: franceTravailQueryKeys.effectifDetail(id!, params),
+    queryFn: () => fetchEffectifDetail(id!, params),
     enabled: id !== null,
     staleTime: 30 * 1000,
     retry: 3,
     refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      if (data.next) {
-        queryClient.prefetchQuery(
-          franceTravailQueryKeys.effectifDetail(data.next.id, params),
-          () => fetchEffectifDetail(data.next!.id, params),
-          {
-            staleTime: 30 * 1000,
-          }
-        );
-      }
-
-      if (data.previous) {
-        queryClient.prefetchQuery(
-          franceTravailQueryKeys.effectifDetail(data.previous.id, params),
-          () => fetchEffectifDetail(data.previous!.id, params),
-          {
-            staleTime: 30 * 1000,
-          }
-        );
-      }
-    },
   });
+
+  // v5 : onSuccess a été retiré de useQuery — le prefetch des voisins se fait désormais via un effet sur la donnée.
+  const { data } = query;
+  useEffect(() => {
+    if (!data) return;
+
+    if (data.next) {
+      queryClient.prefetchQuery({
+        queryKey: franceTravailQueryKeys.effectifDetail(data.next.id, params),
+        queryFn: () => fetchEffectifDetail(data.next!.id, params),
+        staleTime: 30 * 1000,
+      });
+    }
+
+    if (data.previous) {
+      queryClient.prefetchQuery({
+        queryKey: franceTravailQueryKeys.effectifDetail(data.previous.id, params),
+        queryFn: () => fetchEffectifDetail(data.previous!.id, params),
+        staleTime: 30 * 1000,
+      });
+    }
+  }, [data, params, queryClient]);
 
   return query;
 }
@@ -137,9 +141,11 @@ const updateEffectif = async ({ id, commentaire, situation, code_secteur }: Upda
 export function useUpdateEffectif() {
   const queryClient = useQueryClient();
 
-  return useMutation(updateEffectif, {
+  return useMutation({
+    mutationFn: updateEffectif,
+
     onSuccess: () => {
-      queryClient.invalidateQueries(franceTravailQueryKeys.all);
+      queryClient.invalidateQueries({ queryKey: franceTravailQueryKeys.all });
     },
   });
 }
@@ -149,9 +155,11 @@ const fetchMoisTraites = async (): Promise<IMoisTraitesResponse> => {
 };
 
 export function useMoisTraites() {
-  return useQuery(franceTravailQueryKeys.moisTraites(), fetchMoisTraites, {
+  return useQuery({
+    queryKey: franceTravailQueryKeys.moisTraites(),
+    queryFn: fetchMoisTraites,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     retry: 3,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -160,7 +168,7 @@ export function useMoisTraites() {
 
 const fetchEffectifsTraitesParMois = async (
   mois: string,
-  params: Record<string, any>
+  params: Record<string, unknown>
 ): Promise<IEffectifsTraitesParMoisResponse> => {
   return _get(`/api/v1/organisation/france-travail/effectifs/traite/mois/${mois}`, { params });
 };
@@ -169,16 +177,14 @@ export function useEffectifsTraitesParMois(
   mois: string | null,
   params: { page?: number; limit?: number; search?: string; departements?: string } = {}
 ) {
-  return useQuery(
-    franceTravailQueryKeys.effectifsTraitesParMois(mois!, params),
-    () => fetchEffectifsTraitesParMois(mois!, params),
-    {
-      enabled: mois !== null,
-      staleTime: 30 * 1000,
-      retry: 3,
-      refetchOnWindowFocus: false,
-    }
-  );
+  return useQuery({
+    queryKey: franceTravailQueryKeys.effectifsTraitesParMois(mois!, params),
+    queryFn: () => fetchEffectifsTraitesParMois(mois!, params),
+    enabled: mois !== null,
+    staleTime: 30 * 1000,
+    retry: 3,
+    refetchOnWindowFocus: false,
+  });
 }
 
 const fetchDepartementCounts = async (codeSecteur: number): Promise<IDepartementCountsResponse> => {
@@ -186,10 +192,12 @@ const fetchDepartementCounts = async (codeSecteur: number): Promise<IDepartement
 };
 
 export function useDepartementCounts(codeSecteur: number | null) {
-  return useQuery(franceTravailQueryKeys.departementCounts(codeSecteur!), () => fetchDepartementCounts(codeSecteur!), {
+  return useQuery({
+    queryKey: franceTravailQueryKeys.departementCounts(codeSecteur!),
+    queryFn: () => fetchDepartementCounts(codeSecteur!),
     enabled: codeSecteur !== null,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     retry: 3,
     refetchOnWindowFocus: false,
   });

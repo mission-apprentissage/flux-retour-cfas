@@ -1,17 +1,5 @@
-import { fr } from "@codegouvfr/react-dsfr";
+import styles from "@/app/_components/layouts/pageContainer.module.css";
 
 export function MlContainer({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      style={{
-        margin: "auto",
-        maxWidth: 1232,
-        ...fr.spacing("padding", {
-          topBottom: "10v",
-        }),
-      }}
-    >
-      {children}
-    </div>
-  );
+  return <div className={styles.container}>{children}</div>;
 }

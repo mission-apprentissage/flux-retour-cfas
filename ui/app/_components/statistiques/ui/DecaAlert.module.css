@@ -1,0 +1,13 @@
+.lien {
+  padding: 0;
+  color: var(--text-action-high-blue-france);
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.detail {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}

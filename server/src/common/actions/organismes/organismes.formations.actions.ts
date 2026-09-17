@@ -2,7 +2,7 @@ import { IFormationSearchResponse } from "shared/models";
 
 import { formationsCatalogueDb } from "@/common/model/collections";
 
-export async function searchOrganismesFormations(searchTerm: string): Promise<any[]> {
+export async function searchOrganismesFormations(searchTerm: string) {
   const formations = await formationsCatalogueDb()
     .aggregate<IFormationSearchResponse>([
       {

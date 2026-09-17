@@ -61,7 +61,7 @@ export const populateReseauxCollection = async (): Promise<void> => {
       const filePath = getStaticFilePath(file);
       const reseauFile = readJsonFromCsvFile(filePath, ";");
 
-      reseauFile.forEach((row: any) => {
+      reseauFile.forEach((row) => {
         const reseaux = parseReseauxTextFromCsv(row[INPUT_FILE_COLUMN_NAMES.RESEAUX_A_JOUR]);
         reseaux.forEach((reseau) => uniqueReseaux.add(reseau));
       });

@@ -1,5 +1,6 @@
 import { omit } from "lodash-es";
 import nodemailer from "nodemailer";
+import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import { htmlToText } from "nodemailer-html-to-text";
 
 import { sendStoredEmail } from "@/common/actions/emails.actions";
@@ -8,8 +9,8 @@ import { __dirname } from "@/common/utils/esmUtils";
 import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
 import config from "@/config";
 
-function createTransporter(smtp) {
-  const needsAuthentication = !!smtp.auth.user;
+function createTransporter(smtp: SMTPTransport.Options & { auth?: { user?: string; pass?: string } }) {
+  const needsAuthentication = !!smtp.auth?.user;
   const transporter = nodemailer.createTransport(needsAuthentication ? smtp : omit(smtp, ["auth"]));
   transporter.use("compile", htmlToText({ ignoreImage: true }));
   return transporter;
@@ -19,8 +20,20 @@ export interface SendEmailOptions {
   noreply?: boolean;
 }
 
-export function createMailerService(transporter = createTransporter({ ...config.smtp, secure: false })) {
-  async function sendEmailMessage(to: string, template: any, options?: SendEmailOptions) {
+export interface EmailTemplate<T extends TemplateName = TemplateName> {
+  subject: string;
+  templateFile: string;
+  data: TemplatePayloads[T] & { token?: string };
+}
+
+export function createMailerService(
+  transporter = createTransporter({
+    ...config.smtp,
+    port: config.smtp.port ? Number(config.smtp.port) : undefined,
+    secure: false,
+  })
+) {
+  async function sendEmailMessage(to: string, template: EmailTemplate, options?: SendEmailOptions) {
     const { subject, data } = template;
 
     const from = options?.noreply
@@ -66,7 +79,7 @@ export async function sendEmail<T extends TemplateName>(
   );
 }
 
-export function getEmailInfos<T extends TemplateName>(template: T, payload: TemplatePayloads[T]) {
+export function getEmailInfos<T extends TemplateName>(template: T, payload: TemplatePayloads[T]): EmailTemplate<T> {
   return {
     subject: templatesTitleFuncs[template](payload),
     templateFile: getStaticFilePath(`./emails/${template}.mjml.ejs`),

@@ -8,16 +8,18 @@ export const parseLocalXlsx = async (relativePath: string) => {
   return data;
 };
 
+export interface XlsxColumn {
+  name: string;
+  id: string;
+  array?: string;
+  transform?: (d: unknown) => unknown;
+  listValues?: string[];
+}
+
 export const addSheetToXlscFile = async (
   relativePath: string,
-  worksheetList: Array<{ worksheetName: string; logsTag: string; data: Array<any> }>,
-  columns: Array<{
-    name: string;
-    id: string;
-    array?: string;
-    transform?: (d: any) => any;
-    listValues?: string[];
-  }>
+  worksheetList: Array<{ worksheetName: string; logsTag: string; data: Array<object> }>,
+  columns: XlsxColumn[]
 ) => {
   const workbook = await parseLocalXlsx(relativePath);
   const wsList = workbook.worksheets.map(({ name }) => name);
@@ -69,21 +71,15 @@ function applyDataValidationLists(
   });
 }
 
-export const formatJsonToXlsx = (
-  data: Array<any>,
-  format: Array<{
-    name: string;
-    id: string;
-    array?: string;
-    transform?: (d: any) => any;
-  }>
-): any[][] => {
+export const formatJsonToXlsx = (data: Array<object>, format: XlsxColumn[]): unknown[][] => {
   const attributeSizeMap: Record<string, number> = {};
+  const rows = data as Array<Record<string, unknown>>;
 
   const getMaxElementForAttribute = (arrName: string) => {
-    return data.reduce((maxElement, obj) => {
-      if (!obj[arrName]) return maxElement;
-      return obj[arrName].length > maxElement ? obj[arrName].length : maxElement;
+    return rows.reduce((maxElement, obj) => {
+      const arr = obj[arrName];
+      if (!Array.isArray(arr)) return maxElement;
+      return arr.length > maxElement ? arr.length : maxElement;
     }, 0);
   };
 
@@ -104,13 +100,15 @@ export const formatJsonToXlsx = (
     return array ? [...acc, ...generateNColumnForAttribute(name, array)] : [...acc, name];
   }, []);
 
-  const rows = data.map((item) => {
-    return format.reduce((rowAcc: any[], { id, transform, array }) => {
-      const computeSingleData = (val: any) => (transform ? transform(val) : val);
+  const formattedRows = rows.map((item) => {
+    return format.reduce((rowAcc: unknown[], { id, transform, array }) => {
+      const computeSingleData = (val: unknown) => (transform ? transform(val) : val);
 
       if (array) {
-        const arrValues = item[array] || [];
-        const extended = arrValues.map((arrAttr: any) => computeSingleData(arrAttr[id] ?? null));
+        const arrValues = item[array];
+        const extended = (Array.isArray(arrValues) ? arrValues : []).map((arrAttr: Record<string, unknown>) =>
+          computeSingleData(arrAttr[id] ?? null)
+        );
 
         const neededSize = attributeSizeMap[array] || 0;
         return [...rowAcc, ...extendArrayWithSize(extended, neededSize)];
@@ -120,10 +118,10 @@ export const formatJsonToXlsx = (
     }, []);
   });
 
-  return [formatHeader, ...rows];
+  return [formatHeader, ...formattedRows];
 };
 
-function extendArrayWithSize(arr: any[], size: number): any[] {
+function extendArrayWithSize(arr: unknown[], size: number): unknown[] {
   const diff = size - arr.length;
   if (diff > 0) {
     return arr.concat(Array(diff).fill(null));
