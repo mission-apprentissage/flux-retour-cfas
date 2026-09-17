@@ -242,6 +242,11 @@ const SYNCED_ACCOUNT_STATUSES = ["CONFIRMED", "PENDING_ADMIN_VALIDATION", "PENDI
 const selectTbaContacts = async (filter?: FetchContactsFilter): Promise<TbaUserContext[]> => {
   type UserWithOrg = Omit<TbaUserContext, "organisme">;
 
+  // Filtre ne portant que sur des organisations : cette source n'est pas
+  // concernée (sans quoi une synchro unitaire d'organisation remonterait
+  // l'intégralité des comptes).
+  if (filter?.organisationIds?.length && !filter.userIds?.length) return [];
+
   // Phase 1 — Aggregate users + organisations (lookup `_id`, indexé).
   const usersWithOrgsStages = [
     {
