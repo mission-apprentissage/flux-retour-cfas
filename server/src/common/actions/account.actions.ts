@@ -27,7 +27,13 @@ import { buildOrganisationLabel, createOrganisation, getOrganisationById } from 
 import { getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
 import { resumeCollab } from "./organismes/organismes.admin.actions";
 import { createSession } from "./sessions.actions";
-import { authenticate, createUser, getUserByEmail, updateUserLastConnection } from "./users.actions";
+import {
+  authenticate,
+  createUser,
+  getUserByEmail,
+  isEmailAlreadyUsed,
+  updateUserLastConnection,
+} from "./users.actions";
 
 export async function register(registration: RegistrationSchema): Promise<{
   account_status: "PENDING_EMAIL_VALIDATION" | "CONFIRMED";
@@ -308,12 +314,7 @@ export async function registerCfa(data: RegistrationCfaSchema): Promise<{
     throw Boom.unauthorized("Le lien d'invitation a expiré. Veuillez demander une nouvelle invitation.");
   }
 
-  const emailEsc = invitation.email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const alreadyExists = await usersMigrationDb().findOne(
-    { email: { $regex: `^${emailEsc}$`, $options: "i" } },
-    { projection: { _id: 1 } }
-  );
-  if (alreadyExists) {
+  if (await isEmailAlreadyUsed(invitation.email)) {
     throw Boom.conflict("Cet email est déjà utilisé.");
   }
 

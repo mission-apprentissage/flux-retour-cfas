@@ -1,8 +1,14 @@
-import brevo, { AccountApiApiKeys, ContactsApiApiKeys, EventsApiApiKeys } from "@getbrevo/brevo";
+import brevo, {
+  AccountApiApiKeys,
+  ContactsApiApiKeys,
+  EventsApiApiKeys,
+  TransactionalEmailsApiApiKeys,
+} from "@getbrevo/brevo";
 import { captureException } from "@sentry/node";
 import Boom from "boom";
 import { format } from "date-fns";
 
+import logger from "@/common/logger";
 import config from "@/config";
 
 const initContactApi = () => {
@@ -14,6 +20,17 @@ const initContactApi = () => {
   }
   apiContactInstance.setApiKey(ContactsApiApiKeys.apiKey, apiKey);
   return apiContactInstance;
+};
+
+const initEmailApi = () => {
+  const apiEmailInstance = new brevo.TransactionalEmailsApi();
+  const apiKey = config.brevo.apiKey;
+  if (!apiKey) {
+    captureException(new Error("Brevo API key not set"));
+    return null;
+  }
+  apiEmailInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, apiKey);
+  return apiEmailInstance;
 };
 
 const initEventApi = () => {
@@ -28,7 +45,85 @@ const initEventApi = () => {
 };
 
 const ContactInstance: brevo.ContactsApi | null = initContactApi();
+const EmailInstance: brevo.TransactionalEmailsApi | null = initEmailApi();
 const EventInstance: brevo.EventsApi | null = initEventApi();
+
+export interface SendTransactionalEmailOptions {
+  cc?: string[];
+  /**
+   * Hors production, redirige l'email vers cette adresse au lieu du vrai destinataire ; sans effet
+   * en production. Obligatoire : la même clé Brevo joint l'API depuis tous les environnements, donc
+   * rien n'empêche structurellement un envoi réel. Une valeur vide bloque l'envoi hors production.
+   */
+  redirectRecipientInNonProdTo: string | undefined;
+}
+
+/** Forme des erreurs remontées par le SDK Brevo : le corps de la réponse porte la vraie cause. */
+interface BrevoApiError {
+  message?: string;
+  statusCode?: number;
+  body?: { message?: string; code?: string };
+  response?: { statusCode?: number; body?: { message?: string; code?: string } };
+}
+
+export const sendTransactionalEmail = async (
+  recipientEmail: string,
+  templateId: number,
+  params: Record<string, unknown>,
+  options: SendTransactionalEmailOptions
+) => {
+  if (!EmailInstance) {
+    throw Boom.internal("Brevo instance not initialized");
+  }
+
+  const isProduction = config.env === "production";
+
+  // Sans adresse de repli hors production : mieux vaut un email manquant qu'un email parti au CFA.
+  const redirectTo = isProduction ? undefined : options.redirectRecipientInNonProdTo;
+  if (!isProduction && !redirectTo) {
+    logger.warn(
+      { templateId, realRecipient: recipientEmail, env: config.env },
+      "Email Brevo non envoyé : aucune adresse de redirection fournie hors production"
+    );
+    return;
+  }
+
+  const finalRecipient = redirectTo || recipientEmail;
+  const isRedirected = finalRecipient !== recipientEmail;
+
+  if (isRedirected) {
+    logger.info(
+      { templateId, realRecipient: recipientEmail, redirectedTo: finalRecipient, env: config.env },
+      "Email Brevo redirigé vers l'utilisateur de test (hors production)"
+    );
+  }
+
+  const sendSmtpEmail = new brevo.SendSmtpEmail();
+  sendSmtpEmail.templateId = templateId;
+  sendSmtpEmail.to = [{ email: finalRecipient }];
+  // En mode redirigé, on expose le vrai destinataire dans les variables pour information du testeur.
+  sendSmtpEmail.params = isRedirected ? { ...params, DESTINATAIRE_REEL: recipientEmail } : params;
+  // Pas de CC quand l'email est redirigé (le testeur est déjà le destinataire principal).
+  if (options?.cc?.length && !isRedirected) {
+    sendSmtpEmail.cc = options.cc.map((email) => ({ email }));
+  }
+  try {
+    return await EmailInstance.sendTransacEmail(sendSmtpEmail);
+  } catch (e) {
+    captureException(e);
+    // Sans ce log, l'appelant ne voit qu'un `undefined` : la cause renvoyée par Brevo (template
+    // inexistant, IP non autorisée, quota...) serait perdue dès que Sentry n'est pas actif.
+    const err = e as BrevoApiError;
+    const brevoBody = err?.response?.body ?? err?.body;
+    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? err?.message ?? "unknown error";
+    const status = err?.response?.statusCode ?? err?.statusCode ?? "?";
+    logger.error(
+      { templateId, recipient: finalRecipient, status, brevoMsg },
+      "Échec d'envoi de l'email transactionnel Brevo"
+    );
+    return;
+  }
+};
 
 const BREVO_IMPORT_BATCH_SIZE = 500;
 

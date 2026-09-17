@@ -6,12 +6,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import type { AuthContext } from "@/common/model/internal/AuthContext";
 import { useMongo } from "@tests/jest/setupMongo";
-import { testDoc } from "@tests/utils/testUtils";
+import { testDoc, testDocs } from "@tests/utils/testUtils";
 
 import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
-import { buildOrgaOf, buildUser } from "./brevo/contacts/fixtures";
+import { buildOrgaOf, buildUser, NOW } from "./brevo/contacts/fixtures";
 import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
-import { rejectMembre, validateMembre } from "./organisations.actions";
+import { getCfaAccountsByOrganismeIds, rejectMembre, validateMembre } from "./organisations.actions";
 
 // Voir account.actions.test.ts : on espionne le câblage, pas le comportement interne
 // de l'enqueue (qui est no-op hors prod).
@@ -72,5 +72,27 @@ describe("organisations.actions — câblage de la synchro Brevo instantanée", 
       expect(enqueueMock).not.toHaveBeenCalled();
       expect(eventMock).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe("getCfaAccountsByOrganismeIds", () => {
+  it("réunit les comptes confirmés de toutes les organisations d'un même organisme", async () => {
+    const organismeId = new ObjectId().toString();
+    const orgaSansActivation = buildOrgaOf({ organisme_id: organismeId });
+    const orgaActivee = buildOrgaOf({ organisme_id: organismeId, ml_beta_activated_at: NOW });
+    await organisationsDb().insertMany(testDocs<IOrganisation>([orgaSansActivation, orgaActivee]));
+    await usersMigrationDb().insertMany(
+      testDocs<IUsersMigration>([
+        buildUser(orgaSansActivation, { email: "alice@cfa.fr" }),
+        buildUser(orgaActivee, { email: "bob@cfa.fr" }),
+        buildUser(orgaActivee, { email: "refuse@cfa.fr", account_status: "PENDING_ADMIN_VALIDATION" }),
+      ])
+    );
+
+    const accounts = await getCfaAccountsByOrganismeIds([organismeId]);
+
+    const entry = accounts.get(organismeId);
+    expect(entry?.destinataires.map((d) => d.email).sort()).toEqual(["alice@cfa.fr", "bob@cfa.fr"]);
+    expect(entry?.ml_beta_activated_at).toEqual(NOW);
   });
 });

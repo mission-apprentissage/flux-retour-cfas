@@ -13,9 +13,14 @@ import {
   effectifMissionLocaleListe,
   effectifsFusionnesQuerySchema,
   effectifsParMoisFiltersMissionLocaleAPISchema,
+  inviteCfaMissionLocaleApi,
 } from "shared/models/routes/mission-locale/missionLocale.api";
 import { z } from "zod";
 
+import {
+  getCfaListToInviteForMissionLocale,
+  sendCfaInvitationFromMissionLocale,
+} from "@/common/actions/mission-locale/mission-locale-cfa-invitation.actions";
 import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
@@ -31,6 +36,7 @@ import { getAgeFromDate } from "@/common/utils/miscUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { addSheetToXlscFile, XlsxColumn } from "@/common/utils/xlsxUtils";
 import { MissionLocaleLocals, returnResult, RouteHandler } from "@/http/middlewares/helpers";
+import { heavyLimiter } from "@/http/middlewares/rateLimit";
 
 export default () => {
   const router = express.Router();
@@ -43,6 +49,9 @@ export default () => {
   router.get("/parametres", returnResult(getMlParametres));
   router.put("/parametres", returnResult(updateMlParametres));
   router.get("/banner-stats", returnResult(getMlBannerStats));
+  router.get("/cfa-invitations", returnResult(getCfaInvitationsList));
+  // Un envoi déclenche jusqu'à une trentaine d'emails réels : on plafonne les appels par conseiller.
+  router.post("/cfa-invitations", heavyLimiter, returnResult(inviteCfaFromMissionLocale));
   return router;
 };
 
@@ -86,6 +95,20 @@ const updateMlParametres: RouteHandler<MissionLocaleLocals> = async (req, { loca
   );
 
   return { rdv_url: body.rdv_url };
+};
+
+const getCfaInvitationsList: RouteHandler<MissionLocaleLocals> = async (req, { locals }) => {
+  // `requireMissionLocale` garantit déjà le type MISSION_LOCALE et peuple `locals.missionLocale`
+  // (même usage direct que les autres handlers du fichier, ex. getMlBannerStats).
+  const missionLocale = locals.missionLocale;
+  const userId = new ObjectId(req.user._id);
+  return await getCfaListToInviteForMissionLocale(missionLocale, userId);
+};
+
+const inviteCfaFromMissionLocale: RouteHandler<MissionLocaleLocals> = async (req, { locals }) => {
+  const missionLocale = locals.missionLocale;
+  const { organisme_id, note } = await validateFullZodObjectSchema(req.body, inviteCfaMissionLocaleApi);
+  return await sendCfaInvitationFromMissionLocale(missionLocale, req.user, organisme_id, note);
 };
 
 const updateEffectifMissionLocaleData: RouteHandler<MissionLocaleLocals> = async (req, { locals }) => {

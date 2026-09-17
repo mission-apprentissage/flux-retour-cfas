@@ -90,3 +90,45 @@ export type IEffectifsParMoisFiltersMissionLocaleAPISchema = z.infer<
 export type IEffectifsParMoisFiltersMissionLocaleSchema = z.infer<
   z.ZodObject<typeof effectifsParMoisFiltersMissionLocaleSchema>
 >;
+
+/**
+ * Feature "Inviter les CFA" (acquisition CFA via les Missions Locales).
+ * Statut affiché par CFA dans la liste, relatif au conseiller ML connecté.
+ */
+export enum CFA_INVITATION_STATUT {
+  // Aucune invitation envoyée par ce conseiller ; CFA éligible et contactable.
+  INVITER = "INVITER",
+  // Ce conseiller a déjà envoyé une invitation pour ce CFA.
+  INVITATION_ENVOYEE = "INVITATION_ENVOYEE",
+  // Le CFA a activé la collaboration de lui-même.
+  CFA_ACTIF = "CFA_ACTIF",
+  // Le CFA a activé la collaboration après une invitation de ce conseiller.
+  CFA_ACTIF_APRES_INVITATION = "CFA_ACTIF_APRES_INVITATION",
+}
+
+export interface ICfaToInvite {
+  organisme_id: string;
+  siret: string | null;
+  uai: string | null;
+  nom: string | null;
+  adresse: string | null;
+  // Périmètre de cette ML : clé de tri de la liste.
+  nb_jeunes_rupture: number;
+  // Toutes ML confondues : c'est le chiffre que le CFA lira dans l'email.
+  nb_jeunes_rupture_etablissement: number;
+  statut: CFA_INVITATION_STATUT;
+  // Nombre de comptes TBA du CFA qui recevront l'invitation
+  nb_destinataires: number;
+  // Missions Locales actives de la région du CFA, affichées dans l'email d'invitation
+  ml_partenaires: {
+    count: number;
+    noms: string[];
+  };
+}
+
+export const inviteCfaMissionLocaleApi = {
+  organisme_id: z.string(),
+  note: z.string().trim().max(2000).optional(),
+};
+
+export type IInviteCfaMissionLocaleApi = z.infer<z.ZodObject<typeof inviteCfaMissionLocaleApi>>;
