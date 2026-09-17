@@ -26,8 +26,11 @@ import { sendEmail } from "@/common/services/mailer/mailer";
 import { generateKey } from "@/common/utils/cryptoUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 
-import { activateMissionLocaleAtAdminValidation } from "./admin/mission-locale/mission-locale.admin.actions";
-import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
+import {
+  activateMissionLocaleAtAdminValidation,
+  isMissionLocaleActivated,
+} from "./admin/mission-locale/mission-locale.admin.actions";
+import { enqueueBrevoContactSync, enqueueBrevoOrganisationContactSync } from "./brevo/contacts/enqueue-sync";
 import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
 import { OrganismeWithPermissions } from "./helpers/permissions-organisme";
 import { getOrganismeProjection } from "./organismes/organismes.actions";
@@ -354,6 +357,16 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
     }
   }
 
+  const userOrganisation = await getOrganisationById(user.organisation_id);
+
+  // Lu AVANT la confirmation, et sur le même critère que les autres chemins
+  // (`activated_at` OU un compte déjà confirmé) : se fier au seul retour de
+  // `activateMissionLocaleAtAdminValidation` rejouerait l'événement pour une ML
+  // déjà rendue active par une inscription sur invitation, qui ne pose jamais
+  // `activated_at`.
+  const mlWasActivated =
+    userOrganisation.type === "MISSION_LOCALE" ? await isMissionLocaleActivated(user.organisation_id) : true;
+
   await usersMigrationDb().updateOne(
     { _id: user._id },
     {
@@ -364,8 +377,6 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
       },
     }
   );
-
-  const userOrganisation = await getOrganisationById(user.organisation_id);
 
   if (userOrganisation.type === "MISSION_LOCALE") {
     await activateMissionLocaleAtAdminValidation(user.organisation_id, new Date());
@@ -387,6 +398,16 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
   // Le compte passe à CONFIRMED : on synchronise le contact Brevo et on émet l'événement.
   await enqueueBrevoContactSync(user._id);
   await enqueueBrevoEvent("account-confirmed", { userId: user._id.toString() });
+
+  // La ML est désormais active : son adresse générique, démarchée par les
+  // campagnes, doit refléter cette conversion. L'événement n'est émis que sur la
+  // transition, pour ne pas le rejouer à chaque nouvel agent validé.
+  if (userOrganisation.type === "MISSION_LOCALE") {
+    await enqueueBrevoOrganisationContactSync(user.organisation_id);
+    if (!mlWasActivated) {
+      await enqueueBrevoEvent("account-confirmed-ml-generic", { userId: user._id.toString() });
+    }
+  }
 }
 
 export async function rejectMembre(ctx: AuthContext, userId: string): Promise<void> {
