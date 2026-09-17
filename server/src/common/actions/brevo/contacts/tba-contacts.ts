@@ -17,11 +17,13 @@ import {
   createDernierStatutFieldPipeline,
   DATE_START_RUPTURES,
 } from "@/common/actions/shared/rupture-pipeline.utils";
+import logger from "@/common/logger";
 import {
   effectifsDb,
   effectifsDECADb,
   missionLocaleEffectifsDb,
   missionLocaleStatsDb,
+  organisationsDb,
   organismesDb,
   transmissionDailyReportDb,
   usersMigrationDb,
@@ -32,6 +34,7 @@ import config from "@/config";
 
 import { getOrCreateConnexionInvitationsByEmails } from "./connexion-invitations.actions";
 import { cleanSiret, formatCivilite, formatEmail, formatJoinedList, formatName } from "./formatters";
+import { isBrevoMlGenericContactsActive } from "./sync-settings.actions";
 import { BrevoAttributeType, ContactListDefinition, ContactListUtm, FetchContactsFilter } from "./types";
 import { buildUtmUrl } from "./utm";
 
@@ -111,7 +114,8 @@ export type TbaContactAttributeName =
   | "CFA_NB_JEUNES_EN_RUPTURE"
   | "CFA_NB_MISSIONS_LOCALES_PARTENAIRES"
   | "CFA_LISTE_MISSIONS_LOCALES"
-  | "CFA_LIEN_CONNEXION_PERSONNALISE";
+  | "CFA_LIEN_CONNEXION_PERSONNALISE"
+  | "ML_ADRESSE_GENERIQUE";
 
 // `undefined` autorisé : un attribut absent du payload est préservé par Brevo,
 // alors qu'un attribut à `null` est écrasé. Utilisé pour `CFA_ERP_CLIENT` qui est
@@ -170,6 +174,7 @@ export const tbaContactsAttributesSchema: Record<TbaContactAttributeName, BrevoA
   CFA_NB_MISSIONS_LOCALES_PARTENAIRES: "float",
   CFA_LISTE_MISSIONS_LOCALES: "text",
   CFA_LIEN_CONNEXION_PERSONNALISE: "text",
+  ML_ADRESSE_GENERIQUE: "boolean",
 };
 
 type TbaUserContext = {
@@ -633,6 +638,30 @@ const deriveCfaStatutV2 = (
   return activationDate ? "oui" : "activable";
 };
 
+/**
+ * Libellés géographiques dérivés de l'adresse, avec repli sur les codes portés
+ * par le document `organisation` (typologies institutionnelles sans adresse).
+ * Mutualisé entre les contacts utilisateurs et les contacts d'organisation.
+ */
+const deriveGeoLabels = (
+  adresse: TbaAdresse | null | undefined,
+  fallback: { departementCode: string | null; regionCode: string | null }
+) => {
+  const departementCode = adresse?.departement ?? fallback.departementCode;
+  const regionCode = adresse?.region ?? fallback.regionCode;
+  return {
+    departementCode,
+    regionLabel: regionCode ? (REGIONS_BY_CODE[regionCode as keyof typeof REGIONS_BY_CODE]?.nom ?? null) : null,
+    departementNomLabel: departementCode
+      ? (DEPARTEMENTS_BY_CODE[departementCode as IDepartmentCode]?.nom ?? null)
+      : null,
+    academieLabel: adresse?.academie
+      ? (ACADEMIES_BY_CODE[adresse.academie as keyof typeof ACADEMIES_BY_CODE]?.nom ?? null)
+      : null,
+    adresseString: adresse?.complete ?? buildAdresseFallback(adresse),
+  };
+};
+
 type CfaOrgStats = {
   decaCounts?: { apprenants: number; rupturants: number };
   erpRupturants?: number;
@@ -659,16 +688,10 @@ const buildAttributes = (
   // ACADEMIE, TETE_DE_RESEAU, CARIF_OREF_NATIONAL) : pas d'adresse en DB, on
   // dérive nom + codes géo depuis les champs propres au doc `organisation`.
   const fallback = getOrganisationFallbacks(user.organisation);
-  const departementCode = adresse?.departement ?? fallback.departementCode;
-  const regionCode = adresse?.region ?? fallback.regionCode;
-  const regionLabel = regionCode ? (REGIONS_BY_CODE[regionCode as keyof typeof REGIONS_BY_CODE]?.nom ?? null) : null;
-  const departementNomLabel = departementCode
-    ? (DEPARTEMENTS_BY_CODE[departementCode as IDepartmentCode]?.nom ?? null)
-    : null;
-  const academieLabel = adresse?.academie
-    ? (ACADEMIES_BY_CODE[adresse.academie as keyof typeof ACADEMIES_BY_CODE]?.nom ?? null)
-    : null;
-  const adresseString = adresse?.complete ?? buildAdresseFallback(adresse);
+  const { regionLabel, departementNomLabel, departementCode, academieLabel, adresseString } = deriveGeoLabels(
+    adresse,
+    fallback
+  );
 
   const uai = user.organisation.uai ?? null;
   const siret = cleanSiret(user.organisation.siret);
@@ -769,6 +792,10 @@ const buildAttributes = (
       : null,
 
     CFA_LIEN_CONNEXION_PERSONNALISE: isCfa ? lienConnexionPersonnalise : null,
+
+    // `false` explicite (et non omis) : si une adresse générique de ML devient
+    // le compte d'un agent, le contact doit perdre le marqueur.
+    ML_ADRESSE_GENERIQUE: false,
   };
 };
 
@@ -800,15 +827,177 @@ const buildLienByEmail = async (users: TbaUserContext[]): Promise<Map<string, st
   return lienByEmail;
 };
 
+// ---------------------------------------------------------------------------
+// Contacts dérivés des organisations : adresses génériques des Missions Locales
+//
+// Ces adresses (`organisations.email`, issues du référentiel) sont déjà des
+// contacts Brevo, importés par l'équipe growth pour les campagnes d'acquisition.
+// Aucun compte utilisateur ne leur correspond : sans cette source, leur
+// `STATUT_COMPTE_USER` ne bascule jamais et la ML continue d'être relancée alors
+// qu'un de ses agents s'est inscrit avec sa propre adresse nominative.
+// ---------------------------------------------------------------------------
+
+// Valeur portée par le contact générique d'une ML activée. On réutilise
+// volontairement `CONFIRMED` (et non une valeur dédiée) pour que les scénarios
+// d'automation existants sortent sans modification côté Brevo ; `SOURCE_EMAIL`
+// permet de distinguer ces contacts des vrais comptes.
+const ML_GENERIC_STATUT_ACTIVE = "CONFIRMED";
+
+// Projection du document `organisations` : le type union des organisations ne
+// se restreint pas au seul `$match` sur `type`, on le déclare explicitement.
+type MlGenericOrgRow = {
+  _id: ObjectId;
+  nom?: string | null;
+  siret?: string | null;
+  email?: string | null;
+  adresse?: TbaAdresse;
+  activated_at?: Date | null;
+};
+
+type MlGenericContext = {
+  email: string;
+  organisation: Omit<MlGenericOrgRow, "email">;
+  /** `activated_at` posé OU au moins un compte CONFIRMED dans l'organisation. */
+  isActivated: boolean;
+  /** Repli de `ML_DATE_ACTIVATION_ML` quand `activated_at` est absent. */
+  firstConfirmedAt: Date | null;
+};
+
+const selectMlGenericContexts = async (filter?: FetchContactsFilter): Promise<MlGenericContext[]> => {
+  if (!(await isBrevoMlGenericContactsActive())) return [];
+  // Filtre ne portant que sur des utilisateurs : cette source n'est pas concernée.
+  if (filter?.userIds?.length && !filter.organisationIds?.length) return [];
+
+  const organisations = await organisationsDb()
+    .find<MlGenericOrgRow>(
+      {
+        type: "MISSION_LOCALE",
+        email: { $nin: [null, ""] },
+        ...(filter?.organisationIds?.length ? { _id: { $in: filter.organisationIds } } : {}),
+      },
+      { projection: { _id: 1, nom: 1, siret: 1, email: 1, adresse: 1, activated_at: 1 } }
+    )
+    .toArray();
+  if (organisations.length === 0) return [];
+
+  const mlIds = organisations.map((o) => o._id);
+  const [confirmedRows, collisionRows] = await Promise.all([
+    usersMigrationDb()
+      .aggregate<{ _id: ObjectId; firstConfirmedAt: Date | null }>([
+        { $match: { organisation_id: { $in: mlIds }, account_status: "CONFIRMED" } },
+        { $group: { _id: "$organisation_id", firstConfirmedAt: { $min: "$confirmed_at" } } },
+      ])
+      .toArray(),
+    // Adresses génériques déjà portées par un compte utilisateur : on les écarte
+    // ici, et pas seulement à la dédup de `fetchContacts`, sinon une synchro
+    // unitaire d'organisation (qui ne charge aucun user) écraserait le contact
+    // du compte, qui perdrait ses données nominatives.
+    usersMigrationDb()
+      .aggregate<{ _id: string }>([
+        { $group: { _id: { $toLower: "$email" } } },
+        { $match: { _id: { $in: organisations.map((o) => formatEmail(o.email ?? "")) } } },
+      ])
+      .toArray(),
+  ]);
+  const confirmedByOrgId = new Map(confirmedRows.map((r) => [String(r._id), r.firstConfirmedAt ?? null]));
+  const emailsPortesParUnCompte = new Set(collisionRows.map((r) => r._id));
+
+  return organisations
+    .filter((o) => !emailsPortesParUnCompte.has(formatEmail(o.email ?? "")))
+    .map(({ email, ...organisation }): MlGenericContext => {
+      const orgId = String(organisation._id);
+      return {
+        email: email as string,
+        organisation,
+        isActivated: Boolean(organisation.activated_at) || confirmedByOrgId.has(orgId),
+        firstConfirmedAt: confirmedByOrgId.get(orgId) ?? null,
+      };
+    });
+};
+
+/**
+ * Attributs du contact générique d'une ML.
+ *
+ * Les champs nominatifs sont volontairement ABSENTS (et non à `null`) : ces
+ * contacts préexistent dans Brevo avec des valeurs saisies par l'équipe, qu'un
+ * `null` effacerait à chaque synchro (cf. `serializeBrevoAttributes`). Même
+ * raisonnement que l'exception `CFA_ERP_CLIENT`.
+ */
+const buildMlGenericAttributes = (ctx: MlGenericContext, mlStats: MlStats | undefined): TbaContactAttributes => {
+  const { regionLabel, departementNomLabel, departementCode, academieLabel, adresseString } = deriveGeoLabels(
+    ctx.organisation.adresse,
+    { departementCode: null, regionCode: null }
+  );
+
+  return {
+    // `SOURCE_EMAIL` volontairement absent : ces contacts préexistent dans Brevo
+    // (import de l'équipe growth) et leur provenance d'origine doit être
+    // préservée. Le marqueur de cette source est `ML_ADRESSE_GENERIQUE`.
+    ML_ADRESSE_GENERIQUE: true,
+    STATUT_COMPTE_USER: ctx.isActivated ? ML_GENERIC_STATUT_ACTIVE : null,
+
+    ORGANISATION: ctx.organisation.nom ?? null,
+    TYPE_ORGANISATION: "MISSION_LOCALE",
+    REGION: regionLabel,
+    DEPARTEMENT_NOM: departementNomLabel,
+    DEPARTEMENT_NUM: departementCode,
+    ACADEMIE: academieLabel,
+    ADRESSE: adresseString,
+    SIRET: cleanSiret(ctx.organisation.siret),
+
+    ML_DATE_ACTIVATION_ML: ctx.organisation.activated_at ?? ctx.firstConfirmedAt ?? null,
+    ML_NB_RUPTURANTS_TOTAL: mlStats?.total ?? 0,
+    ML_NB_RUPTURANTS_A_TRAITER: mlStats?.a_traiter ?? 0,
+    ML_NB_RUPTURANTS_TRAITES: mlStats?.traite ?? 0,
+    ML_POURCENTAGE_RUPTURANTS_TRAITES:
+      mlStats && mlStats.total > 0 ? Math.round((mlStats.traite / mlStats.total) * 100) : 0,
+
+    // Non applicables à une organisation : mis à `null` pour effacer une valeur
+    // résiduelle d'un import antérieur, comme le fait déjà la branche user ML.
+    CFA_RESEAUX: null,
+    ENSEIGNE: null,
+    RAISON_SOCIALE: null,
+    UAI: null,
+    UAI_SIRET: null,
+    STATUT_SIRET: null,
+    ORGANISME_ID: null,
+    URL_TBA: null,
+    CFA_NATURE: null,
+    CFA_NB_FORMATEURS: null,
+    CFA_ERP_OU_DECA: null,
+    CFA_ERP: null,
+    CFA_STATUT_CLE_API: null,
+    CFA_DATE_DERNIERE_TRANSMISSION: null,
+    CFA_DATE_ERREURS_TRANSMISSION: null,
+    CFA_NB_ERREURS_TRANSMISSION: null,
+    CFA_NB_APPRENANTS_ERP: null,
+    CFA_NB_APPRENANTS_DECA: null,
+    CFA_NB_RUPTURANTS_ERP: null,
+    CFA_NB_RUPTURANTS_DECA: null,
+    CFA_STATUT_V2: null,
+    CFA_DATE_ACTIVATION_V2: null,
+    CFA_NB_COLLABORATIONS: null,
+    CFA_DATE_DERNIERE_COLLABORATION: null,
+    CFA_NB_JEUNES_EN_RUPTURE: null,
+    CFA_NB_MISSIONS_LOCALES_PARTENAIRES: null,
+    CFA_LISTE_MISSIONS_LOCALES: null,
+    CFA_LIEN_CONNEXION_PERSONNALISE: null,
+  };
+};
+
 const fetchContacts = async (filter?: FetchContactsFilter): Promise<BrevoContact[]> => {
   const users = await selectTbaContacts(filter);
+  const mlGenericContexts = await selectMlGenericContexts(filter);
 
   const cfaOrgIds = users
     .filter((u) => u.organisation.type === "ORGANISME_FORMATION")
     .map((u) => u.organisme?._id)
     .filter((id): id is ObjectId => Boolean(id));
 
-  const mlIds = users.filter((u) => u.organisation.type === "MISSION_LOCALE").map((u) => u.organisation._id);
+  const mlIds = [
+    ...users.filter((u) => u.organisation.type === "MISSION_LOCALE").map((u) => u.organisation._id),
+    ...mlGenericContexts.map((c) => c.organisation._id),
+  ];
 
   const endExclusive = addDaysUTC(normalizeToUTCDay(new Date()), 1);
 
@@ -836,7 +1025,7 @@ const fetchContacts = async (filter?: FetchContactsFilter): Promise<BrevoContact
 
   const eligibleOrgIds = new Set(eligibleOrgsRows.map((o) => String(o._id)));
 
-  return users.map((user): BrevoContact => {
+  const userContacts = users.map((user): BrevoContact => {
     const organismeId = user.organisme?._id ? String(user.organisme._id) : null;
     const orgStats: CfaOrgStats = organismeId
       ? {
@@ -856,6 +1045,31 @@ const fetchContacts = async (filter?: FetchContactsFilter): Promise<BrevoContact
       attributes: buildAttributes(user, lien, orgStats, mlStats, eligibleOrgIds),
     };
   });
+
+  if (mlGenericContexts.length === 0) return userContacts;
+
+  // Dédup avant l'envoi : Brevo ne garantit aucun ordre entre deux entrées de
+  // même email dans un batch. Le contact utilisateur l'emporte — il porte les
+  // données nominatives et un statut de compte réel, là où le contact
+  // d'organisation n'est qu'une projection de l'état de la ML.
+  const byEmail = new Map(userContacts.map((c) => [c.email, c]));
+  let collisions = 0;
+  for (const ctx of mlGenericContexts) {
+    const email = formatEmail(ctx.email);
+    if (byEmail.has(email)) {
+      collisions++;
+      continue;
+    }
+    byEmail.set(email, {
+      email,
+      attributes: buildMlGenericAttributes(ctx, mlStatsByMlId.get(String(ctx.organisation._id))),
+    });
+  }
+  if (collisions > 0) {
+    logger.info({ collisions }, "Adresses génériques ML déjà portées par un compte utilisateur (contact user retenu)");
+  }
+
+  return [...byEmail.values()];
 };
 
 // Nom utilisé uniquement à la création auto (dev). En prod la liste cible est

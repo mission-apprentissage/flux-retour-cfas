@@ -4,10 +4,10 @@ import { organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/
 import { ensureBrevoAttributes, importContactsToBrevoList } from "@/common/services/brevo/brevo";
 import { useMongo } from "@tests/jest/setupMongo";
 
-import { buildOrganisme, buildOrgaOf, buildUser } from "./fixtures";
+import { buildOrganisme, buildOrgaMl, buildOrgaOf, buildUser } from "./fixtures";
 import { getOrCreateContactList } from "./list.actions";
 import { syncSingleContact } from "./sync";
-import { isBrevoInstantSyncActive } from "./sync-settings.actions";
+import { isBrevoInstantSyncActive, isBrevoMlGenericContactsActive } from "./sync-settings.actions";
 
 // On mocke uniquement les appels réseau Brevo : le pipeline `fetchContacts`
 // tourne en vrai contre le mongo en mémoire (filtre `userIds` inclus).
@@ -20,8 +20,11 @@ vi.mock("./list.actions", () => ({
   getOrCreateContactList: vi.fn().mockResolvedValue(999),
 }));
 // Garde prod-only : active par défaut ici (config.env vaut "test" sinon → syncSingleContact no-op).
+// `isBrevoMlGenericContactsActive` est à false par défaut : les tests ci-dessous
+// vérifient d'abord que la source users est strictement inchangée.
 vi.mock("./sync-settings.actions", () => ({
   isBrevoInstantSyncActive: vi.fn().mockResolvedValue(true),
+  isBrevoMlGenericContactsActive: vi.fn().mockResolvedValue(false),
 }));
 
 useMongo();
@@ -30,6 +33,7 @@ const importMock = vi.mocked(importContactsToBrevoList);
 const ensureMock = vi.mocked(ensureBrevoAttributes);
 const getOrCreateMock = vi.mocked(getOrCreateContactList);
 const isActiveMock = vi.mocked(isBrevoInstantSyncActive);
+const isMlGenericActiveMock = vi.mocked(isBrevoMlGenericContactsActive);
 
 const seedCfa = async () => {
   const orgaOf = buildOrgaOf();
@@ -45,6 +49,8 @@ describe("syncSingleContact", () => {
     getOrCreateMock.mockClear();
     isActiveMock.mockReset();
     isActiveMock.mockResolvedValue(true);
+    isMlGenericActiveMock.mockReset();
+    isMlGenericActiveMock.mockResolvedValue(false);
   });
 
   it("ne synchronise QUE l'utilisateur ciblé vers la liste tba-contacts", async () => {
@@ -105,5 +111,20 @@ describe("syncSingleContact", () => {
 
     expect(result).toBeUndefined();
     expect(importMock).not.toHaveBeenCalled();
+  });
+
+  // Non-régression : le filtre `userIds` ne doit pas laisser passer les contacts
+  // génériques ML, sinon une synchro unitaire réimporterait toutes les ML.
+  it("reste strictement unitaire même quand les contacts génériques ML sont actifs", async () => {
+    isMlGenericActiveMock.mockResolvedValue(true);
+    await organisationsDb().insertOne(buildOrgaMl("ML Nantes", { email: "contact@ml-nantes.fr" }) as any);
+    const orgaOf = await seedCfa();
+    const u1 = buildUser(orgaOf);
+    await usersMigrationDb().insertOne(u1 as any);
+
+    const result = await syncSingleContact(u1._id);
+
+    expect(result?.count).toBe(1);
+    expect(importMock.mock.calls[0][1][0].email).toBe(u1.email.toLowerCase());
   });
 });

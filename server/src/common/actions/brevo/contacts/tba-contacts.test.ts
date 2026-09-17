@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { computeStatsForDate } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
 import {
+  brevoSyncSettingsDb,
   connexionInvitationsDb,
   effectifsDb,
   effectifsDECADb,
@@ -835,6 +836,165 @@ describe("tbaContactsContactList", () => {
         second[0].attributes.CFA_LIEN_CONNEXION_PERSONNALISE
       );
       expect(await connexionInvitationsDb().countDocuments({})).toBe(1);
+    });
+  });
+
+  describe("fetchContacts - contacts génériques ML", () => {
+    const enableMlGenericContacts = async () => {
+      await brevoSyncSettingsDb().insertOne({
+        key: "brevo-contact-sync",
+        daily_full_sync_enabled: false,
+        instant_sync_enabled: false,
+        ml_generic_contacts_enabled: true,
+      } as any);
+    };
+
+    const genericContacts = (contacts: { attributes: Record<string, any> }[]) =>
+      contacts.filter((c) => c.attributes.ML_ADRESSE_GENERIQUE === true);
+
+    it("désactivé par défaut : aucune adresse générique n'est produite", async () => {
+      await organisationsDb().insertOne(
+        buildOrgaMl("ML NANTES", { email: "contact@ml-nantes.fr", activated_at: NOW }) as any
+      );
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(0);
+    });
+
+    it("ML activée via `activated_at` : contact générique marqué CONFIRMED", async () => {
+      await enableMlGenericContacts();
+      const activatedAt = new Date("2026-02-01T08:00:00.000Z");
+      const orgaMl = buildOrgaMl("ML NANTES", {
+        email: "Contact@ML-Nantes.fr",
+        activated_at: activatedAt,
+        adresse: { region: "52", departement: "44", academie: "17", complete: "1 rue de Nantes 44000 NANTES" },
+      });
+      await organisationsDb().insertOne(orgaMl as any);
+      await missionLocaleStatsDb().insertOne(
+        buildMlStatsDoc(orgaMl._id, { total: 20, a_traiter: 5, traite: 15 }) as any,
+        { bypassDocumentValidation: true }
+      );
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0]).toMatchObject({
+        email: "contact@ml-nantes.fr",
+        attributes: {
+          ML_ADRESSE_GENERIQUE: true,
+          STATUT_COMPTE_USER: "CONFIRMED",
+          TYPE_ORGANISATION: "MISSION_LOCALE",
+          ORGANISATION: "ML NANTES",
+          ADRESSE: "1 rue de Nantes 44000 NANTES",
+          DEPARTEMENT_NUM: "44",
+          ML_DATE_ACTIVATION_ML: activatedAt,
+          ML_NB_RUPTURANTS_TOTAL: 20,
+          ML_NB_RUPTURANTS_TRAITES: 15,
+          ML_POURCENTAGE_RUPTURANTS_TRAITES: 75,
+        },
+      });
+    });
+
+    // Le critère est un OU : l'inscription par invitation confirme un compte
+    // sans jamais poser `activated_at` sur l'organisation.
+    it("ML sans `activated_at` mais avec un compte confirmé : CONFIRMED, date repliée sur confirmed_at", async () => {
+      await enableMlGenericContacts();
+      const confirmedAt = new Date("2026-03-10T09:00:00.000Z");
+      const orgaMl = buildOrgaMl("ML RENNES", { email: "contact@ml-rennes.fr" });
+      await organisationsDb().insertOne(orgaMl as any);
+      await usersMigrationDb().insertOne(
+        buildUser(orgaMl, { email: "agent@ml-rennes.fr", confirmed_at: confirmedAt }) as any
+      );
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      const generiques = genericContacts(contacts);
+      expect(generiques).toHaveLength(1);
+      expect(generiques[0].attributes.STATUT_COMPTE_USER).toBe("CONFIRMED");
+      expect(generiques[0].attributes.ML_DATE_ACTIVATION_ML).toEqual(confirmedAt);
+    });
+
+    it("ML ni activée ni pourvue d'un compte confirmé : statut vide", async () => {
+      await enableMlGenericContacts();
+      const orgaMl = buildOrgaMl("ML BREST", { email: "contact@ml-brest.fr" });
+      await organisationsDb().insertOne(orgaMl as any);
+      await usersMigrationDb().insertOne(
+        buildUser(orgaMl, { email: "agent@ml-brest.fr", account_status: "PENDING_ADMIN_VALIDATION" }) as any
+      );
+
+      const generiques = genericContacts(await tbaContactsContactList.fetchContacts());
+
+      expect(generiques).toHaveLength(1);
+      expect(generiques[0].attributes.STATUT_COMPTE_USER).toBeNull();
+      expect(generiques[0].attributes.ML_DATE_ACTIVATION_ML).toBeNull();
+    });
+
+    it("exclut les ML dont l'adresse générique est vide ou absente", async () => {
+      await enableMlGenericContacts();
+      await organisationsDb().insertMany([
+        buildOrgaMl("ML SANS EMAIL", { activated_at: NOW }),
+        buildOrgaMl("ML EMAIL VIDE", { email: "", activated_at: NOW }),
+        buildOrgaMl("ML EMAIL NULL", { email: null, activated_at: NOW }),
+      ] as any);
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(0);
+    });
+
+    // Brevo déduplique par email : il faut un gagnant déterministe, et c'est le
+    // compte utilisateur, seul à porter les données nominatives.
+    it("collision avec un compte utilisateur : un seul contact, celui du compte", async () => {
+      await enableMlGenericContacts();
+      const orgaMl = buildOrgaMl("ML LYON", { email: "Contact@ML-Lyon.fr", activated_at: NOW });
+      await organisationsDb().insertOne(orgaMl as any);
+      await usersMigrationDb().insertOne(buildUser(orgaMl, { email: "contact@ml-lyon.fr" }) as any);
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0].attributes.SOURCE_EMAIL).toBe("users_tba");
+      expect(contacts[0].attributes.NOM).toBe("Dupont");
+    });
+
+    // Ces contacts préexistent dans Brevo avec des valeurs saisies par l'équipe :
+    // un `null` les effacerait à chaque synchro quotidienne.
+    it("omet les attributs nominatifs plutôt que de les mettre à null", async () => {
+      await enableMlGenericContacts();
+      await organisationsDb().insertOne(
+        buildOrgaMl("ML TOURS", { email: "contact@ml-tours.fr", activated_at: NOW }) as any
+      );
+
+      const [contact] = await tbaContactsContactList.fetchContacts();
+
+      for (const attr of [
+        // `SOURCE_EMAIL` : ces contacts viennent d'un import de l'équipe growth,
+        // leur provenance d'origine doit survivre à la synchro.
+        "SOURCE_EMAIL",
+        "NOM",
+        "PRENOM",
+        "CIVILITE",
+        "FONCTION",
+        "TELEPHONE",
+        "DATE_INSCRIPTION_USER_TBA",
+        "DATE_DERNIERE_CONNEXION_USER_TBA",
+        "CFA_ERP_CLIENT",
+      ]) {
+        expect(attr in contact.attributes).toBe(false);
+      }
+    });
+
+    it("cohabite avec les contacts utilisateurs sans les altérer", async () => {
+      await enableMlGenericContacts();
+      const orgaMl = buildOrgaMl("ML ANGERS", { email: "contact@ml-angers.fr", activated_at: NOW });
+      await organisationsDb().insertOne(orgaMl as any);
+      await usersMigrationDb().insertOne(buildUser(orgaMl, { email: "agent@ml-angers.fr" }) as any);
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(2);
+      expect(contacts.map((c) => c.attributes.ML_ADRESSE_GENERIQUE).sort()).toEqual([false, true]);
     });
   });
 });
