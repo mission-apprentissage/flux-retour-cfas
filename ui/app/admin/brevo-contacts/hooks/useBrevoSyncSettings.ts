@@ -8,9 +8,14 @@ export type BrevoSyncSettings = {
   dailyFullSyncEnabled: boolean;
   instantSyncEnabled: boolean;
   eventsEnabled: boolean;
+  mlGenericContactsEnabled: boolean;
 };
 
-export type BrevoSyncSettingField = "dailyFullSyncEnabled" | "instantSyncEnabled" | "eventsEnabled";
+export type BrevoSyncSettingField =
+  | "dailyFullSyncEnabled"
+  | "instantSyncEnabled"
+  | "eventsEnabled"
+  | "mlGenericContactsEnabled";
 
 const syncSettingsQueryKey = [...brevoContactsQueryKeys.all, "sync-settings"] as const;
 

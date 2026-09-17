@@ -5,9 +5,10 @@ import { brevoSyncSettingsDb } from "@/common/model/collections";
 import config from "@/config";
 
 /**
- * Pilotage des synchronisations et événements Brevo via trois toggles persistés en base
+ * Pilotage des synchronisations et événements Brevo via des toggles persistés en base
  *
- * Sécurité : ces synchronisations ne sont **activables qu'en production**.
+ * Sécurité : les toggles qui déclenchent un appel à Brevo ne sont **activables
+ * qu'en production**.
  * - Garde 1 : `setBrevoSyncSetting` refuse de persister `true` hors prod.
  * - Garde 2 : `isBrevo*Active` re-vérifie `config.env === "production"` à la
  *   lecture, donc un flag à `true` qui traînerait en base (ex: dump prod
@@ -15,28 +16,56 @@ import config from "@/config";
  */
 const SETTINGS_KEY = "brevo-contact-sync" as const;
 
-export type BrevoSyncSettingField = "dailyFullSyncEnabled" | "instantSyncEnabled" | "eventsEnabled";
+export type BrevoSyncSettingField =
+  | "dailyFullSyncEnabled"
+  | "instantSyncEnabled"
+  | "eventsEnabled"
+  | "mlGenericContactsEnabled";
 
 export type BrevoSyncSettings = {
   dailyFullSyncEnabled: boolean;
   instantSyncEnabled: boolean;
   eventsEnabled: boolean;
+  mlGenericContactsEnabled: boolean;
 };
 
-type BrevoSyncSettingDbField = "daily_full_sync_enabled" | "instant_sync_enabled" | "events_enabled";
+type BrevoSyncSettingDbField =
+  | "daily_full_sync_enabled"
+  | "instant_sync_enabled"
+  | "events_enabled"
+  | "ml_generic_contacts_enabled";
 
 const FIELD_TO_DB: Record<BrevoSyncSettingField, BrevoSyncSettingDbField> = {
   dailyFullSyncEnabled: "daily_full_sync_enabled",
   instantSyncEnabled: "instant_sync_enabled",
   eventsEnabled: "events_enabled",
+  mlGenericContactsEnabled: "ml_generic_contacts_enabled",
 };
 
-const ALL_DB_FIELDS: BrevoSyncSettingDbField[] = ["daily_full_sync_enabled", "instant_sync_enabled", "events_enabled"];
+const ALL_DB_FIELDS: BrevoSyncSettingDbField[] = [
+  "daily_full_sync_enabled",
+  "instant_sync_enabled",
+  "events_enabled",
+  "ml_generic_contacts_enabled",
+];
+
+/**
+ * Toggles réservés à la production, car chacun déclenche des appels à Brevo.
+ *
+ * `mlGenericContactsEnabled` n'y figure volontairement PAS : il ne fait que
+ * décider si les adresses génériques des ML entrent dans le périmètre des
+ * contacts construits, sans jamais provoquer d'appel réseau par lui-même — tout
+ * envoi reste gardé par les trois toggles ci-dessous ET par `config.env`. Le
+ * rendre prod-only rendrait par ailleurs impossible toute recette locale par
+ * `--dry-run`. Ne pas l'ajouter ici.
+ */
+const PROD_ONLY_FIELDS: BrevoSyncSettingField[] = ["dailyFullSyncEnabled", "instantSyncEnabled", "eventsEnabled"];
 
 const toSettings = (doc: IBrevoSyncSettings | null): BrevoSyncSettings => ({
   dailyFullSyncEnabled: doc?.daily_full_sync_enabled ?? false,
   instantSyncEnabled: doc?.instant_sync_enabled ?? false,
   eventsEnabled: doc?.events_enabled ?? false,
+  mlGenericContactsEnabled: doc?.ml_generic_contacts_enabled ?? false,
 });
 
 export const getBrevoSyncSettings = async (): Promise<BrevoSyncSettings> => {
@@ -48,7 +77,7 @@ export const setBrevoSyncSetting = async (
   enabled: boolean,
   userEmail: string
 ): Promise<BrevoSyncSettings> => {
-  if (enabled && config.env !== "production") {
+  if (enabled && PROD_ONLY_FIELDS.includes(field) && config.env !== "production") {
     throw Boom.badRequest("La synchronisation Brevo n'est activable qu'en production");
   }
   const dbField = FIELD_TO_DB[field];
@@ -91,3 +120,11 @@ export const isBrevoInstantSyncActive = async (): Promise<boolean> =>
 // un flag `events_enabled: true` en base, cette fonction renvoie false → aucun envoi.
 export const isBrevoEventsActive = async (): Promise<boolean> =>
   config.env === "production" && (await getBrevoSyncSettings()).eventsEnabled;
+
+/**
+ * Contrairement aux trois autres : pas de garde `config.env`. Ce toggle ne
+ * déclenche aucun appel à Brevo, il définit un périmètre de contacts — et doit
+ * rester évaluable hors prod pour la recette par `--dry-run`.
+ */
+export const isBrevoMlGenericContactsActive = async (): Promise<boolean> =>
+  (await getBrevoSyncSettings()).mlGenericContactsEnabled;
