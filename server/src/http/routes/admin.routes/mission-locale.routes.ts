@@ -26,6 +26,7 @@ import {
   setEffectifMissionLocaleDataAdmin,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getOrCreateBrevoList } from "@/common/actions/brevo/brevo.actions";
+import { enqueueBrevoOrganisationContactSync } from "@/common/actions/brevo/contacts/enqueue-sync";
 import {
   getRupturantsStats,
   getDossiersTraitesStats,
@@ -306,9 +307,16 @@ const resetMissionLocaleEffectif = async (req) => {
   return resetEffectifMissionLocaleDataAdmin(new ObjectId(mission_locale_id), new ObjectId(effectif_id), req.user);
 };
 
-const activateMLAtDate = ({ body }) => {
+const activateMLAtDate = async ({ body }) => {
   const { date, missionLocaleId } = body;
-  return activateMissionLocale(missionLocaleId, date);
+  const result = await activateMissionLocale(missionLocaleId, date);
+  // La ML devient active : son contact générique Brevo doit le refléter.
+  // L'enqueue est posé ici, et non dans `activateMissionLocale`, car celle-ci est
+  // aussi appelée en boucle sur toutes les ML activées par
+  // `updateMissionLocaleEffectifSnapshot` — ce qui enfilerait des centaines de
+  // jobs de synchro à chaque passage.
+  await enqueueBrevoOrganisationContactSync(new ObjectId(missionLocaleId));
+  return result;
 };
 
 const getSyncBrevoContactInfo = async (req) => {

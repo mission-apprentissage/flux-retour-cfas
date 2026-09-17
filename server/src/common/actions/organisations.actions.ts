@@ -27,7 +27,7 @@ import { generateKey } from "@/common/utils/cryptoUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
 
 import { activateMissionLocaleAtAdminValidation } from "./admin/mission-locale/mission-locale.admin.actions";
-import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
+import { enqueueBrevoContactSync, enqueueBrevoOrganisationContactSync } from "./brevo/contacts/enqueue-sync";
 import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
 import { OrganismeWithPermissions } from "./helpers/permissions-organisme";
 import { getOrganismeProjection } from "./organismes/organismes.actions";
@@ -387,6 +387,12 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
   // Le compte passe à CONFIRMED : on synchronise le contact Brevo et on émet l'événement.
   await enqueueBrevoContactSync(user._id);
   await enqueueBrevoEvent("account-confirmed", { userId: user._id.toString() });
+
+  // La ML est désormais active : son adresse générique, démarchée par les
+  // campagnes, doit refléter cette conversion.
+  if (userOrganisation.type === "MISSION_LOCALE") {
+    await enqueueBrevoOrganisationContactSync(user.organisation_id);
+  }
 }
 
 export async function rejectMembre(ctx: AuthContext, userId: string): Promise<void> {

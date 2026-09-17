@@ -12,7 +12,7 @@ import {
 
 import { getOrCreateContactList } from "./list.actions";
 import { getContactList } from "./registry";
-import { isBrevoInstantSyncActive } from "./sync-settings.actions";
+import { isBrevoInstantSyncActive, isBrevoMlGenericContactsActive } from "./sync-settings.actions";
 import { FetchContactsFilter } from "./types";
 
 // Sample affiché dans l'UI admin : on applique la même sérialisation que celle
@@ -112,4 +112,21 @@ export const syncSingleContact = async (userId: ObjectId | string) => {
   }
   const _id = typeof userId === "string" ? new ObjectId(userId) : userId;
   return await syncContactList({ slug: "tba-contacts", filter: { userIds: [_id] } });
+};
+
+/**
+ * Synchro Brevo du SEUL contact dérivé d'une organisation (adresse générique
+ * d'une Mission Locale). No-op si la synchro instantanée ou les contacts
+ * génériques ML sont désactivés.
+ */
+export const syncSingleOrganisationContact = async (organisationId: ObjectId | string) => {
+  if (!(await isBrevoInstantSyncActive()) || !(await isBrevoMlGenericContactsActive())) {
+    logger.info(
+      { organisationId: String(organisationId) },
+      "Brevo single organisation contact sync skipped (inactif ou hors production)"
+    );
+    return;
+  }
+  const _id = typeof organisationId === "string" ? new ObjectId(organisationId) : organisationId;
+  return await syncContactList({ slug: "tba-contacts", filter: { organisationIds: [_id] } });
 };
