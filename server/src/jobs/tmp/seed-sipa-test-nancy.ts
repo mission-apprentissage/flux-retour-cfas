@@ -22,198 +22,322 @@ const VERIF_DEPARTEMENTS = ["54", "55", "88"];
 
 const d = (s: string) => new Date(`${s}T00:00:00.000Z`);
 
-interface SeedRecord {
-  key: string;
+interface SeedProfil {
   kind: "CFA" | "DECA";
   uai: string;
   siret: string;
   expectedDepartement: string;
-  apprenant: {
-    nom: string;
-    prenom: string;
-    ine: string | null;
-    date_de_naissance: string;
-    sexe: "M" | "F";
-    courriel: string;
-    telephone: string;
-  };
-  formation: {
-    cfd: string;
-    rncp: string;
-    libelle: string;
-    date_inscription: string;
-    date_entree: string;
-    date_fin: string;
-  };
+  formation: { cfd: string; rncp: string; date_inscription: string; date_entree: string; date_fin: string };
   contrat: { date_debut: string; date_fin: string; date_rupture: string | null } | null;
 }
 
-const RECORDS: SeedRecord[] = [
-  {
-    key: "XOSMOA",
+const PROFILS = {
+  INSCRIT_54: {
     kind: "CFA",
     uai: "0540081V",
     siret: "19540081700019",
     expectedDepartement: "54",
-    apprenant: {
-      nom: "XOSMOA",
-      prenom: "Abdramane",
-      ine: "120156231KE",
-      date_de_naissance: "2010-10-12",
-      sexe: "M",
-      courriel: "Abdramaneemail_contact@domain.tld",
-      telephone: "0628000000",
-    },
     formation: {
       cfd: "50022141",
       rncp: "RNCP4637",
-      libelle: "1CAP2  MAINT.VEHIC.OPT.VEHIC.LEGERS",
       date_inscription: "2026-09-02",
       date_entree: "2026-09-02",
       date_fin: "2027-08-31",
     },
-    contrat: null, // inscription CFA sans contrat
+    contrat: null,
   },
-  {
-    key: "DRIFNUDU",
+  DECLARE_55: {
     kind: "CFA",
     uai: "0550892W",
     siret: "78341511000015",
     expectedDepartement: "55",
-    apprenant: {
-      nom: "DRIFNUDU",
-      prenom: "Oriane",
-      ine: null, // contrat déclaré sans INE
-      date_de_naissance: "2011-08-15",
-      sexe: "M",
-      courriel: "Orianeemail_contact@domain.tld",
-      telephone: "0628000000",
-    },
     formation: {
       cfd: "50022141",
       rncp: "RNCP4637",
-      libelle: "1CAP2  MAINT.MATERIELS OPT.C ESP. VERTS",
       date_inscription: "2026-09-02",
       date_entree: "2026-09-02",
       date_fin: "2027-08-31",
     },
     contrat: { date_debut: "2026-09-01", date_fin: "2027-08-31", date_rupture: null },
   },
-  {
-    key: "FABBORI",
-    kind: "CFA",
-    uai: "0550861M",
-    siret: "30019718300027",
-    expectedDepartement: "55",
-    apprenant: {
-      nom: "FABBORI",
-      prenom: "Mustapha",
-      ine: "130187884JE",
-      date_de_naissance: "2010-05-07",
-      sexe: "M",
-      courriel: "Mustaphaemail_contact@domain.tld",
-      telephone: "0628000000",
-    },
-    formation: {
-      cfd: "50022141",
-      rncp: "RNCP4637",
-      libelle: "1CAP2  BOULANGER",
-      date_inscription: "2026-09-02",
-      date_entree: "2026-09-02",
-      date_fin: "2027-08-31",
-    },
-    contrat: { date_debut: "2026-09-01", date_fin: "2027-08-31", date_rupture: null },
-  },
-  {
-    key: "GLARCINE",
+  DECA_88: {
     kind: "DECA",
     uai: "0881269B",
     siret: "78334702400086",
     expectedDepartement: "88",
-    apprenant: {
-      nom: "GLARCINE",
-      prenom: "Safa",
-      ine: null,
-      date_de_naissance: "2011-12-09",
-      sexe: "M",
-      courriel: "Safa.bernard@example.com",
-      telephone: "0690000000",
-    },
     formation: {
       cfd: "40025503",
       rncp: "RNCP38596",
-      libelle: "1CAP2  MACON",
       date_inscription: "2026-09-02",
       date_entree: "2026-09-02",
       date_fin: "2027-06-30",
     },
     contrat: { date_debut: "2026-09-01", date_fin: "2027-06-30", date_rupture: "2027-07-15" },
   },
+} satisfies Record<string, SeedProfil>;
+
+interface SeedRecord {
+  key: string;
+  profil: keyof typeof PROFILS;
+  nom: string;
+  prenom: string;
+  ine: string | null;
+  date_de_naissance: string;
+  sexe: "M" | "F";
+  courriel: string;
+  telephone: string;
+  libelle: string;
+  decaRawId?: string;
+}
+
+const LIBELLE_INSCRIT = "1CAP2  MAINT.VEHIC.OPT.VEHIC.LEGERS";
+const LIBELLE_DECLARE = "1CAP2  MAINT.MATERIELS OPT.C ESP. VERTS";
+const LIBELLE_DECA = "1CAP2  MACON";
+const TEL_CFA = "0628000000";
+const TEL_DECA = "0690000000";
+
+const RECORDS: SeedRecord[] = [
   {
-    key: "DRILGIPI",
-    kind: "DECA",
-    uai: "0550861M",
-    siret: "30019718300027",
-    expectedDepartement: "55",
-    apprenant: {
-      nom: "DRILGIPI",
-      prenom: "Stephane",
-      ine: null,
-      date_de_naissance: "2010-08-06",
-      sexe: "M",
-      courriel: "Stephane.bernard@example.com",
-      telephone: "0690000000",
-    },
-    formation: {
-      cfd: "40025503",
-      rncp: "RNCP38596",
-      libelle: "1CAP2  MAINT.VEHIC.OPT.VEHIC.LEGERS",
-      date_inscription: "2026-09-02",
-      date_entree: "2026-09-02",
-      date_fin: "2027-06-30",
-    },
-    contrat: { date_debut: "2026-09-01", date_fin: "2027-06-30", date_rupture: "2027-07-15" },
+    key: "CDT01",
+    profil: "DECA_88",
+    nom: "XOTNUDA",
+    prenom: "Ccaeaeoeoe",
+    ine: null,
+    date_de_naissance: "2011-05-07",
+    sexe: "F",
+    courriel: "Ccaeaeoeoe.bernard@example.com",
+    telephone: TEL_DECA,
+    libelle: LIBELLE_DECA,
+    decaRawId: "665f1a2b3c4d5e6f7a869521",
+  },
+  {
+    key: "CDT02",
+    profil: "DECLARE_55",
+    nom: "XUTNALI",
+    prenom: "Ççææœœ",
+    ine: null,
+    date_de_naissance: "2011-06-07",
+    sexe: "F",
+    courriel: "XUTNALIemail_contact@domain.tld",
+    telephone: TEL_CFA,
+    libelle: LIBELLE_DECLARE,
+  },
+  {
+    key: "CDT03",
+    profil: "INSCRIT_54",
+    nom: "ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝ",
+    prenom: "Jules",
+    ine: null,
+    date_de_naissance: "2011-05-23",
+    sexe: "M",
+    courriel: "Jules_contact@domain.tld",
+    telephone: TEL_CFA,
+    libelle: LIBELLE_INSCRIT,
+  },
+  {
+    key: "CDT04",
+    profil: "DECA_88",
+    nom: "AAAAAAEEEEIIIIOOOOOUUUUY",
+    prenom: "Aloïs",
+    ine: null,
+    date_de_naissance: "2011-05-30",
+    sexe: "M",
+    courriel: "Aloïs@example.com",
+    telephone: TEL_DECA,
+    libelle: LIBELLE_DECA,
+    decaRawId: "69522a2b3c4d5e6f7a8b9c11",
+  },
+  {
+    key: "CDT05",
+    profil: "DECA_88",
+    nom: "TRASNAPU",
+    prenom: "Aaaaaaeeeeiiiiooooouuuuy",
+    ine: null,
+    date_de_naissance: "2011-12-08",
+    sexe: "M",
+    courriel: "Aaaaaaeeeeiiiiooooouuuuy.bernard@example.com",
+    telephone: TEL_DECA,
+    libelle: LIBELLE_DECA,
+    decaRawId: "69520a2b3c4d5e6f7a8b9c11",
+  },
+  {
+    key: "CDT06",
+    profil: "DECLARE_55",
+    nom: "ROBINSON-NINO",
+    prenom: "Àáâãäåèéêëìíîïòóôõöùúûüý",
+    ine: null,
+    date_de_naissance: "2011-03-06",
+    sexe: "M",
+    courriel: "ROBINSON-NINO_contact@domain.tld",
+    telephone: TEL_CFA,
+    libelle: LIBELLE_DECLARE,
+  },
+  {
+    key: "CDT07",
+    profil: "DECA_88",
+    nom: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    prenom: "Inaya",
+    ine: null,
+    date_de_naissance: "2011-11-21",
+    sexe: "M",
+    courriel: "Inaya.bernard@example.com",
+    telephone: TEL_DECA,
+    libelle: LIBELLE_DECA,
+    decaRawId: "69516a2b3c4d5e6f7a8b9c11",
+  },
+  {
+    key: "CDT08",
+    profil: "INSCRIT_54",
+    nom: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    prenom: "Bettina",
+    ine: null,
+    date_de_naissance: "2011-03-12",
+    sexe: "F",
+    courriel: "Bettina_contact@domain.tld",
+    telephone: TEL_CFA,
+    libelle: LIBELLE_INSCRIT,
+  },
+  {
+    key: "CDT09",
+    profil: "INSCRIT_54",
+    nom: "NAJJILE",
+    prenom: "Mohamed-Ali",
+    ine: null,
+    date_de_naissance: "2010-11-09",
+    sexe: "M",
+    courriel: "Mohamed-Aliemail_contact@domain.tld",
+    telephone: TEL_CFA,
+    libelle: LIBELLE_INSCRIT,
+  },
+  {
+    key: "CDT10",
+    profil: "DECLARE_55",
+    nom: "GLOFVALE",
+    prenom: "Lou-Ann",
+    ine: null,
+    date_de_naissance: "2011-05-28",
+    sexe: "M",
+    courriel: "Lou-Annemail_contact@domain.tld",
+    telephone: TEL_CFA,
+    libelle: LIBELLE_DECLARE,
+  },
+  {
+    key: "CDT11",
+    profil: "INSCRIT_54",
+    nom: "KLICVELA",
+    prenom: "Marie-Ange",
+    ine: "120156231KE",
+    date_de_naissance: "2011-01-28",
+    sexe: "M",
+    courriel: "Marie-Angeemail_contact@domain.tld",
+    telephone: TEL_CFA,
+    libelle: LIBELLE_INSCRIT,
+  },
+  {
+    key: "CDT12",
+    profil: "DECLARE_55",
+    nom: "FRIJPURO",
+    prenom: "Lili-Rose",
+    ine: null,
+    date_de_naissance: "2011-04-26",
+    sexe: "M",
+    courriel: "Lili-Roseemail_contact@domain.tld",
+    telephone: TEL_CFA,
+    libelle: LIBELLE_DECLARE,
+  },
+  {
+    key: "CDT13",
+    profil: "DECA_88",
+    nom: "PROLAINI",
+    prenom: "Anne-Sophie",
+    ine: null,
+    date_de_naissance: "2011-05-31",
+    sexe: "M",
+    courriel: "Anne-Sophie.bernard@example.com",
+    telephone: TEL_DECA,
+    libelle: LIBELLE_DECA,
+    decaRawId: "26220a2b3c4d5e6f7a8b9c11",
+  },
+  {
+    key: "CDT14",
+    profil: "DECLARE_55",
+    nom: "CIPCIRA",
+    prenom: "Alima",
+    ine: null,
+    date_de_naissance: "2011-06-14",
+    sexe: "M",
+    courriel: "Alimaemail_contact@domain.tld",
+    telephone: TEL_CFA,
+    libelle: LIBELLE_DECLARE,
+  },
+  {
+    key: "CDT15",
+    profil: "INSCRIT_54",
+    nom: "NIMAINE",
+    prenom: "Louis-Marie",
+    ine: "120156231KE",
+    date_de_naissance: "2011-06-24",
+    sexe: "M",
+    courriel: "Louis-Marieemail_contact@domain.tld",
+    telephone: TEL_CFA,
+    libelle: LIBELLE_INSCRIT,
+  },
+  {
+    key: "CDT16",
+    profil: "DECA_88",
+    nom: "DREMRACU",
+    prenom: "Cheick-Oumar",
+    ine: null,
+    date_de_naissance: "2011-12-09",
+    sexe: "M",
+    courriel: "Cheick-Oumar.bernard@example.com",
+    telephone: TEL_DECA,
+    libelle: LIBELLE_DECA,
+    decaRawId: "46666a2b3c4d5e6f7a8b9c11",
   },
 ];
 
 const markerId = (key: string) => `${MARKER}_${key}`;
+const profilOf = (record: SeedRecord): SeedProfil => PROFILS[record.profil];
 
 function buildApprenant(record: SeedRecord) {
   return {
-    nom: record.apprenant.nom,
-    prenom: record.apprenant.prenom,
-    ine: record.apprenant.ine,
-    date_de_naissance: d(record.apprenant.date_de_naissance),
-    sexe: record.apprenant.sexe,
-    courriel: record.apprenant.courriel,
-    telephone: record.apprenant.telephone,
+    nom: record.nom,
+    prenom: record.prenom,
+    ine: record.ine,
+    date_de_naissance: d(record.date_de_naissance),
+    sexe: record.sexe,
+    courriel: record.courriel,
+    telephone: record.telephone,
     has_nir: false,
     historique_statut: [],
   };
 }
 
 function buildFormation(record: SeedRecord) {
+  const { formation } = profilOf(record);
   return {
-    cfd: record.formation.cfd,
-    rncp: record.formation.rncp,
-    libelle_long: record.formation.libelle,
-    libelle_court: record.formation.libelle,
+    cfd: formation.cfd,
+    rncp: formation.rncp,
+    libelle_long: record.libelle,
+    libelle_court: record.libelle,
     niveau: NIVEAU,
     niveau_libelle: NIVEAU_LIBELLE,
     periode: [2026, 2027],
-    date_inscription: d(record.formation.date_inscription),
-    date_entree: d(record.formation.date_entree),
-    date_fin: d(record.formation.date_fin),
+    date_inscription: d(formation.date_inscription),
+    date_entree: d(formation.date_entree),
+    date_fin: d(formation.date_fin),
   };
 }
 
 function buildContrats(record: SeedRecord) {
-  if (!record.contrat) return [];
+  const { contrat } = profilOf(record);
+  if (!contrat) return [];
   return [
     {
-      date_debut: d(record.contrat.date_debut),
-      date_fin: d(record.contrat.date_fin),
-      date_rupture: record.contrat.date_rupture ? d(record.contrat.date_rupture) : null,
+      date_debut: d(contrat.date_debut),
+      date_fin: d(contrat.date_fin),
+      date_rupture: contrat.date_rupture ? d(contrat.date_rupture) : null,
     },
   ];
 }
@@ -234,10 +358,11 @@ async function insertRecords(dryRun: boolean): Promise<{ inserted: number; skipp
   let inserted = 0;
 
   for (const record of RECORDS) {
-    const organisme = await getOrganismeByUAIAndSIRET(record.uai, record.siret);
+    const profil = profilOf(record);
+    const organisme = await getOrganismeByUAIAndSIRET(profil.uai, profil.siret);
     if (!organisme) {
       logger.error(
-        { key: record.key, uai: record.uai, siret: record.siret },
+        { key: record.key, uai: profil.uai, siret: profil.siret },
         "Organisme introuvable (UAI+SIRET) — skip"
       );
       skipped.push(record.key);
@@ -261,9 +386,13 @@ async function insertRecords(dryRun: boolean): Promise<{ inserted: number; skipp
       transmitted_at: now,
     };
 
-    if (record.kind === "DECA") {
+    if (profil.kind === "DECA") {
       const effectif = (await withComputedFields(
-        { ...base, source: SOURCE_APPRENANT.DECA, deca_raw_id: new ObjectId() } as WithoutId<IEffectifDECA>,
+        {
+          ...base,
+          source: SOURCE_APPRENANT.DECA,
+          deca_raw_id: record.decaRawId ? new ObjectId(record.decaRawId) : new ObjectId(),
+        } as WithoutId<IEffectifDECA>,
         { organisme, certification: null }
       )) as WithoutId<IEffectifDECA>;
       if (!dryRun) await effectifsDECADb().insertOne({ ...effectif, _id: new ObjectId() });
@@ -279,7 +408,7 @@ async function insertRecords(dryRun: boolean): Promise<{ inserted: number; skipp
     logger.info(
       {
         key: record.key,
-        kind: record.kind,
+        profil: record.profil,
         organisme: organisme.nom,
         departement: organisme.adresse?.departement,
         dryRun,
@@ -330,16 +459,18 @@ async function verify(): Promise<void> {
   const failures: string[] = [];
 
   for (const record of RECORDS) {
-    const found: any = byKey.get(
-      verifKey(record.apprenant.nom, record.apprenant.prenom, record.apprenant.date_de_naissance)
-    );
-    const expectedDept = record.expectedDepartement.padStart(3, "0");
-    const expectedSource = record.kind;
+    const profil = profilOf(record);
+    const found: any = byKey.get(verifKey(record.nom, record.prenom, record.date_de_naissance));
+    const expectedDept = profil.expectedDepartement.padStart(3, "0");
+    const expectedSource = profil.kind;
     const problems: string[] = [];
 
     if (!found) {
       problems.push("absent du résultat SIPA");
     } else {
+      if (found.apprenant?.nom !== record.nom || found.apprenant?.prenom !== record.prenom) {
+        problems.push(`nom/prénom altérés : ${found.apprenant?.nom} ${found.apprenant?.prenom}`);
+      }
       if (found.organismeFormation?.departement !== expectedDept) {
         problems.push(`département ${found.organismeFormation?.departement} (attendu ${expectedDept})`);
       }
@@ -347,10 +478,10 @@ async function verify(): Promise<void> {
         problems.push(`source ${found.source} (attendu ${expectedSource})`);
       }
       const foundIne = found.apprenant?.ine ?? null;
-      if (foundIne !== record.apprenant.ine) {
-        problems.push(`INE ${foundIne ?? "absent"} (attendu ${record.apprenant.ine ?? "absent"})`);
+      if (foundIne !== record.ine) {
+        problems.push(`INE ${foundIne ?? "absent"} (attendu ${record.ine ?? "absent"})`);
       }
-      const expectHasContrat = !!record.contrat;
+      const expectHasContrat = !!profil.contrat;
       if (!!found.contrats !== expectHasContrat) {
         problems.push(
           `contrat ${found.contrats ? "présent" : "absent"} (attendu ${expectHasContrat ? "présent" : "absent"})`
