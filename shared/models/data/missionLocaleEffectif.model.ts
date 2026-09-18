@@ -205,6 +205,12 @@ const zMissionLocaleEffectif = z.object({
           "Indique si l'utilisateur CFA qui a fait acc_conjoint a une notification non lue suite à une action de la ML"
         ),
       acc_conjoint_by: zObjectId.nullish().describe("ID de l'utilisateur CFA qui a effectué la demande"),
+      acc_conjoint_at: z
+        .date()
+        .nullish()
+        .describe(
+          "Date d'envoi de la collaboration à la ML, posée une seule fois. reponse_at reste la dernière modification"
+        ),
       still_at_cfa: z.boolean().nullish().describe("Indique si le jeune est toujours en formation au CFA"),
       commentaires_par_motif: z
         .record(zAccConjointMotifEnum, z.string())

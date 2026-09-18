@@ -74,6 +74,10 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     throw Boom.conflict("Un dossier de collaboration a déjà été envoyé pour cet effectif");
   }
 
+  if (data.acc_conjoint === true && !existing?.organisme_data?.acc_conjoint_at) {
+    setFields["organisme_data.acc_conjoint_at"] = new Date();
+  }
+
   let targetFilter: Record<string, unknown> = existingFilter;
 
   const dateRupture = data.date_rupture;
