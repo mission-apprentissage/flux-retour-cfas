@@ -1,7 +1,7 @@
 "use client";
 
 import { Table } from "@codegouvfr/react-dsfr/Table";
-import type { ITraitementRegionStats, StatsPeriod } from "shared/models/data/nationalStats.model";
+import type { ITraitementRegionStats, StatsPeriod, StatsSegment } from "shared/models/data/nationalStats.model";
 
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
@@ -14,14 +14,15 @@ import styles from "./TraitementTable.module.css";
 
 interface TraitementRegionTableProps {
   period: StatsPeriod;
+  segment?: StatsSegment;
   national?: boolean;
 }
 
 type SortColumn = keyof ITraitementRegionStats;
 
-export function TraitementRegionTable({ period, national = false }: TraitementRegionTableProps) {
+export function TraitementRegionTable({ period, segment = "all", national = false }: TraitementRegionTableProps) {
   const { sortColumn, sortDirection, handleSort, sortData } = useSortableTable<SortColumn>("traites");
-  const { data: regions, isLoading } = useTraitementRegionsStats(period, national);
+  const { data: regions, isLoading } = useTraitementRegionsStats(period, national, segment);
 
   const sortedRegions = sortData(regions || []);
 

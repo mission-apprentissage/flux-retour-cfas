@@ -1,0 +1,22 @@
+.about {
+  padding: 16px 24px;
+  margin-bottom: 24px;
+  background-color: var(--background-alt-blue-france);
+  border-left: 4px solid var(--border-plain-blue-france);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px 0;
+  font-weight: 700;
+  color: var(--text-title-blue-france);
+}
+
+.text {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  color: var(--text-default-grey);
+}

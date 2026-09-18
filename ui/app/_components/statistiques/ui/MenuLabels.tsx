@@ -26,7 +26,7 @@ export function SyntheseLabel({ isActive, collapsed }: MenuLabelProps) {
           fill={isActive ? "#000091" : "#CECECE"}
         />
       </svg>
-      {!collapsed && "Synthèse"}
+      {!collapsed && "Vue d'ensemble"}
     </>
   );
 }

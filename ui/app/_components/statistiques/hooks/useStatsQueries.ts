@@ -11,11 +11,17 @@ import type {
   ITraitementRegionStats,
   ITraitementStatsResponse,
   IWhatsAppStats,
+  StatsSegment,
+  TraitementMlSortBy,
 } from "shared/models/data/nationalStats.model";
 
 import { _get, _put } from "@/common/httpClient";
 
 import type { Period } from "../ui/PeriodSelector";
+
+import { buildSegmentStatsRequest, buildTraitementRequest, type SegmentStatsParams } from "./statsRoutes";
+
+export type { SegmentStatsParams };
 
 interface IDeploymentStatsResponse {
   summary: {
@@ -41,6 +47,7 @@ interface IRupturantsStatsResponse {
   summary: IRupturantsSummary;
   evaluationDate: Date;
   period: Period;
+  segment: StatsSegment;
 }
 
 interface ICouvertureRegionsStatsResponse {
@@ -68,26 +75,27 @@ function buildStatsParams(params: {
   region?: string;
   mlId?: string;
   national?: boolean;
+  segment?: StatsSegment;
 }): Record<string, unknown> {
   return {
     ...(params.period && { period: params.period }),
     ...(params.region && { region: params.region }),
     ...(params.mlId && { ml_id: params.mlId }),
     ...(params.national && { national: true }),
+    ...(params.segment && { segment: params.segment }),
   };
 }
 
 export const statsQueryKeys = {
-  traitement: (period: Period, region?: string) => ["stats", "traitement", period, region] as const,
+  traitement: (params: SegmentStatsParams) => ["stats", "traitement", params] as const,
   deployment: (period: Period) => ["stats", "deployment", period] as const,
   syntheseRegions: (period: Period) => ["stats", "synthese-regions", period] as const,
-  rupturants: (period: Period, region?: string, mlId?: string) =>
-    ["stats", "rupturants", period, region, mlId] as const,
-  dossiersTraites: (period: Period, region?: string, mlId?: string) =>
-    ["stats", "dossiers-traites", period, region, mlId] as const,
+  rupturants: (params: SegmentStatsParams) => ["stats", "rupturants", params] as const,
+  dossiersTraites: (params: SegmentStatsParams) => ["stats", "dossiers-traites", params] as const,
   couvertureRegions: (period: Period) => ["stats", "couverture-regions", period] as const,
   traitementML: (params: TraitementMLParams) => ["stats", "traitement-ml", params] as const,
-  traitementRegions: (period: Period) => ["stats", "traitement-regions", period] as const,
+  traitementRegions: (period: Period, segment: StatsSegment) =>
+    ["stats", "traitement-regions", period, segment] as const,
   accompagnementConjoint: (region?: string, mlId?: string) =>
     ["stats", "accompagnement-conjoint", region, mlId] as const,
   missionLocaleDetail: (mlId: string) => ["stats", "ml-detail", mlId] as const,
@@ -98,10 +106,11 @@ export const statsQueryKeys = {
 
 export interface TraitementMLParams {
   period: Period;
+  segment: StatsSegment;
   region?: string;
   page: number;
   limit: number;
-  sort_by: string;
+  sort_by: TraitementMlSortBy;
   sort_order: "asc" | "desc";
   search?: string;
 }
@@ -109,6 +118,7 @@ export interface TraitementMLParams {
 function buildTraitementMLRequestParams(params: TraitementMLParams): Record<string, unknown> {
   return {
     period: params.period,
+    segment: params.segment,
     ...(params.region && { region: params.region }),
     page: params.page,
     limit: params.limit,
@@ -118,14 +128,11 @@ function buildTraitementMLRequestParams(params: TraitementMLParams): Record<stri
   };
 }
 
-export function useTraitementStats(period: Period, region?: string) {
+export function useTraitementStats(params: SegmentStatsParams) {
+  const request = buildTraitementRequest(params);
   return useQuery<ITraitementStatsResponse>({
-    queryKey: statsQueryKeys.traitement(period, region),
-
-    queryFn: () =>
-      region
-        ? _get("/api/v1/organisation/indicateurs-ml/traitement", { params: { period, region } })
-        : _get("/api/v1/mission-locale/stats/traitement", { params: { period } }),
+    queryKey: statsQueryKeys.traitement(params),
+    queryFn: () => _get(request.url, { params: request.params }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }
@@ -146,26 +153,20 @@ export function useSyntheseRegionsStats(period: Period) {
   });
 }
 
-export function useRupturantsStats(period: Period, region?: string, mlId?: string, national?: boolean) {
+export function useRupturantsStats(params: SegmentStatsParams) {
+  const request = buildSegmentStatsRequest("rupturants", params);
   return useQuery<IRupturantsStatsResponse>({
-    queryKey: [...statsQueryKeys.rupturants(period, region, mlId), national] as const,
-
-    queryFn: () =>
-      _get("/api/v1/organisation/indicateurs-ml/stats/rupturants", {
-        params: buildStatsParams({ period, region, mlId, national }),
-      }),
+    queryKey: statsQueryKeys.rupturants(params),
+    queryFn: () => _get(request.url, { params: request.params }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }
 
-export function useDossiersTraitesStats(period: Period, region?: string, mlId?: string, national?: boolean) {
+export function useDossiersTraitesStats(params: SegmentStatsParams) {
+  const request = buildSegmentStatsRequest("dossiers-traites", params);
   return useQuery<IDossiersTraitesStatsResponse>({
-    queryKey: [...statsQueryKeys.dossiersTraites(period, region, mlId), national] as const,
-
-    queryFn: () =>
-      _get("/api/v1/organisation/indicateurs-ml/stats/dossiers-traites", {
-        params: buildStatsParams({ period, region, mlId, national }),
-      }),
+    queryKey: statsQueryKeys.dossiersTraites(params),
+    queryFn: () => _get(request.url, { params: request.params }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }
@@ -212,13 +213,13 @@ export function usePrefetchTraitementML() {
   );
 }
 
-export function useTraitementRegionsStats(period: Period, national?: boolean) {
+export function useTraitementRegionsStats(period: Period, national?: boolean, segment: StatsSegment = "all") {
   return useQuery<ITraitementRegionStats[]>({
-    queryKey: [...statsQueryKeys.traitementRegions(period), national] as const,
+    queryKey: [...statsQueryKeys.traitementRegions(period, segment), national] as const,
 
     queryFn: () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/traitement/regions", {
-        params: buildStatsParams({ period, national }),
+        params: buildStatsParams({ period, national, segment }),
       }),
     ...STATS_QUERY_CONFIG,
   });
@@ -263,6 +264,7 @@ export interface IMissionLocaleDetailResponse {
     };
   };
   activated_at: string | null;
+  is_active: boolean;
   last_activity_at: string | null;
   has_cfa_collaboration: boolean;
   traites_count: number;

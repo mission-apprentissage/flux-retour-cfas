@@ -12,22 +12,22 @@ import { DossiersTraitesSection } from "./DossiersTraitesSection";
 import styles from "./IdentificationSuiviSection.module.css";
 import { RupturantsSection } from "./RupturantsSection";
 import { StatisticsSection } from "./StatisticsSection";
-import type { BaseSectionProps } from "./types";
+import type { BaseSectionProps, SegmentSectionProps } from "./types";
 
-interface IdentificationSuiviSectionProps extends BaseSectionProps {
+interface IdentificationSuiviSectionProps extends BaseSectionProps, SegmentSectionProps {
   defaultPeriod?: Period;
-  showCharts?: boolean;
 }
 
 export function IdentificationSuiviSection({
   defaultPeriod = "30days",
-  showCharts = true,
+  segment,
+  isPublic = false,
   region,
   national = false,
 }: IdentificationSuiviSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
-  const { data, isLoading, isFetching, error } = useTraitementStats(period, region);
-  const { data: dossiersTraitesData } = useDossiersTraitesStats(period, region, undefined, national);
+  const { data, isLoading, isFetching, error } = useTraitementStats({ period, segment, region });
+  const { data: dossiersTraitesData } = useDossiersTraitesStats({ period, segment, region, national, isPublic });
 
   const loadingPercentage = isLoadingVariation(isFetching, isLoading);
   const hideDossiersTraites = dossiersTraitesData?.traites === 0;
@@ -47,12 +47,24 @@ export function IdentificationSuiviSection({
             loadingPercentage={loadingPercentage}
           />
         </div>
-        {showCharts && (
-          <div className={hideDossiersTraites ? styles.chartsContainerFullWidth : styles.chartsContainer}>
-            <RupturantsSection period={period} region={region} national={national} />
-            {!hideDossiersTraites && <DossiersTraitesSection period={period} region={region} national={national} />}
-          </div>
-        )}
+        <div className={hideDossiersTraites ? styles.chartsContainerFullWidth : styles.chartsContainer}>
+          <RupturantsSection
+            period={period}
+            segment={segment}
+            isPublic={isPublic}
+            region={region}
+            national={national}
+          />
+          {!hideDossiersTraites && (
+            <DossiersTraitesSection
+              period={period}
+              segment={segment}
+              isPublic={isPublic}
+              region={region}
+              national={national}
+            />
+          )}
+        </div>
       </StatsErrorHandler>
     </StatisticsSection>
   );

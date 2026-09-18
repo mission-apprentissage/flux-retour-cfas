@@ -133,7 +133,7 @@ function buildCollapsedMenuItems(
   const items: SideMenuProps.Item[] = [
     {
       text: <SyntheseLabel isActive={pathname === BASE_PATH} collapsed />,
-      linkProps: { href: BASE_PATH, title: "Synthèse" },
+      linkProps: { href: BASE_PATH, title: "Vue d'ensemble" },
       isActive: pathname === BASE_PATH,
     },
     {

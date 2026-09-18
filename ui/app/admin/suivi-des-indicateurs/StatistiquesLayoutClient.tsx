@@ -28,7 +28,7 @@ const SyntheseLabel = ({ isActive, collapsed }: { isActive: boolean; collapsed?:
         fill={isActive ? "#000091" : "#CECECE"}
       />
     </svg>
-    {!collapsed && "Synthèse"}
+    {!collapsed && "Vue d'ensemble"}
   </>
 );
 
@@ -82,7 +82,7 @@ export function StatistiquesLayoutClient({ children }: { children: React.ReactNo
           text: <SyntheseLabel isActive={pathname === "/admin/suivi-des-indicateurs"} collapsed />,
           linkProps: {
             href: "/admin/suivi-des-indicateurs",
-            title: "Synthèse",
+            title: "Vue d'ensemble",
           },
           isActive: pathname === "/admin/suivi-des-indicateurs",
         },

@@ -3,9 +3,10 @@
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 
 import { AccompagnementConjointSection } from "../sections/AccompagnementConjointSection";
-import { IdentificationSuiviSection } from "../sections/IdentificationSuiviSection";
+import { RupturesSegmentPanel } from "../sections/RupturesSegmentPanel";
 import { SuiviTraitementSection } from "../sections/SuiviTraitementSection";
 import { RegionSVG } from "../ui/RegionSVG";
+import { StatsTabs } from "../ui/StatsTabs";
 import { ViewHeader } from "../ui/ViewHeader";
 
 import styles from "./RegionView.module.css";
@@ -15,7 +16,7 @@ interface RegionViewProps {
   isAdmin?: boolean;
 }
 
-export function RegionView({ regionCode, isAdmin = true }: RegionViewProps) {
+export function RegionView({ regionCode, isAdmin = false }: RegionViewProps) {
   const region = REGIONS_BY_CODE[regionCode as keyof typeof REGIONS_BY_CODE];
   const regionName = region?.nom || "Région inconnue";
 
@@ -30,10 +31,38 @@ export function RegionView({ regionCode, isAdmin = true }: RegionViewProps) {
         }
       />
 
-      <IdentificationSuiviSection region={regionCode} />
-
-      <SuiviTraitementSection region={regionCode} isAdmin={isAdmin} />
-      <AccompagnementConjointSection region={regionCode} />
+      <StatsTabs
+        tabs={[
+          {
+            id: "ruptures",
+            label: "Ruptures uniquement",
+            content: (
+              <RupturesSegmentPanel
+                region={regionCode}
+                isAdmin={isAdmin}
+                suiviTraitement
+                suiviTraitementTitle="Suivi traitement rupture"
+              />
+            ),
+          },
+          {
+            id: "collaborations",
+            label: "Collaborations",
+            content: (
+              <div>
+                <AccompagnementConjointSection region={regionCode} />
+                <SuiviTraitementSection
+                  segment="collab"
+                  title="Suivi traitement collaboration"
+                  region={regionCode}
+                  isAdmin={isAdmin}
+                  exportable={false}
+                />
+              </div>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }

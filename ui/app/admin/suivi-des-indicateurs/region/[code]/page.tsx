@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { REGIONS_WITH_SVG_SORTED } from "shared/constants/territoires";
 
 import { RegionView } from "@/app/_components/statistiques/views/RegionView";
@@ -10,5 +11,9 @@ export function generateStaticParams() {
 
 export default async function RegionPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
-  return <RegionView regionCode={code} />;
+  return (
+    <Suspense>
+      <RegionView regionCode={code} isAdmin />
+    </Suspense>
+  );
 }

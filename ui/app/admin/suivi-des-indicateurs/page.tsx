@@ -1,5 +1,11 @@
-import { SyntheseView } from "../../_components/statistiques/views/SyntheseView";
+import { Suspense } from "react";
+
+import { VueEnsembleView } from "@/app/_components/statistiques/views/VueEnsembleView";
 
 export default function StatistiquesPage() {
-  return <SyntheseView showDetailColumn={true} isAdmin={true} />;
+  return (
+    <Suspense>
+      <VueEnsembleView isAdmin />
+    </Suspense>
+  );
 }

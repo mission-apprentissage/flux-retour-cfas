@@ -3,9 +3,10 @@
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
+import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import Link from "next/link";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
-import type { StatsPeriod } from "shared/models/data/nationalStats.model";
+import type { StatsPeriod, StatsSegment } from "shared/models/data/nationalStats.model";
 
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
@@ -20,6 +21,7 @@ import styles from "./TraitementTable.module.css";
 
 interface TraitementMLTableProps {
   period: StatsPeriod;
+  segment: StatsSegment;
   region?: string;
   search?: string;
   hideDescription?: boolean;
@@ -28,7 +30,15 @@ interface TraitementMLTableProps {
 
 type SortColumn = "nom" | "total_jeunes" | "a_traiter" | "traites" | "pourcentage_traites" | "jours_depuis_activite";
 
-export function TraitementMLTable({ period, region, search, hideDescription, isAdmin = true }: TraitementMLTableProps) {
+export function TraitementMLTable({
+  period,
+  segment,
+  region,
+  search,
+  hideDescription,
+  isAdmin = false,
+}: TraitementMLTableProps) {
+  const totalLabel = segment === "collab" ? "Total collab" : "Total jeunes";
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
@@ -58,6 +68,7 @@ export function TraitementMLTable({ period, region, search, hideDescription, isA
 
   const { data, isLoading, isFetching } = useTraitementMLStats({
     period,
+    segment,
     region,
     page,
     limit,
@@ -67,11 +78,11 @@ export function TraitementMLTable({ period, region, search, hideDescription, isA
   });
   const prefetchNextPage = usePrefetchTraitementML();
 
-  const prevParamsRef = useRef({ page, limit, sortColumn, sortDirection, search, period });
+  const prevParamsRef = useRef({ page, limit, sortColumn, sortDirection, search, period, segment });
 
   const isPeriodChangeOnly = useMemo(() => {
     const prev = prevParamsRef.current;
-    const periodChanged = prev.period !== period;
+    const periodChanged = prev.period !== period || prev.segment !== segment;
     const otherParamsChanged =
       prev.page !== page ||
       prev.limit !== limit ||
@@ -80,11 +91,11 @@ export function TraitementMLTable({ period, region, search, hideDescription, isA
       prev.search !== search;
 
     return periodChanged && !otherParamsChanged;
-  }, [page, limit, sortColumn, sortDirection, search, period]);
+  }, [page, limit, sortColumn, sortDirection, search, period, segment]);
 
   useEffect(() => {
-    prevParamsRef.current = { page, limit, sortColumn, sortDirection, search, period };
-  }, [page, limit, sortColumn, sortDirection, search, period]);
+    prevParamsRef.current = { page, limit, sortColumn, sortDirection, search, period, segment };
+  }, [page, limit, sortColumn, sortDirection, search, period, segment]);
 
   const showFullSkeleton = isLoading || (isFetching && !isPeriodChangeOnly);
 
@@ -103,6 +114,7 @@ export function TraitementMLTable({ period, region, search, hideDescription, isA
       if (nextPage <= data.pagination.totalPages) {
         prefetchNextPage({
           period,
+          segment,
           region,
           page: nextPage,
           limit,
@@ -112,7 +124,19 @@ export function TraitementMLTable({ period, region, search, hideDescription, isA
         });
       }
     }
-  }, [data, isLoading, page, period, region, limit, effectiveSortBy, effectiveSortOrder, prefetchNextPage, search]);
+  }, [
+    data,
+    isLoading,
+    page,
+    period,
+    segment,
+    region,
+    limit,
+    effectiveSortBy,
+    effectiveSortOrder,
+    prefetchNextPage,
+    search,
+  ]);
 
   const loadingEvolution = isLoadingVariation(isFetching, isLoading);
 
@@ -132,7 +156,7 @@ export function TraitementMLTable({ period, region, search, hideDescription, isA
 
   const tableHeaders = useMemo(() => {
     if (isSearching) {
-      return ["Mission Locale", "Total jeunes", "À traiter", "Traités", "Détails", "% Traités", "Activité"];
+      return ["Mission Locale", totalLabel, "À traiter", "Traités", "Détails", "% Traités", "Activité"];
     }
 
     return [
@@ -147,7 +171,7 @@ export function TraitementMLTable({ period, region, search, hideDescription, isA
       <SortableTableHeader
         key="total_jeunes"
         column="total_jeunes"
-        label="Total jeunes"
+        label={totalLabel}
         currentSortColumn={sortColumn}
         sortDirection={sortDirection}
         onSort={handleSort}
@@ -191,7 +215,7 @@ export function TraitementMLTable({ period, region, search, hideDescription, isA
         centered
       />,
     ];
-  }, [isSearching, sortColumn, sortDirection, handleSort]);
+  }, [isSearching, sortColumn, sortDirection, handleSort, totalLabel]);
 
   return (
     <div className={styles.tableContainer}>
@@ -227,6 +251,7 @@ export function TraitementMLTable({ period, region, search, hideDescription, isA
                 return [
                   <div key={`nom-${ml.id}`} className={styles.mlNameCell}>
                     <span>{ml.nom}</span>
+                    {!region && ml.region_code && <Tag small>{ml.region_nom}</Tag>}
                     <Link href={buildDetailUrl(ml.id)} className="fr-link fr-link--sm">
                       Voir la fiche
                     </Link>

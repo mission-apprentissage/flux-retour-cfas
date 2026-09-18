@@ -1,5 +1,11 @@
+import { Suspense } from "react";
+
 import { NationalView } from "@/app/_components/statistiques/views/NationalView";
 
 export default function NationalPage() {
-  return <NationalView isAdmin={true} />;
+  return (
+    <Suspense>
+      <NationalView isAdmin />
+    </Suspense>
+  );
 }

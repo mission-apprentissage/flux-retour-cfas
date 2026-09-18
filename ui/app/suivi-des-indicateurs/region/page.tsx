@@ -1,5 +1,7 @@
 "use client";
 
+import { Suspense } from "react";
+
 import { useUserRegions } from "@/app/_components/statistiques/hooks/useUserRegions";
 import { RegionView } from "@/app/_components/statistiques/views/RegionView";
 
@@ -16,5 +18,9 @@ export default function RegionMLPage() {
     return <div>Aucune région disponible</div>;
   }
 
-  return <RegionView regionCode={defaultRegionCode} isAdmin={false} />;
+  return (
+    <Suspense>
+      <RegionView regionCode={defaultRegionCode} isAdmin={false} />
+    </Suspense>
+  );
 }

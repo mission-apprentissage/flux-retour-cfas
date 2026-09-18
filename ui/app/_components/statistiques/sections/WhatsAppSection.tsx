@@ -4,13 +4,18 @@ import { StatCard } from "../cards/StatCard";
 import { WhatsAppOutcomesPieChart } from "../charts/WhatsAppOutcomesPieChart";
 import { WhatsAppResponsePieChart } from "../charts/WhatsAppResponsePieChart";
 import { useWhatsAppStats } from "../hooks/useStatsQueries";
+import type { Period } from "../ui/PeriodSelector";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import { StatisticsSection } from "./StatisticsSection";
 import styles from "./WhatsAppSection.module.css";
 
-export function WhatsAppSection() {
-  const { data, isLoading, error } = useWhatsAppStats("all");
+interface WhatsAppSectionProps {
+  period?: Period;
+}
+
+export function WhatsAppSection({ period = "all" }: WhatsAppSectionProps) {
+  const { data, isLoading, error } = useWhatsAppStats(period);
 
   return (
     <StatisticsSection title="Messagerie WhatsApp">
