@@ -47,3 +47,22 @@ export function buildSegmentStatsRequest(
     ? { url: `${PUBLIC_STATS_BASE}/${resource}`, params: { period: params.period, segment: params.segment } }
     : { url: `${INDICATEURS_ML_BASE}/stats/${resource}`, params: territorialParams(params) };
 }
+
+export type CollaborationStatsParams = Omit<SegmentStatsParams, "segment">;
+
+/** Bloc collaboration : route anonyme nationale en public, sinon route territoriale scopée. */
+export function buildCollaborationsRequest(params: CollaborationStatsParams): StatsRequest {
+  if (params.isPublic) {
+    return { url: `${PUBLIC_STATS_BASE}/collaborations`, params: { period: params.period } };
+  }
+  const { period, region, mlId, national } = params;
+  return {
+    url: `${INDICATEURS_ML_BASE}/stats/collaborations`,
+    params: {
+      period,
+      ...(region && { region }),
+      ...(mlId && { ml_id: mlId }),
+      ...(national && { national: true }),
+    },
+  };
+}

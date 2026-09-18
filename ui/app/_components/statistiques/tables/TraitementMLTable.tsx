@@ -28,7 +28,14 @@ interface TraitementMLTableProps {
   isAdmin?: boolean;
 }
 
-type SortColumn = "nom" | "total_jeunes" | "a_traiter" | "traites" | "pourcentage_traites" | "jours_depuis_activite";
+type SortColumn =
+  | "nom"
+  | "total_jeunes"
+  | "a_traiter"
+  | "traites"
+  | "pourcentage_traites"
+  | "delai_moyen_jours"
+  | "jours_depuis_activite";
 
 export function TraitementMLTable({
   period,
@@ -38,7 +45,8 @@ export function TraitementMLTable({
   hideDescription,
   isAdmin = false,
 }: TraitementMLTableProps) {
-  const totalLabel = segment === "collab" ? "Total collab" : "Total jeunes";
+  const isCollab = segment === "collab";
+  const totalLabel = isCollab ? "Total collab" : "Total jeunes";
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
@@ -156,8 +164,32 @@ export function TraitementMLTable({
 
   const tableHeaders = useMemo(() => {
     if (isSearching) {
-      return ["Mission Locale", totalLabel, "À traiter", "Traités", "Détails", "% Traités", "Activité"];
+      return [
+        "Mission Locale",
+        totalLabel,
+        "À traiter",
+        "Traités",
+        "Détails",
+        "% Traités",
+        ...(isCollab ? ["Délai moy."] : []),
+        "Activité",
+      ];
     }
+
+    const delaiHeader = isCollab
+      ? [
+          <SortableTableHeader
+            key="delai_moyen_jours"
+            column="delai_moyen_jours"
+            label="Délai moy."
+            currentSortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+            centered
+            tooltip="Délai moyen, en jours, entre l'envoi d'une collaboration et la première action d'un conseiller de la Mission Locale."
+          />,
+        ]
+      : [];
 
     return [
       <SortableTableHeader
@@ -205,6 +237,7 @@ export function TraitementMLTable({
         onSort={handleSort}
         centered
       />,
+      ...delaiHeader,
       <SortableTableHeader
         key="jours_depuis_activite"
         column="jours_depuis_activite"
@@ -215,7 +248,7 @@ export function TraitementMLTable({
         centered
       />,
     ];
-  }, [isSearching, sortColumn, sortDirection, handleSort, totalLabel]);
+  }, [isSearching, sortColumn, sortDirection, handleSort, totalLabel, isCollab]);
 
   return (
     <div className={styles.tableContainer}>
@@ -274,6 +307,16 @@ export function TraitementMLTable({
                   <div className={styles.centeredCell} key={`pct-${ml.id}`}>
                     {formatPercentageBadge(ml.pourcentage_traites, ml.pourcentage_evolution, loadingEvolution)}
                   </div>,
+                  ...(isCollab
+                    ? [
+                        <div
+                          className={`${styles.centeredCell} ${ml.delai_moyen_jours === null ? styles.emptyValue : ""}`}
+                          key={`delai-${ml.id}`}
+                        >
+                          {ml.delai_moyen_jours === null ? "-" : `${ml.delai_moyen_jours.toLocaleString("fr-FR")} j`}
+                        </div>,
+                      ]
+                    : []),
                   <div className={`${styles.centeredCell} ${activity.className}`} key={`activity-${ml.id}`}>
                     {activity.text}
                   </div>,

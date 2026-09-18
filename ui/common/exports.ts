@@ -260,6 +260,44 @@ export const traitementRegionExportColumns = [
   { label: "Collab à recontacter", key: "collab_a_recontacter", width: 20 },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
+const traitementSegmentBaseColumns = [
+  { label: "Région", key: "region_nom", width: 30 },
+  { label: "Département", key: "departement_nom", width: 25 },
+  { label: "Code département", key: "departement_code", xlsxType: "string", width: 18 },
+  { label: "Mission Locale", key: "nom", width: 40 },
+  { label: "SIRET", key: "siret", xlsxType: "string", width: 15 },
+  { label: "Date activation", key: "date_activation", xlsxType: "date", width: 15 },
+  { label: "Dernière activité", key: "derniere_activite", xlsxType: "date", width: 18 },
+  { label: "Total jeunes", key: "total_jeunes", width: 12 },
+  { label: "À traiter", key: "a_traiter", width: 12 },
+  { label: "Traités", key: "traites", width: 12 },
+  { label: "% Traités", key: "pourcentage_traites", width: 12 },
+  { label: "Ayant répondu", key: "repondu", width: 14 },
+  { label: "RDV pris", key: "rdv_pris", width: 10 },
+  { label: "Accompagnés découverts", key: "rdv_pris_decouverts", width: 22 },
+  { label: "Projet pro sécurisé", key: "projet_pro_securise", width: 18 },
+  { label: "Ne souhaite pas d'accompagnement", key: "ne_souhaite_pas_accompagnement", width: 30 },
+  { label: "À recontacter", key: "a_recontacter", width: 13 },
+  { label: "Injoignable", key: "injoignable", width: 12 },
+  { label: "Autre", key: "autre", width: 10 },
+  { label: "Déjà connus accompagnés", key: "deja_connu_accompagne", width: 22 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const traitementRuptureExportColumns = traitementSegmentBaseColumns;
+
+export const traitementCollabExportColumns = [
+  ...traitementSegmentBaseColumns.map((column) =>
+    column.key === "total_jeunes" ? { ...column, label: "Total collab" } : column
+  ),
+  { label: "Situation : rupture", key: "situation_rupture", width: 18 },
+  { label: "Situation : abandon", key: "situation_abandon", width: 18 },
+  { label: "Prévention : inévitable", key: "situation_prevention_inevitable", width: 22 },
+  { label: "Prévention : très élevé", key: "situation_prevention_tres_eleve", width: 22 },
+  { label: "Prévention : modéré", key: "situation_prevention_modere", width: 20 },
+  { label: "Besoin d'aide hors rupture", key: "situation_besoin_aide_hors_rupture", width: 24 },
+  { label: "Délai moyen (jours)", key: "delai_moyen_jours", width: 18 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
 export const collaborationCfaCompatiblesExportColumns = [
   { label: "SIRET", key: "siret", xlsxType: "string", width: 18 },
   { label: "Nom", key: "nom", width: 50 },

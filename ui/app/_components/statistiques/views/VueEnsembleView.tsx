@@ -1,8 +1,6 @@
 "use client";
 
-import Alert from "@codegouvfr/react-dsfr/Alert";
-
-import { AccompagnementConjointSection } from "../sections/AccompagnementConjointSection";
+import { CollaborationSegmentPanel } from "../sections/CollaborationSegmentPanel";
 import { DeploymentPanel } from "../sections/DeploymentPanel";
 import { RupturesSegmentPanel } from "../sections/RupturesSegmentPanel";
 import { WhatsAppPanel } from "../sections/WhatsAppPanel";
@@ -29,15 +27,7 @@ export function VueEnsembleView({ isAdmin = false, isPublic = false }: VueEnsemb
     {
       id: "collaborations",
       label: "Suivi collaborations",
-      content: isPublic ? (
-        <Alert
-          severity="info"
-          small
-          description="Le suivi des collaborations entre CFA et Missions Locales arrive prochainement."
-        />
-      ) : (
-        <AccompagnementConjointSection national />
-      ),
+      content: <CollaborationSegmentPanel national isPublic={isPublic} />,
     },
   ];
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { CollaborationsAdminSection } from "./CollaborationsAdminSection";
+import { CollaborationsCfaSection } from "./CollaborationsCfaSection";
 import { DeploymentSection } from "./DeploymentSection";
 
 interface DeploymentPanelProps {
@@ -12,7 +13,7 @@ export function DeploymentPanel({ isAdmin = false, showDetailColumn = false }: D
   return (
     <div>
       <DeploymentSection showDetailColumn={showDetailColumn} isAdmin={isAdmin} />
-      {isAdmin && <CollaborationsAdminSection />}
+      {isAdmin ? <CollaborationsAdminSection /> : <CollaborationsCfaSection />}
     </div>
   );
 }

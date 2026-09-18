@@ -1,7 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import type {
-  IAccompagnementConjointStats,
+  ICollaborationSegmentStats,
   IDossiersTraitesStatsResponse,
   IPrequalifStats,
   IRegionStats,
@@ -14,14 +14,21 @@ import type {
   StatsSegment,
   TraitementMlSortBy,
 } from "shared/models/data/nationalStats.model";
+import type { ICollaborationsCfaSyntheseResponse } from "shared/models/routes/admin/collaboration-stats.api";
 
 import { _get, _put } from "@/common/httpClient";
 
 import type { Period } from "../ui/PeriodSelector";
 
-import { buildSegmentStatsRequest, buildTraitementRequest, type SegmentStatsParams } from "./statsRoutes";
+import {
+  buildCollaborationsRequest,
+  buildSegmentStatsRequest,
+  buildTraitementRequest,
+  type CollaborationStatsParams,
+  type SegmentStatsParams,
+} from "./statsRoutes";
 
-export type { SegmentStatsParams };
+export type { CollaborationStatsParams, SegmentStatsParams };
 
 interface IDeploymentStatsResponse {
   summary: {
@@ -96,8 +103,8 @@ export const statsQueryKeys = {
   traitementML: (params: TraitementMLParams) => ["stats", "traitement-ml", params] as const,
   traitementRegions: (period: Period, segment: StatsSegment) =>
     ["stats", "traitement-regions", period, segment] as const,
-  accompagnementConjoint: (region?: string, mlId?: string) =>
-    ["stats", "accompagnement-conjoint", region, mlId] as const,
+  collaborations: (params: CollaborationStatsParams) => ["stats", "collaborations", params] as const,
+  collaborationsCfa: () => ["stats", "collaborations-cfa"] as const,
   missionLocaleDetail: (mlId: string) => ["stats", "ml-detail", mlId] as const,
   missionLocaleMembres: (mlId: string) => ["stats", "ml-membres", mlId] as const,
   whatsapp: (period: Period) => ["stats", "whatsapp", period] as const,
@@ -225,14 +232,19 @@ export function useTraitementRegionsStats(period: Period, national?: boolean, se
   });
 }
 
-export function useAccompagnementConjointStats(region?: string, mlId?: string, national?: boolean) {
-  return useQuery<IAccompagnementConjointStats>({
-    queryKey: [...statsQueryKeys.accompagnementConjoint(region, mlId), national] as const,
+export function useCollaborationSegmentStats(params: CollaborationStatsParams) {
+  const request = buildCollaborationsRequest(params);
+  return useQuery<ICollaborationSegmentStats>({
+    queryKey: statsQueryKeys.collaborations(params),
+    queryFn: () => _get(request.url, { params: request.params }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
 
-    queryFn: () =>
-      _get("/api/v1/organisation/indicateurs-ml/stats/accompagnement-conjoint", {
-        params: buildStatsParams({ region, mlId, national }),
-      }),
+export function useCollaborationsCfaPublic() {
+  return useQuery<ICollaborationsCfaSyntheseResponse>({
+    queryKey: statsQueryKeys.collaborationsCfa(),
+    queryFn: () => _get("/api/v1/mission-locale/stats/synthese/collaborations-cfa"),
     ...STATS_QUERY_CONFIG,
   });
 }

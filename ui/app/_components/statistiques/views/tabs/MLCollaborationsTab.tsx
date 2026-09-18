@@ -1,6 +1,6 @@
 "use client";
 
-import { AccompagnementConjointSection } from "../../sections/AccompagnementConjointSection";
+import { CollaborationSegmentPanel } from "../../sections/CollaborationSegmentPanel";
 
 import styles from "./MLSuiviTraitementTab.module.css";
 
@@ -11,7 +11,7 @@ interface MLCollaborationsTabProps {
 export function MLCollaborationsTab({ mlId }: MLCollaborationsTabProps) {
   return (
     <div className={styles.container}>
-      <AccompagnementConjointSection mlId={mlId} compact />
+      <CollaborationSegmentPanel mlId={mlId} />
     </div>
   );
 }

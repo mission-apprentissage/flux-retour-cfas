@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildSegmentStatsRequest, buildTraitementRequest } from "./statsRoutes";
+import { buildCollaborationsRequest, buildSegmentStatsRequest, buildTraitementRequest } from "./statsRoutes";
 
 describe("buildTraitementRequest", () => {
   it("va sur la route publique sans région, même connecté", () => {
@@ -39,6 +39,22 @@ describe("buildSegmentStatsRequest", () => {
     ).toEqual({
       url: "/api/v1/organisation/indicateurs-ml/stats/dossiers-traites",
       params: { period: "30days", segment: "collab", ml_id: "abc", national: true },
+    });
+  });
+});
+
+describe("buildCollaborationsRequest", () => {
+  it("va sur la route publique nationale en public", () => {
+    expect(buildCollaborationsRequest({ period: "all", region: "11", isPublic: true })).toEqual({
+      url: "/api/v1/mission-locale/stats/collaborations",
+      params: { period: "all" },
+    });
+  });
+
+  it("scope la route territoriale par ML", () => {
+    expect(buildCollaborationsRequest({ period: "30days", mlId: "abc" })).toEqual({
+      url: "/api/v1/organisation/indicateurs-ml/stats/collaborations",
+      params: { period: "30days", ml_id: "abc" },
     });
   });
 });

@@ -2,9 +2,8 @@
 
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 
-import { AccompagnementConjointSection } from "../sections/AccompagnementConjointSection";
+import { CollaborationSegmentPanel } from "../sections/CollaborationSegmentPanel";
 import { RupturesSegmentPanel } from "../sections/RupturesSegmentPanel";
-import { SuiviTraitementSection } from "../sections/SuiviTraitementSection";
 import { RegionSVG } from "../ui/RegionSVG";
 import { StatsTabs } from "../ui/StatsTabs";
 import { ViewHeader } from "../ui/ViewHeader";
@@ -48,18 +47,7 @@ export function RegionView({ regionCode, isAdmin = false }: RegionViewProps) {
           {
             id: "collaborations",
             label: "Collaborations",
-            content: (
-              <div>
-                <AccompagnementConjointSection region={regionCode} />
-                <SuiviTraitementSection
-                  segment="collab"
-                  title="Suivi traitement collaboration"
-                  region={regionCode}
-                  isAdmin={isAdmin}
-                  exportable={false}
-                />
-              </div>
-            ),
+            content: <CollaborationSegmentPanel region={regionCode} isAdmin={isAdmin} suiviTraitement />,
           },
         ]}
       />

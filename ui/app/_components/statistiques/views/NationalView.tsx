@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { AccompagnementConjointSection } from "../sections/AccompagnementConjointSection";
+import { CollaborationSegmentPanel } from "../sections/CollaborationSegmentPanel";
 import { CouvertureRegionsSection } from "../sections/CouvertureRegionsSection";
 import { RupturesSegmentPanel } from "../sections/RupturesSegmentPanel";
 import { StatsTabs } from "../ui/StatsTabs";
@@ -32,7 +32,7 @@ export function NationalView({ isAdmin = false }: NationalViewProps) {
           {
             id: "collaborations",
             label: "Collaborations",
-            content: <AccompagnementConjointSection national />,
+            content: <CollaborationSegmentPanel national isAdmin={isAdmin} suiviTraitement />,
           },
           {
             id: "deploiement",

@@ -14,14 +14,14 @@ export function SegmentAboutText({ variant }: SegmentAboutTextProps) {
         <p className={styles.text}>
           Ces indicateurs portent sur les jeunes identifiés en rupture de contrat d&apos;apprentissage et transmis aux
           Missions Locales, y compris les collaborations engagées par les CFA pour un jeune déjà en rupture. Les
-          collaborations de prévention, pour des jeunes encore en contrat, sont exclues. Les courbes reflètent
+          collaborations de prévention, pour des jeunes encore en contrat, sont exclues. Ces chiffres reflètent
           l&apos;état actuel des dossiers, classés par date de transmission à la Mission Locale.
         </p>
       ) : (
         <p className={styles.text}>
           Ces indicateurs portent sur les dossiers envoyés par les CFA aux Missions Locales dans le cadre d&apos;une
           collaboration, qu&apos;il s&apos;agisse d&apos;une rupture, d&apos;un abandon ou d&apos;une prévention de
-          rupture. Un jeune en rupture envoyé par son CFA est donc aussi compté dans le suivi des ruptures. Les courbes
+          rupture. Un jeune en rupture envoyé par son CFA est donc aussi compté dans le suivi des ruptures. Ces chiffres
           reflètent l&apos;état actuel des dossiers, classés par date d&apos;envoi de la collaboration.
         </p>
       )}

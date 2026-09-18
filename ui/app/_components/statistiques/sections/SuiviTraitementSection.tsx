@@ -21,7 +21,6 @@ interface SuiviTraitementSectionProps {
   region?: string;
   isAdmin?: boolean;
   national?: boolean;
-  exportable?: boolean;
 }
 
 export function SuiviTraitementSection({
@@ -31,7 +30,6 @@ export function SuiviTraitementSection({
   region,
   isAdmin = false,
   national = false,
-  exportable = true,
 }: SuiviTraitementSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -44,17 +42,15 @@ export function SuiviTraitementSection({
   const controls = (
     <div className={styles.controlsWrapper}>
       <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />
-      {exportable && (
-        <Button
-          iconId="fr-icon-download-line"
-          iconPosition="right"
-          priority="primary"
-          onClick={exportData}
-          disabled={isExporting}
-        >
-          {isExporting ? "Export en cours..." : "Exporter les données"}
-        </Button>
-      )}
+      <Button
+        iconId="fr-icon-download-line"
+        iconPosition="right"
+        priority="primary"
+        onClick={exportData}
+        disabled={isExporting}
+      >
+        {isExporting ? "Export en cours..." : "Exporter les données"}
+      </Button>
     </div>
   );
 

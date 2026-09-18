@@ -1,12 +1,15 @@
 "use client";
 
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 import { _post } from "@/common/httpClient";
 
 import { useMissionLocaleDetail } from "../hooks/useStatsQueries";
+import { useTraitementExport } from "../hooks/useTraitementExport";
 import { NO_DATA_ML_MESSAGE } from "../ui/NoDataMessage";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 import { StatsTabs, type StatsTab } from "../ui/StatsTabs";
@@ -27,6 +30,13 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
   const searchParams = useSearchParams();
   const { data, isLoading, error } = useMissionLocaleDetail(mlId);
   const isActive = data?.is_active === true;
+  const [exportError, setExportError] = useState<string | null>(null);
+  const { exportData, isExporting } = useTraitementExport({
+    mlId,
+    mlNom: data?.ml?.nom,
+    onError: (err) => setExportError(err.message),
+    onSuccess: () => setExportError(null),
+  });
 
   const handleImpersonate = async () => {
     if (!data?.ml) return;
@@ -122,6 +132,22 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
             >
               Voir le suivi des jeunes
             </Button>
+          )}
+
+          {isActive && (
+            <Button
+              iconId="fr-icon-download-line"
+              iconPosition="right"
+              priority="secondary"
+              onClick={exportData}
+              disabled={isExporting}
+              className={styles.sidebarButton}
+            >
+              {isExporting ? "Export en cours..." : "Exporter les données de cette Mission Locale"}
+            </Button>
+          )}
+          {exportError && (
+            <Alert severity="error" small description={exportError} closable onClose={() => setExportError(null)} />
           )}
 
           <div className={styles.aboutBox}>
