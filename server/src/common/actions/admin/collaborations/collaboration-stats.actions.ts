@@ -449,32 +449,9 @@ export async function getCollaborationStats(referenceDate?: Date): Promise<IColl
   };
 }
 
-const CFA_SYNTHESE_CACHE_TTL_MS = 5 * 60 * 1000;
-let cfaSyntheseCache: { expiresAt: number; value: Promise<ICollaborationsCfaSyntheseResponse> } | null = null;
-
-/**
- * Synthèse publique du déploiement CFA. Le calcul parcourt tous les organismes éligibles :
- * mémoïsé 5 minutes en mémoire (par process) pour ne pas le relancer à chaque visiteur anonyme.
- */
-export function getCollaborationsCfaSynthese(referenceDate?: Date): Promise<ICollaborationsCfaSyntheseResponse> {
-  if (referenceDate) {
-    return computeCollaborationsCfaSynthese(referenceDate);
-  }
-
-  const now = Date.now();
-  if (!cfaSyntheseCache || cfaSyntheseCache.expiresAt <= now) {
-    const value = computeCollaborationsCfaSynthese(new Date()).catch((err) => {
-      cfaSyntheseCache = null;
-      throw err;
-    });
-    cfaSyntheseCache = { expiresAt: now + CFA_SYNTHESE_CACHE_TTL_MS, value };
-  }
-
-  return cfaSyntheseCache.value;
-}
-
-async function computeCollaborationsCfaSynthese(referenceDate: Date): Promise<ICollaborationsCfaSyntheseResponse> {
-  const today = normalizeToUTCDay(referenceDate);
+/** Synthèse publique du déploiement CFA (calcul sur tous les organismes éligibles : à mettre en cache côté route). */
+export async function getCollaborationsCfaSynthese(referenceDate?: Date): Promise<ICollaborationsCfaSyntheseResponse> {
+  const today = normalizeToUTCDay(referenceDate ?? new Date());
   const snapshot = await computeStatsForDate(addDaysUTC(today, 1));
 
   return {

@@ -12,6 +12,7 @@ import {
   getTraitementStats,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { getAllARML, getAllMissionsLocales } from "@/common/actions/organisations.actions";
+import { tryCachedExecution } from "@/common/utils/cacheUtils";
 import { DefaultParams, returnResult, RouteHandler } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
@@ -27,6 +28,17 @@ const publicStatsCache: express.RequestHandler = (_req, res, next) => {
   res.set("Cache-Control", `public, max-age=${PUBLIC_STATS_CACHE_SECONDS}`);
   next();
 };
+
+/**
+ * Les lecteurs publics sont anonymes et coûteux (série temporelle, distinct sur les collabs, scan des
+ * organismes éligibles) : leur résultat est mémoïsé en mémoire pour la même durée que le Cache-Control.
+ */
+const cachedPublicStats = <T>(route: string, params: Record<string, string | undefined>, compute: () => Promise<T>) =>
+  tryCachedExecution(
+    `public-stats:${route}:${Object.values(params).join(":")}`,
+    PUBLIC_STATS_CACHE_SECONDS * 1000,
+    compute
+  );
 
 export default () => {
   const router = express.Router();
@@ -88,23 +100,32 @@ const getARML = async () => {
 };
 
 const getTraitementRoute: PublicHandler<z.infer<typeof segmentQuery>> = async (req) => {
-  const { period, segment } = req.query;
-  return await getTraitementStats(period || "30days", undefined, undefined, segment || "rupture");
+  const period = req.query.period || "30days";
+  const segment = req.query.segment || "rupture";
+  return await cachedPublicStats("traitement", { period, segment }, () =>
+    getTraitementStats(period, undefined, undefined, segment)
+  );
 };
 
 const getRupturantsRoute: PublicHandler<z.infer<typeof segmentQuery>> = async (req) => {
-  const { period, segment } = req.query;
-  return await getRupturantsStats(period || "30days", undefined, undefined, segment || "rupture");
+  const period = req.query.period || "30days";
+  const segment = req.query.segment || "rupture";
+  return await cachedPublicStats("rupturants", { period, segment }, () =>
+    getRupturantsStats(period, undefined, undefined, segment)
+  );
 };
 
 const getDossiersTraitesRoute: PublicHandler<z.infer<typeof segmentQuery>> = async (req) => {
-  const { period, segment } = req.query;
-  return await getDossiersTraitesStats(period || "30days", undefined, undefined, segment || "rupture");
+  const period = req.query.period || "30days";
+  const segment = req.query.segment || "rupture";
+  return await cachedPublicStats("dossiers-traites", { period, segment }, () =>
+    getDossiersTraitesStats(period, undefined, undefined, segment)
+  );
 };
 
 const getCollaborationsRoute: PublicHandler<z.infer<typeof strictPeriodQuery>> = async (req) => {
-  const { period } = req.query;
-  return await getCollaborationSegmentStats(period || "30days");
+  const period = req.query.period || "30days";
+  return await cachedPublicStats("collaborations", { period }, () => getCollaborationSegmentStats(period));
 };
 
 const getDeploymentRoute: PublicHandler<z.infer<typeof periodQuery>> = async (req) => {
@@ -118,5 +139,5 @@ const getSyntheseRegionsRoute: PublicHandler<z.infer<typeof periodQuery>> = asyn
 };
 
 const getCollaborationsCfaRoute = async () => {
-  return await getCollaborationsCfaSynthese();
+  return await cachedPublicStats("synthese-collaborations-cfa", {}, () => getCollaborationsCfaSynthese());
 };

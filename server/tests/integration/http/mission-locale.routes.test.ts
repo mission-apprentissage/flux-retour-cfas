@@ -3,7 +3,7 @@ import { AxiosInstance } from "axiosist";
 import { ObjectId } from "bson";
 import { ML_SITUATION_DOSSIER, ML_TRI_COLONNE, SITUATION_ENUM } from "shared";
 import { SOURCE_APPRENANT, STATUT_APPRENANT, StatutApprenant } from "shared/constants";
-import type { IEffectif, IMissionLocaleEffectif } from "shared/models";
+import type { IEffectif, IMissionLocaleEffectif, IMissionLocaleStats } from "shared/models";
 import { API_EFFECTIF_LISTE, CONNAISSANCE_ML_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type { IOrganisation } from "shared/models/data/organisations.model";
 import { it, expect, describe, beforeEach, vi } from "vitest";
@@ -19,6 +19,7 @@ import {
   organismesDb,
   regionsDb,
 } from "@/common/model/collections";
+import { clearCache } from "@/common/utils/cacheUtils";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
 import { createRupturantEffectifPayload, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -1599,6 +1600,7 @@ describe("Mission Locale Stats Routes - Public", () => {
   useMongo();
 
   let httpClient: AxiosInstance;
+  let statsBase: Record<string, number>;
 
   const ML_ID_STATS = new ObjectId();
   const ML_ID_STATS_ARA = new ObjectId();
@@ -1645,10 +1647,12 @@ describe("Mission Locale Stats Routes - Public", () => {
       },
     ]);
 
+    clearCache();
+
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
-    const statsBase = {
+    statsBase = {
       abandon: 0,
       mineur: 0,
       mineur_a_traiter: 0,
@@ -1708,7 +1712,7 @@ describe("Mission Locale Stats Routes - Public", () => {
           autre_avec_contact: 2,
           deja_connu: 8,
           ...statsBase,
-        },
+        } as IMissionLocaleStats["stats"],
       },
       {
         _id: new ObjectId(),
@@ -1735,7 +1739,7 @@ describe("Mission Locale Stats Routes - Public", () => {
           autre_avec_contact: 1,
           deja_connu: 4,
           ...statsBase,
-        },
+        } as IMissionLocaleStats["stats"],
       },
     ]);
   });
@@ -1800,6 +1804,63 @@ describe("Mission Locale Stats Routes - Public", () => {
       const response = await httpClient.get("/api/v1/mission-locale/stats/traitement");
 
       expect(response.headers["cache-control"]).toBe("public, max-age=300");
+    });
+
+    it("Mémoïse la réponse côté serveur par période et segment", async () => {
+      const before = await httpClient.get("/api/v1/mission-locale/stats/traitement");
+      expect(before.data.latest.total).toBe(150);
+
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const mlId = new ObjectId();
+      await organisationsDb().insertOne({
+        _id: mlId,
+        created_at: new Date(),
+        activated_at: new Date("2025-01-01"),
+        email: "",
+        telephone: "",
+        site_web: "",
+        ml_id: 614,
+        nom: "ML STATS CACHE",
+        type: "MISSION_LOCALE",
+      });
+      await missionLocaleStatsDb().insertOne({
+        _id: new ObjectId(),
+        mission_locale_id: mlId,
+        computed_day: today,
+        created_at: new Date(),
+        updated_at: new Date(),
+        stats: {
+          total: 7,
+          a_traiter: 3,
+          traite: 4,
+          rdv_pris: 4,
+          rdv_pris_decouverts: 0,
+          nouveau_projet: 0,
+          deja_accompagne: 0,
+          contacte_sans_retour: 0,
+          injoignables: 0,
+          coordonnees_incorrectes: 0,
+          autre: 0,
+          cherche_contrat: 0,
+          reorientation: 0,
+          ne_veut_pas_accompagnement: 0,
+          ne_souhaite_pas_etre_recontacte: 0,
+          autre_avec_contact: 0,
+          deja_connu: 0,
+          ...statsBase,
+        } as IMissionLocaleStats["stats"],
+      });
+
+      const cached = await httpClient.get("/api/v1/mission-locale/stats/traitement");
+      expect(cached.data.latest.total).toBe(150);
+
+      const otherSegment = await httpClient.get("/api/v1/mission-locale/stats/traitement?segment=all");
+      expect(otherSegment.data.latest.total).toBe(157);
+
+      clearCache();
+      const fresh = await httpClient.get("/api/v1/mission-locale/stats/traitement");
+      expect(fresh.data.latest.total).toBe(157);
     });
   });
 
