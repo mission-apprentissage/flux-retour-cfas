@@ -93,6 +93,7 @@ const zCollaborationsCfaRegionRow = z.object({
   cfa_compatibles: z.number(),
   cfa_avec_compte: z.number(),
   cfa_with_collab: z.number(),
+  dossiers_envoyes_cfa: z.number(),
 });
 
 const zCollaborationsCfaSyntheseResponse = z.object({
@@ -101,6 +102,7 @@ const zCollaborationsCfaSyntheseResponse = z.object({
     cfa_compatibles: z.number(),
     cfa_avec_compte: z.number(),
     cfa_with_collab: z.number(),
+    dossiers_envoyes_cfa: z.number(),
   }),
   regions: z.array(zCollaborationsCfaRegionRow),
 });

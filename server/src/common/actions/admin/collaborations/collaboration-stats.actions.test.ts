@@ -18,7 +18,11 @@ import {
 import { useMongo } from "@tests/jest/setupMongo";
 import { testPasswordHash } from "@tests/utils/testUtils";
 
-import { computeStatsForDate, getCollaborationStats } from "./collaboration-stats.actions";
+import {
+  computeStatsForDate,
+  getCollaborationStats,
+  getCollaborationsCfaSynthese,
+} from "./collaboration-stats.actions";
 
 useMongo();
 
@@ -422,5 +426,52 @@ describe("getCollaborationStats", () => {
 
     expect(hdf?.cfa_with_collab).toEqual({ current: 1, delta: 0 });
     expect(hdf?.dossiers_envoyes_cfa).toBe(3);
+  });
+});
+
+describe("getCollaborationsCfaSynthese", () => {
+  it("expose les compteurs d'activation et les dossiers envoyés, au national et par région", async () => {
+    const compatibleOrg = await insertCompatible({ adresse: { region: HDF } as never });
+    await insertCompatible({ adresse: { region: HDF } as never });
+    await insertCompatible({ adresse: { region: IDF } as never });
+
+    const sentAt = new Date("2026-02-01");
+    await missionLocaleEffectifsDb().insertMany(
+      [
+        buildMlEffectif({
+          organisme_id: compatibleOrg._id,
+          created_at: sentAt,
+          reponse_at: sentAt,
+          acc_conjoint: true,
+        }),
+        buildMlEffectif({
+          organisme_id: compatibleOrg._id,
+          created_at: sentAt,
+          reponse_at: sentAt,
+          acc_conjoint: true,
+        }),
+        buildMlEffectif({ organisme_id: compatibleOrg._id, created_at: sentAt }),
+      ],
+      { bypassDocumentValidation: true }
+    );
+
+    const synthese = await getCollaborationsCfaSynthese(new Date("2026-05-25"));
+
+    expect(synthese.national).toEqual({
+      cfa_compatibles: 3,
+      cfa_avec_compte: 0,
+      cfa_with_collab: 1,
+      dossiers_envoyes_cfa: 2,
+    });
+    expect(synthese.regions.find((r) => r.region_code === HDF)).toMatchObject({
+      cfa_compatibles: 2,
+      cfa_with_collab: 1,
+      dossiers_envoyes_cfa: 2,
+    });
+    expect(synthese.regions.find((r) => r.region_code === IDF)).toMatchObject({
+      cfa_compatibles: 1,
+      cfa_with_collab: 0,
+      dossiers_envoyes_cfa: 0,
+    });
   });
 });

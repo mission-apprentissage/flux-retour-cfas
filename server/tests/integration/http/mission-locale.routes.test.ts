@@ -1915,7 +1915,12 @@ describe("Mission Locale Stats Routes - Public", () => {
       const response = await httpClient.get("/api/v1/mission-locale/stats/synthese/collaborations-cfa");
 
       expect(response.status).toBe(200);
-      expect(response.data.national).toEqual({ cfa_compatibles: 0, cfa_avec_compte: 0, cfa_with_collab: 0 });
+      expect(response.data.national).toEqual({
+        cfa_compatibles: 0,
+        cfa_avec_compte: 0,
+        cfa_with_collab: 0,
+        dossiers_envoyes_cfa: 0,
+      });
       expect(response.data.regions).toEqual([]);
     });
   });

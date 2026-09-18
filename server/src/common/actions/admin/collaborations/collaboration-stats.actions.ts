@@ -460,6 +460,7 @@ export async function getCollaborationsCfaSynthese(referenceDate?: Date): Promis
       cfa_compatibles: snapshot.national.activation.cfa_compatibles,
       cfa_avec_compte: snapshot.national.activation.cfa_avec_compte,
       cfa_with_collab: snapshot.national.activation.cfa_with_collab,
+      dossiers_envoyes_cfa: snapshot.national.usage.dossiers_envoyes_cfa,
     },
     regions: snapshot.regions.map((row) => ({
       region_code: row.region_code,
@@ -467,6 +468,7 @@ export async function getCollaborationsCfaSynthese(referenceDate?: Date): Promis
       cfa_compatibles: row.cfa_compatibles,
       cfa_avec_compte: row.cfa_avec_compte,
       cfa_with_collab: row.cfa_with_collab,
+      dossiers_envoyes_cfa: row.dossiers_envoyes_cfa,
     })),
   };
 }
