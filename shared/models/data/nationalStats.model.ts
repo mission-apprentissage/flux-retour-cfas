@@ -4,32 +4,25 @@ const STATS_PERIODS = ["30days", "3months", "all"] as const;
 export const zStatsPeriod = z.enum(STATS_PERIODS);
 export type StatsPeriod = z.output<typeof zStatsPeriod>;
 
+const STATS_SEGMENTS = ["all", "rupture", "collab"] as const;
+export const zStatsSegment = z.enum(STATS_SEGMENTS);
+export type StatsSegment = z.output<typeof zStatsSegment>;
+
 const zStatWithVariation = z.object({
   current: z.number(),
   variation: z.string(),
 });
 
-const zAggregatedStats = z.object({
-  total: z.number(),
-  total_a_traiter: z.number(),
-  total_traites: z.number(),
+const zSegmentTranches = z.object({
   rdv_pris: z.number(),
-  rdv_pris_decouverts: z.number(),
-  nouveau_projet: z.number(),
-  contacte_sans_retour: z.number(),
-  injoignables: z.number(),
-  coordonnees_incorrectes: z.number(),
-  autre_avec_contact: z.number(),
+  projet_pro_securise: z.number(),
+  ne_souhaite_pas_accompagnement: z.number(),
+  a_recontacter: z.number(),
+  injoignable: z.number(),
   autre: z.number(),
-  deja_accompagne: z.number(),
-  cherche_contrat: z.number(),
-  reorientation: z.number(),
-  ne_veut_pas_accompagnement: z.number(),
-  ne_souhaite_pas_etre_recontacte: z.number(),
-  deja_connu: z.number(),
 });
 
-export type IAggregatedStats = z.output<typeof zAggregatedStats>;
+export type ISegmentTranches = z.output<typeof zSegmentTranches>;
 
 const zTimeSeriesPoint = z.object({
   date: z.date(),
@@ -52,23 +45,6 @@ const zRupturantsSummary = z.object({
 
 export type IRupturantsSummary = z.output<typeof zRupturantsSummary>;
 
-const zDetailsDossiersTraites = z.object({
-  rdv_pris: zStatWithVariation,
-  nouveau_projet: zStatWithVariation,
-  contacte_sans_retour: zStatWithVariation,
-  injoignables: zStatWithVariation,
-  coordonnees_incorrectes: zStatWithVariation,
-  autre_avec_contact: zStatWithVariation,
-  cherche_contrat: zStatWithVariation,
-  reorientation: zStatWithVariation,
-  ne_veut_pas_accompagnement: zStatWithVariation,
-  ne_souhaite_pas_etre_recontacte: zStatWithVariation,
-  deja_connu: z.number(),
-  total: z.number(),
-});
-
-export type IDetailsDossiersTraites = z.output<typeof zDetailsDossiersTraites>;
-
 const zDetailsDossiersTraitesV2 = z.object({
   rdv_pris: zStatWithVariation,
   projet_pro_securise: zStatWithVariation,
@@ -80,6 +56,17 @@ const zDetailsDossiersTraitesV2 = z.object({
 });
 
 export type IDetailsDossiersTraitesV2 = z.output<typeof zDetailsDossiersTraitesV2>;
+
+const zDossiersTraitesStatsResponse = z.object({
+  detailsV2: zDetailsDossiersTraitesV2,
+  traites: z.number(),
+  deja_connu_accompagne: z.number().nullable(),
+  evaluationDate: z.date(),
+  period: zStatsPeriod,
+  segment: zStatsSegment,
+});
+
+export type IDossiersTraitesStatsResponse = z.output<typeof zDossiersTraitesStatsResponse>;
 
 const zRegionStats = z.object({
   code: z.string(),
@@ -110,6 +97,7 @@ const zTraitementStatsResponse = z.object({
   first: zTraitementStatsData,
   evaluationDate: z.date(),
   period: zStatsPeriod,
+  segment: zStatsSegment,
 });
 
 export type ITraitementStatsResponse = z.output<typeof zTraitementStatsResponse>;
@@ -139,11 +127,25 @@ const zMissionLocaleTraitementStats = z.object({
   traites: z.number(),
   pourcentage_traites: z.number(),
   pourcentage_evolution: z.string(),
-  details: zTraitementDetails,
+  details: zSegmentTranches,
+  delai_moyen_jours: z.number().nullable(),
   derniere_activite: z.date().nullable(),
   jours_depuis_activite: z.number().nullable(),
   is_activated: z.boolean(),
 });
+
+export const TRAITEMENT_ML_SORT_FIELDS = [
+  "nom",
+  "total_jeunes",
+  "a_traiter",
+  "traites",
+  "pourcentage_traites",
+  "derniere_activite",
+  "jours_depuis_activite",
+  "delai_moyen_jours",
+] as const;
+export const zTraitementMlSortBy = z.enum(TRAITEMENT_ML_SORT_FIELDS);
+export type TraitementMlSortBy = z.output<typeof zTraitementMlSortBy>;
 
 const zTraitementMLStatsResponse = z.object({
   data: z.array(zMissionLocaleTraitementStats),
@@ -154,6 +156,7 @@ const zTraitementMLStatsResponse = z.object({
     totalPages: z.number(),
   }),
   period: zStatsPeriod,
+  segment: zStatsSegment,
 });
 
 export type ITraitementMLStatsResponse = z.output<typeof zTraitementMLStatsResponse>;
@@ -200,6 +203,34 @@ const zAccompagnementConjointStats = z.object({
 });
 
 export type IAccompagnementConjointStats = z.output<typeof zAccompagnementConjointStats>;
+
+const zCollabSituations = z.object({
+  rupture: z.number(),
+  abandon: z.number(),
+  prevention_inevitable: z.number(),
+  prevention_tres_eleve: z.number(),
+  prevention_modere: z.number(),
+  besoin_aide_hors_rupture: z.number(),
+  total: z.number(),
+});
+
+export type ICollabSituations = z.output<typeof zCollabSituations>;
+
+const zCollaborationSegmentStats = z.object({
+  evaluationDate: z.date(),
+  period: zStatsPeriod,
+  cfa_ayant_collabore: zStatWithVariation,
+  jeunes_envoyes: zStatWithVariation,
+  jeunes_contactes: zStatWithVariation,
+  jeunes_accompagnement_accepte: zStatWithVariation,
+  resultats: zDetailsDossiersTraitesV2,
+  part_deja_connus: z.number(),
+  delai_moyen_jours: z.number().nullable(),
+  situations: zCollabSituations,
+  objectifs: zAccompagnementConjointMotifs.extend({ total_dossiers: z.number() }),
+});
+
+export type ICollaborationSegmentStats = z.output<typeof zCollaborationSegmentStats>;
 
 const zMissionLocaleExportData = z.object({
   region_nom: z.string(),
@@ -255,9 +286,48 @@ const zRegionExportData = z.object({
   collab_a_recontacter: z.number(),
 });
 
+const zSegmentExportRow = z.object({
+  region_nom: z.string(),
+  departement_code: z.string().nullable(),
+  departement_nom: z.string(),
+  nom: z.string(),
+  siret: z.string().nullable(),
+  date_activation: z.date().nullable(),
+  derniere_activite: z.date().nullable(),
+  total_jeunes: z.number(),
+  a_traiter: z.number(),
+  traites: z.number(),
+  pourcentage_traites: z.number(),
+  repondu: z.number(),
+  rdv_pris: z.number(),
+  rdv_pris_decouverts: z.number(),
+  projet_pro_securise: z.number(),
+  ne_souhaite_pas_accompagnement: z.number(),
+  a_recontacter: z.number(),
+  injoignable: z.number(),
+  autre: z.number(),
+  deja_connu_accompagne: z.number(),
+});
+
+export type ISegmentExportRow = z.output<typeof zSegmentExportRow>;
+
+const zCollabSegmentExportRow = zSegmentExportRow.extend({
+  situation_rupture: z.number(),
+  situation_abandon: z.number(),
+  situation_prevention_inevitable: z.number(),
+  situation_prevention_tres_eleve: z.number(),
+  situation_prevention_modere: z.number(),
+  situation_besoin_aide_hors_rupture: z.number(),
+  delai_moyen_jours: z.number().nullable(),
+});
+
+export type ICollabSegmentExportRow = z.output<typeof zCollabSegmentExportRow>;
+
 const zTraitementExportResponse = z.object({
   mlData: z.array(zMissionLocaleExportData),
   regionData: z.array(zRegionExportData),
+  rows_rupture: z.array(zSegmentExportRow),
+  rows_collab: z.array(zCollabSegmentExportRow),
   exportDate: z.date(),
 });
 

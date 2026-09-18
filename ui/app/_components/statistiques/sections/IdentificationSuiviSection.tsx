@@ -30,7 +30,7 @@ export function IdentificationSuiviSection({
   const { data: dossiersTraitesData } = useDossiersTraitesStats(period, region, undefined, national);
 
   const loadingPercentage = isLoadingVariation(isFetching, isLoading);
-  const hideDossiersTraites = dossiersTraitesData?.details?.total === 0;
+  const hideDossiersTraites = dossiersTraitesData?.traites === 0;
 
   return (
     <StatisticsSection

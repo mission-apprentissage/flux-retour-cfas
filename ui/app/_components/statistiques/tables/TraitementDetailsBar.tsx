@@ -1,12 +1,11 @@
-import type { ITraitementDetails } from "shared/models/data/nationalStats.model";
+import type { ISegmentTranches } from "shared/models/data/nationalStats.model";
 
 import { TRAITEMENT_SEGMENTS_V2 } from "../constants";
 
-import { regroupV1ToV2 } from "./TraitementDetailsBar.utils";
 import styles from "./TraitementTable.module.css";
 
 interface TraitementDetailsBarProps {
-  details: ITraitementDetails;
+  details: ISegmentTranches;
   total: number;
   tooltipPosition?: "top" | "bottom";
 }
@@ -16,10 +15,8 @@ export function TraitementDetailsBar({ details, total, tooltipPosition = "top" }
     return <span className={styles.emptyValue}>-</span>;
   }
 
-  const groupedValues = regroupV1ToV2(details);
-
   const segments = TRAITEMENT_SEGMENTS_V2.map((segment) => {
-    const value = groupedValues[segment.key];
+    const value = details[segment.key];
     const percentage = (value / total) * 100;
     return {
       ...segment,

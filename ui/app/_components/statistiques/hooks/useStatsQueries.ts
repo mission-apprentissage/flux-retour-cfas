@@ -2,8 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { useCallback } from "react";
 import type {
   IAccompagnementConjointStats,
-  IDetailsDossiersTraites,
-  IDetailsDossiersTraitesV2,
+  IDossiersTraitesStatsResponse,
   IPrequalifStats,
   IRegionStats,
   IRupturantsSummary,
@@ -40,13 +39,6 @@ interface ISyntheseRegionsStatsResponse {
 interface IRupturantsStatsResponse {
   timeSeries: ITimeSeriesPoint[];
   summary: IRupturantsSummary;
-  evaluationDate: Date;
-  period: Period;
-}
-
-interface IDossiersTraitesStatsResponse {
-  details: IDetailsDossiersTraites;
-  detailsV2: IDetailsDossiersTraitesV2;
   evaluationDate: Date;
   period: Period;
 }
@@ -131,9 +123,9 @@ export function useTraitementStats(period: Period, region?: string) {
     queryKey: statsQueryKeys.traitement(period, region),
 
     queryFn: () =>
-      _get("/api/v1/mission-locale/stats/traitement", {
-        params: { period, ...(region && { region }) },
-      }),
+      region
+        ? _get("/api/v1/organisation/indicateurs-ml/traitement", { params: { period, region } })
+        : _get("/api/v1/mission-locale/stats/traitement", { params: { period } }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }
