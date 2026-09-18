@@ -24,13 +24,7 @@ import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.a
 import { getCurrentStatutFromParcours } from "@/common/actions/shared/rupture-pipeline.utils";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
-import {
-  effectifsDb,
-  effectifsQueueDb,
-  missionLocaleEffectifsDb,
-  missionLocaleStatsDb,
-  organisationsDb,
-} from "@/common/model/collections";
+import { effectifsDb, effectifsQueueDb, missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 
 export const hydrateMissionLocaleSnapshot = async (missionLocaleStructureId: number | null) => {
   const cursor = organisationsDb().find({
@@ -893,9 +887,20 @@ export const hydrateMissionLocaleStats = async () => {
   }
 };
 
-export const hydrateDailyMissionLocaleStats = async () => {
-  await missionLocaleStatsDb().deleteMany({});
+const DAILY_STATS_CONCURRENCY = 8;
 
+const runWithConcurrency = async <T>(items: T[], concurrency: number, task: (item: T) => Promise<void>) => {
+  let nextIndex = 0;
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (nextIndex < items.length) {
+      const item = items[nextIndex++];
+      await task(item);
+    }
+  });
+  await Promise.all(workers);
+};
+
+export const hydrateDailyMissionLocaleStats = async () => {
   const mls = (await organisationsDb().find({ type: "MISSION_LOCALE" }).toArray()) as Array<IOrganisationMissionLocale>;
 
   const firstDate = await missionLocaleEffectifsDb().findOne({}, { sort: { created_at: 1 } });
@@ -920,13 +925,27 @@ export const hydrateDailyMissionLocaleStats = async () => {
   };
 
   const allDates = getAllDateSinceStartingDate(startDate);
+  let errors = 0;
 
   for (const date of allDates) {
-    const mapped = mls.map((ml) => () => {
-      return createOrUpdateMissionLocaleStats(new ObjectId(ml._id), date);
+    await runWithConcurrency(mls, DAILY_STATS_CONCURRENCY, async (ml) => {
+      try {
+        await createOrUpdateMissionLocaleStats(new ObjectId(ml._id), date);
+      } catch (err) {
+        errors++;
+        logger.error({ err, missionLocaleId: ml._id, date }, "daily mission locale stats computation failed");
+        captureException(err);
+      }
     });
+  }
 
-    await Promise.allSettled(mapped.map((fn) => fn()));
+  logger.info(
+    { days: allDates.length, missionLocales: mls.length, errors },
+    "daily mission locale stats backfill finished"
+  );
+
+  if (errors > 0) {
+    throw new Error(`${errors} daily mission locale stats computation(s) failed`);
   }
 };
 
