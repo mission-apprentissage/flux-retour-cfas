@@ -9,6 +9,7 @@ const zRegionRow = z.object({
   region_code: z.string(),
   region_nom: z.string(),
   cfa_compatibles: z.number(),
+  cfa_avec_compte: z.number(),
   cfa_actives: z.object({ current: z.number(), delta: z.number() }),
   cfa_with_collab: z.object({ current: z.number(), delta: z.number() }),
   rupturants: z.number(),
@@ -21,6 +22,7 @@ export const zCollaborationStatsResponse = z.object({
   national: z.object({
     activation: z.object({
       cfa_compatibles: zStatWithVariation,
+      cfa_avec_compte: zStatWithVariation,
       cfa_actives: zStatWithVariation,
       cfa_with_collab: zStatWithVariation,
     }),
@@ -84,3 +86,23 @@ export const zCollaborationExportResponse = z.object({
 });
 
 export type ICollaborationExportResponseSchema = z.output<typeof zCollaborationExportResponse>;
+
+const zCollaborationsCfaRegionRow = z.object({
+  region_code: z.string(),
+  region_nom: z.string(),
+  cfa_compatibles: z.number(),
+  cfa_avec_compte: z.number(),
+  cfa_with_collab: z.number(),
+});
+
+const zCollaborationsCfaSyntheseResponse = z.object({
+  evaluationDate: z.date(),
+  national: z.object({
+    cfa_compatibles: z.number(),
+    cfa_avec_compte: z.number(),
+    cfa_with_collab: z.number(),
+  }),
+  regions: z.array(zCollaborationsCfaRegionRow),
+});
+
+export type ICollaborationsCfaSyntheseResponse = z.output<typeof zCollaborationsCfaSyntheseResponse>;

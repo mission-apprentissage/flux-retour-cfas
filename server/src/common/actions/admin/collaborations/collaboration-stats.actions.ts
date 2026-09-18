@@ -2,8 +2,10 @@ import { ObjectId } from "bson";
 import { COLLABORATION_CUTOFF_DATE, REPONDU_SITUATIONS } from "shared/constants/collaboration";
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import type { ICollaborationsCfaSyntheseResponse } from "shared/models/routes/admin/collaboration-stats.api";
 import { addDaysUTC, normalizeToUTCDay, subtractDaysUTC } from "shared/utils/date";
 
+import { getCfaAccountsByOrganismeIds } from "@/common/actions/organisations.actions";
 import { findEligibleOrganismes, type IEligibleOrganismeRow } from "@/common/actions/organismes/deca-cfa-eligibility";
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 
@@ -18,12 +20,14 @@ export type ICompatibleOrganisme = {
   has_effectifs_erp: boolean;
   has_effectifs_deca: boolean;
   date_activation: Date | null;
+  has_compte: boolean;
 };
 
 export type ICollaborationRegionRow = {
   region_code: string;
   region_nom: string;
   cfa_compatibles: number;
+  cfa_avec_compte: number;
   cfa_actives: number;
   cfa_with_collab: number;
   rupturants: number;
@@ -32,7 +36,7 @@ export type ICollaborationRegionRow = {
 
 export type ICollaborationStatsSnapshot = {
   national: {
-    activation: { cfa_compatibles: number; cfa_actives: number; cfa_with_collab: number };
+    activation: { cfa_compatibles: number; cfa_avec_compte: number; cfa_actives: number; cfa_with_collab: number };
     usage: {
       rupturants: number;
       dossiers_envoyes_cfa: number;
@@ -50,6 +54,7 @@ export type ICollaborationStatsResponse = {
   national: {
     activation: {
       cfa_compatibles: IStatWithVariation;
+      cfa_avec_compte: IStatWithVariation;
       cfa_actives: IStatWithVariation;
       cfa_with_collab: IStatWithVariation;
     };
@@ -65,6 +70,7 @@ export type ICollaborationStatsResponse = {
     region_code: string;
     region_nom: string;
     cfa_compatibles: number;
+    cfa_avec_compte: number;
     cfa_actives: { current: number; delta: number };
     cfa_with_collab: { current: number; delta: number };
     rupturants: number;
@@ -127,16 +133,27 @@ export async function fetchCollaborationsByOrgId(
   return new Map(rows.map((r) => [r._id.toString(), { nb: r.nb, last: r.last }]));
 }
 
+export async function fetchOrganismeIdsWithConfirmedAccount(organismeIds: ObjectId[]): Promise<Set<string>> {
+  const accountsByOrgId = await getCfaAccountsByOrganismeIds(organismeIds.map((id) => id.toString()));
+  return new Set(
+    Array.from(accountsByOrgId.entries())
+      .filter(([, accounts]) => accounts.destinataires.length > 0)
+      .map(([organismeId]) => organismeId)
+  );
+}
+
 async function attachActivationDates(
   eligible: IEligibleOrganismeRow[],
-  endExclusive: Date
+  endExclusive: Date,
+  orgIdsWithCompte?: Set<string>
 ): Promise<ICompatibleOrganisme[]> {
   if (eligible.length === 0) return [];
 
-  const activationByOrgId = await fetchActivationDatesByOrgId(
-    eligible.map((o) => o._id),
-    endExclusive
-  );
+  const organismeIds = eligible.map((o) => o._id);
+  const [activationByOrgId, resolvedOrgIdsWithCompte] = await Promise.all([
+    fetchActivationDatesByOrgId(organismeIds, endExclusive),
+    orgIdsWithCompte ?? fetchOrganismeIdsWithConfirmedAccount(organismeIds),
+  ]);
 
   return eligible.map((org) => ({
     _id: org._id,
@@ -147,6 +164,7 @@ async function attachActivationDates(
     has_effectifs_erp: org.has_effectifs_erp,
     has_effectifs_deca: org.has_effectifs_deca,
     date_activation: activationByOrgId.get(org._id.toString()) ?? null,
+    has_compte: resolvedOrgIdsWithCompte.has(org._id.toString()),
   }));
 }
 
@@ -281,44 +299,46 @@ async function computeUsage(
   return { national, perRegion, cfaWithCollabNational };
 }
 
+type ActivationCounters = { cfa_compatibles: number; cfa_avec_compte: number; cfa_actives: number };
+
 type ActivationAggregates = {
-  national: { cfa_compatibles: number; cfa_actives: number };
-  perRegion: Map<string, { cfa_compatibles: number; cfa_actives: number }>;
+  national: ActivationCounters;
+  perRegion: Map<string, ActivationCounters>;
   activatedOrganismeIds: Set<string>;
 };
 
 function aggregateActivation(compatibles: ICompatibleOrganisme[]): ActivationAggregates {
-  const perRegion = new Map<string, { cfa_compatibles: number; cfa_actives: number }>();
+  const perRegion = new Map<string, ActivationCounters>();
   const activatedOrganismeIds = new Set<string>();
-  let totalCompatibles = 0;
-  let totalActives = 0;
+  const national: ActivationCounters = { cfa_compatibles: 0, cfa_avec_compte: 0, cfa_actives: 0 };
 
   for (const org of compatibles) {
-    totalCompatibles += 1;
     const isActive = org.date_activation !== null;
     if (isActive) {
-      totalActives += 1;
       activatedOrganismeIds.add(org._id.toString());
     }
-    if (!org.region) continue;
-    const current = perRegion.get(org.region) ?? { cfa_compatibles: 0, cfa_actives: 0 };
-    current.cfa_compatibles += 1;
-    if (isActive) current.cfa_actives += 1;
-    perRegion.set(org.region, current);
+    const targets = [national];
+    if (org.region) {
+      const current = perRegion.get(org.region) ?? { cfa_compatibles: 0, cfa_avec_compte: 0, cfa_actives: 0 };
+      perRegion.set(org.region, current);
+      targets.push(current);
+    }
+    for (const counters of targets) {
+      counters.cfa_compatibles += 1;
+      if (org.has_compte) counters.cfa_avec_compte += 1;
+      if (isActive) counters.cfa_actives += 1;
+    }
   }
 
-  return {
-    national: { cfa_compatibles: totalCompatibles, cfa_actives: totalActives },
-    perRegion,
-    activatedOrganismeIds,
-  };
+  return { national, perRegion, activatedOrganismeIds };
 }
 
 async function computeStatsForEligible(
   endExclusive: Date,
-  eligible: IEligibleOrganismeRow[]
+  eligible: IEligibleOrganismeRow[],
+  orgIdsWithCompte?: Set<string>
 ): Promise<ICollaborationStatsSnapshot> {
-  const compatibles = await attachActivationDates(eligible, endExclusive);
+  const compatibles = await attachActivationDates(eligible, endExclusive, orgIdsWithCompte);
   const activation = aggregateActivation(compatibles);
   const usage = await computeUsage(endExclusive, activation.activatedOrganismeIds);
 
@@ -326,13 +346,14 @@ async function computeStatsForEligible(
 
   const regions: ICollaborationRegionRow[] = Array.from(regionCodes)
     .map((code) => {
-      const activ = activation.perRegion.get(code) ?? { cfa_compatibles: 0, cfa_actives: 0 };
+      const activ = activation.perRegion.get(code) ?? { cfa_compatibles: 0, cfa_avec_compte: 0, cfa_actives: 0 };
       const us = usage.perRegion.get(code) ?? { rupturants: 0, dossiers_envoyes_cfa: 0, cfa_with_collab: 0 };
       const region = REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE];
       return {
         region_code: code,
         region_nom: region?.nom ?? code,
         cfa_compatibles: activ.cfa_compatibles,
+        cfa_avec_compte: activ.cfa_avec_compte,
         cfa_actives: activ.cfa_actives,
         cfa_with_collab: us.cfa_with_collab,
         rupturants: us.rupturants,
@@ -371,9 +392,10 @@ export async function getCollaborationStats(referenceDate?: Date): Promise<IColl
   const j7End = subtractDaysUTC(todayEnd, 7);
 
   const eligible = await findEligibleOrganismes();
+  const orgIdsWithCompte = await fetchOrganismeIdsWithConfirmedAccount(eligible.map((o) => o._id));
   const [current, previous] = await Promise.all([
-    computeStatsForEligible(todayEnd, eligible),
-    computeStatsForEligible(j7End, eligible),
+    computeStatsForEligible(todayEnd, eligible, orgIdsWithCompte),
+    computeStatsForEligible(j7End, eligible, orgIdsWithCompte),
   ]);
 
   const previousByRegion = new Map(previous.regions.map((r) => [r.region_code, r]));
@@ -384,6 +406,7 @@ export async function getCollaborationStats(referenceDate?: Date): Promise<IColl
     national: {
       activation: {
         cfa_compatibles: buildVariation(current.national.activation.cfa_compatibles, null),
+        cfa_avec_compte: buildVariation(current.national.activation.cfa_avec_compte, null),
         cfa_actives: buildVariation(current.national.activation.cfa_actives, previous.national.activation.cfa_actives),
         cfa_with_collab: buildVariation(
           current.national.activation.cfa_with_collab,
@@ -413,6 +436,7 @@ export async function getCollaborationStats(referenceDate?: Date): Promise<IColl
         region_code: row.region_code,
         region_nom: row.region_nom,
         cfa_compatibles: row.cfa_compatibles,
+        cfa_avec_compte: row.cfa_avec_compte,
         cfa_actives: { current: row.cfa_actives, delta: row.cfa_actives - (prev?.cfa_actives ?? 0) },
         cfa_with_collab: {
           current: row.cfa_with_collab,
@@ -422,5 +446,50 @@ export async function getCollaborationStats(referenceDate?: Date): Promise<IColl
         dossiers_envoyes_cfa: row.dossiers_envoyes_cfa,
       };
     }),
+  };
+}
+
+const CFA_SYNTHESE_CACHE_TTL_MS = 5 * 60 * 1000;
+let cfaSyntheseCache: { expiresAt: number; value: Promise<ICollaborationsCfaSyntheseResponse> } | null = null;
+
+/**
+ * Synthèse publique du déploiement CFA. Le calcul parcourt tous les organismes éligibles :
+ * mémoïsé 5 minutes en mémoire (par process) pour ne pas le relancer à chaque visiteur anonyme.
+ */
+export function getCollaborationsCfaSynthese(referenceDate?: Date): Promise<ICollaborationsCfaSyntheseResponse> {
+  if (referenceDate) {
+    return computeCollaborationsCfaSynthese(referenceDate);
+  }
+
+  const now = Date.now();
+  if (!cfaSyntheseCache || cfaSyntheseCache.expiresAt <= now) {
+    const value = computeCollaborationsCfaSynthese(new Date()).catch((err) => {
+      cfaSyntheseCache = null;
+      throw err;
+    });
+    cfaSyntheseCache = { expiresAt: now + CFA_SYNTHESE_CACHE_TTL_MS, value };
+  }
+
+  return cfaSyntheseCache.value;
+}
+
+async function computeCollaborationsCfaSynthese(referenceDate: Date): Promise<ICollaborationsCfaSyntheseResponse> {
+  const today = normalizeToUTCDay(referenceDate);
+  const snapshot = await computeStatsForDate(addDaysUTC(today, 1));
+
+  return {
+    evaluationDate: today,
+    national: {
+      cfa_compatibles: snapshot.national.activation.cfa_compatibles,
+      cfa_avec_compte: snapshot.national.activation.cfa_avec_compte,
+      cfa_with_collab: snapshot.national.activation.cfa_with_collab,
+    },
+    regions: snapshot.regions.map((row) => ({
+      region_code: row.region_code,
+      region_nom: row.region_nom,
+      cfa_compatibles: row.cfa_compatibles,
+      cfa_avec_compte: row.cfa_avec_compte,
+      cfa_with_collab: row.cfa_with_collab,
+    })),
   };
 }

@@ -2,13 +2,21 @@ import { ObjectId } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
 import type { IOrganisation, IOrganisme } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { generateMissionLocaleEffectifFixture } from "shared/models/fixtures/missionLocaleEffectif.fixture";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { addDaysUTC, getAnneeScolaireFromDate } from "shared/utils";
 import { describe, it, expect } from "vitest";
 
-import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import {
+  effectifsDb,
+  missionLocaleEffectifsDb,
+  organisationsDb,
+  organismesDb,
+  usersMigrationDb,
+} from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testPasswordHash } from "@tests/utils/testUtils";
 
 import { computeStatsForDate, getCollaborationStats } from "./collaboration-stats.actions";
 
@@ -70,7 +78,12 @@ const orgFormationFixture = (organismeId: ObjectId, activatedAt: Date | null): I
 describe("computeStatsForDate", () => {
   it("returns zeros for everything when no data", async () => {
     const stats = await computeStatsForDate(new Date("2026-05-26"));
-    expect(stats.national.activation).toEqual({ cfa_compatibles: 0, cfa_actives: 0, cfa_with_collab: 0 });
+    expect(stats.national.activation).toEqual({
+      cfa_compatibles: 0,
+      cfa_avec_compte: 0,
+      cfa_actives: 0,
+      cfa_with_collab: 0,
+    });
     expect(stats.national.usage).toEqual({
       rupturants: 0,
       dossiers_envoyes_cfa: 0,
@@ -287,6 +300,55 @@ describe("computeStatsForDate", () => {
 
     expect(stats.national.usage.rupturants).toBe(1);
     expect(stats.national.usage.dossiers_envoyes_cfa).toBe(1);
+  });
+});
+
+const insertCfaUser = async (organisationId: ObjectId, accountStatus: IUsersMigration["account_status"]) => {
+  const _id = new ObjectId();
+  await usersMigrationDb().insertOne({
+    _id,
+    account_status: accountStatus,
+    password_updated_at: new Date(),
+    connection_history: [],
+    emails: [],
+    created_at: new Date(),
+    civility: "Madame",
+    nom: "Cfa",
+    prenom: "Compte",
+    fonction: "Directrice",
+    email: `${_id.toString()}@cfa.local`,
+    telephone: "",
+    password: testPasswordHash,
+    has_accept_cgu_version: "v0.1",
+    organisation_id: organisationId,
+  } as IUsersMigration);
+};
+
+describe("cfa_avec_compte", () => {
+  it("compte les CFA compatibles ayant au moins un compte confirmé, par région", async () => {
+    const sansOrganisation = await insertCompatible({ adresse: { region: HDF } as never }, { activatedAt: null });
+    const sansCompte = await insertCompatible({ adresse: { region: HDF } as never }, { activatedAt: null });
+    const comptePending = await insertCompatible({ adresse: { region: IDF } as never }, { activatedAt: null });
+    const compteConfirme = await insertCompatible({ adresse: { region: IDF } as never }, { activatedAt: null });
+    expect(sansOrganisation).toBeDefined();
+
+    const orgaSansCompte = orgFormationFixture(sansCompte._id as ObjectId, null);
+    const orgaPending = orgFormationFixture(comptePending._id as ObjectId, null);
+    const orgaConfirme = orgFormationFixture(compteConfirme._id as ObjectId, null);
+    await organisationsDb().insertMany([orgaSansCompte, orgaPending, orgaConfirme]);
+    await insertCfaUser(orgaPending._id, "PENDING_EMAIL_VALIDATION");
+    await insertCfaUser(orgaConfirme._id, "CONFIRMED");
+    await insertCfaUser(orgaConfirme._id, "CONFIRMED");
+
+    const stats = await computeStatsForDate(new Date("2026-05-26"));
+
+    expect(stats.national.activation).toMatchObject({ cfa_compatibles: 4, cfa_avec_compte: 1, cfa_actives: 0 });
+    expect(stats.regions.find((r) => r.region_code === HDF)).toMatchObject({ cfa_compatibles: 2, cfa_avec_compte: 0 });
+    expect(stats.regions.find((r) => r.region_code === IDF)).toMatchObject({ cfa_compatibles: 2, cfa_avec_compte: 1 });
+
+    const response = await getCollaborationStats(new Date("2026-05-26"));
+    expect(response.national.activation.cfa_avec_compte).toEqual({ current: 1, variation: "" });
+    expect(response.regions.find((r) => r.region_code === IDF)?.cfa_avec_compte).toBe(1);
   });
 });
 
