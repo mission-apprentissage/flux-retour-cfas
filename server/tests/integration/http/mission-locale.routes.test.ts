@@ -2127,12 +2127,12 @@ describe("Mission Locale Stats Routes - Admin", () => {
         rdv_pris: 0,
         rdv_pris_decouverts: 0,
         nouveau_projet: 0,
-        deja_accompagne: 0,
+        deja_accompagne: 2,
         contacte_sans_retour: 0,
         injoignables: 0,
         coordonnees_incorrectes: 0,
-        autre: 0,
-        autre_avec_contact: 0,
+        autre: 3,
+        autre_avec_contact: 1,
         deja_connu: 0,
         ne_souhaite_pas_etre_recontacte,
         ne_veut_pas_accompagnement,
@@ -2175,6 +2175,8 @@ describe("Mission Locale Stats Routes - Admin", () => {
 
       expect(response.data.detailsV2.ne_souhaite_pas_accompagnement.current).toBe(19);
       expect(response.data.detailsV2.ne_souhaite_pas_accompagnement.variation).toBe("+63%");
+      expect(response.data.detailsV2.autre.current).toBe(5);
+      expect(response.data.detailsV2.total).toBe(24);
     });
 
     it("Changer la plage ne déplace que la variation, pas les valeurs absolues", async () => {

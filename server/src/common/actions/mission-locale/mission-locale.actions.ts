@@ -17,12 +17,13 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
   IEmailStatusEnum,
   API_EFFECTIF_LISTE,
+  CFA_RISQUE_RUPTURE_ENUM,
   CFA_SITUATION_TYPE_ENUM,
   CONNAISSANCE_ML_ENUM,
   IMissionLocaleEffectif,
   SITUATION_ENUM,
 } from "shared/models/data/missionLocaleEffectif.model";
-import { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
+import { IMissionLocaleStats, IMissionLocaleStatsSegments } from "shared/models/data/missionLocaleStats.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
 
@@ -55,6 +56,13 @@ import {
 
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
+import {
+  buildEmptySegments,
+  ICollabSegmentRawCounters,
+  ISegmentRawCounters,
+  toCollabSegmentStats,
+  toSegmentStats,
+} from "./mission-locale-stats.helpers";
 import { computeSuiviDatesSet } from "./mission-locale-suivi-dates";
 import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "./mission-locale.constants";
 
@@ -2078,10 +2086,212 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
   }
 };
 
+const countIf = (condition: Document) => ({ $sum: { $cond: [condition, 1, 0] } });
+
+const computedSituationIs = (...situations: SITUATION_ENUM[]) => ({ $in: ["$computed_situation", situations] });
+
+const RDV_PRIS_DECOUVERT_CONDITION = {
+  $and: [
+    computedSituationIs(SITUATION_ENUM.RDV_PRIS),
+    {
+      $or: [
+        {
+          $in: [
+            "$computed_connaissance_ml",
+            [CONNAISSANCE_ML_ENUM.CONNU_NON_ACCOMPAGNE, CONNAISSANCE_ML_ENUM.NON_CONNU],
+          ],
+        },
+        {
+          $and: [
+            { $eq: [{ $ifNull: ["$computed_connaissance_ml", null] }, null] },
+            { $eq: ["$computed_deja_connu", false] },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+const DEJA_CONNU_ACCOMPAGNE_CONDITION = {
+  $or: [
+    { $eq: ["$computed_connaissance_ml", CONNAISSANCE_ML_ENUM.DEJA_ACCOMPAGNE_ACTIVEMENT] },
+    {
+      $and: [
+        { $eq: [{ $ifNull: ["$computed_connaissance_ml", null] }, null] },
+        { $eq: ["$computed_deja_connu", true] },
+      ],
+    },
+  ],
+};
+
+const AUTRE_AVEC_CONTACT_CONDITION = {
+  $and: [computedSituationIs(SITUATION_ENUM.AUTRE), { $eq: [{ $ifNull: ["$computed_probleme_type", null] }, null] }],
+};
+
+const buildSegmentAccumulators = (key: string, segmentCondition: Document) => {
+  const within = (condition: Document) => countIf({ $and: [segmentCondition, condition] });
+  return {
+    [`${key}_total`]: countIf(segmentCondition),
+    [`${key}_a_traiter`]: within({ $eq: ["$a_traiter", true] }),
+    [`${key}_traite`]: within({ $eq: ["$a_traiter", false] }),
+    [`${key}_rdv_pris`]: within(computedSituationIs(SITUATION_ENUM.RDV_PRIS)),
+    [`${key}_rdv_pris_decouverts`]: within(RDV_PRIS_DECOUVERT_CONDITION),
+    [`${key}_nouveau_projet`]: within(
+      computedSituationIs(SITUATION_ENUM.NOUVEAU_PROJET, SITUATION_ENUM.NOUVEAU_CONTRAT)
+    ),
+    [`${key}_deja_accompagne`]: within(computedSituationIs(SITUATION_ENUM.DEJA_ACCOMPAGNE)),
+    [`${key}_contacte_sans_retour`]: within(computedSituationIs(SITUATION_ENUM.CONTACTE_SANS_RETOUR)),
+    [`${key}_injoignables`]: within(computedSituationIs(SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES)),
+    [`${key}_coordonnees_incorrectes`]: within(computedSituationIs(SITUATION_ENUM.COORDONNEES_INCORRECT)),
+    [`${key}_autre`]: within(computedSituationIs(SITUATION_ENUM.AUTRE)),
+    [`${key}_cherche_contrat`]: within(computedSituationIs(SITUATION_ENUM.CHERCHE_CONTRAT)),
+    [`${key}_reorientation`]: within(computedSituationIs(SITUATION_ENUM.REORIENTATION)),
+    [`${key}_ne_veut_pas_accompagnement`]: within(computedSituationIs(SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT)),
+    [`${key}_ne_souhaite_pas_etre_recontacte`]: within(
+      computedSituationIs(SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE)
+    ),
+    [`${key}_autre_avec_contact`]: within(AUTRE_AVEC_CONTACT_CONDITION),
+    [`${key}_deja_connu_accompagne`]: within(DEJA_CONNU_ACCOMPAGNE_CONDITION),
+  };
+};
+
+const SEGMENT_RAW_COUNTER_KEYS = [
+  "total",
+  "a_traiter",
+  "traite",
+  "rdv_pris",
+  "rdv_pris_decouverts",
+  "nouveau_projet",
+  "deja_accompagne",
+  "contacte_sans_retour",
+  "injoignables",
+  "coordonnees_incorrectes",
+  "autre",
+  "cherche_contrat",
+  "reorientation",
+  "ne_veut_pas_accompagnement",
+  "ne_souhaite_pas_etre_recontacte",
+  "autre_avec_contact",
+  "deja_connu_accompagne",
+];
+
+const COLLAB_RAW_COUNTER_KEYS = [
+  ...SEGMENT_RAW_COUNTER_KEYS,
+  "situation_rupture",
+  "situation_abandon",
+  "situation_prevention_inevitable",
+  "situation_prevention_tres_eleve",
+  "situation_prevention_modere",
+  "situation_besoin_aide_hors_rupture",
+  "delai_premiere_activite_jours_total",
+  "delai_premiere_activite_count",
+];
+
+const projectSegment = (key: string, counterKeys: string[]) =>
+  Object.fromEntries(counterKeys.map((counter) => [counter, `$${key}_${counter}`]));
+
+const COLLAB_SITUATION = {
+  RUPTURE: "rupture",
+  ABANDON: "abandon",
+  PREVENTION_INEVITABLE: "prevention_inevitable",
+  PREVENTION_TRES_ELEVE: "prevention_tres_eleve",
+  PREVENTION_MODERE: "prevention_modere",
+  BESOIN_AIDE_HORS_RUPTURE: "besoin_aide_hors_rupture",
+} as const;
+
+const addCollabSituationField = () => ({
+  $addFields: {
+    collab_situation: {
+      $switch: {
+        branches: [
+          {
+            case: {
+              $and: [
+                { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+                { $eq: ["$organisme_data.risque_rupture", CFA_RISQUE_RUPTURE_ENUM.FAIBLE] },
+              ],
+            },
+            then: COLLAB_SITUATION.BESOIN_AIDE_HORS_RUPTURE,
+          },
+          {
+            case: {
+              $and: [
+                { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+                { $eq: ["$organisme_data.risque_rupture", CFA_RISQUE_RUPTURE_ENUM.INEVITABLE] },
+              ],
+            },
+            then: COLLAB_SITUATION.PREVENTION_INEVITABLE,
+          },
+          {
+            case: {
+              $and: [
+                { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+                { $eq: ["$organisme_data.risque_rupture", CFA_RISQUE_RUPTURE_ENUM.TRES_ELEVE] },
+              ],
+            },
+            then: COLLAB_SITUATION.PREVENTION_TRES_ELEVE,
+          },
+          {
+            case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+            then: COLLAB_SITUATION.PREVENTION_MODERE,
+          },
+          {
+            case: { $ne: [{ $ifNull: ["$organisme_data.date_abandon", null] }, null] },
+            then: COLLAB_SITUATION.ABANDON,
+          },
+          {
+            case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE] },
+            then: COLLAB_SITUATION.RUPTURE,
+          },
+          {
+            case: { $eq: ["$current_status.value", STATUT_APPRENANT.ABANDON] },
+            then: COLLAB_SITUATION.ABANDON,
+          },
+        ],
+        default: COLLAB_SITUATION.RUPTURE,
+      },
+    },
+  },
+});
+
+const addPremiereActiviteMlField = (mlUserIds: ObjectId[]) => ({
+  $addFields: {
+    premiere_activite_ml_at: {
+      $min: {
+        $map: {
+          input: {
+            $filter: {
+              input: "$filteredLogs",
+              as: "log",
+              cond: { $in: [{ $ifNull: ["$$log.created_by", null] }, mlUserIds] },
+            },
+          },
+          as: "log",
+          in: "$$log.created_at",
+        },
+      },
+    },
+  },
+});
+
+const DELAI_PREMIERE_ACTIVITE_EXPR = {
+  $max: [
+    0,
+    {
+      $dateDiff: {
+        startDate: "$organisme_data.acc_conjoint_at",
+        endDate: "$premiere_activite_ml_at",
+        unit: "day",
+        timezone: "Europe/Paris",
+      },
+    },
+  ],
+};
+
 export const computeMissionLocaleStats = async (
   organisation: IOrganisationMissionLocale,
   endDate: Date = new Date()
-): Promise<IMissionLocaleStats["stats"]> => {
+): Promise<{ stats: IMissionLocaleStats["stats"]; segments: IMissionLocaleStatsSegments }> => {
   const mineurCondition = {
     $gte: [
       "$effectif_snapshot.apprenant.date_de_naissance",
@@ -2089,6 +2299,32 @@ export const computeMissionLocaleStats = async (
     ],
   };
   const rqthCondition = { $eq: ["$effectif_snapshot.apprenant.rqth", true] };
+
+  const mlUserIds = (
+    await usersMigrationDb()
+      .find({ organisation_id: organisation._id }, { projection: { _id: 1 } })
+      .toArray()
+  ).map((user) => user._id);
+
+  const isCollabCondition = {
+    $and: [
+      { $eq: ["$organisme_data.acc_conjoint", true] },
+      { $ne: [{ $ifNull: ["$organisme_data.acc_conjoint_at", null] }, null] },
+      { $lte: ["$organisme_data.acc_conjoint_at", endDate] },
+    ],
+  };
+  const isRuptureCondition = {
+    $not: [
+      {
+        $and: [
+          { $eq: ["$organisme_data.acc_conjoint", true] },
+          { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+        ],
+      },
+    ],
+  };
+  const collabWith = (condition: Document) => countIf({ $and: [isCollabCondition, condition] });
+  const hasPremiereActiviteCondition = { $ne: [{ $ifNull: ["$premiere_activite_ml_at", null] }, null] };
 
   const effectifsMissionLocaleAggregation = [
     ...(endDate
@@ -2139,6 +2375,8 @@ export const computeMissionLocaleStats = async (
         computed_probleme_detail: { $ifNull: ["$log.probleme_detail", "$probleme_detail"] },
       },
     },
+    addCollabSituationField(),
+    addPremiereActiviteMlField(mlUserIds),
     {
       $group: {
         _id: null,
@@ -2146,35 +2384,7 @@ export const computeMissionLocaleStats = async (
         a_traiter: { $sum: { $cond: [{ $eq: ["$a_traiter", true] }, 1, 0] } },
         traite: { $sum: { $cond: [{ $eq: ["$a_traiter", false] }, 1, 0] } },
         rdv_pris: { $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.RDV_PRIS] }, 1, 0] } },
-        rdv_pris_decouverts: {
-          $sum: {
-            $cond: [
-              {
-                $and: [
-                  { $eq: ["$computed_situation", SITUATION_ENUM.RDV_PRIS] },
-                  {
-                    $or: [
-                      {
-                        $in: [
-                          "$computed_connaissance_ml",
-                          [CONNAISSANCE_ML_ENUM.CONNU_NON_ACCOMPAGNE, CONNAISSANCE_ML_ENUM.NON_CONNU],
-                        ],
-                      },
-                      {
-                        $and: [
-                          { $eq: [{ $ifNull: ["$computed_connaissance_ml", null] }, null] },
-                          { $eq: ["$computed_deja_connu", false] },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-              1,
-              0,
-            ],
-          },
-        },
+        rdv_pris_decouverts: countIf(RDV_PRIS_DECOUVERT_CONDITION),
         nouveau_projet: {
           $sum: {
             $cond: [
@@ -2212,20 +2422,7 @@ export const computeMissionLocaleStats = async (
         ne_souhaite_pas_etre_recontacte: {
           $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE] }, 1, 0] },
         },
-        autre_avec_contact: {
-          $sum: {
-            $cond: [
-              {
-                $and: [
-                  { $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] },
-                  { $eq: [{ $ifNull: ["$computed_probleme_type", null] }, null] },
-                ],
-              },
-              1,
-              0,
-            ],
-          },
-        },
+        autre_avec_contact: countIf(AUTRE_AVEC_CONTACT_CONDITION),
         deja_connu: { $sum: { $cond: ["$computed_deja_connu", 1, 0] } },
         mineur: {
           $sum: {
@@ -2481,6 +2678,28 @@ export const computeMissionLocaleStats = async (
           },
         },
         abandon: { $sum: { $cond: [{ $eq: ["$current_status.value", "ABANDON"] }, 1, 0] } },
+        ...buildSegmentAccumulators("rupture", isRuptureCondition),
+        ...buildSegmentAccumulators("collab", isCollabCondition),
+        collab_situation_rupture: collabWith({ $eq: ["$collab_situation", COLLAB_SITUATION.RUPTURE] }),
+        collab_situation_abandon: collabWith({ $eq: ["$collab_situation", COLLAB_SITUATION.ABANDON] }),
+        collab_situation_prevention_inevitable: collabWith({
+          $eq: ["$collab_situation", COLLAB_SITUATION.PREVENTION_INEVITABLE],
+        }),
+        collab_situation_prevention_tres_eleve: collabWith({
+          $eq: ["$collab_situation", COLLAB_SITUATION.PREVENTION_TRES_ELEVE],
+        }),
+        collab_situation_prevention_modere: collabWith({
+          $eq: ["$collab_situation", COLLAB_SITUATION.PREVENTION_MODERE],
+        }),
+        collab_situation_besoin_aide_hors_rupture: collabWith({
+          $eq: ["$collab_situation", COLLAB_SITUATION.BESOIN_AIDE_HORS_RUPTURE],
+        }),
+        collab_delai_premiere_activite_jours_total: {
+          $sum: {
+            $cond: [{ $and: [isCollabCondition, hasPremiereActiviteCondition] }, DELAI_PREMIERE_ACTIVITE_EXPR, 0],
+          },
+        },
+        collab_delai_premiere_activite_count: collabWith(hasPremiereActiviteCondition),
       },
     },
     {
@@ -2534,66 +2753,75 @@ export const computeMissionLocaleStats = async (
         rqth_ne_souhaite_pas_etre_recontacte: 1,
         rqth_autre_avec_contact: 1,
         abandon: 1,
+        rupture: projectSegment("rupture", SEGMENT_RAW_COUNTER_KEYS),
+        collab: projectSegment("collab", COLLAB_RAW_COUNTER_KEYS),
       },
     },
   ];
 
-  const data = (await missionLocaleEffectifsDb()
-    .aggregate(effectifsMissionLocaleAggregation)
-    .next()) as IMissionLocaleStats["stats"];
+  const data = (await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).next()) as
+    | (IMissionLocaleStats["stats"] & { rupture: ISegmentRawCounters; collab: ICollabSegmentRawCounters })
+    | null;
   if (!data) {
     return {
-      total: 0,
-      a_traiter: 0,
-      traite: 0,
-      rdv_pris: 0,
-      rdv_pris_decouverts: 0,
-      nouveau_projet: 0,
-      deja_accompagne: 0,
-      contacte_sans_retour: 0,
-      injoignables: 0,
-      coordonnees_incorrectes: 0,
-      autre: 0,
-      cherche_contrat: 0,
-      reorientation: 0,
-      ne_veut_pas_accompagnement: 0,
-      ne_souhaite_pas_etre_recontacte: 0,
-      autre_avec_contact: 0,
-      deja_connu: 0,
-      mineur: 0,
-      mineur_a_traiter: 0,
-      mineur_traite: 0,
-      mineur_rdv_pris: 0,
-      mineur_nouveau_projet: 0,
-      mineur_deja_accompagne: 0,
-      mineur_contacte_sans_retour: 0,
-      mineur_injoignables: 0,
-      mineur_coordonnees_incorrectes: 0,
-      mineur_autre: 0,
-      mineur_cherche_contrat: 0,
-      mineur_reorientation: 0,
-      mineur_ne_veut_pas_accompagnement: 0,
-      mineur_ne_souhaite_pas_etre_recontacte: 0,
-      mineur_autre_avec_contact: 0,
-      rqth: 0,
-      rqth_a_traiter: 0,
-      rqth_traite: 0,
-      rqth_rdv_pris: 0,
-      rqth_nouveau_projet: 0,
-      rqth_deja_accompagne: 0,
-      rqth_contacte_sans_retour: 0,
-      rqth_injoignables: 0,
-      rqth_coordonnees_incorrectes: 0,
-      rqth_autre: 0,
-      rqth_cherche_contrat: 0,
-      rqth_reorientation: 0,
-      rqth_ne_veut_pas_accompagnement: 0,
-      rqth_ne_souhaite_pas_etre_recontacte: 0,
-      rqth_autre_avec_contact: 0,
-      abandon: 0,
+      stats: {
+        total: 0,
+        a_traiter: 0,
+        traite: 0,
+        rdv_pris: 0,
+        rdv_pris_decouverts: 0,
+        nouveau_projet: 0,
+        deja_accompagne: 0,
+        contacte_sans_retour: 0,
+        injoignables: 0,
+        coordonnees_incorrectes: 0,
+        autre: 0,
+        cherche_contrat: 0,
+        reorientation: 0,
+        ne_veut_pas_accompagnement: 0,
+        ne_souhaite_pas_etre_recontacte: 0,
+        autre_avec_contact: 0,
+        deja_connu: 0,
+        mineur: 0,
+        mineur_a_traiter: 0,
+        mineur_traite: 0,
+        mineur_rdv_pris: 0,
+        mineur_nouveau_projet: 0,
+        mineur_deja_accompagne: 0,
+        mineur_contacte_sans_retour: 0,
+        mineur_injoignables: 0,
+        mineur_coordonnees_incorrectes: 0,
+        mineur_autre: 0,
+        mineur_cherche_contrat: 0,
+        mineur_reorientation: 0,
+        mineur_ne_veut_pas_accompagnement: 0,
+        mineur_ne_souhaite_pas_etre_recontacte: 0,
+        mineur_autre_avec_contact: 0,
+        rqth: 0,
+        rqth_a_traiter: 0,
+        rqth_traite: 0,
+        rqth_rdv_pris: 0,
+        rqth_nouveau_projet: 0,
+        rqth_deja_accompagne: 0,
+        rqth_contacte_sans_retour: 0,
+        rqth_injoignables: 0,
+        rqth_coordonnees_incorrectes: 0,
+        rqth_autre: 0,
+        rqth_cherche_contrat: 0,
+        rqth_reorientation: 0,
+        rqth_ne_veut_pas_accompagnement: 0,
+        rqth_ne_souhaite_pas_etre_recontacte: 0,
+        rqth_autre_avec_contact: 0,
+        abandon: 0,
+      },
+      segments: buildEmptySegments(),
     };
   }
-  return data;
+  const { rupture, collab, ...stats } = data;
+  return {
+    stats,
+    segments: { rupture: toSegmentStats(rupture), collab: toCollabSegmentStats(collab) },
+  };
 };
 
 /**

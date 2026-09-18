@@ -31,6 +31,7 @@ import {
   buildOrgLookupPipeline,
   buildPercentageExpression,
   buildRegionLookupPipeline,
+  buildSituationBuckets,
   buildTotalTraitesV2Expression,
   calculateStartDate,
   calculateStartDateAsync,
@@ -48,7 +49,7 @@ export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId
   const dateToUse = normalizeToUTCDay(date ?? new Date());
 
   const ml = (await getOrganisationById(missionLocaleId)) as IOrganisationMissionLocale;
-  const mlStats = await computeMissionLocaleStats(ml, dateToUse);
+  const { stats, segments } = await computeMissionLocaleStats(ml, dateToUse);
 
   await missionLocaleStatsDb().findOneAndUpdate(
     {
@@ -57,7 +58,8 @@ export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId
     },
     {
       $set: {
-        stats: mlStats,
+        stats,
+        segments,
         updated_at: new Date(),
         computed_day: dateToUse,
       },
@@ -132,6 +134,8 @@ const getLatestStatsPerML = async (endDate: Date, missionLocaleIds?: ObjectId[])
           injoignables: { $sum: { $ifNull: ["$latest_stats.injoignables", 0] } },
           coordonnees_incorrectes: { $sum: "$latest_stats.coordonnees_incorrectes" },
           autre_avec_contact: { $sum: { $ifNull: ["$latest_stats.autre_avec_contact", 0] } },
+          autre: { $sum: { $ifNull: ["$latest_stats.autre", 0] } },
+          deja_accompagne: { $sum: { $ifNull: ["$latest_stats.deja_accompagne", 0] } },
           cherche_contrat: { $sum: { $ifNull: ["$latest_stats.cherche_contrat", 0] } },
           reorientation: { $sum: { $ifNull: ["$latest_stats.reorientation", 0] } },
           ne_veut_pas_accompagnement: { $sum: { $ifNull: ["$latest_stats.ne_veut_pas_accompagnement", 0] } },
@@ -416,6 +420,8 @@ export async function getStatsForPeriod(endDate: Date, missionLocaleIds?: Object
       injoignables: currentStats.injoignables || 0,
       coordonnees_incorrectes: currentStats.coordonnees_incorrectes || 0,
       autre_avec_contact: currentStats.autre_avec_contact || 0,
+      autre: currentStats.autre || 0,
+      deja_accompagne: currentStats.deja_accompagne || 0,
       cherche_contrat: currentStats.cherche_contrat || 0,
       reorientation: currentStats.reorientation || 0,
       ne_veut_pas_accompagnement: currentStats.ne_veut_pas_accompagnement || 0,
@@ -1209,36 +1215,29 @@ export async function getDossiersTraitesStats(period: StatsPeriod = "30days", re
     total: currentStats.total_traites,
   };
 
-  const neSouhaiteCurrent =
-    currentStats.ne_veut_pas_accompagnement +
-    currentStats.ne_souhaite_pas_etre_recontacte +
-    currentStats.cherche_contrat +
-    currentStats.reorientation;
-  const neSouhaitePrevious =
-    previousStats.ne_veut_pas_accompagnement +
-    previousStats.ne_souhaite_pas_etre_recontacte +
-    previousStats.cherche_contrat +
-    previousStats.reorientation;
-
-  const injoignableCurrent = currentStats.injoignables + currentStats.coordonnees_incorrectes;
-  const injoignablePrevious = previousStats.injoignables + previousStats.coordonnees_incorrectes;
-
-  const totalV2Current =
-    currentStats.rdv_pris +
-    currentStats.nouveau_projet +
-    neSouhaiteCurrent +
-    currentStats.contacte_sans_retour +
-    injoignableCurrent +
-    currentStats.autre_avec_contact;
+  const currentBuckets = buildSituationBuckets(currentStats);
+  const previousBuckets = buildSituationBuckets(previousStats);
 
   const detailsTraitesV2: IDetailsDossiersTraitesV2 = {
-    rdv_pris: createStatWithVariation(currentStats.rdv_pris, previousStats.rdv_pris),
-    projet_pro_securise: createStatWithVariation(currentStats.nouveau_projet, previousStats.nouveau_projet),
-    ne_souhaite_pas_accompagnement: createStatWithVariation(neSouhaiteCurrent, neSouhaitePrevious),
-    a_recontacter: createStatWithVariation(currentStats.contacte_sans_retour, previousStats.contacte_sans_retour),
-    injoignable: createStatWithVariation(injoignableCurrent, injoignablePrevious),
-    autre: createStatWithVariation(currentStats.autre_avec_contact, previousStats.autre_avec_contact),
-    total: totalV2Current,
+    rdv_pris: createStatWithVariation(currentBuckets.rdv_pris, previousBuckets.rdv_pris),
+    projet_pro_securise: createStatWithVariation(
+      currentBuckets.projet_pro_securise,
+      previousBuckets.projet_pro_securise
+    ),
+    ne_souhaite_pas_accompagnement: createStatWithVariation(
+      currentBuckets.ne_souhaite_pas_accompagnement,
+      previousBuckets.ne_souhaite_pas_accompagnement
+    ),
+    a_recontacter: createStatWithVariation(currentBuckets.a_recontacter, previousBuckets.a_recontacter),
+    injoignable: createStatWithVariation(currentBuckets.injoignable, previousBuckets.injoignable),
+    autre: createStatWithVariation(currentBuckets.autre, previousBuckets.autre),
+    total:
+      currentBuckets.rdv_pris +
+      currentBuckets.projet_pro_securise +
+      currentBuckets.ne_souhaite_pas_accompagnement +
+      currentBuckets.a_recontacter +
+      currentBuckets.injoignable +
+      currentBuckets.autre,
   };
 
   return {

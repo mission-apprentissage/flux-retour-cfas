@@ -20,6 +20,8 @@ const zAggregatedStats = z.object({
   injoignables: z.number(),
   coordonnees_incorrectes: z.number(),
   autre_avec_contact: z.number(),
+  autre: z.number(),
+  deja_accompagne: z.number(),
   cherche_contrat: z.number(),
   reorientation: z.number(),
   ne_veut_pas_accompagnement: z.number(),

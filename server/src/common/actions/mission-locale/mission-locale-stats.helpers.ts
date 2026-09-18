@@ -6,6 +6,11 @@
  */
 
 import { ObjectId } from "bson";
+import type {
+  ICollabSegmentStats,
+  IMissionLocaleStatsSegments,
+  ISegmentStats,
+} from "shared/models/data/missionLocaleStats.model";
 import type { IAggregatedStats, StatsPeriod } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
 import { calculatePercentage } from "shared/utils/stats";
@@ -35,6 +40,8 @@ export const EMPTY_STATS: IAggregatedStats = {
   injoignables: 0,
   coordonnees_incorrectes: 0,
   autre_avec_contact: 0,
+  autre: 0,
+  deja_accompagne: 0,
   cherche_contrat: 0,
   reorientation: 0,
   ne_veut_pas_accompagnement: 0,
@@ -174,6 +181,124 @@ export async function calculateStartDateAsync(period: StatsPeriod, referenceDate
   }
   return calculateStartDate(period, referenceDate);
 }
+
+export type ISituationCounters = {
+  rdv_pris: number;
+  nouveau_projet: number;
+  deja_accompagne: number;
+  contacte_sans_retour: number;
+  injoignables: number;
+  coordonnees_incorrectes: number;
+  autre: number;
+  cherche_contrat: number;
+  reorientation: number;
+  ne_veut_pas_accompagnement: number;
+  ne_souhaite_pas_etre_recontacte: number;
+  autre_avec_contact: number;
+};
+
+export type ISituationBuckets = {
+  rdv_pris: number;
+  projet_pro_securise: number;
+  ne_souhaite_pas_accompagnement: number;
+  a_recontacter: number;
+  injoignable: number;
+  autre: number;
+  autre_avec_contact: number;
+  repondu: number;
+};
+
+export const buildSituationBuckets = (counters: ISituationCounters): ISituationBuckets => {
+  const ne_souhaite_pas_accompagnement =
+    counters.ne_veut_pas_accompagnement +
+    counters.ne_souhaite_pas_etre_recontacte +
+    counters.cherche_contrat +
+    counters.reorientation;
+
+  return {
+    rdv_pris: counters.rdv_pris,
+    projet_pro_securise: counters.nouveau_projet,
+    ne_souhaite_pas_accompagnement,
+    a_recontacter: counters.contacte_sans_retour,
+    injoignable: counters.injoignables + counters.coordonnees_incorrectes,
+    autre: counters.autre + counters.deja_accompagne,
+    autre_avec_contact: counters.autre_avec_contact,
+    repondu: counters.rdv_pris + counters.nouveau_projet + ne_souhaite_pas_accompagnement + counters.autre_avec_contact,
+  };
+};
+
+export type ISegmentRawCounters = ISituationCounters & {
+  total: number;
+  a_traiter: number;
+  traite: number;
+  rdv_pris_decouverts: number;
+  deja_connu_accompagne: number;
+};
+
+export type ICollabSegmentRawCounters = ISegmentRawCounters & {
+  situation_rupture: number;
+  situation_abandon: number;
+  situation_prevention_inevitable: number;
+  situation_prevention_tres_eleve: number;
+  situation_prevention_modere: number;
+  situation_besoin_aide_hors_rupture: number;
+  delai_premiere_activite_jours_total: number;
+  delai_premiere_activite_count: number;
+};
+
+export const toSegmentStats = (raw: ISegmentRawCounters): ISegmentStats => ({
+  total: raw.total,
+  a_traiter: raw.a_traiter,
+  traite: raw.traite,
+  rdv_pris_decouverts: raw.rdv_pris_decouverts,
+  deja_connu_accompagne: raw.deja_connu_accompagne,
+  ...buildSituationBuckets(raw),
+});
+
+export const toCollabSegmentStats = (raw: ICollabSegmentRawCounters): ICollabSegmentStats => ({
+  ...toSegmentStats(raw),
+  situation_rupture: raw.situation_rupture,
+  situation_abandon: raw.situation_abandon,
+  situation_prevention_inevitable: raw.situation_prevention_inevitable,
+  situation_prevention_tres_eleve: raw.situation_prevention_tres_eleve,
+  situation_prevention_modere: raw.situation_prevention_modere,
+  situation_besoin_aide_hors_rupture: raw.situation_besoin_aide_hors_rupture,
+  delai_premiere_activite_jours_total: raw.delai_premiere_activite_jours_total,
+  delai_premiere_activite_count: raw.delai_premiere_activite_count,
+});
+
+export const EMPTY_SEGMENT_STATS: ISegmentStats = {
+  total: 0,
+  a_traiter: 0,
+  traite: 0,
+  repondu: 0,
+  rdv_pris: 0,
+  rdv_pris_decouverts: 0,
+  projet_pro_securise: 0,
+  ne_souhaite_pas_accompagnement: 0,
+  a_recontacter: 0,
+  injoignable: 0,
+  autre: 0,
+  autre_avec_contact: 0,
+  deja_connu_accompagne: 0,
+};
+
+export const EMPTY_COLLAB_SEGMENT_STATS: ICollabSegmentStats = {
+  ...EMPTY_SEGMENT_STATS,
+  situation_rupture: 0,
+  situation_abandon: 0,
+  situation_prevention_inevitable: 0,
+  situation_prevention_tres_eleve: 0,
+  situation_prevention_modere: 0,
+  situation_besoin_aide_hors_rupture: 0,
+  delai_premiere_activite_jours_total: 0,
+  delai_premiere_activite_count: 0,
+};
+
+export const buildEmptySegments = (): IMissionLocaleStatsSegments => ({
+  rupture: { ...EMPTY_SEGMENT_STATS },
+  collab: { ...EMPTY_COLLAB_SEGMENT_STATS },
+});
 
 export const buildTotalTraitesV2Expression = (statsPath = "$latest_stats") => ({
   $ifNull: [`${statsPath}.traite`, 0],
