@@ -1,9 +1,8 @@
 import { ObjectId } from "bson";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
-import { IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "shared/models";
+import { IOrganisationMissionLocale } from "shared/models";
 import type { ICollabSegmentStats } from "shared/models/data/missionLocaleStats.model";
 import {
-  IAccompagnementConjointStats,
   ICollabSegmentExportRow,
   ICollaborationSegmentStats,
   IDetailsDossiersTraitesV2,
@@ -22,12 +21,7 @@ import {
 import { normalizeToUTCDay } from "shared/utils/date";
 import { calculatePercentage } from "shared/utils/stats";
 
-import {
-  missionLocaleEffectifsDb,
-  missionLocaleStatsDb,
-  organisationsDb,
-  organismesDb,
-} from "@/common/model/collections";
+import { missionLocaleEffectifsDb, missionLocaleStatsDb, organisationsDb } from "@/common/model/collections";
 import { escapeRegex } from "@/common/utils/usersFiltersUtils";
 
 import { getOrganisationById } from "../organisations.actions";
@@ -751,20 +745,6 @@ const DEFAULT_MOTIFS = {
   autre: 0,
 };
 
-const DEFAULT_STATUTS_TRAITEMENT = {
-  rdv_pris: 0,
-  nouveau_projet: 0,
-  contacte_sans_retour: 0,
-  injoignables: 0,
-  coordonnees_incorrectes: 0,
-  cherche_contrat: 0,
-  reorientation: 0,
-  ne_veut_pas_accompagnement: 0,
-  ne_souhaite_pas_etre_recontacte: 0,
-  autre_avec_contact: 0,
-  total_traites: 0,
-};
-
 const MOTIFS_PIPELINE = [
   { $unwind: { path: "$organisme_data.motif", preserveNullAndEmptyArrays: true } },
   {
@@ -782,179 +762,6 @@ const MOTIFS_PIPELINE = [
     },
   },
 ];
-
-const NOUVEAU_PROJET_SITUATIONS = ["NOUVEAU_PROJET", "NOUVEAU_CONTRAT"] as const;
-
-const TRAITES_V2_SITUATIONS = [
-  "RDV_PRIS",
-  ...NOUVEAU_PROJET_SITUATIONS,
-  "CONTACTE_SANS_RETOUR",
-  "INJOIGNABLE_APRES_RELANCES",
-  "COORDONNEES_INCORRECT",
-  "CHERCHE_CONTRAT",
-  "REORIENTATION",
-  "NE_VEUT_PAS_ACCOMPAGNEMENT",
-  "NE_SOUHAITE_PAS_ETRE_RECONTACTE",
-] as const;
-
-const buildAutreAvecContactCondition = () => ({
-  $and: [{ $eq: ["$situation", "AUTRE"] }, { $eq: [{ $ifNull: ["$probleme_type", null] }, null] }],
-});
-
-const STATUTS_TRAITEMENT_PIPELINE = [
-  {
-    $group: {
-      _id: null,
-      rdv_pris: buildCountIf("$situation", "RDV_PRIS"),
-      nouveau_projet: {
-        $sum: { $cond: [{ $in: ["$situation", NOUVEAU_PROJET_SITUATIONS] }, 1, 0] },
-      },
-      contacte_sans_retour: buildCountIf("$situation", "CONTACTE_SANS_RETOUR"),
-      injoignables: buildCountIf("$situation", "INJOIGNABLE_APRES_RELANCES"),
-      coordonnees_incorrectes: buildCountIf("$situation", "COORDONNEES_INCORRECT"),
-      cherche_contrat: buildCountIf("$situation", "CHERCHE_CONTRAT"),
-      reorientation: buildCountIf("$situation", "REORIENTATION"),
-      ne_veut_pas_accompagnement: buildCountIf("$situation", "NE_VEUT_PAS_ACCOMPAGNEMENT"),
-      ne_souhaite_pas_etre_recontacte: buildCountIf("$situation", "NE_SOUHAITE_PAS_ETRE_RECONTACTE"),
-      autre_avec_contact: {
-        $sum: { $cond: [buildAutreAvecContactCondition(), 1, 0] },
-      },
-      total_traites: {
-        $sum: {
-          $cond: [
-            {
-              $or: [{ $in: ["$situation", TRAITES_V2_SITUATIONS] }, buildAutreAvecContactCondition()],
-            },
-            1,
-            0,
-          ],
-        },
-      },
-    },
-  },
-];
-
-const getCfaPilotesOids = async () => {
-  const cfaPilotes = (await organisationsDb()
-    .find({
-      type: "ORGANISME_FORMATION",
-      ml_beta_activated_at: { $exists: true, $ne: null },
-    })
-    .toArray()) as IOrganisationOrganismeFormation[];
-
-  return cfaPilotes
-    .map((o) => (o.organisme_id ? new ObjectId(o.organisme_id) : null))
-    .filter((id): id is ObjectId => id !== null);
-};
-
-const getRegionsActives = async (cfaPilotesOids: ObjectId[]) => {
-  const organismesAvecRegion = await organismesDb()
-    .find({ _id: { $in: cfaPilotesOids } }, { projection: { "adresse.region": 1 } })
-    .toArray();
-
-  return [...new Set(organismesAvecRegion.map((o) => o.adresse?.region).filter(Boolean))] as string[];
-};
-
-export const getAccompagnementConjointStats = async (
-  regions?: string[],
-  mlId?: string
-): Promise<IAccompagnementConjointStats> => {
-  const evaluationDate = normalizeToUTCDay(new Date());
-
-  const cfaPilotesOids = await getCfaPilotesOids();
-  const regionsActives = await getRegionsActives(cfaPilotesOids);
-
-  const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
-  const missionLocaleFilter = missionLocaleIds ? { mission_locale_id: { $in: missionLocaleIds } } : {};
-
-  const [accConjointStats] = await missionLocaleEffectifsDb()
-    .aggregate([
-      {
-        $match: {
-          "effectif_snapshot.organisme_id": { $in: cfaPilotesOids },
-          ...missionLocaleFilter,
-        },
-      },
-      {
-        $facet: {
-          totalJeunesRupturants: [{ $count: "count" }],
-          dossiersPartages: [{ $match: { "organisme_data.acc_conjoint": true } }, { $count: "count" }],
-          mlConcernees: [
-            { $match: { "organisme_data.acc_conjoint": true } },
-            { $group: { _id: "$mission_locale_id" } },
-            { $count: "count" },
-          ],
-          cfaPartenaires: [
-            { $match: { "organisme_data.acc_conjoint": true } },
-            { $group: { _id: "$effectif_snapshot.organisme_id" } },
-            { $count: "count" },
-          ],
-          motifs: [{ $match: { "organisme_data.acc_conjoint": true } }, ...MOTIFS_PIPELINE],
-          statutsTraitement: [{ $match: { "organisme_data.acc_conjoint": true } }, ...STATUTS_TRAITEMENT_PIPELINE],
-          dejaConnu: [
-            { $match: { "organisme_data.acc_conjoint": true } },
-            {
-              $group: {
-                _id: null,
-                count: { $sum: { $cond: [{ $eq: ["$deja_connu", true] }, 1, 0] } },
-                total: { $sum: 1 },
-              },
-            },
-          ],
-        },
-      },
-    ])
-    .toArray();
-
-  const totalJeunesRupturants = accConjointStats?.totalJeunesRupturants[0]?.count || 0;
-
-  const totalDossiersPartages = accConjointStats?.dossiersPartages[0]?.count || 0;
-  const mlConcernees = accConjointStats?.mlConcernees[0]?.count || 0;
-  const cfaPartenairesCount = accConjointStats?.cfaPartenaires[0]?.count || 0;
-  const motifs = { ...DEFAULT_MOTIFS, ...accConjointStats?.motifs[0] };
-  const statutsTraitement = { ...DEFAULT_STATUTS_TRAITEMENT, ...accConjointStats?.statutsTraitement[0] };
-  const dejaConnuData = accConjointStats?.dejaConnu[0] || { count: 0, total: 0 };
-
-  const totalDossiersTraites = statutsTraitement.total_traites;
-  const pourcentageTraites =
-    totalDossiersPartages > 0 ? Math.round((totalDossiersTraites / totalDossiersPartages) * 100) : 0;
-
-  return {
-    cfaPartenaires: cfaPartenairesCount,
-    mlConcernees,
-    regionsActives,
-    totalJeunesRupturants,
-    totalDossiersPartages,
-    totalDossiersTraites,
-    pourcentageTraites,
-    motifs: {
-      mobilite: motifs.mobilite || 0,
-      logement: motifs.logement || 0,
-      sante: motifs.sante || 0,
-      finance: motifs.finance || 0,
-      administratif: motifs.administratif || 0,
-      social_familial: motifs.social_familial || 0,
-      reorientation: motifs.reorientation || 0,
-      recherche_emploi: motifs.recherche_emploi || 0,
-      autre: motifs.autre || 0,
-    },
-    statutsTraitement: {
-      rdv_pris: statutsTraitement.rdv_pris || 0,
-      nouveau_projet: statutsTraitement.nouveau_projet || 0,
-      contacte_sans_retour: statutsTraitement.contacte_sans_retour || 0,
-      injoignables: statutsTraitement.injoignables || 0,
-      coordonnees_incorrectes: statutsTraitement.coordonnees_incorrectes || 0,
-      autre_avec_contact: statutsTraitement.autre_avec_contact || 0,
-      cherche_contrat: statutsTraitement.cherche_contrat || 0,
-      reorientation: statutsTraitement.reorientation || 0,
-      ne_veut_pas_accompagnement: statutsTraitement.ne_veut_pas_accompagnement || 0,
-      ne_souhaite_pas_etre_recontacte: statutsTraitement.ne_souhaite_pas_etre_recontacte || 0,
-    },
-    dejaConnu: dejaConnuData.count,
-    totalPourDejaConnu: dejaConnuData.total,
-    evaluationDate,
-  };
-};
 
 export async function getDeploymentStats(period: StatsPeriod = "30days") {
   const evaluationDate = normalizeToUTCDay(new Date());

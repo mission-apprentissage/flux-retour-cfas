@@ -14,7 +14,6 @@ import {
   getDossiersTraitesStats,
   getTraitementStatsByMissionLocale,
   getSuiviTraitementByRegion,
-  getAccompagnementConjointStats,
   getCollaborationSegmentStats,
   getTraitementStats,
   getDeploymentStats,
@@ -69,11 +68,6 @@ const traitementMlQuery = z.object({
 const nationalQuery = z.object({ period: zStatsPeriod.optional(), national: z.coerce.boolean().optional() });
 const traitementRegionsQuery = nationalQuery.extend({ segment: zStatsSegment.default("all") });
 const exportQuery = z.object({ region: z.string().optional(), ml_id: mlIdSchema.optional() });
-const accompagnementQuery = z.object({
-  region: z.string().optional(),
-  ml_id: mlIdSchema.optional(),
-  national: z.coerce.boolean().optional(),
-});
 const mlIdParams = z.object({ id: mlIdSchema });
 
 type IndicateursHandler<TQuery = DefaultQuery, TParams = DefaultParams> = RouteHandler<
@@ -129,11 +123,6 @@ export default () => {
   );
   router.get("/stats/whatsapp", validateRequestMiddleware({ query: periodQuery }), returnResult(getWhatsAppRoute));
   router.get("/stats/prequalif", validateRequestMiddleware({ query: periodQuery }), returnResult(getPrequalifRoute));
-  router.get(
-    "/stats/accompagnement-conjoint",
-    validateRequestMiddleware({ query: accompagnementQuery }),
-    returnResult(getAccompagnementConjointRoute)
-  );
   router.get(
     "/mission-locale/:id/detail",
     validateRequestMiddleware({ params: mlIdParams }),
@@ -297,15 +286,6 @@ const getCouvertureRegionsRoute: IndicateursHandler<z.infer<typeof nationalQuery
   }
 
   return stats;
-};
-
-const getAccompagnementConjointRoute: IndicateursHandler<z.infer<typeof accompagnementQuery>> = async (
-  req,
-  { locals }
-) => {
-  const scope = await resolveStatsScope(req.query, locals.regions);
-
-  return await getAccompagnementConjointStats(scope.regions, scope.mlId);
 };
 
 const getMlDetailRoute: IndicateursHandler<DefaultQuery, z.infer<typeof mlIdParams>> = async (req, { locals }) => {

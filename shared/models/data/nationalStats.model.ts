@@ -102,21 +102,6 @@ const zTraitementStatsResponse = z.object({
 
 export type ITraitementStatsResponse = z.output<typeof zTraitementStatsResponse>;
 
-const zTraitementDetails = z.object({
-  rdv_pris: z.number(),
-  nouveau_projet: z.number(),
-  contacte_sans_retour: z.number(),
-  injoignables: z.number(),
-  coordonnees_incorrectes: z.number(),
-  autre_avec_contact: z.number(),
-  cherche_contrat: z.number(),
-  reorientation: z.number(),
-  ne_veut_pas_accompagnement: z.number(),
-  ne_souhaite_pas_etre_recontacte: z.number(),
-});
-
-export type ITraitementDetails = z.output<typeof zTraitementDetails>;
-
 const zMissionLocaleTraitementStats = z.object({
   id: z.string(),
   nom: z.string(),
@@ -173,7 +158,7 @@ const zTraitementRegionStats = z.object({
 
 export type ITraitementRegionStats = z.output<typeof zTraitementRegionStats>;
 
-const zAccompagnementConjointMotifs = z.object({
+const zCollaborationObjectifs = z.object({
   mobilite: z.number(),
   logement: z.number(),
   sante: z.number(),
@@ -185,24 +170,7 @@ const zAccompagnementConjointMotifs = z.object({
   autre: z.number(),
 });
 
-export type IAccompagnementConjointMotifs = z.output<typeof zAccompagnementConjointMotifs>;
-
-const zAccompagnementConjointStats = z.object({
-  cfaPartenaires: z.number(),
-  mlConcernees: z.number(),
-  regionsActives: z.array(z.string()),
-  totalJeunesRupturants: z.number(),
-  totalDossiersPartages: z.number(),
-  totalDossiersTraites: z.number(),
-  pourcentageTraites: z.number(),
-  motifs: zAccompagnementConjointMotifs,
-  statutsTraitement: zTraitementDetails,
-  dejaConnu: z.number(),
-  totalPourDejaConnu: z.number(),
-  evaluationDate: z.coerce.date(),
-});
-
-export type IAccompagnementConjointStats = z.output<typeof zAccompagnementConjointStats>;
+export type ICollaborationObjectifs = z.output<typeof zCollaborationObjectifs>;
 
 const zCollabSituations = z.object({
   rupture: z.number(),
@@ -227,7 +195,7 @@ const zCollaborationSegmentStats = z.object({
   part_deja_connus: z.number(),
   delai_moyen_jours: z.number().nullable(),
   situations: zCollabSituations,
-  objectifs: zAccompagnementConjointMotifs.extend({ total_dossiers: z.number() }),
+  objectifs: zCollaborationObjectifs.extend({ total_dossiers: z.number() }),
 });
 
 export type ICollaborationSegmentStats = z.output<typeof zCollaborationSegmentStats>;
