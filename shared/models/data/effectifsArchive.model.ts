@@ -8,7 +8,9 @@ import { zEffectif } from "./effectifs.model";
 
 const collectionName = "effectifsArchive";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ "suppression.date": 1 }, { expireAfterSeconds: 60 * 60 * 24 * 30 * 24, name: "ttl_suppression_date" }],
+];
 
 export const zEffectifArchive = zEffectif.extend({
   suppression: z.object({
