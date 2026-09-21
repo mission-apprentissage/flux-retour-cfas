@@ -1,6 +1,5 @@
 "use client";
 
-import { captureException } from "@sentry/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import type { CfdInfo } from "shared/models/apis/@types/ApiAlternance";
 
@@ -23,7 +22,6 @@ export function CfdDetails({ code }: { code: string | null }) {
   if (cfdInfoQuery.isLoading) return <p>Chargement…</p>;
 
   if (cfdInfoQuery.isError) {
-    captureException(cfdInfoQuery.error, { extra: { code } });
     return <p>Erreur lors de la récupération des informations CFD</p>;
   }
 

@@ -9,13 +9,14 @@ import Boom from "boom";
 import { format } from "date-fns";
 
 import logger from "@/common/logger";
+import { reportConfigurationIssueOnce } from "@/common/services/sentry/reportOnce";
 import config from "@/config";
 
 const initContactApi = () => {
   const apiContactInstance = new brevo.ContactsApi();
   const apiKey = config.brevo.apiKey;
   if (!apiKey) {
-    captureException(new Error("Brevo API key not set"));
+    reportConfigurationIssueOnce("brevo.apiKey", "Brevo API key not set");
     return null;
   }
   apiContactInstance.setApiKey(ContactsApiApiKeys.apiKey, apiKey);
@@ -26,7 +27,7 @@ const initEmailApi = () => {
   const apiEmailInstance = new brevo.TransactionalEmailsApi();
   const apiKey = config.brevo.apiKey;
   if (!apiKey) {
-    captureException(new Error("Brevo API key not set"));
+    reportConfigurationIssueOnce("brevo.apiKey", "Brevo API key not set");
     return null;
   }
   apiEmailInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, apiKey);
@@ -37,7 +38,7 @@ const initEventApi = () => {
   const apiEventInstance = new brevo.EventsApi();
   const apiKey = config.brevo.apiKey;
   if (!apiKey) {
-    captureException(new Error("Brevo API key not set"));
+    reportConfigurationIssueOnce("brevo.apiKey", "Brevo API key not set");
     return null;
   }
   apiEventInstance.setApiKey(EventsApiApiKeys.apiKey, apiKey);
