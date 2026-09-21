@@ -10,6 +10,7 @@ import { activateMissionLocale } from "@/common/actions/admin/mission-locale/mis
 import { updateEffectifStatut } from "@/common/actions/effectifs.statut.actions";
 import { getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
 import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
+import { listUtcDays } from "@/common/actions/mission-locale/mission-locale-stats.helpers";
 import {
   checkMissionLocaleEffectifDoublon,
   createMissionLocaleSnapshot,
@@ -909,22 +910,7 @@ export const hydrateDailyMissionLocaleStats = async () => {
     return;
   }
 
-  const startDate = firstDate.created_at;
-
-  const getAllDateSinceStartingDate = (start: Date): Date[] => {
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const dates: Date[] = [];
-    const currentDate = new Date(start);
-    currentDate.setUTCHours(0, 0, 0, 0);
-    while (currentDate <= today) {
-      dates.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    return dates;
-  };
-
-  const allDates = getAllDateSinceStartingDate(startDate);
+  const allDates = listUtcDays(firstDate.created_at, new Date());
   let errors = 0;
 
   for (const date of allDates) {

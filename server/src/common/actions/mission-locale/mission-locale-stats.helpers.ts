@@ -294,6 +294,17 @@ export function createStatWithVariation(current: number, previous: number) {
  */
 const LATEST_STATS_LOOKBACK_DAYS = 30;
 
+export const listUtcDays = (start: Date, end: Date): Date[] => {
+  const days: Date[] = [];
+  const cursor = normalizeToUTCDay(start);
+  const last = normalizeToUTCDay(end);
+  while (cursor <= last) {
+    days.push(new Date(cursor));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return days;
+};
+
 export const getLatestStatsLowerBound = (referenceDate: Date): Date => {
   const bound = new Date(referenceDate);
   bound.setUTCDate(bound.getUTCDate() - LATEST_STATS_LOOKBACK_DAYS);

@@ -4,6 +4,7 @@ import {
   buildEmptySegments,
   buildSituationBuckets,
   ISituationCounters,
+  listUtcDays,
   toCollabSegmentStats,
   toSegmentStats,
 } from "./mission-locale-stats.helpers";
@@ -130,5 +131,23 @@ describe("buildEmptySegments", () => {
     expect(Object.keys(segments.collab)).toHaveLength(21);
     segments.rupture.total = 3;
     expect(buildEmptySegments().rupture.total).toBe(0);
+  });
+});
+
+describe("listUtcDays", () => {
+  it("énumère chaque jour UTC une seule fois, changements d'heure compris, bornes incluses", () => {
+    const days = listUtcDays(new Date("2025-03-22T09:30:00.000Z"), new Date("2026-09-21T15:00:00.000Z"));
+    const keys = days.map((day) => day.toISOString());
+
+    expect(days).toHaveLength(549);
+    expect(new Set(keys).size).toBe(549);
+    expect(keys[0]).toBe("2025-03-22T00:00:00.000Z");
+    expect(keys[keys.length - 1]).toBe("2026-09-21T00:00:00.000Z");
+    expect(keys).toContain("2025-10-26T00:00:00.000Z");
+    expect(keys.filter((key) => key.startsWith("2026-03-29")).length).toBe(1);
+  });
+
+  it("renvoie une liste vide quand le début est après la fin", () => {
+    expect(listUtcDays(new Date("2026-09-22T00:00:00.000Z"), new Date("2026-09-21T00:00:00.000Z"))).toEqual([]);
   });
 });
