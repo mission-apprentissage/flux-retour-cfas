@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const CFA_INVITES_SORT_FIELDS = ["localisation", "invitations"] as const;
 export const zCfaInvitesSortBy = z.enum(CFA_INVITES_SORT_FIELDS);
+export type ICfaInvitesSortBy = z.output<typeof zCfaInvitesSortBy>;
 
 export const zCfaInvitesSansCollabQuery = z.object({
   page: z.coerce.number().int().min(1).default(1),

@@ -1,0 +1,66 @@
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tableContainer {
+  width: 100%;
+  padding: 0 1rem;
+}
+
+.table {
+  width: 100%;
+}
+
+.table table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 220px;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 220px;
+  text-align: center;
+}
+
+.nameCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.name {
+  font-weight: 500;
+}
+
+.meta {
+  font-size: 12px;
+  color: var(--text-mention-grey);
+}
+
+.centeredCell {
+  composes: centeredCell from "./common.module.css";
+}
+
+.emptyValue {
+  composes: emptyValue from "./common.module.css";
+}
+
+.emptyMessage {
+  composes: emptyMessage from "./common.module.css";
+}
+
+.paginationContainer {
+  composes: paginationContainer from "./TraitementTable.module.css";
+}
+
+.pageSizeSelector {
+  composes: pageSizeSelector from "./TraitementTable.module.css";
+}

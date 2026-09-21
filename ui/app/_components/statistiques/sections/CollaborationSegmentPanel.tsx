@@ -9,6 +9,7 @@ import { ObjectifsBarChart } from "../charts/ObjectifsBarChart";
 import { SituationsPieChart } from "../charts/SituationsPieChart";
 import { isLoadingVariation } from "../hooks/useLoadingVariation";
 import { useCollaborationSegmentStats } from "../hooks/useStatsQueries";
+import { CfaInvitesSansCollabTable } from "../tables/CfaInvitesSansCollabTable";
 import { NoDataMessage } from "../ui/NoDataMessage";
 import { PeriodSelector, type Period } from "../ui/PeriodSelector";
 import { SegmentAboutText } from "../ui/SegmentAboutText";
@@ -26,6 +27,7 @@ interface CollaborationSegmentPanelProps {
   isAdmin?: boolean;
   suiviTraitement?: boolean;
   suiviTraitementTitle?: string;
+  cfaInvites?: boolean;
 }
 
 export function CollaborationSegmentPanel({
@@ -36,6 +38,7 @@ export function CollaborationSegmentPanel({
   isAdmin = false,
   suiviTraitement = false,
   suiviTraitementTitle = "Suivi traitement collaboration",
+  cfaInvites = false,
 }: CollaborationSegmentPanelProps) {
   const [period, setPeriod] = useState<Period>("30days");
   const { data, isLoading, isFetching, error } = useCollaborationSegmentStats({
@@ -149,6 +152,8 @@ export function CollaborationSegmentPanel({
           national={national}
         />
       )}
+
+      {cfaInvites && <CfaInvitesSansCollabTable />}
     </div>
   );
 }

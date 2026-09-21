@@ -27,7 +27,7 @@ export function VueEnsembleView({ isAdmin = false, isPublic = false }: VueEnsemb
     {
       id: "collaborations",
       label: "Suivi collaborations",
-      content: <CollaborationSegmentPanel national isPublic={isPublic} />,
+      content: <CollaborationSegmentPanel national isPublic={isPublic} cfaInvites={isAdmin} />,
     },
   ];
 
