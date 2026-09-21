@@ -2,7 +2,7 @@
 // The config you add here will be used whenever a users loads a page in their browser.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
-import { captureConsoleIntegration, extraErrorDataIntegration } from "@sentry/integrations";
+import { extraErrorDataIntegration } from "@sentry/integrations";
 import { init } from "@sentry/nextjs";
 
 import { publicConfig } from "./config.public";
@@ -23,7 +23,6 @@ init({
     //   blockAllMedia: true,
     // }),
     // new Sentry.BrowserTracing(),
-    captureConsoleIntegration({ levels: ["error"] }),
     extraErrorDataIntegration({ depth: 8 }),
   ],
 });

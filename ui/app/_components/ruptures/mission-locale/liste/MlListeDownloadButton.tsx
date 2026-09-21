@@ -8,6 +8,7 @@ import { IMissionLocaleEffectifList } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _getBlob } from "@/common/httpClient";
+import { reportError } from "@/common/reportError";
 import { downloadObject } from "@/common/utils/browser";
 
 export function MlListeDownloadButton({
@@ -32,7 +33,7 @@ export function MlListeDownloadButton({
       trackPlausibleEvent("telechargement_mission_locale_liste");
       downloadObject(data, fileName, mime.getType("xlsx") ?? "text/plain");
     } catch (error) {
-      console.error("Erreur lors du téléchargement:", error);
+      reportError(error, { action: "telechargement-liste-ml" });
       onError("Une erreur est survenue lors du téléchargement. Veuillez réessayer.");
     } finally {
       setIsFetching(false);

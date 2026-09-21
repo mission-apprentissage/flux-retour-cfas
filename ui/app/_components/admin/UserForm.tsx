@@ -11,6 +11,7 @@ import { toFormikValidationSchema } from "zod-formik-adapter";
 import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 import { _delete, _put, _post } from "@/common/httpClient";
 import { getApiErrorMessage, getServerErrorMessage } from "@/common/rateLimit";
+import { reportError } from "@/common/reportError";
 import { UserNormalized } from "@/modules/admin/users/models/users";
 
 import userSchema from "../../../modules/admin/userSchema";
@@ -128,7 +129,7 @@ const UserForm = ({
           }
         }
       } catch (e) {
-        console.error(e);
+        reportError(e, { action: "creation-utilisateur" });
         setAlert({
           message: getApiErrorMessage(e, "Une erreur est survenue"),
           severity: "error",
@@ -176,7 +177,7 @@ const UserForm = ({
       });
       validate ? onUpdate?.() : onDelete?.();
     } catch (e) {
-      console.error(e);
+      reportError(e, { action: "validation-acces" });
       setAlert({
         message: getServerErrorMessage(e, "Erreur lors de la validation de l'accès."),
         severity: "error",
@@ -193,7 +194,7 @@ const UserForm = ({
         severity: "success",
       });
     } catch (e) {
-      console.error(e);
+      reportError(e, { action: "renvoi-email-confirmation" });
       setAlert({
         message: getServerErrorMessage(e, "Erreur lors de l'envoi de l'email."),
         severity: "error",

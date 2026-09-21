@@ -10,6 +10,7 @@ import { FTHeader } from "@/app/_components/france-travail/FTHeader";
 import { useMoisTraites, useArborescence } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { reportError } from "@/common/reportError";
 import { publicConfig } from "@/config.public";
 
 import styles from "./DejaTraitesClient.module.css";
@@ -104,7 +105,7 @@ export default function DejaTraitesClient() {
 
       trackPlausibleEvent("isc_telechargement_liste_traitee");
     } catch (error) {
-      console.error("Erreur lors du téléchargement:", error);
+      reportError(error, { action: "telechargement-deja-traites" });
       setDownloadError("Une erreur est survenue lors du téléchargement du fichier. Veuillez réessayer.");
     }
   };

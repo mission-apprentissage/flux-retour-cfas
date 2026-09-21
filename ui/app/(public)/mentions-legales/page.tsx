@@ -4,6 +4,7 @@ import type { ExtendedRecordMap } from "notion-types";
 
 import { getNotionPage } from "@/app/_utils/notion.utils";
 import { PAGES } from "@/app/_utils/routes.utils";
+import { reportError } from "@/common/reportError";
 
 import { NotionBody } from "../_components/NotionBody";
 
@@ -17,7 +18,7 @@ export default async function MentionsLegalesPage() {
   try {
     recordMap = await getNotionPage(NOTION_PAGE_ID);
   } catch (error) {
-    console.error(`Échec du chargement de la page Notion ${NOTION_PAGE_ID}`, error);
+    reportError(error, { notionPageId: NOTION_PAGE_ID });
     recordMap = null;
   }
 
