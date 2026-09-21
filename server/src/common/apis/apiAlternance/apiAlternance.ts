@@ -1,7 +1,6 @@
-import { captureException } from "@sentry/node";
+import { captureException, withScope } from "@sentry/node";
 import type { ICommune, IMissionLocale } from "api-alternance-sdk";
 import { zCfd } from "api-alternance-sdk/internal";
-import Boom from "boom";
 import type { CfdInfo, RncpInfo } from "shared/models/apis/@types/ApiAlternance";
 
 import logger from "@/common/logger";
@@ -9,6 +8,17 @@ import { getErrorMessage } from "@/common/utils/errorUtils";
 import config from "@/config";
 
 import { apiAlternanceClient } from "./client";
+
+/** Le code demandé reste hors du regroupement : sinon une issue par CFD, RNCP ou commune. */
+const captureApiFailure = (operation: string, error: unknown, extra: Record<string, unknown>): void => {
+  withScope((scope) => {
+    scope.setTag("error_kind", "upstream");
+    scope.setTag("upstream", "api-alternance");
+    scope.setFingerprint(["api-alternance", operation]);
+    scope.setContext("appel", { operation, ...extra });
+    captureException(new Error(`api-alternance: échec de ${operation}`, { cause: error }));
+  });
+};
 
 const describeApiError = (error: unknown) => {
   const { response } = error as { response?: { data?: unknown } };
@@ -55,7 +65,7 @@ export const getCfdInfo = async (cfd: string): Promise<CfdInfo | null> => {
     return data;
   } catch (error) {
     logger.error(`getCfdInfo: something went wrong while requesting CFD "${cfd}"`, describeApiError(error));
-    captureException(new Error(`getCfdInfo: something went wrong while requesting CFD "${cfd}"`, { cause: error }));
+    captureApiFailure("getCfdInfo", error, { cfd });
     return null;
   }
 };
@@ -83,7 +93,7 @@ export const getRncpInfo = async (rncp: string): Promise<RncpInfo | null> => {
     return data;
   } catch (error) {
     logger.error(`getRncpInfo: something went wrong while requesting RNCP "${rncp}"`, describeApiError(error));
-    captureException(new Error(`getRncpInfo: something went wrong while requesting RNCP "${rncp}"`, { cause: error }));
+    captureApiFailure("getRncpInfo", error, { rncp });
     return null;
   }
 };
@@ -107,9 +117,7 @@ export const getCommune = async ({
       codePostal,
     });
 
-    const err = Boom.internal("Échec de l'appel API pour la recherche de code postal", { codePostal });
-    err.cause = error;
-    captureException(err);
+    captureApiFailure("rechercheCommune", error, { codePostal, codeInsee });
 
     return [];
   });
@@ -156,7 +164,7 @@ export const getMissionsLocales = async (): Promise<IMissionLocale[] | null> => 
     const result = await apiAlternanceClient.geographie.listMissionLocales({});
     return result;
   } catch (error) {
-    captureException(new Error(`getMissionsLocales: something went wrong while requesting ML `, { cause: error }));
+    captureApiFailure("getMissionsLocales", error, {});
     return null;
   }
 };
