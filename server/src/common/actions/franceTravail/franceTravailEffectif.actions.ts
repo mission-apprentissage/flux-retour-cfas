@@ -887,8 +887,7 @@ export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif, w
     );
     withDedupe && (await dedupeFranceTravailEffectifSnapshots(effectif._id, person?._id || null));
   } catch (e) {
-    logger.error(e);
-    console.error("Error while creating France Travail effectif snapshot", e);
+    logger.error({ err: e, effectifId: effectif._id }, "Error while creating France Travail effectif snapshot");
   }
 };
 

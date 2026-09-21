@@ -1,6 +1,7 @@
 import { captureException } from "@sentry/node";
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
+import logger from "@/common/logger";
 import { getDbCollection } from "@/common/mongodb";
 
 interface CollectionDescriptor {
@@ -18,7 +19,10 @@ export const createCollectionIndexes = async (collectionDescriptor?: CollectionD
       try {
         await getDbCollection(collectionDescriptor.collectionName).createIndex(index, options);
       } catch (err) {
-        console.error(`Error creating indexes for ${collectionDescriptor.collectionName}: ${err}`);
+        logger.error(
+          { err, collectionName: collectionDescriptor.collectionName },
+          "Erreur lors de la création des index"
+        );
         captureException(
           new Error(`Error creating indexes for ${collectionDescriptor.collectionName}`, { cause: err })
         );

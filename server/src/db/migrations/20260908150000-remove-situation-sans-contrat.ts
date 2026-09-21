@@ -1,3 +1,4 @@
+import logger from "@/common/logger";
 import { getDatabase } from "@/common/mongodb";
 
 const PREFIXE_ARCHIVE = "Recherche d'entreprise signalée par le CFA : ";
@@ -15,7 +16,7 @@ export const up = async () => {
   };
 
   const aTraiter = await collection.countDocuments(filtre);
-  console.log(`Dossiers portant la situation « sans contrat » retirée : ${aTraiter}`);
+  logger.info({ count: aTraiter }, "[Migration] Dossiers portant la situation « sans contrat » à retirer");
 
   if (aTraiter === 0) {
     return;
@@ -59,7 +60,7 @@ export const up = async () => {
       },
       { $unset: ["organisme_data.date_debut_formation", "organisme_data.recherche_entreprise"] },
     ]);
-    console.log(`Dossiers nettoyés : ${res.modifiedCount}`);
+    logger.info({ modifiedCount: res.modifiedCount }, "[Migration] Dossiers nettoyés");
   } finally {
     await db.command({ collMod: "missionLocaleEffectif", validationLevel: "strict" });
   }

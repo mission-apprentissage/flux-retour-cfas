@@ -5,6 +5,7 @@ import {
   updateMissionLocaleEffectifComputedCollab,
   updateMissionLocaleEffectifComputedOrganisme,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
+import logger from "@/common/logger";
 import { missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 
 const PARTHENAY_DOUBLON_ORGANISATION_ID = new ObjectId("68e69fc89c04f0a8e7505868");
@@ -46,7 +47,8 @@ export const up = async () => {
     { $unset: { ml_beta_activated_at: "" } }
   );
 
-  console.log(
-    `Collab ON rétro-posé sur ${organismesCount} organisme(s), ${dossiersCount} dossier(s) ML dénormalisé(s), doublon Parthenay ${modifiedCount ? "nettoyé" : "absent"}`
+  logger.info(
+    { organismesCount, dossiersCount, doublonParthenayNettoye: modifiedCount > 0 },
+    "[Migration] Collab ON rétro-posé"
   );
 };

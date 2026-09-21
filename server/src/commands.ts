@@ -233,10 +233,8 @@ program
     } catch (err) {
       program.error(getErrorMessage(err) || "Command failed", { exitCode: 2 });
     }
-    // eslint-disable-next-line no-console
     console.log(`Compte SIPA créé : ${username}`);
     if (!password) {
-      // eslint-disable-next-line no-console
       console.log(`Mot de passe généré (affiché une seule fois, à ranger dans le coffre) : ${finalPassword}`);
     }
   });
@@ -251,7 +249,6 @@ program
     } catch (err) {
       program.error(getErrorMessage(err) || "Command failed", { exitCode: 2 });
     }
-    // eslint-disable-next-line no-console
     console.log(`Compte SIPA supprimé : ${username}`);
   });
 
@@ -504,7 +501,6 @@ program
   .command("jobs:list")
   .description("Affiche les jobs et crons enregistrés, groupés par domaine (horaires Europe/Paris)")
   .action(() => {
-    /* eslint-disable no-console */
     for (const [domain, def] of Object.entries(registry)) {
       console.log(`\n[${domain}] ${Object.keys(def.jobs).length} jobs`);
       for (const name of Object.keys(def.jobs)) {
@@ -523,7 +519,6 @@ program
     for (const [name, def] of sortedCrons) {
       console.log(`  ${def.cron_string.padEnd(12)} ${name}`);
     }
-    /* eslint-enable no-console */
   });
 
 program
