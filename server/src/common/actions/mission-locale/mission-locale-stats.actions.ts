@@ -253,25 +253,25 @@ async function getRegionsMissionLocales(evaluationDate: Date, startDate: Date) {
     .toArray();
 }
 
-// Borne inférieure pour limiter les scans de collection
-const STATS_START_DATE = new Date("2025-02-01T00:00:00.000Z");
+type RegionalStatsAtDate = { engaged: number; a_traiter: number; traites: number };
 
-async function getEngagementStatsByRegion(evaluationDate: Date, startDate: Date) {
-  const allEngagementStats = await missionLocaleStatsDb()
+async function getRegionalStatsAtDate(date: Date): Promise<Map<string, RegionalStatsAtDate>> {
+  const rows = (await missionLocaleStatsDb()
     .aggregate(
       [
-        { $match: { computed_day: { $in: [evaluationDate, startDate], $gte: STATS_START_DATE } } },
-        ...buildOrgLookupPipeline({ checkActivation: true }),
+        ...buildLatestPerMlStages(buildLatestStatsMatch(date)),
+        ...buildOrgLookupPipeline({ checkActivation: false, localField: "_id" }),
         {
           $group: {
-            _id: { region: "$ml.adresse.region", date: "$computed_day" },
-            engaged_count: {
+            _id: "$ml.adresse.region",
+            engaged: {
               $sum: {
                 $cond: [
                   {
                     $and: [
-                      { $ne: ["$stats.total", 0] },
-                      { $gte: [{ $divide: ["$stats.traite", "$stats.total"] }, ENGAGEMENT_THRESHOLD] },
+                      { $ne: [{ $ifNull: ["$ml.activated_at", null] }, null] },
+                      { $ne: ["$latest_stats.total", 0] },
+                      { $gte: [{ $divide: ["$latest_stats.traite", "$latest_stats.total"] }, ENGAGEMENT_THRESHOLD] },
                     ],
                   },
                   1,
@@ -279,80 +279,18 @@ async function getEngagementStatsByRegion(evaluationDate: Date, startDate: Date)
                 ],
               },
             },
+            a_traiter: { $sum: "$latest_stats.a_traiter" },
+            traites: { $sum: "$latest_stats.traite" },
           },
         },
       ],
       { allowDiskUse: true }
     )
-    .toArray();
+    .toArray()) as Array<{ _id: string; engaged: number; a_traiter: number; traites: number }>;
 
-  const engagementByRegionDate = new Map<string, { current: number; previous: number }>();
-  allEngagementStats.forEach((stat) => {
-    const regionCode = stat._id.region;
-    const isCurrent = stat._id.date.getTime() === evaluationDate.getTime();
-
-    if (!engagementByRegionDate.has(regionCode)) {
-      engagementByRegionDate.set(regionCode, { current: 0, previous: 0 });
-    }
-
-    const entry = engagementByRegionDate.get(regionCode)!;
-    if (isCurrent) {
-      entry.current = stat.engaged_count;
-    } else {
-      entry.previous = stat.engaged_count;
-    }
-  });
-
-  return engagementByRegionDate;
-}
-
-async function getTraitementStatsByRegion(evaluationDate: Date, startDate: Date) {
-  const allStats = (await missionLocaleStatsDb()
-    .aggregate(
-      [
-        {
-          $match: {
-            computed_day: { $in: [evaluationDate, startDate], $gte: STATS_START_DATE },
-          },
-        },
-        ...buildOrgLookupPipeline({ checkActivation: false }),
-        {
-          $group: {
-            _id: { region: "$ml.adresse.region", date: "$computed_day" },
-            a_traiter: { $sum: "$stats.a_traiter" },
-            traites: { $sum: "$stats.traite" },
-          },
-        },
-      ],
-      { allowDiskUse: true }
-    )
-    .toArray()) as Array<{ _id: { region: string; date: Date }; a_traiter: number; traites: number }>;
-
-  const traitementByRegionDate = new Map<
-    string,
-    { current: { a_traiter: number; traites: number }; previous: { a_traiter: number; traites: number } }
-  >();
-
-  allStats.forEach((stat) => {
-    const regionCode = stat._id.region;
-    const isCurrent = stat._id.date.getTime() === evaluationDate.getTime();
-
-    if (!traitementByRegionDate.has(regionCode)) {
-      traitementByRegionDate.set(regionCode, {
-        current: { a_traiter: 0, traites: 0 },
-        previous: { a_traiter: 0, traites: 0 },
-      });
-    }
-
-    const entry = traitementByRegionDate.get(regionCode)!;
-    if (isCurrent) {
-      entry.current = { a_traiter: stat.a_traiter, traites: stat.traites };
-    } else {
-      entry.previous = { a_traiter: stat.a_traiter, traites: stat.traites };
-    }
-  });
-
-  return traitementByRegionDate;
+  return new Map(
+    rows.map((row) => [row._id, { engaged: row.engaged, a_traiter: row.a_traiter, traites: row.traites }])
+  );
 }
 
 export const getRegionalStats = async (period: StatsPeriod = "30days") => {
@@ -361,20 +299,19 @@ export const getRegionalStats = async (period: StatsPeriod = "30days") => {
 
   const { DEPLOYED_REGION_CODES } = await import("shared/constants/deployedRegions");
 
-  const [regions, engagementByRegionDate, traitementByRegionDate] = await Promise.all([
+  const [regions, currentByRegion, previousByRegion] = await Promise.all([
     getRegionsMissionLocales(evaluationDate, startDate),
-    getEngagementStatsByRegion(evaluationDate, startDate),
-    getTraitementStatsByRegion(evaluationDate, startDate),
+    getRegionalStatsAtDate(evaluationDate),
+    getRegionalStatsAtDate(startDate),
   ]);
+
+  const emptyStats: RegionalStatsAtDate = { engaged: 0, a_traiter: 0, traites: 0 };
 
   const regionsWithEngagement = regions
     .filter((region) => region._id != null)
     .map((region) => {
-      const engagement = engagementByRegionDate.get(region._id) || { current: 0, previous: 0 };
-      const traitement = traitementByRegionDate.get(region._id) || {
-        current: { a_traiter: 0, traites: 0 },
-        previous: { a_traiter: 0, traites: 0 },
-      };
+      const current = currentByRegion.get(region._id) || emptyStats;
+      const previous = previousByRegion.get(region._id) || emptyStats;
 
       return {
         code: region._id,
@@ -383,12 +320,12 @@ export const getRegionalStats = async (period: StatsPeriod = "30days") => {
         ml_total: region.ml_total,
         ml_activees: region.ml_activees_current,
         ml_activees_delta: region.ml_activees_current - region.ml_activees_previous,
-        ml_engagees: engagement.current,
-        ml_engagees_delta: engagement.current - engagement.previous,
-        engagement_rate: region.ml_activees_current > 0 ? engagement.current / region.ml_activees_current : 0,
-        a_traiter: traitement.current.a_traiter,
-        traites: traitement.current.traites,
-        traites_variation: calculatePercentage(traitement.current.traites, traitement.previous.traites),
+        ml_engagees: current.engaged,
+        ml_engagees_delta: current.engaged - previous.engaged,
+        engagement_rate: region.ml_activees_current > 0 ? current.engaged / region.ml_activees_current : 0,
+        a_traiter: current.a_traiter,
+        traites: current.traites,
+        traites_variation: calculatePercentage(current.traites, previous.traites),
       };
     });
 
