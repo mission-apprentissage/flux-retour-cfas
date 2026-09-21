@@ -1,4 +1,3 @@
-import { captureException } from "@sentry/node";
 import { ObjectId } from "bson";
 
 import {
@@ -8,6 +7,7 @@ import {
 import logger from "@/common/logger";
 import { transmissionDailyReportDb } from "@/common/model/collections";
 import { formatDateYYYYMMDD } from "@/common/utils/dateUtils";
+import { createErrorAggregator } from "@/common/utils/errorAggregator";
 
 const insertTransmissions = async (date: Date) => {
   const formattedDay = formatDateYYYYMMDD(date);
@@ -51,30 +51,33 @@ export const hydrateAllTransmissions = async () => {
   const allDates = await getAllTransmissionsDate();
 
   if (!allDates || allDates.length === 0) {
-    captureException(new Error("No transmission dates found."));
-    logger.error("Aucune date de transmission trouvée");
+    logger.warn("Aucune date de transmission trouvée");
     return;
   }
+
+  const errors = createErrorAggregator("hydrate-transmissions");
   for (const date of allDates) {
     if (!date) {
-      logger.error({ date }, "Date invalide dans les dates de transmission");
+      logger.warn({ date }, "Date invalide dans les dates de transmission");
       continue;
     }
     try {
       await insertTransmissions(new Date(date));
+      errors.ok();
     } catch (error) {
-      captureException(error);
-      logger.error({ err: error, date }, "Erreur lors du traitement de la date de transmission");
+      errors.record(error, { date });
     }
   }
+  errors.finish();
 };
 
 export const forceHydrateAllTransmissions = async () => {
   const allDates = await getAllTransmissionsDate();
 
+  const errors = createErrorAggregator("force-hydrate-transmissions");
   for (const date of allDates) {
     if (!date) {
-      logger.error({ date }, "Date invalide dans les dates de transmission");
+      logger.warn({ date }, "Date invalide dans les dates de transmission");
       continue;
     }
     const today = new Date();
@@ -86,9 +89,10 @@ export const forceHydrateAllTransmissions = async () => {
     try {
       await deleteTransmissions(new Date(date));
       await insertTransmissions(new Date(date));
+      errors.ok();
     } catch (error) {
-      captureException(error);
-      logger.error({ err: error, date }, "Erreur lors du traitement de la date de transmission");
+      errors.record(error, { date });
     }
   }
+  errors.finish();
 };
