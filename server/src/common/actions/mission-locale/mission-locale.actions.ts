@@ -2254,37 +2254,57 @@ const addCollabSituationField = () => ({
   },
 });
 
-const addPremiereActiviteMlField = (mlUserIds: ObjectId[]) => ({
-  $addFields: {
-    premiere_activite_ml_at: {
-      $min: {
-        $map: {
-          input: {
-            $filter: {
-              input: "$filteredLogs",
-              as: "log",
-              cond: { $in: [{ $ifNull: ["$$log.created_by", null] }, mlUserIds] },
+const addPremiereActiviteMlField = (mlUserIds: ObjectId[]) => {
+  const logsConseiller = {
+    $filter: {
+      input: "$filteredLogs",
+      as: "log",
+      cond: { $in: [{ $ifNull: ["$$log.created_by", null] }, mlUserIds] },
+    },
+  };
+  return {
+    $addFields: {
+      premiere_activite_ml_at: {
+        $min: {
+          $map: {
+            input: {
+              $filter: {
+                input: logsConseiller,
+                as: "log",
+                cond: { $gte: ["$$log.created_at", "$organisme_data.acc_conjoint_at"] },
+              },
             },
+            as: "log",
+            in: "$$log.created_at",
           },
-          as: "log",
-          in: "$$log.created_at",
         },
       },
+      activite_ml_avant_envoi: { $gt: [{ $size: logsConseiller }, 0] },
     },
-  },
-});
+  };
+};
+
+const HAS_PREMIERE_ACTIVITE_CONDITION = {
+  $or: [{ $ne: [{ $ifNull: ["$premiere_activite_ml_at", null] }, null] }, { $eq: ["$activite_ml_avant_envoi", true] }],
+};
 
 const DELAI_PREMIERE_ACTIVITE_EXPR = {
-  $max: [
-    0,
+  $cond: [
+    { $ne: [{ $ifNull: ["$premiere_activite_ml_at", null] }, null] },
     {
-      $dateDiff: {
-        startDate: "$organisme_data.acc_conjoint_at",
-        endDate: "$premiere_activite_ml_at",
-        unit: "day",
-        timezone: "Europe/Paris",
-      },
+      $max: [
+        0,
+        {
+          $dateDiff: {
+            startDate: "$organisme_data.acc_conjoint_at",
+            endDate: "$premiere_activite_ml_at",
+            unit: "day",
+            timezone: "Europe/Paris",
+          },
+        },
+      ],
     },
+    0,
   ],
 };
 
@@ -2324,7 +2344,6 @@ export const computeMissionLocaleStats = async (
     ],
   };
   const collabWith = (condition: Document) => countIf({ $and: [isCollabCondition, condition] });
-  const hasPremiereActiviteCondition = { $ne: [{ $ifNull: ["$premiere_activite_ml_at", null] }, null] };
 
   const effectifsMissionLocaleAggregation = [
     ...(endDate
@@ -2696,10 +2715,10 @@ export const computeMissionLocaleStats = async (
         }),
         collab_delai_premiere_activite_jours_total: {
           $sum: {
-            $cond: [{ $and: [isCollabCondition, hasPremiereActiviteCondition] }, DELAI_PREMIERE_ACTIVITE_EXPR, 0],
+            $cond: [{ $and: [isCollabCondition, HAS_PREMIERE_ACTIVITE_CONDITION] }, DELAI_PREMIERE_ACTIVITE_EXPR, 0],
           },
         },
-        collab_delai_premiere_activite_count: collabWith(hasPremiereActiviteCondition),
+        collab_delai_premiere_activite_count: collabWith(HAS_PREMIERE_ACTIVITE_CONDITION),
       },
     },
     {

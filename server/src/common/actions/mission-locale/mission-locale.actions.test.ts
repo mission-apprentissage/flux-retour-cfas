@@ -43,6 +43,7 @@ const ML_ORGANISATION = {
 const dayAgo = (n: number) => {
   const d = new Date();
   d.setUTCDate(d.getUTCDate() - n);
+  d.setUTCHours(12, 0, 0, 0);
   return d;
 };
 
@@ -348,6 +349,18 @@ describe("computeMissionLocaleStats", () => {
 
       expect(segments.collab.delai_premiere_activite_count).toBe(1);
       expect(segments.collab.delai_premiere_activite_jours_total).toBe(3);
+    });
+
+    it("ignore les logs conseiller antérieurs à l'envoi quand un log postérieur existe", async () => {
+      const mlUser = await insertUser(ML_ID);
+      const dossier = await insertDossier({ createdDaysAgo: 60, collab: { accConjointAt: dayAgo(10) } });
+      await insertLog(dossier, { createdBy: mlUser, createdAt: dayAgo(40), situation: SITUATION_ENUM.RDV_PRIS });
+      await insertLog(dossier, { createdBy: mlUser, createdAt: dayAgo(4), situation: SITUATION_ENUM.NOUVEAU_PROJET });
+
+      const { segments } = await computeMissionLocaleStats(ML_ORGANISATION);
+
+      expect(segments.collab.delai_premiere_activite_count).toBe(1);
+      expect(segments.collab.delai_premiere_activite_jours_total).toBe(6);
     });
 
     it("ne regarde que les logs antérieurs à la date de calcul", async () => {
