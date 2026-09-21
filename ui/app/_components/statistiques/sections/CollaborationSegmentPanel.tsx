@@ -57,7 +57,7 @@ export function CollaborationSegmentPanel({
       <SegmentAboutText variant="collab" />
 
       <StatisticsSection
-        title="Suivi des collaborations CFA et Missions Locales"
+        title="De l'envoi par le CFA au rendez-vous en Mission Locale"
         controls={<PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />}
         controlsPosition="below-left"
       >
@@ -68,7 +68,7 @@ export function CollaborationSegmentPanel({
             <>
               <div className={styles.cards}>
                 <StatCard
-                  label="CFA ayant collaboré"
+                  label="Total CFA qui ont déjà collaboré au moins une fois"
                   value={data?.cfa_ayant_collabore.current}
                   variation={data?.cfa_ayant_collabore.variation}
                   loading={isLoading}
@@ -76,7 +76,7 @@ export function CollaborationSegmentPanel({
                   tooltip="CFA distincts ayant envoyé au moins un dossier de collaboration aux Missions Locales du périmètre."
                 />
                 <StatCard
-                  label="Jeunes envoyés par les CFA"
+                  label="Total jeunes envoyés par les CFA aux Missions Locales"
                   value={data?.jeunes_envoyes.current}
                   variation={data?.jeunes_envoyes.variation}
                   loading={isLoading}
@@ -84,7 +84,7 @@ export function CollaborationSegmentPanel({
                   tooltip="Dossiers de collaboration reçus par les Missions Locales, toutes situations confondues."
                 />
                 <StatCard
-                  label="Jeunes contactés par les Missions Locales"
+                  label="Total jeunes contactés par les Missions Locales"
                   value={data?.jeunes_contactes.current}
                   variation={data?.jeunes_contactes.variation}
                   loading={isLoading}
@@ -92,7 +92,7 @@ export function CollaborationSegmentPanel({
                   tooltip="Dossiers de collaboration pour lesquels la Mission Locale a renseigné une situation, y compris « à recontacter »."
                 />
                 <StatCard
-                  label="Jeunes ayant accepté l'accompagnement"
+                  label="Total jeunes ayant accepté l'accompagnement de la Mission Locale"
                   value={data?.jeunes_accompagnement_accepte.current}
                   variation={data?.jeunes_accompagnement_accepte.variation}
                   loading={isLoading}
@@ -103,7 +103,7 @@ export function CollaborationSegmentPanel({
 
               <div className={styles.chartCard}>
                 <h3 className={fr.cx("fr-h6", "fr-mb-2w")}>
-                  Dossiers de collaboration traités{" "}
+                  Résultats du traitement des dossiers par les Missions Locales{" "}
                   <Tooltip
                     kind="hover"
                     title="Répartition des dossiers de collaboration selon la situation renseignée par la Mission Locale. Un dossier est traité dès qu'une situation est renseignée, y compris « à recontacter »."
@@ -118,7 +118,7 @@ export function CollaborationSegmentPanel({
                   <div className={styles.encarts}>
                     <div className={styles.encart}>
                       <span className={styles.encartLabel}>
-                        Part des jeunes déjà connus par la Mission Locale{" "}
+                        Part de jeunes déjà connus des Missions Locales dans les dossiers traités{" "}
                         <Tooltip
                           kind="hover"
                           title="Parmi les dossiers de collaboration traités, part des jeunes que la Mission Locale a déclarés déjà connus et accompagnés."
@@ -128,7 +128,7 @@ export function CollaborationSegmentPanel({
                     </div>
                     <div className={styles.encart}>
                       <span className={styles.encartLabel}>
-                        Délai moyen avant la première action de la Mission Locale{" "}
+                        Délai moyen de traitement par les Missions Locales{" "}
                         <Tooltip
                           kind="hover"
                           title="Nombre moyen de jours entre l'envoi de la collaboration par le CFA et la première action d'un conseiller de la Mission Locale sur le dossier."
@@ -137,7 +137,7 @@ export function CollaborationSegmentPanel({
                       <strong className={styles.encartValue}>
                         {data?.delai_moyen_jours === null || data?.delai_moyen_jours === undefined
                           ? "—"
-                          : `${data.delai_moyen_jours.toLocaleString("fr-FR")} j`}
+                          : `${data.delai_moyen_jours.toLocaleString("fr-FR")} ${data.delai_moyen_jours > 1 ? "jours" : "jour"}`}
                       </strong>
                     </div>
                   </div>
@@ -147,7 +147,7 @@ export function CollaborationSegmentPanel({
               <div className={styles.chartsRow}>
                 <div className={styles.chartCard}>
                   <h3 className={fr.cx("fr-h6", "fr-mb-2w")}>
-                    Situation du jeune{" "}
+                    La situation du jeune lorsqu&apos;il est envoyé par le CFA{" "}
                     <Tooltip
                       kind="hover"
                       title="Situation du jeune telle que qualifiée par le CFA au moment de l'envoi de la collaboration : rupture, abandon, risque de rupture selon trois niveaux, ou besoin d'aide sans rupture."
@@ -158,12 +158,16 @@ export function CollaborationSegmentPanel({
 
                 <div className={styles.chartCard}>
                   <h3 className={fr.cx("fr-h6", "fr-mb-2w")}>
-                    Objectifs d&apos;accompagnement{" "}
+                    Les objectifs d&apos;accompagnement sélectionnés par les CFA{" "}
                     <Tooltip
                       kind="hover"
-                      title="Motifs d'accompagnement cochés par le CFA lors de l'envoi de la collaboration. Un dossier peut porter plusieurs motifs : la somme des barres peut dépasser le total des dossiers envoyés."
+                      title="Objectifs cochés par le CFA lors de l'envoi de la collaboration, chaque barre étant rapportée au total des dossiers envoyés."
                     />
                   </h3>
+                  <p className={fr.cx("fr-text--sm", "fr-mb-2w")}>
+                    Les objectifs d&apos;accompagnement sont cumulatifs : pour un même dossier de jeune, le CFA peut
+                    sélectionner plusieurs objectifs d&apos;accompagnement par la Mission Locale.
+                  </p>
                   <ObjectifsBarChart data={data?.objectifs} loading={isLoading} />
                 </div>
               </div>

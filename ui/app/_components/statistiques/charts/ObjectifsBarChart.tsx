@@ -17,7 +17,7 @@ interface ObjectifsBarChartProps {
 const BAR_COLOR = "#6A6AF4";
 const BACKGROUND_COLOR = "#E3E3FD";
 const ROW_HEIGHT = 34;
-const LABEL_WIDTH = 190;
+const LABEL_WIDTH = 236;
 
 function MotifTick({ x = 0, y = 0, payload }: { x?: number; y?: number; payload?: { value: string } }) {
   const motif = MOTIFS_CONFIG.find((item) => item.label === payload?.value);

@@ -21,13 +21,14 @@ export function SegmentAboutText({ variant }: SegmentAboutTextProps) {
         </p>
       ) : (
         <p className={styles.text}>
-          Ces indicateurs portent sur les dossiers envoyés par les CFA aux Missions Locales dans le cadre d&apos;une
-          collaboration, qu&apos;il s&apos;agisse d&apos;une rupture, d&apos;un abandon ou d&apos;une prévention de
-          rupture. Un jeune en rupture envoyé par son CFA est donc aussi compté dans le suivi des ruptures. Ces chiffres
-          reflètent l&apos;état actuel des dossiers, classés par date d&apos;envoi de la collaboration : les compteurs
-          d&apos;une période passée décrivent la situation d&apos;aujourd&apos;hui des dossiers envoyés pendant cette
-          période. La table « Déploiement aux CFA » de l&apos;onglet Suivi déploiement compte, elle, les collaborations
-          depuis le 1er janvier 2026 à la date de réponse du CFA : ses totaux peuvent différer de ceux affichés ici.
+          Ces chiffres couvrent uniquement les dossiers de jeunes envoyés manuellement sur l&apos;initiative de CFA
+          connectés au Tableau de bord aux Missions Locales via la fonctionnalité de collaboration, qu&apos;il
+          s&apos;agisse d&apos;une rupture, d&apos;un abandon ou d&apos;une prévention de rupture. Un jeune en rupture
+          envoyé par son CFA est donc aussi compté dans le suivi des ruptures. Ces chiffres reflètent l&apos;état actuel
+          des dossiers, classés par date d&apos;envoi de la collaboration : les compteurs d&apos;une période passée
+          décrivent la situation d&apos;aujourd&apos;hui des dossiers envoyés pendant cette période. La table «
+          Déploiement aux CFA » de l&apos;onglet Suivi déploiement compte, elle, les collaborations depuis le 1er
+          janvier 2026 à la date de réponse du CFA : ses totaux peuvent différer de ceux affichés ici.
         </p>
       )}
     </div>

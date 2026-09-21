@@ -49,7 +49,7 @@ export function DeploymentSection({ defaultPeriod = "30days", isAdmin = false }:
 
   return (
     <StatisticsSection
-      title="Déploiement"
+      title="Déploiement aux Missions Locales"
       className={styles.sectionContainer}
       controls={<PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />}
       controlsPosition="below-left"

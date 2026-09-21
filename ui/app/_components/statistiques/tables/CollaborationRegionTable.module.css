@@ -1,21 +1,27 @@
 .table {
-  display: flex;
-  justify-content: center;
+  width: 100%;
+}
+
+.table > * {
+  width: 100%;
 }
 
 .table table {
+  display: table;
   width: 100%;
   table-layout: fixed;
 }
 
 .table th:first-child,
 .table td:first-child {
-  width: 220px;
+  width: 160px;
 }
 
 .table th:not(:first-child),
 .table td:not(:first-child) {
   text-align: center;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 .centeredCell {
