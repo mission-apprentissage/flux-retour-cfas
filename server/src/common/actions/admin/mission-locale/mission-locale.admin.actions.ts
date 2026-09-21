@@ -47,6 +47,7 @@ export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Dat
 
   await updateEffectifMissionLocaleSnapshotAtMLActivation(missionLocaleId);
   await updateMissionLocaleEffectifComputedML(date, new ObjectId(missionLocaleId));
+  await createOrUpdateMissionLocaleStats(new ObjectId(missionLocaleId));
 };
 
 export const getAllMlFromOrganisations = async (): Promise<Array<IOrganisationMissionLocale>> => {
