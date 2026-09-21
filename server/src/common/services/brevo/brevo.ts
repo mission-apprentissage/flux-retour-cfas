@@ -189,10 +189,9 @@ export const ensureBrevoAttributes = async (
     const res = await ContactInstance.getAttributes();
     existing = (res?.body?.attributes ?? []) as unknown as typeof existing;
   } catch (error) {
-    captureException(error);
     const e = asBrevoError(error);
     const brevoMsg = e.response?.body?.message ?? e.message ?? "unknown error";
-    throw new Error(`Brevo API error when listing attributes: ${brevoMsg}`);
+    throw new Error(`Brevo API error when listing attributes: ${brevoMsg}`, { cause: error });
   }
   const existingByLowerName = new Map(
     existing.filter((a) => a.category === "normal" && a.name).map((a) => [(a.name as string).toLowerCase(), a])
@@ -237,10 +236,10 @@ export const ensureBrevoAttributes = async (
         report.skipped.push(name);
         continue;
       }
-      captureException(e);
       const status = e?.response?.statusCode ?? e?.statusCode ?? "?";
       throw new Error(
-        `Brevo API error [${status}] when creating attribute "${name}" (${type}): ${brevoMsg || e?.message || "unknown error"}`
+        `Brevo API error [${status}] when creating attribute "${name}" (${type}): ${brevoMsg || e?.message || "unknown error"}`,
+        { cause: e }
       );
     }
   }
@@ -258,7 +257,6 @@ export const createBrevoList = async (params: { name: string; folderId: number }
   try {
     return await ContactInstance.createList(contactList);
   } catch (error) {
-    captureException(error);
     // Propage le message Brevo réel (folderId invalide, clé API erronée, quota, …).
     const e = asBrevoError(error);
     const brevoBody = e.response?.body ?? e.body;
@@ -433,7 +431,6 @@ export const sendBrevoEvent = async (payload: BrevoEventPayload) => {
   try {
     return await EventInstance.createEvent(event);
   } catch (error) {
-    captureException(error);
     const e = asBrevoError(error);
     const brevoBody = e.response?.body ?? e.body;
     const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e.message ?? "unknown error";

@@ -1,4 +1,3 @@
-import { captureException } from "@sentry/node";
 import Boom from "boom";
 import { format } from "date-fns";
 import express from "express";
@@ -194,9 +193,10 @@ const exportNonConcretisee: AffelnetHandler = async (req, { locals }) => {
     const csv = await json2csvParser.parse(transformedVoeux);
     return csv;
   } catch (error) {
-    captureException(error);
     logger.error({ err: error }, "Échec de l'export des voeux non concrétisés");
-    throw Boom.internal("Failed to export non-concretise");
+    const boom = Boom.internal("Failed to export non-concretise");
+    boom.cause = error;
+    throw boom;
   }
 };
 
@@ -249,8 +249,9 @@ const exportConcretisee: AffelnetHandler = async (req, { locals }) => {
 
     return csv;
   } catch (error) {
-    captureException(error);
     logger.error({ err: error }, "Échec de l'export des voeux concrétisés");
-    throw Boom.internal("Failed to export concretise");
+    const boom = Boom.internal("Failed to export concretise");
+    boom.cause = error;
+    throw boom;
   }
 };
