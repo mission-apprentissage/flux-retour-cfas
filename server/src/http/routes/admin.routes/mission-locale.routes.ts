@@ -238,7 +238,7 @@ const updateMlParametresAdmin: AdminHandler<
 
   const result = await organisationsDb().updateOne(
     { _id: new ObjectId(id), type: "MISSION_LOCALE" },
-    { $set: { rdv_url, updated_at: new Date() } }
+    { $set: { rdv_url } }
   );
 
   if (result.matchedCount === 0) {
