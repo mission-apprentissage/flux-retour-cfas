@@ -7,6 +7,7 @@ import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
 import { useSortableTable } from "../hooks/useSortableTable";
 import { useTraitementRegionsStats } from "../hooks/useStatsQueries";
+import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 import { formatMlActives, formatPercentageBadgeSimple } from "../utils";
 
 import { SortableTableHeader } from "./SortableTableHeader";
@@ -22,12 +23,16 @@ type SortColumn = keyof ITraitementRegionStats;
 
 export function TraitementRegionTable({ period, segment = "all", national = false }: TraitementRegionTableProps) {
   const { sortColumn, sortDirection, handleSort, sortData } = useSortableTable<SortColumn>("traites");
-  const { data: regions, isLoading } = useTraitementRegionsStats(period, national, segment);
+  const { data: regions, isLoading, error } = useTraitementRegionsStats(period, national, segment);
 
   const sortedRegions = sortData(regions || []);
 
   if (isLoading) {
     return <TableSkeleton rows={6} />;
+  }
+
+  if (error) {
+    return <StatsErrorHandler data={regions} error={error} isLoading={isLoading} />;
   }
 
   if (!regions || regions.length === 0) {

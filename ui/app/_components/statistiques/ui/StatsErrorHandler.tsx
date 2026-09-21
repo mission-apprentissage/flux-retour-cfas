@@ -8,7 +8,7 @@ interface StatsErrorHandlerProps<T> {
   data: T | undefined;
   error: unknown;
   isLoading: boolean;
-  children: ReactNode;
+  children?: ReactNode;
   emptyMessage?: string;
 }
 
@@ -31,11 +31,12 @@ export function StatsErrorHandler<T>({
         />
       );
     }
+    const prettyMessage = (error as { prettyMessage?: string }).prettyMessage;
     return (
       <Alert
         severity="error"
         title="Erreur"
-        description={error instanceof Error ? error.message : "Une erreur est survenue"}
+        description={prettyMessage ?? "Une erreur technique est survenue"}
         className={fr.cx("fr-mb-4w")}
       />
     );

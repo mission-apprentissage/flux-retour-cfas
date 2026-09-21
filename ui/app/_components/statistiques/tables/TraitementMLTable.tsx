@@ -13,6 +13,7 @@ import { TableSkeleton } from "@/app/_components/common/Skeleton";
 import { isLoadingVariation } from "../hooks/useLoadingVariation";
 import { useSortableTable } from "../hooks/useSortableTable";
 import { useTraitementMLStats, usePrefetchTraitementML } from "../hooks/useStatsQueries";
+import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 import { formatActivityDuration, formatPercentageBadge } from "../utils";
 
 import { SortableTableHeader } from "./SortableTableHeader";
@@ -66,7 +67,7 @@ export function TraitementMLTable({ period, segment, region, search, hideDescrip
     setPage(1);
   }, [search]);
 
-  const { data, isLoading, isFetching } = useTraitementMLStats({
+  const { data, isLoading, isFetching, error } = useTraitementMLStats({
     period,
     segment,
     region,
@@ -243,111 +244,113 @@ export function TraitementMLTable({ period, segment, region, search, hideDescrip
 
   return (
     <div className={styles.tableContainer}>
-      {showFullSkeleton ? (
-        <TableSkeleton rows={limit} />
-      ) : mlList.length === 0 ? (
-        <p className={styles.emptyMessage}>
-          {isSearching ? `Aucune Mission Locale trouvée pour "${search}"` : "Aucune donnée disponible."}
-        </p>
-      ) : (
-        <>
-          {!hideDescription && (
-            <p className={styles.tableDescription}>
-              <strong>Sur ce tableau :</strong> Suivez les statistiques de traitement des dossiers à l&apos;échelle des
-              Missions Locales. Par défaut, le tableau classe la présentation des Missions Locales par leur dernière
-              activité sur le service, vous pouvez modifier cet ordre en manipulant les options de tris.
-            </p>
-          )}
-          <div className={`${styles.traitementTable} ${styles.mlTable}`}>
-            <Table
-              headers={tableHeaders}
-              data={mlList.map((ml, index) => {
-                const isNotActivated = ml.is_activated === false;
-                const hasNoActivity = ml.traites === 0;
-                const activity = isNotActivated
-                  ? { text: "Non activée", className: styles.emptyValue }
-                  : hasNoActivity
-                    ? { text: "Aucune activité", className: styles.emptyValue }
-                    : formatActivityDuration(ml.jours_depuis_activite);
-                const visibleRowsThreshold = Math.min(3, Math.floor(limit / 3));
-                const isInLastRows = index >= mlList.length - visibleRowsThreshold;
-                const tooltipPosition = isInLastRows ? "top" : "bottom";
-                return [
-                  <div key={`nom-${ml.id}`} className={styles.mlNameCell}>
-                    <span>{ml.nom}</span>
-                    {!region && ml.region_code && <Tag small>{ml.region_nom}</Tag>}
-                    <Link href={buildDetailUrl(ml.id)} className="fr-link fr-link--sm">
-                      Voir la fiche
-                    </Link>
-                  </div>,
-                  <div className={styles.centeredCell} key={`total-${ml.id}`}>
-                    {ml.total_jeunes}
-                  </div>,
-                  <div className={styles.centeredCell} key={`a-traiter-${ml.id}`}>
-                    {ml.a_traiter}
-                  </div>,
-                  <div className={styles.centeredCell} key={`traites-${ml.id}`}>
-                    {ml.traites}
-                  </div>,
-                  <TraitementDetailsBar
-                    key={`details-${ml.id}`}
-                    details={ml.details}
-                    total={ml.traites}
-                    tooltipPosition={tooltipPosition}
-                  />,
-                  <div className={styles.centeredCell} key={`pct-${ml.id}`}>
-                    {formatPercentageBadge(ml.pourcentage_traites, ml.pourcentage_evolution, loadingEvolution)}
-                  </div>,
-                  ...(isCollab
-                    ? [
-                        <div
-                          className={`${styles.centeredCell} ${ml.delai_moyen_jours === null ? styles.emptyValue : ""}`}
-                          key={`delai-${ml.id}`}
-                        >
-                          {ml.delai_moyen_jours === null ? "-" : `${ml.delai_moyen_jours.toLocaleString("fr-FR")} j`}
-                        </div>,
-                      ]
-                    : []),
-                  <div className={`${styles.centeredCell} ${activity.className}`} key={`activity-${ml.id}`}>
-                    {activity.text}
-                  </div>,
-                ];
-              })}
-            />
-          </div>
-
-          {pagination && pagination.totalPages > 1 && (
-            <div className={styles.paginationContainer}>
-              <Pagination
-                key={page}
-                count={pagination.totalPages}
-                defaultPage={page}
-                getPageLinkProps={(pageNumber) => ({
-                  href: `#page-${pageNumber}`,
-                  onClick: (e) => {
-                    e.preventDefault();
-                    handlePageChange(pageNumber);
-                  },
+      <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
+        {showFullSkeleton ? (
+          <TableSkeleton rows={limit} />
+        ) : mlList.length === 0 ? (
+          <p className={styles.emptyMessage}>
+            {isSearching ? `Aucune Mission Locale trouvée pour "${search}"` : "Aucune donnée disponible."}
+          </p>
+        ) : (
+          <>
+            {!hideDescription && (
+              <p className={styles.tableDescription}>
+                <strong>Sur ce tableau :</strong> Suivez les statistiques de traitement des dossiers à l&apos;échelle
+                des Missions Locales. Par défaut, le tableau classe la présentation des Missions Locales par leur
+                dernière activité sur le service, vous pouvez modifier cet ordre en manipulant les options de tris.
+              </p>
+            )}
+            <div className={`${styles.traitementTable} ${styles.mlTable}`}>
+              <Table
+                headers={tableHeaders}
+                data={mlList.map((ml, index) => {
+                  const isNotActivated = ml.is_activated === false;
+                  const hasNoActivity = ml.traites === 0;
+                  const activity = isNotActivated
+                    ? { text: "Non activée", className: styles.emptyValue }
+                    : hasNoActivity
+                      ? { text: "Aucune activité", className: styles.emptyValue }
+                      : formatActivityDuration(ml.jours_depuis_activite);
+                  const visibleRowsThreshold = Math.min(3, Math.floor(limit / 3));
+                  const isInLastRows = index >= mlList.length - visibleRowsThreshold;
+                  const tooltipPosition = isInLastRows ? "top" : "bottom";
+                  return [
+                    <div key={`nom-${ml.id}`} className={styles.mlNameCell}>
+                      <span>{ml.nom}</span>
+                      {!region && ml.region_code && <Tag small>{ml.region_nom}</Tag>}
+                      <Link href={buildDetailUrl(ml.id)} className="fr-link fr-link--sm">
+                        Voir la fiche
+                      </Link>
+                    </div>,
+                    <div className={styles.centeredCell} key={`total-${ml.id}`}>
+                      {ml.total_jeunes}
+                    </div>,
+                    <div className={styles.centeredCell} key={`a-traiter-${ml.id}`}>
+                      {ml.a_traiter}
+                    </div>,
+                    <div className={styles.centeredCell} key={`traites-${ml.id}`}>
+                      {ml.traites}
+                    </div>,
+                    <TraitementDetailsBar
+                      key={`details-${ml.id}`}
+                      details={ml.details}
+                      total={ml.traites}
+                      tooltipPosition={tooltipPosition}
+                    />,
+                    <div className={styles.centeredCell} key={`pct-${ml.id}`}>
+                      {formatPercentageBadge(ml.pourcentage_traites, ml.pourcentage_evolution, loadingEvolution)}
+                    </div>,
+                    ...(isCollab
+                      ? [
+                          <div
+                            className={`${styles.centeredCell} ${ml.delai_moyen_jours === null ? styles.emptyValue : ""}`}
+                            key={`delai-${ml.id}`}
+                          >
+                            {ml.delai_moyen_jours === null ? "-" : `${ml.delai_moyen_jours.toLocaleString("fr-FR")} j`}
+                          </div>,
+                        ]
+                      : []),
+                    <div className={`${styles.centeredCell} ${activity.className}`} key={`activity-${ml.id}`}>
+                      {activity.text}
+                    </div>,
+                  ];
                 })}
-                showFirstLast
               />
-              <div className={styles.pageSizeSelector}>
-                <Select
-                  label=""
-                  options={[5, 10, 20, 50].map((size) => ({
-                    value: size.toString(),
-                    label: `Voir par ${size}`,
-                  }))}
-                  nativeSelectProps={{
-                    value: limit.toString(),
-                    onChange: (e) => handlePageSizeChange(Number(e.target.value)),
-                  }}
-                />
-              </div>
             </div>
-          )}
-        </>
-      )}
+
+            {pagination && pagination.totalPages > 1 && (
+              <div className={styles.paginationContainer}>
+                <Pagination
+                  key={page}
+                  count={pagination.totalPages}
+                  defaultPage={page}
+                  getPageLinkProps={(pageNumber) => ({
+                    href: `#page-${pageNumber}`,
+                    onClick: (e) => {
+                      e.preventDefault();
+                      handlePageChange(pageNumber);
+                    },
+                  })}
+                  showFirstLast
+                />
+                <div className={styles.pageSizeSelector}>
+                  <Select
+                    label=""
+                    options={[5, 10, 20, 50].map((size) => ({
+                      value: size.toString(),
+                      label: `Voir par ${size}`,
+                    }))}
+                    nativeSelectProps={{
+                      value: limit.toString(),
+                      onChange: (e) => handlePageSizeChange(Number(e.target.value)),
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </StatsErrorHandler>
     </div>
   );
 }
