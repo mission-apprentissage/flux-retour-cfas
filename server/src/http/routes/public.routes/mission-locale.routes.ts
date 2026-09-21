@@ -24,10 +24,13 @@ const strictPeriodQuery = periodQuery.strict();
 const emptyQuery = z.object({}).strict();
 type PublicHandler<TQuery> = RouteHandler<Record<string, unknown>, DefaultParams, TQuery>;
 
-const publicStatsCache: express.RequestHandler = (_req, res, next) => {
-  res.set("Cache-Control", `public, max-age=${PUBLIC_STATS_CACHE_SECONDS}`);
-  next();
-};
+const withPublicCache =
+  <TQuery>(handler: PublicHandler<TQuery>): PublicHandler<TQuery> =>
+  async (req, res, next) => {
+    const result = await handler(req, res, next);
+    res.set("Cache-Control", `public, max-age=${PUBLIC_STATS_CACHE_SECONDS}`);
+    return result;
+  };
 
 /**
  * Les lecteurs publics sont anonymes et coûteux (série temporelle, distinct sur les collabs, scan des
@@ -48,44 +51,37 @@ export default () => {
   router.get(
     "/stats/traitement",
     validateRequestMiddleware({ query: segmentQuery }),
-    publicStatsCache,
-    returnResult(getTraitementRoute)
+    returnResult(withPublicCache(getTraitementRoute))
   );
   router.get(
     "/stats/rupturants",
     validateRequestMiddleware({ query: segmentQuery }),
-    publicStatsCache,
-    returnResult(getRupturantsRoute)
+    returnResult(withPublicCache(getRupturantsRoute))
   );
   router.get(
     "/stats/dossiers-traites",
     validateRequestMiddleware({ query: segmentQuery }),
-    publicStatsCache,
-    returnResult(getDossiersTraitesRoute)
+    returnResult(withPublicCache(getDossiersTraitesRoute))
   );
   router.get(
     "/stats/collaborations",
     validateRequestMiddleware({ query: strictPeriodQuery }),
-    publicStatsCache,
-    returnResult(getCollaborationsRoute)
+    returnResult(withPublicCache(getCollaborationsRoute))
   );
   router.get(
     "/stats/synthese/deployment",
     validateRequestMiddleware({ query: periodQuery }),
-    publicStatsCache,
-    returnResult(getDeploymentRoute)
+    returnResult(withPublicCache(getDeploymentRoute))
   );
   router.get(
     "/stats/synthese/regions",
     validateRequestMiddleware({ query: periodQuery }),
-    publicStatsCache,
-    returnResult(getSyntheseRegionsRoute)
+    returnResult(withPublicCache(getSyntheseRegionsRoute))
   );
   router.get(
     "/stats/synthese/collaborations-cfa",
     validateRequestMiddleware({ query: emptyQuery }),
-    publicStatsCache,
-    returnResult(getCollaborationsCfaRoute)
+    returnResult(withPublicCache(getCollaborationsCfaRoute))
   );
 
   return router;
