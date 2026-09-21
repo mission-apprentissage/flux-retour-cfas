@@ -277,9 +277,8 @@ export default async function createServer(): Promise<Application> {
 
   setupRoutes(app);
 
-  // The error handler must be before any other error middleware and after all controllers
-  app.use(Sentry.Handlers.errorHandler());
-
+  // errorMiddleware est le seul décideur de capture : le handler Sentry s'exécutait avant
+  // la normalisation, ne voyait donc aucun statut et traitait toute erreur comme une 500.
   app.use(errorMiddleware());
 
   return app;
