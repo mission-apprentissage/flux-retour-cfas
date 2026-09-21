@@ -10,8 +10,6 @@ vi.mock("@sentry/node", () => ({
   withScope: vi.fn((cb: (s: typeof scope) => void) => cb(scope)),
 }));
 
-vi.mock("@/common/logger", () => ({ default: { error: vi.fn() } }));
-
 beforeEach(() => {
   vi.mocked(captureException).mockClear();
   scope.setFingerprint.mockClear();

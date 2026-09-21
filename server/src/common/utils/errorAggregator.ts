@@ -1,14 +1,13 @@
 import { captureException, withScope } from "@sentry/node";
 
-import logger from "@/common/logger";
-
 import { getErrorMessage } from "./errorUtils";
 
 type CauseBucket = { key: string; count: number; sample: Error };
 
+/** N'écrit aucun log : les appelants journalisent avec leur propre contexte. */
 export type ErrorAggregator = {
   ok(count?: number): void;
-  record(error: unknown, context?: Record<string, unknown>): void;
+  record(error: unknown): void;
   /** Émet la synthèse du lot courant puis remet les compteurs à zéro. N'échoue jamais. */
   flush(): void;
   /** Émet la synthèse finale, et lève si le taux d'échec dépasse le seuil. */
@@ -84,7 +83,7 @@ export function createErrorAggregator(name: string, options: ErrorAggregatorOpti
       processed += count;
     },
 
-    record(error, context) {
+    record(error) {
       const err = toError(error);
       processed += 1;
       failed += 1;
@@ -96,8 +95,6 @@ export function createErrorAggregator(name: string, options: ErrorAggregatorOpti
       } else {
         causes.set(key, { key, count: 1, sample: err });
       }
-
-      logger.error({ err, ...context }, `[${name}] échec`);
     },
 
     flush() {

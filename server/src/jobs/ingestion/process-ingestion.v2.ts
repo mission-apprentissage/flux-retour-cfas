@@ -7,6 +7,7 @@ import dossierApprenantSchemaV3, { type IDossierApprenantSchemaV3 } from "shared
 // import { createMissionLocaleSnapshotV2 } from "@/common/actions/mission-locale/mission-locale.actions.v2";
 import parentLogger from "@/common/logger";
 import { effectifsDb, organismesDb } from "@/common/model/collections";
+import type { ErrorAggregator } from "@/common/utils/errorAggregator";
 
 import { buildAdresse, type IIngestAdresseUsedFields } from "./adresse/adresse.builder";
 import { ingestEffectifV2, type IIngestEffectifUsedFields } from "./effectif/effectif.ingestion";
@@ -41,7 +42,8 @@ async function ingestDossier(
 
 export async function handleEffectifTransmission(
   effectifQueue: WithId<IEffectifQueue>,
-  date_transmission: Date
+  date_transmission: Date,
+  errors?: ErrorAggregator
 ): Promise<IEffectifV2 | undefined> {
   try {
     const dossier = dossierApprenantSchemaV3.parse(effectifQueue);
@@ -50,7 +52,11 @@ export async function handleEffectifTransmission(
     return effectif;
   } catch (e) {
     logger.error("Error while processing effectif transmission v2", e);
-    captureException(e);
+    if (errors) {
+      errors.record(e);
+    } else {
+      captureException(e);
+    }
   }
 }
 

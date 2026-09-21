@@ -65,7 +65,8 @@ export const hydrateAllTransmissions = async () => {
       await insertTransmissions(new Date(date));
       errors.ok();
     } catch (error) {
-      errors.record(error, { date });
+      logger.error({ err: error, date }, "Erreur lors du traitement de la date de transmission");
+      errors.record(error);
     }
   }
   errors.finish();
@@ -91,7 +92,8 @@ export const forceHydrateAllTransmissions = async () => {
       await insertTransmissions(new Date(date));
       errors.ok();
     } catch (error) {
-      errors.record(error, { date });
+      logger.error({ err: error, date }, "Erreur lors du traitement de la date de transmission");
+      errors.record(error);
     }
   }
   errors.finish();
