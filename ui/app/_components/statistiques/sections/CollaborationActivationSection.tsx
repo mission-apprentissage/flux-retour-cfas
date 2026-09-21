@@ -22,6 +22,7 @@ export function CollaborationActivationSection({ data, loading }: CollaborationA
           value={activation?.cfa_compatibles.current}
           variation={activation?.cfa_compatibles.variation}
           loading={loading}
+          tooltip="CFA du référentiel avec un SIRET et un UAI, de nature formateur, non fermés, transmettant au moins un effectif sur les années scolaires en cours."
         />
         <StatCard
           label="CFA activés sur la V2"

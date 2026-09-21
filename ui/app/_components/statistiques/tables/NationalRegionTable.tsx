@@ -77,6 +77,7 @@ export function NationalRegionTable({ regions, loadingDeltas = false, detailRegi
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 centered
+                tooltip="Missions Locales dont l'accès au suivi des jeunes a été activé, rapportées au nombre de Missions Locales de la région."
               />,
               <SortableTableHeader
                 key="ml_engagees"

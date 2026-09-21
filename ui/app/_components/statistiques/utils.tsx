@@ -33,7 +33,10 @@ export function formatPercentageBadge(percentage: number, evolution?: string, lo
       ) : (
         evolutionDisplay &&
         (evolutionDisplay.icon ? (
-          <span className={`${evolutionDisplay.icon} ${evolutionDisplay.className}`} aria-hidden="true" />
+          <>
+            <span className={`${evolutionDisplay.icon} ${evolutionDisplay.className}`} aria-hidden="true" />
+            <span className="fr-sr-only">{evolution?.startsWith("+") ? "en hausse" : "en baisse"}</span>
+          </>
         ) : (
           <span className={evolutionDisplay.className}>=</span>
         ))

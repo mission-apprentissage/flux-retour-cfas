@@ -13,7 +13,8 @@ export function CollaborationsCfaSection() {
     <StatisticsSection title="Déploiement aux CFA">
       <p className="fr-text--sm fr-mb-2w">
         CFA compatibles avec la collaboration, dont ceux ayant créé un compte sur le Tableau de bord et ceux ayant déjà
-        envoyé au moins un dossier à une Mission Locale.
+        envoyé au moins un dossier à une Mission Locale. Les collaborations sont comptées depuis le 1er janvier 2026, à
+        la date de réponse du CFA.
       </p>
       <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
         <CollaborationRegionTable

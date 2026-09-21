@@ -20,6 +20,17 @@ export function StatsErrorHandler<T>({
   emptyMessage = "Aucune donnée n'est disponible pour cette période",
 }: StatsErrorHandlerProps<T>) {
   if (error) {
+    const statusCode = (error as { statusCode?: number }).statusCode;
+    if (statusCode === 401 || statusCode === 403) {
+      return (
+        <Alert
+          severity="warning"
+          title="Accès non autorisé"
+          description="Ces données ne font pas partie de votre périmètre. Vous pouvez consulter les régions et Missions Locales rattachées à votre organisation."
+          className={fr.cx("fr-mb-4w")}
+        />
+      );
+    }
     return (
       <Alert
         severity="error"

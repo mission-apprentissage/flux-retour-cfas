@@ -1,6 +1,7 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
+import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { useState } from "react";
 
 import { StatCard } from "../cards/StatCard";
@@ -101,7 +102,13 @@ export function CollaborationSegmentPanel({
               </div>
 
               <div className={styles.chartCard}>
-                <h3 className={fr.cx("fr-h6", "fr-mb-2w")}>Dossiers de collaboration traités</h3>
+                <h3 className={fr.cx("fr-h6", "fr-mb-2w")}>
+                  Dossiers de collaboration traités{" "}
+                  <Tooltip
+                    kind="hover"
+                    title="Répartition des dossiers de collaboration selon la situation renseignée par la Mission Locale. Un dossier est traité dès qu'une situation est renseignée, y compris « à recontacter »."
+                  />
+                </h3>
                 <div className={styles.resultats}>
                   <DetailsDossiersTraitesPieChart
                     data={data?.resultats}
@@ -110,12 +117,22 @@ export function CollaborationSegmentPanel({
                   />
                   <div className={styles.encarts}>
                     <div className={styles.encart}>
-                      <span className={styles.encartLabel}>Part des jeunes déjà connus par la Mission Locale</span>
+                      <span className={styles.encartLabel}>
+                        Part des jeunes déjà connus par la Mission Locale{" "}
+                        <Tooltip
+                          kind="hover"
+                          title="Parmi les dossiers de collaboration traités, part des jeunes que la Mission Locale a déclarés déjà connus et accompagnés."
+                        />
+                      </span>
                       <strong className={styles.encartValue}>{data?.part_deja_connus ?? 0} %</strong>
                     </div>
                     <div className={styles.encart}>
                       <span className={styles.encartLabel}>
-                        Délai moyen avant la première action de la Mission Locale
+                        Délai moyen avant la première action de la Mission Locale{" "}
+                        <Tooltip
+                          kind="hover"
+                          title="Nombre moyen de jours entre l'envoi de la collaboration par le CFA et la première action d'un conseiller de la Mission Locale sur le dossier."
+                        />
                       </span>
                       <strong className={styles.encartValue}>
                         {data?.delai_moyen_jours === null || data?.delai_moyen_jours === undefined
@@ -129,12 +146,24 @@ export function CollaborationSegmentPanel({
 
               <div className={styles.chartsRow}>
                 <div className={styles.chartCard}>
-                  <h3 className={fr.cx("fr-h6", "fr-mb-2w")}>Situation du jeune</h3>
+                  <h3 className={fr.cx("fr-h6", "fr-mb-2w")}>
+                    Situation du jeune{" "}
+                    <Tooltip
+                      kind="hover"
+                      title="Situation du jeune telle que qualifiée par le CFA au moment de l'envoi de la collaboration : rupture, abandon, risque de rupture selon trois niveaux, ou besoin d'aide sans rupture."
+                    />
+                  </h3>
                   <SituationsPieChart data={data?.situations} loading={isLoading} />
                 </div>
 
                 <div className={styles.chartCard}>
-                  <h3 className={fr.cx("fr-h6", "fr-mb-2w")}>Objectifs d&apos;accompagnement</h3>
+                  <h3 className={fr.cx("fr-h6", "fr-mb-2w")}>
+                    Objectifs d&apos;accompagnement{" "}
+                    <Tooltip
+                      kind="hover"
+                      title="Motifs d'accompagnement cochés par le CFA lors de l'envoi de la collaboration. Un dossier peut porter plusieurs motifs : la somme des barres peut dépasser le total des dossiers envoyés."
+                    />
+                  </h3>
                   <ObjectifsBarChart data={data?.objectifs} loading={isLoading} />
                 </div>
               </div>
