@@ -21,7 +21,7 @@ export function NationalView({ isAdmin = false }: NationalViewProps) {
       <ViewHeader
         title="National"
         icon={<Image src="/france.png" alt="France" width={60} height={60} className={styles.franceLogo} />}
-        action={<ExportAllButton />}
+        action={<ExportAllButton national />}
       />
 
       <StatsTabs

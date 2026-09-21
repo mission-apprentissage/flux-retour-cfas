@@ -13,6 +13,7 @@ import { exportMultiSheetXlsx } from "@/common/utils/exportUtils";
 interface UseTraitementExportOptions {
   region?: string;
   mlId?: string;
+  national?: boolean;
   mlNom?: string;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
@@ -26,7 +27,14 @@ const toFilenameSlug = (value: string) =>
     .replace(/^-|-$/g, "");
 
 /** Export xlsx du suivi : feuilles « tous segments » (par ML, par région), puis une feuille par segment. */
-export function useTraitementExport({ region, mlId, mlNom, onSuccess, onError }: UseTraitementExportOptions = {}) {
+export function useTraitementExport({
+  region,
+  mlId,
+  national,
+  mlNom,
+  onSuccess,
+  onError,
+}: UseTraitementExportOptions = {}) {
   const [isExporting, setIsExporting] = useState(false);
 
   const exportData = useCallback(async () => {
@@ -37,7 +45,7 @@ export function useTraitementExport({ region, mlId, mlNom, onSuccess, onError }:
       const data = await _get<ITraitementExportResponse>(
         "/api/v1/organisation/indicateurs-ml/stats/traitement/export",
         {
-          params: mlId ? { ml_id: mlId } : region ? { region } : {},
+          params: mlId ? { ml_id: mlId } : region ? { region } : national ? { national: true } : {},
         }
       );
 
@@ -81,7 +89,7 @@ export function useTraitementExport({ region, mlId, mlNom, onSuccess, onError }:
     } finally {
       setIsExporting(false);
     }
-  }, [region, mlId, mlNom, isExporting, onSuccess, onError]);
+  }, [region, mlId, national, mlNom, isExporting, onSuccess, onError]);
 
   return { exportData, isExporting };
 }

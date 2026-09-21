@@ -35,6 +35,7 @@ export function SuiviTraitementSection({
   const [exportError, setExportError] = useState<string | null>(null);
   const { exportData, isExporting } = useTraitementExport({
     region,
+    national,
     onError: (error) => setExportError(error.message),
     onSuccess: () => setExportError(null),
   });

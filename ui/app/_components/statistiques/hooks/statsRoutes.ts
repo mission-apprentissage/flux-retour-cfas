@@ -31,11 +31,12 @@ const territorialParams = ({ period, segment, region, mlId, national }: SegmentS
   ...(national && { national: true }),
 });
 
-/** Sans région, les cartes de l'entonnoir sont nationales : la route publique suffit, connecté ou non. */
-export function buildTraitementRequest({ period, segment, region }: SegmentStatsParams): StatsRequest {
-  return region
-    ? { url: `${INDICATEURS_ML_BASE}/traitement`, params: { period, region, segment } }
-    : { url: `${PUBLIC_STATS_BASE}/traitement`, params: { period, segment } };
+/** Sans périmètre (ni région ni ML), les cartes de l'entonnoir sont nationales : la route publique suffit, connecté ou non. */
+export function buildTraitementRequest(params: SegmentStatsParams): StatsRequest {
+  const { period, segment, region, mlId, isPublic } = params;
+  return isPublic || (!region && !mlId)
+    ? { url: `${PUBLIC_STATS_BASE}/traitement`, params: { period, segment } }
+    : { url: `${INDICATEURS_ML_BASE}/traitement`, params: territorialParams(params) };
 }
 
 /** Graphes rupturants / dossiers traités : route anonyme nationale en public, sinon route territoriale scopée. */

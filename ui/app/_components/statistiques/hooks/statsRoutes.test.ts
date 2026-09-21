@@ -16,6 +16,20 @@ describe("buildTraitementRequest", () => {
       params: { period: "all", region: "11", segment: "collab" },
     });
   });
+
+  it("va sur la route territoriale avec une ML", () => {
+    expect(buildTraitementRequest({ period: "30days", segment: "rupture", mlId: "abc" })).toEqual({
+      url: "/api/v1/organisation/indicateurs-ml/traitement",
+      params: { period: "30days", segment: "rupture", ml_id: "abc" },
+    });
+  });
+
+  it("reste sur la route publique en public, même avec une région", () => {
+    expect(buildTraitementRequest({ period: "30days", segment: "rupture", region: "11", isPublic: true })).toEqual({
+      url: "/api/v1/mission-locale/stats/traitement",
+      params: { period: "30days", segment: "rupture" },
+    });
+  });
 });
 
 describe("buildSegmentStatsRequest", () => {
