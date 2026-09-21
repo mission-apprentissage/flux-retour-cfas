@@ -804,7 +804,12 @@ describe("tbaContactsContactList", () => {
       }
 
       expect(contacts).toHaveLength(6);
-      expect(stats.national.activation).toEqual({ cfa_compatibles: 4, cfa_actives: 2, cfa_with_collab: 1 });
+      expect(stats.national.activation).toEqual({
+        cfa_compatibles: 4,
+        cfa_avec_compte: 4,
+        cfa_actives: 2,
+        cfa_with_collab: 1,
+      });
       expect(byStatut.oui.size).toBe(stats.national.activation.cfa_actives);
       expect(byStatut.oui.size + byStatut.activable.size).toBe(stats.national.activation.cfa_compatibles);
       expect(ouiWithCollab.size).toBe(stats.national.activation.cfa_with_collab);
