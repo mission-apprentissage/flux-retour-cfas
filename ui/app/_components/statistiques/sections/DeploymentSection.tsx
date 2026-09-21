@@ -7,6 +7,7 @@ import { TableSkeleton } from "@/app/_components/common/Skeleton";
 import { DeploymentRow } from "../cards/DeploymentRow";
 import { calculatePercentage, getPercentageColor } from "../constants";
 import { useDeploymentStats, useSyntheseRegionsStats } from "../hooks/useStatsQueries";
+import { useUserRegions } from "../hooks/useUserRegions";
 import { RegionTable } from "../tables/RegionTable";
 import { FranceMapSVG } from "../ui/FranceMapSVGLazy";
 import { PeriodSelector, type Period } from "../ui/PeriodSelector";
@@ -17,16 +18,12 @@ import { StatisticsSection } from "./StatisticsSection";
 
 interface DeploymentSectionProps {
   defaultPeriod?: Period;
-  showDetailColumn?: boolean;
   isAdmin?: boolean;
 }
 
-export function DeploymentSection({
-  defaultPeriod = "30days",
-  showDetailColumn = true,
-  isAdmin = false,
-}: DeploymentSectionProps) {
+export function DeploymentSection({ defaultPeriod = "30days", isAdmin = false }: DeploymentSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
+  const { regions: userRegions } = useUserRegions();
 
   const {
     data: deploymentData,
@@ -111,9 +108,8 @@ export function DeploymentSection({
           ) : (
             <RegionTable
               regions={regionalStats}
-              showDetailColumn={showDetailColumn}
               loadingDeltas={loadingPercentage}
-              isAdmin={isAdmin}
+              detailRegions={isAdmin ? regionalStats.map((region) => region.code) : userRegions}
             />
           )}
         </div>

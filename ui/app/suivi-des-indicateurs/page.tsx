@@ -3,15 +3,14 @@ import { Suspense } from "react";
 import { VueEnsembleView } from "@/app/_components/statistiques/views/VueEnsembleView";
 import { getSession } from "@/app/_utils/session.utils";
 
-import { isIndicateursUser } from "./access";
+import { isAdminUser, isIndicateursUser } from "./access";
 
 export default async function StatistiquesMLPage() {
   const user = await getSession();
-  const isPublic = !isIndicateursUser(user);
 
   return (
     <Suspense>
-      <VueEnsembleView isPublic={isPublic} />
+      <VueEnsembleView isPublic={!isIndicateursUser(user)} isAdmin={isAdminUser(user)} />
     </Suspense>
   );
 }

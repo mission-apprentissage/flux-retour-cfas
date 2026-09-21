@@ -5,6 +5,7 @@ import { useState } from "react";
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
 import { useCouvertureRegionsStats } from "../hooks/useStatsQueries";
+import { useUserRegions } from "../hooks/useUserRegions";
 import { NationalRegionTable } from "../tables/NationalRegionTable";
 import { PeriodSelector, type Period } from "../ui/PeriodSelector";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
@@ -28,6 +29,9 @@ export function CouvertureRegionsSection({
 }: CouvertureRegionsSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
   const { data, isLoading, isFetching, error } = useCouvertureRegionsStats(period, national);
+  const { regions: userRegions } = useUserRegions();
+  const regions = data?.regions || [];
+  const detailRegions = isAdmin ? regions.map((region) => region.code) : userRegions;
 
   const loadingDeltas = isFetching && !isLoading;
 
@@ -43,7 +47,7 @@ export function CouvertureRegionsSection({
           {isLoading ? (
             <TableSkeleton rows={6} />
           ) : (
-            <NationalRegionTable regions={data?.regions || []} loadingDeltas={loadingDeltas} isAdmin={isAdmin} />
+            <NationalRegionTable regions={regions} loadingDeltas={loadingDeltas} detailRegions={detailRegions} />
           )}
         </div>
       </StatsErrorHandler>

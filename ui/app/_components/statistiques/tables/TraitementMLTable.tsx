@@ -25,7 +25,6 @@ interface TraitementMLTableProps {
   region?: string;
   search?: string;
   hideDescription?: boolean;
-  isAdmin?: boolean;
 }
 
 type SortColumn =
@@ -37,14 +36,7 @@ type SortColumn =
   | "delai_moyen_jours"
   | "jours_depuis_activite";
 
-export function TraitementMLTable({
-  period,
-  segment,
-  region,
-  search,
-  hideDescription,
-  isAdmin = false,
-}: TraitementMLTableProps) {
+export function TraitementMLTable({ period, segment, region, search, hideDescription }: TraitementMLTableProps) {
   const isCollab = segment === "collab";
   const totalLabel = isCollab ? "Total collab" : "Total jeunes";
   const [page, setPage] = useState(1);
@@ -158,8 +150,7 @@ export function TraitementMLTable({
     params.set("sort_by", sortColumn);
     params.set("sort_order", sortDirection);
     if (search) params.set("search", search);
-    const basePath = isAdmin ? "/admin/suivi-des-indicateurs" : "/suivi-des-indicateurs";
-    return `${basePath}/mission-locale/${mlId}?${params.toString()}`;
+    return `/suivi-des-indicateurs/mission-locale/${mlId}?${params.toString()}`;
   };
 
   const tableHeaders = useMemo(() => {

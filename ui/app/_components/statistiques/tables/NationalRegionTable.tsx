@@ -17,12 +17,13 @@ import { SortableTableHeader } from "./SortableTableHeader";
 interface NationalRegionTableProps {
   regions: IRegionStats[];
   loadingDeltas?: boolean;
-  isAdmin?: boolean;
+  detailRegions?: ReadonlyArray<string>;
 }
 
 type SortColumn = keyof IRegionStats;
 
-export function NationalRegionTable({ regions, loadingDeltas = false, isAdmin = false }: NationalRegionTableProps) {
+export function NationalRegionTable({ regions, loadingDeltas = false, detailRegions = [] }: NationalRegionTableProps) {
+  const showDetailColumn = detailRegions.length > 0;
   const [showAll, setShowAll] = useState(false);
   const { sortColumn, sortDirection, handleSort } = useSortableTable<SortColumn>("ml_activees");
 
@@ -105,7 +106,7 @@ export function NationalRegionTable({ regions, loadingDeltas = false, isAdmin = 
                 onSort={handleSort}
                 centered
               />,
-              ...(isAdmin ? ["Détail"] : []),
+              ...(showDetailColumn ? ["Détail"] : []),
             ]}
             data={displayedRegions.map((region) => {
               const hasActiveML = region.ml_activees > 0;
@@ -147,15 +148,19 @@ export function NationalRegionTable({ regions, loadingDeltas = false, isAdmin = 
                     <span>-</span>
                   )}
                 </div>,
-                ...(isAdmin
+                ...(showDetailColumn
                   ? [
-                      <Link
-                        key={`detail-${region.code}`}
-                        href={`/admin/suivi-des-indicateurs/region/${region.code}`}
-                        className={`${styles.detailLink} ${styles.stretchedLink}`}
-                      >
-                        <span className={`fr-icon-arrow-right-line ${styles.detailArrow}`} aria-hidden="true" />
-                      </Link>,
+                      detailRegions.includes(region.code) ? (
+                        <Link
+                          key={`detail-${region.code}`}
+                          href={`/suivi-des-indicateurs/region/${region.code}`}
+                          className={`${styles.detailLink} ${styles.stretchedLink}`}
+                        >
+                          <span className={`fr-icon-arrow-right-line ${styles.detailArrow}`} aria-hidden="true" />
+                        </Link>
+                      ) : (
+                        ""
+                      ),
                     ]
                   : []),
               ];

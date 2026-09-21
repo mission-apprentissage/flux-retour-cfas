@@ -2,7 +2,7 @@
 
 import type { SideMenuProps } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
-import { REGIONS_BY_CODE } from "shared/constants/territoires";
+import { REGIONS_BY_CODE, REGIONS_WITH_SVG_SORTED } from "shared/constants/territoires";
 
 import { useUserRegions } from "@/app/_components/statistiques/hooks/useUserRegions";
 import {
@@ -13,13 +13,21 @@ import {
   SyntheseLabel,
 } from "@/app/_components/statistiques/ui/MenuLabels";
 
+import { ADMIN_DEFAULT_REGION_CODE } from "./access";
 import { StatistiquesLayoutBase } from "./StatistiquesLayoutBase";
 
 const BASE_PATH = "/suivi-des-indicateurs";
+const ADMIN_REGION_CODES = REGIONS_WITH_SVG_SORTED.map((region) => region.code);
 
-export function StatistiquesMLLayoutClient({ children }: { children: React.ReactNode }) {
+interface StatistiquesMLLayoutClientProps {
+  children: React.ReactNode;
+  isAdmin?: boolean;
+}
+
+export function StatistiquesMLLayoutClient({ children, isAdmin = false }: StatistiquesMLLayoutClientProps) {
   const pathname = usePathname() ?? "";
-  const { regions: userRegions, isLoading } = useUserRegions();
+  const { regions: ownRegions, isLoading } = useUserRegions();
+  const userRegions = isAdmin ? ADMIN_REGION_CODES : ownRegions;
 
   const isRegionPage = pathname.includes(`${BASE_PATH}/region/`) || pathname === `${BASE_PATH}/region`;
   const isMissionLocalePage = pathname === `${BASE_PATH}/mission-locale`;
@@ -30,11 +38,12 @@ export function StatistiquesMLLayoutClient({ children }: { children: React.React
 
   const isMonoRegion = userRegions.length === 1;
   const hasRegions = userRegions.length > 0;
-  const defaultRegionCode = userRegions[0];
+  const defaultRegionCode = isAdmin ? ADMIN_DEFAULT_REGION_CODE : userRegions[0];
+  const regionsLabel = isAdmin ? "Par région" : isMonoRegion ? "Ma région" : "Mes régions";
 
   const regionMenuHref = isRegionPage
     ? pathname
-    : isMonoRegion && defaultRegionCode
+    : defaultRegionCode
       ? `${BASE_PATH}/region/${defaultRegionCode}`
       : `${BASE_PATH}/region`;
 
@@ -50,6 +59,7 @@ export function StatistiquesMLLayoutClient({ children }: { children: React.React
     hasRegions,
     defaultRegionCode,
     regionMenuHref,
+    regionsLabel,
   });
 
   return (
@@ -71,6 +81,7 @@ interface BuildMenuParams {
   hasRegions: boolean;
   defaultRegionCode: string | undefined;
   regionMenuHref: string;
+  regionsLabel: string;
 }
 
 function buildSideMenuItems(params: BuildMenuParams): SideMenuProps.Item[] {
@@ -86,6 +97,7 @@ function buildSideMenuItems(params: BuildMenuParams): SideMenuProps.Item[] {
     hasRegions,
     defaultRegionCode,
     regionMenuHref,
+    regionsLabel,
   } = params;
 
   if (isCollapsedMenu) {
@@ -99,6 +111,7 @@ function buildSideMenuItems(params: BuildMenuParams): SideMenuProps.Item[] {
       hasRegions,
       defaultRegionCode,
       regionMenuHref,
+      regionsLabel,
     });
   }
 
@@ -112,6 +125,7 @@ function buildSideMenuItems(params: BuildMenuParams): SideMenuProps.Item[] {
     hasRegions,
     defaultRegionCode,
     regionMenuHref,
+    regionsLabel,
   });
 }
 
@@ -128,6 +142,7 @@ function buildCollapsedMenuItems(
     hasRegions,
     defaultRegionCode,
     regionMenuHref,
+    regionsLabel,
   } = params;
 
   const items: SideMenuProps.Item[] = [
@@ -148,13 +163,13 @@ function buildCollapsedMenuItems(
       text: isMonoRegion ? (
         <RegionItemLabel regionCode={defaultRegionCode} isActive={isRegionPage} collapsed />
       ) : (
-        <RegionsLabel isActive={isRegionPage} collapsed regionCodes={userRegions} />
+        <RegionsLabel isActive={isRegionPage} collapsed regionCodes={userRegions} label={regionsLabel} />
       ),
       linkProps: {
         href: regionMenuHref,
         title: isMonoRegion
           ? REGIONS_BY_CODE[defaultRegionCode as keyof typeof REGIONS_BY_CODE]?.nom || defaultRegionCode
-          : "Mes régions",
+          : regionsLabel,
       },
       isActive: isRegionPage,
     });
@@ -182,6 +197,7 @@ function buildExpandedMenuItems(
     hasRegions,
     defaultRegionCode,
     regionMenuHref,
+    regionsLabel,
   } = params;
 
   const items: SideMenuProps.Item[] = [
@@ -206,7 +222,7 @@ function buildExpandedMenuItems(
       });
     } else {
       items.push({
-        text: <RegionsLabel isActive={isRegionPage} regionCodes={userRegions} />,
+        text: <RegionsLabel isActive={isRegionPage} regionCodes={userRegions} label={regionsLabel} />,
         linkProps: { href: regionMenuHref },
         isActive: isRegionPage,
         expandedByDefault: isRegionPage,

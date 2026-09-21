@@ -22,7 +22,7 @@ export function VueEnsembleView({ isAdmin = false, isPublic = false }: VueEnsemb
     {
       id: "deploiement",
       label: "Suivi déploiement",
-      content: <DeploymentPanel isAdmin={isAdmin} showDetailColumn={isAdmin} />,
+      content: <DeploymentPanel isAdmin={isAdmin} />,
     },
     {
       id: "collaborations",

@@ -55,7 +55,7 @@ export default function MissionLocalePage() {
         controls={<PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />}
         controlsPosition="below-left"
       >
-        <TraitementMLTable period={period} segment="rupture" search={debouncedSearch} hideDescription isAdmin={false} />
+        <TraitementMLTable period={period} segment="rupture" search={debouncedSearch} hideDescription />
       </StatisticsSection>
     </div>
   );

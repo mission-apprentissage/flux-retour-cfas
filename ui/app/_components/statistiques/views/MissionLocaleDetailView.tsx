@@ -63,8 +63,7 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
     if (search) params.set("search", search);
 
     const queryString = params.toString();
-    const basePath = isAdmin ? "/admin/suivi-des-indicateurs" : "/suivi-des-indicateurs";
-    return `${basePath}/mission-locale${queryString ? `?${queryString}` : ""}`;
+    return `/suivi-des-indicateurs/mission-locale${queryString ? `?${queryString}` : ""}`;
   };
 
   if (isLoading) {

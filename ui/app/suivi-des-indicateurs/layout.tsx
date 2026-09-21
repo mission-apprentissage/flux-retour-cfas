@@ -7,7 +7,7 @@ import { PublicHeaderWithoutAuth } from "@/app/_components/PublicHeaderWithoutAu
 import { getSession } from "@/app/_utils/session.utils";
 import { Providers } from "@/app/providers";
 
-import { isIndicateursUser } from "./access";
+import { isAdminUser, isIndicateursUser } from "./access";
 import { StatistiquesMLLayoutClient } from "./StatistiquesMLLayoutClient";
 import { StatistiquesPublicLayoutClient } from "./StatistiquesPublicLayoutClient";
 
@@ -23,7 +23,7 @@ export default async function StatistiquesLayout({ children }: { children: JSX.E
       <Providers>
         <UserContextProvider user={user}>
           <ConnectedHeader />
-          <StatistiquesMLLayoutClient>{children}</StatistiquesMLLayoutClient>
+          <StatistiquesMLLayoutClient isAdmin={isAdminUser(user)}>{children}</StatistiquesMLLayoutClient>
           <Footer />
         </UserContextProvider>
       </Providers>

@@ -69,7 +69,7 @@ export function SuiviTraitementSection({
     return (
       <StatisticsSection title={title} controls={controls} controlsPosition="below-left">
         {errorAlert}
-        <TraitementMLTable period={period} segment={segment} region={region} isAdmin={isAdmin} />
+        <TraitementMLTable period={period} segment={segment} region={region} />
       </StatisticsSection>
     );
   }
@@ -91,7 +91,7 @@ export function SuiviTraitementSection({
         tabs={[
           {
             label: "Par Mission Locale",
-            content: <TraitementMLTable period={period} segment={segment} isAdmin={isAdmin} />,
+            content: <TraitementMLTable period={period} segment={segment} />,
           },
           {
             label: "Par région",
