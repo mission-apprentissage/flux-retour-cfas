@@ -65,10 +65,13 @@ interface ICouvertureRegionsStatsResponse {
 const THIRTY_MINUTES = 30 * 60 * 1000;
 const ONE_HOUR = 60 * 60 * 1000;
 
+const NON_RETRYABLE_STATUS = [400, 401, 403, 404];
+
 export const STATS_QUERY_CONFIG = {
   staleTime: THIRTY_MINUTES,
   gcTime: ONE_HOUR,
-  retry: 3,
+  retry: (failureCount: number, error: unknown) =>
+    !NON_RETRYABLE_STATUS.includes((error as { statusCode?: number }).statusCode ?? 0) && failureCount < 3,
   refetchOnWindowFocus: false,
 } as const;
 

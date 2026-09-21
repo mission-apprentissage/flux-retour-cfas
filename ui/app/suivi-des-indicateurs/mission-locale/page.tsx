@@ -1,20 +1,58 @@
 "use client";
 
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
 
 import { ExportAllButton } from "@/app/_components/statistiques/sections/ExportAllButton";
 import { StatisticsSection } from "@/app/_components/statistiques/sections/StatisticsSection";
-import { TraitementMLTable } from "@/app/_components/statistiques/tables/TraitementMLTable";
+import {
+  TraitementMLTable,
+  type TraitementMLSortColumn,
+  type TraitementMLTableState,
+} from "@/app/_components/statistiques/tables/TraitementMLTable";
 import commonStyles from "@/app/_components/statistiques/ui/common.module.css";
 import { PeriodSelector, type Period } from "@/app/_components/statistiques/ui/PeriodSelector";
 
 import styles from "./page.module.css";
 
+const SORT_COLUMNS: TraitementMLSortColumn[] = [
+  "nom",
+  "total_jeunes",
+  "a_traiter",
+  "traites",
+  "pourcentage_traites",
+  "delai_moyen_jours",
+  "jours_depuis_activite",
+];
+
+const readTableState = (params: URLSearchParams | null): TraitementMLTableState => {
+  const page = Number(params?.get("page"));
+  const limit = Number(params?.get("limit"));
+  const sortColumn = params?.get("sort_by") as TraitementMLSortColumn | null;
+  const sortDirection = params?.get("sort_order");
+  return {
+    ...(Number.isInteger(page) && page > 0 ? { page } : {}),
+    ...([5, 10, 20, 50].includes(limit) ? { limit } : {}),
+    ...(sortColumn && SORT_COLUMNS.includes(sortColumn) ? { sortColumn } : {}),
+    ...(sortDirection === "asc" || sortDirection === "desc" ? { sortDirection } : {}),
+  };
+};
+
 export default function MissionLocalePage() {
+  return (
+    <Suspense>
+      <MissionLocalePageContent />
+    </Suspense>
+  );
+}
+
+function MissionLocalePageContent() {
+  const searchParams = useSearchParams();
+  const [tableState] = useState(() => readTableState(searchParams));
   const [period, setPeriod] = useState<Period>("30days");
-  const [searchInput, setSearchInput] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [searchInput, setSearchInput] = useState(() => searchParams?.get("search") ?? "");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -61,7 +99,7 @@ export default function MissionLocalePage() {
         }
         controlsPosition="below-left"
       >
-        <TraitementMLTable period={period} segment="rupture" search={debouncedSearch} />
+        <TraitementMLTable period={period} segment="rupture" search={debouncedSearch} initialState={tableState} />
       </StatisticsSection>
     </div>
   );

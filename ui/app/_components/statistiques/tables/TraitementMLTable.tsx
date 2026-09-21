@@ -20,15 +20,7 @@ import { SortableTableHeader } from "./SortableTableHeader";
 import { TraitementDetailsBar } from "./TraitementDetailsBar";
 import styles from "./TraitementTable.module.css";
 
-interface TraitementMLTableProps {
-  period: StatsPeriod;
-  segment: StatsSegment;
-  region?: string;
-  search?: string;
-  hideDescription?: boolean;
-}
-
-type SortColumn =
+export type TraitementMLSortColumn =
   | "nom"
   | "total_jeunes"
   | "a_traiter"
@@ -37,18 +29,50 @@ type SortColumn =
   | "delai_moyen_jours"
   | "jours_depuis_activite";
 
-export function TraitementMLTable({ period, segment, region, search, hideDescription }: TraitementMLTableProps) {
+export interface TraitementMLTableState {
+  page?: number;
+  limit?: number;
+  sortColumn?: TraitementMLSortColumn;
+  sortDirection?: "asc" | "desc";
+}
+
+interface TraitementMLTableProps {
+  period: StatsPeriod;
+  segment: StatsSegment;
+  region?: string;
+  search?: string;
+  hideDescription?: boolean;
+  initialState?: TraitementMLTableState;
+}
+
+type SortColumn = TraitementMLSortColumn;
+
+export function TraitementMLTable({
+  period,
+  segment,
+  region,
+  search,
+  hideDescription,
+  initialState,
+}: TraitementMLTableProps) {
   const isCollab = segment === "collab";
   const totalLabel = isCollab ? "Total collab" : "Total jeunes";
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [page, setPage] = useState(initialState?.page ?? 1);
+  const [limit, setLimit] = useState(initialState?.limit ?? 10);
 
   const resetPage = useCallback(() => setPage(1), []);
   const {
     sortColumn,
     sortDirection,
     handleSort: baseSortHandler,
-  } = useSortableTable<SortColumn>("jours_depuis_activite", "desc", { onSortChange: resetPage });
+  } = useSortableTable<SortColumn>(
+    initialState?.sortColumn ?? "jours_depuis_activite",
+    initialState?.sortDirection ?? "desc",
+    {
+      onSortChange: resetPage,
+      columnDefaultDirections: { nom: "asc" },
+    }
+  );
 
   const isSearching = !!search && search.length > 0;
 
@@ -63,7 +87,12 @@ export function TraitementMLTable({ period, segment, region, search, hideDescrip
     [isSearching, baseSortHandler]
   );
 
+  const isFirstSearchRender = useRef(true);
   useEffect(() => {
+    if (isFirstSearchRender.current) {
+      isFirstSearchRender.current = false;
+      return;
+    }
     setPage(1);
   }, [search]);
 

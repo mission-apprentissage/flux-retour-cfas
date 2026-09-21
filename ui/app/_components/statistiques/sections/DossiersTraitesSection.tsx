@@ -2,7 +2,7 @@
 
 import { DetailsDossiersTraitesPieChart } from "../charts/DetailsDossiersTraitesPieChart";
 import { isLoadingVariation } from "../hooks/useLoadingVariation";
-import { useDossiersTraitesStats } from "../hooks/useStatsQueries";
+import { useDossiersTraitesStats, type SegmentStatsParams } from "../hooks/useStatsQueries";
 import { NoDataMessage } from "../ui/NoDataMessage";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
@@ -31,42 +31,43 @@ export function DossiersTraitesSection({
   national = false,
   title = "Dossiers traités",
 }: DossiersTraitesSectionProps) {
-  const { data, isLoading, isFetching, error } = useDossiersTraitesStats({
-    period,
-    segment,
-    region,
-    mlId,
-    national,
-    isPublic,
-  });
-
-  const loadingVariation = isLoadingVariation(isFetching, isLoading);
-
-  if (noData) {
-    return (
-      <StatisticsSection title={title} width={fullWidth ? "full" : "two-thirds"} smallTitle>
+  return (
+    <StatisticsSection title={title} width={fullWidth ? "full" : "two-thirds"} smallTitle>
+      {noData ? (
         <div className={styles.noDataContainer}>
           <div className={styles.noDataPieChartPlaceholder} />
           <NoDataMessage />
         </div>
-      </StatisticsSection>
-    );
-  }
+      ) : (
+        <DossiersTraitesChart
+          period={period}
+          segment={segment}
+          region={region}
+          mlId={mlId}
+          national={national}
+          isPublic={isPublic}
+        />
+      )}
+    </StatisticsSection>
+  );
+}
+
+function DossiersTraitesChart(params: SegmentStatsParams) {
+  const { data, isLoading, isFetching, error } = useDossiersTraitesStats(params);
+  const loadingVariation = isLoadingVariation(isFetching, isLoading);
 
   return (
-    <StatisticsSection title={title} width={fullWidth ? "full" : "two-thirds"} smallTitle>
-      <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
-        <DetailsDossiersTraitesPieChart
-          data={data?.detailsV2}
-          dejaConnu={
-            data && data.deja_connu_accompagne !== null
-              ? { value: data.deja_connu_accompagne, total: data.traites }
-              : undefined
-          }
-          loading={isLoading}
-          loadingVariation={loadingVariation}
-        />
-      </StatsErrorHandler>
-    </StatisticsSection>
+    <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
+      <DetailsDossiersTraitesPieChart
+        data={data?.detailsV2}
+        dejaConnu={
+          data && data.deja_connu_accompagne !== null
+            ? { value: data.deja_connu_accompagne, total: data.traites }
+            : undefined
+        }
+        loading={isLoading}
+        loadingVariation={loadingVariation}
+      />
+    </StatsErrorHandler>
   );
 }

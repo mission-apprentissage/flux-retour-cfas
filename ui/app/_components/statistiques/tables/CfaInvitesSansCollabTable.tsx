@@ -36,9 +36,10 @@ export function CfaInvitesSansCollabTable() {
   const resetPage = useCallback(() => setPage(1), []);
   const { sortColumn, sortDirection, handleSort } = useSortableTable<ICfaInvitesSortBy>("invitations", "desc", {
     onSortChange: resetPage,
+    columnDefaultDirections: { localisation: "asc" },
   });
 
-  const { data, isLoading, isFetching, error } = useCfaInvitesSansCollab({
+  const { data, isLoading, error } = useCfaInvitesSansCollab({
     page,
     limit,
     sort_by: sortColumn,
@@ -69,7 +70,7 @@ export function CfaInvitesSansCollabTable() {
       wrapTitle
     >
       <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
-        {isLoading || isFetching ? (
+        {isLoading ? (
           <TableSkeleton rows={Math.min(limit, 10)} />
         ) : rows.length === 0 ? (
           <p className={styles.emptyMessage}>Aucun CFA invité en attente.</p>
