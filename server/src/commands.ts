@@ -12,7 +12,7 @@ import { getErrorMessage } from "@/common/utils/errorUtils";
 import { createSipaUser, deleteSipaUser } from "./common/actions/sipa.actions";
 import logger from "./common/logger";
 import { closeMongodbConnection } from "./common/mongodb";
-import { closeSentry, initSentryProcessor } from "./common/services/sentry/sentry";
+import { closeSentry } from "./common/services/sentry/sentry";
 import { sleep } from "./common/utils/asyncUtils";
 import config from "./config";
 import createServer from "./http/server";
@@ -62,8 +62,6 @@ program
     // on définit le module du logger en global pour distinguer les logs des jobs
     if (command !== "start") {
       logger.fields.module = `cli:${command}`;
-      // Pas besoin d'init Sentry dans le cas du server car il est start automatiquement
-      initSentryProcessor();
     }
   })
   .hook("postAction", async () => {
@@ -122,7 +120,6 @@ program
       await Promise.all(tasks);
     } catch (err) {
       logger.error(err);
-      captureException(err);
       throw err;
     }
   });
@@ -131,7 +128,6 @@ program
   .command("queue_processor:start")
   .description("Démarre le démon qui traite les effectifs en attente")
   .action(async () => {
-    initSentryProcessor();
     const signal = createProcessExitSignal();
 
     if (config.disable_processors) {
