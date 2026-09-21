@@ -1,4 +1,4 @@
-import { CaptureConsole, ExtraErrorData } from "@sentry/integrations";
+import { ExtraErrorData } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import type { Integration } from "@sentry/types";
 import type { Express } from "express";
@@ -37,9 +37,7 @@ function getSentryOptions(extraIntegrations: Integration[]): Sentry.NodeOptions 
     integrations: [
       new Sentry.Integrations.Http({ tracing: true }),
       new Sentry.Integrations.Mongo({ useMongoose: false }),
-      new CaptureConsole({ levels: ["error"] }) as Integration,
       new ExtraErrorData({ depth: 16 }) as Integration,
-      new Sentry.Integrations.Anr({ captureStackTrace: true }) as Integration,
       ...extraIntegrations,
     ],
   };
@@ -54,5 +52,12 @@ export async function closeSentry(): Promise<void> {
 }
 
 export function initSentryExpress(app: Express): void {
-  Sentry.init(getSentryOptions([new Sentry.Integrations.Express({ app })]));
+  Sentry.init(
+    getSentryOptions([
+      new Sentry.Integrations.Express({ app }),
+      // ANR sur le serveur HTTP uniquement : les processors traitent par lots et bloquent
+      // légitimement la boucle d'événements, l'intégration n'y produirait que des faux positifs.
+      new Sentry.Integrations.Anr({ captureStackTrace: true }) as Integration,
+    ])
+  );
 }

@@ -96,6 +96,7 @@ import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
 import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
+import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
@@ -303,13 +304,15 @@ function setupRoutes(app: Application) {
       "/api/healthcheck",
       returnResult(async () => {
         let mongodbHealthy = false;
+        let cause: unknown;
         try {
           await usersMigrationDb().findOne({});
           mongodbHealthy = true;
         } catch (err) {
+          cause = err;
           logger.error({ err }, "healthcheck failed");
-          Sentry.captureException(new Error("healthcheck failed", { cause: err }));
         }
+        reportDependencyHealth("mongodb", mongodbHealthy, cause);
 
         return {
           name: "TDB Apprentissage API",
