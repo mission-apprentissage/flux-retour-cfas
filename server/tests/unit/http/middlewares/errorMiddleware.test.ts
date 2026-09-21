@@ -141,8 +141,6 @@ describe("errorMiddleware", () => {
     expect(captureException).not.toHaveBeenCalled();
   });
 
-  // Le changement de politique du lot : ces 4xx partaient dans Sentry, alors que
-  // le suivi des erreurs ERP vit en base et dans les pages « transmissions ».
   it("ne capture pas un 400 sur la route ERP", () => {
     const req = mockReq({ originalUrl: "/api/v3/dossiers-apprenants", method: "POST" } as Partial<Request>);
     expect(run(Boom.badRequest("invalide"), req).status).toBe(400);

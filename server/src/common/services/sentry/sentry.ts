@@ -55,8 +55,8 @@ export function initSentryExpress(app: Express): void {
   Sentry.init(
     getSentryOptions([
       new Sentry.Integrations.Express({ app }),
-      // ANR sur le serveur HTTP uniquement : les processors traitent par lots et bloquent
-      // légitimement la boucle d'événements, l'intégration n'y produirait que des faux positifs.
+      // Serveur HTTP seulement : les traitements par lots des processors bloquent
+      // légitimement la boucle d'événements.
       new Sentry.Integrations.Anr({ captureStackTrace: true }) as Integration,
     ])
   );

@@ -12,11 +12,7 @@ type RequestValidation<TParams, TQuery, TBody> = {
 
 type ValidationErrorItem = { type: "Query" | "Params" | "Body"; errors: ZodError };
 
-/**
- * Construit le Boom 400 ici plutôt que de propager le tableau brut : une valeur sans
- * statut est vue comme une 500 non gérée par l'instrumentation en amont d'errorMiddleware.
- * La charge utile reste celle d'avant — `details` porte les issues du premier échec.
- */
+/** Un tableau brut n'a pas de statut et serait vu comme une 500 non gérée. */
 function toRequestValidationError(errors: ValidationErrorItem[]): Boom {
   const boomError = Boom.badRequest("Erreur de validation");
   (boomError.output.payload as Boom.Payload & { details?: unknown }).details = errors[0].errors.issues;

@@ -278,8 +278,8 @@ export default async function createServer(): Promise<Application> {
 
   setupRoutes(app);
 
-  // errorMiddleware est le seul décideur de capture : le handler Sentry s'exécutait avant
-  // la normalisation, ne voyait donc aucun statut et traitait toute erreur comme une 500.
+  // Seul décideur de capture : le handler Sentry s'exécutait avant la normalisation
+  // et traitait donc toute erreur sans statut comme une 500.
   app.use(errorMiddleware());
 
   return app;

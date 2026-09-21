@@ -11,10 +11,7 @@ interface ErrorPayload extends Boom.Payload {
   issues?: unknown;
 }
 
-/**
- * Table de préfixes plutôt que l'URL : un tag doit rester de cardinalité bornée,
- * or les URL portent des identifiants. Le préfixe le plus spécifique gagne.
- */
+/** Préfixes plutôt que l'URL, qui porte des identifiants : un tag doit rester borné. */
 const ROUTE_GROUPS: ReadonlyArray<readonly [string, string]> = [
   ["/api/v3/dossiers-apprenants", "ingestion-v3"],
   ["/api/webhooks", "webhook"],
@@ -91,11 +88,7 @@ export function normalizeToBoom(rawError: unknown): Boom {
   return boomError;
 }
 
-/**
- * Seule règle de capture du serveur HTTP. Les 4xx de /api/v3/dossiers-apprenants étaient
- * capturées en plus des 5xx ; ce suivi est déjà assuré par effectifsQueue.validation_errors
- * et les pages « transmissions » de l'UI, où chaque organisme consulte ses propres erreurs.
- */
+/** Seule règle de capture du serveur HTTP. */
 export function shouldReportError(boomError: Boom): boolean {
   return boomError.isServer;
 }

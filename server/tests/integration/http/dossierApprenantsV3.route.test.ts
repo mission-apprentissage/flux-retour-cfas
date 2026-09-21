@@ -45,8 +45,6 @@ describe("Dossier Apprenants Route V3", () => {
       expect(response.status).toBe(200);
     });
 
-    // Un échec d'écriture Mongo répondait 400, ce qui dissuade les ERP de retenter
-    // et leur renvoyait le message d'erreur interne.
     it("répond 500 sans divulguer le message interne quand l'écriture Mongo échoue", async () => {
       vi.spyOn(collections, "effectifsQueueDb").mockReturnValue({
         insertOne: () => Promise.reject(new Error("mongo indisponible")),

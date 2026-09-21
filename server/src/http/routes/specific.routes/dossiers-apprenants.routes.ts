@@ -87,10 +87,7 @@ export default () => {
         data: effectifsToQueue,
       });
     } catch (e) {
-      // Ce catch entoure des écritures Mongo : un échec n'est pas une erreur client.
-      // Répondre 400 conduisait les ERP à ne pas retenter, donc à perdre la transmission,
-      // et renvoyait le message d'erreur interne au partenaire. errorMiddleware capture
-      // avec la stack d'origine, d'où un regroupement Sentry par cause réelle.
+      // Échec d'écriture Mongo : un 400 dissuaderait les ERP de retenter.
       return next(formatError(e));
     }
   });
