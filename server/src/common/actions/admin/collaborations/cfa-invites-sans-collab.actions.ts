@@ -6,8 +6,8 @@ import type {
 import { missionLocaleCfaInvitationsDb } from "@/common/model/collections";
 
 const SORT_STAGES: Record<ICfaInvitesSansCollabQuery["sort_by"], (direction: 1 | -1) => Record<string, 1 | -1>> = {
-  invitations: (direction) => ({ invitations_recues: direction, derniere_invitation_at: -1, siret: 1 }),
-  localisation: (direction) => ({ "adresse.code_postal": direction, "adresse.commune": direction, siret: 1 }),
+  invitations: (direction) => ({ invitations_recues: direction, derniere_invitation_at: -1, siret: 1, _id: 1 }),
+  localisation: (direction) => ({ "adresse.code_postal": direction, "adresse.commune": direction, siret: 1, _id: 1 }),
 };
 
 export async function getCfaInvitesSansCollab(

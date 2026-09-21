@@ -880,7 +880,7 @@ export const hydrateMissionLocaleStats = async () => {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
   const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
 
   for (const ml of mls) {
     await createOrUpdateMissionLocaleStats(ml._id, today);
