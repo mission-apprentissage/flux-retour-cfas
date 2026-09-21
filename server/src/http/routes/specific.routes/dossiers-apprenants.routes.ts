@@ -1,11 +1,9 @@
-import { captureException } from "@sentry/node";
 import Boom from "boom";
 import express from "express";
 import { ObjectId } from "mongodb";
 import { dossierApprenantSchemaV3Input, stripModelAdditionalKeys } from "shared/models/parts/dossierApprenantSchemaV3";
 
 import { updateOrganisme } from "@/common/actions/organismes/organismes.actions";
-import logger from "@/common/logger";
 import { effectifsQueueDb } from "@/common/model/collections";
 import { defaultValuesEffectifQueue } from "@/common/model/effectifsQueue.model";
 import { formatDateYYYYMMDD } from "@/common/utils/dateUtils";
@@ -23,7 +21,7 @@ export default () => {
    * Une prévalidation des données est effectuée, afin de faire un retour immédiat à l'utilisateur
    * Une validation plus complete est effectuée lors du traitement des données par process-effectifs-queue
    */
-  router.post("/", async ({ user, body }, res) => {
+  router.post("/", async ({ user, body }, res, next) => {
     const bodyItems = validateArrayInput(body, POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH).map((e) =>
       stripNullProperties(e as Record<string, unknown>)
     );
@@ -89,15 +87,11 @@ export default () => {
         data: effectifsToQueue,
       });
     } catch (e) {
-      const err = formatError(e);
-      logger.error({ err }, "POST /dossiers-apprenants error");
-      captureException(new Error("POST /dossiers-apprenants error", { cause: err }));
-
-      res.status(400).json({
-        status: "ERROR",
-        message: err.message,
-        details: err.details,
-      });
+      // Ce catch entoure des écritures Mongo : un échec n'est pas une erreur client.
+      // Répondre 400 conduisait les ERP à ne pas retenter, donc à perdre la transmission,
+      // et renvoyait le message d'erreur interne au partenaire. errorMiddleware capture
+      // avec la stack d'origine, d'où un regroupement Sentry par cause réelle.
+      return next(formatError(e));
     }
   });
 
