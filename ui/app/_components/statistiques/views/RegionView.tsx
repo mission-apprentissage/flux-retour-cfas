@@ -3,6 +3,7 @@
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 
 import { CollaborationSegmentPanel } from "../sections/CollaborationSegmentPanel";
+import { ExportAllButton } from "../sections/ExportAllButton";
 import { RupturesSegmentPanel } from "../sections/RupturesSegmentPanel";
 import { RegionSVG } from "../ui/RegionSVG";
 import { StatsTabs } from "../ui/StatsTabs";
@@ -28,6 +29,7 @@ export function RegionView({ regionCode, isAdmin = false }: RegionViewProps) {
             <RegionSVG regionCode={regionCode} fill="#6A6AF4" />
           </div>
         }
+        action={<ExportAllButton region={regionCode} />}
       />
 
       <StatsTabs
@@ -35,6 +37,7 @@ export function RegionView({ regionCode, isAdmin = false }: RegionViewProps) {
           {
             id: "ruptures",
             label: "Ruptures uniquement",
+            iconId: "fr-icon-file-text-line",
             content: (
               <RupturesSegmentPanel
                 region={regionCode}
@@ -47,6 +50,7 @@ export function RegionView({ regionCode, isAdmin = false }: RegionViewProps) {
           {
             id: "collaborations",
             label: "Collaborations",
+            iconId: "fr-icon-team-line",
             content: <CollaborationSegmentPanel region={regionCode} isAdmin={isAdmin} suiviTraitement />,
           },
         ]}

@@ -15,7 +15,9 @@ import type { SectionWithPeriodAndMlProps, SectionWithLayoutProps, SegmentSectio
 
 type ChartType = "bar" | "pie";
 
-type RupturantsSectionProps = SectionWithPeriodAndMlProps & SectionWithLayoutProps & SegmentSectionProps;
+type RupturantsSectionProps = SectionWithPeriodAndMlProps &
+  SectionWithLayoutProps &
+  SegmentSectionProps & { title?: string };
 
 export function RupturantsSection({
   period = "30days",
@@ -25,6 +27,7 @@ export function RupturantsSection({
   mlId,
   fullWidth,
   national = false,
+  title = "Jeunes rupturants",
 }: RupturantsSectionProps) {
   const [chartType, setChartType] = useState<ChartType>("bar");
 
@@ -41,9 +44,10 @@ export function RupturantsSection({
 
   return (
     <StatisticsSection
-      title="Jeunes rupturants"
+      title={title}
       width={fullWidth ? "full" : "one-third"}
       smallTitle
+      wrapTitle
       controls={
         <SegmentedControl
           hideLegend

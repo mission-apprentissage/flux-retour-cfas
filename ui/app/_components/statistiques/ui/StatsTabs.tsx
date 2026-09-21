@@ -2,7 +2,7 @@
 
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, type ReactNode } from "react";
+import { useCallback, useEffect, type ReactNode } from "react";
 
 import { resolveTabId, type StatsTabDefinition } from "./StatsTabs.utils";
 
@@ -26,8 +26,17 @@ export function StatsTabs({ tabs, className }: StatsTabsProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const selectedTabId = resolveTabId(searchParams?.get(TAB_PARAM), tabs);
+  const requestedTabId = searchParams?.get(TAB_PARAM);
+  const selectedTabId = resolveTabId(requestedTabId, tabs);
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId);
+
+  useEffect(() => {
+    if (requestedTabId && requestedTabId !== selectedTabId) {
+      const params = new URLSearchParams(searchParams?.toString());
+      params.set(TAB_PARAM, selectedTabId);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+  }, [requestedTabId, selectedTabId, router, pathname, searchParams]);
 
   const handleTabChange = useCallback(
     (tabId: string) => {
@@ -47,7 +56,7 @@ export function StatsTabs({ tabs, className }: StatsTabsProps) {
       className={className}
       selectedTabId={selectedTabId}
       onTabChange={handleTabChange}
-      tabs={tabs.map(({ id, label }) => ({ tabId: id, label }))}
+      tabs={tabs.map(({ id, label, iconId }) => ({ tabId: id, label, iconId }))}
     >
       {selectedTab?.content}
     </Tabs>

@@ -17,22 +17,30 @@ export function VueEnsembleView({ isAdmin = false, isPublic = false }: VueEnsemb
     {
       id: "ruptures",
       label: "Suivi ruptures",
+      iconId: "fr-icon-file-text-line",
       content: <RupturesSegmentPanel national isPublic={isPublic} />,
     },
     {
       id: "deploiement",
       label: "Suivi déploiement",
+      iconId: "fr-icon-line-chart-line",
       content: <DeploymentPanel isAdmin={isAdmin} />,
     },
     {
       id: "collaborations",
       label: "Suivi collaborations",
+      iconId: "fr-icon-team-line",
       content: <CollaborationSegmentPanel national isPublic={isPublic} cfaInvites={isAdmin} />,
     },
   ];
 
   if (isAdmin) {
-    tabs.push({ id: "whatsapp", label: "Messages WhatsApp", content: <WhatsAppPanel /> });
+    tabs.push({
+      id: "whatsapp",
+      label: "Messages WhatsApp",
+      iconId: "fr-icon-chat-3-line",
+      content: <WhatsAppPanel />,
+    });
   }
 
   return (

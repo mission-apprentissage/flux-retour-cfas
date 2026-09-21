@@ -122,9 +122,7 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
             {r.cfa_compatibles}
           </div>,
           <div className={styles.centeredCell} key={`compte-${r.region_code}`}>
-            <span>
-              <strong>{r.cfa_avec_compte}</strong>/{r.cfa_compatibles}
-            </span>
+            {r.cfa_avec_compte}
           </div>,
           <div className={styles.centeredCell} key={`collab-${r.region_code}`}>
             <span>

@@ -24,8 +24,13 @@ export function RupturesSegmentPanel({
 }: RupturesSegmentPanelProps) {
   return (
     <div>
-      <SegmentAboutText variant="rupture" />
-      <IdentificationSuiviSection segment="rupture" isPublic={isPublic} region={region} national={national} />
+      <IdentificationSuiviSection
+        segment="rupture"
+        isPublic={isPublic}
+        region={region}
+        national={national}
+        description={<SegmentAboutText variant="rupture" />}
+      />
       {suiviTraitement && (
         <SuiviTraitementSection
           segment="rupture"

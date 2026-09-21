@@ -3,6 +3,7 @@
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useState, useEffect } from "react";
 
+import { ExportAllButton } from "@/app/_components/statistiques/sections/ExportAllButton";
 import { StatisticsSection } from "@/app/_components/statistiques/sections/StatisticsSection";
 import { TraitementMLTable } from "@/app/_components/statistiques/tables/TraitementMLTable";
 import commonStyles from "@/app/_components/statistiques/ui/common.module.css";
@@ -52,10 +53,15 @@ export default function MissionLocalePage() {
 
       <StatisticsSection
         title="Toutes les Missions Locales"
-        controls={<PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />}
+        controls={
+          <div className={styles.controls}>
+            <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />
+            <ExportAllButton label="Exporter les données" />
+          </div>
+        }
         controlsPosition="below-left"
       >
-        <TraitementMLTable period={period} segment="rupture" search={debouncedSearch} hideDescription />
+        <TraitementMLTable period={period} segment="rupture" search={debouncedSearch} />
       </StatisticsSection>
     </div>
   );

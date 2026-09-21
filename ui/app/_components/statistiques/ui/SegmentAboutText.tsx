@@ -7,17 +7,17 @@ interface SegmentAboutTextProps {
 export function SegmentAboutText({ variant }: SegmentAboutTextProps) {
   return (
     <div className={styles.about}>
-      <p className={styles.title}>
-        <i className="fr-icon-information-line fr-icon--sm" aria-hidden="true" />À propos de ces chiffres
-      </p>
+      <p className={styles.title}>À propos de ces chiffres :</p>
       {variant === "rupture" ? (
         <p className={styles.text}>
-          Ces indicateurs portent sur les jeunes identifiés en rupture de contrat d&apos;apprentissage et transmis aux
-          Missions Locales, y compris les collaborations engagées par les CFA pour un jeune déjà en rupture. Les
-          collaborations de prévention, pour des jeunes encore en contrat, sont exclues. Ces chiffres reflètent
-          l&apos;état actuel des dossiers, classés par date de transmission à la Mission Locale : les compteurs
-          d&apos;une période passée décrivent la situation d&apos;aujourd&apos;hui des dossiers transmis pendant cette
-          période, et non leur situation à cette date.
+          Ces chiffres couvrent uniquement les dossiers de jeunes en situation de rupture. À partir de septembre 2026,
+          le Tableau de bord de l&apos;apprentissage permet aux CFA de solliciter des collaborations pour des jeunes sur
+          de la prévention de rupture. Ces dossiers ne sont pas inclus dans ces données chiffrées, seuls sont
+          représentés ici les dossiers de rupture identifiés (sources : DECA, les ERP des CFA connectés et le déclaratif
+          des CFA lors de collaborations sollicitées pour ce motif). Ces chiffres reflètent l&apos;état actuel des
+          dossiers, classés par date de transmission à la Mission Locale : les compteurs d&apos;une période passée
+          décrivent la situation d&apos;aujourd&apos;hui des dossiers transmis pendant cette période, et non leur
+          situation à cette date.
         </p>
       ) : (
         <p className={styles.text}>

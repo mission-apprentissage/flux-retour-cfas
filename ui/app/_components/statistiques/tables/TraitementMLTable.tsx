@@ -278,7 +278,10 @@ export function TraitementMLTable({ period, segment, region, search, hideDescrip
                     <div key={`nom-${ml.id}`} className={styles.mlNameCell}>
                       <span>{ml.nom}</span>
                       {!region && ml.region_code && <Tag small>{ml.region_nom}</Tag>}
-                      <Link href={buildDetailUrl(ml.id)} className="fr-link fr-link--sm">
+                      <Link
+                        href={buildDetailUrl(ml.id)}
+                        className="fr-link fr-link--sm fr-link--icon-right fr-icon-external-link-line"
+                      >
                         Voir la fiche
                       </Link>
                     </div>,

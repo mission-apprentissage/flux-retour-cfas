@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { TraitementCards } from "../cards/TraitementCards";
 import { isLoadingVariation } from "../hooks/useLoadingVariation";
@@ -16,6 +16,7 @@ import type { BaseSectionProps, SegmentSectionProps } from "./types";
 
 interface IdentificationSuiviSectionProps extends BaseSectionProps, SegmentSectionProps {
   defaultPeriod?: Period;
+  description?: ReactNode;
 }
 
 export function IdentificationSuiviSection({
@@ -24,6 +25,7 @@ export function IdentificationSuiviSection({
   isPublic = false,
   region,
   national = false,
+  description,
 }: IdentificationSuiviSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
   const { data, isLoading, isFetching, error } = useTraitementStats({ period, segment, region });
@@ -34,7 +36,8 @@ export function IdentificationSuiviSection({
 
   return (
     <StatisticsSection
-      title="De l'identification au suivi"
+      title="De l'identification de la rupture au suivi par une Mission Locale"
+      description={description}
       controls={<PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />}
       controlsPosition="below-left"
     >

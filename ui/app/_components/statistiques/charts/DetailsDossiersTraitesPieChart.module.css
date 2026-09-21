@@ -30,9 +30,11 @@
 }
 
 .chartWrapper {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   display: flex;
   justify-content: center;
+  width: 100%;
+  min-width: 0;
   max-width: 250px;
 }
 

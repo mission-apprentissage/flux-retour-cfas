@@ -2,18 +2,10 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  margin-bottom: 24px;
 }
 
 .cards > * {
   min-width: 0;
-}
-
-.chartsRow {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 16px;
 }
 
 .chartCard {
@@ -24,17 +16,15 @@
   min-width: 0;
 }
 
-.resultats {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr);
-  gap: 24px;
-  align-items: center;
+.chartCardSpaced {
+  margin-top: 16px;
 }
 
 .encarts {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
 }
 
 .encart {
@@ -56,12 +46,15 @@
 }
 
 @media (max-width: 992px) {
-  .cards {
+  .cards,
+  .encarts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
 
-  .chartsRow,
-  .resultats {
+@media (max-width: 576px) {
+  .cards,
+  .encarts {
     grid-template-columns: 1fr;
   }
 }
