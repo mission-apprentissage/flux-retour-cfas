@@ -3,8 +3,8 @@ import Boom from "boom";
 import { ErrorRequestHandler, Request } from "express";
 import { ZodError } from "zod";
 
+import { toValidationError } from "@/common/utils/validationUtils";
 import config from "@/config";
-import { isValidationErrorList } from "@/http/middlewares/validateRequestMiddleware";
 
 interface ErrorPayload extends Boom.Payload {
   details?: unknown;
@@ -38,12 +38,7 @@ export default (): ErrorRequestHandler => {
     if (Boom.isBoom(error)) {
       boomError = error;
     } else if (error instanceof ZodError) {
-      boomError = Boom.badRequest("Erreur de validation");
-      payload().issues = error.issues;
-      payload().details = error.issues[0]?.message; // compatibility with other error handling
-    } else if (isValidationErrorList(rawError)) {
-      boomError = Boom.badRequest("Erreur de validation");
-      payload().details = rawError[0].errors.issues;
+      boomError = toValidationError(error);
     } else if (error.name === "ValidationError") {
       boomError = Boom.badRequest("Erreur de validation");
       payload().details = "details" in error ? error.details : undefined;
