@@ -260,8 +260,13 @@ export async function requireIndicateursMlAccess(
     throw Boom.notFound("Organisation non trouvée");
   }
 
+  const regions = getRegionsFromOrganisation(orga as OrganisationWithRegions);
+  if (orga.type !== ORGANISATION_TYPE.ADMINISTRATEUR && regions.length === 0) {
+    throw Boom.forbidden("Aucun périmètre territorial n'est rattaché à votre organisation");
+  }
+
   res.locals.organisation = orga;
-  res.locals.regions = getRegionsFromOrganisation(orga as OrganisationWithRegions);
+  res.locals.regions = regions;
 
   next();
 }

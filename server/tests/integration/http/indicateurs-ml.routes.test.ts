@@ -7,11 +7,17 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { missionLocaleEffectifsDb, missionLocaleStatsDb, organisationsDb, regionsDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";
-import { expectForbiddenError, initTestApp, RequestAsOrganisationFunc } from "@tests/utils/testUtils";
+import { initTestApp, RequestAsOrganisationFunc } from "@tests/utils/testUtils";
 
 const ADMIN: IOrganisationCreate = { type: "ADMINISTRATEUR" };
 const ARML_IDF: IOrganisationCreate = { type: "ARML", nom: "ARML IDF", region_list: ["11"] };
 const ARML_IDF_ARA: IOrganisationCreate = { type: "ARML", nom: "ARML IDF ARA", region_list: ["11", "84"] };
+const ARML_SANS_REGION: IOrganisationCreate = { type: "ARML", nom: "ARML sans périmètre", region_list: [] };
+
+const expectForbidden = (response: { status: number; data: { error: string; message: string } }, message: string) => {
+  expect(response.status).toBe(403);
+  expect(response.data).toEqual({ error: "Forbidden", message });
+};
 
 const ML_IDF = new ObjectId();
 const ML_ARA = new ObjectId();
@@ -428,7 +434,57 @@ describe("Indicateurs ML routes (territoriales)", () => {
         "get",
         "/api/v1/organisation/indicateurs-ml/stats/rupturants?region=84"
       );
-      expectForbiddenError(other);
+      expectForbidden(other, "Accès non autorisé à cette région");
+    });
+
+    it("Refuse une organisation territoriale sans périmètre au lieu de lui ouvrir le national", async () => {
+      const response = await requestAsOrganisation(
+        ARML_SANS_REGION,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/rupturants"
+      );
+      expectForbidden(response, "Aucun périmètre territorial n'est rattaché à votre organisation");
+    });
+
+    it("Restreint chaque lecteur au périmètre de l'ARML, avec ou sans paramètre", async () => {
+      const scoped: Array<[string, (data: Record<string, unknown>) => unknown, unknown]> = [
+        ["/traitement", (d) => (d.latest as { total: number }).total, 60],
+        ["/stats/rupturants", (d) => (d.summary as { total: number }).total, 60],
+        ["/stats/dossiers-traites", (d) => d.traites, 40],
+        ["/stats/traitement/ml", (d) => (d.pagination as { total: number }).total, 1],
+        ["/stats/traitement/regions", (d) => (d as unknown as Array<{ code: string }>).map((r) => r.code), ["11"]],
+        ["/stats/couverture-regions", (d) => (d.regions as Array<{ code: string }>).map((r) => r.code), ["11"]],
+        ["/synthese/regions", (d) => (d.regions as Array<{ code: string }>).map((r) => r.code), ["11"]],
+        ["/stats/collaborations", (d) => (d.objectifs as { total_dossiers: number }).total_dossiers, 2],
+      ];
+      for (const [path, pick, expected] of scoped) {
+        const response = await requestAsOrganisation(ARML_IDF, "get", `/api/v1/organisation/indicateurs-ml${path}`);
+        expect(response.status, path).toBe(200);
+        expect(pick(response.data), path).toEqual(expected);
+      }
+
+      for (const path of ["/traitement", "/stats/dossiers-traites", "/stats/traitement/ml", "/stats/collaborations"]) {
+        const other = await requestAsOrganisation(
+          ARML_IDF,
+          "get",
+          `/api/v1/organisation/indicateurs-ml${path}?region=84`
+        );
+        expectForbidden(other, "Accès non autorisé à cette région");
+      }
+
+      for (const path of ["detail", "membres"]) {
+        const other = await requestAsOrganisation(
+          ARML_IDF,
+          "get",
+          `/api/v1/organisation/indicateurs-ml/mission-locale/${ML_ARA}/${path}`
+        );
+        expectForbidden(other, "Accès non autorisé à cette Mission Locale");
+      }
+
+      for (const path of ["/stats/whatsapp", "/stats/prequalif"]) {
+        const response = await requestAsOrganisation(ARML_IDF, "get", `/api/v1/organisation/indicateurs-ml${path}`);
+        expect(response.status, path).toBe(403);
+      }
     });
 
     it("Un admin sans région voit tout", async () => {
@@ -511,15 +567,22 @@ describe("Indicateurs ML routes (territoriales)", () => {
         "get",
         `/api/v1/organisation/indicateurs-ml/stats/collaborations?ml_id=${ML_ARA}`
       );
-      expectForbiddenError(otherMl);
+      expectForbidden(otherMl, "Accès non autorisé à cette Mission Locale");
 
       const mlSansRegion = await requestAsOrganisation(
         ARML_IDF,
         "get",
         `/api/v1/organisation/indicateurs-ml/stats/collaborations?ml_id=${ML_SANS_REGION}`
       );
-      expect(mlSansRegion.status).toBe(200);
-      expect(mlSansRegion.data.jeunes_envoyes.current).toBe(0);
+      expectForbidden(mlSansRegion, "Accès non autorisé à cette Mission Locale");
+
+      const adminSansRegion = await requestAsOrganisation(
+        ADMIN,
+        "get",
+        `/api/v1/organisation/indicateurs-ml/stats/collaborations?ml_id=${ML_SANS_REGION}`
+      );
+      expect(adminSansRegion.status).toBe(200);
+      expect(adminSansRegion.data.jeunes_envoyes.current).toBe(0);
     });
   });
 
@@ -530,7 +593,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
         "get",
         `/api/v1/organisation/indicateurs-ml/stats/traitement/export?ml_id=${ML_ARA}`
       );
-      expectForbiddenError(forbidden);
+      expectForbidden(forbidden, "Accès non autorisé à cette Mission Locale");
 
       const response = await requestAsOrganisation(
         ADMIN,
@@ -557,6 +620,17 @@ describe("Indicateurs ML routes (territoriales)", () => {
         situation_rupture: 8,
         delai_moyen_jours: 3,
       });
+    });
+
+    it("Avec national, une ARML exporte toutes les régions", async () => {
+      const response = await requestAsOrganisation(
+        ARML_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/traitement/export?national=true"
+      );
+      expect(response.status).toBe(200);
+      expect(response.data.regionData).toHaveLength(3);
+      expect(response.data.rows_rupture).toHaveLength(3);
     });
 
     it("Sans ml_id, une ARML exporte sa région avec le repli sur stats", async () => {

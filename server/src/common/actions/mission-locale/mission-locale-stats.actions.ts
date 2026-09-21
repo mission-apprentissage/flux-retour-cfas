@@ -349,12 +349,13 @@ export const getTraitementStats = async (
   period: StatsPeriod = "30days",
   evaluationDate: Date = normalizeToUTCDay(new Date()),
   regions?: string[],
-  segment: StatsSegment = "rupture"
+  segment: StatsSegment = "rupture",
+  mlId?: string
 ): Promise<ITraitementStatsResponse> => {
   const endDate = evaluationDate;
   const startDate = await calculateStartDateAsync(period, endDate);
 
-  const missionLocaleIds = await resolveMissionLocaleIds(regions);
+  const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
 
   const [latest, first] = await Promise.all([
     getSegmentStatsForPeriod(endDate, missionLocaleIds, segment),

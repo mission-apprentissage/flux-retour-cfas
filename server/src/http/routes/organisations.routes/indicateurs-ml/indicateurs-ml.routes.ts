@@ -40,6 +40,8 @@ const periodQuery = z.object({ period: zStatsPeriod.optional() });
 const traitementQuery = z.object({
   period: zStatsPeriod.optional(),
   region: z.string().optional(),
+  ml_id: mlIdSchema.optional(),
+  national: z.coerce.boolean().optional(),
   segment: zStatsSegment.default("rupture"),
 });
 const statsQuery = z.object({
@@ -67,7 +69,11 @@ const traitementMlQuery = z.object({
 });
 const nationalQuery = z.object({ period: zStatsPeriod.optional(), national: z.coerce.boolean().optional() });
 const traitementRegionsQuery = nationalQuery.extend({ segment: zStatsSegment.default("all") });
-const exportQuery = z.object({ region: z.string().optional(), ml_id: mlIdSchema.optional() });
+const exportQuery = z.object({
+  region: z.string().optional(),
+  ml_id: mlIdSchema.optional(),
+  national: z.coerce.boolean().optional(),
+});
 const mlIdParams = z.object({ id: mlIdSchema });
 
 type IndicateursHandler<TQuery = DefaultQuery, TParams = DefaultParams> = RouteHandler<
@@ -202,7 +208,7 @@ const getTraitementRoute: IndicateursHandler<z.infer<typeof traitementQuery>> = 
   const { period, segment } = req.query;
   const scope = await resolveStatsScope(req.query, locals.regions);
 
-  return await getTraitementStats(period || "30days", undefined, scope.regions, segment);
+  return await getTraitementStats(period || "30days", undefined, scope.regions, segment, scope.mlId);
 };
 
 const getRupturantsRoute: IndicateursHandler<z.infer<typeof statsQuery>> = async (req, { locals }) => {
@@ -345,7 +351,7 @@ async function verifyMlInRegions(mlId: string, userRegions: string[]): Promise<v
 
   const mlRegion = (ml as { adresse?: { region?: string } }).adresse?.region;
 
-  if (mlRegion && !userRegions.includes(mlRegion)) {
+  if (!mlRegion || !userRegions.includes(mlRegion)) {
     throw Boom.forbidden("Accès non autorisé à cette Mission Locale");
   }
 }
