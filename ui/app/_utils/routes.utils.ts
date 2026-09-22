@@ -254,6 +254,13 @@ export const PAGES = {
         title: `Vœux Affelnet | ${SITE_NAME}`,
       }),
     },
+    travaux: {
+      getPath: () => "/travaux",
+      title: "Aperçu des données de l’apprentissage de votre périmètre",
+      getMetadata: () => ({
+        title: `Travaux en cours | ${SITE_NAME}`,
+      }),
+    },
     parametres: {
       getPath: () => "/parametres",
       title: "Paramétrage de votre moyen de transmission",
