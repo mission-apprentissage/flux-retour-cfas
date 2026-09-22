@@ -1,4 +1,3 @@
-import { captureException } from "@sentry/node";
 import { ObjectId } from "mongodb";
 import { CODES_STATUT_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisationARML, IOrganisationMissionLocale } from "shared/models";
@@ -26,6 +25,7 @@ import { getCurrentStatutFromParcours } from "@/common/actions/shared/rupture-pi
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 import { effectifsDb, effectifsQueueDb, missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
+import { createErrorAggregator } from "@/common/utils/errorAggregator";
 
 export const hydrateMissionLocaleSnapshot = async (missionLocaleStructureId: number | null) => {
   const cursor = organisationsDb().find({
@@ -344,6 +344,7 @@ export const hydrateMissionLocaleEffectifDateRupture = async () => {
   const BATCH_SIZE = 1000;
 
   let batch: Array<{ _id: ObjectId; date_rupture: Date }> = [];
+  const errors = createErrorAggregator("hydrate-ml-date-rupture");
 
   const processBatch = (currentBatch: Array<{ _id: ObjectId; date_rupture: Date }>) => {
     if (currentBatch.length === 0) {
@@ -364,7 +365,8 @@ export const hydrateMissionLocaleEffectifDateRupture = async () => {
 
       return missionLocaleEffectifsDb().bulkWrite(mapped);
     } catch (e) {
-      captureException(e);
+      logger.error({ err: e }, "Échec du bulkWrite des dates de rupture");
+      errors.record(e);
     }
   };
 
@@ -396,6 +398,7 @@ export const hydrateMissionLocaleEffectifDateRupture = async () => {
   }
 
   await processBatch(batch);
+  errors.flush();
 };
 
 export const updateMissionLocaleEffectifActivationDate = async () => {
@@ -946,6 +949,7 @@ export const backfillIdentifiantNormalise = async () => {
   };
 
   let batch: BatchItem[] = [];
+  const errors = createErrorAggregator("backfill-identifiant-normalise");
 
   const processBatch = async (currentBatch: BatchItem[]) => {
     if (currentBatch.length === 0) {
@@ -955,7 +959,8 @@ export const backfillIdentifiantNormalise = async () => {
     try {
       return await missionLocaleEffectifsDb().bulkWrite(currentBatch);
     } catch (e) {
-      captureException(e);
+      logger.error({ err: e }, "Échec du bulkWrite des identifiants normalisés");
+      errors.record(e);
     }
   };
 
@@ -997,4 +1002,5 @@ export const backfillIdentifiantNormalise = async () => {
   if (batch.length > 0) {
     await processBatch(batch);
   }
+  errors.flush();
 };
