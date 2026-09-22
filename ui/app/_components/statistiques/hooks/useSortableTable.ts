@@ -1,7 +1,8 @@
 import { useCallback, useState } from "react";
 
-interface UseSortableTableOptions {
+interface UseSortableTableOptions<T extends string> {
   onSortChange?: () => void;
+  columnDefaultDirections?: Partial<Record<T, "asc" | "desc">>;
 }
 
 interface UseSortableTableReturn<T extends string> {
@@ -14,7 +15,7 @@ interface UseSortableTableReturn<T extends string> {
 export function useSortableTable<T extends string>(
   defaultColumn: T,
   defaultDirection: "asc" | "desc" = "desc",
-  options?: UseSortableTableOptions
+  options?: UseSortableTableOptions<T>
 ): UseSortableTableReturn<T> {
   const [sortColumn, setSortColumn] = useState<T>(defaultColumn);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">(defaultDirection);
@@ -25,7 +26,7 @@ export function useSortableTable<T extends string>(
         setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
       } else {
         setSortColumn(column);
-        setSortDirection("desc");
+        setSortDirection(options?.columnDefaultDirections?.[column] ?? "desc");
       }
       options?.onSortChange?.();
     },

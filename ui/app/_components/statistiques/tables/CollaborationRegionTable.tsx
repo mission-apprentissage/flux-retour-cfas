@@ -15,7 +15,8 @@ export interface CollaborationRegionRow {
   region_code: string;
   region_nom: string;
   cfa_compatibles: number;
-  cfa_actives: { current: number; delta: number };
+  cfa_avec_compte: number;
+  cfa_with_collab: { current: number; delta?: number };
   dossiers_envoyes_cfa: number;
 }
 
@@ -24,7 +25,7 @@ interface CollaborationRegionTableProps {
   loading: boolean;
 }
 
-type SortColumn = "region_nom" | "cfa_compatibles" | "cfa_actives" | "dossiers_envoyes_cfa";
+type SortColumn = "region_nom" | "cfa_compatibles" | "cfa_avec_compte" | "cfa_with_collab" | "dossiers_envoyes_cfa";
 
 export function CollaborationRegionTable({ regions, loading }: CollaborationRegionTableProps) {
   const { sortColumn, sortDirection, handleSort } = useSortableTable<SortColumn>("cfa_compatibles");
@@ -37,8 +38,10 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
           return r.region_nom;
         case "cfa_compatibles":
           return r.cfa_compatibles;
-        case "cfa_actives":
-          return r.cfa_actives.current;
+        case "cfa_avec_compte":
+          return r.cfa_avec_compte;
+        case "cfa_with_collab":
+          return r.cfa_with_collab.current;
         case "dossiers_envoyes_cfa":
           return r.dossiers_envoyes_cfa;
       }
@@ -75,20 +78,32 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
           <SortableTableHeader
             key="compat"
             column="cfa_compatibles"
-            label="CFA V2 compatibles"
+            label="CFA compatibles"
             currentSortColumn={sortColumn}
             sortDirection={sortDirection}
             onSort={handleSort}
             centered
+            tooltip="CFA du référentiel avec un SIRET et un UAI, de nature formateur, non fermés, transmettant au moins un effectif sur les années scolaires en cours."
           />,
           <SortableTableHeader
-            key="actives"
-            column="cfa_actives"
-            label="CFA activés sur la V2"
+            key="compte"
+            column="cfa_avec_compte"
+            label="CFA avec compte TBA"
             currentSortColumn={sortColumn}
             sortDirection={sortDirection}
             onSort={handleSort}
             centered
+            tooltip="CFA compatibles dont au moins un utilisateur a un compte confirmé sur le Tableau de bord, rapportés au nombre de CFA compatibles."
+          />,
+          <SortableTableHeader
+            key="collab"
+            column="cfa_with_collab"
+            label="CFA qui collaborent"
+            currentSortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+            centered
+            tooltip="CFA compatibles ayant envoyé au moins un dossier de collaboration à une Mission Locale depuis le 1er janvier 2026, rapportés au nombre de CFA compatibles."
           />,
           <SortableTableHeader
             key="dossiers"
@@ -98,6 +113,7 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
             sortDirection={sortDirection}
             onSort={handleSort}
             centered
+            tooltip="Dossiers de collaboration envoyés par les CFA de la région depuis le 1er janvier 2026, comptés à la date de réponse du CFA."
           />,
         ]}
         data={sorted.map((r) => [
@@ -105,11 +121,14 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
           <div className={styles.centeredCell} key={`compat-${r.region_code}`}>
             {r.cfa_compatibles}
           </div>,
-          <div className={styles.centeredCell} key={`actives-${r.region_code}`}>
+          <div className={styles.centeredCell} key={`compte-${r.region_code}`}>
+            {r.cfa_avec_compte}
+          </div>,
+          <div className={styles.centeredCell} key={`collab-${r.region_code}`}>
             <span>
-              <strong>{r.cfa_actives.current}</strong>/{r.cfa_compatibles}
+              <strong>{r.cfa_with_collab.current}</strong>/{r.cfa_compatibles}
             </span>
-            {formatDelta(r.cfa_actives.delta)}
+            {r.cfa_with_collab.delta !== undefined && formatDelta(r.cfa_with_collab.delta)}
           </div>,
           <div className={styles.centeredCell} key={`dossiers-${r.region_code}`}>
             {r.dossiers_envoyes_cfa}

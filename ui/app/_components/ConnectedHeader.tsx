@@ -164,9 +164,9 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
       if (organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) {
         baseItems.push({
           text: "Suivi des indicateurs",
-          isActive: pathname?.startsWith("/admin/suivi-des-indicateurs"),
+          isActive: pathname?.startsWith("/suivi-des-indicateurs"),
           linkProps: {
-            href: "/admin/suivi-des-indicateurs",
+            href: "/suivi-des-indicateurs",
             target: "_self",
           },
         });
@@ -233,7 +233,6 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           text: "Administration",
           isActive:
             !!pathname?.startsWith("/admin") &&
-            !pathname?.startsWith("/admin/suivi-des-indicateurs") &&
             !pathname?.startsWith("/admin/users") &&
             !pathname?.startsWith("/admin/impostures"),
           menuLinks: [

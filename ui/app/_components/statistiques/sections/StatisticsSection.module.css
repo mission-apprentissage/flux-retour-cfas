@@ -34,6 +34,11 @@
   flex-shrink: 0;
 }
 
+.description {
+  width: 100%;
+  flex-basis: 100%;
+}
+
 .headerColumn {
   display: flex;
   flex-direction: column;

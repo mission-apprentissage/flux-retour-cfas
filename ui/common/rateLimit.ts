@@ -54,5 +54,8 @@ export function getApiErrorMessage(err: unknown, fallback = "Une erreur techniqu
   if (isRateLimited(err)) {
     return formatRateLimitMessage(error.json);
   }
+  if ((getErrorStatusCode(err) ?? 0) >= 500) {
+    return fallback;
+  }
   return error.json?.data?.message || error.message || fallback;
 }

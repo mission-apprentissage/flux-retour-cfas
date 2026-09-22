@@ -1,0 +1,60 @@
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cards > * {
+  min-width: 0;
+}
+
+.chartCard {
+  background-color: var(--background-default-grey);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.chartCardSpaced {
+  margin-top: 16px;
+}
+
+.encarts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.encart {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  background-color: var(--background-alt-blue-france);
+}
+
+.encartLabel {
+  font-size: 13px;
+  color: var(--text-default-grey);
+}
+
+.encartValue {
+  font-size: 20px;
+  color: var(--text-title-blue-france);
+}
+
+@media (max-width: 992px) {
+  .cards,
+  .encarts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .cards,
+  .encarts {
+    grid-template-columns: 1fr;
+  }
+}

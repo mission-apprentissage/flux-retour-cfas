@@ -129,6 +129,36 @@ export const TRAITEMENT_SEGMENTS_V2 = [
   { key: "autre" as const, label: "Autre", color: DOSSIERS_TRAITES_V2_COLORS.autre },
 ] as const;
 
+export const SITUATIONS_COLLAB: ReadonlyArray<{
+  key:
+    | "rupture"
+    | "abandon"
+    | "prevention_inevitable"
+    | "prevention_tres_eleve"
+    | "prevention_modere"
+    | "besoin_aide_hors_rupture";
+  label: string;
+  sublabel?: string;
+  color: string;
+}> = [
+  { key: "rupture" as const, label: "Rupture de contrat", color: COLOR_PALETTE.YELLOW },
+  { key: "abandon" as const, label: "Abandon", color: COLOR_PALETTE.RED_DARK },
+  {
+    key: "prevention_inevitable" as const,
+    label: "Prévention de rupture",
+    sublabel: "Risque : inévitable",
+    color: "#E4794A",
+  },
+  {
+    key: "prevention_tres_eleve" as const,
+    label: "Prévention de rupture",
+    sublabel: "Risque : très élevé",
+    color: "#F4A261",
+  },
+  { key: "prevention_modere" as const, label: "Prévention de rupture", sublabel: "Risque : modéré", color: "#FCC9A0" },
+  { key: "besoin_aide_hors_rupture" as const, label: "Besoin d'aide hors rupture", color: COLOR_PALETTE.PINK_LIGHT },
+] as const;
+
 export const RUPTURANTS_COLORS = {
   a_traiter: COLOR_PALETTE.ML_INACTIVE,
   traites: "#00A95F",

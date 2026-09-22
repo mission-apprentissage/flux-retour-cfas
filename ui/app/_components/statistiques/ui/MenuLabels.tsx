@@ -26,7 +26,7 @@ export function SyntheseLabel({ isActive, collapsed }: MenuLabelProps) {
           fill={isActive ? "#000091" : "#CECECE"}
         />
       </svg>
-      {!collapsed && "Synthèse"}
+      {!collapsed && "Vue d'ensemble"}
     </>
   );
 }
@@ -51,15 +51,16 @@ export function MissionLocaleLabel({ isActive, collapsed }: MenuLabelProps) {
 
 interface RegionsLabelProps extends MenuLabelProps {
   regionCodes: string[];
+  label?: string;
 }
 
-export function RegionsLabel({ isActive, collapsed, regionCodes }: RegionsLabelProps) {
+export function RegionsLabel({ isActive, collapsed, regionCodes, label }: RegionsLabelProps) {
   return (
     <>
       <div className={`${styles.regionsIcon} ${isActive ? "" : styles.regionsIconInactive}`}>
         <FranceMapSVG regionsActives={regionCodes} />
       </div>
-      {!collapsed && (regionCodes.length === 1 ? "Ma région" : "Mes régions")}
+      {!collapsed && (label ?? (regionCodes.length === 1 ? "Ma région" : "Mes régions"))}
     </>
   );
 }

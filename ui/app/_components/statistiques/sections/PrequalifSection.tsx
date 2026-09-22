@@ -3,13 +3,18 @@
 import { StatCard } from "../cards/StatCard";
 import { PrequalifResponsesDonut } from "../charts/PrequalifResponsesDonut";
 import { usePrequalifStats } from "../hooks/useStatsQueries";
+import type { Period } from "../ui/PeriodSelector";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import styles from "./PrequalifSection.module.css";
 import { StatisticsSection } from "./StatisticsSection";
 
-export function PrequalifSection() {
-  const { data, isLoading, error } = usePrequalifStats("all");
+interface PrequalifSectionProps {
+  period?: Period;
+}
+
+export function PrequalifSection({ period = "all" }: PrequalifSectionProps) {
+  const { data, isLoading, error } = usePrequalifStats(period);
 
   return (
     <StatisticsSection title="Préqualification WhatsApp">

@@ -131,7 +131,7 @@ export function TraitementCards({
             <TooltipContent>
               <TooltipText>
                 Ces jeunes ont été découverts par les Missions Locales grâce au Tableau de bord de l&apos;apprentissage
-                et y ont pris rendez-vous.
+                et ont pris rendez-vous.
               </TooltipText>
               <TooltipText spaced>Parmi les dossiers de ces jeunes vous retrouvez :</TooltipText>
               <ul className={styles.bulletList}>

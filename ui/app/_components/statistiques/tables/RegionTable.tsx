@@ -24,17 +24,12 @@ export interface RegionStats {
 
 interface RegionTableProps {
   regions: RegionStats[];
-  showDetailColumn?: boolean;
   loadingDeltas?: boolean;
-  isAdmin?: boolean;
+  detailRegions?: ReadonlyArray<string>;
 }
 
-export function RegionTable({
-  regions,
-  showDetailColumn = true,
-  loadingDeltas = false,
-  isAdmin = false,
-}: RegionTableProps) {
+export function RegionTable({ regions, loadingDeltas = false, detailRegions = [] }: RegionTableProps) {
+  const showDetailColumn = detailRegions.length > 0;
   const [showInactive, setShowInactive] = useState(false);
   const [sortColumn, setSortColumn] = useState<keyof RegionStats>("ml_total");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
@@ -107,6 +102,7 @@ export function RegionTable({
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 centered
+                tooltip="Missions Locales dont l'accès au suivi des jeunes a été activé, rapportées au nombre de Missions Locales de la région."
               />,
               <SortableTableHeader
                 key="ml_engagees"
@@ -147,10 +143,10 @@ export function RegionTable({
               </div>,
               ...(showDetailColumn
                 ? [
-                    isAdmin ? (
+                    detailRegions.includes(region.code) ? (
                       <Link
                         key={`detail-${region.code}`}
-                        href={`/admin/suivi-des-indicateurs/region/${region.code}`}
+                        href={`/suivi-des-indicateurs/region/${region.code}`}
                         className={`${styles.detailLink} ${styles.stretchedLink}`}
                       >
                         <span className={`fr-icon-arrow-right-line ${styles.detailArrow}`} aria-hidden="true" />

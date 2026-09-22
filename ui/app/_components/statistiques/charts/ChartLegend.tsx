@@ -4,6 +4,7 @@ import styles from "./legend.module.css";
 
 interface LegendItem {
   label: string;
+  sublabel?: string;
   color: string;
   value: number;
   variation?: string;
@@ -22,7 +23,10 @@ export function ChartLegend({ items, loadingVariation = false }: ChartLegendProp
         <div key={index} className={styles.legendItem}>
           <div className={styles.legendLeftContent}>
             <div className={styles.legendColorCircle} style={{ backgroundColor: item.color }} />
-            <span className={styles.legendLabel}>{item.label}</span>
+            <span className={styles.legendLabel}>
+              {item.label}
+              {item.sublabel && <span className={styles.legendSublabel}>{item.sublabel}</span>}
+            </span>
           </div>
           <div className={styles.legendRightContent}>
             <span className={styles.legendValue}>{item.value.toLocaleString("fr-FR")}</span>

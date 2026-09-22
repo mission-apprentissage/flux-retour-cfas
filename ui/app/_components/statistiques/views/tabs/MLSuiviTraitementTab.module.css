@@ -2,9 +2,13 @@
   padding: 12px 0 24px 0;
 }
 
-.periodSelectorContainer {
+.periodRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
   margin-bottom: 24px;
-  max-width: 320px;
 }
 
 .chartsContainer {

@@ -17952,6 +17952,17 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "Indique si le CFA souhaite l'accompagnement conjoint pour cet effectif",
             },
+            "acc_conjoint_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+              "description": "Date d'envoi de la collaboration à la ML, posée une seule fois. reponse_at reste la dernière modification",
+            },
             "acc_conjoint_by": {
               "anyOf": [
                 {
@@ -18821,6 +18832,168 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
     },
     "mission_locale_id": {
       "bsonType": "objectId",
+    },
+    "segments": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "collab": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "a_recontacter": {
+              "bsonType": "int",
+            },
+            "a_traiter": {
+              "bsonType": "int",
+            },
+            "autre": {
+              "bsonType": "int",
+            },
+            "autre_avec_contact": {
+              "bsonType": "int",
+            },
+            "deja_connu_accompagne": {
+              "bsonType": "int",
+            },
+            "delai_premiere_activite_count": {
+              "bsonType": "int",
+            },
+            "delai_premiere_activite_jours_total": {
+              "bsonType": "int",
+            },
+            "injoignable": {
+              "bsonType": "int",
+            },
+            "ne_souhaite_pas_accompagnement": {
+              "bsonType": "int",
+            },
+            "projet_pro_securise": {
+              "bsonType": "int",
+            },
+            "rdv_pris": {
+              "bsonType": "int",
+            },
+            "rdv_pris_decouverts": {
+              "bsonType": "int",
+            },
+            "repondu": {
+              "bsonType": "int",
+            },
+            "situation_abandon": {
+              "bsonType": "int",
+            },
+            "situation_besoin_aide_hors_rupture": {
+              "bsonType": "int",
+            },
+            "situation_prevention_inevitable": {
+              "bsonType": "int",
+            },
+            "situation_prevention_modere": {
+              "bsonType": "int",
+            },
+            "situation_prevention_tres_eleve": {
+              "bsonType": "int",
+            },
+            "situation_rupture": {
+              "bsonType": "int",
+            },
+            "total": {
+              "bsonType": "int",
+            },
+            "traite": {
+              "bsonType": "int",
+            },
+          },
+          "required": [
+            "total",
+            "a_traiter",
+            "traite",
+            "repondu",
+            "rdv_pris",
+            "rdv_pris_decouverts",
+            "projet_pro_securise",
+            "ne_souhaite_pas_accompagnement",
+            "a_recontacter",
+            "injoignable",
+            "autre",
+            "autre_avec_contact",
+            "deja_connu_accompagne",
+            "situation_rupture",
+            "situation_abandon",
+            "situation_prevention_inevitable",
+            "situation_prevention_tres_eleve",
+            "situation_prevention_modere",
+            "situation_besoin_aide_hors_rupture",
+            "delai_premiere_activite_jours_total",
+            "delai_premiere_activite_count",
+          ],
+        },
+        "rupture": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "a_recontacter": {
+              "bsonType": "int",
+            },
+            "a_traiter": {
+              "bsonType": "int",
+            },
+            "autre": {
+              "bsonType": "int",
+            },
+            "autre_avec_contact": {
+              "bsonType": "int",
+            },
+            "deja_connu_accompagne": {
+              "bsonType": "int",
+            },
+            "injoignable": {
+              "bsonType": "int",
+            },
+            "ne_souhaite_pas_accompagnement": {
+              "bsonType": "int",
+            },
+            "projet_pro_securise": {
+              "bsonType": "int",
+            },
+            "rdv_pris": {
+              "bsonType": "int",
+            },
+            "rdv_pris_decouverts": {
+              "bsonType": "int",
+            },
+            "repondu": {
+              "bsonType": "int",
+            },
+            "total": {
+              "bsonType": "int",
+            },
+            "traite": {
+              "bsonType": "int",
+            },
+          },
+          "required": [
+            "total",
+            "a_traiter",
+            "traite",
+            "repondu",
+            "rdv_pris",
+            "rdv_pris_decouverts",
+            "projet_pro_securise",
+            "ne_souhaite_pas_accompagnement",
+            "a_recontacter",
+            "injoignable",
+            "autre",
+            "autre_avec_contact",
+            "deja_connu_accompagne",
+          ],
+        },
+      },
+      "required": [
+        "rupture",
+        "collab",
+      ],
     },
     "stats": {
       "additionalProperties": false,

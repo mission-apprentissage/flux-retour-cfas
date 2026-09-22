@@ -47,6 +47,7 @@ export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Dat
 
   await updateEffectifMissionLocaleSnapshotAtMLActivation(missionLocaleId);
   await updateMissionLocaleEffectifComputedML(date, new ObjectId(missionLocaleId));
+  await createOrUpdateMissionLocaleStats(new ObjectId(missionLocaleId));
 };
 
 export const getAllMlFromOrganisations = async (): Promise<Array<IOrganisationMissionLocale>> => {
@@ -348,6 +349,7 @@ export interface IMissionLocaleMember {
 export interface IMissionLocaleDetail {
   ml: IOrganisationMissionLocale;
   activated_at: Date | null;
+  is_active: boolean;
   last_activity_at: Date | null;
   has_cfa_collaboration: boolean;
   traites_count: number;
@@ -428,6 +430,7 @@ export const getMissionLocaleDetail = async (missionLocaleId: ObjectId): Promise
   return {
     ml,
     activated_at: ml.activated_at || null,
+    is_active: !!ml.activated_at,
     last_activity_at: lastLog.length > 0 ? lastLog[0].created_at : null,
     has_cfa_collaboration: hasCfaCollaboration > 0,
     traites_count: traitesCount,

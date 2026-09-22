@@ -139,7 +139,7 @@ export const missionLocaleJobs = {
       return backfillIdentifiantNormalise();
     },
   },
-  "tmp:hydrate:timeseries-stats-ml": {
+  "hydrate:daily-mission-locale-stats": {
     handler: async () => {
       return hydrateDailyMissionLocaleStats();
     },

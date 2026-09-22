@@ -610,7 +610,7 @@ const deriveCfaErpOuDeca = (
 };
 
 // Statut V2 (cf. MDD), même définition que le tableau de bord
-// `/admin/suivi-des-indicateurs` : "oui" = compatible (`findEligibleOrganismes`)
+// `/suivi-des-indicateurs` : "oui" = compatible (`findEligibleOrganismes`)
 // et activé (`organisations.ml_beta_activated_at`), "activable" = compatible
 // sans date d'activation, "exclu" sinon.
 const deriveCfaStatutV2 = (

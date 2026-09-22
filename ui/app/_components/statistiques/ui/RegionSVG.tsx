@@ -123,7 +123,11 @@ export function RegionSVG({ regionCode, className, fill = "#6A6AF4" }: RegionSVG
   const regionData = REGION_DATA[regionCode];
 
   if (!regionData) {
-    return null;
+    return (
+      <span className={className}>
+        <i className="fr-icon-map-pin-2-fill" style={{ color: fill }} aria-hidden="true" />
+      </span>
+    );
   }
 
   return (

@@ -1,0 +1,43 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-default-grey);
+  font-size: 14px;
+}
+
+.totalLabel {
+  color: var(--text-default-grey);
+}
+
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 4px 16px;
+}
+
+.legendItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  padding: 0;
+}
+
+.legendLabel {
+  color: var(--text-default-grey);
+}
+
+.legendValue {
+  font-weight: 700;
+}

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ORGANISATION_TYPE } from "shared";
 
 import { ConnectedHeader } from "@/app/_components/ConnectedHeader";
 import { UserContextProvider } from "@/app/_components/context/UserContext";
@@ -9,6 +8,7 @@ import { TravauxBanner } from "@/app/_components/TravauxBanner";
 import { getSession } from "@/app/_utils/session.utils";
 import { Providers } from "@/app/providers";
 
+import { isAdminUser, isIndicateursUser } from "./access";
 import { StatistiquesMLLayoutClient } from "./StatistiquesMLLayoutClient";
 import { StatistiquesPublicLayoutClient } from "./StatistiquesPublicLayoutClient";
 
@@ -16,21 +16,16 @@ export const metadata: Metadata = {
   title: "Suivi des indicateurs | Tableau de bord de l'apprentissage",
 };
 
-const ALLOWED_ORGANISATION_TYPES = [ORGANISATION_TYPE.ARML, ORGANISATION_TYPE.DREETS, ORGANISATION_TYPE.DDETS];
-
 export default async function StatistiquesLayout({ children }: { children: JSX.Element }) {
   const user = await getSession();
 
-  const isConnected =
-    user && ALLOWED_ORGANISATION_TYPES.includes(user.organisation?.type as (typeof ALLOWED_ORGANISATION_TYPES)[number]);
-
-  if (isConnected) {
+  if (isIndicateursUser(user)) {
     return (
       <Providers>
         <UserContextProvider user={user}>
           <TravauxBanner />
           <ConnectedHeader />
-          <StatistiquesMLLayoutClient>{children}</StatistiquesMLLayoutClient>
+          <StatistiquesMLLayoutClient isAdmin={isAdminUser(user)}>{children}</StatistiquesMLLayoutClient>
           <Footer />
         </UserContextProvider>
       </Providers>

@@ -10,6 +10,7 @@ import { activateMissionLocale } from "@/common/actions/admin/mission-locale/mis
 import { updateEffectifStatut } from "@/common/actions/effectifs.statut.actions";
 import { getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
 import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
+import { listUtcDays } from "@/common/actions/mission-locale/mission-locale-stats.helpers";
 import {
   checkMissionLocaleEffectifDoublon,
   createMissionLocaleSnapshot,
@@ -24,13 +25,7 @@ import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.a
 import { getCurrentStatutFromParcours } from "@/common/actions/shared/rupture-pipeline.utils";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
-import {
-  effectifsDb,
-  effectifsQueueDb,
-  missionLocaleEffectifsDb,
-  missionLocaleStatsDb,
-  organisationsDb,
-} from "@/common/model/collections";
+import { effectifsDb, effectifsQueueDb, missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 
 export const hydrateMissionLocaleSnapshot = async (missionLocaleStructureId: number | null) => {
   const cursor = organisationsDb().find({
@@ -885,7 +880,7 @@ export const hydrateMissionLocaleStats = async () => {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
   const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
 
   for (const ml of mls) {
     await createOrUpdateMissionLocaleStats(ml._id, today);
@@ -893,9 +888,20 @@ export const hydrateMissionLocaleStats = async () => {
   }
 };
 
-export const hydrateDailyMissionLocaleStats = async () => {
-  await missionLocaleStatsDb().deleteMany({});
+const DAILY_STATS_CONCURRENCY = 8;
 
+const runWithConcurrency = async <T>(items: T[], concurrency: number, task: (item: T) => Promise<void>) => {
+  let nextIndex = 0;
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (nextIndex < items.length) {
+      const item = items[nextIndex++];
+      await task(item);
+    }
+  });
+  await Promise.all(workers);
+};
+
+export const hydrateDailyMissionLocaleStats = async () => {
   const mls = (await organisationsDb().find({ type: "MISSION_LOCALE" }).toArray()) as Array<IOrganisationMissionLocale>;
 
   const firstDate = await missionLocaleEffectifsDb().findOne({}, { sort: { created_at: 1 } });
@@ -904,29 +910,28 @@ export const hydrateDailyMissionLocaleStats = async () => {
     return;
   }
 
-  const startDate = firstDate.created_at;
-
-  const getAllDateSinceStartingDate = (start: Date): Date[] => {
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const dates: Date[] = [];
-    const currentDate = new Date(start);
-    currentDate.setUTCHours(0, 0, 0, 0);
-    while (currentDate <= today) {
-      dates.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    return dates;
-  };
-
-  const allDates = getAllDateSinceStartingDate(startDate);
+  const allDates = listUtcDays(firstDate.created_at, new Date());
+  let errors = 0;
 
   for (const date of allDates) {
-    const mapped = mls.map((ml) => () => {
-      return createOrUpdateMissionLocaleStats(new ObjectId(ml._id), date);
+    await runWithConcurrency(mls, DAILY_STATS_CONCURRENCY, async (ml) => {
+      try {
+        await createOrUpdateMissionLocaleStats(new ObjectId(ml._id), date);
+      } catch (err) {
+        errors++;
+        logger.error({ err, missionLocaleId: ml._id, date }, "daily mission locale stats computation failed");
+        captureException(err);
+      }
     });
+  }
 
-    await Promise.allSettled(mapped.map((fn) => fn()));
+  logger.info(
+    { days: allDates.length, missionLocales: mls.length, errors },
+    "daily mission locale stats backfill finished"
+  );
+
+  if (errors > 0) {
+    throw new Error(`${errors} daily mission locale stats computation(s) failed`);
   }
 };
 

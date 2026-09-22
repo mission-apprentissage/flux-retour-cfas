@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { isIndicateursUser } from "@/app/suivi-des-indicateurs/access";
 import { AuthContext } from "@/common/internal/AuthContext";
 
 import { publicConfig } from "./config.public";
@@ -78,7 +79,7 @@ function redirectToHome(
     case "DDETS":
       return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
     case "ADMINISTRATEUR":
-      return NextResponse.redirect(new URL("/admin/suivi-des-indicateurs", request.url));
+      return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
     case "ACADEMIE":
       return NextResponse.redirect(new URL("/voeux-affelnet", request.url));
     case "FRANCE_TRAVAIL":
@@ -179,9 +180,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (pathname === "/admin/suivi-des-indicateurs" || pathname.startsWith("/admin/suivi-des-indicateurs/")) {
+    const url = new URL(pathname.replace(/^\/admin/, ""), request.url);
+    url.search = request.nextUrl.search;
+    return NextResponse.redirect(url);
+  }
+
   if (pathname.startsWith("/suivi-des-indicateurs/")) {
-    const allowedTypes = ["ARML", "DREETS", "DDETS"];
-    if (!session || !allowedTypes.includes(session.organisation?.type || "")) {
+    if (!isIndicateursUser(session)) {
       return NextResponse.redirect(new URL("/suivi-des-indicateurs", request.url));
     }
     return NextResponse.next(requestNextData);
