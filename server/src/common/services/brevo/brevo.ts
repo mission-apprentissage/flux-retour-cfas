@@ -10,6 +10,7 @@ import { format } from "date-fns";
 
 import logger from "@/common/logger";
 import { reportConfigurationIssueOnce } from "@/common/services/sentry/reportOnce";
+import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import config from "@/config";
 
 const initContactApi = () => {
@@ -203,17 +204,9 @@ export const ensureBrevoAttributes = async (
       report.skipped.push(name);
       if (found.name && found.name !== name) {
         report.casingMismatches.push({ codeName: name, brevoName: found.name });
-        captureException(
-          new Error(`Brevo attribute exists as "${found.name}" but code uses "${name}". Consider aligning the casing.`)
-        );
       }
       if (found.type && found.type !== type) {
         report.conflicts.push({ name, existingType: found.type, expectedType: type });
-        captureException(
-          new Error(
-            `Brevo attribute "${name}" exists with type "${found.type}" but code expects "${type}". Update Brevo manually or rename the code attribute.`
-          )
-        );
       }
       continue;
     }
@@ -277,6 +270,7 @@ export const importContactsToBrevoList = async (listeId: number, contacts: Brevo
   }
 
   const results: Array<Awaited<ReturnType<NonNullable<typeof ContactInstance>["importContacts"]>> | undefined> = [];
+  const errors = createErrorAggregator("brevo-import-contacts");
 
   for (let i = 0; i < contacts.length; i += BREVO_IMPORT_BATCH_SIZE) {
     const batch = contacts.slice(i, i + BREVO_IMPORT_BATCH_SIZE);
@@ -292,12 +286,15 @@ export const importContactsToBrevoList = async (listeId: number, contacts: Brevo
 
     try {
       results.push(await ContactInstance.importContacts(contactImport));
+      errors.ok();
     } catch (e) {
-      captureException(e);
+      logger.error({ err: e, listeId }, "Échec d'import d'un lot de contacts Brevo");
+      errors.record(e);
       results.push(undefined);
     }
   }
 
+  errors.flush();
   return results;
 };
 
