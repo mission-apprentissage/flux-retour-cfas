@@ -2,7 +2,7 @@
 
 import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { IEffectifMissionLocale } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
@@ -23,7 +23,6 @@ interface CfaCollaborationDetailProps {
 
 export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   const { effectif } = data;
-  const pageRef = useRef<HTMLDivElement>(null);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const searchParams = useSearchParams();
   const liste = getCfaListeInfo(searchParams?.get("origine"), searchParams?.get("category"));
@@ -31,14 +30,14 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
   // Dépend de effectif.id : la navigation Précédent/Suivant change l'[id] sans démonter le composant
   // (data servie depuis le cache react-query), il faut donc re-scroller et re-tracker à chaque dossier.
   useEffect(() => {
-    pageRef.current?.scrollIntoView({ behavior: "instant" });
+    window.scrollTo({ top: 0, behavior: "instant" });
     trackPlausibleEvent("cfa_fiche_ouverte", undefined, { effectifId: String(effectif.id) });
   }, [effectif.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const effectifName = `${effectif.prenom} ${effectif.nom}`;
 
   return (
-    <div ref={pageRef} className={`${styles.page} ${styles.detailPage}`}>
+    <div className={`${styles.page} ${styles.detailPage}`}>
       <Breadcrumb
         currentPageLabel={effectifName}
         segments={[
