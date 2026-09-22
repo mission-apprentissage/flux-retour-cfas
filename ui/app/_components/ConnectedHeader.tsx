@@ -17,6 +17,25 @@ import { Impersonate } from "./Impersonate";
 import { useCfaUnreadNotificationsCount } from "./ruptures/cfa/hooks";
 import { UserConnectedHeader } from "./UserConnectedHeader";
 
+// Onglets des DREETS/DDETS mis en pause pendant les travaux : les anciennes URL restent valides et affichent la page travaux.
+const ONGLETS_EN_PAUSE = [
+  { text: "Mon Tableau de bord", href: "/home" },
+  { text: "Mon territoire", href: "/organismes" },
+  { text: "Mes indicateurs", href: "/indicateurs" },
+  { text: "Vœux Affelnet", href: "/voeux-affelnet" },
+  { text: "Indicateurs nationaux", href: "/national/indicateurs" },
+];
+
+function OngletEnPause({ label }: { label: string }) {
+  return (
+    <span>
+      {label}
+      <i className={`ri-tools-fill ${styles.pausedMark}`} aria-hidden="true" />
+      <span className="fr-sr-only">(fonctionnalité en pause pendant les travaux)</span>
+    </span>
+  );
+}
+
 export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   const { user } = useAuth();
   const pathname = usePathname();
@@ -25,6 +44,10 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   const isCfa = user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION;
   const { data: unreadData } = useCfaUnreadNotificationsCount(isCfa ? getUserOrganismeId(user) : undefined);
   const unreadCount = unreadData?.count ?? 0;
+
+  // Nav plus dense : ces profils ont deux onglets de plus que les autres pendant les travaux.
+  const aOngletsEnPause =
+    user?.organisation?.type === ORGANISATION_TYPE.DREETS || user?.organisation?.type === ORGANISATION_TYPE.DDETS;
 
   const getMesOrganismesLabel = (type: string) => {
     switch (type) {
@@ -157,6 +180,16 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
             target: "_self",
           },
         });
+        ONGLETS_EN_PAUSE.forEach(({ text, href }) => {
+          baseItems.push({
+            text: <OngletEnPause label={text} />,
+            isActive: pathname === href || pathname?.startsWith(`${href}/`),
+            linkProps: {
+              href,
+              target: "_self",
+            },
+          });
+        });
       }
       if (
         organisationType === ORGANISATION_TYPE.TETE_DE_RESEAU ||
@@ -170,7 +203,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           },
         });
       }
-      if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.ACADEMIE) {
+      if (organisationType === ORGANISATION_TYPE.ACADEMIE) {
         baseItems.push({
           text: "Vœux Affelnet",
           linkProps: {
@@ -299,6 +332,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
 
   return (
     <DsfrHeader
+      className={aOngletsEnPause ? styles.headerOngletsEnPause : undefined}
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
       homeLinkProps={{
         href: "/",
