@@ -21,14 +21,20 @@
 }
 
 .illustrationContainer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
   max-width: var(--container-xl);
 }
 
+/* L'illustration chevauche la bande dégradée de hauteur fixe : on la borne à sa largeur de maquette
+   pour qu'elle ne déborde pas sur la section du dessus quand le conteneur s'élargit. */
 .illustration {
   position: relative;
   z-index: 1;
   display: block;
   width: 100%;
+  max-width: 41.25rem;
   height: auto;
   margin-bottom: -1.375rem;
   user-select: none;
