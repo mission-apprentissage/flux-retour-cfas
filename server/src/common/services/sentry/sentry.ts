@@ -5,6 +5,8 @@ import type { Express } from "express";
 
 import config from "../../../config";
 
+import { dropJobProcessorNoise } from "./jobProcessorNoise";
+
 function getSentryOptions(extraIntegrations: Integration[]): Sentry.NodeOptions {
   return {
     tracesSampler: (samplingContext) => {
@@ -30,6 +32,7 @@ function getSentryOptions(extraIntegrations: Integration[]): Sentry.NodeOptions 
 
       return 0.01;
     },
+    beforeSend: (event) => dropJobProcessorNoise(event),
     tracePropagationTargets: [/^https:\/\/[^/]*\.apprentissage\.beta\.gouv\.fr/],
     environment: config.env,
     release: config.version,
