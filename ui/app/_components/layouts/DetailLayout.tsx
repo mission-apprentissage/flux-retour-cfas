@@ -4,7 +4,7 @@ import { ConnectedHeader } from "../ConnectedHeader";
 import { UserContextProvider } from "../context/UserContext";
 import { Footer } from "../Footer";
 
-import fond from "./fond.module.css";
+import styles from "./DetailLayout.module.css";
 
 export async function DetailLayout({ children }: { children: React.ReactNode }) {
   const user = await getSession();
@@ -12,13 +12,13 @@ export async function DetailLayout({ children }: { children: React.ReactNode }) 
   return (
     <Providers>
       <UserContextProvider user={user}>
-        <div className={fond.page}>
+        <div className={styles.viewport}>
           <ConnectedHeader withNav={false} />
-          <main id="contenu" tabIndex={-1} className={fond.fond}>
+          <main id="contenu" tabIndex={-1} className={styles.main}>
             {children}
           </main>
-          <Footer />
         </div>
+        <Footer compact />
       </UserContextProvider>
     </Providers>
   );

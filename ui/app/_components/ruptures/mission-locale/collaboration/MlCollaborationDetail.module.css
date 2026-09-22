@@ -1,7 +1,8 @@
 .detailPage {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  height: 100vh;
+  min-height: 0;
 }
 
 .breadcrumb {

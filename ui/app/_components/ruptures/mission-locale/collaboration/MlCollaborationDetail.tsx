@@ -2,7 +2,7 @@
 
 import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { API_EFFECTIF_LISTE, IEffectifMissionLocale } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
@@ -83,7 +83,6 @@ export function MlCollaborationDetail({ data }: MlCollaborationDetailProps) {
     : null;
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const collabReceived = !!effectif.organisme_data?.acc_conjoint;
-  const pageRef = useRef<HTMLDivElement>(null);
 
   const codePostal = searchParams?.get("cp");
   const origine = searchParams?.get("origine");
@@ -102,7 +101,7 @@ export function MlCollaborationDetail({ data }: MlCollaborationDetailProps) {
   // Dépend de effectif.id : la navigation Précédent/Suivant change l'[id] sans démonter le composant
   // (data servie depuis le cache react-query), il faut donc re-scroller et re-tracker à chaque dossier.
   useEffect(() => {
-    pageRef.current?.scrollIntoView({ behavior: "instant" });
+    window.scrollTo({ top: 0, behavior: "instant" });
     trackPlausibleEvent("ml_fiche_ouverte", undefined, {
       effectifId: String(effectif.id),
       collaboration: collabReceived,
@@ -110,7 +109,7 @@ export function MlCollaborationDetail({ data }: MlCollaborationDetailProps) {
   }, [effectif.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div ref={pageRef} className={`${styles.page} ${styles.detailPage}`}>
+    <div className={`${styles.page} ${styles.detailPage}`}>
       <Breadcrumb
         currentPageLabel={`${effectif.prenom} ${effectif.nom}`}
         segments={[
