@@ -122,17 +122,24 @@ function isFullyExtensionStack(event: SentryEventLike): boolean {
   return candidates.every(isExtensionFrame);
 }
 
-/** Retourne la raison du rejet, ou `null` si l'événement doit être conservé. */
-export function classifyDrop(event: SentryEventLike): DropReason | null {
+/**
+ * Retourne la raison du rejet, ou `null` si l'événement doit être conservé.
+ *
+ * `reasons` est explicite et sans défaut : appliquer les motifs du navigateur au
+ * serveur y masquerait des pannes d'API amont.
+ */
+export function classifyDrop(event: SentryEventLike, reasons: readonly DropReason[]): DropReason | null {
+  const active = new Set(reasons);
   const texts = messagesOf(event);
 
   for (const { reason, patterns } of DROP_PATTERNS) {
+    if (!active.has(reason)) continue;
     if (texts.some((text) => patterns.some((pattern) => matches(text, pattern)))) {
       return reason;
     }
   }
 
-  return isFullyExtensionStack(event) ? "browser-extension" : null;
+  return active.has("browser-extension") && isFullyExtensionStack(event) ? "browser-extension" : null;
 }
 
 function maskEmailsInText(text: string): string {
@@ -219,6 +226,8 @@ export function enforceTagPolicy<T extends SentryEventLike>(event: T): T {
 }
 
 export type BeforeSendOptions<T extends SentryEventLike> = {
+  /** Catégories rejetées pour ce runtime. Omises, aucun événement n'est supprimé. */
+  dropReasons?: readonly DropReason[];
   /**
    * Semaine d'observation : les événements rejetés sont taggés `drop_reason`
    * au lieu d'être supprimés, pour mesurer avant de couper.
@@ -228,11 +237,15 @@ export type BeforeSendOptions<T extends SentryEventLike> = {
   enrich?: (event: T) => T;
 };
 
-export function buildBeforeSend<T extends SentryEventLike>({ debug = false, enrich }: BeforeSendOptions<T> = {}) {
+export function buildBeforeSend<T extends SentryEventLike>({
+  dropReasons = [],
+  debug = false,
+  enrich,
+}: BeforeSendOptions<T> = {}) {
   return (event: T): T | null => {
     const enriched = enrich ? enrich(event) : event;
 
-    const dropReason = classifyDrop(enriched);
+    const dropReason = classifyDrop(enriched, dropReasons);
     if (dropReason && !debug) return null;
     if (dropReason) {
       enriched.tags = { ...(enriched.tags ?? {}), drop_reason: dropReason };

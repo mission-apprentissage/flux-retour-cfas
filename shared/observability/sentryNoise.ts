@@ -61,6 +61,22 @@ export const DROP_PATTERNS: ReadonlyArray<{ reason: DropReason; patterns: Readon
   },
 ];
 
+/**
+ * Les catégories ne s'appliquent pas partout, et c'est le point délicat : côté
+ * serveur, « Failed to fetch » n'est pas du bruit mais une panne d'API amont.
+ * Chaque runtime déclare donc ce qui le concerne, et rien n'est rejeté par défaut.
+ */
+export const BROWSER_DROP_REASONS: readonly DropReason[] = [
+  "expected-auth",
+  "chunk-load",
+  "network",
+  "browser-extension",
+  "browser-noise",
+];
+
+/** Levé pendant le rendu, donc aussi bien côté serveur Next que dans le navigateur. */
+export const NEXT_DROP_REASONS: readonly DropReason[] = ["next-control-flow"];
+
 /** Protocoles de frames dont le code ne nous appartient pas. */
 export const EXTENSION_PROTOCOLS: readonly string[] = [
   "chrome-extension://",

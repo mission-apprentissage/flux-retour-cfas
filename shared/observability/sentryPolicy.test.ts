@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { BROWSER_DROP_REASONS, NEXT_DROP_REASONS } from "./sentryNoise";
 import {
   buildBeforeSend,
   classifyDrop,
@@ -8,6 +9,8 @@ import {
   scrubPii,
   type SentryEventLike,
 } from "./sentryPolicy";
+
+const UI_DROP_REASONS = [...BROWSER_DROP_REASONS, ...NEXT_DROP_REASONS];
 
 const withException = (type: string, value: string, extra: Partial<SentryEventLike> = {}): SentryEventLike => ({
   exception: { values: [{ type, value }] },
@@ -29,26 +32,38 @@ describe("normalizeForGrouping", () => {
 
 describe("classifyDrop", () => {
   it("rejette les 401/403 attendus du front", () => {
-    expect(classifyDrop(withException("AuthError", "Request rejected with status code 401"))).toBe("expected-auth");
-  });
-
-  it("rejette les échecs de chargement de chunk", () => {
-    expect(classifyDrop(withException("ChunkLoadError", "Loading chunk 4821 failed"))).toBe("chunk-load");
-    expect(classifyDrop(withException("TypeError", "Failed to fetch dynamically imported module: /x.js"))).toBe(
-      "chunk-load"
+    expect(classifyDrop(withException("AuthError", "Request rejected with status code 401"), UI_DROP_REASONS)).toBe(
+      "expected-auth"
     );
   });
 
+  it("rejette les échecs de chargement de chunk", () => {
+    expect(classifyDrop(withException("ChunkLoadError", "Loading chunk 4821 failed"), UI_DROP_REASONS)).toBe(
+      "chunk-load"
+    );
+    expect(
+      classifyDrop(withException("TypeError", "Failed to fetch dynamically imported module: /x.js"), UI_DROP_REASONS)
+    ).toBe("chunk-load");
+  });
+
   it("rejette le contrôle de flux de Next", () => {
-    expect(classifyDrop(withException("Error", "NEXT_REDIRECT"))).toBe("next-control-flow");
+    expect(classifyDrop(withException("Error", "NEXT_REDIRECT"), UI_DROP_REASONS)).toBe("next-control-flow");
   });
 
   it("conserve une vraie erreur serveur", () => {
-    expect(classifyDrop(withException("TypeError", "Cannot read properties of undefined"))).toBeNull();
+    expect(classifyDrop(withException("TypeError", "Cannot read properties of undefined"), UI_DROP_REASONS)).toBeNull();
   });
 
   it("ne rejette pas une phrase contenant « cancelled »", () => {
-    expect(classifyDrop(withException("Error", "Job cancelled by the operator"))).toBeNull();
+    expect(classifyDrop(withException("Error", "Job cancelled by the operator"), UI_DROP_REASONS)).toBeNull();
+  });
+
+  // Côté serveur, ce message désigne une panne d'API amont, pas un onglet fermé.
+  it("conserve « Failed to fetch » pour un runtime sans catégorie navigateur", () => {
+    const event = withException("TypeError", "Failed to fetch");
+
+    expect(classifyDrop(event, UI_DROP_REASONS)).toBe("network");
+    expect(classifyDrop(event, [])).toBeNull();
   });
 
   it("rejette une pile entièrement issue d'une extension", () => {
@@ -69,7 +84,7 @@ describe("classifyDrop", () => {
       },
     };
 
-    expect(classifyDrop(event)).toBe("browser-extension");
+    expect(classifyDrop(event, UI_DROP_REASONS)).toBe("browser-extension");
   });
 
   it("conserve une pile applicative qui contient une frame d'extension", () => {
@@ -90,7 +105,7 @@ describe("classifyDrop", () => {
       },
     };
 
-    expect(classifyDrop(event)).toBeNull();
+    expect(classifyDrop(event, UI_DROP_REASONS)).toBeNull();
   });
 });
 
@@ -170,11 +185,15 @@ describe("enforceTagPolicy", () => {
 
 describe("buildBeforeSend", () => {
   it("supprime un événement rejeté", () => {
-    expect(buildBeforeSend()(withException("ChunkLoadError", "Loading chunk 1 failed"))).toBeNull();
+    expect(
+      buildBeforeSend({ dropReasons: UI_DROP_REASONS })(withException("ChunkLoadError", "Loading chunk 1 failed"))
+    ).toBeNull();
   });
 
   it("en mode debug, conserve l'événement et pose drop_reason", () => {
-    const event = buildBeforeSend({ debug: true })(withException("ChunkLoadError", "Loading chunk 1 failed"));
+    const event = buildBeforeSend({ dropReasons: UI_DROP_REASONS, debug: true })(
+      withException("ChunkLoadError", "Loading chunk 1 failed")
+    );
 
     expect(event?.tags?.drop_reason).toBe("chunk-load");
   });
