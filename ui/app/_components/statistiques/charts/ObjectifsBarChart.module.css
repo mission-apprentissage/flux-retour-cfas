@@ -17,27 +17,63 @@
   color: var(--text-default-grey);
 }
 
-.legend {
+.rows {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 4px 16px;
-}
-
-.legendItem {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 8px;
-  font-size: 13px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 88px;
+  align-items: center;
+  gap: 12px;
   padding: 0;
+  font-size: 13px;
 }
 
-.legendLabel {
-  color: var(--text-default-grey);
+.label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-title-grey);
 }
 
-.legendValue {
+.label svg {
+  flex-shrink: 0;
+}
+
+.track {
+  display: block;
+  height: 16px;
+  border-radius: 2px;
+  background-color: #e3e3fd;
+  overflow: hidden;
+}
+
+.bar {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background-color: #6a6af4;
+}
+
+.value {
   font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (max-width: 576px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 4px;
+  }
+
+  .label {
+    grid-column: 1 / -1;
+  }
 }
