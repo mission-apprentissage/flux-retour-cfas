@@ -8,7 +8,7 @@
     - [Pré-requis](#pré-requis)
     - [Clé GPG](#clé-gpg)
   - [Développement](#développement)
-    - [Gettting started](#gettting-started)
+    - [Getting started](#getting-started)
     - [Détails des commandes globales](#détails-des-commandes-globales)
       - [Installation .env](#installation-env)
       - [Lancement de la stack compléte](#lancement-de-la-stack-compléte)
@@ -111,7 +111,7 @@ Voici les étapes pour créer votre clé OpenPGP :
 
 ## Développement
 
-### Gettting started
+### Getting started
 
 Avant de lancer l'application, assurez-vous d'installer toutes les dépendances nécessaires en exécutant la commande suivante :
 
