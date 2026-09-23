@@ -5,6 +5,7 @@ import styles from "@/app/_components/layouts/pageContainer.module.css";
 import { ConnectedHeader } from "../_components/ConnectedHeader";
 import { UserContextProvider } from "../_components/context/UserContext";
 import { Footer } from "../_components/Footer";
+import { TravauxBanner } from "../_components/TravauxBanner";
 import { getSession } from "../_utils/session.utils";
 import { Providers } from "../providers";
 
@@ -16,6 +17,7 @@ export default async function CompteLayout({ children }: { children: JSX.Element
   return (
     <Providers>
       <UserContextProvider user={user}>
+        <TravauxBanner />
         <ConnectedHeader />
         <div className={styles.growGrey}>{children}</div>
         <Footer />

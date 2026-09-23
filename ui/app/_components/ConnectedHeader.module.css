@@ -20,6 +20,32 @@
   align-items: center;
 }
 
+/* Nav DREETS/DDETS uniquement : onglets resserrés pour absorber les deux entrées supplémentaires. */
+.headerOngletsEnPause :global(.fr-nav__link),
+.headerOngletsEnPause :global(.fr-nav__btn) {
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+
+.pausedMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  margin-left: 0.375rem;
+  color: var(--text-default-warning);
+  vertical-align: middle;
+  background-color: var(--background-contrast-warning);
+  border-radius: 0.25rem;
+}
+
+/* react-dsfr fixe width/height du ::before en dur : on les surcharge pour tenir dans le badge. */
+.pausedMark.pausedMark::before {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
 .unreadDot {
   display: inline-block;
   flex-shrink: 0;

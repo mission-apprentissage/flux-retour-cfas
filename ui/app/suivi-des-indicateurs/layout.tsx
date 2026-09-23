@@ -4,6 +4,7 @@ import { ConnectedHeader } from "@/app/_components/ConnectedHeader";
 import { UserContextProvider } from "@/app/_components/context/UserContext";
 import { Footer } from "@/app/_components/Footer";
 import { PublicHeaderWithoutAuth } from "@/app/_components/PublicHeaderWithoutAuth";
+import { TravauxBanner } from "@/app/_components/TravauxBanner";
 import { getSession } from "@/app/_utils/session.utils";
 import { Providers } from "@/app/providers";
 
@@ -35,6 +36,7 @@ export default async function StatistiquesLayout({ children }: { children: JSX.E
     return (
       <Providers>
         <UserContextProvider user={user}>
+          <TravauxBanner />
           <ConnectedHeader />
           <StatistiquesMLLayoutClient isAdmin={isAdminUser(user)}>{children}</StatistiquesMLLayoutClient>
           <Footer />

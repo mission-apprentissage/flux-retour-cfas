@@ -3,4 +3,5 @@ export const LOCAL_STORAGE_KEYS = {
   CFA_INVITE_BANNER_DISMISSED: "cfa-invite-banner-dismissed",
   CFA_V2_UPDATE_BANNER_DISMISSED: "cfa-v2-update-banner-dismissed",
   CFA_V2_WELCOME_CARD_DISMISSED: "cfa-v2-welcome-card-dismissed",
+  DREETS_TRAVAUX_BANNER_DISMISSED: "dreets-travaux-banner-dismissed",
 } as const;

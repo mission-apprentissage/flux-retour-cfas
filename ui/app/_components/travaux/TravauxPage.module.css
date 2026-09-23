@@ -1,0 +1,177 @@
+.page {
+  display: flex;
+  flex-direction: column;
+}
+
+.titleBar {
+  padding: 2rem 0;
+  background-color: var(--background-alt-grey);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  color: var(--text-action-high-blue-france);
+}
+
+.unavailable {
+  padding: 2rem;
+  margin: 3rem 0;
+  background-color: var(--background-contrast-warning);
+  border-left: 4px solid var(--border-plain-warning);
+}
+
+.unavailable p {
+  margin: 0 0 1.5rem;
+}
+
+.unavailable p:last-child {
+  margin-bottom: 0;
+}
+
+.unavailableIcon {
+  display: block;
+  margin-bottom: 1.5rem;
+  color: var(--text-default-warning);
+}
+
+.unavailableIcon.unavailableIcon::before {
+  width: 2rem;
+  height: 2rem;
+}
+
+.unavailableTitle {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.evolution {
+  padding: 4rem 0;
+  background-color: var(--background-alt-blue-france);
+}
+
+.sectionTitleCentered {
+  margin: 0 0 3rem;
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  text-align: center;
+}
+
+.evolutionIllustration {
+  display: block;
+  width: 100%;
+  max-width: 54rem;
+  height: auto;
+  margin: 0 auto 4rem;
+}
+
+.roles {
+  padding: 4rem 0;
+  background-color: var(--artwork-minor-blue-france);
+  color: var(--text-inverted-grey);
+}
+
+.rolesTitle {
+  margin: 0 0 3rem;
+  font-size: 1.75rem;
+  line-height: 2.5rem;
+  color: inherit;
+  text-align: center;
+}
+
+.rolesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.roleCard {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-default-grey);
+  color: var(--text-default-grey);
+}
+
+.roleImage {
+  width: 100%;
+  height: auto;
+}
+
+.roleBody {
+  padding: 1.5rem;
+}
+
+.roleTitle {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  color: var(--text-action-high-blue-france);
+}
+
+.roleDescription {
+  margin: 0;
+}
+
+.split {
+  padding: 4rem 0;
+}
+
+.splitInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 4rem;
+  align-items: center;
+}
+
+.splitTitle {
+  margin: 0 0 1.5rem;
+  font-size: 1.375rem;
+  line-height: 2rem;
+}
+
+.splitIllustration,
+.contactIllustration {
+  width: 100%;
+  max-width: 28rem;
+  height: auto;
+  margin: 0 auto;
+}
+
+.splitCapture {
+  width: 100%;
+  height: auto;
+}
+
+.contact {
+  padding: 4rem 0;
+  background-color: var(--background-open-blue-france);
+}
+
+@media (max-width: 62em) {
+  .rolesGrid,
+  .splitInner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+
+  .splitReverse > *:first-child {
+    order: 1;
+  }
+
+  .evolution,
+  .roles,
+  .split,
+  .contact {
+    padding: 3rem 0;
+  }
+
+  .unavailable {
+    padding: 1.5rem;
+    margin: 2rem 0;
+  }
+}
