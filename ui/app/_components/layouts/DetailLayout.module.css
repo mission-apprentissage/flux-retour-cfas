@@ -1,0 +1,25 @@
+.viewport {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #f6f6f6 5.73%, #f5f5fe 41.13%);
+}
+
+@media (max-width: 991px) {
+  .viewport {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .main {
+    overflow: visible;
+  }
+}

@@ -35,7 +35,7 @@ export function CollaborationsAdminSection() {
   );
 
   return (
-    <StatisticsSection title="Collaborations entre CFA et Missions Locales" controls={exportButton}>
+    <StatisticsSection title="Déploiement aux CFA" controls={exportButton}>
       <p className={styles.description}>
         Chiffres cumulés depuis le lancement de la V2 avec la fonctionnalité de collaboration (1er janvier 2026).
       </p>

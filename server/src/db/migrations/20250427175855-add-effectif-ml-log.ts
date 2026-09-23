@@ -1,4 +1,5 @@
-import { ObjectId } from "mongodb";
+import { AnyBulkWriteOperation, ObjectId } from "mongodb";
+import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
 
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
 
@@ -8,7 +9,7 @@ export const up = async () => {
     updated_at: { $exists: true },
   });
 
-  const bulkOperations: Array<any> = [];
+  const bulkOperations: AnyBulkWriteOperation<IMissionLocaleEffectifLog>[] = [];
   for await (const mle of cursor) {
     bulkOperations.push({
       insertOne: {
@@ -20,7 +21,7 @@ export const up = async () => {
           commentaires: mle.commentaires,
           created_at: now,
           mission_locale_effectif_id: mle._id,
-        },
+        } as IMissionLocaleEffectifLog,
       },
     });
   }

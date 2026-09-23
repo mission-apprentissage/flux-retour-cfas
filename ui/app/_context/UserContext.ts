@@ -1,5 +1,5 @@
 import { useContext } from "react";
 
-import { UserContext } from "../_components/context/UserContext";
+import { IUserContext, UserContext } from "../_components/context/UserContext";
 
-export const useAuth = () => useContext(UserContext) ?? {};
+export const useAuth = (): IUserContext => useContext(UserContext) ?? {};

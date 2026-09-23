@@ -1,0 +1,24 @@
+.badgeTexte {
+  margin-left: 5px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badgeTexteSerre {
+  margin-left: 2px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badgeTexteSeul {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badgePlat {
+  margin: 0;
+}
+
+.dateTraitement {
+  color: var(--text-default-grey);
+}

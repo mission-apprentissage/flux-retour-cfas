@@ -1,4 +1,10 @@
 import { ObjectId } from "bson";
+import type { IBrevoSyncSettings, IMissionLocaleEffectif, IMissionLocaleStats } from "shared/models";
+import type { IEffectif } from "shared/models/data/effectifs.model";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IOrganisme } from "shared/models/data/organismes.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { addDaysUTC, normalizeToUTCDay } from "shared/utils/date";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -15,6 +21,7 @@ import {
   usersMigrationDb,
 } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
+import { DeepPartial, testDoc, testDocs } from "@tests/utils/testUtils";
 
 import {
   buildOrganisme,
@@ -32,7 +39,7 @@ useMongo();
 const buildEffectif = (
   organismeId: ObjectId,
   statut: "APPRENTI" | "RUPTURANT",
-  override: Record<string, any> = {}
+  override: Record<string, unknown> = {}
 ) => ({
   _id: new ObjectId(),
   organisme_id: organismeId,
@@ -49,7 +56,7 @@ const buildEffectif = (
 const buildMlStatsDoc = (
   mlId: ObjectId,
   stats: { total: number; a_traiter: number; traite: number },
-  override: Record<string, any> = {}
+  override: DeepPartial<IMissionLocaleStats> = {}
 ) => ({
   _id: new ObjectId(),
   mission_locale_id: mlId,
@@ -110,22 +117,28 @@ const buildMlStatsDoc = (
 
 const ACTIVATED_AT = new Date("2026-03-01T00:00:00.000Z");
 
-const insertCfa = async (opts: { eligible?: boolean; activatedAt?: Date; organisme?: Record<string, any> } = {}) => {
+const insertCfa = async (
+  opts: { eligible?: boolean; activatedAt?: Date; organisme?: DeepPartial<IOrganisme> } = {}
+) => {
   const orgaOf = buildOrgaOf(opts.activatedAt ? { ml_beta_activated_at: opts.activatedAt } : {});
   const organisme = buildOrganisme(orgaOf, { nature: "responsable_formateur", ...opts.organisme });
-  await organisationsDb().insertOne(orgaOf as any);
-  await organismesDb().insertOne(organisme as any);
-  await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
+  await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+  await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+  await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaOf)));
   if (opts.eligible !== false) {
-    await effectifsDb().insertMany([buildEffectif(organisme._id, "APPRENTI") as any], {
+    await effectifsDb().insertMany([testDoc<IEffectif>(buildEffectif(organisme._id, "APPRENTI"))], {
       bypassDocumentValidation: true,
     });
   }
   return { orgaOf, organisme };
 };
 
-const buildCollab = (organismeId: ObjectId, mlId: ObjectId, reponseAt: Date, override: Record<string, any> = {}) =>
-  buildRupturant(organismeId, mlId, { organisme_data: { acc_conjoint: true, reponse_at: reponseAt }, ...override });
+const buildCollab = (
+  organismeId: ObjectId,
+  mlId: ObjectId,
+  reponseAt: Date,
+  override: DeepPartial<IMissionLocaleEffectif> = {}
+) => buildRupturant(organismeId, mlId, { organisme_data: { acc_conjoint: true, reponse_at: reponseAt }, ...override });
 
 describe("tbaContactsContactList", () => {
   beforeEach(() => {
@@ -155,14 +168,14 @@ describe("tbaContactsContactList", () => {
       });
       const user = buildUser(orgaOf, { email: "alice@example.com" });
 
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(user as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
       await effectifsDb().insertMany(
         [
-          buildEffectif(organisme._id, "APPRENTI") as any,
-          buildEffectif(organisme._id, "APPRENTI") as any,
-          buildEffectif(organisme._id, "RUPTURANT") as any,
+          testDoc<IEffectif>(buildEffectif(organisme._id, "APPRENTI")),
+          testDoc<IEffectif>(buildEffectif(organisme._id, "APPRENTI")),
+          testDoc<IEffectif>(buildEffectif(organisme._id, "RUPTURANT")),
         ],
         { bypassDocumentValidation: true }
       );
@@ -198,7 +211,7 @@ describe("tbaContactsContactList", () => {
           UAI_SIRET: `${orgaOf.uai}_${orgaOf.siret}`,
           STATUT_SIRET: "ouvert",
           ORGANISME_ID: String(organisme._id),
-          URL_TBA: `http://localhost:3000/organismes/${String(organisme._id)}`,
+          URL_TBA: "http://localhost:3000/cfa",
           CFA_NATURE: null,
           CFA_NB_FORMATEURS: 3,
           CFA_ERP_OU_DECA: "ERP",
@@ -230,10 +243,10 @@ describe("tbaContactsContactList", () => {
       const orgaMl = buildOrgaMl("ML PARIS");
       const user = buildUser(orgaMl, { email: "bob@ml.fr" });
 
-      await organisationsDb().insertOne(orgaMl as any);
-      await usersMigrationDb().insertOne(user as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
       await missionLocaleStatsDb().insertOne(
-        buildMlStatsDoc(orgaMl._id, { total: 50, a_traiter: 10, traite: 40 }) as any,
+        testDoc<IMissionLocaleStats>(buildMlStatsDoc(orgaMl._id, { total: 50, a_traiter: 10, traite: 40 })),
         { bypassDocumentValidation: true }
       );
 
@@ -271,8 +284,8 @@ describe("tbaContactsContactList", () => {
 
     it("retourne 0 pour total/a_traiter/traite quand pas de doc missionLocaleStats", async () => {
       const orgaMl = buildOrgaMl("ML SOLO");
-      await organisationsDb().insertOne(orgaMl as any);
-      await usersMigrationDb().insertOne(buildUser(orgaMl) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaMl)));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -285,14 +298,16 @@ describe("tbaContactsContactList", () => {
 
     it("prend toujours le snapshot le plus récent quand plusieurs computed_day existent pour la même ML", async () => {
       const orgaMl = buildOrgaMl("ML STALE");
-      await organisationsDb().insertOne(orgaMl as any);
-      await usersMigrationDb().insertOne(buildUser(orgaMl) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaMl)));
 
       const yesterday = new Date(NOW.getTime() - 24 * 3600 * 1000);
       await missionLocaleStatsDb().insertMany(
         [
-          buildMlStatsDoc(orgaMl._id, { total: 100, a_traiter: 100, traite: 0 }, { computed_day: yesterday }) as any,
-          buildMlStatsDoc(orgaMl._id, { total: 100, a_traiter: 20, traite: 80 }) as any,
+          testDoc<IMissionLocaleStats>(
+            buildMlStatsDoc(orgaMl._id, { total: 100, a_traiter: 100, traite: 0 }, { computed_day: yesterday })
+          ),
+          testDoc<IMissionLocaleStats>(buildMlStatsDoc(orgaMl._id, { total: 100, a_traiter: 20, traite: 80 })),
         ],
         { bypassDocumentValidation: true }
       );
@@ -308,9 +323,9 @@ describe("tbaContactsContactList", () => {
     it("exclut un user désinscrit (unsubscribe: true)", async () => {
       const orgaOf = buildOrgaOf();
       const organisme = buildOrganisme(orgaOf);
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf, { unsubscribe: true }) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaOf, { unsubscribe: true })));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -320,11 +335,11 @@ describe("tbaContactsContactList", () => {
     it("exclut un user ADMINISTRATEUR (compte interne TBA)", async () => {
       const orgaAdmin = {
         _id: new ObjectId(),
-        type: "ADMINISTRATEUR",
+        type: "ADMINISTRATEUR" as const,
         created_at: NOW,
       };
-      await organisationsDb().insertOne(orgaAdmin as any);
-      await usersMigrationDb().insertOne(buildUser(orgaAdmin) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaAdmin));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaAdmin)));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -336,14 +351,15 @@ describe("tbaContactsContactList", () => {
     it("inclut les 3 statuts (CONFIRMED, PENDING_ADMIN_VALIDATION, PENDING_EMAIL_VALIDATION) et reflète STATUT_COMPTE_USER", async () => {
       const orgaOf = buildOrgaOf();
       const organisme = buildOrganisme(orgaOf);
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
       await usersMigrationDb().insertMany([
-        buildUser(orgaOf, { account_status: "CONFIRMED" }) as any,
-        buildUser(orgaOf, { account_status: "PENDING_ADMIN_VALIDATION" }) as any,
-        buildUser(orgaOf, { account_status: "PENDING_EMAIL_VALIDATION" }) as any,
-        // exclus malgré un statut valide
-        buildUser(orgaOf, { account_status: "CONFIRMED", unsubscribe: true }) as any,
+        testDoc<IUsersMigration>(buildUser(orgaOf, { account_status: "CONFIRMED" })),
+        testDoc<IUsersMigration>(buildUser(orgaOf, { account_status: "PENDING_ADMIN_VALIDATION" })),
+        testDoc<IUsersMigration>(buildUser(orgaOf, { account_status: "PENDING_EMAIL_VALIDATION" })),
+        testDoc<IUsersMigration>( // exclus malgré un statut valide
+          buildUser(orgaOf, { account_status: "CONFIRMED", unsubscribe: true })
+        ),
       ]);
 
       const contacts = await tbaContactsContactList.fetchContacts();
@@ -359,11 +375,11 @@ describe("tbaContactsContactList", () => {
     it("ne renvoie que les utilisateurs ciblés", async () => {
       const orgaOf = buildOrgaOf();
       const organisme = buildOrganisme(orgaOf);
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
       const user1 = buildUser(orgaOf);
       const user2 = buildUser(orgaOf);
-      await usersMigrationDb().insertMany([user1 as any, user2 as any]);
+      await usersMigrationDb().insertMany([testDoc<IUsersMigration>(user1), testDoc<IUsersMigration>(user2)]);
 
       const contacts = await tbaContactsContactList.fetchContacts({ userIds: [user1._id] });
 
@@ -374,10 +390,10 @@ describe("tbaContactsContactList", () => {
     it("renvoie un tableau vide si l'utilisateur ciblé est hors-périmètre (unsubscribe)", async () => {
       const orgaOf = buildOrgaOf();
       const organisme = buildOrganisme(orgaOf);
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
       const user = buildUser(orgaOf, { unsubscribe: true });
-      await usersMigrationDb().insertOne(user as any);
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
 
       const contacts = await tbaContactsContactList.fetchContacts({ userIds: [user._id] });
 
@@ -389,9 +405,9 @@ describe("tbaContactsContactList", () => {
     it("STATUT_SIRET='fermé' quand organisme.ferme=true", async () => {
       const orgaOf = buildOrgaOf();
       const organisme = buildOrganisme(orgaOf, { ferme: true });
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaOf)));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -402,13 +418,13 @@ describe("tbaContactsContactList", () => {
     it("STATUT_SIRET=null quand la typologie d'organisation n'a pas de SIRET", async () => {
       const orgaArml = {
         _id: new ObjectId(),
-        type: "ARML",
+        type: "ARML" as const,
         nom: "ARML Île-de-France",
         region_list: ["11"],
         created_at: NOW,
       };
-      await organisationsDb().insertOne(orgaArml as any);
-      await usersMigrationDb().insertOne(buildUser(orgaArml) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaArml));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaArml)));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -421,12 +437,12 @@ describe("tbaContactsContactList", () => {
     it("DDETS : ORGANISATION/REGION/DEPARTEMENT_* dérivés depuis code_departement", async () => {
       const orgaDdets = {
         _id: new ObjectId(),
-        type: "DDETS",
-        code_departement: "42",
+        type: "DDETS" as const,
+        code_departement: "42" as const,
         created_at: NOW,
       };
-      await organisationsDb().insertOne(orgaDdets as any);
-      await usersMigrationDb().insertOne(buildUser(orgaDdets) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaDdets));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaDdets)));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -443,9 +459,9 @@ describe("tbaContactsContactList", () => {
       const organisme = buildOrganisme(orgaOf, {
         adresse: { region: "11", departement: "75", academie: "01", commune: "Paris" },
       });
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaOf)));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -460,9 +476,9 @@ describe("tbaContactsContactList", () => {
       const activatedAt = new Date("2026-01-15T10:00:00.000Z");
       const orgaOf = buildOrgaOf({ ml_beta_activated_at: activatedAt });
       const organisme = buildOrganisme(orgaOf);
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaOf)));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -475,8 +491,8 @@ describe("tbaContactsContactList", () => {
     it("ML_DATE_ACTIVATION_ML reprend `activated_at` de l'organisation ML", async () => {
       const activatedAt = new Date("2026-01-15T10:00:00.000Z");
       const orgaMl = buildOrgaMl("ML ACTIVE", { activated_at: activatedAt });
-      await organisationsDb().insertOne(orgaMl as any);
-      await usersMigrationDb().insertOne(buildUser(orgaMl) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaMl)));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -485,9 +501,9 @@ describe("tbaContactsContactList", () => {
     });
 
     it("ML_DATE_ACTIVATION_ML null si la ML n'a pas de `activated_at`", async () => {
-      const orgaMl = buildOrgaMl("ML INACTIVE");
-      await organisationsDb().insertOne(orgaMl as any);
-      await usersMigrationDb().insertOne(buildUser(orgaMl) as any);
+      const { activated_at: _activatedAt, ...orgaMl } = buildOrgaMl("ML INACTIVE");
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaMl)));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -500,23 +516,26 @@ describe("tbaContactsContactList", () => {
       const orgaOf = buildOrgaOf();
       // ERP apprenants = `effectifs_current_year_count` pré-calculé sur l'organisme.
       const organisme = buildOrganisme(orgaOf, { effectifs_current_year_count: 3 });
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaOf)));
 
       // ERP rupturants = contrats avec date_rupture dans l'année civile courante.
       await effectifsDb().insertMany(
-        [buildEffectif(organisme._id, "RUPTURANT") as any, buildEffectif(organisme._id, "RUPTURANT") as any],
+        [
+          testDoc<IEffectif>(buildEffectif(organisme._id, "RUPTURANT")),
+          testDoc<IEffectif>(buildEffectif(organisme._id, "RUPTURANT")),
+        ],
         { bypassDocumentValidation: true }
       );
       // DECA = effectifsDECA avec formation.date_entree dans l'année civile courante.
       // Rupturants DECA = sous-ensemble avec contrats[0].date_rupture non nul.
       await effectifsDECADb().insertMany(
         [
-          buildEffectif(organisme._id, "APPRENTI") as any,
-          buildEffectif(organisme._id, "RUPTURANT") as any,
-          buildEffectif(organisme._id, "RUPTURANT") as any,
-          buildEffectif(organisme._id, "RUPTURANT") as any,
+          testDoc<IEffectifDECA>(buildEffectif(organisme._id, "APPRENTI")),
+          testDoc<IEffectifDECA>(buildEffectif(organisme._id, "RUPTURANT")),
+          testDoc<IEffectifDECA>(buildEffectif(organisme._id, "RUPTURANT")),
+          testDoc<IEffectifDECA>(buildEffectif(organisme._id, "RUPTURANT")),
         ],
         { bypassDocumentValidation: true }
       );
@@ -533,10 +552,10 @@ describe("tbaContactsContactList", () => {
     it("CFA_ERP_OU_DECA='DECA' quand pas d'ERPs déclarés mais apprenants DECA présents", async () => {
       const orgaOf = buildOrgaOf();
       const organisme = buildOrganisme(orgaOf);
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
-      await effectifsDECADb().insertMany([buildEffectif(organisme._id, "APPRENTI") as any], {
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaOf)));
+      await effectifsDECADb().insertMany([testDoc<IEffectifDECA>(buildEffectif(organisme._id, "APPRENTI"))], {
         bypassDocumentValidation: true,
       });
 
@@ -550,9 +569,9 @@ describe("tbaContactsContactList", () => {
     it("retourne 0 / 0 / '' quand l'organisme n'a aucun rupturant suivi par une ML", async () => {
       const orgaOf = buildOrgaOf();
       const organisme = buildOrganisme(orgaOf);
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaOf)));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -569,18 +588,23 @@ describe("tbaContactsContactList", () => {
       const mlB = buildOrgaMl("ML B");
       const mlC = buildOrgaMl("ML C");
 
-      await organisationsDb().insertMany([orgaOf as any, mlA as any, mlB as any, mlC as any]);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
+      await organisationsDb().insertMany([
+        testDoc<IOrganisation>(orgaOf),
+        testDoc<IOrganisation>(mlA),
+        testDoc<IOrganisation>(mlB),
+        testDoc<IOrganisation>(mlC),
+      ]);
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaOf)));
       // ML A : 3 rupturants, ML B : 2, ML C : 1 → "ML A, ML B et 1 autre"
       await missionLocaleEffectifsDb().insertMany(
         [
-          buildRupturant(organisme._id, mlA._id) as any,
-          buildRupturant(organisme._id, mlA._id) as any,
-          buildRupturant(organisme._id, mlA._id) as any,
-          buildRupturant(organisme._id, mlB._id) as any,
-          buildRupturant(organisme._id, mlB._id) as any,
-          buildRupturant(organisme._id, mlC._id) as any,
+          testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlA._id)),
+          testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlA._id)),
+          testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlA._id)),
+          testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlB._id)),
+          testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlB._id)),
+          testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlC._id)),
         ],
         { bypassDocumentValidation: true }
       );
@@ -599,14 +623,18 @@ describe("tbaContactsContactList", () => {
       const mlA = buildOrgaMl("ML A");
       const mlB = buildOrgaMl("ML B");
 
-      await organisationsDb().insertMany([orgaOf as any, mlA as any, mlB as any]);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf) as any);
+      await organisationsDb().insertMany([
+        testDoc<IOrganisation>(orgaOf),
+        testDoc<IOrganisation>(mlA),
+        testDoc<IOrganisation>(mlB),
+      ]);
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaOf)));
       await missionLocaleEffectifsDb().insertMany(
         [
-          buildRupturant(organisme._id, mlA._id) as any,
-          buildRupturant(organisme._id, mlA._id) as any,
-          buildRupturant(organisme._id, mlB._id) as any,
+          testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlA._id)),
+          testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlA._id)),
+          testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, mlB._id)),
         ],
         { bypassDocumentValidation: true }
       );
@@ -620,8 +648,8 @@ describe("tbaContactsContactList", () => {
 
     it("les champs d'extension sont null côté ML (réservés aux OF)", async () => {
       const orgaMl = buildOrgaMl("ML PARIS");
-      await organisationsDb().insertOne(orgaMl as any);
-      await usersMigrationDb().insertOne(buildUser(orgaMl) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaMl)));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -672,8 +700,8 @@ describe("tbaContactsContactList", () => {
 
     it("null côté ML (réservé aux OF)", async () => {
       const orgaMl = buildOrgaMl("ML PARIS");
-      await organisationsDb().insertOne(orgaMl as any);
-      await usersMigrationDb().insertOne(buildUser(orgaMl) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaMl)));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -687,10 +715,12 @@ describe("tbaContactsContactList", () => {
     it("retient la plus ancienne ml_beta_activated_at parmi les organisations de l'organisme", async () => {
       const { organisme } = await insertCfa({ activatedAt: ACTIVATED_AT });
       await organisationsDb().insertOne(
-        buildOrgaOf({
-          organisme_id: String(organisme._id),
-          ml_beta_activated_at: new Date("2026-02-10T00:00:00.000Z"),
-        }) as any
+        testDoc<IOrganisation>(
+          buildOrgaOf({
+            organisme_id: String(organisme._id),
+            ml_beta_activated_at: new Date("2026-02-10T00:00:00.000Z"),
+          })
+        )
       );
 
       const contacts = await tbaContactsContactList.fetchContacts();
@@ -715,7 +745,7 @@ describe("tbaContactsContactList", () => {
       const { organisme } = await insertCfa({ activatedAt: ACTIVATED_AT });
       const mlId = new ObjectId();
       await missionLocaleEffectifsDb().insertMany(
-        [
+        testDocs<IMissionLocaleEffectif>([
           buildCollab(organisme._id, mlId, new Date("2026-02-01T00:00:00.000Z")),
           buildCollab(organisme._id, mlId, new Date("2026-04-15T00:00:00.000Z")),
           buildCollab(organisme._id, mlId, new Date("2025-12-31T23:59:59.000Z")),
@@ -723,7 +753,7 @@ describe("tbaContactsContactList", () => {
           buildRupturant(organisme._id, mlId, {
             organisme_data: { acc_conjoint: false, reponse_at: new Date("2026-05-02T00:00:00.000Z") },
           }),
-        ] as any[],
+        ]),
         { bypassDocumentValidation: true }
       );
 
@@ -736,9 +766,12 @@ describe("tbaContactsContactList", () => {
 
     it("0 et null quand aucun dossier n'a été envoyé", async () => {
       const { organisme } = await insertCfa({ activatedAt: ACTIVATED_AT });
-      await missionLocaleEffectifsDb().insertOne(buildRupturant(organisme._id, new ObjectId()) as any, {
-        bypassDocumentValidation: true,
-      });
+      await missionLocaleEffectifsDb().insertOne(
+        testDoc<IMissionLocaleEffectif>(buildRupturant(organisme._id, new ObjectId())),
+        {
+          bypassDocumentValidation: true,
+        }
+      );
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -748,8 +781,8 @@ describe("tbaContactsContactList", () => {
 
     it("null côté ML (réservé aux OF)", async () => {
       const orgaMl = buildOrgaMl("ML PARIS");
-      await organisationsDb().insertOne(orgaMl as any);
-      await usersMigrationDb().insertOne(buildUser(orgaMl) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaMl)));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -766,16 +799,16 @@ describe("tbaContactsContactList", () => {
       const c = await insertCfa();
       const d = await insertCfa({ activatedAt: ACTIVATED_AT, organisme: { ferme: true } });
       const e = await insertCfa();
-      await usersMigrationDb().insertOne(buildUser(e.orgaOf) as any);
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(e.orgaOf)));
       await missionLocaleEffectifsDb().insertMany(
-        [
+        testDocs<IMissionLocaleEffectif>([
           buildCollab(a.organisme._id, mlId, new Date("2026-02-01T00:00:00.000Z")),
           buildCollab(a.organisme._id, mlId, new Date("2026-03-01T00:00:00.000Z")),
           buildCollab(a.organisme._id, mlId, new Date("2025-11-01T00:00:00.000Z")),
           buildCollab(c.organisme._id, mlId, new Date("2026-03-01T00:00:00.000Z")),
           buildCollab(d.organisme._id, mlId, new Date("2026-03-01T00:00:00.000Z")),
           buildRupturant(b.organisme._id, mlId),
-        ] as any[],
+        ]),
         { bypassDocumentValidation: true }
       );
 
@@ -796,7 +829,12 @@ describe("tbaContactsContactList", () => {
       }
 
       expect(contacts).toHaveLength(6);
-      expect(stats.national.activation).toEqual({ cfa_compatibles: 4, cfa_actives: 2, cfa_with_collab: 1 });
+      expect(stats.national.activation).toEqual({
+        cfa_compatibles: 4,
+        cfa_avec_compte: 4,
+        cfa_actives: 2,
+        cfa_with_collab: 1,
+      });
       expect(byStatut.oui.size).toBe(stats.national.activation.cfa_actives);
       expect(byStatut.oui.size + byStatut.activable.size).toBe(stats.national.activation.cfa_compatibles);
       expect(ouiWithCollab.size).toBe(stats.national.activation.cfa_with_collab);
@@ -807,9 +845,9 @@ describe("tbaContactsContactList", () => {
     it("sync réelle : crée une invitation de connexion par user en DB, source=tba-contacts", async () => {
       const orgaOf = buildOrgaOf();
       const organisme = buildOrganisme(orgaOf);
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf, { email: "alice@example.fr" }) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaOf, { email: "alice@example.fr" })));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -825,9 +863,9 @@ describe("tbaContactsContactList", () => {
     it("idempotent : 2 syncs successives produisent le même token pour le même email", async () => {
       const orgaOf = buildOrgaOf();
       const organisme = buildOrganisme(orgaOf);
-      await organisationsDb().insertOne(orgaOf as any);
-      await organismesDb().insertOne(organisme as any);
-      await usersMigrationDb().insertOne(buildUser(orgaOf, { email: "stable@example.fr" }) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(organisme));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaOf, { email: "stable@example.fr" })));
 
       const first = await tbaContactsContactList.fetchContacts();
       const second = await tbaContactsContactList.fetchContacts();
@@ -841,20 +879,22 @@ describe("tbaContactsContactList", () => {
 
   describe("fetchContacts - contacts génériques ML", () => {
     const enableMlGenericContacts = async () => {
-      await brevoSyncSettingsDb().insertOne({
-        key: "brevo-contact-sync",
-        daily_full_sync_enabled: false,
-        instant_sync_enabled: false,
-        ml_generic_contacts_enabled: true,
-      } as any);
+      await brevoSyncSettingsDb().insertOne(
+        testDoc<IBrevoSyncSettings>({
+          key: "brevo-contact-sync",
+          daily_full_sync_enabled: false,
+          instant_sync_enabled: false,
+          ml_generic_contacts_enabled: true,
+        })
+      );
     };
 
-    const genericContacts = (contacts: { attributes: Record<string, any> }[]) =>
+    const genericContacts = (contacts: { attributes: Record<string, unknown> }[]) =>
       contacts.filter((c) => c.attributes.ML_ADRESSE_GENERIQUE === true);
 
     it("désactivé par défaut : aucune adresse générique n'est produite", async () => {
       await organisationsDb().insertOne(
-        buildOrgaMl("ML NANTES", { email: "contact@ml-nantes.fr", activated_at: NOW }) as any
+        testDoc<IOrganisation>(buildOrgaMl("ML NANTES", { email: "contact@ml-nantes.fr", activated_at: NOW }))
       );
 
       const contacts = await tbaContactsContactList.fetchContacts();
@@ -870,9 +910,9 @@ describe("tbaContactsContactList", () => {
         activated_at: activatedAt,
         adresse: { region: "52", departement: "44", academie: "17", complete: "1 rue de Nantes 44000 NANTES" },
       });
-      await organisationsDb().insertOne(orgaMl as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
       await missionLocaleStatsDb().insertOne(
-        buildMlStatsDoc(orgaMl._id, { total: 20, a_traiter: 5, traite: 15 }) as any,
+        testDoc<IMissionLocaleStats>(buildMlStatsDoc(orgaMl._id, { total: 20, a_traiter: 5, traite: 15 })),
         { bypassDocumentValidation: true }
       );
 
@@ -901,10 +941,10 @@ describe("tbaContactsContactList", () => {
     it("ML sans `activated_at` mais avec un compte confirmé : CONFIRMED, date repliée sur confirmed_at", async () => {
       await enableMlGenericContacts();
       const confirmedAt = new Date("2026-03-10T09:00:00.000Z");
-      const orgaMl = buildOrgaMl("ML RENNES", { email: "contact@ml-rennes.fr" });
-      await organisationsDb().insertOne(orgaMl as any);
+      const { activated_at: _activatedAt, ...orgaMl } = buildOrgaMl("ML RENNES", { email: "contact@ml-rennes.fr" });
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
       await usersMigrationDb().insertOne(
-        buildUser(orgaMl, { email: "agent@ml-rennes.fr", confirmed_at: confirmedAt }) as any
+        testDoc<IUsersMigration>(buildUser(orgaMl, { email: "agent@ml-rennes.fr", confirmed_at: confirmedAt }))
       );
 
       const contacts = await tbaContactsContactList.fetchContacts();
@@ -917,10 +957,12 @@ describe("tbaContactsContactList", () => {
 
     it("ML ni activée ni pourvue d'un compte confirmé : statut vide", async () => {
       await enableMlGenericContacts();
-      const orgaMl = buildOrgaMl("ML BREST", { email: "contact@ml-brest.fr" });
-      await organisationsDb().insertOne(orgaMl as any);
+      const { activated_at: _activatedAt, ...orgaMl } = buildOrgaMl("ML BREST", { email: "contact@ml-brest.fr" });
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
       await usersMigrationDb().insertOne(
-        buildUser(orgaMl, { email: "agent@ml-brest.fr", account_status: "PENDING_ADMIN_VALIDATION" }) as any
+        testDoc<IUsersMigration>(
+          buildUser(orgaMl, { email: "agent@ml-brest.fr", account_status: "PENDING_ADMIN_VALIDATION" })
+        )
       );
 
       const generiques = genericContacts(await tbaContactsContactList.fetchContacts());
@@ -932,11 +974,13 @@ describe("tbaContactsContactList", () => {
 
     it("exclut les ML dont l'adresse générique est vide ou absente", async () => {
       await enableMlGenericContacts();
-      await organisationsDb().insertMany([
-        buildOrgaMl("ML SANS EMAIL", { activated_at: NOW }),
-        buildOrgaMl("ML EMAIL VIDE", { email: "", activated_at: NOW }),
-        buildOrgaMl("ML EMAIL NULL", { email: null, activated_at: NOW }),
-      ] as any);
+      await organisationsDb().insertMany(
+        testDocs<IOrganisation>([
+          buildOrgaMl("ML SANS EMAIL", { activated_at: NOW }),
+          buildOrgaMl("ML EMAIL VIDE", { email: "", activated_at: NOW }),
+          buildOrgaMl("ML EMAIL NULL", { email: null, activated_at: NOW }),
+        ])
+      );
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -948,8 +992,8 @@ describe("tbaContactsContactList", () => {
     it("collision avec un compte utilisateur : un seul contact, celui du compte", async () => {
       await enableMlGenericContacts();
       const orgaMl = buildOrgaMl("ML LYON", { email: "Contact@ML-Lyon.fr", activated_at: NOW });
-      await organisationsDb().insertOne(orgaMl as any);
-      await usersMigrationDb().insertOne(buildUser(orgaMl, { email: "contact@ml-lyon.fr" }) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaMl, { email: "contact@ml-lyon.fr" })));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
@@ -963,7 +1007,7 @@ describe("tbaContactsContactList", () => {
     it("omet les attributs nominatifs plutôt que de les mettre à null", async () => {
       await enableMlGenericContacts();
       await organisationsDb().insertOne(
-        buildOrgaMl("ML TOURS", { email: "contact@ml-tours.fr", activated_at: NOW }) as any
+        testDoc<IOrganisation>(buildOrgaMl("ML TOURS", { email: "contact@ml-tours.fr", activated_at: NOW }))
       );
 
       const [contact] = await tbaContactsContactList.fetchContacts();
@@ -988,8 +1032,8 @@ describe("tbaContactsContactList", () => {
     it("cohabite avec les contacts utilisateurs sans les altérer", async () => {
       await enableMlGenericContacts();
       const orgaMl = buildOrgaMl("ML ANGERS", { email: "contact@ml-angers.fr", activated_at: NOW });
-      await organisationsDb().insertOne(orgaMl as any);
-      await usersMigrationDb().insertOne(buildUser(orgaMl, { email: "agent@ml-angers.fr" }) as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser(orgaMl, { email: "agent@ml-angers.fr" })));
 
       const contacts = await tbaContactsContactList.fetchContacts();
 

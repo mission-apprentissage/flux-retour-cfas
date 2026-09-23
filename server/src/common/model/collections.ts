@@ -1,11 +1,5 @@
 import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLogs.model";
 import brevoContactListModelDescriptor, { IBrevoContactList } from "shared/models/data/brevoContactList.model";
-import brevoMissionLocaleListModelDescriptor, {
-  IBrevoMissionLocaleList,
-} from "shared/models/data/brevoMissionLocaleList.model";
-import brevoMissionLocaleTemplateModelDescriptor, {
-  IBrevoMissionLocaleTemplate,
-} from "shared/models/data/brevoMissionLocaleTemplate.model";
 import brevoSyncSettingsModelDescriptor, { IBrevoSyncSettings } from "shared/models/data/brevoSyncSettings.model";
 import connexionInvitationsModelDescriptor, {
   IConnexionInvitation,
@@ -22,7 +16,9 @@ import franceTravailEffectifDescriptor, {
 import invitationsModelDescriptor, { IInvitation } from "shared/models/data/invitations.model";
 import invitationsArchiveModelDescriptor, { IInvitationArchive } from "shared/models/data/invitationsArchive.model";
 import JwtSessionsModelDescriptor, { IJwtSession } from "shared/models/data/jwtSessions.model";
-import MaintenanceMessagesModelDescriptor, { IMaintenanceMessage } from "shared/models/data/maintenanceMessages.model";
+import missionLocaleCfaInvitationsDescriptor, {
+  IMissionLocaleCfaInvitation,
+} from "shared/models/data/missionLocaleCfaInvitations.model";
 import missionLocaleEffectifDescriptor, {
   IMissionLocaleEffectif,
 } from "shared/models/data/missionLocaleEffectif.model";
@@ -60,7 +56,6 @@ export const modelDescriptors = [
   formationsCatalogueModelDescriptor,
   usersMigrationModelDescriptor,
   JwtSessionsModelDescriptor,
-  MaintenanceMessagesModelDescriptor,
   invitationsModelDescriptor,
   invitationsArchiveModelDescriptor,
   organisationsModelDescriptor,
@@ -81,10 +76,9 @@ export const modelDescriptors = [
   transmissionV2Descriptor,
   ReseauxModelDescriptor,
   missionLocaleEffectifDescriptor,
+  missionLocaleCfaInvitationsDescriptor,
   regionsModelDescriptor,
-  brevoMissionLocaleTemplateModelDescriptor,
   missionLocaleEffectifLogDescriptor,
-  brevoMissionLocaleListModelDescriptor,
   brevoContactListModelDescriptor,
   brevoSyncSettingsModelDescriptor,
   connexionInvitationsModelDescriptor,
@@ -105,8 +99,6 @@ export const invitationsDb = () => getDbCollection<IInvitation>(invitationsModel
 export const invitationsArchiveDb = () =>
   getDbCollection<IInvitationArchive>(invitationsArchiveModelDescriptor.collectionName);
 export const organisationsDb = () => getDbCollection<IOrganisation>(organisationsModelDescriptor.collectionName);
-export const maintenanceMessageDb = () =>
-  getDbCollection<IMaintenanceMessage>(MaintenanceMessagesModelDescriptor.collectionName);
 export const effectifsDb = () => getDbCollection<IEffectif>(effectifsModelDescriptor.collectionName);
 export const effectifsArchiveDb = () =>
   getDbCollection<IEffectifArchive>(effectifsArchiveModelDescriptor.collectionName);
@@ -124,15 +116,13 @@ export const reseauxDb = () => getDbCollection<IReseau>(ReseauxModelDescriptor.c
 
 export const missionLocaleEffectifsDb = () =>
   getDbCollection<IMissionLocaleEffectif>(missionLocaleEffectifDescriptor.collectionName);
+export const missionLocaleCfaInvitationsDb = () =>
+  getDbCollection<IMissionLocaleCfaInvitation>(missionLocaleCfaInvitationsDescriptor.collectionName);
 export const missionLocaleStatsDb = () =>
   getDbCollection<IMissionLocaleStats>(missionLocaleStatsDescriptor.collectionName);
 export const missionLocaleEffectifsLogDb = () =>
   getDbCollection<IMissionLocaleEffectifLog>(missionLocaleEffectifLogDescriptor.collectionName);
 export const regionsDb = () => getDbCollection<IRegion>(regionsModelDescriptor.collectionName);
-export const brevoMissionLocaleTemplateDb = () =>
-  getDbCollection<IBrevoMissionLocaleTemplate>(brevoMissionLocaleTemplateModelDescriptor.collectionName);
-export const brevoMissionLocaleListDb = () =>
-  getDbCollection<IBrevoMissionLocaleList>(brevoMissionLocaleListModelDescriptor.collectionName);
 export const brevoContactListDb = () =>
   getDbCollection<IBrevoContactList>(brevoContactListModelDescriptor.collectionName);
 export const brevoSyncSettingsDb = () =>

@@ -39,7 +39,7 @@ import { getUserById } from "./users.actions";
 export const INVITATION_EXPIRATION_MS = 96 * 60 * 60 * 1000;
 
 export async function createOrganisation(organisation: IOrganisationCreate): Promise<ObjectId> {
-  const formatOrganisme = async (organisation) => {
+  const formatOrganisme = async (organisation: Extract<IOrganisationCreate, { type: "ORGANISME_FORMATION" }>) => {
     const organisme = await organismesDb().findOne({
       siret: organisation.siret,
       ...(organisation.uai ? { uai: organisation.uai } : {}),
@@ -134,7 +134,7 @@ export async function listContactsOrganisation(organisationId: ObjectId): Promis
     .toArray();
 }
 
-export async function listOrganisationPendingInvitations(ctx: AuthContext): Promise<any[]> {
+export async function listOrganisationPendingInvitations(ctx: AuthContext) {
   return await invitationsDb()
     .find({ organisation_id: ctx.organisation_id }, { projection: { token: 0 } })
     .toArray();
@@ -582,7 +582,7 @@ export const getOrganisationOrganismeByOrganismeId = async (
   return found as WithId<IOrganisationOrganismeFormation>;
 };
 
-export async function getInvitationByToken(token: string): Promise<any> {
+export async function getInvitationByToken(token: string) {
   const invitation = await invitationsDb().findOne({
     token,
   });
@@ -707,6 +707,96 @@ export const getAllMissionsLocales = async (): Promise<IOrganisationMissionLocal
     throw Boom.notFound("Aucune mission locale trouvée");
   }
   return organisations;
+};
+
+/**
+ * Missions Locales actives (déjà activées sur le Tableau de bord) situées dans les régions données.
+ * Mutualisé entre l'email d'invitation CFA et l'onboarding CFA, qui listent les ML du même territoire.
+ */
+export const getActiveMissionLocalesByRegions = async (regions: string[]): Promise<IOrganisationMissionLocale[]> => {
+  const codesRegion = [...new Set(regions.filter(Boolean))];
+  if (codesRegion.length === 0) {
+    return [];
+  }
+  return organisationsDb()
+    .find<IOrganisationMissionLocale>({
+      type: "MISSION_LOCALE",
+      "adresse.region": { $in: codesRegion },
+      activated_at: { $exists: true, $ne: null },
+    })
+    .toArray();
+};
+
+export interface ICfaAccounts {
+  organisation_id: ObjectId;
+  ml_beta_activated_at: Date | null;
+  /** Utilisateurs du CFA dont le compte est `CONFIRMED`. */
+  destinataires: Array<{ user_id: ObjectId; email: string; nom: string | null }>;
+}
+
+export const getCfaAccountsByOrganismeIds = async (organismeIds: string[]): Promise<Map<string, ICfaAccounts>> => {
+  const map = new Map<string, ICfaAccounts>();
+  const ids = [...new Set(organismeIds.filter(Boolean))];
+  if (ids.length === 0) {
+    return map;
+  }
+
+  const organisations = await organisationsDb()
+    .find<IOrganisationOrganismeFormation>(
+      { type: "ORGANISME_FORMATION", organisme_id: { $in: ids } },
+      { projection: { organisme_id: 1, ml_beta_activated_at: 1 } }
+    )
+    .toArray();
+
+  // Plusieurs organisations peuvent porter le même organisme : fusion sur la plus ancienne activation,
+  // sinon une organisation non activée masque l'activation d'une autre.
+  const organismeIdByOrganisationId = new Map<string, string>();
+  for (const organisation of organisations) {
+    if (!organisation.organisme_id) {
+      continue;
+    }
+    organismeIdByOrganisationId.set(organisation._id.toString(), organisation.organisme_id);
+    const existing = map.get(organisation.organisme_id);
+    const activatedAt = organisation.ml_beta_activated_at ?? null;
+    if (!existing) {
+      map.set(organisation.organisme_id, {
+        organisation_id: organisation._id,
+        ml_beta_activated_at: activatedAt,
+        destinataires: [],
+      });
+      continue;
+    }
+    if (activatedAt && (!existing.ml_beta_activated_at || activatedAt < existing.ml_beta_activated_at)) {
+      existing.ml_beta_activated_at = activatedAt;
+      existing.organisation_id = organisation._id;
+    }
+  }
+
+  if (organisations.length === 0) {
+    return map;
+  }
+
+  const users = await usersMigrationDb()
+    .find(
+      { organisation_id: { $in: organisations.map((o) => o._id) }, account_status: "CONFIRMED" },
+      { projection: { _id: 1, email: 1, prenom: 1, nom: 1, organisation_id: 1 } }
+    )
+    .toArray();
+
+  for (const user of users) {
+    const organismeId = organismeIdByOrganisationId.get(user.organisation_id.toString());
+    const entry = organismeId ? map.get(organismeId) : undefined;
+    if (!entry) {
+      continue;
+    }
+    entry.destinataires.push({
+      user_id: user._id,
+      email: user.email,
+      nom: [user.prenom, user.nom].filter(Boolean).join(" ") || null,
+    });
+  }
+
+  return map;
 };
 
 export const getAllARML = async (): Promise<IOrganisationARML[]> => {

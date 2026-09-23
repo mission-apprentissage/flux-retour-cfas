@@ -1,0 +1,147 @@
+.title {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-title-blue-france);
+}
+
+.header {
+  max-width: 48rem;
+  line-height: 1.6;
+}
+
+.divider {
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.responsibility {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.responsibilityItem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin: 0;
+}
+
+.ribbon {
+  margin-bottom: 2rem;
+}
+
+.exampleButton {
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.sidebarCard {
+  padding: 1.5rem;
+  border-left: 4px solid transparent;
+}
+
+.sidebarInfos {
+  background-color: #fee7fc;
+  border-left-color: #6e445a;
+}
+
+.sidebarTips {
+  background-color: #e8edff;
+  border-left-color: #0063cb;
+}
+
+.sidebarTitle {
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.sidebarInfos .sidebarTitle {
+  color: #6e445a;
+}
+
+.sidebarTips .sidebarTitle {
+  color: #0063cb;
+}
+
+.sidebarBody {
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+
+.downloadLink {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-right: 1.5rem;
+}
+
+.downloadMeta {
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.fileCard {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  max-width: 26rem;
+  padding: 1rem;
+  background-color: var(--background-default-grey);
+  background-image: none;
+  border: 1px solid var(--border-default-grey);
+  border-bottom: 3px solid var(--border-active-blue-france);
+
+  &:hover {
+    background-color: var(--background-default-grey-hover);
+  }
+}
+
+.fileCardIcon {
+  color: var(--text-action-high-blue-france);
+}
+
+.fileCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fileCardCategory {
+  align-self: flex-start;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6e445a;
+  background-color: #fee7fc;
+}
+
+.fileCardTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-action-high-blue-france);
+}
+
+.fileCardDescription {
+  color: var(--text-default-grey);
+}
+
+.fileCardMeta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: var(--text-mention-grey);
+}
+
+.exampleImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 1.5rem;
+}

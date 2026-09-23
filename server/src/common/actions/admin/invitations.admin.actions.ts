@@ -1,6 +1,6 @@
 import Boom from "boom";
 import { format } from "date-fns";
-import { ObjectId } from "mongodb";
+import { Document, ObjectId } from "mongodb";
 
 import { INVITATION_EXPIRATION_MS } from "@/common/actions/organisations.actions";
 import {
@@ -40,11 +40,11 @@ export async function listAdminInvitations(params: ListAdminInvitationsParams) {
 
   const collection = status === "pending" ? invitationsDb() : invitationsArchiveDb();
 
-  const match: Record<string, any> = {};
+  const match: Document = {};
   if (role) match.role = role;
   if (organisation_id) match.organisation_id = new ObjectId(organisation_id);
 
-  const pipeline: any[] = [{ $match: match }];
+  const pipeline: Document[] = [{ $match: match }];
 
   pipeline.push(
     {
@@ -201,7 +201,7 @@ export async function resendAdminInvitation(invitationId: string): Promise<{ ema
       : null;
     const organisationLabel =
       organisation.type === "MISSION_LOCALE"
-        ? `Mission locale ${(organisation as any).nom ?? ""}`
+        ? `Mission locale ${organisation.nom ?? ""}`
         : organisation.type === "FRANCE_TRAVAIL"
           ? "France Travail"
           : organisation.type;

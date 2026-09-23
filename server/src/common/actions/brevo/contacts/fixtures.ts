@@ -1,4 +1,13 @@
 import { ObjectId } from "bson";
+import type {
+  IMissionLocaleEffectif,
+  IOrganisationMissionLocale,
+  IOrganisationOrganismeFormation,
+  IOrganisme,
+  IUsersMigration,
+} from "shared/models";
+
+import type { DeepPartial } from "@tests/utils/testUtils";
 
 export const NOW = new Date("2026-05-13T00:00:00.000Z");
 export const ANNEE_SCOLAIRE = "2025-2026";
@@ -15,27 +24,30 @@ export const resetFixtureCounters = () => {
   userCounter = 0;
 };
 
-export const buildOrgaOf = (override: Record<string, any> = {}) => ({
-  _id: new ObjectId(),
-  type: "ORGANISME_FORMATION" as const,
-  siret: `${++siretCounter}`,
-  uai: `${++uaiCounter}A`,
-  created_at: NOW,
-  ...override,
-});
+export const buildOrgaOf = (override: DeepPartial<IOrganisationOrganismeFormation> = {}) =>
+  ({
+    _id: new ObjectId(),
+    type: "ORGANISME_FORMATION" as const,
+    siret: `${++siretCounter}`,
+    uai: `${++uaiCounter}A`,
+    created_at: NOW,
+    ...override,
+  }) satisfies DeepPartial<IOrganisationOrganismeFormation>;
 
-export const buildOrgaMl = (nom: string, override: Record<string, any> = {}) => ({
-  _id: new ObjectId(),
-  type: "MISSION_LOCALE" as const,
-  nom,
-  ml_id: Math.floor(Math.random() * 100000) + 1,
-  created_at: NOW,
-  ...override,
-});
+export const buildOrgaMl = (nom: string, override: DeepPartial<IOrganisationMissionLocale> = {}) =>
+  ({
+    _id: new ObjectId(),
+    type: "MISSION_LOCALE" as const,
+    nom,
+    ml_id: Math.floor(Math.random() * 100000) + 1,
+    activated_at: NOW,
+    created_at: NOW,
+    ...override,
+  }) satisfies DeepPartial<IOrganisationMissionLocale>;
 
 export const buildOrganisme = (
-  orgaOf: { siret: string; uai: string | null; organisme_id?: string },
-  override: Record<string, any> = {}
+  orgaOf: { siret: string; uai: string | null; organisme_id?: string | null },
+  override: DeepPartial<IOrganisme> = {}
 ) => {
   const organisme = {
     _id: new ObjectId(),
@@ -53,45 +65,51 @@ export const buildOrganisme = (
     updated_at: NOW,
     created_at: NOW,
     ...override,
-  };
+  } satisfies DeepPartial<IOrganisme>;
   orgaOf.organisme_id = String(organisme._id);
   return organisme;
 };
 
-export const buildUser = (orgaOf: { _id: ObjectId }, override: Record<string, any> = {}) => ({
-  _id: new ObjectId(),
-  email: `user-${++userCounter}@example.com`,
-  password: "hashed",
-  prenom: "Alice",
-  nom: "DUPONT",
-  civility: "Madame",
-  fonction: "Conseillère",
-  telephone: "0123456789",
-  organisation_id: orgaOf._id,
-  organisation_role: "member",
-  account_status: "CONFIRMED" as const,
-  created_at: NOW,
-  ...override,
-});
+export const buildUser = (orgaOf: { _id: ObjectId }, override: DeepPartial<IUsersMigration> = {}) =>
+  ({
+    _id: new ObjectId(),
+    email: `user-${++userCounter}@example.com`,
+    password: "hashed",
+    prenom: "Alice",
+    nom: "DUPONT",
+    civility: "Madame",
+    fonction: "Conseillère",
+    telephone: "0123456789",
+    organisation_id: orgaOf._id,
+    organisation_role: "member",
+    account_status: "CONFIRMED" as const,
+    created_at: NOW,
+    ...override,
+  }) satisfies DeepPartial<IUsersMigration>;
 
-export const buildRupturant = (organismeId: ObjectId, mlId: ObjectId, override: Record<string, any> = {}) => ({
-  _id: new ObjectId(),
-  mission_locale_id: mlId,
-  effectif_id: new ObjectId(),
-  date_rupture: DATE_RUPTURE_RECENTE,
-  created_at: NOW,
-  brevo: {},
-  current_status: { value: "RUPTURANT", date: NOW },
-  effectif_snapshot: {
-    organisme_id: organismeId,
-    annee_scolaire: ANNEE_SCOLAIRE,
-    apprenant: {
-      nom: "X",
-      prenom: "Y",
-      date_de_naissance: DOB_21_ANS,
-      courriel: "x@y.fr",
+export const buildRupturant = (
+  organismeId: ObjectId,
+  mlId: ObjectId,
+  override: DeepPartial<IMissionLocaleEffectif> = {}
+) =>
+  ({
+    _id: new ObjectId(),
+    mission_locale_id: mlId,
+    effectif_id: new ObjectId(),
+    date_rupture: DATE_RUPTURE_RECENTE,
+    created_at: NOW,
+    brevo: {},
+    current_status: { value: "RUPTURANT", date: NOW },
+    effectif_snapshot: {
+      organisme_id: organismeId,
+      annee_scolaire: ANNEE_SCOLAIRE,
+      apprenant: {
+        nom: "X",
+        prenom: "Y",
+        date_de_naissance: DOB_21_ANS,
+        courriel: "x@y.fr",
+      },
+      _computed: { statut: { en_cours: "RUPTURANT" } },
     },
-    _computed: { statut: { en_cours: "RUPTURANT" } },
-  },
-  ...override,
-});
+    ...override,
+  }) satisfies DeepPartial<IMissionLocaleEffectif>;

@@ -1,6 +1,5 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { SideMenu } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
@@ -12,6 +11,8 @@ import { ISecteurArborescence, IMoisTraite } from "@/app/_components/france-trav
 import { formatMoisLabel } from "@/app/_components/france-travail/utils/dateFormatting";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+
+import layoutStyles from "./france-travail-layout.module.css";
 
 function FTSideMenu({
   secteurs,
@@ -84,7 +85,7 @@ function FTSideMenu({
       burgerMenuButtonText="Dans cette rubrique"
       sticky={false}
       items={sideMenuItems}
-      style={{ maxHeight: "none", overflow: "visible" }}
+      classes={{ root: layoutStyles.sideMenu }}
     />
   );
 }
@@ -125,7 +126,7 @@ export function FranceTravailLayoutClient({ children }: { children: React.ReactN
 
   if (arboError) {
     return (
-      <div className="fr-container" style={{ ...fr.spacing("padding", { topBottom: "10v" }) }}>
+      <div className="fr-container fr-py-10v">
         <Alert
           severity="error"
           title="Erreur de chargement"

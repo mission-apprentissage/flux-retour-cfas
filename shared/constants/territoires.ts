@@ -1465,7 +1465,7 @@ const ACADEMIES = [
   { nom: "Normandie", code: "70", id: "NORMANDIE" },
 ] as const;
 
-export const ACADEMIES_DEPARTEMENT_MAP: Record<any, Array<any>> = DEPARTEMENTS.reduce(
+export const ACADEMIES_DEPARTEMENT_MAP: Record<IAcademieCode, Array<IDepartmentCode>> = DEPARTEMENTS.reduce(
   (acc, curr) => {
     return {
       ...acc,
@@ -2760,18 +2760,6 @@ const BASSINS_EMPLOI = [
     nom: "Propriano",
   },
 ];
-
-type IBassinsEmplois = typeof BASSINS_EMPLOI;
-type IBassinsEmploi = IBassinsEmplois[number];
-type IBassinsEmploiCode = IBassinsEmploi["code"];
-
-export const BASSIN_EMPLOI_BY_CODE = BASSINS_EMPLOI.reduce(
-  (acc, bassinEmploi) => {
-    acc[bassinEmploi.code] = bassinEmploi;
-    return acc;
-  },
-  {} as Record<IBassinsEmploiCode, IBassinsEmploi>
-);
 
 export const REGIONS_SORTED = sortAlphabeticallyBy("nom", REGIONS).map((region) => {
   return { ...region, type: TERRITOIRE_TYPE.REGION };

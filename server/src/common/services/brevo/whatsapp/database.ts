@@ -36,7 +36,7 @@ export async function updateWhatsAppContact(
   }>,
   historyEntries?: IWhatsAppMessageHistory | IWhatsAppMessageHistory[]
 ): Promise<void> {
-  const updateDoc: Record<string, any> = {};
+  const updateDoc: Record<string, unknown> = {};
 
   // Build $set operations
   for (const [key, value] of Object.entries(update)) {
@@ -45,7 +45,7 @@ export async function updateWhatsAppContact(
     }
   }
 
-  const updateOps: Record<string, any> = {
+  const updateOps: Record<string, unknown> = {
     $set: {
       ...updateDoc,
       updated_at: new Date(),

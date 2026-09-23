@@ -1,3 +1,5 @@
+import type { Document } from "mongodb";
+
 import { effectifsDb } from "@/common/model/collections";
 
 /**
@@ -89,14 +91,25 @@ import { effectifsDb } from "@/common/model/collections";
   }
 ]
  */
-export class Indicator {
-  config: any;
+interface IndicatorConfig {
+  preStages: Document[];
+  postStages: Document[];
+  formatRow?: (item: Document) => Record<string, unknown>;
+}
 
-  constructor(config) {
+interface IndicatorOptions {
+  projection?: Document;
+  groupedBy?: Document;
+}
+
+export class Indicator {
+  config: IndicatorConfig;
+
+  constructor(config: IndicatorConfig) {
     this.config = config;
   }
 
-  getAtDateAggregationPipeline(searchDate: any, options: any = {}): any[] {
+  getAtDateAggregationPipeline(searchDate: Date, options: IndicatorOptions = {}): Document[] {
     return [
       ...this.config.preStages,
       ...this.getEffectifsWithStatutAtDateAggregationPipeline(searchDate, options.projection),
@@ -111,7 +124,7 @@ export class Indicator {
    * @param {*} options Options de regroupement / projection optionnelles
    * @returns
    */
-  async getCountAtDate(searchDate: any, filterStages: any = [], options: any = {}) {
+  async getCountAtDate(searchDate: Date, filterStages: Document[] = [], options: IndicatorOptions = {}) {
     const result = await effectifsDb()
       .aggregate([
         ...filterStages,
@@ -133,7 +146,7 @@ export class Indicator {
    * @param {*} options Options de regroupement / projection optionnelles
    * @returns
    */
-  async getListAtDate(searchDate: any, filterStages: any[] = [], options: any = {}) {
+  async getListAtDate(searchDate: Date, filterStages: Document[] = [], options: IndicatorOptions = {}) {
     const result = await effectifsDb()
       .aggregate([...filterStages, ...this.getAtDateAggregationPipeline(searchDate, options)])
       .toArray();
@@ -146,7 +159,7 @@ export class Indicator {
    * 2. On construit dans l'historique des statuts un champ diff_date_search = différence entre la date du statut de l'historique et la date recherchée
    * 3. On crée un champ statut_apprenant_at_date = statut dans l'historique avec le plus petit diff_date_search
    */
-  getEffectifsWithStatutAtDateAggregationPipeline(searchDate: any, projection = {}) {
+  getEffectifsWithStatutAtDateAggregationPipeline(searchDate: Date, projection: Document = {}): Document[] {
     return [
       // Filtrage sur les élements avec date antérieure à la date recherchée
       {

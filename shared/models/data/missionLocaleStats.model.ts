@@ -11,6 +11,42 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ computed_day: -1, mission_locale_id: 1 }, { name: "computed_day_ml_id_desc" }],
   [{ mission_locale_id: 1, computed_day: -1 }, { name: "ml_id_computed_day_desc" }],
 ];
+export const zSegmentStats = z.object({
+  total: z.number().int(),
+  a_traiter: z.number().int(),
+  traite: z.number().int(),
+  repondu: z.number().int(),
+  rdv_pris: z.number().int(),
+  rdv_pris_decouverts: z.number().int(),
+  projet_pro_securise: z.number().int(),
+  ne_souhaite_pas_accompagnement: z.number().int(),
+  a_recontacter: z.number().int(),
+  injoignable: z.number().int(),
+  autre: z.number().int(),
+  autre_avec_contact: z.number().int(),
+  deja_connu_accompagne: z.number().int(),
+});
+
+export const zCollabSegmentStats = zSegmentStats.extend({
+  situation_rupture: z.number().int(),
+  situation_abandon: z.number().int(),
+  situation_prevention_inevitable: z.number().int(),
+  situation_prevention_tres_eleve: z.number().int(),
+  situation_prevention_modere: z.number().int(),
+  situation_besoin_aide_hors_rupture: z.number().int(),
+  delai_premiere_activite_jours_total: z.number().int(),
+  delai_premiere_activite_count: z.number().int(),
+});
+
+export const zMissionLocaleStatsSegments = z.object({
+  rupture: zSegmentStats,
+  collab: zCollabSegmentStats,
+});
+
+export type ISegmentStats = z.output<typeof zSegmentStats>;
+export type ICollabSegmentStats = z.output<typeof zCollabSegmentStats>;
+export type IMissionLocaleStatsSegments = z.output<typeof zMissionLocaleStatsSegments>;
+
 const zMissionLocaleStats = z.object({
   _id: zObjectId,
   created_at: z.date(),
@@ -67,6 +103,7 @@ const zMissionLocaleStats = z.object({
     rqth_autre_avec_contact: z.number().int().default(0),
     abandon: z.number().int().default(0),
   }),
+  segments: zMissionLocaleStatsSegments.optional(),
 });
 
 export type IMissionLocaleStats = z.output<typeof zMissionLocaleStats>;

@@ -6,7 +6,10 @@ const effectifsFilterSchema = () =>
     filter: z
       .object({
         organisme_id: z
-          .preprocess((v: any) => (ObjectId.isValid(v) ? new ObjectId(v) : v), z.instanceof(ObjectId))
+          .preprocess(
+            (v: unknown) => (typeof v === "string" && ObjectId.isValid(v) ? new ObjectId(v) : v),
+            z.instanceof(ObjectId)
+          )
           .optional(),
         id_erp_apprenant: z.string().optional(),
         source: z.string().optional(),

@@ -1,0 +1,24 @@
+.iconeEvenement {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.iconeCalendrier {
+  font-size: 20px;
+}
+
+.pastille {
+  width: 8px;
+  height: 8px;
+  background-color: var(--text-disabled-grey);
+  border-radius: 50%;
+}
+
+.sousTitre {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  font-style: italic;
+}

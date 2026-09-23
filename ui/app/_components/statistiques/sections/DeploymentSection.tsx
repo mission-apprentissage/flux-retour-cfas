@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 
+import { TableSkeleton } from "@/app/_components/common/Skeleton";
+
 import { DeploymentRow } from "../cards/DeploymentRow";
 import { calculatePercentage, getPercentageColor } from "../constants";
 import { useDeploymentStats, useSyntheseRegionsStats } from "../hooks/useStatsQueries";
+import { useUserRegions } from "../hooks/useUserRegions";
 import { RegionTable } from "../tables/RegionTable";
 import { FranceMapSVG } from "../ui/FranceMapSVGLazy";
 import { PeriodSelector, type Period } from "../ui/PeriodSelector";
-import { TableSkeleton } from "../ui/Skeleton";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import styles from "./DeploymentSection.module.css";
@@ -16,16 +18,12 @@ import { StatisticsSection } from "./StatisticsSection";
 
 interface DeploymentSectionProps {
   defaultPeriod?: Period;
-  showDetailColumn?: boolean;
   isAdmin?: boolean;
 }
 
-export function DeploymentSection({
-  defaultPeriod = "30days",
-  showDetailColumn = true,
-  isAdmin = false,
-}: DeploymentSectionProps) {
+export function DeploymentSection({ defaultPeriod = "30days", isAdmin = false }: DeploymentSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
+  const { regions: userRegions } = useUserRegions();
 
   const {
     data: deploymentData,
@@ -51,7 +49,7 @@ export function DeploymentSection({
 
   return (
     <StatisticsSection
-      title="Déploiement"
+      title="Déploiement aux Missions Locales"
       className={styles.sectionContainer}
       controls={<PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />}
       controlsPosition="below-left"
@@ -77,6 +75,7 @@ export function DeploymentSection({
                 color="#6A6AF4"
                 percentage={calculatePercentage(stats?.activatedMlCount || 0, stats?.previousActivatedMlCount || 0)}
                 percentageColor={getPercentageColor(stats?.activatedMlCount || 0, stats?.previousActivatedMlCount || 0)}
+                tooltip="Missions Locales dont l'accès au suivi des jeunes a été activé sur le Tableau de bord à la date d'évaluation."
               />
 
               <DeploymentRow
@@ -95,11 +94,17 @@ export function DeploymentSection({
                 value={(stats?.mlCount || 0) - (stats?.activatedMlCount || 0)}
                 loading={loading}
                 color="#E3E3FD"
+                tooltip="Missions Locales recensées dont l'accès n'a pas encore été activé."
               />
 
               <div className={styles.deploymentSeparator} />
 
-              <DeploymentRow label="Total ML en France" value={stats?.mlCount} loading={loading} />
+              <DeploymentRow
+                label="Total ML en France"
+                value={stats?.mlCount}
+                loading={loading}
+                tooltip="Ensemble des Missions Locales recensées dans le Tableau de bord, métropole et outre-mer."
+              />
             </div>
           </div>
         </div>
@@ -110,9 +115,8 @@ export function DeploymentSection({
           ) : (
             <RegionTable
               regions={regionalStats}
-              showDetailColumn={showDetailColumn}
               loadingDeltas={loadingPercentage}
-              isAdmin={isAdmin}
+              detailRegions={isAdmin ? regionalStats.map((region) => region.code) : userRegions}
             />
           )}
         </div>

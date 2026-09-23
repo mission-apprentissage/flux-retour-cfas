@@ -2,29 +2,27 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useLocalStorage } from "usehooks-ts";
 
 import { LOCAL_STORAGE_KEYS } from "@/app/_constants/localStorage";
 import { useCfaAdmin } from "@/app/_hooks/useCfaAdmin";
 import { _get } from "@/common/httpClient";
 
-import styles from "./CfaInviteBanner.module.css";
+import { useDismissible } from "../shared/hooks";
+import { DismissButton } from "../shared/ui/DismissButton";
 
-const CFA_TABS_WITH_BANNER = ["/cfa/collaborations", "/cfa/effectifs"] as const;
+import styles from "./CfaInviteBanner.module.css";
+import { useIsCfaBannerRoute } from "./hooks";
+
 const MAX_MEMBERS_BEFORE_HIDE = 1;
 const MAX_INVITATIONS_BEFORE_HIDE = 1;
 
 export function CfaInviteBanner() {
   const { isCfaAdmin } = useCfaAdmin();
-  const pathname = usePathname();
-  const [dismissed, setDismissed] = useLocalStorage(LOCAL_STORAGE_KEYS.CFA_INVITE_BANNER_DISMISSED, false);
+  const isOnCfaTab = useIsCfaBannerRoute();
+  const { visible, dismiss } = useDismissible(LOCAL_STORAGE_KEYS.CFA_INVITE_BANNER_DISMISSED);
+  const { visible: isUpdateBannerVisible } = useDismissible(LOCAL_STORAGE_KEYS.CFA_V2_UPDATE_BANNER_DISMISSED);
 
-  const isOnCfaTab =
-    pathname === "/cfa" ||
-    CFA_TABS_WITH_BANNER.some((route) => pathname === route || pathname?.startsWith(`${route}/`));
-
-  const shouldFetch = isCfaAdmin && isOnCfaTab && !dismissed;
+  const shouldFetch = isCfaAdmin && isOnCfaTab && visible && !isUpdateBannerVisible;
 
   const { data: membres } = useQuery<{ length: number }[]>({
     queryKey: ["organisation-membres"],
@@ -44,8 +42,6 @@ export function CfaInviteBanner() {
   if (!membres || !invitations) return null;
   if (membres.length > MAX_MEMBERS_BEFORE_HIDE || invitations.length > MAX_INVITATIONS_BEFORE_HIDE) return null;
 
-  const handleDismiss = () => setDismissed(true);
-
   return (
     <div className={styles.banner} role="region" aria-label="Invitation de collègues">
       <div className={`fr-container ${styles.bannerInner}`}>
@@ -63,9 +59,7 @@ export function CfaInviteBanner() {
             </Link>
           </div>
         </div>
-        <button className={styles.closeButton} onClick={handleDismiss} aria-label="Fermer">
-          <span className="fr-icon-close-line" aria-hidden="true" />
-        </button>
+        <DismissButton onDismiss={dismiss} label="Fermer le bandeau d'invitation" />
       </div>
     </div>
   );

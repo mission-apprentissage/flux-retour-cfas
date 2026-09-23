@@ -1,0 +1,20 @@
+.detailsList {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.detailsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: baseline;
+
+  dd {
+    margin: 0;
+  }
+}
+
+.detailsAction {
+  margin-left: auto;
+}

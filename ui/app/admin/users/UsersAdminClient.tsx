@@ -5,10 +5,9 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
-import { Box, Stack, Typography } from "@mui/material";
 import { SortingState } from "@tanstack/react-table";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "shared/constants/territoires";
 
 import InvitationsTable from "@/app/_components/admin/InvitationsTable";
@@ -25,8 +24,12 @@ import { FullTable } from "@/app/_components/table/FullTable";
 import { useAllUsers } from "@/app/_hooks/useAllUsers";
 import { usersExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
+import type { User } from "@/common/internal/User";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
+import { UserNormalized } from "@/modules/admin/users/models/users";
 import { UsersFiltersQuery, parseUsersFiltersFromQuery } from "@/modules/admin/users/models/users-filters";
+
+import styles from "./UsersAdminClient.module.css";
 
 type TabKey = "users" | "invitations-pending" | "invitations-consumed";
 
@@ -63,7 +66,7 @@ const USERS_TABLE_COLUMNS = [
   },
 ];
 
-function transformUserToTableData(user: any) {
+function transformUserToTableData(user: UserNormalized) {
   const displayName = user.organisation?.organisme?.nom || user.organisation?.label || "Aucune organisation";
 
   return {
@@ -88,22 +91,37 @@ export default function UsersAdminClient() {
   const initialTab = (searchParams?.get("tab") as TabKey) || "users";
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const organisationIdFilter = searchParams?.get("organisation_id") || undefined;
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState(searchParams?.get("q") || "");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchParams?.get("q") || "");
+  const [currentPage, setCurrentPage] = useState(Math.max(1, Number(searchParams?.get("page")) || 1));
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [sorting, setSorting] = useState<SortingState>([{ id: "created_at", desc: true }]);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
+  const updateQueryParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      });
+      if (params.toString() !== (searchParams?.toString() || "")) {
+        router.replace(`/admin/users?${params.toString()}`, { scroll: false });
+      }
+    },
+    [router, searchParams]
+  );
+
   const handleTabChange = useCallback(
     (tabId: TabKey) => {
       setActiveTab(tabId);
-      const params = new URLSearchParams(searchParams?.toString() || "");
-      params.set("tab", tabId);
-      router.replace(`/admin/users?${params.toString()}`);
+      updateQueryParams({ tab: tabId });
     },
-    [router, searchParams]
+    [updateQueryParams]
   );
 
   useEffect(() => {
@@ -112,12 +130,16 @@ export default function UsersAdminClient() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      // Sans changement réel de recherche, ne pas toucher à la pagination : l'effet se redéclenche
+      // à chaque mise à jour de l'URL (identité de updateQueryParams) et effacerait la page courante.
+      if (searchTerm === debouncedSearchTerm) return;
       setDebouncedSearchTerm(searchTerm);
       setCurrentPage(1);
+      updateQueryParams({ q: searchTerm.trim() || null, page: null });
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchTerm]);
+  }, [searchTerm, debouncedSearchTerm, updateQueryParams]);
 
   const usersFilters = useMemo(() => {
     if (!searchParams) return {};
@@ -138,13 +160,31 @@ export default function UsersAdminClient() {
     setCurrentPage(1);
   }, []);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [usersFilters, searchTerm]);
+  // Clé stable des filtres (hors pagination, onglet et recherche) : l'objet usersFilters change
+  // d'identité à chaque navigation, ce qui réinitialisait la page à chaque changement d'URL.
+  const usersFiltersKey = useMemo(() => {
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    ["page", "tab", "q"].forEach((key) => params.delete(key));
+    params.sort();
+    return params.toString();
+  }, [searchParams]);
 
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-  }, []);
+  const isInitialFiltersSync = useRef(true);
+  useEffect(() => {
+    if (isInitialFiltersSync.current) {
+      isInitialFiltersSync.current = false;
+      return;
+    }
+    setCurrentPage(1);
+  }, [usersFiltersKey]);
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      setCurrentPage(page);
+      updateQueryParams({ page: page > 1 ? String(page) : null });
+    },
+    [updateQueryParams]
+  );
 
   const hasFiltersOrSearch = useMemo(() => {
     const hasActiveFilters = Object.values(usersFilters).some((value) => {
@@ -175,7 +215,7 @@ export default function UsersAdminClient() {
       setIsExporting(true);
       setExportError(null);
 
-      const params: Record<string, any> = {
+      const params: Record<string, string> = {
         sort: sorting.length > 0 ? `${sorting[0].id}:${sorting[0].desc ? "-1" : "1"}` : "created_at:-1",
       };
 
@@ -187,14 +227,14 @@ export default function UsersAdminClient() {
         }
       });
 
-      const allUsersData = await _get("/api/v1/admin/users/export", { params });
+      const allUsersData = await _get<User[]>("/api/v1/admin/users/export", { params });
 
       if (!allUsersData || allUsersData.length === 0) {
         setExportError("Aucun utilisateur ne correspond aux critères de recherche.");
         return;
       }
 
-      const exportData = allUsersData.map((user: any) => {
+      const exportData = allUsersData.map((user) => {
         let deptCode: string | undefined;
         let regionCode: string | undefined;
         let codeRegionValue = "";
@@ -281,7 +321,7 @@ export default function UsersAdminClient() {
   }, [sorting, searchTerm, usersFilters, isExporting]);
 
   return (
-    <Stack spacing={3} sx={{ p: 3 }}>
+    <div className={styles.page}>
       <Breadcrumb
         currentPageLabel="Gestion des utilisateurs"
         segments={[
@@ -293,9 +333,9 @@ export default function UsersAdminClient() {
           },
         ]}
       />
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h1">Gestion des utilisateurs</Typography>
-        <Stack direction="row" spacing={2}>
+      <div className={styles.titleRow}>
+        <h1 className={styles.title}>Gestion des utilisateurs</h1>
+        <div>
           <Button
             onClick={handleExport}
             iconId="ri-download-line"
@@ -303,10 +343,10 @@ export default function UsersAdminClient() {
             priority="secondary"
             disabled={isExporting}
           >
-            {isExporting ? "Export en cours..." : "Télécharger la liste"}
+            {isExporting ? "Export en cours…" : "Télécharger la liste"}
           </Button>
-        </Stack>
-      </Box>
+        </div>
+      </div>
 
       {exportError && (
         <Notice
@@ -327,9 +367,9 @@ export default function UsersAdminClient() {
         ]}
       >
         {activeTab === "users" && (
-          <Stack spacing={3}>
+          <div className={styles.stack}>
             <UsersFiltersPanel />
-            <Stack spacing={3}>
+            <div className={styles.stack}>
               <SearchBar
                 label="Rechercher un utilisateur"
                 onButtonClick={(value) => setSearchTerm(value)}
@@ -337,8 +377,9 @@ export default function UsersAdminClient() {
                   <input
                     className={className}
                     id={id}
-                    placeholder="Nom, prénom, email, organisation..."
+                    placeholder="Nom, prénom, email, organisation…"
                     type={type}
+                    autoComplete="off"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -348,21 +389,19 @@ export default function UsersAdminClient() {
                 <TableSkeleton />
               ) : (
                 <>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      {hasFiltersOrSearch ? (
-                        <>
-                          {displayCount.total} utilisateur{displayCount.total > 1 ? "s" : ""} trouvé
-                          {displayCount.total > 1 ? "s" : ""} ({pagination.globalTotal} au total)
-                        </>
-                      ) : (
-                        <>
-                          {pagination.globalTotal} utilisateur{pagination.globalTotal > 1 ? "s" : ""} au total
-                        </>
-                      )}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ width: "100%", overflow: "hidden" }}>
+                  <p className={styles.count}>
+                    {hasFiltersOrSearch ? (
+                      <>
+                        {displayCount.total} utilisateur{displayCount.total > 1 ? "s" : ""} trouvé
+                        {displayCount.total > 1 ? "s" : ""} ({pagination.globalTotal} au total)
+                      </>
+                    ) : (
+                      <>
+                        {pagination.globalTotal} utilisateur{pagination.globalTotal > 1 ? "s" : ""} au total
+                      </>
+                    )}
+                  </p>
+                  <div className={styles.tableWrapper}>
                     <FullTable
                       data={tableData}
                       columns={USERS_TABLE_COLUMNS}
@@ -373,11 +412,11 @@ export default function UsersAdminClient() {
                       sorting={sorting}
                       onSortingChange={handleSortingChange}
                     />
-                  </Box>
+                  </div>
                 </>
               )}
-            </Stack>
-          </Stack>
+            </div>
+          </div>
         )}
         {activeTab === "invitations-pending" && (
           <InvitationsTable status="pending" organisation_id={organisationIdFilter} />
@@ -386,6 +425,6 @@ export default function UsersAdminClient() {
           <InvitationsTable status="consumed" organisation_id={organisationIdFilter} />
         )}
       </Tabs>
-    </Stack>
+    </div>
   );
 }

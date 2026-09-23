@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 import { erpDb } from "../model/collections";
 import { slugify } from "../utils/stringUtils";
 
-export const createERP = async (name: string, helpFilePath = null) => {
+export const createERP = async (name: string, helpFilePath: string | null = null) => {
   const uniqueId = slugify(name);
 
   return erpDb().insertOne({
@@ -17,7 +17,7 @@ export const createERP = async (name: string, helpFilePath = null) => {
   });
 };
 
-export const deleteERPById = async (id: string) => {
+export const deleteERPById = async (id: string | ObjectId) => {
   const erp = await erpDb().findOne({ _id: new ObjectId(id) });
 
   if (!erp) {

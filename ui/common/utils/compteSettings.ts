@@ -1,7 +1,5 @@
 import type { IOrganisationJson } from "shared";
 
-import { isCfaWithMlBeta } from "./cfaUtils";
-
 /**
  * Liens vers les onglets du hub unifié /compte.
  * On utilise un query param (et non un hash #) afin que l'onglet soit lisible côté serveur
@@ -24,15 +22,14 @@ export type CompteSettingsTab = {
 
 /**
  * Source unique de vérité : l'onglet « Paramètres » géré par le hub /compte selon la typologie.
- * Renvoie `null` pour les typologies sans paramètres dans le hub. Le cas legacy de l'OF non-beta
- * (page Pages Router /parametres) reste géré séparément par le menu du header.
+ * Renvoie `null` pour les typologies sans paramètres dans le hub.
  */
 export function getCompteSettingsTab(organisation?: IOrganisationJson | null): CompteSettingsTab | null {
   if (!organisation) return null;
   if (organisation.type === "MISSION_LOCALE") {
     return { kind: "mission-locale", shortLabel: "Paramètres de la ML", label: "Paramètres de la Mission Locale" };
   }
-  if (isCfaWithMlBeta(organisation)) {
+  if (organisation.type === "ORGANISME_FORMATION") {
     return { kind: "cfa-erp", shortLabel: "Paramètres de connexion ERP", label: "Paramètres de connexion ERP" };
   }
   return null;

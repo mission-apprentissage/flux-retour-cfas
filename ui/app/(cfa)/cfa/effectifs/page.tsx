@@ -8,7 +8,7 @@ import { CfaContainer } from "../CfaContainer";
 import CfaEffectifsClient from "./CfaEffectifsClient";
 
 export const metadata: Metadata = {
-  title: "Tous mes effectifs | Tableau de bord de l'apprentissage",
+  title: "Effectifs de l'établissement | Tableau de bord de l'apprentissage",
 };
 
 export default function CfaEffectifsPage() {

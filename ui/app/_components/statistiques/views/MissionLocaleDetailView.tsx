@@ -1,19 +1,21 @@
 "use client";
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import { _post } from "@/common/httpClient";
 
 import { useMissionLocaleDetail } from "../hooks/useStatsQueries";
+import { ExportAllButton } from "../sections/ExportAllButton";
 import { NO_DATA_ML_MESSAGE } from "../ui/NoDataMessage";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
+import { StatsTabs, type StatsTab } from "../ui/StatsTabs";
 import { formatDateFr } from "../utils";
 
 import styles from "./MissionLocaleDetailView.module.css";
 import { MlAdminRdvUrlEditor } from "./MlAdminRdvUrlEditor";
+import { MLCollaborationsTab } from "./tabs/MLCollaborationsTab";
 import { MLEquipeTab } from "./tabs/MLEquipeTab";
 import { MLSuiviTraitementTab } from "./tabs/MLSuiviTraitementTab";
 
@@ -22,9 +24,10 @@ interface MissionLocaleDetailViewProps {
   isAdmin?: boolean;
 }
 
-export function MissionLocaleDetailView({ mlId, isAdmin = true }: MissionLocaleDetailViewProps) {
+export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocaleDetailViewProps) {
   const searchParams = useSearchParams();
   const { data, isLoading, error } = useMissionLocaleDetail(mlId);
+  const isActive = data?.is_active === true;
 
   const handleImpersonate = async () => {
     if (!data?.ml) return;
@@ -51,8 +54,7 @@ export function MissionLocaleDetailView({ mlId, isAdmin = true }: MissionLocaleD
     if (search) params.set("search", search);
 
     const queryString = params.toString();
-    const basePath = isAdmin ? "/admin/suivi-des-indicateurs" : "/suivi-des-indicateurs";
-    return `${basePath}/mission-locale${queryString ? `?${queryString}` : ""}`;
+    return `/suivi-des-indicateurs/mission-locale${queryString ? `?${queryString}` : ""}`;
   };
 
   if (isLoading) {
@@ -68,7 +70,7 @@ export function MissionLocaleDetailView({ mlId, isAdmin = true }: MissionLocaleD
     <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
       <Link href={buildBackUrl()} className="fr-link fr-link--sm">
         <i className="fr-icon-arrow-left-line fr-icon--sm" aria-hidden="true" />
-        Revenir à la liste des Missions Locales
+        Retour à la liste des Missions Locales
       </Link>
 
       <div className={styles.pageLayout}>
@@ -86,7 +88,7 @@ export function MissionLocaleDetailView({ mlId, isAdmin = true }: MissionLocaleD
             <h1 className={styles.title}>Mission Locale : {data?.ml?.nom || "—"}</h1>
           </div>
 
-          {data?.traites_count === 0 ? (
+          {!isActive ? (
             <div className={styles.warningBanner}>
               <span className="fr-icon-info-fill" aria-hidden="true" />
               <span>{NO_DATA_ML_MESSAGE}</span>
@@ -102,26 +104,11 @@ export function MissionLocaleDetailView({ mlId, isAdmin = true }: MissionLocaleD
             )
           )}
 
-          <div className={styles.tabsContainer}>
-            <Tabs
-              tabs={[
-                {
-                  label: "Suivi traitement",
-                  content: (
-                    <MLSuiviTraitementTab
-                      mlId={mlId}
-                      noData={data?.traites_count === 0}
-                      hasCfaCollaboration={data?.has_cfa_collaboration}
-                    />
-                  ),
-                },
-                {
-                  label: "Équipe",
-                  content: <MLEquipeTab mlId={mlId} noData={data?.traites_count === 0} />,
-                },
-              ]}
-            />
-          </div>
+          {data && (
+            <div className={styles.tabsContainer}>
+              <StatsTabs tabs={buildTabs(mlId, isActive, data?.ml?.nom)} />
+            </div>
+          )}
         </div>
 
         <aside className={styles.sidebar}>
@@ -131,6 +118,7 @@ export function MissionLocaleDetailView({ mlId, isAdmin = true }: MissionLocaleD
               priority="primary"
               onClick={handleImpersonate}
               className={styles.sidebarButton}
+              disabled={!isActive}
             >
               Voir le suivi des jeunes
             </Button>
@@ -181,7 +169,7 @@ export function MissionLocaleDetailView({ mlId, isAdmin = true }: MissionLocaleD
               )}
             </div>
 
-            {data?.traites_count === 0 ? (
+            {!isActive ? (
               <div className={styles.sidebarWarningBanner}>
                 <span className="fr-icon-info-fill" aria-hidden="true" />
                 <span>{NO_DATA_ML_MESSAGE}</span>
@@ -207,4 +195,28 @@ export function MissionLocaleDetailView({ mlId, isAdmin = true }: MissionLocaleD
       </div>
     </StatsErrorHandler>
   );
+}
+
+function buildTabs(mlId: string, isActive: boolean, mlNom?: string): StatsTab[] {
+  if (!isActive) {
+    return [
+      { id: "ruptures", label: "Suivi traitement", content: <MLSuiviTraitementTab mlId={mlId} noData /> },
+      { id: "equipe", label: "Équipe", content: <MLEquipeTab mlId={mlId} noData /> },
+    ];
+  }
+
+  return [
+    {
+      id: "ruptures",
+      label: "Suivi traitement ruptures",
+      content: (
+        <MLSuiviTraitementTab
+          mlId={mlId}
+          action={<ExportAllButton mlId={mlId} mlNom={mlNom} label="Exporter les données de cette Mission Locale" />}
+        />
+      ),
+    },
+    { id: "collaborations", label: "Suivi traitement collaborations", content: <MLCollaborationsTab mlId={mlId} /> },
+    { id: "equipe", label: "Équipe", content: <MLEquipeTab mlId={mlId} /> },
+  ];
 }

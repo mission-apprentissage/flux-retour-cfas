@@ -1,16 +1,18 @@
 "use client";
 
-import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { Field, Form, Formik, FormikErrors, FormikHelpers } from "formik";
+import { Field, FieldProps, Form, Formik, FormikErrors, FormikHelpers } from "formik";
 import { useState } from "react";
 import { z, ZodError } from "zod";
 
 import { useMlParametres, useUpdateMlParametres } from "@/app/_components/ruptures/shared/hooks";
 import { ContentSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { TrackFormDirty } from "@/app/_components/UnsavedChangesContext";
+import { getApiErrorMessage } from "@/common/rateLimit";
+
+import formStyles from "./ParametresClient.module.css";
 
 const URL_ERROR = "Veuillez saisir une URL publique valide (ex: https://www.exemple.fr/rdv)";
 
@@ -60,8 +62,8 @@ export default function ParametresClient() {
       // Remet le formulaire à l'état "non modifié" (dirty=false) pour ne pas redéclencher le garde de navigation.
       resetForm({ values: { rdv_url: trimmed } });
       setAlert({ severity: "success", message: "Vos paramètres ont été enregistrés." });
-    } catch (err: any) {
-      const errorMessage = err?.json?.data?.message || err?.message || "Erreur lors de l'enregistrement";
+    } catch (err) {
+      const errorMessage = getApiErrorMessage(err, "Erreur lors de l'enregistrement");
       setAlert({ severity: "error", message: errorMessage });
     } finally {
       setSubmitting(false);
@@ -104,10 +106,10 @@ export default function ParametresClient() {
         onSubmit={handleSubmit}
       >
         {({ isSubmitting, dirty, isValid }) => (
-          <Form noValidate style={{ maxWidth: 720 }}>
+          <Form noValidate className={formStyles.formulaire}>
             <TrackFormDirty dirty={dirty} />
             <Field name="rdv_url">
-              {({ field, meta }: any) => (
+              {({ field, meta }: FieldProps) => (
                 <Input
                   label="Lien de prise de rendez-vous"
                   hintText="Ce lien sera envoyé aux jeunes qui répondent positivement à notre message WhatsApp pour qu'ils puissent prendre RDV directement avec votre Mission Locale."
@@ -126,7 +128,7 @@ export default function ParametresClient() {
               )}
             </Field>
 
-            <Button type="submit" disabled={isSubmitting || !dirty || !isValid} style={{ marginTop: fr.spacing("2w") }}>
+            <Button type="submit" disabled={isSubmitting || !dirty || !isValid} className={formStyles.boutonSoumettre}>
               Enregistrer
             </Button>
           </Form>

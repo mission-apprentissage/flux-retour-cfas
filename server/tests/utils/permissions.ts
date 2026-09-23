@@ -156,34 +156,33 @@ export type PermissionsTestConfig<ExpectedResult = boolean, ExcludedCases extend
   [key in Exclude<ProfilLabel, ExcludedCases>]: ExpectedResult;
 };
 
-export const commonOrganismeAttributes: Omit<{ [key in keyof IOrganisme]: IOrganisme[key] }, "_id" | "siret" | "uai"> =
-  {
-    adresse: {
-      departement: ofCible.departement, // morbihan
-      region: ofCible.region, // bretagne
-      academie: ofCible.academie, // rennes
-      bassinEmploi: "5315", // rennes
-    },
-    geopoint: {
-      type: "Point",
-      coordinates: [48.8588897, 2.320041],
-    },
-    reseaux: [ofCible.reseaux.normal, ofCible.reseaux.responsable],
-    erps: ["YMAG"],
-    nature: "responsable_formateur",
-    raison_sociale: "ADEN Formations (Caen)",
-    fiabilisation_statut: "FIABLE",
-    ferme: false,
-    formations_count: 0,
-    organismesFormateurs: [],
-    organismesResponsables: [],
-    created_at,
-    updated_at: created_at,
-    est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.PRESENT,
-    first_transmission_date: startOfDay(subMonths(new Date(), 3)),
-    last_transmission_date: startOfDay(subMonths(new Date(), 1)),
-    contacts_from_referentiel: [],
-  };
+const commonOrganismeAttributes: Omit<{ [key in keyof IOrganisme]: IOrganisme[key] }, "_id" | "siret" | "uai"> = {
+  adresse: {
+    departement: ofCible.departement, // morbihan
+    region: ofCible.region, // bretagne
+    academie: ofCible.academie, // rennes
+    bassinEmploi: "5315", // rennes
+  },
+  geopoint: {
+    type: "Point",
+    coordinates: [48.8588897, 2.320041],
+  },
+  reseaux: [ofCible.reseaux.normal, ofCible.reseaux.responsable],
+  erps: ["YMAG"],
+  nature: "responsable_formateur",
+  raison_sociale: "ADEN Formations (Caen)",
+  fiabilisation_statut: "FIABLE",
+  ferme: false,
+  formations_count: 0,
+  organismesFormateurs: [],
+  organismesResponsables: [],
+  created_at,
+  updated_at: created_at,
+  est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.PRESENT,
+  first_transmission_date: startOfDay(subMonths(new Date(), 3)),
+  last_transmission_date: startOfDay(subMonths(new Date(), 1)),
+  contacts_from_referentiel: [],
+};
 
 export const organismesByLabel = {
   "OF cible": {
@@ -260,7 +259,7 @@ type TestFunc<ExpectedResult> = (
   organisation: IOrganisationCreate,
   expectedResult: ExpectedResult,
   organisationLabel?: ProfilLabel
-) => Promise<any>;
+) => Promise<unknown>;
 
 /**
  * Utilitaire pour exécuter un test avec tous les profils d'organisation
@@ -270,7 +269,7 @@ export function testPermissions<ExpectedResult, ExcludedCases extends ProfilLabe
   testFunc: TestFunc<ExpectedResult>
 ) {
   Object.entries(permissionsConfig).forEach(([label, allowed]) => {
-    const conf = profilsPermissionByLabel[label];
+    const conf = profilsPermissionByLabel[label as ProfilLabel];
     it(`${label} - ${allowed ? "ALLOWED" : "FORBIDDEN"}`, async () => {
       await testFunc(conf, allowed as ExpectedResult, label as ProfilLabel);
     });

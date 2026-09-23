@@ -1,7 +1,7 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import ExcelJs from "exceljs";
-import express from "express";
+import express, { Response } from "express";
 import { CFA_SUIVI_CATEGORY, zDeclareCfaRuptureApi } from "shared/models/routes/organismes/cfa";
 import { z } from "zod";
 
@@ -18,16 +18,17 @@ import {
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import { missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
-import { formatJsonToXlsx } from "@/common/utils/xlsxUtils";
-import { returnResult } from "@/http/middlewares/helpers";
+import { formatJsonToXlsx, XlsxColumn } from "@/common/utils/xlsxUtils";
+import { OrganismeLocals, returnResult, RouteHandler } from "@/http/middlewares/helpers";
 
 const zCfaEffectifsQuery = {
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(100),
   search: z.string().optional(),
-  sort: z.enum(["nom", "formation", "date_rupture", "en_rupture", "collab_status", "last_activity"]).default("nom"),
+  sort: z
+    .enum(["nom", "formation", "date_rupture", "en_rupture", "mission_locale", "collab_status", "last_activity"])
+    .default("nom"),
   order: z.enum(["asc", "desc"]).default("asc"),
-  en_rupture: z.enum(["oui", "non"]).optional(),
   collab_status: z.string().optional(),
   formation: z.string().optional(),
 };
@@ -49,15 +50,15 @@ const zCfaSuiviMissionLocaleQuery = {
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(100),
   search: z.string().optional(),
-  sort: z.enum(["nom", "formation", "date_rupture", "collab_status"]).default("date_rupture"),
-  order: z.enum(["asc", "desc"]).default("desc"),
+  sort: z.enum(["nom", "formation", "mission_locale", "last_activity"]).default("nom"),
+  order: z.enum(["asc", "desc"]).default("asc"),
   collab_status: z.string().optional(),
   formation: z.string().optional(),
 };
 
 const zDeclareRuptureBody = zDeclareCfaRuptureApi.shape;
 
-async function getOrganismeWithDeca(locals: { organismeId: string }) {
+async function getOrganismeWithDeca(locals: OrganismeLocals) {
   const organismeObjectId = new ObjectId(locals.organismeId);
   const organisme = await getOrganisationOrganismeByOrganismeId(organismeObjectId);
   if (!organisme) {
@@ -77,11 +78,11 @@ async function getOrganismeWithDeca(locals: { organismeId: string }) {
   return { organisme, organismeId, isAllowedDeca: organismeDoc?.is_allowed_deca ?? false };
 }
 
-async function getCfaEffectifsRuptureHandler({ query }, { locals }) {
+const getCfaEffectifsRuptureHandler: RouteHandler<OrganismeLocals> = async ({ query }, { locals }) => {
   const { organisme, isAllowedDeca } = await getOrganismeWithDeca(locals);
   const params = await validateFullZodObjectSchema(query, zCfaRupturesQuery);
   return await getCfaEffectifsEnRupture(organisme, isAllowedDeca, params);
-}
+};
 
 export default () => {
   const router = express.Router();
@@ -90,7 +91,7 @@ export default () => {
 
   router.get(
     "/unread-notifications-count",
-    returnResult(async (_req, { locals }) => {
+    returnResult<OrganismeLocals>(async (_req, { locals }) => {
       const { organismeId } = await getOrganismeWithDeca(locals);
       const count = await missionLocaleEffectifsDb().countDocuments({
         "effectif_snapshot.organisme_id": organismeId,
@@ -103,7 +104,7 @@ export default () => {
 
   router.get(
     "/effectifs",
-    returnResult(async ({ query }, { locals }) => {
+    returnResult<OrganismeLocals>(async ({ query }, { locals }) => {
       const { organisme, isAllowedDeca } = await getOrganismeWithDeca(locals);
       const params = await validateFullZodObjectSchema(query, zCfaEffectifsQuery);
       return await getCfaEffectifs(organisme, isAllowedDeca, params);
@@ -112,24 +113,24 @@ export default () => {
 
   router.get(
     "/suivi-mission-locale",
-    returnResult(async ({ query }, { locals }) => {
+    returnResult<OrganismeLocals>(async ({ query }, { locals }) => {
       const { organisme, isAllowedDeca } = await getOrganismeWithDeca(locals);
       const params = await validateFullZodObjectSchema(query, zCfaSuiviMissionLocaleQuery);
       return await getCfaSuiviMissionLocale(organisme, isAllowedDeca, params);
     })
   );
 
-  router.get("/suivi-mission-locale/export", async (_req, res, next) => {
+  router.get("/suivi-mission-locale/export", async (_req, res: Response<unknown, OrganismeLocals>, next) => {
     try {
-      const { organisme, isAllowedDeca } = await getOrganismeWithDeca(res.locals as { organismeId: string });
+      const { organisme, isAllowedDeca } = await getOrganismeWithDeca(res.locals);
       const rows = await getCfaSuiviMissionLocaleExportRows(organisme, isAllowedDeca);
 
-      const columns = [
+      const columns: XlsxColumn[] = [
         { name: "Prénom", id: "prenom" },
         { name: "Nom", id: "nom" },
         { name: "En rupture", id: "en_rupture" },
         { name: "Intitulé de la formation", id: "libelle_formation" },
-        { name: "Date de rupture", id: "date_rupture", transform: (d: Date | null) => (d ? new Date(d) : "") },
+        { name: "Date de rupture", id: "date_rupture", transform: (d) => (d ? new Date(d as Date) : "") },
         { name: "Statut de collaboration avec la ML", id: "collab_status_label" },
         { name: "Catégorie", id: "categorie" },
         { name: "Mission Locale de rattachement", id: "mission_locale_nom" },
@@ -152,7 +153,7 @@ export default () => {
 
   router.get(
     "/effectif/:id",
-    returnResult(async (req, { locals }) => {
+    returnResult<OrganismeLocals>(async (req, { locals }) => {
       if (!ObjectId.isValid(req.params.id)) {
         throw Boom.badRequest("ID effectif invalide");
       }
@@ -164,7 +165,7 @@ export default () => {
 
   router.post(
     "/effectif/:id/declare-rupture",
-    returnResult(async (req, { locals }) => {
+    returnResult<OrganismeLocals>(async (req, { locals }) => {
       if (!ObjectId.isValid(req.params.id)) {
         throw Boom.badRequest("ID effectif invalide");
       }

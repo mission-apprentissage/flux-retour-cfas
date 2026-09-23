@@ -2,19 +2,23 @@ import { z } from "zod";
 
 import { extensions, primitivesV1, primitivesV3 } from "./zodPrimitives";
 
-export const stripModelAdditionalKeys = (validationSchema: any, data: any) => {
-  const strippedData = Object.keys(validationSchema.shape).reduce((acc, curr) => {
-    return data[curr] !== undefined
+export const stripModelAdditionalKeys = <T extends object>(
+  validationSchema: z.AnyZodObject,
+  data: T
+): Omit<Partial<T>, "_id"> => {
+  const values = data as Record<string, unknown>;
+  const strippedData = Object.keys(validationSchema.shape).reduce<Record<string, unknown>>((acc, curr) => {
+    return values[curr] !== undefined
       ? {
           ...acc,
-          [curr]: data[curr],
+          [curr]: values[curr],
         }
       : acc;
-  }, {} as any);
+  }, {});
 
   delete strippedData._id;
 
-  return strippedData;
+  return strippedData as Omit<Partial<T>, "_id">;
 };
 
 export const dossierApprenantSchemaV3Base = z.object({
@@ -127,9 +131,9 @@ export const dossierApprenantSchemaV3Input = dossierApprenantSchemaV3Base
     z.object({
       nir_apprenant: z
         .preprocess(
-          (v: any) => (v ? String(v).replace(/[\s.-]+/g, "") : v),
+          (v: unknown) => (v ? String(v).replace(/[\s.-]+/g, "") : v),
           z
-            .any()
+            .unknown()
             // On indique juste "13 chiffres attendus", car ça ne devrait pas être 15 (on répare silencieusement quand même à la ligne suivante)
             .describe("NIR de l'apprenant")
             .openapi({

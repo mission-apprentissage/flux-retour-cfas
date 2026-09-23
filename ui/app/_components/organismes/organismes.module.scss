@@ -1,0 +1,216 @@
+.sectionTitle {
+  margin-bottom: 2rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-title-blue-france);
+}
+
+.sources {
+  margin-bottom: 2rem;
+  font-style: italic;
+  color: var(--text-mention-grey);
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-rows: repeat(2, minmax(120px, auto));
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 2rem 0;
+
+  @media (width <= 62em) {
+    grid-template-rows: none;
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: var(--background-raised-grey);
+  border-radius: 4px;
+}
+
+.cardBig {
+  display: flex;
+  flex-direction: column;
+  grid-row: span 2;
+  justify-content: center;
+}
+
+.cardSkeleton {
+  min-height: 120px;
+  opacity: 0.5;
+}
+
+.cardBody {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.cardDivider {
+  padding: 0;
+  margin: 0 1.5rem;
+}
+
+.cardCountRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.cardDont {
+  font-size: 0.75rem;
+}
+
+.cardCount {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.cardCountBig {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.cardLabel {
+  margin-bottom: 0;
+  color: var(--text-default-grey);
+}
+
+.cardIconMain {
+  color: var(--text-title-blue-france);
+
+  &::before {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+.cardIconOk {
+  color: var(--text-default-success);
+}
+
+.cardIconAlert {
+  color: var(--text-default-warning);
+}
+
+.cardDownloadLink {
+  padding: 0;
+  margin-top: 0.5rem;
+  background: none;
+}
+
+.indicateursError {
+  margin: 2rem 0;
+  color: var(--text-default-error);
+  text-align: center;
+}
+
+.searchPanel {
+  padding: 1rem 1.5rem 1.5rem;
+  margin-bottom: 1.5rem;
+  background: var(--background-raised-grey);
+  border-radius: 4px;
+}
+
+.searchRow {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.searchInput {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.tableCount {
+  margin: 1rem 0;
+}
+
+.organismeNameCell {
+  display: block;
+}
+
+.organismeNameSub {
+  display: block;
+  padding-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+  white-space: nowrap;
+}
+
+.uaiInconnue {
+  color: var(--text-default-error);
+}
+
+.localisationCell {
+  white-space: nowrap;
+}
+
+.formationsLink {
+  white-space: nowrap;
+}
+
+.formationsVide {
+  color: var(--text-mention-grey);
+}
+
+.etatFerme {
+  font-weight: 700;
+  color: var(--text-default-warning);
+}
+
+.transmissionCell {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  :global(.fr-badge) {
+    white-space: nowrap;
+  }
+}
+
+.transmissionDate {
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+}
+
+.organismesTable {
+  :global(tr:has(.organisme-prominent)) td:first-child {
+    box-shadow: inset 4px 0 0 var(--border-plain-blue-france);
+  }
+}
+
+.headerWithTooltip {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.faqSection {
+  display: flex;
+  gap: 3rem;
+  margin-top: 4rem;
+  margin-bottom: 1.5rem;
+
+  @media (width <= 62em) {
+    flex-direction: column;
+  }
+}
+
+.faqMain {
+  flex: 3;
+}
+
+.faqAside {
+  flex: 1;
+}
+
+// Double sélecteur : les styles émotion de MUI (font-style: inherit) sont injectés après les CSS modules.
+.organismeNameInconnu.organismeNameInconnu {
+  font-style: italic;
+  color: var(--text-mention-grey);
+}

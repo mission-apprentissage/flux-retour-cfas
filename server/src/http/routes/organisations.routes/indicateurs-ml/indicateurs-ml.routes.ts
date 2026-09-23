@@ -1,7 +1,7 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
-import { StatsPeriod, zStatsPeriod } from "shared/models/data/nationalStats.model";
+import { zStatsPeriod, zStatsSegment, zTraitementMlSortBy } from "shared/models/data/nationalStats.model";
 import { getRegionsFromOrganisation, OrganisationWithRegions } from "shared/utils/organisationRegions";
 import { z } from "zod";
 
@@ -14,7 +14,7 @@ import {
   getDossiersTraitesStats,
   getTraitementStatsByMissionLocale,
   getSuiviTraitementByRegion,
-  getAccompagnementConjointStats,
+  getCollaborationSegmentStats,
   getTraitementStats,
   getDeploymentStats,
   getSyntheseRegionsStats,
@@ -24,188 +24,130 @@ import {
   getPrequalifStats,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { organisationsDb } from "@/common/model/collections";
-import { returnResult } from "@/http/middlewares/helpers";
+import {
+  DefaultParams,
+  DefaultQuery,
+  IndicateursMlLocals,
+  returnResult,
+  RouteHandler,
+} from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 export type { OrganisationWithRegions };
+
+const mlIdSchema = z.string().regex(/^[0-9a-f]{24}$/);
+const periodQuery = z.object({ period: zStatsPeriod.optional() });
+const traitementQuery = z.object({
+  period: zStatsPeriod.optional(),
+  region: z.string().optional(),
+  ml_id: mlIdSchema.optional(),
+  national: z.coerce.boolean().optional(),
+  segment: zStatsSegment.default("rupture"),
+});
+const statsQuery = z.object({
+  period: zStatsPeriod.optional(),
+  region: z.string().optional(),
+  ml_id: mlIdSchema.optional(),
+  national: z.coerce.boolean().optional(),
+  segment: zStatsSegment.default("rupture"),
+});
+const collaborationsQuery = z.object({
+  period: zStatsPeriod.optional(),
+  region: z.string().optional(),
+  ml_id: mlIdSchema.optional(),
+  national: z.coerce.boolean().optional(),
+});
+const traitementMlQuery = z.object({
+  period: zStatsPeriod.optional(),
+  region: z.string().optional(),
+  segment: zStatsSegment.default("rupture"),
+  page: z.coerce.number().min(1).optional().default(1),
+  limit: z.coerce.number().min(1).max(100).optional().default(10),
+  sort_by: zTraitementMlSortBy.default("total_jeunes"),
+  sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
+  search: z.string().optional(),
+});
+const nationalQuery = z.object({ period: zStatsPeriod.optional(), national: z.coerce.boolean().optional() });
+const traitementRegionsQuery = nationalQuery.extend({ segment: zStatsSegment.default("all") });
+const exportQuery = z.object({
+  region: z.string().optional(),
+  ml_id: mlIdSchema.optional(),
+  national: z.coerce.boolean().optional(),
+});
+const mlIdParams = z.object({ id: mlIdSchema });
+
+type IndicateursHandler<TQuery = DefaultQuery, TParams = DefaultParams> = RouteHandler<
+  IndicateursMlLocals,
+  TParams,
+  TQuery
+>;
 
 export default () => {
   const router = express.Router();
 
   router.get(
     "/synthese/deployment",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: periodQuery }),
     returnResult(getDeploymentRoute)
   );
-
   router.get(
     "/synthese/regions",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: periodQuery }),
     returnResult(getSyntheseRegionsRoute)
   );
-
-  router.get(
-    "/traitement",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-        region: z.string().optional(),
-      }),
-    }),
-    returnResult(getTraitementRoute)
-  );
-
-  router.get(
-    "/stats/rupturants",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-        region: z.string().optional(),
-        ml_id: z
-          .string()
-          .regex(/^[0-9a-f]{24}$/)
-          .optional(),
-        national: z.coerce.boolean().optional(),
-      }),
-    }),
-    returnResult(getRupturantsRoute)
-  );
-
+  router.get("/traitement", validateRequestMiddleware({ query: traitementQuery }), returnResult(getTraitementRoute));
+  router.get("/stats/rupturants", validateRequestMiddleware({ query: statsQuery }), returnResult(getRupturantsRoute));
   router.get(
     "/stats/dossiers-traites",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-        region: z.string().optional(),
-        ml_id: z
-          .string()
-          .regex(/^[0-9a-f]{24}$/)
-          .optional(),
-        national: z.coerce.boolean().optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: statsQuery }),
     returnResult(getDossiersTraitesRoute)
   );
-
   router.get(
     "/stats/traitement/ml",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-        region: z.string().optional(),
-        page: z.coerce.number().min(1).optional().default(1),
-        limit: z.coerce.number().min(1).max(100).optional().default(10),
-        sort_by: z.string().optional().default("total_jeunes"),
-        sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
-        search: z.string().optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: traitementMlQuery }),
     returnResult(getTraitementMLRoute)
   );
-
   router.get(
     "/stats/traitement/regions",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-        national: z.coerce.boolean().optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: traitementRegionsQuery }),
     returnResult(getTraitementRegionsRoute)
   );
-
   router.get(
     "/stats/traitement/export",
-    validateRequestMiddleware({
-      query: z.object({
-        region: z.string().optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: exportQuery }),
     returnResult(getTraitementExportRoute)
   );
-
+  router.get(
+    "/stats/collaborations",
+    validateRequestMiddleware({ query: collaborationsQuery }),
+    returnResult(getCollaborationsRoute)
+  );
   router.get(
     "/stats/couverture-regions",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-        national: z.coerce.boolean().optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: nationalQuery }),
     returnResult(getCouvertureRegionsRoute)
   );
-
-  router.get(
-    "/stats/whatsapp",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-      }),
-    }),
-    returnResult(getWhatsAppRoute)
-  );
-
-  router.get(
-    "/stats/prequalif",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-      }),
-    }),
-    returnResult(getPrequalifRoute)
-  );
-
-  router.get(
-    "/stats/accompagnement-conjoint",
-    validateRequestMiddleware({
-      query: z.object({
-        region: z.string().optional(),
-        ml_id: z
-          .string()
-          .regex(/^[0-9a-f]{24}$/)
-          .optional(),
-        national: z.coerce.boolean().optional(),
-      }),
-    }),
-    returnResult(getAccompagnementConjointRoute)
-  );
-
+  router.get("/stats/whatsapp", validateRequestMiddleware({ query: periodQuery }), returnResult(getWhatsAppRoute));
+  router.get("/stats/prequalif", validateRequestMiddleware({ query: periodQuery }), returnResult(getPrequalifRoute));
   router.get(
     "/mission-locale/:id/detail",
-    validateRequestMiddleware({
-      params: z.object({
-        id: z.string().regex(/^[0-9a-f]{24}$/),
-      }),
-    }),
+    validateRequestMiddleware({ params: mlIdParams }),
     returnResult(getMlDetailRoute)
   );
-
   router.get(
     "/mission-locale/:id/membres",
-    validateRequestMiddleware({
-      params: z.object({
-        id: z.string().regex(/^[0-9a-f]{24}$/),
-      }),
-    }),
+    validateRequestMiddleware({ params: mlIdParams }),
     returnResult(getMlMembresRoute)
   );
 
   return router;
 };
 
-const getDeploymentRoute = async (req, { locals }) => {
+const getDeploymentRoute: IndicateursHandler<z.infer<typeof periodQuery>> = async (req, { locals }) => {
   const { period } = req.query;
-  const regions = locals.regions as string[];
+  const regions = locals.regions;
 
-  const stats = await getDeploymentStats((period as StatsPeriod) || "30days");
+  const stats = await getDeploymentStats(period || "30days");
 
   if (regions.length > 0) {
     stats.regionsActives = stats.regionsActives.filter((code) => regions.includes(code));
@@ -214,11 +156,11 @@ const getDeploymentRoute = async (req, { locals }) => {
   return stats;
 };
 
-const getSyntheseRegionsRoute = async (req, { locals }) => {
+const getSyntheseRegionsRoute: IndicateursHandler<z.infer<typeof periodQuery>> = async (req, { locals }) => {
   const { period } = req.query;
-  const regions = locals.regions as string[];
+  const regions = locals.regions;
 
-  const stats = await getSyntheseRegionsStats((period as StatsPeriod) || "30days");
+  const stats = await getSyntheseRegionsStats(period || "30days");
 
   if (regions.length > 0) {
     stats.regions = stats.regions.filter((r) => regions.includes(r.code));
@@ -227,94 +169,96 @@ const getSyntheseRegionsRoute = async (req, { locals }) => {
   return stats;
 };
 
-const getTraitementRoute = async (req, { locals }) => {
-  const { period, region } = req.query;
-  const userRegions = locals.regions as string[];
-
-  if (region && userRegions.length > 0 && !userRegions.includes(region as string)) {
+const assertRegionAllowed = (region: string | undefined, userRegions: string[]) => {
+  if (region && userRegions.length > 0 && !userRegions.includes(region)) {
     throw Boom.forbidden("Accès non autorisé à cette région");
   }
-
-  const targetRegion = region || (userRegions.length === 1 ? userRegions[0] : undefined);
-
-  return await getTraitementStats((period as StatsPeriod) || "30days", undefined, targetRegion as string | undefined);
 };
 
-const getRupturantsRoute = async (req, { locals }) => {
-  const { period, region, ml_id, national } = req.query;
-  const userRegions = locals.regions as string[];
+/**
+ * Périmètre des lecteurs de stats : `ml_id` (vérifié) court-circuite tout, `national` ignore le
+ * périmètre territorial, sinon la région demandée ou toutes les régions de l'utilisateur.
+ * Un admin (aucune région) sans paramètre voit tout.
+ */
+const resolveStatsScope = async (
+  query: { region?: string; ml_id?: string; national?: boolean },
+  userRegions: string[]
+): Promise<{ regions?: string[]; mlId?: string }> => {
+  const { region, ml_id, national } = query;
 
-  if (region && userRegions.length > 0 && !userRegions.includes(region as string)) {
-    throw Boom.forbidden("Accès non autorisé à cette région");
-  }
+  assertRegionAllowed(region, userRegions);
 
   if (ml_id) {
-    await verifyMlInRegions(ml_id as string, userRegions);
+    await verifyMlInRegions(ml_id, userRegions);
+    return { mlId: ml_id };
   }
 
   if (national) {
-    return await getRupturantsStats((period as StatsPeriod) || "30days", undefined, ml_id as string | undefined);
+    return {};
   }
 
-  const targetRegion = region || (userRegions.length === 1 ? userRegions[0] : undefined);
+  if (region) {
+    return { regions: [region] };
+  }
 
-  return await getRupturantsStats(
-    (period as StatsPeriod) || "30days",
-    targetRegion as string | undefined,
-    ml_id as string | undefined
-  );
+  return userRegions.length > 0 ? { regions: userRegions } : {};
 };
 
-const getDossiersTraitesRoute = async (req, { locals }) => {
-  const { period, region, ml_id, national } = req.query;
-  const userRegions = locals.regions as string[];
+const getTraitementRoute: IndicateursHandler<z.infer<typeof traitementQuery>> = async (req, { locals }) => {
+  const { period, segment } = req.query;
+  const scope = await resolveStatsScope(req.query, locals.regions);
 
-  if (region && userRegions.length > 0 && !userRegions.includes(region as string)) {
-    throw Boom.forbidden("Accès non autorisé à cette région");
-  }
-
-  if (ml_id) {
-    await verifyMlInRegions(ml_id as string, userRegions);
-  }
-
-  if (national) {
-    return await getDossiersTraitesStats((period as StatsPeriod) || "30days", undefined, ml_id as string | undefined);
-  }
-
-  const targetRegion = region || (userRegions.length === 1 ? userRegions[0] : undefined);
-
-  return await getDossiersTraitesStats(
-    (period as StatsPeriod) || "30days",
-    targetRegion as string | undefined,
-    ml_id as string | undefined
-  );
+  return await getTraitementStats(period || "30days", undefined, scope.regions, segment, scope.mlId);
 };
 
-const getTraitementMLRoute = async (req, { locals }) => {
-  const { period, region, page, limit, sort_by, sort_order, search } = req.query;
-  const userRegions = locals.regions as string[];
+const getRupturantsRoute: IndicateursHandler<z.infer<typeof statsQuery>> = async (req, { locals }) => {
+  const { period, segment } = req.query;
+  const scope = await resolveStatsScope(req.query, locals.regions);
 
-  if (region && userRegions.length > 0 && !userRegions.includes(region as string)) {
-    throw Boom.forbidden("Accès non autorisé à cette région");
-  }
+  return await getRupturantsStats(period || "30days", scope.regions, scope.mlId, segment);
+};
+
+const getDossiersTraitesRoute: IndicateursHandler<z.infer<typeof statsQuery>> = async (req, { locals }) => {
+  const { period, segment } = req.query;
+  const scope = await resolveStatsScope(req.query, locals.regions);
+
+  return await getDossiersTraitesStats(period || "30days", scope.regions, scope.mlId, segment);
+};
+
+const getCollaborationsRoute: IndicateursHandler<z.infer<typeof collaborationsQuery>> = async (req, { locals }) => {
+  const { period } = req.query;
+  const scope = await resolveStatsScope(req.query, locals.regions);
+
+  return await getCollaborationSegmentStats(period || "30days", scope.regions, scope.mlId);
+};
+
+const getTraitementMLRoute: IndicateursHandler<z.infer<typeof traitementMlQuery>> = async (req, { locals }) => {
+  const { period, region, segment, page, limit, sort_by, sort_order, search } = req.query;
+  const userRegions = locals.regions;
+
+  assertRegionAllowed(region, userRegions);
 
   return await getTraitementStatsByMissionLocale({
-    period: (period as StatsPeriod) || "30days",
-    region: region as string | undefined,
+    period: period || "30days",
+    segment,
+    region,
     regions: !region && userRegions.length > 0 ? userRegions : undefined,
     page: Number(page) || 1,
     limit: Number(limit) || 10,
-    sort_by: (sort_by as string) || "total_jeunes",
-    sort_order: (sort_order as "asc" | "desc") || "desc",
-    search: search as string | undefined,
+    sort_by,
+    sort_order: sort_order || "desc",
+    search,
   });
 };
 
-const getTraitementRegionsRoute = async (req, { locals }) => {
-  const { national } = req.query;
-  const userRegions = locals.regions as string[];
+const getTraitementRegionsRoute: IndicateursHandler<z.infer<typeof traitementRegionsQuery>> = async (
+  req,
+  { locals }
+) => {
+  const { national, segment } = req.query;
+  const userRegions = locals.regions;
 
-  const allRegions = await getSuiviTraitementByRegion();
+  const allRegions = await getSuiviTraitementByRegion(segment);
 
   if (national) {
     return allRegions;
@@ -327,24 +271,17 @@ const getTraitementRegionsRoute = async (req, { locals }) => {
   return allRegions;
 };
 
-const getTraitementExportRoute = async (req, { locals }) => {
-  const { region } = req.query;
-  const userRegions = locals.regions as string[];
+const getTraitementExportRoute: IndicateursHandler<z.infer<typeof exportQuery>> = async (req, { locals }) => {
+  const scope = await resolveStatsScope(req.query, locals.regions);
 
-  if (region && userRegions.length > 0 && !userRegions.includes(region as string)) {
-    throw Boom.forbidden("Accès non autorisé à cette région");
-  }
-
-  const targetRegion = region || (userRegions.length === 1 ? userRegions[0] : undefined);
-
-  return await getTraitementExportData({ region: targetRegion as string | undefined });
+  return await getTraitementExportData(scope);
 };
 
-const getCouvertureRegionsRoute = async (req, { locals }) => {
+const getCouvertureRegionsRoute: IndicateursHandler<z.infer<typeof nationalQuery>> = async (req, { locals }) => {
   const { period, national } = req.query;
-  const userRegions = locals.regions as string[];
+  const userRegions = locals.regions;
 
-  const stats = await getCouvertureRegionsStats((period as StatsPeriod) || "30days");
+  const stats = await getCouvertureRegionsStats(period || "30days");
 
   if (national) {
     return stats;
@@ -357,55 +294,32 @@ const getCouvertureRegionsRoute = async (req, { locals }) => {
   return stats;
 };
 
-const getAccompagnementConjointRoute = async (req, { locals }) => {
-  const { region, ml_id, national } = req.query;
-  const userRegions = locals.regions as string[];
-
-  if (region && userRegions.length > 0 && !userRegions.includes(region as string)) {
-    throw Boom.forbidden("Accès non autorisé à cette région");
-  }
-
-  if (ml_id) {
-    await verifyMlInRegions(ml_id as string, userRegions);
-    return await getAccompagnementConjointStats(undefined, ml_id as string);
-  }
-
-  if (national) {
-    return await getAccompagnementConjointStats(undefined);
-  }
-
-  const targetRegion = region || (userRegions.length === 1 ? userRegions[0] : undefined);
-
-  return await getAccompagnementConjointStats(targetRegion as string | undefined);
-};
-
-const getMlDetailRoute = async (req, { locals }) => {
+const getMlDetailRoute: IndicateursHandler<DefaultQuery, z.infer<typeof mlIdParams>> = async (req, { locals }) => {
   const { id } = req.params;
-  const userRegions = locals.regions as string[];
+  const userRegions = locals.regions;
 
   await verifyMlInRegions(id, userRegions);
 
   return getMissionLocaleDetail(new ObjectId(id));
 };
 
-const getMlMembresRoute = async (req, { locals }) => {
+const getMlMembresRoute: IndicateursHandler<DefaultQuery, z.infer<typeof mlIdParams>> = async (req, { locals }) => {
   const { id } = req.params;
-  const userRegions = locals.regions as string[];
+  const userRegions = locals.regions;
 
   await verifyMlInRegions(id, userRegions);
 
   return getMissionLocaleMembers(new ObjectId(id));
 };
 
-const getWhatsAppRoute = async (req, { locals }) => {
+const getWhatsAppRoute: IndicateursHandler<z.infer<typeof periodQuery>> = async (req, { locals }) => {
   const { period } = req.query;
-  const organisation = locals.organisation as { type: string };
 
-  if (organisation.type !== "ADMINISTRATEUR") {
+  if (locals.organisation.type !== "ADMINISTRATEUR") {
     throw Boom.forbidden("Accès réservé aux administrateurs");
   }
 
-  return await getWhatsAppStats((period as StatsPeriod) || "all");
+  return await getWhatsAppStats(period || "all");
 };
 
 /**
@@ -413,15 +327,14 @@ const getWhatsAppRoute = async (req, { locals }) => {
  * Admin-only
  *
  */
-const getPrequalifRoute = async (req, { locals }) => {
-  const organisation = locals.organisation as { type: string };
-  if (organisation.type !== "ADMINISTRATEUR") {
+const getPrequalifRoute: IndicateursHandler<z.infer<typeof periodQuery>> = async (req, { locals }) => {
+  if (locals.organisation.type !== "ADMINISTRATEUR") {
     throw Boom.forbidden("Accès réservé aux administrateurs");
   }
 
-  const { period } = req.query as { period?: string };
+  const { period } = req.query;
 
-  return await getPrequalifStats((period as StatsPeriod) || "all");
+  return await getPrequalifStats(period || "all");
 };
 
 async function verifyMlInRegions(mlId: string, userRegions: string[]): Promise<void> {
@@ -438,7 +351,7 @@ async function verifyMlInRegions(mlId: string, userRegions: string[]): Promise<v
 
   const mlRegion = (ml as { adresse?: { region?: string } }).adresse?.region;
 
-  if (mlRegion && !userRegions.includes(mlRegion)) {
+  if (!mlRegion || !userRegions.includes(mlRegion)) {
     throw Boom.forbidden("Accès non autorisé à cette Mission Locale");
   }
 }

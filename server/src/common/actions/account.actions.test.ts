@@ -1,8 +1,13 @@
 import { ObjectId } from "bson";
+import type { IInvitation } from "shared/models/data/invitations.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { invitationsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import type { AuthContext } from "@/common/model/internal/AuthContext";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc } from "@tests/utils/testUtils";
 
 import { activateUser, register, registerCfa } from "./account.actions";
 import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
@@ -57,14 +62,16 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
 
     it("enfile la synchro du compte créé (chemin invitation → CONFIRMED)", async () => {
       const organisationId = await createOrganisation({ type: "ADMINISTRATEUR" });
-      await invitationsDb().insertOne({
-        _id: new ObjectId(),
-        token: "tok-invite",
-        email: "invite@example.com",
-        organisation_id: organisationId,
-        author_id: new ObjectId(),
-        created_at: new Date(),
-      } as any);
+      await invitationsDb().insertOne(
+        testDoc<IInvitation>({
+          _id: new ObjectId(),
+          token: "tok-invite",
+          email: "invite@example.com",
+          organisation_id: organisationId,
+          author_id: new ObjectId(),
+          created_at: new Date(),
+        })
+      );
 
       const result = await register({
         user: buildRegistrationUser("invite@example.com"),
@@ -83,15 +90,19 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
     // `buildUser`/`buildOrgaOf` produisent des documents conformes au schéma Mongo
     // (validation activée en test). `activateUser` ne lit de l'organisation que son
     // `type` : un OF emprunte des branches non-ML, sans effet de bord.
-    const seedPendingUser = async (override: Record<string, any> = {}) => {
+    const seedPendingUser = async (override: Record<string, unknown> = {}) => {
       const orga = buildOrgaOf();
-      await organisationsDb().insertOne(orga as any);
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orga));
       const user = buildUser(orga, { account_status: "PENDING_EMAIL_VALIDATION", ...override });
-      await usersMigrationDb().insertOne(user as any);
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
       return { user, orga };
     };
 
-    const buildCtx = (user: any, orga: any, extra: Record<string, any> = {}) =>
+    const buildCtx = (
+      user: ReturnType<typeof buildUser>,
+      orga: ReturnType<typeof buildOrgaOf>,
+      extra: Partial<AuthContext> = {}
+    ) =>
       ({
         _id: user._id,
         email: user.email,
@@ -102,7 +113,7 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
         organisation: { _id: orga._id, type: orga.type },
         account_status: user.account_status,
         ...extra,
-      }) as any;
+      }) as AuthContext;
 
     it("branche CFA (organisation_role) → CONFIRMED : enfile la synchro du compte activé", async () => {
       const { user, orga } = await seedPendingUser();
@@ -141,15 +152,17 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
 
   describe("registerCfa", () => {
     it("enfile la synchro du compte CFA créé", async () => {
-      await invitationsDb().insertOne({
-        _id: new ObjectId(),
-        token: "tok-cfa",
-        email: "cfa@example.com",
-        organisation_id: new ObjectId(),
-        author_id: new ObjectId(),
-        role: "member",
-        created_at: new Date(),
-      } as any);
+      await invitationsDb().insertOne(
+        testDoc<IInvitation>({
+          _id: new ObjectId(),
+          token: "tok-cfa",
+          email: "cfa@example.com",
+          organisation_id: new ObjectId(),
+          author_id: new ObjectId(),
+          role: "member",
+          created_at: new Date(),
+        })
+      );
 
       const result = await registerCfa({
         token: "tok-cfa",

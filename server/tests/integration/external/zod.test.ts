@@ -26,7 +26,7 @@ describe("zod", () => {
       z.object({
         // Must be first
         missing: z.string().refine(() => false),
-        preprocess: z.preprocess((data: any) => data?.trim(), z.string().regex(/ asdf/)),
+        preprocess: z.preprocess((data) => (typeof data === "string" ? data.trim() : data), z.string().regex(/ asdf/)),
       }).parse({ preprocess: " asdf" });
     }).toThrow(
       JSON.stringify(

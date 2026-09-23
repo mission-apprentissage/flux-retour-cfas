@@ -1,3 +1,5 @@
+import type { IncomingMessage } from "http";
+
 import { ObjectId } from "bson";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -17,9 +19,9 @@ const createBrevoListMock = vi.mocked(createBrevoList);
 
 const mockCreateOk = (id: number) =>
   createBrevoListMock.mockResolvedValueOnce({
-    response: { statusCode: 201 } as any,
-    body: { id } as any,
-  } as any);
+    response: { statusCode: 201 } as IncomingMessage,
+    body: { id },
+  });
 
 describe("getOrCreateContactList", () => {
   beforeEach(() => {
@@ -74,9 +76,9 @@ describe("getOrCreateContactList", () => {
 
   it("throw si Brevo retourne un status non-201", async () => {
     createBrevoListMock.mockResolvedValueOnce({
-      response: { statusCode: 500 } as any,
-      body: {} as any,
-    } as any);
+      response: { statusCode: 500 } as IncomingMessage,
+      body: { id: 0 },
+    });
 
     await expect(getOrCreateContactList({ slug: "cfa-users", name: "x", folderId: 5 })).rejects.toThrow(
       /Error creating Brevo list/

@@ -11,6 +11,7 @@ import type { IArchivableOrganismesResponse } from "shared/models/routes/admin/o
 
 import {
   activateOrganisme,
+  updateMissionLocaleEffectifComputedCollab,
   updateMissionLocaleEffectifComputedOrganisme,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getCfdInfo } from "@/common/apis/apiAlternance/apiAlternance";
@@ -18,6 +19,7 @@ import { getEtablissement } from "@/common/apis/ApiEntreprise";
 import { fetchOrganismeReferentielBySiret } from "@/common/apis/apiReferentielMna";
 import logger from "@/common/logger";
 import {
+  auditLogsDb,
   effectifsDb,
   formationsCatalogueDb,
   missionLocaleEffectifsDb,
@@ -481,7 +483,6 @@ export async function activateDecaCfaPilotBatch(
   items: DecaCfaPilotBatchItem[],
   adminUserId: string
 ): Promise<DecaCfaPilotBatchResult<DecaCfaPilotActivateStatus>> {
-  const now = new Date();
   const deduped = dedupeBatchItems(items);
   const results: DecaCfaPilotBatchItemResult<DecaCfaPilotActivateStatus>[] = [];
 
@@ -502,20 +503,8 @@ export async function activateDecaCfaPilotBatch(
 
     if (eligibility.alreadyActive) {
       try {
-        const existingOrg = (await organisationsDb().findOne(
-          { type: "ORGANISME_FORMATION", organisme_id: organismeId },
-          { projection: { ml_beta_activated_at: 1 } }
-        )) as Pick<IOrganisationOrganismeFormation, "ml_beta_activated_at"> | null;
-        const mlBetaActivatedAt = existingOrg?.ml_beta_activated_at ?? undefined;
-        // Idempotent re-set of the flags + propagation of computed if stale
-        await organismesDb().updateOne(
-          { _id: organisme._id as ObjectId },
-          { $set: { is_allowed_deca: true, is_allowed_collab: true } }
-        );
-        if (mlBetaActivatedAt) {
-          await updateMissionLocaleEffectifComputedOrganisme(mlBetaActivatedAt, organisme._id as ObjectId);
-        }
-        results.push({ input, status: "already_active", organismeId, eligibility, mlBetaActivatedAt });
+        await organismesDb().updateOne({ _id: organisme._id as ObjectId }, { $set: { is_allowed_deca: true } });
+        results.push({ input, status: "already_active", organismeId, eligibility });
       } catch (err) {
         logger.error({ err, siret, uai, organismeId }, "deca-cfa-pilot activate (already_active replay) failed");
         results.push({
@@ -535,35 +524,8 @@ export async function activateDecaCfaPilotBatch(
     }
 
     try {
-      await organismesDb().updateOne(
-        { _id: organisme._id as ObjectId },
-        { $set: { is_allowed_deca: true, is_allowed_collab: true } }
-      );
-
-      const existingOrg = (await organisationsDb().findOne(
-        { type: "ORGANISME_FORMATION", organisme_id: organismeId },
-        { projection: { ml_beta_activated_at: 1 } }
-      )) as Pick<IOrganisationOrganismeFormation, "ml_beta_activated_at"> | null;
-
-      if (!existingOrg?.ml_beta_activated_at) {
-        await activateOrganisme(now, organisme._id as ObjectId);
-        results.push({
-          input,
-          status: "activated",
-          organismeId,
-          eligibility,
-          mlBetaActivatedAt: now,
-        });
-      } else {
-        await updateMissionLocaleEffectifComputedOrganisme(existingOrg.ml_beta_activated_at, organisme._id as ObjectId);
-        results.push({
-          input,
-          status: "already_active",
-          organismeId,
-          eligibility,
-          mlBetaActivatedAt: existingOrg.ml_beta_activated_at,
-        });
-      }
+      await organismesDb().updateOne({ _id: organisme._id as ObjectId }, { $set: { is_allowed_deca: true } });
+      results.push({ input, status: "activated", organismeId, eligibility });
     } catch (err) {
       logger.error({ err, siret, uai, organismeId }, "deca-cfa-pilot activate failed");
       results.push({
@@ -607,18 +569,7 @@ export async function deactivateDecaCfaPilotBatch(
     }
 
     try {
-      await organismesDb().updateOne(
-        { _id: organisme._id as ObjectId },
-        { $unset: { is_allowed_deca: "", is_allowed_collab: "" } }
-      );
-      await organisationsDb().updateMany(
-        { type: "ORGANISME_FORMATION", organisme_id: organismeId },
-        { $unset: { ml_beta_activated_at: "" } }
-      );
-      await missionLocaleEffectifsDb().updateMany(
-        { "effectif_snapshot.organisme_id": organisme._id as ObjectId },
-        { $unset: { "computed.organisme.ml_beta_activated_at": "" } }
-      );
+      await organismesDb().updateOne({ _id: organisme._id as ObjectId }, { $unset: { is_allowed_deca: "" } });
       results.push({ input, status: "deactivated", organismeId });
     } catch (err) {
       logger.error({ err, siret, uai, organismeId }, "deca-cfa-pilot deactivate failed");
@@ -639,7 +590,7 @@ export async function deactivateDecaCfaPilotBatch(
 
 export type CollabV2ActivateStatus = "activated" | "already_active" | "not_eligible" | "not_found" | "partial_failure";
 
-export type CollabV2DeactivateStatus = "deactivated" | "not_active" | "not_found" | "partial_failure";
+export type CollabSuspendStatus = "suspended" | "already_suspended" | "not_active" | "not_found";
 
 export type CollabV2ActionResult<S extends string> = {
   status: S;
@@ -665,7 +616,18 @@ export async function activateCollabV2(
   const organisme = await organismesDb().findOne(
     { _id },
     {
-      projection: { _id: 1, siret: 1, uai: 1, nature: 1, is_allowed_collab: 1, nom: 1, raison_sociale: 1, enseigne: 1 },
+      projection: {
+        _id: 1,
+        siret: 1,
+        uai: 1,
+        nature: 1,
+        is_allowed_collab: 1,
+        nom: 1,
+        raison_sociale: 1,
+        enseigne: 1,
+        collab_suspended_at: 1,
+        collab_inactivity_email_sent_at: 1,
+      },
     }
   );
 
@@ -683,8 +645,12 @@ export async function activateCollabV2(
       )) as Pick<IOrganisationOrganismeFormation, "ml_beta_activated_at"> | null;
       const mlBetaActivatedAt = existingOrg?.ml_beta_activated_at ?? undefined;
       await organismesDb().updateOne({ _id }, { $set: { is_allowed_collab: true } });
+      await updateMissionLocaleEffectifComputedCollab(_id, true);
       if (mlBetaActivatedAt) {
         await updateMissionLocaleEffectifComputedOrganisme(mlBetaActivatedAt, _id);
+      }
+      if (organisme.collab_suspended_at || organisme.collab_inactivity_email_sent_at) {
+        await resumeCollab(_id, { reason: "admin", userId: adminUserId });
       }
       logger.info({ adminUserId, organismeId, status: "already_active" }, "collab-v2 activate");
       return { status: "already_active", organismeId, eligibility, mlBetaActivatedAt };
@@ -700,74 +666,149 @@ export async function activateCollabV2(
 
   try {
     await organismesDb().updateOne({ _id }, { $set: { is_allowed_collab: true } });
-
-    const existingOrg = (await organisationsDb().findOne(
-      { type: "ORGANISME_FORMATION", organisme_id: organismeId },
-      { projection: { ml_beta_activated_at: 1 } }
-    )) as Pick<IOrganisationOrganismeFormation, "ml_beta_activated_at"> | null;
-
-    if (!existingOrg?.ml_beta_activated_at) {
-      await activateOrganisme(now, _id);
-      logger.info({ adminUserId, organismeId, status: "activated" }, "collab-v2 activate");
-      return { status: "activated", organismeId, eligibility, mlBetaActivatedAt: now };
-    }
-
-    await updateMissionLocaleEffectifComputedOrganisme(existingOrg.ml_beta_activated_at, _id);
-    logger.info({ adminUserId, organismeId, status: "already_active" }, "collab-v2 activate");
-    return {
-      status: "already_active",
-      organismeId,
-      eligibility,
-      mlBetaActivatedAt: existingOrg.ml_beta_activated_at,
-    };
+    const { mlBetaActivatedAt, activated } = await applyCollabActivation(_id, now);
+    const status: CollabV2ActivateStatus = activated ? "activated" : "already_active";
+    logger.info({ adminUserId, organismeId, status }, "collab-v2 activate");
+    return { status, organismeId, eligibility, mlBetaActivatedAt };
   } catch (err) {
     logger.error({ err, organismeId }, "collab-v2 activate failed");
     return { status: "partial_failure", organismeId, eligibility, error: (err as Error).message };
   }
 }
 
-export async function deactivateCollabV2(
-  organismeId: string,
-  adminUserId: string
-): Promise<CollabV2ActionResult<CollabV2DeactivateStatus>> {
-  let _id: ObjectId;
-  try {
-    _id = new ObjectId(organismeId);
-  } catch {
-    return { status: "not_found" };
+async function applyCollabActivation(
+  _id: ObjectId,
+  now: Date
+): Promise<{ mlBetaActivatedAt: Date; activated: boolean }> {
+  await updateMissionLocaleEffectifComputedCollab(_id, true);
+
+  const existingOrg = (await organisationsDb().findOne(
+    { type: "ORGANISME_FORMATION", organisme_id: _id.toString() },
+    { projection: { ml_beta_activated_at: 1 } }
+  )) as Pick<IOrganisationOrganismeFormation, "ml_beta_activated_at"> | null;
+
+  if (!existingOrg?.ml_beta_activated_at) {
+    await activateOrganisme(now, _id);
+    return { mlBetaActivatedAt: now, activated: true };
   }
 
+  await updateMissionLocaleEffectifComputedOrganisme(existingOrg.ml_beta_activated_at, _id);
+  return { mlBetaActivatedAt: existingOrg.ml_beta_activated_at, activated: false };
+}
+
+export type CollabResumeReason = "reconnexion" | "collaboration_envoyee" | "admin";
+
+export async function suspendCollab(
+  organismeId: ObjectId,
+  context: { userId: ObjectId | string }
+): Promise<CollabSuspendStatus> {
+  const now = new Date();
   const organisme = await organismesDb().findOne(
-    { _id },
-    { projection: { _id: 1, is_allowed_collab: 1, is_allowed_deca: 1 } }
+    { _id: organismeId },
+    { projection: { is_allowed_collab: 1, collab_suspended_at: 1 } }
   );
-
   if (!organisme) {
-    return { status: "not_found" };
+    return "not_found";
   }
-
   if (organisme.is_allowed_collab !== true) {
-    return { status: "not_active", organismeId };
+    return "not_active";
+  }
+  if (organisme.collab_suspended_at) {
+    return "already_suspended";
   }
 
-  try {
-    await organismesDb().updateOne({ _id }, { $unset: { is_allowed_collab: "" } });
+  await organismesDb().updateOne({ _id: organismeId }, { $set: { collab_suspended_at: now } });
+  await missionLocaleEffectifsDb().updateMany(
+    { "effectif_snapshot.organisme_id": organismeId },
+    { $set: { "computed.organisme.collab_suspended_at": now } }
+  );
+  await auditLogsDb().insertOne({
+    action: "collab_suspended_admin",
+    date: now,
+    data: { organisme_id: organismeId, user_id: context.userId.toString() },
+  });
+  logger.info({ organismeId: organismeId.toString(), userId: context.userId.toString() }, "collab suspended by admin");
+  return "suspended";
+}
+export type CollabResumeStatus = "resumed" | "email_lock_cleared" | "nothing_to_resume" | "not_found";
 
-    if (organisme.is_allowed_deca !== true) {
-      await organisationsDb().updateMany(
-        { type: "ORGANISME_FORMATION", organisme_id: organismeId },
-        { $unset: { ml_beta_activated_at: "" } }
-      );
-      await missionLocaleEffectifsDb().updateMany(
-        { "effectif_snapshot.organisme_id": _id },
-        { $unset: { "computed.organisme.ml_beta_activated_at": "" } }
-      );
+export async function resumeCollab(
+  organismeId: ObjectId,
+  context: { reason: CollabResumeReason; userId?: ObjectId | string }
+): Promise<CollabResumeStatus> {
+  const now = new Date();
+  const organisme = await organismesDb().findOne(
+    { _id: organismeId },
+    { projection: { collab_suspended_at: 1, collab_inactivity_email_sent_at: 1 } }
+  );
+  if (!organisme) {
+    return "not_found";
+  }
+  const wasSuspended = !!organisme.collab_suspended_at;
+  if (!wasSuspended && !organisme.collab_inactivity_email_sent_at) {
+    return "nothing_to_resume";
+  }
+
+  await organismesDb().updateOne(
+    { _id: organismeId },
+    {
+      $unset: { collab_suspended_at: "", collab_inactivity_email_sent_at: "" },
+      ...(wasSuspended ? { $set: { collab_resumed_at: now } } : {}),
     }
-
-    logger.info({ adminUserId, organismeId, keptDeca: organisme.is_allowed_deca === true }, "collab-v2 deactivate");
-    return { status: "deactivated", organismeId };
-  } catch (err) {
-    logger.error({ err, organismeId }, "collab-v2 deactivate failed");
-    return { status: "partial_failure", organismeId, error: (err as Error).message };
+  );
+  if (!wasSuspended) {
+    return "email_lock_cleared";
   }
+
+  await missionLocaleEffectifsDb().updateMany(
+    { "effectif_snapshot.organisme_id": organismeId },
+    { $unset: { "computed.organisme.collab_suspended_at": "" }, $set: { "computed.organisme.collab_resumed_at": now } }
+  );
+  await auditLogsDb().insertOne({
+    action: "collab_resumed",
+    date: now,
+    data: { organisme_id: organismeId, reason: context.reason, user_id: context.userId?.toString() ?? null },
+  });
+  logger.info(
+    { organismeId: organismeId.toString(), reason: context.reason, userId: context.userId?.toString() },
+    "collab resumed"
+  );
+  return "resumed";
+}
+
+export type CollabOnAfterCollaborationStatus = "activated" | "already_on";
+
+export async function ensureCollabOnAfterCollaboration(
+  organismeId: ObjectId,
+  context: { userId?: ObjectId; effectifId: ObjectId }
+): Promise<CollabOnAfterCollaborationStatus> {
+  const now = new Date();
+
+  const current = await organismesDb().findOne(
+    { _id: organismeId },
+    { projection: { collab_suspended_at: 1, collab_inactivity_email_sent_at: 1 } }
+  );
+  if (current?.collab_suspended_at || current?.collab_inactivity_email_sent_at) {
+    await resumeCollab(organismeId, { reason: "collaboration_envoyee", userId: context.userId });
+  }
+
+  const { modifiedCount } = await organismesDb().updateOne(
+    { _id: organismeId, is_allowed_collab: { $ne: true } },
+    { $set: { is_allowed_collab: true } }
+  );
+  if (modifiedCount === 0) {
+    return "already_on";
+  }
+
+  const { mlBetaActivatedAt } = await applyCollabActivation(organismeId, now);
+  logger.info(
+    {
+      organismeId: organismeId.toString(),
+      userId: context.userId?.toString(),
+      effectifId: context.effectifId.toString(),
+      mlBetaActivatedAt,
+    },
+    "collab-on auto-activation"
+  );
+  return "activated";
 }

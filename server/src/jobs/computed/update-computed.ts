@@ -1,7 +1,9 @@
+import type { IOrganisme } from "shared/models";
+
 import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
 import { effectifsDb, effectifsDECADb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
 
-async function updateComputedFieldForOrganisme(organisme) {
+async function updateComputedFieldForOrganisme(organisme: IOrganisme | null | undefined) {
   if (!organisme || !organisme._id) return;
 
   const op = { $set: { "_computed.organisme": generateOrganismeComputed(organisme) } };

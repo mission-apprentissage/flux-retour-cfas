@@ -1,13 +1,22 @@
+import { randomUUID } from "node:crypto";
+
 import { captureException } from "@sentry/node";
-import { v4 as uuidv4 } from "uuid";
+import Boom from "boom";
 
 import logger from "@/common/logger";
 import { usersMigrationDb } from "@/common/model/collections";
-import { getEmailInfos, SendEmailOptions, TemplateName, TemplatePayloads } from "@/common/services/mailer/mailer";
+import {
+  EmailTemplate,
+  getEmailInfos,
+  SendEmailOptions,
+  TemplateName,
+  TemplatePayloads,
+} from "@/common/services/mailer/mailer";
 import { generateHtml } from "@/common/utils/emailsUtils";
+import { getErrorMessage } from "@/common/utils/errorUtils";
 import { mailer } from "@/services";
 
-function addEmail(userEmail: string, token: string, templateName: string, payload: any) {
+function addEmail(userEmail: string, token: string, templateName: string, payload: unknown) {
   return usersMigrationDb().findOneAndUpdate(
     { email: userEmail },
     {
@@ -24,7 +33,7 @@ function addEmail(userEmail: string, token: string, templateName: string, payloa
   );
 }
 
-function addEmailMessageId(token, messageId) {
+function addEmailMessageId(token: string, messageId: string) {
   return usersMigrationDb().findOneAndUpdate(
     { "emails.token": token },
     {
@@ -39,14 +48,14 @@ function addEmailMessageId(token, messageId) {
   );
 }
 
-function addEmailError(token, e) {
+function addEmailError(token: string, e: unknown) {
   return usersMigrationDb().findOneAndUpdate(
     { "emails.token": token },
     {
       $set: {
         "emails.$.error": {
           type: "fatal",
-          message: e.message,
+          message: getErrorMessage(e),
         },
       },
     },
@@ -54,7 +63,7 @@ function addEmailError(token, e) {
   );
 }
 
-export async function markEmailAsDelivered(messageId) {
+export async function markEmailAsDelivered(messageId: string) {
   return usersMigrationDb().findOneAndUpdate(
     { "emails.messageIds": messageId },
     {
@@ -66,7 +75,7 @@ export async function markEmailAsDelivered(messageId) {
   );
 }
 
-export async function markEmailAsFailed(messageId, type) {
+export async function markEmailAsFailed(messageId: string, type: string) {
   return usersMigrationDb().findOneAndUpdate(
     { "emails.messageIds": messageId },
     {
@@ -80,7 +89,7 @@ export async function markEmailAsFailed(messageId, type) {
   );
 }
 
-export async function markEmailAsOpened(token) {
+export async function markEmailAsOpened(token: string) {
   return usersMigrationDb().findOneAndUpdate(
     { "emails.token": token },
     {
@@ -92,7 +101,7 @@ export async function markEmailAsOpened(token) {
   );
 }
 
-export async function unsubscribeUser(id) {
+export async function unsubscribeUser(id: string) {
   return usersMigrationDb().findOneAndUpdate(
     { $or: [{ email: id }, { "emails.token": id }] },
     {
@@ -105,12 +114,19 @@ export async function unsubscribeUser(id) {
 }
 
 export async function renderEmail(token: string) {
-  const user: any = await usersMigrationDb().findOne({ "emails.token": token });
-  const { templateName, payload } = user.emails.find((e) => e.token === token);
-  return generateHtml(user.email, getEmailInfos(templateName as TemplateName, payload));
+  const user = await usersMigrationDb().findOne({ "emails.token": token });
+  const email = user?.emails?.find((e) => e.token === token);
+  if (!user || !email) {
+    throw Boom.notFound("Email introuvable");
+  }
+  const { templateName, payload } = email;
+  return generateHtml(
+    user.email,
+    getEmailInfos(templateName as TemplateName, payload as TemplatePayloads[TemplateName])
+  );
 }
 
-export async function checkIfEmailExists(token) {
+export async function checkIfEmailExists(token: string) {
   const count = await usersMigrationDb().countDocuments({ "emails.token": token });
   return count > 0;
 }
@@ -120,16 +136,16 @@ export async function sendStoredEmail<T extends TemplateName>(
   recipient: string,
   templateName: T,
   payload: TemplatePayloads[T],
-  template: any,
+  template: EmailTemplate<T>,
   options?: SendEmailOptions
 ): Promise<void> {
-  const emailToken = uuidv4();
+  const emailToken = randomUUID();
   try {
     template.data.token = emailToken;
     await addEmail(recipient, emailToken, templateName, payload);
     const messageId = await mailer.sendEmailMessage(recipient, template, options);
     await addEmailMessageId(emailToken, messageId);
-  } catch (err: any) {
+  } catch (err) {
     logger.error({ err, template: templateName }, "error sending email");
     captureException(err);
     await addEmailError(emailToken, err);

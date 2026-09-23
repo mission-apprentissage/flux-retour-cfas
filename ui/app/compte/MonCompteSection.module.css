@@ -1,0 +1,15 @@
+.formulaire {
+  max-width: 720px;
+}
+
+.boutonSoumettre {
+  margin-top: 1rem;
+}
+
+.titre {
+  color: var(--text-title-blue-france);
+}
+
+.sousTitre {
+  color: var(--text-mention-grey);
+}

@@ -11,30 +11,43 @@ import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import styles from "./RupturantsSection.module.css";
 import { StatisticsSection } from "./StatisticsSection";
-import type { SectionWithPeriodAndMlProps, SectionWithLayoutProps } from "./types";
+import type { SectionWithPeriodAndMlProps, SectionWithLayoutProps, SegmentSectionProps } from "./types";
 
 type ChartType = "bar" | "pie";
 
-type RupturantsSectionProps = SectionWithPeriodAndMlProps & SectionWithLayoutProps;
+type RupturantsSectionProps = SectionWithPeriodAndMlProps &
+  SectionWithLayoutProps &
+  SegmentSectionProps & { title?: string };
 
 export function RupturantsSection({
   period = "30days",
+  segment,
+  isPublic = false,
   region,
   mlId,
   fullWidth,
   national = false,
+  title = "Jeunes rupturants",
 }: RupturantsSectionProps) {
   const [chartType, setChartType] = useState<ChartType>("bar");
 
-  const { data, isLoading, isFetching, error } = useRupturantsStats(period, region, mlId, national);
+  const { data, isLoading, isFetching, error } = useRupturantsStats({
+    period,
+    segment,
+    region,
+    mlId,
+    national,
+    isPublic,
+  });
 
   const loadingVariation = isLoadingVariation(isFetching, isLoading);
 
   return (
     <StatisticsSection
-      title="Jeunes rupturants"
+      title={title}
       width={fullWidth ? "full" : "one-third"}
       smallTitle
+      wrapTitle
       controls={
         <SegmentedControl
           hideLegend

@@ -32,6 +32,8 @@ export type CollabV2EligibilityResult = {
     nom?: string;
     raison_sociale?: string;
     enseigne?: string | null;
+    collab_suspended_at?: Date | null;
+    collab_inactivity_email_sent_at?: Date | null;
   } | null;
 };
 
@@ -54,10 +56,30 @@ function notEvaluated(): CollabV2EligibilityCheck {
 export async function checkCollabV2EligibilityForLoaded(
   organisme: Pick<
     IOrganisme,
-    "_id" | "siret" | "uai" | "nature" | "is_allowed_collab" | "nom" | "raison_sociale" | "enseigne"
+    | "_id"
+    | "siret"
+    | "uai"
+    | "nature"
+    | "is_allowed_collab"
+    | "nom"
+    | "raison_sociale"
+    | "enseigne"
+    | "collab_suspended_at"
+    | "collab_inactivity_email_sent_at"
   >
 ): Promise<CollabV2EligibilityResult> {
-  const { _id, siret, uai, nature, is_allowed_collab, nom, raison_sociale, enseigne } = organisme;
+  const {
+    _id,
+    siret,
+    uai,
+    nature,
+    is_allowed_collab,
+    nom,
+    raison_sociale,
+    enseigne,
+    collab_suspended_at,
+    collab_inactivity_email_sent_at,
+  } = organisme;
 
   const exists_with_siret_uai: CollabV2EligibilityCheck = {
     passed: Boolean(siret && uai),
@@ -82,6 +104,8 @@ export async function checkCollabV2EligibilityForLoaded(
         nom,
         raison_sociale,
         enseigne,
+        collab_suspended_at,
+        collab_inactivity_email_sent_at,
       },
     };
   }
@@ -127,6 +151,8 @@ export async function checkCollabV2EligibilityForLoaded(
       nom,
       raison_sociale,
       enseigne,
+      collab_suspended_at,
+      collab_inactivity_email_sent_at,
     },
   };
 }
@@ -161,6 +187,8 @@ export async function checkCollabV2Eligibility(organismeId: string): Promise<Col
         nom: 1,
         raison_sociale: 1,
         enseigne: 1,
+        collab_suspended_at: 1,
+        collab_inactivity_email_sent_at: 1,
       },
     }
   );

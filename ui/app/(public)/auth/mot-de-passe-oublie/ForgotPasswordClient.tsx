@@ -4,15 +4,18 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { Container, Stack, Link, Typography } from "@mui/material";
-import { Formik, Form, Field, FormikErrors } from "formik";
-import NextLink from "next/link";
+import { Field, FieldProps, Form, Formik, FormikErrors, FormikHelpers } from "formik";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { z, ZodError } from "zod";
 
+import { PAGES } from "@/app/_utils/routes.utils";
 import { _post } from "@/common/httpClient";
 import { getApiErrorMessage, isRateLimited } from "@/common/rateLimit";
+
+import { AuthCard } from "../_components/AuthCard";
+
+import styles from "./forgot-password.module.scss";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email({ message: "Format d'email invalide" }),
@@ -25,14 +28,17 @@ export default function ForgotPasswordClient() {
   const router = useRouter();
   const [statusMessage, setStatusMessage] = React.useState<string | null>(null);
 
-  const handleSubmit = async (values: ForgotPasswordType, { setStatus, setSubmitting }: any) => {
+  const handleSubmit = async (
+    values: ForgotPasswordType,
+    { setStatus, setSubmitting }: FormikHelpers<ForgotPasswordType>
+  ) => {
     try {
       await _post("/api/v1/password/forgotten-password", { ...values });
       setStatusMessage(
         "Si cette adresse existe, vous allez recevoir un e-mail contenant un lien pour réinitialiser votre mot de passe."
       );
       setTimeout(() => router.push("/"), REDIRECT_TIMEOUT);
-    } catch (err: any) {
+    } catch (err) {
       setStatus({ error: getApiErrorMessage(err), severity: isRateLimited(err) ? "warning" : "error" });
     } finally {
       setSubmitting(false);
@@ -40,23 +46,16 @@ export default function ForgotPasswordClient() {
   };
 
   return (
-    <Container
-      maxWidth="sm"
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        border: "1px solid",
-        borderColor: fr.colors.decisions.border.default.grey.default,
-        py: { xs: fr.spacing("6w") },
-        px: { xs: fr.spacing("6w") },
-        mx: "auto",
-        my: { xs: fr.spacing("2w"), md: fr.spacing("4w") },
-      }}
+    <AuthCard
+      title="Mot de passe oublié"
+      footer={
+        <p className={styles.footer}>
+          <a className={fr.cx("fr-link")} href={PAGES.static.authConnexion.getPath()}>
+            Annuler
+          </a>
+        </p>
+      }
     >
-      <Typography component="h1" variant="h3" sx={{ mb: fr.spacing("3w") }}>
-        Mot de passe oublié
-      </Typography>
-
       <Formik<ForgotPasswordType>
         initialValues={{ email: "" }}
         validate={(values) => {
@@ -78,43 +77,43 @@ export default function ForgotPasswordClient() {
       >
         {({ status = {}, isSubmitting }) => (
           <Form noValidate>
-            <Stack sx={{ gap: fr.spacing("1w") }}>
-              <Field name="email">
-                {({ field, meta }: any) => (
-                  <Input
-                    label="Email (votre identifiant)"
-                    state={meta.touched && meta.error ? "error" : "default"}
-                    stateRelatedMessage={meta.touched ? (meta.error ?? "\u00a0") : "\u00a0"}
-                    nativeInputProps={{
-                      id: field.name,
-                      name: field.name,
-                      type: "email",
-                      placeholder: "prenom.nom@courriel.fr",
-                      value: field.value,
-                      onChange: field.onChange,
-                      onBlur: field.onBlur,
-                    }}
-                  />
-                )}
-              </Field>
+            <Field name="email">
+              {({ field, meta }: FieldProps) => (
+                <Input
+                  label="Email (votre identifiant)"
+                  state={meta.touched && meta.error ? "error" : "default"}
+                  stateRelatedMessage={meta.touched ? meta.error : undefined}
+                  nativeInputProps={{
+                    id: field.name,
+                    name: field.name,
+                    type: "email",
+                    placeholder: "prenom.nom@courriel.fr",
+                    value: field.value,
+                    onChange: field.onChange,
+                    onBlur: field.onBlur,
+                  }}
+                />
+              )}
+            </Field>
 
-              {statusMessage && <Typography color="primary">{statusMessage}</Typography>}
+            {statusMessage && (
+              <div className={styles.alert}>
+                <Alert severity="success" small description={statusMessage} />
+              </div>
+            )}
 
-              <Button type="submit" disabled={isSubmitting} style={{ width: "100%", justifyContent: "center" }}>
-                Recevoir un courriel de ré-initialisation
-              </Button>
+            <Button type="submit" disabled={isSubmitting} className={styles.submit}>
+              Recevoir un courriel de ré-initialisation
+            </Button>
 
-              {status.error && <Alert severity={status.severity ?? "error"} small description={status.error} />}
-            </Stack>
+            {status.error && (
+              <div className={styles.alert}>
+                <Alert severity={status.severity ?? "error"} small description={status.error} />
+              </div>
+            )}
           </Form>
         )}
       </Formik>
-
-      <Stack direction="row" spacing={fr.spacing("1w")} justifyContent="center" sx={{ mt: fr.spacing("5w") }}>
-        <Link component={NextLink} href="/auth/connexion">
-          Annuler
-        </Link>
-      </Stack>
-    </Container>
+    </AuthCard>
   );
 }

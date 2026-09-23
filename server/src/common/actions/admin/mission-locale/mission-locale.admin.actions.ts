@@ -17,6 +17,7 @@ import {
 
 import { createEffectifMissionLocaleLog } from "../../mission-locale/mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "../../mission-locale/mission-locale-stats.actions";
+import { computeSuiviDatesSet } from "../../mission-locale/mission-locale-suivi-dates";
 import { getMissionLocaleStat } from "../../mission-locale/mission-locale.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../../organisations.actions";
 
@@ -64,6 +65,7 @@ export const activateMissionLocale = async (missionLocaleId: ObjectId, date: Dat
 
   await updateEffectifMissionLocaleSnapshotAtMLActivation(missionLocaleId);
   await updateMissionLocaleEffectifComputedML(date, new ObjectId(missionLocaleId));
+  await createOrUpdateMissionLocaleStats(new ObjectId(missionLocaleId));
 };
 
 export const getAllMlFromOrganisations = async (): Promise<Array<IOrganisationMissionLocale>> => {
@@ -121,6 +123,7 @@ export const setEffectifMissionLocaleDataAdmin = async (
 
   await createEffectifMissionLocaleLog(mlEff?._id, logPayload, user, missionLocaleId);
 
+  const now = new Date();
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
     {
       effectif_id: new ObjectId(effectifId),
@@ -129,7 +132,8 @@ export const setEffectifMissionLocaleDataAdmin = async (
     {
       $set: {
         ...setObject,
-        updated_at: new Date(),
+        ...computeSuiviDatesSet(situation, Object.keys(setObject).length > 0, now),
+        updated_at: now,
       },
       ...(shouldClearStaleConnaissanceMl ? { $unset: { connaissance_ml: 1 } } : {}),
     },
@@ -183,6 +187,9 @@ export const resetEffectifMissionLocaleDataAdmin = async (
         deja_connu: 1,
         connaissance_ml: 1,
         commentaires: 1,
+        date_traitement: 1,
+        date_dernier_passage_a_recontacter: 1,
+        date_derniere_action_ml: 1,
       },
     }
   );
@@ -321,6 +328,21 @@ export const updateMissionLocaleEffectifComputedOrganisme = (date: Date, organis
   );
 };
 
+/**
+ * Dénormalise l'appartenance au flux de collaboration sur les dossiers déjà créés.
+ * Sans ça, activer un organisme ne rend visibles côté ML que ses futurs dossiers.
+ */
+export const updateMissionLocaleEffectifComputedCollab = (organismeId: ObjectId, isAllowedCollab: boolean) => {
+  return missionLocaleEffectifsDb().updateMany(
+    { "effectif_snapshot.organisme_id": organismeId },
+    {
+      $set: {
+        "computed.organisme.is_allowed_collab": isAllowedCollab,
+      },
+    }
+  );
+};
+
 export const updateMissionLocaleEffectifComputedML = (date: Date, missionLocaleId: ObjectId) => {
   return missionLocaleEffectifsDb().updateMany(
     { mission_locale_id: missionLocaleId },
@@ -345,6 +367,7 @@ export interface IMissionLocaleMember {
 export interface IMissionLocaleDetail {
   ml: IOrganisationMissionLocale;
   activated_at: Date | null;
+  is_active: boolean;
   last_activity_at: Date | null;
   has_cfa_collaboration: boolean;
   traites_count: number;
@@ -425,6 +448,7 @@ export const getMissionLocaleDetail = async (missionLocaleId: ObjectId): Promise
   return {
     ml,
     activated_at: ml.activated_at || null,
+    is_active: !!ml.activated_at,
     last_activity_at: lastLog.length > 0 ? lastLog[0].created_at : null,
     has_cfa_collaboration: hasCfaCollaboration > 0,
     traites_count: traitesCount,

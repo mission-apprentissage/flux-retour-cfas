@@ -1,9 +1,15 @@
+import { Suspense } from "react";
+
 import { PAGES } from "@/app/_utils/routes.utils";
 
-import BienvenueClient from "./BienvenueClient";
+import ActivationClient from "../_components/ActivationClient";
 
 export const metadata = PAGES.static.authBienvenue.getMetadata();
 
 export default function Page() {
-  return <BienvenueClient />;
+  return (
+    <Suspense>
+      <ActivationClient />
+    </Suspense>
+  );
 }

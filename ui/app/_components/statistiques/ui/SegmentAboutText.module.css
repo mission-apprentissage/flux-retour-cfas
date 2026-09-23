@@ -1,0 +1,17 @@
+.about {
+  margin: 0 0 16px 0;
+}
+
+.title {
+  margin: 0 0 4px 0;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--text-mention-grey);
+}
+
+.text {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--text-mention-grey);
+}

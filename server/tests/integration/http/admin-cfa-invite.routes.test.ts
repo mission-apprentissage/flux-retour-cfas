@@ -1,5 +1,7 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { vi, it, expect, describe, beforeEach } from "vitest";
 
@@ -7,7 +9,7 @@ import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { setTime } from "@/common/utils/timeUtils";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id, initTestApp, RequestAsOrganisationFunc, testPasswordHash } from "@tests/utils/testUtils";
+import { RequestAsOrganisationFunc, id, initTestApp, testDoc, testPasswordHash } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/mailer/mailer");
 
@@ -184,26 +186,30 @@ describe("Admin CFA invite routes", () => {
       await seedOrganisme({ organismeId });
 
       const otherOrgId = new ObjectId(id(50));
-      await organisationsDb().insertOne({
-        _id: otherOrgId,
-        created_at: new Date(now),
-        type: "ORGANISME_FORMATION",
-        siret: "99999999999999",
-        uai: "9999999A",
-      } as any);
-      await usersMigrationDb().insertOne({
-        _id: new ObjectId(),
-        account_status: "CONFIRMED",
-        email: "Existing.User@Cfa.fr",
-        password: testPasswordHash,
-        nom: "N",
-        prenom: "P",
-        organisation_id: otherOrgId,
-        created_at: new Date(),
-        password_updated_at: new Date(),
-        connection_history: [],
-        emails: [],
-      } as any);
+      await organisationsDb().insertOne(
+        testDoc<IOrganisation>({
+          _id: otherOrgId,
+          created_at: new Date(now),
+          type: "ORGANISME_FORMATION",
+          siret: "99999999999999",
+          uai: "9999999A",
+        })
+      );
+      await usersMigrationDb().insertOne(
+        testDoc<IUsersMigration>({
+          _id: new ObjectId(),
+          account_status: "CONFIRMED",
+          email: "Existing.User@Cfa.fr",
+          password: testPasswordHash,
+          nom: "N",
+          prenom: "P",
+          organisation_id: otherOrgId,
+          created_at: new Date(),
+          password_updated_at: new Date(),
+          connection_history: [],
+          emails: [],
+        })
+      );
 
       const response = await requestAsOrganisation(
         { type: "ADMINISTRATEUR" },
@@ -261,20 +267,22 @@ describe("Admin CFA invite routes", () => {
       });
 
       const organisation = await organisationsDb().findOne({ siret: SIRET, uai: UAI });
-      await usersMigrationDb().insertOne({
-        _id: new ObjectId(),
-        account_status: "CONFIRMED",
-        email: "prior-admin@cfa.fr",
-        password: testPasswordHash,
-        nom: "N",
-        prenom: "P",
-        organisation_id: organisation!._id,
-        organisation_role: "admin",
-        created_at: new Date(),
-        password_updated_at: new Date(),
-        connection_history: [],
-        emails: [],
-      } as any);
+      await usersMigrationDb().insertOne(
+        testDoc<IUsersMigration>({
+          _id: new ObjectId(),
+          account_status: "CONFIRMED",
+          email: "prior-admin@cfa.fr",
+          password: testPasswordHash,
+          nom: "N",
+          prenom: "P",
+          organisation_id: organisation!._id,
+          organisation_role: "admin",
+          created_at: new Date(),
+          password_updated_at: new Date(),
+          connection_history: [],
+          emails: [],
+        })
+      );
 
       const response = await requestAsOrganisation(
         { type: "ADMINISTRATEUR" },
@@ -305,19 +313,21 @@ describe("Admin CFA invite routes", () => {
       });
 
       const organisation = await organisationsDb().findOne({ siret: SIRET, uai: UAI });
-      await usersMigrationDb().insertOne({
-        _id: new ObjectId(),
-        account_status: "CONFIRMED",
-        email: "member@cfa.fr",
-        password: testPasswordHash,
-        nom: "N",
-        prenom: "P",
-        organisation_id: organisation!._id,
-        created_at: new Date(),
-        password_updated_at: new Date(),
-        connection_history: [],
-        emails: [],
-      } as any);
+      await usersMigrationDb().insertOne(
+        testDoc<IUsersMigration>({
+          _id: new ObjectId(),
+          account_status: "CONFIRMED",
+          email: "member@cfa.fr",
+          password: testPasswordHash,
+          nom: "N",
+          prenom: "P",
+          organisation_id: organisation!._id,
+          created_at: new Date(),
+          password_updated_at: new Date(),
+          connection_history: [],
+          emails: [],
+        })
+      );
 
       const response = await requestAsOrganisation(
         { type: "ADMINISTRATEUR" },
@@ -337,7 +347,7 @@ describe("Admin CFA invite routes", () => {
 
     it("refuse l'accès à un non-admin plateforme", async () => {
       const response = await requestAsOrganisation(
-        { type: "ORGANISME_FORMATION", siret: SIRET, uai: UAI } as any,
+        { type: "ORGANISME_FORMATION", siret: SIRET, uai: UAI },
         "post",
         "/api/v1/admin/users/cfa/admin-invite",
         { email: "x@y.fr", siret: SIRET, prenom: "P", nom: "N" }

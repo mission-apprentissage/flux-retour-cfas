@@ -6,8 +6,6 @@ import {
   IUpdateMissionLocaleEffectif,
   updateMissionLocaleEffectifApi,
 } from "shared/models";
-import { BREVO_LISTE_TYPE } from "shared/models/data/brevoMissionLocaleList.model";
-import { zStatsPeriod, StatsPeriod } from "shared/models/data/nationalStats.model";
 import { httpUrlSchema } from "shared/models/data/organisations.model";
 import { extensions } from "shared/models/parts/zodPrimitives";
 import { effectifMissionLocaleListe } from "shared/models/routes/mission-locale/missionLocale.api";
@@ -25,171 +23,67 @@ import {
   resetEffectifMissionLocaleDataAdmin,
   setEffectifMissionLocaleDataAdmin,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
-import { getOrCreateBrevoList } from "@/common/actions/brevo/brevo.actions";
 import { enqueueBrevoOrganisationContactSync } from "@/common/actions/brevo/contacts/enqueue-sync";
-import {
-  getRupturantsStats,
-  getDossiersTraitesStats,
-  getCouvertureRegionsStats,
-  getTraitementStatsByMissionLocale,
-  getSuiviTraitementByRegion,
-  getAccompagnementConjointStats,
-} from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
-  getEffectifMissionLocaleEligibleToBrevo,
-  getEffectifMissionLocaleEligibleToBrevoCount,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { getMissionsLocales } from "@/common/apis/apiAlternance/apiAlternance";
 import { organisationsDb, organismesDb } from "@/common/model/collections";
-import { importContacts, removeAllContactFromList } from "@/common/services/brevo/brevo";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
-import { returnResult } from "@/http/middlewares/helpers";
+import { DefaultParams, DefaultQuery, returnResult, RouteHandler } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
+
+const mlIdSchema = z.string().regex(/^[0-9a-f]{24}$/);
+const statsAdminQuery = z.object({ arml: z.array(mlIdSchema).optional().default([]) });
+const activateBody = z.object({ date: z.coerce.date(), missionLocaleId: mlIdSchema });
+const updateEffectifBody = z.object({
+  ...updateMissionLocaleEffectifApi,
+  mission_locale_id: extensions.objectIdString(),
+  effectif_id: extensions.objectIdString(),
+});
+const resetEffectifBody = z.object({
+  mission_locale_id: extensions.objectIdString(),
+  effectif_id: extensions.objectIdString(),
+});
+const activateOrganismesBody = z.object({
+  date: z.coerce.date(),
+  organismes_ids_list: z.array(extensions.objectIdString()),
+});
+const mlIdParams = z.object({ id: mlIdSchema });
+const parametresBody = z.object({ rdv_url: httpUrlSchema.nullable() });
+const mlStatsQuery = z.object({
+  rqth_only: z.enum(["true", "false"]).optional(),
+  mineur_only: z.enum(["true", "false"]).optional(),
+});
+
+type AdminHandler<TQuery = DefaultQuery, TParams = DefaultParams, TBody = unknown> = RouteHandler<
+  Record<string, unknown>,
+  TParams,
+  TQuery,
+  TBody
+>;
 
 export default () => {
   const router = express.Router();
 
   router.get("/", returnResult(getAllMls));
-  router.get(
-    "/stats",
-    validateRequestMiddleware({
-      query: z.object({
-        arml: z
-          .array(
-            z
-              .string()
-              .regex(/^[0-9a-f]{24}$/)
-              .optional()
-          )
-          .optional()
-          .default([]),
-      }),
-    }),
-    returnResult(getAllMlsStats)
-  );
-
-  router.post(
-    "/activate",
-    validateRequestMiddleware({
-      body: z.object({ date: z.coerce.date(), missionLocaleId: z.string().regex(/^[0-9a-f]{24}$/) }),
-    }),
-    returnResult(activateMLAtDate)
-  );
-
+  router.get("/stats", validateRequestMiddleware({ query: statsAdminQuery }), returnResult(getAllMlsStats));
+  router.post("/activate", validateRequestMiddleware({ body: activateBody }), returnResult(activateMLAtDate));
   router.put(
     "/effectif",
-    validateRequestMiddleware({
-      body: z.object({
-        ...updateMissionLocaleEffectifApi,
-        mission_locale_id: extensions.objectIdString(),
-        effectif_id: extensions.objectIdString(),
-      }),
-    }),
+    validateRequestMiddleware({ body: updateEffectifBody }),
     returnResult(updateMissionLocaleEffectif)
   );
-
   router.post(
     "/effectif/reset",
-    validateRequestMiddleware({
-      body: z.object({
-        mission_locale_id: extensions.objectIdString(),
-        effectif_id: extensions.objectIdString(),
-      }),
-    }),
+    validateRequestMiddleware({ body: resetEffectifBody }),
     returnResult(resetMissionLocaleEffectif)
   );
-
   router.post(
     "/organismes/activate",
-    validateRequestMiddleware({
-      body: z.object({
-        date: z.coerce.date(),
-        organismes_ids_list: z.array(extensions.objectIdString()),
-      }),
-    }),
+    validateRequestMiddleware({ body: activateOrganismesBody }),
     returnResult(activateOrganismeAtDate)
-  );
-
-  router.get(
-    "/stats/national/rupturants",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-        region: z.string().optional(),
-        ml_id: z
-          .string()
-          .regex(/^[0-9a-f]{24}$/)
-          .optional(),
-      }),
-    }),
-    returnResult(getRupturantsRoute)
-  );
-
-  router.get(
-    "/stats/national/dossiers-traites",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-        region: z.string().optional(),
-        ml_id: z
-          .string()
-          .regex(/^[0-9a-f]{24}$/)
-          .optional(),
-      }),
-    }),
-    returnResult(getDossiersTraitesRoute)
-  );
-
-  router.get(
-    "/stats/national/couverture-regions",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-      }),
-    }),
-    returnResult(getCouvertureRegionsRoute)
-  );
-
-  router.get(
-    "/stats/traitement/ml",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-        region: z.string().optional(),
-        page: z.coerce.number().min(1).optional().default(1),
-        limit: z.coerce.number().min(1).max(100).optional().default(10),
-        sort_by: z.string().optional().default("total_jeunes"),
-        sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
-        search: z.string().optional(),
-      }),
-    }),
-    returnResult(getTraitementMLRoute)
-  );
-
-  router.get(
-    "/stats/traitement/regions",
-    validateRequestMiddleware({
-      query: z.object({
-        period: zStatsPeriod.optional(),
-      }),
-    }),
-    returnResult(getTraitementRegionsRoute)
-  );
-
-  router.get(
-    "/stats/accompagnement-conjoint",
-    validateRequestMiddleware({
-      query: z.object({
-        region: z.string().optional(),
-        ml_id: z
-          .string()
-          .regex(/^[0-9a-f]{24}$/)
-          .optional(),
-      }),
-    }),
-    returnResult(getAccompagnementConjointRoute)
   );
 
   router.get("/:id", returnResult(getMl));
@@ -197,26 +91,12 @@ export default () => {
   router.get("/:id/membres", returnResult(getMlMembres));
   router.put(
     "/:id/parametres",
-    validateRequestMiddleware({
-      params: z.object({ id: z.string().regex(/^[0-9a-f]{24}$/) }),
-      body: z.object({ rdv_url: httpUrlSchema.nullable() }),
-    }),
+    validateRequestMiddleware({ params: mlIdParams, body: parametresBody }),
     returnResult(updateMlParametresAdmin)
   );
-  router.get(
-    "/:id/stats",
-    validateRequestMiddleware({
-      query: z.object({
-        rqth_only: z.enum(["true", "false"]).optional(),
-        mineur_only: z.enum(["true", "false"]).optional(),
-      }),
-    }),
-    returnResult(getMlStats)
-  );
+  router.get("/:id/stats", validateRequestMiddleware({ query: mlStatsQuery }), returnResult(getMlStats));
   router.get("/:id/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.get("/:id/effectif/:effectiId", returnResult(getEffectifMissionLocale));
-  router.get("/:id/brevo/sync", returnResult(getSyncBrevoContactInfo));
-  router.post("/:id/brevo/sync", returnResult(syncBrevoContactMissionLocale));
 
   return router;
 };
@@ -233,13 +113,13 @@ const getAllMls = async () => {
     .filter((ml) => ml.externalML);
 };
 
-const getAllMlsStats = async ({ query }) => {
-  const { arml }: { arml: Array<string> } = query;
+const getAllMlsStats: AdminHandler<z.infer<typeof statsAdminQuery>> = async ({ query }) => {
+  const { arml } = query;
   const mls = await getMissionsLocalesStatsAdmin(arml);
   return mls;
 };
 
-const getMl = async (req) => {
+const getMl: AdminHandler = async (req) => {
   const id = req.params.id;
   const organisationMl = await getMlFromOrganisations(id);
   if (!organisationMl) {
@@ -248,7 +128,7 @@ const getMl = async (req) => {
   return organisationMl;
 };
 
-const getMlStats = async ({ params, query }) => {
+const getMlStats: AdminHandler<z.infer<typeof mlStatsQuery>> = async ({ params, query }) => {
   const id = params.id;
   const organisationMl = await getMlFromOrganisations(id);
   if (!organisationMl) {
@@ -264,7 +144,7 @@ const getMlStats = async ({ params, query }) => {
   };
 };
 
-export const getEffectifsParMoisMissionLocale = async (req) => {
+export const getEffectifsParMoisMissionLocale: AdminHandler = async (req) => {
   const id = req.params.id;
   if (!id) {
     throw Boom.badRequest("Missing id");
@@ -278,7 +158,7 @@ export const getEffectifsParMoisMissionLocale = async (req) => {
   return await getAllEffectifsParMois(missionLocale);
 };
 
-const getEffectifMissionLocale = async (req) => {
+const getEffectifMissionLocale: AdminHandler = async (req) => {
   const { nom_liste } = await validateFullZodObjectSchema(req.query, effectifMissionLocaleListe);
   const mlId = req.params.id;
   const effectifId = req.params.effectiId;
@@ -291,7 +171,11 @@ const getEffectifMissionLocale = async (req) => {
   return await getEffectifFromMissionLocaleId(missionLocale, effectifId, nom_liste);
 };
 
-const updateMissionLocaleEffectif = async (req) => {
+const updateMissionLocaleEffectif: AdminHandler<
+  DefaultQuery,
+  DefaultParams,
+  z.infer<typeof updateEffectifBody>
+> = async (req) => {
   const { mission_locale_id, effectif_id, ...rest } = req.body;
   return await setEffectifMissionLocaleDataAdmin(
     new ObjectId(mission_locale_id),
@@ -301,15 +185,17 @@ const updateMissionLocaleEffectif = async (req) => {
   );
 };
 
-const resetMissionLocaleEffectif = async (req) => {
+const resetMissionLocaleEffectif: AdminHandler<DefaultQuery, DefaultParams, z.infer<typeof resetEffectifBody>> = async (
+  req
+) => {
   const { mission_locale_id, effectif_id } = req.body;
 
   return resetEffectifMissionLocaleDataAdmin(new ObjectId(mission_locale_id), new ObjectId(effectif_id), req.user);
 };
 
-const activateMLAtDate = async ({ body }) => {
+const activateMLAtDate: AdminHandler<DefaultQuery, DefaultParams, z.infer<typeof activateBody>> = async ({ body }) => {
   const { date, missionLocaleId } = body;
-  const result = await activateMissionLocale(missionLocaleId, date);
+  const result = await activateMissionLocale(new ObjectId(missionLocaleId), date);
   // La ML devient active : son contact générique Brevo doit le refléter.
   // L'enqueue est posé ici, et non dans `activateMissionLocale`, car celle-ci est
   // aussi appelée en boucle sur toutes les ML activées par
@@ -319,34 +205,11 @@ const activateMLAtDate = async ({ body }) => {
   return result;
 };
 
-const getSyncBrevoContactInfo = async (req) => {
-  const id = req.params.id;
-  const organisationMl = await getMlFromOrganisations(id);
-  if (!organisationMl) {
-    throw Boom.notFound(`No Mission Locale found for id: ${id}`);
-  }
-  return getEffectifMissionLocaleEligibleToBrevoCount(organisationMl);
-};
-
-const syncBrevoContactMissionLocale = async (req) => {
-  const id = req.params.id;
-  const organisationMl = await getMlFromOrganisations(id);
-  if (!organisationMl) {
-    throw Boom.notFound(`No Mission Locale found for id: ${id}`);
-  }
-
-  const getMissionLocaleEffectif = await getEffectifMissionLocaleEligibleToBrevo(organisationMl);
-  const listId = await getOrCreateBrevoList(organisationMl.ml_id, organisationMl?.nom, BREVO_LISTE_TYPE.MISSION_LOCALE);
-
-  if (!listId) {
-    throw Boom.notFound(`Error while creating Brevo list for id: ${id}`);
-  }
-
-  await removeAllContactFromList(listId);
-  await importContacts(listId, getMissionLocaleEffectif);
-};
-
-export const activateOrganismeAtDate = async (req) => {
+export const activateOrganismeAtDate: AdminHandler<
+  DefaultQuery,
+  DefaultParams,
+  z.infer<typeof activateOrganismesBody>
+> = async (req) => {
   const { date, organismes_ids_list } = req.body;
 
   const organismes = await organismesDb()
@@ -364,52 +227,7 @@ export const activateOrganismeAtDate = async (req) => {
   }
 };
 
-const getRupturantsRoute = async (req) => {
-  const { period, region, ml_id } = req.query;
-  return await getRupturantsStats(
-    (period as StatsPeriod) || "30days",
-    region as string | undefined,
-    ml_id as string | undefined
-  );
-};
-
-const getDossiersTraitesRoute = async (req) => {
-  const { period, region, ml_id } = req.query;
-  return await getDossiersTraitesStats(
-    (period as StatsPeriod) || "30days",
-    region as string | undefined,
-    ml_id as string | undefined
-  );
-};
-
-const getCouvertureRegionsRoute = async (req) => {
-  const { period } = req.query;
-  return await getCouvertureRegionsStats((period as StatsPeriod) || "30days");
-};
-
-const getTraitementMLRoute = async (req) => {
-  const { period, region, page, limit, sort_by, sort_order, search } = req.query;
-  return await getTraitementStatsByMissionLocale({
-    period: (period as StatsPeriod) || "30days",
-    region: region as string | undefined,
-    page: Number(page) || 1,
-    limit: Number(limit) || 10,
-    sort_by: (sort_by as string) || "total_jeunes",
-    sort_order: (sort_order as "asc" | "desc") || "desc",
-    search: search as string | undefined,
-  });
-};
-
-const getTraitementRegionsRoute = async () => {
-  return await getSuiviTraitementByRegion();
-};
-
-const getAccompagnementConjointRoute = async (req) => {
-  const { region, ml_id } = req.query;
-  return await getAccompagnementConjointStats(region as string | undefined, ml_id as string | undefined);
-};
-
-const getMlDetail = async (req) => {
+const getMlDetail: AdminHandler = async (req) => {
   const id = req.params.id;
   return getMissionLocaleDetail(new ObjectId(id));
 };
@@ -418,13 +236,17 @@ const getMlDetail = async (req) => {
  * Met à jour les paramètres ML côté admin.
  * Mirror de la route user `PUT /api/v1/organisation/mission-locale/parametres` (§8.1).
  */
-const updateMlParametresAdmin = async (req) => {
+const updateMlParametresAdmin: AdminHandler<
+  DefaultQuery,
+  z.infer<typeof mlIdParams>,
+  z.infer<typeof parametresBody>
+> = async (req) => {
   const id = req.params.id;
   const { rdv_url } = req.body;
 
   const result = await organisationsDb().updateOne(
     { _id: new ObjectId(id), type: "MISSION_LOCALE" },
-    { $set: { rdv_url, updated_at: new Date() } }
+    { $set: { rdv_url } }
   );
 
   if (result.matchedCount === 0) {
@@ -434,7 +256,7 @@ const updateMlParametresAdmin = async (req) => {
   return { rdv_url };
 };
 
-const getMlMembres = async (req) => {
+const getMlMembres: AdminHandler = async (req) => {
   const id = req.params.id;
   const organisationMl = await getMlFromOrganisations(id);
   if (!organisationMl) {

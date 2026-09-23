@@ -1,12 +1,14 @@
 import { ObjectId } from "mongodb";
 import { API_EFFECTIF_LISTE } from "shared/models";
 import { IEffectif } from "shared/models/data/effectifs.model";
+import type { IFranceTravailEffectif } from "shared/models/data/franceTravailEffectif.model";
 import { describe, it, expect, beforeEach } from "vitest";
 
 import { getFranceTravailEffectifsByCodeSecteur } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { franceTravailEffectifsDb, romeSecteurActivitesDb } from "@/common/model/collections";
 import { createSampleEffectif, createRandomOrganisme, createRandomFormation } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDocs } from "@tests/utils/testUtils";
 
 useMongo();
 
@@ -209,7 +211,7 @@ describe("Tests des actions France Travail Effectif", () => {
         expect(result?.effectifs).toHaveLength(3);
         expect(result?.pagination.total).toBe(3);
 
-        result?.effectifs.forEach((effectif) => {
+        result?.effectifs.forEach((effectif: { code_region?: string; ft_data?: unknown }) => {
           expect(effectif.code_region).toBe("84");
         });
       });
@@ -254,7 +256,7 @@ describe("Tests des actions France Travail Effectif", () => {
         expect(result?.effectifs).toHaveLength(3);
         expect(result?.pagination.total).toBe(3);
 
-        result?.effectifs.forEach((effectif) => {
+        result?.effectifs.forEach((effectif: { code_region?: string; ft_data?: unknown }) => {
           expect(effectif.ft_data).toHaveProperty("1");
         });
       });
@@ -310,7 +312,7 @@ describe("Tests des actions France Travail Effectif", () => {
           totalPages: 2,
         });
 
-        result?.effectifs.forEach((effectif) => {
+        result?.effectifs.forEach((effectif: { code_region?: string; ft_data?: unknown }) => {
           expect(effectif.code_region).toBe("84");
           expect(effectif.ft_data).toHaveProperty("1");
         });
@@ -692,7 +694,9 @@ describe("Tests des actions France Travail Effectif", () => {
         },
       ];
 
-      await franceTravailEffectifsDb().insertMany(effectifs as any, { bypassDocumentValidation: true });
+      await franceTravailEffectifsDb().insertMany(testDocs<IFranceTravailEffectif>(effectifs), {
+        bypassDocumentValidation: true,
+      });
     });
 
     it("devrait récupérer les effectifs de tous les codes ROME du secteur", async () => {
@@ -722,7 +726,7 @@ describe("Tests des actions France Travail Effectif", () => {
       });
 
       expect(result?.effectifs).toHaveLength(1);
-      expect(result?.effectifs.every((e) => e.code_region === "84")).toBe(true);
+      expect(result?.effectifs.every((e: { code_region?: string }) => e.code_region === "84")).toBe(true);
     });
 
     it("devrait supporter la recherche", async () => {

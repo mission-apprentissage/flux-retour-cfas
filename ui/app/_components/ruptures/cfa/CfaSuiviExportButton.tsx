@@ -46,7 +46,7 @@ export function CfaSuiviExportButton({ organismeId }: CfaSuiviExportButtonProps)
         aria-busy={isFetching}
         aria-label={isFetching ? "Téléchargement en cours..." : "Exporter les dossiers suivis"}
       >
-        {isFetching && <Spinner size="1em" style={{ marginRight: "0.5rem" }} />}
+        {isFetching && <Spinner size="1em" className="fr-mr-1w" />}
         Exporter les dossiers suivis
       </Button>
       {downloadError && (

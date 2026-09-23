@@ -8,7 +8,7 @@ interface StatsErrorHandlerProps<T> {
   data: T | undefined;
   error: unknown;
   isLoading: boolean;
-  children: ReactNode;
+  children?: ReactNode;
   emptyMessage?: string;
 }
 
@@ -20,11 +20,23 @@ export function StatsErrorHandler<T>({
   emptyMessage = "Aucune donnée n'est disponible pour cette période",
 }: StatsErrorHandlerProps<T>) {
   if (error) {
+    const statusCode = (error as { statusCode?: number }).statusCode;
+    if (statusCode === 401 || statusCode === 403) {
+      return (
+        <Alert
+          severity="warning"
+          title="Accès non autorisé"
+          description="Ces données ne font pas partie de votre périmètre. Vous pouvez consulter les régions et Missions Locales rattachées à votre organisation."
+          className={fr.cx("fr-mb-4w")}
+        />
+      );
+    }
+    const prettyMessage = (error as { prettyMessage?: string }).prettyMessage;
     return (
       <Alert
         severity="error"
         title="Erreur"
-        description={error instanceof Error ? error.message : "Une erreur est survenue"}
+        description={prettyMessage ?? "Une erreur technique est survenue"}
         className={fr.cx("fr-mb-4w")}
       />
     );

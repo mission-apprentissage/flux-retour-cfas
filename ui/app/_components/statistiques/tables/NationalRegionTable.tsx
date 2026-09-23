@@ -6,8 +6,9 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { IRegionStats } from "shared/models/data/nationalStats.model";
 
+import { Skeleton } from "@/app/_components/common/Skeleton";
+
 import { useSortableTable } from "../hooks/useSortableTable";
-import { Skeleton } from "../ui/Skeleton";
 import { formatDelta, formatVariationBadge } from "../utils";
 
 import styles from "./NationalRegionTable.module.css";
@@ -16,12 +17,13 @@ import { SortableTableHeader } from "./SortableTableHeader";
 interface NationalRegionTableProps {
   regions: IRegionStats[];
   loadingDeltas?: boolean;
-  isAdmin?: boolean;
+  detailRegions?: ReadonlyArray<string>;
 }
 
 type SortColumn = keyof IRegionStats;
 
-export function NationalRegionTable({ regions, loadingDeltas = false, isAdmin = false }: NationalRegionTableProps) {
+export function NationalRegionTable({ regions, loadingDeltas = false, detailRegions = [] }: NationalRegionTableProps) {
+  const showDetailColumn = detailRegions.length > 0;
   const [showAll, setShowAll] = useState(false);
   const { sortColumn, sortDirection, handleSort } = useSortableTable<SortColumn>("ml_activees");
 
@@ -75,6 +77,7 @@ export function NationalRegionTable({ regions, loadingDeltas = false, isAdmin = 
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 centered
+                tooltip="Missions Locales dont l'accès au suivi des jeunes a été activé, rapportées au nombre de Missions Locales de la région."
               />,
               <SortableTableHeader
                 key="ml_engagees"
@@ -104,7 +107,7 @@ export function NationalRegionTable({ regions, loadingDeltas = false, isAdmin = 
                 onSort={handleSort}
                 centered
               />,
-              ...(isAdmin ? ["Détail"] : []),
+              ...(showDetailColumn ? ["Détail"] : []),
             ]}
             data={displayedRegions.map((region) => {
               const hasActiveML = region.ml_activees > 0;
@@ -146,15 +149,19 @@ export function NationalRegionTable({ regions, loadingDeltas = false, isAdmin = 
                     <span>-</span>
                   )}
                 </div>,
-                ...(isAdmin
+                ...(showDetailColumn
                   ? [
-                      <Link
-                        key={`detail-${region.code}`}
-                        href={`/admin/suivi-des-indicateurs/region/${region.code}`}
-                        className={`${styles.detailLink} ${styles.stretchedLink}`}
-                      >
-                        <span className={`fr-icon-arrow-right-line ${styles.detailArrow}`} aria-hidden="true" />
-                      </Link>,
+                      detailRegions.includes(region.code) ? (
+                        <Link
+                          key={`detail-${region.code}`}
+                          href={`/suivi-des-indicateurs/region/${region.code}`}
+                          className={`${styles.detailLink} ${styles.stretchedLink}`}
+                        >
+                          <span className={`fr-icon-arrow-right-line ${styles.detailArrow}`} aria-hidden="true" />
+                        </Link>
+                      ) : (
+                        ""
+                      ),
                     ]
                   : []),
               ];

@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import styles from "./FranceIcon.module.css";
+
 interface FranceIconProps {
   isActive: boolean;
   width?: number;
@@ -14,11 +16,7 @@ export function FranceIcon({ isActive, width = 22, height = 22, className }: Fra
       alt="France"
       width={width}
       height={height}
-      className={className}
-      style={{
-        filter: isActive ? "none" : "grayscale(100%) brightness(1.6)",
-        opacity: isActive ? 1 : 0.35,
-      }}
+      className={`${isActive ? "" : styles.inactive} ${className || ""}`}
     />
   );
 }

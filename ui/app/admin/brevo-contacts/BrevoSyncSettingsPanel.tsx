@@ -20,11 +20,11 @@ export function BrevoSyncSettingsPanel() {
 
   // Hors production, les synchronisations sont inopérantes (garde serveur) :
   // les toggles sont affichés mais désactivés.
-  const disabled = !isProd || isLoading || setSetting.isLoading;
+  const disabled = !isProd || isLoading || setSetting.isPending;
 
   // Exception : le périmètre des contacts génériques ML ne déclenche aucun appel
   // à Brevo, il reste donc pilotable hors production (recette par `--dry-run`).
-  const scopeDisabled = isLoading || setSetting.isLoading;
+  const scopeDisabled = isLoading || setSetting.isPending;
 
   return (
     <section className={styles.settingsPanel}>

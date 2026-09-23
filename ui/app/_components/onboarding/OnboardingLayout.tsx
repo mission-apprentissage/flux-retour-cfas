@@ -18,12 +18,12 @@ export function OnboardingLayout({ sidebar, title, children }: OnboardingLayoutP
   return (
     <div className={styles.layout}>
       <div className={styles.sidebar}>{sidebar}</div>
-      <div className={styles.main}>
+      <main className={styles.main}>
         <div className={styles.content}>
           <h1 className={styles.title}>{title}</h1>
           {children}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

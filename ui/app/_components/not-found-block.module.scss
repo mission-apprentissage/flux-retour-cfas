@@ -1,0 +1,11 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  max-width: 48rem;
+  padding: 2rem;
+  margin: 0 auto;
+  text-align: center;
+  border: 1px solid var(--border-default-blue-france);
+}

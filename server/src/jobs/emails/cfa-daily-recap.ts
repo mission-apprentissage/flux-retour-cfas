@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 import {
   getCfaEffectifsWithMlActionsLast24h,
-  getCfaPiloteUsers,
+  getCfaUsers,
   getJeunesForCfaMl,
 } from "@/common/actions/cfa/cfa-daily-recap.actions";
 import parentLogger from "@/common/logger";
@@ -45,7 +45,7 @@ export async function sendCfaDailyRecap() {
 
         if (mlData.acc_conjoint_by) {
           userId = new ObjectId(mlData.acc_conjoint_by.toString());
-          const result = await getCfaPiloteUsers(cfaStat.cfa._id, userId);
+          const result = await getCfaUsers(cfaStat.cfa._id, userId);
           organisation = result.organisation;
           users = result.users;
 
@@ -59,13 +59,13 @@ export async function sendCfaDailyRecap() {
               "Specific user not found - fallback to all CFA users"
             );
 
-            const fallbackResult = await getCfaPiloteUsers(cfaStat.cfa._id);
+            const fallbackResult = await getCfaUsers(cfaStat.cfa._id);
             organisation = fallbackResult.organisation;
             users = fallbackResult.users;
             userId = undefined;
           }
         } else {
-          const result = await getCfaPiloteUsers(cfaStat.cfa._id);
+          const result = await getCfaUsers(cfaStat.cfa._id);
           organisation = result.organisation;
           users = result.users;
           userId = undefined;

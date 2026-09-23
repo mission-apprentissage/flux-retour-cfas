@@ -1,9 +1,10 @@
+import type { Request, Response } from "express";
 import { ObjectId } from "mongodb";
 import { describe, it, expect, vi } from "vitest";
 
 import { requireCfaAdmin } from "@/http/middlewares/helpers";
 
-function mockReq(overrides: Record<string, any> = {}) {
+function mockReq(overrides: Record<string, unknown> = {}) {
   return {
     user: {
       _id: new ObjectId(),
@@ -12,10 +13,10 @@ function mockReq(overrides: Record<string, any> = {}) {
       organisation_role: "admin",
       ...overrides,
     },
-  } as any;
+  } as unknown as Request;
 }
 
-const mockRes = {} as any;
+const mockRes = {} as Response;
 
 describe("requireCfaAdmin", () => {
   it("laisse passer un admin CFA confirmé", () => {

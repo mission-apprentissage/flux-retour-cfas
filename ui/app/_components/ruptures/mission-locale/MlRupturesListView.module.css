@@ -1,0 +1,63 @@
+.anneeFermee {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.anneeLienAfficher {
+  font-weight: 400;
+  color: var(--text-action-high-blue-france);
+  text-decoration: underline;
+}
+
+/* Le sticky DSFR colle au bord exact de la fenêtre. */
+.moisNav.moisNav {
+  top: 1.5rem;
+  padding-right: 0;
+}
+
+.colonneListe {
+  padding-left: 2rem;
+}
+
+.moisItem {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 400;
+}
+
+.moisToutTraite {
+  color: var(--text-mention-grey);
+}
+
+/* En-tête du panneau : titre à gauche, effectif et téléchargement à droite, filet de séparation. */
+.panneauEntete {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-default-grey);
+}
+
+.panneauTitre {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-title-blue-france);
+}
+
+.panneauActions {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.panneauCompteur {
+  color: var(--text-mention-grey);
+  white-space: nowrap;
+}

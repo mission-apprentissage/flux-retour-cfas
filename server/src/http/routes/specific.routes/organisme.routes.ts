@@ -1,5 +1,5 @@
 import { ObjectId } from "bson";
-import { getAnneeScolaireFromDate } from "shared";
+import { getAnneeScolaireFromDate, IEffectif } from "shared";
 import { zGetEffectifsForOrganismeApi } from "shared/models/routes/organismes/effectifs/effectifs.api";
 import { WithPagination } from "shared/models/routes/pagination";
 
@@ -58,7 +58,9 @@ export async function getOrganismeEffectifs(
   options: WithPagination<typeof zGetEffectifsForOrganismeApi>
 ) {
   const organisme = await organismesDb().findOne({ _id: organismeId });
-  const filterNotNull = (data) => ({ $filter: { input: `$${data}`, as: "data", cond: { $ne: ["$$data", null] } } });
+  const filterNotNull = (data: string) => ({
+    $filter: { input: `$${data}`, as: "data", cond: { $ne: ["$$data", null] } },
+  });
 
   const {
     search,
@@ -143,7 +145,7 @@ export async function getOrganismeEffectifs(
   ];
   const [data] = await db.aggregate(pipeline).toArray();
 
-  const effectifs = data?.results.map((effectif) => ({
+  const effectifs = data?.results.map((effectif: IEffectif) => ({
     id: effectif._id.toString(),
     id_erp_apprenant: effectif.id_erp_apprenant,
     organisme_id: organismeId,

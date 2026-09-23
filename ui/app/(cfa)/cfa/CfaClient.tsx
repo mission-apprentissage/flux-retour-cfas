@@ -7,12 +7,13 @@ import { CfaDashboardSkeleton } from "@/app/_components/ruptures/cfa/CfaDashboar
 import { useCfaEffectifs, useCfaEffectifsRuptures, useCfaUrlParams } from "@/app/_components/ruptures/cfa/hooks";
 import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { getUserOrganismeId } from "@/common/internal/AuthContext";
 
 const RUPTURES_PAGE_SIZE = 100;
 
 export default function CfaClient() {
   const { user } = useAuth();
-  const organismeId = user?.organisation?.organisme_id;
+  const organismeId = getUserOrganismeId(user);
   const { searchParams, updateParams } = useCfaUrlParams("/cfa");
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const hasTrackedSearchRef = useRef(false);

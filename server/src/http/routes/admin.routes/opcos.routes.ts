@@ -12,28 +12,31 @@ import {
 import { getFicheRNCP } from "@/common/actions/rncp.actions";
 import logger from "@/common/logger";
 import objectIdSchema from "@/common/validation/objectIdSchema";
-import { returnResult } from "@/http/middlewares/helpers";
+import { DefaultQuery, returnResult, RouteHandler } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
+
+const idParams = objectIdSchema("id");
+const rncpBody = z.object({ rncp: z.array(z.string()) });
+type OpcoHandler = RouteHandler<
+  Record<string, unknown>,
+  z.infer<typeof idParams>,
+  DefaultQuery,
+  z.infer<typeof rncpBody>
+>;
 
 export default () => {
   const router = express.Router();
 
   router.get("/", returnResult(getAllOpcos));
-  router.get("/:id/rncp", validateRequestMiddleware({ params: objectIdSchema("id") }), returnResult(getRNCPByOpcosId));
+  router.get("/:id/rncp", validateRequestMiddleware({ params: idParams }), returnResult(getRNCPByOpcosId));
   router.post(
     "/:id/rncp",
-    validateRequestMiddleware({
-      params: objectIdSchema("id"),
-      body: z.object({ rncp: z.array(z.string()) }),
-    }),
+    validateRequestMiddleware({ params: idParams, body: rncpBody }),
     returnResult(postRNCPByOpcosId)
   );
   router.delete(
     "/:id/rncp",
-    validateRequestMiddleware({
-      params: objectIdSchema("id"),
-      body: z.object({ rncp: z.array(z.string()) }),
-    }),
+    validateRequestMiddleware({ params: idParams, body: rncpBody }),
     returnResult(deleteRNCPByOpcosId)
   );
   return router;
@@ -43,14 +46,14 @@ const getAllOpcos = async () => {
   return findAllOpcos();
 };
 
-const getRNCPByOpcosId = async (req) => {
+const getRNCPByOpcosId: RouteHandler<Record<string, unknown>, z.infer<typeof idParams>> = async (req) => {
   const { id } = req.params;
   return findRNCPByOpcosId(id);
 };
 
-const postRNCPByOpcosId = async (req) => {
+const postRNCPByOpcosId: OpcoHandler = async (req) => {
   const { id } = req.params;
-  const { rncp }: { rncp: Array<string> } = req.body;
+  const { rncp } = req.body;
   const errors: Array<string> = [];
 
   const opco = await findOpco(id);
@@ -75,9 +78,9 @@ const postRNCPByOpcosId = async (req) => {
   return { errors };
 };
 
-const deleteRNCPByOpcosId = async (req) => {
+const deleteRNCPByOpcosId: OpcoHandler = async (req) => {
   const { id } = req.params;
-  const { rncp }: { rncp: Array<string> } = req.body;
+  const { rncp } = req.body;
   const errors: Array<string> = [];
 
   const opco = await findOpco(id);

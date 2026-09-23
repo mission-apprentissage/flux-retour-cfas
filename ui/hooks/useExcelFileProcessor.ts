@@ -8,13 +8,17 @@ import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
 import { toEffectifsQueue } from "@/common/utils/televersement";
 
-import useToaster from "./useToaster";
-
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
 
-interface ProcessedDataType {
-  [key: string]: any;
+export interface ProcessedDataType {
+  [key: string]: unknown;
   errors: { key: string; message: string }[];
+}
+
+interface ValidationIssue {
+  path: Array<string | number>;
+  message: string;
+  code?: string;
 }
 
 interface StateType {
@@ -42,7 +46,6 @@ const initialState: StateType = {
 };
 
 const useExcelFileProcessor = (organismeId: string) => {
-  const { toastError } = useToaster();
   const [state, setState] = useState<StateType>(initialState);
 
   const resetState = () => {
@@ -55,7 +58,6 @@ const useExcelFileProcessor = (organismeId: string) => {
     const file = acceptedFiles[0];
     if (!file) {
       const errorMsg = "No file provided";
-      toastError(errorMsg);
       setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
       return;
     }
@@ -64,7 +66,6 @@ const useExcelFileProcessor = (organismeId: string) => {
     reader.onload = async (e) => {
       if (!e.target?.result) {
         const errorMsg = "Erreur lors de la lecture du fichier, veuillez réessayer.";
-        toastError(errorMsg);
         setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
         return;
       }
@@ -74,20 +75,22 @@ const useExcelFileProcessor = (organismeId: string) => {
         const workbook = XLSX.read(data, { type: "array" });
         const worksheetName = workbook.SheetNames[0];
         if (!worksheetName) {
-          toastError("Impossible de charger la première feuille du fichier Excel");
-          setState((prevState) => ({ ...prevState, status: "idle" }));
+          setState((prevState) => ({
+            ...prevState,
+            error: "Impossible de charger la première feuille du fichier Excel",
+            status: "idle",
+          }));
           return;
         }
         const worksheet = workbook.Sheets[worksheetName];
         const rawJsonData = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1 }) as unknown[][];
 
-        const filteredJsonData = rawJsonData.filter((row: any[]) =>
+        const filteredJsonData = rawJsonData.filter((row: unknown[]) =>
           row.some((cell) => typeof cell === "string" && cell.trim() !== "")
         );
 
         if (filteredJsonData.length - 1 > POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH) {
           const errorMsg = `Pour des raisons techniques et de sécurité, votre fichier ne doit pas dépasser ${POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} lignes. Veuillez téléverser un premier fichier de ${POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} lignes/effectifs et renouveler l'opération avec un deuxième fichier comprenant le nombre de lignes restantes.`;
-          toastError(errorMsg);
           setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
           return;
         }
@@ -110,7 +113,6 @@ const useExcelFileProcessor = (organismeId: string) => {
         if (Object.keys(headerMap).length === 0) {
           const errorMsg =
             "Le format de votre fichier n'est pas conforme. Veuillez respecter celui du fichier-modèle Excel téléchargeable.";
-          toastError(errorMsg);
           setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
           return;
         }
@@ -122,11 +124,11 @@ const useExcelFileProcessor = (organismeId: string) => {
             const index = headerMap[header];
             if (index !== undefined) {
               const config = televersementHeaders[header];
-              const cellValue = (row as any[])[index];
+              const cellValue = (row as unknown[])[index];
 
               if (config) {
                 if (config.type === "date") {
-                  rowObject[header] = parseExcelDate(cellValue);
+                  rowObject[header] = parseExcelDate(cellValue as string | number | null | undefined);
                 } else if (config.type === "boolean") {
                   rowObject[header] = parseExcelBoolean(cellValue);
                 } else {
@@ -145,7 +147,10 @@ const useExcelFileProcessor = (organismeId: string) => {
           return rowObject;
         });
 
-        const res = await _post(`/api/v1/organismes/${organismeId}/upload/validate`, toEffectifsQueue(jsonData));
+        const res = await _post<
+          unknown,
+          { error?: { issues?: ValidationIssue[] }; warnings?: Record<string, unknown> }
+        >(`/api/v1/organismes/${organismeId}/upload/validate`, toEffectifsQueue(jsonData));
 
         const errors = res.error?.issues || [];
         setState((prevState) => ({
@@ -163,8 +168,8 @@ const useExcelFileProcessor = (organismeId: string) => {
           missingHeaders: missingMandatoryHeaders,
         }));
 
-        const errorsByRow = errors.reduce((acc: Record<number, { message: string; key: string }[]>, error: any) => {
-          const row = error.path[0];
+        const errorsByRow = errors.reduce((acc: Record<number, { message: string; key: string }[]>, error) => {
+          const row = Number(error.path[0]);
           let message = error.message;
 
           if (error.code === "invalid_type") {
@@ -174,15 +179,15 @@ const useExcelFileProcessor = (organismeId: string) => {
           if (!acc[row]) acc[row] = [];
           acc[row].push({
             message,
-            key: error.path[1],
+            key: String(error.path[1]),
           });
           return acc;
         }, {});
 
-        const columnsWithErrorsArray = errors.map((e: any) => e.path[1]);
+        const columnsWithErrorsArray = errors.map((e) => String(e.path[1]));
         const uniqueColumnsWithErrors = Array.from(new Set(columnsWithErrorsArray));
 
-        const rows = jsonData.map((row: any, index: number) => {
+        const rows = jsonData.map((row, index) => {
           const rowErrors = errorsByRow[index] || [];
           return { ...row, errors: rowErrors };
         });
@@ -196,14 +201,12 @@ const useExcelFileProcessor = (organismeId: string) => {
       } catch (error) {
         console.error("Erreur de traitement du fichier:", error);
         const errorMsg = "Erreur de traitement du fichier";
-        toastError(errorMsg);
         setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
       }
     };
 
     reader.onerror = () => {
       const errorMsg = "Erreur de lecture du fichier";
-      toastError(errorMsg);
       setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
     };
 
@@ -217,8 +220,11 @@ const useExcelFileProcessor = (organismeId: string) => {
     },
     onDrop,
     onDropRejected: (rejections) => {
-      toastError(`Ce fichier ne peut pas être déposé : ${rejections?.[0]?.errors?.[0]?.message}`);
-      setState((prevState) => ({ ...prevState, status: "idle" }));
+      setState((prevState) => ({
+        ...prevState,
+        error: `Ce fichier ne peut pas être déposé : ${rejections?.[0]?.errors?.[0]?.message}`,
+        status: "idle",
+      }));
     },
   });
 

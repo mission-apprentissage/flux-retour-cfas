@@ -20,7 +20,9 @@ const getRandomIne = () => new RandExp(INE_REGEX).gen().toUpperCase();
 const getRandomFormationCfd = () => new RandExp(CFD_REGEX).gen().toUpperCase();
 const getRandomRncpFormation = () => new RandExp(RNCP_REGEX).gen();
 const getRandomEtablissement = (siret?: string): SampleEtablissement =>
-  siret ? sampleEtablissements[siret] : faker.helpers.arrayElement(Object.values(sampleEtablissements));
+  siret
+    ? (sampleEtablissements as Record<string, SampleEtablissement>)[siret]
+    : faker.helpers.arrayElement(Object.values(sampleEtablissements));
 const getRandomDateInRange = (start: Date, end: Date): Date => {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 };
@@ -58,7 +60,7 @@ export const createRandomFormation = (annee_scolaire: string, dateEntreeParam?: 
   };
 };
 
-const getRandomPeriodeFormation = (anneeScolaire): [number, number] => {
+const getRandomPeriodeFormation = (anneeScolaire: string): [number, number] => {
   const yearToInclude = Number(anneeScolaire.slice(0, 4));
   const startYear = faker.helpers.arrayElement<number>([yearToInclude, yearToInclude - 1, yearToInclude - 2]);
   const endYear = startYear + faker.helpers.arrayElement<number>([1, 2]);

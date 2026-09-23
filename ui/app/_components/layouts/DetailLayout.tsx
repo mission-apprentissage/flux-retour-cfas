@@ -4,24 +4,21 @@ import { ConnectedHeader } from "../ConnectedHeader";
 import { UserContextProvider } from "../context/UserContext";
 import { Footer } from "../Footer";
 
+import styles from "./DetailLayout.module.css";
+
 export async function DetailLayout({ children }: { children: React.ReactNode }) {
   const user = await getSession();
 
   return (
     <Providers>
       <UserContextProvider user={user}>
-        <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <div className={styles.viewport}>
           <ConnectedHeader withNav={false} />
-          <div
-            style={{
-              flex: 1,
-              background: "linear-gradient(180deg, #F6F6F6 5.73%, #F5F5FE 41.13%)",
-            }}
-          >
+          <main id="contenu" tabIndex={-1} className={styles.main}>
             {children}
-          </div>
-          <Footer />
+          </main>
         </div>
+        <Footer compact />
       </UserContextProvider>
     </Providers>
   );

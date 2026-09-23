@@ -18,8 +18,11 @@ module.exports = {
   },
   plugins: ["@typescript-eslint", "simple-import-sort", "import", "unused-imports"],
   rules: {
-    "@typescript-eslint/no-explicit-any": 0,
-    "@typescript-eslint/ban-ts-comment": 0,
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/ban-ts-comment": [
+      "error",
+      { "ts-ignore": true, "ts-nocheck": true, "ts-expect-error": false, "ts-check": false },
+    ],
     "@typescript-eslint/no-empty-function": 0,
     "@typescript-eslint/no-unused-vars": [
       "error",
@@ -84,6 +87,25 @@ module.exports = {
       },
     ],
   },
+  overrides: [
+    {
+      files: [
+        "server/src/**",
+        "server/tests/**",
+        "server/scripts/**",
+        "shared/constants/**",
+        "shared/models/apis/**",
+        "shared/models/fixtures/**",
+        "shared/models/parts/**",
+        "shared/models/routes/**",
+        "shared/utils/**",
+        "ui/**",
+      ],
+      rules: {
+        "@typescript-eslint/no-explicit-any": "error",
+      },
+    },
+  ],
   settings: {
     "import/extensions": [".js", ".ts"],
     "import/parsers": {

@@ -1,13 +1,13 @@
 "use client";
 
-import { PieChart } from "@mui/x-charts/PieChart";
 import type { IWhatsAppStats } from "shared/models/data/nationalStats.model";
 
+import { Skeleton } from "@/app/_components/common/Skeleton";
+
 import { WHATSAPP_OUTCOMES_COLORS, WHATSAPP_OUTCOMES_LABELS } from "../constants";
-import { Skeleton } from "../ui/Skeleton";
 
 import { ChartLegend } from "./ChartLegend";
-import { ItemChartTooltip } from "./ChartTooltip";
+import { DonutChart } from "./DonutChart";
 import styles from "./WhatsAppPieChart.module.css";
 
 interface WhatsAppOutcomesPieChartProps {
@@ -52,21 +52,14 @@ export function WhatsAppOutcomesPieChart({ data, loading }: WhatsAppOutcomesPieC
     <div className={styles.container}>
       <h3 className={styles.title}>Suivi après demande de rappel</h3>
       <div className={styles.chartSection}>
-        <PieChart
-          series={[
-            {
-              data: pieData,
-              highlightScope: { highlight: "item" },
-              valueFormatter: (item) => {
-                const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
-                return `${item.value.toLocaleString("fr-FR")} (${pct}%)`;
-              },
-            },
-          ]}
+        <DonutChart
+          data={pieData}
           height={280}
-          margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-          slots={{ legend: () => null, tooltip: ItemChartTooltip }}
-          sx={{ width: "100%", maxWidth: "280px", "& .MuiChartsLegend-root": { display: "none" } }}
+          maxWidth={280}
+          valueFormatter={(item) => {
+            const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
+            return `${item.value.toLocaleString("fr-FR")} (${pct}%)`;
+          }}
         />
       </div>
       <div className={styles.legendSection}>

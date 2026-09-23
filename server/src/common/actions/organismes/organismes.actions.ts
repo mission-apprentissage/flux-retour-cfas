@@ -1,20 +1,19 @@
+import { randomUUID } from "node:crypto";
+
 import { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { subMonths } from "date-fns";
 import type { Request } from "express";
-import { ObjectId, WithId } from "mongodb";
+import { Document, ObjectId, WithId } from "mongodb";
 import {
   getAnneesScolaireListFromDate,
   Acl,
   PermissionsOrganisme,
   IOrganisationIndicateursOrganismes,
-  ORGANISME_INDICATEURS_TYPE,
-  IOrganisation,
   IUsersMigration,
 } from "shared";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme, hasRecentTransmissions, withOrganismeListSummary } from "shared/models/data/organismes.model";
-import { v4 as uuidv4 } from "uuid";
 
 import {
   findOrganismesAccessiblesByOrganisationOF,
@@ -45,11 +44,12 @@ import { listContactsMlOrganisme } from "../mission-locale/mission-locale.action
 /**
  * Méthode de récupération d'un organisme depuis un UAI et un SIRET
  */
-export const findOrganismeByUaiAndSiret = async (uai?: string, siret?: string, projection = {}) => {
+export const findOrganismeByUaiAndSiret = async (uai?: string | null, siret?: string | null, projection = {}) => {
   if (!uai && !siret) {
     throw new Error("missing parameter `uai` or `siret`");
   }
-  return await organismesDb().findOne({ uai, siret } as any, { projection });
+  const filter: Document = { uai, siret };
+  return await organismesDb().findOne(filter, { projection });
 };
 
 /**
@@ -80,7 +80,11 @@ export const updateOrganisme = async (_id: ObjectId, data: Partial<IOrganisme>) 
     { returnDocument: "after" }
   );
 
-  return updated.value as WithId<IOrganisme>;
+  if (!updated) {
+    throw new Error(`Unable to find organisme ${_id.toString()}`);
+  }
+
+  return updated;
 };
 
 /**
@@ -122,7 +126,7 @@ export const updateOrganismeTransmission = async (
     );
   }
 
-  if (!modifyResult.value) {
+  if (!modifyResult) {
     throw new Error(`Could not set organisme transmission infos on organisme ${organisme._id.toString()}`);
   }
 };
@@ -221,17 +225,17 @@ export const generateApiKeyForOrg = async (organismeId: ObjectId) => {
   const updated = await organismesDb().findOneAndUpdate(
     { _id: organismeId },
     {
-      $set: { api_key: uuidv4(), api_key_generated_at: new Date() },
+      $set: { api_key: randomUUID(), api_key_generated_at: new Date() },
       $unset: { api_key_revoked_at: "", api_key_revoked_reason: "" },
     },
     { returnDocument: "after" }
   );
 
-  if (!updated.value) {
+  if (!updated) {
     throw Boom.notFound(`IOrganisme ${organismeId} not found`);
   }
 
-  return updated?.value.api_key;
+  return updated.api_key;
 };
 
 export const API_KEY_REVOCATION_REASON_INACTIVE = "inactif_12_mois";
@@ -537,7 +541,7 @@ export async function findOrganismesByUAI(uai: string): Promise<IOrganisme[]> {
 
 export async function getOrganismeByUAIAndSIRET(uai: string | null, siret: string): Promise<WithId<IOrganisme> | null> {
   return await organismesDb().findOne({
-    uai: uai as any,
+    uai,
     siret: siret,
   });
 }
@@ -548,7 +552,7 @@ export async function getPublicOrganismeByUAIAndSIRET(
 ): Promise<Partial<WithId<IOrganisme>> | null> {
   return await organismesDb().findOne(
     {
-      uai: uai as any,
+      uai,
       siret: siret,
     },
     {
@@ -627,7 +631,7 @@ export async function resetConfigurationERP(organismeId: ObjectId): Promise<void
   );
 }
 
-export async function verifyOrganismeAPIKeyToUser(organismeId: ObjectId, verif: IReqPostVerifyUser): Promise<any> {
+export async function verifyOrganismeAPIKeyToUser(organismeId: ObjectId, verif: IReqPostVerifyUser): Promise<void> {
   const organisme = (await organismesDb().findOne({ _id: organismeId })) as WithId<IOrganisme>;
   if (!organisme) {
     throw Boom.notFound("Aucun organisme trouvé");
@@ -671,6 +675,182 @@ export async function listOrganisationOrganismes(acl: Acl): Promise<WithId<Organ
   return organismes;
 }
 
+const ACCENT_EQUIVALENTS: Record<string, string> = {
+  a: "aàâä",
+  c: "cç",
+  e: "eéèêë",
+  i: "iîï",
+  o: "oôö",
+  u: "uùûü",
+  y: "yÿ",
+};
+
+function buildAccentInsensitiveRegex(token: string): string {
+  return token
+    .split("")
+    .map((char) => {
+      const lower = char.toLowerCase();
+      const base = Object.entries(ACCENT_EQUIVALENTS).find(
+        ([plain, variants]) => plain === lower || variants.includes(lower)
+      );
+      if (base) return `[${base[1]}]`;
+      return char.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    })
+    .join("");
+}
+
+export interface ListOrganismesPaginatedParams {
+  page: number;
+  limit: number;
+  sort: "nom" | "nature" | "transmission" | "formations" | "adresse";
+  order: "asc" | "desc";
+  search?: string;
+  departements?: string[];
+  regions?: string[];
+  nature?: string[];
+  transmission?: string[];
+  qualiopi?: boolean[];
+  ferme?: boolean[];
+  etatUAI?: boolean[];
+}
+
+export async function listOrganisationOrganismesPaginated(acl: Acl, params: ListOrganismesPaginatedParams) {
+  const now = new Date();
+  const oneMonthAgo = subMonths(now, 1);
+  const threeMonthsAgo = subMonths(now, 3);
+
+  const matchFilters: Document[] = [buildOrganismePerimetreMongoFilters(acl.viewContacts)];
+
+  if (params.departements?.length) matchFilters.push({ "adresse.departement": { $in: params.departements } });
+  if (params.regions?.length) matchFilters.push({ "adresse.region": { $in: params.regions } });
+  if (params.nature?.length) {
+    matchFilters.push(
+      params.nature.includes("inconnue")
+        ? { $or: [{ nature: { $in: params.nature } }, { nature: { $exists: false } }, { nature: null }] }
+        : { nature: { $in: params.nature } }
+    );
+  }
+  if (params.qualiopi?.length) matchFilters.push({ qualiopi: { $in: params.qualiopi } });
+  if (params.ferme?.length) matchFilters.push({ ferme: { $in: params.ferme } });
+  if (params.etatUAI?.length && !(params.etatUAI.includes(true) && params.etatUAI.includes(false))) {
+    matchFilters.push(params.etatUAI.includes(true) ? { uai: { $ne: null } } : { uai: null });
+  }
+  if (params.transmission?.length) {
+    const transmissionConditions: Document[] = [];
+    for (const state of params.transmission) {
+      switch (state) {
+        case "recent":
+          transmissionConditions.push({ last_transmission_date: { $gte: oneMonthAgo } });
+          break;
+        case "1_3_mois":
+          transmissionConditions.push({ last_transmission_date: { $gte: threeMonthsAgo, $lt: oneMonthAgo } });
+          break;
+        case "arrete":
+          transmissionConditions.push({ last_transmission_date: { $lt: threeMonthsAgo } });
+          break;
+        case "jamais":
+          transmissionConditions.push({ last_transmission_date: null });
+          break;
+      }
+    }
+    if (transmissionConditions.length > 0) matchFilters.push({ $or: transmissionConditions });
+  }
+  if (params.search && params.search.trim().length >= 2) {
+    const searchValue = params.search.trim();
+    const tokenClauses = searchValue
+      .split(/\s+/)
+      .filter((token) => token.length > 0)
+      .map((token) => {
+        const regex = buildAccentInsensitiveRegex(token);
+        return {
+          $or: [
+            { enseigne: { $regex: regex, $options: "i" } },
+            { raison_sociale: { $regex: regex, $options: "i" } },
+            { "adresse.commune": { $regex: regex, $options: "i" } },
+          ],
+        };
+      });
+    const escapedFull = searchValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    matchFilters.push({
+      $or: [
+        ...(tokenClauses.length > 0 ? [{ $and: tokenClauses }] : []),
+        { uai: { $regex: `^${escapedFull}`, $options: "i" } },
+        { siret: { $regex: `^${escapedFull.replace(/\s+/g, "")}` } },
+      ],
+    });
+  }
+
+  const direction = params.order === "desc" ? -1 : 1;
+  const sortStages: Document[] = [];
+  switch (params.sort) {
+    case "nature":
+      sortStages.push(
+        { $addFields: { _sortNature: { $ifNull: ["$nature", "inconnue"] } } },
+        { $sort: { _sortNature: direction, _id: 1 } }
+      );
+      break;
+    case "transmission":
+      sortStages.push(
+        { $addFields: { _sansTransmission: { $cond: [{ $ifNull: ["$last_transmission_date", false] }, 0, 1] } } },
+        { $sort: { _sansTransmission: 1, last_transmission_date: direction, _id: 1 } }
+      );
+      break;
+    case "formations":
+      sortStages.push(
+        { $addFields: { _sortFormations: { $ifNull: ["$formations_count", 0] } } },
+        { $sort: { _sortFormations: direction, _id: 1 } }
+      );
+      break;
+    case "adresse":
+      sortStages.push(
+        { $addFields: { _sortCommune: { $ifNull: ["$adresse.commune", ""] } } },
+        { $sort: { _sortCommune: direction, _id: 1 } }
+      );
+      break;
+    default:
+      sortStages.push(
+        {
+          $addFields: {
+            _sortNom: { $toLower: { $ifNull: ["$enseigne", { $ifNull: ["$raison_sociale", ""] }] } },
+          },
+        },
+        { $addFields: { _sansNom: { $cond: [{ $eq: ["$_sortNom", ""] }, 1, 0] } } },
+        { $sort: { _sansNom: 1, _sortNom: direction, _id: 1 } }
+      );
+  }
+
+  const [result] = await organismesDb()
+    .aggregate([
+      { $match: matchFilters.length > 1 ? { $and: matchFilters } : matchFilters[0] },
+      ...sortStages,
+      {
+        $facet: {
+          organismes: [
+            { $skip: (params.page - 1) * params.limit },
+            { $limit: params.limit },
+            { $project: getOrganismeListProjection(true) },
+          ],
+          total: [{ $count: "count" }],
+          formations: [{ $group: { _id: null, total: { $sum: { $ifNull: ["$formations_count", 0] } } } }],
+        },
+      },
+    ])
+    .toArray();
+
+  const total = result?.total?.[0]?.count ?? 0;
+
+  return {
+    organismes: (result?.organismes ?? []) as WithId<OrganismeWithPermissions>[],
+    pagination: {
+      page: params.page,
+      limit: params.limit,
+      total,
+      totalPages: Math.ceil(total / params.limit),
+    },
+    totalFormations: result?.formations?.[0]?.total ?? 0,
+  };
+}
+
 export async function getOrganisationIndicateursOrganismes(acl: Acl): Promise<IOrganisationIndicateursOrganismes> {
   const organismes = (await organismesDb()
     .find(buildOrganismePerimetreMongoFilters(acl.viewContacts), {
@@ -699,147 +879,6 @@ export async function getOrganisationIndicateursOrganismes(acl: Acl): Promise<IO
       uaiNonDeterminee: 0,
     }
   );
-}
-
-export async function getOrganisationIndicateursForRelatedOrganismes(acl: Acl, indicateurType: string) {
-  const matchIndicateurType: any = {};
-
-  switch (indicateurType) {
-    case ORGANISME_INDICATEURS_TYPE.SANS_EFFECTIFS: {
-      const threeMonthsAgo = subMonths(new Date(), 3);
-      matchIndicateurType.$or = [
-        { last_transmission_date: { $eq: null } },
-        {
-          $expr: {
-            $lt: ["$last_transmission_date", threeMonthsAgo],
-          },
-        },
-      ];
-      break;
-    }
-    case ORGANISME_INDICATEURS_TYPE.NATURE_INCONNUE: {
-      matchIndicateurType.$or = [
-        { nature: { $eq: "inconnue" } },
-        { nature: { $eq: null } },
-        { nature: { $exists: false } },
-      ];
-      break;
-    }
-    case ORGANISME_INDICATEURS_TYPE.SIRET_FERME:
-      matchIndicateurType.ferme = { $eq: true };
-      break;
-    case ORGANISME_INDICATEURS_TYPE.UAI_NON_DETERMINE:
-      matchIndicateurType.uai = { $eq: null };
-      break;
-    default:
-      return [];
-  }
-
-  const organismes = (await organismesDb()
-    .aggregate([
-      {
-        $match: buildOrganismePerimetreMongoFilters(acl.viewContacts),
-      },
-      {
-        $match: matchIndicateurType,
-      },
-      {
-        $project: getOrganismeListProjection(true),
-      },
-      {
-        $lookup: {
-          from: "organisations",
-          let: { uai: "$uai", siret: "$siret" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [{ $eq: ["$uai", "$$uai"] }, { $eq: ["$siret", "$$siret"] }],
-                },
-              },
-            },
-            {
-              $limit: 1,
-            },
-          ],
-          as: "relatedOrganisation",
-        },
-      },
-      {
-        $unwind: {
-          path: "$relatedOrganisation",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: "usersMigration",
-          let: { orgId: "$relatedOrganisation._id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$organisation_id", "$$orgId"] },
-                    { $eq: ["$account_status", "CONFIRMED"] },
-                    { $ne: ["$has_accept_cgu_version", ""] },
-                  ],
-                },
-              },
-            },
-            {
-              $project: {
-                _id: 1,
-                email: 1,
-                account_status: 1,
-                nom: 1,
-                prenom: 1,
-                telephone: 1,
-              },
-            },
-            {
-              $limit: 1,
-            },
-          ],
-          as: "relatedUser",
-        },
-      },
-      {
-        $unwind: {
-          path: "$relatedUser",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $group: {
-          _id: "$_id",
-          relatedOrganisation: { $first: "$relatedOrganisation" },
-          relatedUser: { $first: "$relatedUser" },
-          organism: { $first: "$$ROOT" },
-        },
-      },
-      {
-        $project: {
-          _id: "$organism._id",
-          siret: "$organism.siret",
-          uai: "$organism.uai",
-          ferme: "$organism.ferme",
-          nature: "$organism.nature",
-          qualiopi: "$organism.qualiopi",
-          enseigne: "$organism.enseigne",
-          raison_sociale: "$organism.raison_sociale",
-          adresse: "$organism.adresse",
-          formationsCount: "$organism.formationsCount",
-          relatedOrganisation: "$relatedOrganisation",
-          relatedUser: "$relatedUser",
-        },
-      },
-    ])
-    .toArray()) as WithId<
-    OrganismeWithPermissions & { relatedOrganisation?: IOrganisation; relatedUser?: IUsersMigration }
-  >[];
-
-  return organismes;
 }
 
 export async function listOrganismesFormateurs(
@@ -890,9 +929,7 @@ async function getInfoTransmissionEffectifsCondition(ctx: AuthContext) {
 /**
  * Retourne la projection d'un organisme selon les permissions.
  */
-export function getOrganismeProjection(
-  permissionsOrganisme: PermissionsOrganisme
-): Partial<WithId<OrganismeWithPermissions>> {
+export function getOrganismeProjection(permissionsOrganisme: PermissionsOrganisme): Document {
   return cleanProjection<IOrganisme>({
     _id: 1,
     siret: 1,
@@ -936,8 +973,8 @@ export function getOrganismeProjection(
  * Retourne la projection d'un organisme utilisé dans une liste selon les permissions.
  */
 function getOrganismeListProjection(
-  infoTransmissionEffectifsCondition: any
-): Partial<WithId<OrganismeWithPermissions>> {
+  infoTransmissionEffectifsCondition: Awaited<ReturnType<typeof getInfoTransmissionEffectifsCondition>>
+): Document {
   return cleanProjection<WithId<OrganismeWithPermissions>>({
     _id: 1,
     siret: 1,

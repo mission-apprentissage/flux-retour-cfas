@@ -1,5 +1,10 @@
 import { ObjectId } from "bson";
+import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
+import type { IMissionLocaleEffectif } from "shared/models";
+import type { IEffectif } from "shared/models/data/effectifs.model";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
 import { it, expect, describe, beforeAll, beforeEach } from "vitest";
 
 import {
@@ -12,6 +17,7 @@ import { createIndexes } from "@/common/model/indexes";
 import { migrateOrphanMlRecordsDecaToErp } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc, testDocs } from "@tests/utils/testUtils";
 
 const ML_OBJECTID = new ObjectId();
 const ORG_ID = new ObjectId();
@@ -52,11 +58,11 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
           date_de_naissance: overrides.ddn,
           adresse: { mission_locale_id: overrides.mlId ?? 100 },
         },
-        source: "DECA" as any,
+        source: SOURCE_APPRENANT.DECA,
       })),
       organisme_id: orgId,
     };
-    await effectifsDECADb().insertOne(decaEffectif as any);
+    await effectifsDECADb().insertOne(testDoc<IEffectifDECA>(decaEffectif));
 
     const mlRecord = {
       _id: new ObjectId(),
@@ -71,7 +77,7 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
       brevo: { token: null, token_created_at: null },
       soft_deleted: false,
     };
-    await missionLocaleEffectifsDb().insertOne(mlRecord as any);
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(mlRecord));
 
     return { decaEffectif, mlRecord, sampleOrganisme };
   };
@@ -97,7 +103,7 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
         },
       })),
     };
-    await effectifsDb().insertOne(erpEffectif as any);
+    await effectifsDb().insertOne(testDoc<IEffectif>(erpEffectif));
 
     const summary = await migrateOrphanMlRecordsDecaToErp();
 
@@ -148,7 +154,7 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
         },
       })),
     };
-    await effectifsDb().insertOne(erpEffectif as any);
+    await effectifsDb().insertOne(testDoc<IEffectif>(erpEffectif));
 
     const summary = await migrateOrphanMlRecordsDecaToErp();
 
@@ -178,7 +184,7 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
         },
       })),
     };
-    await effectifsDb().insertOne(erpEffectif as any);
+    await effectifsDb().insertOne(testDoc<IEffectif>(erpEffectif));
 
     const summary = await migrateOrphanMlRecordsDecaToErp();
 
@@ -210,7 +216,7 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
         },
       })),
     };
-    await effectifsDb().insertOne(erpEffectif as any);
+    await effectifsDb().insertOne(testDoc<IEffectif>(erpEffectif));
 
     const summary = await migrateOrphanMlRecordsDecaToErp();
 
@@ -243,7 +249,7 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
         apprenant: { nom: "DUPONT", prenom: "Marie", date_de_naissance: ddn, adresse: { mission_locale_id: 100 } },
       })),
     };
-    await effectifsDb().insertMany([erpHomonym, erpRight] as any[]);
+    await effectifsDb().insertMany(testDocs<IEffectif>([erpHomonym, erpRight]));
 
     const summary = await migrateOrphanMlRecordsDecaToErp();
 
@@ -296,7 +302,7 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
         apprenant: { nom: "Martin", prenom: "Lucie", date_de_naissance: ddn1, adresse: { mission_locale_id: 100 } },
       })),
     };
-    await effectifsDb().insertMany([erpA, erpB, erpDecoy] as any[]);
+    await effectifsDb().insertMany(testDocs<IEffectif>([erpA, erpB, erpDecoy]));
 
     const summary = await migrateOrphanMlRecordsDecaToErp();
 
@@ -322,32 +328,34 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
         organisme: sampleOrganisme,
         annee_scolaire: ANNEE,
         apprenant: { nom: "DUPONT", prenom: "Lucas", date_de_naissance: ddn, adresse: { mission_locale_id: 100 } },
-        source: "DECA" as any,
+        source: SOURCE_APPRENANT.DECA,
       })),
       organisme_id: orgId,
     };
-    await effectifsDECADb().insertOne(decaEffectif as any);
+    await effectifsDECADb().insertOne(testDoc<IEffectifDECA>(decaEffectif));
 
     const orphanId = new ObjectId();
-    await missionLocaleEffectifsDb().insertOne({
-      _id: orphanId,
-      mission_locale_id: ML_OBJECTID,
-      effectif_id: decaEffectif._id,
-      effectif_snapshot: {
-        ...decaEffectif,
-        organisme_id: orgId,
-        _computed: { ...decaEffectif._computed, statut: { en_cours: "RUPTURANT", parcours: [] } },
-      },
-      effectif_snapshot_date: new Date(),
-      identifiant_normalise: { nom: "DUPONT", prenom: "Lucas", date_de_naissance: ddn },
-      date_rupture: new Date("2025-12-01"),
-      created_at: new Date(),
-      current_status: { value: "RUPTURANT", date: new Date("2025-12-01") },
-      brevo: { token: null, token_created_at: null },
-      soft_deleted: false,
-      situation: null,
-      cfa_rupture_declaration: null,
-    } as any);
+    await missionLocaleEffectifsDb().insertOne(
+      testDoc<IMissionLocaleEffectif>({
+        _id: orphanId,
+        mission_locale_id: ML_OBJECTID,
+        effectif_id: decaEffectif._id,
+        effectif_snapshot: {
+          ...decaEffectif,
+          organisme_id: orgId,
+          _computed: { ...decaEffectif._computed, statut: { en_cours: "RUPTURANT", parcours: [] } },
+        },
+        effectif_snapshot_date: new Date(),
+        identifiant_normalise: { nom: "DUPONT", prenom: "Lucas", date_de_naissance: ddn },
+        date_rupture: new Date("2025-12-01"),
+        created_at: new Date(),
+        current_status: { value: "RUPTURANT", date: new Date("2025-12-01") },
+        brevo: { token: null, token_created_at: null },
+        soft_deleted: false,
+        situation: null,
+        cfa_rupture_declaration: null,
+      })
+    );
 
     // ERP twin non-RUPTURANT (ex: APPRENTI, le contrat a repris).
     const erpEffectif = {
@@ -360,9 +368,9 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
     };
     erpEffectif._computed = {
       ...erpEffectif._computed,
-      statut: { en_cours: "APPRENTI", parcours: [] },
-    } as any;
-    await effectifsDb().insertOne(erpEffectif as any);
+      statut: { en_cours: STATUT_APPRENANT.APPRENTI, parcours: [] },
+    };
+    await effectifsDb().insertOne(testDoc<IEffectif>(erpEffectif));
 
     const summary = await migrateOrphanMlRecordsDecaToErp();
 
@@ -389,32 +397,34 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
         organisme: sampleOrganisme,
         annee_scolaire: ANNEE,
         apprenant: { nom: "MARTIN", prenom: "Léa", date_de_naissance: ddn, adresse: { mission_locale_id: 100 } },
-        source: "DECA" as any,
+        source: SOURCE_APPRENANT.DECA,
       })),
       organisme_id: orgId,
     };
-    await effectifsDECADb().insertOne(decaEffectif as any);
+    await effectifsDECADb().insertOne(testDoc<IEffectifDECA>(decaEffectif));
 
     const orphanId = new ObjectId();
-    await missionLocaleEffectifsDb().insertOne({
-      _id: orphanId,
-      mission_locale_id: ML_OBJECTID,
-      effectif_id: decaEffectif._id,
-      effectif_snapshot: {
-        ...decaEffectif,
-        organisme_id: orgId,
-        _computed: { ...decaEffectif._computed, statut: { en_cours: "RUPTURANT", parcours: [] } },
-      },
-      effectif_snapshot_date: new Date(),
-      identifiant_normalise: { nom: "MARTIN", prenom: "Léa", date_de_naissance: ddn },
-      date_rupture: new Date("2025-12-01"),
-      created_at: new Date(),
-      current_status: { value: "RUPTURANT", date: new Date("2025-12-01") },
-      brevo: { token: null, token_created_at: null },
-      soft_deleted: false,
-      situation: SITUATION_ENUM.RDV_PRIS, // conseiller a déjà qualifié → Option B garde la visibilité
-      cfa_rupture_declaration: null,
-    } as any);
+    await missionLocaleEffectifsDb().insertOne(
+      testDoc<IMissionLocaleEffectif>({
+        _id: orphanId,
+        mission_locale_id: ML_OBJECTID,
+        effectif_id: decaEffectif._id,
+        effectif_snapshot: {
+          ...decaEffectif,
+          organisme_id: orgId,
+          _computed: { ...decaEffectif._computed, statut: { en_cours: "RUPTURANT", parcours: [] } },
+        },
+        effectif_snapshot_date: new Date(),
+        identifiant_normalise: { nom: "MARTIN", prenom: "Léa", date_de_naissance: ddn },
+        date_rupture: new Date("2025-12-01"),
+        created_at: new Date(),
+        current_status: { value: "RUPTURANT", date: new Date("2025-12-01") },
+        brevo: { token: null, token_created_at: null },
+        soft_deleted: false,
+        situation: SITUATION_ENUM.RDV_PRIS, // conseiller a déjà qualifié → Option B garde la visibilité
+        cfa_rupture_declaration: null,
+      })
+    );
 
     const erpEffectif = {
       _id: new ObjectId(),
@@ -426,9 +436,9 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
     };
     erpEffectif._computed = {
       ...erpEffectif._computed,
-      statut: { en_cours: "FIN_DE_FORMATION", parcours: [] },
-    } as any;
-    await effectifsDb().insertOne(erpEffectif as any);
+      statut: { en_cours: STATUT_APPRENANT.FIN_DE_FORMATION, parcours: [] },
+    };
+    await effectifsDb().insertOne(testDoc<IEffectif>(erpEffectif));
 
     const summary = await migrateOrphanMlRecordsDecaToErp();
 
@@ -442,7 +452,7 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
     expect(after?.situation).toBe(SITUATION_ENUM.RDV_PRIS);
   });
 
-  it("squatter ERP soft-deleted : ressuscite, merge orphan, préserve logs et brevo.history", async () => {
+  it("squatter ERP soft-deleted : ressuscite, merge orphan, préserve les logs", async () => {
     const ddn = new Date("2005-06-15T00:00:00Z");
     const { mlRecord: orphanMlRecord, sampleOrganisme } = await seedDecaWithOrphanMlRecord({
       nom: "LEROY",
@@ -466,14 +476,16 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
 
     // Log historique attaché à l'orphan : doit être réassigné au keeper.
     const orphanLogId = new ObjectId();
-    await missionLocaleEffectifsLogDb().insertOne({
-      _id: orphanLogId,
-      mission_locale_effectif_id: orphanMlRecord._id,
-      created_at: new Date(),
-      created_by: new ObjectId(),
-      read_by: [],
-      situation: "RDV_PRIS",
-    } as any);
+    await missionLocaleEffectifsLogDb().insertOne(
+      testDoc<IMissionLocaleEffectifLog>({
+        _id: orphanLogId,
+        mission_locale_effectif_id: orphanMlRecord._id,
+        created_at: new Date(),
+        created_by: new ObjectId(),
+        read_by: [],
+        situation: SITUATION_ENUM.RDV_PRIS,
+      })
+    );
 
     const erpEffectif = {
       _id: new ObjectId(),
@@ -488,24 +500,26 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
         },
       })),
     };
-    await effectifsDb().insertOne(erpEffectif as any);
+    await effectifsDb().insertOne(testDoc<IEffectif>(erpEffectif));
 
     // Squatter ERP soft-deleted occupant déjà (ml, erpEffectif._id) — bloquerait $set effectif_id sans le squatter handler.
     const squatterId = new ObjectId();
     const squatterToken = "squatter-token-uuid";
-    await missionLocaleEffectifsDb().insertOne({
-      _id: squatterId,
-      mission_locale_id: ML_OBJECTID,
-      effectif_id: erpEffectif._id,
-      effectif_snapshot: { ...erpEffectif, organisme_id: sampleOrganisme._id },
-      effectif_snapshot_date: new Date(),
-      identifiant_normalise: undefined, // unset par un ancien soft-delete
-      date_rupture: null,
-      created_at: new Date(),
-      current_status: { value: null, date: null },
-      brevo: { token: squatterToken, token_created_at: new Date("2024-01-01") },
-      soft_deleted: true,
-    } as any);
+    await missionLocaleEffectifsDb().insertOne(
+      testDoc<IMissionLocaleEffectif>({
+        _id: squatterId,
+        mission_locale_id: ML_OBJECTID,
+        effectif_id: erpEffectif._id,
+        effectif_snapshot: { ...erpEffectif, organisme_id: sampleOrganisme._id },
+        effectif_snapshot_date: new Date(),
+        identifiant_normalise: undefined, // unset par un ancien soft-delete
+        date_rupture: null,
+        created_at: new Date(),
+        current_status: { value: null, date: null },
+        brevo: { token: squatterToken, token_created_at: new Date("2024-01-01") },
+        soft_deleted: true,
+      })
+    );
 
     const summary = await migrateOrphanMlRecordsDecaToErp();
 
@@ -523,9 +537,10 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
     // identifiant_normalise backfillé depuis l'orphan (squatter n'en avait pas).
     expect(squatterAfter?.identifiant_normalise?.nom).toBe("LEROY");
 
-    // brevo.token courant conservé sur le squatter, token de l'orphan archivé en history.
+    // brevo est un champ legacy (flux campagne ML abandonné) : la dédup n'y touche plus.
+    // Le brevo du squatter reste intact et aucun history n'est archivé depuis l'orphan.
     expect(squatterAfter?.brevo?.token).toBe(squatterToken);
-    expect(squatterAfter?.brevo?.history?.some((h) => h.token === orphanToken)).toBe(true);
+    expect(squatterAfter?.brevo?.history ?? []).toHaveLength(0);
 
     // Orphan soft-deleted, identifiant_normalise unset.
     const orphanAfter = await missionLocaleEffectifsDb().findOne({ _id: orphanMlRecord._id });
@@ -558,22 +573,24 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
         },
       })),
     };
-    await effectifsDb().insertOne(erpEffectif as any);
+    await effectifsDb().insertOne(testDoc<IEffectif>(erpEffectif));
 
     // Squatter actif (anomalie : sans identifiant_normalise — ne devrait pas exister mais on teste la défense).
     const squatterId = new ObjectId();
-    await missionLocaleEffectifsDb().insertOne({
-      _id: squatterId,
-      mission_locale_id: ML_OBJECTID,
-      effectif_id: erpEffectif._id,
-      effectif_snapshot: { ...erpEffectif, organisme_id: sampleOrganisme._id },
-      effectif_snapshot_date: new Date(),
-      date_rupture: null,
-      created_at: new Date(),
-      current_status: { value: null, date: null },
-      brevo: { token: "active-squatter", token_created_at: new Date() },
-      soft_deleted: false,
-    } as any);
+    await missionLocaleEffectifsDb().insertOne(
+      testDoc<IMissionLocaleEffectif>({
+        _id: squatterId,
+        mission_locale_id: ML_OBJECTID,
+        effectif_id: erpEffectif._id,
+        effectif_snapshot: { ...erpEffectif, organisme_id: sampleOrganisme._id },
+        effectif_snapshot_date: new Date(),
+        date_rupture: null,
+        created_at: new Date(),
+        current_status: { value: null, date: null },
+        brevo: { token: "active-squatter", token_created_at: new Date() },
+        soft_deleted: false,
+      })
+    );
 
     const summary = await migrateOrphanMlRecordsDecaToErp();
 
@@ -608,7 +625,7 @@ describe("migrateOrphanMlRecordsDecaToErp", () => {
         },
       })),
     };
-    await effectifsDb().insertOne(erpEffectif as any);
+    await effectifsDb().insertOne(testDoc<IEffectif>(erpEffectif));
 
     const first = await migrateOrphanMlRecordsDecaToErp();
     expect(first.migrated).toBe(1);

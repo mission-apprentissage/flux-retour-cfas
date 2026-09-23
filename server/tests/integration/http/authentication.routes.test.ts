@@ -3,12 +3,14 @@ import { strict as assert } from "assert";
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
-import { it, describe, beforeEach } from "vitest";
+import { it, describe, beforeEach, vi } from "vitest";
 
-import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
+import { auditLogsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { setTime } from "@/common/utils/timeUtils";
 import { useMongo } from "@tests/jest/setupMongo";
 import { id, initTestApp, testPasswordHash } from "@tests/utils/testUtils";
+
+vi.mock("@/common/services/mailer/mailer");
 
 const date = "2022-10-10T00:00:00.000Z";
 
@@ -181,6 +183,135 @@ describe("Authentification", () => {
         error: "Forbidden",
         message: "Votre compte n'est pas encore validé.",
       });
+    });
+  });
+
+  describe("POST /v1/auth/login - reprise de collaboration à la reconnexion", () => {
+    const organismeId = new ObjectId(id(3));
+    const cfaOrganisationId = new ObjectId(id(2));
+    const cfaUser: IUsersMigration = {
+      ...testUser,
+      _id: new ObjectId(id(2)),
+      email: "cfa@tdb.local",
+      organisation_id: cfaOrganisationId,
+    };
+
+    beforeEach(async () => {
+      await Promise.all([
+        organisationsDb().insertOne({
+          _id: cfaOrganisationId,
+          created_at: new Date(date),
+          type: "ORGANISME_FORMATION",
+          siret: "19040492100016",
+          uai: "0802004U",
+          organisme_id: organismeId.toString(),
+          ml_beta_activated_at: new Date("2022-01-01T00:00:00.000Z"),
+        }),
+        organismesDb().insertOne(
+          {
+            _id: organismeId,
+            siret: "19040492100016",
+            uai: "0802004U",
+            created_at: new Date(date),
+            updated_at: new Date(date),
+            contacts_from_referentiel: [],
+            formations_count: 0,
+            is_allowed_collab: true,
+            collab_suspended_at: new Date("2022-10-01T00:00:00.000Z"),
+            collab_inactivity_email_sent_at: new Date("2022-09-26T00:00:00.000Z"),
+          },
+          { bypassDocumentValidation: true }
+        ),
+        usersMigrationDb().insertOne(cfaUser),
+      ]);
+    });
+
+    it("lève la suspension du CFA du membre qui se reconnecte", async () => {
+      const response = await httpClient.post("/api/v1/auth/login", {
+        email: "cfa@tdb.local",
+        password: "MDP-azerty123",
+      });
+      assert.strictEqual(response.status, 200);
+
+      const organisme = await organismesDb().findOne({ _id: organismeId });
+      assert.strictEqual(organisme?.collab_suspended_at, undefined);
+      assert.strictEqual(organisme?.collab_inactivity_email_sent_at, undefined);
+      assert.ok(organisme?.collab_resumed_at instanceof Date);
+      assert.strictEqual(organisme?.is_allowed_collab, true);
+
+      const audit = await auditLogsDb().findOne({ action: "collab_resumed" });
+      assert.ok(audit);
+      assert.deepStrictEqual(audit.data, {
+        organisme_id: organismeId,
+        reason: "reconnexion",
+        user_id: cfaUser._id.toString(),
+      });
+    });
+
+    it("ne touche à rien pour un membre d'une autre organisation", async () => {
+      await organisationsDb().insertOne({
+        _id: new ObjectId(id(1)),
+        created_at: new Date(date),
+        type: "DREETS",
+        code_region: "53",
+      });
+      await usersMigrationDb().insertOne(testUser);
+
+      const response = await httpClient.post("/api/v1/auth/login", {
+        email: "user@tdb.local",
+        password: "MDP-azerty123",
+      });
+      assert.strictEqual(response.status, 200);
+
+      const organisme = await organismesDb().findOne({ _id: organismeId });
+      assert.ok(organisme?.collab_suspended_at instanceof Date);
+      assert.strictEqual(await auditLogsDb().countDocuments({ action: "collab_resumed" }), 0);
+    });
+  });
+
+  describe("POST /v1/auth/register - règles de mot de passe", () => {
+    const registrationBody = (password: string, organisation: object = { type: "DREETS", code_region: "53" }) => ({
+      user: {
+        email: "nouveau@tdb.local",
+        civility: "Madame",
+        nom: "Dupont",
+        prenom: "Jeanne",
+        fonction: "Responsable administratif",
+        telephone: "0102030405",
+        password,
+        has_accept_cgu_version: "v0.4",
+      },
+      organisation,
+    });
+
+    it.each([
+      ["trop court", "Abcdef1!"],
+      ["sans majuscule", "abcdefghijk1!"],
+      ["sans minuscule", "ABCDEFGHIJK1!"],
+      ["sans chiffre", "Abcdefghijkl!"],
+      ["sans caractère spécial", "Abcdefghijk12"],
+    ])("Refuse un mot de passe %s", async (_label, password) => {
+      const response = await httpClient.post("/api/v1/auth/register", registrationBody(password));
+
+      assert.strictEqual(response.status, 400);
+      assert.strictEqual(await usersMigrationDb().countDocuments({}), 0);
+    });
+
+    it("Accepte un mot de passe conforme", async () => {
+      const response = await httpClient.post("/api/v1/auth/register", registrationBody("Abcdefghijk1!"));
+
+      assert.strictEqual(response.status, 200);
+      assert.strictEqual(await usersMigrationDb().countDocuments({ email: "nouveau@tdb.local" }), 1);
+    });
+
+    it("Exige 20 caractères pour une organisation ADMINISTRATEUR", async () => {
+      const response = await httpClient.post(
+        "/api/v1/auth/register",
+        registrationBody("Abcdefghijk1!", { type: "ADMINISTRATEUR" })
+      );
+
+      assert.strictEqual(response.status, 400);
+      assert.strictEqual(await usersMigrationDb().countDocuments({}), 0);
     });
   });
 });

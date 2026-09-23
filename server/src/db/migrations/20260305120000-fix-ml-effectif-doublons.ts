@@ -123,7 +123,7 @@ export const up = async () => {
     const docs = await collection.find({ _id: { $in: group.doc_ids } }).toArray();
 
     // Trier : source ERP > situation non-null > plus récent
-    docs.sort((a: any, b: any) => {
+    docs.sort((a, b) => {
       const aIsErp = a.effectif_snapshot?.source !== "DECA";
       const bIsErp = b.effectif_snapshot?.source !== "DECA";
       if (aIsErp && !bIsErp) return -1;

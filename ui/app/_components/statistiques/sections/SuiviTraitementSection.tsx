@@ -4,6 +4,7 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { useState } from "react";
+import type { StatsSegment } from "shared/models/data/nationalStats.model";
 
 import { useTraitementExport } from "../hooks/useTraitementExport";
 import { TraitementMLTable } from "../tables/TraitementMLTable";
@@ -15,6 +16,8 @@ import styles from "./StatisticsSection.module.css";
 
 interface SuiviTraitementSectionProps {
   defaultPeriod?: Period;
+  segment: StatsSegment;
+  title?: string;
   region?: string;
   isAdmin?: boolean;
   national?: boolean;
@@ -22,14 +25,17 @@ interface SuiviTraitementSectionProps {
 
 export function SuiviTraitementSection({
   defaultPeriod = "30days",
+  segment,
+  title = "Suivi traitement",
   region,
-  isAdmin = true,
+  isAdmin = false,
   national = false,
 }: SuiviTraitementSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
   const [exportError, setExportError] = useState<string | null>(null);
   const { exportData, isExporting } = useTraitementExport({
     region,
+    national,
     onError: (error) => setExportError(error.message),
     onSuccess: () => setExportError(null),
   });
@@ -62,35 +68,35 @@ export function SuiviTraitementSection({
 
   if (region) {
     return (
-      <StatisticsSection title="Suivi traitement" controls={controls} controlsPosition="below-left">
+      <StatisticsSection title={title} controls={controls} controlsPosition="below-left">
         {errorAlert}
-        <TraitementMLTable period={period} region={region} isAdmin={isAdmin} />
+        <TraitementMLTable period={period} segment={segment} region={region} />
       </StatisticsSection>
     );
   }
 
   if (!isAdmin) {
     return (
-      <StatisticsSection title="Suivi traitement" controls={controls} controlsPosition="below-left">
+      <StatisticsSection title={title} controls={controls} controlsPosition="below-left">
         {errorAlert}
-        <TraitementRegionTable period={period} national={national} />
+        <TraitementRegionTable period={period} segment={segment} national={national} />
       </StatisticsSection>
     );
   }
 
   return (
-    <StatisticsSection title="Suivi traitement" controls={controls} controlsPosition="below-left">
+    <StatisticsSection title={title} controls={controls} controlsPosition="below-left">
       {errorAlert}
       <Tabs
         className={styles.tabsContainer}
         tabs={[
           {
             label: "Par Mission Locale",
-            content: <TraitementMLTable period={period} isAdmin={isAdmin} />,
+            content: <TraitementMLTable period={period} segment={segment} />,
           },
           {
             label: "Par région",
-            content: <TraitementRegionTable period={period} national={national} />,
+            content: <TraitementRegionTable period={period} segment={segment} national={national} />,
           },
         ]}
       />

@@ -2,9 +2,9 @@
 
 import { SideMenu, type SideMenuProps } from "@codegouvfr/react-dsfr/SideMenu";
 
-import { DecaAlert } from "@/app/_components/statistiques/ui/DecaAlert";
-import { Skeleton } from "@/app/_components/statistiques/ui/Skeleton";
+import { Skeleton } from "@/app/_components/common/Skeleton";
 
+import baseStyles from "./StatistiquesLayoutBase.module.css";
 import styles from "./StatistiquesMLLayoutClient.module.css";
 
 interface StatistiquesLayoutBaseProps {
@@ -28,7 +28,7 @@ export function StatistiquesLayoutBase({
           <div className="fr-container">
             <div className="fr-grid-row">
               <div className={`fr-col-12 fr-col-md-3 ${styles.sideMenuColumn}`}>
-                <div style={{ padding: "16px" }}>
+                <div className={baseStyles.contenu}>
                   <Skeleton height="32px" width="80%" className={styles.skeletonMarginBottom} />
                   <Skeleton height="32px" width="70%" className={styles.skeletonMarginBottom} />
                   <Skeleton height="32px" width="60%" className={styles.skeletonMarginBottom} />
@@ -50,9 +50,6 @@ export function StatistiquesLayoutBase({
   return (
     <>
       <Banner />
-      <div className="fr-container fr-mt-2w fr-mb-3w">
-        <DecaAlert />
-      </div>
       <div className={styles.mainContainer}>
         <div className="fr-container">
           <div className="fr-grid-row">

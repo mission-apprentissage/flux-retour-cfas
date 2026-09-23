@@ -14,7 +14,7 @@ export const metadata = PAGES.static.home.getMetadata();
 
 export default function HomePage() {
   return (
-    <main id="accueil-content" className={landingStyles.mainContainer}>
+    <main className={landingStyles.mainContainer}>
       <HeroSection />
       <SponsorsSection />
       <BaseRupturesContratSection

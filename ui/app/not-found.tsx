@@ -1,13 +1,24 @@
-"use client";
+import { fr } from "@codegouvfr/react-dsfr";
+import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
 
-import Error from "next/error";
+import { Footer } from "./_components/Footer";
+import { NotFoundBlock } from "./_components/NotFoundBlock";
+import { PublicHeader } from "./_components/PublicHeader";
 
 export default function NotFound() {
   return (
-    <html lang="en">
-      <body>
-        <Error statusCode={404} />
-      </body>
-    </html>
+    <>
+      <SkipLinks
+        links={[
+          { anchor: "#contenu", label: "Contenu" },
+          { anchor: "#fr-footer", label: "Pied de page" },
+        ]}
+      />
+      <PublicHeader />
+      <main id="contenu" tabIndex={-1} className={fr.cx("fr-container", "fr-py-12w")}>
+        <NotFoundBlock />
+      </main>
+      <Footer />
+    </>
   );
 }

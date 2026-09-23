@@ -9,11 +9,13 @@ import {
 } from "@/common/actions/indicateurs/transmissions/transmission.action";
 import { formatDateYYYYMMDD } from "@/common/utils/dateUtils";
 import paginationSchema from "@/common/validation/paginationSchema";
-import { returnResult } from "@/http/middlewares/helpers";
+import { DefaultParams, returnResult, RouteHandler } from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 const pagination = paginationSchema({ defaultSort: "processed_at:-1" }).strict();
 type Pagination = z.infer<typeof pagination>;
+const dateParams = z.object({ date: extensions.iso8601Date() });
+type DateParams = z.infer<typeof dateParams>;
 
 export default () => {
   const router = express.Router();
@@ -21,21 +23,23 @@ export default () => {
   router.get("/", validateRequestMiddleware({ query: pagination }), returnResult(getAllTransmissionsByDateAdmin));
   router.get(
     "/:date/error",
-    validateRequestMiddleware({ params: z.object({ date: extensions.iso8601Date() }), query: pagination }),
+    validateRequestMiddleware({ params: dateParams, query: pagination }),
     returnResult(getTransmissionByDateErrorAdmin)
   );
 
   return router;
 };
 
-const getAllTransmissionsByDateAdmin = async (req) => {
-  const { page, limit } = req.query as Pagination;
+const getAllTransmissionsByDateAdmin: RouteHandler<Record<string, unknown>, DefaultParams, Pagination> = async (
+  req
+) => {
+  const { page, limit } = req.query;
   return await getAllTransmissionStatusGroupedByDate(page, limit);
 };
 
-const getTransmissionByDateErrorAdmin = async (req) => {
-  const { page, limit } = req.query as Pagination;
-  const date = req.params.date as Date;
+const getTransmissionByDateErrorAdmin: RouteHandler<Record<string, unknown>, DateParams, Pagination> = async (req) => {
+  const { page, limit } = req.query;
+  const date = req.params.date;
   const formattedDate = formatDateYYYYMMDD(date);
 
   if (!formattedDate) {

@@ -584,3 +584,9 @@ export interface Organisme {
     }[];
   };
 }
+
+export type OrganismeNormalized = Organisme & {
+  normalizedName: string;
+  normalizedUai: string;
+  normalizedCommune: string;
+};

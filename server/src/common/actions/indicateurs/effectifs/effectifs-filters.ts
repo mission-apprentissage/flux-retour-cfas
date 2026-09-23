@@ -10,7 +10,7 @@ import { escapeRegExp } from "@/common/utils/regexUtils";
 import { FullEffectifsFilters } from "../../helpers/filters";
 
 // [min, max[
-const intervalParTrancheAge = {
+const intervalParTrancheAge: Record<string, [number, number]> = {
   "-18": [0, 18],
   "18-20": [18, 21],
   "21-25": [21, 26],
@@ -64,7 +64,7 @@ export function buildEffectifPerimetreMongoFilters(perimetre: PermissionScope | 
   }, {});
 }
 
-const buildFilterDate = (filter) => {
+const buildFilterDate = (filter: FullEffectifsFilters) => {
   const value = filter["date"];
   if (!value) {
     return {};
@@ -72,7 +72,7 @@ const buildFilterDate = (filter) => {
   return { annee_scolaire: { $in: getAnneesScolaireListFromDate(value) } };
 };
 
-const buildFilterOrganismeRegions = (filter) => {
+const buildFilterOrganismeRegions = (filter: FullEffectifsFilters) => {
   const value = filter["organisme_regions"];
   if (!value) {
     return {};
@@ -81,7 +81,7 @@ const buildFilterOrganismeRegions = (filter) => {
   return { "_computed.organisme.region": { $in: value } };
 };
 
-const buildFilterOrganismeDepartement = (filter) => {
+const buildFilterOrganismeDepartement = (filter: FullEffectifsFilters) => {
   const value = filter["organisme_departements"];
   if (!value) {
     return {};
@@ -89,7 +89,7 @@ const buildFilterOrganismeDepartement = (filter) => {
   return { "_computed.organisme.departement": { $in: value } };
 };
 
-const buildFilterOrganismeAcademies = (filter) => {
+const buildFilterOrganismeAcademies = (filter: FullEffectifsFilters) => {
   const value = filter["organisme_academies"];
   if (!value) {
     return {};
@@ -97,7 +97,7 @@ const buildFilterOrganismeAcademies = (filter) => {
   return { "_computed.organisme.academie": { $in: value } };
 };
 
-const buildFilterOrganismeBassinsEmploi = (filter) => {
+const buildFilterOrganismeBassinsEmploi = (filter: FullEffectifsFilters) => {
   const value = filter["organisme_bassinsEmploi"];
   if (!value) {
     return {};
@@ -105,7 +105,7 @@ const buildFilterOrganismeBassinsEmploi = (filter) => {
   return { "_computed.organisme.bassinEmploi": { $in: value } };
 };
 
-const buildFilterOrganismeSearch = (filter) => {
+const buildFilterOrganismeSearch = (filter: FullEffectifsFilters) => {
   const value = filter["organisme_search"];
   if (!value) {
     return {};
@@ -113,7 +113,7 @@ const buildFilterOrganismeSearch = (filter) => {
   return { $or: buildOrganismeSearchCondition(value) };
 };
 
-const buildFilterOrganismeReseaux = (filter) => {
+const buildFilterOrganismeReseaux = (filter: FullEffectifsFilters) => {
   const value = filter["organisme_reseaux"];
   if (!value) {
     return {};
@@ -121,13 +121,13 @@ const buildFilterOrganismeReseaux = (filter) => {
   return { "_computed.organisme.reseaux": { $in: value } };
 };
 
-const buildFilterApprenantTrancheAge = (filter) => {
+const buildFilterApprenantTrancheAge = (filter: FullEffectifsFilters) => {
   const value = filter["apprenant_tranchesAge"];
   if (!value) {
     return {};
   }
   return {
-    $or: value.map((key) => {
+    $or: value.map((key: string) => {
       const [min, max] = intervalParTrancheAge[key];
       return {
         "apprenant.date_de_naissance": {
@@ -139,7 +139,7 @@ const buildFilterApprenantTrancheAge = (filter) => {
   };
 };
 
-const buildFilterFormationAnnee = (filter) => {
+const buildFilterFormationAnnee = (filter: FullEffectifsFilters) => {
   const value = filter["formation_annees"];
   if (!value) {
     return {};
@@ -147,7 +147,7 @@ const buildFilterFormationAnnee = (filter) => {
   return { "formation.annee": { $in: value } };
 };
 
-const buildFilterFormationNiveau = (filter) => {
+const buildFilterFormationNiveau = (filter: FullEffectifsFilters) => {
   const value = filter["formation_niveaux"];
   if (!value) {
     return {};
@@ -155,7 +155,7 @@ const buildFilterFormationNiveau = (filter) => {
   return { "formation.niveau": { $in: value } };
 };
 
-const buildFilterFormationCfd = (filter) => {
+const buildFilterFormationCfd = (filter: FullEffectifsFilters) => {
   const value = filter["formation_cfds"];
   if (!value) {
     return {};
@@ -163,7 +163,7 @@ const buildFilterFormationCfd = (filter) => {
   return { "formation.cfd": { $in: value } };
 };
 
-const buildFilterFormationSecteurProfessionnels = (filter) => {
+const buildFilterFormationSecteurProfessionnels = (filter: FullEffectifsFilters) => {
   const value = filter["formation_secteursProfessionnels"];
   if (!value) {
     return {};

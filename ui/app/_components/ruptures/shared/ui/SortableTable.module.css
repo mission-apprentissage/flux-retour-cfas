@@ -2,6 +2,8 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  /* Un intitulé de colonne coupé en deux ("En / rupture") isole la flèche de tri. */
+  white-space: nowrap;
   background: none;
   border: none;
   padding: 0;

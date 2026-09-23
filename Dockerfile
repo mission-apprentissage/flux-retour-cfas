@@ -1,4 +1,4 @@
-FROM node:22.6-slim AS builder_root
+FROM node:24-slim AS builder_root
 WORKDIR /app
 COPY .yarn /app/.yarn
 COPY package.json package.json
@@ -10,7 +10,7 @@ COPY shared/package.json shared/package.json
 
 RUN --mount=type=cache,target=/app/.yarn/cache yarn install --immutable
 
-FROM builder_root as root
+FROM builder_root AS root
 WORKDIR /app
 
 ##############################################################
@@ -31,12 +31,12 @@ RUN --mount=type=cache,target=/app/.yarn/cache yarn workspaces focus --all --pro
 RUN mkdir -p /app/shared/node_modules && mkdir -p /app/server/node_modules
 
 # Production image, copy all the files and run next
-FROM node:22.6-slim AS server
+FROM node:24-slim AS server
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y ca-certificates curl && update-ca-certificates && apt-get clean
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 ARG PUBLIC_VERSION
 ENV PUBLIC_VERSION=$PUBLIC_VERSION
 ARG COMMIT_HASH
@@ -67,7 +67,7 @@ COPY ./shared ./shared
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 ARG PUBLIC_VERSION
 ENV NEXT_PUBLIC_VERSION=$PUBLIC_VERSION
@@ -75,18 +75,17 @@ ENV NEXT_PUBLIC_VERSION=$PUBLIC_VERSION
 ARG PUBLIC_ENV
 ENV NEXT_PUBLIC_ENV=$PUBLIC_ENV
 
-RUN yarn workspace ui build
-# RUN --mount=type=cache,target=/app/ui/.next/cache yarn --cwd ui build
+RUN --mount=type=cache,target=/app/ui/.next/cache yarn workspace ui build
 
 # Production image, copy all the files and run next
-FROM node:22.6-slim AS ui
+FROM node:24-slim AS ui
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y ca-certificates curl && update-ca-certificates && apt-get clean
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 # Uncomment the following line in case you want to disable telemetry during runtime.
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 ARG PUBLIC_VERSION
 ENV NEXT_PUBLIC_VERSION=$PUBLIC_VERSION
@@ -111,6 +110,6 @@ USER nextjs
 
 EXPOSE 3000
 
-ENV PORT 3000
+ENV PORT=3000
 
 CMD ["node", "ui/server"]

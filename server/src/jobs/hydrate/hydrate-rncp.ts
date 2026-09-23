@@ -14,6 +14,15 @@ import parentLogger from "@/common/logger";
 import { rncpDb } from "@/common/model/collections";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 
+interface RncpFicheXml {
+  NUMERO_FICHE?: string;
+  NOUVELLE_CERTIFICATION?: string[];
+  NIVEAU?: string;
+  INTITULE?: string;
+  ETAT_FICHE?: string;
+  ACTIF?: string;
+}
+
 const logger = parentLogger.child({
   module: "job:hydrate:rncp",
 });
@@ -38,7 +47,9 @@ export async function hydrateRNCP() {
   if (res.status !== 200) {
     throw new Error(`Invalid response status. Expected 200 but received ${res.status}`);
   }
-  const resourceRncpV3 = res.data.data.find((resource) => resource.title.includes("export-fiches-rncp-v3"));
+  const resourceRncpV3 = res.data.data.find((resource: { title: string }) =>
+    resource.title.includes("export-fiches-rncp-v3")
+  );
   if (!resourceRncpV3) {
     throw new Error(`Ressource non trouvée dans la liste`);
   }
@@ -98,10 +109,10 @@ export async function hydrateRNCP() {
   const stream = createReadStream(tempXmlFilePath);
 
   // State for tracking current element
-  let currentFiche: any = null;
+  let currentFiche: RncpFicheXml | null = null;
   let currentPath: string[] = [];
   let currentText = "";
-  let romeList: any[] = [];
+  let romeList: Array<{ CODE?: string }> = [];
 
   saxStream.on("opentag", (node) => {
     currentPath.push(node.name);
@@ -152,13 +163,13 @@ export async function hydrateRNCP() {
     // When FICHE closes, process it
     if (tagName === "FICHE" && currentFiche) {
       const rncpDoc: WithoutId<IRncp> = {
-        rncp: currentFiche.NUMERO_FICHE,
+        rncp: currentFiche.NUMERO_FICHE ?? "",
         nouveaux_rncp: currentFiche.NOUVELLE_CERTIFICATION ?? [],
         niveau: currentFiche.NIVEAU ? parseInt(currentFiche.NIVEAU.substring(3)) : undefined,
-        intitule: currentFiche.INTITULE,
-        etat_fiche: currentFiche.ETAT_FICHE,
+        intitule: currentFiche.INTITULE ?? "",
+        etat_fiche: currentFiche.ETAT_FICHE ?? "",
         actif: currentFiche.ACTIF === "Oui",
-        romes: romeList.map((rome) => rome.CODE).filter(Boolean),
+        romes: romeList.map((rome) => rome.CODE).filter((code): code is string => Boolean(code)),
       };
 
       batch.push(rncpDoc);

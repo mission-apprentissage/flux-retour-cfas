@@ -1,11 +1,12 @@
 import { fr } from "@codegouvfr/react-dsfr";
-import { Link } from "@mui/material";
 import type { LinkProps } from "next/link";
 import NextLink from "next/link";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 
 import { publicConfig } from "@/config.public";
+
+import styles from "./DsfrLink.module.css";
 
 export function DsfrLink({
   children,
@@ -33,15 +34,11 @@ export function DsfrLink({
   }, [href, external]);
 
   return (
-    <Link
-      component={NextLink}
-      sx={{
-        textUnderlinePosition: "under",
-      }}
+    <NextLink
       href={href}
       rel={isExternal ? "noopener noreferrer" : undefined}
       target={isExternal ? "_blank" : undefined}
-      className={`${fr.cx(`fr-text--${size}`, {
+      className={`${styles.link} ${fr.cx(`fr-text--${size}`, {
         "fr-link--sm": size === "sm",
         "fr-link--lg": size === "lg",
         "fr-link--icon-left": arrow === "left",
@@ -52,6 +49,6 @@ export function DsfrLink({
       {...rest}
     >
       {children}
-    </Link>
+    </NextLink>
   );
 }

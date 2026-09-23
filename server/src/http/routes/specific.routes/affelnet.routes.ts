@@ -13,8 +13,14 @@ import {
   getAffelnetVoeuxNonConcretise,
 } from "@/common/actions/affelnet.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
-import { AuthContext } from "@/common/model/internal/AuthContext";
-import { requireOrganismeRegional, returnResult } from "@/http/middlewares/helpers";
+import { zCommaSeparated } from "@/common/validation/commaSeparated";
+import {
+  DefaultParams,
+  RegionalLocals,
+  requireOrganismeRegional,
+  returnResult,
+  RouteHandler,
+} from "@/http/middlewares/helpers";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 const AFFELNET_FIELDS = [
@@ -48,7 +54,17 @@ const AFFELNET_FIELDS = [
   { label: "Contrat signé (selon DECA)", value: "contrat_deca_signe" },
 ];
 
-const computeFields = (data) => {
+const affelnetQuery = z.object({
+  organisme_departements: zCommaSeparated(z.string()).optional(),
+  year: z.string().optional(),
+});
+type AffelnetQuery = z.infer<typeof affelnetQuery>;
+type AffelnetHandler = RouteHandler<RegionalLocals, DefaultParams, AffelnetQuery>;
+
+type ContratDates = { date_debut_contrat: Date | string; date_fin_contrat: Date | string };
+type ContratConcretise = { date_debut: Date | string; date_fin: Date | string };
+
+const computeFields = (data: Array<{ contrats?: unknown[] | null; contrats_deca?: unknown[] | null }>) => {
   const maxContrats = Math.max(...data.map((d) => (d.contrats ? d.contrats.length : 0)));
   const extraFields: Array<{ label: string; value: string }> = [];
 
@@ -90,26 +106,16 @@ export default () => {
   router.get(
     "/national/count",
     requireOrganismeRegional,
-    validateRequestMiddleware({
-      query: z.object({
-        organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
-        year: z.string().optional(),
-      }),
-    }),
+    validateRequestMiddleware({ query: affelnetQuery }),
     returnResult(getNationalCount)
   );
 
   router.get(
     "/export/concretise",
     requireOrganismeRegional,
-    validateRequestMiddleware({
-      query: z.object({
-        organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
-        year: z.string().optional(),
-      }),
-    }),
-    returnResult(async (req, res) => {
-      const affelnetCsv = await exportConcretisee(req, res);
+    validateRequestMiddleware({ query: affelnetQuery }),
+    returnResult<RegionalLocals, DefaultParams, AffelnetQuery>(async (req, res, next) => {
+      const affelnetCsv = await exportConcretisee(req, res, next);
       res.attachment(`voeux_affelnet_concretisee.csv`);
       return affelnetCsv;
     })
@@ -118,14 +124,9 @@ export default () => {
   router.get(
     "/export/non-concretise",
     requireOrganismeRegional,
-    validateRequestMiddleware({
-      query: z.object({
-        organisme_departements: z.preprocess((str: any) => str.split(","), z.array(z.string())).optional(),
-        year: z.string().optional(),
-      }),
-    }),
-    returnResult(async (req, res) => {
-      const affelnetCsv = await exportNonConcretisee(req, res);
+    validateRequestMiddleware({ query: affelnetQuery }),
+    returnResult<RegionalLocals, DefaultParams, AffelnetQuery>(async (req, res, next) => {
+      const affelnetCsv = await exportNonConcretisee(req, res, next);
       res.attachment(`voeux_affelnet_non_concretisee.csv`);
       return affelnetCsv;
     })
@@ -134,9 +135,9 @@ export default () => {
   return router;
 };
 
-const getNationalCount = async (req, { locals }) => {
+const getNationalCount: AffelnetHandler = async (req, { locals }) => {
   const { year } = req.query;
-  const academie_list = locals.academie_list as string[];
+  const academie_list = locals.academie_list;
 
   if (!year) {
     throw Boom.badRequest("Year is required");
@@ -145,10 +146,10 @@ const getNationalCount = async (req, { locals }) => {
   return await getAffelnetCountVoeuxNational(academie_list, year);
 };
 
-const exportNonConcretisee = async (req, { locals }) => {
-  const user = req.user as AuthContext;
+const exportNonConcretisee: AffelnetHandler = async (req, { locals }) => {
+  const user = req.user;
   const { year } = req.query;
-  const academie_list = locals.academie_list as string[];
+  const academie_list = locals.academie_list;
   if (!year) {
     throw Boom.badRequest("Year is required");
   }
@@ -162,14 +163,14 @@ const exportNonConcretisee = async (req, { locals }) => {
       formations_demandees: formations_demandees.join(", "),
       contrat_signe: contrats && contrats.length ? "Oui" : "Non",
       contrat_deca_signe: contrats_deca && contrats_deca.length ? "Oui" : "Non",
-      ...contrats.reduce((acc, curr, index) => {
+      ...contrats.reduce((acc: Record<string, string>, curr: ContratDates, index: number) => {
         return {
           ...acc,
           [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
           [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin_contrat), "dd/MM/yyyy"),
         };
       }, {}),
-      ...contrats_deca.reduce((acc, curr, index) => {
+      ...contrats_deca.reduce((acc: Record<string, string>, curr: ContratDates, index: number) => {
         return {
           ...acc,
           [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut_contrat), "dd/MM/yyyy"),
@@ -198,10 +199,10 @@ const exportNonConcretisee = async (req, { locals }) => {
   }
 };
 
-const exportConcretisee = async (req, { locals }) => {
-  const user = req.user as AuthContext;
+const exportConcretisee: AffelnetHandler = async (req, { locals }) => {
+  const user = req.user;
   const { year } = req.query;
-  const academie_list = locals.academie_list as string[];
+  const academie_list = locals.academie_list;
 
   if (!year) {
     throw Boom.badRequest("Year is required");
@@ -216,14 +217,14 @@ const exportConcretisee = async (req, { locals }) => {
       formations_demandees: formations_demandees.join(", "),
       contrat_signe: contrats && contrats.length ? "Oui" : "Non",
       contrat_deca_signe: contrats_deca && contrats_deca.length ? "Oui" : "Non",
-      ...contrats.reduce((acc, curr, index) => {
+      ...contrats.reduce((acc: Record<string, string>, curr: ContratConcretise, index: number) => {
         return {
           ...acc,
           [`date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut), "dd/MM/yyyy"),
           [`date_fin_contrat_${index + 1}`]: format(new Date(curr.date_fin), "dd/MM/yyyy"),
         };
       }, {}),
-      ...contrats_deca.reduce((acc, curr, index) => {
+      ...contrats_deca.reduce((acc: Record<string, string>, curr: ContratConcretise, index: number) => {
         return {
           ...acc,
           [`deca_date_debut_contrat_${index + 1}`]: format(new Date(curr.date_debut), "dd/MM/yyyy"),

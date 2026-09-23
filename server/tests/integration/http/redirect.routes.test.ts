@@ -1,12 +1,15 @@
+import { randomUUID } from "node:crypto";
+
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
-import { v4 as uuidv4 } from "uuid";
+import type { IMissionLocaleEffectif } from "shared/models";
+import type { IOrganisation } from "shared/models/data/organisations.model";
 import { it, expect, describe, beforeEach, vi } from "vitest";
 
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 import { useMongo } from "@tests/jest/setupMongo";
-import { initTestApp } from "@tests/utils/testUtils";
+import { initTestApp, testDoc } from "@tests/utils/testUtils";
 
 const FALLBACK_ML_URL = "https://www.unml.info/";
 
@@ -16,14 +19,14 @@ let httpClient: AxiosInstance;
 const insertMlOrga = async (rdvUrl?: string | null): Promise<ObjectId> => {
   const id = new ObjectId();
   await organisationsDb().insertOne(
-    {
+    testDoc<IOrganisation>({
       _id: id,
       type: "MISSION_LOCALE",
       nom: "ML Test",
       ml_id: 42,
       ...(rdvUrl !== undefined ? { rdv_url: rdvUrl } : {}),
       created_at: new Date(),
-    } as any,
+    }),
     { bypassDocumentValidation: true }
   );
   return id;
@@ -36,7 +39,7 @@ const insertEffectifWithToken = async (
 ): Promise<ObjectId> => {
   const id = new ObjectId();
   await missionLocaleEffectifsDb().insertOne(
-    {
+    testDoc<IMissionLocaleEffectif>({
       _id: id,
       mission_locale_id: mlId,
       effectif_id: new ObjectId(),
@@ -62,7 +65,7 @@ const insertEffectifWithToken = async (
         rdv_clicks: [],
       },
       ...(overrides.softDeleted ? { soft_deleted: true } : {}),
-    } as any,
+    }),
     { bypassDocumentValidation: true }
   );
   return id;
@@ -91,7 +94,7 @@ describe("Route GET /api/r/:token", () => {
   it("token valide + rdv_url présent → 302 vers rdv_url + clic loggé", async () => {
     const rdvUrl = "https://calendly.com/ml-test";
     const mlId = await insertMlOrga(rdvUrl);
-    const token = uuidv4();
+    const token = randomUUID();
     const effectifId = await insertEffectifWithToken(mlId, token);
 
     const response = await httpClient.get(`/api/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
@@ -107,7 +110,7 @@ describe("Route GET /api/r/:token", () => {
   });
 
   it("token inexistant → 302 vers fallback, pas de log", async () => {
-    const response = await httpClient.get(`/api/r/${uuidv4()}`, { maxRedirects: 0, validateStatus: () => true });
+    const response = await httpClient.get(`/api/r/${randomUUID()}`, { maxRedirects: 0, validateStatus: () => true });
 
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe(FALLBACK_ML_URL);
@@ -120,7 +123,7 @@ describe("Route GET /api/r/:token", () => {
 
   it("token valide mais ML a supprimé rdv_url → 302 fallback, log avec redirect_url:null", async () => {
     const mlId = await insertMlOrga(); // pas de rdv_url
-    const token = uuidv4();
+    const token = randomUUID();
     const effectifId = await insertEffectifWithToken(mlId, token);
 
     const response = await httpClient.get(`/api/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
@@ -135,7 +138,7 @@ describe("Route GET /api/r/:token", () => {
 
   it("token expiré (>90j) → 302 fallback, pas de log", async () => {
     const mlId = await insertMlOrga("https://calendly.com/ml-test");
-    const token = uuidv4();
+    const token = randomUUID();
     const expiredCreatedAt = new Date(Date.now() - 91 * 24 * 60 * 60 * 1000);
     const effectifId = await insertEffectifWithToken(mlId, token, { tokenCreatedAt: expiredCreatedAt });
 
@@ -150,7 +153,7 @@ describe("Route GET /api/r/:token", () => {
 
   it("effectif soft-deleted → 302 fallback, pas de log", async () => {
     const mlId = await insertMlOrga("https://calendly.com/ml-test");
-    const token = uuidv4();
+    const token = randomUUID();
     const effectifId = await insertEffectifWithToken(mlId, token, { softDeleted: true });
 
     const response = await httpClient.get(`/api/r/${token}`, { maxRedirects: 0, validateStatus: () => true });
@@ -164,7 +167,7 @@ describe("Route GET /api/r/:token", () => {
 
   it("3 clics consécutifs → 3 entrées dans rdv_clicks", async () => {
     const mlId = await insertMlOrga("https://calendly.com/ml-test");
-    const token = uuidv4();
+    const token = randomUUID();
     const effectifId = await insertEffectifWithToken(mlId, token);
 
     for (let i = 0; i < 3; i++) {
@@ -177,7 +180,7 @@ describe("Route GET /api/r/:token", () => {
 
   it("rate-limit : >30 req/min sur le même token → 429", async () => {
     const mlId = await insertMlOrga("https://calendly.com/ml-test");
-    const token = uuidv4();
+    const token = randomUUID();
     await insertEffectifWithToken(mlId, token);
 
     for (let i = 0; i < 30; i++) {

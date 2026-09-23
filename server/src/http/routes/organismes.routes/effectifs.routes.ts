@@ -4,7 +4,7 @@ import { zGetEffectifsForOrganismeApi } from "shared/models/routes/organismes/ef
 import { withPaginationSchema } from "shared/models/routes/pagination";
 
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
-import { requireOrganismePermission, returnResult } from "@/http/middlewares/helpers";
+import { OrganismeLocals, requireOrganismePermission, returnResult } from "@/http/middlewares/helpers";
 
 import { getOrganismeEffectifs, updateOrganismeEffectifs } from "../specific.routes/organisme.routes";
 
@@ -14,7 +14,7 @@ export default () => {
   router.get(
     "/",
     requireOrganismePermission("manageEffectifs"),
-    returnResult(async ({ query }, res) => {
+    returnResult<OrganismeLocals>(async ({ query }, res) => {
       const queryFilters = await validateFullZodObjectSchema(query, withPaginationSchema(zGetEffectifsForOrganismeApi));
 
       return await getOrganismeEffectifs(res.locals.organismeId, queryFilters);
@@ -24,7 +24,7 @@ export default () => {
   router.put(
     "/",
     requireOrganismePermission("manageEffectifs"),
-    returnResult(async (req, res) => {
+    returnResult<OrganismeLocals>(async (req, res) => {
       const updated = await validateFullZodObjectSchema(req.body, {
         "apprenant.type_cfa": primitivesV3.type_cfa.optional(),
       });

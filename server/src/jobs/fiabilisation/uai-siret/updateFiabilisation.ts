@@ -7,13 +7,19 @@ import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { organismesDb } from "@/common/model/collections";
 
 type FiabilisationUaiSiret = {
-  uai: string;
-  siret: string;
+  uai: string | null | undefined;
+  siret: string | null | undefined;
   statut: "FIABLE" | "NON_FIABLE" | "INCONNU";
   api_response: IRechercheOrganismeResponse | null;
 };
 
-export async function fiabilisationUaiSiret({ uai, siret }): Promise<FiabilisationUaiSiret> {
+export async function fiabilisationUaiSiret({
+  uai,
+  siret,
+}: {
+  uai: string | null | undefined;
+  siret: string | null | undefined;
+}): Promise<FiabilisationUaiSiret> {
   return apiAlternanceClient.organisme
     .recherche({ siret, uai })
     .then((apiData): FiabilisationUaiSiret => {
@@ -29,8 +35,11 @@ export async function fiabilisationUaiSiret({ uai, siret }): Promise<Fiabilisati
     .catch((error) => {
       if (error instanceof ApiError) {
         if (error.context.statusCode === 400) {
-          const siretError = (error.context.errorData as any)?.validationError?.siret?._errors?.[0] ?? null;
-          const uaiError = (error.context.errorData as any)?.validationError?.uai?._errors?.[0] ?? null;
+          const errorData = error.context.errorData as
+            | { validationError?: { siret?: { _errors?: string[] }; uai?: { _errors?: string[] } } }
+            | undefined;
+          const siretError = errorData?.validationError?.siret?._errors?.[0] ?? null;
+          const uaiError = errorData?.validationError?.uai?._errors?.[0] ?? null;
 
           if (siretError || uaiError) {
             return {

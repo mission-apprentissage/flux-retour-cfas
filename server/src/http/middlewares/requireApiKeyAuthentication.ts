@@ -2,7 +2,7 @@ import * as Sentry from "@sentry/node";
 import passport from "passport";
 import { Strategy as LocalAPIKeyStrategy } from "passport-localapikey";
 
-export default ({ apiKeyField = "apiKey", apiKeyValue }) => {
+export default ({ apiKeyField = "apiKey", apiKeyValue }: { apiKeyField?: string; apiKeyValue?: string }) => {
   passport.use(
     "apiKeyStrategy",
     new LocalAPIKeyStrategy({ apiKeyField }, async (apikey, done) => {

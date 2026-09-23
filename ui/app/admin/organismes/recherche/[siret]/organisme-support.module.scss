@@ -1,0 +1,18 @@
+.tabs {
+  :global(.fr-badge) {
+    white-space: nowrap;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(28rem, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}

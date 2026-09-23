@@ -6,7 +6,7 @@ import config from "@/config";
 
 import getApiClient from "../client";
 
-let axiosClient: any = null;
+let axiosClient: ReturnType<typeof getApiClient> | null = null;
 
 const initClient = () => {
   if (!config.bal || !config.bal.endpoint || !config.bal.bearer_key) {

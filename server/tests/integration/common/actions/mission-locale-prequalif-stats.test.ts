@@ -1,10 +1,13 @@
 import { ObjectId } from "mongodb";
+import type { IMissionLocaleEffectif } from "shared/models";
+import type { IOrganisation } from "shared/models/data/organisations.model";
 import { describe, beforeEach, it, expect } from "vitest";
 
 import { getPrequalifStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc } from "@tests/utils/testUtils";
 
 describe("getPrequalifStats", () => {
   useMongo();
@@ -20,14 +23,14 @@ describe("getPrequalifStats", () => {
   const insertMl = async (overrides: { rdvUrl?: string | null } = {}): Promise<ObjectId> => {
     const id = new ObjectId();
     await organisationsDb().insertOne(
-      {
+      testDoc<IOrganisation>({
         _id: id,
         type: "MISSION_LOCALE",
         nom: "ML",
         ml_id: Math.floor(Math.random() * 100000),
         created_at: new Date(),
         ...(overrides.rdvUrl !== undefined ? { rdv_url: overrides.rdvUrl } : {}),
-      } as any,
+      }),
       { bypassDocumentValidation: true }
     );
     return id;
@@ -48,7 +51,7 @@ describe("getPrequalifStats", () => {
     } = {}
   ): Promise<void> => {
     await missionLocaleEffectifsDb().insertOne(
-      {
+      testDoc<IMissionLocaleEffectif>({
         _id: new ObjectId(),
         mission_locale_id: mlId,
         effectif_id: new ObjectId(),
@@ -88,7 +91,7 @@ describe("getPrequalifStats", () => {
               }
             : { rdv_clicks: [] }),
         },
-      } as any,
+      }),
       { bypassDocumentValidation: true }
     );
   };

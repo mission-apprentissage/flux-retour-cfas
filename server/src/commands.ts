@@ -7,6 +7,8 @@ import { addJob, startJobProcessor as startJobProcessorFn } from "job-processor"
 import HttpTerminator from "lil-http-terminator";
 import { ObjectId } from "mongodb";
 
+import { getErrorMessage } from "@/common/utils/errorUtils";
+
 import { createSipaUser, deleteSipaUser } from "./common/actions/sipa.actions";
 import logger from "./common/logger";
 import { closeMongodbConnection } from "./common/mongodb";
@@ -15,6 +17,7 @@ import { sleep } from "./common/utils/asyncUtils";
 import config from "./config";
 import createServer from "./http/server";
 import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
+import { crons, registry } from "./jobs/registry";
 
 async function startJobProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
@@ -160,13 +163,12 @@ program
   });
 
 function createJobAction(name: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return async (options: any) => {
+  return async (options: Record<string, unknown>) => {
     try {
-      const { queued = false, ...payload } = options;
+      const { queued, ...payload } = options;
       const exitCode = await addJob({
         name,
-        queued,
+        queued: queued === true,
         payload,
       });
 
@@ -228,8 +230,8 @@ program
     const finalPassword = password ?? crypto.randomBytes(24).toString("base64url");
     try {
       await createSipaUser(username, finalPassword);
-    } catch (err: any) {
-      program.error(err.message || "Command failed", { exitCode: 2 });
+    } catch (err) {
+      program.error(getErrorMessage(err) || "Command failed", { exitCode: 2 });
     }
     // eslint-disable-next-line no-console
     console.log(`Compte SIPA créé : ${username}`);
@@ -246,8 +248,8 @@ program
   .action(async ({ username }) => {
     try {
       await deleteSipaUser(username);
-    } catch (err: any) {
-      program.error(err.message || "Command failed", { exitCode: 2 });
+    } catch (err) {
+      program.error(getErrorMessage(err) || "Command failed", { exitCode: 2 });
     }
     // eslint-disable-next-line no-console
     console.log(`Compte SIPA supprimé : ${username}`);
@@ -413,6 +415,13 @@ program
   });
 
 program
+  .command("tmp:migrate:ml-cloture-a-recontacter")
+  .description("Clôture en injoignable les dossiers ML restés à recontacter depuis avant le 01/06/2026")
+  .option("--dry-run", "Simulation sans écriture", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:migrate:ml-cloture-a-recontacter"));
+
+program
   .command("tmp:seed-ml-rdv-url")
   .description("Seed initial des rdv_url sur les organisations Mission Locale via un CSV (colonnes siret, rdv_url)")
   .requiredOption("--csv-path <path>", "Chemin du CSV (colonnes siret, rdv_url)")
@@ -489,6 +498,32 @@ program
       userId: options.userId,
       queued: options.queued ?? false,
     });
+  });
+
+program
+  .command("jobs:list")
+  .description("Affiche les jobs et crons enregistrés, groupés par domaine (horaires Europe/Paris)")
+  .action(() => {
+    /* eslint-disable no-console */
+    for (const [domain, def] of Object.entries(registry)) {
+      console.log(`\n[${domain}] ${Object.keys(def.jobs).length} jobs`);
+      for (const name of Object.keys(def.jobs)) {
+        console.log(`  ${name}`);
+      }
+    }
+    const dailyMinute = (cronString: string) => {
+      const [minute, hour] = cronString.split(" ");
+      const parsed = Number(hour) * 60 + Number(minute);
+      return Number.isFinite(parsed) ? parsed : Number.MAX_SAFE_INTEGER;
+    };
+    const sortedCrons = Object.entries(crons).sort(
+      ([nameA, a], [nameB, b]) => dailyMinute(a.cron_string) - dailyMinute(b.cron_string) || nameA.localeCompare(nameB)
+    );
+    console.log(`\nCrons (${sortedCrons.length}) — cron_string interprété en Europe/Paris :`);
+    for (const [name, def] of sortedCrons) {
+      console.log(`  ${def.cron_string.padEnd(12)} ${name}`);
+    }
+    /* eslint-enable no-console */
   });
 
 program

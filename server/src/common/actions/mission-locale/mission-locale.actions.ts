@@ -2,8 +2,10 @@ import { captureException } from "@sentry/node";
 import type { IMissionLocale } from "api-alternance-sdk";
 import Boom from "boom";
 import { ObjectId } from "bson";
-import { AggregationCursor, MongoServerError } from "mongodb";
-import { STATUT_APPRENANT } from "shared/constants";
+import { AggregationCursor, Document, MongoServerError } from "mongodb";
+import { ML_DELAI_RELANCE_JOURS, ML_TRI_COLONNE, STATUT_APPRENANT } from "shared/constants";
+import { CFA_COLLAB_AUTO_SEND_DELAI_DAYS } from "shared/constants/collaboration";
+import type { MlTri } from "shared/constants/missionLocale";
 import {
   IEffectif,
   IOrganisationMissionLocale,
@@ -15,14 +17,15 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import {
   IEmailStatusEnum,
   API_EFFECTIF_LISTE,
+  CFA_RISQUE_RUPTURE_ENUM,
+  CFA_SITUATION_TYPE_ENUM,
   CONNAISSANCE_ML_ENUM,
+  IMissionLocaleEffectif,
   SITUATION_ENUM,
-  zEmailStatusEnum,
 } from "shared/models/data/missionLocaleEffectif.model";
-import { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
+import { IMissionLocaleStats, IMissionLocaleStatsSegments } from "shared/models/data/missionLocaleStats.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
-import { v4 as uuidv4 } from "uuid";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
@@ -37,15 +40,14 @@ import {
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { triggerWhatsAppIfEligible } from "@/common/services/brevo/whatsapp";
 import { extractScoreInput, scoreEffectifs } from "@/common/services/classifier";
-import config from "@/config";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
 import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
 import {
-  CFA_COLLAB_AUTO_SEND_DELAI_DAYS,
   DATE_START_RUPTURES,
   STATUTS_SORTIE_RUPTURE,
+  addSituationDossierField,
   buildEffRuptureAgeFilter,
   buildVisibilityWindowMatch,
   createDernierStatutFieldPipeline as createDernierStatutFieldPipelineShared,
@@ -54,6 +56,14 @@ import {
 
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
+import {
+  buildEmptySegments,
+  ICollabSegmentRawCounters,
+  ISegmentRawCounters,
+  toCollabSegmentStats,
+  toSegmentStats,
+} from "./mission-locale-stats.helpers";
+import { computeSuiviDatesSet } from "./mission-locale-suivi-dates";
 import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "./mission-locale.constants";
 
 const DECA_RUPTURE_DATE_DEBUT = new Date("2025-11-01");
@@ -64,7 +74,8 @@ const DELAI_MIN_RUPTURE_FIN_FORMATION_DAYS = 90;
  * Deux cas (V2 collab) :
  *  - explicitement, via une demande de collaboration (`organisme_data.acc_conjoint`) ;
  *  - automatiquement, pour un CFA en collab (`is_allowed_collab`) dès que la rupture
- *    dépasse 45 jours — sauf si l'effectif est depuis arrivé au terme de sa formation.
+ *    dépasse 45 jours, ou immédiatement si sa collaboration est suspendue (`collab_suspended_at`) —
+ *    sauf si l'effectif est depuis arrivé au terme de sa formation.
  * L'envoi explicite force la visibilité même si l'effectif sortirait sinon de l'outil
  * (jeune en fin de formation, en abandon +180j, ou non visible pour une autre raison).
  */
@@ -76,9 +87,14 @@ const cfaForceVisibleExpr = () => ({
         { $eq: [{ $ifNull: ["$computed.organisme.is_allowed_collab", false] }, true] },
         { $ne: [{ $ifNull: ["$date_rupture", null] }, null] },
         {
-          $lte: [
-            "$date_rupture",
-            { $dateSubtract: { startDate: "$$NOW", unit: "day", amount: CFA_COLLAB_AUTO_SEND_DELAI_DAYS } },
+          $or: [
+            {
+              $lte: [
+                "$date_rupture",
+                { $dateSubtract: { startDate: "$$NOW", unit: "day", amount: CFA_COLLAB_AUTO_SEND_DELAI_DAYS } },
+              ],
+            },
+            { $ne: [{ $ifNull: ["$computed.organisme.collab_suspended_at", null] }, null] },
           ],
         },
         { $ne: [{ $ifNull: ["$current_status.value", null] }, STATUT_APPRENANT.FIN_DE_FORMATION] },
@@ -202,6 +218,18 @@ const matchTraitementEffectifPipelineMl = (
           },
         },
       ];
+    case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+      return [{ $match: { $or: [{ a_traiter: true }, { injoignable: true }] } }];
+    case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
+      return [
+        {
+          $match: {
+            $and: [{ "organisme_data.acc_conjoint": true }, { $or: [{ a_traiter: true }, { injoignable: true }] }],
+          },
+        },
+      ];
+    case API_EFFECTIF_LISTE.COLLAB_TRAITE:
+      return [{ $match: { a_traiter: false, injoignable: false, "organisme_data.acc_conjoint": true } }];
   }
 
   const WHATSAPP_CALLBACK_INJOIGNABLE = { whatsapp_callback_requested: true, injoignable: true };
@@ -263,25 +291,36 @@ const filterByActivationDatePipelineMl = () => {
   ];
 };
 
-const matchDernierStatutPipelineMl = (): any => {
+const matchDernierStatutPipelineMl = (): Document => {
   return {
     $match: {
-      date_rupture: { $lte: new Date() },
-      $or: [
+      $and: [
         {
-          "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
-          "current_status.value": { $ne: STATUT_APPRENANT.FIN_DE_FORMATION },
+          $or: [
+            { date_rupture: { $lte: new Date() } },
+            // Collab V2 élargie : un dossier envoyé par le CFA pour un jeune en contrat
+            // (prévention) ou sans contrat n'a pas de date de rupture.
+            { $expr: cfaForceVisibleExpr() },
+          ],
         },
-        { cfa_rupture_declaration: { $exists: true, $ne: null } },
-        // Un dossier qualifié par un conseiller ML reste traçable même si le snapshot ERP a évolué
-        // (ex: apprenti revenu en formation après une rupture déjà traitée par la ML).
-        { situation: { $exists: true, $ne: null } },
-        // Collab V2 : un effectif "envoyé" par le CFA (demande de collaboration ou envoi
-        // automatique après 45j) reste visible même si le jeune n'est plus rupturant.
-        { $expr: cfaForceVisibleExpr() },
-        // Demande de RDV : un jeune ayant sollicité un rendez-vous reste visible même
-        // s'il n'est plus rupturant (ex: revenu en formation / fin de formation).
-        { souhaite_rdv: true },
+        {
+          $or: [
+            {
+              "effectif_snapshot._computed.statut.en_cours": STATUT_APPRENANT.RUPTURANT,
+              "current_status.value": { $ne: STATUT_APPRENANT.FIN_DE_FORMATION },
+            },
+            { cfa_rupture_declaration: { $exists: true, $ne: null } },
+            // Un dossier qualifié par un conseiller ML reste traçable même si le snapshot ERP a évolué
+            // (ex: apprenti revenu en formation après une rupture déjà traitée par la ML).
+            { situation: { $exists: true, $ne: null } },
+            // Collab V2 : un effectif "envoyé" par le CFA (demande de collaboration ou envoi
+            // automatique après 45j) reste visible même si le jeune n'est plus rupturant.
+            { $expr: cfaForceVisibleExpr() },
+            // Demande de RDV : un jeune ayant sollicité un rendez-vous reste visible même
+            // s'il n'est plus rupturant (ex: revenu en formation / fin de formation).
+            { souhaite_rdv: true },
+          ],
+        },
       ],
     },
   };
@@ -394,6 +433,19 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
       {
         $ne: [{ $ifNull: ["$situation", null] }, null],
       },
+      // Antériorité : un dossier créé avant l'activation ML de son organisme ou avant sa dernière
+      // reprise après suspension reste visible. Activer ou réactiver ne retire rien aux ML.
+      {
+        $and: [
+          { $ne: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null] },
+          {
+            $lt: [
+              "$created_at",
+              { $max: ["$computed.organisme.ml_beta_activated_at", "$computed.organisme.collab_resumed_at"] },
+            ],
+          },
+        ],
+      },
     ],
   };
 
@@ -442,6 +494,9 @@ const addFieldTraitementStatus = (visibility: "MISSION_LOCALE" | "ORGANISME_FORM
             $and: [
               { $eq: ["$current_status.value", "APPRENTI"] },
               { $not: [{ $ifNull: ["$cfa_rupture_declaration", false] }] },
+              // Un dossier de prévention porte sur un jeune toujours en contrat : le statut
+              // APPRENTI sans déclaration de rupture y est normal, ce n'est pas un nouveau contrat.
+              { $ne: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
             ],
           },
           true,
@@ -627,7 +682,13 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
     transmitted_at: "$effectif_snapshot.transmitted_at",
     source: "$effectif_snapshot.source",
     organisme: {
-      $mergeObjects: ["$organisme", { ml_beta_activated_at: "$organisme_organisation.ml_beta_activated_at" }],
+      $mergeObjects: [
+        "$organisme",
+        {
+          ml_beta_activated_at: "$organisme_organisation.ml_beta_activated_at",
+          collab_suspended_at: "$computed.organisme.collab_suspended_at",
+        },
+      ],
     },
     contrats: "$effectif_snapshot.contrats",
     "situation.situation": "$situation",
@@ -662,7 +723,12 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
         {
           $and: [
             { $ne: [{ $ifNull: ["$organisme_organisation.ml_beta_activated_at", null] }, null] },
-            { $lt: ["$created_at", "$organisme_organisation.ml_beta_activated_at"] },
+            {
+              $lt: [
+                "$created_at",
+                { $max: ["$organisme_organisation.ml_beta_activated_at", "$computed.organisme.collab_resumed_at"] },
+              ],
+            },
           ],
         },
         true,
@@ -684,13 +750,171 @@ const getEffectifProjectionStage = (visibility: "MISSION_LOCALE" | "ORGANISME_FO
           souhaite_rdv_at: "$souhaite_rdv_at",
           mineur: "$a_risque_mineur",
           acc_conjoint: "$a_risque_accompagnement_conjoint",
+          situation_dossier: "$situation_dossier",
+          date_reception: "$date_reception",
+          date_traitement: "$date_traitement",
+          date_dernier_passage_a_recontacter: "$date_dernier_passage_a_recontacter",
+          date_derniere_action_ml: "$date_derniere_action_ml",
         }
       : {
           unread_by_current_user: "$unread_by_current_user",
         };
 
-  return [{ $project: { ...baseProjection, ...specificFields } }];
+  // Le retour sur le formulaire est un signal produit interne : jamais exposé, ni au CFA ni à la ML.
+  return [{ $project: { ...baseProjection, ...specificFields } }, { $unset: "organisme_data.form_feedback" }];
 };
+
+/**
+ * Date de rattachement d'un dossier ML. Un dossier de collaboration ouvert en prévention ou pour
+ * un dossier de prévention n'a pas de date de rupture : il est rattaché au mois de son envoi.
+ */
+const addDateReferenceField = () => [
+  {
+    $addFields: {
+      date_reference: { $ifNull: ["$date_rupture", "$organisme_data.reponse_at", "$created_at"] },
+    },
+  },
+];
+
+/** Réception du dossier par la ML : envoi du CFA si collaboration, sinon création. Jamais la date de rupture. */
+const addDateReceptionField = () => [
+  {
+    $addFields: {
+      date_reception: {
+        $cond: [
+          { $eq: ["$organisme_data.acc_conjoint", true] },
+          { $ifNull: ["$organisme_data.reponse_at", "$created_at"] },
+          "$created_at",
+        ],
+      },
+    },
+  },
+];
+
+/**
+ * Remonte en tête les dossiers à recontacter et les collaborations CFA sans action ML depuis
+ * ML_DELAI_RELANCE_JOURS. À placer après addFieldTraitementStatus et addDateReceptionField.
+ */
+const addNudgeFields = () => [
+  {
+    $addFields: {
+      derniere_activite_ml: { $ifNull: ["$date_derniere_action_ml", "$date_reception"] },
+    },
+  },
+  {
+    $addFields: {
+      relance_urgente: {
+        $cond: [
+          {
+            $and: [
+              {
+                $or: [
+                  { $eq: ["$injoignable", true] },
+                  { $and: [{ $eq: ["$a_traiter", true] }, { $eq: ["$organisme_data.acc_conjoint", true] }] },
+                ],
+              },
+              {
+                $lte: [
+                  "$derniere_activite_ml",
+                  { $dateSubtract: { startDate: "$$NOW", unit: "day", amount: ML_DELAI_RELANCE_JOURS } },
+                ],
+              },
+            ],
+          },
+          true,
+          false,
+        ],
+      },
+    },
+  },
+];
+
+/** À utiliser partout où l'on trie ces listes (liste et précédent/suivant) pour un ordre identique. */
+const getSortPrerequisiteStages = (nom_liste: API_EFFECTIF_LISTE) => {
+  switch (nom_liste) {
+    case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+    case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
+    case API_EFFECTIF_LISTE.COLLAB_TRAITE:
+      return addNudgeFields();
+    default:
+      return [];
+  }
+};
+
+/**
+ * Champs de tri par colonne : le nom concaténé et minusculisé, et le rang du statut dérivé.
+ * `situation_dossier` vient d'addSituationDossierField(), à appeler avant le $sort.
+ */
+const addTriColonneFields = () => [
+  {
+    $addFields: {
+      tri_nom: {
+        $toLower: {
+          $concat: [
+            { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom", ""] },
+            " ",
+            { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom", ""] },
+          ],
+        },
+      },
+      tri_statut: {
+        $switch: {
+          branches: [
+            { case: "$a_traiter", then: 0 },
+            { case: "$injoignable", then: 1 },
+          ],
+          default: 2,
+        },
+      },
+    },
+  },
+];
+
+/** Tri demandé par le conseiller. `_id` ferme chaque tri pour garder le précédent/suivant déterministe. */
+const getTriColonneRules = (colonne: ML_TRI_COLONNE, ordre: 1 | -1) => {
+  switch (colonne) {
+    case ML_TRI_COLONNE.NOM:
+      return { tri_nom: ordre, _id: 1 };
+    case ML_TRI_COLONNE.SITUATION:
+      return { situation_dossier: ordre, tri_nom: 1, _id: 1 };
+    case ML_TRI_COLONNE.FORMATION:
+      return { "effectif_snapshot.formation.libelle_long": ordre, tri_nom: 1, _id: 1 };
+    case ML_TRI_COLONNE.COMMUNE:
+      return { "effectif_snapshot.apprenant.adresse.commune": ordre, tri_nom: 1, _id: 1 };
+    case ML_TRI_COLONNE.STATUT:
+      return { tri_statut: ordre, date_reference: -1, _id: 1 };
+    default:
+      throw Boom.badRequest(`Colonne de tri inconnue: ${colonne}`);
+  }
+};
+
+/** Étages de tri d'une liste ML : ordre de priorité par défaut, colonne demandée sinon. */
+const getTriStages = (nom_liste: API_EFFECTIF_LISTE, tri?: MlTri | null) => [
+  ...getSortPrerequisiteStages(nom_liste),
+  ...addSituationDossierField(),
+  ...(tri ? addTriColonneFields() : []),
+  {
+    $sort: tri ? getTriColonneRules(tri.colonne, tri.ordre === "desc" ? -1 : 1) : getSortedRulesByListeType(nom_liste),
+  },
+];
+
+const buildFirstDayOfMonthExpr = (format?: string) => ({
+  $cond: {
+    if: { $lt: [{ $dateDiff: { startDate: "$date_reference", endDate: "$$NOW", unit: "day" } }, 180] },
+    then: {
+      $dateToString: {
+        date: {
+          $dateFromParts: {
+            year: { $year: "$date_reference" },
+            month: { $month: "$date_reference" },
+          },
+        },
+        ...(format ? { format } : {}),
+      },
+    },
+    else: "plus-de-180-j",
+  },
+});
 
 const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
   switch (nom_liste) {
@@ -698,7 +922,7 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
     case API_EFFECTIF_LISTE.INJOIGNABLE:
     case API_EFFECTIF_LISTE.TRAITE:
     case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
-      return { date_rupture: -1 };
+      return { date_reference: -1 };
     case API_EFFECTIF_LISTE.A_TRAITER_PRIORITAIRE:
     case API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE:
     case API_EFFECTIF_LISTE.PRIORITAIRE:
@@ -709,6 +933,25 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
         a_risque_whatsapp_callback: -1,
         a_contacter: -1,
       };
+    // Listes fusionnées : nudge en tête, puis les critères de priorité (Collaboration CFA,
+    // Souhaite un RDV, Mineur, RQTH — dissociés), puis À recontacter avant À traiter.
+    // `_id` en dernier pour un ordre déterministe (précédent/suivant de la fiche).
+    case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+    case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
+      return {
+        relance_urgente: -1,
+        a_risque_accompagnement_conjoint: -1,
+        a_risque_souhaite_rdv: -1,
+        a_risque_mineur: -1,
+        a_risque_rqth: -1,
+        injoignable: -1,
+        date_reference: -1,
+        _id: 1,
+      };
+    case API_EFFECTIF_LISTE.COLLAB_TRAITE:
+      return { date_traitement: -1, date_reference: -1, _id: 1 };
+    default:
+      throw Boom.badRequest(`Liste inconnue: ${nom_liste}`);
   }
 };
 
@@ -730,6 +973,7 @@ const lookUpOrganisme = (withContacts: boolean = false) => {
               siret: 1,
               enseigne: 1,
               is_allowed_deca: 1,
+              has_account: 1,
             },
           },
         ],
@@ -944,14 +1188,32 @@ export const missionLocaleBaseAggregation = async (
     ...addFieldFromActivationDate(),
     ...filterByActivationDatePipelineMl(),
     ...addFieldTraitementStatus(organisation.type),
+    ...addDateReferenceField(),
+    ...addDateReceptionField(),
   ];
 };
+
+/**
+ * Dossiers d'un organisme tels que les ML les voient, toutes ML confondues : mêmes filtres que
+ * `missionLocaleBaseAggregation`, sans la restriction à une ML donnée ni les `$addFields` de
+ * traitement propres aux listes.
+ */
+export const missionLocaleVisibilityAggregationByOrganisme = (organismeId: ObjectId) => [
+  { $match: { "effectif_snapshot.organisme_id": organismeId } },
+  { $match: buildVisibilityWindowMatch() },
+  ...matchFromJointOrganisme("MISSION_LOCALE"),
+  ...buildEffMissionLocaleFilter(),
+  ...filterByDernierStatutPipelineMl(),
+  ...addFieldFromActivationDate(),
+  ...filterByActivationDatePipelineMl(),
+];
 
 const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifId: ObjectId,
   nom_liste: API_EFFECTIF_LISTE,
-  codesPostaux?: string[]
+  codesPostaux?: string[],
+  tri?: MlTri | null
 ) => {
   const aggregation = [
     ...(await missionLocaleBaseAggregation(organisation)),
@@ -960,9 +1222,8 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
     ...(codesPostaux && codesPostaux.length > 0
       ? [{ $match: { "effectif_snapshot.apprenant.adresse.code_postal": { $in: codesPostaux } } }]
       : []),
-    {
-      $sort: getSortedRulesByListeType(nom_liste),
-    },
+    // Même tri que la liste, sinon la numérotation « dossier n°X sur N » ne lui correspond plus.
+    ...getTriStages(nom_liste, tri),
     {
       $project: {
         _id: 0,
@@ -998,11 +1259,17 @@ const getEffectifsIdSortedByMonthAndRuptureDateByMissionLocaleId = async (
 export const getEffectifsParMoisByMissionLocaleId = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   effectifsParMoisFiltersMissionLocale: IEffectifsParMoisFiltersMissionLocaleSchema,
-  userId?: ObjectId
+  userId?: ObjectId,
+  /** Chaque mois réel sur toutes les années, sans bucket +180j : navigation par année. */
+  tousLesMois = false,
+  /** Regrouper et trier sur la réception du dossier plutôt que sur sa date de rupture. */
+  parDateReception = false
 ) => {
+  const champDate = parDateReception ? "$date_reception" : "$date_reference";
   const { type } = effectifsParMoisFiltersMissionLocale;
 
-  const aTraiter = type === API_EFFECTIF_LISTE.A_TRAITER;
+  // Les listes de dossiers non traités affichent, par mois, le nombre de dossiers déjà traités.
+  const aTraiter = type === API_EFFECTIF_LISTE.A_TRAITER || type === API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER;
 
   const getSevenLastMonth = () => {
     return [
@@ -1036,6 +1303,15 @@ export const getEffectifsParMoisByMissionLocaleId = async (
       case API_EFFECTIF_LISTE.A_TRAITER:
         return {
           $and: [{ $eq: ["$$ROOT.a_traiter", true] }, { $eq: ["$$ROOT.in_activation_range", true] }],
+        };
+      // Sous-onglet unique « À traiter ou recontacter » de la liste ruptures : les deux statuts
+      // sont mélangés dans les mêmes buckets mensuels.
+      case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+        return {
+          $or: [
+            { $and: [{ $eq: ["$$ROOT.a_traiter", true] }, { $eq: ["$$ROOT.in_activation_range", true] }] },
+            { $eq: ["$$ROOT.injoignable", true] },
+          ],
         };
       case API_EFFECTIF_LISTE.PRIORITAIRE:
         return {
@@ -1079,39 +1355,34 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     }
   };
 
-  const organismeMissionLocaleAggregation: any[] = [
+  const organismeMissionLocaleAggregation: Document[] = [
     ...(await generateOrganisationMatchStage(organisation)),
     ...buildEffMissionLocaleFilter(),
     ...filterByDernierStatutPipelineMl(),
     ...addFieldFromActivationDate(),
     ...addFieldTraitementStatus(organisation.type),
+    ...addDateReferenceField(),
+    ...addDateReceptionField(),
   ];
 
   organismeMissionLocaleAggregation.push(
     {
       $sort: {
-        date_rupture: -1,
+        [parDateReception ? "date_reception" : "date_reference"]: -1,
       },
     },
     ...lookUpOrganisme(),
     {
       $addFields: {
-        firstDayOfMonth: {
-          $cond: {
-            if: { $lt: ["$$ROOT.dernierStatutDureeInDay", 180] },
-            then: {
+        firstDayOfMonth: tousLesMois
+          ? {
               $dateToString: {
                 date: {
-                  $dateFromParts: {
-                    year: { $year: "$date_rupture" },
-                    month: { $month: "$date_rupture" },
-                  },
+                  $dateFromParts: { year: { $year: champDate }, month: { $month: champDate } },
                 },
               },
-            },
-            else: "plus-de-180-j",
-          },
-        },
+            }
+          : buildFirstDayOfMonthExpr(),
       },
     },
     {
@@ -1142,6 +1413,10 @@ export const getEffectifsParMoisByMissionLocaleId = async (
                 injoignable: "$$ROOT.injoignable",
                 nouveau_contrat: "$nouveau_contrat",
                 situation: "$$ROOT.situation",
+                date_reception: "$$ROOT.date_reception",
+                date_traitement: "$$ROOT.date_traitement",
+                date_dernier_passage_a_recontacter: "$$ROOT.date_dernier_passage_a_recontacter",
+                date_derniere_action_ml: "$$ROOT.date_derniere_action_ml",
                 whatsapp_callback_requested: { $ifNull: ["$$ROOT.whatsapp_callback_requested", false] },
                 whatsapp_no_help_responded: { $ifNull: ["$$ROOT.whatsapp_no_help_responded", false] },
                 souhaite_rdv: { $ifNull: ["$$ROOT.souhaite_rdv", false] },
@@ -1168,7 +1443,15 @@ export const getEffectifsParMoisByMissionLocaleId = async (
           ? {
               treated_count: {
                 $sum: {
-                  $cond: [{ $eq: ["$$ROOT.a_traiter", false] }, 1, 0],
+                  $cond: [
+                    // Sur la liste fusionnée, un dossier à recontacter reste actionnable :
+                    // il est affiché dans le mois et ne doit pas compter comme traité.
+                    type === API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER
+                      ? { $and: [{ $eq: ["$$ROOT.a_traiter", false] }, { $eq: ["$$ROOT.injoignable", false] }] }
+                      : { $eq: ["$$ROOT.a_traiter", false] },
+                    1,
+                    0,
+                  ],
                 },
               },
             }
@@ -1192,10 +1475,20 @@ export const getEffectifsParMoisByMissionLocaleId = async (
     }
   );
   const result = await missionLocaleEffectifsDb().aggregate(organismeMissionLocaleAggregation).toArray();
+
+  // On renvoie les mois réellement présents, sans compléter les mois vides ni rogner la fin de
+  // liste. Un mois sans dossier actionnable mais avec des dossiers traités est conservé : c'est
+  // lui que la navigation latérale coche.
+  if (tousLesMois) {
+    return result.filter(
+      ({ data, treated_count }) => (Array.isArray(data) && data.length > 0) || (treated_count ?? 0) > 0
+    );
+  }
+
   const sevenLastMonth = getSevenLastMonth();
   const mapped = sevenLastMonth.map((data) => {
     const found = result.find(({ month }) => {
-      return month.toString() === data.month;
+      return String(month ?? "") === data.month;
     });
     return found ? found : data;
   });
@@ -1217,7 +1510,8 @@ export const getEffectifFromMissionLocaleId = async (
   effectifId: string,
   nom_liste: API_EFFECTIF_LISTE,
   userId?: ObjectId,
-  codesPostaux?: string[]
+  codesPostaux?: string[],
+  tri?: MlTri | null
 ) => {
   const aggregation = [
     ...(await generateOrganisationMatchStage(organisation)),
@@ -1228,6 +1522,8 @@ export const getEffectifFromMissionLocaleId = async (
       },
     },
     ...addFieldTraitementStatus(organisation.type),
+    ...addDateReceptionField(),
+    ...addSituationDossierField(),
     ...createDernierStatutFieldPipelineML(),
     ...lookUpOrganisme(true),
     {
@@ -1331,7 +1627,8 @@ export const getEffectifFromMissionLocaleId = async (
     organisation,
     new ObjectId(effectifId),
     nom_liste,
-    codesPostaux
+    codesPostaux,
+    tri
   );
   return { effectif, ...next };
 };
@@ -1348,23 +1645,7 @@ export const getEffectifsListByMissionLocaleId = async (
     return [
       {
         $addFields: {
-          firstDayOfMonth: {
-            $cond: {
-              if: { $lt: ["$dernierStatutDureeInDay", 180] },
-              then: {
-                $dateToString: {
-                  date: {
-                    $dateFromParts: {
-                      year: { $year: "$date_rupture" },
-                      month: { $month: "$date_rupture" },
-                    },
-                  },
-                  format: "%Y-%m",
-                },
-              },
-              else: "plus-de-180-j",
-            },
-          },
+          firstDayOfMonth: buildFirstDayOfMonthExpr("%Y-%m"),
         },
       },
       {
@@ -1378,6 +1659,7 @@ export const getEffectifsListByMissionLocaleId = async (
   const effectifsMissionLocaleAggregation = [
     ...(await missionLocaleBaseAggregation(organisation)),
     ...matchTraitementEffectifPipelineMl(type, organisation.type),
+    ...addSituationDossierField(),
     ...lookUpOrganisme(true),
     ...computeMonthParams(),
     {
@@ -1462,6 +1744,10 @@ export const getEffectifsListByMissionLocaleId = async (
         collaboration_cfa: "$a_risque_accompagnement_conjoint",
         disponible_whatsapp: { $ifNull: ["$whatsapp_callback_requested", false] },
         effectif_choice: "$_effectif_choice_label",
+        situation_dossier: "$situation_dossier",
+        date_reception: "$date_reception",
+        date_traitement: "$date_traitement",
+        date_dernier_passage_a_recontacter: "$date_dernier_passage_a_recontacter",
         ml_situation: "$situation",
         ml_deja_connu: "$deja_connu",
         ml_commentaires: "$commentaires",
@@ -1555,6 +1841,10 @@ export const getEffectifARisqueByMissionLocaleId = async (
               whatsapp_callback_requested: { $ifNull: ["$whatsapp_callback_requested", false] },
               whatsapp_no_help_responded: { $ifNull: ["$whatsapp_no_help_responded", false] },
               souhaite_rdv: { $ifNull: ["$souhaite_rdv", false] },
+              date_reception: "$date_reception",
+              date_traitement: "$date_traitement",
+              date_dernier_passage_a_recontacter: "$date_dernier_passage_a_recontacter",
+              date_derniere_action_ml: "$date_derniere_action_ml",
             },
           },
         ],
@@ -1573,34 +1863,75 @@ export const getEffectifARisqueByMissionLocaleId = async (
   return result;
 };
 
-const getEffectifMissionLocaleEligibleToBrevoAggregation = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
-) => [
-  ...(await generateOrganisationMatchStage(organisation)),
-  ...buildEffMissionLocaleFilter(),
-  ...filterByDernierStatutPipelineMl(),
-  ...addFieldFromActivationDate(),
-  ...filterByActivationDatePipelineMl(),
-];
+type NomListeFusionnee =
+  | API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER
+  | API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER
+  | API_EFFECTIF_LISTE.COLLAB_TRAITE;
 
-export const getEffectifMissionLocaleEligibleToBrevoCount = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
+/** Listes plates de l'espace ML, triées serveur, avec les compteurs des sous-onglets. */
+export const getEffectifsFusionnesByMissionLocaleId = async (
+  organisation: IOrganisationMissionLocale,
+  nomListe: NomListeFusionnee,
+  tri?: MlTri | null
 ) => {
-  const effectifsMissionLocaleAggregation = [
-    ...(await getEffectifMissionLocaleEligibleToBrevoAggregation(organisation)),
+  const isCollab = nomListe !== API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER;
 
+  const pipeline = [
+    ...(await missionLocaleBaseAggregation(organisation)),
+    ...(isCollab ? [{ $match: { "organisme_data.acc_conjoint": true } }] : []),
     {
       $facet: {
-        total: [{ $count: "total" }],
-        eligible: [
-          { $match: { email_status: zEmailStatusEnum.enum.valid, "brevo.token": { $ne: null } } },
-          { $count: "total" },
+        liste: [
+          ...matchTraitementEffectifPipelineMl(nomListe, organisation.type),
+          ...getTriStages(nomListe, tri),
+          ...lookUpOrganisme(),
+          {
+            $project: {
+              _id: 0,
+              id: "$effectif_snapshot._id",
+              nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
+              prenom: { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom"] },
+              libelle_formation: "$effectif_snapshot.formation.libelle_long",
+              commune: "$effectif_snapshot.apprenant.adresse.commune",
+              code_postal: "$effectif_snapshot.apprenant.adresse.code_postal",
+              organisme_nom: "$organisme.nom",
+              organisme_raison_sociale: "$organisme.raison_sociale",
+              organisme_enseigne: "$organisme.enseigne",
+              prioritaire: "$a_risque",
+              date_rupture: "$date_rupture",
+              a_traiter: "$a_traiter",
+              injoignable: "$injoignable",
+              nouveau_contrat: "$nouveau_contrat",
+              mineur: "$a_risque_mineur",
+              acc_conjoint: "$a_risque_accompagnement_conjoint",
+              rqth: "$effectif_snapshot.apprenant.rqth",
+              whatsapp_callback_requested: { $ifNull: ["$whatsapp_callback_requested", false] },
+              whatsapp_no_help_responded: { $ifNull: ["$whatsapp_no_help_responded", false] },
+              souhaite_rdv: { $ifNull: ["$souhaite_rdv", false] },
+              situation: "$situation",
+              situation_dossier: 1,
+              relance_urgente: 1,
+              date_reception: 1,
+              date_traitement: 1,
+              date_dernier_passage_a_recontacter: 1,
+              date_derniere_action_ml: 1,
+            },
+          },
         ],
-        details: [
+        counts: [
           {
             $group: {
-              _id: { $ifNull: ["$email_status", "not_processed"] },
-              count: { $sum: 1 },
+              _id: null,
+              a_traiter_ou_recontacter: {
+                $sum: {
+                  $cond: [{ $or: [{ $eq: ["$a_traiter", true] }, { $eq: ["$injoignable", true] }] }, 1, 0],
+                },
+              },
+              traite: {
+                $sum: {
+                  $cond: [{ $and: [{ $eq: ["$a_traiter", false] }, { $eq: ["$injoignable", false] }] }, 1, 0],
+                },
+              },
             },
           },
         ],
@@ -1608,141 +1939,59 @@ export const getEffectifMissionLocaleEligibleToBrevoCount = async (
     },
     {
       $project: {
-        total: { $arrayElemAt: ["$total.total", 0] },
-        eligible: { $arrayElemAt: ["$eligible.total", 0] },
-        details: 1,
+        effectifs: "$liste",
+        // $let force l'évaluation comme expression : sans lui, le document serait interprété
+        // comme une projection imbriquée du tableau produit par le $facet.
+        counts: {
+          $let: {
+            vars: { compteurs: { $arrayElemAt: ["$counts", 0] } },
+            in: {
+              a_traiter_ou_recontacter: { $ifNull: ["$$compteurs.a_traiter_ou_recontacter", 0] },
+              traite: { $ifNull: ["$$compteurs.traite", 0] },
+            },
+          },
+        },
       },
     },
   ];
-  const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).next();
-  return data;
+
+  const [result] = await missionLocaleEffectifsDb().aggregate(pipeline).toArray();
+  return result as {
+    effectifs: Array<Record<string, unknown>>;
+    counts: { a_traiter_ou_recontacter: number; traite: number };
+  };
 };
 
 export async function getAllEffectifsParMois(
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   userId?: ObjectId
 ) {
-  const fetchByType = (type: API_EFFECTIF_LISTE) =>
-    getEffectifsParMoisByMissionLocaleId(organisation, { type } as IEffectifsParMoisFiltersMissionLocaleSchema, userId);
+  const fetchByType = (type: API_EFFECTIF_LISTE, tousLesMois = false, parDateReception = false) =>
+    getEffectifsParMoisByMissionLocaleId(
+      organisation,
+      { type } as IEffectifsParMoisFiltersMissionLocaleSchema,
+      userId,
+      tousLesMois,
+      parDateReception
+    );
 
-  const [a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable] = await Promise.all([
-    fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
-    fetchByType(API_EFFECTIF_LISTE.TRAITE),
-    getEffectifARisqueByMissionLocaleId(organisation, API_EFFECTIF_LISTE.PRIORITAIRE),
-    getEffectifARisqueByMissionLocaleId(organisation, API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE),
-    fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
-  ]);
+  // La liste ML des dossiers traités se navigue par année : elle a besoin de tous les mois.
+  const estMissionLocale = organisation.type === "MISSION_LOCALE";
 
-  return { a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable };
+  const [a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable, a_traiter_ou_recontacter] =
+    await Promise.all([
+      fetchByType(API_EFFECTIF_LISTE.A_TRAITER),
+      fetchByType(API_EFFECTIF_LISTE.TRAITE, estMissionLocale, estMissionLocale),
+      getEffectifARisqueByMissionLocaleId(organisation, API_EFFECTIF_LISTE.PRIORITAIRE),
+      getEffectifARisqueByMissionLocaleId(organisation, API_EFFECTIF_LISTE.INJOIGNABLE_PRIORITAIRE),
+      fetchByType(API_EFFECTIF_LISTE.INJOIGNABLE),
+      // Sous-onglet unique de la liste ruptures : à traiter et à recontacter dans les mêmes mois.
+      // Propre à l'espace ML : côté organisme, un dossier n'est jamais « à recontacter ».
+      estMissionLocale ? fetchByType(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER, true, true) : [],
+    ]);
+
+  return { a_traiter, traite, prioritaire, injoignable_prioritaire, injoignable, a_traiter_ou_recontacter };
 }
-
-// BAL
-
-export const getEffectifMissionLocaleEligibleToBrevo = async (
-  organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation
-) => {
-  const effectifsMissionLocaleAggregation = [
-    ...(await getEffectifMissionLocaleEligibleToBrevoAggregation(organisation)),
-    {
-      $match: {
-        soft_deleted: { $ne: true },
-        "brevo.token": { $ne: null },
-      },
-    },
-    {
-      $lookup: {
-        from: "organisations",
-        let: { id: "$mission_locale_id" },
-        pipeline: [
-          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
-          {
-            $project: {
-              _id: 1,
-              nom: 1,
-              site_web: 1,
-            },
-          },
-        ],
-        as: "mission_locale",
-      },
-    },
-    {
-      $lookup: {
-        from: "organismes",
-        let: { id: "$effectif_snapshot.organisme_id" },
-        pipeline: [
-          { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
-          {
-            $project: {
-              _id: 1,
-              nom: 1,
-            },
-          },
-        ],
-        as: "organisme",
-      },
-    },
-    {
-      $unwind: {
-        path: "$organisme",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $unwind: {
-        path: "$mission_locale",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        email: "$effectif_snapshot.apprenant.courriel",
-        nom: { $ifNull: ["$identifiant_normalise.nom", "$effectif_snapshot.apprenant.nom"] },
-        prenom: { $ifNull: ["$identifiant_normalise.prenom", "$effectif_snapshot.apprenant.prenom"] },
-        "urls.TDB_AB_TEST_A": {
-          $concat: [config.publicUrl, "/campagnes/mission-locale/", "$brevo.token"],
-        },
-        "urls.TDB_AB_TEST_B_TRUE": {
-          $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/true"],
-        },
-        "urls.TDB_AB_TEST_B_FALSE": {
-          $concat: [config.publicUrl, "/api/v1/campagne/mission-locale/", "$brevo.token", "/confirmation/false"],
-        },
-        "urls.TDB_LBA_LINK": {
-          $concat: [
-            config.publicUrl,
-            "/api/v1/mission-locale/lba?",
-            "rncp=",
-            "$effectif_snapshot.formation.rncp",
-            "&cfd=",
-            "$effectif_snapshot.formation.cfd",
-          ],
-        },
-        "urls.TDB_MISSION_LOCALE_URL": "$mission_locale.site_web",
-        telephone: "$effectif_snapshot.apprenant.telephone",
-        nom_organisme: "$organisme.nom",
-        nom_mission_locale: "$mission_locale.nom",
-        mission_locale_id: { $toString: "$effectif_snapshot.apprenant.adresse.mission_locale_id" },
-        date_de_naissance: "$effectif_snapshot.apprenant.date_de_naissance",
-        date_derniere_rupture: "$date_rupture",
-      },
-    },
-  ];
-  const data = await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).toArray();
-  return data as Array<{
-    email: string;
-    prenom: string;
-    nom: string;
-    urls?: Record<string, string> | null;
-    telephone?: string | null;
-    nom_organisme?: string | null;
-    mission_locale_id: string;
-    nom_mission_locale: string;
-    date_de_naissance?: Date | null;
-    date_derniere_rupture?: Date | null;
-  }>;
-};
 
 export const getMissionLocaleRupturantToCheckMail = async (): Promise<Array<string>> => {
   return (
@@ -1780,6 +2029,21 @@ export const updateRupturantsWithMailInfo = async (rupturants: Array<{ email: st
   return result;
 };
 
+/**
+ * Le RQTH déclaré par le CFA dans le tunnel de collaboration prime sur la valeur de l'ERP :
+ * il doit être ré-appliqué à chaque réécriture du snapshot, sinon la déclaration est perdue.
+ */
+const applyRqthDeclaration = <T extends IEffectif | IEffectifDECA>(
+  snapshot: T,
+  mlRecord: IMissionLocaleEffectif
+): T => {
+  const declared = (mlRecord.organisme_data?.verified_info as { rqth_declare?: string } | undefined)?.rqth_declare;
+  if (declared !== "OUI" && declared !== "NON") {
+    return snapshot;
+  }
+  return { ...snapshot, apprenant: { ...snapshot.apprenant, rqth: declared === "OUI" } };
+};
+
 export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | IEffectifDECA) => {
   const eff = await missionLocaleEffectifsDb().findOne({ effectif_id: effectif._id });
   const currentStatus = getCurrentStatutFromParcours(effectif._computed?.statut?.parcours);
@@ -1791,13 +2055,17 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
     // Sortant requalifié : masqué des listes par `current_status`, jamais soft-deleted — le
     // masquage doit rester réversible si une rupture est transmise plus tard.
     const sortantRequalifie = currentStatus?.valeur === STATUT_APPRENANT.FIN_DE_FORMATION;
-    const shouldKeep = rupturantFilter || hasValidCfaDeclaration || sortantRequalifie;
+    const hasAccConjoint = eff.organisme_data?.acc_conjoint === true;
+    const souhaiteRdv = eff.souhaite_rdv === true;
+    const shouldKeep = rupturantFilter || hasValidCfaDeclaration || sortantRequalifie || hasAccConjoint || souhaiteRdv;
 
+    // Tout dossier conservé sans statut rupturant ni déclaration CFA garde sa date de rupture
+    // enregistrée : la remettre à null le ferait sortir de la fenêtre de visibilité ML.
     const dateRupture = rupturantFilter
       ? currentStatus?.date
       : hasValidCfaDeclaration
         ? eff.cfa_rupture_declaration?.date_rupture
-        : sortantRequalifie
+        : shouldKeep
           ? eff.date_rupture
           : null;
 
@@ -1806,7 +2074,7 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
       {
         $set: {
           ...(shouldKeep ? {} : { soft_deleted: true }),
-          effectif_snapshot: { ...effectif, _id: effectif._id },
+          effectif_snapshot: applyRqthDeclaration({ ...effectif, _id: effectif._id }, eff),
           effectif_snapshot_date: new Date(),
           updated_at: new Date(),
           date_rupture: dateRupture ?? null,
@@ -1818,10 +2086,232 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
   }
 };
 
+const countIf = (condition: Document) => ({ $sum: { $cond: [condition, 1, 0] } });
+
+const computedSituationIs = (...situations: SITUATION_ENUM[]) => ({ $in: ["$computed_situation", situations] });
+
+const RDV_PRIS_DECOUVERT_CONDITION = {
+  $and: [
+    computedSituationIs(SITUATION_ENUM.RDV_PRIS),
+    {
+      $or: [
+        {
+          $in: [
+            "$computed_connaissance_ml",
+            [CONNAISSANCE_ML_ENUM.CONNU_NON_ACCOMPAGNE, CONNAISSANCE_ML_ENUM.NON_CONNU],
+          ],
+        },
+        {
+          $and: [
+            { $eq: [{ $ifNull: ["$computed_connaissance_ml", null] }, null] },
+            { $eq: ["$computed_deja_connu", false] },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+const DEJA_CONNU_ACCOMPAGNE_CONDITION = {
+  $or: [
+    { $eq: ["$computed_connaissance_ml", CONNAISSANCE_ML_ENUM.DEJA_ACCOMPAGNE_ACTIVEMENT] },
+    {
+      $and: [
+        { $eq: [{ $ifNull: ["$computed_connaissance_ml", null] }, null] },
+        { $eq: ["$computed_deja_connu", true] },
+      ],
+    },
+  ],
+};
+
+const AUTRE_AVEC_CONTACT_CONDITION = {
+  $and: [computedSituationIs(SITUATION_ENUM.AUTRE), { $eq: [{ $ifNull: ["$computed_probleme_type", null] }, null] }],
+};
+
+const buildSegmentAccumulators = (key: string, segmentCondition: Document) => {
+  const within = (condition: Document) => countIf({ $and: [segmentCondition, condition] });
+  return {
+    [`${key}_total`]: countIf(segmentCondition),
+    [`${key}_a_traiter`]: within({ $eq: ["$a_traiter", true] }),
+    [`${key}_traite`]: within({ $eq: ["$a_traiter", false] }),
+    [`${key}_rdv_pris`]: within(computedSituationIs(SITUATION_ENUM.RDV_PRIS)),
+    [`${key}_rdv_pris_decouverts`]: within(RDV_PRIS_DECOUVERT_CONDITION),
+    [`${key}_nouveau_projet`]: within(
+      computedSituationIs(SITUATION_ENUM.NOUVEAU_PROJET, SITUATION_ENUM.NOUVEAU_CONTRAT)
+    ),
+    [`${key}_deja_accompagne`]: within(computedSituationIs(SITUATION_ENUM.DEJA_ACCOMPAGNE)),
+    [`${key}_contacte_sans_retour`]: within(computedSituationIs(SITUATION_ENUM.CONTACTE_SANS_RETOUR)),
+    [`${key}_injoignables`]: within(computedSituationIs(SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES)),
+    [`${key}_coordonnees_incorrectes`]: within(computedSituationIs(SITUATION_ENUM.COORDONNEES_INCORRECT)),
+    [`${key}_autre`]: within(computedSituationIs(SITUATION_ENUM.AUTRE)),
+    [`${key}_cherche_contrat`]: within(computedSituationIs(SITUATION_ENUM.CHERCHE_CONTRAT)),
+    [`${key}_reorientation`]: within(computedSituationIs(SITUATION_ENUM.REORIENTATION)),
+    [`${key}_ne_veut_pas_accompagnement`]: within(computedSituationIs(SITUATION_ENUM.NE_VEUT_PAS_ACCOMPAGNEMENT)),
+    [`${key}_ne_souhaite_pas_etre_recontacte`]: within(
+      computedSituationIs(SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE)
+    ),
+    [`${key}_autre_avec_contact`]: within(AUTRE_AVEC_CONTACT_CONDITION),
+    [`${key}_deja_connu_accompagne`]: within(DEJA_CONNU_ACCOMPAGNE_CONDITION),
+  };
+};
+
+const SEGMENT_RAW_COUNTER_KEYS = [
+  "total",
+  "a_traiter",
+  "traite",
+  "rdv_pris",
+  "rdv_pris_decouverts",
+  "nouveau_projet",
+  "deja_accompagne",
+  "contacte_sans_retour",
+  "injoignables",
+  "coordonnees_incorrectes",
+  "autre",
+  "cherche_contrat",
+  "reorientation",
+  "ne_veut_pas_accompagnement",
+  "ne_souhaite_pas_etre_recontacte",
+  "autre_avec_contact",
+  "deja_connu_accompagne",
+];
+
+const COLLAB_RAW_COUNTER_KEYS = [
+  ...SEGMENT_RAW_COUNTER_KEYS,
+  "situation_rupture",
+  "situation_abandon",
+  "situation_prevention_inevitable",
+  "situation_prevention_tres_eleve",
+  "situation_prevention_modere",
+  "situation_besoin_aide_hors_rupture",
+  "delai_premiere_activite_jours_total",
+  "delai_premiere_activite_count",
+];
+
+const projectSegment = (key: string, counterKeys: string[]) =>
+  Object.fromEntries(counterKeys.map((counter) => [counter, `$${key}_${counter}`]));
+
+const COLLAB_SITUATION = {
+  RUPTURE: "rupture",
+  ABANDON: "abandon",
+  PREVENTION_INEVITABLE: "prevention_inevitable",
+  PREVENTION_TRES_ELEVE: "prevention_tres_eleve",
+  PREVENTION_MODERE: "prevention_modere",
+  BESOIN_AIDE_HORS_RUPTURE: "besoin_aide_hors_rupture",
+} as const;
+
+const addCollabSituationField = () => ({
+  $addFields: {
+    collab_situation: {
+      $switch: {
+        branches: [
+          {
+            case: {
+              $and: [
+                { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+                { $eq: ["$organisme_data.risque_rupture", CFA_RISQUE_RUPTURE_ENUM.FAIBLE] },
+              ],
+            },
+            then: COLLAB_SITUATION.BESOIN_AIDE_HORS_RUPTURE,
+          },
+          {
+            case: {
+              $and: [
+                { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+                { $eq: ["$organisme_data.risque_rupture", CFA_RISQUE_RUPTURE_ENUM.INEVITABLE] },
+              ],
+            },
+            then: COLLAB_SITUATION.PREVENTION_INEVITABLE,
+          },
+          {
+            case: {
+              $and: [
+                { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+                { $eq: ["$organisme_data.risque_rupture", CFA_RISQUE_RUPTURE_ENUM.TRES_ELEVE] },
+              ],
+            },
+            then: COLLAB_SITUATION.PREVENTION_TRES_ELEVE,
+          },
+          {
+            case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+            then: COLLAB_SITUATION.PREVENTION_MODERE,
+          },
+          {
+            case: { $ne: [{ $ifNull: ["$organisme_data.date_abandon", null] }, null] },
+            then: COLLAB_SITUATION.ABANDON,
+          },
+          {
+            case: { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE] },
+            then: COLLAB_SITUATION.RUPTURE,
+          },
+          {
+            case: { $eq: ["$current_status.value", STATUT_APPRENANT.ABANDON] },
+            then: COLLAB_SITUATION.ABANDON,
+          },
+        ],
+        default: COLLAB_SITUATION.RUPTURE,
+      },
+    },
+  },
+});
+
+const addPremiereActiviteMlField = (mlUserIds: ObjectId[]) => {
+  const logsConseiller = {
+    $filter: {
+      input: "$filteredLogs",
+      as: "log",
+      cond: { $in: [{ $ifNull: ["$$log.created_by", null] }, mlUserIds] },
+    },
+  };
+  return {
+    $addFields: {
+      premiere_activite_ml_at: {
+        $min: {
+          $map: {
+            input: {
+              $filter: {
+                input: logsConseiller,
+                as: "log",
+                cond: { $gte: ["$$log.created_at", "$organisme_data.acc_conjoint_at"] },
+              },
+            },
+            as: "log",
+            in: "$$log.created_at",
+          },
+        },
+      },
+      activite_ml_avant_envoi: { $gt: [{ $size: logsConseiller }, 0] },
+    },
+  };
+};
+
+const HAS_PREMIERE_ACTIVITE_CONDITION = {
+  $or: [{ $ne: [{ $ifNull: ["$premiere_activite_ml_at", null] }, null] }, { $eq: ["$activite_ml_avant_envoi", true] }],
+};
+
+const DELAI_PREMIERE_ACTIVITE_EXPR = {
+  $cond: [
+    { $ne: [{ $ifNull: ["$premiere_activite_ml_at", null] }, null] },
+    {
+      $max: [
+        0,
+        {
+          $dateDiff: {
+            startDate: "$organisme_data.acc_conjoint_at",
+            endDate: "$premiere_activite_ml_at",
+            unit: "day",
+            timezone: "Europe/Paris",
+          },
+        },
+      ],
+    },
+    0,
+  ],
+};
+
 export const computeMissionLocaleStats = async (
   organisation: IOrganisationMissionLocale,
   endDate: Date = new Date()
-): Promise<IMissionLocaleStats["stats"]> => {
+): Promise<{ stats: IMissionLocaleStats["stats"]; segments: IMissionLocaleStatsSegments }> => {
   const mineurCondition = {
     $gte: [
       "$effectif_snapshot.apprenant.date_de_naissance",
@@ -1829,6 +2319,31 @@ export const computeMissionLocaleStats = async (
     ],
   };
   const rqthCondition = { $eq: ["$effectif_snapshot.apprenant.rqth", true] };
+
+  const mlUserIds = (
+    await usersMigrationDb()
+      .find({ organisation_id: organisation._id }, { projection: { _id: 1 } })
+      .toArray()
+  ).map((user) => user._id);
+
+  const isCollabCondition = {
+    $and: [
+      { $eq: ["$organisme_data.acc_conjoint", true] },
+      { $ne: [{ $ifNull: ["$organisme_data.acc_conjoint_at", null] }, null] },
+      { $lte: ["$organisme_data.acc_conjoint_at", endDate] },
+    ],
+  };
+  const isRuptureCondition = {
+    $not: [
+      {
+        $and: [
+          { $eq: ["$organisme_data.acc_conjoint", true] },
+          { $eq: ["$organisme_data.situation_type", CFA_SITUATION_TYPE_ENUM.EN_CONTRAT] },
+        ],
+      },
+    ],
+  };
+  const collabWith = (condition: Document) => countIf({ $and: [isCollabCondition, condition] });
 
   const effectifsMissionLocaleAggregation = [
     ...(endDate
@@ -1879,6 +2394,8 @@ export const computeMissionLocaleStats = async (
         computed_probleme_detail: { $ifNull: ["$log.probleme_detail", "$probleme_detail"] },
       },
     },
+    addCollabSituationField(),
+    addPremiereActiviteMlField(mlUserIds),
     {
       $group: {
         _id: null,
@@ -1886,35 +2403,7 @@ export const computeMissionLocaleStats = async (
         a_traiter: { $sum: { $cond: [{ $eq: ["$a_traiter", true] }, 1, 0] } },
         traite: { $sum: { $cond: [{ $eq: ["$a_traiter", false] }, 1, 0] } },
         rdv_pris: { $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.RDV_PRIS] }, 1, 0] } },
-        rdv_pris_decouverts: {
-          $sum: {
-            $cond: [
-              {
-                $and: [
-                  { $eq: ["$computed_situation", SITUATION_ENUM.RDV_PRIS] },
-                  {
-                    $or: [
-                      {
-                        $in: [
-                          "$computed_connaissance_ml",
-                          [CONNAISSANCE_ML_ENUM.CONNU_NON_ACCOMPAGNE, CONNAISSANCE_ML_ENUM.NON_CONNU],
-                        ],
-                      },
-                      {
-                        $and: [
-                          { $eq: [{ $ifNull: ["$computed_connaissance_ml", null] }, null] },
-                          { $eq: ["$computed_deja_connu", false] },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-              1,
-              0,
-            ],
-          },
-        },
+        rdv_pris_decouverts: countIf(RDV_PRIS_DECOUVERT_CONDITION),
         nouveau_projet: {
           $sum: {
             $cond: [
@@ -1952,20 +2441,7 @@ export const computeMissionLocaleStats = async (
         ne_souhaite_pas_etre_recontacte: {
           $sum: { $cond: [{ $eq: ["$computed_situation", SITUATION_ENUM.NE_SOUHAITE_PAS_ETRE_RECONTACTE] }, 1, 0] },
         },
-        autre_avec_contact: {
-          $sum: {
-            $cond: [
-              {
-                $and: [
-                  { $eq: ["$computed_situation", SITUATION_ENUM.AUTRE] },
-                  { $eq: [{ $ifNull: ["$computed_probleme_type", null] }, null] },
-                ],
-              },
-              1,
-              0,
-            ],
-          },
-        },
+        autre_avec_contact: countIf(AUTRE_AVEC_CONTACT_CONDITION),
         deja_connu: { $sum: { $cond: ["$computed_deja_connu", 1, 0] } },
         mineur: {
           $sum: {
@@ -2221,6 +2697,28 @@ export const computeMissionLocaleStats = async (
           },
         },
         abandon: { $sum: { $cond: [{ $eq: ["$current_status.value", "ABANDON"] }, 1, 0] } },
+        ...buildSegmentAccumulators("rupture", isRuptureCondition),
+        ...buildSegmentAccumulators("collab", isCollabCondition),
+        collab_situation_rupture: collabWith({ $eq: ["$collab_situation", COLLAB_SITUATION.RUPTURE] }),
+        collab_situation_abandon: collabWith({ $eq: ["$collab_situation", COLLAB_SITUATION.ABANDON] }),
+        collab_situation_prevention_inevitable: collabWith({
+          $eq: ["$collab_situation", COLLAB_SITUATION.PREVENTION_INEVITABLE],
+        }),
+        collab_situation_prevention_tres_eleve: collabWith({
+          $eq: ["$collab_situation", COLLAB_SITUATION.PREVENTION_TRES_ELEVE],
+        }),
+        collab_situation_prevention_modere: collabWith({
+          $eq: ["$collab_situation", COLLAB_SITUATION.PREVENTION_MODERE],
+        }),
+        collab_situation_besoin_aide_hors_rupture: collabWith({
+          $eq: ["$collab_situation", COLLAB_SITUATION.BESOIN_AIDE_HORS_RUPTURE],
+        }),
+        collab_delai_premiere_activite_jours_total: {
+          $sum: {
+            $cond: [{ $and: [isCollabCondition, HAS_PREMIERE_ACTIVITE_CONDITION] }, DELAI_PREMIERE_ACTIVITE_EXPR, 0],
+          },
+        },
+        collab_delai_premiere_activite_count: collabWith(HAS_PREMIERE_ACTIVITE_CONDITION),
       },
     },
     {
@@ -2274,66 +2772,75 @@ export const computeMissionLocaleStats = async (
         rqth_ne_souhaite_pas_etre_recontacte: 1,
         rqth_autre_avec_contact: 1,
         abandon: 1,
+        rupture: projectSegment("rupture", SEGMENT_RAW_COUNTER_KEYS),
+        collab: projectSegment("collab", COLLAB_RAW_COUNTER_KEYS),
       },
     },
   ];
 
-  const data = (await missionLocaleEffectifsDb()
-    .aggregate(effectifsMissionLocaleAggregation)
-    .next()) as IMissionLocaleStats["stats"];
+  const data = (await missionLocaleEffectifsDb().aggregate(effectifsMissionLocaleAggregation).next()) as
+    | (IMissionLocaleStats["stats"] & { rupture: ISegmentRawCounters; collab: ICollabSegmentRawCounters })
+    | null;
   if (!data) {
     return {
-      total: 0,
-      a_traiter: 0,
-      traite: 0,
-      rdv_pris: 0,
-      rdv_pris_decouverts: 0,
-      nouveau_projet: 0,
-      deja_accompagne: 0,
-      contacte_sans_retour: 0,
-      injoignables: 0,
-      coordonnees_incorrectes: 0,
-      autre: 0,
-      cherche_contrat: 0,
-      reorientation: 0,
-      ne_veut_pas_accompagnement: 0,
-      ne_souhaite_pas_etre_recontacte: 0,
-      autre_avec_contact: 0,
-      deja_connu: 0,
-      mineur: 0,
-      mineur_a_traiter: 0,
-      mineur_traite: 0,
-      mineur_rdv_pris: 0,
-      mineur_nouveau_projet: 0,
-      mineur_deja_accompagne: 0,
-      mineur_contacte_sans_retour: 0,
-      mineur_injoignables: 0,
-      mineur_coordonnees_incorrectes: 0,
-      mineur_autre: 0,
-      mineur_cherche_contrat: 0,
-      mineur_reorientation: 0,
-      mineur_ne_veut_pas_accompagnement: 0,
-      mineur_ne_souhaite_pas_etre_recontacte: 0,
-      mineur_autre_avec_contact: 0,
-      rqth: 0,
-      rqth_a_traiter: 0,
-      rqth_traite: 0,
-      rqth_rdv_pris: 0,
-      rqth_nouveau_projet: 0,
-      rqth_deja_accompagne: 0,
-      rqth_contacte_sans_retour: 0,
-      rqth_injoignables: 0,
-      rqth_coordonnees_incorrectes: 0,
-      rqth_autre: 0,
-      rqth_cherche_contrat: 0,
-      rqth_reorientation: 0,
-      rqth_ne_veut_pas_accompagnement: 0,
-      rqth_ne_souhaite_pas_etre_recontacte: 0,
-      rqth_autre_avec_contact: 0,
-      abandon: 0,
+      stats: {
+        total: 0,
+        a_traiter: 0,
+        traite: 0,
+        rdv_pris: 0,
+        rdv_pris_decouverts: 0,
+        nouveau_projet: 0,
+        deja_accompagne: 0,
+        contacte_sans_retour: 0,
+        injoignables: 0,
+        coordonnees_incorrectes: 0,
+        autre: 0,
+        cherche_contrat: 0,
+        reorientation: 0,
+        ne_veut_pas_accompagnement: 0,
+        ne_souhaite_pas_etre_recontacte: 0,
+        autre_avec_contact: 0,
+        deja_connu: 0,
+        mineur: 0,
+        mineur_a_traiter: 0,
+        mineur_traite: 0,
+        mineur_rdv_pris: 0,
+        mineur_nouveau_projet: 0,
+        mineur_deja_accompagne: 0,
+        mineur_contacte_sans_retour: 0,
+        mineur_injoignables: 0,
+        mineur_coordonnees_incorrectes: 0,
+        mineur_autre: 0,
+        mineur_cherche_contrat: 0,
+        mineur_reorientation: 0,
+        mineur_ne_veut_pas_accompagnement: 0,
+        mineur_ne_souhaite_pas_etre_recontacte: 0,
+        mineur_autre_avec_contact: 0,
+        rqth: 0,
+        rqth_a_traiter: 0,
+        rqth_traite: 0,
+        rqth_rdv_pris: 0,
+        rqth_nouveau_projet: 0,
+        rqth_deja_accompagne: 0,
+        rqth_contacte_sans_retour: 0,
+        rqth_injoignables: 0,
+        rqth_coordonnees_incorrectes: 0,
+        rqth_autre: 0,
+        rqth_cherche_contrat: 0,
+        rqth_reorientation: 0,
+        rqth_ne_veut_pas_accompagnement: 0,
+        rqth_ne_souhaite_pas_etre_recontacte: 0,
+        rqth_autre_avec_contact: 0,
+        abandon: 0,
+      },
+      segments: buildEmptySegments(),
     };
   }
-  return data;
+  const { rupture, collab, ...stats } = data;
+  return {
+    stats,
+    segments: { rupture: toSegmentStats(rupture), collab: toCollabSegmentStats(collab) },
+  };
 };
 
 /**
@@ -2372,6 +2879,7 @@ export const setEffectifMissionLocaleData = async (
     effectif_id: new ObjectId(effectifId),
   });
 
+  const now = new Date();
   const updated = await missionLocaleEffectifsDb().findOneAndUpdate(
     {
       mission_locale_id: missionLocaleId,
@@ -2380,7 +2888,8 @@ export const setEffectifMissionLocaleData = async (
     {
       $set: {
         ...dbSetObject,
-        updated_at: new Date(),
+        ...computeSuiviDatesSet(effectifFields.situation, Object.keys(dbSetObject).length > 0, now),
+        updated_at: now,
         ...(effectif?.organisme_data?.acc_conjoint
           ? {
               "organisme_data.has_unread_notification": true,
@@ -2393,12 +2902,12 @@ export const setEffectifMissionLocaleData = async (
   );
   if (Object.keys(dbSetObject).length > 0) {
     const logPayload = shouldClearStaleConnaissanceMl ? { ...dbSetObject, connaissance_ml: null } : dbSetObject;
-    await createEffectifMissionLocaleLog(updated.value?._id, logPayload, user, missionLocaleId);
+    await createEffectifMissionLocaleLog(updated?._id, logPayload, user, missionLocaleId);
   }
 
   // Déclencher WhatsApp si l'effectif est marqué comme "Contacté sans retour"
   if (effectifFields.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {
-    triggerWhatsAppIfEligible(updated.value, missionLocaleId).catch((error) => {
+    triggerWhatsAppIfEligible(updated, missionLocaleId).catch((error) => {
       logger.error({ error, effectifId: effectifId }, "Failed to trigger WhatsApp");
       captureException(error);
     });
@@ -2411,7 +2920,7 @@ export const setEffectifMissionLocaleData = async (
 const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
   try {
     // Détection des incohérences
-    const parcours = (effectif._computed as any)?.parcours || [];
+    const parcours = effectif._computed?.statut?.parcours ?? [];
     const inconsistencies: string[] = [];
 
     if (parcours.length > 0) {
@@ -2419,12 +2928,12 @@ const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
 
       // Statut actif selon les dates vs dernier du parcours
       const currentStatusML =
-        parcours.filter((statut: any) => new Date(statut.date) <= today).slice(-1)[0] || parcours.slice(-1)[0];
+        parcours.filter((statut) => new Date(statut.date) <= today).slice(-1)[0] || parcours.slice(-1)[0];
       const lastParcoursStatus = parcours[parcours.length - 1];
 
-      if (currentStatusML && lastParcoursStatus && currentStatusML.statut !== lastParcoursStatus.statut) {
+      if (currentStatusML && lastParcoursStatus && currentStatusML.valeur !== lastParcoursStatus.valeur) {
         inconsistencies.push(
-          `Statut actif (${currentStatusML.statut}) != dernier parcours (${lastParcoursStatus.statut})`
+          `Statut actif (${currentStatusML.valeur}) != dernier parcours (${lastParcoursStatus.valeur})`
         );
       }
 
@@ -2433,13 +2942,13 @@ const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
         const daysFuture = Math.floor(
           (new Date(currentStatusML.date).getTime() - today.getTime()) / (1000 * 3600 * 24)
         );
-        inconsistencies.push(`Statut futur activé (${currentStatusML.statut} dans ${daysFuture} jours)`);
+        inconsistencies.push(`Statut futur activé (${currentStatusML.valeur} dans ${daysFuture} jours)`);
       }
 
       // Rupture sans RUPTURANT après la date
-      const hasRuptureDate = effectif.contrats?.some((c: any) => c.date_rupture && new Date(c.date_rupture) <= today);
-      if (hasRuptureDate && currentStatusML?.statut !== "RUPTURANT") {
-        inconsistencies.push(`Contrat rompu mais statut != RUPTURANT (${currentStatusML?.statut})`);
+      const hasRuptureDate = effectif.contrats?.some((c) => c.date_rupture && new Date(c.date_rupture) <= today);
+      if (hasRuptureDate && currentStatusML?.valeur !== "RUPTURANT") {
+        inconsistencies.push(`Contrat rompu mais statut != RUPTURANT (${currentStatusML?.valeur})`);
       }
 
       if (inconsistencies.length > 0) {
@@ -2448,15 +2957,15 @@ const logMissionLocaleSnapshot = (effectif: IEffectif | IEffectifDECA) => {
             effectifId: effectif._id,
             apprenant: `${effectif.apprenant?.prenom} ${effectif.apprenant?.nom}`,
             inconsistencies,
-            parcours: parcours.map((p: any) => ({ statut: p.statut, date: p.date })),
+            parcours: parcours.map((p) => ({ statut: p.valeur, date: p.date })),
             contrats:
-              effectif.contrats?.map((c: any) => ({
+              effectif.contrats?.map((c) => ({
                 debut: c.date_debut,
                 fin: c.date_fin,
                 rupture: c.date_rupture,
               })) || [],
             currentStatusWillBe: {
-              statut: currentStatusML?.statut,
+              statut: currentStatusML?.valeur,
               date: currentStatusML?.date,
             },
           },
@@ -2573,7 +3082,7 @@ interface IMissionLocaleSnapshotResult {
  *
  * Si un autre ml record (actif OU soft-deleted) occupe déjà `(mission_locale_id, newEffectif._id)` :
  * on "réveille" ce squatter (s'il était soft-deleted), on merge l'orphelin dedans (champs utilisateur,
- * logs, brevo.history) puis on soft-delete l'orphelin. Évite l'E11000 sur l'index unique
+ * logs) puis on soft-delete l'orphelin. Évite l'E11000 sur l'index unique
  * `mission_locale_id_1_effectif_id_1` qui n'est pas filtré sur `soft_deleted`.
  *
  * Garde anti-disparition : si remplacer le snapshot par celui de `newEffectif` ferait perdre
@@ -2631,9 +3140,9 @@ export async function migrateMlRecordEffectifId(
 
   const now = new Date();
 
-  const buildRefreshSet = (): Record<string, unknown> => {
+  const buildRefreshSet = (record: IMissionLocaleEffectif): Record<string, unknown> => {
     const set: Record<string, unknown> = {
-      effectif_snapshot: { ...newEffectif, _id: newEffectif._id },
+      effectif_snapshot: applyRqthDeclaration({ ...newEffectif, _id: newEffectif._id }, record),
       effectif_snapshot_date: now,
       updated_at: now,
       ...(options.extraSet ?? {}),
@@ -2656,7 +3165,7 @@ export async function migrateMlRecordEffectifId(
       );
     }
 
-    // 2. Merge donor -> keeper (logs, brevo.history, MERGEABLE_FIELDS) + soft-delete orphan + $unset identifiant_normalise.
+    // 2. Merge donor -> keeper (logs, MERGEABLE_FIELDS) + soft-delete orphan + $unset identifiant_normalise.
     await mergeAndSoftDeleteDuplicates(squatter._id, [mlRecordId]);
 
     // 3. Backfill identifiant_normalise sur le keeper si manquant (cas legacy).
@@ -2668,7 +3177,12 @@ export async function migrateMlRecordEffectifId(
     }
 
     // 4. Refresh effectif_snapshot + extraSet APRÈS merge (sinon dot-paths d'extraSet bloqueraient le merge).
-    await missionLocaleEffectifsDb().updateOne({ _id: squatter._id }, { $set: buildRefreshSet() });
+    // Relecture : le merge a pu remonter l'organisme_data du donneur, dont dépend la déclaration RQTH.
+    const mergedSquatter = await missionLocaleEffectifsDb().findOne({ _id: squatter._id });
+    await missionLocaleEffectifsDb().updateOne(
+      { _id: squatter._id },
+      { $set: buildRefreshSet(mergedSquatter ?? squatter) }
+    );
 
     logger.info(
       {
@@ -2687,7 +3201,7 @@ export async function migrateMlRecordEffectifId(
   // Voie classique : pas de squatter, on repointe l'orphelin.
   await missionLocaleEffectifsDb().updateOne(
     { _id: mlRecordId },
-    { $set: { effectif_id: newEffectif._id, ...buildRefreshSet() } }
+    { $set: { effectif_id: newEffectif._id, ...buildRefreshSet(orphan) } }
   );
 
   logger.info(
@@ -2798,7 +3312,7 @@ export const createMissionLocaleSnapshot = async (
   const organisation = await getOrganisationOrganismeByOrganismeId(effectif.organisme_id);
   const organisme = await organismesDb().findOne(
     { _id: effectif.organisme_id },
-    { projection: { is_allowed_collab: 1 } }
+    { projection: { is_allowed_collab: 1, collab_suspended_at: 1, collab_resumed_at: 1 } }
   );
 
   let mongoInfo;
@@ -2820,21 +3334,21 @@ export const createMissionLocaleSnapshot = async (
           effectif_snapshot_date: date,
           date_rupture: currentStatus?.date,
           created_at: date,
-          brevo: {
-            token: uuidv4(),
-            token_created_at: date,
-          },
           computed: {
             organisme: {
               ml_beta_activated_at: organisation?.ml_beta_activated_at,
               is_allowed_collab: organisme?.is_allowed_collab ?? false,
+              ...(organisme?.collab_suspended_at ? { collab_suspended_at: organisme.collab_suspended_at } : {}),
+              ...(organisme?.collab_resumed_at ? { collab_resumed_at: organisme.collab_resumed_at } : {}),
             },
             ...(mlData.activated_at ? { mission_locale: { activated_at: mlData.activated_at } } : {}),
           },
           ...(normalizedIdentifiant ? { identifiant_normalise: normalizedIdentifiant } : {}),
         },
       },
-      { upsert: shouldUpsert }
+      // includeResultMetadata: v6 renvoie le document nu par défaut ; on garde la forme ModifyResult
+      // ({ value, lastErrorObject, ok }) car on lit lastErrorObject.upserted / .n et value ci-dessous.
+      { upsert: shouldUpsert, includeResultMetadata: true }
     );
   } catch (error) {
     // Race condition : un doublon a été inséré entre le check et l'upsert
@@ -2928,7 +3442,7 @@ export const getMissionLocaleStat = async (
   };
   const rqthCondition = { $eq: ["$effectif_snapshot.apprenant.rqth", true] };
 
-  const withCondition = (cond?: any) => {
+  const withCondition = (cond?: Document) => {
     if (!mineur && !rqth) {
       return { $sum: cond ? { $cond: [cond, 1, 0] } : 1 };
     }
@@ -2997,6 +3511,10 @@ export const getMissionLocaleStat = async (
 const MERGEABLE_FIELDS = [
   "situation",
   "situation_autre",
+  // dates de suivi : sans elles, le keeper hérite d'une situation sans sa date (sous-texte et tri faussés)
+  "date_traitement",
+  "date_dernier_passage_a_recontacter",
+  "date_derniere_action_ml",
   "commentaires",
   "deja_connu",
   "connaissance_ml",
@@ -3039,10 +3557,28 @@ export function sortKeeperPriority(
 }
 
 /**
+ * Un donneur antérieur à la migration peut porter la situation « sans contrat » et ses champs,
+ * absents du modèle : recopiés tels quels sur le survivant, la validation stricte rejetterait
+ * l'écriture et interromprait toute la passe de déduplication.
+ */
+const sansChampsRetires = (organismeData: unknown): unknown => {
+  if (!organismeData || typeof organismeData !== "object") return organismeData;
+  const {
+    situation_type,
+    date_debut_formation: _dateDebutFormation,
+    recherche_entreprise: _rechercheEntreprise,
+    ...reste
+  } = organismeData as Record<string, unknown>;
+  return {
+    ...reste,
+    ...(situation_type !== undefined && situation_type !== "SANS_CONTRAT" ? { situation_type } : {}),
+  };
+};
+
+/**
  * Fusionne les champs utilisateur des doublons vers le keeper, puis soft-delete les doublons.
  *
  * - Réassigne les logs `missionLocaleEffectifLog` du donor vers le keeper (préserve l'historique côté UI).
- * - Préserve les `brevo.token` des donors dans `keeper.brevo.history` (évite de casser les liens email actifs).
  * - `$unset` `identifiant_normalise` sur les donors avant soft-delete (libère le partial unique index).
  */
 export async function mergeAndSoftDeleteDuplicates(keeperId: ObjectId, duplicateIds: ObjectId[]) {
@@ -3060,35 +3596,14 @@ export async function mergeAndSoftDeleteDuplicates(keeperId: ObjectId, duplicate
     if (keeper[field] == null) {
       const donor = duplicates.find((d) => d[field] != null);
       if (donor) {
-        mergeUpdate[field] = donor[field];
+        mergeUpdate[field] = field === "organisme_data" ? sansChampsRetires(donor[field]) : donor[field];
       }
     }
   }
 
-  // Préserver les tokens brevo des donors dans keeper.brevo.history pour ne pas casser les liens email déjà envoyés.
-  const historyEntries: Array<{ token: string; token_created_at?: Date; token_expired_at?: Date }> = [];
   const now = new Date();
-  for (const donor of duplicates) {
-    if (donor.brevo?.token && donor.brevo.token !== keeper.brevo?.token) {
-      historyEntries.push({
-        token: donor.brevo.token,
-        token_created_at: donor.brevo.token_created_at ?? undefined,
-        token_expired_at: now,
-      });
-    }
-    for (const entry of donor.brevo?.history ?? []) {
-      if (entry.token && entry.token !== keeper.brevo?.token) {
-        historyEntries.push(entry);
-      }
-    }
-  }
-
-  if (Object.keys(mergeUpdate).length > 0 || historyEntries.length > 0) {
-    const update: Record<string, unknown> = { $set: { ...mergeUpdate, updated_at: now } };
-    if (historyEntries.length > 0) {
-      update.$push = { "brevo.history": { $each: historyEntries } };
-    }
-    await missionLocaleEffectifsDb().updateOne({ _id: keeperId }, update);
+  if (Object.keys(mergeUpdate).length > 0) {
+    await missionLocaleEffectifsDb().updateOne({ _id: keeperId }, { $set: { ...mergeUpdate, updated_at: now } });
   }
 
   // Réassigner les logs des donors vers le keeper (préserve l'historique conseiller ML).

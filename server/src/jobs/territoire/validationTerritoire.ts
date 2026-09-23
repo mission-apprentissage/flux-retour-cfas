@@ -32,7 +32,7 @@ function validationRegions(apiDepartements: IApiDepartement[]): number {
 
     todo.delete(apiDepartement.region.codeInsee);
 
-    const tdbRegion = REGIONS_BY_CODE[apiDepartement.region.codeInsee];
+    const tdbRegion = REGIONS_BY_CODE[apiDepartement.region.codeInsee as keyof typeof REGIONS_BY_CODE];
     const expectedTdbRegion = {
       code: apiDepartement.region.codeInsee,
       nom: apiDepartement.region.nom,
@@ -74,7 +74,7 @@ function validationDepartements(apiDepartements: IApiDepartement[]): number {
 
     todo.delete(apiDepartement.codeInsee);
 
-    const tdbDepartement = DEPARTEMENTS_BY_CODE[apiDepartement.codeInsee];
+    const tdbDepartement = DEPARTEMENTS_BY_CODE[apiDepartement.codeInsee as keyof typeof DEPARTEMENTS_BY_CODE];
     const expectedTdbDepartement = {
       code: apiDepartement.codeInsee,
       nom: apiDepartement.nom,

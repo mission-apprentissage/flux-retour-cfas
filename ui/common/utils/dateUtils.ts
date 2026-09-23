@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 // TODO [tech] TO REMOVE
-export const prettyPrintDate = (date) => {
+export const prettyPrintDate = (date: string | number | Date) => {
   const event = new Date(date);
   const options = {
     hour: "2-digit" as const,
@@ -38,23 +38,4 @@ export const formatDateHourMinutesSecondsMs = (date: string) => {
     minute: "numeric",
     second: "numeric",
   }).format(d);
-};
-
-export const calculateAge = (dateOfBirth: string | Date): number | null => {
-  if (!dateOfBirth) {
-    return null;
-  }
-
-  const dob = typeof dateOfBirth === "string" ? new Date(dateOfBirth) : dateOfBirth;
-  const today = new Date();
-
-  let age = today.getFullYear() - dob.getFullYear();
-  const monthDiff = today.getMonth() - dob.getMonth();
-  const dayDiff = today.getDate() - dob.getDate();
-
-  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-    age--;
-  }
-
-  return age;
 };

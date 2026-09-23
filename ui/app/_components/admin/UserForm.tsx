@@ -2,17 +2,31 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { Box, Stack, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
 import { useFormik } from "formik";
 import React, { useState } from "react";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 
 import { USER_STATUS_LABELS } from "@/common/constants/usersConstants";
 import { _delete, _put, _post } from "@/common/httpClient";
+import { getApiErrorMessage, getServerErrorMessage } from "@/common/rateLimit";
+import { UserNormalized } from "@/modules/admin/users/models/users";
 
 import userSchema from "../../../modules/admin/userSchema";
+
+import styles from "./UserForm.module.css";
+
+const deleteUserModal = createModal({
+  id: "admin-user-delete",
+  isOpenedByDefault: false,
+});
+
+interface UserFormResult {
+  ok?: boolean;
+  error?: string;
+  _id?: string;
+}
 
 const UserForm = ({
   user,
@@ -20,10 +34,10 @@ const UserForm = ({
   onDelete,
   onUpdate,
 }: {
-  user: any;
-  onCreate?: any;
-  onDelete?: any;
-  onUpdate?: any;
+  user: UserNormalized | null;
+  onCreate?: (user: { _id: string }) => void;
+  onDelete?: () => void;
+  onUpdate?: () => void;
 }) => {
   const [alert, setAlert] = useState<{
     message: string;
@@ -41,7 +55,7 @@ const UserForm = ({
       telephone: user?.telephone || "",
     },
     onSubmit: async ({ civility, nom, prenom, email, fonction, telephone }, { setSubmitting }) => {
-      let result;
+      let result: UserFormResult | undefined;
 
       try {
         if (user) {
@@ -53,7 +67,7 @@ const UserForm = ({
             fonction,
             telephone,
           };
-          result = await _put(`/api/v1/admin/users/${user._id}`, body).catch((err) => {
+          result = await _put<UserFormResult>(`/api/v1/admin/users/${user._id}`, body).catch((err) => {
             if (err.statusCode === 409) {
               return { error: "Cet email est déjà utilisé par un autre utilisateur" };
             }
@@ -89,7 +103,7 @@ const UserForm = ({
             fonction,
             telephone,
           };
-          result = await _post("/api/v1/admin/users", body).catch((err) => {
+          result = await _post<unknown, UserFormResult>("/api/v1/admin/users", body).catch((err) => {
             if (err.statusCode === 409) {
               return { error: "Cet utilisateur existe déjà" };
             }
@@ -100,7 +114,7 @@ const UserForm = ({
               severity: "success",
             });
             resetForm();
-            onCreate?.(result);
+            onCreate?.({ _id: result._id });
           } else if (result?.error) {
             setAlert({
               message: result.error,
@@ -114,10 +128,10 @@ const UserForm = ({
             });
           }
         }
-      } catch (e: any) {
+      } catch (e) {
         console.error(e);
         setAlert({
-          message: e?.json?.data?.message || e?.message || "Une erreur est survenue",
+          message: getApiErrorMessage(e, "Une erreur est survenue"),
           severity: "error",
         });
       }
@@ -125,28 +139,27 @@ const UserForm = ({
     },
   });
 
-  const onDeleteClicked = async (e) => {
-    e.preventDefault();
-    if (confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) {
-      const result = await _delete(`/api/v1/admin/users/${user._id}`);
-      if (result?.ok) {
-        setAlert({
-          message: "Utilisateur supprimé",
-          severity: "success",
-        });
-      } else {
-        setAlert({
-          message: "Erreur lors de la suppression de l'utilisateur.",
-          severity: "error",
-          description: " Merci de réessayer plus tard",
-        });
-      }
-
-      return onDelete?.();
+  const performDelete = async () => {
+    if (!user) return;
+    const result = await _delete<{ ok?: boolean }>(`/api/v1/admin/users/${user._id}`);
+    if (result?.ok) {
+      setAlert({
+        message: "Utilisateur supprimé",
+        severity: "success",
+      });
+    } else {
+      setAlert({
+        message: "Erreur lors de la suppression de l'utilisateur.",
+        severity: "error",
+        description: " Merci de réessayer plus tard",
+      });
     }
+
+    return onDelete?.();
   };
 
-  const confirmUserAccess = async (validate) => {
+  const confirmUserAccess = async (validate: boolean) => {
+    if (!user) return;
     if (
       !confirm(
         `Voulez-vous vraiment ${validate ? "valider" : "rejeter"} l'accès de cet utilisateur sur l'organisation ${
@@ -163,26 +176,27 @@ const UserForm = ({
         severity: "success",
       });
       validate ? onUpdate?.() : onDelete?.();
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
       setAlert({
-        message: e?.json?.data?.message || "Erreur lors de la validation de l'accès.",
+        message: getServerErrorMessage(e, "Erreur lors de la validation de l'accès."),
         severity: "error",
       });
     }
   };
 
   const resendConfirmationEmail = async () => {
+    if (!user) return;
     try {
       await _post(`/api/v1/admin/users/${user._id}/resend-confirmation-email`);
       setAlert({
         message: "L'email de confirmation a été renvoyé.",
         severity: "success",
       });
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
       setAlert({
-        message: e?.json?.data?.message || "Erreur lors de l'envoi de l'email.",
+        message: getServerErrorMessage(e, "Erreur lors de l'envoi de l'email."),
         severity: "error",
       });
     }
@@ -202,9 +216,9 @@ const UserForm = ({
           }}
         />
       )}
-      <Stack spacing={3} sx={{ my: 4 }}>
-        <Grid container spacing={2} columns={12}>
-          <Grid size={6}>
+      <div className={styles.sections}>
+        <div className="fr-grid-row fr-grid-row--gutters">
+          <div className="fr-col-6">
             <Input
               label="Nom"
               nativeInputProps={{
@@ -217,8 +231,8 @@ const UserForm = ({
               state={errors.nom && touched.nom ? "error" : "default"}
               stateRelatedMessage={errors.nom && touched.nom ? (errors.nom as string) : undefined}
             />
-          </Grid>
-          <Grid size={6}>
+          </div>
+          <div className="fr-col-6">
             <Input
               label="Prénom"
               nativeInputProps={{
@@ -231,8 +245,8 @@ const UserForm = ({
               state={errors.prenom && touched.prenom ? "error" : "default"}
               stateRelatedMessage={errors.prenom && touched.prenom ? (errors.prenom as string) : undefined}
             />
-          </Grid>
-          <Grid size={6}>
+          </div>
+          <div className="fr-col-6">
             <RadioButtons
               legend="Civilité"
               name="civility"
@@ -258,8 +272,8 @@ const UserForm = ({
               state={errors.civility && touched.civility ? "error" : "default"}
               stateRelatedMessage={errors.civility && touched.civility ? (errors.civility as string) : undefined}
             />
-          </Grid>
-          <Grid size={6}>
+          </div>
+          <div className="fr-col-6">
             <Input
               label="Email"
               nativeInputProps={{
@@ -272,8 +286,8 @@ const UserForm = ({
               state={errors.email && touched.email ? "error" : "default"}
               stateRelatedMessage={errors.email && touched.email ? (errors.email as string) : undefined}
             />
-          </Grid>
-          <Grid size={6}>
+          </div>
+          <div className="fr-col-6">
             <Input
               label="Fonction"
               nativeInputProps={{
@@ -286,8 +300,8 @@ const UserForm = ({
               state={errors.fonction && touched.fonction ? "error" : "default"}
               stateRelatedMessage={errors.fonction && touched.fonction ? (errors.fonction as string) : undefined}
             />
-          </Grid>
-          <Grid size={6}>
+          </div>
+          <div className="fr-col-6">
             <Input
               label="Téléphone"
               nativeInputProps={{
@@ -300,59 +314,85 @@ const UserForm = ({
               state={errors.telephone && touched.telephone ? "error" : "default"}
               stateRelatedMessage={errors.telephone && touched.telephone ? (errors.telephone as string) : undefined}
             />
-          </Grid>
-        </Grid>
+          </div>
+        </div>
 
         {user && (
           <>
-            <Stack direction="row" spacing={2} alignItems="center" sx={{ my: 2 }}>
-              <Typography variant="body1">Statut du compte</Typography>
-              <Badge severity="info">{USER_STATUS_LABELS[user.account_status] || user.account_status}</Badge>
+            <div className={styles.statusRow}>
+              <p className={styles.statusLabel}>Statut du compte</p>
+              <Badge severity="info">
+                {USER_STATUS_LABELS[user.account_status as keyof typeof USER_STATUS_LABELS] || user.account_status}
+              </Badge>
 
               {user.account_status === "PENDING_EMAIL_VALIDATION" && (
-                <Box sx={{ ml: 2 }}>
+                <div className={styles.statusAction}>
                   <Button priority="primary" onClick={() => resendConfirmationEmail()}>
                     Renvoyer l&apos;email de confirmation
                   </Button>
-                </Box>
+                </div>
               )}
-            </Stack>
+            </div>
 
-            <Stack direction="row" spacing={2} alignItems="center" sx={{ my: 2 }}>
-              <Typography variant="body1">Type de compte</Typography>
+            <div className={styles.statusRow}>
+              <p className={styles.statusLabel}>Type de compte</p>
               <Badge severity="new">{user.organisation.label}</Badge>
 
               {user.account_status !== "CONFIRMED" && (
-                <Stack direction="row" spacing={1} sx={{ ml: 2 }}>
+                <div className={styles.statusActions}>
                   <Button priority="primary" onClick={() => confirmUserAccess(true)}>
                     Confirmer
                   </Button>
                   <Button priority="secondary" onClick={() => confirmUserAccess(false)}>
                     Rejeter
                   </Button>
-                </Stack>
+                </div>
               )}
-            </Stack>
+            </div>
           </>
         )}
 
         {user ? (
-          <Box sx={{ pt: 4 }}>
-            <Stack direction="row" spacing={2}>
+          <div className={styles.footer}>
+            <div className={styles.footerActions}>
               <Button type="submit" priority="primary" disabled={!dirty}>
                 Enregistrer
               </Button>
-              <Button priority="secondary" onClick={onDeleteClicked}>
+              <Button type="button" priority="secondary" onClick={() => deleteUserModal.open()}>
                 Supprimer l&apos;utilisateur
               </Button>
-            </Stack>
-          </Box>
+            </div>
+            <deleteUserModal.Component
+              title="Supprimer l'utilisateur"
+              buttons={[
+                {
+                  children: "Annuler",
+                  doClosesModal: true,
+                  priority: "secondary",
+                },
+                {
+                  children: "Supprimer définitivement",
+                  doClosesModal: true,
+                  priority: "primary",
+                  onClick: performDelete,
+                },
+              ]}
+            >
+              <p>
+                Vous allez supprimer le compte de{" "}
+                <strong>
+                  {user.prenom} {user.nom}
+                </strong>{" "}
+                ({user.email}). Cette action est irréversible.
+              </p>
+            </deleteUserModal.Component>
+          </div>
         ) : (
           <Button type="submit" priority="primary">
             Créer l&apos;utilisateur
           </Button>
         )}
-      </Stack>
+      </div>
     </form>
   );
 };

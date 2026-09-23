@@ -1,9 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import type {
-  IAccompagnementConjointStats,
-  IDetailsDossiersTraites,
-  IDetailsDossiersTraitesV2,
+  ICollaborationSegmentStats,
+  IDossiersTraitesStatsResponse,
   IPrequalifStats,
   IRegionStats,
   IRupturantsSummary,
@@ -12,11 +11,24 @@ import type {
   ITraitementRegionStats,
   ITraitementStatsResponse,
   IWhatsAppStats,
+  StatsSegment,
+  TraitementMlSortBy,
 } from "shared/models/data/nationalStats.model";
+import type { ICollaborationsCfaSyntheseResponse } from "shared/models/routes/admin/collaboration-stats.api";
 
 import { _get, _put } from "@/common/httpClient";
 
 import type { Period } from "../ui/PeriodSelector";
+
+import {
+  buildCollaborationsRequest,
+  buildSegmentStatsRequest,
+  buildTraitementRequest,
+  type CollaborationStatsParams,
+  type SegmentStatsParams,
+} from "./statsRoutes";
+
+export type { CollaborationStatsParams, SegmentStatsParams };
 
 interface IDeploymentStatsResponse {
   summary: {
@@ -42,13 +54,7 @@ interface IRupturantsStatsResponse {
   summary: IRupturantsSummary;
   evaluationDate: Date;
   period: Period;
-}
-
-interface IDossiersTraitesStatsResponse {
-  details: IDetailsDossiersTraites;
-  detailsV2: IDetailsDossiersTraitesV2;
-  evaluationDate: Date;
-  period: Period;
+  segment: StatsSegment;
 }
 
 interface ICouvertureRegionsStatsResponse {
@@ -59,16 +65,19 @@ interface ICouvertureRegionsStatsResponse {
 const THIRTY_MINUTES = 30 * 60 * 1000;
 const ONE_HOUR = 60 * 60 * 1000;
 
+const NON_RETRYABLE_STATUS = [400, 401, 403, 404];
+
 export const STATS_QUERY_CONFIG = {
   staleTime: THIRTY_MINUTES,
-  cacheTime: ONE_HOUR,
-  retry: 3,
+  gcTime: ONE_HOUR,
+  retry: (failureCount: number, error: unknown) =>
+    !NON_RETRYABLE_STATUS.includes((error as { statusCode?: number }).statusCode ?? 0) && failureCount < 3,
   refetchOnWindowFocus: false,
 } as const;
 
 export const STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA = {
   ...STATS_QUERY_CONFIG,
-  keepPreviousData: true,
+  placeholderData: keepPreviousData,
 } as const;
 
 function buildStatsParams(params: {
@@ -76,28 +85,29 @@ function buildStatsParams(params: {
   region?: string;
   mlId?: string;
   national?: boolean;
+  segment?: StatsSegment;
 }): Record<string, unknown> {
   return {
     ...(params.period && { period: params.period }),
     ...(params.region && { region: params.region }),
     ...(params.mlId && { ml_id: params.mlId }),
     ...(params.national && { national: true }),
+    ...(params.segment && { segment: params.segment }),
   };
 }
 
 export const statsQueryKeys = {
-  traitement: (period: Period, region?: string) => ["stats", "traitement", period, region] as const,
+  traitement: (params: SegmentStatsParams) => ["stats", "traitement", params] as const,
   deployment: (period: Period) => ["stats", "deployment", period] as const,
   syntheseRegions: (period: Period) => ["stats", "synthese-regions", period] as const,
-  rupturants: (period: Period, region?: string, mlId?: string) =>
-    ["stats", "rupturants", period, region, mlId] as const,
-  dossiersTraites: (period: Period, region?: string, mlId?: string) =>
-    ["stats", "dossiers-traites", period, region, mlId] as const,
+  rupturants: (params: SegmentStatsParams) => ["stats", "rupturants", params] as const,
+  dossiersTraites: (params: SegmentStatsParams) => ["stats", "dossiers-traites", params] as const,
   couvertureRegions: (period: Period) => ["stats", "couverture-regions", period] as const,
   traitementML: (params: TraitementMLParams) => ["stats", "traitement-ml", params] as const,
-  traitementRegions: (period: Period) => ["stats", "traitement-regions", period] as const,
-  accompagnementConjoint: (region?: string, mlId?: string) =>
-    ["stats", "accompagnement-conjoint", region, mlId] as const,
+  traitementRegions: (period: Period, segment: StatsSegment) =>
+    ["stats", "traitement-regions", period, segment] as const,
+  collaborations: (params: CollaborationStatsParams) => ["stats", "collaborations", params] as const,
+  collaborationsCfa: () => ["stats", "collaborations-cfa"] as const,
   missionLocaleDetail: (mlId: string) => ["stats", "ml-detail", mlId] as const,
   missionLocaleMembres: (mlId: string) => ["stats", "ml-membres", mlId] as const,
   whatsapp: (period: Period) => ["stats", "whatsapp", period] as const,
@@ -106,10 +116,11 @@ export const statsQueryKeys = {
 
 export interface TraitementMLParams {
   period: Period;
+  segment: StatsSegment;
   region?: string;
   page: number;
   limit: number;
-  sort_by: string;
+  sort_by: TraitementMlSortBy;
   sort_order: "asc" | "desc";
   search?: string;
 }
@@ -117,6 +128,7 @@ export interface TraitementMLParams {
 function buildTraitementMLRequestParams(params: TraitementMLParams): Record<string, unknown> {
   return {
     period: params.period,
+    segment: params.segment,
     ...(params.region && { region: params.region }),
     page: params.page,
     limit: params.limit,
@@ -126,64 +138,59 @@ function buildTraitementMLRequestParams(params: TraitementMLParams): Record<stri
   };
 }
 
-export function useTraitementStats(period: Period, region?: string) {
-  return useQuery<ITraitementStatsResponse>(
-    statsQueryKeys.traitement(period, region),
-    () =>
-      _get("/api/v1/mission-locale/stats/traitement", {
-        params: { period, ...(region && { region }) },
-      }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+export function useTraitementStats(params: SegmentStatsParams) {
+  const request = buildTraitementRequest(params);
+  return useQuery<ITraitementStatsResponse>({
+    queryKey: statsQueryKeys.traitement(params),
+    queryFn: () => _get(request.url, { params: request.params }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
 export function useDeploymentStats(period: Period) {
-  return useQuery<IDeploymentStatsResponse>(
-    statsQueryKeys.deployment(period),
-    () => _get("/api/v1/mission-locale/stats/synthese/deployment", { params: { period } }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+  return useQuery<IDeploymentStatsResponse>({
+    queryKey: statsQueryKeys.deployment(period),
+    queryFn: () => _get("/api/v1/mission-locale/stats/synthese/deployment", { params: { period } }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
 export function useSyntheseRegionsStats(period: Period) {
-  return useQuery<ISyntheseRegionsStatsResponse>(
-    statsQueryKeys.syntheseRegions(period),
-    () => _get("/api/v1/mission-locale/stats/synthese/regions", { params: { period } }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+  return useQuery<ISyntheseRegionsStatsResponse>({
+    queryKey: statsQueryKeys.syntheseRegions(period),
+    queryFn: () => _get("/api/v1/mission-locale/stats/synthese/regions", { params: { period } }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
-export function useRupturantsStats(period: Period, region?: string, mlId?: string, national?: boolean) {
-  return useQuery<IRupturantsStatsResponse>(
-    [...statsQueryKeys.rupturants(period, region, mlId), national] as const,
-    () =>
-      _get("/api/v1/organisation/indicateurs-ml/stats/rupturants", {
-        params: buildStatsParams({ period, region, mlId, national }),
-      }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+export function useRupturantsStats(params: SegmentStatsParams) {
+  const request = buildSegmentStatsRequest("rupturants", params);
+  return useQuery<IRupturantsStatsResponse>({
+    queryKey: statsQueryKeys.rupturants(params),
+    queryFn: () => _get(request.url, { params: request.params }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
-export function useDossiersTraitesStats(period: Period, region?: string, mlId?: string, national?: boolean) {
-  return useQuery<IDossiersTraitesStatsResponse>(
-    [...statsQueryKeys.dossiersTraites(period, region, mlId), national] as const,
-    () =>
-      _get("/api/v1/organisation/indicateurs-ml/stats/dossiers-traites", {
-        params: buildStatsParams({ period, region, mlId, national }),
-      }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+export function useDossiersTraitesStats(params: SegmentStatsParams) {
+  const request = buildSegmentStatsRequest("dossiers-traites", params);
+  return useQuery<IDossiersTraitesStatsResponse>({
+    queryKey: statsQueryKeys.dossiersTraites(params),
+    queryFn: () => _get(request.url, { params: request.params }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
 export function useCouvertureRegionsStats(period: Period, national?: boolean) {
-  return useQuery<ICouvertureRegionsStatsResponse>(
-    [...statsQueryKeys.couvertureRegions(period), national] as const,
-    () =>
+  return useQuery<ICouvertureRegionsStatsResponse>({
+    queryKey: [...statsQueryKeys.couvertureRegions(period), national] as const,
+
+    queryFn: () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/couverture-regions", {
         params: buildStatsParams({ period, national }),
       }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
 export function useTraitementMLStats(params: TraitementMLParams) {
@@ -216,26 +223,33 @@ export function usePrefetchTraitementML() {
   );
 }
 
-export function useTraitementRegionsStats(period: Period, national?: boolean) {
-  return useQuery<ITraitementRegionStats[]>(
-    [...statsQueryKeys.traitementRegions(period), national] as const,
-    () =>
+export function useTraitementRegionsStats(period: Period, national?: boolean, segment: StatsSegment = "all") {
+  return useQuery<ITraitementRegionStats[]>({
+    queryKey: [...statsQueryKeys.traitementRegions(period, segment), national] as const,
+
+    queryFn: () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/traitement/regions", {
-        params: buildStatsParams({ period, national }),
+        params: buildStatsParams({ period, national, segment }),
       }),
-    STATS_QUERY_CONFIG
-  );
+    ...STATS_QUERY_CONFIG,
+  });
 }
 
-export function useAccompagnementConjointStats(region?: string, mlId?: string, national?: boolean) {
-  return useQuery<IAccompagnementConjointStats>(
-    [...statsQueryKeys.accompagnementConjoint(region, mlId), national] as const,
-    () =>
-      _get("/api/v1/organisation/indicateurs-ml/stats/accompagnement-conjoint", {
-        params: buildStatsParams({ region, mlId, national }),
-      }),
-    STATS_QUERY_CONFIG
-  );
+export function useCollaborationSegmentStats(params: CollaborationStatsParams) {
+  const request = buildCollaborationsRequest(params);
+  return useQuery<ICollaborationSegmentStats>({
+    queryKey: statsQueryKeys.collaborations(params),
+    queryFn: () => _get(request.url, { params: request.params }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+export function useCollaborationsCfaPublic() {
+  return useQuery<ICollaborationsCfaSyntheseResponse>({
+    queryKey: statsQueryKeys.collaborationsCfa(),
+    queryFn: () => _get("/api/v1/mission-locale/stats/synthese/collaborations-cfa"),
+    ...STATS_QUERY_CONFIG,
+  });
 }
 
 export interface IMissionLocaleMemberResponse {
@@ -265,20 +279,19 @@ export interface IMissionLocaleDetailResponse {
     };
   };
   activated_at: string | null;
+  is_active: boolean;
   last_activity_at: string | null;
   has_cfa_collaboration: boolean;
   traites_count: number;
 }
 
 export function useMissionLocaleDetail(mlId: string) {
-  return useQuery<IMissionLocaleDetailResponse>(
-    statsQueryKeys.missionLocaleDetail(mlId),
-    () => _get(`/api/v1/organisation/indicateurs-ml/mission-locale/${mlId}/detail`),
-    {
-      ...STATS_QUERY_CONFIG,
-      enabled: !!mlId,
-    }
-  );
+  return useQuery<IMissionLocaleDetailResponse>({
+    queryKey: statsQueryKeys.missionLocaleDetail(mlId),
+    queryFn: () => _get(`/api/v1/organisation/indicateurs-ml/mission-locale/${mlId}/detail`),
+    ...STATS_QUERY_CONFIG,
+    enabled: !!mlId,
+  });
 }
 
 export function useUpdateMlParametresAdmin(mlId: string) {
@@ -292,37 +305,37 @@ export function useUpdateMlParametresAdmin(mlId: string) {
 }
 
 export function useMissionLocaleMembres(mlId: string) {
-  return useQuery<IMissionLocaleMemberResponse[]>(
-    statsQueryKeys.missionLocaleMembres(mlId),
-    () => _get(`/api/v1/organisation/indicateurs-ml/mission-locale/${mlId}/membres`),
-    {
-      ...STATS_QUERY_CONFIG,
-      enabled: !!mlId,
-    }
-  );
+  return useQuery<IMissionLocaleMemberResponse[]>({
+    queryKey: statsQueryKeys.missionLocaleMembres(mlId),
+    queryFn: () => _get(`/api/v1/organisation/indicateurs-ml/mission-locale/${mlId}/membres`),
+    ...STATS_QUERY_CONFIG,
+    enabled: !!mlId,
+  });
 }
 
 export function useWhatsAppStats(period: Period) {
-  return useQuery<IWhatsAppStats>(
-    statsQueryKeys.whatsapp(period),
-    () =>
+  return useQuery<IWhatsAppStats>({
+    queryKey: statsQueryKeys.whatsapp(period),
+
+    queryFn: () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/whatsapp", {
         params: { period },
       }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }
 
 /**
  * Indicateurs préqualif WhatsApp (admin-only).
  */
 export function usePrequalifStats(period: Period = "all") {
-  return useQuery<IPrequalifStats>(
-    statsQueryKeys.prequalif(period),
-    () =>
+  return useQuery<IPrequalifStats>({
+    queryKey: statsQueryKeys.prequalif(period),
+
+    queryFn: () =>
       _get("/api/v1/organisation/indicateurs-ml/stats/prequalif", {
         params: { period },
       }),
-    STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA
-  );
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
 }

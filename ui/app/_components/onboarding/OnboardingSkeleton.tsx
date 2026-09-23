@@ -1,6 +1,8 @@
 "use client";
 
-import { Box, Skeleton } from "@mui/material";
+import { Skeleton } from "@/app/_components/common/Skeleton";
+
+import styles from "./OnboardingSkeleton.module.css";
 
 const SIDEBAR_BAR_WIDTHS = [120, 200, 160, 140];
 const MAIN_BAR_WIDTHS: Array<number | string> = [300, 250, "100%", "100%", 200];
@@ -9,18 +11,18 @@ const MAIN_BAR_WIDTHS: Array<number | string> = [300, 250, "100%", "100%", 200];
 // le saut visuel quand les données arrivent.
 export function OnboardingSkeleton() {
   return (
-    <Box sx={{ display: "flex", minHeight: "calc(100vh - 200px)" }}>
-      <Box sx={{ width: "35%", padding: "3.5rem 4rem" }}>
+    <div className={styles.layout}>
+      <div className={styles.sidebar}>
         {SIDEBAR_BAR_WIDTHS.map((w, i) => (
-          <Skeleton key={i} animation="wave" variant="rectangular" width={w} height={16} sx={{ mb: 2 }} />
+          <Skeleton key={i} width={w} height={16} className="fr-mb-2w" />
         ))}
-      </Box>
-      <Box sx={{ flex: 1, padding: "2.5rem 3rem" }}>
-        <Skeleton animation="wave" variant="rectangular" width="70%" height={36} sx={{ mb: 4 }} />
+      </div>
+      <div className={styles.main}>
+        <Skeleton width="70%" height={36} className="fr-mb-4w" />
         {MAIN_BAR_WIDTHS.map((w, i) => (
-          <Skeleton key={i} animation="wave" variant="rectangular" width={w} height={44} sx={{ mb: 2 }} />
+          <Skeleton key={i} width={w} height={44} className="fr-mb-2w" />
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

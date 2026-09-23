@@ -1,9 +1,12 @@
 import { ObjectId } from "bson";
+import type { IOrganisation, IOrganisationMissionLocale } from "shared/models/data/organisations.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import { sendBrevoEvent } from "@/common/services/brevo/brevo";
 import { useMongo } from "@tests/jest/setupMongo";
+import { DeepPartial, testDoc } from "@tests/utils/testUtils";
 
 import { buildOrgaMl, buildOrgaOf, buildUser } from "../contacts/fixtures";
 import { isBrevoEventsActive, isBrevoMlGenericContactsActive } from "../contacts/sync-settings.actions";
@@ -35,10 +38,10 @@ describe("trackBrevoEvent — account-confirmed", () => {
 
   it("construit le payload (email seul + event_date de confirmation) et envoie l'événement", async () => {
     const orga = buildOrgaOf();
-    await organisationsDb().insertOne(orga as any);
+    await organisationsDb().insertOne(testDoc<IOrganisation>(orga));
     const confirmedAt = new Date("2026-01-15T10:00:00.000Z");
     const user = buildUser(orga, { account_status: "CONFIRMED", confirmed_at: confirmedAt });
-    await usersMigrationDb().insertOne(user as any);
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
 
     await trackBrevoEvent("account-confirmed", { userId: user._id.toString() });
 
@@ -52,9 +55,9 @@ describe("trackBrevoEvent — account-confirmed", () => {
 
   it("omet event_date si le compte n'a pas de confirmed_at", async () => {
     const orga = buildOrgaOf();
-    await organisationsDb().insertOne(orga as any);
+    await organisationsDb().insertOne(testDoc<IOrganisation>(orga));
     const user = buildUser(orga, { account_status: "CONFIRMED" });
-    await usersMigrationDb().insertOne(user as any);
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
 
     await trackBrevoEvent("account-confirmed", { userId: user._id.toString() });
 
@@ -64,9 +67,9 @@ describe("trackBrevoEvent — account-confirmed", () => {
   it("no-op si les événements sont inactifs / hors production (garde consumer)", async () => {
     isActiveMock.mockResolvedValue(false);
     const orga = buildOrgaOf();
-    await organisationsDb().insertOne(orga as any);
+    await organisationsDb().insertOne(testDoc<IOrganisation>(orga));
     const user = buildUser(orga, { account_status: "CONFIRMED" });
-    await usersMigrationDb().insertOne(user as any);
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
 
     await trackBrevoEvent("account-confirmed", { userId: user._id.toString() });
 
@@ -89,11 +92,14 @@ describe("trackBrevoEvent — account-confirmed", () => {
 describe("trackBrevoEvent — account-confirmed-ml-generic", () => {
   const confirmedAt = new Date("2026-04-02T07:00:00.000Z");
 
-  const seedMlUser = async (orgaOverride: Record<string, any> = {}, userOverride: Record<string, any> = {}) => {
+  const seedMlUser = async (
+    orgaOverride: DeepPartial<IOrganisationMissionLocale> = {},
+    userOverride: DeepPartial<IUsersMigration> = {}
+  ) => {
     const orga = buildOrgaMl("ML NANTES", orgaOverride);
-    await organisationsDb().insertOne(orga as any);
+    await organisationsDb().insertOne(testDoc<IOrganisation>(orga));
     const user = buildUser(orga, { account_status: "CONFIRMED", confirmed_at: confirmedAt, ...userOverride });
-    await usersMigrationDb().insertOne(user as any);
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
     return user;
   };
 
@@ -148,9 +154,9 @@ describe("trackBrevoEvent — account-confirmed-ml-generic", () => {
   // façon pas d'adresse générique à cibler.
   it("no-op si l'organisation n'est pas une Mission Locale", async () => {
     const orga = buildOrgaOf();
-    await organisationsDb().insertOne(orga as any);
+    await organisationsDb().insertOne(testDoc<IOrganisation>(orga));
     const user = buildUser(orga, { account_status: "CONFIRMED", confirmed_at: confirmedAt });
-    await usersMigrationDb().insertOne(user as any);
+    await usersMigrationDb().insertOne(testDoc<IUsersMigration>(user));
 
     await trackBrevoEvent("account-confirmed-ml-generic", { userId: user._id.toString() });
 

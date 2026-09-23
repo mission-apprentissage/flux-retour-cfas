@@ -1,8 +1,8 @@
 import Boom from "boom";
-import express from "express";
-import Joi from "joi";
+import express, { NextFunction, Request, Response } from "express";
 import passport from "passport";
 import { Strategy as LocalAPIKeyStrategy } from "passport-localapikey";
+import { z } from "zod";
 
 import {
   checkIfEmailExists,
@@ -21,7 +21,7 @@ function checkWebhookKey() {
         apiKeyField: "webhookKey",
       },
       async (apiKey, done) => {
-        return done(null, (config.smtp as any).webhookKey === apiKey ? { apiKey } : false);
+        return done(null, config.smtp.webhookKey === apiKey ? { apiKey } : false);
       }
     )
   );
@@ -32,7 +32,7 @@ function checkWebhookKey() {
 export default () => {
   const router = express.Router(); // eslint-disable-line new-cap
 
-  async function checkEmailToken(req, res, next) {
+  async function checkEmailToken(req: Request<{ token: string }>, res: Response, next: NextFunction) {
     const { token } = req.params;
     if (!(await checkIfEmailExists(token))) {
       return next(Boom.notFound());
@@ -57,12 +57,13 @@ export default () => {
   });
 
   router.post("/webhook", checkWebhookKey(), async (req, res) => {
-    const parameters = await Joi.object({
-      event: Joi.string().required(), //https://developers.sendinblue.com/docs/transactional-webhooks
-      "message-id": Joi.string().required(),
-    })
-      .unknown()
-      .validateAsync(req.body, { abortEarly: false });
+    const parameters = await z
+      .object({
+        event: z.string(), //https://developers.sendinblue.com/docs/transactional-webhooks
+        "message-id": z.string(),
+      })
+      .passthrough()
+      .parseAsync(req.body);
 
     if (parameters.event === "delivered") {
       markEmailAsDelivered(parameters["message-id"]);

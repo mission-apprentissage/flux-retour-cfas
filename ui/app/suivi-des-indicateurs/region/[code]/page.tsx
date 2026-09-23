@@ -1,4 +1,9 @@
+import { Suspense } from "react";
+
 import { RegionView } from "@/app/_components/statistiques/views/RegionView";
+import { getSession } from "@/app/_utils/session.utils";
+
+import { isAdminUser } from "../../access";
 
 interface RegionDetailPageProps {
   params: Promise<{
@@ -7,6 +12,11 @@ interface RegionDetailPageProps {
 }
 
 export default async function RegionDetailMLPage({ params }: RegionDetailPageProps) {
-  const { code } = await params;
-  return <RegionView regionCode={code} isAdmin={false} />;
+  const [{ code }, user] = await Promise.all([params, getSession()]);
+
+  return (
+    <Suspense>
+      <RegionView regionCode={code} isAdmin={isAdminUser(user)} />
+    </Suspense>
+  );
 }

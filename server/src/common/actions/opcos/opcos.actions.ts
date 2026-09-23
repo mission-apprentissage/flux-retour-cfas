@@ -10,11 +10,11 @@ export const findAllOpcos = async () => {
   return opcosDb().find().toArray();
 };
 
-export const findOpco = async (id: string) => {
+export const findOpco = async (id: string | ObjectId) => {
   return opcosDb().findOne({ _id: new ObjectId(id) });
 };
 
-export const findRNCPByOpcosId = async (id: string) => {
+export const findRNCPByOpcosId = async (id: string | ObjectId) => {
   const opco = await findOpco(id);
   if (!opco) {
     throw Boom.notFound(`Opco with id ${id} not found`);

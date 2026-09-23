@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 
 import { ObjectId } from "mongodb";
+import type { IEffectif } from "shared/models";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { it, afterEach, describe, beforeEach } from "vitest";
 
@@ -8,14 +9,15 @@ import { effectifsDb, organismesDb } from "@/common/model/collections";
 import { getEffectifsDuplicatesFromOrganismes } from "@/jobs/fiabilisation/uai-siret/update.utils";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDocs } from "@tests/utils/testUtils";
 
 describe("Job Update Fiabilisation UAI SIRET", () => {
   useMongo();
   describe("getEffectifsDuplicatesFromOrganismes", () => {
-    let organisme1Id;
-    let organisme2Id;
-    let sampleEffectif1;
-    let sampleEffectif2;
+    let organisme1Id: ObjectId;
+    let organisme2Id: ObjectId;
+    let sampleEffectif1: Awaited<ReturnType<typeof createSampleEffectif>>;
+    let sampleEffectif2: Awaited<ReturnType<typeof createSampleEffectif>>;
 
     beforeEach(async () => {
       // Ajout de 2 organismes test
@@ -49,12 +51,14 @@ describe("Job Update Fiabilisation UAI SIRET", () => {
     });
 
     it("Vérifie la récupération des doublons d'effectifs sur 2 organismes", async () => {
-      await effectifsDb().insertMany([
-        { ...sampleEffectif1, organisme_id: organisme1Id },
-        { ...sampleEffectif2, organisme_id: organisme1Id },
-        { ...sampleEffectif1, organisme_id: organisme2Id },
-        { ...sampleEffectif2, organisme_id: organisme2Id },
-      ]);
+      await effectifsDb().insertMany(
+        testDocs<IEffectif>([
+          { ...sampleEffectif1, organisme_id: organisme1Id },
+          { ...sampleEffectif2, organisme_id: organisme1Id },
+          { ...sampleEffectif1, organisme_id: organisme2Id },
+          { ...sampleEffectif2, organisme_id: organisme2Id },
+        ])
+      );
 
       // Récupération des doublons & décompte
       const duplicates = await getEffectifsDuplicatesFromOrganismes(organisme1Id, organisme2Id);
@@ -62,10 +66,12 @@ describe("Job Update Fiabilisation UAI SIRET", () => {
     });
 
     it("Vérifie la non récupération des doublons d'effectifs sur 2 organismes", async () => {
-      await effectifsDb().insertMany([
-        { ...sampleEffectif1, organisme_id: organisme1Id },
-        { ...sampleEffectif2, organisme_id: organisme2Id },
-      ]);
+      await effectifsDb().insertMany(
+        testDocs<IEffectif>([
+          { ...sampleEffectif1, organisme_id: organisme1Id },
+          { ...sampleEffectif2, organisme_id: organisme2Id },
+        ])
+      );
 
       // Récupération des doublons & décompte
       const duplicates = await getEffectifsDuplicatesFromOrganismes(organisme1Id, organisme2Id);

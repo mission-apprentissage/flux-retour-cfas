@@ -1,0 +1,4 @@
+.inactive {
+  opacity: 0.35;
+  filter: grayscale(100%) brightness(1.6);
+}

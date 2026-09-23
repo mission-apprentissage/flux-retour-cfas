@@ -178,7 +178,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
 
       // création ou mise à jour de l'effectif
       const [{ upsertedEffectif, itemProcessingInfos }] = await Promise.all([
-        createOrUpdateEffectif(effectif, 0, organismeTarget.uai),
+        createOrUpdateEffectif(effectif, 0, organismeTarget?.uai),
         updateOrganismeTransmission(
           organisme,
           effectif.source,
@@ -236,7 +236,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
     await handleDECAMechanism(organismeTarget);
 
     return result.success;
-  } catch (err: any) {
+  } catch (err) {
     const error = Boom.internal("failed processing item", ctx);
     error.cause = err;
     captureException(err);
@@ -281,10 +281,10 @@ type ItemProcessingInfos = {
 async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQueue): Promise<{
   result: SafeParseReturnType<IEffectifQueue, { effectif: WithoutId<IEffectif>; organisme: IOrganisme }>;
   itemProcessingInfos: ItemProcessingInfos;
-  organismeTarget: IOrganisme;
+  organismeTarget: IOrganisme | null | undefined;
 }> {
   const itemProcessingInfos: ItemProcessingInfos = {};
-  let organismeTarget: any;
+  let organismeTarget: IOrganisme | null | undefined;
 
   const result = await dossierApprenantSchemaV3
     .transform(async (effectifQueued, ctx): Promise<{ effectif: WithoutId<IEffectif>; organisme: IOrganisme }> => {
@@ -514,11 +514,11 @@ async function findOrganismeWithStats(
   // 3. Des indicateurs pour apporter des informations sur le traitement
   stats.uai = uai_etablissement;
   if (fiabilisationResult.uai !== uai_etablissement) {
-    stats.uai_corrige = fiabilisationResult.uai;
+    stats.uai_corrige = fiabilisationResult.uai ?? undefined;
   }
   stats.siret = siret_etablissement;
   if (fiabilisationResult.siret !== siret_etablissement) {
-    stats.siret_corrige = fiabilisationResult.siret;
+    stats.siret_corrige = fiabilisationResult.siret ?? undefined;
   }
   stats.fiabilisation = fiabilisationResult.statut;
   stats.found = !!organisme;
@@ -528,7 +528,7 @@ async function findOrganismeWithStats(
   return { organisme, stats };
 }
 
-const handleDECAMechanism = async (organismeTarget) => {
+const handleDECAMechanism = async (organismeTarget: IOrganisme | null | undefined) => {
   if (!organismeTarget) {
     logger.error("Cannot find target organisme for this transmission");
     return;

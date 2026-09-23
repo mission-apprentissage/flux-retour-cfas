@@ -5,6 +5,7 @@ import styles from "./StatisticsSection.module.css";
 
 interface StatisticsSectionProps {
   title: string;
+  description?: ReactNode;
   children: ReactNode;
   className?: string;
   width?: "full" | "two-thirds" | "one-third";
@@ -16,6 +17,7 @@ interface StatisticsSectionProps {
 
 export function StatisticsSection({
   title,
+  description,
   children,
   className,
   width = "full",
@@ -34,6 +36,7 @@ export function StatisticsSection({
     <section className={`${styles.section} ${widthClass} ${className || ""}`}>
       <div className={isBelowLeft ? styles.headerColumn : headerClass}>
         <h2 className={titleClass}>{title}</h2>
+        {description && <div className={styles.description}>{description}</div>}
         {controls && <div className={isBelowLeft ? styles.controlsBelowLeft : styles.controls}>{controls}</div>}
       </div>
       {children}

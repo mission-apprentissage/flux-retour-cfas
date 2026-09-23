@@ -2,10 +2,11 @@
 
 import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { API_EFFECTIF_LISTE, IEffectifMissionLocale } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { triQueryDepuisUrl } from "@/app/_utils/ruptures.utils";
 
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 import { PageHeader } from "../../shared/ui/PageHeader";
@@ -20,7 +21,12 @@ const styles = withSharedStyles(localStyles);
 function getMlListInfo(
   effectif: IEffectifMissionLocale["effectif"],
   nomListe: API_EFFECTIF_LISTE | null,
-  codePostal?: string | null
+  codePostal?: string | null,
+  /** Vue d'où provient le dossier : la liste fusionnée alimente les vues prioritaires ET ruptures. */
+  origine?: string | null,
+  criteres?: string | null,
+  sousOnglet?: string | null,
+  triQuery?: string
 ): { label: string; href: string } {
   const statut: API_EFFECTIF_LISTE =
     nomListe ??
@@ -30,9 +36,10 @@ function getMlListInfo(
         ? API_EFFECTIF_LISTE.A_TRAITER
         : API_EFFECTIF_LISTE.TRAITE);
 
-  // Conserve le filtre villes au retour à la liste via le fil d'Ariane.
+  // Conserve les filtres actifs au retour à la liste via le fil d'Ariane.
   const cpQuery = codePostal ? `&cp=${codePostal}` : "";
-  const href = `/mission-locale?statut=${statut}${cpQuery}`;
+  const filtresQuery = `${cpQuery}${criteres ? `&criteres=${criteres}` : ""}${triQuery ?? ""}`;
+  const href = `/mission-locale/ruptures?statut=${statut}${filtresQuery}`;
 
   switch (statut) {
     case API_EFFECTIF_LISTE.INJOIGNABLE:
@@ -41,6 +48,22 @@ function getMlListInfo(
     case API_EFFECTIF_LISTE.TRAITE:
     case API_EFFECTIF_LISTE.TRAITE_PRIORITAIRE:
       return { label: "Dossiers déjà traités", href };
+    case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+      return origine === "ruptures"
+        ? { label: "Tous les dossiers", href }
+        : {
+            label: "Dossiers prioritaires à traiter",
+            href: `/mission-locale${filtresQuery ? `?${filtresQuery.slice(1)}` : ""}`,
+          };
+    case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
+    case API_EFFECTIF_LISTE.COLLAB_TRAITE: {
+      const traites = sousOnglet === "traites" || statut === API_EFFECTIF_LISTE.COLLAB_TRAITE;
+      const query = `${traites ? "sous_onglet=traites" : ""}${filtresQuery}`.replace(/^&/, "");
+      return {
+        label: traites ? "Collaborations CFA traitées" : "Collaborations CFA",
+        href: `/mission-locale/collaborations${query ? `?${query}` : ""}`,
+      };
+    }
     default:
       return { label: "Dossiers à traiter", href };
   }
@@ -60,15 +83,25 @@ export function MlCollaborationDetail({ data }: MlCollaborationDetailProps) {
     : null;
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const collabReceived = !!effectif.organisme_data?.acc_conjoint;
-  const pageRef = useRef<HTMLDivElement>(null);
 
   const codePostal = searchParams?.get("cp");
-  const { label: listLabel, href: listHref } = getMlListInfo(effectif, nomListe, codePostal);
+  const origine = searchParams?.get("origine");
+  const criteres = searchParams?.get("criteres");
+  const sousOnglet = searchParams?.get("sous_onglet");
+  const { label: listLabel, href: listHref } = getMlListInfo(
+    effectif,
+    nomListe,
+    codePostal,
+    origine,
+    criteres,
+    sousOnglet,
+    triQueryDepuisUrl(searchParams?.get("tri"), searchParams?.get("ordre"))
+  );
 
   // Dépend de effectif.id : la navigation Précédent/Suivant change l'[id] sans démonter le composant
   // (data servie depuis le cache react-query), il faut donc re-scroller et re-tracker à chaque dossier.
   useEffect(() => {
-    pageRef.current?.scrollIntoView({ behavior: "instant" });
+    window.scrollTo({ top: 0, behavior: "instant" });
     trackPlausibleEvent("ml_fiche_ouverte", undefined, {
       effectifId: String(effectif.id),
       collaboration: collabReceived,
@@ -76,7 +109,7 @@ export function MlCollaborationDetail({ data }: MlCollaborationDetailProps) {
   }, [effectif.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div ref={pageRef} className={`${styles.page} ${styles.detailPage}`}>
+    <div className={`${styles.page} ${styles.detailPage}`}>
       <Breadcrumb
         currentPageLabel={`${effectif.prenom} ${effectif.nom}`}
         segments={[

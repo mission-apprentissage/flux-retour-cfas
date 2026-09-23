@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useAuth } from "@/app/_context/UserContext";
 import { _put } from "@/common/httpClient";
+import { getUserOrganismeId } from "@/common/internal/AuthContext";
 
 import { cfaQueryKeys } from "../../cfa/hooks";
 
@@ -13,7 +14,7 @@ export function useMarkNotificationAsRead() {
 
   return useMutation({
     mutationFn: async (effectifId: string) => {
-      const organismeId = user?.organisation?.organisme_id;
+      const organismeId = getUserOrganismeId(user);
       if (!organismeId) {
         throw new Error("organismeId not found in user context");
       }

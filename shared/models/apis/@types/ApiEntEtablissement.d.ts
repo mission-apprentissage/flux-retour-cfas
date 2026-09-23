@@ -4,7 +4,7 @@ type ApiEntEtablissement = {
   date_creation: number;
   date_fermeture: number | null;
   etat_administratif: string;
-  enseigne: any;
+  enseigne: string | null;
   activite_principale: {
     code: string;
   };
@@ -17,20 +17,20 @@ type ApiEntEtablissement = {
     de: number;
   };
   adresse: {
-    complement_adresse: any;
+    complement_adresse: string | null;
     numero_voie: string;
     type_voie: string;
     libelle_voie: string;
     code_postal: string;
     libelle_commune: string;
     code_commune: string;
-    code_cedex: any;
+    code_cedex: string | null;
     acheminement_postal: {
       l1: string;
-      l2: any;
-      l3: any;
+      l2: string | null;
+      l3: string | null;
       l4: string;
-      l5: any;
+      l5: string | null;
       l6: string;
       l7: string;
     };

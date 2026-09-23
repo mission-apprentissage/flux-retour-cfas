@@ -1,0 +1,62 @@
+.searchPanel {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-open-blue-france);
+}
+
+.searchRow {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.searchInput {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.filtersRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.errorsToggle {
+  flex: 0 0 auto;
+  max-width: 22rem;
+  margin-bottom: 0;
+}
+
+.resultCount {
+  margin: 2rem 0 1rem;
+  font-weight: 700;
+}
+
+.formationCell {
+  display: block;
+  max-width: 22rem;
+}
+
+.cellSub {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+  white-space: nowrap;
+}
+
+.cellError {
+  font-weight: 500;
+  color: var(--text-default-error);
+}
+
+.statutInconnu {
+  font-weight: 700;
+  color: var(--text-default-error);
+}
+
+.requiredMark {
+  color: var(--text-default-error);
+}

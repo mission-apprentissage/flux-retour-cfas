@@ -117,7 +117,7 @@ describe("Suppression des doublons les plus anciens", () => {
       "Il ne devrait rester que 5 effectifs, un pour chaque id_erp_apprenant"
     );
 
-    const counts = effectifsRestants.reduce((acc, effectif) => {
+    const counts = effectifsRestants.reduce<Record<string, number>>((acc, effectif) => {
       acc[effectif.id_erp_apprenant] = (acc[effectif.id_erp_apprenant] || 0) + 1;
       return acc;
     }, {});

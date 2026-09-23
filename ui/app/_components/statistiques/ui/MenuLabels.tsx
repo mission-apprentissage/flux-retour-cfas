@@ -26,7 +26,7 @@ export function SyntheseLabel({ isActive, collapsed }: MenuLabelProps) {
           fill={isActive ? "#000091" : "#CECECE"}
         />
       </svg>
-      {!collapsed && "Synthèse"}
+      {!collapsed && "Vue d'ensemble"}
     </>
   );
 }
@@ -43,13 +43,7 @@ export function NationalLabel({ isActive, collapsed }: MenuLabelProps) {
 export function MissionLocaleLabel({ isActive, collapsed }: MenuLabelProps) {
   return (
     <>
-      <i
-        className={`ri-school-fill ${styles.menuIcon}`}
-        style={{
-          fontSize: "22px",
-          color: isActive ? "#000091" : "#CECECE",
-        }}
-      />
+      <i className={`ri-school-fill ${styles.menuIcon} ${styles.mlIcon} ${isActive ? styles.mlIconActive : ""}`} />
       {!collapsed && "Par Mission Locale"}
     </>
   );
@@ -57,21 +51,16 @@ export function MissionLocaleLabel({ isActive, collapsed }: MenuLabelProps) {
 
 interface RegionsLabelProps extends MenuLabelProps {
   regionCodes: string[];
+  label?: string;
 }
 
-export function RegionsLabel({ isActive, collapsed, regionCodes }: RegionsLabelProps) {
+export function RegionsLabel({ isActive, collapsed, regionCodes, label }: RegionsLabelProps) {
   return (
     <>
-      <div
-        className={styles.regionsIcon}
-        style={{
-          filter: isActive ? "none" : "grayscale(100%)",
-          opacity: isActive ? 1 : 0.6,
-        }}
-      >
+      <div className={`${styles.regionsIcon} ${isActive ? "" : styles.regionsIconInactive}`}>
         <FranceMapSVG regionsActives={regionCodes} />
       </div>
-      {!collapsed && (regionCodes.length === 1 ? "Ma région" : "Mes régions")}
+      {!collapsed && (label ?? (regionCodes.length === 1 ? "Ma région" : "Mes régions"))}
     </>
   );
 }

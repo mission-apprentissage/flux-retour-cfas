@@ -1,20 +1,18 @@
-"use client";
+import { redirect } from "next/navigation";
+import { getRegionsFromOrganisation, type OrganisationWithRegions } from "shared/utils/organisationRegions";
 
-import { useUserRegions } from "@/app/_components/statistiques/hooks/useUserRegions";
-import { RegionView } from "@/app/_components/statistiques/views/RegionView";
+import { getSession } from "@/app/_utils/session.utils";
 
-export default function RegionMLPage() {
-  const { regions, isLoading } = useUserRegions();
+import { ADMIN_DEFAULT_REGION_CODE, isAdminUser } from "../access";
 
-  if (isLoading) {
-    return <div>Chargement...</div>;
-  }
-
-  const defaultRegionCode = regions[0];
+export default async function RegionMLPage() {
+  const user = await getSession();
+  const regions = user?.organisation ? getRegionsFromOrganisation(user.organisation as OrganisationWithRegions) : [];
+  const defaultRegionCode = isAdminUser(user) ? ADMIN_DEFAULT_REGION_CODE : regions[0];
 
   if (!defaultRegionCode) {
-    return <div>Aucune région disponible</div>;
+    return <p>Aucune région disponible.</p>;
   }
 
-  return <RegionView regionCode={defaultRegionCode} isAdmin={false} />;
+  redirect(`/suivi-des-indicateurs/region/${defaultRegionCode}`);
 }

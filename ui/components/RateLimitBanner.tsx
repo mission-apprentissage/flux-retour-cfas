@@ -1,6 +1,7 @@
 "use client";
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import type { AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
 
 import { emitter } from "@/common/emitter";
@@ -27,7 +28,7 @@ export default function RateLimitBanner() {
   useEffect(() => {
     let hideTimer: ReturnType<typeof setTimeout> | undefined;
 
-    const onHttpError = (response: any) => {
+    const onHttpError = (response: AxiosResponse) => {
       if (response?.status !== RATE_LIMIT_STATUS) return;
       const url: string = response?.config?.url ?? "";
       if (INLINE_HANDLED_PATHS.some((path) => url.includes(path))) return;

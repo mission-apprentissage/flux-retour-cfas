@@ -6,7 +6,12 @@
  */
 
 import { ObjectId } from "bson";
-import type { IAggregatedStats, StatsPeriod } from "shared/models/data/nationalStats.model";
+import type {
+  ICollabSegmentStats,
+  IMissionLocaleStatsSegments,
+  ISegmentStats,
+} from "shared/models/data/missionLocaleStats.model";
+import type { StatsPeriod, StatsSegment } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
 import { calculatePercentage } from "shared/utils/stats";
 
@@ -22,25 +27,6 @@ export const TIME_SERIES_POINTS_COUNT = 6;
  * Une ML est considérée "engagée" si elle a traité au moins 70% de ses dossiers
  */
 export const ENGAGEMENT_THRESHOLD = 0.7;
-
-/** Stats par défaut quand aucune donnée n'est disponible */
-export const EMPTY_STATS: IAggregatedStats = {
-  total: 0,
-  total_a_traiter: 0,
-  total_traites: 0,
-  rdv_pris: 0,
-  rdv_pris_decouverts: 0,
-  nouveau_projet: 0,
-  contacte_sans_retour: 0,
-  injoignables: 0,
-  coordonnees_incorrectes: 0,
-  autre_avec_contact: 0,
-  cherche_contrat: 0,
-  reorientation: 0,
-  ne_veut_pas_accompagnement: 0,
-  ne_souhaite_pas_etre_recontacte: 0,
-  deja_connu: 0,
-};
 
 /**
  * Construit un pipeline de lookup pour récupérer les organisations liées
@@ -104,15 +90,9 @@ export const buildPercentageExpression = (numerator: MongoExpression, denominato
 /**
  * Récupère les IDs des Missions Locales d'une région donnée
  */
-export const getMissionLocaleIdsByRegion = async (region: string): Promise<ObjectId[]> => {
+export const getMissionLocaleIdsByRegions = async (regions: string[]): Promise<ObjectId[]> => {
   const mls = await organisationsDb()
-    .find(
-      {
-        type: "MISSION_LOCALE",
-        "adresse.region": region,
-      },
-      { projection: { _id: 1 } }
-    )
+    .find({ type: "MISSION_LOCALE", "adresse.region": { $in: regions } }, { projection: { _id: 1 } })
     .toArray();
 
   return mls.map((ml) => ml._id);
@@ -175,6 +155,124 @@ export async function calculateStartDateAsync(period: StatsPeriod, referenceDate
   return calculateStartDate(period, referenceDate);
 }
 
+export type ISituationCounters = {
+  rdv_pris: number;
+  nouveau_projet: number;
+  deja_accompagne: number;
+  contacte_sans_retour: number;
+  injoignables: number;
+  coordonnees_incorrectes: number;
+  autre: number;
+  cherche_contrat: number;
+  reorientation: number;
+  ne_veut_pas_accompagnement: number;
+  ne_souhaite_pas_etre_recontacte: number;
+  autre_avec_contact: number;
+};
+
+export type ISituationBuckets = {
+  rdv_pris: number;
+  projet_pro_securise: number;
+  ne_souhaite_pas_accompagnement: number;
+  a_recontacter: number;
+  injoignable: number;
+  autre: number;
+  autre_avec_contact: number;
+  repondu: number;
+};
+
+export const buildSituationBuckets = (counters: ISituationCounters): ISituationBuckets => {
+  const ne_souhaite_pas_accompagnement =
+    counters.ne_veut_pas_accompagnement +
+    counters.ne_souhaite_pas_etre_recontacte +
+    counters.cherche_contrat +
+    counters.reorientation;
+
+  return {
+    rdv_pris: counters.rdv_pris,
+    projet_pro_securise: counters.nouveau_projet,
+    ne_souhaite_pas_accompagnement,
+    a_recontacter: counters.contacte_sans_retour,
+    injoignable: counters.injoignables + counters.coordonnees_incorrectes,
+    autre: counters.autre + counters.deja_accompagne,
+    autre_avec_contact: counters.autre_avec_contact,
+    repondu: counters.rdv_pris + counters.nouveau_projet + ne_souhaite_pas_accompagnement + counters.autre_avec_contact,
+  };
+};
+
+export type ISegmentRawCounters = ISituationCounters & {
+  total: number;
+  a_traiter: number;
+  traite: number;
+  rdv_pris_decouverts: number;
+  deja_connu_accompagne: number;
+};
+
+export type ICollabSegmentRawCounters = ISegmentRawCounters & {
+  situation_rupture: number;
+  situation_abandon: number;
+  situation_prevention_inevitable: number;
+  situation_prevention_tres_eleve: number;
+  situation_prevention_modere: number;
+  situation_besoin_aide_hors_rupture: number;
+  delai_premiere_activite_jours_total: number;
+  delai_premiere_activite_count: number;
+};
+
+export const toSegmentStats = (raw: ISegmentRawCounters): ISegmentStats => ({
+  total: raw.total,
+  a_traiter: raw.a_traiter,
+  traite: raw.traite,
+  rdv_pris_decouverts: raw.rdv_pris_decouverts,
+  deja_connu_accompagne: raw.deja_connu_accompagne,
+  ...buildSituationBuckets(raw),
+});
+
+export const toCollabSegmentStats = (raw: ICollabSegmentRawCounters): ICollabSegmentStats => ({
+  ...toSegmentStats(raw),
+  situation_rupture: raw.situation_rupture,
+  situation_abandon: raw.situation_abandon,
+  situation_prevention_inevitable: raw.situation_prevention_inevitable,
+  situation_prevention_tres_eleve: raw.situation_prevention_tres_eleve,
+  situation_prevention_modere: raw.situation_prevention_modere,
+  situation_besoin_aide_hors_rupture: raw.situation_besoin_aide_hors_rupture,
+  delai_premiere_activite_jours_total: raw.delai_premiere_activite_jours_total,
+  delai_premiere_activite_count: raw.delai_premiere_activite_count,
+});
+
+export const EMPTY_SEGMENT_STATS: ISegmentStats = {
+  total: 0,
+  a_traiter: 0,
+  traite: 0,
+  repondu: 0,
+  rdv_pris: 0,
+  rdv_pris_decouverts: 0,
+  projet_pro_securise: 0,
+  ne_souhaite_pas_accompagnement: 0,
+  a_recontacter: 0,
+  injoignable: 0,
+  autre: 0,
+  autre_avec_contact: 0,
+  deja_connu_accompagne: 0,
+};
+
+export const EMPTY_COLLAB_SEGMENT_STATS: ICollabSegmentStats = {
+  ...EMPTY_SEGMENT_STATS,
+  situation_rupture: 0,
+  situation_abandon: 0,
+  situation_prevention_inevitable: 0,
+  situation_prevention_tres_eleve: 0,
+  situation_prevention_modere: 0,
+  situation_besoin_aide_hors_rupture: 0,
+  delai_premiere_activite_jours_total: 0,
+  delai_premiere_activite_count: 0,
+};
+
+export const buildEmptySegments = (): IMissionLocaleStatsSegments => ({
+  rupture: { ...EMPTY_SEGMENT_STATS },
+  collab: { ...EMPTY_COLLAB_SEGMENT_STATS },
+});
+
 export const buildTotalTraitesV2Expression = (statsPath = "$latest_stats") => ({
   $ifNull: [`${statsPath}.traite`, 0],
 });
@@ -196,37 +294,131 @@ export function createStatWithVariation(current: number, previous: number) {
  */
 const LATEST_STATS_LOOKBACK_DAYS = 30;
 
+export const listUtcDays = (start: Date, end: Date): Date[] => {
+  const days: Date[] = [];
+  const cursor = normalizeToUTCDay(start);
+  const last = normalizeToUTCDay(end);
+  while (cursor <= last) {
+    days.push(new Date(cursor));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return days;
+};
+
 export const getLatestStatsLowerBound = (referenceDate: Date): Date => {
   const bound = new Date(referenceDate);
   bound.setUTCDate(bound.getUTCDate() - LATEST_STATS_LOOKBACK_DAYS);
   return normalizeToUTCDay(bound);
 };
 
+const sumOrZero = (...paths: string[]) => ({ $add: paths.map((path) => ({ $ifNull: [path, 0] })) });
+
+const buildAllSegmentViewExpr = (statsPath: string) => {
+  const field = (name: string) => ({ $ifNull: [`${statsPath}.${name}`, 0] });
+  const neSouhaitePas = sumOrZero(
+    `${statsPath}.ne_veut_pas_accompagnement`,
+    `${statsPath}.ne_souhaite_pas_etre_recontacte`,
+    `${statsPath}.cherche_contrat`,
+    `${statsPath}.reorientation`
+  );
+  return {
+    total: field("total"),
+    a_traiter: field("a_traiter"),
+    traite: field("traite"),
+    repondu: {
+      $add: [field("rdv_pris"), field("nouveau_projet"), neSouhaitePas, field("autre_avec_contact")],
+    },
+    rdv_pris: field("rdv_pris"),
+    rdv_pris_decouverts: field("rdv_pris_decouverts"),
+    projet_pro_securise: field("nouveau_projet"),
+    ne_souhaite_pas_accompagnement: neSouhaitePas,
+    a_recontacter: field("contacte_sans_retour"),
+    injoignable: sumOrZero(`${statsPath}.injoignables`, `${statsPath}.coordonnees_incorrectes`),
+    autre: sumOrZero(`${statsPath}.autre`, `${statsPath}.deja_accompagne`),
+    autre_avec_contact: field("autre_avec_contact"),
+    deja_connu_accompagne: { $literal: 0 },
+  };
+};
+
 /**
- * Construit un pipeline pour les stats cumulatives jusqu'à une date donnée
+ * Vue normalisée d'un document missionLocaleStats pour un segment donné, avec repli
+ * pour les documents antérieurs au backfill : rupture ⇒ stats, collab ⇒ zéros.
  */
-export const buildCumulativeStatsPipeline = (targetDate: Date, missionLocaleIds?: ObjectId[]) => {
-  const matchFilter = withMissionLocaleFilter(
-    { computed_day: { $lte: targetDate, $gte: getLatestStatsLowerBound(targetDate) } },
+export const buildSegmentViewExpr = (
+  segment: StatsSegment,
+  statsPath = "$latest_stats",
+  segmentsPath = "$latest_segments"
+) => {
+  switch (segment) {
+    case "all":
+      return buildAllSegmentViewExpr(statsPath);
+    case "rupture":
+      return { $ifNull: [`${segmentsPath}.rupture`, buildAllSegmentViewExpr(statsPath)] };
+    case "collab":
+      return { $ifNull: [`${segmentsPath}.collab`, { $literal: EMPTY_COLLAB_SEGMENT_STATS }] };
+  }
+};
+
+export const SEGMENT_VIEW_KEYS = Object.keys(EMPTY_SEGMENT_STATS) as Array<keyof ISegmentStats>;
+export const COLLAB_VIEW_KEYS = Object.keys(EMPTY_COLLAB_SEGMENT_STATS) as Array<keyof ICollabSegmentStats>;
+
+/** Accumulateurs `$sum` d'une vue segment, pour agréger plusieurs ML. */
+export const buildSegmentSumAccumulators = (viewPath = "$view", keys: readonly string[] = COLLAB_VIEW_KEYS) =>
+  Object.fromEntries(keys.map((key) => [key, { $sum: { $ifNull: [`${viewPath}.${key}`, 0] } }]));
+
+/** Dernier document de stats par ML dans la fenêtre, avec `stats` et `segments`. */
+export const buildLatestPerMlStages = (
+  matchFilter: Record<string, unknown>,
+  sortOrder: 1 | -1 = -1
+): Record<string, unknown>[] => [
+  { $match: matchFilter },
+  { $sort: { computed_day: sortOrder } },
+  {
+    $group: {
+      _id: "$mission_locale_id",
+      latest_stats: { $first: "$stats" },
+      latest_segments: { $first: "$segments" },
+    },
+  },
+];
+
+export const buildLatestStatsMatch = (endDate: Date, missionLocaleIds?: ObjectId[]) =>
+  withMissionLocaleFilter(
+    { computed_day: { $lte: endDate, $gte: getLatestStatsLowerBound(endDate) } },
     missionLocaleIds
   );
 
-  return [
-    { $match: matchFilter },
-    { $sort: { computed_day: -1 as const } },
+export const buildDelaiMoyenExpr = (collabPath = "$latest_segments.collab") => ({
+  $cond: [
+    { $gt: [{ $ifNull: [`${collabPath}.delai_premiere_activite_count`, 0] }, 0] },
     {
-      $group: {
-        _id: "$mission_locale_id",
-        latest_stats: { $first: "$stats" },
-      },
+      $round: [
+        {
+          $divide: [`${collabPath}.delai_premiere_activite_jours_total`, `${collabPath}.delai_premiere_activite_count`],
+        },
+        1,
+      ],
     },
-    {
-      $group: {
-        _id: null,
-        total: { $sum: "$latest_stats.total" },
-        total_traites: { $sum: buildTotalTraitesV2Expression() },
-        total_a_traiter: { $sum: "$latest_stats.a_traiter" },
-      },
+    null,
+  ],
+});
+
+/**
+ * Construit un pipeline pour les stats cumulatives jusqu'à une date donnée
+ */
+export const buildCumulativeStatsPipeline = (
+  targetDate: Date,
+  missionLocaleIds: ObjectId[] | undefined,
+  segment: StatsSegment
+) => [
+  ...buildLatestPerMlStages(buildLatestStatsMatch(targetDate, missionLocaleIds)),
+  { $addFields: { view: buildSegmentViewExpr(segment) } },
+  {
+    $group: {
+      _id: null,
+      total: { $sum: "$view.total" },
+      total_traites: { $sum: "$view.traite" },
+      total_a_traiter: { $sum: "$view.a_traiter" },
     },
-  ];
-};
+  },
+];

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
 export const zOrganismeReferentiel = z.object({
-  _id: zObjectId,
+  _id: zObjectId.optional(),
   siret: z.string(),
   uai: z.string().optional(),
   raison_sociale: z.string().optional(),
@@ -33,7 +33,7 @@ export const zOrganismeReferentiel = z.object({
           type: z.string(),
           geometry: z.object({
             type: z.string(),
-            coordinates: z.array(z.any()),
+            coordinates: z.array(z.unknown()),
           }),
           properties: z
             .object({

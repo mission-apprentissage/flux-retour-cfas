@@ -1,4 +1,3 @@
-import React from "react";
 import { Acl, IOrganisationJson } from "shared";
 
 export interface AuthContext<IOrganisation extends IOrganisationJson = IOrganisationJson> {
@@ -28,7 +27,6 @@ export interface AuthContext<IOrganisation extends IOrganisationJson = IOrganisa
 }
 
 // contexte côté UI
-export interface IAuthenticationContext {
-  auth: AuthContext;
-  setAuth: React.Dispatch<AuthContext>;
-}
+
+export const getUserOrganismeId = (user: AuthContext | null | undefined): string | undefined =>
+  user?.organisation?.type === "ORGANISME_FORMATION" ? (user.organisation.organisme_id ?? undefined) : undefined;

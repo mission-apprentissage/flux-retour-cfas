@@ -1,5 +1,6 @@
 import Boom from "boom";
 import { ObjectId } from "mongodb";
+import type { IOrganisationMissionLocale } from "shared/models";
 import { IInvitation } from "shared/models/data/invitations.model";
 
 import logger from "@/common/logger";
@@ -25,8 +26,15 @@ import { enqueueBrevoContactSync, enqueueBrevoOrganisationContactSync } from "./
 import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
 import { buildOrganisationLabel, createOrganisation, getOrganisationById } from "./organisations.actions";
 import { getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
+import { resumeCollab } from "./organismes/organismes.admin.actions";
 import { createSession } from "./sessions.actions";
-import { authenticate, createUser, getUserByEmail, updateUserLastConnection } from "./users.actions";
+import {
+  authenticate,
+  createUser,
+  getUserByEmail,
+  isEmailAlreadyUsed,
+  updateUserLastConnection,
+} from "./users.actions";
 
 export async function register(registration: RegistrationSchema): Promise<{
   account_status: "PENDING_EMAIL_VALIDATION" | "CONFIRMED";
@@ -146,8 +154,25 @@ export async function login(email: string, password: string): Promise<string> {
 
   await updateUserLastConnection(user._id);
 
+  try {
+    await resumeCollabOnReconnection(user.organisation_id, user._id);
+  } catch (err) {
+    logger.error({ err, userId: user._id }, "collab resume on reconnection failed");
+  }
+
   const sessionToken = await createSession(email);
   return sessionToken;
+}
+
+async function resumeCollabOnReconnection(organisationId: ObjectId, userId: ObjectId) {
+  const organisation = await organisationsDb().findOne(
+    { _id: organisationId },
+    { projection: { type: 1, organisme_id: 1 } }
+  );
+  if (organisation?.type !== "ORGANISME_FORMATION" || !organisation.organisme_id) {
+    return;
+  }
+  await resumeCollab(new ObjectId(organisation.organisme_id), { reason: "reconnexion", userId });
 }
 
 /**
@@ -317,12 +342,7 @@ export async function registerCfa(data: RegistrationCfaSchema): Promise<{
     throw Boom.unauthorized("Le lien d'invitation a expiré. Veuillez demander une nouvelle invitation.");
   }
 
-  const emailEsc = invitation.email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const alreadyExists = await usersMigrationDb().findOne(
-    { email: { $regex: `^${emailEsc}$`, $options: "i" } },
-    { projection: { _id: 1 } }
-  );
-  if (alreadyExists) {
+  if (await isEmailAlreadyUsed(invitation.email)) {
     throw Boom.conflict("Cet email est déjà utilisé.");
   }
 
@@ -427,9 +447,9 @@ export async function getCfaOnboardingInfo(token: string) {
         .toArray()
     : [];
 
-  const cfaBetaOrganismeIds = cfaBetaOrganisations
-    .filter((o: any) => o.organisme_id)
-    .map((o: any) => new ObjectId(o.organisme_id));
+  const cfaBetaOrganismeIds = cfaBetaOrganisations.flatMap((o) =>
+    "organisme_id" in o && o.organisme_id ? [new ObjectId(o.organisme_id)] : []
+  );
 
   const cfaConnectesCount =
     cfaBetaOrganismeIds.length > 0
@@ -455,12 +475,12 @@ export async function getCfaOnboardingInfo(token: string) {
       departement,
     },
     missionsLocales: missionsLocales.map((ml) => {
-      const mlAny = ml as any;
+      const details = ml as IOrganisationMissionLocale;
       return {
         _id: ml._id,
-        nom: mlAny.nom as string,
-        commune: mlAny.adresse?.commune as string | undefined,
-        codePostal: mlAny.adresse?.code_postal as string | undefined,
+        nom: details.nom,
+        commune: details.adresse?.commune,
+        codePostal: details.adresse?.code_postal,
       };
     }),
     cfaConnectesCount,

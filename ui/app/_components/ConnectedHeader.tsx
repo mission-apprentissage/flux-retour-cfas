@@ -1,29 +1,53 @@
 "use client";
 
 import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
+import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { usePathname } from "next/navigation";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
+import { PAGES } from "@/app/_utils/routes.utils";
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
-import { isCfaWithMlBeta as checkCfaWithMlBeta } from "@/common/utils/cfaUtils";
+import { getUserOrganismeId } from "@/common/internal/AuthContext";
 
 import { useAuth } from "../_context/UserContext";
 import { usePlausibleAppTracking } from "../_hooks/plausible";
 
+import styles from "./ConnectedHeader.module.css";
 import { Impersonate } from "./Impersonate";
 import { useCfaUnreadNotificationsCount } from "./ruptures/cfa/hooks";
 import { UserConnectedHeader } from "./UserConnectedHeader";
+
+// Onglets des DREETS/DDETS mis en pause pendant les travaux : les anciennes URL restent valides et affichent la page travaux.
+const ONGLETS_EN_PAUSE = [
+  { text: "Mon Tableau de bord", href: "/home" },
+  { text: "Mon territoire", href: "/organismes" },
+  { text: "Mes indicateurs", href: "/indicateurs" },
+  { text: "Vœux Affelnet", href: "/voeux-affelnet" },
+  { text: "Indicateurs nationaux", href: "/national/indicateurs" },
+];
+
+function OngletEnPause({ label }: { label: string }) {
+  return (
+    <span>
+      {label}
+      <i className={`ri-tools-fill ${styles.pausedMark}`} aria-hidden="true" />
+      <span className="fr-sr-only">(fonctionnalité en pause pendant les travaux)</span>
+    </span>
+  );
+}
 
 export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   const { user } = useAuth();
   const pathname = usePathname();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
-  const isCfaWithMlBeta = checkCfaWithMlBeta(user?.organisation);
-  const { data: unreadData } = useCfaUnreadNotificationsCount(
-    isCfaWithMlBeta ? user?.organisation?.organisme_id : undefined
-  );
+  const isCfa = user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION;
+  const { data: unreadData } = useCfaUnreadNotificationsCount(isCfa ? getUserOrganismeId(user) : undefined);
   const unreadCount = unreadData?.count ?? 0;
+
+  // Nav plus dense : ces profils ont deux onglets de plus que les autres pendant les travaux.
+  const aOngletsEnPause =
+    user?.organisation?.type === ORGANISATION_TYPE.DREETS || user?.organisation?.type === ORGANISATION_TYPE.DDETS;
 
   const getMesOrganismesLabel = (type: string) => {
     switch (type) {
@@ -46,111 +70,88 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
     if (!withNav) return undefined;
 
     const organisationType = user?.organisation?.type;
-    const baseItems: any[] = [];
+    const baseItems: MainNavigationProps["items"] = [];
 
     if (organisationType === ORGANISATION_TYPE.MISSION_LOCALE) {
       baseItems.push({
-        text: "Mon tableau de bord",
+        text: "Dossiers prioritaires",
+        isActive: pathname === "/mission-locale",
         linkProps: {
           href: "/mission-locale",
+          target: "_self",
+          onClick: () => trackPlausibleEvent("ml_onglet_prioritaires_ouvert"),
+        },
+      });
+      baseItems.push({
+        text: "Collaborations CFA",
+        isActive: pathname?.startsWith("/mission-locale/collaborations"),
+        linkProps: {
+          href: "/mission-locale/collaborations",
+          target: "_self",
+          onClick: () => trackPlausibleEvent("ml_onglet_collaborations_ouvert"),
+        },
+      });
+      baseItems.push({
+        text: "Tous les dossiers",
+        isActive: pathname?.startsWith("/mission-locale/ruptures"),
+        linkProps: {
+          href: "/mission-locale/ruptures",
+          target: "_self",
+          onClick: () => trackPlausibleEvent("ml_onglet_ruptures_ouvert"),
+        },
+      });
+      baseItems.push({
+        text: "Inviter les CFA",
+        isActive: pathname?.startsWith("/mission-locale/inviter-les-cfa"),
+        linkProps: {
+          href: "/mission-locale/inviter-les-cfa",
           target: "_self",
         },
       });
     } else if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION) {
-      if (user?.organisation?.ml_beta_activated_at) {
-        baseItems.push({
-          text: "Effectifs en ruptures",
-          isActive:
-            pathname === "/cfa" ||
-            (pathname?.startsWith("/cfa/") &&
-              !pathname?.startsWith("/cfa/effectifs") &&
-              !pathname?.startsWith("/cfa/collaborations") &&
-              !pathname?.startsWith("/cfa/parametres")),
-          linkProps: {
-            href: "/cfa",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
-              Suivi Missions Locales
-              {unreadCount > 0 && (
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    backgroundColor: "var(--text-default-error)",
-                    flexShrink: 0,
-                  }}
-                  role="status"
-                  aria-label={`${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}`}
-                />
-              )}
-            </span>
-          ),
-          isActive: pathname?.startsWith("/cfa/collaborations"),
-          linkProps: {
-            href: "/cfa/collaborations",
-            target: "_self",
-            onClick: () => trackPlausibleEvent("cfa_liste_onglet_collab"),
-          },
-        });
-        baseItems.push({
-          text: "Tous mes effectifs",
-          isActive: pathname?.startsWith("/cfa/effectifs"),
-          linkProps: {
-            href: "/cfa/effectifs",
-            target: "_self",
-            onClick: () => trackPlausibleEvent("cfa_liste_onglet_tous"),
-          },
-        });
-      } else {
-        baseItems.push({
-          text: "Mon tableau de bord",
-          linkProps: {
-            href: "/",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: "Mes organismes",
-          linkProps: {
-            href: "/organismes",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: "Mes indicateurs",
-          linkProps: {
-            href: "/indicateurs",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: "Mes effectifs",
-          linkProps: {
-            href: "/effectifs",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: "Mon enquête SIFA",
-          linkProps: {
-            href: "/enquete-sifa",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: "Indicateurs Nationaux",
-          linkProps: {
-            href: "/national/indicateurs",
-            target: "_self",
-          },
-        });
-      }
+      baseItems.push({
+        text: "Effectifs de l'établissement",
+        isActive: pathname?.startsWith("/cfa/effectifs"),
+        linkProps: {
+          href: "/cfa/effectifs",
+          target: "_self",
+          onClick: () => trackPlausibleEvent("cfa_liste_onglet_tous"),
+        },
+      });
+      baseItems.push({
+        text: (
+          <span className={styles.navLabel}>
+            Collaboration et suivi Missions Locales
+            {unreadCount > 0 && (
+              <span
+                className={styles.unreadDot}
+                role="status"
+                aria-label={`${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}`}
+              />
+            )}
+          </span>
+        ),
+        isActive: pathname?.startsWith("/cfa/collaborations"),
+        linkProps: {
+          href: "/cfa/collaborations",
+          target: "_self",
+          onClick: () => trackPlausibleEvent("cfa_liste_onglet_collab"),
+        },
+      });
+      baseItems.push({
+        text: (
+          <span className={styles.aProposItem}>
+            À propos de la nouvelle version
+            <i className="fr-icon-information-line fr-icon--sm" aria-hidden="true" />
+          </span>
+        ),
+        isActive: pathname?.startsWith("/cfa/a-propos"),
+        linkProps: {
+          href: "/cfa/a-propos",
+          target: "_self",
+          className: styles.aProposLink,
+        },
+      });
     } else if (
       [
         ORGANISATION_TYPE.TETE_DE_RESEAU,
@@ -163,9 +164,9 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
       if (organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) {
         baseItems.push({
           text: "Suivi des indicateurs",
-          isActive: pathname?.startsWith("/admin/suivi-des-indicateurs"),
+          isActive: pathname?.startsWith("/suivi-des-indicateurs"),
           linkProps: {
-            href: "/admin/suivi-des-indicateurs",
+            href: "/suivi-des-indicateurs",
             target: "_self",
           },
         });
@@ -179,44 +180,74 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
             target: "_self",
           },
         });
+        ONGLETS_EN_PAUSE.forEach(({ text, href }) => {
+          baseItems.push({
+            text: <OngletEnPause label={text} />,
+            isActive: pathname === href || pathname?.startsWith(`${href}/`),
+            linkProps: {
+              href,
+              target: "_self",
+            },
+          });
+        });
       }
-      baseItems.push({
-        text: "Mon tableau de bord",
-        linkProps: {
-          href: "/home",
-          target: "_self",
-        },
-      });
-      baseItems.push({
-        text: getMesOrganismesLabel(organisationType || ""),
-        linkProps: {
-          href: "/organismes",
-          target: "_self",
-        },
-      });
-      baseItems.push({
-        text: "Mes indicateurs",
-        linkProps: {
-          href: "/indicateurs",
-          target: "_self",
-        },
-      });
-      if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.ACADEMIE) {
+      if (
+        organisationType === ORGANISATION_TYPE.TETE_DE_RESEAU ||
+        organisationType === ORGANISATION_TYPE.ADMINISTRATEUR
+      ) {
         baseItems.push({
-          text: "Vœux Affelnet",
+          text: getMesOrganismesLabel(organisationType || ""),
           linkProps: {
-            href: "/voeux-affelnet",
+            href: "/organismes",
             target: "_self",
           },
         });
       }
-      baseItems.push({
-        text: "Indicateurs Nationaux",
-        linkProps: {
-          href: "/national/indicateurs",
-          target: "_self",
-        },
-      });
+      if (organisationType === ORGANISATION_TYPE.ACADEMIE) {
+        baseItems.push({
+          text: "Vœux Affelnet",
+          linkProps: {
+            href: PAGES.static.voeuxAffelnet.getPath(),
+            target: "_self",
+          },
+        });
+      }
+      if (organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) {
+        baseItems.push({
+          text: "Gestion des utilisateurs",
+          isActive: pathname?.startsWith("/admin/users"),
+          linkProps: {
+            href: "/admin/users",
+            target: "_self",
+          },
+        });
+        baseItems.push({
+          text: "Impostures",
+          isActive: pathname?.startsWith("/admin/impostures"),
+          linkProps: {
+            href: "/admin/impostures",
+            target: "_self",
+          },
+        });
+        baseItems.push({
+          text: "Administration",
+          isActive:
+            !!pathname?.startsWith("/admin") &&
+            !pathname?.startsWith("/admin/users") &&
+            !pathname?.startsWith("/admin/impostures"),
+          menuLinks: [
+            { text: "Gestion des réseaux", linkProps: { href: "/admin/reseaux", target: "_self" } },
+            { text: "Toutes les transmissions", linkProps: { href: "/admin/transmissions", target: "_self" } },
+            { text: "Recherche d'un organisme", linkProps: { href: "/admin/organismes/recherche", target: "_self" } },
+            { text: "Fusion d'organismes", linkProps: { href: "/admin/fusion-organismes", target: "_self" } },
+            {
+              text: "Organismes absents du référentiel",
+              linkProps: { href: "/admin/organismes/gestion", target: "_self" },
+            },
+            { text: "Listes de contacts Brevo", linkProps: { href: "/admin/brevo-contacts", target: "_self" } },
+          ],
+        });
+      }
     } else if (organisationType === ORGANISATION_TYPE.ARML) {
       baseItems.push({
         text: "Suivi des indicateurs",
@@ -249,7 +280,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
     if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) {
       aideMenuLinks.push({
         linkProps: {
-          href: "https://cfas.apprentissage.beta.gouv.fr/docs/kit-deploiement-tba-op",
+          href: PAGES.static.docsKitDeploiementTbaOp.getPath(),
           target: "_blank",
           rel: "noopener noreferrer",
         },
@@ -273,7 +304,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
     ) {
       aideMenuLinks.push({
         linkProps: {
-          href: "/referencement-organisme",
+          href: PAGES.static.referencementOrganisme.getPath(),
           target: "_self",
         },
         text: "Référencement de votre organisme",
@@ -282,13 +313,13 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
 
     aideMenuLinks.push({
       linkProps: {
-        href: "/glossaire",
+        href: PAGES.static.glossaire.getPath(),
         target: "_self",
       },
       text: "Glossaire",
     });
 
-    if (!isCfaWithMlBeta) {
+    if (!isCfa) {
       baseItems.push({
         text: "Aide et ressources",
         menuLinks: aideMenuLinks,
@@ -300,6 +331,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
 
   return (
     <DsfrHeader
+      className={aOngletsEnPause ? styles.headerOngletsEnPause : undefined}
       brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
       homeLinkProps={{
         href: "/",
@@ -309,6 +341,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
       serviceTitle={PRODUCT_NAME_TITLE}
       quickAccessItems={[<Impersonate key="impersonate" />, <UserConnectedHeader key="user-connected" />]}
       navigation={getNavigationItems()}
+      disableDisplay
     />
   );
 }
