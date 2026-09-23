@@ -1,3 +1,4 @@
+import { accountConfirmedMlGenericEvent } from "./account-confirmed-ml-generic.event";
 import { accountConfirmedEvent } from "./account-confirmed.event";
 import { BrevoEventDefinition } from "./types";
 
@@ -5,6 +6,7 @@ import { BrevoEventDefinition } from "./types";
 // Pour ajouter un événement : importer sa définition et l'enregistrer ci-dessous.
 export const brevoEventRegistry: Record<string, BrevoEventDefinition> = {
   [accountConfirmedEvent.key]: accountConfirmedEvent,
+  [accountConfirmedMlGenericEvent.key]: accountConfirmedMlGenericEvent,
 };
 
 export const getBrevoEvent = (key: string): BrevoEventDefinition => {

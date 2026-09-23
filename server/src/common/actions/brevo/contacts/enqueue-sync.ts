@@ -3,7 +3,7 @@ import { addJob } from "job-processor";
 
 import logger from "@/common/logger";
 
-import { isBrevoInstantSyncActive } from "./sync-settings.actions";
+import { isBrevoInstantSyncActive, isBrevoMlGenericContactsActive } from "./sync-settings.actions";
 
 /**
  * Enfile (asynchrone) une synchro Brevo unitaire pour un utilisateur.
@@ -18,5 +18,26 @@ export const enqueueBrevoContactSync = async (userId: ObjectId | string): Promis
     await addJob({ name: "brevo-contacts:sync-one", payload: { userId: String(userId) }, queued: true });
   } catch (err) {
     logger.error({ err, userId: String(userId) }, "Échec de l'enqueue de la synchro Brevo unitaire");
+  }
+};
+
+/**
+ * Enfile une synchro Brevo unitaire pour le contact dérivé d'une organisation
+ * (adresse générique d'une Mission Locale). Mêmes garanties que
+ * `enqueueBrevoContactSync` : no-op si désactivé, ne lève jamais.
+ */
+export const enqueueBrevoOrganisationContactSync = async (organisationId: ObjectId | string): Promise<void> => {
+  try {
+    if (!(await isBrevoInstantSyncActive()) || !(await isBrevoMlGenericContactsActive())) return;
+    await addJob({
+      name: "brevo-contacts:sync-one-organisation",
+      payload: { organisationId: String(organisationId) },
+      queued: true,
+    });
+  } catch (err) {
+    logger.error(
+      { err, organisationId: String(organisationId) },
+      "Échec de l'enqueue de la synchro Brevo unitaire d'organisation"
+    );
   }
 };

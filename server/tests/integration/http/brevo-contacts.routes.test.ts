@@ -27,7 +27,7 @@ describe("Routes admin brevo-contacts/sync-settings", () => {
       expectUnauthorizedError(response);
     });
 
-    it("Retourne les trois toggles désactivés par défaut (aucun document)", async () => {
+    it("Retourne tous les toggles désactivés par défaut (aucun document)", async () => {
       const response = await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "get", SYNC_SETTINGS_URL);
 
       expect(response.status).toBe(200);
@@ -35,6 +35,7 @@ describe("Routes admin brevo-contacts/sync-settings", () => {
         dailyFullSyncEnabled: false,
         instantSyncEnabled: false,
         eventsEnabled: false,
+        mlGenericContactsEnabled: false,
       });
     });
   });
@@ -56,9 +57,24 @@ describe("Routes admin brevo-contacts/sync-settings", () => {
         dailyFullSyncEnabled: false,
         instantSyncEnabled: false,
         eventsEnabled: false,
+        mlGenericContactsEnabled: false,
       });
       const doc = await brevoSyncSettingsDb().findOne({ key: "brevo-contact-sync" });
       expect(doc?.instant_sync_enabled).toBe(false);
+    });
+
+    // Ce toggle ne déclenche aucun appel Brevo : contrairement aux autres, il
+    // doit rester activable hors production.
+    it("Autorise l'activation des contacts génériques ML hors production", async () => {
+      const response = await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "put", SYNC_SETTINGS_URL, {
+        field: "mlGenericContactsEnabled",
+        enabled: true,
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.data.mlGenericContactsEnabled).toBe(true);
+      const doc = await brevoSyncSettingsDb().findOne({ key: "brevo-contact-sync" });
+      expect(doc?.ml_generic_contacts_enabled).toBe(true);
     });
 
     it("Refuse l'activation hors production (garde 400) et ne persiste rien", async () => {

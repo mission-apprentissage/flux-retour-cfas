@@ -2,7 +2,11 @@ import { addJob, initJobProcessor } from "job-processor";
 import { ObjectId } from "mongodb";
 import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
-import { syncContactList, syncSingleContact } from "@/common/actions/brevo/contacts/sync";
+import {
+  syncContactList,
+  syncSingleContact,
+  syncSingleOrganisationContact,
+} from "@/common/actions/brevo/contacts/sync";
 import { isBrevoDailyFullSyncActive } from "@/common/actions/brevo/contacts/sync-settings.actions";
 import { trackBrevoEvent } from "@/common/actions/brevo/events/track";
 import logger from "@/common/logger";
@@ -769,6 +773,19 @@ export async function setupJobProcessor() {
           const result = await syncSingleContact(payload.userId);
           if (result) {
             logger.info({ userId: payload.userId, ...result }, "Brevo single contact sync done");
+          }
+          return result;
+        },
+      },
+      "brevo-contacts:sync-one-organisation": {
+        handler: async (job) => {
+          const payload = job.payload as { organisationId?: string } | undefined;
+          if (!payload?.organisationId) {
+            throw new Error("organisationId est requis");
+          }
+          const result = await syncSingleOrganisationContact(payload.organisationId);
+          if (result) {
+            logger.info({ organisationId: payload.organisationId, ...result }, "Brevo single organisation sync done");
           }
           return result;
         },
