@@ -142,6 +142,14 @@ describe("scrubPii", () => {
     expect(event.request?.headers).toEqual({ "Content-Type": "application/json" });
   });
 
+  // Les sites d'appel masquent déjà à la source : un second passage ne doit rien changer.
+  it("est idempotent", () => {
+    const once = scrubPii({ message: "envoi à jean.dupont@example.com" }).message;
+    const twice = scrubPii({ message: once }).message;
+
+    expect(twice).toBe(once);
+  });
+
   it("supporte une structure cyclique", () => {
     const extra: Record<string, unknown> = { nom: "a@b.fr" };
     extra.self = extra;

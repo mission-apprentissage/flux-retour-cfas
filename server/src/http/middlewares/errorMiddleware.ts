@@ -3,6 +3,7 @@ import Boom from "boom";
 import { ErrorRequestHandler, Request } from "express";
 import { ZodError } from "zod";
 
+import type { ErrorKind } from "@/common/services/sentry/alertContract";
 import { toValidationError } from "@/common/utils/validationUtils";
 import config from "@/config";
 
@@ -44,7 +45,7 @@ export function routeGroupOf(req: Request): string {
   return match;
 }
 
-export function errorKindOf(boomError: Boom): string {
+export function errorKindOf(boomError: Boom): ErrorKind {
   const status = boomError.output.statusCode;
   if (status === 401 || status === 403) return "auth";
   if (status === 429) return "rate-limit";

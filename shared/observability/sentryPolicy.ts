@@ -78,7 +78,11 @@ export const TAG_ALLOWLIST: readonly string[] = [
 
 const MAX_TAG_VALUE_LENGTH = 200;
 const MAX_SCRUB_DEPTH = 6;
-const EMAIL_PATTERN = /[\w.+-]+@[\w-]+\.[\w.-]+/g;
+/**
+ * Le `(?<!\*)` rend le masquage idempotent : sans lui, `jea*******t@cfa.fr`
+ * serait re-matché à partir du `t` et perdrait un caractère à chaque passage.
+ */
+const EMAIL_PATTERN = /(?<!\*)[\w.+-]+@[\w-]+\.[\w.-]+/g;
 const SENSITIVE_HEADERS = ["authorization", "cookie", "set-cookie", "x-api-key", "proxy-authorization"];
 
 /** Neutralise les valeurs variables, sinon chaque identifiant fabrique son propre groupe. */

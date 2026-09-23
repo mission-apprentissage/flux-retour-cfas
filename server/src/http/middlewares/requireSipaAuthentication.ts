@@ -30,7 +30,6 @@ export default function requireSipaAuthentication() {
       req.user = { _id: user._id, username: user.username } as unknown as AuthContext;
       Sentry.setUser({
         segment: "sipa",
-        ip_address: req.ip,
         id: user._id.toString(),
         username: user.username,
       });

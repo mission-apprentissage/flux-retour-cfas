@@ -539,11 +539,10 @@ function setupRoutes(app: Application) {
 
         void clearIngestionAuthCounter(req.ip);
 
+        // Le siret et l'uai identifient l'organisme : l'_id suffit au diagnostic.
         Sentry.setUser({
           segment: "bearer",
-          ip_address: req.ip,
           id: `organisme-${organisme._id.toString()}`,
-          username: `organisme: ${organisme.siret} / ${organisme.uai}`,
         });
         next();
       } catch (err) {
