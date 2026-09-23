@@ -102,8 +102,10 @@ export default () => {
 };
 
 const getAllMls = async () => {
+  // getMissionsLocales lève désormais sur panne : la seule absence possible ici
+  // est une liste vide, qui n'a jamais déclenché l'ancienne garde.
   const externalML = await getMissionsLocales();
-  if (!externalML) {
+  if (externalML.length === 0) {
     throw Boom.notFound("Aucune mission locale trouvée");
   }
   const organisationMl = await getAllMlFromOrganisations();

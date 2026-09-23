@@ -1,23 +1,34 @@
-import { captureException, withScope } from "@sentry/node";
 import type { ICommune, IMissionLocale } from "api-alternance-sdk";
 import { zCfd } from "api-alternance-sdk/internal";
 import type { CfdInfo, RncpInfo } from "shared/models/apis/@types/ApiAlternance";
 
 import logger from "@/common/logger";
+import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 import { getErrorMessage } from "@/common/utils/errorUtils";
-import config from "@/config";
 
 import { apiAlternanceClient } from "./client";
 
-/** Le code demandé reste hors du regroupement : sinon une issue par CFD, RNCP ou commune. */
-const captureApiFailure = (operation: string, error: unknown, extra: Record<string, unknown>): void => {
-  withScope((scope) => {
-    scope.setTag("error_kind", "upstream");
-    scope.setTag("upstream", "api-alternance");
-    scope.setFingerprint(["api-alternance", operation]);
-    scope.setContext("appel", { operation, ...extra });
-    captureException(new Error(`api-alternance: échec de ${operation}`, { cause: error }));
+/**
+ * `null` ne signifie plus que « cette certification ou cette commune n'existe
+ * pas » : un échec technique lève. Sans cette distinction, une panne de l'API
+ * faisait ingérer des effectifs sans commune ni niveau, silencieusement, et
+ * répondre 200 avec un corps vide sur quatre routes.
+ *
+ * Le signalement passe par la santé de la dépendance, qui ne capture qu'à la
+ * transition : sur le chemin d'ingestion, une capture par appel produirait un
+ * événement par effectif.
+ */
+const failed = (operation: string, error: unknown): Error => {
+  reportDependencyHealth(`api-alternance:${operation}`, false, error, {
+    tier: "jour",
+    errorKind: "upstream",
+    upstream: "api-alternance",
   });
+  return new Error(`api-alternance: échec de ${operation}`, { cause: error });
+};
+
+const succeeded = (operation: string): void => {
+  reportDependencyHealth(`api-alternance:${operation}`, true);
 };
 
 const describeApiError = (error: unknown) => {
@@ -33,6 +44,7 @@ export const getCfdInfo = async (cfd: string): Promise<CfdInfo | null> => {
     }
 
     const certifications = await apiAlternanceClient.certification.index({ identifiant: { cfd } });
+    succeeded("getCfdInfo");
 
     if (certifications.length === 0) {
       return null;
@@ -65,14 +77,14 @@ export const getCfdInfo = async (cfd: string): Promise<CfdInfo | null> => {
     return data;
   } catch (error) {
     logger.error(`getCfdInfo: something went wrong while requesting CFD "${cfd}"`, describeApiError(error));
-    captureApiFailure("getCfdInfo", error, { cfd });
-    return null;
+    throw failed("getCfdInfo", error);
   }
 };
 
 export const getRncpInfo = async (rncp: string): Promise<RncpInfo | null> => {
   try {
     const certifications = await apiAlternanceClient.certification.index({ identifiant: { rncp } });
+    succeeded("getRncpInfo");
 
     if (certifications.length === 0) {
       return null;
@@ -93,8 +105,7 @@ export const getRncpInfo = async (rncp: string): Promise<RncpInfo | null> => {
     return data;
   } catch (error) {
     logger.error(`getRncpInfo: something went wrong while requesting RNCP "${rncp}"`, describeApiError(error));
-    captureApiFailure("getRncpInfo", error, { rncp });
-    return null;
+    throw failed("getRncpInfo", error);
   }
 };
 
@@ -110,17 +121,14 @@ export const getCommune = async ({
   if (!code) return null;
 
   const communeList = await apiAlternanceClient.geographie.rechercheCommune({ code }).catch((error) => {
-    if (config.env === "test") throw error;
-
     logger.error(`getCommune: something went wrong while requesting code postal "${codePostal}": ${error.message}`, {
       error,
       codePostal,
     });
 
-    captureApiFailure("rechercheCommune", error, { codePostal, codeInsee });
-
-    return [];
+    throw failed("rechercheCommune", error);
   });
+  succeeded("rechercheCommune");
 
   if (!communeList || communeList.length === 0) {
     return null;
@@ -159,12 +167,12 @@ export const getCommune = async ({
   return null;
 };
 
-export const getMissionsLocales = async (): Promise<IMissionLocale[] | null> => {
+export const getMissionsLocales = async (): Promise<IMissionLocale[]> => {
   try {
     const result = await apiAlternanceClient.geographie.listMissionLocales({});
+    succeeded("getMissionsLocales");
     return result;
   } catch (error) {
-    captureApiFailure("getMissionsLocales", error, {});
-    return null;
+    throw failed("getMissionsLocales", error);
   }
 };

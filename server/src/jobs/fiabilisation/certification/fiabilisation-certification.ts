@@ -278,9 +278,11 @@ export async function fiabilisationEffectifFormation<T extends Pick<IEffectif, "
   certification: ICertification | null
 ): Promise<T["formation"]> {
   if (!certification) {
+    // Dégradation assumée : sans ces informations, la formation reste en l'état
+    // plutôt que de faire échouer l'effectif. Le wrapper a signalé la panne.
     const [cfdInfo, rncpInfo] = await Promise.all([
-      effectif.formation?.cfd ? getCfdInfo(effectif.formation?.cfd) : null,
-      effectif.formation?.rncp ? getRncpInfo(effectif.formation?.rncp) : null,
+      effectif.formation?.cfd ? getCfdInfo(effectif.formation?.cfd).catch(() => null) : null,
+      effectif.formation?.rncp ? getRncpInfo(effectif.formation?.rncp).catch(() => null) : null,
     ]);
 
     const niveau = cfdInfo?.niveau ?? rncpInfo?.niveau;

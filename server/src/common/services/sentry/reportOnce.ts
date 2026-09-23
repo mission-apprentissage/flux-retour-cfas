@@ -1,6 +1,8 @@
+import type { AlertTier } from "shared/observability/sentryPolicy";
+
 import logger from "@/common/logger";
 
-import { captureTiered } from "./alertContract";
+import { captureTiered, type ErrorKind } from "./alertContract";
 
 const reportedConfigurationIssues = new Set<string>();
 const degradedDependencies = new Set<string>();
@@ -20,8 +22,19 @@ export function reportConfigurationIssueOnce(key: string, message: string): void
   });
 }
 
-/** Ne capture que le front montant sain → dégradé : la sonde passe toutes les 10 s. */
-export function reportDependencyHealth(key: string, healthy: boolean, cause?: unknown): void {
+type DependencyHealthOptions = { tier?: AlertTier; errorKind?: ErrorKind; upstream?: string };
+
+/**
+ * Ne capture que le front montant sain → dégradé, et se réarme au retour à la
+ * normale. C'est ce qui rend le volume indépendant du débit : une sonde qui
+ * passe toutes les 10 s, ou un appel par effectif, produisent le même événement.
+ */
+export function reportDependencyHealth(
+  key: string,
+  healthy: boolean,
+  cause?: unknown,
+  { tier = "oncall", errorKind = "db", upstream }: DependencyHealthOptions = {}
+): void {
   if (healthy) {
     degradedDependencies.delete(key);
     return;
@@ -33,9 +46,9 @@ export function reportDependencyHealth(key: string, healthy: boolean, cause?: un
   degradedDependencies.add(key);
 
   captureTiered(new Error(`Dépendance indisponible : ${key}`, { cause }), {
-    // Une dépendance injoignable rend le service inutilisable pour tout le monde.
-    tier: "oncall",
-    errorKind: "db",
+    tier,
+    errorKind,
+    upstream,
     fingerprintKey: `dependency-health:${key}`,
   });
 }

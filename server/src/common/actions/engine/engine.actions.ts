@@ -79,7 +79,9 @@ export const getAndFormatCommuneFromCode = async (
           mission_locale_id: communeInfo.mission_locale?.id,
         }
       : {};
-  } catch (e) {
+  } catch {
+    // Dégradation assumée, comme dans adresse.builder : l'effectif s'ingère sans
+    // commune. Le wrapper a déjà signalé la panne d'api-alternance.
     return {};
   }
 };
