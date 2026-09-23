@@ -32,6 +32,10 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   "Send ML daily recap at 13h30": { tier: "jour" },
   "Send ML weekly recap at 14h30 on Mondays": { tier: "jour" },
   "Envoi WhatsApp préqualif quotidien à 18h30": { tier: "jour" },
+  // Le cron lui-même en « jour » : c'est son contenu qui pose « oncall » quand la
+  // file d'ingestion n'avance plus, pas son échec technique.
+  "Vérifie que l'ingestion avance toutes les 15 min": { tier: "jour" },
+  "heartbeat:ingestion": { tier: "jour" },
   // `veille` : nettoyage, révocation, contrôle de cohérence. Un report d'un jour
   // ne change rien pour personne.
   "Cleanup organismes": { tier: "veille" },

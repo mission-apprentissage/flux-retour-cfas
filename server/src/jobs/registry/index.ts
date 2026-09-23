@@ -9,7 +9,7 @@ import { effectifsCrons, effectifsJobs } from "./effectifs";
 import { emailsCrons, emailsJobs } from "./emails";
 import { fiabilisationJobs } from "./fiabilisation";
 import { formationsCrons, formationsJobs } from "./formations";
-import { ingestionJobs } from "./ingestion";
+import { ingestionCrons, ingestionJobs } from "./ingestion";
 import { missionLocaleCrons, missionLocaleJobs } from "./mission-locale";
 import { organismesCrons, organismesJobs } from "./organismes";
 import { transmissionsJobs } from "./transmissions";
@@ -31,7 +31,7 @@ export const registry = {
   "mission-locale": { jobs: missionLocaleJobs, crons: missionLocaleCrons },
   deca: { jobs: decaJobs, crons: decaCrons },
   "voeux-affelnet": { jobs: voeuxAffelnetJobs },
-  ingestion: { jobs: ingestionJobs },
+  ingestion: { jobs: ingestionJobs, crons: ingestionCrons },
   fiabilisation: { jobs: fiabilisationJobs },
   transmissions: { jobs: transmissionsJobs },
   emails: { jobs: emailsJobs, crons: emailsCrons },

@@ -1,7 +1,8 @@
-import type { JobDef } from "job-processor";
+import type { CronDef, JobDef } from "job-processor";
 import { ObjectId } from "mongodb";
 
 import { purgeQueues } from "../clear/purge-queues";
+import { heartbeatIngestion } from "../ingestion/heartbeat-ingestion";
 import { updateEffectifQueueDateAndError } from "../ingestion/migration/effectif-queue";
 import { removeDuplicatesEffectifsQueue } from "../ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "../ingestion/process-ingestion";
@@ -40,4 +41,15 @@ export const ingestionJobs = {
   "tmp:migrate:effectifs-queue": {
     handler: updateEffectifQueueDateAndError,
   },
+  "heartbeat:ingestion": {
+    handler: heartbeatIngestion,
+  },
 } satisfies Record<string, JobDef>;
+
+export const ingestionCrons = {
+  // Toutes les 15 minutes — détecte une file d'ingestion qui n'avance plus.
+  "Vérifie que l'ingestion avance toutes les 15 min": {
+    cron_string: "*/15 * * * *",
+    handler: heartbeatIngestion,
+  },
+} satisfies Record<string, CronDef>;

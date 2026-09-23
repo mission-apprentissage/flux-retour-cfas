@@ -48,6 +48,7 @@ describe("registre des jobs", () => {
       "Send ML daily recap at 13h30": "30 13 * * *",
       "Send ML weekly recap at 14h30 on Mondays": "30 14 * * 1",
       "Envoi WhatsApp préqualif quotidien à 18h30": "30 18 * * *",
+      "Vérifie que l'ingestion avance toutes les 15 min": "*/15 * * * *",
     });
   });
 
@@ -66,6 +67,7 @@ describe("registre des jobs", () => {
       "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis",
       "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis",
       "fiabilisation:uai-siret:run",
+      "heartbeat:ingestion",
       "hydrate:bal-mails",
       "hydrate:contrats-deca-raw",
       "hydrate:daily",
