@@ -28,14 +28,15 @@ export const emailsJobs = {
 } satisfies Record<string, JobDef>;
 
 export const emailsCrons = {
-  // 07h00 Paris — mise en file des emails de relance
-  "Send reminder emails at 7h": {
+  // Commenté avec le job "send-reminder-emails" ci-dessus : sans définition de job,
+  // il enfilait une tâche introuvable et échouait tous les jours à 7h.
+  /* "Send reminder emails at 7h": {
     cron_string: "0 7 * * *",
     handler: async () => {
       await addJob({ name: "send-reminder-emails", queued: true });
       return 0;
     },
-  },
+  }, */
   // 14h30 Paris le lundi — récap hebdomadaire envoyé aux Missions Locales
   "Send ML weekly recap at 14h30 on Mondays": {
     cron_string: "30 14 * * 1",

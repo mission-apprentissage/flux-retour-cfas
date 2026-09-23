@@ -336,11 +336,13 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis"));
 
+/* Commenté avec le job et le cron correspondants dans jobs/registry/emails.ts.
 program
   .command("send-reminder-emails")
   .description("Envoi des emails de relance")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("send-reminder-emails"));
+*/
 
 program
   .command("send-mission-locale-weekly-recap")

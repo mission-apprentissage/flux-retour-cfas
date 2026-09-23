@@ -43,7 +43,6 @@ describe("registre des jobs", () => {
       "Nettoie et met à jour les statistiques des Missions Locales": "30 4 * * *",
       "Synchro Brevo de tous les contacts TBA à 5h": "0 5 * * *",
       "Mettre à jour les statuts d'effectifs tous les samedis matin à 5h": "0 5 * * 6",
-      "Send reminder emails at 7h": "0 7 * * *",
       "Send CFA daily recap at 10h30": "30 10 * * *",
       "hydrate:contrats-deca-raw": "30 10 * * 7",
       "Send ML daily recap at 13h30": "30 13 * * *",
