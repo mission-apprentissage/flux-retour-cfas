@@ -21,7 +21,8 @@ import config from "@/config";
 
 import { AuthContext } from "../model/internal/AuthContext.js";
 
-import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
+import { isMissionLocaleActivated } from "./admin/mission-locale/mission-locale.admin.actions";
+import { enqueueBrevoContactSync, enqueueBrevoOrganisationContactSync } from "./brevo/contacts/enqueue-sync";
 import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
 import { buildOrganisationLabel, createOrganisation, getOrganisationById } from "./organisations.actions";
 import { getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
@@ -86,6 +87,10 @@ export async function register(registration: RegistrationSchema): Promise<{
 
   // si l'utilisateur est invité, alors on juge son email comme validé et ses permissions valides
   if (invitation) {
+    // Lu avant la confirmation : ce compte va la faire basculer, or on ne veut
+    // émettre l'événement Brevo que sur la transition inactive → active.
+    const mlWasActivated = orga.type === "MISSION_LOCALE" ? await isMissionLocaleActivated(organisationId) : true;
+
     await usersMigrationDb().updateOne(
       {
         _id: userId,
@@ -103,6 +108,17 @@ export async function register(registration: RegistrationSchema): Promise<{
     await enqueueBrevoContactSync(userId);
     // Transition -> CONFIRMED (invitation) : émet l'événement Brevo pour le scénario d'automation.
     await enqueueBrevoEvent("account-confirmed", { userId: userId.toString() });
+
+    // Ce chemin confirme un compte sans passer par `activateMissionLocale` : la
+    // ML devient active du seul fait de ce compte, il faut donc rafraîchir son
+    // contact générique (et n'émettre l'événement que sur la transition).
+    if (orga.type === "MISSION_LOCALE") {
+      await enqueueBrevoOrganisationContactSync(organisationId);
+      if (!mlWasActivated) {
+        await enqueueBrevoEvent("account-confirmed-ml-generic", { userId: userId.toString() });
+      }
+    }
+
     return {
       account_status: "CONFIRMED",
     };
@@ -178,6 +194,9 @@ export async function activateUser(ctx: AuthContext) {
   // tant que l'utilisateur n'est pas confirmé
   if (ctx.account_status === "PENDING_EMAIL_VALIDATION") {
     if (ctx.organisation_role) {
+      // Lu avant la confirmation, pour ne réagir qu'à la transition (cf. `register`).
+      const mlWasActivated = await isMissionLocaleActivated(ctx.organisation_id);
+
       const res = await usersMigrationDb().updateOne(
         {
           email: ctx.email,
@@ -210,6 +229,15 @@ export async function activateUser(ctx: AuthContext) {
 
       // Transition -> CONFIRMED (activation CFA) : émet l'événement Brevo.
       await enqueueBrevoEvent("account-confirmed", { userId: ctx._id.toString() });
+
+      // Cas marginal mais réel : un agent de ML invité avec un rôle passe ici
+      // sans repasser par la validation admin.
+      if (organisation.type === "MISSION_LOCALE") {
+        await enqueueBrevoOrganisationContactSync(ctx.organisation_id);
+        if (!mlWasActivated) {
+          await enqueueBrevoEvent("account-confirmed-ml-generic", { userId: ctx._id.toString() });
+        }
+      }
     } else {
       const res = await usersMigrationDb().updateOne(
         {

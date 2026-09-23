@@ -19,6 +19,12 @@ export const zBrevoSyncSettings = z.object({
     .boolean()
     .optional()
     .describe("Active l'émission d'événements Brevo (API Events) sur transitions métier — prod uniquement"),
+  ml_generic_contacts_enabled: z
+    .boolean()
+    .optional()
+    .describe(
+      "Inclut les adresses génériques des Missions Locales dans les contacts synchronisés — activable sur tous les environnements"
+    ),
   updated_at: z.date().optional().describe("Date de dernière modification d'un toggle"),
   updated_by: z.string().optional().describe("Email de l'administrateur ayant modifié un toggle"),
 });

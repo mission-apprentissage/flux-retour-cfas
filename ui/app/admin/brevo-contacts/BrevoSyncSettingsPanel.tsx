@@ -22,6 +22,10 @@ export function BrevoSyncSettingsPanel() {
   // les toggles sont affichés mais désactivés.
   const disabled = !isProd || isLoading || setSetting.isPending;
 
+  // Exception : le périmètre des contacts génériques ML ne déclenche aucun appel
+  // à Brevo, il reste donc pilotable hors production (recette par `--dry-run`).
+  const scopeDisabled = isLoading || setSetting.isPending;
+
   return (
     <section className={styles.settingsPanel}>
       <h2 className={styles.settingsTitle}>Pilotage de la synchronisation</h2>
@@ -79,6 +83,17 @@ export function BrevoSyncSettingsPanel() {
         checked={settings?.eventsEnabled ?? false}
         disabled={disabled}
         onChange={handleToggle("eventsEnabled")}
+      />
+
+      <ToggleSwitch
+        inputTitle="Adresses génériques des Missions Locales"
+        label="Adresses génériques des Missions Locales"
+        helperText="Inclut l'adresse générique de chaque ML dans les contacts synchronisés, marquée comme confirmée dès que la ML est activée. Ne crée aucun compte utilisateur."
+        labelPosition="left"
+        showCheckedHint
+        checked={settings?.mlGenericContactsEnabled ?? false}
+        disabled={scopeDisabled}
+        onChange={handleToggle("mlGenericContactsEnabled")}
       />
     </section>
   );

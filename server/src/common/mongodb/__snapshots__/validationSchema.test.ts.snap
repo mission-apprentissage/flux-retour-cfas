@@ -95,6 +95,10 @@ exports[`validation-schema > should create validation schema for brevoSyncSettin
       "bsonType": "string",
       "description": "Discriminant du document singleton de configuration",
     },
+    "ml_generic_contacts_enabled": {
+      "bsonType": "bool",
+      "description": "Inclut les adresses génériques des Missions Locales dans les contacts synchronisés — activable sur tous les environnements",
+    },
     "updated_at": {
       "bsonType": "date",
       "description": "Date de dernière modification d'un toggle",

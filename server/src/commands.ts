@@ -475,6 +475,18 @@ program
   });
 
 program
+  .command("brevo-contacts:sync-one-organisation")
+  .description("Synchronise le contact générique d'une organisation vers Brevo (adresse générique d'une ML)")
+  .requiredOption("--organisation-id <id>", "ObjectId de l'organisation (organisations._id)")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action((options) => {
+    return createJobAction("brevo-contacts:sync-one-organisation")({
+      organisationId: options.organisationId,
+      queued: options.queued ?? false,
+    });
+  });
+
+program
   .command("brevo-events:track-one")
   .description("Émet un événement Brevo pour un utilisateur (par userId et clé d'événement)")
   .requiredOption("--user-id <id>", "ObjectId de l'utilisateur (usersMigration._id)")

@@ -10,6 +10,7 @@ import {
   isBrevoDailyFullSyncActive,
   isBrevoEventsActive,
   isBrevoInstantSyncActive,
+  isBrevoMlGenericContactsActive,
   setBrevoSyncSetting,
 } from "./sync-settings.actions";
 
@@ -17,18 +18,24 @@ useMongo();
 
 // Note : en environnement de test, `config.env === "test"` (≠ "production").
 describe("sync-settings.actions", () => {
-  it("retourne les trois toggles désactivés par défaut (aucun document)", async () => {
+  it("retourne tous les toggles désactivés par défaut (aucun document)", async () => {
     expect(await getBrevoSyncSettings()).toEqual({
       dailyFullSyncEnabled: false,
       instantSyncEnabled: false,
       eventsEnabled: false,
+      mlGenericContactsEnabled: false,
     });
   });
 
   it("persiste la désactivation, initialise l'autre champ et trace l'auteur", async () => {
     const result = await setBrevoSyncSetting("instantSyncEnabled", false, "admin@example.com");
 
-    expect(result).toEqual({ dailyFullSyncEnabled: false, instantSyncEnabled: false, eventsEnabled: false });
+    expect(result).toEqual({
+      dailyFullSyncEnabled: false,
+      instantSyncEnabled: false,
+      eventsEnabled: false,
+      mlGenericContactsEnabled: false,
+    });
     const doc = await brevoSyncSettingsDb().findOne({ key: "brevo-contact-sync" });
     expect(doc).toMatchObject({
       key: "brevo-contact-sync",
@@ -52,7 +59,12 @@ describe("sync-settings.actions", () => {
     // On modifie daily : instant doit rester à true.
     const result = await setBrevoSyncSetting("dailyFullSyncEnabled", false, "b@example.com");
 
-    expect(result).toEqual({ dailyFullSyncEnabled: false, instantSyncEnabled: true, eventsEnabled: false });
+    expect(result).toEqual({
+      dailyFullSyncEnabled: false,
+      instantSyncEnabled: true,
+      eventsEnabled: false,
+      mlGenericContactsEnabled: false,
+    });
     const doc = await brevoSyncSettingsDb().findOne({ key: "brevo-contact-sync" });
     expect(doc?.instant_sync_enabled).toBe(true);
     expect(doc?.updated_by).toBe("b@example.com");
@@ -83,5 +95,21 @@ describe("sync-settings.actions", () => {
     await expect(setBrevoSyncSetting("eventsEnabled", true, "admin@example.com")).rejects.toThrow();
     const doc = await brevoSyncSettingsDb().findOne({ key: "brevo-contact-sync" });
     expect(doc?.events_enabled ?? false).toBe(false);
+  });
+
+  // Divergence assumée : ce toggle ne déclenche aucun appel Brevo (il définit un
+  // périmètre de contacts), il doit donc rester pilotable hors production pour
+  // permettre la recette par `--dry-run`.
+  it("autorise l'activation des contacts génériques ML hors production", async () => {
+    const result = await setBrevoSyncSetting("mlGenericContactsEnabled", true, "admin@example.com");
+
+    expect(result.mlGenericContactsEnabled).toBe(true);
+    const doc = await brevoSyncSettingsDb().findOne({ key: "brevo-contact-sync" });
+    expect(doc?.ml_generic_contacts_enabled).toBe(true);
+    expect(await isBrevoMlGenericContactsActive()).toBe(true);
+  });
+
+  it("garde le toggle des contacts génériques ML à false par défaut", async () => {
+    expect(await isBrevoMlGenericContactsActive()).toBe(false);
   });
 });

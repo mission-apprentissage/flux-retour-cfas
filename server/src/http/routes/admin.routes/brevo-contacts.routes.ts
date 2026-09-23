@@ -14,7 +14,7 @@ const syncBodySchema = z.object({
 });
 
 const syncSettingsBodySchema = z.object({
-  field: z.enum(["dailyFullSyncEnabled", "instantSyncEnabled", "eventsEnabled"]),
+  field: z.enum(["dailyFullSyncEnabled", "instantSyncEnabled", "eventsEnabled", "mlGenericContactsEnabled"]),
   enabled: z.boolean(),
 });
 
