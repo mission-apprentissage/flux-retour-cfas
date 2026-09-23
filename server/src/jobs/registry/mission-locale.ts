@@ -25,6 +25,7 @@ import {
   updateNotActivatedMissionLocaleEffectifSnapshot,
 } from "../hydrate/mission-locale/hydrate-mission-locale";
 import { backfillMlSuiviDates } from "../migration/backfill-ml-suivi-dates";
+import { clotureMlARecontacter } from "../migration/cloture-ml-a-recontacter";
 import { migrateAutreSituations } from "../migration/migrate-autre-situations";
 import { seedMlRdvUrl } from "../tmp/seed-ml-rdv-url";
 
@@ -151,6 +152,12 @@ export const missionLocaleJobs = {
         throw new Error("csvPath est requis");
       }
       return migrateAutreSituations({ csvPath: payload.csvPath, dryRun: payload.dryRun ?? false });
+    },
+  },
+  "tmp:migrate:ml-cloture-a-recontacter": {
+    handler: async (job) => {
+      const payload = job.payload as { dryRun?: boolean } | undefined;
+      return clotureMlARecontacter({ dryRun: payload?.dryRun ?? false });
     },
   },
   "tmp:seed-ml-rdv-url": {

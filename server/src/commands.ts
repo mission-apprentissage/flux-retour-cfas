@@ -415,6 +415,13 @@ program
   });
 
 program
+  .command("tmp:migrate:ml-cloture-a-recontacter")
+  .description("Clôture en injoignable les dossiers ML restés à recontacter depuis avant le 01/06/2026")
+  .option("--dry-run", "Simulation sans écriture", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:migrate:ml-cloture-a-recontacter"));
+
+program
   .command("tmp:seed-ml-rdv-url")
   .description("Seed initial des rdv_url sur les organisations Mission Locale via un CSV (colonnes siret, rdv_url)")
   .requiredOption("--csv-path <path>", "Chemin du CSV (colonnes siret, rdv_url)")
