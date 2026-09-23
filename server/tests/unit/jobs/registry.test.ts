@@ -56,6 +56,7 @@ describe("registre des jobs", () => {
     expect(Object.keys(jobs).sort()).toEqual([
       "brevo-contacts:sync",
       "brevo-contacts:sync-one",
+      "brevo-contacts:sync-one-organisation",
       "brevo-events:track",
       "classifier:score-effectifs",
       "collab:inactivite-cfa",
