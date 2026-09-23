@@ -87,8 +87,15 @@ export const EXTENSION_PROTOCOLS: readonly string[] = [
   "webkit-masked-url://",
 ];
 
-/** Motifs à plat, pour `ignoreErrors` à l'init. */
-export const IGNORE_ERRORS: ReadonlyArray<string | RegExp> = DROP_PATTERNS.flatMap(({ patterns }) => [...patterns]);
+/**
+ * Motifs à plat pour `ignoreErrors` à l'init. `inboundFiltersIntegration` les
+ * applique avant `beforeSend`, donc à moindre coût ; `classifyDrop` reste le
+ * filet pour ce qu'un motif seul n'exprime pas, comme la pile d'extension.
+ */
+export function ignoreErrorsFor(reasons: readonly DropReason[]): Array<string | RegExp> {
+  const active = new Set(reasons);
+  return DROP_PATTERNS.filter(({ reason }) => active.has(reason)).flatMap(({ patterns }) => [...patterns]);
+}
 
 export const DENY_URLS: ReadonlyArray<string | RegExp> = [
   ...EXTENSION_PROTOCOLS.map((protocol) => new RegExp(protocol.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))),

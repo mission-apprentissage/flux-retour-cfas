@@ -25,7 +25,7 @@ export type SentryEventLike = {
   extra?: Record<string, unknown>;
   contexts?: Record<string, unknown>;
   user?: Record<string, unknown>;
-  request?: { headers?: Record<string, unknown>; data?: unknown; url?: string };
+  request?: { headers?: Record<string, string>; data?: unknown; url?: string };
   fingerprint?: string[];
 };
 
