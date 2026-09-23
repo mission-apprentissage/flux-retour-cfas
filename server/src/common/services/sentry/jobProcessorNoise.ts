@@ -1,8 +1,4 @@
-export type SentryEventLike = {
-  exception?: { values?: Array<{ type?: string; value?: string }> };
-  message?: string;
-  extra?: Record<string, unknown>;
-};
+import type { SentryEventLike } from "shared/observability/sentryPolicy";
 
 const JOB_ABORTED = "[job-processor] Job aborted";
 

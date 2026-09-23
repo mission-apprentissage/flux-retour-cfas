@@ -1,6 +1,7 @@
+import type { SentryEventLike } from "shared/observability/sentryPolicy";
 import { describe, it, expect } from "vitest";
 
-import { dropJobProcessorNoise, type SentryEventLike } from "./jobProcessorNoise";
+import { dropJobProcessorNoise } from "./jobProcessorNoise";
 
 const exception = (value: string, extra?: Record<string, unknown>): SentryEventLike => ({
   exception: { values: [{ type: "Error", value }] },
