@@ -1,4 +1,5 @@
 import { captureException, withScope } from "@sentry/node";
+import { normalizeForGrouping } from "shared/observability/sentryPolicy";
 
 import { getErrorMessage } from "./errorUtils";
 
@@ -21,18 +22,6 @@ export type ErrorAggregatorOptions = {
   failureRateThreshold?: number;
   maxDistinctCauses?: number;
 };
-
-/** Neutralise les valeurs variables, sinon chaque identifiant fabriquerait sa propre cause. */
-export function normalizeCauseKey(message: string): string {
-  return message
-    .replace(/[0-9a-f]{24}\b/gi, "<id>")
-    .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, "<uuid>")
-    .replace(/\d{4}-\d{2}-\d{2}(?:T[\d:.]+Z?)?/g, "<date>")
-    .replace(/\d+/g, "<n>")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 200);
-}
 
 export function createErrorAggregator(name: string, options: ErrorAggregatorOptions = {}): ErrorAggregator {
   const { failureRateThreshold = 1, maxDistinctCauses = 5 } = options;
@@ -88,7 +77,7 @@ export function createErrorAggregator(name: string, options: ErrorAggregatorOpti
       processed += 1;
       failed += 1;
 
-      const key = normalizeCauseKey(`${err.name}: ${err.message}`);
+      const key = normalizeForGrouping(`${err.name}: ${err.message}`);
       const bucket = causes.get(key);
       if (bucket) {
         bucket.count += 1;

@@ -1,7 +1,7 @@
 import { captureException } from "@sentry/node";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-import { createErrorAggregator, normalizeCauseKey } from "./errorAggregator";
+import { createErrorAggregator } from "./errorAggregator";
 
 const scope = { setTag: vi.fn(), setFingerprint: vi.fn(), setContext: vi.fn() };
 
@@ -20,21 +20,7 @@ function contextOf(call = 0) {
   return scope.setContext.mock.calls[call][1] as Record<string, unknown>;
 }
 
-describe("normalizeCauseKey", () => {
-  it.each([
-    ["Effectif 64f0a1b2c3d4e5f6a7b8c9d0 introuvable", "Effectif <id> introuvable"],
-    ["Échec au 2026-03-14", "Échec au <date>"],
-    ["timeout après 3000 ms", "timeout après <n> ms"],
-  ])("neutralise %s", (input, expected) => {
-    expect(normalizeCauseKey(input)).toBe(expected);
-  });
-
-  it("regroupe deux messages ne différant que par un identifiant", () => {
-    expect(normalizeCauseKey("organisme 64f0a1b2c3d4e5f6a7b8c9d0 KO")).toBe(
-      normalizeCauseKey("organisme 74f0a1b2c3d4e5f6a7b8c9d1 KO")
-    );
-  });
-});
+// La normalisation des clés de cause est testée dans shared/observability/sentryPolicy.test.ts.
 
 describe("createErrorAggregator", () => {
   it("n'émet rien sans échec", () => {
