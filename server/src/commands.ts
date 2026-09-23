@@ -427,7 +427,7 @@ program
 program
   .command("tmp:seed-sipa-test-nancy")
   .description(
-    "Seed du jeu de test SIPA/académie de Nancy (effectifs CFA + DECA 2026-2027) puis vérification de la sortie SIPA"
+    "Seed du jeu de test SIPA/académie de Nancy (jeu CDT du 10/09/2026 : 16 dossiers CFA + DECA 2026-2027) puis vérification de la sortie SIPA"
   )
   .option("--cleanup", "Supprime uniquement les effectifs de test (tag SIPA_TEST_NANCY_)", false)
   .option("--verify", "Rejoue uniquement l'agrégation SIPA et rapporte les écarts, sans insérer", false)
