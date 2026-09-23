@@ -104,6 +104,8 @@ export function applyAlertContract<T extends SentryEventLike>(event: T): T {
 export type CaptureTieredOptions = {
   tier: AlertTier;
   errorKind?: ErrorKind;
+  /** Nom du service amont, pour les règles qui surveillent les dépendances. */
+  upstream?: string;
   /** Clé de regroupement stable. À utiliser dès que le message porte une valeur variable. */
   fingerprintKey?: string;
   /** Les identifiants métier vont ici, jamais en tag. */
@@ -115,6 +117,7 @@ export function captureTiered(error: unknown, options: CaptureTieredOptions): vo
   withScope((scope) => {
     scope.setTag("alert_tier", options.tier);
     if (options.errorKind) scope.setTag("error_kind", options.errorKind);
+    if (options.upstream) scope.setTag("upstream", options.upstream);
     if (options.fingerprintKey) scope.setFingerprint([options.fingerprintKey]);
     if (options.extra) scope.setContext("détail", options.extra);
     captureException(error);

@@ -4,6 +4,7 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import config from "../../../config";
 import getApiClient from "../../apis/client";
+import { captureTiered } from "../sentry/alertContract";
 
 export interface EffectifScoreInput {
   "apprenant.date_de_naissance": string;
@@ -51,4 +52,19 @@ export function extractScoreInput(effectif: IEffectif | IEffectifDECA): Effectif
     "contrat.date_fin": lastContrat.date_fin?.toISOString() ?? "",
     "contrat.date_rupture": lastContrat.date_rupture.toISOString(),
   };
+}
+
+/**
+ * Les erreurs du service de classification ne produisaient aucun événement, ni
+ * côté Python ni côté Node : les trois appelants se contentaient d'un log.
+ * Un fingerprint stable garde une seule issue, dont le compteur signale la panne.
+ */
+export function reportClassifierFailure(operation: string, error: unknown, extra?: Record<string, unknown>): void {
+  captureTiered(new Error(`classifier: échec de ${operation}`, { cause: error }), {
+    tier: "veille",
+    errorKind: "upstream",
+    upstream: "server-classifier",
+    fingerprintKey: `classifier:${operation}`,
+    extra,
+  });
 }

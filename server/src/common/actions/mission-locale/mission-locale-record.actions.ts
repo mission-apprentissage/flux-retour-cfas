@@ -13,7 +13,7 @@ import {
   organisationsDb,
   organismesDb,
 } from "@/common/model/collections";
-import { extractScoreInput, scoreEffectifs } from "@/common/services/classifier";
+import { extractScoreInput, reportClassifierFailure, scoreEffectifs } from "@/common/services/classifier";
 
 import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
 import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
@@ -382,5 +382,6 @@ export function scoreEffectifInBackground(missionLocaleEffectifId: ObjectId, eff
     })
     .catch((err) => {
       logger.warn({ err, effectif_id: effectif._id }, "Classifier scoring failed, continuing without score");
+      reportClassifierFailure("score-effectif", err, { effectif_id: effectif._id?.toString() });
     });
 }

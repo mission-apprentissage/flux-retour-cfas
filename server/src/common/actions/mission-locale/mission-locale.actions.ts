@@ -39,7 +39,7 @@ import {
 } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { triggerWhatsAppIfEligible } from "@/common/services/brevo/whatsapp";
-import { extractScoreInput, scoreEffectifs } from "@/common/services/classifier";
+import { extractScoreInput, reportClassifierFailure, scoreEffectifs } from "@/common/services/classifier";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
@@ -3450,6 +3450,7 @@ function scoreEffectifInBackground(missionLocaleEffectifId: ObjectId, effectif: 
     })
     .catch((err) => {
       logger.warn({ err, effectif_id: effectif._id }, "Classifier scoring failed, continuing without score");
+      reportClassifierFailure("score-effectif", err, { effectif_id: effectif._id?.toString() });
     });
 }
 

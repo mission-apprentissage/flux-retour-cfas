@@ -47,10 +47,12 @@ export const TAG_ALLOWLIST: readonly string[] = [
   "http_status_class",
   "route_group",
   "job_kind",
-  // applicatifs déjà en place
+  // applicatifs déjà en place, tous à valeurs bornées
   "job",
   "upstream",
   "http.method",
+  "rate_limit_tier",
+  "enforced",
   "drop_reason",
   // posés par le SDK ou l'instance
   "transaction",
