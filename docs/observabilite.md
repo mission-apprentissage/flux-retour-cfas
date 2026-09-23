@@ -1,0 +1,89 @@
+# Observabilité — que faire d'une alerte
+
+Cette page dit qui regarde quoi, et ce qu'on attend de vous quand une alerte arrive.
+Elle ne décrit pas comment le code est instrumenté : pour ça, voir `shared/observability/`
+et `server/src/common/services/sentry/`.
+
+> **État au 23/09/2026** : l'instrumentation est en place dans le code. Les canaux Slack
+> et les règles d'alerte Sentry restent à créer. Tant que c'est le cas, les événements
+> sont consultables dans Sentry mais ne notifient personne.
+
+## Les trois niveaux
+
+Chaque événement porte un tag `alert_tier`. C'est lui, et lui seul, qui décide du canal.
+
+| Niveau   | Ce que ça veut dire                                                                                                | Où ça arrive                              | Ce qu'on attend                          |
+| -------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- | ---------------------------------------- |
+| `oncall` | Le service est inutilisable pour une population entière, ou on perd de la donnée usager sans pouvoir la rattraper. | `#tdb-alertes-critiques`, avec mention    | Prise en charge sous 30 min              |
+| `jour`   | Une fonction est cassée ou dégradée, l'impact usager est visible, mais le rattrapage peut attendre.                | `#tableau-de-bord-alerting`, sans mention | Traité avant la fin de la journée ouvrée |
+| `veille` | Signal de qualité exploitable, aucune décision immédiate.                                                          | Nulle part — vue Sentry + Metabase        | Revue de sprint                          |
+
+**Le test qui tranche les cas limites** : si personne ne sait quoi faire en recevant
+l'alerte à trois heures du matin, ce n'est pas un `oncall`. Si personne ne va la lire
+dans la semaine, ce n'est pas une alerte du tout.
+
+`veille` est le **défaut**. Un événement qui ne dit rien de son niveau ne notifie
+personne. C'est voulu : alerter se mérite, et une taxonomie qu'on doit entretenir à la
+main finit toujours par rouiller.
+
+## Comment le niveau est décidé
+
+Trois mécanismes, dans cet ordre :
+
+1. **Le code le pose explicitement**, via `captureTiered(error, { tier, errorKind, … })`.
+   C'est le cas des dépendances injoignables (`oncall`), des erreurs de configuration et
+   des erreurs serveur non gérées (`jour`).
+2. **`JOB_META` le déduit du nom du job** (`server/src/common/services/sentry/alertContract.ts`).
+   La table couvre les crons et les jobs qu'un cron enfile — ces derniers comptent, car
+   le monitor d'un cron passe au vert dès qu'il a enfilé, sans rien savoir de la suite.
+3. **À défaut, `veille`.**
+
+Un niveau posé par le code n'est jamais écrasé par la table.
+
+## Ajouter ou changer une alerte
+
+**Monter un job d'un cran** : ajoutez ou modifiez son entrée dans `JOB_META`. Un test
+refuse qu'un cron du registre soit absent de la table, donc ajouter un cron force à
+déclarer son niveau.
+
+**Rétrograder une alerte qui ne mérite pas son tag** : c'est la manœuvre la plus
+importante, et elle doit rester facile. Passez le niveau à `veille` dans le code, avec
+en commentaire ce qui l'a motivé. Une alerte qu'on apprend à ignorer coûte plus cher
+qu'une alerte absente, parce qu'elle entraîne à ignorer les autres.
+
+**Ne mettez jamais en tag** un siret, un uai, un identifiant d'organisme, d'effectif ou
+d'utilisateur, ni une date ou une adresse e-mail. Les tags sont indexés par Sentry : une
+valeur non bornée y rend les règles d'alerte inutilisables. Ces valeurs vont en `extra`
+ou en contexte, où elles restent consultables. Une liste blanche l'applique
+automatiquement, et déplace en `extra` tout tag qu'elle ne connaît pas.
+
+## Ce qui ne doit pas devenir une alerte
+
+| Signal                                | Où le consulter                                                                                                        |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Erreurs de transmission des ERP       | En base (`effectifsQueue`) et dans l'UI, sous `transmissions` : chaque organisme voit ses erreurs par date             |
+| Durées et statuts des crons           | Metabase, sur `job_processor.jobs`                                                                                     |
+| Dérive du référentiel des territoires | Un événement `veille` par exécution du cron mensuel                                                                    |
+| Interruption d'un job au déploiement  | En base : `status: "errored"`, `output.error: "Interrupted"`                                                           |
+| Les `logger.error` applicatifs        | Logs bunyan → Fluentd. **Ne les branchez pas sur Sentry** : c'est précisément ce qui avait rendu l'outil inexploitable |
+
+## Le budget
+
+Un contrat sans budget se refait noyer. Ces seuils sont des garde-fous, pas des objectifs.
+
+|          | Régime nominal                 | Si dépassé                                                              |
+| -------- | ------------------------------ | ----------------------------------------------------------------------- |
+| `oncall` | ≤ 5 notifications par mois     | On retire le tag : c'est un incident d'observabilité, pas de production |
+| `jour`   | ≤ 15 notifications par semaine | Revue hebdomadaire, on rétrograde                                       |
+
+## Les limites connues
+
+- **La page Crons de Sentry** est fiable depuis le correctif apporté à `job-processor`
+  (`.yarn/patches/`), mais la source de vérité reste `job_processor.jobs`. Le patch sera
+  retiré au passage en version 2.5.0.
+- **Le scheduler de crons** de `job-processor` émet un événement par minute quand il
+  échoue, sans rien qui permette de le distinguer d'une erreur applicative. Il n'est pas
+  filtré.
+- **Les erreurs du navigateur restent minifiées** : les source maps sont servies
+  publiquement mais jamais envoyées à Sentry. Tant que ce point n'est pas traité, les
+  erreurs `next-client` sont peu exploitables.
