@@ -12,10 +12,12 @@ import errorMiddleware, {
   shouldReportError,
 } from "@/http/middlewares/errorMiddleware";
 
+const scope = { setTag: vi.fn() };
+
 vi.mock("@sentry/node", () => ({
   captureException: vi.fn(),
   captureMessage: vi.fn(),
-  withScope: vi.fn((cb: (scope: { setTag: () => void }) => void) => cb({ setTag: vi.fn() })),
+  withScope: vi.fn((cb: (s: typeof scope) => void) => cb(scope)),
 }));
 
 function mockReq(overrides: Partial<Request> = {}): Request {
@@ -165,5 +167,20 @@ describe("errorMiddleware", () => {
     const err = new Error("boom");
     errorMiddleware()(err, req, mockRes(), vi.fn());
     expect(req.err).toBe(err);
+  });
+});
+
+describe("niveau d'alerte", () => {
+  it("classe une erreur serveur en « jour »", () => {
+    run(new Error("boom"));
+
+    expect(scope.setTag).toHaveBeenCalledWith("alert_tier", "jour");
+    expect(scope.setTag).toHaveBeenCalledWith("http_status_class", "5xx");
+  });
+
+  it("ne pose aucun tag quand l'erreur n'est pas rapportée", () => {
+    run(Boom.unauthorized("nope"));
+
+    expect(scope.setTag).not.toHaveBeenCalled();
   });
 });

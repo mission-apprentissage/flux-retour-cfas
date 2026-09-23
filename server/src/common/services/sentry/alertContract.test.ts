@@ -1,9 +1,17 @@
+import { captureException } from "@sentry/node";
 import { type SentryEventLike } from "shared/observability/sentryPolicy";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { crons, jobs } from "@/jobs/registry";
 
-import { applyAlertContract, JOB_META } from "./alertContract";
+import { applyAlertContract, captureTiered, JOB_META } from "./alertContract";
+
+const scope = { setTag: vi.fn(), setFingerprint: vi.fn(), setContext: vi.fn() };
+
+vi.mock("@sentry/node", () => ({
+  captureException: vi.fn(),
+  withScope: vi.fn((cb: (s: typeof scope) => void) => cb(scope)),
+}));
 
 describe("JOB_META", () => {
   // Sans cette garde, ajouter un cron le laisserait silencieusement en « veille ».
@@ -52,5 +60,24 @@ describe("applyAlertContract", () => {
     const event: SentryEventLike = { tags: { route_group: "auth" } };
 
     expect(applyAlertContract(event).tags).toEqual({ route_group: "auth" });
+  });
+});
+
+describe("captureTiered", () => {
+  it("pose le niveau, le type et le regroupement", () => {
+    const error = new Error("boom");
+    captureTiered(error, { tier: "oncall", errorKind: "db", fingerprintKey: "dependency-health:mongodb" });
+
+    expect(scope.setTag).toHaveBeenCalledWith("alert_tier", "oncall");
+    expect(scope.setTag).toHaveBeenCalledWith("error_kind", "db");
+    expect(scope.setFingerprint).toHaveBeenCalledWith(["dependency-health:mongodb"]);
+    expect(captureException).toHaveBeenCalledWith(error);
+  });
+
+  it("range les identifiants métier en contexte, jamais en tag", () => {
+    captureTiered(new Error("boom"), { tier: "jour", extra: { siret: "12345678900011" } });
+
+    expect(scope.setContext).toHaveBeenCalledWith("détail", { siret: "12345678900011" });
+    expect(scope.setTag).not.toHaveBeenCalledWith("siret", expect.anything());
   });
 });

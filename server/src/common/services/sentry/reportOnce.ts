@@ -1,6 +1,6 @@
-import { captureException, withScope } from "@sentry/node";
-
 import logger from "@/common/logger";
+
+import { captureTiered } from "./alertContract";
 
 const reportedConfigurationIssues = new Set<string>();
 const degradedDependencies = new Set<string>();
@@ -13,10 +13,10 @@ export function reportConfigurationIssueOnce(key: string, message: string): void
   reportedConfigurationIssues.add(key);
 
   logger.error({ key }, message);
-  withScope((scope) => {
-    scope.setTag("error_kind", "config");
-    scope.setFingerprint(["configuration", key]);
-    captureException(new Error(message));
+  captureTiered(new Error(message), {
+    tier: "jour",
+    errorKind: "config",
+    fingerprintKey: `configuration:${key}`,
   });
 }
 
@@ -32,9 +32,10 @@ export function reportDependencyHealth(key: string, healthy: boolean, cause?: un
   }
   degradedDependencies.add(key);
 
-  withScope((scope) => {
-    scope.setTag("error_kind", "db");
-    scope.setFingerprint(["dependency-health", key]);
-    captureException(new Error(`Dépendance indisponible : ${key}`, { cause }));
+  captureTiered(new Error(`Dépendance indisponible : ${key}`, { cause }), {
+    // Une dépendance injoignable rend le service inutilisable pour tout le monde.
+    tier: "oncall",
+    errorKind: "db",
+    fingerprintKey: `dependency-health:${key}`,
   });
 }

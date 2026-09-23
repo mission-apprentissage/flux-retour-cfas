@@ -152,6 +152,7 @@ export async function validationTerritoires(): Promise<number> {
 
   // Un renommage de région ne doit pas réveiller une astreinte : warning, pas fatal.
   withScope((scope) => {
+    scope.setTag("alert_tier", "veille");
     scope.setTag("error_kind", "data-drift");
     scope.setFingerprint(["territoires-drift"]);
     scope.setContext("dérive", { total: divergences.length, divergences: divergences.slice(0, 20) });

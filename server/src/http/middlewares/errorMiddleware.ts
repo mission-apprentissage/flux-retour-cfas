@@ -103,6 +103,9 @@ export default (): ErrorRequestHandler => {
 
     if (shouldReportError(boomError)) {
       withScope((scope) => {
+        // Une fonction de l'API est cassée : à traiter dans la journée, pas la nuit.
+        // La rafale, elle, relève d'une règle sur la fréquence.
+        scope.setTag("alert_tier", "jour");
         scope.setTag("route_group", routeGroupOf(req));
         scope.setTag("http_status_class", statusCode >= 500 ? "5xx" : "4xx");
         scope.setTag("error_kind", errorKindOf(boomError));
