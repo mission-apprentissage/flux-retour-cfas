@@ -8,6 +8,7 @@ import { getSession } from "@/app/_utils/session.utils";
 import { Providers } from "@/app/providers";
 
 import { isAdminUser, isIndicateursUser } from "./access";
+import { ImpersonationNotice } from "./ImpersonationNotice";
 import { StatistiquesMLLayoutClient } from "./StatistiquesMLLayoutClient";
 import { StatistiquesPublicLayoutClient } from "./StatistiquesPublicLayoutClient";
 
@@ -17,6 +18,18 @@ export const metadata: Metadata = {
 
 export default async function StatistiquesLayout({ children }: { children: JSX.Element }) {
   const user = await getSession();
+
+  if (user?.impersonating && !isIndicateursUser(user)) {
+    return (
+      <Providers>
+        <UserContextProvider user={user}>
+          <ConnectedHeader />
+          <ImpersonationNotice />
+          <Footer />
+        </UserContextProvider>
+      </Providers>
+    );
+  }
 
   if (isIndicateursUser(user)) {
     return (

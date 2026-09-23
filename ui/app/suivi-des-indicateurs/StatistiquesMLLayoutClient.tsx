@@ -2,6 +2,7 @@
 
 import type { SideMenuProps } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { REGIONS_BY_CODE, REGIONS_WITH_SVG_SORTED } from "shared/constants/territoires";
 
 import { useUserRegions } from "@/app/_components/statistiques/hooks/useUserRegions";
@@ -28,6 +29,14 @@ export function StatistiquesMLLayoutClient({ children, isAdmin = false }: Statis
   const pathname = usePathname() ?? "";
   const { regions: ownRegions, isLoading } = useUserRegions();
   const userRegions = isAdmin ? ADMIN_REGION_CODES : ownRegions;
+
+  useEffect(() => {
+    const reloadIfRestoredFromCache = (event: PageTransitionEvent) => {
+      if (event.persisted) window.location.reload();
+    };
+    window.addEventListener("pageshow", reloadIfRestoredFromCache);
+    return () => window.removeEventListener("pageshow", reloadIfRestoredFromCache);
+  }, []);
 
   const isRegionPage = pathname.includes(`${BASE_PATH}/region/`) || pathname === `${BASE_PATH}/region`;
   const isMissionLocalePage = pathname === `${BASE_PATH}/mission-locale`;
