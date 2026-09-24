@@ -192,6 +192,16 @@ const buildPrioritaireMatchOr = () => ({
   ],
 });
 
+/** Critères de la liste « Dossiers prioritaires », alignés sur le filtre « Critère priorité » de l'UI. */
+const buildCriteresPrioritairesMatchOr = () => ({
+  $or: [
+    { a_risque_accompagnement_conjoint: true },
+    { a_risque_souhaite_rdv: true },
+    { a_risque_mineur: true },
+    { a_risque_rqth: true },
+  ],
+});
+
 const matchTraitementEffectifPipelineMl = (
   nom_liste: API_EFFECTIF_LISTE,
   type: "MISSION_LOCALE" | "ORGANISME_FORMATION"
@@ -220,6 +230,14 @@ const matchTraitementEffectifPipelineMl = (
       ];
     case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
       return [{ $match: { $or: [{ a_traiter: true }, { injoignable: true }] } }];
+    case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER_PRIORITAIRE:
+      return [
+        {
+          $match: {
+            $and: [{ $or: [{ a_traiter: true }, { injoignable: true }] }, buildCriteresPrioritairesMatchOr()],
+          },
+        },
+      ];
     case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
       return [
         {
@@ -833,6 +851,7 @@ const addNudgeFields = () => [
 const getSortPrerequisiteStages = (nom_liste: API_EFFECTIF_LISTE) => {
   switch (nom_liste) {
     case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+    case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER_PRIORITAIRE:
     case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
     case API_EFFECTIF_LISTE.COLLAB_TRAITE:
       return addNudgeFields();
@@ -937,6 +956,7 @@ const getSortedRulesByListeType = (nom_liste: API_EFFECTIF_LISTE) => {
     // Souhaite un RDV, Mineur, RQTH — dissociés), puis À recontacter avant À traiter.
     // `_id` en dernier pour un ordre déterministe (précédent/suivant de la fiche).
     case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
+    case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER_PRIORITAIRE:
     case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
       return {
         relance_urgente: -1,
@@ -1865,6 +1885,7 @@ export const getEffectifARisqueByMissionLocaleId = async (
 
 type NomListeFusionnee =
   | API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER
+  | API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER_PRIORITAIRE
   | API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER
   | API_EFFECTIF_LISTE.COLLAB_TRAITE;
 
@@ -1874,11 +1895,14 @@ export const getEffectifsFusionnesByMissionLocaleId = async (
   nomListe: NomListeFusionnee,
   tri?: MlTri | null
 ) => {
-  const isCollab = nomListe !== API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER;
+  const isCollab =
+    nomListe === API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER || nomListe === API_EFFECTIF_LISTE.COLLAB_TRAITE;
+  const isPrioritaire = nomListe === API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER_PRIORITAIRE;
 
   const pipeline = [
     ...(await missionLocaleBaseAggregation(organisation)),
     ...(isCollab ? [{ $match: { "organisme_data.acc_conjoint": true } }] : []),
+    ...(isPrioritaire ? [{ $match: buildCriteresPrioritairesMatchOr() }] : []),
     {
       $facet: {
         liste: [
