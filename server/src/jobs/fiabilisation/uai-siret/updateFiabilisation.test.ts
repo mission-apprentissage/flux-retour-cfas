@@ -1,12 +1,11 @@
-import { captureException } from "@sentry/node";
 import { ApiError, type IRechercheOrganismeResponse } from "api-alternance-sdk";
-import Boom from "boom";
 import type { IOrganisme } from "shared/models";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { describe, it, vi, beforeEach, expect } from "vitest";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { organismesDb } from "@/common/model/collections";
+import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 import { useMongo } from "@tests/jest/setupMongo";
 
 import { fiabilisationUaiSiret, updateOrganismesFiabilisationStatut } from "./updateFiabilisation";
@@ -20,9 +19,9 @@ vi.mock("@/common/apis/apiAlternance/client", () => {
     },
   };
 });
-vi.mock("@sentry/node", () => {
+vi.mock("@/common/services/sentry/reportOnce", () => {
   return {
-    captureException: vi.fn(),
+    reportDependencyHealth: vi.fn(),
   };
 });
 
@@ -154,7 +153,12 @@ describe("fiabilisationUaiSiret", () => {
         api_response: null,
       });
       expect(apiAlternanceClient.organisme.recherche).toHaveBeenCalledWith({ uai, siret });
-      expect(captureException).not.toHaveBeenCalled();
+      expect(reportDependencyHealth).not.toHaveBeenCalledWith(
+        expect.anything(),
+        false,
+        expect.anything(),
+        expect.anything()
+      );
     });
   });
 
@@ -188,7 +192,12 @@ describe("fiabilisationUaiSiret", () => {
         api_response: null,
       });
       expect(apiAlternanceClient.organisme.recherche).toHaveBeenCalledWith({ uai, siret });
-      expect(captureException).not.toHaveBeenCalled();
+      expect(reportDependencyHealth).not.toHaveBeenCalledWith(
+        expect.anything(),
+        false,
+        expect.anything(),
+        expect.anything()
+      );
     });
   });
 
@@ -215,8 +224,11 @@ describe("fiabilisationUaiSiret", () => {
         api_response: null,
       });
       expect(apiAlternanceClient.organisme.recherche).toHaveBeenCalledWith({ uai, siret });
-      expect(captureException).toHaveBeenCalledWith(
-        Boom.internal("Échec de l'appel API pour la fiabilisation des organismes", { uai, siret })
+      expect(reportDependencyHealth).toHaveBeenCalledWith(
+        "api-alternance:rechercheOrganisme",
+        false,
+        expect.anything(),
+        expect.objectContaining({ upstream: "api-alternance" })
       );
     });
   });
@@ -232,8 +244,11 @@ describe("fiabilisationUaiSiret", () => {
         api_response: null,
       });
       expect(apiAlternanceClient.organisme.recherche).toHaveBeenCalledWith({ uai, siret });
-      expect(captureException).toHaveBeenCalledWith(
-        Boom.internal("Échec de l'appel API pour la fiabilisation des organismes", { uai, siret })
+      expect(reportDependencyHealth).toHaveBeenCalledWith(
+        "api-alternance:rechercheOrganisme",
+        false,
+        expect.anything(),
+        expect.objectContaining({ upstream: "api-alternance" })
       );
     });
   });
