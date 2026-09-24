@@ -15,7 +15,7 @@ import { useMlListeFiltres } from "@/app/_components/ruptures/mission-locale/lis
 import { SuspenseWrapper } from "@/app/_components/suspense/SuspenseWrapper";
 import type { MlListeEffectif } from "@/common/types/ruptures";
 
-const NOM_LISTE = API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER;
+const NOM_LISTE = API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER_PRIORITAIRE;
 
 const BLOC_EXPLICATIF = (
   <>

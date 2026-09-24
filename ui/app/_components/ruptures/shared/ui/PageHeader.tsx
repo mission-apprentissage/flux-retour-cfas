@@ -63,6 +63,8 @@ export function PageHeader({
       case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER:
       case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
         return "à traiter ou recontacter";
+      case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER_PRIORITAIRE:
+        return "à traiter ou recontacter en priorité";
       case API_EFFECTIF_LISTE.COLLAB_TRAITE:
         return "traité";
       default:
