@@ -23,9 +23,21 @@ export const decaJobs = {
 } satisfies Record<string, JobDef>;
 
 export const decaCrons = {
-  // 10h30 Paris le dimanche — import hebdomadaire des contrats DECA bruts (production uniquement)
+  // 19h00 Paris le dimanche — import hebdomadaire des contrats DECA bruts (production uniquement).
+  //
+  // L'import dure 6h30 en moyenne et occupe le worker, qui est séquentiel et unique.
+  // À 10h30 il entrait en collision avec le récap quotidien des CFA, planifié à la même
+  // minute : un dimanche sur deux environ, CFA et Missions Locales recevaient leur récap
+  // vers 17h20 au lieu de 10h30 et 13h30.
+  //
+  // 19h00 est le seul créneau qui convienne : après l'envoi WhatsApp de 18h30, et assez
+  // tôt pour finir avant le batch quotidien de 2h30.
+  //
+  // Mesuré sur 13 occurrences : durée moyenne 388 min, max 411 min.
   "hydrate:contrats-deca-raw": {
-    cron_string: "30 10 * * 7",
+    cron_string: "0 19 * * 7",
+    checkinMargin: 15,
+    maxRuntimeInMinutes: 825,
     handler: async () => {
       if (config.env !== "production") {
         logger.warn("hydrate:contrats-deca-raw job can only be run in production environment");

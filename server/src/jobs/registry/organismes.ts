@@ -66,14 +66,23 @@ export const organismesJobs = {
 } satisfies Record<string, JobDef>;
 
 export const organismesCrons = {
-  // 03h00 Paris — nettoyage quotidien des organismes obsolètes
+  // 04h35 Paris — nettoyage quotidien des organismes obsolètes.
+  // Déplacé de 03h00 : il attendait 78 min derrière la file du batch de 02h30.
+  // Mesuré sur 90 j : durée max 4 s.
   "Cleanup organismes": {
-    cron_string: "0 3 * * *",
+    cron_string: "35 4 * * *",
+    checkinMargin: 15,
+    maxRuntimeInMinutes: 5,
     handler: cleanupOrganismes,
   },
-  // 04h00 Paris — révocation des clés API des organismes inactifs depuis plus de 12 mois
+  // 04h00 Paris — révocation des clés API des organismes inactifs depuis plus de 12 mois.
+  // Seul cron qui reste dans la file du batch de 02h30 : son heure figure dans son nom,
+  // qui sert d'identifiant en base et de slug de monitor, donc il n'est pas déplaçable.
+  // Mesuré sur 90 j : attente max 31 min, durée max 0,1 s.
   "Révoque les clés API des organismes inactifs depuis +12 mois, tous les jours à 4h": {
     cron_string: "0 4 * * *",
+    checkinMargin: 45,
+    maxRuntimeInMinutes: 5,
     handler: async () => {
       await addJob({ name: "organismes:revoke-stale-api-keys", queued: true });
       return 0;

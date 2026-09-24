@@ -38,9 +38,13 @@ export const diversJobs = {
 } satisfies Record<string, JobDef>;
 
 export const diversCrons = {
-  // 04h05 Paris le 1er du mois — contrôle de cohérence des constantes de territoires
+  // 04h50 Paris le 1er du mois — contrôle de cohérence des constantes de territoires.
+  // Déplacé de 04h05 : il attendait 20 min derrière la file du batch de 02h30.
+  // Mesuré sur 3 occurrences : durée max 0,1 s.
   "Validation des constantes de territoires": {
-    cron_string: "5 4 1 * *",
+    cron_string: "50 4 1 * *",
+    checkinMargin: 15,
+    maxRuntimeInMinutes: 5,
     handler: validationTerritoires,
   },
 

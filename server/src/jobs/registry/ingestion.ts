@@ -48,8 +48,14 @@ export const ingestionJobs = {
 
 export const ingestionCrons = {
   // Toutes les 15 minutes — détecte une file d'ingestion qui n'avance plus.
+  //
+  // La marge est large parce que ce cron partage le worker avec le batch de 02h30 :
+  // entre 02h30 et 04h27, il ne s'exécute pas. L'ingestion, elle, tourne sur le
+  // queue_processor et n'est pas bloquée — seule sa surveillance l'est.
   "Vérifie que l'ingestion avance toutes les 15 min": {
     cron_string: "*/15 * * * *",
+    checkinMargin: 120,
+    maxRuntimeInMinutes: 10,
     handler: heartbeatIngestion,
   },
 } satisfies Record<string, CronDef>;

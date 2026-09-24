@@ -69,8 +69,12 @@ export const dailyJobs = {
 
 export const dailyCrons = {
   // 02h30 Paris — enchaîne tous les jobs quotidiens (hydrate, fiabilisation, purge) en file
+  // Enfile 20 jobs puis rend la main : sa durée propre est de 0,3 s, mais sa file
+  // occupe le worker jusqu'à 04h27 au pire. Tout l'ordonnancement nocturne en découle.
   "Run daily jobs each day at 02h30": {
     cron_string: "30 2 * * *",
+    checkinMargin: 15,
+    maxRuntimeInMinutes: 5,
     handler: async () => runDailyJobs(true),
   },
 } satisfies Record<string, CronDef>;

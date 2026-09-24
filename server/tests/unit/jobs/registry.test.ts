@@ -36,20 +36,30 @@ describe("registre des jobs", () => {
 
     expect(schedules).toEqual({
       "Run daily jobs each day at 02h30": "30 2 * * *",
-      "Import formations": "0 3 * * *",
-      "Cleanup organismes": "0 3 * * *",
+      "Import formations": "40 4 * * *",
+      "Cleanup organismes": "35 4 * * *",
       "Révoque les clés API des organismes inactifs depuis +12 mois, tous les jours à 4h": "0 4 * * *",
-      "Validation des constantes de territoires": "5 4 1 * *",
-      "Nettoie et met à jour les statistiques des Missions Locales": "30 4 * * *",
+      "Validation des constantes de territoires": "50 4 1 * *",
+      "Nettoie et met à jour les statistiques des Missions Locales": "45 5 * * *",
       "Synchro Brevo de tous les contacts TBA à 5h": "0 5 * * *",
       "Mettre à jour les statuts d'effectifs tous les samedis matin à 5h": "0 5 * * 6",
       "Send CFA daily recap at 10h30": "30 10 * * *",
-      "hydrate:contrats-deca-raw": "30 10 * * 7",
+      "hydrate:contrats-deca-raw": "0 19 * * 7",
       "Send ML daily recap at 13h30": "30 13 * * *",
       "Send ML weekly recap at 14h30 on Mondays": "30 14 * * 1",
       "Envoi WhatsApp préqualif quotidien à 18h30": "30 18 * * *",
       "Vérifie que l'ingestion avance toutes les 15 min": "*/15 * * * *",
     });
+  });
+
+  // Les défauts de job-processor sont checkinMargin: 5 et maxRuntime: 60. Ils ont
+  // produit 9 monitors rouges en permanence : un nouveau cron ne doit pas y retomber.
+  it("déclare un budget d'exécution pour chaque cron", () => {
+    const sansBudget = Object.entries(crons)
+      .filter(([, cron]) => cron.checkinMargin == null || cron.maxRuntimeInMinutes == null)
+      .map(([name]) => name);
+
+    expect(sansBudget).toEqual([]);
   });
 
   it("conserve chaque job enregistré", () => {

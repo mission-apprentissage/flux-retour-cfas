@@ -172,9 +172,13 @@ export const missionLocaleJobs = {
 } satisfies Record<string, JobDef>;
 
 export const missionLocaleCrons = {
-  // 04h30 Paris — purge des snapshots ML non activés puis recalcul des statistiques Missions Locales
+  // 05h45 Paris — purge des snapshots ML non activés puis recalcul des statistiques Missions Locales.
+  // Déplacé de 04h30 pour passer après les statuts d'effectifs du samedi, qui finissent
+  // au plus tard à 05h36. Mesuré sur 90 j : durée max 30 min.
   "Nettoie et met à jour les statistiques des Missions Locales": {
-    cron_string: "30 4 * * *",
+    cron_string: "45 5 * * *",
+    checkinMargin: 15,
+    maxRuntimeInMinutes: 65,
     handler: async () => {
       await updateNotActivatedMissionLocaleEffectifSnapshot();
       await hydrateMissionLocaleStats();

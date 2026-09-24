@@ -76,8 +76,33 @@ Un contrat sans budget se refait noyer. Ces seuils sont des garde-fous, pas des 
 | `oncall` | ≤ 5 notifications par mois     | On retire le tag : c'est un incident d'observabilité, pas de production |
 | `jour`   | ≤ 15 notifications par semaine | Revue hebdomadaire, on rétrograde                                       |
 
+## Les budgets de crons
+
+Chaque cron déclare deux valeurs à côté de son `cron_string`, et un test refuse qu'un
+nouveau cron les omette :
+
+- **`checkinMargin`** — le retard de démarrage toléré avant que Sentry ne le marque
+  « missed ». Il couvre l'**attente en file**, pas une dérive d'horloge : le worker est
+  unique et séquentiel, donc un cron attend derrière tout ce qui tourne déjà.
+- **`maxRuntimeInMinutes`** — la durée tolérée avant « timeout ». Posée au double de la
+  durée maximale observée.
+
+Les valeurs viennent d'une mesure sur 90 jours de `job_processor.jobs`, reportée en
+commentaire à côté de chaque cron. **À refaire quand les volumes auront changé** : les
+défauts de la bibliothèque (5 min et 60 min) maintenaient neuf monitors au rouge en
+permanence, sans qu'aucun cron ne soit réellement en panne.
+
+L'ordonnancement nocturne en découle : le batch de 2h30 occupe le worker jusqu'à 4h27,
+et les crons qui suivent sont espacés pour ne pas s'attendre. Avant d'ajouter un cron
+entre 2h30 et 6h, vérifie où il tombe dans cette file.
+
 ## Les limites connues
 
+- **Le heartbeat d'ingestion ne surveille rien entre 2h30 et 4h27.** Il partage le worker
+  avec le batch nocturne, d'où sa marge de 120 minutes. L'ingestion elle-même n'est pas
+  bloquée — elle tourne sur `queue_processor`, un service distinct — mais un blocage
+  survenu à 3h ne sera signalé qu'à la fin du batch. Le porter par le `queue_processor`
+  lèverait la limite.
 - **La page Crons de Sentry** est fiable depuis le correctif apporté à `job-processor`
   (`.yarn/patches/`), mais la source de vérité reste `job_processor.jobs`. Le patch sera
   retiré au passage en version 2.5.0.
