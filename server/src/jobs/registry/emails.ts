@@ -62,8 +62,8 @@ export const emailsCrons = {
     },
   },
   // 10h30 Paris — récap quotidien envoyé aux CFA
-  // Était planifié à la même minute que l'import DECA du dimanche : un dimanche sur
-  // deux environ, le récap partait vers 17h20 au lieu de 10h30. DECA est passé à 19h.
+  // Était planifié à la même minute que l'import DECA du dimanche, qui dure 6h30 :
+  // chaque dimanche, le récap partait vers 17h00 au lieu de 10h30. DECA est passé à 19h.
   "Send CFA daily recap at 10h30": {
     cron_string: "30 10 * * *",
     checkinMargin: 20,

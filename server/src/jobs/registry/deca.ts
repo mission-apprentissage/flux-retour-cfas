@@ -27,8 +27,8 @@ export const decaCrons = {
   //
   // L'import dure 6h30 en moyenne et occupe le worker, qui est séquentiel et unique.
   // À 10h30 il entrait en collision avec le récap quotidien des CFA, planifié à la même
-  // minute : un dimanche sur deux environ, CFA et Missions Locales recevaient leur récap
-  // vers 17h20 au lieu de 10h30 et 13h30.
+  // minute : chaque dimanche, CFA et Missions Locales recevaient leur récap vers 17h00
+  // au lieu de 10h30 et 13h30.
   //
   // 19h00 est le seul créneau qui convienne : après l'envoi WhatsApp de 18h30, et assez
   // tôt pour finir avant le batch quotidien de 2h30.
