@@ -104,6 +104,7 @@ export enum API_EFFECTIF_LISTE {
   A_TRAITER_PRIORITAIRE = "a_traiter_prioritaire",
   TRAITE_PRIORITAIRE = "traite_prioritaire",
   A_TRAITER_OU_RECONTACTER = "a_traiter_ou_recontacter",
+  A_TRAITER_OU_RECONTACTER_PRIORITAIRE = "a_traiter_ou_recontacter_prioritaire",
   COLLAB_A_TRAITER_OU_RECONTACTER = "collab_a_traiter_ou_recontacter",
   COLLAB_TRAITE = "collab_traite",
 }

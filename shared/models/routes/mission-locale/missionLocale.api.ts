@@ -31,6 +31,7 @@ export const effectifMissionLocaleListe = {
 /** Listes plates de l'espace ML : dossiers prioritaires et collaborations CFA. */
 export const zNomListeFusionnee = z.enum([
   API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER,
+  API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER_PRIORITAIRE,
   API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER,
   API_EFFECTIF_LISTE.COLLAB_TRAITE,
 ]);

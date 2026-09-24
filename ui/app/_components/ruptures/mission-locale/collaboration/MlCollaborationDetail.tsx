@@ -55,6 +55,11 @@ function getMlListInfo(
             label: "Dossiers prioritaires à traiter",
             href: `/mission-locale${filtresQuery ? `?${filtresQuery.slice(1)}` : ""}`,
           };
+    case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER_PRIORITAIRE:
+      return {
+        label: "Dossiers prioritaires à traiter",
+        href: `/mission-locale${filtresQuery ? `?${filtresQuery.slice(1)}` : ""}`,
+      };
     case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
     case API_EFFECTIF_LISTE.COLLAB_TRAITE: {
       const traites = sousOnglet === "traites" || statut === API_EFFECTIF_LISTE.COLLAB_TRAITE;

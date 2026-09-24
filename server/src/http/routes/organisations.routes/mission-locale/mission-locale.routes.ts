@@ -230,6 +230,13 @@ const exportEffectifMissionLocale: RouteHandler<MissionLocaleLocals> = async (re
             data: effectifsList,
           });
           break;
+        case API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER_PRIORITAIRE:
+          dataArr.push({
+            worksheetName: "Prioritaires",
+            logsTag: "ml_a_traiter_ou_recontacter" as const,
+            data: effectifsList,
+          });
+          break;
         case API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER:
           dataArr.push({
             // Excel tronque au-delà de 31 caractères : garder ce libellé court.

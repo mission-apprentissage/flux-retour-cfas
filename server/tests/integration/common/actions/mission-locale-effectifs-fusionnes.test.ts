@@ -13,6 +13,7 @@ import { getAnneesScolaireListFromDate } from "shared/utils";
 import { describe, it, beforeEach, expect } from "vitest";
 
 import {
+  getEffectifFromMissionLocaleId,
   getEffectifsFusionnesByMissionLocaleId,
   getEffectifsListByMissionLocaleId,
 } from "@/common/actions/mission-locale/mission-locale.actions";
@@ -217,6 +218,72 @@ describe("getEffectifsFusionnesByMissionLocaleId", () => {
       expect(dossier.injoignable).toBe(true);
       expect(dossier.date_dernier_passage_a_recontacter).toEqual(daysAgo(2));
       expect(dossier.date_reception).toEqual(daysAgo(30));
+    });
+  });
+
+  describe("liste des dossiers prioritaires", () => {
+    const LISTE = API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER_PRIORITAIRE;
+
+    it("ne garde que les dossiers portant un critère de priorité, compteur compris", async () => {
+      await insertMlRecord("SANSCRITERE");
+      await insertMlRecord("COLLAB", { organisme_data: collabData() });
+      await insertMlRecord("RDV", { souhaite_rdv: true });
+      await insertMlRecord("MINEUR", {}, { date_de_naissance: yearsAgo(17) });
+      await insertMlRecord("RQTH", {}, { rqth: true });
+
+      const prioritaires = await getEffectifsFusionnesByMissionLocaleId(missionLocale, LISTE);
+      expect(noms(prioritaires)).toEqual(["COLLAB", "RDV", "MINEUR", "RQTH"]);
+      expect(prioritaires.counts.a_traiter_ou_recontacter).toBe(4);
+
+      const tous = await getEffectifsFusionnesByMissionLocaleId(
+        missionLocale,
+        API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER
+      );
+      expect(noms(tous)).toContain("SANSCRITERE");
+      expect(tous.counts.a_traiter_ou_recontacter).toBe(5);
+    });
+
+    it("inclut les dossiers à recontacter prioritaires et exclut les traités", async () => {
+      await insertMlRecord("RECONTACTERPRIO", { situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR }, { rqth: true });
+      await insertMlRecord("RECONTACTERSANSCRITERE", { situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR });
+      await insertMlRecord(
+        "TRAITEPRIO",
+        { situation: SITUATION_ENUM.RDV_PRIS, date_traitement: daysAgo(1) },
+        { rqth: true }
+      );
+
+      const result = await getEffectifsFusionnesByMissionLocaleId(missionLocale, LISTE);
+
+      expect(noms(result)).toEqual(["RECONTACTERPRIO"]);
+      expect(result.counts).toEqual({ a_traiter_ou_recontacter: 1, traite: 1 });
+    });
+
+    it("n'inclut pas un dossier dont le seul signal est un rappel WhatsApp ou une autorisation de contact", async () => {
+      await insertMlRecord("CALLBACK", {
+        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+        whatsapp_callback_requested: true,
+      });
+      await insertMlRecord("AUTORISATION", { effectif_choice: { confirmation: true } });
+
+      const result = await getEffectifsFusionnesByMissionLocaleId(missionLocale, LISTE);
+
+      expect(noms(result)).toEqual([]);
+    });
+
+    it("aligne le précédent/suivant de la fiche sur la liste filtrée", async () => {
+      await insertMlRecord("SANSCRITERE");
+      const premier = await insertMlRecord("COLLAB", { organisme_data: collabData() });
+      await insertMlRecord("RQTH", {}, { rqth: true });
+
+      const fiche = await getEffectifFromMissionLocaleId(
+        missionLocale,
+        premier.effectif_snapshot._id.toString(),
+        LISTE
+      );
+
+      expect(fiche.total).toBe(2);
+      expect(fiche.currentIndex).toBe(0);
+      expect(fiche.next?.nom).toBe("RQTH");
     });
   });
 
