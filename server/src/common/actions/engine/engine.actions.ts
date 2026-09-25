@@ -57,7 +57,8 @@ export const buildNewHistoriqueStatutApprenant = (
 
 export const getAndFormatCommuneFromCode = async (
   insee: string | null | undefined,
-  postal: string | null | undefined
+  postal: string | null | undefined,
+  adresse?: string | null
 ) => {
   if (!insee && !postal) {
     return {};
@@ -66,6 +67,7 @@ export const getAndFormatCommuneFromCode = async (
     const communeInfo = await getCommune({
       codeInsee: insee,
       codePostal: postal,
+      adresse,
     });
 
     return communeInfo
@@ -95,7 +97,8 @@ export const completeEffectifAddress = async <T extends { apprenant: Partial<IEf
     ...effectifDataWithAddress.apprenant.adresse,
     ...(await getAndFormatCommuneFromCode(
       effectifData.apprenant?.adresse?.code_insee,
-      effectifData.apprenant?.adresse?.code_postal
+      effectifData.apprenant?.adresse?.code_postal,
+      effectifData.apprenant?.adresse?.complete
     )),
   };
 

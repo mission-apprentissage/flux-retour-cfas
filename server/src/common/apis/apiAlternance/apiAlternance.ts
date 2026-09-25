@@ -5,6 +5,7 @@ import Boom from "boom";
 import type { CfdInfo, RncpInfo } from "shared/models/apis/@types/ApiAlternance";
 
 import logger from "@/common/logger";
+import { resoudreCodeInsee } from "@/common/services/commune/resoudreCodeInsee";
 import { getErrorMessage } from "@/common/utils/errorUtils";
 import config from "@/config";
 
@@ -91,9 +92,11 @@ export const getRncpInfo = async (rncp: string): Promise<RncpInfo | null> => {
 export const getCommune = async ({
   codePostal,
   codeInsee,
+  adresse,
 }: {
   codePostal?: string | null;
   codeInsee?: string | null;
+  adresse?: string | null;
 }): Promise<ICommune | null> => {
   const code = codePostal || codeInsee;
 
@@ -139,13 +142,17 @@ export const getCommune = async ({
 
   // Partial match code postal
   if (codePostal) {
-    const communeByPostal = communeList.find(({ code }) => code.postaux.includes(codePostal));
+    const communesByPostal = communeList.filter(({ code }) => code.postaux.includes(codePostal));
 
-    if (communeByPostal) {
-      return communeByPostal;
+    if (communesByPostal.length > 1) {
+      const resolution = await resoudreCodeInsee({ codePostal, adresse });
+      const communeResolue = communesByPostal.find(({ code }) => code.insee === resolution?.code_insee);
+      if (communeResolue) {
+        return communeResolue;
+      }
     }
 
-    return null;
+    return communesByPostal[0] ?? null;
   }
 
   return null;

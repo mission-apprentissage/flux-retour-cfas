@@ -54,7 +54,11 @@ export const hydrateMissionLocaleOrganisation = async () => {
     if (!missionLocale) {
       let arml: IOrganisationARML | null = null;
 
-      const { mission_locale_id, ...rest } = await getAndFormatCommuneFromCode(null, ml.localisation.cp);
+      const { mission_locale_id, ...rest } = await getAndFormatCommuneFromCode(
+        null,
+        ml.localisation.cp,
+        `${ml.localisation.adresse} ${ml.localisation.ville}`
+      );
 
       if (rest.region) {
         arml = (await organisationsDb().findOne({
@@ -212,7 +216,11 @@ export const hydrateMissionLocaleAdresse = async () => {
 
   for (const ml of allMl) {
     const missionLocale = await organisationsDb().findOne({ ml_id: ml.id, type: "MISSION_LOCALE" });
-    const { mission_locale_id, ...rest } = await getAndFormatCommuneFromCode(null, ml.localisation.cp);
+    const { mission_locale_id, ...rest } = await getAndFormatCommuneFromCode(
+      null,
+      ml.localisation.cp,
+      `${ml.localisation.adresse} ${ml.localisation.ville}`
+    );
 
     if (missionLocale) {
       await organisationsDb().updateOne(
