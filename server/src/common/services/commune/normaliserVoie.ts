@@ -28,7 +28,7 @@ export function normaliserVoie(texte: string | null | undefined): string {
 
   return texte
     .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/\p{M}/gu, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .split(" ")

@@ -1,16 +1,15 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { communesVoiesDb } from "@/common/model/collections";
-import { clearCache } from "@/common/utils/cacheUtils";
 import { useMongo } from "@tests/jest/setupMongo";
 
-import { resoudreCodeInsee } from "./resoudreCodeInsee";
+import { resoudreCodeInsee, viderCacheCommunesVoies } from "./resoudreCodeInsee";
 
 describe("resoudreCodeInsee", () => {
   useMongo();
 
   beforeEach(async () => {
-    clearCache();
+    viderCacheCommunesVoies();
     await communesVoiesDb().insertOne({
       _id: "02100",
       communes: [
@@ -21,7 +20,7 @@ describe("resoudreCodeInsee", () => {
       voies: [
         { nom: "rue sentier", code_insee: ["02691"] },
         { nom: "rue maurice duverget", code_insee: ["02525"] },
-        { nom: "rue gare", code_insee: ["02288", "02691"] },
+        { nom: "rue gare", code_insee: ["02288", "02525"] },
         { nom: "gare", code_insee: ["02525"] },
       ],
       updated_at: new Date(),
@@ -50,6 +49,13 @@ describe("resoudreCodeInsee", () => {
     expect(
       await resoudreCodeInsee({ codePostal: "02100", adresse: "56 bis rue Alexandre Ribot saint quentin" })
     ).toEqual({ code_insee: "02691", methode: "commune" });
+  });
+
+  it("limite le repli aux communes où la voie existe", async () => {
+    expect(await resoudreCodeInsee({ codePostal: "02100", adresse: "5 rue de la Gare" })).toEqual({
+      code_insee: "02525",
+      methode: "population",
+    });
   });
 
   it("se replie sur la commune la plus peuplée", async () => {

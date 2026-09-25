@@ -2,7 +2,7 @@ import type { ICommune } from "api-alternance-sdk";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { communesVoiesDb } from "@/common/model/collections";
-import { clearCache } from "@/common/utils/cacheUtils";
+import { viderCacheCommunesVoies } from "@/common/services/commune/resoudreCodeInsee";
 import { useMongo } from "@tests/jest/setupMongo";
 
 import { getCommune } from "./apiAlternance";
@@ -37,7 +37,7 @@ describe("getCommune", () => {
   useMongo();
 
   beforeEach(async () => {
-    clearCache();
+    viderCacheCommunesVoies();
     vi.mocked(apiAlternanceClient.geographie.rechercheCommune).mockImplementation(async ({ code }) =>
       code === "02000" ? [laon] : [essigny, saintQuentin]
     );
@@ -66,7 +66,7 @@ describe("getCommune", () => {
 
   it("renvoie la première commune si le code postal est absent du référentiel", async () => {
     await communesVoiesDb().deleteMany({});
-    clearCache();
+    viderCacheCommunesVoies();
     expect(await getCommune({ codePostal: "02100", adresse: "138 rue du Sentier" })).toBe(essigny);
   });
 
