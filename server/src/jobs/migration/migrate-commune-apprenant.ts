@@ -4,10 +4,19 @@ import type { AnyBulkWriteOperation, Collection, Filter, ObjectId } from "mongod
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
+import type { IOrganisationMissionLocale } from "shared/models/data/organisations.model";
 
+import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import parentLogger from "@/common/logger";
-import { communesVoiesDb, effectifsDb, effectifsDECADb, missionLocaleEffectifsDb } from "@/common/model/collections";
+import {
+  communesVoiesDb,
+  effectifsDb,
+  effectifsDECADb,
+  missionLocaleEffectifsDb,
+  missionLocaleEffectifsLogDb,
+  organisationsDb,
+} from "@/common/model/collections";
 import { resoudreCodeInsee, type ResolutionCodeInsee } from "@/common/services/commune/resoudreCodeInsee";
 
 const logger = parentLogger.child({ module: "job:migrate:commune-apprenant" });
@@ -212,10 +221,152 @@ async function rattraperCollection<E extends IEffectif | IEffectifDECA>(
   );
 }
 
+type RapportReaffectation = {
+  dossiers: number;
+  deplaces: number;
+  traites_conserves: number;
+  deja_dans_la_bonne_ml: number;
+  hors_ancienne_ml: number;
+  ml_cible_absente: number;
+  doublons_supprimes: number;
+  conflits_actifs: number;
+  ecritures_en_erreur: number;
+  stats_en_erreur: number;
+};
+
+async function estTraite(dossier: IMissionLocaleEffectif): Promise<boolean> {
+  if (
+    dossier.situation ||
+    dossier.whatsapp_contact ||
+    dossier.cfa_rupture_declaration ||
+    dossier.organisme_data?.acc_conjoint === true ||
+    dossier.organisme_data?.reponse_at ||
+    dossier.souhaite_rdv === true
+  ) {
+    return true;
+  }
+  const log = await missionLocaleEffectifsLogDb().findOne(
+    { mission_locale_effectif_id: dossier._id },
+    { projection: { _id: 1 } }
+  );
+  return log !== null;
+}
+
+/**
+ * Déplace vers leur nouvelle Mission Locale les dossiers non traités des effectifs dont la ML a
+ * changé avec la commune. Les dossiers traités restent dans leur ML actuelle.
+ */
+async function reaffecterDossiersMl(changementsMl: ChangementMissionLocale[], dryRun: boolean) {
+  const rapport: RapportReaffectation = {
+    dossiers: 0,
+    deplaces: 0,
+    traites_conserves: 0,
+    deja_dans_la_bonne_ml: 0,
+    hors_ancienne_ml: 0,
+    ml_cible_absente: 0,
+    doublons_supprimes: 0,
+    conflits_actifs: 0,
+    ecritures_en_erreur: 0,
+    stats_en_erreur: 0,
+  };
+  const dossiersTraites: Array<{ dossier_id: ObjectId; ml_actuelle: number | null; ml_cible: number }> = [];
+  const missionLocalesModifiees = new Map<string, ObjectId>();
+
+  const organisations = (await organisationsDb()
+    .find({ type: "MISSION_LOCALE" })
+    .toArray()) as IOrganisationMissionLocale[];
+  const parMlId = new Map(organisations.map((o) => [o.ml_id, o]));
+  const parId = new Map(organisations.map((o) => [o._id.toString(), o]));
+
+  for (const changement of changementsMl) {
+    const dossiers = await missionLocaleEffectifsDb()
+      .find({ effectif_id: changement.effectif_id, soft_deleted: { $ne: true } })
+      .toArray();
+
+    for (const dossier of dossiers) {
+      rapport.dossiers++;
+      const cible = changement.nouveau_ml_id === null ? undefined : parMlId.get(changement.nouveau_ml_id);
+      const actuelle = parId.get(dossier.mission_locale_id.toString());
+
+      if (!cible) {
+        rapport.ml_cible_absente++;
+        continue;
+      }
+      if (cible._id.equals(dossier.mission_locale_id)) {
+        rapport.deja_dans_la_bonne_ml++;
+        continue;
+      }
+      if ((actuelle?.ml_id ?? null) !== changement.ancien_ml_id) {
+        rapport.hors_ancienne_ml++;
+        continue;
+      }
+      if (await estTraite(dossier)) {
+        rapport.traites_conserves++;
+        dossiersTraites.push({ dossier_id: dossier._id, ml_actuelle: actuelle?.ml_id ?? null, ml_cible: cible.ml_id });
+        continue;
+      }
+
+      const doublon = await missionLocaleEffectifsDb().findOne({
+        mission_locale_id: cible._id,
+        effectif_id: dossier.effectif_id,
+      });
+      if (doublon && !doublon.soft_deleted) {
+        rapport.conflits_actifs++;
+        continue;
+      }
+
+      rapport.deplaces++;
+      if (dryRun) continue;
+
+      try {
+        if (doublon) {
+          await missionLocaleEffectifsDb().deleteOne({ _id: doublon._id, soft_deleted: true });
+          rapport.doublons_supprimes++;
+          logger.info({ doublon: doublon._id, dossier: dossier._id }, "doublon soft-deleted supprimé dans la ML cible");
+        }
+        await missionLocaleEffectifsDb().updateOne(
+          { _id: dossier._id },
+          cible.activated_at
+            ? {
+                $set: {
+                  mission_locale_id: cible._id,
+                  "computed.mission_locale.activated_at": cible.activated_at,
+                  updated_at: new Date(),
+                },
+              }
+            : {
+                $set: { mission_locale_id: cible._id, updated_at: new Date() },
+                $unset: { "computed.mission_locale": "" },
+              }
+        );
+        missionLocalesModifiees.set(dossier.mission_locale_id.toString(), dossier.mission_locale_id);
+        missionLocalesModifiees.set(cible._id.toString(), cible._id);
+      } catch (error) {
+        rapport.ecritures_en_erreur++;
+        logger.error({ error, dossier: dossier._id }, "échec du déplacement du dossier vers sa nouvelle ML");
+        captureException(error);
+      }
+    }
+  }
+
+  for (const [mlId, missionLocaleId] of missionLocalesModifiees) {
+    try {
+      await createOrUpdateMissionLocaleStats(missionLocaleId);
+    } catch (error) {
+      rapport.stats_en_erreur++;
+      logger.error({ error, mlId }, "échec du recalcul des stats de la Mission Locale");
+      captureException(error);
+    }
+  }
+
+  logger.info({ dossiers: dossiersTraites }, "dossiers traités laissés dans leur Mission Locale actuelle");
+  return { rapport, dossiersTraites };
+}
+
 /**
  * Recalcule la commune des apprenants dont la commune avait été devinée depuis un code postal
- * partagé (plus petit code INSEE du code postal, ou commune absente), puis répercute l'adresse
- * sur les snapshots des dossiers Mission Locale.
+ * partagé (plus petit code INSEE du code postal, ou commune absente), répercute l'adresse sur les
+ * snapshots des dossiers Mission Locale, puis déplace les dossiers non traités dont la ML a changé.
  */
 export async function migrateCommuneApprenant({ dryRun, limit }: MigrateCommuneOptions) {
   const plusPetitInsee = await chargerPlusPetitInsee();
@@ -230,6 +381,9 @@ export async function migrateCommuneApprenant({ dryRun, limit }: MigrateCommuneO
   await rattraperCollection(effectifsDb(), { ...contexte, stats: rapport.effectifs });
   await rattraperCollection(effectifsDECADb(), { ...contexte, stats: rapport.effectifsDECA });
 
-  logger.info(rapport, "rattrapage des communes terminé");
-  return { rapport, changementsMl };
+  const reaffectation = await reaffecterDossiersMl(changementsMl, dryRun);
+
+  const rapportComplet = { ...rapport, reaffectation: reaffectation.rapport };
+  logger.info(rapportComplet, "rattrapage des communes terminé");
+  return { rapport: rapportComplet, changementsMl, dossiersTraites: reaffectation.dossiersTraites };
 }

@@ -3,11 +3,19 @@ import { ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
+import { SITUATION_ENUM, type IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
+import type { IOrganisationMissionLocale } from "shared/models/data/organisations.model";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
-import { communesVoiesDb, effectifsDb, effectifsDECADb, missionLocaleEffectifsDb } from "@/common/model/collections";
+import {
+  communesVoiesDb,
+  effectifsDb,
+  effectifsDECADb,
+  missionLocaleEffectifsDb,
+  missionLocaleEffectifsLogDb,
+  organisationsDb,
+} from "@/common/model/collections";
 import { clearCache } from "@/common/utils/cacheUtils";
 import { migrateCommuneApprenant } from "@/jobs/migration/migrate-commune-apprenant";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
@@ -63,7 +71,10 @@ async function insererEffectifDECA(adresse: Record<string, unknown>) {
   return effectif;
 }
 
-async function insererDossierMl(effectif: { _id: ObjectId }) {
+async function insererDossierMl(
+  effectif: { _id: ObjectId },
+  params: { mission_locale_id?: ObjectId } & Partial<IMissionLocaleEffectif> = {}
+) {
   const dossier = {
     _id: new ObjectId(),
     mission_locale_id: new ObjectId(),
@@ -74,9 +85,23 @@ async function insererDossierMl(effectif: { _id: ObjectId }) {
     current_status: { value: null, date: null },
     brevo: { token: null, token_created_at: null },
     soft_deleted: false,
+    ...params,
   };
   await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(dossier));
   return dossier;
+}
+
+async function insererMissionLocale(mlId: number, activatedAt?: Date) {
+  const organisation: IOrganisationMissionLocale = {
+    _id: new ObjectId(),
+    type: "MISSION_LOCALE",
+    nom: `ML ${mlId}`,
+    ml_id: mlId,
+    created_at: new Date(),
+    ...(activatedAt ? { activated_at: activatedAt } : {}),
+  };
+  await organisationsDb().insertOne(organisation);
+  return organisation;
 }
 
 describe("migrateCommuneApprenant", () => {
@@ -179,5 +204,115 @@ describe("migrateCommuneApprenant", () => {
     await communesVoiesDb().deleteMany({});
 
     await expect(migrateCommuneApprenant({ dryRun: true })).rejects.toThrow(/hydrate:communes-voies/);
+  });
+
+  describe("réaffectation des dossiers ML", () => {
+    const adresseMorcourt = { ...adresseDevinee, numero: 24, voie: "RUE MAURICE DUVERGET" };
+    const activationMorcourt = new Date("2025-03-01");
+    let mlEssigny: IOrganisationMissionLocale;
+    let mlMorcourt: IOrganisationMissionLocale;
+
+    beforeEach(async () => {
+      mlEssigny = await insererMissionLocale(486, new Date("2025-01-01"));
+      mlMorcourt = await insererMissionLocale(999, activationMorcourt);
+    });
+
+    it("déplace un dossier non traité vers sa nouvelle ML", async () => {
+      const effectif = await insererEffectifDECA(adresseMorcourt);
+      const dossier = await insererDossierMl(effectif, { mission_locale_id: mlEssigny._id });
+
+      const { rapport } = await migrateCommuneApprenant({ dryRun: false });
+
+      const apres = await missionLocaleEffectifsDb().findOne({ _id: dossier._id });
+      expect(apres?.mission_locale_id).toEqual(mlMorcourt._id);
+      expect(apres?.computed?.mission_locale?.activated_at).toEqual(activationMorcourt);
+      expect(rapport.reaffectation).toMatchObject({
+        dossiers: 1,
+        deplaces: 1,
+        traites_conserves: 0,
+        ecritures_en_erreur: 0,
+        stats_en_erreur: 0,
+      });
+    });
+
+    it("laisse dans sa ML un dossier traité, par situation ou par historique", async () => {
+      const avecSituation = await insererDossierMl(await insererEffectifDECA(adresseMorcourt), {
+        mission_locale_id: mlEssigny._id,
+        situation: SITUATION_ENUM.RDV_PRIS,
+      });
+      const avecLog = await insererDossierMl(await insererEffectifDECA(adresseMorcourt), {
+        mission_locale_id: mlEssigny._id,
+      });
+      await missionLocaleEffectifsLogDb().insertOne({
+        _id: new ObjectId(),
+        mission_locale_effectif_id: avecLog._id,
+        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+        created_at: new Date(),
+        created_by: null,
+        read_by: [],
+      });
+
+      const { rapport, dossiersTraites } = await migrateCommuneApprenant({ dryRun: false });
+
+      for (const dossier of [avecSituation, avecLog]) {
+        expect((await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.mission_locale_id).toEqual(
+          mlEssigny._id
+        );
+      }
+      expect(rapport.reaffectation).toMatchObject({ deplaces: 0, traites_conserves: 2 });
+      expect(dossiersTraites).toEqual(
+        expect.arrayContaining([{ dossier_id: avecSituation._id, ml_actuelle: 486, ml_cible: 999 }])
+      );
+    });
+
+    it("remplace un doublon soft-deleted présent dans la ML cible", async () => {
+      const effectif = await insererEffectifDECA(adresseMorcourt);
+      const dossier = await insererDossierMl(effectif, { mission_locale_id: mlEssigny._id });
+      const doublon = await insererDossierMl(effectif, { mission_locale_id: mlMorcourt._id, soft_deleted: true });
+
+      const { rapport } = await migrateCommuneApprenant({ dryRun: false });
+
+      expect(await missionLocaleEffectifsDb().findOne({ _id: doublon._id })).toBeNull();
+      expect((await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.mission_locale_id).toEqual(
+        mlMorcourt._id
+      );
+      expect(rapport.reaffectation).toMatchObject({ deplaces: 1, doublons_supprimes: 1 });
+    });
+
+    it("ne touche pas un dossier déjà suivi par une autre ML que l'ancienne", async () => {
+      const autreMl = await insererMissionLocale(777);
+      const effectif = await insererEffectifDECA(adresseMorcourt);
+      const dossier = await insererDossierMl(effectif, { mission_locale_id: autreMl._id });
+
+      const { rapport } = await migrateCommuneApprenant({ dryRun: false });
+
+      expect((await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.mission_locale_id).toEqual(autreMl._id);
+      expect(rapport.reaffectation).toMatchObject({ deplaces: 0, hors_ancienne_ml: 1 });
+    });
+
+    it("ne déplace rien si la ML cible n'a pas d'organisation", async () => {
+      await organisationsDb().deleteOne({ _id: mlMorcourt._id });
+      const effectif = await insererEffectifDECA(adresseMorcourt);
+      const dossier = await insererDossierMl(effectif, { mission_locale_id: mlEssigny._id });
+
+      const { rapport } = await migrateCommuneApprenant({ dryRun: false });
+
+      expect((await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.mission_locale_id).toEqual(
+        mlEssigny._id
+      );
+      expect(rapport.reaffectation).toMatchObject({ deplaces: 0, ml_cible_absente: 1 });
+    });
+
+    it("ne déplace rien en simulation", async () => {
+      const effectif = await insererEffectifDECA(adresseMorcourt);
+      const dossier = await insererDossierMl(effectif, { mission_locale_id: mlEssigny._id });
+
+      const { rapport } = await migrateCommuneApprenant({ dryRun: true });
+
+      expect((await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.mission_locale_id).toEqual(
+        mlEssigny._id
+      );
+      expect(rapport.reaffectation.deplaces).toBe(1);
+    });
   });
 });
