@@ -743,6 +743,66 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       expect(active[0].cfa_rupture_declaration).toBeTruthy();
     });
 
+    it("Même effectif traité dont seule la commune change (même code postal) → reste dans ML-A avec la nouvelle adresse", async () => {
+      const erp = createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_H", "Prenomh", 21) });
+      await createMissionLocaleSnapshot(erp);
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: erp._id },
+        { $set: { situation: SITUATION_ENUM.RDV_PRIS } }
+      );
+
+      const erpCorrige = { ...erp, apprenant: makeApprenant("TESTNOM_H", "Prenomh", 21, ML_ID_2) };
+      const result = await createMissionLocaleSnapshot(erpCorrige);
+      expect(result?.upserted).toBe(false);
+
+      const all = await missionLocaleEffectifsDb().find({}).toArray();
+      expect(all).toHaveLength(1);
+      expect(all[0].soft_deleted).toBeFalsy();
+      expect(all[0].situation).toBe(SITUATION_ENUM.RDV_PRIS);
+      expect(all[0].effectif_snapshot.apprenant.adresse?.mission_locale_id).toBe(ML_ID_2);
+    });
+
+    it("Même effectif non traité dont seule la commune change → suit le jeune dans ML-B", async () => {
+      const erp = createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_I", "Prenomi", 21) });
+      await createMissionLocaleSnapshot(erp);
+
+      const erpCorrige = { ...erp, apprenant: makeApprenant("TESTNOM_I", "Prenomi", 21, ML_ID_2) };
+      const result = await createMissionLocaleSnapshot(erpCorrige);
+      expect(result?.upserted).toBe(true);
+
+      const active = await missionLocaleEffectifsDb()
+        .find({ soft_deleted: { $ne: true } })
+        .toArray();
+      const ml2 = await organisationsDb().findOne({ ml_id: ML_ID_2 });
+      expect(active).toHaveLength(1);
+      expect(active[0].mission_locale_id).toEqual(ml2?._id);
+    });
+
+    it("Même effectif traité qui déménage (autre code postal) → suit le jeune dans ML-B", async () => {
+      const erp = createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_J", "Prenomj", 21) });
+      await createMissionLocaleSnapshot(erp);
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: erp._id },
+        { $set: { situation: SITUATION_ENUM.RDV_PRIS } }
+      );
+
+      const apprenantDemenage = makeApprenant("TESTNOM_J", "Prenomj", 21, ML_ID_2);
+      const erpDemenage = {
+        ...erp,
+        apprenant: { ...apprenantDemenage, adresse: { ...apprenantDemenage.adresse, code_postal: "75002" } },
+      };
+      const result = await createMissionLocaleSnapshot(erpDemenage);
+      expect(result?.upserted).toBe(true);
+
+      const active = await missionLocaleEffectifsDb()
+        .find({ soft_deleted: { $ne: true } })
+        .toArray();
+      const ml2 = await organisationsDb().findOne({ ml_id: ML_ID_2 });
+      expect(active).toHaveLength(1);
+      expect(active[0].mission_locale_id).toEqual(ml2?._id);
+      expect(active[0].situation).toBe(SITUATION_ENUM.RDV_PRIS);
+    });
+
     it("DECA dans ML-A, puis DECA pour même personne dans ML-B → ancien soft-deleted, nouveau inséré", async () => {
       const decaML1 = createBaseDecaEffectif({ apprenant: makeApprenant("TESTNOM_H", "Prenomh", 18) });
       const result1 = await createMissionLocaleSnapshot(decaML1);

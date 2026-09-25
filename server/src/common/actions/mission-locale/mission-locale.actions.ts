@@ -54,6 +54,7 @@ import {
   getCurrentStatutFromParcours,
 } from "../shared/rupture-pipeline.utils";
 
+import { estDossierMlTraite } from "./dossier-traite.actions";
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
 import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
 import {
@@ -3038,7 +3039,8 @@ interface DuplicateCheckResult {
 async function checkAndHandleDuplicate(
   normalizedIdentifiant: IPersonV2["identifiant"],
   isNewDeca: boolean,
-  newMissionLocaleId: ObjectId
+  newMissionLocaleId: ObjectId,
+  effectif: IEffectif | IEffectifDECA
 ): Promise<DuplicateCheckResult> {
   const existing = await missionLocaleEffectifsDb().findOne({
     "identifiant_normalise.nom": normalizedIdentifiant.nom,
@@ -3070,6 +3072,21 @@ async function checkAndHandleDuplicate(
     if (existing.cfa_rupture_declaration) {
       logger.info(
         `Dedup cross-ML: skip soft-delete pour ${personLabel} (cfa_rupture_declaration active sur ${existing._id})`
+      );
+      return { canInsert: false };
+    }
+    const adresse = effectif.apprenant.adresse;
+    if (
+      existing.effectif_id.equals(effectif._id) &&
+      existing.effectif_snapshot?.apprenant?.adresse?.code_postal === adresse?.code_postal &&
+      (await estDossierMlTraite(existing))
+    ) {
+      await missionLocaleEffectifsDb().updateOne(
+        { _id: existing._id },
+        { $set: { "effectif_snapshot.apprenant.adresse": adresse } }
+      );
+      logger.info(
+        `Dedup cross-ML: dossier traité ${existing._id} conservé (correction de commune pour ${personLabel})`
       );
       return { canInsert: false };
     }
@@ -3325,7 +3342,7 @@ export const createMissionLocaleSnapshot = async (
   let softDeletedId: ObjectId | undefined;
   if (preFilter && normalizedIdentifiant) {
     const isNewDeca = isDeca(effectif);
-    const dupResult = await checkAndHandleDuplicate(normalizedIdentifiant, isNewDeca, mlData._id);
+    const dupResult = await checkAndHandleDuplicate(normalizedIdentifiant, isNewDeca, mlData._id, effectif);
     duplicateFilter = dupResult.canInsert;
     softDeletedId = dupResult.softDeletedId;
   }
