@@ -1,6 +1,6 @@
 import { captureException } from "@sentry/node";
 import type { ICommune } from "api-alternance-sdk";
-import type { AnyBulkWriteOperation, Collection, Filter, ObjectId } from "mongodb";
+import { MongoBulkWriteError, type AnyBulkWriteOperation, type Collection, type Filter, type ObjectId } from "mongodb";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
@@ -173,27 +173,44 @@ async function rattraperCollection<E extends IEffectif | IEffectifDECA>(
         },
       })
     );
-    const opsSnapshots = courant.map(
-      ({ effectif, commune }): AnyBulkWriteOperation<IMissionLocaleEffectif> => ({
-        updateMany: {
-          filter: { effectif_id: effectif._id },
-          update: {
-            $set: prefixer(
-              "effectif_snapshot.apprenant.adresse",
-              setAdresse(commune)
-            ) as Partial<IMissionLocaleEffectif>,
-          },
-        },
-      })
-    );
-
+    let indexEnEchec = new Set<number>();
     try {
       await collection.bulkWrite(opsEffectifs, { ordered: false });
-      const { modifiedCount } = await missionLocaleEffectifsDb().bulkWrite(opsSnapshots, { ordered: false });
-      stats.snapshots_ml += modifiedCount;
     } catch (error) {
       stats.batches_en_erreur++;
       logger.error({ error, collection: collection.collectionName }, "échec partiel du lot de rattrapage des communes");
+      captureException(error);
+      if (!(error instanceof MongoBulkWriteError)) return;
+      indexEnEchec = new Set([error.writeErrors].flat().map(({ index }) => index));
+    }
+
+    const opsSnapshots = courant.flatMap(
+      ({ effectif, commune }, index): AnyBulkWriteOperation<IMissionLocaleEffectif>[] =>
+        indexEnEchec.has(index)
+          ? []
+          : [
+              {
+                updateMany: {
+                  filter: { effectif_id: effectif._id },
+                  update: {
+                    $set: prefixer(
+                      "effectif_snapshot.apprenant.adresse",
+                      setAdresse(commune)
+                    ) as Partial<IMissionLocaleEffectif>,
+                  },
+                },
+              },
+            ]
+    );
+    if (opsSnapshots.length === 0) return;
+
+    try {
+      const { modifiedCount } = await missionLocaleEffectifsDb().bulkWrite(opsSnapshots, { ordered: false });
+      stats.snapshots_ml += modifiedCount;
+    } catch (error) {
+      if (error instanceof MongoBulkWriteError) stats.snapshots_ml += error.result.modifiedCount;
+      stats.batches_en_erreur++;
+      logger.error({ error }, "échec partiel de la synchronisation des snapshots ML");
       captureException(error);
     }
   };

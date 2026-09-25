@@ -1,4 +1,5 @@
 import { IncomingMessage } from "node:http";
+import { pipeline } from "node:stream";
 import { createGunzip } from "node:zlib";
 
 import axios, { isAxiosError } from "axios";
@@ -88,7 +89,12 @@ async function lireVoiesDepartement(departement: string, ambigus: Map<string, Co
     throw err;
   }
 
-  const lignes = res.data.pipe(createGunzip()).pipe(parse({ delimiter: ";", columns: true, relax_quotes: true }));
+  const lignes = pipeline(
+    res.data,
+    createGunzip(),
+    parse({ delimiter: ";", columns: true, relax_quotes: true }),
+    () => {}
+  );
 
   for await (const ligne of lignes as AsyncIterable<BanLigne>) {
     const codePostal = ambigus.get(ligne.code_postal);

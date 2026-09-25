@@ -145,7 +145,11 @@ export const getCommune = async ({
     const communesByPostal = communeList.filter(({ code }) => code.postaux.includes(codePostal));
 
     if (communesByPostal.length > 1) {
-      const resolution = await resoudreCodeInsee({ codePostal, adresse });
+      const resolution = await resoudreCodeInsee({ codePostal, adresse }).catch((error) => {
+        logger.error({ error, codePostal }, "getCommune: échec de la résolution du code INSEE");
+        captureException(error);
+        return null;
+      });
       const communeResolue = communesByPostal.find(({ code }) => code.insee === resolution?.code_insee);
       if (communeResolue) {
         return communeResolue;
