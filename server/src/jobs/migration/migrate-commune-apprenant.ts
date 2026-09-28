@@ -5,6 +5,7 @@ import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import type { IOrganisationMissionLocale } from "shared/models/data/organisations.model";
+import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { estDossierMlTraite } from "@/common/actions/mission-locale/dossier-traite.actions";
 import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
@@ -149,6 +150,7 @@ async function rattraperCollection<E extends IEffectif | IEffectifDECA>(
   collection: Collection<E>,
   contexte: {
     codesPostaux: string[];
+    effectifIds: ObjectId[];
     communesApi: CommunesApi;
     changementsMl: ChangementMissionLocale[];
     stats: RapportCollection;
@@ -156,7 +158,7 @@ async function rattraperCollection<E extends IEffectif | IEffectifDECA>(
     limit?: number;
   }
 ) {
-  const { codesPostaux, communesApi, changementsMl, stats, dryRun, limit } = contexte;
+  const { codesPostaux, effectifIds, communesApi, changementsMl, stats, dryRun, limit } = contexte;
   let batch: Array<{ effectif: EffectifAdresse; commune: ICommune }> = [];
 
   const flush = async () => {
@@ -191,7 +193,10 @@ async function rattraperCollection<E extends IEffectif | IEffectifDECA>(
           : [
               {
                 updateMany: {
-                  filter: { effectif_id: effectif._id },
+                  filter: {
+                    effectif_id: effectif._id,
+                    "effectif_snapshot.apprenant.adresse.code_postal": effectif.apprenant.adresse?.code_postal,
+                  },
                   update: {
                     $set: prefixer(
                       "effectif_snapshot.apprenant.adresse",
@@ -215,7 +220,10 @@ async function rattraperCollection<E extends IEffectif | IEffectifDECA>(
     }
   };
 
-  const filtre: Filter<IEffectif | IEffectifDECA> = { "apprenant.adresse.code_postal": { $in: codesPostaux } };
+  const filtre: Filter<IEffectif | IEffectifDECA> = {
+    $or: [{ _id: { $in: effectifIds } }, { annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } }],
+    "apprenant.adresse.code_postal": { $in: codesPostaux },
+  };
   const cursor = collection.find<EffectifAdresse>(filtre as Filter<E>, {
     projection: {
       "apprenant.adresse.code_postal": 1,
@@ -278,7 +286,7 @@ async function rattraperCollection<E extends IEffectif | IEffectifDECA>(
 }
 
 async function adresseEffectif(dossier: IMissionLocaleEffectif): Promise<AdresseApprenant | null> {
-  const projection = { "apprenant.adresse.code_postal": 1, "apprenant.adresse.mission_locale_id": 1 };
+  const projection = { "apprenant.adresse": 1 };
   const chercherErp = () => effectifsDb().findOne({ _id: dossier.effectif_id }, { projection });
   const chercherDeca = () => effectifsDECADb().findOne({ _id: dossier.effectif_id }, { projection });
   const [premier, second] = isDecaSnapshot(dossier.effectif_snapshot)
@@ -336,9 +344,11 @@ async function reaffecterDossiersMl(contexte: {
     if (!actuelle || typeof codePostal !== "string") continue;
 
     let mlEffectif = nouvelleMlParEffectif.get(dossier.effectif_id.toString());
+    let adresseCorrigee: AdresseApprenant | undefined;
     if (mlEffectif === undefined) {
       const adresse = await adresseEffectif(dossier);
       if (!adresse) continue;
+      adresseCorrigee = adresse;
       if (adresse.code_postal !== codePostal) {
         if ((adresse.mission_locale_id ?? null) !== actuelle.ml_id) rapport.demenagements++;
         continue;
@@ -391,18 +401,20 @@ async function reaffecterDossiersMl(contexte: {
         rapport.doublons_supprimes++;
         logger.info({ doublon: doublon._id, dossier: dossier._id }, "doublon soft-deleted supprimé dans la ML cible");
       }
+      const snapshot = adresseCorrigee ? { "effectif_snapshot.apprenant.adresse": adresseCorrigee } : {};
       await missionLocaleEffectifsDb().updateOne(
         { _id: dossier._id },
         cible.activated_at
           ? {
               $set: {
+                ...snapshot,
                 mission_locale_id: cible._id,
                 "computed.mission_locale.activated_at": cible.activated_at,
                 updated_at: new Date(),
               },
             }
           : {
-              $set: { mission_locale_id: cible._id, updated_at: new Date() },
+              $set: { ...snapshot, mission_locale_id: cible._id, updated_at: new Date() },
               $unset: { "computed.mission_locale": "" },
             }
       );
@@ -430,9 +442,10 @@ async function reaffecterDossiersMl(contexte: {
 }
 
 /**
- * Recalcule la commune des apprenants dont la commune avait été devinée depuis un code postal
- * partagé (première commune d'API Apprentissage, ou commune absente), répercute l'adresse sur les
- * snapshots des dossiers Mission Locale, puis déplace les dossiers non traités vers leur nouvelle ML.
+ * Recalcule la commune des apprenants suivis par une Mission Locale ou de l'année scolaire en cours
+ * (listes CFA) dont la commune avait été devinée depuis un code postal partagé (première commune d'API
+ * Apprentissage, ou commune absente), répercute l'adresse sur les snapshots des dossiers Mission Locale,
+ * puis déplace les dossiers non traités vers leur nouvelle ML.
  */
 export async function migrateCommuneApprenant({ dryRun, limit }: MigrateCommuneOptions) {
   const codesPostaux = await chargerCodesPostauxAmbigus();
@@ -440,9 +453,10 @@ export async function migrateCommuneApprenant({ dryRun, limit }: MigrateCommuneO
     throw new Error("Référentiel communesVoies vide : lancer hydrate:communes-voies avant ce job");
   }
 
+  const effectifIds = await missionLocaleEffectifsDb().distinct("effectif_id", { soft_deleted: { $ne: true } });
   const communesApi = communesDuCodePostalApi();
   const changementsMl: ChangementMissionLocale[] = [];
-  const contexte = { codesPostaux, communesApi, changementsMl, dryRun, limit };
+  const contexte = { codesPostaux, effectifIds, communesApi, changementsMl, dryRun, limit };
   const rapport = { dryRun, effectifs: nouveauRapport(), effectifsDECA: nouveauRapport() };
 
   await rattraperCollection(effectifsDb(), { ...contexte, stats: rapport.effectifs });

@@ -423,7 +423,9 @@ program
 
 program
   .command("tmp:migrate:commune-apprenant")
-  .description("Recalcule la commune des apprenants devinée depuis un code postal partagé entre plusieurs communes")
+  .description(
+    "Recalcule la commune des apprenants suivis par une ML ou de l'année scolaire en cours, devinée depuis un code postal partagé entre plusieurs communes"
+  )
   .option("--dry-run", "Simulation sans écriture", false)
   .option("-l, --limit <number>", "Limite le nombre d'effectifs examinés par collection", (value) => parseInt(value))
   .option("-q, --queued", "Run job asynchronously", false)

@@ -5,6 +5,7 @@ import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { SITUATION_ENUM, type IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import type { IOrganisationMissionLocale } from "shared/models/data/organisations.model";
+import { getAnneeScolaireFromDate } from "shared/utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
@@ -158,6 +159,7 @@ describe("migrateCommuneApprenant", () => {
 
   it("corrige un effectif DECA à partir du numéro et de la voie et signale le changement de ML", async () => {
     const effectif = await insererEffectifDECA({ ...adresseDevinee, numero: 24, voie: "RUE MAURICE DUVERGET" });
+    await insererDossierMl(effectif);
 
     const { rapport, changementsMl } = await migrateCommuneApprenant({ dryRun: false });
 
@@ -177,6 +179,7 @@ describe("migrateCommuneApprenant", () => {
       commune: "Morcourt",
       complete: "138 rue du Sentier",
     });
+    await insererDossierMl(effectif);
 
     const { rapport } = await migrateCommuneApprenant({ dryRun: false });
 
@@ -185,7 +188,7 @@ describe("migrateCommuneApprenant", () => {
   });
 
   it("laisse inchangée une commune devinée que l'adresse confirme", async () => {
-    await insererEffectif({ ...adresseDevinee, complete: "3 rue des Écoles" });
+    await insererDossierMl(await insererEffectif({ ...adresseDevinee, complete: "3 rue des Écoles" }));
 
     const { rapport } = await migrateCommuneApprenant({ dryRun: false });
 
@@ -194,6 +197,7 @@ describe("migrateCommuneApprenant", () => {
 
   it("n'écrit rien en simulation", async () => {
     const effectif = await insererEffectif({ ...adresseDevinee, complete: "138 rue du Sentier" });
+    await insererDossierMl(effectif);
 
     const { rapport } = await migrateCommuneApprenant({ dryRun: true });
 
@@ -214,6 +218,8 @@ describe("migrateCommuneApprenant", () => {
       complete: "24 rue Maurice Duverget",
     });
     const transmis = await insererEffectif({ ...adresseDevinee, complete: "24 rue Maurice Duverget" });
+    await insererDossierMl(devine);
+    await insererDossierMl(transmis);
 
     await migrateCommuneApprenant({ dryRun: false });
 
@@ -223,12 +229,54 @@ describe("migrateCommuneApprenant", () => {
 
   it("compte les échecs d'API Apprentissage sans interrompre le job", async () => {
     vi.mocked(apiAlternanceClient.geographie.rechercheCommune).mockRejectedValue(new Error("API indisponible"));
-    await insererEffectif({ ...adresseDevinee, complete: "138 rue du Sentier" });
-    await insererEffectif({ ...adresseDevinee, complete: "24 rue Maurice Duverget" });
+    await insererDossierMl(await insererEffectif({ ...adresseDevinee, complete: "138 rue du Sentier" }));
+    await insererDossierMl(await insererEffectif({ ...adresseDevinee, complete: "24 rue Maurice Duverget" }));
 
     const { rapport } = await migrateCommuneApprenant({ dryRun: false });
 
     expect(rapport.effectifs).toMatchObject({ examines: 2, erreurs_api: 2, modifies: 0 });
+  });
+
+  it("ne réécrit pas le snapshot d'un dossier dont le code postal diffère de l'effectif", async () => {
+    const effectif = await insererEffectif({ ...adresseDevinee, complete: "138 rue du Sentier" });
+    const dossier = await insererDossierMl({
+      ...effectif,
+      apprenant: { ...effectif.apprenant, adresse: { ...adresseDevinee, code_postal: "02000" } },
+    });
+
+    const { rapport } = await migrateCommuneApprenant({ dryRun: false });
+
+    expect(
+      (await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.effectif_snapshot.apprenant.adresse
+    ).toMatchObject({ code_postal: "02000", code_insee: "02288" });
+    expect(rapport.effectifs).toMatchObject({ modifies: 1, snapshots_ml: 0 });
+  });
+
+  it("ignore les effectifs sans dossier ML actif hors de l'année scolaire en cours", async () => {
+    const sansDossier = await insererEffectif({ ...adresseDevinee, complete: "138 rue du Sentier" });
+    const dossierSupprime = await insererEffectif({ ...adresseDevinee, complete: "138 rue du Sentier" });
+    await insererDossierMl(dossierSupprime, { soft_deleted: true });
+    await effectifsDb().updateMany({}, { $set: { annee_scolaire: "2020-2021" } });
+
+    const { rapport } = await migrateCommuneApprenant({ dryRun: false });
+
+    for (const effectif of [sansDossier, dossierSupprime]) {
+      expect((await effectifsDb().findOne({ _id: effectif._id }))?.apprenant.adresse?.code_insee).toBe("02288");
+    }
+    expect(rapport.effectifs.examines).toBe(0);
+  });
+
+  it("corrige un effectif de l'année scolaire en cours sans dossier ML", async () => {
+    const effectif = await insererEffectif({ ...adresseDevinee, complete: "138 rue du Sentier" });
+    await effectifsDb().updateOne(
+      { _id: effectif._id },
+      { $set: { annee_scolaire: getAnneeScolaireFromDate(new Date()) } }
+    );
+
+    const { rapport } = await migrateCommuneApprenant({ dryRun: false });
+
+    expect((await effectifsDb().findOne({ _id: effectif._id }))?.apprenant.adresse?.code_insee).toBe("02691");
+    expect(rapport.effectifs).toMatchObject({ examines: 1, modifies: 1, snapshots_ml: 0 });
   });
 
   it("refuse de tourner sans référentiel", async () => {
@@ -339,9 +387,9 @@ describe("migrateCommuneApprenant", () => {
       const { rapport } = await migrateCommuneApprenant({ dryRun: false });
 
       expect(rapport.effectifsDECA.devines).toBe(0);
-      expect((await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.mission_locale_id).toEqual(
-        mlMorcourt._id
-      );
+      const apres = await missionLocaleEffectifsDb().findOne({ _id: dossier._id });
+      expect(apres?.mission_locale_id).toEqual(mlMorcourt._id);
+      expect(apres?.effectif_snapshot.apprenant.adresse).toMatchObject({ code_insee: "02525", commune: "Morcourt" });
       expect(rapport.reaffectation).toMatchObject({ candidats: 1, deplaces: 1 });
     });
 
