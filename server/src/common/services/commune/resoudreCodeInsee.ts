@@ -78,17 +78,18 @@ export async function resoudreCodeInsee({
 
   if (texte.trim()) {
     const voie = index.voiesParLongueur.find(({ nom }) => texte.includes(` ${nom} `));
+    const texteSansVoie = voie ? texte.replace(` ${voie.nom} `, " ") : texte;
+
+    const communesNommees = index.communes.filter(({ nomNormalise }) => texteSansVoie.includes(` ${nomNormalise} `));
+    if (communesNommees.length === 1) {
+      return { code_insee: communesNommees[0].code_insee, methode: "commune" };
+    }
     if (voie?.code_insee.length === 1) {
       return { code_insee: voie.code_insee[0], methode: "voie" };
     }
     if (voie) {
       const communesDeLaVoie = index.communes.filter((c) => voie.code_insee.includes(c.code_insee));
       if (communesDeLaVoie.length > 0) candidates = communesDeLaVoie;
-    }
-
-    const communesNommees = candidates.filter(({ nomNormalise }) => texte.includes(` ${nomNormalise} `));
-    if (communesNommees.length === 1) {
-      return { code_insee: communesNommees[0].code_insee, methode: "commune" };
     }
   }
 

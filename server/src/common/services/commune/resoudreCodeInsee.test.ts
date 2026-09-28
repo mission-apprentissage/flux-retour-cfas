@@ -16,12 +16,15 @@ describe("resoudreCodeInsee", () => {
         { code_insee: "02288", nom: "Essigny-le-Petit", population: 345 },
         { code_insee: "02525", nom: "Morcourt", population: 500 },
         { code_insee: "02691", nom: "Saint-Quentin", population: 52813 },
+        { code_insee: "02340", nom: "Gauchy", population: 5000 },
       ],
       voies: [
         { nom: "rue sentier", code_insee: ["02691"] },
         { nom: "rue maurice duverget", code_insee: ["02525"] },
         { nom: "rue gare", code_insee: ["02288", "02525"] },
         { nom: "gare", code_insee: ["02525"] },
+        { nom: "route gauchy", code_insee: ["02691"] },
+        { nom: "rue pasteur", code_insee: ["02525"] },
       ],
       updated_at: new Date(),
     });
@@ -49,6 +52,27 @@ describe("resoudreCodeInsee", () => {
     expect(
       await resoudreCodeInsee({ codePostal: "02100", adresse: "56 bis rue Alexandre Ribot saint quentin" })
     ).toEqual({ code_insee: "02691", methode: "commune" });
+  });
+
+  it("privilégie la commune citée sur la voie", async () => {
+    expect(await resoudreCodeInsee({ codePostal: "02100", adresse: "3 rue Pasteur Saint-Quentin" })).toEqual({
+      code_insee: "02691",
+      methode: "commune",
+    });
+  });
+
+  it("ne prend pas pour une commune citée le nom de commune qui fait partie de la voie", async () => {
+    expect(await resoudreCodeInsee({ codePostal: "02100", adresse: "12 route de Gauchy" })).toEqual({
+      code_insee: "02691",
+      methode: "voie",
+    });
+  });
+
+  it("laisse la voie décider quand plusieurs communes sont citées", async () => {
+    expect(await resoudreCodeInsee({ codePostal: "02100", adresse: "3 rue Pasteur Saint-Quentin Gauchy" })).toEqual({
+      code_insee: "02525",
+      methode: "voie",
+    });
   });
 
   it("limite le repli aux communes où la voie existe", async () => {
