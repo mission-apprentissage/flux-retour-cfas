@@ -122,6 +122,7 @@ describe("registre des jobs", () => {
       "tmp:hydrate:rome-secteur-activites",
       "tmp:migrate:autre-situations",
       "tmp:migrate:commune-apprenant",
+      "tmp:migrate:communes-voies-puis-commune-apprenant",
       "tmp:migrate:effectifs",
       "tmp:migrate:effectifs-queue",
       "tmp:migrate:mission-locale-current-status",
