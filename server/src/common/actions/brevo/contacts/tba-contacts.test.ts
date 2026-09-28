@@ -679,8 +679,18 @@ describe("tbaContactsContactList", () => {
       expect(contacts[0].attributes.CFA_STATUT_V2).toBe("activable");
     });
 
-    it("'exclu' quand is_allowed_deca=true et activé mais plus éligible (aucun effectif)", async () => {
-      await insertCfa({ eligible: false, activatedAt: ACTIVATED_AT, organisme: { is_allowed_deca: true } });
+    it("'oui' quand l'organisme est activé mais hors périmètre compatible (nature responsable)", async () => {
+      await insertCfa({ activatedAt: ACTIVATED_AT, organisme: { nature: "responsable" } });
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0].attributes.CFA_STATUT_V2).toBe("oui");
+      expect(contacts[0].attributes.CFA_DATE_ACTIVATION_V2).toEqual(ACTIVATED_AT);
+    });
+
+    it("'exclu' quand l'organisme n'est ni activé ni compatible", async () => {
+      await insertCfa({ eligible: false });
 
       const contacts = await tbaContactsContactList.fetchContacts();
 
