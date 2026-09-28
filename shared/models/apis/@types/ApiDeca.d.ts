@@ -14,18 +14,18 @@ export interface Alternant {
   sexe: string;
   dateNaissance: string;
   departementNaissance: string;
-  nationalite: number?;
-  handicap: boolean?;
-  courriel: string?;
-  telephone: string?;
+  nationalite?: number;
+  handicap?: boolean;
+  courriel?: string;
+  telephone?: string;
   adresse: Adresse;
-  derniereClasse: string?;
+  derniereClasse?: string;
 }
 
 export type Adresse = {
-  numero: number?;
-  voie: string?;
-  codePostal: string?;
+  numero?: number;
+  voie?: string;
+  codePostal?: string;
 };
 
 export interface DetailsContrat {
@@ -34,10 +34,10 @@ export interface DetailsContrat {
   statut: Statut;
   dateFinContrat: string;
   dateEffetAvenant: string;
-  noAvenant: string?;
+  noAvenant?: string;
 }
 
-enum Statut {
+declare enum Statut {
   Annule = "Annulé",
   Corrige = "Corrigé",
   Empty = "",
@@ -50,20 +50,20 @@ export interface Employeur {
 }
 
 export interface EtablissementFormation {
-  siret: string?; // Organisme responsable
+  siret?: string; // Organisme responsable
 }
 
 export interface Formation {
   dateDebutFormation: string;
   dateFinFormation: string;
   codeDiplome: string;
-  rncp: string?;
+  rncp?: string;
   intituleOuQualification: string;
 }
 
 export interface OrganismeFormationResponsable {
-  uaiCfa: string?;
-  siret: string?;
+  uaiCfa?: string;
+  siret?: string;
 }
 
 export interface Rupture {
