@@ -620,17 +620,17 @@ const deriveCfaErpOuDeca = (
 };
 
 // Statut V2 (cf. MDD), même définition que le tableau de bord
-// `/suivi-des-indicateurs` : "oui" = compatible (`findEligibleOrganismes`)
-// et activé (`organisations.ml_beta_activated_at`), "activable" = compatible
+// `/suivi-des-indicateurs` : "oui" = activé (`organisations.ml_beta_activated_at`)
+// et non fermé, compatible ou non, "activable" = compatible (`findEligibleOrganismes`)
 // sans date d'activation, "exclu" sinon.
 const deriveCfaStatutV2 = (
   organisme: TbaUserContext["organisme"] | undefined,
   eligibleOrgIds: Set<string>,
   activationDate: Date | undefined
 ): "oui" | "activable" | "exclu" | null => {
-  if (!organisme?._id) return "exclu";
-  if (!eligibleOrgIds.has(String(organisme._id))) return "exclu";
-  return activationDate ? "oui" : "activable";
+  if (!organisme?._id || organisme.ferme) return "exclu";
+  if (activationDate) return "oui";
+  return eligibleOrgIds.has(String(organisme._id)) ? "activable" : "exclu";
 };
 
 /**

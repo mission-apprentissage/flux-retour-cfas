@@ -11,16 +11,12 @@ import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collec
 
 export type IStatWithVariation = { current: number; variation: string };
 
-export type ICompatibleOrganisme = {
+export type IActivatedOrganisme = {
   _id: ObjectId;
-  siret: string;
+  siret: string | null;
   nom: string | null;
   region: string | null;
-  is_allowed_deca: boolean;
-  has_effectifs_erp: boolean;
-  has_effectifs_deca: boolean;
-  date_activation: Date | null;
-  has_compte: boolean;
+  date_activation: Date;
 };
 
 export type ICollaborationRegionRow = {
@@ -134,6 +130,7 @@ export async function fetchCollaborationsByOrgId(
 }
 
 export async function fetchOrganismeIdsWithConfirmedAccount(organismeIds: ObjectId[]): Promise<Set<string>> {
+  if (organismeIds.length === 0) return new Set();
   const accountsByOrgId = await getCfaAccountsByOrganismeIds(organismeIds.map((id) => id.toString()));
   return new Set(
     Array.from(accountsByOrgId.entries())
@@ -142,35 +139,46 @@ export async function fetchOrganismeIdsWithConfirmedAccount(organismeIds: Object
   );
 }
 
-async function attachActivationDates(
-  eligible: IEligibleOrganismeRow[],
-  endExclusive: Date,
-  orgIdsWithCompte?: Set<string>
-): Promise<ICompatibleOrganisme[]> {
-  if (eligible.length === 0) return [];
-
-  const organismeIds = eligible.map((o) => o._id);
-  const [activationByOrgId, resolvedOrgIdsWithCompte] = await Promise.all([
-    fetchActivationDatesByOrgId(organismeIds, endExclusive),
-    orgIdsWithCompte ?? fetchOrganismeIdsWithConfirmedAccount(organismeIds),
-  ]);
-
-  return eligible.map((org) => ({
-    _id: org._id,
-    siret: org.siret,
-    nom: org.nom,
-    region: org.region,
-    is_allowed_deca: org.is_allowed_deca,
-    has_effectifs_erp: org.has_effectifs_erp,
-    has_effectifs_deca: org.has_effectifs_deca,
-    date_activation: activationByOrgId.get(org._id.toString()) ?? null,
-    has_compte: resolvedOrgIdsWithCompte.has(org._id.toString()),
-  }));
-}
-
-export async function fetchCompatibleOrganismes(endExclusive: Date): Promise<ICompatibleOrganisme[]> {
-  const eligible = await findEligibleOrganismes();
-  return attachActivationDates(eligible, endExclusive);
+export async function fetchActivatedOrganismes(endExclusive: Date): Promise<IActivatedOrganisme[]> {
+  return organisationsDb()
+    .aggregate<IActivatedOrganisme>([
+      {
+        $match: {
+          type: "ORGANISME_FORMATION",
+          ml_beta_activated_at: { $type: "date", $lt: endExclusive },
+        },
+      },
+      { $group: { _id: "$organisme_id", date_activation: { $min: "$ml_beta_activated_at" } } },
+      {
+        $addFields: {
+          organisme_oid: { $convert: { input: "$_id", to: "objectId", onError: null, onNull: null } },
+        },
+      },
+      { $match: { organisme_oid: { $ne: null } } },
+      {
+        $lookup: {
+          from: "organismes",
+          localField: "organisme_oid",
+          foreignField: "_id",
+          as: "organisme",
+          pipeline: [
+            { $match: { ferme: { $ne: true } } },
+            { $project: { siret: 1, nom: 1, raison_sociale: 1, enseigne: 1, "adresse.region": 1 } },
+          ],
+        },
+      },
+      { $unwind: "$organisme" },
+      {
+        $project: {
+          _id: "$organisme._id",
+          siret: { $ifNull: ["$organisme.siret", null] },
+          nom: { $ifNull: ["$organisme.nom", { $ifNull: ["$organisme.raison_sociale", "$organisme.enseigne"] }] },
+          region: { $ifNull: ["$organisme.adresse.region", null] },
+          date_activation: 1,
+        },
+      },
+    ])
+    .toArray();
 }
 
 type UsageRow = {
@@ -307,30 +315,35 @@ type ActivationAggregates = {
   activatedOrganismeIds: Set<string>;
 };
 
-function aggregateActivation(compatibles: ICompatibleOrganisme[]): ActivationAggregates {
+function aggregateActivation(
+  eligible: IEligibleOrganismeRow[],
+  orgIdsWithCompte: Set<string>,
+  activated: IActivatedOrganisme[]
+): ActivationAggregates {
   const perRegion = new Map<string, ActivationCounters>();
-  const activatedOrganismeIds = new Set<string>();
   const national: ActivationCounters = { cfa_compatibles: 0, cfa_avec_compte: 0, cfa_actives: 0 };
 
-  for (const org of compatibles) {
-    const isActive = org.date_activation !== null;
-    if (isActive) {
-      activatedOrganismeIds.add(org._id.toString());
-    }
-    const targets = [national];
-    if (org.region) {
-      const current = perRegion.get(org.region) ?? { cfa_compatibles: 0, cfa_avec_compte: 0, cfa_actives: 0 };
-      perRegion.set(org.region, current);
-      targets.push(current);
-    }
-    for (const counters of targets) {
+  const countersFor = (region: string | null): ActivationCounters[] => {
+    if (!region) return [national];
+    const current = perRegion.get(region) ?? { cfa_compatibles: 0, cfa_avec_compte: 0, cfa_actives: 0 };
+    perRegion.set(region, current);
+    return [national, current];
+  };
+
+  for (const org of eligible) {
+    for (const counters of countersFor(org.region)) {
       counters.cfa_compatibles += 1;
-      if (org.has_compte) counters.cfa_avec_compte += 1;
-      if (isActive) counters.cfa_actives += 1;
+      if (orgIdsWithCompte.has(org._id.toString())) counters.cfa_avec_compte += 1;
     }
   }
 
-  return { national, perRegion, activatedOrganismeIds };
+  for (const org of activated) {
+    for (const counters of countersFor(org.region)) {
+      counters.cfa_actives += 1;
+    }
+  }
+
+  return { national, perRegion, activatedOrganismeIds: new Set(activated.map((o) => o._id.toString())) };
 }
 
 async function computeStatsForEligible(
@@ -338,8 +351,11 @@ async function computeStatsForEligible(
   eligible: IEligibleOrganismeRow[],
   orgIdsWithCompte?: Set<string>
 ): Promise<ICollaborationStatsSnapshot> {
-  const compatibles = await attachActivationDates(eligible, endExclusive, orgIdsWithCompte);
-  const activation = aggregateActivation(compatibles);
+  const [resolvedOrgIdsWithCompte, activated] = await Promise.all([
+    orgIdsWithCompte ?? fetchOrganismeIdsWithConfirmedAccount(eligible.map((o) => o._id)),
+    fetchActivatedOrganismes(endExclusive),
+  ]);
+  const activation = aggregateActivation(eligible, resolvedOrgIdsWithCompte, activated);
   const usage = await computeUsage(endExclusive, activation.activatedOrganismeIds);
 
   const regionCodes = new Set<string>([...activation.perRegion.keys(), ...usage.perRegion.keys()]);
