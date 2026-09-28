@@ -3,6 +3,7 @@ import type { CronDef, JobDef } from "job-processor";
 import { effectifsDb } from "@/common/model/collections";
 
 import { verifyMissionLocaleEffectifMail } from "../bal/bal.job";
+import { hydrateCommunesVoies } from "../hydrate/communes-voies/hydrate-communes-voies";
 import {
   hydrateEffectifsComputedTypes,
   hydratePreviousYearMissionLocaleEffectifStatut,
@@ -166,6 +167,13 @@ export const missionLocaleJobs = {
       const payload = job.payload as { dryRun?: boolean; limit?: number } | undefined;
       const { rapport } = await migrateCommuneApprenant({ dryRun: payload?.dryRun ?? false, limit: payload?.limit });
       return rapport;
+    },
+  },
+  "tmp:migrate:communes-voies-puis-commune-apprenant": {
+    handler: async () => {
+      const communesVoies = await hydrateCommunesVoies();
+      const { rapport } = await migrateCommuneApprenant({ dryRun: false });
+      return { communesVoies, rapport };
     },
   },
   "tmp:seed-ml-rdv-url": {
