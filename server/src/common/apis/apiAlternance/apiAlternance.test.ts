@@ -5,7 +5,7 @@ import { communesVoiesDb } from "@/common/model/collections";
 import { viderCacheCommunesVoies } from "@/common/services/commune/resoudreCodeInsee";
 import { useMongo } from "@tests/jest/setupMongo";
 
-import { getCommune } from "./apiAlternance";
+import { estCommuneParDefaut, getCommune } from "./apiAlternance";
 import { apiAlternanceClient } from "./client";
 
 vi.mock("@/common/apis/apiAlternance/client", () => ({
@@ -72,5 +72,27 @@ describe("getCommune", () => {
 
   it("renvoie l'unique commune d'un code postal non partagé", async () => {
     expect(await getCommune({ codePostal: "02000" })).toBe(laon);
+  });
+});
+
+describe("estCommuneParDefaut", () => {
+  beforeEach(() => {
+    vi.mocked(apiAlternanceClient.geographie.rechercheCommune).mockReset();
+    vi.mocked(apiAlternanceClient.geographie.rechercheCommune).mockResolvedValue([laon, essigny, saintQuentin]);
+  });
+
+  it("considère une commune absente comme devinée, sans appeler l'API", async () => {
+    expect(await estCommuneParDefaut("02100", null)).toBe(true);
+    expect(apiAlternanceClient.geographie.rechercheCommune).not.toHaveBeenCalled();
+  });
+
+  it("reconnaît la première commune du code postal renvoyée par l'API", async () => {
+    expect(await estCommuneParDefaut("02100", "02288")).toBe(true);
+    expect(await estCommuneParDefaut("02100", "02691")).toBe(false);
+  });
+
+  it("considère la commune comme devinée si l'API échoue", async () => {
+    vi.mocked(apiAlternanceClient.geographie.rechercheCommune).mockRejectedValue(new Error("API indisponible"));
+    expect(await estCommuneParDefaut("02100", "02691")).toBe(true);
   });
 });

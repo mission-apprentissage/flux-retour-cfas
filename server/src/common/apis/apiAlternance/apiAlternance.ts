@@ -162,6 +162,18 @@ export const getCommune = async ({
   return null;
 };
 
+export const estCommuneParDefaut = async (codePostal: string, codeInsee: string | null | undefined) => {
+  if (!codeInsee) return true;
+  try {
+    const communes = await apiAlternanceClient.geographie.rechercheCommune({ code: codePostal });
+    return communes.find(({ code }) => code.postaux.includes(codePostal))?.code.insee === codeInsee;
+  } catch (error) {
+    logger.error({ error, codePostal }, "estCommuneParDefaut: échec de la recherche des communes du code postal");
+    captureException(error);
+    return true;
+  }
+};
+
 export const getMissionsLocales = async (): Promise<IMissionLocale[] | null> => {
   try {
     const result = await apiAlternanceClient.geographie.listMissionLocales({});
