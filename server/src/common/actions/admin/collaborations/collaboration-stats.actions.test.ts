@@ -137,7 +137,7 @@ describe("computeStatsForDate", () => {
     expect(after.national.activation.cfa_actives).toBe(1);
   });
 
-  it("counts pre/post-cutoff effectifs correctly, excludes soft_deleted, restricts cfa_with_collab to compatibles", async () => {
+  it("counts pre/post-cutoff effectifs correctly, excludes soft_deleted, restricts cfa_with_collab to activated CFAs", async () => {
     const compatibleOrg = await insertCompatible({ adresse: { region: HDF } as never });
     const compatibleOrgNoEnvoi = await insertCompatible({ adresse: { region: HDF } as never });
     const nonCompatibleOrg = generateOrganismeFixture({
@@ -271,7 +271,7 @@ describe("computeStatsForDate", () => {
     expect(stats.national.usage.dossiers_traites_ml).toBe(1);
   });
 
-  it("excludes effectifs from non-compatible CFAs (regardless of activation flag)", async () => {
+  it("excludes effectifs from non-activated CFAs", async () => {
     const compatible = await insertCompatible({ adresse: { region: HDF } as never });
 
     const nonCompatibleOrg = generateOrganismeFixture({
@@ -304,6 +304,44 @@ describe("computeStatsForDate", () => {
 
     expect(stats.national.usage.rupturants).toBe(1);
     expect(stats.national.usage.dossiers_envoyes_cfa).toBe(1);
+  });
+
+  it("counts activated CFAs outside the compatible perimeter in actives and usage, not in compatibles", async () => {
+    await insertCompatible({ adresse: { region: HDF } as never });
+    const responsable = await insertCompatible({
+      nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
+      adresse: { region: HDF } as never,
+    });
+    const fermeActive = await insertCompatible({ ferme: true, adresse: { region: HDF } as never });
+
+    await missionLocaleEffectifsDb().insertMany(
+      [
+        buildMlEffectif({
+          organisme_id: responsable._id,
+          created_at: new Date("2026-02-01"),
+          reponse_at: new Date("2026-02-02"),
+          acc_conjoint: true,
+        }),
+        buildMlEffectif({
+          organisme_id: fermeActive._id,
+          created_at: new Date("2026-02-01"),
+          reponse_at: new Date("2026-02-02"),
+          acc_conjoint: true,
+        }),
+      ],
+      { bypassDocumentValidation: true }
+    );
+
+    const stats = await computeStatsForDate(addDaysUTC(new Date("2026-05-25"), 1));
+
+    expect(stats.national.activation).toMatchObject({ cfa_compatibles: 1, cfa_actives: 2, cfa_with_collab: 1 });
+    expect(stats.national.usage.dossiers_envoyes_cfa).toBe(1);
+    expect(stats.regions.find((r) => r.region_code === HDF)).toMatchObject({
+      cfa_compatibles: 1,
+      cfa_actives: 2,
+      cfa_with_collab: 1,
+      dossiers_envoyes_cfa: 1,
+    });
   });
 });
 

@@ -227,6 +227,49 @@ describe("admin collaborations routes", () => {
       });
     });
 
+    it("includes activated CFAs outside the compatible perimeter in actives, collab and details sheets", async () => {
+      const responsable = await insertCompatibleOrganisme({
+        siret: "12345678900042",
+        nom: "CCI Responsable",
+        nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
+        adresse: { region: HDF } as never,
+      });
+      await organisationsDb().insertOne(orgFormationFixture(responsable._id as ObjectId, new Date("2026-03-01")));
+      await missionLocaleEffectifsDb().insertOne(
+        buildMlEffectif({
+          mission_locale_id: new ObjectId(),
+          organisme_id: responsable._id,
+          created_at: new Date("2026-04-01"),
+          reponse_at: new Date("2026-04-10"),
+          acc_conjoint: true,
+        }),
+        { bypassDocumentValidation: true }
+      );
+
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        "/api/v1/admin/collaborations/export"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data.cfa_compatibles).toEqual([]);
+      expect(response.data.cfa_actives).toEqual([
+        {
+          siret: "12345678900042",
+          nom: "CCI Responsable",
+          region: HDF_NOM,
+          date_activation: "2026-03-01T00:00:00.000Z",
+          sources: "ERP",
+        },
+      ]);
+      expect(response.data.cfa_with_collab).toEqual([
+        { siret: "12345678900042", nom: "CCI Responsable", region: HDF_NOM, nb_collaborations: 1 },
+      ]);
+      expect(response.data.details_collaborations).toHaveLength(1);
+      expect(response.data.details_collaborations[0]).toMatchObject({ siret_cfa: "12345678900042" });
+    });
+
     it("populates date_traitement_ml from the earliest ML log entry with a situation", async () => {
       const org = await insertCompatibleOrganisme({
         siret: "12345678900034",

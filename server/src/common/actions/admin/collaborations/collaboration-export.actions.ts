@@ -1,16 +1,15 @@
+import type { ObjectId } from "bson";
 import { REPONDU_SITUATIONS } from "shared/constants/collaboration";
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type { ICollaborationExportResponseSchema } from "shared/models/routes/admin/collaboration-stats.api";
+import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { addDaysUTC, normalizeToUTCDay } from "shared/utils/date";
 
-import { missionLocaleEffectifsDb } from "@/common/model/collections";
+import { findEligibleOrganismes } from "@/common/actions/organismes/deca-cfa-eligibility";
+import { effectifsDb, effectifsDECADb, missionLocaleEffectifsDb } from "@/common/model/collections";
 
-import {
-  buildDossierEnvoyeMatch,
-  fetchCompatibleOrganismes,
-  type ICompatibleOrganisme,
-} from "./collaboration-stats.actions";
+import { buildDossierEnvoyeMatch, fetchActivatedOrganismes } from "./collaboration-stats.actions";
 
 const REGION_NON_RENSEIGNEE = "Non renseigné";
 
@@ -114,23 +113,41 @@ async function fetchCollaborationDetails(endExclusive: Date): Promise<Collaborat
     .toArray();
 }
 
-type UsagePerOrg = { nb_collaborations: number };
+type CfaWithCollabRow = { siret: string; nom: string | null; region: string; nb_collaborations: number };
 
-function aggregateUsageFromDetails(details: CollaborationDetailRow[]): Map<string, UsagePerOrg> {
-  const usage = new Map<string, UsagePerOrg>();
+function aggregateCfaWithCollab(details: CollaborationDetailRow[]): CfaWithCollabRow[] {
+  const byOrg = new Map<string, CfaWithCollabRow>();
   for (const d of details) {
-    const current = usage.get(d.organisme_id_str) ?? { nb_collaborations: 0 };
+    const current = byOrg.get(d.organisme_id_str) ?? {
+      siret: d.siret_cfa ?? "",
+      nom: d.nom_cfa,
+      region: formatRegion(d.region_cfa),
+      nb_collaborations: 0,
+    };
     current.nb_collaborations += 1;
-    usage.set(d.organisme_id_str, current);
+    byOrg.set(d.organisme_id_str, current);
   }
-  return usage;
+  return Array.from(byOrg.values());
 }
 
-function formatSources(org: { has_effectifs_erp: boolean; has_effectifs_deca: boolean }): string {
-  const parts: string[] = [];
-  if (org.has_effectifs_erp) parts.push("ERP");
-  if (org.has_effectifs_deca) parts.push("DECA");
-  return parts.join(", ");
+async function fetchSourcesByOrgId(organismeIds: ObjectId[]): Promise<Map<string, string>> {
+  const activeAnnees = getActiveAnneesScolaires(new Date());
+  const filter = { organisme_id: { $in: organismeIds }, annee_scolaire: { $in: activeAnnees } };
+  const [erpIds, decaIds] = await Promise.all([
+    effectifsDb().distinct("organisme_id", filter),
+    effectifsDECADb().distinct("organisme_id", filter),
+  ]);
+  const erp = new Set(erpIds.map((id) => id.toString()));
+  const deca = new Set(decaIds.map((id) => id.toString()));
+
+  return new Map(
+    organismeIds.map((id) => {
+      const parts: string[] = [];
+      if (erp.has(id.toString())) parts.push("ERP");
+      if (deca.has(id.toString())) parts.push("DECA");
+      return [id.toString(), parts.join(", ")];
+    })
+  );
 }
 
 function sortByNom<T extends { nom: string | null }>(rows: T[]): T[] {
@@ -140,41 +157,30 @@ function sortByNom<T extends { nom: string | null }>(rows: T[]): T[] {
 export async function getCollaborationExportData(): Promise<ICollaborationExportResponseSchema> {
   const endExclusive = addDaysUTC(normalizeToUTCDay(new Date()), 1);
 
-  const [compatibles, details] = await Promise.all([
-    fetchCompatibleOrganismes(endExclusive),
+  const [compatibles, activated, details] = await Promise.all([
+    findEligibleOrganismes(),
+    fetchActivatedOrganismes(endExclusive),
     fetchCollaborationDetails(endExclusive),
   ]);
-
-  const compatiblesById = new Map<string, ICompatibleOrganisme>(compatibles.map((c) => [c._id.toString(), c]));
-  const usageById = aggregateUsageFromDetails(details);
+  const sourcesByOrgId = await fetchSourcesByOrgId(activated.map((o) => o._id));
 
   const cfa_compatibles = sortByNom(
     compatibles.map((c) => ({ siret: c.siret, nom: c.nom, region: formatRegion(c.region) }))
   );
 
   const cfa_actives = sortByNom(
-    compatibles
-      .filter((c): c is ICompatibleOrganisme & { date_activation: Date } => c.date_activation !== null)
-      .map((c) => ({
-        siret: c.siret,
-        nom: c.nom,
-        region: formatRegion(c.region),
-        date_activation: c.date_activation,
-        sources: formatSources(c),
-      }))
+    activated.map((o) => ({
+      siret: o.siret ?? "",
+      nom: o.nom,
+      region: formatRegion(o.region),
+      date_activation: o.date_activation,
+      sources: sourcesByOrgId.get(o._id.toString()) ?? "",
+    }))
   );
 
-  const cfa_with_collab = sortByNom(
-    Array.from(usageById.entries())
-      .filter(([id]) => compatiblesById.has(id))
-      .map(([id, u]) => {
-        const c = compatiblesById.get(id)!;
-        return { siret: c.siret, nom: c.nom, region: formatRegion(c.region), nb_collaborations: u.nb_collaborations };
-      })
-  );
+  const cfa_with_collab = sortByNom(aggregateCfaWithCollab(details));
 
   const details_collaborations = details
-    .filter((d) => compatiblesById.has(d.organisme_id_str))
     .map((d) => {
       const traite = d.situation != null;
       const repondu = d.situation != null && REPONDU_SITUATIONS.includes(d.situation);
