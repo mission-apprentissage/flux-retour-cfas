@@ -27,6 +27,7 @@ import {
 import { backfillMlSuiviDates } from "../migration/backfill-ml-suivi-dates";
 import { clotureMlARecontacter } from "../migration/cloture-ml-a-recontacter";
 import { migrateAutreSituations } from "../migration/migrate-autre-situations";
+import { migrateCommuneApprenant } from "../migration/migrate-commune-apprenant";
 import { seedMlRdvUrl } from "../tmp/seed-ml-rdv-url";
 
 import { payloadDate } from "./payload";
@@ -158,6 +159,13 @@ export const missionLocaleJobs = {
     handler: async (job) => {
       const payload = job.payload as { dryRun?: boolean } | undefined;
       return clotureMlARecontacter({ dryRun: payload?.dryRun ?? false });
+    },
+  },
+  "tmp:migrate:commune-apprenant": {
+    handler: async (job) => {
+      const payload = job.payload as { dryRun?: boolean; limit?: number } | undefined;
+      const { rapport } = await migrateCommuneApprenant({ dryRun: payload?.dryRun ?? false, limit: payload?.limit });
+      return rapport;
     },
   },
   "tmp:seed-ml-rdv-url": {

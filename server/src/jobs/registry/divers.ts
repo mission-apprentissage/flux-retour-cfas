@@ -1,5 +1,6 @@
 import type { CronDef, JobDef } from "job-processor";
 
+import { hydrateCommunesVoies } from "../hydrate/communes-voies/hydrate-communes-voies";
 import { hydrateOpenApi } from "../hydrate/open-api/hydrate-open-api";
 import { populateReseauxCollection } from "../hydrate/reseaux/hydrate-reseaux";
 import { hydrateRomeSecteurActivites } from "../hydrate/rome/hydrate-rome";
@@ -9,6 +10,9 @@ import { validationTerritoires } from "../territoire/validationTerritoire";
 export const diversJobs = {
   "territoire:validate": {
     handler: validationTerritoires,
+  },
+  "hydrate:communes-voies": {
+    handler: hydrateCommunesVoies,
   },
   "populate:reseaux": {
     handler: async () => {
@@ -42,6 +46,12 @@ export const diversCrons = {
   "Validation des constantes de territoires": {
     cron_string: "5 4 1 * *",
     handler: validationTerritoires,
+  },
+
+  // 03h30 Paris le 2 du mois — référentiel voies BAN des codes postaux multi-communes
+  "hydrate:communes-voies": {
+    cron_string: "30 3 2 * *",
+    handler: hydrateCommunesVoies,
   },
 
   // TODO : Checker si coté métier l'archivage est toujours prévu ?

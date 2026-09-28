@@ -14,6 +14,11 @@ import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 
 const mockScoreEffectifs = vi.fn().mockResolvedValue({ model: "2026-03-16", scores: [0.5] });
+const mockRechercheCommune = vi.fn();
+
+vi.mock("@/common/apis/apiAlternance/client", () => ({
+  apiAlternanceClient: { geographie: { rechercheCommune: (...args: unknown[]) => mockRechercheCommune(...args) } },
+}));
 
 vi.mock("@/common/services/classifier/classifier", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/common/services/classifier/classifier")>();
@@ -741,6 +746,130 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       expect(active.length).toBe(1);
       expect(active[0].effectif_id.toString()).toBe(erpML1._id.toString());
       expect(active[0].cfa_rupture_declaration).toBeTruthy();
+    });
+
+    const apprenantCommune = (nom: string, prenom: string, codeInsee: string, mlId: number) => {
+      const apprenant = makeApprenant(nom, prenom, 21, mlId);
+      return { ...apprenant, adresse: { ...apprenant.adresse, code_insee: codeInsee } };
+    };
+
+    const creerDossierTraite = async (nom: string, prenom: string, codeInsee: string) => {
+      const erp = createBaseErpEffectif({ apprenant: apprenantCommune(nom, prenom, codeInsee, ML_ID) });
+      await createMissionLocaleSnapshot(erp);
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: erp._id },
+        { $set: { situation: SITUATION_ENUM.RDV_PRIS } }
+      );
+      return erp;
+    };
+
+    const expectDossierSuitLeJeune = async () => {
+      const active = await missionLocaleEffectifsDb()
+        .find({ soft_deleted: { $ne: true } })
+        .toArray();
+      const ml2 = await organisationsDb().findOne({ ml_id: ML_ID_2 });
+      expect(active).toHaveLength(1);
+      expect(active[0].mission_locale_id).toEqual(ml2?._id);
+    };
+
+    beforeEach(() => {
+      mockRechercheCommune.mockReset();
+      mockRechercheCommune.mockResolvedValue([
+        { code: { insee: "75101", postaux: ["75001"] } },
+        { code: { insee: "75102", postaux: ["75001"] } },
+      ]);
+    });
+
+    it("Même effectif traité dont la commune devinée est corrigée (même code postal) → reste dans ML-A avec la nouvelle adresse", async () => {
+      const erp = await creerDossierTraite("TESTNOM_H", "Prenomh", "75101");
+
+      const erpCorrige = { ...erp, apprenant: apprenantCommune("TESTNOM_H", "Prenomh", "75102", ML_ID_2) };
+      const result = await createMissionLocaleSnapshot(erpCorrige);
+      expect(result?.upserted).toBe(false);
+
+      const all = await missionLocaleEffectifsDb().find({}).toArray();
+      expect(all).toHaveLength(1);
+      expect(all[0].soft_deleted).toBeFalsy();
+      expect(all[0].situation).toBe(SITUATION_ENUM.RDV_PRIS);
+      expect(all[0].effectif_snapshot.apprenant.adresse).toMatchObject({
+        code_insee: "75102",
+        mission_locale_id: ML_ID_2,
+      });
+    });
+
+    it("Même effectif traité dont la commune devinée est corrigée, API indisponible → reste dans ML-A", async () => {
+      mockRechercheCommune.mockRejectedValue(new Error("API indisponible"));
+      const erp = await creerDossierTraite("TESTNOM_K", "Prenomk", "75102");
+
+      const erpCorrige = { ...erp, apprenant: apprenantCommune("TESTNOM_K", "Prenomk", "75101", ML_ID_2) };
+      const result = await createMissionLocaleSnapshot(erpCorrige);
+      expect(result?.upserted).toBe(false);
+
+      const active = await missionLocaleEffectifsDb()
+        .find({ soft_deleted: { $ne: true } })
+        .toArray();
+      expect(active).toHaveLength(1);
+      expect(active[0].situation).toBe(SITUATION_ENUM.RDV_PRIS);
+    });
+
+    it("Même effectif traité qui change vraiment de commune dans le même code postal → suit le jeune dans ML-B", async () => {
+      const erp = await creerDossierTraite("TESTNOM_L", "Prenoml", "75102");
+
+      const erpDemenage = { ...erp, apprenant: apprenantCommune("TESTNOM_L", "Prenoml", "75101", ML_ID_2) };
+      const result = await createMissionLocaleSnapshot(erpDemenage);
+      expect(result?.upserted).toBe(true);
+      await expectDossierSuitLeJeune();
+    });
+
+    it("Même effectif traité dont la commune est rattachée à une autre ML → suit le jeune dans ML-B", async () => {
+      const erp = await creerDossierTraite("TESTNOM_M", "Prenomm", "75101");
+
+      const erpReaffecte = { ...erp, apprenant: apprenantCommune("TESTNOM_M", "Prenomm", "75101", ML_ID_2) };
+      const result = await createMissionLocaleSnapshot(erpReaffecte);
+      expect(result?.upserted).toBe(true);
+      await expectDossierSuitLeJeune();
+      expect(mockRechercheCommune).not.toHaveBeenCalled();
+    });
+
+    it("Même effectif non traité dont seule la commune change → suit le jeune dans ML-B", async () => {
+      const erp = createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_I", "Prenomi", 21) });
+      await createMissionLocaleSnapshot(erp);
+
+      const erpCorrige = { ...erp, apprenant: makeApprenant("TESTNOM_I", "Prenomi", 21, ML_ID_2) };
+      const result = await createMissionLocaleSnapshot(erpCorrige);
+      expect(result?.upserted).toBe(true);
+
+      const active = await missionLocaleEffectifsDb()
+        .find({ soft_deleted: { $ne: true } })
+        .toArray();
+      const ml2 = await organisationsDb().findOne({ ml_id: ML_ID_2 });
+      expect(active).toHaveLength(1);
+      expect(active[0].mission_locale_id).toEqual(ml2?._id);
+    });
+
+    it("Même effectif traité qui déménage (autre code postal) → suit le jeune dans ML-B", async () => {
+      const erp = createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_J", "Prenomj", 21) });
+      await createMissionLocaleSnapshot(erp);
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: erp._id },
+        { $set: { situation: SITUATION_ENUM.RDV_PRIS } }
+      );
+
+      const apprenantDemenage = makeApprenant("TESTNOM_J", "Prenomj", 21, ML_ID_2);
+      const erpDemenage = {
+        ...erp,
+        apprenant: { ...apprenantDemenage, adresse: { ...apprenantDemenage.adresse, code_postal: "75002" } },
+      };
+      const result = await createMissionLocaleSnapshot(erpDemenage);
+      expect(result?.upserted).toBe(true);
+
+      const active = await missionLocaleEffectifsDb()
+        .find({ soft_deleted: { $ne: true } })
+        .toArray();
+      const ml2 = await organisationsDb().findOne({ ml_id: ML_ID_2 });
+      expect(active).toHaveLength(1);
+      expect(active[0].mission_locale_id).toEqual(ml2?._id);
+      expect(active[0].situation).toBe(SITUATION_ENUM.RDV_PRIS);
     });
 
     it("DECA dans ML-A, puis DECA pour même personne dans ML-B → ancien soft-deleted, nouveau inséré", async () => {

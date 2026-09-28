@@ -322,7 +322,11 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
     return null;
   }
 
-  const commune = await getAndFormatCommuneFromCode(null, adresseAlternant.code_postal);
+  const commune = await getAndFormatCommuneFromCode(
+    null,
+    adresseAlternant.code_postal,
+    [adresseAlternant.numero, adresseAlternant.voie].filter(Boolean).join(" ")
+  );
 
   const effectif: WithoutId<IEffectifDECA> = {
     deca_raw_id: new ObjectId(document._id),

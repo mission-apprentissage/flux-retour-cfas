@@ -422,6 +422,16 @@ program
   .action(createJobAction("tmp:migrate:ml-cloture-a-recontacter"));
 
 program
+  .command("tmp:migrate:commune-apprenant")
+  .description(
+    "Recalcule la commune des apprenants suivis par une ML ou de l'année scolaire en cours, devinée depuis un code postal partagé entre plusieurs communes"
+  )
+  .option("--dry-run", "Simulation sans écriture", false)
+  .option("-l, --limit <number>", "Limite le nombre d'effectifs examinés par collection", (value) => parseInt(value))
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:migrate:commune-apprenant"));
+
+program
   .command("tmp:seed-ml-rdv-url")
   .description("Seed initial des rdv_url sur les organisations Mission Locale via un CSV (colonnes siret, rdv_url)")
   .requiredOption("--csv-path <path>", "Chemin du CSV (colonnes siret, rdv_url)")
