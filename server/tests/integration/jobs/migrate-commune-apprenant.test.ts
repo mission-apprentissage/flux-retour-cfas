@@ -189,7 +189,9 @@ describe("migrateCommuneApprenant", () => {
       mission_locale_id: 999,
     });
     expect(rapport.effectifsDECA.changements_ml).toBe(1);
-    expect(changementsMl).toEqual([{ effectif_id: effectif._id, ancien_ml_id: 486, nouveau_ml_id: 999 }]);
+    expect(changementsMl).toEqual([
+      { effectif_id: effectif._id, code_postal: "02100", ancien_ml_id: 486, nouveau_ml_id: 999 },
+    ]);
   });
 
   it("ne touche pas une commune transmise par l'ERP", async () => {
@@ -349,6 +351,14 @@ describe("migrateCommuneApprenant", () => {
     expect(rapport.effectifs).toMatchObject({ examines: 1, modifies: 1, snapshots_ml: 0 });
   });
 
+  it("refuse --limit hors simulation", async () => {
+    const effectif = await insererEffectif({ ...adresseDevinee, complete: "138 rue du Sentier" });
+    await insererDossierMl(effectif);
+
+    await expect(migrateCommuneApprenant({ dryRun: false, limit: 10 })).rejects.toThrow(/--dry-run/);
+    expect((await effectifsDb().findOne({ _id: effectif._id }))?.apprenant.adresse?.code_insee).toBe("02288");
+  });
+
   it("refuse de tourner sans référentiel", async () => {
     await communesVoiesDb().deleteMany({});
 
@@ -414,18 +424,34 @@ describe("migrateCommuneApprenant", () => {
       );
     });
 
-    it("remplace un doublon soft-deleted présent dans la ML cible", async () => {
+    it("ne déplace pas un dossier dont un doublon soft-deleted existe dans la ML cible", async () => {
       const effectif = await insererEffectifDECA(adresseMorcourt);
       const dossier = await insererDossierMl(effectif, { mission_locale_id: mlEssigny._id });
       const doublon = await insererDossierMl(effectif, { mission_locale_id: mlMorcourt._id, soft_deleted: true });
+      const logId = new ObjectId();
+      await missionLocaleEffectifsLogDb().insertOne({
+        _id: logId,
+        mission_locale_effectif_id: doublon._id,
+        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+        created_at: new Date(),
+        created_by: null,
+        read_by: [],
+      });
 
-      const { rapport } = await migrateCommuneApprenant({ dryRun: false });
+      const { rapport, doublonsCible } = await migrateCommuneApprenant({ dryRun: false });
 
-      expect(await missionLocaleEffectifsDb().findOne({ _id: doublon._id })).toBeNull();
-      expect((await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.mission_locale_id).toEqual(
-        mlMorcourt._id
+      expect(await missionLocaleEffectifsDb().findOne({ _id: doublon._id })).toMatchObject({
+        mission_locale_id: mlMorcourt._id,
+        soft_deleted: true,
+      });
+      expect((await missionLocaleEffectifsLogDb().findOne({ _id: logId }))?.mission_locale_effectif_id).toEqual(
+        doublon._id
       );
-      expect(rapport.reaffectation).toMatchObject({ deplaces: 1, doublons_supprimes: 1 });
+      expect((await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.mission_locale_id).toEqual(
+        mlEssigny._id
+      );
+      expect(rapport.reaffectation).toMatchObject({ deplaces: 0, doublons_soft_deleted: 1 });
+      expect(doublonsCible).toEqual([{ dossier_id: dossier._id, doublon_id: doublon._id, ml_cible: 999 }]);
     });
 
     it("ne touche pas un dossier rattaché à une autre ML que celle de la commune devinée", async () => {
@@ -478,25 +504,36 @@ describe("migrateCommuneApprenant", () => {
       expect(rapport.reaffectation).toMatchObject({ deplaces: 0, demenagements: 1 });
     });
 
-    it("rattache au dossier déplacé l'historique du doublon supprimé", async () => {
-      const effectif = await insererEffectifDECA(adresseMorcourt);
-      const dossier = await insererDossierMl(effectif, { mission_locale_id: mlEssigny._id });
-      const doublon = await insererDossierMl(effectif, { mission_locale_id: mlMorcourt._id, soft_deleted: true });
-      const logId = new ObjectId();
-      await missionLocaleEffectifsLogDb().insertOne({
-        _id: logId,
-        mission_locale_effectif_id: doublon._id,
-        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
-        created_at: new Date(),
-        created_by: null,
-        read_by: [],
-      });
-
-      await migrateCommuneApprenant({ dryRun: false });
-
-      expect((await missionLocaleEffectifsLogDb().findOne({ _id: logId }))?.mission_locale_effectif_id).toEqual(
-        dossier._id
+    it("ne déplace pas un dossier dont l'effectif corrigé par le job a un autre code postal", async () => {
+      vi.mocked(apiAlternanceClient.geographie.rechercheCommune).mockResolvedValue(
+        [
+          commune("02288", "Essigny-le-Petit", 486),
+          commune("02525", "Morcourt", 999),
+          commune("02691", "Saint-Quentin", 486),
+        ].map((c) => ({ ...c, code: { ...c.code, postaux: ["02100", "02110"] } }))
       );
+      await communesVoiesDb().insertOne({
+        _id: "02110",
+        communes: [
+          { code_insee: "02288", nom: "Essigny-le-Petit", population: 345 },
+          { code_insee: "02691", nom: "Saint-Quentin", population: 52813 },
+        ],
+        voies: [],
+        updated_at: new Date(),
+      });
+      const effectif = await insererEffectifDECA(adresseMorcourt);
+      const dossier = await insererDossierMl(
+        { ...effectif, apprenant: { ...effectif.apprenant, adresse: { ...adresseDevinee, code_postal: "02110" } } },
+        { mission_locale_id: mlEssigny._id }
+      );
+
+      const { rapport, changementsMl } = await migrateCommuneApprenant({ dryRun: false });
+
+      expect(changementsMl).toHaveLength(1);
+      expect((await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.mission_locale_id).toEqual(
+        mlEssigny._id
+      );
+      expect(rapport.reaffectation).toMatchObject({ deplaces: 0, demenagements: 1 });
     });
 
     it("ne déplace rien si la ML cible n'a pas d'organisation", async () => {

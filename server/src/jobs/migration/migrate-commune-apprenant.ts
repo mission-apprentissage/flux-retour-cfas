@@ -18,7 +18,6 @@ import {
   effectifsDECADb,
   effectifsQueueDb,
   missionLocaleEffectifsDb,
-  missionLocaleEffectifsLogDb,
   organisationsDb,
 } from "@/common/model/collections";
 import { normaliserVoie } from "@/common/services/commune/normaliserVoie";
@@ -45,6 +44,7 @@ type CommunesApi = (codePostal: string) => Promise<ICommune[] | null>;
 
 export type ChangementMissionLocale = {
   effectif_id: ObjectId;
+  code_postal: string;
   ancien_ml_id: number | null;
   nouveau_ml_id: number | null;
 };
@@ -83,7 +83,7 @@ type RapportReaffectation = {
   hors_commune_devinee: number;
   demenagements: number;
   ml_cible_absente: number;
-  doublons_supprimes: number;
+  doublons_soft_deleted: number;
   conflits_actifs: number;
   erreurs_api: number;
   ecritures_en_erreur: number;
@@ -334,7 +334,12 @@ async function rattraperCollection<E extends IEffectif | IEffectifDECA>(
     const ancienMlId = adresse.mission_locale_id ?? null;
     if (nouveauMlId !== ancienMlId) {
       stats.changements_ml++;
-      changementsMl.push({ effectif_id: effectif._id, ancien_ml_id: ancienMlId, nouveau_ml_id: nouveauMlId });
+      changementsMl.push({
+        effectif_id: effectif._id,
+        code_postal: codePostal,
+        ancien_ml_id: ancienMlId,
+        nouveau_ml_id: nouveauMlId,
+      });
     }
 
     batch.push({ effectif, commune });
@@ -379,15 +384,16 @@ async function reaffecterDossiersMl(contexte: {
     hors_commune_devinee: 0,
     demenagements: 0,
     ml_cible_absente: 0,
-    doublons_supprimes: 0,
+    doublons_soft_deleted: 0,
     conflits_actifs: 0,
     erreurs_api: 0,
     ecritures_en_erreur: 0,
     stats_en_erreur: 0,
   };
   const dossiersTraites: Array<{ dossier_id: ObjectId; ml_actuelle: number; ml_cible: number }> = [];
+  const doublonsCible: Array<{ dossier_id: ObjectId; doublon_id: ObjectId; ml_cible: number }> = [];
   const missionLocalesModifiees = new Map<string, ObjectId>();
-  const nouvelleMlParEffectif = new Map(changementsMl.map((c) => [c.effectif_id.toString(), c.nouveau_ml_id]));
+  const changementParEffectif = new Map(changementsMl.map((c) => [c.effectif_id.toString(), c]));
 
   const organisations = (await organisationsDb()
     .find({ type: "MISSION_LOCALE" })
@@ -406,9 +412,16 @@ async function reaffecterDossiersMl(contexte: {
     const codePostal = dossier.effectif_snapshot.apprenant.adresse?.code_postal;
     if (!actuelle || typeof codePostal !== "string") continue;
 
-    let mlEffectif = nouvelleMlParEffectif.get(dossier.effectif_id.toString());
+    const changement = changementParEffectif.get(dossier.effectif_id.toString());
+    let mlEffectif: number | null;
     let adresseCorrigee: AdresseApprenant | undefined;
-    if (mlEffectif === undefined) {
+    if (changement) {
+      if (changement.code_postal !== codePostal) {
+        if (changement.nouveau_ml_id !== actuelle.ml_id) rapport.demenagements++;
+        continue;
+      }
+      mlEffectif = changement.nouveau_ml_id;
+    } else {
       const adresse = await adresseEffectif(dossier);
       if (!adresse) continue;
       adresseCorrigee = adresse;
@@ -446,7 +459,12 @@ async function reaffecterDossiersMl(contexte: {
       mission_locale_id: cible._id,
       effectif_id: dossier.effectif_id,
     });
-    if (doublon && !doublon.soft_deleted) {
+    if (doublon?.soft_deleted) {
+      rapport.doublons_soft_deleted++;
+      doublonsCible.push({ dossier_id: dossier._id, doublon_id: doublon._id, ml_cible: cible.ml_id });
+      continue;
+    }
+    if (doublon) {
       rapport.conflits_actifs++;
       continue;
     }
@@ -455,15 +473,6 @@ async function reaffecterDossiersMl(contexte: {
     if (dryRun) continue;
 
     try {
-      if (doublon) {
-        await missionLocaleEffectifsLogDb().updateMany(
-          { mission_locale_effectif_id: doublon._id },
-          { $set: { mission_locale_effectif_id: dossier._id } }
-        );
-        await missionLocaleEffectifsDb().deleteOne({ _id: doublon._id, soft_deleted: true });
-        rapport.doublons_supprimes++;
-        logger.info({ doublon: doublon._id, dossier: dossier._id }, "doublon soft-deleted supprimé dans la ML cible");
-      }
       const snapshot = adresseCorrigee ? { "effectif_snapshot.apprenant.adresse": adresseCorrigee } : {};
       await missionLocaleEffectifsDb().updateOne(
         { _id: dossier._id },
@@ -501,7 +510,8 @@ async function reaffecterDossiersMl(contexte: {
   }
 
   logger.info({ dossiers: dossiersTraites }, "dossiers traités laissés dans leur Mission Locale actuelle");
-  return { rapport, dossiersTraites };
+  logger.info({ dossiers: doublonsCible }, "dossiers non déplacés : doublon soft-deleted dans la ML cible");
+  return { rapport, dossiersTraites, doublonsCible };
 }
 
 /**
@@ -511,6 +521,9 @@ async function reaffecterDossiersMl(contexte: {
  * puis déplace les dossiers non traités vers leur nouvelle ML.
  */
 export async function migrateCommuneApprenant({ dryRun, limit }: MigrateCommuneOptions) {
+  if (limit && !dryRun) {
+    throw new Error("--limit n'est autorisé qu'avec --dry-run");
+  }
   const codesPostaux = await chargerCodesPostauxAmbigus();
   if (codesPostaux.length === 0) {
     throw new Error("Référentiel communesVoies vide : lancer hydrate:communes-voies avant ce job");
@@ -529,5 +542,10 @@ export async function migrateCommuneApprenant({ dryRun, limit }: MigrateCommuneO
 
   const rapportComplet = { ...rapport, reaffectation: reaffectation.rapport };
   logger.info(rapportComplet, "rattrapage des communes terminé");
-  return { rapport: rapportComplet, changementsMl, dossiersTraites: reaffectation.dossiersTraites };
+  return {
+    rapport: rapportComplet,
+    changementsMl,
+    dossiersTraites: reaffectation.dossiersTraites,
+    doublonsCible: reaffectation.doublonsCible,
+  };
 }
