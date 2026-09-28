@@ -96,6 +96,24 @@ L'ordonnancement nocturne en découle : le batch de 2h30 occupe le worker jusqu'
 et les crons qui suivent sont espacés pour ne pas s'attendre. Avant d'ajouter un cron
 entre 2h30 et 6h, vérifie où il tombe dans cette file.
 
+## Les deux sondes de santé
+
+Elles répondent à deux questions différentes :
+
+| Route                        | Question                          | Lecteur         | Comportement si Mongo est KO                                              |
+| ---------------------------- | --------------------------------- | --------------- | ------------------------------------------------------------------------- |
+| `/api/healthcheck`           | Le process répond-il ?            | La sonde Docker | **200** — le champ `mongodb` passe à `false`, mais le statut ne bouge pas |
+| `/api/healthcheck/readiness` | Les dépendances répondent-elles ? | La supervision  | **503**                                                                   |
+
+Docker ne doit pas lire la readiness : redémarrer l'API ne répare pas Mongo, et une
+base brièvement absente pendant un déploiement ferait tuer les deux réplicas au pire
+moment. Un redémarrage est en revanche la bonne réponse à un process figé, ce que la
+liveness détecte.
+
+Les deux passent par le même contrôle, qui signale la panne à Sentry **à la transition
+seulement** : la sonde Docker interroge la route toutes les 10 secondes sur deux
+réplicas, soit 720 appels par heure.
+
 ## Les limites connues
 
 - **Le heartbeat d'ingestion ne surveille rien entre 2h30 et 4h27.** Il partage le worker
