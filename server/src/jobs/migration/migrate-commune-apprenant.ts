@@ -16,16 +16,19 @@ import {
   communesVoiesDb,
   effectifsDb,
   effectifsDECADb,
+  effectifsQueueDb,
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogDb,
   organisationsDb,
 } from "@/common/model/collections";
+import { normaliserVoie } from "@/common/services/commune/normaliserVoie";
 import { resoudreCodeInsee, type ResolutionCodeInsee } from "@/common/services/commune/resoudreCodeInsee";
 
 const logger = parentLogger.child({ module: "job:migrate:commune-apprenant" });
 
 const BATCH_SIZE = 1_000;
 const MAX_ECHECS_API = 3;
+const MAX_ECARTS = 50;
 
 type AdresseApprenant = {
   code_postal?: string | null;
@@ -46,14 +49,27 @@ export type ChangementMissionLocale = {
   nouveau_ml_id: number | null;
 };
 
+type Methode = ResolutionCodeInsee["methode"];
+
+type EcartResolution = {
+  code_postal: string;
+  voie: string;
+  attendu: string;
+  obtenu: string;
+  methode: Methode;
+};
+
 type RapportCollection = {
   examines: number;
+  insee_erp: number;
+  precision: Record<Methode, { ok: number; ko: number }>;
+  ecarts: EcartResolution[];
   devines: number;
   inchanges: number;
   modifies: number;
   hors_api: number;
   erreurs_api: number;
-  methodes: Record<ResolutionCodeInsee["methode"], number>;
+  methodes: Record<Methode, number>;
   changements_ml: number;
   snapshots_ml: number;
   batches_en_erreur: number;
@@ -81,6 +97,9 @@ interface MigrateCommuneOptions {
 
 const nouveauRapport = (): RapportCollection => ({
   examines: 0,
+  insee_erp: 0,
+  precision: { voie: { ok: 0, ko: 0 }, commune: { ok: 0, ko: 0 }, population: { ok: 0, ko: 0 } },
+  ecarts: [],
   devines: 0,
   inchanges: 0,
   modifies: 0,
@@ -94,6 +113,38 @@ const nouveauRapport = (): RapportCollection => ({
 
 function texteAdresse(adresse: AdresseApprenant): string {
   return adresse.complete || [adresse.numero, adresse.voie].filter(Boolean).join(" ");
+}
+
+async function inseeTransmisParErp(effectifId: ObjectId): Promise<{ codeInsee: string; codePostal: unknown } | null> {
+  const element = await effectifsQueueDb().findOne(
+    { effectif_id: effectifId, processed_at: { $ne: null } },
+    { sort: { created_at: -1 }, projection: { code_commune_insee_apprenant: 1, code_postal_apprenant: 1 } }
+  );
+  const codeInsee = element?.code_commune_insee_apprenant;
+  if (typeof codeInsee !== "string" || !codeInsee.trim()) return null;
+  return { codeInsee: codeInsee.trim(), codePostal: element?.code_postal_apprenant };
+}
+
+async function mesurerPrecision(
+  stats: RapportCollection,
+  params: { codePostal: string; texte: string; attendu: string }
+) {
+  const resolution = await resoudreCodeInsee({ codePostal: params.codePostal, adresse: params.texte });
+  if (!resolution) return;
+  const juste = resolution.code_insee === params.attendu;
+  stats.precision[resolution.methode][juste ? "ok" : "ko"]++;
+  if (!juste && stats.ecarts.length < MAX_ECARTS) {
+    stats.ecarts.push({
+      code_postal: params.codePostal,
+      voie: normaliserVoie(params.texte)
+        .replace(/\b\d+\b/g, "")
+        .replace(/\s+/g, " ")
+        .trim(),
+      attendu: params.attendu,
+      obtenu: resolution.code_insee,
+      methode: resolution.methode,
+    });
+  }
 }
 
 function communesDuCodePostalApi(): CommunesApi {
@@ -154,11 +205,12 @@ async function rattraperCollection<E extends IEffectif | IEffectifDECA>(
     communesApi: CommunesApi;
     changementsMl: ChangementMissionLocale[];
     stats: RapportCollection;
+    lireFileErp: boolean;
     dryRun: boolean;
     limit?: number;
   }
 ) {
-  const { codesPostaux, effectifIds, communesApi, changementsMl, stats, dryRun, limit } = contexte;
+  const { codesPostaux, effectifIds, communesApi, changementsMl, stats, lireFileErp, dryRun, limit } = contexte;
   let batch: Array<{ effectif: EffectifAdresse; commune: ICommune }> = [];
 
   const flush = async () => {
@@ -247,6 +299,17 @@ async function rattraperCollection<E extends IEffectif | IEffectifDECA>(
     if (!communes) {
       stats.erreurs_api++;
       continue;
+    }
+
+    if (lireFileErp) {
+      const transmis = await inseeTransmisParErp(effectif._id);
+      if (transmis) {
+        stats.insee_erp++;
+        if (transmis.codePostal === codePostal && communes.some(({ code }) => code.insee === transmis.codeInsee)) {
+          await mesurerPrecision(stats, { codePostal, texte: texteAdresse(adresse), attendu: transmis.codeInsee });
+        }
+        continue;
+      }
     }
 
     if (adresse.code_insee && adresse.code_insee !== communes[0]?.code.insee) continue;
@@ -459,8 +522,8 @@ export async function migrateCommuneApprenant({ dryRun, limit }: MigrateCommuneO
   const contexte = { codesPostaux, effectifIds, communesApi, changementsMl, dryRun, limit };
   const rapport = { dryRun, effectifs: nouveauRapport(), effectifsDECA: nouveauRapport() };
 
-  await rattraperCollection(effectifsDb(), { ...contexte, stats: rapport.effectifs });
-  await rattraperCollection(effectifsDECADb(), { ...contexte, stats: rapport.effectifsDECA });
+  await rattraperCollection(effectifsDb(), { ...contexte, stats: rapport.effectifs, lireFileErp: true });
+  await rattraperCollection(effectifsDECADb(), { ...contexte, stats: rapport.effectifsDECA, lireFileErp: false });
 
   const reaffectation = await reaffecterDossiersMl(contexte);
 

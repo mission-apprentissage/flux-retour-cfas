@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import type { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { SITUATION_ENUM, type IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import type { IOrganisationMissionLocale } from "shared/models/data/organisations.model";
 import { getAnneeScolaireFromDate } from "shared/utils";
@@ -13,6 +14,7 @@ import {
   communesVoiesDb,
   effectifsDb,
   effectifsDECADb,
+  effectifsQueueDb,
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogDb,
   organisationsDb,
@@ -91,6 +93,24 @@ async function insererDossierMl<T extends { _id: ObjectId }>(
   };
   await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(dossier));
   return dossier;
+}
+
+async function insererElementFile(
+  effectifId: ObjectId,
+  params: { code_commune_insee_apprenant?: string | null; created_at?: Date; processed_at?: Date | null }
+) {
+  await effectifsQueueDb().insertOne(
+    testDoc<IEffectifQueue>({
+      _id: new ObjectId(),
+      effectif_id: effectifId,
+      source: SOURCE_APPRENANT.ERP,
+      validation_errors: [],
+      code_postal_apprenant: "02100",
+      created_at: new Date(),
+      processed_at: new Date(),
+      ...params,
+    })
+  );
 }
 
 async function insererMissionLocale(mlId: number, activatedAt?: Date) {
@@ -185,6 +205,56 @@ describe("migrateCommuneApprenant", () => {
 
     expect((await effectifsDb().findOne({ _id: effectif._id }))?.apprenant.adresse?.code_insee).toBe("02525");
     expect(rapport.effectifs).toMatchObject({ examines: 1, devines: 0, modifies: 0 });
+  });
+
+  it("n'écrase pas l'INSEE transmis par l'ERP et s'en sert pour mesurer la précision", async () => {
+    const faux = await insererEffectif({ ...adresseDevinee, complete: "138 rue du Sentier" });
+    const juste = await insererEffectif({
+      ...adresseDevinee,
+      code_insee: "02691",
+      commune: "Saint-Quentin",
+      complete: "138 rue du Sentier",
+    });
+    await insererDossierMl(faux);
+    await insererDossierMl(juste);
+    await insererElementFile(faux._id, { code_commune_insee_apprenant: "02288" });
+    await insererElementFile(juste._id, { code_commune_insee_apprenant: "02691" });
+
+    const { rapport } = await migrateCommuneApprenant({ dryRun: false });
+
+    expect((await effectifsDb().findOne({ _id: faux._id }))?.apprenant.adresse?.code_insee).toBe("02288");
+    expect(rapport.effectifs).toMatchObject({ insee_erp: 2, devines: 0, modifies: 0 });
+    expect(rapport.effectifs.precision.voie).toEqual({ ok: 1, ko: 1 });
+    expect(rapport.effectifs.ecarts).toEqual([
+      { code_postal: "02100", voie: "rue sentier", attendu: "02288", obtenu: "02691", methode: "voie" },
+    ]);
+  });
+
+  it("corrige un effectif ERP dont la dernière transmission traitée n'a pas d'INSEE", async () => {
+    const effectif = await insererEffectif({ ...adresseDevinee, complete: "138 rue du Sentier" });
+    await insererDossierMl(effectif);
+    await insererElementFile(effectif._id, {
+      code_commune_insee_apprenant: "02288",
+      created_at: new Date("2025-01-01"),
+    });
+    await insererElementFile(effectif._id, { code_commune_insee_apprenant: null, created_at: new Date("2025-06-01") });
+    await insererElementFile(effectif._id, { code_commune_insee_apprenant: "02288", processed_at: null });
+
+    const { rapport } = await migrateCommuneApprenant({ dryRun: false });
+
+    expect((await effectifsDb().findOne({ _id: effectif._id }))?.apprenant.adresse?.code_insee).toBe("02691");
+    expect(rapport.effectifs).toMatchObject({ insee_erp: 0, modifies: 1 });
+  });
+
+  it("ne lit pas la file d'ingestion pour un effectif DECA", async () => {
+    const effectif = await insererEffectifDECA({ ...adresseDevinee, numero: 24, voie: "RUE MAURICE DUVERGET" });
+    await insererDossierMl(effectif);
+    await insererElementFile(effectif._id, { code_commune_insee_apprenant: "02288" });
+
+    const { rapport } = await migrateCommuneApprenant({ dryRun: false });
+
+    expect((await effectifsDECADb().findOne({ _id: effectif._id }))?.apprenant.adresse?.code_insee).toBe("02525");
+    expect(rapport.effectifsDECA).toMatchObject({ insee_erp: 0, modifies: 1 });
   });
 
   it("laisse inchangée une commune devinée que l'adresse confirme", async () => {
