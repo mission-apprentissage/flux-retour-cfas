@@ -2,6 +2,7 @@ import { IncomingMessage } from "node:http";
 import { pipeline } from "node:stream";
 import { createGunzip } from "node:zlib";
 
+import { captureException } from "@sentry/node";
 import axios, { isAxiosError } from "axios";
 import { parse } from "csv-parse";
 import type { AnyBulkWriteOperation } from "mongodb";
@@ -74,7 +75,7 @@ function indexerCodesPostauxAmbigus(communes: GeoCommune[]): Map<string, CodePos
   return ambigus;
 }
 
-async function lireVoiesDepartement(departement: string, ambigus: Map<string, CodePostalEnCours>) {
+async function lireVoiesDepartement(departement: string, ambigus: Map<string, CodePostalEnCours>): Promise<boolean> {
   let res: { data: IncomingMessage };
   try {
     res = await axios.get<IncomingMessage>(`${BAN_ADRESSES_URL}/adresses-${departement}.csv.gz`, {
@@ -83,8 +84,9 @@ async function lireVoiesDepartement(departement: string, ambigus: Map<string, Co
     });
   } catch (err) {
     if (isAxiosError(err) && err.response?.status === 404) {
-      logger.warn({ departement }, "fichier BAN absent, département ignoré");
-      return;
+      logger.warn({ departement }, "fichier BAN absent, codes postaux du département conservés");
+      captureException(new Error(`hydrate:communes-voies : fichier BAN absent pour le département ${departement}`));
+      return false;
     }
     throw err;
   }
@@ -111,17 +113,25 @@ async function lireVoiesDepartement(departement: string, ambigus: Map<string, Co
       codePostal.voies.set(voie, codesInsee);
     }
   }
+  return true;
 }
 
 async function ecrireCodesPostauxComplets(
   ambigus: Map<string, CodePostalEnCours>,
   departementsTraites: Set<string>,
+  departementsAbsents: Set<string>,
+  conserves: string[],
   updatedAt: Date
 ): Promise<number> {
   const ops: AnyBulkWriteOperation<ICommunesVoies>[] = [];
 
   for (const [codePostal, enCours] of ambigus) {
     if (![...enCours.departements].every((d) => departementsTraites.has(d))) continue;
+    ambigus.delete(codePostal);
+    if ([...enCours.departements].some((d) => departementsAbsents.has(d))) {
+      conserves.push(codePostal);
+      continue;
+    }
 
     ops.push({
       replaceOne: {
@@ -134,7 +144,6 @@ async function ecrireCodesPostauxComplets(
         upsert: true,
       },
     });
-    ambigus.delete(codePostal);
   }
 
   if (ops.length > 0) {
@@ -153,22 +162,36 @@ export async function hydrateCommunesVoies() {
   logger.info({ codesPostaux: ambigus.size, departements: departements.length }, "import des voies BAN");
 
   const departementsTraites = new Set<string>();
+  const departementsAbsents = new Set<string>();
+  const conserves: string[] = [];
   let nbEcrits = 0;
 
   for (const departement of departements) {
-    await lireVoiesDepartement(departement, ambigus);
+    if (!(await lireVoiesDepartement(departement, ambigus))) departementsAbsents.add(departement);
     departementsTraites.add(departement);
-    nbEcrits += await ecrireCodesPostauxComplets(ambigus, departementsTraites, updatedAt);
+    nbEcrits += await ecrireCodesPostauxComplets(
+      ambigus,
+      departementsTraites,
+      departementsAbsents,
+      conserves,
+      updatedAt
+    );
     logger.info({ departement, nbEcrits }, "département traité");
   }
 
-  if (nbEcrits < nbAvant * SEUIL_BAISSE_VOLUME) {
+  if (nbEcrits + conserves.length < nbAvant * SEUIL_BAISSE_VOLUME) {
     throw new Error(
       `hydrate:communes-voies : ${nbEcrits} codes postaux écrits contre ${nbAvant} auparavant, anciennes entrées conservées`
     );
   }
 
-  const { deletedCount } = await communesVoiesDb().deleteMany({ updated_at: { $lt: updatedAt } });
-  logger.info({ nbEcrits, supprimes: deletedCount }, "référentiel communesVoies à jour");
+  const { deletedCount } = await communesVoiesDb().deleteMany({
+    updated_at: { $lt: updatedAt },
+    _id: { $nin: conserves },
+  });
+  logger.info(
+    { nbEcrits, conserves: conserves.length, departementsAbsents: [...departementsAbsents], supprimes: deletedCount },
+    "référentiel communesVoies à jour"
+  );
   return nbEcrits;
 }

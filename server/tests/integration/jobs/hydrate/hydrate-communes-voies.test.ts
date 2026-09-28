@@ -27,7 +27,7 @@ function csvGz(lignes: string[]) {
   return gzipSync([ENTETE, ...lignes].join("\n"));
 }
 
-const banParDepartement: Record<string, Buffer | null> = {
+const banParDepartement: Record<string, Buffer> = {
   "02": csvGz([
     "a;;138;;Rue du Sentier;02100;02691;Saint-Quentin;",
     "b;;1;;Rue de la Gare;02100;02691;Saint-Quentin;",
@@ -35,17 +35,17 @@ const banParDepartement: Record<string, Buffer | null> = {
     "d;;3;;Rue de Laon;02000;02408;Laon;",
     "e;;4;;Rue Fantôme;02100;02999;Hors liste;",
   ]),
-  "04": null,
+  "04": csvGz(["h;;2;;Route des Crêtes;05110;04001;Commune04;"]),
   "05": csvGz(["f;;1;;Chemin des Alpes;05110;05001;Commune05;Le Hameau"]),
   "13": csvGz(["g;;1;;Boulevard de la Valbarelle;13012;13212;Marseille 12e Arrondissement;"]),
 };
 
-function mockApis() {
+function mockApis(departementsAbsents: string[] = []) {
   nock(GEO_API_COMMUNES_URL).get(/.*/).reply(200, communes);
   for (const [departement, fichier] of Object.entries(banParDepartement)) {
     const scope = nock(BAN_ADRESSES_URL).get(`/adresses-${departement}.csv.gz`);
-    if (fichier) scope.reply(200, fichier);
-    else scope.reply(404);
+    if (departementsAbsents.includes(departement)) scope.reply(404);
+    else scope.reply(200, fichier);
   }
 }
 
@@ -81,7 +81,7 @@ describe("hydrateCommunesVoies", () => {
     expect(await communesVoiesDb().findOne({ _id: "02000" })).toBeNull();
   });
 
-  it("gère les codes postaux à cheval sur deux départements et les fichiers BAN absents", async () => {
+  it("gère les codes postaux à cheval sur deux départements", async () => {
     mockApis();
 
     await hydrateCommunesVoies();
@@ -90,10 +90,36 @@ describe("hydrateCommunesVoies", () => {
     expect(doc?.communes.map((c) => c.code_insee)).toEqual(["04001", "05001"]);
     expect(doc?.voies).toEqual(
       expect.arrayContaining([
+        { nom: "route cretes", code_insee: ["04001"] },
         { nom: "chemin alpes", code_insee: ["05001"] },
         { nom: "hameau", code_insee: ["05001"] },
       ])
     );
+  });
+
+  it("conserve les codes postaux d'un département dont le fichier BAN est absent", async () => {
+    const ancien = {
+      communes: [{ code_insee: "04001", nom: "Commune04", population: 100 }],
+      voies: [{ nom: "route cretes", code_insee: ["04001"] }],
+      updated_at: new Date(0),
+    };
+    await communesVoiesDb().insertOne({ _id: "05110", ...ancien });
+    mockApis(["04"]);
+
+    await hydrateCommunesVoies();
+
+    expect(await communesVoiesDb().findOne({ _id: "05110" })).toEqual({ _id: "05110", ...ancien });
+    expect((await communesVoiesDb().findOne({ _id: "02100" }))?.updated_at).not.toEqual(new Date(0));
+    expect(await communesVoiesDb().findOne({ _id: "13012" })).not.toBeNull();
+  });
+
+  it("n'écrit pas de voies partielles pour un code postal dont un département est absent", async () => {
+    mockApis(["04"]);
+
+    await hydrateCommunesVoies();
+
+    expect(await communesVoiesDb().findOne({ _id: "05110" })).toBeNull();
+    expect(await communesVoiesDb().countDocuments()).toBe(2);
   });
 
   it("rattache les arrondissements municipaux à leur commune", async () => {
