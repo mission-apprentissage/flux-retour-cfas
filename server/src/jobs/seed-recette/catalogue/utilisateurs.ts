@@ -1,91 +1,109 @@
 import type { IUsersMigration } from "shared/models";
 
 import { buildUser, jour, type SeedContext } from "../factories";
+import type { CfaHostCode, MlHostCode } from "../hosts";
 import { seedId } from "../seed-ids";
 
-export const USERS = {
-  ML_A_CONSEIL_1: 1,
-  ML_A_CONSEIL_2: 2,
-  CFA_ON_ADMIN: 11,
-  CFA_ON_MEMBRE: 12,
-  CFA_SUSP_ADMIN: 13,
-  CFA_OFF_ADMIN: 14,
-  CFA_DECA_ADMIN: 15,
-} as const;
+export interface Compte {
+  n: number;
+  hote: MlHostCode | CfaHostCode;
+  prenom: string;
+  nom: string;
+  civility: "Madame" | "Monsieur";
+  fonction: string;
+  role?: "admin" | "member";
+  derniereConnexion: number;
+}
 
-export const userId = (code: keyof typeof USERS) => seedId("user", USERS[code]);
+export const COMPTES = {
+  ML_A_CONSEIL_1: {
+    n: 1,
+    hote: "ML_A",
+    prenom: "Claire",
+    nom: "Fontaine",
+    civility: "Madame",
+    fonction: "Conseillère en insertion",
+    derniereConnexion: -1,
+  },
+  ML_A_CONSEIL_2: {
+    n: 2,
+    hote: "ML_A",
+    prenom: "Karim",
+    nom: "Benali",
+    civility: "Monsieur",
+    fonction: "Conseiller en insertion",
+    derniereConnexion: -3,
+  },
+  CFA_ON_ADMIN: {
+    n: 11,
+    hote: "CFA_ON",
+    prenom: "Sophie",
+    nom: "Marchand",
+    civility: "Madame",
+    fonction: "Référente apprentissage",
+    role: "admin",
+    derniereConnexion: -1,
+  },
+  CFA_ON_MEMBRE: {
+    n: 12,
+    hote: "CFA_ON",
+    prenom: "Julien",
+    nom: "Carpentier",
+    civility: "Monsieur",
+    fonction: "Chargé de relations entreprises",
+    role: "member",
+    derniereConnexion: -6,
+  },
+  CFA_SUSP_ADMIN: {
+    n: 13,
+    hote: "CFA_SUSP",
+    prenom: "Nadia",
+    nom: "Haddad",
+    civility: "Madame",
+    fonction: "Directrice adjointe",
+    role: "admin",
+    derniereConnexion: -70,
+  },
+  CFA_OFF_ADMIN: {
+    n: 14,
+    hote: "CFA_OFF",
+    prenom: "Pierre",
+    nom: "Lemoine",
+    civility: "Monsieur",
+    fonction: "Responsable administratif",
+    role: "admin",
+    derniereConnexion: -12,
+  },
+  CFA_DECA_ADMIN: {
+    n: 15,
+    hote: "CFA_DECA",
+    prenom: "Aurélie",
+    nom: "Chevalier",
+    civility: "Madame",
+    fonction: "Coordinatrice pédagogique",
+    role: "admin",
+    derniereConnexion: -2,
+  },
+} satisfies Record<string, Compte>;
+
+export type CodeCompte = keyof typeof COMPTES;
+
+export const userId = (code: CodeCompte) => seedId("user", COMPTES[code].n);
+
+const organisationDe = (ctx: SeedContext, hote: Compte["hote"]) =>
+  hote === "ML_A" || hote === "ML_B" ? ctx.missionsLocales[hote]._id : ctx.cfas[hote].organisation._id;
 
 export function buildUtilisateurs(ctx: SeedContext): IUsersMigration[] {
-  const mlA = ctx.missionsLocales.ML_A._id;
-  const cfa = (code: keyof SeedContext["cfas"]) => ctx.cfas[code].organisation._id;
-  return [
+  return Object.values(COMPTES).map((compte: Compte) =>
     buildUser(ctx, {
-      n: USERS.ML_A_CONSEIL_1,
-      organisationId: mlA,
-      prenom: "Claire",
-      nom: "Fontaine",
-      civility: "Madame",
-      fonction: "Conseillère en insertion",
-      lastConnection: jour(ctx, -1),
-    }),
-    buildUser(ctx, {
-      n: USERS.ML_A_CONSEIL_2,
-      organisationId: mlA,
-      prenom: "Karim",
-      nom: "Benali",
-      civility: "Monsieur",
-      fonction: "Conseiller en insertion",
-      lastConnection: jour(ctx, -3),
-    }),
-    buildUser(ctx, {
-      n: USERS.CFA_ON_ADMIN,
-      organisationId: cfa("CFA_ON"),
-      prenom: "Sophie",
-      nom: "Marchand",
-      civility: "Madame",
-      fonction: "Référente apprentissage",
-      role: "admin",
-      lastConnection: jour(ctx, -1),
-    }),
-    buildUser(ctx, {
-      n: USERS.CFA_ON_MEMBRE,
-      organisationId: cfa("CFA_ON"),
-      prenom: "Julien",
-      nom: "Carpentier",
-      civility: "Monsieur",
-      fonction: "Chargé de relations entreprises",
-      role: "member",
-      lastConnection: jour(ctx, -6),
-    }),
-    buildUser(ctx, {
-      n: USERS.CFA_SUSP_ADMIN,
-      organisationId: cfa("CFA_SUSP"),
-      prenom: "Nadia",
-      nom: "Haddad",
-      civility: "Madame",
-      fonction: "Directrice adjointe",
-      role: "admin",
-      lastConnection: jour(ctx, -70),
-    }),
-    buildUser(ctx, {
-      n: USERS.CFA_OFF_ADMIN,
-      organisationId: cfa("CFA_OFF"),
-      prenom: "Pierre",
-      nom: "Lemoine",
-      civility: "Monsieur",
-      fonction: "Responsable administratif",
-      role: "admin",
-      lastConnection: jour(ctx, -12),
-    }),
-    buildUser(ctx, {
-      n: USERS.CFA_DECA_ADMIN,
-      organisationId: cfa("CFA_DECA"),
-      prenom: "Aurélie",
-      nom: "Chevalier",
-      civility: "Madame",
-      fonction: "Coordinatrice pédagogique",
-      role: "admin",
-      lastConnection: jour(ctx, -2),
-    }),
-  ];
+      n: compte.n,
+      organisationId: organisationDe(ctx, compte.hote),
+      prenom: compte.prenom,
+      nom: compte.nom,
+      civility: compte.civility,
+      fonction: compte.fonction,
+      role: compte.role,
+      lastConnection: jour(ctx, compte.derniereConnexion),
+    })
+  );
 }

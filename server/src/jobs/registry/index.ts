@@ -12,7 +12,7 @@ import { formationsCrons, formationsJobs } from "./formations";
 import { ingestionJobs } from "./ingestion";
 import { missionLocaleCrons, missionLocaleJobs } from "./mission-locale";
 import { organismesCrons, organismesJobs } from "./organismes";
-import { seedRecetteJobs } from "./seed-recette";
+import { seedRecetteCrons, seedRecetteJobs } from "./seed-recette";
 import { transmissionsJobs } from "./transmissions";
 import { voeuxAffelnetJobs } from "./voeux-affelnet";
 import { whatsappCrons, whatsappJobs } from "./whatsapp";
@@ -40,7 +40,7 @@ export const registry = {
   brevo: { jobs: brevoJobs, crons: brevoCrons },
   "db-maintenance": { jobs: dbMaintenanceJobs },
   divers: { jobs: diversJobs, crons: diversCrons },
-  "seed-recette": { jobs: seedRecetteJobs },
+  "seed-recette": { jobs: seedRecetteJobs, crons: seedRecetteCrons },
 } satisfies Record<string, DomainRegistry>;
 
 function mergeDomains<T>(kind: string, pick: (domain: DomainRegistry) => Record<string, T> | undefined) {

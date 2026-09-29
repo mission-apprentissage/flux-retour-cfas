@@ -62,6 +62,7 @@ export const ML_CASES: SeedCase[] = [
   {
     n: 2,
     code: "A02 DECA",
+    source: "DECA",
     titre: "Rupture remontée par DECA (CFA sans DECA côté CFA)",
     attendu: { ml: { ml: "ML_A", liste: "a_traiter_ou_recontacter", indicateurs: { a_traiter: true } } },
     build: async (ctx) => (await rupture(ctx, { n: 2, cfa: "CFA_SANS", deca: true })).docs,

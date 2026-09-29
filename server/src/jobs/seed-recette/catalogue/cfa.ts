@@ -16,14 +16,14 @@ import { seedId } from "../seed-ids";
 
 import { collaborer, parcoursEnContrat, rupture, traiter, type CollaborationCfa, type RuptureInput } from "./helpers";
 import type { SeedCase } from "./types";
-import { userId } from "./utilisateurs";
+import { type CodeCompte, userId } from "./utilisateurs";
 
 const logN = (n: number) => n * 10;
 
 interface ScenarioCfa {
   rupture: RuptureInput;
   collaboration?: Omit<CollaborationCfa, "par"> & {
-    par?: "CFA_ON_ADMIN" | "CFA_ON_MEMBRE" | "CFA_SUSP_ADMIN" | "CFA_DECA_ADMIN";
+    par?: CodeCompte;
   };
   declaration?: { jourRupture: number; jour: number };
   actionMl?: { jour: number; situation: SITUATION_ENUM };
@@ -421,6 +421,7 @@ export const COLLAB_CASES: SeedCase[] = [
   {
     n: 42,
     code: "G42 DECA VISIBLE COTE CFA",
+    source: "DECA",
     titre: "Rupture DECA visible côté CFA (pilote DECA)",
     attendu: {
       ml: { ml: "ML_A", liste: "a_traiter_ou_recontacter", indicateurs: { a_traiter: true } },
@@ -431,6 +432,7 @@ export const COLLAB_CASES: SeedCase[] = [
   {
     n: 43,
     code: "G43 DECA COLLAB",
+    source: "DECA",
     titre: "Collaboration sur une rupture DECA",
     attendu: {
       ml: {

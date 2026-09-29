@@ -64,3 +64,13 @@ export const ML_HOST_COMMUNES: Record<MlHostCode, SeedCommune[]> = {
 export const mlOrganisationIds = (hosts: SeedRecetteHosts) => Object.values(hosts.missionsLocales);
 export const cfaOrganisationIds = (hosts: SeedRecetteHosts) => Object.values(hosts.cfas).map((c) => c.organisationId);
 export const cfaOrganismeIds = (hosts: SeedRecetteHosts) => Object.values(hosts.cfas).map((c) => c.organismeId);
+
+export const HOST_LABELS: Record<MlHostCode | CfaHostCode, { nom: string; role: string }> = {
+  ML_A: { nom: "Mission Locale Ivry-Vitry-sur-Seine (ml_id 569)", role: "ML activée par le seed, avec lien de RDV" },
+  ML_B: { nom: "Mission Locale d'Aubervilliers (ml_id 39)", role: "ML non activée" },
+  CFA_ON: { nom: "ESTP, Cachan", role: "Collaboration active" },
+  CFA_SUSP: { nom: "Association Sup de Vinci, Saint-Maur-des-Fossés", role: "Collaboration suspendue pour inactivité" },
+  CFA_OFF: { nom: "Maison du Sacré-Cœur, Thiais", role: "Utilise le TDB, sans collaboration" },
+  CFA_SANS: { nom: "AFASEC Grosbois, Boissy-Saint-Léger", role: "Sans compte TDB" },
+  CFA_DECA: { nom: "Plateform', Montreuil", role: "Pilote DECA et collaboration active" },
+};
