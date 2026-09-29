@@ -1,6 +1,12 @@
 import type { ObjectId } from "mongodb";
 import type { IMissionLocaleEffectif } from "shared/models";
-import { CONNAISSANCE_ML_ENUM, type SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import {
+  type ACC_CONJOINT_MOTIF_ENUM,
+  CFA_SITUATION_TYPE_ENUM,
+  CONNAISSANCE_ML_ENUM,
+  type CFA_RISQUE_RUPTURE_ENUM,
+  type SITUATION_ENUM,
+} from "shared/models/data/missionLocaleEffectif.model";
 import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
 
 import { computeSuiviDatesSet } from "@/common/actions/mission-locale/mission-locale-suivi-dates";
@@ -22,7 +28,6 @@ import type { SeedDocs } from "./types";
 
 export interface RuptureInput {
   n: number;
-  nom: string;
   cfa: CfaHostCode;
   ml?: MlHostCode;
   age?: number;
@@ -46,6 +51,14 @@ export function parcoursRupture(ctx: SeedContext, joursDepuisRupture: number): S
   };
 }
 
+export function parcoursEnContrat(ctx: SeedContext): SeedParcoursInput {
+  return {
+    dateEntree: jour(ctx, -300),
+    dateFin: jour(ctx, 400),
+    contrats: [{ debut: jour(ctx, -290), fin: jour(ctx, 400) }],
+  };
+}
+
 export interface Rupture {
   personne: SeedPersonne;
   dossier: IMissionLocaleEffectif;
@@ -56,7 +69,6 @@ export async function rupture(ctx: SeedContext, input: RuptureInput): Promise<Ru
   const ml = input.ml ?? "ML_A";
   const personne = buildPersonne(ctx, {
     n: input.n,
-    nom: input.nom,
     age: input.age ?? 20,
     rqth: input.rqth,
     dateDeNaissance: input.dateDeNaissance,
@@ -121,6 +133,9 @@ export function traiter(
       ...(dejaConnu !== undefined ? { deja_connu: dejaConnu } : {}),
       updated_at: date,
     });
+    if (dossier.organisme_data?.acc_conjoint) {
+      dossier.organisme_data.has_unread_notification = true;
+    }
 
     return buildLog({
       n: premierLog + i,
@@ -131,4 +146,50 @@ export function traiter(
       ...(dejaConnu !== undefined ? { deja_connu: dejaConnu } : {}),
     });
   });
+}
+
+type OrganismeData = NonNullable<IMissionLocaleEffectif["organisme_data"]>;
+
+export interface CollaborationCfa {
+  jour: number;
+  par: ObjectId;
+  situationType: CFA_SITUATION_TYPE_ENUM;
+  motifs: ACC_CONJOINT_MOTIF_ENUM[];
+  commentaires: string;
+  risque?: CFA_RISQUE_RUPTURE_ENUM;
+  toujoursAuCfa?: boolean;
+  causeRupture?: string;
+  jourRupture?: number;
+  jourAbandon?: number;
+  complement?: Partial<OrganismeData>;
+}
+
+export function collaborer(ctx: SeedContext, dossier: IMissionLocaleEffectif, c: CollaborationCfa) {
+  const date = jour(ctx, c.jour);
+  const enRupture = c.situationType === CFA_SITUATION_TYPE_ENUM.RUPTURE_OU_SORTIE;
+
+  dossier.organisme_data = {
+    rupture: enRupture,
+    acc_conjoint: true,
+    motif: c.motifs,
+    commentaires: c.commentaires,
+    reponse_at: date,
+    has_unread_notification: false,
+    acc_conjoint_by: c.par,
+    acc_conjoint_at: date,
+    situation_type: c.situationType,
+    referent_type: "me",
+    ...(c.risque ? { risque_rupture: c.risque } : {}),
+    ...(c.toujoursAuCfa !== undefined ? { still_at_cfa: c.toujoursAuCfa } : {}),
+    ...(c.causeRupture ? { cause_rupture: c.causeRupture } : {}),
+    ...(c.jourAbandon !== undefined ? { date_abandon: jour(ctx, c.jourAbandon) } : {}),
+    ...c.complement,
+  };
+
+  if (c.jourRupture !== undefined) {
+    const dateRupture = jour(ctx, c.jourRupture);
+    dossier.cfa_rupture_declaration = { date_rupture: dateRupture, declared_at: date, declared_by: c.par };
+    dossier.date_rupture = dateRupture;
+  }
+  dossier.updated_at = date;
 }

@@ -22,6 +22,7 @@ import {
   cfaOrganisationIds,
   cfaOrganismeIds,
   CFA_HOST_CODES,
+  type CfaHostCode,
   HOSTS_RECETTE,
   ML_HOST_CODES,
   mlOrganisationIds,
@@ -64,6 +65,7 @@ export interface SeedRecetteCreationReport {
   missionLocaleEffectif: number;
   missionLocaleEffectifLog: number;
   usersMigration: number;
+  missionLocaleCfaInvitations: number;
 }
 
 export interface SeedRecetteReport {
@@ -236,12 +238,59 @@ async function unsetHostFlags(hosts: SeedRecetteHosts, dryRun: boolean): Promise
   };
 }
 
-async function setMlHostFlags(hosts: SeedRecetteHosts, now: Date) {
+const COLLAB_FLAGS = [
+  "is_allowed_collab",
+  "is_allowed_deca",
+  "collab_inactivity_email_sent_at",
+  "collab_suspended_at",
+  "collab_resumed_at",
+] as const;
+
+interface CfaHostFlags {
+  mlBetaJours: number | null;
+  organisme: Partial<Record<(typeof COLLAB_FLAGS)[number], boolean | number>>;
+  hasAccount: boolean;
+}
+
+const CFA_HOST_FLAGS: Record<CfaHostCode, CfaHostFlags> = {
+  CFA_ON: { mlBetaJours: 120, organisme: { is_allowed_collab: true }, hasAccount: true },
+  CFA_SUSP: {
+    mlBetaJours: 150,
+    organisme: { is_allowed_collab: true, collab_inactivity_email_sent_at: 40, collab_suspended_at: 35 },
+    hasAccount: true,
+  },
+  CFA_OFF: { mlBetaJours: null, organisme: {}, hasAccount: true },
+  CFA_SANS: { mlBetaJours: null, organisme: {}, hasAccount: false },
+  CFA_DECA: { mlBetaJours: 120, organisme: { is_allowed_collab: true, is_allowed_deca: true }, hasAccount: true },
+};
+
+async function setHostFlags(hosts: SeedRecetteHosts, now: Date) {
   await organisationsDb().updateOne(
     { _id: hosts.missionsLocales.ML_A },
     { $set: { activated_at: subDays(now, 180), rdv_url: ML_A_RDV_URL } }
   );
   await organisationsDb().updateOne({ _id: hosts.missionsLocales.ML_B }, { $unset: { activated_at: "", rdv_url: "" } });
+
+  for (const code of CFA_HOST_CODES) {
+    const { organisationId, organismeId } = hosts.cfas[code];
+    const { mlBetaJours, organisme, hasAccount } = CFA_HOST_FLAGS[code];
+
+    await organisationsDb().updateOne(
+      { _id: organisationId },
+      mlBetaJours === null
+        ? { $unset: { ml_beta_activated_at: "" } }
+        : { $set: { ml_beta_activated_at: subDays(now, mlBetaJours) } }
+    );
+
+    const set: Record<string, boolean | Date> = { has_account: hasAccount };
+    const unset: Record<string, ""> = {};
+    for (const flag of COLLAB_FLAGS) {
+      const valeur = organisme[flag];
+      if (valeur === undefined) unset[flag] = "";
+      else set[flag] = typeof valeur === "number" ? subDays(now, valeur) : valeur;
+    }
+    await organismesDb().updateOne({ _id: organismeId }, { $set: set, $unset: unset });
+  }
 }
 
 async function insertDocs(docs: SeedDocs) {
@@ -253,11 +302,12 @@ async function insertDocs(docs: SeedDocs) {
   await insert(missionLocaleEffectifsDb(), docs.dossiers);
   await insert(missionLocaleEffectifsLogDb(), docs.logs);
   await insert(usersMigrationDb(), docs.users);
+  await insert(missionLocaleCfaInvitationsDb(), docs.invitations);
 }
 
 async function createSeed(hosts: SeedRecetteHosts, now: Date, dryRun: boolean): Promise<SeedRecetteCreationReport> {
   if (!dryRun) {
-    await setMlHostFlags(hosts, now);
+    await setHostFlags(hosts, now);
   }
   const ctx = await loadSeedContext(hosts, now);
   const docs = await buildCatalogue(ctx);
@@ -273,6 +323,7 @@ async function createSeed(hosts: SeedRecetteHosts, now: Date, dryRun: boolean): 
     missionLocaleEffectif: docs.dossiers.length,
     missionLocaleEffectifLog: docs.logs.length,
     usersMigration: docs.users.length,
+    missionLocaleCfaInvitations: docs.invitations.length,
   };
 }
 

@@ -30,29 +30,10 @@ import {
   type MlHostCode,
   type SeedRecetteHosts,
 } from "./hosts";
+import { email, identite } from "./identites";
 import { seedId } from "./seed-ids";
 
-export const SEED_EMAIL_DOMAIN = "seed.recette.invalid";
 export const SEED_MARKER = "SEED_RECETTE";
-
-const PRENOMS = [
-  "Camille",
-  "Sacha",
-  "Alix",
-  "Charlie",
-  "Eden",
-  "Lou",
-  "Noa",
-  "Maxime",
-  "Andréa",
-  "Morgan",
-  "Yaël",
-  "Élie",
-  "Louison",
-  "Ambre",
-  "Gabin",
-  "Inès",
-];
 
 const FORMATION = {
   cfd: "50022141",
@@ -101,13 +82,9 @@ export async function loadSeedContext(hosts: SeedRecetteHosts, now: Date): Promi
 
 export const jour = (ctx: SeedContext, offset: number) => addDays(ctx.today, offset);
 
-const slug = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+function minDate(a: Date, b: Date) {
+  return a < b ? a : b;
+}
 
 export interface SeedPersonne {
   nom: string;
@@ -121,7 +98,6 @@ export interface SeedPersonne {
 
 export interface SeedPersonneInput {
   n: number;
-  nom: string;
   age: number;
   rqth?: boolean;
   dateDeNaissance?: Date;
@@ -129,16 +105,16 @@ export interface SeedPersonneInput {
 
 export function buildPersonne(
   ctx: SeedContext,
-  { n, nom, age, rqth = false, dateDeNaissance }: SeedPersonneInput
+  { n, age, rqth = false, dateDeNaissance }: SeedPersonneInput
 ): SeedPersonne {
-  const prenom = PRENOMS[n % PRENOMS.length];
+  const { nom, prenom, sexe } = identite(n);
   return {
     nom,
     prenom,
     date_de_naissance: dateDeNaissance ?? subDays(subYears(ctx.today, age), 30 + (n % 300)),
-    sexe: n % 2 === 0 ? "F" : "M",
+    sexe,
     telephone: `063998${String(n).padStart(4, "0")}`,
-    courriel: `${slug(prenom)}.${slug(nom)}@${SEED_EMAIL_DOMAIN}`,
+    courriel: email(prenom, nom),
     rqth,
   };
 }
@@ -169,7 +145,7 @@ function buildEffectifBase(ctx: SeedContext, { n, cfa, ml, personne, parcours }:
   const { organisme } = ctx.cfas[cfa];
   const communes = ML_HOST_COMMUNES[ml];
   const commune = communes[n % communes.length];
-  const anneeScolaire = getAnneeScolaireFromDate(parcours.dateEntree);
+  const anneeScolaire = getAnneeScolaireFromDate(minDate(ctx.today, parcours.dateFin));
   const [debut, fin] = anneeScolaire.split("-").map(Number);
 
   return {
@@ -258,7 +234,7 @@ export function buildDossierMl(
   const parcours = effectif._computed?.statut?.parcours ?? [];
   const current = getCurrentStatutFromParcours(parcours, ctx.now);
   const derniereRupture = parcours.filter((s) => s.valeur === "RUPTURANT" && s.date <= ctx.now).at(-1);
-  const dateRupture = derniereRupture?.date ?? current?.date ?? null;
+  const dateRupture = derniereRupture?.date ?? null;
   const created = createdAt ?? (dateRupture ? minDate(addDays(dateRupture, 1), ctx.now) : ctx.now);
   const statutALaCreation = getCurrentStatutFromParcours(parcours, created);
   const snapshot =
@@ -300,8 +276,6 @@ export function buildDossierMl(
   } as IMissionLocaleEffectif;
 }
 
-const minDate = (a: Date, b: Date) => (a < b ? a : b);
-
 export interface SeedLogInput extends Partial<Omit<IMissionLocaleEffectifLog, "_id" | "mission_locale_effectif_id">> {
   n: number;
   dossierId: ObjectId;
@@ -324,6 +298,7 @@ export interface SeedUserInput {
   organisationId: ObjectId;
   prenom: string;
   nom: string;
+  civility: "Madame" | "Monsieur";
   fonction: string;
   role?: "admin" | "member";
   lastConnection?: Date;
@@ -331,14 +306,14 @@ export interface SeedUserInput {
 
 export function buildUser(
   ctx: SeedContext,
-  { n, organisationId, prenom, nom, fonction, role, lastConnection }: SeedUserInput
+  { n, organisationId, prenom, nom, civility, fonction, role, lastConnection }: SeedUserInput
 ): IUsersMigration {
   const createdAt = jour(ctx, -200);
   return {
     _id: seedId("user", n),
-    email: `${slug(prenom)}.${slug(nom)}@${SEED_EMAIL_DOMAIN}`,
+    email: email(prenom, nom),
     password: ctx.passwordHash,
-    civility: n % 2 === 0 ? "Madame" : "Monsieur",
+    civility,
     nom,
     prenom,
     fonction,

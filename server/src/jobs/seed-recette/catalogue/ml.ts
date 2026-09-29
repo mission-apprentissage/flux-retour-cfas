@@ -16,13 +16,11 @@ const logN = (n: number) => n * 10;
 async function ruptureTraitee(
   ctx: SeedContext,
   n: number,
-  nom: string,
   etapes: Omit<EtapeMl, "par">[],
   options: { ml?: "ML_A" | "ML_B"; joursDepuisRupture?: number } = {}
 ) {
   const r = await rupture(ctx, {
     n,
-    nom,
     cfa: "CFA_SANS",
     ml: options.ml,
     joursDepuisRupture: options.joursDepuisRupture ?? 75,
@@ -48,7 +46,7 @@ const traite = (
   code,
   titre,
   attendu: { ml: { ml: options.ml ?? "ML_A", liste: "traite", indicateurs: { a_traiter: false, injoignable: false } } },
-  build: (ctx) => ruptureTraitee(ctx, n, code, etapes, options),
+  build: (ctx) => ruptureTraitee(ctx, n, etapes, options),
 });
 
 export const ML_CASES: SeedCase[] = [
@@ -59,14 +57,14 @@ export const ML_CASES: SeedCase[] = [
     attendu: {
       ml: { ml: "ML_A", liste: "a_traiter_ou_recontacter", indicateurs: { a_traiter: true, prioritaire: false } },
     },
-    build: async (ctx) => (await rupture(ctx, { n: 1, nom: "A01 STANDARD", cfa: "CFA_SANS" })).docs,
+    build: async (ctx) => (await rupture(ctx, { n: 1, cfa: "CFA_SANS" })).docs,
   },
   {
     n: 2,
     code: "A02 DECA",
     titre: "Rupture remontée par DECA (CFA sans DECA côté CFA)",
     attendu: { ml: { ml: "ML_A", liste: "a_traiter_ou_recontacter", indicateurs: { a_traiter: true } } },
-    build: async (ctx) => (await rupture(ctx, { n: 2, nom: "A02 DECA", cfa: "CFA_SANS", deca: true })).docs,
+    build: async (ctx) => (await rupture(ctx, { n: 2, cfa: "CFA_SANS", deca: true })).docs,
   },
   {
     n: 3,
@@ -80,7 +78,7 @@ export const ML_CASES: SeedCase[] = [
         indicateurs: { a_traiter: true, mineur: true, prioritaire: true },
       },
     },
-    build: async (ctx) => (await rupture(ctx, { n: 3, nom: "A03 MINEUR", cfa: "CFA_SANS", age: 17 })).docs,
+    build: async (ctx) => (await rupture(ctx, { n: 3, cfa: "CFA_SANS", age: 17 })).docs,
   },
   {
     n: 4,
@@ -94,7 +92,7 @@ export const ML_CASES: SeedCase[] = [
         indicateurs: { a_traiter: true, prioritaire: true },
       },
     },
-    build: async (ctx) => (await rupture(ctx, { n: 4, nom: "A04 RQTH", cfa: "CFA_SANS", age: 28, rqth: true })).docs,
+    build: async (ctx) => (await rupture(ctx, { n: 4, cfa: "CFA_SANS", age: 28, rqth: true })).docs,
   },
   {
     n: 9,
@@ -105,7 +103,6 @@ export const ML_CASES: SeedCase[] = [
       (
         await rupture(ctx, {
           n: 9,
-          nom: "A09 A CONTACTER",
           cfa: "CFA_SANS",
           dossier: {
             effectif_choice: { confirmation: true, confirmation_created_at: jour(ctx, -2), telephone: "0639980009" },
@@ -118,8 +115,7 @@ export const ML_CASES: SeedCase[] = [
     code: "A10 PLUS DE 180 J",
     titre: "Rupture il y a 200 jours, jeune passé en abandon → groupe « plus de 180 j »",
     attendu: { ml: { ml: "ML_A", liste: "a_traiter_ou_recontacter", indicateurs: { a_traiter: true } } },
-    build: async (ctx) =>
-      (await rupture(ctx, { n: 10, nom: "A10 PLUS DE 180 J", cfa: "CFA_SANS", joursDepuisRupture: 200 })).docs,
+    build: async (ctx) => (await rupture(ctx, { n: 10, cfa: "CFA_SANS", joursDepuisRupture: 200 })).docs,
   },
   {
     n: 11,
@@ -132,7 +128,6 @@ export const ML_CASES: SeedCase[] = [
       (
         await rupture(ctx, {
           n: 11,
-          nom: "A11 NOUVEAU CONTRAT",
           cfa: "CFA_SANS",
           parcours: {
             dateEntree: jour(ctx, -300),
@@ -153,7 +148,6 @@ export const ML_CASES: SeedCase[] = [
     build: async (ctx) => {
       const r = await rupture(ctx, {
         n: 12,
-        nom: "B12 FIN DE FORMATION",
         cfa: "CFA_SANS",
         parcours: {
           dateEntree: jour(ctx, -420),
@@ -185,7 +179,7 @@ export const ML_CASES: SeedCase[] = [
       },
     },
     build: (ctx) =>
-      ruptureTraitee(ctx, 13, "B13 RECONTACTER", [
+      ruptureTraitee(ctx, 13, [
         {
           jour: -2,
           situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
@@ -205,7 +199,7 @@ export const ML_CASES: SeedCase[] = [
       },
     },
     build: (ctx) =>
-      ruptureTraitee(ctx, 14, "B14 RELANCE URGENTE", [
+      ruptureTraitee(ctx, 14, [
         { jour: -10, situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR, commentaires: "Pas de réponse au SMS" },
       ]),
   },
@@ -266,7 +260,7 @@ export const ML_CASES: SeedCase[] = [
     code: "I54 ML B A TRAITER",
     titre: "ML non activée : dossier à traiter",
     attendu: { ml: { ml: "ML_B", liste: "a_traiter_ou_recontacter", indicateurs: { a_traiter: true } } },
-    build: async (ctx) => (await rupture(ctx, { n: 54, nom: "I54 ML B A TRAITER", cfa: "CFA_SANS", ml: "ML_B" })).docs,
+    build: async (ctx) => (await rupture(ctx, { n: 54, cfa: "CFA_SANS", ml: "ML_B" })).docs,
   },
   traite(55, "I55 ML B TRAITE", "ML non activée : dossier traité", [{ jour: -3, situation: SITUATION_ENUM.RDV_PRIS }], {
     ml: "ML_B",
@@ -276,9 +270,7 @@ export const ML_CASES: SeedCase[] = [
     code: "I56 ML B ANCIENNE",
     titre: "ML non activée : rupture ancienne, sans fenêtre d'activation",
     attendu: { ml: { ml: "ML_B", liste: "a_traiter_ou_recontacter", indicateurs: { a_traiter: true } } },
-    build: async (ctx) =>
-      (await rupture(ctx, { n: 56, nom: "I56 ML B ANCIENNE", cfa: "CFA_SANS", ml: "ML_B", joursDepuisRupture: 300 }))
-        .docs,
+    build: async (ctx) => (await rupture(ctx, { n: 56, cfa: "CFA_SANS", ml: "ML_B", joursDepuisRupture: 300 })).docs,
   },
   {
     n: 63,
@@ -289,7 +281,6 @@ export const ML_CASES: SeedCase[] = [
       (
         await rupture(ctx, {
           n: 63,
-          nom: "K63 PLUS DE 26 ANS",
           cfa: "CFA_SANS",
           dateDeNaissance: subDays(subYears(ctx.today, 26), 10),
         })
@@ -300,6 +291,6 @@ export const ML_CASES: SeedCase[] = [
     code: "K64 MOINS DE 16 ANS",
     titre: "Jeune de 15 ans → absent",
     attendu: { ml: { ml: "ML_A", liste: null } },
-    build: async (ctx) => (await rupture(ctx, { n: 64, nom: "K64 MOINS DE 16 ANS", cfa: "CFA_SANS", age: 15 })).docs,
+    build: async (ctx) => (await rupture(ctx, { n: 64, cfa: "CFA_SANS", age: 15 })).docs,
   },
 ];

@@ -44,18 +44,19 @@ describe("fabriques du seed recette", () => {
   });
 
   it("construit une personne unique, mineure ou majeure, avec un téléphone hors WhatsApp", () => {
-    const mineur = buildPersonne(ctx, { n: 3, nom: "A03 MINEUR", age: 17 });
-    const rqth = buildPersonne(ctx, { n: 4, nom: "A04 RQTH", age: 28, rqth: true });
+    const mineur = buildPersonne(ctx, { n: 3, age: 17 });
+    const rqth = buildPersonne(ctx, { n: 4, age: 28, rqth: true });
 
     expect(mineur.date_de_naissance > new Date("2008-09-29T00:00:00.000Z")).toBe(true);
     expect(mineur.date_de_naissance < new Date("2009-09-29T00:00:00.000Z")).toBe(true);
     expect(rqth.rqth).toBe(true);
     expect(mineur.telephone).toBe("0639980003");
-    expect(mineur.courriel).toMatch(/@seed\.recette\.invalid$/);
+    expect(mineur.courriel).toBe("hugo.thomas@example.com");
+    expect(mineur.sexe).toBe("M");
   });
 
   it("produit un effectif ERP en rupture, accepté par le validateur Mongo", async () => {
-    const personne = buildPersonne(ctx, { n: 1, nom: "A01 STANDARD", age: 20 });
+    const personne = buildPersonne(ctx, { n: 1, age: 20 });
     const effectif = await buildEffectifErp(ctx, {
       n: 1,
       cfa: "CFA_SANS",
@@ -67,13 +68,13 @@ describe("fabriques du seed recette", () => {
     await effectifsDb().insertOne(effectif);
 
     expect(isSeedId(effectif._id)).toBe(true);
-    expect(effectif.annee_scolaire).toBe("2025-2026");
+    expect(effectif.annee_scolaire).toBe("2026-2027");
     expect(effectif.apprenant.adresse?.mission_locale_id).toBe(569);
     expect(effectif._computed?.statut?.en_cours).toBe("RUPTURANT");
   });
 
   it("produit un effectif DECA compatible, accepté par le validateur Mongo", async () => {
-    const personne = buildPersonne(ctx, { n: 2, nom: "A02 DECA", age: 20 });
+    const personne = buildPersonne(ctx, { n: 2, age: 20 });
     const effectif = await buildEffectifDeca(ctx, {
       n: 2,
       cfa: "CFA_SANS",
@@ -89,7 +90,7 @@ describe("fabriques du seed recette", () => {
   });
 
   it("produit un dossier ML aligné sur la création réelle, accepté par le validateur Mongo", async () => {
-    const personne = buildPersonne(ctx, { n: 1, nom: "A01 STANDARD", age: 20 });
+    const personne = buildPersonne(ctx, { n: 1, age: 20 });
     const effectif = await buildEffectifErp(ctx, {
       n: 1,
       cfa: "CFA_ON",
@@ -106,8 +107,8 @@ describe("fabriques du seed recette", () => {
     expect(dossier.date_rupture).toEqual(jour(ctx, -60));
     expect(dossier.created_at).toEqual(jour(ctx, -59));
     expect(dossier.identifiant_normalise).toEqual({
-      nom: "A01 STANDARD",
-      prenom: "Sacha",
+      nom: "BERNARD",
+      prenom: "Lucas",
       date_de_naissance: personne.date_de_naissance,
     });
     expect(dossier.computed).toEqual({
@@ -117,7 +118,7 @@ describe("fabriques du seed recette", () => {
   });
 
   it("garde la date de rupture d'un jeune reparti en contrat", async () => {
-    const personne = buildPersonne(ctx, { n: 11, nom: "A11 NOUVEAU CONTRAT", age: 20 });
+    const personne = buildPersonne(ctx, { n: 11, age: 20 });
     const effectif = await buildEffectifErp(ctx, {
       n: 11,
       cfa: "CFA_SANS",
@@ -143,7 +144,8 @@ describe("fabriques du seed recette", () => {
       n: 1,
       organisationId: new ObjectId(),
       prenom: "Claire",
-      nom: "Conseil",
+      nom: "Fontaine",
+      civility: "Madame",
       fonction: "Conseillère",
       lastConnection: jour(ctx, -1),
     });
@@ -158,7 +160,7 @@ describe("fabriques du seed recette", () => {
     await usersMigrationDb().insertOne(user);
     await missionLocaleEffectifsLogDb().insertOne(log);
 
-    expect(user.email).toBe("claire.conseil@seed.recette.invalid");
+    expect(user.email).toBe("claire.fontaine@example.com");
     expect(user.password).toMatch(/^\$6\$/);
   });
 });

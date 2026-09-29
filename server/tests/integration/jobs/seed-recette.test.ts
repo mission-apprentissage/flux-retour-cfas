@@ -214,10 +214,24 @@ describe("seedRecette", () => {
     expect(await organismesDb().countDocuments({ collab_suspended_at: { $exists: true } })).toBe(0);
   });
 
-  it("ne retire pas les flags hors désinstallation", async () => {
+  it("pose les flags de chaque hôte", async () => {
     const report = await seedRecette({ hosts });
 
     expect(report.flagsRetires).toBeNull();
-    expect(await organismesDb().countDocuments({ is_allowed_collab: true })).toBe(5);
+    const organisme = (code: keyof SeedRecetteHosts["cfas"]) =>
+      organismesDb().findOne({ _id: hosts.cfas[code].organismeId });
+    expect(await organisme("CFA_ON")).toMatchObject({ is_allowed_collab: true, has_account: true });
+    expect(await organisme("CFA_SUSP")).toMatchObject({
+      is_allowed_collab: true,
+      collab_suspended_at: expect.any(Date),
+    });
+    expect(await organisme("CFA_DECA")).toMatchObject({ is_allowed_collab: true, is_allowed_deca: true });
+    expect(await organisme("CFA_OFF")).not.toHaveProperty("is_allowed_collab");
+    expect(await organisme("CFA_SANS")).toMatchObject({ has_account: false });
+    expect(await organisationsDb().findOne({ _id: hosts.missionsLocales.ML_A })).toMatchObject({
+      activated_at: expect.any(Date),
+      rdv_url: expect.any(String),
+    });
+    expect(await organisationsDb().findOne({ _id: hosts.missionsLocales.ML_B })).not.toHaveProperty("activated_at");
   });
 });
