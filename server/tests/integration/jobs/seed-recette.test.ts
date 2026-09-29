@@ -136,6 +136,21 @@ describe("seedRecette", () => {
     await expect(seedRecette({ hosts })).rejects.toThrow(/activité réelle/);
   });
 
+  it("ignore les anciens dossiers soft-deleted des ML hôtes", async () => {
+    await missionLocaleEffectifsDb().insertOne(
+      testDocs<IMissionLocaleEffectif>([
+        {
+          _id: new ObjectId(),
+          mission_locale_id: hosts.missionsLocales.ML_A,
+          effectif_id: new ObjectId(),
+          soft_deleted: true,
+        },
+      ])[0]
+    );
+
+    await expect(seedRecette({ hosts })).resolves.toBeDefined();
+  });
+
   it("purge le jeu fictif et ce qui s'y rattache, sans toucher au reste (désinstallation)", async () => {
     const reel = { effectif: new ObjectId(), dossier: new ObjectId(), log: new ObjectId(), user: new ObjectId() };
     const dossierTesteur = new ObjectId();
