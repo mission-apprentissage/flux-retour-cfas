@@ -1,0 +1,15 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  background-color: var(--background-default-grey);
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  line-height: 36px;
+  color: var(--text-title-blue-france);
+}

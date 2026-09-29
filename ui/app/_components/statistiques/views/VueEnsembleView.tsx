@@ -2,6 +2,7 @@
 
 import { CollaborationSegmentPanel } from "../sections/CollaborationSegmentPanel";
 import { DeploymentPanel } from "../sections/DeploymentPanel";
+import { RupturesOverviewSection } from "../sections/RupturesOverviewSection";
 import { RupturesSegmentPanel } from "../sections/RupturesSegmentPanel";
 import { WhatsAppPanel } from "../sections/WhatsAppPanel";
 import commonStyles from "../ui/common.module.css";
@@ -51,7 +52,8 @@ export function VueEnsembleView({ isAdmin = false, isPublic = false }: VueEnsemb
           title="Vue d'ensemble"
           description="Retrouvez ici les chiffres des indicateurs principaux du déploiement et de l'activité des Missions Locales et des CFA sur le Tableau de bord de l'apprentissage sur le territoire de votre choix."
         />
-        <StatsTabs tabs={tabs} />
+        <RupturesOverviewSection />
+        <StatsTabs tabs={tabs.filter((tab) => tab.id !== "ruptures")} />
       </div>
     );
   }
