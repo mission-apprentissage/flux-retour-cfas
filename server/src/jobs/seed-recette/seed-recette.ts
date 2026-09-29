@@ -115,6 +115,7 @@ async function assertHostsSansActivite(hosts: SeedRecetteHosts) {
     missionLocaleEffectifsDb().countDocuments({
       mission_locale_id: { $in: mlOrganisationIds(hosts) },
       effectif_id: horsSeed,
+      soft_deleted: { $ne: true },
     }),
   ]);
 
