@@ -1,4 +1,3 @@
-import { subDays } from "date-fns";
 import type { Collection, Document, OptionalUnlessRequiredId } from "mongodb";
 
 import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
@@ -18,11 +17,11 @@ import config from "@/config";
 import { buildCatalogue } from "./catalogue";
 import type { SeedDocs } from "./catalogue/types";
 import { loadSeedContext } from "./factories";
+import { applyHostFlags, planHostFlags } from "./host-flags";
 import {
   cfaOrganisationIds,
   cfaOrganismeIds,
   CFA_HOST_CODES,
-  type CfaHostCode,
   HOSTS_RECETTE,
   ML_HOST_CODES,
   mlOrganisationIds,
@@ -33,8 +32,6 @@ import { SEED_ID_RANGE } from "./seed-ids";
 const logger = parentLogger.child({ module: "job:seed-recette" });
 
 const ALLOWED_ENVS = ["recette", "local", "test"];
-
-const ML_A_RDV_URL = "https://rdv.seed.recette.invalid/ml-a";
 
 interface SeedRecetteOptions {
   dryRun?: boolean;
@@ -136,7 +133,9 @@ async function countUtilisateursNonFictifs(hosts: SeedRecetteHosts) {
 }
 
 async function purgeSeed(hosts: SeedRecetteHosts, dryRun: boolean): Promise<SeedRecettePurgeReport> {
-  const dossiersMlFilter = { $or: [{ _id: SEED_ID_RANGE }, { effectif_id: SEED_ID_RANGE }] };
+  const dossiersMlFilter = {
+    $or: [{ _id: SEED_ID_RANGE }, { effectif_id: SEED_ID_RANGE, mission_locale_id: { $in: mlOrganisationIds(hosts) } }],
+  };
   const dossierMlIds = (
     await missionLocaleEffectifsDb()
       .find(dossiersMlFilter, { projection: { _id: 1 } })
@@ -147,9 +146,7 @@ async function purgeSeed(hosts: SeedRecetteHosts, dryRun: boolean): Promise<Seed
     effectifs: { _id: SEED_ID_RANGE },
     effectifsDECA: { _id: SEED_ID_RANGE },
     missionLocaleEffectifLog: { $or: [{ _id: SEED_ID_RANGE }, { mission_locale_effectif_id: { $in: dossierMlIds } }] },
-    missionLocaleCfaInvitations: {
-      $or: [{ _id: SEED_ID_RANGE }, { mission_locale_id: { $in: mlOrganisationIds(hosts) } }],
-    },
+    missionLocaleCfaInvitations: { $or: [{ _id: SEED_ID_RANGE }, { author_id: SEED_ID_RANGE }] },
     usersMigration: { _id: SEED_ID_RANGE },
   };
 
@@ -238,61 +235,6 @@ async function unsetHostFlags(hosts: SeedRecetteHosts, dryRun: boolean): Promise
   };
 }
 
-const COLLAB_FLAGS = [
-  "is_allowed_collab",
-  "is_allowed_deca",
-  "collab_inactivity_email_sent_at",
-  "collab_suspended_at",
-  "collab_resumed_at",
-] as const;
-
-interface CfaHostFlags {
-  mlBetaJours: number | null;
-  organisme: Partial<Record<(typeof COLLAB_FLAGS)[number], boolean | number>>;
-  hasAccount: boolean;
-}
-
-const CFA_HOST_FLAGS: Record<CfaHostCode, CfaHostFlags> = {
-  CFA_ON: { mlBetaJours: 120, organisme: { is_allowed_collab: true }, hasAccount: true },
-  CFA_SUSP: {
-    mlBetaJours: 150,
-    organisme: { is_allowed_collab: true, collab_inactivity_email_sent_at: 40, collab_suspended_at: 35 },
-    hasAccount: true,
-  },
-  CFA_OFF: { mlBetaJours: null, organisme: {}, hasAccount: true },
-  CFA_SANS: { mlBetaJours: null, organisme: {}, hasAccount: false },
-  CFA_DECA: { mlBetaJours: 120, organisme: { is_allowed_collab: true, is_allowed_deca: true }, hasAccount: true },
-};
-
-async function setHostFlags(hosts: SeedRecetteHosts, now: Date) {
-  await organisationsDb().updateOne(
-    { _id: hosts.missionsLocales.ML_A },
-    { $set: { activated_at: subDays(now, 180), rdv_url: ML_A_RDV_URL } }
-  );
-  await organisationsDb().updateOne({ _id: hosts.missionsLocales.ML_B }, { $unset: { activated_at: "", rdv_url: "" } });
-
-  for (const code of CFA_HOST_CODES) {
-    const { organisationId, organismeId } = hosts.cfas[code];
-    const { mlBetaJours, organisme, hasAccount } = CFA_HOST_FLAGS[code];
-
-    await organisationsDb().updateOne(
-      { _id: organisationId },
-      mlBetaJours === null
-        ? { $unset: { ml_beta_activated_at: "" } }
-        : { $set: { ml_beta_activated_at: subDays(now, mlBetaJours) } }
-    );
-
-    const set: Record<string, boolean | Date> = { has_account: hasAccount };
-    const unset: Record<string, ""> = {};
-    for (const flag of COLLAB_FLAGS) {
-      const valeur = organisme[flag];
-      if (valeur === undefined) unset[flag] = "";
-      else set[flag] = typeof valeur === "number" ? subDays(now, valeur) : valeur;
-    }
-    await organismesDb().updateOne({ _id: organismeId }, { $set: set, $unset: unset });
-  }
-}
-
 async function insertDocs(docs: SeedDocs) {
   const insert = async <T extends Document>(collection: Collection<T>, items: OptionalUnlessRequiredId<T>[]) => {
     if (items.length > 0) await collection.insertMany(items);
@@ -305,18 +247,7 @@ async function insertDocs(docs: SeedDocs) {
   await insert(missionLocaleCfaInvitationsDb(), docs.invitations);
 }
 
-async function createSeed(hosts: SeedRecetteHosts, now: Date, dryRun: boolean): Promise<SeedRecetteCreationReport> {
-  if (!dryRun) {
-    await setHostFlags(hosts, now);
-  }
-  const ctx = await loadSeedContext(hosts, now);
-  const docs = await buildCatalogue(ctx);
-  if (!dryRun) {
-    await insertDocs(docs);
-    for (const mlId of mlOrganisationIds(hosts)) {
-      await createOrUpdateMissionLocaleStats(mlId);
-    }
-  }
+function compter(docs: SeedDocs): SeedRecetteCreationReport {
   return {
     effectifs: docs.effectifs.length,
     effectifsDECA: docs.effectifsDeca.length,
@@ -336,20 +267,34 @@ export async function seedRecette({
 }: SeedRecetteOptions = {}): Promise<SeedRecetteReport> {
   assertSeedRecetteEnv(env);
   await assertHostsExist(hosts);
-  if (!uninstall) {
-    await assertHostsSansActivite(hosts);
-  }
+  await assertHostsSansActivite(hosts);
 
   const utilisateursNonFictifs = await countUtilisateursNonFictifs(hosts);
   if (utilisateursNonFictifs > 0) {
     logger.warn({ utilisateursNonFictifs }, "Des utilisateurs hors seed sont rattachés aux organisations hôtes");
   }
 
-  const purge = await purgeSeed(hosts, dryRun);
-  const flagsRetires = uninstall ? await unsetHostFlags(hosts, dryRun) : null;
-  const crees = uninstall ? null : await createSeed(hosts, now, dryRun);
+  let report: SeedRecetteReport;
+  if (uninstall) {
+    const purge = await purgeSeed(hosts, dryRun);
+    const flagsRetires = await unsetHostFlags(hosts, dryRun);
+    report = { dryRun, uninstall, utilisateursNonFictifs, purge, flagsRetires, crees: null };
+  } else {
+    const plan = planHostFlags(hosts, now);
+    const ctx = await loadSeedContext(hosts, now, plan);
+    const docs = await buildCatalogue(ctx);
 
-  const report: SeedRecetteReport = { dryRun, uninstall, utilisateursNonFictifs, purge, flagsRetires, crees };
+    const purge = await purgeSeed(hosts, dryRun);
+    if (!dryRun) {
+      await applyHostFlags(plan);
+      await insertDocs(docs);
+      for (const mlId of mlOrganisationIds(hosts)) {
+        await createOrUpdateMissionLocaleStats(mlId);
+      }
+    }
+    report = { dryRun, uninstall, utilisateursNonFictifs, purge, flagsRetires: null, crees: compter(docs) };
+  }
+
   logger.info(report, dryRun ? "Seed recette simulé (dry-run)" : "Seed recette terminé");
   return report;
 }

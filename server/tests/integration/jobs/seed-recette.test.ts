@@ -1,4 +1,5 @@
 import { ObjectId } from "bson";
+import { subDays, subYears } from "date-fns";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IMissionLocaleCfaInvitation } from "shared/models/data/missionLocaleCfaInvitations.model";
 import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
@@ -138,6 +139,7 @@ describe("seedRecette", () => {
   it("purge le jeu fictif et ce qui s'y rattache, sans toucher au reste (désinstallation)", async () => {
     const reel = { effectif: new ObjectId(), dossier: new ObjectId(), log: new ObjectId(), user: new ObjectId() };
     const dossierTesteur = new ObjectId();
+    const dossierAutreMl = new ObjectId();
     const logTesteur = new ObjectId();
 
     await effectifsDb().insertMany(testDocs<IEffectif>([{ _id: seedId("effectif", 1) }, { _id: reel.effectif }]));
@@ -150,6 +152,7 @@ describe("seedRecette", () => {
         },
         { _id: dossierTesteur, mission_locale_id: hosts.missionsLocales.ML_A, effectif_id: seedId("effectif", 3) },
         { _id: reel.dossier, mission_locale_id: new ObjectId(), effectif_id: reel.effectif },
+        { _id: dossierAutreMl, mission_locale_id: new ObjectId(), effectif_id: seedId("effectif", 4) },
       ])
     );
     await missionLocaleEffectifsLogDb().insertMany(
@@ -159,10 +162,11 @@ describe("seedRecette", () => {
         { _id: reel.log, mission_locale_effectif_id: reel.dossier },
       ])
     );
+    const invitationReelle = new ObjectId();
     await missionLocaleCfaInvitationsDb().insertMany(
       testDocs<IMissionLocaleCfaInvitation>([
-        { _id: new ObjectId(), mission_locale_id: hosts.missionsLocales.ML_A },
-        { _id: new ObjectId(), mission_locale_id: new ObjectId() },
+        { _id: new ObjectId(), mission_locale_id: hosts.missionsLocales.ML_A, author_id: seedId("user", 1) },
+        { _id: invitationReelle, mission_locale_id: hosts.missionsLocales.ML_A, author_id: new ObjectId() },
       ])
     );
     await usersMigrationDb().insertMany(
@@ -183,9 +187,11 @@ describe("seedRecette", () => {
       usersMigration: 1,
     });
     expect(await effectifsDb().distinct("_id")).toEqual([reel.effectif]);
-    expect(await missionLocaleEffectifsDb().distinct("_id")).toEqual([reel.dossier]);
+    expect((await missionLocaleEffectifsDb().distinct("_id")).map(String).sort()).toEqual(
+      [reel.dossier, dossierAutreMl].map(String).sort()
+    );
     expect(await missionLocaleEffectifsLogDb().distinct("_id")).toEqual([reel.log]);
-    expect(await missionLocaleCfaInvitationsDb().countDocuments()).toBe(1);
+    expect(await missionLocaleCfaInvitationsDb().distinct("_id")).toEqual([invitationReelle]);
     expect(await usersMigrationDb().distinct("_id")).toEqual([reel.user]);
   });
 
@@ -200,18 +206,45 @@ describe("seedRecette", () => {
     expect(await organismesDb().countDocuments({ is_allowed_collab: true })).toBe(5);
   });
 
-  it("retire les flags des hôtes à la désinstallation, même avec une activité réelle", async () => {
+  it("refuse la désinstallation quand un hôte a une activité réelle", async () => {
     await effectifsDb().insertOne(
       testDocs<IEffectif>([{ _id: new ObjectId(), organisme_id: hosts.cfas.CFA_ON.organismeId }])[0]
     );
 
+    await expect(seedRecette({ hosts, uninstall: true })).rejects.toThrow(/activité réelle/);
+
+    expect(await organismesDb().countDocuments({ is_allowed_collab: true })).toBe(5);
+  });
+
+  it("retire les flags des hôtes à la désinstallation", async () => {
     const report = await seedRecette({ hosts, uninstall: true });
 
     expect(report.flagsRetires).toEqual({ missionsLocales: 1, organisationsCfa: 5, organismes: 5 });
     expect(await organisationsDb().countDocuments({ activated_at: { $exists: true } })).toBe(0);
-    expect(await organisationsDb().countDocuments({ ml_beta_activated_at: { $exists: true } })).toBe(0);
     expect(await organismesDb().countDocuments({ is_allowed_collab: { $exists: true } })).toBe(0);
-    expect(await organismesDb().countDocuments({ collab_suspended_at: { $exists: true } })).toBe(0);
+  });
+
+  it("décale la date de naissance d'un jeune fictif quand un vrai dossier porte déjà son identité", async () => {
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const dateVoulue = subDays(subYears(today, 20), 31);
+    const reel = { nom: "BERNARD", prenom: "Lucas", date_de_naissance: dateVoulue };
+    await missionLocaleEffectifsDb().insertOne(
+      testDocs<IMissionLocaleEffectif>([
+        {
+          _id: new ObjectId(),
+          mission_locale_id: new ObjectId(),
+          effectif_id: new ObjectId(),
+          identifiant_normalise: reel,
+        },
+      ])[0]
+    );
+
+    await seedRecette({ hosts, now });
+
+    const fictif = await missionLocaleEffectifsDb().findOne({ _id: seedId("dossierMl", 1) });
+    expect(fictif?.identifiant_normalise).toMatchObject({ nom: "BERNARD", prenom: "Lucas" });
+    expect(fictif?.identifiant_normalise?.date_de_naissance).toEqual(subDays(dateVoulue, 1));
   });
 
   it("pose les flags de chaque hôte", async () => {

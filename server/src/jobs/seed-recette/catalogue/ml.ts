@@ -4,6 +4,7 @@ import {
   PROBLEME_TYPE_ENUM,
   SITUATION_ENUM,
 } from "shared/models/data/missionLocaleEffectif.model";
+import { CFA_COLLAB_STATUS } from "shared/models/routes/organismes/cfa/cfa.api";
 
 import { jour, type SeedContext } from "../factories";
 
@@ -63,9 +64,12 @@ export const ML_CASES: SeedCase[] = [
     n: 2,
     code: "A02 DECA",
     source: "DECA",
-    titre: "Rupture remontée par DECA (CFA sans DECA côté CFA)",
-    attendu: { ml: { ml: "ML_A", liste: "a_traiter_ou_recontacter", indicateurs: { a_traiter: true } } },
-    build: async (ctx) => (await rupture(ctx, { n: 2, cfa: "CFA_SANS", deca: true })).docs,
+    titre: "Rupture remontée par DECA pour un CFA sans ERP",
+    attendu: {
+      ml: { ml: "ML_A", liste: "a_traiter_ou_recontacter", indicateurs: { a_traiter: true } },
+      cfa: { cfa: "CFA_DECA", ruptures: "plus_45j", collabStatus: CFA_COLLAB_STATUS.DEMARRER_COLLAB, suivi: null },
+    },
+    build: async (ctx) => (await rupture(ctx, { n: 2, cfa: "CFA_DECA", deca: true })).docs,
   },
   {
     n: 3,
@@ -95,22 +99,7 @@ export const ML_CASES: SeedCase[] = [
     },
     build: async (ctx) => (await rupture(ctx, { n: 4, cfa: "CFA_SANS", age: 28, rqth: true })).docs,
   },
-  {
-    n: 9,
-    code: "A09 A CONTACTER",
-    titre: "Le jeune a confirmé vouloir être contacté (badge « à contacter »)",
-    attendu: { ml: { ml: "ML_A", liste: "a_traiter_ou_recontacter", indicateurs: { a_traiter: true } } },
-    build: async (ctx) =>
-      (
-        await rupture(ctx, {
-          n: 9,
-          cfa: "CFA_SANS",
-          dossier: {
-            effectif_choice: { confirmation: true, confirmation_created_at: jour(ctx, -2), telephone: "0639980009" },
-          },
-        })
-      ).docs,
-  },
+
   {
     n: 10,
     code: "A10 PLUS DE 180 J",
@@ -266,13 +255,7 @@ export const ML_CASES: SeedCase[] = [
   traite(55, "I55 ML B TRAITE", "ML non activée : dossier traité", [{ jour: -3, situation: SITUATION_ENUM.RDV_PRIS }], {
     ml: "ML_B",
   }),
-  {
-    n: 56,
-    code: "I56 ML B ANCIENNE",
-    titre: "ML non activée : rupture ancienne, sans fenêtre d'activation",
-    attendu: { ml: { ml: "ML_B", liste: "a_traiter_ou_recontacter", indicateurs: { a_traiter: true } } },
-    build: async (ctx) => (await rupture(ctx, { n: 56, cfa: "CFA_SANS", ml: "ML_B", joursDepuisRupture: 300 })).docs,
-  },
+
   {
     n: 63,
     code: "K63 PLUS DE 26 ANS",

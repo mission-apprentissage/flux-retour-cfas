@@ -43,7 +43,7 @@ const PRENOMS: Array<{ prenom: string; sexe: "M" | "F" }> = [
   { prenom: "Jules", sexe: "M" },
 ];
 
-const NOMS = [
+export const NOMS = [
   "Martin",
   "Bernard",
   "Dubois",

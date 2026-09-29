@@ -5,9 +5,12 @@ Regénérer : `npx vitest run --project server tests/unit/jobs/seed-recette-read
 
 ## Fonctionnement
 
-- Régénéré chaque nuit à 05h00 sur recette (cron déclaré uniquement si `MNA_TDB_ENV=recette`) : purge de tout le jeu fictif, puis recréation avec des dates recalculées au jour même. **Les manipulations de la veille sont perdues.**
+- Régénéré chaque nuit à 05h30 sur recette (cron déclaré uniquement si `MNA_TDB_ENV=recette`) : purge de tout le jeu fictif, puis recréation avec des dates recalculées au jour même. **Les manipulations de la veille sont perdues.**
 - À la main : `yarn cli seed:recette` (`--dry-run` pour simuler, `--uninstall` pour tout retirer et remettre les flags des hôtes).
-- Refuse de tourner hors recette/local/test, et s'arrête sans rien écrire si un hôte a une activité réelle (effectif ou dossier ML hors seed).
+- Refuse de tourner hors recette/local/test, et s'arrête sans rien écrire (désinstallation comprise) si un hôte a une activité réelle : effectif ou dossier ML hors seed. En cron, l'échec remonte dans Sentry.
+- Tout le jeu est construit avant la moindre écriture : une erreur de construction ne laisse aucun état partiel.
+- La purge ne touche que le jeu fictif : `_id` en `5eed`, dossiers des ML hôtes créés sur un effectif fictif, invitations émises par un compte fictif.
+- Si un vrai dossier porte déjà le même nom, prénom et date de naissance qu'un jeune fictif, la date de naissance fictive est décalée de quelques jours (l'index est unique sur toutes les ML).
 - Tous les `_id` créés commencent par `5eed` ; les URL ci-dessous restent valides d'une nuit à l'autre.
 - Identités fictives : e-mails en `@example.com` (domaine réservé), téléphones dans la plage de fiction ARCEP 06 39 98.
 - WhatsApp : hors production, aucun envoi sans `MNA_TDB_WHATSAPP_TEST_PHONE_OVERRIDE`, et tout part alors vers ce seul numéro.
@@ -45,10 +48,9 @@ Mot de passe commun : variable `MNA_TDB_SEED_RECETTE_PASSWORD` (sops, `env.recet
 | Cas | Jeune | Ce qu'il teste | Où le voir | Fiche |
 | --- | --- | --- | --- | --- |
 | A01 STANDARD | Lucas Bernard | Rupture récente, CFA sans compte | ML_A › À traiter ou recontacter | `/mission-locale/5eed01000000000000000001` |
-| A02 DECA | Chloé Dubois | Rupture remontée par DECA (CFA sans DECA côté CFA) | ML_A › À traiter ou recontacter | `/mission-locale/5eed02000000000000000002` |
+| A02 DECA | Chloé Dubois | Rupture remontée par DECA pour un CFA sans ERP | ML_A › À traiter ou recontacter ; CFA_DECA › Ruptures de 45 j et plus | `/mission-locale/5eed02000000000000000002` |
 | A03 MINEUR | Hugo Thomas | Jeune de 17 ans → prioritaire | ML_A › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed01000000000000000003` |
 | A04 RQTH | Manon Robert | Jeune de 28 ans avec RQTH → visible et prioritaire | ML_A › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed01000000000000000004` |
-| A09 A CONTACTER | Louis Moreau | Le jeune a confirmé vouloir être contacté (badge « à contacter ») | ML_A › À traiter ou recontacter | `/mission-locale/5eed01000000000000000009` |
 | A10 PLUS DE 180 J | Jade Simon | Rupture il y a 200 jours, jeune passé en abandon → groupe « plus de 180 j » | ML_A › À traiter ou recontacter | `/mission-locale/5eed0100000000000000000a` |
 | A11 NOUVEAU CONTRAT | Gabriel Laurent | Jeune reparti en contrat depuis la rupture → bandeau « nouveau contrat » | ML_A › À traiter ou recontacter | `/mission-locale/5eed0100000000000000000b` |
 | B12 FIN DE FORMATION | Sarah Lefebvre | À recontacter, formation terminée depuis | ML_A › À traiter ou recontacter | `/mission-locale/5eed0100000000000000000c` |
@@ -67,7 +69,6 @@ Mot de passe commun : variable `MNA_TDB_SEED_RECETTE_PASSWORD` (sops, `env.recet
 | C25 NE VEUT PAS ACCOMPAGNEMENT | Kylian Dupont | Ne veut pas d'accompagnement | ML_A › Traités | `/mission-locale/5eed01000000000000000019` |
 | I54 ML B A TRAITER | Emma Michel | ML non activée : dossier à traiter | ML_B › À traiter ou recontacter | `/mission-locale/5eed01000000000000000036` |
 | I55 ML B TRAITE | Yanis Garcia | ML non activée : dossier traité | ML_B › Traités | `/mission-locale/5eed01000000000000000037` |
-| I56 ML B ANCIENNE | Lina David | ML non activée : rupture ancienne, sans fenêtre d'activation | ML_B › À traiter ou recontacter | `/mission-locale/5eed01000000000000000038` |
 | K63 PLUS DE 26 ANS | Noah André | A eu 26 ans depuis la création du dossier, sans RQTH → absent | ML_A : absent des listes (vérifie un filtre) | — |
 | K64 MOINS DE 16 ANS | Maëlys Lefèvre | Jeune de 15 ans → absent | ML_A : absent des listes (vérifie un filtre) | — |
 | A05 SOUHAITE UN RDV | Nathan Richard | A répondu oui au message de préqualification et a cliqué sur le lien de prise de RDV | ML_A › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed01000000000000000005` |
@@ -119,11 +120,11 @@ Mot de passe commun : variable `MNA_TDB_SEED_RECETTE_PASSWORD` (sops, `env.recet
 | J132 CFA_SANS APPRENTI | Sarah Moreau | Tableau des effectifs CFA_SANS : apprenti | CFA_SANS › Effectifs | `/cfa/5eed01000000000000000084` |
 | J133 CFA_SANS ABANDON (EXCLUSION) | Adam Simon | Tableau des effectifs CFA_SANS : abandon (exclusion) | CFA_SANS › Effectifs | `/cfa/5eed01000000000000000085` |
 | J134 CFA_SANS FIN DE FORMATION | Emma Laurent | Tableau des effectifs CFA_SANS : fin de formation | CFA_SANS › Effectifs | `/cfa/5eed01000000000000000086` |
-| J140 CFA_DECA INSCRIT, ENTRÉE À VENIR | Clara Roux | Tableau des effectifs CFA_DECA : inscrit, entrée à venir | CFA_DECA › Effectifs | `/cfa/5eed0100000000000000008c` |
-| J141 CFA_DECA INSCRIT SANS CONTRAT | Théo Vincent | Tableau des effectifs CFA_DECA : inscrit sans contrat | CFA_DECA › Effectifs | `/cfa/5eed0100000000000000008d` |
-| J142 CFA_DECA APPRENTI | Anaïs Fournier | Tableau des effectifs CFA_DECA : apprenti | CFA_DECA › Effectifs | `/cfa/5eed0100000000000000008e` |
-| J143 CFA_DECA ABANDON (EXCLUSION) | Noah Morel | Tableau des effectifs CFA_DECA : abandon (exclusion) | CFA_DECA › Effectifs | `/cfa/5eed0100000000000000008f` |
-| J144 CFA_DECA FIN DE FORMATION | Maëlys Girard | Tableau des effectifs CFA_DECA : fin de formation | CFA_DECA › Effectifs | `/cfa/5eed01000000000000000090` |
+| J140 CFA_DECA INSCRIT, ENTRÉE À VENIR | Clara Roux | Tableau des effectifs CFA_DECA : inscrit, entrée à venir | CFA_DECA › Effectifs | `/cfa/5eed0200000000000000008c` |
+| J141 CFA_DECA INSCRIT SANS CONTRAT | Théo Vincent | Tableau des effectifs CFA_DECA : inscrit sans contrat | CFA_DECA › Effectifs | `/cfa/5eed0200000000000000008d` |
+| J142 CFA_DECA APPRENTI | Anaïs Fournier | Tableau des effectifs CFA_DECA : apprenti | CFA_DECA › Effectifs | `/cfa/5eed0200000000000000008e` |
+| J143 CFA_DECA ABANDON (EXCLUSION) | Noah Morel | Tableau des effectifs CFA_DECA : abandon (exclusion) | CFA_DECA › Effectifs | `/cfa/5eed0200000000000000008f` |
+| J144 CFA_DECA FIN DE FORMATION | Maëlys Girard | Tableau des effectifs CFA_DECA : fin de formation | CFA_DECA › Effectifs | `/cfa/5eed02000000000000000090` |
 
 ## Autres données
 

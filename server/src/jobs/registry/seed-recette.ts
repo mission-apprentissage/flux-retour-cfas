@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import type { CronDef, JobDef } from "job-processor";
 
 import config from "@/config";
@@ -18,10 +19,17 @@ export function buildSeedRecetteCrons(env: string): Record<string, CronDef> {
     return {};
   }
   return {
-    // 05h00 Paris, recette uniquement — après hydrate:daily (02h30) et la purge ML (04h30)
-    "Régénère le jeu de données fictif de recette à 5h": {
-      cron_string: "0 5 * * *",
-      handler: async () => seedRecette(),
+    // 05h30 Paris, recette uniquement — après hydrate:daily (02h30), la purge ML (04h30) et le job des statuts du samedi (05h00)
+    "Régénère le jeu de données fictif de recette à 5h30": {
+      cron_string: "30 5 * * *",
+      handler: async () => {
+        try {
+          return await seedRecette();
+        } catch (error) {
+          captureException(error);
+          throw error;
+        }
+      },
     },
   };
 }

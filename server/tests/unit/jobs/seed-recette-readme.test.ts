@@ -10,7 +10,7 @@ describe("seed recette", () => {
 
   it("ne déclare le cron de régénération qu'en recette", () => {
     expect(buildSeedRecetteCrons("recette")).toMatchObject({
-      "Régénère le jeu de données fictif de recette à 5h": { cron_string: "0 5 * * *" },
+      "Régénère le jeu de données fictif de recette à 5h30": { cron_string: "30 5 * * *" },
     });
     for (const env of ["production", "preprod", "local", "test"]) {
       expect(buildSeedRecetteCrons(env)).toEqual({});

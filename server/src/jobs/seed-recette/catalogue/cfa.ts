@@ -9,7 +9,14 @@ import {
 import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
 import { CFA_COLLAB_STATUS } from "shared/models/routes/organismes/cfa/cfa.api";
 
-import { buildEffectifErp, buildPersonne, jour, type SeedContext, type SeedParcoursInput } from "../factories";
+import {
+  buildEffectifDeca,
+  buildEffectifErp,
+  buildPersonne,
+  jour,
+  type SeedContext,
+  type SeedParcoursInput,
+} from "../factories";
 import { CFA_HOST_CODES, type CfaHostCode } from "../hosts";
 import { email, identite } from "../identites";
 import { seedId } from "../seed-ids";
@@ -54,6 +61,11 @@ async function scenario(ctx: SeedContext, s: ScenarioCfa) {
       declared_by: userId(PAR_DEFAUT[s.rupture.cfa]),
     };
     r.dossier.date_rupture = dateRupture;
+    r.dossier.organisme_data = {
+      has_unread_notification: false,
+      rupture: true,
+      reponse_at: jour(ctx, s.declaration.jour),
+    };
   }
 
   if (s.actionMl) {
@@ -114,15 +126,15 @@ export const COLLAB_CASES: SeedCase[] = [
         liste: "a_traiter_ou_recontacter",
         dansPrioritaires: true,
         dansCollaborations: true,
-        indicateurs: { a_traiter: true, situation_dossier: "PREVENTION_RUPTURE" },
+        indicateurs: { a_traiter: true, situation_dossier: "PREVENTION_RUPTURE", relance_urgente: false },
       },
       cfa: { cfa: "CFA_ON", ruptures: null, collabStatus: CFA_COLLAB_STATUS.COLLAB_DEMANDEE, suivi: "collab" },
     },
     build: (ctx) =>
       scenario(ctx, {
-        rupture: { n: 27, cfa: "CFA_ON", parcours: parcoursEnContrat(ctx), createdAt: jour(ctx, -7) },
+        rupture: { n: 27, cfa: "CFA_ON", parcours: parcoursEnContrat(ctx), createdAt: jour(ctx, -5) },
         collaboration: {
-          jour: -7,
+          jour: -5,
           situationType: CFA_SITUATION_TYPE_ENUM.EN_CONTRAT,
           risque: CFA_RISQUE_RUPTURE_ENUM.TRES_ELEVE,
           motifs: [ACC_CONJOINT_MOTIF_ENUM.SOCIAL_FAMILIAL],
@@ -168,7 +180,7 @@ export const COLLAB_CASES: SeedCase[] = [
         liste: "a_traiter_ou_recontacter",
         dansPrioritaires: true,
         dansCollaborations: true,
-        indicateurs: { a_traiter: true, situation_dossier: "ABANDON" },
+        indicateurs: { a_traiter: true, situation_dossier: "ABANDON", relance_urgente: true },
       },
       cfa: { cfa: "CFA_ON", ruptures: "moins_45j", collabStatus: CFA_COLLAB_STATUS.COLLAB_DEMANDEE, suivi: "collab" },
     },
@@ -370,7 +382,7 @@ export const COLLAB_CASES: SeedCase[] = [
         liste: "a_traiter_ou_recontacter",
         dansPrioritaires: true,
         dansCollaborations: true,
-        indicateurs: { a_traiter: true },
+        indicateurs: { a_traiter: true, relance_urgente: true },
       },
       cfa: { cfa: "CFA_SUSP", ruptures: "plus_45j", collabStatus: CFA_COLLAB_STATUS.COLLAB_DEMANDEE, suivi: "collab" },
     },
@@ -513,11 +525,14 @@ export const EFFECTIFS_CASES: SeedCase[] = CFA_HOST_CODES.flatMap((cfa) =>
       n,
       code: `J${n} ${cfa} ${libelle.toUpperCase()}`,
       titre: `Tableau des effectifs ${cfa} : ${libelle}`,
+      ...(cfa === "CFA_DECA" ? { source: "DECA" as const } : {}),
       attendu: { cfa: { cfa, ruptures: null, dansEffectifs: true, statutEffectif: statut } },
       build: async (ctx: SeedContext) => {
         const personne = buildPersonne(ctx, { n, age: 19 });
-        const effectif = await buildEffectifErp(ctx, { n, cfa, ml: "ML_A", personne, parcours: parcours(ctx) });
-        return { effectifs: [effectif] };
+        const input = { n, cfa, ml: "ML_A" as const, personne, parcours: parcours(ctx) };
+        return cfa === "CFA_DECA"
+          ? { effectifsDeca: [await buildEffectifDeca(ctx, input)] }
+          : { effectifs: [await buildEffectifErp(ctx, input)] };
       },
     };
   })

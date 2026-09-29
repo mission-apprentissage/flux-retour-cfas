@@ -18,10 +18,12 @@ import { getAnneeScolaireFromDate } from "shared/utils";
 import { withComputedFields } from "@/common/actions/effectifs.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import { getCurrentStatutFromParcours } from "@/common/actions/shared/rupture-pipeline.utils";
-import { organisationsDb, organismesDb } from "@/common/model/collections";
+import parentLogger from "@/common/logger";
+import { missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { hash } from "@/common/utils/passwordUtils";
 import config from "@/config";
 
+import { applyPatch, type HostFlagsPlan } from "./host-flags";
 import {
   CFA_HOST_CODES,
   type CfaHostCode,
@@ -30,8 +32,10 @@ import {
   type MlHostCode,
   type SeedRecetteHosts,
 } from "./hosts";
-import { email, identite } from "./identites";
-import { seedId } from "./seed-ids";
+import { email, identite, NOMS } from "./identites";
+import { SEED_ID_RANGE, seedId } from "./seed-ids";
+
+const logger = parentLogger.child({ module: "job:seed-recette" });
 
 export const SEED_MARKER = "SEED_RECETTE";
 
@@ -55,35 +59,82 @@ export interface SeedContext {
   missionsLocales: Record<MlHostCode, IOrganisationMissionLocale>;
   cfas: Record<CfaHostCode, SeedCfa>;
   passwordHash: string;
+  identitesPrises: Set<string>;
 }
 
-export async function loadSeedContext(hosts: SeedRecetteHosts, now: Date): Promise<SeedContext> {
+const cleIdentite = (identifiant: { nom: string; prenom: string; date_de_naissance: Date }) =>
+  `${identifiant.nom}|${identifiant.prenom}|${identifiant.date_de_naissance.toISOString()}`;
+
+async function loadIdentitesPrises(hosts: SeedRecetteHosts): Promise<Set<string>> {
+  const dossiers = await missionLocaleEffectifsDb()
+    .find(
+      {
+        "identifiant_normalise.nom": { $in: NOMS.map((nom) => nom.toUpperCase()) },
+        $nor: [
+          { _id: SEED_ID_RANGE },
+          { effectif_id: SEED_ID_RANGE, mission_locale_id: { $in: Object.values(hosts.missionsLocales) } },
+        ],
+      },
+      { projection: { identifiant_normalise: 1 } }
+    )
+    .toArray();
+  return new Set(dossiers.flatMap((d) => (d.identifiant_normalise ? [cleIdentite(d.identifiant_normalise)] : [])));
+}
+
+export async function loadSeedContext(hosts: SeedRecetteHosts, now: Date, plan?: HostFlagsPlan): Promise<SeedContext> {
   const missionsLocales = {} as Record<MlHostCode, IOrganisationMissionLocale>;
   for (const code of ML_HOST_CODES) {
-    missionsLocales[code] = (await organisationsDb().findOne({
+    const organisation = (await organisationsDb().findOne({
       _id: hosts.missionsLocales[code],
     })) as IOrganisationMissionLocale;
+    missionsLocales[code] = applyPatch(organisation, plan?.organisations.get(organisation._id.toHexString()));
   }
 
   const cfas = {} as Record<CfaHostCode, SeedCfa>;
   for (const code of CFA_HOST_CODES) {
     const { organisationId, organismeId } = hosts.cfas[code];
+    const organisation = (await organisationsDb().findOne({ _id: organisationId })) as IOrganisationOrganismeFormation;
+    const organisme = (await organismesDb().findOne({ _id: organismeId })) as IOrganisme;
     cfas[code] = {
-      organisation: (await organisationsDb().findOne({ _id: organisationId })) as IOrganisationOrganismeFormation,
-      organisme: (await organismesDb().findOne({ _id: organismeId })) as IOrganisme,
+      organisation: applyPatch(organisation, plan?.organisations.get(organisationId.toHexString())),
+      organisme: applyPatch(organisme, plan?.organismes.get(organismeId.toHexString())),
     };
   }
 
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  if (!config.seedRecette.password) {
+    logger.warn("MNA_TDB_SEED_RECETTE_PASSWORD absent : les comptes fictifs ne seront pas connectables");
+  }
   const password = config.seedRecette.password || randomUUID();
 
-  return { now, today, missionsLocales, cfas, passwordHash: hash(password) };
+  return {
+    now,
+    today,
+    missionsLocales,
+    cfas,
+    passwordHash: hash(password),
+    identitesPrises: await loadIdentitesPrises(hosts),
+  };
 }
 
 export const jour = (ctx: SeedContext, offset: number) => addDays(ctx.today, offset);
 
 function minDate(a: Date, b: Date) {
   return a < b ? a : b;
+}
+
+const MAX_DECALAGE_JOURS = 20;
+
+function dateDeNaissanceLibre(ctx: SeedContext, nom: string, prenom: string, souhaitee: Date): Date {
+  for (let decalage = 0; decalage <= MAX_DECALAGE_JOURS; decalage++) {
+    const candidate = subDays(souhaitee, decalage);
+    const cle = cleIdentite(normalisePersonIdentifiant({ nom, prenom, date_de_naissance: candidate }));
+    if (!ctx.identitesPrises.has(cle)) {
+      ctx.identitesPrises.add(cle);
+      return candidate;
+    }
+  }
+  throw new Error(`Aucune date de naissance libre pour ${prenom} ${nom} autour du ${souhaitee.toISOString()}`);
 }
 
 export interface SeedPersonne {
@@ -108,10 +159,16 @@ export function buildPersonne(
   { n, age, rqth = false, dateDeNaissance }: SeedPersonneInput
 ): SeedPersonne {
   const { nom, prenom, sexe } = identite(n);
+  const date_de_naissance = dateDeNaissanceLibre(
+    ctx,
+    nom,
+    prenom,
+    dateDeNaissance ?? subDays(subYears(ctx.today, age), 30 + (n % 300))
+  );
   return {
     nom,
     prenom,
-    date_de_naissance: dateDeNaissance ?? subDays(subYears(ctx.today, age), 30 + (n % 300)),
+    date_de_naissance,
     sexe,
     telephone: `063998${String(n).padStart(4, "0")}`,
     courriel: email(prenom, nom),
