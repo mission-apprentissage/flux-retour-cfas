@@ -1,6 +1,7 @@
 "use client";
 
 import { CollaborationSegmentPanel } from "../sections/CollaborationSegmentPanel";
+import { DeploymentOverviewSection } from "../sections/DeploymentOverviewSection";
 import { DeploymentPanel } from "../sections/DeploymentPanel";
 import { RupturesOverviewSection } from "../sections/RupturesOverviewSection";
 import { RupturesSegmentPanel } from "../sections/RupturesSegmentPanel";
@@ -53,7 +54,20 @@ export function VueEnsembleView({ isAdmin = false, isPublic = false }: VueEnsemb
           description="Retrouvez ici les chiffres des indicateurs principaux du déploiement et de l'activité des Missions Locales et des CFA sur le Tableau de bord de l'apprentissage sur le territoire de votre choix."
         />
         <RupturesOverviewSection />
-        <StatsTabs tabs={tabs.filter((tab) => tab.id !== "ruptures")} />
+        <DeploymentOverviewSection isAdmin={isAdmin} />
+        <StatsTabs
+          tabs={tabs
+            .filter((tab) => tab.id !== "ruptures")
+            .map((tab) =>
+              tab.id === "deploiement"
+                ? {
+                    ...tab,
+                    label: "Déploiement aux CFA",
+                    content: <DeploymentPanel isAdmin={isAdmin} withMissionLocales={false} />,
+                  }
+                : tab
+            )}
+        />
       </div>
     );
   }

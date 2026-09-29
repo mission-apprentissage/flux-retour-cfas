@@ -6,12 +6,13 @@ import { DeploymentSection } from "./DeploymentSection";
 
 interface DeploymentPanelProps {
   isAdmin?: boolean;
+  withMissionLocales?: boolean;
 }
 
-export function DeploymentPanel({ isAdmin = false }: DeploymentPanelProps) {
+export function DeploymentPanel({ isAdmin = false, withMissionLocales = true }: DeploymentPanelProps) {
   return (
     <div>
-      <DeploymentSection isAdmin={isAdmin} />
+      {withMissionLocales && <DeploymentSection isAdmin={isAdmin} />}
       {isAdmin ? <CollaborationsAdminSection /> : <CollaborationsCfaSection />}
     </div>
   );

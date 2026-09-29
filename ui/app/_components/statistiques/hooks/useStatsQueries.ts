@@ -23,6 +23,7 @@ import type { Period } from "../ui/PeriodSelector";
 import {
   buildCollaborationsRequest,
   buildSegmentStatsRequest,
+  buildSyntheseRequest,
   buildTraitementRequest,
   type CollaborationStatsParams,
   type SegmentStatsParams,
@@ -98,8 +99,8 @@ function buildStatsParams(params: {
 
 export const statsQueryKeys = {
   traitement: (params: SegmentStatsParams) => ["stats", "traitement", params] as const,
-  deployment: (period: Period) => ["stats", "deployment", period] as const,
-  syntheseRegions: (period: Period) => ["stats", "synthese-regions", period] as const,
+  deployment: (period: Period, region?: string) => ["stats", "deployment", period, region] as const,
+  syntheseRegions: (period: Period, region?: string) => ["stats", "synthese-regions", period, region] as const,
   rupturants: (params: SegmentStatsParams) => ["stats", "rupturants", params] as const,
   dossiersTraites: (params: SegmentStatsParams) => ["stats", "dossiers-traites", params] as const,
   couvertureRegions: (period: Period) => ["stats", "couverture-regions", period] as const,
@@ -147,18 +148,20 @@ export function useTraitementStats(params: SegmentStatsParams) {
   });
 }
 
-export function useDeploymentStats(period: Period) {
+export function useDeploymentStats(period: Period, region?: string) {
+  const request = buildSyntheseRequest("deployment", period, region);
   return useQuery<IDeploymentStatsResponse>({
-    queryKey: statsQueryKeys.deployment(period),
-    queryFn: () => _get("/api/v1/mission-locale/stats/synthese/deployment", { params: { period } }),
+    queryKey: statsQueryKeys.deployment(period, region),
+    queryFn: () => _get(request.url, { params: request.params }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }
 
-export function useSyntheseRegionsStats(period: Period) {
+export function useSyntheseRegionsStats(period: Period, region?: string) {
+  const request = buildSyntheseRequest("regions", period, region);
   return useQuery<ISyntheseRegionsStatsResponse>({
-    queryKey: statsQueryKeys.syntheseRegions(period),
-    queryFn: () => _get("/api/v1/mission-locale/stats/synthese/regions", { params: { period } }),
+    queryKey: statsQueryKeys.syntheseRegions(period, region),
+    queryFn: () => _get(request.url, { params: request.params }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }

@@ -67,3 +67,14 @@ export function buildCollaborationsRequest(params: CollaborationStatsParams): St
     },
   };
 }
+
+/** Sans région, le déploiement national passe par la route publique ; avec une région, par la route territoriale scopée. */
+export function buildSyntheseRequest(
+  resource: "deployment" | "regions",
+  period: Period,
+  region?: string
+): StatsRequest {
+  return region
+    ? { url: `${INDICATEURS_ML_BASE}/synthese/${resource}`, params: { period, region } }
+    : { url: `${PUBLIC_STATS_BASE}/synthese/${resource}`, params: { period } };
+}
