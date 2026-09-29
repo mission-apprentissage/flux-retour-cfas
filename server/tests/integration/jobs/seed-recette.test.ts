@@ -92,7 +92,7 @@ describe("seedRecette", () => {
     });
 
     it("n'écrit rien en production", async () => {
-      await effectifsDb().insertOne(testDocs<IEffectif>([{ _id: seedId(1) }])[0]);
+      await effectifsDb().insertOne(testDocs<IEffectif>([{ _id: seedId("effectif", 1) }])[0]);
 
       await expect(seedRecette({ hosts, env: "production" })).rejects.toThrow(/refusé/);
 
@@ -108,7 +108,10 @@ describe("seedRecette", () => {
 
   it("annule sans rien purger si un hôte a une activité réelle", async () => {
     await effectifsDb().insertMany(
-      testDocs<IEffectif>([{ _id: seedId(1) }, { _id: new ObjectId(), organisme_id: hosts.cfas.CFA_ON.organismeId }])
+      testDocs<IEffectif>([
+        { _id: seedId("effectif", 1) },
+        { _id: new ObjectId(), organisme_id: hosts.cfas.CFA_ON.organismeId },
+      ])
     );
 
     await expect(seedRecette({ hosts })).rejects.toThrow(/activité réelle/);
@@ -119,7 +122,7 @@ describe("seedRecette", () => {
   it("annule si la ML hôte a un dossier réel, mais pas pour un dossier créé sur un effectif fictif", async () => {
     await missionLocaleEffectifsDb().insertOne(
       testDocs<IMissionLocaleEffectif>([
-        { _id: new ObjectId(), mission_locale_id: hosts.missionsLocales.ML_A, effectif_id: seedId(2) },
+        { _id: new ObjectId(), mission_locale_id: hosts.missionsLocales.ML_A, effectif_id: seedId("effectif", 2) },
       ])[0]
     );
     await expect(seedRecette({ hosts })).resolves.toBeDefined();
@@ -137,17 +140,21 @@ describe("seedRecette", () => {
     const dossierTesteur = new ObjectId();
     const logTesteur = new ObjectId();
 
-    await effectifsDb().insertMany(testDocs<IEffectif>([{ _id: seedId(1) }, { _id: reel.effectif }]));
+    await effectifsDb().insertMany(testDocs<IEffectif>([{ _id: seedId("effectif", 1) }, { _id: reel.effectif }]));
     await missionLocaleEffectifsDb().insertMany(
       testDocs<IMissionLocaleEffectif>([
-        { _id: seedId(2), mission_locale_id: hosts.missionsLocales.ML_A, effectif_id: seedId(1) },
-        { _id: dossierTesteur, mission_locale_id: hosts.missionsLocales.ML_A, effectif_id: seedId(3) },
+        {
+          _id: seedId("effectif", 2),
+          mission_locale_id: hosts.missionsLocales.ML_A,
+          effectif_id: seedId("effectif", 1),
+        },
+        { _id: dossierTesteur, mission_locale_id: hosts.missionsLocales.ML_A, effectif_id: seedId("effectif", 3) },
         { _id: reel.dossier, mission_locale_id: new ObjectId(), effectif_id: reel.effectif },
       ])
     );
     await missionLocaleEffectifsLogDb().insertMany(
       testDocs<IMissionLocaleEffectifLog>([
-        { _id: seedId(4), mission_locale_effectif_id: seedId(2) },
+        { _id: seedId("effectif", 4), mission_locale_effectif_id: seedId("effectif", 2) },
         { _id: logTesteur, mission_locale_effectif_id: dossierTesteur },
         { _id: reel.log, mission_locale_effectif_id: reel.dossier },
       ])
@@ -160,7 +167,7 @@ describe("seedRecette", () => {
     );
     await usersMigrationDb().insertMany(
       testDocs<IUsersMigration>([
-        { _id: seedId(5), organisation_id: hosts.missionsLocales.ML_A },
+        { _id: seedId("effectif", 5), organisation_id: hosts.missionsLocales.ML_A },
         { _id: reel.user, organisation_id: new ObjectId() },
       ])
     );
@@ -183,7 +190,7 @@ describe("seedRecette", () => {
   });
 
   it("compte sans écrire en dry-run", async () => {
-    await effectifsDb().insertOne(testDocs<IEffectif>([{ _id: seedId(1) }])[0]);
+    await effectifsDb().insertOne(testDocs<IEffectif>([{ _id: seedId("effectif", 1) }])[0]);
 
     const report = await seedRecette({ hosts, dryRun: true, uninstall: true });
 

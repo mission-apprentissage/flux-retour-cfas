@@ -45,6 +45,22 @@ export const HOSTS_RECETTE: SeedRecetteHosts = {
   },
 };
 
+export interface SeedCommune {
+  code_postal: string;
+  code_insee: string;
+  commune: string;
+  departement: string;
+  region: string;
+}
+
+export const ML_HOST_COMMUNES: Record<MlHostCode, SeedCommune[]> = {
+  ML_A: [
+    { code_postal: "94200", code_insee: "94041", commune: "Ivry-sur-Seine", departement: "94", region: "11" },
+    { code_postal: "94400", code_insee: "94081", commune: "Vitry-sur-Seine", departement: "94", region: "11" },
+  ],
+  ML_B: [{ code_postal: "93300", code_insee: "93001", commune: "Aubervilliers", departement: "93", region: "11" }],
+};
+
 export const mlOrganisationIds = (hosts: SeedRecetteHosts) => Object.values(hosts.missionsLocales);
 export const cfaOrganisationIds = (hosts: SeedRecetteHosts) => Object.values(hosts.cfas).map((c) => c.organisationId);
 export const cfaOrganismeIds = (hosts: SeedRecetteHosts) => Object.values(hosts.cfas).map((c) => c.organismeId);
