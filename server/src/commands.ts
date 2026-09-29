@@ -455,6 +455,14 @@ program
   .action(createJobAction("tmp:seed-sipa-test-nancy"));
 
 program
+  .command("seed:recette")
+  .description("Jeu de données fictif ML/CFA de recette : purge puis régénère les dossiers sur les organisations hôtes")
+  .option("--dry-run", "Simulation sans écriture", false)
+  .option("--uninstall", "Purge le jeu fictif et retire les flags posés sur les hôtes, sans régénérer", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("seed:recette"));
+
+program
   .command("brevo-contacts:sync")
   .description("Synchronise une liste de contacts vers Brevo (création/peuplement de la liste)")
   .requiredOption("--slug <slug>", "Slug de la liste (ex: cfa-users)")

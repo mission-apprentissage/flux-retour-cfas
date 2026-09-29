@@ -12,3 +12,4 @@
 .infra/env.production.yml
 .infra/env.recette.yml
 server-classifier/
+server/src/jobs/seed-recette/README.md

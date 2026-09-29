@@ -160,6 +160,9 @@ const config = {
       };
     })(),
   },
+  seedRecette: {
+    password: env.get("MNA_TDB_SEED_RECETTE_PASSWORD").default("").asString(),
+  },
 };
 
 export default config;
