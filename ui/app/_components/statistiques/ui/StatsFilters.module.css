@@ -1,0 +1,9 @@
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filters :global(.fr-btn) {
+  gap: 8px;
+}

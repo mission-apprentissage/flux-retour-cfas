@@ -18,4 +18,10 @@ export function isAdminUser(user: AuthContext | null): boolean {
   return user?.organisation?.type === ORGANISATION_TYPE.ADMINISTRATEUR;
 }
 
+/** Persona DREETS : DREETS et DDETS partagent la navigation dédiée du suivi des indicateurs. */
+export function isDreetsPersona(user: AuthContext | null): boolean {
+  const type = user?.organisation?.type;
+  return type === ORGANISATION_TYPE.DREETS || type === ORGANISATION_TYPE.DDETS;
+}
+
 export const ADMIN_DEFAULT_REGION_CODE = "84";

@@ -13,6 +13,7 @@ const ADMIN: IOrganisationCreate = { type: "ADMINISTRATEUR" };
 const ARML_IDF: IOrganisationCreate = { type: "ARML", nom: "ARML IDF", region_list: ["11"] };
 const ARML_IDF_ARA: IOrganisationCreate = { type: "ARML", nom: "ARML IDF ARA", region_list: ["11", "84"] };
 const ARML_SANS_REGION: IOrganisationCreate = { type: "ARML", nom: "ARML sans périmètre", region_list: [] };
+const DREETS_IDF: IOrganisationCreate = { type: "DREETS", code_region: "11" };
 
 const expectForbidden = (response: { status: number; data: { error: string; message: string } }, message: string) => {
   expect(response.status).toBe(403);
@@ -522,6 +523,36 @@ describe("Indicateurs ML routes (territoriales)", () => {
       );
       expect(exportData.data.rows_rupture.map((r: { nom: string }) => r.nom).sort()).toEqual(["ML ARA", "ML IDF"]);
       expect(exportData.data.regionData).toHaveLength(2);
+    });
+  });
+
+  describe("GET /synthese/deployment et /synthese/regions", () => {
+    const deployment = (org: IOrganisationCreate, query = "") =>
+      requestAsOrganisation(org, "get", `/api/v1/organisation/indicateurs-ml/synthese/deployment${query}`);
+
+    it("Une DREETS voit le déploiement de sa région, et le national sur demande", async () => {
+      const own = await deployment(DREETS_IDF);
+      expect(own.status).toBe(200);
+      expect(own.data.summary).toMatchObject({ mlCount: 1, activatedMlCount: 1, engagedMlCount: 1 });
+
+      const national = await deployment(DREETS_IDF, "?national=true");
+      expect(national.data.summary).toMatchObject({ mlCount: 4, activatedMlCount: 4, engagedMlCount: 1 });
+
+      const regions = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/synthese/regions"
+      );
+      expect(regions.data.regions.map((r: { code: string }) => r.code)).toEqual(["11"]);
+    });
+
+    it("Refuse à une DREETS une autre région", async () => {
+      expectForbidden(await deployment(DREETS_IDF, "?region=84"), "Accès non autorisé à cette région");
+    });
+
+    it("Un admin peut cibler n'importe quelle région", async () => {
+      const response = await deployment(ADMIN, "?region=84");
+      expect(response.data.summary).toMatchObject({ mlCount: 1, activatedMlCount: 1, engagedMlCount: 0 });
     });
   });
 

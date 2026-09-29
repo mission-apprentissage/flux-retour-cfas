@@ -702,34 +702,49 @@ const MOTIFS_PIPELINE = [
   },
 ];
 
-export async function getDeploymentStats(period: StatsPeriod = "30days") {
+export async function getDeploymentStats(period: StatsPeriod = "30days", scopeRegions?: string[]) {
   const evaluationDate = normalizeToUTCDay(new Date());
 
   const [summary, regional] = await Promise.all([getSummaryStats(evaluationDate, period), getRegionalStats(period)]);
 
-  const engagedMlCount = regional.regions.reduce((sum, r) => sum + r.ml_engagees, 0);
-  const previousEngagedMlCount = regional.regions.reduce((sum, r) => sum + (r.ml_engagees - r.ml_engagees_delta), 0);
+  const regions = scopeRegions?.length
+    ? regional.regions.filter((r) => scopeRegions.includes(r.code))
+    : regional.regions;
+
+  const engagedMlCount = regions.reduce((sum, r) => sum + r.ml_engagees, 0);
+  const previousEngagedMlCount = regions.reduce((sum, r) => sum + (r.ml_engagees - r.ml_engagees_delta), 0);
+
+  // Le national passe par getSummaryStats pour compter aussi les ML sans région.
+  const mlCounts = scopeRegions?.length
+    ? {
+        mlCount: regions.reduce((sum, r) => sum + r.ml_total, 0),
+        activatedMlCount: regions.reduce((sum, r) => sum + r.ml_activees, 0),
+        previousActivatedMlCount: regions.reduce((sum, r) => sum + (r.ml_activees - r.ml_activees_delta), 0),
+      }
+    : {
+        mlCount: summary.mlCount,
+        activatedMlCount: summary.activatedMlCount,
+        previousActivatedMlCount: summary.previousActivatedMlCount,
+      };
 
   return {
     summary: {
-      mlCount: summary.mlCount,
-      activatedMlCount: summary.activatedMlCount,
-      previousActivatedMlCount: summary.previousActivatedMlCount,
+      ...mlCounts,
       engagedMlCount,
       previousEngagedMlCount,
       date: summary.date,
     },
-    regionsActives: regional.regions.filter((r) => r.deployed).map((r) => r.code),
+    regionsActives: regions.filter((r) => r.deployed).map((r) => r.code),
     evaluationDate,
     period,
   };
 }
 
-export async function getSyntheseRegionsStats(period: StatsPeriod = "30days") {
+export async function getSyntheseRegionsStats(period: StatsPeriod = "30days", scopeRegions?: string[]) {
   const regional = await getRegionalStats(period);
 
   return {
-    regions: regional.regions,
+    regions: scopeRegions?.length ? regional.regions.filter((r) => scopeRegions.includes(r.code)) : regional.regions,
     period,
   };
 }

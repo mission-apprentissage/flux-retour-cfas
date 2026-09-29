@@ -16,6 +16,7 @@ import {
 
 import { ADMIN_DEFAULT_REGION_CODE } from "./access";
 import { StatistiquesLayoutBase } from "./StatistiquesLayoutBase";
+import styles from "./StatistiquesMLLayoutClient.module.css";
 
 const BASE_PATH = "/suivi-des-indicateurs";
 const ADMIN_REGION_CODES = REGIONS_WITH_SVG_SORTED.map((region) => region.code);
@@ -23,9 +24,14 @@ const ADMIN_REGION_CODES = REGIONS_WITH_SVG_SORTED.map((region) => region.code);
 interface StatistiquesMLLayoutClientProps {
   children: React.ReactNode;
   isAdmin?: boolean;
+  isDreets?: boolean;
 }
 
-export function StatistiquesMLLayoutClient({ children, isAdmin = false }: StatistiquesMLLayoutClientProps) {
+export function StatistiquesMLLayoutClient({
+  children,
+  isAdmin = false,
+  isDreets = false,
+}: StatistiquesMLLayoutClientProps) {
   const pathname = usePathname() ?? "";
   const { regions: ownRegions, isLoading } = useUserRegions();
   const userRegions = isAdmin ? ADMIN_REGION_CODES : ownRegions;
@@ -37,6 +43,14 @@ export function StatistiquesMLLayoutClient({ children, isAdmin = false }: Statis
     window.addEventListener("pageshow", reloadIfRestoredFromCache);
     return () => window.removeEventListener("pageshow", reloadIfRestoredFromCache);
   }, []);
+
+  if (isDreets) {
+    return (
+      <div className={styles.dreetsPage}>
+        <div className="fr-container">{children}</div>
+      </div>
+    );
+  }
 
   const isRegionPage = pathname.includes(`${BASE_PATH}/region/`) || pathname === `${BASE_PATH}/region`;
   const isMissionLocalePage = pathname === `${BASE_PATH}/mission-locale`;

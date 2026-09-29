@@ -1,7 +1,7 @@
 "use client";
 
 import { fr, type FrIconClassName, type RiIconClassName } from "@codegouvfr/react-dsfr";
-import { Button } from "@codegouvfr/react-dsfr/Button";
+import { Button, type ButtonProps } from "@codegouvfr/react-dsfr/Button";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import styles from "./DropdownMenu.module.css";
@@ -10,10 +10,19 @@ type DropdownMenuProps = {
   label: ReactNode;
   buttonIconId: FrIconClassName | RiIconClassName;
   ariaLabel?: string;
+  priority?: ButtonProps["priority"];
+  align?: "left" | "right";
   children: (api: { close: () => void; open: boolean }) => ReactNode;
 };
 
-export function DropdownMenu({ label, buttonIconId, ariaLabel, children }: DropdownMenuProps) {
+export function DropdownMenu({
+  label,
+  buttonIconId,
+  ariaLabel,
+  priority = "tertiary no outline",
+  align = "right",
+  children,
+}: DropdownMenuProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -68,7 +77,7 @@ export function DropdownMenu({ label, buttonIconId, ariaLabel, children }: Dropd
       <span data-dropdown-trigger>
         <Button
           iconId={buttonIconId}
-          priority="tertiary no outline"
+          priority={priority}
           aria-haspopup="menu"
           aria-expanded={open}
           aria-label={ariaLabel}
@@ -83,7 +92,7 @@ export function DropdownMenu({ label, buttonIconId, ariaLabel, children }: Dropd
       </span>
 
       {open && (
-        <ul className={styles.panel} role="menu" onClick={close}>
+        <ul className={`${styles.panel} ${align === "left" ? styles.panelLeft : ""}`} role="menu" onClick={close}>
           {children({ close, open })}
         </ul>
       )}
@@ -115,16 +124,18 @@ type DropdownMenuButtonProps = {
   icon?: FrIconClassName | RiIconClassName;
   separator?: boolean;
   danger?: boolean;
+  selected?: boolean;
   children: ReactNode;
 };
 
-export function DropdownMenuButton({ onClick, icon, separator, danger, children }: DropdownMenuButtonProps) {
+export function DropdownMenuButton({ onClick, icon, separator, danger, selected, children }: DropdownMenuButtonProps) {
   return (
     <li className={separator ? styles.separator : undefined}>
       <button
         type="button"
         role="menuitem"
-        className={`${styles.item} ${danger ? styles.danger : ""}`}
+        aria-current={selected || undefined}
+        className={`${styles.item} ${danger ? styles.danger : ""} ${selected ? styles.selected : ""}`}
         onClick={onClick}
       >
         {icon && <i className={`${fr.cx(icon, "fr-icon--sm")} ${styles.icon}`} aria-hidden="true" />}

@@ -5,6 +5,7 @@ import { DeploymentPanel } from "../sections/DeploymentPanel";
 import { RupturesSegmentPanel } from "../sections/RupturesSegmentPanel";
 import { WhatsAppPanel } from "../sections/WhatsAppPanel";
 import commonStyles from "../ui/common.module.css";
+import { StatsPageHeader } from "../ui/StatsPageHeader";
 import { StatsTabs, type StatsTab } from "../ui/StatsTabs";
 
 interface VueEnsembleViewProps {
@@ -41,6 +42,18 @@ export function VueEnsembleView({ isAdmin = false, isPublic = false }: VueEnsemb
       iconId: "fr-icon-chat-3-line",
       content: <WhatsAppPanel />,
     });
+  }
+
+  if (!isPublic) {
+    return (
+      <div>
+        <StatsPageHeader
+          title="Vue d'ensemble"
+          description="Retrouvez ici les chiffres des indicateurs principaux du déploiement et de l'activité des Missions Locales et des CFA sur le Tableau de bord de l'apprentissage sur le territoire de votre choix."
+        />
+        <StatsTabs tabs={tabs} />
+      </div>
+    );
   }
 
   return (

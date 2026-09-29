@@ -37,6 +37,11 @@ export type { OrganisationWithRegions };
 
 const mlIdSchema = z.string().regex(/^[0-9a-f]{24}$/);
 const periodQuery = z.object({ period: zStatsPeriod.optional() });
+const syntheseQuery = z.object({
+  period: zStatsPeriod.optional(),
+  region: z.string().optional(),
+  national: z.coerce.boolean().optional(),
+});
 const traitementQuery = z.object({
   period: zStatsPeriod.optional(),
   region: z.string().optional(),
@@ -87,12 +92,12 @@ export default () => {
 
   router.get(
     "/synthese/deployment",
-    validateRequestMiddleware({ query: periodQuery }),
+    validateRequestMiddleware({ query: syntheseQuery }),
     returnResult(getDeploymentRoute)
   );
   router.get(
     "/synthese/regions",
-    validateRequestMiddleware({ query: periodQuery }),
+    validateRequestMiddleware({ query: syntheseQuery }),
     returnResult(getSyntheseRegionsRoute)
   );
   router.get("/traitement", validateRequestMiddleware({ query: traitementQuery }), returnResult(getTraitementRoute));
@@ -143,30 +148,16 @@ export default () => {
   return router;
 };
 
-const getDeploymentRoute: IndicateursHandler<z.infer<typeof periodQuery>> = async (req, { locals }) => {
-  const { period } = req.query;
-  const regions = locals.regions;
+const getDeploymentRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = async (req, { locals }) => {
+  const scope = await resolveStatsScope(req.query, locals.regions);
 
-  const stats = await getDeploymentStats(period || "30days");
-
-  if (regions.length > 0) {
-    stats.regionsActives = stats.regionsActives.filter((code) => regions.includes(code));
-  }
-
-  return stats;
+  return await getDeploymentStats(req.query.period || "30days", scope.regions);
 };
 
-const getSyntheseRegionsRoute: IndicateursHandler<z.infer<typeof periodQuery>> = async (req, { locals }) => {
-  const { period } = req.query;
-  const regions = locals.regions;
+const getSyntheseRegionsRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = async (req, { locals }) => {
+  const scope = await resolveStatsScope(req.query, locals.regions);
 
-  const stats = await getSyntheseRegionsStats(period || "30days");
-
-  if (regions.length > 0) {
-    stats.regions = stats.regions.filter((r) => regions.includes(r.code));
-  }
-
-  return stats;
+  return await getSyntheseRegionsStats(req.query.period || "30days", scope.regions);
 };
 
 const assertRegionAllowed = (region: string | undefined, userRegions: string[]) => {
