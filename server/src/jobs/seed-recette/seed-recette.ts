@@ -1,3 +1,7 @@
+import { subDays } from "date-fns";
+import type { Collection, Document, OptionalUnlessRequiredId } from "mongodb";
+
+import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import parentLogger from "@/common/logger";
 import {
   effectifsDb,
@@ -11,6 +15,9 @@ import {
 } from "@/common/model/collections";
 import config from "@/config";
 
+import { buildCatalogue } from "./catalogue";
+import type { SeedDocs } from "./catalogue/types";
+import { loadSeedContext } from "./factories";
 import {
   cfaOrganisationIds,
   cfaOrganismeIds,
@@ -26,11 +33,14 @@ const logger = parentLogger.child({ module: "job:seed-recette" });
 
 const ALLOWED_ENVS = ["recette", "local", "test"];
 
+const ML_A_RDV_URL = "https://rdv.seed.recette.invalid/ml-a";
+
 interface SeedRecetteOptions {
   dryRun?: boolean;
   uninstall?: boolean;
   hosts?: SeedRecetteHosts;
   env?: string;
+  now?: Date;
 }
 
 export interface SeedRecettePurgeReport {
@@ -48,12 +58,21 @@ export interface SeedRecetteFlagsReport {
   organismes: number;
 }
 
+export interface SeedRecetteCreationReport {
+  effectifs: number;
+  effectifsDECA: number;
+  missionLocaleEffectif: number;
+  missionLocaleEffectifLog: number;
+  usersMigration: number;
+}
+
 export interface SeedRecetteReport {
   dryRun: boolean;
   uninstall: boolean;
   utilisateursNonFictifs: number;
   purge: SeedRecettePurgeReport;
   flagsRetires: SeedRecetteFlagsReport | null;
+  crees: SeedRecetteCreationReport | null;
 }
 
 export function assertSeedRecetteEnv(env: string) {
@@ -217,11 +236,52 @@ async function unsetHostFlags(hosts: SeedRecetteHosts, dryRun: boolean): Promise
   };
 }
 
+async function setMlHostFlags(hosts: SeedRecetteHosts, now: Date) {
+  await organisationsDb().updateOne(
+    { _id: hosts.missionsLocales.ML_A },
+    { $set: { activated_at: subDays(now, 180), rdv_url: ML_A_RDV_URL } }
+  );
+  await organisationsDb().updateOne({ _id: hosts.missionsLocales.ML_B }, { $unset: { activated_at: "", rdv_url: "" } });
+}
+
+async function insertDocs(docs: SeedDocs) {
+  const insert = async <T extends Document>(collection: Collection<T>, items: OptionalUnlessRequiredId<T>[]) => {
+    if (items.length > 0) await collection.insertMany(items);
+  };
+  await insert(effectifsDb(), docs.effectifs);
+  await insert(effectifsDECADb(), docs.effectifsDeca);
+  await insert(missionLocaleEffectifsDb(), docs.dossiers);
+  await insert(missionLocaleEffectifsLogDb(), docs.logs);
+  await insert(usersMigrationDb(), docs.users);
+}
+
+async function createSeed(hosts: SeedRecetteHosts, now: Date, dryRun: boolean): Promise<SeedRecetteCreationReport> {
+  if (!dryRun) {
+    await setMlHostFlags(hosts, now);
+  }
+  const ctx = await loadSeedContext(hosts, now);
+  const docs = await buildCatalogue(ctx);
+  if (!dryRun) {
+    await insertDocs(docs);
+    for (const mlId of mlOrganisationIds(hosts)) {
+      await createOrUpdateMissionLocaleStats(mlId);
+    }
+  }
+  return {
+    effectifs: docs.effectifs.length,
+    effectifsDECA: docs.effectifsDeca.length,
+    missionLocaleEffectif: docs.dossiers.length,
+    missionLocaleEffectifLog: docs.logs.length,
+    usersMigration: docs.users.length,
+  };
+}
+
 export async function seedRecette({
   dryRun = false,
   uninstall = false,
   hosts = HOSTS_RECETTE,
   env = config.env,
+  now = new Date(),
 }: SeedRecetteOptions = {}): Promise<SeedRecetteReport> {
   assertSeedRecetteEnv(env);
   await assertHostsExist(hosts);
@@ -236,8 +296,9 @@ export async function seedRecette({
 
   const purge = await purgeSeed(hosts, dryRun);
   const flagsRetires = uninstall ? await unsetHostFlags(hosts, dryRun) : null;
+  const crees = uninstall ? null : await createSeed(hosts, now, dryRun);
 
-  const report: SeedRecetteReport = { dryRun, uninstall, utilisateursNonFictifs, purge, flagsRetires };
+  const report: SeedRecetteReport = { dryRun, uninstall, utilisateursNonFictifs, purge, flagsRetires, crees };
   logger.info(report, dryRun ? "Seed recette simulé (dry-run)" : "Seed recette terminé");
   return report;
 }

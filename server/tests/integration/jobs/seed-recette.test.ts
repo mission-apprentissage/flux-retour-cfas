@@ -135,7 +135,7 @@ describe("seedRecette", () => {
     await expect(seedRecette({ hosts })).rejects.toThrow(/activité réelle/);
   });
 
-  it("purge le jeu fictif et ce qui s'y rattache, sans toucher au reste", async () => {
+  it("purge le jeu fictif et ce qui s'y rattache, sans toucher au reste (désinstallation)", async () => {
     const reel = { effectif: new ObjectId(), dossier: new ObjectId(), log: new ObjectId(), user: new ObjectId() };
     const dossierTesteur = new ObjectId();
     const logTesteur = new ObjectId();
@@ -172,7 +172,7 @@ describe("seedRecette", () => {
       ])
     );
 
-    const report = await seedRecette({ hosts });
+    const report = await seedRecette({ hosts, uninstall: true });
 
     expect(report.purge).toEqual({
       effectifs: 1,

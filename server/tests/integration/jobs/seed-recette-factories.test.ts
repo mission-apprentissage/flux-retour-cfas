@@ -1,16 +1,12 @@
 import { ObjectId } from "bson";
-import type { IOrganisationMissionLocale, IOrganisationOrganismeFormation, IOrganisme } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { buildOrgaMl, buildOrgaOf, buildOrganisme } from "@/common/actions/brevo/contacts/fixtures";
 import {
   effectifsDb,
   effectifsDECADb,
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogDb,
-  organisationsDb,
-  organismesDb,
   usersMigrationDb,
 } from "@/common/model/collections";
 import {
@@ -24,34 +20,12 @@ import {
   loadSeedContext,
   type SeedContext,
 } from "@/jobs/seed-recette/factories";
-import { CFA_HOST_CODES, type SeedRecetteHosts } from "@/jobs/seed-recette/hosts";
 import { isSeedId } from "@/jobs/seed-recette/seed-ids";
 import { useMongo } from "@tests/jest/setupMongo";
 
+import { insertSeedRecetteHosts } from "./seed-recette.hosts";
+
 const NOW = new Date("2026-09-29T10:00:00.000Z");
-
-async function insertHosts(): Promise<SeedRecetteHosts> {
-  const mlA = buildOrgaMl("ML A", { ml_id: 569, activated_at: new Date("2026-04-01T00:00:00.000Z") });
-  const { activated_at: _nonActivee, ...mlB } = buildOrgaMl("ML B", { ml_id: 39 });
-  await organisationsDb().insertMany([mlA as IOrganisationMissionLocale, mlB as IOrganisationMissionLocale]);
-
-  const cfas = {} as SeedRecetteHosts["cfas"];
-  for (const code of CFA_HOST_CODES) {
-    const orgaOf = buildOrgaOf();
-    const organisme = buildOrganisme(orgaOf, {
-      is_allowed_collab: code === "CFA_ON",
-      adresse: { region: "11", departement: "94", commune: "Cachan" },
-    });
-    await organismesDb().insertOne(organisme as IOrganisme);
-    await organisationsDb().insertOne({
-      ...orgaOf,
-      ...(code === "CFA_ON" ? { ml_beta_activated_at: new Date("2026-05-01T00:00:00.000Z") } : {}),
-    } as IOrganisationOrganismeFormation);
-    cfas[code] = { organisationId: orgaOf._id, organismeId: organisme._id };
-  }
-
-  return { missionsLocales: { ML_A: mlA._id, ML_B: mlB._id }, cfas };
-}
 
 const parcoursRupture = (ctx: SeedContext, joursDepuisRupture: number) => ({
   dateEntree: jour(ctx, -300),
@@ -65,7 +39,7 @@ describe("fabriques du seed recette", () => {
   let ctx: SeedContext;
 
   beforeEach(async () => {
-    const hosts = await insertHosts();
+    const hosts = await insertSeedRecetteHosts();
     ctx = await loadSeedContext(hosts, NOW);
   });
 

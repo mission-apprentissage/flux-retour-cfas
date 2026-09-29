@@ -124,14 +124,18 @@ export interface SeedPersonneInput {
   nom: string;
   age: number;
   rqth?: boolean;
+  dateDeNaissance?: Date;
 }
 
-export function buildPersonne(ctx: SeedContext, { n, nom, age, rqth = false }: SeedPersonneInput): SeedPersonne {
+export function buildPersonne(
+  ctx: SeedContext,
+  { n, nom, age, rqth = false, dateDeNaissance }: SeedPersonneInput
+): SeedPersonne {
   const prenom = PRENOMS[n % PRENOMS.length];
   return {
     nom,
     prenom,
-    date_de_naissance: subDays(subYears(ctx.today, age), 30 + (n % 300)),
+    date_de_naissance: dateDeNaissance ?? subDays(subYears(ctx.today, age), 30 + (n % 300)),
     sexe: n % 2 === 0 ? "F" : "M",
     telephone: `063998${String(n).padStart(4, "0")}`,
     courriel: `${slug(prenom)}.${slug(nom)}@${SEED_EMAIL_DOMAIN}`,
@@ -256,6 +260,17 @@ export function buildDossierMl(
   const derniereRupture = parcours.filter((s) => s.valeur === "RUPTURANT" && s.date <= ctx.now).at(-1);
   const dateRupture = derniereRupture?.date ?? current?.date ?? null;
   const created = createdAt ?? (dateRupture ? minDate(addDays(dateRupture, 1), ctx.now) : ctx.now);
+  const statutALaCreation = getCurrentStatutFromParcours(parcours, created);
+  const snapshot =
+    effectif._computed?.statut && statutALaCreation
+      ? {
+          ...effectif,
+          _computed: {
+            ...effectif._computed,
+            statut: { ...effectif._computed.statut, en_cours: statutALaCreation.valeur },
+          },
+        }
+      : { ...effectif };
 
   const { organisme, organisation } = ctx.cfas[cfa];
   const missionLocale = ctx.missionsLocales[ml];
@@ -265,7 +280,7 @@ export function buildDossierMl(
     _id: seedId("dossierMl", n),
     mission_locale_id: missionLocale._id,
     effectif_id: effectif._id,
-    effectif_snapshot: { ...effectif },
+    effectif_snapshot: snapshot,
     effectif_snapshot_date: created,
     date_rupture: dateRupture,
     created_at: created,
