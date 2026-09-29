@@ -4,13 +4,12 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { useState } from "react";
 
-import { StatCard } from "../cards/StatCard";
+import { CollaborationCards } from "../cards/CollaborationCards";
 import { DetailsDossiersTraitesPieChart } from "../charts/DetailsDossiersTraitesPieChart";
 import { ObjectifsBarChart } from "../charts/ObjectifsBarChart";
 import { SituationsPieChart } from "../charts/SituationsPieChart";
 import { isLoadingVariation } from "../hooks/useLoadingVariation";
 import { useCollaborationSegmentStats } from "../hooks/useStatsQueries";
-import { CfaInvitesSansCollabTable } from "../tables/CfaInvitesSansCollabTable";
 import { NoDataMessage } from "../ui/NoDataMessage";
 import { PeriodSelector, type Period } from "../ui/PeriodSelector";
 import { SegmentAboutText } from "../ui/SegmentAboutText";
@@ -28,7 +27,6 @@ interface CollaborationSegmentPanelProps {
   isAdmin?: boolean;
   suiviTraitement?: boolean;
   suiviTraitementTitle?: string;
-  cfaInvites?: boolean;
 }
 
 export function CollaborationSegmentPanel({
@@ -39,7 +37,6 @@ export function CollaborationSegmentPanel({
   isAdmin = false,
   suiviTraitement = false,
   suiviTraitementTitle = "Suivi traitement collaboration",
-  cfaInvites = false,
 }: CollaborationSegmentPanelProps) {
   const [period, setPeriod] = useState<Period>("30days");
   const { data, isLoading, isFetching, error } = useCollaborationSegmentStats({
@@ -65,38 +62,7 @@ export function CollaborationSegmentPanel({
             <NoDataMessage message="Aucun dossier de collaboration n'a encore été envoyé à cette Mission Locale." />
           ) : (
             <div className={styles.cards}>
-              <StatCard
-                label="Total CFA qui ont déjà collaboré au moins une fois"
-                value={data?.cfa_ayant_collabore.current}
-                variation={data?.cfa_ayant_collabore.variation}
-                loading={isLoading}
-                loadingPercentage={loadingVariation}
-                tooltip="CFA distincts ayant envoyé au moins un dossier de collaboration aux Missions Locales du périmètre."
-              />
-              <StatCard
-                label="Total jeunes envoyés par les CFA aux Missions Locales"
-                value={data?.jeunes_envoyes.current}
-                variation={data?.jeunes_envoyes.variation}
-                loading={isLoading}
-                loadingPercentage={loadingVariation}
-                tooltip="Dossiers de collaboration reçus par les Missions Locales, toutes situations confondues."
-              />
-              <StatCard
-                label="Total jeunes contactés par les Missions Locales"
-                value={data?.jeunes_contactes.current}
-                variation={data?.jeunes_contactes.variation}
-                loading={isLoading}
-                loadingPercentage={loadingVariation}
-                tooltip="Dossiers de collaboration pour lesquels la Mission Locale a renseigné une situation, y compris « à recontacter »."
-              />
-              <StatCard
-                label="Total jeunes ayant accepté l'accompagnement de la Mission Locale"
-                value={data?.jeunes_accompagnement_accepte.current}
-                variation={data?.jeunes_accompagnement_accepte.variation}
-                loading={isLoading}
-                loadingPercentage={loadingVariation}
-                tooltip="Dossiers de collaboration pour lesquels un rendez-vous a été pris avec la Mission Locale."
-              />
+              <CollaborationCards data={data} loading={isLoading} loadingPercentage={loadingVariation} />
             </div>
           )}
         </StatsErrorHandler>
@@ -186,8 +152,6 @@ export function CollaborationSegmentPanel({
           national={national}
         />
       )}
-
-      {cfaInvites && <CfaInvitesSansCollabTable />}
     </div>
   );
 }

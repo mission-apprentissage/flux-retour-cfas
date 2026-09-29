@@ -1,11 +1,13 @@
 "use client";
 
 import { CollaborationSegmentPanel } from "../sections/CollaborationSegmentPanel";
+import { CollaborationsOverviewSection } from "../sections/CollaborationsOverviewSection";
 import { DeploymentOverviewSection } from "../sections/DeploymentOverviewSection";
 import { DeploymentPanel } from "../sections/DeploymentPanel";
 import { RupturesOverviewSection } from "../sections/RupturesOverviewSection";
 import { RupturesSegmentPanel } from "../sections/RupturesSegmentPanel";
 import { WhatsAppPanel } from "../sections/WhatsAppPanel";
+import { CfaInvitesSansCollabTable } from "../tables/CfaInvitesSansCollabTable";
 import commonStyles from "../ui/common.module.css";
 import { StatsPageHeader } from "../ui/StatsPageHeader";
 import { StatsTabs, type StatsTab } from "../ui/StatsTabs";
@@ -15,37 +17,49 @@ interface VueEnsembleViewProps {
   isPublic?: boolean;
 }
 
+const ADMIN_TABS: StatsTab[] = [
+  {
+    id: "deploiement",
+    label: "Déploiement aux CFA",
+    iconId: "fr-icon-line-chart-line",
+    content: <DeploymentPanel isAdmin withMissionLocales={false} />,
+  },
+  {
+    id: "cfa-invites",
+    label: "CFA invités sans collaboration",
+    iconId: "fr-icon-team-line",
+    content: <CfaInvitesSansCollabTable />,
+  },
+  {
+    id: "whatsapp",
+    label: "Messages WhatsApp",
+    iconId: "fr-icon-chat-3-line",
+    content: <WhatsAppPanel />,
+  },
+];
+
+const PUBLIC_TABS: StatsTab[] = [
+  {
+    id: "ruptures",
+    label: "Suivi ruptures",
+    iconId: "fr-icon-file-text-line",
+    content: <RupturesSegmentPanel national isPublic />,
+  },
+  {
+    id: "deploiement",
+    label: "Suivi déploiement",
+    iconId: "fr-icon-line-chart-line",
+    content: <DeploymentPanel />,
+  },
+  {
+    id: "collaborations",
+    label: "Suivi collaborations",
+    iconId: "fr-icon-team-line",
+    content: <CollaborationSegmentPanel national isPublic />,
+  },
+];
+
 export function VueEnsembleView({ isAdmin = false, isPublic = false }: VueEnsembleViewProps) {
-  const tabs: StatsTab[] = [
-    {
-      id: "ruptures",
-      label: "Suivi ruptures",
-      iconId: "fr-icon-file-text-line",
-      content: <RupturesSegmentPanel national isPublic={isPublic} />,
-    },
-    {
-      id: "deploiement",
-      label: "Suivi déploiement",
-      iconId: "fr-icon-line-chart-line",
-      content: <DeploymentPanel isAdmin={isAdmin} />,
-    },
-    {
-      id: "collaborations",
-      label: "Suivi collaborations",
-      iconId: "fr-icon-team-line",
-      content: <CollaborationSegmentPanel national isPublic={isPublic} cfaInvites={isAdmin} />,
-    },
-  ];
-
-  if (isAdmin) {
-    tabs.push({
-      id: "whatsapp",
-      label: "Messages WhatsApp",
-      iconId: "fr-icon-chat-3-line",
-      content: <WhatsAppPanel />,
-    });
-  }
-
   if (!isPublic) {
     return (
       <div>
@@ -55,19 +69,8 @@ export function VueEnsembleView({ isAdmin = false, isPublic = false }: VueEnsemb
         />
         <RupturesOverviewSection />
         <DeploymentOverviewSection isAdmin={isAdmin} />
-        <StatsTabs
-          tabs={tabs
-            .filter((tab) => tab.id !== "ruptures")
-            .map((tab) =>
-              tab.id === "deploiement"
-                ? {
-                    ...tab,
-                    label: "Déploiement aux CFA",
-                    content: <DeploymentPanel isAdmin={isAdmin} withMissionLocales={false} />,
-                  }
-                : tab
-            )}
-        />
+        <CollaborationsOverviewSection />
+        {isAdmin && <StatsTabs tabs={ADMIN_TABS} />}
       </div>
     );
   }
@@ -83,7 +86,7 @@ export function VueEnsembleView({ isAdmin = false, isPublic = false }: VueEnsemb
         <h2 className={commonStyles.headerTitle}>Vue d&apos;ensemble</h2>
       </div>
 
-      <StatsTabs tabs={tabs} />
+      <StatsTabs tabs={PUBLIC_TABS} />
     </div>
   );
 }
