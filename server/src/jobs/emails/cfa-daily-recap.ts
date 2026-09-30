@@ -41,61 +41,22 @@ export async function sendCfaDailyRecap() {
       );
 
       for (const mlData of cfaStat.missions_locales) {
-        let organisation, users, userId;
-
-        if (mlData.acc_conjoint_by) {
-          userId = new ObjectId(mlData.acc_conjoint_by.toString());
-          const result = await getCfaUsers(cfaStat.cfa._id, userId);
-          organisation = result.organisation;
-          users = result.users;
-
-          if (users.length === 0) {
-            logger.warn(
-              {
-                cfa_nom: cfaStat.cfa.nom,
-                ml_nom: mlData.mission_locale.nom,
-                user_id: userId.toString(),
-              },
-              "Specific user not found - fallback to all CFA users"
-            );
-
-            const fallbackResult = await getCfaUsers(cfaStat.cfa._id);
-            organisation = fallbackResult.organisation;
-            users = fallbackResult.users;
-            userId = undefined;
-          }
-        } else {
-          const result = await getCfaUsers(cfaStat.cfa._id);
-          organisation = result.organisation;
-          users = result.users;
-          userId = undefined;
-
-          logger.info(
-            {
-              cfa_nom: cfaStat.cfa.nom,
-              ml_nom: mlData.mission_locale.nom,
-            },
-            "No acc_conjoint_by - using historical behavior (all CFA users)"
-          );
-        }
+        const userId = new ObjectId(mlData.acc_conjoint_by.toString());
+        const { organisation, users } = await getCfaUsers(cfaStat.cfa._id, userId);
 
         if (!organisation) {
-          logger.warn(
-            { cfa_id: cfaStat.cfa._id },
-            "No pilote organization found for CFA (not participating in ML beta)"
-          );
+          logger.warn({ cfa_id: cfaStat.cfa._id }, "No organisation found for CFA");
           continue;
         }
 
         if (users.length === 0) {
-          const userType = userId ? "specific and fallback users" : "confirmed users";
           logger.warn(
             {
               cfa_nom: cfaStat.cfa.nom,
               ml_nom: mlData.mission_locale.nom,
-              user_id: userId?.toString(),
+              user_id: userId.toString(),
             },
-            `No ${userType} found for CFA`
+            "Collab user not found or not confirmed for CFA"
           );
           continue;
         }
