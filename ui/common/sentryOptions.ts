@@ -36,7 +36,7 @@ export function buildUiSentryOptions(runtime: UiRuntime) {
     enabled: publicConfig.env !== "local",
     release: publicConfig.version,
     normalizeDepth: 8,
-    initialScope: { tags: { runtime } },
+    initialScope: { tags: { app_runtime: runtime } },
     ignoreErrors: ignoreErrorsFor(dropReasons),
     // Les frames tierces ne concernent que le navigateur.
     ...(runtime === "next-client" ? { denyUrls: [...DENY_URLS] } : {}),

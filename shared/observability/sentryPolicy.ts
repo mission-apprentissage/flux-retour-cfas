@@ -42,7 +42,7 @@ export const DEFAULT_ALERT_TIER: AlertTier = "veille";
 export const TAG_ALLOWLIST: readonly string[] = [
   // contrat d'alerte
   "alert_tier",
-  "runtime",
+  "app_runtime",
   "error_kind",
   "http_status_class",
   "route_group",
