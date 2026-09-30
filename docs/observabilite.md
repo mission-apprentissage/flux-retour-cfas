@@ -13,17 +13,19 @@ et `server/src/common/services/sentry/`.
 Chaque événement porte un tag `alert_tier`. C'est lui, et lui seul, qui décide de la
 notification.
 
-| Niveau   | Ce que ça veut dire                                                                                                | Où ça arrive                                  | Ce qu'on attend                          |
-| -------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- | ---------------------------------------- |
-| `oncall` | Le service est inutilisable pour une population entière, ou on perd de la donnée usager sans pouvoir la rattraper. | `#tableau-de-bord-alerting`, **avec `@here`** | Prise en charge sous 30 min              |
-| `jour`   | Une fonction est cassée ou dégradée, l'impact usager est visible, mais le rattrapage peut attendre.                | `#tableau-de-bord-alerting`, sans mention     | Traité avant la fin de la journée ouvrée |
-| `veille` | Signal de qualité exploitable, aucune décision immédiate.                                                          | Nulle part — vue Sentry + Metabase            | Revue de sprint                          |
+| Niveau   | Ce que ça veut dire                                                                                                | Où ça arrive                                 | Ce qu'on attend                          |
+| -------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- | ---------------------------------------- |
+| `oncall` | Le service est inutilisable pour une population entière, ou on perd de la donnée usager sans pouvoir la rattraper. | `#tdb-alerting-production`, **avec `@here`** | Prise en charge sous 30 min              |
+| `jour`   | Une fonction est cassée ou dégradée, l'impact usager est visible, mais le rattrapage peut attendre.                | `#tdb-alerting-production`, sans mention     | Traité avant la fin de la journée ouvrée |
+| `veille` | Signal de qualité exploitable, aucune décision immédiate.                                                          | Nulle part — vue Sentry + Metabase           | Revue de sprint                          |
 
-Les deux premiers niveaux partagent le même canal, faute de canal dédié aux
-incidents. C'est la **mention** qui les sépare, et c'est elle qui fait le travail :
-un message sans mention ne sort personne de sa tâche. Si le volume de `oncall`
-rendait un jour le canal illisible, un canal séparé redeviendrait utile — la règle
-d'alerte est le seul endroit à changer.
+Les canaux Slack sont organisés **par environnement**, pas par sévérité :
+`#tdb-alerting-production` et `#tdb-alerting-recette`. Les deux premiers niveaux
+partagent donc le même canal, et c'est la **mention** qui les sépare — c'est elle qui
+fait le travail, un message sans mention ne sort personne de sa tâche.
+
+Hors production, tout part dans `#tdb-alerting-recette`, sans mention. Cela permet
+d'observer le comportement réel des alertes pendant un test sans réveiller personne.
 
 **Le test qui tranche les cas limites** : si personne ne sait quoi faire en recevant
 l'alerte à trois heures du matin, ce n'est pas un `oncall`. Si personne ne va la lire
