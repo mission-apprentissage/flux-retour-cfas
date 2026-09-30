@@ -30,11 +30,13 @@ export interface DoublonObsolete {
   jumeau_organisme_id: ObjectId;
   jumeau_derniere_transmission: Date;
   ecart_jours: number;
+  jours_sans_transmission: number;
   categorie: CategorieDoublon;
   liens: {
     ml: boolean;
     jumeau_ml: boolean;
     france_travail: boolean;
+    jumeau_france_travail: boolean;
     voeux: boolean;
   };
 }
@@ -133,7 +135,7 @@ async function chargerGroupes(annees: string[]): Promise<Groupe[]> {
     .toArray();
 }
 
-function classerGroupe(groupe: Groupe, seuilJours: number): DoublonObsolete[] {
+function classerGroupe(groupe: Groupe, seuilJours: number, date: Date): DoublonObsolete[] {
   const docs = groupe.docs.filter((d): d is DocGroupe & { transmitted_at: Date } => d.transmitted_at instanceof Date);
   if (docs.length < 2) {
     return [];
@@ -143,9 +145,13 @@ function classerGroupe(groupe: Groupe, seuilJours: number): DoublonObsolete[] {
   return docs
     .filter((doc) => !doc._id.equals(jumeau._id))
     .map((doc) => {
-      const ecart = differenceInDays(jumeau.transmitted_at, doc.transmitted_at);
+      const joursSansTransmission = differenceInDays(date, doc.transmitted_at);
       const categorie: CategorieDoublon =
-        doc.identite !== jumeau.identite ? "identite_differente" : ecart >= seuilJours ? "supprimable" : "oscillation";
+        doc.identite !== jumeau.identite
+          ? "identite_differente"
+          : joursSansTransmission >= seuilJours
+            ? "supprimable"
+            : "oscillation";
       return {
         effectif_id: doc._id,
         organisme_id: doc.organisme_id,
@@ -157,9 +163,10 @@ function classerGroupe(groupe: Groupe, seuilJours: number): DoublonObsolete[] {
         jumeau_id: jumeau._id,
         jumeau_organisme_id: jumeau.organisme_id,
         jumeau_derniere_transmission: jumeau.transmitted_at,
-        ecart_jours: ecart,
+        ecart_jours: differenceInDays(jumeau.transmitted_at, doc.transmitted_at),
+        jours_sans_transmission: joursSansTransmission,
         categorie,
-        liens: { ml: false, jumeau_ml: false, france_travail: false, voeux: false },
+        liens: { ml: false, jumeau_ml: false, france_travail: false, jumeau_france_travail: false, voeux: false },
       };
     });
 }
@@ -185,7 +192,7 @@ async function renseignerLiens(fiches: DoublonObsolete[]): Promise<void> {
   const jumeaux = fiches.map((f) => f.jumeau_id);
   const [ml, ft, voeux] = await Promise.all([
     idsLies(missionLocaleEffectifsDb, [...ids, ...jumeaux], { soft_deleted: { $ne: true } }),
-    idsLies(franceTravailEffectifsDb, ids, { soft_deleted: { $ne: true } }),
+    idsLies(franceTravailEffectifsDb, [...ids, ...jumeaux], { soft_deleted: { $ne: true } }),
     idsLies(voeuxAffelnetDb, ids),
   ]);
   for (const fiche of fiches) {
@@ -193,6 +200,7 @@ async function renseignerLiens(fiches: DoublonObsolete[]): Promise<void> {
       ml: ml.has(fiche.effectif_id.toString()),
       jumeau_ml: ml.has(fiche.jumeau_id.toString()),
       france_travail: ft.has(fiche.effectif_id.toString()),
+      jumeau_france_travail: ft.has(fiche.jumeau_id.toString()),
       voeux: voeux.has(fiche.effectif_id.toString()),
     };
   }
@@ -225,7 +233,7 @@ export async function rapportDoublonsObsoletes({
   logger.info({ seuilJours, annees }, "Début du rapport des doublons obsolètes");
 
   const groupes = await chargerGroupes(annees);
-  const fiches = groupes.flatMap((groupe) => classerGroupe(groupe, seuilJours));
+  const fiches = groupes.flatMap((groupe) => classerGroupe(groupe, seuilJours, date));
   await renseignerLiens(fiches);
 
   const parOrganisme = new Map<string, Compteurs>();

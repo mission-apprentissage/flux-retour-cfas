@@ -90,8 +90,9 @@ describe("rapportDoublonsObsoletes", () => {
       jumeau_id: jumeau._id,
       jumeau_organisme_id: recent._id,
       ecart_jours: 45,
+      jours_sans_transmission: 45,
       categorie: "supprimable",
-      liens: { ml: false, jumeau_ml: false, france_travail: false, voeux: false },
+      liens: { ml: false, jumeau_ml: false, france_travail: false, jumeau_france_travail: false, voeux: false },
     });
     expect(rapport.par_organisme).toEqual([
       expect.objectContaining({ organisme_id: ancien._id.toString(), nom: "CMAR NOUVELLE AQUITAINE", supprimable: 1 }),
@@ -110,6 +111,21 @@ describe("rapportDoublonsObsoletes", () => {
       organisme_id: ancien._id,
       ecart_jours: 5,
       categorie: "oscillation",
+    });
+  });
+
+  it("classe supprimable une fiche figée depuis plus de 30 jours même si son jumeau ne bouge plus non plus", async () => {
+    await insererEffectif({ organisme: ancien, idErp: "B3", transmisIlYa: 60 });
+    await insererEffectif({ organisme: recent, idErp: "B3", transmisIlYa: 58 });
+
+    const rapport = await rapportDoublonsObsoletes({ date: NOW });
+
+    expect(rapport.par_categorie).toEqual({ supprimable: 1, oscillation: 0, identite_differente: 0 });
+    expect(rapport.fiches_detail[0]).toMatchObject({
+      organisme_id: ancien._id,
+      ecart_jours: 2,
+      jours_sans_transmission: 60,
+      categorie: "supprimable",
     });
   });
 
@@ -158,13 +174,22 @@ describe("rapportDoublonsObsoletes", () => {
       testDoc<IMissionLocaleEffectif>({ effectif_id: fiche._id, mission_locale_id: new ObjectId() }),
       testDoc<IMissionLocaleEffectif>({ effectif_id: jumeau._id, mission_locale_id: new ObjectId() }),
     ]);
-    await franceTravailEffectifsDb().insertOne(testDoc<IFranceTravailEffectif>({ effectif_id: fiche._id }));
+    await franceTravailEffectifsDb().insertMany([
+      testDoc<IFranceTravailEffectif>({ effectif_id: fiche._id }),
+      testDoc<IFranceTravailEffectif>({ effectif_id: jumeau._id }),
+    ]);
     await voeuxAffelnetDb().insertOne(testDoc<IVoeuAffelnet>({ effectif_id: fiche._id }));
 
     const rapport = await rapportDoublonsObsoletes({ date: NOW });
 
     expect(rapport.liens).toEqual({ ml: 1, france_travail: 1, voeux: 1 });
-    expect(rapport.fiches_detail[0].liens).toEqual({ ml: true, jumeau_ml: true, france_travail: true, voeux: true });
+    expect(rapport.fiches_detail[0].liens).toEqual({
+      ml: true,
+      jumeau_ml: true,
+      france_travail: true,
+      jumeau_france_travail: true,
+      voeux: true,
+    });
     expect(rapport.par_organisme[0].avec_lien).toBe(1);
   });
 

@@ -317,6 +317,15 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("classifier:score-effectifs"));
 
+program
+  .command("effectifs:doublons-obsoletes")
+  .description("Rapporte, sans écrire, les effectifs en doublon obsolètes après changement d'organisme formateur")
+  .option("--seuil-jours <number>", "Jours sans transmission au-delà desquels une fiche est supprimable", (n) =>
+    parseInt(n, 10)
+  )
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("effectifs:doublons-obsoletes"));
+
 /**
  * Job de lancement des scripts de fiabilisation des couples UAI SIRET
  */

@@ -18,6 +18,8 @@ import {
 import { hydrateInscritSansContrat } from "../hydrate/france-travail/hydrate-france-travail";
 import { updateMissionLocaleEffectifCurrentStatus } from "../hydrate/mission-locale/hydrate-mission-locale";
 
+import { payloadNumber } from "./payload";
+
 export const effectifsJobs = {
   "hydrate:effectifs:update_all_computed_statut": {
     handler: async (job, signal) => {
@@ -77,8 +79,7 @@ export const effectifsJobs = {
   },
   "effectifs:doublons-obsoletes": {
     handler: async (job) => {
-      const payload = job.payload as { seuilJours?: number } | undefined;
-      return rapportDoublonsObsoletes({ seuilJours: payload?.seuilJours });
+      return rapportDoublonsObsoletes({ seuilJours: payloadNumber(job.payload, "seuilJours") });
     },
   },
 } satisfies Record<string, JobDef>;
