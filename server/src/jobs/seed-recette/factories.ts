@@ -170,7 +170,7 @@ export function buildPersonne(
     prenom,
     date_de_naissance,
     sexe,
-    telephone: `063998${String(n).padStart(4, "0")}`,
+    telephone: `060000${String(n).padStart(4, "0")}`,
     courriel: email(prenom, nom),
     rqth,
   };
