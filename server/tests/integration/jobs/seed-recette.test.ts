@@ -7,6 +7,7 @@ import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocale
 import type { IOrganisation } from "shared/models/data/organisations.model";
 import type { IOrganisme } from "shared/models/data/organismes.model";
 import type { IUsersMigration } from "shared/models/data/usersMigration.model";
+import { extensions } from "shared/models/parts/zodPrimitives";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
@@ -281,5 +282,26 @@ describe("seedRecette", () => {
       rdv_url: expect.any(String),
     });
     expect(await organisationsDb().findOne({ _id: hosts.missionsLocales.ML_B })).not.toHaveProperty("activated_at");
+  });
+
+  it("ne génère que des téléphones acceptés par la validation serveur", async () => {
+    await seedRecette({ hosts });
+
+    const telephones = new Set<string>();
+    const collecter = (valeur: unknown, cle = ""): void => {
+      if (typeof valeur === "string") {
+        if (/phone|telephone/i.test(cle)) telephones.add(valeur);
+      } else if (Array.isArray(valeur)) {
+        valeur.forEach((v) => collecter(v, cle));
+      } else if (valeur && typeof valeur === "object" && !(valeur instanceof ObjectId) && !(valeur instanceof Date)) {
+        Object.entries(valeur).forEach(([k, v]) => collecter(v, k));
+      }
+    };
+    for (const { name } of await getDatabase().listCollections().toArray()) {
+      (await getDatabase().collection(name).find().toArray()).forEach((doc) => collecter(doc));
+    }
+
+    expect(telephones.size).toBeGreaterThan(0);
+    expect([...telephones].filter((t) => !extensions.phone().safeParse(t).success)).toEqual([]);
   });
 });

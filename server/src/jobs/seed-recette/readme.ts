@@ -78,7 +78,7 @@ export function renderReadme(): string {
     "- La purge ne touche que le jeu fictif : `_id` en `5eed`, dossiers des ML hôtes créés sur un effectif fictif, invitations émises par un compte fictif.",
     "- Si un vrai dossier porte déjà le même nom, prénom et date de naissance qu'un jeune fictif, la date de naissance fictive est décalée de quelques jours (l'index est unique sur toutes les ML).",
     "- Tous les `_id` créés commencent par `5eed` ; les URL ci-dessous restent valides d'une nuit à l'autre.",
-    "- Identités fictives : e-mails en `@example.com` (domaine réservé), téléphones dans la plage de fiction ARCEP 06 39 98.",
+    "- Identités fictives : e-mails en `@example.com` (domaine réservé), téléphones en 06 00 00 (plage de fiction ARCEP 06 39 98 rejetée par la validation serveur).",
     "- WhatsApp : hors production, aucun envoi sans `MNA_TDB_WHATSAPP_TEST_PHONE_OVERRIDE`, et tout part alors vers ce seul numéro.",
     "",
     "## Hôtes (organisations réelles de recette)",

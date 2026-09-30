@@ -25,7 +25,7 @@ const MODELE_CLASSIFIER = "2026-03-16";
 const RDV_REDIRECT_URL = "https://rdv.seed.recette.invalid/ml-a";
 
 const logN = (n: number) => n * 10;
-const telephone = (n: number) => `+33639980${String(n).padStart(3, "0")}`;
+const telephone = (n: number) => `+33600000${String(n).padStart(3, "0")}`;
 
 type Envoi = Pick<IWhatsAppContact, "message_status" | "conversation_state"> & {
   template: "injoignables" | "prequalif";

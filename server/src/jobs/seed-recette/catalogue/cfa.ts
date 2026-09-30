@@ -344,7 +344,7 @@ export const COLLAB_CASES: SeedCase[] = [
             referent_coordonnees: "Julien Carpentier, chargé de relations entreprises – 01 99 00 12 34",
             note_complementaire: "Le jeune préfère être contacté par SMS.",
             verified_info: {
-              telephone: "0639980037",
+              telephone: "0600000037",
               courriel: email(identite(37).prenom, identite(37).nom),
               adresse_rue: "12 rue Marat",
               adresse_code_postal: "94200",

@@ -1,5 +1,6 @@
 import { ObjectId } from "bson";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { extensions } from "shared/models/parts/zodPrimitives";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
@@ -50,7 +51,8 @@ describe("fabriques du seed recette", () => {
     expect(mineur.date_de_naissance > new Date("2008-09-29T00:00:00.000Z")).toBe(true);
     expect(mineur.date_de_naissance < new Date("2009-09-29T00:00:00.000Z")).toBe(true);
     expect(rqth.rqth).toBe(true);
-    expect(mineur.telephone).toBe("0639980003");
+    expect(mineur.telephone).toBe("0600000003");
+    expect(extensions.phone().safeParse(mineur.telephone).success).toBe(true);
     expect(mineur.courriel).toBe("hugo.thomas@example.com");
     expect(mineur.sexe).toBe("M");
   });
