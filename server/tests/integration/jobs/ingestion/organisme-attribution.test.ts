@@ -22,6 +22,8 @@ const UAI_LIEU_CHEZ_GENECH = "0141991N";
 const CMAR_HDF = { uai: "0593321P", siret: "13002374000439" };
 const ROUVIGNIES = { uai: "0597044L", siret: "13002374000272" };
 const UAI_TRITH = "0597346P";
+const ABBEVILLE = { uai: "0802203K", siret: "13002374000389" };
+const ROBERVAL = { uai: "0601787S", siret: "19600005300013" };
 
 const FORINVAL = { uai: "0802084F", siret: "18800864300010" };
 const FELIX_FAURE = { uai: "0600001A", siret: "19600001200019" };
@@ -158,6 +160,28 @@ describe("Attribution de l'organisme à l'ingestion", () => {
     expect(effectif?.organisme_responsable_id).toEqual(lemonnier._id);
   });
 
+  it("applique le même surclassement au responsable", async () => {
+    mockRecherche(LEMONNIER, reponseExacte(LEMONNIER));
+    mockRecherche({ uai: UAI_LIEU_CHEZ_GENECH, siret: LEMONNIER.siret }, reponseParLieu(GENECH, LEMONNIER));
+    const { insertedId } = await effectifsQueueDb().insertOne(
+      dossier(LEMONNIER, lemonnier._id.toString(), { uai: UAI_LIEU_CHEZ_GENECH, siret: LEMONNIER.siret })
+    );
+
+    await processEffectifsQueue();
+
+    const queue = await effectifsQueueDb().findOne({ _id: insertedId });
+    expect(queue).toMatchObject({
+      has_error: false,
+      organisme_id: lemonnier._id,
+      organisme_attribution: {
+        formateur: { mode: "exact", uai: LEMONNIER.uai, siret: LEMONNIER.siret },
+        responsable: { mode: "transmetteur", uai: LEMONNIER.uai, siret: LEMONNIER.siret },
+      },
+    });
+    const effectif = await effectifsDb().findOne({ _id: queue?.effectif_id ?? undefined });
+    expect(effectif?.organisme_responsable_id).toEqual(lemonnier._id);
+  });
+
   it("retient un formateur déclaré du transmetteur quand l'API rattache à la tête de réseau par lieu", async () => {
     const rouvigniesId = new ObjectId();
     const hdf = organisme(CMAR_HDF, { organismesFormateurs: [{ _id: rouvigniesId, ...ROUVIGNIES }] });
@@ -186,6 +210,75 @@ describe("Attribution de l'organisme à l'ingestion", () => {
     const effectif = await effectifsDb().findOne({ _id: queue?.effectif_id ?? undefined });
     expect(effectif?.organisme_id).toEqual(rouvignies._id);
     expect(effectif?.organisme_responsable_id).toEqual(hdf._id);
+  });
+
+  it("retient un organisme qui déclare le transmetteur comme responsable quand l'API rattache par lieu", async () => {
+    const hdfId = new ObjectId();
+    const hdf = { ...organisme(CMAR_HDF), _id: hdfId };
+    const rouvignies = organisme(ROUVIGNIES, { organismesResponsables: [{ _id: hdfId, ...CMAR_HDF }] });
+    await organismesDb().insertMany([hdf, rouvignies]);
+    mockRecherche(
+      { uai: UAI_TRITH, siret: ROUVIGNIES.siret },
+      reponseParLieu(CMAR_HDF, ROUVIGNIES, { lui_meme: false, son_formateur: true, son_responsable: false })
+    );
+    mockRecherche(CMAR_HDF, reponseExacte(CMAR_HDF));
+    const { insertedId } = await effectifsQueueDb().insertOne(
+      dossier({ uai: UAI_TRITH, siret: ROUVIGNIES.siret }, hdf._id.toString(), CMAR_HDF)
+    );
+
+    await processEffectifsQueue();
+
+    const queue = await effectifsQueueDb().findOne({ _id: insertedId });
+    expect(queue).toMatchObject({
+      has_error: false,
+      organisme_id: rouvignies._id,
+      organisme_attribution: { formateur: { mode: "famille", uai: ROUVIGNIES.uai, siret: ROUVIGNIES.siret } },
+    });
+  });
+
+  it("conserve le rattachement par lieu quand le SIRET envoyé est fermé au référentiel", async () => {
+    const hdf = organisme(CMAR_HDF);
+    const abbeville = organisme(ABBEVILLE, { ferme: true, organismesResponsables: [{ _id: hdf._id, ...CMAR_HDF }] });
+    await organismesDb().insertMany([hdf, abbeville]);
+    mockRecherche(ABBEVILLE, reponseParLieu(CMAR_HDF, ABBEVILLE));
+    mockRecherche(CMAR_HDF, reponseExacte(CMAR_HDF));
+    const { insertedId } = await effectifsQueueDb().insertOne(dossier(ABBEVILLE, hdf._id.toString(), CMAR_HDF));
+
+    await processEffectifsQueue();
+
+    const queue = await effectifsQueueDb().findOne({ _id: insertedId });
+    expect(queue).toMatchObject({
+      has_error: false,
+      organisme_id: hdf._id,
+      organisme_attribution: { formateur: { mode: "lieu", uai: CMAR_HDF.uai, siret: CMAR_HDF.siret } },
+    });
+  });
+
+  it("mémorise une UAI retenue nulle quand le référentiel ne connaît pas d'UAI pour le SIRET", async () => {
+    const roberval = organisme(ROBERVAL, { uai: null });
+    await organismesDb().insertOne(roberval);
+    mockRecherche(ROBERVAL, {
+      metadata: metadataOk,
+      resultat: {
+        ...organismeApi(ROBERVAL, {
+          uai: null,
+          siret: { lui_meme: true, son_formateur: false, son_responsable: false },
+        }),
+        organisme: { identifiant: { uai: null, siret: ROBERVAL.siret } },
+      },
+      candidats: [],
+    });
+    mockRecherche(LEMONNIER, reponseExacte(LEMONNIER));
+    const { insertedId } = await effectifsQueueDb().insertOne(dossier(ROBERVAL, lemonnier._id.toString()));
+
+    await processEffectifsQueue();
+
+    const queue = await effectifsQueueDb().findOne({ _id: insertedId });
+    expect(queue).toMatchObject({
+      has_error: false,
+      organisme_id: roberval._id,
+      organisme_attribution: { formateur: { mode: "siret", uai: null, siret: ROBERVAL.siret } },
+    });
   });
 
   it("conserve le rattachement par lieu quand le SIRET envoyé n'est ni le transmetteur ni sa famille", async () => {
@@ -230,7 +323,7 @@ describe("Attribution de l'organisme à l'ingestion", () => {
     });
   });
 
-  it("mémorise l'absence d'attribution quand l'API est injoignable", async () => {
+  it("mémorise l'indisponibilité de l'API quand la recherche d'organisme échoue", async () => {
     nock(API).get("/organisme/v1/recherche").query(true).replyWithError("API indisponible").persist();
     const { insertedId } = await effectifsQueueDb().insertOne(dossier(CFPPA_65, cfppa._id.toString(), CFPPA_65));
 
@@ -241,8 +334,8 @@ describe("Attribution de l'organisme à l'ingestion", () => {
       has_error: false,
       organisme_id: cfppa._id,
       organisme_attribution: {
-        formateur: { mode: "aucun", uai: CFPPA_65.uai, siret: CFPPA_65.siret },
-        responsable: { mode: "aucun", uai: CFPPA_65.uai, siret: CFPPA_65.siret },
+        formateur: { mode: "indisponible", uai: CFPPA_65.uai, siret: CFPPA_65.siret },
+        responsable: { mode: "indisponible", uai: CFPPA_65.uai, siret: CFPPA_65.siret },
       },
     });
   });

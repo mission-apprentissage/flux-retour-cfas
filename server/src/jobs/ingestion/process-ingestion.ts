@@ -285,6 +285,8 @@ interface OrganismeSearchStatsInfos {
   fiabilisation?: "FIABLE" | "NON_FIABLE" | "INCONNU";
   found?: boolean;
   attribution?: IAttributionOrganisme["mode"];
+  uai_retenue?: string | null;
+  siret_retenu?: string | null;
 }
 
 function attributionDepuisStats(
@@ -297,8 +299,8 @@ function attributionDepuisStats(
   }
   return {
     mode,
-    uai: infos[`${prefixe}uai_corrige`] ?? infos[`${prefixe}uai`] ?? null,
-    siret: infos[`${prefixe}siret_corrige`] ?? infos[`${prefixe}siret`] ?? null,
+    uai: infos[`${prefixe}uai_retenue`] ?? null,
+    siret: infos[`${prefixe}siret_retenu`] ?? null,
   };
 }
 
@@ -559,16 +561,17 @@ async function surclasserParTransmetteur(
       ? {}
       : { ...projection, uai: 1, siret: 1, organismesFormateurs: 1, organismesResponsables: 1 };
   const candidats = await organismesDb()
-    .find({ siret, ferme: { $ne: true } }, { projection: projectionCandidats })
+    .find({ siret, ferme: { $ne: true } }, { projection: projectionCandidats, sort: { _id: 1 } })
     .toArray();
 
   const transmetteurLui = candidats.find((candidat) => candidat._id.equals(transmetteur._id));
   if (transmetteurLui) {
     return { organisme: transmetteurLui, mode: "transmetteur" };
   }
+  const relationsTransmetteur = relationsIds(transmetteur);
   const famille = candidats.find(
     (candidat) =>
-      relationsIds(transmetteur).some((id) => id.equals(candidat._id)) ||
+      relationsTransmetteur.some((id) => id.equals(candidat._id)) ||
       relationsIds(candidat).some((id) => id.equals(transmetteur._id))
   );
   return famille ? { organisme: famille, mode: "famille" } : null;
@@ -613,6 +616,8 @@ async function findOrganismeWithStats(
   }
   stats.fiabilisation = fiabilisationResult.statut;
   stats.attribution = attribution;
+  stats.uai_retenue = retenu.uai ?? null;
+  stats.siret_retenu = retenu.siret ?? null;
   stats.found = !!organisme;
   if (organisme) {
     stats.id = organisme._id.toString();
