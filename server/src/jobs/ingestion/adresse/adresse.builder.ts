@@ -19,6 +19,7 @@ export async function buildAdresse(dossier: IBuildAdresseParams): Promise<IEffec
   const communeInfo = await getCommune({
     codeInsee: code_commune_insee_apprenant,
     codePostal: code_postal_apprenant,
+    adresse: dossier.adresse_apprenant,
   }).catch(() => null);
 
   if (communeInfo == null) {

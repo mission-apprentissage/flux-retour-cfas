@@ -352,7 +352,15 @@ program
 
 program
   .command("hydrate:contrats-deca-raw")
-  .description("Manually trigger the creation of deca effectifs")
+  .description("Manually trigger the creation of deca effectifs (production uniquement, sauf --dryRun)")
+  .option(
+    "--dryRun",
+    "Lit sans écrire : un log par contrat (responsable vs établissement de formation) puis un bilan",
+    false
+  )
+  .option("-l, --limit <number>", "Limiter le nombre de contrats bruts lus (les plus récents en dry-run)", (n) =>
+    parseInt(n, 10)
+  )
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:contrats-deca-raw"));
 
@@ -417,6 +425,16 @@ program
   .action(createJobAction("tmp:migrate:ml-cloture-a-recontacter"));
 
 program
+  .command("tmp:migrate:commune-apprenant")
+  .description(
+    "Recalcule la commune des apprenants suivis par une ML ou de l'année scolaire en cours, devinée depuis un code postal partagé entre plusieurs communes"
+  )
+  .option("--dry-run", "Simulation sans écriture", false)
+  .option("-l, --limit <number>", "Limite le nombre d'effectifs examinés par collection", (value) => parseInt(value))
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:migrate:commune-apprenant"));
+
+program
   .command("tmp:seed-ml-rdv-url")
   .description("Seed initial des rdv_url sur les organisations Mission Locale via un CSV (colonnes siret, rdv_url)")
   .requiredOption("--csv-path <path>", "Chemin du CSV (colonnes siret, rdv_url)")
@@ -438,6 +456,14 @@ program
   .option("--dry-run", "Simulation d'insertion sans écriture", false)
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("tmp:seed-sipa-test-nancy"));
+
+program
+  .command("seed:recette")
+  .description("Jeu de données fictif ML/CFA de recette : purge puis régénère les dossiers sur les organisations hôtes")
+  .option("--dry-run", "Simulation sans écriture", false)
+  .option("--uninstall", "Purge le jeu fictif et retire les flags posés sur les hôtes, sans régénérer", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("seed:recette"));
 
 program
   .command("brevo-contacts:sync")

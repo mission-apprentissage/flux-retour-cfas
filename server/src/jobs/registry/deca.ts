@@ -5,14 +5,18 @@ import config from "@/config";
 
 import { hydrateDecaRaw, hydrateDecaFromExistingEffectifs } from "../hydrate/deca/hydrate-deca-raw";
 
+import { payloadBoolean, payloadNumber } from "./payload";
+
 export const decaJobs = {
   "hydrate:contrats-deca-raw": {
-    handler: async () => {
-      if (config.env !== "production") {
+    handler: async (job) => {
+      const dryRun = payloadBoolean(job.payload, "dryRun") ?? false;
+      const limit = payloadNumber(job.payload, "limit");
+      if (!dryRun && config.env !== "production") {
         logger.warn("hydrate:contrats-deca-raw job can only be run in production environment");
         return 0;
       }
-      return hydrateDecaRaw();
+      return hydrateDecaRaw({ dryRun, limit });
     },
   },
   "hydrate:mission-locale-from-deca": {

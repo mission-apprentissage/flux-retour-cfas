@@ -193,6 +193,7 @@ describe("buildAdresse", () => {
     expect(getCommune).toHaveBeenCalledWith({
       codeInsee: "75056",
       codePostal: "75019",
+      adresse: "123 Rue de Paris",
     });
   });
 
@@ -233,6 +234,7 @@ describe("buildAdresse", () => {
     expect(getCommune).toHaveBeenCalledWith({
       codeInsee: "75056",
       codePostal: "75019",
+      adresse: "123 Rue de Paris",
     });
   });
 
@@ -257,6 +259,7 @@ describe("buildAdresse", () => {
     });
     expect(getCommune).toHaveBeenCalledWith({
       codeInsee: "75056",
+      adresse: "123 Rue de Paris",
     });
   });
 
@@ -306,6 +309,7 @@ describe("buildAdresse", () => {
     });
     expect(getCommune).toHaveBeenCalledWith({
       codePostal: "75019",
+      adresse: "123 Rue de Lyon",
     });
   });
 });

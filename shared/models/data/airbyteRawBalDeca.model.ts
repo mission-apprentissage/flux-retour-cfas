@@ -51,6 +51,11 @@ const zOrganismeFormation = z.object({
   uai_cfa: z.string(),
 });
 
+// Etablissement formation schema (lieu principal de formation)
+const zEtablissementFormation = z.object({
+  siret: z.string().nullish(),
+});
+
 // Main schema for the airbyte data
 const zRawBalDeca = z.object({
   _id: zObjectId,
@@ -63,6 +68,7 @@ const zRawBalDeca = z.object({
   dispositif: z.string(),
   employeur: zEmployeur,
   organisme_formation: zOrganismeFormation,
+  etablissement_formation: zEtablissementFormation.nullish(),
   formation: zFormation,
   created_at: z.string().describe("Date de création de l'enregistrement dans la base de données").nullish(),
   updated_at: z.string().describe("Date de dernière mise à jour de l'enregistrement dans la base de données").nullish(),

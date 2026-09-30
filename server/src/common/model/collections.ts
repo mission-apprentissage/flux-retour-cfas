@@ -1,6 +1,7 @@
 import auditLogsModelDescriptor, { IAuditLog } from "shared/models/data/auditLogs.model";
 import brevoContactListModelDescriptor, { IBrevoContactList } from "shared/models/data/brevoContactList.model";
 import brevoSyncSettingsModelDescriptor, { IBrevoSyncSettings } from "shared/models/data/brevoSyncSettings.model";
+import communesVoiesModelDescriptor, { ICommunesVoies } from "shared/models/data/communesVoies.model";
 import connexionInvitationsModelDescriptor, {
   IConnexionInvitation,
 } from "shared/models/data/connexionInvitations.model";
@@ -87,6 +88,7 @@ export const modelDescriptors = [
   franceTravailEffectifDescriptor,
   romeSecteurActivitesDescriptor,
   sipaUsersModelDescriptor,
+  communesVoiesModelDescriptor,
 ];
 
 export const formationsCatalogueDb = () =>
@@ -104,6 +106,7 @@ export const effectifsArchiveDb = () =>
   getDbCollection<IEffectifArchive>(effectifsArchiveModelDescriptor.collectionName);
 export const effectifsDECADb = () => getDbCollection<IEffectifDECA>(effectifsDECAModelDescriptor.collectionName);
 export const effectifsQueueDb = () => getDbCollection<IEffectifQueue>(effectifsQueueModelDescriptor.collectionName);
+export const communesVoiesDb = () => getDbCollection<ICommunesVoies>(communesVoiesModelDescriptor.collectionName);
 export const rncpDb = () => getDbCollection<IRncp>(rncpModelDescriptor.collectionName);
 export const auditLogsDb = () => getDbCollection<IAuditLog>(auditLogsModelDescriptor.collectionName);
 export const voeuxAffelnetDb = () => getDbCollection<IVoeuAffelnet>(voeuxAffelnetDescriptor.collectionName);

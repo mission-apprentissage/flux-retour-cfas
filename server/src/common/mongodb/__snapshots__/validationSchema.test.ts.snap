@@ -117,6 +117,74 @@ exports[`validation-schema > should create validation schema for brevoSyncSettin
 }
 `;
 
+exports[`validation-schema > should create validation schema for communesVoies > communesVoies 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "string",
+      "description": "Code postal partagé par plusieurs communes",
+    },
+    "communes": {
+      "bsonType": "array",
+      "items": {
+        "additionalProperties": false,
+        "bsonType": "object",
+        "properties": {
+          "code_insee": {
+            "bsonType": "string",
+          },
+          "nom": {
+            "bsonType": "string",
+          },
+          "population": {
+            "bsonType": "number",
+          },
+        },
+        "required": [
+          "code_insee",
+          "nom",
+          "population",
+        ],
+      },
+    },
+    "updated_at": {
+      "bsonType": "date",
+    },
+    "voies": {
+      "bsonType": "array",
+      "items": {
+        "additionalProperties": false,
+        "bsonType": "object",
+        "properties": {
+          "code_insee": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "string",
+            },
+          },
+          "nom": {
+            "bsonType": "string",
+            "description": "Nom de voie ou de lieu-dit normalisé",
+          },
+        },
+        "required": [
+          "nom",
+          "code_insee",
+        ],
+      },
+    },
+  },
+  "required": [
+    "_id",
+    "communes",
+    "voies",
+    "updated_at",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for connexionInvitations > connexionInvitations 1`] = `
 {
   "additionalProperties": false,
@@ -7995,6 +8063,13 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "deca_raw_id": {
       "bsonType": "objectId",
       "description": "Identifiant decaraw associé à cet effectif",
+    },
+    "etablissement_formation_siret": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "SIRET du lieu principal de formation déclaré au contrat DECA, brut (non résolu, non routé)",
     },
     "formation": {
       "anyOf": [
@@ -17509,6 +17584,13 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
             "deca_raw_id": {
               "bsonType": "objectId",
               "description": "Identifiant decaraw associé à cet effectif",
+            },
+            "etablissement_formation_siret": {
+              "bsonType": [
+                "string",
+                "null",
+              ],
+              "description": "SIRET du lieu principal de formation déclaré au contrat DECA, brut (non résolu, non routé)",
             },
             "formation": {
               "anyOf": [

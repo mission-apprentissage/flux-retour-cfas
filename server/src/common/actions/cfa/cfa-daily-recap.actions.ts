@@ -29,7 +29,7 @@ interface IMissionLocaleWithActions {
     nom: string;
   };
   effectifs_count: number;
-  acc_conjoint_by: ObjectId | null;
+  acc_conjoint_by: ObjectId;
 }
 
 interface ICfaDailyStats {
@@ -83,6 +83,8 @@ export async function getCfaEffectifsWithMlActionsLast24h(): Promise<ICfaDailySt
         _id: { $in: effectifIds },
         "effectif_snapshot.organisme_id": { $in: cfaOrganismeIds },
         soft_deleted: { $ne: true },
+        "organisme_data.acc_conjoint": true,
+        "organisme_data.acc_conjoint_by": { $exists: true, $ne: null },
       },
     },
     {
@@ -171,7 +173,7 @@ export async function getCfaEffectifsWithMlActionsLast24h(): Promise<ICfaDailySt
 
 export async function getCfaUsers(
   cfaOrganismeId: ObjectId,
-  userId?: ObjectId
+  userId: ObjectId
 ): Promise<{
   organisation: IOrganisation | null;
   users: IUsersMigration[];
@@ -186,13 +188,10 @@ export async function getCfaUsers(
   }
 
   const userQuery: Filter<IUsersMigration> = {
+    _id: userId,
     organisation_id: organisation._id,
     account_status: "CONFIRMED",
   };
-
-  if (userId) {
-    userQuery._id = userId;
-  }
 
   const users = await usersMigrationDb()
     .find(userQuery, {
@@ -211,7 +210,7 @@ export async function getJeunesForCfaMl(
   cfaOrganismeId: ObjectId,
   missionLocaleId: ObjectId,
   since: Date,
-  reponseBy?: ObjectId
+  reponseBy: ObjectId
 ): Promise<Array<{ nom: string; prenom: string }>> {
   const logsRecents = await missionLocaleEffectifsLogDb()
     .find({
@@ -231,11 +230,9 @@ export async function getJeunesForCfaMl(
     "effectif_snapshot.organisme_id": cfaOrganismeId,
     mission_locale_id: missionLocaleId,
     soft_deleted: { $ne: true },
+    "organisme_data.acc_conjoint": true,
+    "organisme_data.acc_conjoint_by": reponseBy,
   };
-
-  if (reponseBy) {
-    query["organisme_data.acc_conjoint_by"] = reponseBy;
-  }
 
   const effectifs = await missionLocaleEffectifsDb()
     .find(query, {
