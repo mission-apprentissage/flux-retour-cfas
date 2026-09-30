@@ -4,6 +4,7 @@ import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
 import { scoreExistingEffectifs } from "../classifier/score-effectifs";
 import { updateComputedFields } from "../computed/update-computed";
+import { rapportDoublonsObsoletes } from "../effectifs/doublons-obsoletes";
 import {
   hydrateEffectifsComputedTypesGenerique,
   hydratePreviousYearMissionLocaleEffectifStatut,
@@ -72,6 +73,12 @@ export const effectifsJobs = {
   "tmp:hydrate:inscrit-sans-contrat": {
     handler: async () => {
       return hydrateInscritSansContrat();
+    },
+  },
+  "effectifs:doublons-obsoletes": {
+    handler: async (job) => {
+      const payload = job.payload as { seuilJours?: number } | undefined;
+      return rapportDoublonsObsoletes({ seuilJours: payload?.seuilJours });
     },
   },
 } satisfies Record<string, JobDef>;
