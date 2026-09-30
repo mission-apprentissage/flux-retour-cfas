@@ -8,6 +8,7 @@ import { IRawBalDeca } from "shared/models/data/airbyteRawBalDeca.model";
 import { zApprenant } from "shared/models/data/effectifs/apprenant.part";
 import { zContrat } from "shared/models/data/effectifs/contrat.part";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import { IOrganisme } from "shared/models/data/organismes.model";
 import { zodOpenApi } from "shared/models/zodOpenApi";
 import { cyrb53Hash, getYearFromDate } from "shared/utils";
 
@@ -51,8 +52,129 @@ function mergeStats(target: IProcessingStats, source: IProcessingStats): void {
   }
 }
 
-export async function hydrateDecaRaw() {
+interface IDryRunStats {
+  contrats: number;
+  responsableIntrouvable: number;
+  etablissementAbsent: number;
+  etablissementVide: number;
+  etablissementIdentiqueAuResponsable: number;
+  etablissementFormateurDuResponsable: number;
+  etablissementMemeSiren: number;
+  etablissementSansLien: number;
+  etablissementSiretOrganismeUnique: number;
+  etablissementSiretPartage: number;
+  etablissementSiretFerme: number;
+  etablissementSiretInconnu: number;
+}
+
+function createEmptyDryRunStats(): IDryRunStats {
+  return {
+    contrats: 0,
+    responsableIntrouvable: 0,
+    etablissementAbsent: 0,
+    etablissementVide: 0,
+    etablissementIdentiqueAuResponsable: 0,
+    etablissementFormateurDuResponsable: 0,
+    etablissementMemeSiren: 0,
+    etablissementSansLien: 0,
+    etablissementSiretOrganismeUnique: 0,
+    etablissementSiretPartage: 0,
+    etablissementSiretFerme: 0,
+    etablissementSiretInconnu: 0,
+  };
+}
+
+const organismeResumeProjection = {
+  siret: 1,
+  uai: 1,
+  enseigne: 1,
+  raison_sociale: 1,
+  nom: 1,
+  nature: 1,
+  ferme: 1,
+  "organismesFormateurs.siret": 1,
+} as const;
+
+type OrganismeResume = Pick<
+  IOrganisme,
+  "siret" | "uai" | "enseigne" | "raison_sociale" | "nom" | "nature" | "ferme" | "organismesFormateurs"
+>;
+
+function libelleOrganisme(organisme: OrganismeResume | null): string {
+  if (!organisme) return "introuvable dans le TDB";
+  const nom = organisme.enseigne ?? organisme.raison_sociale ?? organisme.nom ?? "?";
+  return `${nom} (${organisme.nature ?? "nature inconnue"}${organisme.ferme ? ", fermé" : ""})`;
+}
+
+async function inspectEffectifDeca(document: IRawBalDeca, stats: IDryRunStats): Promise<IProcessingStats> {
+  const { no_contrat, organisme_formation, etablissement_formation, formation } = document;
+  stats.contrats++;
+
+  const responsable = await organismesDb().findOne(
+    { siret: organisme_formation.siret, uai: organisme_formation.uai_cfa },
+    { projection: organismeResumeProjection }
+  );
+  if (!responsable) stats.responsableIntrouvable++;
+
+  const siretEtablissement = etablissement_formation?.siret ?? null;
+  let relation: string;
+  let resolution = "";
+  if (!etablissement_formation) {
+    stats.etablissementAbsent++;
+    relation = "champ absent";
+  } else if (!siretEtablissement) {
+    stats.etablissementVide++;
+    relation = "siret vide";
+  } else if (siretEtablissement === organisme_formation.siret) {
+    stats.etablissementIdentiqueAuResponsable++;
+    relation = "identique au responsable";
+  } else {
+    const candidats = await organismesDb()
+      .find({ siret: siretEtablissement }, { projection: organismeResumeProjection })
+      .toArray();
+    const ouverts = candidats.filter((candidat) => !candidat.ferme);
+    if (ouverts.length === 1) {
+      stats.etablissementSiretOrganismeUnique++;
+      resolution = `→ ${ouverts[0].uai ?? "sans UAI"} ${libelleOrganisme(ouverts[0])}`;
+    } else if (ouverts.length > 1) {
+      stats.etablissementSiretPartage++;
+      resolution = `→ ${ouverts.length} organismes ouverts (UAI ${ouverts.map((o) => o.uai).join(", ")})`;
+    } else if (candidats.length > 0) {
+      stats.etablissementSiretFerme++;
+      resolution = `→ ${libelleOrganisme(candidats[0])}`;
+    } else {
+      stats.etablissementSiretInconnu++;
+      resolution = "→ inconnu du TDB";
+    }
+
+    if (responsable?.organismesFormateurs?.some((formateur) => formateur.siret === siretEtablissement)) {
+      stats.etablissementFormateurDuResponsable++;
+      relation = "formateur du responsable au catalogue";
+    } else if (siretEtablissement.slice(0, 9) === organisme_formation.siret.slice(0, 9)) {
+      stats.etablissementMemeSiren++;
+      relation = "même SIREN, autre établissement";
+    } else {
+      stats.etablissementSansLien++;
+      relation = "sans lien connu";
+    }
+  }
+
+  logger.info(
+    {
+      no_contrat,
+      formation: `${formation.code_diplome} / ${formation.rncp} (${formation.date_debut_formation} → ${formation.date_fin_formation})`,
+      responsable: `${organisme_formation.siret}/${organisme_formation.uai_cfa} ${libelleOrganisme(responsable)}`,
+      etablissement: `${siretEtablissement ?? "-"} ${relation} ${resolution}`.trim(),
+    },
+    "DECA dry-run contrat"
+  );
+
+  return createEmptyStats();
+}
+
+export async function hydrateDecaRaw({ dryRun = false, limit }: { dryRun?: boolean; limit?: number } = {}) {
   const totalStats = createEmptyStats();
+  const dryRunStats = createEmptyDryRunStats();
   let totalCount = 0;
 
   const processBuffer = async (buffer: Promise<IProcessingStats>[]) => {
@@ -77,10 +199,12 @@ export async function hydrateDecaRaw() {
     };
 
     const cursor = client.db().collection<IRawBalDeca>(config.mongodb.decaDbCollectionBal).find(query);
+    if (dryRun) cursor.sort({ created_at: -1 });
+    if (limit) cursor.limit(limit);
 
     let promiseArray: Promise<IProcessingStats>[] = [];
     for await (const document of cursor) {
-      promiseArray.push(updateEffectifDeca(document));
+      promiseArray.push(dryRun ? inspectEffectifDeca(document, dryRunStats) : updateEffectifDeca(document));
 
       if (promiseArray.length === 100) {
         await processBuffer(promiseArray);
@@ -92,7 +216,9 @@ export async function hydrateDecaRaw() {
       await processBuffer(promiseArray);
     }
 
-    if (totalCount > 0) {
+    if (dryRun) {
+      logger.info({ ...dryRunStats, totalCount }, "DECA dry-run : aucune écriture");
+    } else if (totalCount > 0) {
       await updateOrganismesLastEffectifUpdate(totalStats.organismesId);
     } else {
       logger.error("No documents found matching the criteria.");
@@ -263,6 +389,7 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
     formation,
     employeur,
     organisme_formation,
+    etablissement_formation,
     date_debut_contrat,
     date_fin_contrat,
     date_effet_rupture,
@@ -375,6 +502,7 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
     organisme_id: organisme._id,
     organisme_responsable_id: organisme._id,
     organisme_formateur_id: organisme._id,
+    etablissement_formation_siret: etablissement_formation?.siret ?? null,
     validation_errors: [],
     created_at: new Date(),
     updated_at: new Date(),

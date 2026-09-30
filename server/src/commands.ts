@@ -357,7 +357,15 @@ program
 
 program
   .command("hydrate:contrats-deca-raw")
-  .description("Manually trigger the creation of deca effectifs")
+  .description("Manually trigger the creation of deca effectifs (production uniquement, sauf --dryRun)")
+  .option(
+    "--dryRun",
+    "Lit sans écrire : un log par contrat (responsable vs établissement de formation) puis un bilan",
+    false
+  )
+  .option("-l, --limit <number>", "Limiter le nombre de contrats bruts lus (les plus récents en dry-run)", (n) =>
+    parseInt(n, 10)
+  )
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:contrats-deca-raw"));
 
