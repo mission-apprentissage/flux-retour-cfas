@@ -42,6 +42,7 @@ export const ATTRIBUTION_ORGANISME_MODES = [
   "transmetteur",
   "famille",
   "aucun",
+  "indisponible",
 ] as const;
 
 export const zAttributionOrganisme = z.object({

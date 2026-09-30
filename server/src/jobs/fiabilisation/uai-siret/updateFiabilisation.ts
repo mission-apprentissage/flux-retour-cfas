@@ -91,7 +91,7 @@ export async function fiabilisationUaiSiret({
         siret,
         statut: "INCONNU",
         api_response: null,
-        mode: "aucun",
+        mode: "indisponible",
       };
     });
 }
