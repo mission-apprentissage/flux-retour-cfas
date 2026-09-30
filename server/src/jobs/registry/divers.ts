@@ -53,8 +53,12 @@ export const diversCrons = {
   },
 
   // 03h30 Paris le 2 du mois — référentiel voies BAN des codes postaux multi-communes
+  // 06h30 Paris le 2 du mois — déplacé de 03h30, qui tombait dans la file du batch
+  // de 02h30. Budget large faute de mesure : ce cron n'a pas encore assez tourné.
   "hydrate:communes-voies": {
-    cron_string: "30 3 2 * *",
+    cron_string: "30 6 2 * *",
+    checkinMargin: 15,
+    maxRuntimeInMinutes: 240,
     handler: hydrateCommunesVoies,
   },
 

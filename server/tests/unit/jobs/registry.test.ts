@@ -41,7 +41,7 @@ describe("registre des jobs", () => {
       "Révoque les clés API des organismes inactifs depuis +12 mois, tous les jours à 4h": "0 4 * * *",
       "Validation des constantes de territoires": "50 4 1 * *",
       "Nettoie et met à jour les statistiques des Missions Locales": "45 5 * * *",
-      "hydrate:communes-voies": "30 3 2 * *",
+      "hydrate:communes-voies": "30 6 2 * *",
       "Synchro Brevo de tous les contacts TBA à 5h": "0 5 * * *",
       "Mettre à jour les statuts d'effectifs tous les samedis matin à 5h": "0 5 * * 6",
       "Send CFA daily recap at 10h30": "30 10 * * *",
