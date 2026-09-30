@@ -75,6 +75,7 @@ describe("registre des jobs", () => {
       "db:find-invalid-documents",
       "db:validate",
       "dev:generate-open-api",
+      "effectifs:doublons-obsoletes",
       "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis",
       "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis",
       "fiabilisation:uai-siret:run",
