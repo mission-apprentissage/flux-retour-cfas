@@ -9,7 +9,7 @@ import {
   ORGANISME_RESPONSABLE_NOT_FOUND,
   createCustomEffectifIssue,
 } from "shared/models/data/effectifs.model";
-import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
+import { IAttributionOrganisme, IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import dossierApprenantSchemaV3, { type IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 import { NEVER, SafeParseReturnType } from "zod";
@@ -180,6 +180,10 @@ async function processEffectifQueueItem(
     const { result, itemProcessingInfos, organismeTarget } = await transformEffectifQueueV3ToEffectif(effectifQueue);
     // ajout des informations sur le traitement au logger
     itemLogger = itemLogger.child({ ...itemProcessingInfos, format: effectifQueue.api_version });
+    const organisme_attribution = {
+      formateur: attributionDepuisStats(itemProcessingInfos, "organisme_formateur_"),
+      responsable: attributionDepuisStats(itemProcessingInfos, "organisme_responsable_"),
+    };
 
     if (result.success) {
       const { effectif, organisme } = result.data;
@@ -210,6 +214,7 @@ async function processEffectifQueueItem(
             processed_at: currentDate,
             has_error: false,
             computed_day,
+            organisme_attribution,
           },
           $unset: {
             error: 1,
@@ -232,6 +237,7 @@ async function processEffectifQueueItem(
             processed_at: currentDate,
             has_error: true,
             computed_day,
+            organisme_attribution,
           },
           $unset: {
             error: 1,
@@ -278,6 +284,22 @@ interface OrganismeSearchStatsInfos {
   siret_corrige?: string;
   fiabilisation?: "FIABLE" | "NON_FIABLE" | "INCONNU";
   found?: boolean;
+  attribution?: IAttributionOrganisme["mode"];
+}
+
+function attributionDepuisStats(
+  infos: ItemProcessingInfos,
+  prefixe: "organisme_formateur_" | "organisme_responsable_"
+): IAttributionOrganisme | null {
+  const mode = infos[`${prefixe}attribution`];
+  if (!mode) {
+    return null;
+  }
+  return {
+    mode,
+    uai: infos[`${prefixe}uai_corrige`] ?? infos[`${prefixe}uai`] ?? null,
+    siret: infos[`${prefixe}siret_corrige`] ?? infos[`${prefixe}siret`] ?? null,
+  };
 }
 
 type ItemProcessingInfos = {
@@ -534,6 +556,7 @@ async function findOrganismeWithStats(
     stats.siret_corrige = fiabilisationResult.siret ?? undefined;
   }
   stats.fiabilisation = fiabilisationResult.statut;
+  stats.attribution = fiabilisationResult.mode;
   stats.found = !!organisme;
   if (organisme) {
     stats.id = organisme._id.toString();
