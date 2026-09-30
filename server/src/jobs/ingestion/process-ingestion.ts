@@ -328,7 +328,9 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
         (async () => {
           const { organisme, stats } = await findOrganismeWithStats(
             effectifQueued?.etablissement_formateur_uai,
-            effectifQueued?.etablissement_formateur_siret
+            effectifQueued?.etablissement_formateur_siret,
+            {},
+            effectifQueued?.source_organisme_id
           );
           organismeTarget = organisme;
           Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_formateur_", stats));
@@ -338,7 +340,8 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
           const { organisme, stats } = await findOrganismeWithStats(
             effectifQueued?.etablissement_responsable_uai,
             effectifQueued?.etablissement_responsable_siret,
-            { _id: 1 }
+            { _id: 1 },
+            effectifQueued?.source_organisme_id
           );
           Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_responsable_", stats));
           return organisme;
@@ -530,10 +533,52 @@ const createOrUpdateEffectif = async (
   }
 };
 
+const relationsIds = (organisme: Pick<IOrganisme, "organismesFormateurs" | "organismesResponsables">) =>
+  [...(organisme.organismesFormateurs ?? []), ...(organisme.organismesResponsables ?? [])].flatMap((relation) =>
+    relation._id ? [relation._id] : []
+  );
+
+async function surclasserParTransmetteur(
+  siret: string,
+  sourceOrganismeId: string | null | undefined,
+  projection: Record<string, unknown>
+): Promise<{ organisme: IOrganisme; mode: "transmetteur" | "famille" } | null> {
+  if (!sourceOrganismeId || !ObjectId.isValid(sourceOrganismeId)) {
+    return null;
+  }
+  const transmetteur = await organismesDb().findOne(
+    { _id: new ObjectId(sourceOrganismeId) },
+    { projection: { organismesFormateurs: 1, organismesResponsables: 1 } }
+  );
+  if (!transmetteur) {
+    return null;
+  }
+
+  const projectionCandidats =
+    Object.keys(projection).length === 0
+      ? {}
+      : { ...projection, uai: 1, siret: 1, organismesFormateurs: 1, organismesResponsables: 1 };
+  const candidats = await organismesDb()
+    .find({ siret, ferme: { $ne: true } }, { projection: projectionCandidats })
+    .toArray();
+
+  const transmetteurLui = candidats.find((candidat) => candidat._id.equals(transmetteur._id));
+  if (transmetteurLui) {
+    return { organisme: transmetteurLui, mode: "transmetteur" };
+  }
+  const famille = candidats.find(
+    (candidat) =>
+      relationsIds(transmetteur).some((id) => id.equals(candidat._id)) ||
+      relationsIds(candidat).some((id) => id.equals(transmetteur._id))
+  );
+  return famille ? { organisme: famille, mode: "famille" } : null;
+}
+
 async function findOrganismeWithStats(
   uai_etablissement: string,
   siret_etablissement?: string,
-  projection = {}
+  projection: Record<string, unknown> = {},
+  sourceOrganismeId?: string | null
 ): Promise<{ organisme: IOrganisme | null; stats: OrganismeSearchStatsInfos }> {
   const stats: OrganismeSearchStatsInfos = {};
 
@@ -544,19 +589,30 @@ async function findOrganismeWithStats(
   });
 
   // 2. On cherche l'organisme avec le couple uai/siret
-  const organisme = await findOrganismeByUaiAndSiret(fiabilisationResult.uai, fiabilisationResult.siret, projection);
+  let organisme = await findOrganismeByUaiAndSiret(fiabilisationResult.uai, fiabilisationResult.siret, projection);
+  let retenu = { uai: fiabilisationResult.uai, siret: fiabilisationResult.siret };
+  let attribution = fiabilisationResult.mode;
+
+  if (attribution === "lieu" && siret_etablissement) {
+    const surclassement = await surclasserParTransmetteur(siret_etablissement, sourceOrganismeId, projection);
+    if (surclassement) {
+      organisme = surclassement.organisme;
+      retenu = { uai: surclassement.organisme.uai, siret: surclassement.organisme.siret };
+      attribution = surclassement.mode;
+    }
+  }
 
   // 3. Des indicateurs pour apporter des informations sur le traitement
   stats.uai = uai_etablissement;
-  if (fiabilisationResult.uai !== uai_etablissement) {
-    stats.uai_corrige = fiabilisationResult.uai ?? undefined;
+  if (retenu.uai !== uai_etablissement) {
+    stats.uai_corrige = retenu.uai ?? undefined;
   }
   stats.siret = siret_etablissement;
-  if (fiabilisationResult.siret !== siret_etablissement) {
-    stats.siret_corrige = fiabilisationResult.siret ?? undefined;
+  if (retenu.siret !== siret_etablissement) {
+    stats.siret_corrige = retenu.siret ?? undefined;
   }
   stats.fiabilisation = fiabilisationResult.statut;
-  stats.attribution = fiabilisationResult.mode;
+  stats.attribution = attribution;
   stats.found = !!organisme;
   if (organisme) {
     stats.id = organisme._id.toString();

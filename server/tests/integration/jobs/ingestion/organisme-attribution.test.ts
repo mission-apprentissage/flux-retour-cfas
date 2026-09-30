@@ -19,11 +19,22 @@ const GENECH = { uai: "0595689N", siret: "78362626000013" };
 const CFPPA_65 = { uai: "0650950E", siret: "19650139900030" };
 const UAI_LIEU_CHEZ_GENECH = "0141991N";
 
+const CMAR_HDF = { uai: "0593321P", siret: "13002374000439" };
+const ROUVIGNIES = { uai: "0597044L", siret: "13002374000272" };
+const UAI_TRITH = "0597346P";
+
+const FORINVAL = { uai: "0802084F", siret: "18800864300010" };
+const FELIX_FAURE = { uai: "0600001A", siret: "19600001200019" };
+const CNAM_HDF = { uai: "0802196C", siret: "34896746400028" };
+
 type Identifiant = { uai: string; siret: string };
+type CorrespondanceSiret = { lui_meme: boolean; son_formateur: boolean; son_responsable: boolean };
 type Correspondances = {
   uai: { lui_meme: boolean; son_lieu: boolean } | null;
-  siret: { lui_meme: boolean; son_formateur: boolean; son_responsable: boolean } | null;
+  siret: CorrespondanceSiret | null;
 };
+
+const siretSansLien: CorrespondanceSiret = { lui_meme: false, son_formateur: false, son_responsable: false };
 
 function organismeApi(identifiant: Identifiant, correspondances: Correspondances) {
   return {
@@ -44,19 +55,16 @@ const reponseExacte = (identifiant: Identifiant) => ({
   candidats: [],
 });
 
-const reponseParLieu = {
+const reponseParLieu = (resultat: Identifiant, candidat: Identifiant, siretDuResultat = siretSansLien) => ({
   metadata: metadataOk,
-  resultat: organismeApi(GENECH, {
-    uai: { lui_meme: false, son_lieu: true },
-    siret: { lui_meme: false, son_formateur: false, son_responsable: false },
-  }),
+  resultat: organismeApi(resultat, { uai: { lui_meme: false, son_lieu: true }, siret: siretDuResultat }),
   candidats: [
-    organismeApi(LEMONNIER, {
+    organismeApi(candidat, {
       uai: { lui_meme: false, son_lieu: false },
       siret: { lui_meme: true, son_formateur: false, son_responsable: false },
     }),
   ],
-};
+});
 
 const reponseUaiCorrigee = {
   metadata: metadataOk,
@@ -69,6 +77,10 @@ const reponseUaiCorrigee = {
 
 function mockRecherche(couple: Identifiant, body: object) {
   nock(API).get("/organisme/v1/recherche").query(couple).reply(200, body).persist();
+}
+
+function organisme(identifiant: Identifiant, extra: Partial<IOrganisme> = {}): IOrganisme {
+  return { _id: new ObjectId(), ...createRandomOrganisme({ reseaux: [] }), ...identifiant, ...extra };
 }
 
 function dossier(
@@ -115,15 +127,15 @@ describe("Attribution de l'organisme à l'ingestion", () => {
   let cfppa: IOrganisme;
 
   beforeEach(async () => {
-    lemonnier = { _id: new ObjectId(), ...createRandomOrganisme({ reseaux: [] }), ...LEMONNIER };
-    genech = { _id: new ObjectId(), ...createRandomOrganisme({ reseaux: [] }), ...GENECH };
-    cfppa = { _id: new ObjectId(), ...createRandomOrganisme({ reseaux: [] }), ...CFPPA_65 };
+    lemonnier = organisme(LEMONNIER);
+    genech = organisme(GENECH);
+    cfppa = organisme(CFPPA_65);
     await organismesDb().insertMany([lemonnier, genech, cfppa]);
     mockApiApprentissageCertificationApi();
   });
 
-  it("mémorise une attribution par lieu pour le formateur et exacte pour le responsable", async () => {
-    mockRecherche({ uai: UAI_LIEU_CHEZ_GENECH, siret: LEMONNIER.siret }, reponseParLieu);
+  it("retient le transmetteur quand l'API ne rattache que par lieu et que le SIRET envoyé est le sien", async () => {
+    mockRecherche({ uai: UAI_LIEU_CHEZ_GENECH, siret: LEMONNIER.siret }, reponseParLieu(GENECH, LEMONNIER));
     mockRecherche(LEMONNIER, reponseExacte(LEMONNIER));
     const { insertedId } = await effectifsQueueDb().insertOne(
       dossier({ uai: UAI_LIEU_CHEZ_GENECH, siret: LEMONNIER.siret }, lemonnier._id.toString())
@@ -134,15 +146,68 @@ describe("Attribution de l'organisme à l'ingestion", () => {
     const queue = await effectifsQueueDb().findOne({ _id: insertedId });
     expect(queue).toMatchObject({
       has_error: false,
-      organisme_id: genech._id,
+      organisme_id: lemonnier._id,
       organisme_attribution: {
-        formateur: { mode: "lieu", uai: GENECH.uai, siret: GENECH.siret },
+        formateur: { mode: "transmetteur", uai: LEMONNIER.uai, siret: LEMONNIER.siret },
         responsable: { mode: "exact", uai: LEMONNIER.uai, siret: LEMONNIER.siret },
       },
     });
     const effectif = await effectifsDb().findOne({ _id: queue?.effectif_id ?? undefined });
-    expect(effectif?.organisme_id).toEqual(genech._id);
+    expect(effectif?.organisme_id).toEqual(lemonnier._id);
+    expect(effectif?.organisme_formateur_id).toEqual(lemonnier._id);
     expect(effectif?.organisme_responsable_id).toEqual(lemonnier._id);
+  });
+
+  it("retient un formateur déclaré du transmetteur quand l'API rattache à la tête de réseau par lieu", async () => {
+    const rouvigniesId = new ObjectId();
+    const hdf = organisme(CMAR_HDF, { organismesFormateurs: [{ _id: rouvigniesId, ...ROUVIGNIES }] });
+    const rouvignies = { ...organisme(ROUVIGNIES), _id: rouvigniesId };
+    await organismesDb().insertMany([hdf, rouvignies]);
+    mockRecherche(
+      { uai: UAI_TRITH, siret: ROUVIGNIES.siret },
+      reponseParLieu(CMAR_HDF, ROUVIGNIES, { lui_meme: false, son_formateur: true, son_responsable: false })
+    );
+    mockRecherche(CMAR_HDF, reponseExacte(CMAR_HDF));
+    const { insertedId } = await effectifsQueueDb().insertOne(
+      dossier({ uai: UAI_TRITH, siret: ROUVIGNIES.siret }, hdf._id.toString(), CMAR_HDF)
+    );
+
+    await processEffectifsQueue();
+
+    const queue = await effectifsQueueDb().findOne({ _id: insertedId });
+    expect(queue).toMatchObject({
+      has_error: false,
+      organisme_id: rouvignies._id,
+      organisme_attribution: {
+        formateur: { mode: "famille", uai: ROUVIGNIES.uai, siret: ROUVIGNIES.siret },
+        responsable: { mode: "exact", uai: CMAR_HDF.uai, siret: CMAR_HDF.siret },
+      },
+    });
+    const effectif = await effectifsDb().findOne({ _id: queue?.effectif_id ?? undefined });
+    expect(effectif?.organisme_id).toEqual(rouvignies._id);
+    expect(effectif?.organisme_responsable_id).toEqual(hdf._id);
+  });
+
+  it("conserve le rattachement par lieu quand le SIRET envoyé n'est ni le transmetteur ni sa famille", async () => {
+    const forinval = organisme(FORINVAL);
+    const felixFaure = organisme(FELIX_FAURE);
+    const cnam = organisme(CNAM_HDF);
+    await organismesDb().insertMany([forinval, felixFaure, cnam]);
+    mockRecherche(FELIX_FAURE, reponseParLieu(FORINVAL, FELIX_FAURE));
+    mockRecherche(CNAM_HDF, reponseExacte(CNAM_HDF));
+    const { insertedId } = await effectifsQueueDb().insertOne(dossier(FELIX_FAURE, cnam._id.toString(), CNAM_HDF));
+
+    await processEffectifsQueue();
+
+    const queue = await effectifsQueueDb().findOne({ _id: insertedId });
+    expect(queue).toMatchObject({
+      has_error: false,
+      organisme_id: forinval._id,
+      organisme_attribution: {
+        formateur: { mode: "lieu", uai: FORINVAL.uai, siret: FORINVAL.siret },
+        responsable: { mode: "exact" },
+      },
+    });
   });
 
   it("mémorise une attribution par SIRET quand seule l'UAI est corrigée", async () => {
