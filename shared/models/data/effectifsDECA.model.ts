@@ -116,6 +116,10 @@ export const zEffectifDECA = z.object({
   organisme_id: zObjectId.describe("Organisme id (lieu de formation de l'apprenant pour la v3)"),
   organisme_responsable_id: zObjectId.describe("Organisme responsable id").nullish(),
   organisme_formateur_id: zObjectId.describe("Organisme formateur id").nullish(),
+  etablissement_formation_siret: z
+    .string()
+    .describe("SIRET du lieu principal de formation déclaré au contrat DECA, brut (non résolu, non routé)")
+    .nullish(),
 
   id_erp_apprenant: z.string({
     description: "Identifiant de l'apprenant dans l'erp",
