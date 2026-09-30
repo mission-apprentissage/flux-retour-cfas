@@ -4,7 +4,7 @@ import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
 import { scoreExistingEffectifs } from "../classifier/score-effectifs";
 import { updateComputedFields } from "../computed/update-computed";
-import { rapportDoublonsObsoletes } from "../effectifs/doublons-obsoletes";
+import { traiterDoublonsObsoletes } from "../effectifs/doublons-obsoletes";
 import {
   hydrateEffectifsComputedTypesGenerique,
   hydratePreviousYearMissionLocaleEffectifStatut,
@@ -18,7 +18,7 @@ import {
 import { hydrateInscritSansContrat } from "../hydrate/france-travail/hydrate-france-travail";
 import { updateMissionLocaleEffectifCurrentStatus } from "../hydrate/mission-locale/hydrate-mission-locale";
 
-import { payloadNumber } from "./payload";
+import { payloadBoolean, payloadNumber } from "./payload";
 
 export const effectifsJobs = {
   "hydrate:effectifs:update_all_computed_statut": {
@@ -79,7 +79,10 @@ export const effectifsJobs = {
   },
   "effectifs:doublons-obsoletes": {
     handler: async (job) => {
-      return rapportDoublonsObsoletes({ seuilJours: payloadNumber(job.payload, "seuilJours") });
+      return traiterDoublonsObsoletes({
+        seuilJours: payloadNumber(job.payload, "seuilJours"),
+        appliquer: payloadBoolean(job.payload, "appliquer"),
+      });
     },
   },
 } satisfies Record<string, JobDef>;

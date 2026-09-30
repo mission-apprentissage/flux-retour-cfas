@@ -1,9 +1,12 @@
 import { differenceInDays } from "date-fns";
 import { ObjectId } from "mongodb";
+import { MOTIF_SUPPRESSION } from "shared/constants";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
+import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import parentLogger from "@/common/logger";
 import {
+  effectifsArchiveDb,
   effectifsDb,
   franceTravailEffectifsDb,
   missionLocaleEffectifsDb,
@@ -12,11 +15,15 @@ import {
 } from "@/common/model/collections";
 import { stripDiacritics } from "@/common/utils/mongoUtils";
 
+import { repointerLiensVersJumeau, type ResultatRepointage } from "./repointer-liens";
+
 const logger = parentLogger.child({ module: "job:effectifs:doublons-obsoletes" });
 
 export const SEUIL_JOURS_DEFAUT = 30;
 
 export type CategorieDoublon = "supprimable" | "oscillation" | "identite_differente";
+
+export type Traitement = "supprimee" | "conservee";
 
 export interface DoublonObsolete {
   effectif_id: ObjectId;
@@ -39,6 +46,19 @@ export interface DoublonObsolete {
     jumeau_france_travail: boolean;
     voeux: boolean;
   };
+  traitement?: Traitement;
+  motif_conservation?: string;
+}
+
+export interface CompteursTraitement {
+  supprimees: number;
+  conservees: number;
+  ml_repointes: number;
+  ml_fusionnes: number;
+  ml_refuses: number;
+  france_travail_repointes: number;
+  france_travail_fusionnes: number;
+  voeux_repointes: number;
 }
 
 interface Compteurs {
@@ -58,6 +78,8 @@ export interface RapportDoublonsObsoletes {
   par_organisme: Array<{ organisme_id: string; nom: string | null; nature: string | null } & Compteurs>;
   par_source: Array<{ source_organisme_id: string; nom: string | null } & Compteurs>;
   fiches_detail: DoublonObsolete[];
+  appliquer: boolean;
+  traitement: CompteursTraitement | null;
 }
 
 interface DocGroupe {
@@ -282,6 +304,8 @@ export async function rapportDoublonsObsoletes({
       }))
     ),
     fiches_detail: fiches,
+    appliquer: false,
+    traitement: null,
   };
 
   logger.info(
@@ -297,4 +321,103 @@ export async function rapportDoublonsObsoletes({
   );
 
   return rapport;
+}
+
+async function archiverEtSupprimer(fiche: DoublonObsolete, date: Date): Promise<boolean> {
+  const effectif = await effectifsDb().findOne({ _id: fiche.effectif_id });
+  if (!effectif) {
+    return false;
+  }
+  await effectifsArchiveDb().insertOne({
+    ...effectif,
+    _id: new ObjectId(),
+    suppression: {
+      user_id: null,
+      motif: MOTIF_SUPPRESSION.Doublon,
+      description: `Doublon obsolète ${fiche.effectif_id} de la fiche ${fiche.jumeau_id}`,
+      date,
+    },
+  });
+  await effectifsDb().deleteOne({ _id: fiche.effectif_id });
+  return true;
+}
+
+function conserver(fiche: DoublonObsolete, compteurs: CompteursTraitement, motif: string) {
+  fiche.traitement = "conservee";
+  fiche.motif_conservation = motif;
+  compteurs.conservees++;
+  logger.warn({ effectif_id: fiche.effectif_id, jumeau_id: fiche.jumeau_id, motif }, "Doublon obsolète conservé");
+}
+
+function cumuler(compteurs: CompteursTraitement, liens: ResultatRepointage) {
+  compteurs.ml_repointes += liens.ml.repointes;
+  compteurs.ml_fusionnes += liens.ml.fusionnes;
+  compteurs.ml_refuses += liens.ml.refuses;
+  compteurs.france_travail_repointes += liens.france_travail.repointes;
+  compteurs.france_travail_fusionnes += liens.france_travail.fusionnes;
+  compteurs.voeux_repointes += liens.voeux;
+}
+
+export async function traiterDoublonsObsoletes({
+  seuilJours = SEUIL_JOURS_DEFAUT,
+  date = new Date(),
+  appliquer = false,
+}: { seuilJours?: number; date?: Date; appliquer?: boolean } = {}): Promise<RapportDoublonsObsoletes> {
+  const rapport = await rapportDoublonsObsoletes({ seuilJours, date });
+  if (!appliquer) {
+    return rapport;
+  }
+
+  const compteurs: CompteursTraitement = {
+    supprimees: 0,
+    conservees: 0,
+    ml_repointes: 0,
+    ml_fusionnes: 0,
+    ml_refuses: 0,
+    france_travail_repointes: 0,
+    france_travail_fusionnes: 0,
+    voeux_repointes: 0,
+  };
+  const missionsLocales = new Map<string, ObjectId>();
+
+  for (const fiche of rapport.fiches_detail) {
+    if (fiche.categorie !== "supprimable") {
+      continue;
+    }
+    const jumeau = await effectifsDb().findOne({ _id: fiche.jumeau_id });
+    if (!jumeau) {
+      conserver(fiche, compteurs, "jumeau introuvable");
+      continue;
+    }
+    const liens = await repointerLiensVersJumeau(fiche.effectif_id, jumeau);
+    cumuler(compteurs, liens);
+    for (const missionLocaleId of liens.missions_locales) {
+      missionsLocales.set(missionLocaleId.toString(), missionLocaleId);
+    }
+    if (liens.ml.refuses > 0) {
+      conserver(fiche, compteurs, "migration du dossier Mission Locale refusée");
+      continue;
+    }
+    if (!(await archiverEtSupprimer(fiche, date))) {
+      conserver(fiche, compteurs, "fiche introuvable");
+      continue;
+    }
+    fiche.traitement = "supprimee";
+    compteurs.supprimees++;
+    logger.info(
+      { effectif_id: fiche.effectif_id, jumeau_id: fiche.jumeau_id, organisme_id: fiche.organisme_id, liens },
+      "Doublon obsolète archivé et supprimé"
+    );
+  }
+
+  for (const missionLocaleId of missionsLocales.values()) {
+    try {
+      await createOrUpdateMissionLocaleStats(missionLocaleId, date);
+    } catch (err) {
+      logger.warn({ err, mission_locale_id: missionLocaleId }, "Stats de la Mission Locale non rafraîchies");
+    }
+  }
+
+  logger.info(compteurs, "Traitement des doublons obsolètes terminé");
+  return { ...rapport, appliquer: true, traitement: compteurs };
 }

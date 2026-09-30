@@ -319,9 +319,14 @@ program
 
 program
   .command("effectifs:doublons-obsoletes")
-  .description("Rapporte, sans écrire, les effectifs en doublon obsolètes après changement d'organisme formateur")
+  .description("Rapporte les effectifs en doublon obsolètes après changement d'organisme formateur")
   .option("--seuil-jours <number>", "Jours sans transmission au-delà desquels une fiche est supprimable", (n) =>
     parseInt(n, 10)
+  )
+  .option(
+    "--appliquer",
+    "Re-pointe les dossiers ML, France Travail et vœux des fiches supprimables vers la fiche récente, puis les archive et les supprime",
+    false
   )
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("effectifs:doublons-obsoletes"));
