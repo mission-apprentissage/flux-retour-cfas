@@ -38,6 +38,9 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   "heartbeat:ingestion": { tier: "jour" },
   // `veille` : nettoyage, révocation, contrôle de cohérence. Un report d'un jour
   // ne change rien pour personne.
+  // Import mensuel du référentiel de voies : son échec dégrade la résolution des
+  // codes INSEE à l'ingestion, donc la précision des adresses.
+  "hydrate:communes-voies": { tier: "jour" },
   "Cleanup organismes": { tier: "veille" },
   "Révoque les clés API des organismes inactifs depuis +12 mois, tous les jours à 4h": { tier: "veille" },
   "Validation des constantes de territoires": { tier: "veille" },

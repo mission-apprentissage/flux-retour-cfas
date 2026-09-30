@@ -162,11 +162,19 @@ export const getCommune = async ({
     const communesByPostal = communeList.filter(({ code }) => code.postaux.includes(codePostal));
 
     if (communesByPostal.length > 1) {
-      const resolution = await resoudreCodeInsee({ codePostal, adresse }).catch((error) => {
-        logger.error({ error, codePostal }, "getCommune: échec de la résolution du code INSEE");
-        captureException(error);
-        return null;
-      });
+      // Appelé par effectif sur le chemin d'ingestion : une capture par appel
+      // produirait un événement par dossier. Le `then` réarme l'état, sans quoi
+      // le premier échec ferait taire les suivants pour de bon.
+      const resolution = await resoudreCodeInsee({ codePostal, adresse })
+        .then((resultat) => {
+          reportDependencyHealth("resolution-code-insee", true);
+          return resultat;
+        })
+        .catch((error) => {
+          logger.error({ error, codePostal }, "getCommune: échec de la résolution du code INSEE");
+          reportDependencyHealth("resolution-code-insee", false, error, { tier: "jour", errorKind: "db" });
+          return null;
+        });
       const communeResolue = communesByPostal.find(({ code }) => code.insee === resolution?.code_insee);
       if (communeResolue) {
         return communeResolue;
