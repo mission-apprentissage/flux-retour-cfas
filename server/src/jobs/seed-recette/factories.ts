@@ -19,10 +19,11 @@ import { withComputedFields } from "@/common/actions/effectifs.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import { getCurrentStatutFromParcours } from "@/common/actions/shared/rupture-pipeline.utils";
 import parentLogger from "@/common/logger";
-import { missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import { missionLocaleEffectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { hash } from "@/common/utils/passwordUtils";
 import config from "@/config";
 
+import { JEUNES_CLICHY } from "./catalogue/clichy-jeunes";
 import { applyPatch, type HostFlagsPlan } from "./host-flags";
 import {
   CFA_HOST_CODES,
@@ -30,6 +31,7 @@ import {
   ML_HOST_CODES,
   ML_HOST_COMMUNES,
   type MlHostCode,
+  type SeedCommune,
   type SeedRecetteHosts,
 } from "./hosts";
 import { email, identite, NOMS } from "./identites";
@@ -39,7 +41,16 @@ const logger = parentLogger.child({ module: "job:seed-recette" });
 
 export const SEED_MARKER = "SEED_RECETTE";
 
-const FORMATION = {
+export interface SeedFormation {
+  cfd: string;
+  rncp: string;
+  libelle_long: string;
+  libelle_court: string;
+  niveau: string;
+  niveau_libelle: string;
+}
+
+const FORMATION: SeedFormation = {
   cfd: "50022141",
   rncp: "RNCP4637",
   libelle_long: "CAP MAINTENANCE DES VEHICULES OPTION VOITURES PARTICULIERES",
@@ -58,6 +69,7 @@ export interface SeedContext {
   today: Date;
   missionsLocales: Record<MlHostCode, IOrganisationMissionLocale>;
   cfas: Record<CfaHostCode, SeedCfa>;
+  auteurClichy: ObjectId | null;
   passwordHash: string;
   identitesPrises: Set<string>;
 }
@@ -69,7 +81,9 @@ async function loadIdentitesPrises(hosts: SeedRecetteHosts): Promise<Set<string>
   const dossiers = await missionLocaleEffectifsDb()
     .find(
       {
-        "identifiant_normalise.nom": { $in: NOMS.map((nom) => nom.toUpperCase()) },
+        "identifiant_normalise.nom": {
+          $in: [...NOMS, ...JEUNES_CLICHY.map((jeune) => jeune.nom)].map((nom) => nom.toUpperCase()),
+        },
         $nor: [
           { _id: SEED_ID_RANGE },
           { effectif_id: SEED_ID_RANGE, mission_locale_id: { $in: Object.values(hosts.missionsLocales) } },
@@ -106,12 +120,17 @@ export async function loadSeedContext(hosts: SeedRecetteHosts, now: Date, plan?:
     logger.warn("MNA_TDB_SEED_RECETTE_PASSWORD absent : les comptes fictifs ne seront pas connectables");
   }
   const password = config.seedRecette.password || randomUUID();
+  const auteurClichy =
+    hosts.auteurClichy && (await usersMigrationDb().countDocuments({ _id: hosts.auteurClichy })) > 0
+      ? hosts.auteurClichy
+      : null;
 
   return {
     now,
     today,
     missionsLocales,
     cfas,
+    auteurClichy,
     passwordHash: hash(password),
     identitesPrises: await loadIdentitesPrises(hosts),
   };
@@ -119,13 +138,15 @@ export async function loadSeedContext(hosts: SeedRecetteHosts, now: Date, plan?:
 
 export const jour = (ctx: SeedContext, offset: number) => addDays(ctx.today, offset);
 
+export const telephoneFictif = (n: number) => `060000${String(n).padStart(4, "0")}`;
+
 function minDate(a: Date, b: Date) {
   return a < b ? a : b;
 }
 
 const MAX_DECALAGE_JOURS = 20;
 
-function dateDeNaissanceLibre(ctx: SeedContext, nom: string, prenom: string, souhaitee: Date): Date {
+export function dateDeNaissanceLibre(ctx: SeedContext, nom: string, prenom: string, souhaitee: Date): Date {
   for (let decalage = 0; decalage <= MAX_DECALAGE_JOURS; decalage++) {
     const candidate = subDays(souhaitee, decalage);
     const cle = cleIdentite(normalisePersonIdentifiant({ nom, prenom, date_de_naissance: candidate }));
@@ -170,10 +191,16 @@ export function buildPersonne(
     prenom,
     date_de_naissance,
     sexe,
-    telephone: `060000${String(n).padStart(4, "0")}`,
+    telephone: telephoneFictif(n),
     courriel: email(prenom, nom),
     rqth,
   };
+}
+
+export interface SeedEmployeur {
+  siret: string;
+  denomination: string;
+  naf: string;
 }
 
 export interface SeedContratInput {
@@ -181,6 +208,7 @@ export interface SeedContratInput {
   fin: Date;
   rupture?: Date;
   causeRupture?: string;
+  employeur?: SeedEmployeur;
 }
 
 export interface SeedParcoursInput {
@@ -196,12 +224,15 @@ export interface SeedEffectifInput {
   ml: MlHostCode;
   personne: SeedPersonne;
   parcours: SeedParcoursInput;
+  commune?: SeedCommune;
+  adresse?: { numero: number; voie: string };
+  formation?: SeedFormation;
 }
 
-function buildEffectifBase(ctx: SeedContext, { n, cfa, ml, personne, parcours }: SeedEffectifInput) {
+function buildEffectifBase(ctx: SeedContext, { n, cfa, ml, personne, parcours, ...surcharges }: SeedEffectifInput) {
   const { organisme } = ctx.cfas[cfa];
   const communes = ML_HOST_COMMUNES[ml];
-  const commune = communes[n % communes.length];
+  const commune = surcharges.commune ?? communes[n % communes.length];
   const anneeScolaire = getAnneeScolaireFromDate(minDate(ctx.today, parcours.dateFin));
   const [debut, fin] = anneeScolaire.split("-").map(Number);
 
@@ -223,14 +254,13 @@ function buildEffectifBase(ctx: SeedContext, { n, cfa, ml, personne, parcours }:
       has_nir: false,
       historique_statut: [],
       adresse: {
-        numero: 1 + (n % 90),
-        voie: "Rue de la Recette",
+        ...(surcharges.adresse ?? { numero: 1 + (n % 90), voie: "Rue de la Recette" }),
         ...commune,
         mission_locale_id: ctx.missionsLocales[ml].ml_id,
       },
     },
     formation: {
-      ...FORMATION,
+      ...(surcharges.formation ?? FORMATION),
       periode: [debut, fin],
       date_inscription: parcours.dateEntree,
       date_entree: parcours.dateEntree,
@@ -242,6 +272,7 @@ function buildEffectifBase(ctx: SeedContext, { n, cfa, ml, personne, parcours }:
       date_fin: c.fin,
       date_rupture: c.rupture ?? null,
       ...(c.causeRupture ? { cause_rupture: c.causeRupture } : {}),
+      ...c.employeur,
     })),
     is_lock: false,
     validation_errors: [],
@@ -355,6 +386,7 @@ export interface SeedUserInput {
   organisationId: ObjectId;
   prenom: string;
   nom: string;
+  email?: string;
   civility: "Madame" | "Monsieur";
   fonction: string;
   role?: "admin" | "member";
@@ -363,12 +395,12 @@ export interface SeedUserInput {
 
 export function buildUser(
   ctx: SeedContext,
-  { n, organisationId, prenom, nom, civility, fonction, role, lastConnection }: SeedUserInput
+  { n, organisationId, prenom, nom, email: emailCompte, civility, fonction, role, lastConnection }: SeedUserInput
 ): IUsersMigration {
   const createdAt = jour(ctx, -200);
   return {
     _id: seedId("user", n),
-    email: email(prenom, nom),
+    email: emailCompte ?? email(prenom, nom),
     password: ctx.passwordHash,
     civility,
     nom,
