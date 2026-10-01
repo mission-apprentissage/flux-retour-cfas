@@ -1,7 +1,7 @@
 import type { IUsersMigration } from "shared/models";
 
 import { buildUser, jour, type SeedContext } from "../factories";
-import type { CfaHostCode, MlHostCode } from "../hosts";
+import { type CfaHostCode, ML_HOST_CODES, type MlHostCode } from "../hosts";
 import { seedId } from "../seed-ids";
 
 export interface Compte {
@@ -9,10 +9,11 @@ export interface Compte {
   hote: MlHostCode | CfaHostCode;
   prenom: string;
   nom: string;
+  email?: string;
   civility: "Madame" | "Monsieur";
   fonction: string;
   role?: "admin" | "member";
-  derniereConnexion: number;
+  derniereConnexion?: number;
 }
 
 export const COMPTES = {
@@ -33,6 +34,15 @@ export const COMPTES = {
     civility: "Monsieur",
     fonction: "Conseiller en insertion",
     derniereConnexion: -3,
+  },
+  ML_CLICHY_CONSEIL: {
+    n: 103,
+    hote: "ML_CLICHY",
+    prenom: "Élodie",
+    nom: "Marchetti",
+    civility: "Madame",
+    fonction: "Conseillère en insertion",
+    derniereConnexion: -1,
   },
   CFA_ON_ADMIN: {
     n: 11,
@@ -84,14 +94,36 @@ export const COMPTES = {
     role: "admin",
     derniereConnexion: -2,
   },
+  CFA_REAL_CAMPUS_ADMIN: {
+    n: 101,
+    hote: "CFA_REAL_CAMPUS",
+    prenom: "Karim",
+    nom: "BENALI",
+    email: "karim.benali@cfa-metiers-clichy.example",
+    civility: "Monsieur",
+    fonction: "Référent apprentissage",
+    role: "admin",
+  },
+  CFA_AFTRAL_ADMIN: {
+    n: 102,
+    hote: "CFA_AFTRAL",
+    prenom: "Sophie",
+    nom: "LAURENT",
+    email: "sophie.laurent@campus92-formation.example",
+    civility: "Madame",
+    fonction: "Chargée de suivi des apprentis",
+    role: "admin",
+  },
 } satisfies Record<string, Compte>;
 
 export type CodeCompte = keyof typeof COMPTES;
 
 export const userId = (code: CodeCompte) => seedId("user", COMPTES[code].n);
 
+const estMl = (hote: Compte["hote"]): hote is MlHostCode => (ML_HOST_CODES as readonly string[]).includes(hote);
+
 const organisationDe = (ctx: SeedContext, hote: Compte["hote"]) =>
-  hote === "ML_A" || hote === "ML_B" ? ctx.missionsLocales[hote]._id : ctx.cfas[hote].organisation._id;
+  estMl(hote) ? ctx.missionsLocales[hote]._id : ctx.cfas[hote].organisation._id;
 
 export function buildUtilisateurs(ctx: SeedContext): IUsersMigration[] {
   return Object.values(COMPTES).map((compte: Compte) =>
@@ -100,10 +132,11 @@ export function buildUtilisateurs(ctx: SeedContext): IUsersMigration[] {
       organisationId: organisationDe(ctx, compte.hote),
       prenom: compte.prenom,
       nom: compte.nom,
+      email: compte.email,
       civility: compte.civility,
       fonction: compte.fonction,
       role: compte.role,
-      lastConnection: jour(ctx, compte.derniereConnexion),
+      lastConnection: compte.derniereConnexion !== undefined ? jour(ctx, compte.derniereConnexion) : undefined,
     })
   );
 }

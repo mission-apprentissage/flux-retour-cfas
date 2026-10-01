@@ -1,3 +1,5 @@
+import type { ObjectId } from "mongodb";
+
 import { CATALOGUE } from "./catalogue";
 import type { SeedCase } from "./catalogue/types";
 import { COMPTES, type Compte } from "./catalogue/utilisateurs";
@@ -44,21 +46,20 @@ function lien(seedCase: SeedCase): string {
 }
 
 const ligneCas = (c: SeedCase) => {
-  const { prenom, nom } = identite(c.n);
+  const { prenom, nom } = c.identite ?? identite(c.n);
   return `| ${c.code} | ${prenom} ${nom} | ${c.titre} | ${ouVoir(c)} | ${lien(c)} |`;
 };
 
 const ligneCompte = ([code, compte]: [string, Compte]) =>
-  `| ${compte.prenom} ${compte.nom} | ${email(compte.prenom, compte.nom)} | ${compte.hote} | ${compte.role ?? "—"} | ${code} |`;
+  `| ${compte.prenom} ${compte.nom} | ${compte.email ?? email(compte.prenom, compte.nom)} | ${compte.hote} | ${compte.role ?? "—"} | ${code} |`;
 
 export function renderReadme(): string {
-  const hotes = [...ML_HOST_CODES, ...CFA_HOST_CODES].map((code) => {
-    const id =
-      code === "ML_A" || code === "ML_B"
-        ? HOSTS_RECETTE.missionsLocales[code].toHexString()
-        : HOSTS_RECETTE.cfas[code].organisationId.toHexString();
-    return `| ${code} | ${HOST_LABELS[code].nom} | ${HOST_LABELS[code].role} | \`${id}\` |`;
-  });
+  const ligneHote = (code: keyof typeof HOST_LABELS, id: ObjectId) =>
+    `| ${code} | ${HOST_LABELS[code].nom} | ${HOST_LABELS[code].role} | \`${id.toHexString()}\` |`;
+  const hotes = [
+    ...ML_HOST_CODES.map((code) => ligneHote(code, HOSTS_RECETTE.missionsLocales[code])),
+    ...CFA_HOST_CODES.map((code) => ligneHote(code, HOSTS_RECETTE.cfas[code].organisationId)),
+  ];
 
   const casJeunes = CATALOGUE.filter((c) => c.attendu.ml || c.attendu.cfa);
   const autres = CATALOGUE.filter((c) => !c.attendu.ml && !c.attendu.cfa);
@@ -75,7 +76,7 @@ export function renderReadme(): string {
     "- À la main : `yarn cli seed:recette` (`--dry-run` pour simuler, `--uninstall` pour tout retirer et remettre les flags des hôtes).",
     "- Refuse de tourner hors recette/local/test, et s'arrête sans rien écrire (désinstallation comprise) si un hôte a une activité réelle : effectif ou dossier ML actif hors seed (les anciens dossiers soft-deleted sont ignorés). En cron, l'échec remonte dans Sentry.",
     "- Tout le jeu est construit avant la moindre écriture : une erreur de construction ne laisse aucun état partiel.",
-    "- La purge ne touche que le jeu fictif : `_id` en `5eed`, dossiers des ML hôtes créés sur un effectif fictif, invitations émises par un compte fictif.",
+    "- La purge ne touche que le jeu fictif : `_id` en `5eed`, dossiers des ML hôtes créés sur un effectif fictif, invitations émises par un compte fictif ou d'une ML hôte vers un CFA hôte. Les invitations de collègues restent.",
     "- Si un vrai dossier porte déjà le même nom, prénom et date de naissance qu'un jeune fictif, la date de naissance fictive est décalée de quelques jours (l'index est unique sur toutes les ML).",
     "- Tous les `_id` créés commencent par `5eed` ; les URL ci-dessous restent valides d'une nuit à l'autre.",
     "- Identités fictives : e-mails en `@example.com` (domaine réservé), téléphones en 06 00 00 (plage de fiction ARCEP 06 39 98 rejetée par la validation serveur).",
@@ -88,6 +89,15 @@ export function renderReadme(): string {
     "| Code | Organisation | Rôle dans le jeu | Organisation `_id` |",
     "| --- | --- | --- | --- |",
     ...hotes,
+    "",
+    "## ML de Clichy (cas Z01 à Z41)",
+    "",
+    "Les 41 dossiers de la ML Clichoise, repris du jeu importé à la main le 22/09/2026. `ML_CLICHY`, `CFA_REAL_CAMPUS` et `CFA_AFTRAL` sont des organisations réelles qui ont déjà leurs propres dossiers et effectifs, visibles à côté des dossiers fictifs :",
+    "",
+    "- le contrôle d'activité réelle ne s'applique pas à elles, et la purge ne touche jamais leurs vrais dossiers ;",
+    "- la ML n'est jamais modifiée (ni activation, ni lien de RDV), même à la désinstallation ;",
+    "- aucun effectif fictif n'est créé chez ces deux CFA ;",
+    "- les traitements passés sont signés par le compte `auteurClichy` de `hosts.ts`, ou sans auteur s'il n'existe pas.",
     "",
     "## Comptes",
     "",

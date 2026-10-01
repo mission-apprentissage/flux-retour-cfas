@@ -21,10 +21,12 @@ import { applyHostFlags, planHostFlags } from "./host-flags";
 import {
   cfaOrganisationIds,
   cfaOrganismeIds,
+  cfaOrganismeIdsSansActivite,
   CFA_HOST_CODES,
   HOSTS_RECETTE,
   ML_HOST_CODES,
   mlOrganisationIds,
+  mlOrganisationIdsSansActivite,
   type SeedRecetteHosts,
 } from "./hosts";
 import { SEED_ID_RANGE } from "./seed-ids";
@@ -106,14 +108,14 @@ async function assertHostsExist(hosts: SeedRecetteHosts) {
 }
 
 async function assertHostsSansActivite(hosts: SeedRecetteHosts) {
-  const organismeIds = cfaOrganismeIds(hosts);
+  const organismeIds = cfaOrganismeIdsSansActivite(hosts);
   const horsSeed = { $not: SEED_ID_RANGE };
 
   const [effectifs, effectifsDECA, dossiersMl] = await Promise.all([
     effectifsDb().countDocuments({ organisme_id: { $in: organismeIds }, _id: horsSeed }),
     effectifsDECADb().countDocuments({ organisme_id: { $in: organismeIds }, _id: horsSeed }),
     missionLocaleEffectifsDb().countDocuments({
-      mission_locale_id: { $in: mlOrganisationIds(hosts) },
+      mission_locale_id: { $in: mlOrganisationIdsSansActivite(hosts) },
       effectif_id: horsSeed,
       soft_deleted: { $ne: true },
     }),
@@ -147,7 +149,13 @@ async function purgeSeed(hosts: SeedRecetteHosts, dryRun: boolean): Promise<Seed
     effectifs: { _id: SEED_ID_RANGE },
     effectifsDECA: { _id: SEED_ID_RANGE },
     missionLocaleEffectifLog: { $or: [{ _id: SEED_ID_RANGE }, { mission_locale_effectif_id: { $in: dossierMlIds } }] },
-    missionLocaleCfaInvitations: { $or: [{ _id: SEED_ID_RANGE }, { author_id: SEED_ID_RANGE }] },
+    missionLocaleCfaInvitations: {
+      $or: [
+        { _id: SEED_ID_RANGE },
+        { author_id: SEED_ID_RANGE },
+        { mission_locale_id: { $in: mlOrganisationIds(hosts) }, organisme_id: { $in: cfaOrganismeIds(hosts) } },
+      ],
+    },
     usersMigration: { _id: SEED_ID_RANGE },
   };
 
@@ -191,7 +199,7 @@ async function purgeSeed(hosts: SeedRecetteHosts, dryRun: boolean): Promise<Seed
 
 async function unsetHostFlags(hosts: SeedRecetteHosts, dryRun: boolean): Promise<SeedRecetteFlagsReport> {
   const mlFilter = {
-    _id: { $in: mlOrganisationIds(hosts) },
+    _id: { $in: mlOrganisationIdsSansActivite(hosts) },
     $or: [{ activated_at: { $exists: true } }, { rdv_url: { $exists: true } }],
   };
   const cfaOrganisationFilter = { _id: { $in: cfaOrganisationIds(hosts) }, ml_beta_activated_at: { $exists: true } };

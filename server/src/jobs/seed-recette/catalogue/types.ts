@@ -49,6 +49,7 @@ export interface SeedCase {
   n: number;
   code: string;
   titre: string;
+  identite?: { prenom: string; nom: string };
   source?: "DECA";
   attendu: { ml?: AttenduMl; cfa?: AttenduCfa };
   build: (ctx: SeedContext) => Promise<Partial<SeedDocs>>;

@@ -21,7 +21,7 @@ import {
 } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 import { CFA_HOST_CODES, type SeedRecetteHosts } from "@/jobs/seed-recette/hosts";
-import { seedId } from "@/jobs/seed-recette/seed-ids";
+import { isSeedId, seedId } from "@/jobs/seed-recette/seed-ids";
 import { assertSeedRecetteEnv, seedRecette } from "@/jobs/seed-recette/seed-recette";
 import { useMongo } from "@tests/jest/setupMongo";
 import { testDocs } from "@tests/utils/testUtils";
@@ -37,8 +37,11 @@ const COLLECTIONS = [
   "usersMigration",
 ];
 
+const DATE_ACTIVATION_ML_CLICHY = new Date("2025-09-11T00:00:00.000Z");
+const RDV_URL_ML_CLICHY = "https://rdv.example.com/ml-clichy";
+
 const buildHosts = (): SeedRecetteHosts => ({
-  missionsLocales: { ML_A: new ObjectId(), ML_B: new ObjectId() },
+  missionsLocales: { ML_A: new ObjectId(), ML_B: new ObjectId(), ML_CLICHY: new ObjectId() },
   cfas: Object.fromEntries(
     CFA_HOST_CODES.map((code) => [code, { organisationId: new ObjectId(), organismeId: new ObjectId() }])
   ) as SeedRecetteHosts["cfas"],
@@ -49,6 +52,14 @@ async function insertHosts(hosts: SeedRecetteHosts) {
     testDocs<IOrganisation>([
       { _id: hosts.missionsLocales.ML_A, type: "MISSION_LOCALE", nom: "ML A", ml_id: 1, activated_at: new Date() },
       { _id: hosts.missionsLocales.ML_B, type: "MISSION_LOCALE", nom: "ML B", ml_id: 2 },
+      {
+        _id: hosts.missionsLocales.ML_CLICHY,
+        type: "MISSION_LOCALE",
+        nom: "ML CLICHY",
+        ml_id: 3,
+        activated_at: DATE_ACTIVATION_ML_CLICHY,
+        rdv_url: RDV_URL_ML_CLICHY,
+      },
       ...Object.values(hosts.cfas).map(({ organisationId, organismeId }) => ({
         _id: organisationId,
         type: "ORGANISME_FORMATION" as const,
@@ -65,6 +76,7 @@ async function insertHosts(hosts: SeedRecetteHosts) {
         _id: organismeId,
         siret: "12345678901234",
         is_allowed_collab: true,
+        is_allowed_deca: true,
         collab_suspended_at: new Date(),
       }))
     )
@@ -152,6 +164,76 @@ describe("seedRecette", () => {
     await expect(seedRecette({ hosts })).resolves.toBeDefined();
   });
 
+  it("accepte l'activité réelle des hôtes de Clichy et la laisse intacte", async () => {
+    const reel = { effectif: new ObjectId(), dossierMl: new ObjectId(), dossierCfa: new ObjectId() };
+    await effectifsDb().insertOne(
+      testDocs<IEffectif>([{ _id: reel.effectif, organisme_id: hosts.cfas.CFA_AFTRAL.organismeId }])[0]
+    );
+    await missionLocaleEffectifsDb().insertMany(
+      testDocs<IMissionLocaleEffectif>([
+        { _id: reel.dossierMl, mission_locale_id: hosts.missionsLocales.ML_CLICHY, effectif_id: new ObjectId() },
+        { _id: reel.dossierCfa, mission_locale_id: new ObjectId(), effectif_id: reel.effectif },
+      ])
+    );
+
+    await expect(seedRecette({ hosts })).resolves.toBeDefined();
+    await expect(seedRecette({ hosts, uninstall: true })).resolves.toBeDefined();
+
+    expect(await effectifsDb().countDocuments({ _id: reel.effectif })).toBe(1);
+    expect(await missionLocaleEffectifsDb().countDocuments({ _id: { $in: [reel.dossierMl, reel.dossierCfa] } })).toBe(
+      2
+    );
+  });
+
+  it("purge les invitations d'une ML hôte vers un CFA hôte, et seulement elles", async () => {
+    const invitation = (missionLocale: ObjectId, organisme: ObjectId) => ({
+      _id: new ObjectId(),
+      mission_locale_id: missionLocale,
+      organisme_id: organisme,
+      author_id: new ObjectId(),
+    });
+    const entreHotes = invitation(hosts.missionsLocales.ML_CLICHY, hosts.cfas.CFA_REAL_CAMPUS.organismeId);
+    const autreMl = invitation(new ObjectId(), hosts.cfas.CFA_REAL_CAMPUS.organismeId);
+    const autreCfa = invitation(hosts.missionsLocales.ML_CLICHY, new ObjectId());
+    await missionLocaleCfaInvitationsDb().insertMany(
+      testDocs<IMissionLocaleCfaInvitation>([entreHotes, autreMl, autreCfa])
+    );
+
+    const report = await seedRecette({ hosts });
+
+    expect(report.purge.missionLocaleCfaInvitations).toBe(1);
+    const restantes = (await missionLocaleCfaInvitationsDb().distinct("_id")).filter((id) => !isSeedId(id));
+    expect(restantes.map(String).sort()).toEqual([autreMl._id, autreCfa._id].map(String).sort());
+  });
+
+  it("garde l'âge des jeunes de Clichy quel que soit le jour du run", async () => {
+    await seedRecette({ hosts, now: new Date("2027-01-15T05:30:00.000Z") });
+
+    expect(await missionLocaleEffectifsDb().findOne({ _id: seedId("dossierMl", 1019) })).toMatchObject({
+      identifiant_normalise: {
+        nom: "AUBERT",
+        prenom: "Mathilde",
+        date_de_naissance: new Date("2008-08-30T00:00:00.000Z"),
+      },
+    });
+  });
+
+  it("signe les traitements de Clichy avec le compte auteur s'il existe, sinon sans auteur", async () => {
+    const dossierTraite = seedId("dossierMl", 1030);
+
+    await seedRecette({ hosts: { ...hosts, auteurClichy: new ObjectId() } });
+    expect(await missionLocaleEffectifsLogDb().findOne({ mission_locale_effectif_id: dossierTraite })).toMatchObject({
+      created_by: null,
+    });
+
+    const auteurClichy = new ObjectId();
+    await usersMigrationDb().insertOne(testDocs<IUsersMigration>([{ _id: auteurClichy }])[0]);
+    await seedRecette({ hosts: { ...hosts, auteurClichy } });
+    expect(await missionLocaleEffectifsLogDb().findOne({ mission_locale_effectif_id: dossierTraite })).toMatchObject({
+      created_by: auteurClichy,
+    });
+  });
+
   it("purge le jeu fictif et ce qui s'y rattache, sans toucher au reste (désinstallation)", async () => {
     const reel = { effectif: new ObjectId(), dossier: new ObjectId(), log: new ObjectId(), user: new ObjectId() };
     const dossierTesteur = new ObjectId();
@@ -217,9 +299,9 @@ describe("seedRecette", () => {
     const report = await seedRecette({ hosts, dryRun: true, uninstall: true });
 
     expect(report.purge.effectifs).toBe(1);
-    expect(report.flagsRetires).toEqual({ missionsLocales: 1, organisationsCfa: 5, organismes: 5 });
+    expect(report.flagsRetires).toEqual({ missionsLocales: 1, organisationsCfa: 7, organismes: 7 });
     expect(await effectifsDb().countDocuments()).toBe(1);
-    expect(await organismesDb().countDocuments({ is_allowed_collab: true })).toBe(5);
+    expect(await organismesDb().countDocuments({ is_allowed_collab: true })).toBe(7);
   });
 
   it("refuse la désinstallation quand un hôte a une activité réelle", async () => {
@@ -229,14 +311,20 @@ describe("seedRecette", () => {
 
     await expect(seedRecette({ hosts, uninstall: true })).rejects.toThrow(/activité réelle/);
 
-    expect(await organismesDb().countDocuments({ is_allowed_collab: true })).toBe(5);
+    expect(await organismesDb().countDocuments({ is_allowed_collab: true })).toBe(7);
   });
 
-  it("retire les flags des hôtes à la désinstallation", async () => {
+  it("retire les flags des hôtes à la désinstallation, sans désactiver la ML de Clichy", async () => {
     const report = await seedRecette({ hosts, uninstall: true });
 
-    expect(report.flagsRetires).toEqual({ missionsLocales: 1, organisationsCfa: 5, organismes: 5 });
-    expect(await organisationsDb().countDocuments({ activated_at: { $exists: true } })).toBe(0);
+    expect(report.flagsRetires).toEqual({ missionsLocales: 1, organisationsCfa: 7, organismes: 7 });
+    expect(await organisationsDb().distinct("_id", { activated_at: { $exists: true } })).toEqual([
+      hosts.missionsLocales.ML_CLICHY,
+    ]);
+    expect(await organisationsDb().findOne({ _id: hosts.missionsLocales.ML_CLICHY })).toMatchObject({
+      activated_at: DATE_ACTIVATION_ML_CLICHY,
+      rdv_url: RDV_URL_ML_CLICHY,
+    });
     expect(await organismesDb().countDocuments({ is_allowed_collab: { $exists: true } })).toBe(0);
   });
 
@@ -264,7 +352,8 @@ describe("seedRecette", () => {
   });
 
   it("pose les flags de chaque hôte", async () => {
-    const report = await seedRecette({ hosts });
+    const now = new Date();
+    const report = await seedRecette({ hosts, now });
 
     expect(report.flagsRetires).toBeNull();
     const organisme = (code: keyof SeedRecetteHosts["cfas"]) =>
@@ -282,6 +371,20 @@ describe("seedRecette", () => {
       rdv_url: expect.any(String),
     });
     expect(await organisationsDb().findOne({ _id: hosts.missionsLocales.ML_B })).not.toHaveProperty("activated_at");
+    expect(await organisationsDb().findOne({ _id: hosts.missionsLocales.ML_CLICHY })).toMatchObject({
+      activated_at: DATE_ACTIVATION_ML_CLICHY,
+      rdv_url: RDV_URL_ML_CLICHY,
+    });
+    expect(await organisme("CFA_AFTRAL")).toMatchObject({ is_allowed_collab: true, has_account: true });
+    expect(await organisme("CFA_AFTRAL")).not.toHaveProperty("collab_suspended_at");
+    expect(await organisme("CFA_AFTRAL")).not.toHaveProperty("is_allowed_deca");
+    expect(await organisme("CFA_REAL_CAMPUS")).toMatchObject({ has_account: true });
+    expect(await organisme("CFA_REAL_CAMPUS")).not.toHaveProperty("is_allowed_collab");
+    expect(await organisme("CFA_REAL_CAMPUS")).not.toHaveProperty("is_allowed_deca");
+    const organisationCfa = (code: keyof SeedRecetteHosts["cfas"]) =>
+      organisationsDb().findOne({ _id: hosts.cfas[code].organisationId });
+    expect(await organisationCfa("CFA_AFTRAL")).toMatchObject({ ml_beta_activated_at: subDays(now, 7) });
+    expect(await organisationCfa("CFA_REAL_CAMPUS")).not.toHaveProperty("ml_beta_activated_at");
   });
 
   it("ne génère que des téléphones acceptés par la validation serveur", async () => {
