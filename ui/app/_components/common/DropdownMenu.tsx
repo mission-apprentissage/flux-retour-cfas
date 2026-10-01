@@ -55,7 +55,8 @@ export function DropdownMenu({
     };
   }, [open, focusTrigger]);
 
-  const items = () => Array.from(containerRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+  const items = () =>
+    Array.from(containerRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"], [role="menuitemradio"]') ?? []);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (!open) return;
@@ -133,8 +134,8 @@ export function DropdownMenuButton({ onClick, icon, separator, danger, selected,
     <li className={separator ? styles.separator : undefined}>
       <button
         type="button"
-        role="menuitem"
-        aria-current={selected || undefined}
+        role={selected === undefined ? "menuitem" : "menuitemradio"}
+        aria-checked={selected}
         className={`${styles.item} ${danger ? styles.danger : ""} ${selected ? styles.selected : ""}`}
         onClick={onClick}
       >

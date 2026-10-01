@@ -4,10 +4,11 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { usePathname } from "next/navigation";
+import { Suspense, useState } from "react";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
 import { PAGES } from "@/app/_utils/routes.utils";
-import { STATS_NAV_ITEMS } from "@/app/suivi-des-indicateurs/navigation";
+import { STATS_NAV_ITEMS, StatsFiltersQueryReader } from "@/app/suivi-des-indicateurs/navigation";
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 import { getUserOrganismeId } from "@/common/internal/AuthContext";
 
@@ -41,7 +42,11 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   const pathname = usePathname();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
+  const [statsFiltersQuery, setStatsFiltersQuery] = useState("");
+
   const isCfa = user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION;
+  const isDreetsPersona =
+    user?.organisation?.type === ORGANISATION_TYPE.DREETS || user?.organisation?.type === ORGANISATION_TYPE.DDETS;
   const { data: unreadData } = useCfaUnreadNotificationsCount(isCfa ? getUserOrganismeId(user) : undefined);
   const unreadCount = unreadData?.count ?? 0;
 
@@ -171,9 +176,13 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           },
         });
       }
-      if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) {
+      if (isDreetsPersona) {
         STATS_NAV_ITEMS.forEach(({ text, href, isActive }) => {
-          baseItems.push({ text, isActive: isActive(pathname ?? ""), linkProps: { href, target: "_self" } });
+          baseItems.push({
+            text,
+            isActive: isActive(pathname ?? ""),
+            linkProps: { href: `${href}${statsFiltersQuery}`, target: "_self" },
+          });
         });
       }
       if (
@@ -315,17 +324,24 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   };
 
   return (
-    <DsfrHeader
-      brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
-      homeLinkProps={{
-        href: "/",
-        title: `Accueil - ${PRODUCT_NAME_TITLE}`,
-      }}
-      id="fr-header-simple-header-with-service-title-and-tagline"
-      serviceTitle={PRODUCT_NAME_TITLE}
-      quickAccessItems={[<Impersonate key="impersonate" />, <UserConnectedHeader key="user-connected" />]}
-      navigation={getNavigationItems()}
-      disableDisplay
-    />
+    <>
+      {isDreetsPersona && (
+        <Suspense fallback={null}>
+          <StatsFiltersQueryReader onChange={setStatsFiltersQuery} />
+        </Suspense>
+      )}
+      <DsfrHeader
+        brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
+        homeLinkProps={{
+          href: "/",
+          title: `Accueil - ${PRODUCT_NAME_TITLE}`,
+        }}
+        id="fr-header-simple-header-with-service-title-and-tagline"
+        serviceTitle={PRODUCT_NAME_TITLE}
+        quickAccessItems={[<Impersonate key="impersonate" />, <UserConnectedHeader key="user-connected" />]}
+        navigation={getNavigationItems()}
+        disableDisplay
+      />
+    </>
   );
 }

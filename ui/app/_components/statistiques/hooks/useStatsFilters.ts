@@ -1,10 +1,11 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import { ORGANISATION_TYPE } from "shared/constants/organisations";
-import { REGIONS_BY_CODE, REGIONS_WITH_SVG_SORTED } from "shared/constants/territoires";
 import { zStatsPeriod, type StatsPeriod } from "shared/models/data/nationalStats.model";
 
 import { useAuth } from "@/app/_context/UserContext";
+import { ADMIN_REGION_CODES, isAdminUser } from "@/app/suivi-des-indicateurs/access";
+
+import { getRegionLabel } from "../utils";
 
 import { useUserRegions } from "./useUserRegions";
 
@@ -12,15 +13,21 @@ export const TERRITOIRE_FRANCE = "france";
 export const STATS_FILTER_PARAMS = ["periode", "territoire"] as const;
 
 const DEFAULT_PERIOD: StatsPeriod = "30days";
-const ADMIN_REGION_CODES = REGIONS_WITH_SVG_SORTED.map((region) => region.code);
+
+/** Query string des filtres de stats, à reporter sur les liens entre onglets. */
+export function buildStatsFiltersQuery(searchParams: Pick<URLSearchParams, "get"> | null) {
+  const query = new URLSearchParams();
+  STATS_FILTER_PARAMS.forEach((key) => {
+    const value = searchParams?.get(key);
+    if (value) query.set(key, value);
+  });
+  const queryString = query.toString();
+  return queryString ? `?${queryString}` : "";
+}
 
 export interface TerritoireOption {
   value: string;
   label: string;
-}
-
-export function getRegionLabel(code: string) {
-  return REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE]?.nom ?? code;
 }
 
 export function useStatsFilters() {
@@ -30,7 +37,7 @@ export function useStatsFilters() {
   const { user } = useAuth();
   const { regions: ownRegions, isLoading } = useUserRegions();
 
-  const isAdmin = user?.organisation?.type === ORGANISATION_TYPE.ADMINISTRATEUR;
+  const isAdmin = isAdminUser(user ?? null);
   const allowedRegions = isAdmin ? ADMIN_REGION_CODES : ownRegions;
   const defaultTerritoire = !isAdmin && ownRegions.length === 1 ? ownRegions[0] : TERRITOIRE_FRANCE;
 

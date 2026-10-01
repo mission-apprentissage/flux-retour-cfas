@@ -83,7 +83,7 @@ export function VueEnsembleView({ isAdmin = false, isPublic = false }: VueEnsemb
             <path d="M7.5 30H17.5V52.5H7.5V30ZM42.5 20H52.5V52.5H42.5V20ZM25 5H35V52.5H25V5Z" fill="#6A6AF4" />
           </svg>
         </div>
-        <h2 className={commonStyles.headerTitle}>Vue d&apos;ensemble</h2>
+        <h1 className={commonStyles.headerTitle}>Vue d&apos;ensemble</h1>
       </div>
 
       <StatsTabs tabs={PUBLIC_TABS} />

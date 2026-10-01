@@ -3,11 +3,16 @@
 import { format } from "date-fns/format";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { fr } from "date-fns/locale";
+import { REGIONS_BY_CODE } from "shared/constants/territoires";
 
 import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import commonStyles from "./tables/common.module.css";
 import styles from "./tables/TraitementTable.module.css";
+
+export function getRegionLabel(code: string) {
+  return REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE]?.nom ?? code;
+}
 
 export function formatPercentageBadge(percentage: number, evolution?: string, loadingEvolution?: boolean) {
   let badgeClass = styles.percentageBadgeMedium;

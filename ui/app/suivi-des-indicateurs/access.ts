@@ -1,4 +1,5 @@
 import { ORGANISATION_TYPE } from "shared/constants/organisations";
+import { REGIONS_WITH_SVG_SORTED } from "shared/constants/territoires";
 
 import type { AuthContext } from "@/common/internal/AuthContext";
 
@@ -25,3 +26,5 @@ export function isDreetsPersona(user: AuthContext | null): boolean {
 }
 
 export const ADMIN_DEFAULT_REGION_CODE = "84";
+
+export const ADMIN_REGION_CODES = REGIONS_WITH_SVG_SORTED.map((region) => region.code);

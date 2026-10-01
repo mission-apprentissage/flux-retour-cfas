@@ -72,7 +72,7 @@ function MissionLocalePageContent() {
             />
           </svg>
         </div>
-        <h2 className={commonStyles.headerTitle}>Par Mission Locale</h2>
+        <h1 className={commonStyles.headerTitle}>Par Mission Locale</h1>
       </div>
 
       <div className={styles.searchContainer}>

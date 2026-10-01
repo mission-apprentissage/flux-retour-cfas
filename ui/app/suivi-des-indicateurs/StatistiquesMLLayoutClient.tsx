@@ -3,7 +3,6 @@
 import type { SideMenuProps } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { REGIONS_BY_CODE, REGIONS_WITH_SVG_SORTED } from "shared/constants/territoires";
 
 import { useUserRegions } from "@/app/_components/statistiques/hooks/useUserRegions";
 import {
@@ -13,13 +12,13 @@ import {
   RegionsLabel,
   SyntheseLabel,
 } from "@/app/_components/statistiques/ui/MenuLabels";
+import { getRegionLabel } from "@/app/_components/statistiques/utils";
 
-import { ADMIN_DEFAULT_REGION_CODE } from "./access";
+import { ADMIN_DEFAULT_REGION_CODE, ADMIN_REGION_CODES } from "./access";
 import { StatistiquesLayoutBase } from "./StatistiquesLayoutBase";
 import styles from "./StatistiquesMLLayoutClient.module.css";
 
 const BASE_PATH = "/suivi-des-indicateurs";
-const ADMIN_REGION_CODES = REGIONS_WITH_SVG_SORTED.map((region) => region.code);
 
 interface StatistiquesMLLayoutClientProps {
   children: React.ReactNode;
@@ -190,9 +189,7 @@ function buildCollapsedMenuItems(
       ),
       linkProps: {
         href: regionMenuHref,
-        title: isMonoRegion
-          ? REGIONS_BY_CODE[defaultRegionCode as keyof typeof REGIONS_BY_CODE]?.nom || defaultRegionCode
-          : regionsLabel,
+        title: isMonoRegion ? getRegionLabel(defaultRegionCode) : regionsLabel,
       },
       isActive: isRegionPage,
     });
