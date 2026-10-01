@@ -1,13 +1,7 @@
-.searchContainer {
-  display: flex;
-  justify-content: center;
-  margin-top: 6rem;
-  margin-bottom: 6rem;
-}
-
 .searchInput {
   width: 100%;
   max-width: 500px;
+  margin-bottom: 0;
 }
 
 .controls {

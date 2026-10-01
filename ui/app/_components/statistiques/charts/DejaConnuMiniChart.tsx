@@ -38,7 +38,7 @@ export function DejaConnuMiniChart({ dejaConnu, total, loading }: DejaConnuMiniC
           }}
         />
       </div>
-      <span className={styles.label}>Part des jeunes déjà connus par les Missions Locales</span>
+      <span className={styles.label}>Part de jeunes déjà connus des Missions Locales dans les dossiers traités</span>
       <span className={styles.value}>
         <strong>{dejaConnu.toLocaleString("fr-FR")}</strong> sur {total.toLocaleString("fr-FR")}
       </span>

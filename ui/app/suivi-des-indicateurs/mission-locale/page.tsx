@@ -4,15 +4,17 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 
+import { useStatsFilters } from "@/app/_components/statistiques/hooks/useStatsFilters";
 import { ExportAllButton } from "@/app/_components/statistiques/sections/ExportAllButton";
-import { StatisticsSection } from "@/app/_components/statistiques/sections/StatisticsSection";
+import { OverviewSection } from "@/app/_components/statistiques/sections/OverviewSection";
+import { TraitementRupturesPanel } from "@/app/_components/statistiques/sections/TraitementRupturesPanel";
 import {
   TraitementMLTable,
   type TraitementMLSortColumn,
   type TraitementMLTableState,
 } from "@/app/_components/statistiques/tables/TraitementMLTable";
-import commonStyles from "@/app/_components/statistiques/ui/common.module.css";
-import { PeriodSelector, type Period } from "@/app/_components/statistiques/ui/PeriodSelector";
+import { StatsPageHeader } from "@/app/_components/statistiques/ui/StatsPageHeader";
+import { StatsTabs } from "@/app/_components/statistiques/ui/StatsTabs";
 
 import styles from "./page.module.css";
 
@@ -48,9 +50,45 @@ export default function MissionLocalePage() {
 }
 
 function MissionLocalePageContent() {
+  return (
+    <div>
+      <StatsPageHeader
+        title="Missions Locales et suivi des ruptures"
+        description={
+          <>
+            Retrouvez ici les chiffres des indicateurs principaux du déploiement et de l&apos;activité des Missions
+            Locales sur le Tableau de bord de l&apos;apprentissage sur le territoire de votre choix. Aussi retrouvez les
+            chiffres sur le traitement et le suivi des dossiers de jeune en rupture uniquement.
+            <br />
+            Pour changer de territoire et de période sur la visualisation des données, rendez-vous dans l&apos;en-tête
+            de cette page.
+          </>
+        }
+      />
+      <StatsTabs
+        tabs={[
+          {
+            id: "traitement",
+            label: "Traitement et suivi des ruptures",
+            iconId: "fr-icon-file-text-line",
+            content: <TraitementRupturesPanel />,
+          },
+          {
+            id: "deploiement",
+            label: "Déploiement et activité des ML",
+            iconId: "fr-icon-line-chart-line",
+            content: <MissionLocalesPanel />,
+          },
+        ]}
+      />
+    </div>
+  );
+}
+
+function MissionLocalesPanel() {
   const searchParams = useSearchParams();
+  const { period, region, scope } = useStatsFilters();
   const [tableState] = useState(() => readTableState(searchParams));
-  const [period, setPeriod] = useState<Period>("30days");
   const [searchInput, setSearchInput] = useState(() => searchParams?.get("search") ?? "");
   const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
 
@@ -62,45 +100,28 @@ function MissionLocalePageContent() {
   }, [searchInput]);
 
   return (
-    <div>
-      <div className={commonStyles.headerContainer}>
-        <div className={commonStyles.logoContainer}>
-          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M23 18.9999H22V8.99991H18V6.58569L12 0.585693L6 6.58569V8.99991H2V18.9999H1V20.9999H23V18.9999ZM6 19H4V11H6V19ZM18 11H20V19H18V11ZM11 12H13V19H11V12Z"
-              fill="#6A6AF4"
-            />
-          </svg>
-        </div>
-        <h1 className={commonStyles.headerTitle}>Par Mission Locale</h1>
-      </div>
-
-      <div className={styles.searchContainer}>
+    <OverviewSection title="Suivi traitement par Missions Locales">
+      <div className={styles.controls}>
         <Input
           label="Rechercher une Mission Locale"
           hideLabel
           nativeInputProps={{
-            placeholder: "Rechercher une Mission Locale par nom…",
+            placeholder: "Rechercher par nom de Mission Locale",
             value: searchInput,
             onChange: (e) => setSearchInput(e.target.value),
             type: "search",
           }}
           className={styles.searchInput}
         />
+        <ExportAllButton label="Exporter les données" priority="secondary" {...scope} />
       </div>
-
-      <StatisticsSection
-        title="Toutes les Missions Locales"
-        controls={
-          <div className={styles.controls}>
-            <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />
-            <ExportAllButton label="Exporter les données" />
-          </div>
-        }
-        controlsPosition="below-left"
-      >
-        <TraitementMLTable period={period} segment="rupture" search={debouncedSearch} initialState={tableState} />
-      </StatisticsSection>
-    </div>
+      <TraitementMLTable
+        period={period}
+        segment="rupture"
+        region={region}
+        search={debouncedSearch}
+        initialState={tableState}
+      />
+    </OverviewSection>
   );
 }
