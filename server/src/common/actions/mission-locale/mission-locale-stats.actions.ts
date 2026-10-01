@@ -516,7 +516,7 @@ export const getTraitementStatsByMissionLocale = async (
         a_traiter: "$view.a_traiter",
         traites: "$view.traite",
         delai_moyen_jours: segment === "collab" ? buildDelaiMoyenExpr() : { $literal: null },
-        is_activated: { $ne: ["$activated_at", null] },
+        is_activated: { $ne: [{ $ifNull: ["$activated_at", null] }, null] },
       },
     },
     {

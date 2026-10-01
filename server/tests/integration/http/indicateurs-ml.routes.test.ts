@@ -393,6 +393,31 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(ara).toMatchObject({ total_jeunes: 0, delai_moyen_jours: null });
     });
 
+    it("Distingue les ML activées de celles qui n'ont pas de date d'activation", async () => {
+      await organisationsDb().insertOne({
+        _id: new ObjectId(),
+        created_at: new Date(),
+        email: "",
+        telephone: "",
+        site_web: "",
+        adresse: { region: "11" },
+        ml_id: 705,
+        nom: "ML NON ACTIVEE",
+        type: "MISSION_LOCALE",
+      } as never);
+
+      const response = await requestAsOrganisation(
+        ADMIN,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/traitement/ml?limit=100"
+      );
+      const byName = Object.fromEntries(
+        response.data.data.map((ml: { nom: string; is_activated: boolean }) => [ml.nom, ml.is_activated])
+      );
+      expect(byName["ML NON ACTIVEE"]).toBe(false);
+      expect(byName["ML IDF"]).toBe(true);
+    });
+
     it("Le délai moyen est null hors segment collab et sort_by est énuméré", async () => {
       const response = await requestAsOrganisation(
         ADMIN,
