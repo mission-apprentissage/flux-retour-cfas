@@ -411,6 +411,9 @@ interface TraitementMLParams {
   sort_by: TraitementMlSortBy;
   sort_order: "asc" | "desc";
   search?: string;
+  departements?: string[];
+  utiliseService?: boolean;
+  engagee?: boolean;
 }
 
 const TRAITEMENT_ML_SORT_FIELD_MAP: Record<TraitementMlSortBy, string> = {
@@ -443,7 +446,20 @@ const buildTranchesProjection = (viewPath: string) => ({
 export const getTraitementStatsByMissionLocale = async (
   params: TraitementMLParams
 ): Promise<ITraitementMLStatsResponse> => {
-  const { period, segment, region, regions, page, limit, sort_by, sort_order, search } = params;
+  const {
+    period,
+    segment,
+    region,
+    regions,
+    page,
+    limit,
+    sort_by,
+    sort_order,
+    search,
+    departements,
+    utiliseService,
+    engagee,
+  } = params;
   const evaluationDate = normalizeToUTCDay(new Date());
   const startDate = await calculateStartDateAsync(period, evaluationDate);
 
@@ -462,6 +478,7 @@ export const getTraitementStatsByMissionLocale = async (
       $match: {
         type: "MISSION_LOCALE",
         ...regionFilter,
+        ...(departements?.length && { "adresse.departement": { $in: departements } }),
         ...(search && { nom: { $regex: escapeRegex(search), $options: "i" } }),
       },
     },
@@ -547,8 +564,26 @@ export const getTraitementStatsByMissionLocale = async (
         traites: "$view.traite",
         delai_moyen_jours: segment === "collab" ? buildDelaiMoyenExpr() : { $literal: null },
         is_activated: { $ne: [{ $ifNull: ["$activated_at", null] }, null] },
+        is_engaged: {
+          $and: [
+            { $ne: [{ $ifNull: ["$activated_at", null] }, null] },
+            { $gt: [{ $ifNull: ["$latest_stats.total", 0] }, 0] },
+            { $gte: [{ $divide: ["$latest_stats.traite", "$latest_stats.total"] }, ENGAGEMENT_THRESHOLD] },
+          ],
+        },
+        departement_code: "$adresse.departement",
       },
     },
+    ...(utiliseService !== undefined || engagee !== undefined
+      ? [
+          {
+            $match: {
+              ...(utiliseService !== undefined && { is_activated: utiliseService }),
+              ...(engagee !== undefined && { is_engaged: engagee }),
+            },
+          },
+        ]
+      : []),
     {
       $addFields: {
         delai_moyen_jours_sort: {
@@ -601,6 +636,8 @@ export const getTraitementStatsByMissionLocale = async (
               traites: 1,
               pourcentage_traites: 1,
               is_activated: 1,
+              is_engaged: 1,
+              departement_code: 1,
               details: buildTranchesProjection("$view"),
               delai_moyen_jours: 1,
               derniere_activite: { $ifNull: ["$derniere_activite", null] },

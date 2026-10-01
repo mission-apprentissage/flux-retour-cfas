@@ -184,9 +184,10 @@
   text-align: center;
 }
 
-.mlTable {
-  display: flex;
-  justify-content: center;
+.mlTable :global(.fr-table) {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
 }
 
 .mlTable th:first-child,

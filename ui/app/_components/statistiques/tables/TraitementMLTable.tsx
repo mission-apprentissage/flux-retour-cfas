@@ -1,10 +1,12 @@
 "use client";
 
+import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import type { StatsPeriod, StatsSegment } from "shared/models/data/nationalStats.model";
 
@@ -36,6 +38,12 @@ export interface TraitementMLTableState {
   sortDirection?: "asc" | "desc";
 }
 
+export interface TraitementMLFilters {
+  departements?: string[];
+  utiliseService?: boolean;
+  engagee?: boolean;
+}
+
 interface TraitementMLTableProps {
   period: StatsPeriod;
   segment: StatsSegment;
@@ -43,6 +51,9 @@ interface TraitementMLTableProps {
   search?: string;
   hideDescription?: boolean;
   initialState?: TraitementMLTableState;
+  filters?: TraitementMLFilters;
+  onTotalChange?: (total: number) => void;
+  totalLabel?: string;
 }
 
 type SortColumn = TraitementMLSortColumn;
@@ -54,9 +65,20 @@ export function TraitementMLTable({
   search,
   hideDescription,
   initialState,
+  filters,
+  onTotalChange,
+  totalLabel: totalLabelProp,
 }: TraitementMLTableProps) {
   const isCollab = segment === "collab";
-  const totalLabel = isCollab ? "Total collab" : "Total jeunes";
+  const totalLabel = totalLabelProp ?? (isCollab ? "Total collab" : "Total jeunes");
+  const filterParams = useMemo(
+    () => ({
+      departements: filters?.departements,
+      utilise_service: filters?.utiliseService,
+      engagee: filters?.engagee,
+    }),
+    [filters?.departements, filters?.utiliseService, filters?.engagee]
+  );
   const [page, setPage] = useState(initialState?.page ?? 1);
   const [limit, setLimit] = useState(initialState?.limit ?? 10);
 
@@ -75,6 +97,8 @@ export function TraitementMLTable({
   );
 
   const isSearching = !!search && search.length > 0;
+  const hasActiveFilters =
+    !!filters?.departements?.length || filters?.utiliseService !== undefined || filters?.engagee !== undefined;
 
   const effectiveSortBy = isSearching ? "nom" : sortColumn;
   const effectiveSortOrder = isSearching ? "asc" : sortDirection;
@@ -94,7 +118,7 @@ export function TraitementMLTable({
       return;
     }
     setPage(1);
-  }, [search]);
+  }, [search, filterParams]);
 
   const { data, isLoading, isFetching, error } = useTraitementMLStats({
     period,
@@ -105,6 +129,7 @@ export function TraitementMLTable({
     sort_by: effectiveSortBy,
     sort_order: effectiveSortOrder,
     search: search || undefined,
+    ...filterParams,
   });
   const prefetchNextPage = usePrefetchTraitementML();
 
@@ -151,6 +176,7 @@ export function TraitementMLTable({
           sort_by: effectiveSortBy,
           sort_order: effectiveSortOrder,
           search: search || undefined,
+          ...filterParams,
         });
       }
     }
@@ -166,6 +192,7 @@ export function TraitementMLTable({
     effectiveSortOrder,
     prefetchNextPage,
     search,
+    filterParams,
   ]);
 
   const loadingEvolution = isLoadingVariation(isFetching, isLoading);
@@ -173,8 +200,14 @@ export function TraitementMLTable({
   const mlList = data?.data || [];
   const pagination = data?.pagination;
 
+  useEffect(() => {
+    if (pagination) onTotalChange?.(pagination.total);
+  }, [pagination, onTotalChange]);
+
+  const currentSearchParams = useSearchParams();
   const buildDetailUrl = (mlId: string) => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(currentSearchParams?.toString());
+    params.delete("search");
     params.set("page", page.toString());
     params.set("limit", limit.toString());
     params.set("sort_by", sortColumn);
@@ -278,7 +311,11 @@ export function TraitementMLTable({
           <TableSkeleton rows={limit} />
         ) : mlList.length === 0 ? (
           <p className={styles.emptyMessage}>
-            {isSearching ? `Aucune Mission Locale trouvée pour "${search}"` : "Aucune donnée disponible."}
+            {isSearching
+              ? `Aucune Mission Locale trouvée pour "${search}"`
+              : hasActiveFilters
+                ? "Aucune Mission Locale ne correspond à ces filtres."
+                : "Aucune donnée disponible."}
           </p>
         ) : (
           <>
@@ -306,6 +343,11 @@ export function TraitementMLTable({
                   return [
                     <div key={`nom-${ml.id}`} className={styles.mlNameCell}>
                       <span>{ml.nom}</span>
+                      {isNotActivated && (
+                        <Badge as="span" severity="error" small>
+                          N&apos;utilise pas le service
+                        </Badge>
+                      )}
                       {!region && ml.region_code && <Tag small>{ml.region_nom}</Tag>}
                       <Link
                         href={buildDetailUrl(ml.id)}

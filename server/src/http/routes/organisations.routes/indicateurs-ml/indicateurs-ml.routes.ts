@@ -1,6 +1,7 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
+import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import { zStatsPeriod, zStatsSegment, zTraitementMlSortBy } from "shared/models/data/nationalStats.model";
 import { zBooleanStringSchema } from "shared/models/parts/zodPrimitives";
 import { getRegionsFromOrganisation, OrganisationWithRegions } from "shared/utils/organisationRegions";
@@ -73,6 +74,12 @@ const traitementMlQuery = z.object({
   sort_by: zTraitementMlSortBy.default("total_jeunes"),
   sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
   search: z.string().optional(),
+  departements: z
+    .string()
+    .optional()
+    .transform((value) => (value ? value.split(",").filter(Boolean) : undefined)),
+  utilise_service: zBooleanStringSchema.optional(),
+  engagee: zBooleanStringSchema.optional(),
 });
 const couvertureDepartementsQuery = z.object({ period: zStatsPeriod.optional(), region: z.string() });
 const nationalQuery = z.object({ period: zStatsPeriod.optional(), national: zBooleanStringSchema.optional() });
@@ -233,10 +240,17 @@ const getCollaborationsRoute: IndicateursHandler<z.infer<typeof collaborationsQu
 };
 
 const getTraitementMLRoute: IndicateursHandler<z.infer<typeof traitementMlQuery>> = async (req, { locals }) => {
-  const { period, region, segment, page, limit, sort_by, sort_order, search } = req.query;
+  const { period, region, segment, page, limit, sort_by, sort_order, search, departements, utilise_service, engagee } =
+    req.query;
   const userRegions = locals.regions;
 
   assertRegionAllowed(region, userRegions);
+  departements?.forEach((code) => {
+    const departementRegion = DEPARTEMENTS_BY_CODE[code as keyof typeof DEPARTEMENTS_BY_CODE]?.region.code;
+    if (!departementRegion || (userRegions.length > 0 && !userRegions.includes(departementRegion))) {
+      throw Boom.forbidden("Accès non autorisé à ce département");
+    }
+  });
 
   return await getTraitementStatsByMissionLocale({
     period: period || "30days",
@@ -248,6 +262,9 @@ const getTraitementMLRoute: IndicateursHandler<z.infer<typeof traitementMlQuery>
     sort_by,
     sort_order: sort_order || "desc",
     search,
+    departements,
+    utiliseService: utilise_service,
+    engagee,
   });
 };
 

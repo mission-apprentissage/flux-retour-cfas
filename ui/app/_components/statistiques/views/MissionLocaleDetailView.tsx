@@ -40,21 +40,9 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
   };
 
   const buildBackUrl = () => {
-    const params = new URLSearchParams();
-    const page = searchParams?.get("page");
-    const limit = searchParams?.get("limit");
-    const sort_by = searchParams?.get("sort_by");
-    const sort_order = searchParams?.get("sort_order");
-    const search = searchParams?.get("search");
-
-    if (page) params.set("page", page);
-    if (limit) params.set("limit", limit);
-    if (sort_by) params.set("sort_by", sort_by);
-    if (sort_order) params.set("sort_order", sort_order);
-    if (search) params.set("search", search);
-
-    const queryString = params.toString();
-    return `/suivi-des-indicateurs/mission-locale${queryString ? `?${queryString}` : ""}`;
+    const params = new URLSearchParams(searchParams?.toString());
+    params.set("tab", "deploiement");
+    return `/suivi-des-indicateurs/mission-locale?${params.toString()}`;
   };
 
   if (isLoading) {

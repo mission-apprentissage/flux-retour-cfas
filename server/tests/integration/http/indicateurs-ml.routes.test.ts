@@ -418,6 +418,50 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(byName["ML IDF"]).toBe(true);
     });
 
+    it("Filtre par département, utilisation du service et engagement", async () => {
+      await organisationsDb().updateOne({ _id: ML_IDF }, { $set: { "adresse.departement": "92" } });
+      await organisationsDb().insertOne({
+        _id: new ObjectId(),
+        created_at: new Date(),
+        email: "",
+        telephone: "",
+        site_web: "",
+        adresse: { region: "11", departement: "75" },
+        ml_id: 707,
+        nom: "ML PARIS NON ACTIVEE",
+        type: "MISSION_LOCALE",
+      } as never);
+
+      const noms = async (query: string) => {
+        const response = await requestAsOrganisation(
+          DREETS_IDF,
+          "get",
+          `/api/v1/organisation/indicateurs-ml/stats/traitement/ml?limit=100&${query}`
+        );
+        expect(response.status, query).toBe(200);
+        return response.data.data.map((ml: { nom: string }) => ml.nom).sort();
+      };
+
+      expect(await noms("departements=92")).toEqual(["ML IDF"]);
+      expect(await noms("departements=75,92")).toEqual(["ML IDF", "ML PARIS NON ACTIVEE"]);
+      expect(await noms("utilise_service=false")).toEqual(["ML PARIS NON ACTIVEE"]);
+      expect(await noms("engagee=true")).toEqual(["ML IDF"]);
+      expect(await noms("engagee=false&utilise_service=true")).toEqual([]);
+    });
+
+    it("Refuse un département hors périmètre ou inconnu", async () => {
+      for (const departements of ["69", "XX"]) {
+        expectForbidden(
+          await requestAsOrganisation(
+            DREETS_IDF,
+            "get",
+            `/api/v1/organisation/indicateurs-ml/stats/traitement/ml?departements=${departements}`
+          ),
+          "Accès non autorisé à ce département"
+        );
+      }
+    });
+
     it("Le délai moyen est null hors segment collab et sort_by est énuméré", async () => {
       const response = await requestAsOrganisation(
         ADMIN,

@@ -128,6 +128,9 @@ export interface TraitementMLParams {
   sort_by: TraitementMlSortBy;
   sort_order: "asc" | "desc";
   search?: string;
+  departements?: string[];
+  utilise_service?: boolean;
+  engagee?: boolean;
 }
 
 function buildTraitementMLRequestParams(params: TraitementMLParams): Record<string, unknown> {
@@ -140,6 +143,9 @@ function buildTraitementMLRequestParams(params: TraitementMLParams): Record<stri
     sort_by: params.sort_by,
     sort_order: params.sort_order,
     ...(params.search && { search: params.search }),
+    ...(params.departements?.length && { departements: params.departements.join(",") }),
+    ...(params.utilise_service !== undefined && { utilise_service: params.utilise_service }),
+    ...(params.engagee !== undefined && { engagee: params.engagee }),
   };
 }
 

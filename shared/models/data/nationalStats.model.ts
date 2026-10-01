@@ -121,6 +121,8 @@ const zMissionLocaleTraitementStats = z.object({
   derniere_activite: z.date().nullable(),
   jours_depuis_activite: z.number().nullable(),
   is_activated: z.boolean(),
+  is_engaged: z.boolean(),
+  departement_code: z.string().nullish(),
 });
 
 export const TRAITEMENT_ML_SORT_FIELDS = [
