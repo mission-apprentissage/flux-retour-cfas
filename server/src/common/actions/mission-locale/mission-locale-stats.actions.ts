@@ -17,6 +17,7 @@ import {
   StatsPeriod,
   StatsSegment,
   TraitementMlSortBy,
+  UNKNOWN_DEPARTEMENT_CODE,
 } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
 import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
@@ -266,13 +267,13 @@ async function getTerritoryStatsAtDate(
   date: Date,
   level: TerritoryLevel,
   regionCode?: string
-): Promise<Map<string, TerritoryStatsAtDate>> {
+): Promise<Map<string | null, TerritoryStatsAtDate>> {
+  const missionLocaleIds = regionCode ? await getMissionLocaleIdsByRegions([regionCode]) : undefined;
   const rows = (await missionLocaleStatsDb()
     .aggregate(
       [
-        ...buildLatestPerMlStages(buildLatestStatsMatch(date)),
+        ...buildLatestPerMlStages(buildLatestStatsMatch(date, missionLocaleIds)),
         ...buildOrgLookupPipeline({ checkActivation: false, localField: "_id" }),
-        ...(regionCode ? [{ $match: { "ml.adresse.region": regionCode } }] : []),
         {
           $group: {
             _id: `$ml.adresse.${level}`,
@@ -298,7 +299,7 @@ async function getTerritoryStatsAtDate(
       ],
       { allowDiskUse: true }
     )
-    .toArray()) as Array<{ _id: string; engaged: number; a_traiter: number; traites: number }>;
+    .toArray()) as Array<{ _id: string | null; engaged: number; a_traiter: number; traites: number }>;
 
   return new Map(
     rows.map((row) => [row._id, { engaged: row.engaged, a_traiter: row.a_traiter, traites: row.traites }])
@@ -317,14 +318,15 @@ async function getTerritoryStats(period: StatsPeriod, level: TerritoryLevel, reg
     getTerritoryStatsAtDate(startDate, level, regionCode),
   ]);
 
+  // Une ML sans département reste visible (ligne « inconnu ») ; sans région, elle n'a pas de ligne régionale.
   return territories
-    .filter((territory): territory is typeof territory & { _id: string } => territory._id != null)
+    .filter((territory) => level === "departement" || territory._id != null)
     .map((territory) => {
       const current = currentByCode.get(territory._id) || EMPTY_TERRITORY_STATS;
       const previous = previousByCode.get(territory._id) || EMPTY_TERRITORY_STATS;
 
       return {
-        code: territory._id,
+        code: territory._id ?? UNKNOWN_DEPARTEMENT_CODE,
         nom: territory.nom,
         ml_total: territory.ml_total,
         ml_activees: territory.ml_activees_current,

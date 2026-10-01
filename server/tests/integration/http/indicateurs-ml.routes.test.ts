@@ -674,6 +674,18 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(byCode["75"]).toMatchObject({ nom: "Paris", ml_total: 1, ml_activees: 1, ml_engagees: 0, traites: 0 });
     });
 
+    it("Regroupe les ML sans département dans une ligne « Département inconnu »", async () => {
+      const response = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/couverture-departements?region=11"
+      );
+
+      expect(response.data.departements).toEqual([
+        expect.objectContaining({ code: "inconnu", nom: "Département inconnu", ml_total: 1, traites: 70 }),
+      ]);
+    });
+
     it("Refuse une région hors périmètre et exige une région", async () => {
       expectForbidden(
         await requestAsOrganisation(

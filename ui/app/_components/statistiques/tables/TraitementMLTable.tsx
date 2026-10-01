@@ -118,7 +118,7 @@ export function TraitementMLTable({
       return;
     }
     setPage(1);
-  }, [search, filterParams]);
+  }, [search, filterParams, region, period]);
 
   const { data, isLoading, isFetching, error } = useTraitementMLStats({
     period,

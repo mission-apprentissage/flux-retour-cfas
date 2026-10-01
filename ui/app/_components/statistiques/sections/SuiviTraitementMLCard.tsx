@@ -5,6 +5,9 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { DEPARTEMENTS } from "shared/constants/territoires";
 
+import { useAuth } from "@/app/_context/UserContext";
+import { isAdminUser } from "@/app/suivi-des-indicateurs/access";
+
 import { OverviewCard } from "../cards/OverviewCard";
 import { useMlTableFilters } from "../hooks/useMlTableFilters";
 import { useStatsFilters } from "../hooks/useStatsFilters";
@@ -62,6 +65,11 @@ export function SuiviTraitementMLCard() {
   const [searchInput, setSearchInput] = useState(() => searchParams?.get("search") ?? "");
   const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
   const [total, setTotal] = useState<number>();
+  const { user } = useAuth();
+  const limitedTo =
+    !region && !isAdminUser(user ?? null)
+      ? territoireOptions.filter((option) => option.value !== "france").map((option) => option.label)
+      : [];
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchInput), 300);
@@ -125,6 +133,9 @@ export function SuiviTraitementMLCard() {
         }}
         className={styles.search}
       />
+      {limitedTo.length > 0 && (
+        <p className={styles.scopeNote}>Tableau limité à votre territoire : {limitedTo.join(", ")}.</p>
+      )}
       <div className={styles.filters}>
         <span className={styles.filtersLabel}>Filtrer</span>
         <ChecklistFilter
@@ -136,7 +147,9 @@ export function SuiviTraitementMLCard() {
           searchPlaceholder="Rechercher un territoire"
           getDisplayText={(selected) =>
             selected.length === 0
-              ? territoireLabel
+              ? selectedDepartements.length > 0
+                ? `${selectedDepartements.length} département${selectedDepartements.length > 1 ? "s" : ""}`
+                : territoireLabel
               : selected.length === 1
                 ? (territoryOptions.find((o) => o.value === selected[0])?.label ?? territoireLabel)
                 : `${selected.length} ${region ? "départements" : "régions"}`

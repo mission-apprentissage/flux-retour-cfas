@@ -123,7 +123,7 @@ export function NationalRegionTable({
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 centered
-                tooltip="Les Missions Locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur à 70%."
+                tooltip="Les Missions Locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur ou égal à 70%."
               />,
               <SortableTableHeader
                 key="a_traiter"

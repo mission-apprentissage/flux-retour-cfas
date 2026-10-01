@@ -1,16 +1,18 @@
 "use client";
 
+import { UNKNOWN_DEPARTEMENT_CODE } from "shared/models/data/nationalStats.model";
+
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
 import { OverviewCard } from "../cards/OverviewCard";
 import { useMlTableFilters } from "../hooks/useMlTableFilters";
 import { useStatsFilters } from "../hooks/useStatsFilters";
-import { useCouvertureDepartementsStats, useCouvertureRegionsStats } from "../hooks/useStatsQueries";
-import { useUserRegions } from "../hooks/useUserRegions";
+import { useCouvertureDepartementsStats } from "../hooks/useStatsQueries";
 import { NationalRegionTable } from "../tables/NationalRegionTable";
 import type { Period } from "../ui/PeriodSelector";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
+import { CouvertureRegionsContent } from "./CouvertureRegionsSection";
 import styles from "./CouvertureTerritoiresCard.module.css";
 import { ExportAllButton } from "./ExportAllButton";
 import { SUIVI_TRAITEMENT_ML_ANCHOR } from "./SuiviTraitementMLCard";
@@ -26,14 +28,18 @@ export function CouvertureTerritoiresCard({ isAdmin = false }: { isAdmin?: boole
       {region ? (
         <CouvertureDepartements period={period} region={region} />
       ) : (
-        <CouvertureRegions period={period} isAdmin={isAdmin} />
+        <CouvertureRegionsContent period={period} isAdmin={isAdmin} national />
       )}
+      <p className={styles.note}>
+        Les colonnes « À traiter » et « Traités » comptent l&apos;ensemble des dossiers transmis aux Missions Locales :
+        ruptures et collaborations.
+      </p>
     </OverviewCard>
   );
 }
 
 function CouvertureDepartements({ period, region }: { period: Period; region: string }) {
-  const { data, isLoading, isFetching, error } = useCouvertureDepartementsStats(period, region);
+  const { data, isLoading, isFetching, isPlaceholderData, error } = useCouvertureDepartementsStats(period, region);
   const { setDepartements } = useMlTableFilters();
 
   const showDepartement = (code: string) => {
@@ -50,40 +56,25 @@ function CouvertureDepartements({ period, region }: { period: Period; region: st
           regions={data?.departements ?? []}
           loadingDeltas={isFetching && !isLoading}
           territoryLabel="Département"
-          formatName={(departement) => `${departement.nom} (${departement.code})`}
+          formatName={(departement) =>
+            departement.code === UNKNOWN_DEPARTEMENT_CODE ? departement.nom : `${departement.nom} (${departement.code})`
+          }
           showAllLabel="Afficher tous les départements"
           showLessLabel="Afficher moins de départements"
-          renderDetail={(departement) => (
-            <button
-              type="button"
-              className={styles.detailButton}
-              onClick={() => showDepartement(departement.code)}
-              title={`Voir les Missions Locales de ${departement.nom}`}
-            >
-              <span className="fr-icon-arrow-right-line" aria-hidden="true" />
-              <span className="fr-sr-only">Voir les Missions Locales de {departement.nom}</span>
-            </button>
-          )}
-        />
-      )}
-    </StatsErrorHandler>
-  );
-}
-
-function CouvertureRegions({ period, isAdmin }: { period: Period; isAdmin: boolean }) {
-  const { data, isLoading, isFetching, error } = useCouvertureRegionsStats(period, true);
-  const { regions: userRegions } = useUserRegions();
-  const regions = data?.regions ?? [];
-
-  return (
-    <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
-      {isLoading ? (
-        <TableSkeleton rows={6} />
-      ) : (
-        <NationalRegionTable
-          regions={regions}
-          loadingDeltas={isFetching && !isLoading}
-          detailRegions={isAdmin ? regions.map((r) => r.code) : userRegions}
+          renderDetail={(departement) =>
+            departement.code === UNKNOWN_DEPARTEMENT_CODE ? null : (
+              <button
+                type="button"
+                className={styles.detailButton}
+                disabled={isPlaceholderData}
+                onClick={() => showDepartement(departement.code)}
+                title={`Voir les Missions Locales de ${departement.nom}`}
+              >
+                <span className="fr-icon-arrow-right-line" aria-hidden="true" />
+                <span className="fr-sr-only">Voir les Missions Locales de {departement.nom}</span>
+              </button>
+            )
+          }
         />
       )}
     </StatsErrorHandler>

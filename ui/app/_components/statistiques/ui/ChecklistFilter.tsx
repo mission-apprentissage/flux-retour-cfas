@@ -28,10 +28,11 @@ export function ChecklistFilter({
   getDisplayText,
 }: ChecklistFilterProps) {
   const [draft, setDraft] = useState(value);
+  const valueKey = value.join(",");
 
   useEffect(() => {
-    setDraft(value);
-  }, [value]);
+    setDraft(valueKey ? valueKey.split(",") : []);
+  }, [valueKey]);
 
   return (
     <div className={styles.filter}>
