@@ -538,12 +538,25 @@ describe("Indicateurs ML routes (territoriales)", () => {
       const national = await deployment(DREETS_IDF, "?national=true");
       expect(national.data.summary).toMatchObject({ mlCount: 4, activatedMlCount: 4, engagedMlCount: 1 });
 
+      const notNational = await deployment(DREETS_IDF, "?national=false");
+      expect(notNational.data.summary).toMatchObject({ mlCount: 1, activatedMlCount: 1 });
+
+      expect((await deployment(DREETS_IDF, "?national=oui")).status).toBe(400);
+
       const regions = await requestAsOrganisation(
         DREETS_IDF,
         "get",
         "/api/v1/organisation/indicateurs-ml/synthese/regions"
       );
       expect(regions.data.regions.map((r: { code: string }) => r.code)).toEqual(["11"]);
+    });
+
+    it("Compare au premier snapshot sur toute la période, en régional comme en national", async () => {
+      const regional = await deployment(DREETS_IDF, "?period=all");
+      expect(regional.data.summary).toMatchObject({ activatedMlCount: 1, previousActivatedMlCount: 1 });
+
+      const national = await deployment(DREETS_IDF, "?period=all&national=true");
+      expect(national.data.summary).toMatchObject({ activatedMlCount: 4, previousActivatedMlCount: 4 });
     });
 
     it("Refuse à une DREETS une autre région", async () => {

@@ -2,6 +2,7 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
 import { zStatsPeriod, zStatsSegment, zTraitementMlSortBy } from "shared/models/data/nationalStats.model";
+import { zBooleanStringSchema } from "shared/models/parts/zodPrimitives";
 import { getRegionsFromOrganisation, OrganisationWithRegions } from "shared/utils/organisationRegions";
 import { z } from "zod";
 
@@ -40,27 +41,27 @@ const periodQuery = z.object({ period: zStatsPeriod.optional() });
 const syntheseQuery = z.object({
   period: zStatsPeriod.optional(),
   region: z.string().optional(),
-  national: z.coerce.boolean().optional(),
+  national: zBooleanStringSchema.optional(),
 });
 const traitementQuery = z.object({
   period: zStatsPeriod.optional(),
   region: z.string().optional(),
   ml_id: mlIdSchema.optional(),
-  national: z.coerce.boolean().optional(),
+  national: zBooleanStringSchema.optional(),
   segment: zStatsSegment.default("rupture"),
 });
 const statsQuery = z.object({
   period: zStatsPeriod.optional(),
   region: z.string().optional(),
   ml_id: mlIdSchema.optional(),
-  national: z.coerce.boolean().optional(),
+  national: zBooleanStringSchema.optional(),
   segment: zStatsSegment.default("rupture"),
 });
 const collaborationsQuery = z.object({
   period: zStatsPeriod.optional(),
   region: z.string().optional(),
   ml_id: mlIdSchema.optional(),
-  national: z.coerce.boolean().optional(),
+  national: zBooleanStringSchema.optional(),
 });
 const traitementMlQuery = z.object({
   period: zStatsPeriod.optional(),
@@ -72,12 +73,12 @@ const traitementMlQuery = z.object({
   sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
   search: z.string().optional(),
 });
-const nationalQuery = z.object({ period: zStatsPeriod.optional(), national: z.coerce.boolean().optional() });
+const nationalQuery = z.object({ period: zStatsPeriod.optional(), national: zBooleanStringSchema.optional() });
 const traitementRegionsQuery = nationalQuery.extend({ segment: zStatsSegment.default("all") });
 const exportQuery = z.object({
   region: z.string().optional(),
   ml_id: mlIdSchema.optional(),
-  national: z.coerce.boolean().optional(),
+  national: zBooleanStringSchema.optional(),
 });
 const mlIdParams = z.object({ id: mlIdSchema });
 

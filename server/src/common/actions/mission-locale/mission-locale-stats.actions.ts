@@ -38,7 +38,6 @@ import {
   buildSegmentSumAccumulators,
   buildSegmentViewExpr,
   buildTotalTraitesV2Expression,
-  calculateStartDate,
   calculateStartDateAsync,
   createStatWithVariation,
   EMPTY_COLLAB_SEGMENT_STATS,
@@ -296,7 +295,7 @@ async function getRegionalStatsAtDate(date: Date): Promise<Map<string, RegionalS
 
 export const getRegionalStats = async (period: StatsPeriod = "30days") => {
   const evaluationDate = normalizeToUTCDay(new Date());
-  const startDate = calculateStartDate(period, evaluationDate);
+  const startDate = await calculateStartDateAsync(period, evaluationDate);
 
   const { DEPLOYED_REGION_CODES } = await import("shared/constants/deployedRegions");
 
@@ -416,7 +415,7 @@ export const getTraitementStatsByMissionLocale = async (
 ): Promise<ITraitementMLStatsResponse> => {
   const { period, segment, region, regions, page, limit, sort_by, sort_order, search } = params;
   const evaluationDate = normalizeToUTCDay(new Date());
-  const startDate = calculateStartDate(period, evaluationDate);
+  const startDate = await calculateStartDateAsync(period, evaluationDate);
 
   const mongoSortField = TRAITEMENT_ML_SORT_FIELD_MAP[sort_by];
   const sortDirection = sort_order === "desc" ? -1 : 1;
@@ -705,17 +704,19 @@ const MOTIFS_PIPELINE = [
 export async function getDeploymentStats(period: StatsPeriod = "30days", scopeRegions?: string[]) {
   const evaluationDate = normalizeToUTCDay(new Date());
 
-  const [summary, regional] = await Promise.all([getSummaryStats(evaluationDate, period), getRegionalStats(period)]);
+  const scope = scopeRegions?.length ? scopeRegions : undefined;
+  const [summary, regional] = await Promise.all([
+    scope ? null : getSummaryStats(evaluationDate, period),
+    getRegionalStats(period),
+  ]);
 
-  const regions = scopeRegions?.length
-    ? regional.regions.filter((r) => scopeRegions.includes(r.code))
-    : regional.regions;
+  const regions = scope ? regional.regions.filter((r) => scope.includes(r.code)) : regional.regions;
 
   const engagedMlCount = regions.reduce((sum, r) => sum + r.ml_engagees, 0);
   const previousEngagedMlCount = regions.reduce((sum, r) => sum + (r.ml_engagees - r.ml_engagees_delta), 0);
 
   // Le national passe par getSummaryStats pour compter aussi les ML sans région.
-  const mlCounts = scopeRegions?.length
+  const mlCounts = !summary
     ? {
         mlCount: regions.reduce((sum, r) => sum + r.ml_total, 0),
         activatedMlCount: regions.reduce((sum, r) => sum + r.ml_activees, 0),
@@ -732,7 +733,7 @@ export async function getDeploymentStats(period: StatsPeriod = "30days", scopeRe
       ...mlCounts,
       engagedMlCount,
       previousEngagedMlCount,
-      date: summary.date,
+      date: evaluationDate,
     },
     regionsActives: regions.filter((r) => r.deployed).map((r) => r.code),
     evaluationDate,
