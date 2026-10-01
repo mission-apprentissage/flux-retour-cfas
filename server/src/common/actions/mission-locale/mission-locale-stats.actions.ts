@@ -200,13 +200,21 @@ export const getEvenlySpacedDates = async (period: StatsPeriod, referenceDate: D
   return dates;
 };
 
-async function getRegionsMissionLocales(evaluationDate: Date, startDate: Date) {
-  return await organisationsDb()
+type TerritoryLevel = "region" | "departement";
+
+/** ML totales et activées par région ou par département, éventuellement restreintes à une région. */
+async function getMissionLocalesByTerritory(
+  evaluationDate: Date,
+  startDate: Date,
+  level: TerritoryLevel,
+  regionCode?: string
+) {
+  return (await organisationsDb()
     .aggregate([
-      { $match: { type: "MISSION_LOCALE" } },
+      { $match: { type: "MISSION_LOCALE", ...(regionCode ? { "adresse.region": regionCode } : {}) } },
       {
         $group: {
-          _id: "$adresse.region",
+          _id: `$adresse.${level}`,
           ml_total: { $sum: 1 },
           ml_activees_current: {
             $sum: {
@@ -235,35 +243,39 @@ async function getRegionsMissionLocales(evaluationDate: Date, startDate: Date) {
           },
         },
       },
-      {
-        $lookup: {
-          from: "regions",
-          localField: "_id",
-          foreignField: "code",
-          as: "region_info",
-        },
-      },
-      {
-        $addFields: {
-          nom: { $arrayElemAt: ["$region_info.nom", 0] },
-        },
-      },
+      ...(level === "region"
+        ? [
+            { $lookup: { from: "regions", localField: "_id", foreignField: "code", as: "region_info" } },
+            { $addFields: { nom: { $arrayElemAt: ["$region_info.nom", 0] } } },
+          ]
+        : []),
       { $sort: { ml_total: -1 } },
     ])
-    .toArray();
+    .toArray()) as Array<{
+    _id: string | null;
+    nom?: string;
+    ml_total: number;
+    ml_activees_current: number;
+    ml_activees_previous: number;
+  }>;
 }
 
-type RegionalStatsAtDate = { engaged: number; a_traiter: number; traites: number };
+type TerritoryStatsAtDate = { engaged: number; a_traiter: number; traites: number };
 
-async function getRegionalStatsAtDate(date: Date): Promise<Map<string, RegionalStatsAtDate>> {
+async function getTerritoryStatsAtDate(
+  date: Date,
+  level: TerritoryLevel,
+  regionCode?: string
+): Promise<Map<string, TerritoryStatsAtDate>> {
   const rows = (await missionLocaleStatsDb()
     .aggregate(
       [
         ...buildLatestPerMlStages(buildLatestStatsMatch(date)),
         ...buildOrgLookupPipeline({ checkActivation: false, localField: "_id" }),
+        ...(regionCode ? [{ $match: { "ml.adresse.region": regionCode } }] : []),
         {
           $group: {
-            _id: "$ml.adresse.region",
+            _id: `$ml.adresse.${level}`,
             engaged: {
               $sum: {
                 $cond: [
@@ -293,44 +305,62 @@ async function getRegionalStatsAtDate(date: Date): Promise<Map<string, RegionalS
   );
 }
 
-export const getRegionalStats = async (period: StatsPeriod = "30days") => {
+const EMPTY_TERRITORY_STATS: TerritoryStatsAtDate = { engaged: 0, a_traiter: 0, traites: 0 };
+
+async function getTerritoryStats(period: StatsPeriod, level: TerritoryLevel, regionCode?: string) {
   const evaluationDate = normalizeToUTCDay(new Date());
   const startDate = await calculateStartDateAsync(period, evaluationDate);
 
-  const { DEPLOYED_REGION_CODES } = await import("shared/constants/deployedRegions");
-
-  const [regions, currentByRegion, previousByRegion] = await Promise.all([
-    getRegionsMissionLocales(evaluationDate, startDate),
-    getRegionalStatsAtDate(evaluationDate),
-    getRegionalStatsAtDate(startDate),
+  const [territories, currentByCode, previousByCode] = await Promise.all([
+    getMissionLocalesByTerritory(evaluationDate, startDate, level, regionCode),
+    getTerritoryStatsAtDate(evaluationDate, level, regionCode),
+    getTerritoryStatsAtDate(startDate, level, regionCode),
   ]);
 
-  const emptyStats: RegionalStatsAtDate = { engaged: 0, a_traiter: 0, traites: 0 };
-
-  const regionsWithEngagement = regions
-    .filter((region) => region._id != null)
-    .map((region) => {
-      const current = currentByRegion.get(region._id) || emptyStats;
-      const previous = previousByRegion.get(region._id) || emptyStats;
+  return territories
+    .filter((territory): territory is typeof territory & { _id: string } => territory._id != null)
+    .map((territory) => {
+      const current = currentByCode.get(territory._id) || EMPTY_TERRITORY_STATS;
+      const previous = previousByCode.get(territory._id) || EMPTY_TERRITORY_STATS;
 
       return {
-        code: region._id,
-        nom: region.nom || "Région inconnue",
-        deployed: DEPLOYED_REGION_CODES.includes(region._id),
-        ml_total: region.ml_total,
-        ml_activees: region.ml_activees_current,
-        ml_activees_delta: region.ml_activees_current - region.ml_activees_previous,
+        code: territory._id,
+        nom: territory.nom,
+        ml_total: territory.ml_total,
+        ml_activees: territory.ml_activees_current,
+        ml_activees_delta: territory.ml_activees_current - territory.ml_activees_previous,
         ml_engagees: current.engaged,
         ml_engagees_delta: current.engaged - previous.engaged,
-        engagement_rate: region.ml_activees_current > 0 ? current.engaged / region.ml_activees_current : 0,
+        engagement_rate: territory.ml_activees_current > 0 ? current.engaged / territory.ml_activees_current : 0,
         a_traiter: current.a_traiter,
         traites: current.traites,
         traites_variation: calculatePercentage(current.traites, previous.traites),
       };
     });
+}
+
+export const getRegionalStats = async (period: StatsPeriod = "30days") => {
+  const { isRegionDeployed } = await import("shared/constants/deployedRegions");
+  const territories = await getTerritoryStats(period, "region");
 
   return {
-    regions: regionsWithEngagement,
+    regions: territories.map((territory) => ({
+      ...territory,
+      nom: territory.nom || "Région inconnue",
+      deployed: isRegionDeployed(territory.code),
+    })),
+  };
+};
+
+/** Couverture par département d'une région, sur le modèle de `getRegionalStats`. */
+export const getDepartementalStats = async (period: StatsPeriod = "30days", regionCode: string) => {
+  const territories = await getTerritoryStats(period, "departement", regionCode);
+
+  return {
+    departements: territories.map((territory) => ({
+      ...territory,
+      nom: DEPARTEMENTS_BY_CODE[territory.code as keyof typeof DEPARTEMENTS_BY_CODE]?.nom || "Département inconnu",
+    })),
   };
 };
 

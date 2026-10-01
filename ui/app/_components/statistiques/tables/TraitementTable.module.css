@@ -184,6 +184,11 @@
   text-align: center;
 }
 
+.mlTable {
+  display: flex;
+  justify-content: center;
+}
+
 .mlTable th:first-child,
 .mlTable td:first-child {
   width: 200px;

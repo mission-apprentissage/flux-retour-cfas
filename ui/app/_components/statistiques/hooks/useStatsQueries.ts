@@ -4,6 +4,7 @@ import type {
   ICollaborationSegmentStats,
   IDossiersTraitesStatsResponse,
   IPrequalifStats,
+  IDepartementStats,
   IRegionStats,
   IRupturantsSummary,
   ITimeSeriesPoint,
@@ -24,6 +25,7 @@ import {
   buildCollaborationsRequest,
   buildSegmentStatsRequest,
   buildSyntheseRequest,
+  INDICATEURS_ML_BASE,
   buildTraitementRequest,
   type CollaborationStatsParams,
   type SegmentStatsParams,
@@ -104,6 +106,8 @@ export const statsQueryKeys = {
   rupturants: (params: SegmentStatsParams) => ["stats", "rupturants", params] as const,
   dossiersTraites: (params: SegmentStatsParams) => ["stats", "dossiers-traites", params] as const,
   couvertureRegions: (period: Period) => ["stats", "couverture-regions", period] as const,
+  couvertureDepartements: (period: Period, region: string) =>
+    ["stats", "couverture-departements", period, region] as const,
   traitementML: (params: TraitementMLParams) => ["stats", "traitement-ml", params] as const,
   traitementRegions: (period: Period, segment: StatsSegment) =>
     ["stats", "traitement-regions", period, segment] as const,
@@ -180,6 +184,18 @@ export function useDossiersTraitesStats(params: SegmentStatsParams) {
   return useQuery<IDossiersTraitesStatsResponse>({
     queryKey: statsQueryKeys.dossiersTraites(params),
     queryFn: () => _get(request.url, { params: request.params }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+export function useCouvertureDepartementsStats(period: Period, region: string | undefined) {
+  return useQuery<{ departements: IDepartementStats[] }>({
+    queryKey: statsQueryKeys.couvertureDepartements(period, region ?? ""),
+    queryFn: () =>
+      _get(`${INDICATEURS_ML_BASE}/stats/couverture-departements`, {
+        params: { period, region },
+      }),
+    enabled: !!region,
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }

@@ -4,7 +4,10 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 
+import { OverviewCard } from "@/app/_components/statistiques/cards/OverviewCard";
 import { useStatsFilters } from "@/app/_components/statistiques/hooks/useStatsFilters";
+import { AdoptionKpis } from "@/app/_components/statistiques/sections/AdoptionKpis";
+import { CouvertureTerritoiresCard } from "@/app/_components/statistiques/sections/CouvertureTerritoiresCard";
 import { ExportAllButton } from "@/app/_components/statistiques/sections/ExportAllButton";
 import { OverviewSection } from "@/app/_components/statistiques/sections/OverviewSection";
 import { TraitementRupturesPanel } from "@/app/_components/statistiques/sections/TraitementRupturesPanel";
@@ -13,8 +16,11 @@ import {
   type TraitementMLSortColumn,
   type TraitementMLTableState,
 } from "@/app/_components/statistiques/tables/TraitementMLTable";
+import { SegmentAboutText } from "@/app/_components/statistiques/ui/SegmentAboutText";
 import { StatsPageHeader } from "@/app/_components/statistiques/ui/StatsPageHeader";
 import { StatsTabs } from "@/app/_components/statistiques/ui/StatsTabs";
+import { useAuth } from "@/app/_context/UserContext";
+import { isAdminUser } from "@/app/suivi-des-indicateurs/access";
 
 import styles from "./page.module.css";
 
@@ -77,7 +83,7 @@ function MissionLocalePageContent() {
             id: "deploiement",
             label: "Déploiement et activité des ML",
             iconId: "fr-icon-line-chart-line",
-            content: <MissionLocalesPanel />,
+            content: <DeploiementActivitePanel />,
           },
         ]}
       />
@@ -85,7 +91,20 @@ function MissionLocalePageContent() {
   );
 }
 
-function MissionLocalesPanel() {
+function DeploiementActivitePanel() {
+  const { user } = useAuth();
+
+  return (
+    <OverviewSection title="Déploiement et activité des Missions Locales">
+      <SegmentAboutText variant="rupture" />
+      <AdoptionKpis />
+      <CouvertureTerritoiresCard isAdmin={isAdminUser(user ?? null)} />
+      <MissionLocalesCard />
+    </OverviewSection>
+  );
+}
+
+function MissionLocalesCard() {
   const searchParams = useSearchParams();
   const { period, region, scope } = useStatsFilters();
   const [tableState] = useState(() => readTableState(searchParams));
@@ -100,7 +119,10 @@ function MissionLocalesPanel() {
   }, [searchInput]);
 
   return (
-    <OverviewSection title="Suivi traitement par Missions Locales">
+    <OverviewCard
+      title="Suivi traitement par Missions Locales"
+      actions={<ExportAllButton label="Exporter les données" priority="secondary" {...scope} />}
+    >
       <div className={styles.controls}>
         <Input
           label="Rechercher une Mission Locale"
@@ -113,7 +135,6 @@ function MissionLocalesPanel() {
           }}
           className={styles.searchInput}
         />
-        <ExportAllButton label="Exporter les données" priority="secondary" {...scope} />
       </div>
       <TraitementMLTable
         period={period}
@@ -122,6 +143,6 @@ function MissionLocalesPanel() {
         search={debouncedSearch}
         initialState={tableState}
       />
-    </OverviewSection>
+    </OverviewCard>
   );
 }

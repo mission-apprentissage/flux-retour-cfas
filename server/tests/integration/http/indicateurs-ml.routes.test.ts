@@ -594,6 +594,60 @@ describe("Indicateurs ML routes (territoriales)", () => {
     });
   });
 
+  describe("GET /stats/couverture-departements", () => {
+    it("Ventile les ML de la région par département", async () => {
+      await organisationsDb().updateOne({ _id: ML_IDF }, { $set: { "adresse.departement": "92" } });
+      await organisationsDb().insertOne({
+        _id: new ObjectId(),
+        created_at: new Date(),
+        activated_at: new Date("2025-01-01"),
+        email: "",
+        telephone: "",
+        site_web: "",
+        adresse: { region: "11", departement: "75" },
+        ml_id: 706,
+        nom: "ML PARIS",
+        type: "MISSION_LOCALE",
+      } as never);
+
+      const response = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/couverture-departements?region=11"
+      );
+
+      expect(response.status).toBe(200);
+      const byCode = Object.fromEntries(response.data.departements.map((d: { code: string }) => [d.code, d]));
+      expect(Object.keys(byCode).sort()).toEqual(["75", "92"]);
+      expect(byCode["92"]).toMatchObject({
+        nom: "Hauts-de-Seine",
+        ml_total: 1,
+        ml_activees: 1,
+        ml_engagees: 1,
+        a_traiter: 30,
+        traites: 70,
+      });
+      expect(byCode["75"]).toMatchObject({ nom: "Paris", ml_total: 1, ml_activees: 1, ml_engagees: 0, traites: 0 });
+    });
+
+    it("Refuse une région hors périmètre et exige une région", async () => {
+      expectForbidden(
+        await requestAsOrganisation(
+          DREETS_IDF,
+          "get",
+          "/api/v1/organisation/indicateurs-ml/stats/couverture-departements?region=84"
+        ),
+        "Accès non autorisé à cette région"
+      );
+      const sansRegion = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/couverture-departements"
+      );
+      expect(sansRegion.status).toBe(400);
+    });
+  });
+
   describe("GET /stats/collaborations", () => {
     it("Renvoie le bloc collaboration national pour un admin", async () => {
       const response = await requestAsOrganisation(

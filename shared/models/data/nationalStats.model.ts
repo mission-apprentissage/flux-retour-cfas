@@ -85,6 +85,10 @@ const zRegionStats = z.object({
 
 export type IRegionStats = z.output<typeof zRegionStats>;
 
+const zDepartementStats = zRegionStats.omit({ deployed: true });
+
+export type IDepartementStats = z.output<typeof zDepartementStats>;
+
 const zTraitementStatsData = z.object({
   total: z.number(),
   total_contacte: z.number(),

@@ -20,6 +20,7 @@ import {
   getDeploymentStats,
   getSyntheseRegionsStats,
   getCouvertureRegionsStats,
+  getDepartementalStats,
   getTraitementExportData,
   getWhatsAppStats,
   getPrequalifStats,
@@ -73,6 +74,7 @@ const traitementMlQuery = z.object({
   sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
   search: z.string().optional(),
 });
+const couvertureDepartementsQuery = z.object({ period: zStatsPeriod.optional(), region: z.string() });
 const nationalQuery = z.object({ period: zStatsPeriod.optional(), national: zBooleanStringSchema.optional() });
 const traitementRegionsQuery = nationalQuery.extend({ segment: zStatsSegment.default("all") });
 const exportQuery = z.object({
@@ -133,6 +135,12 @@ export default () => {
     validateRequestMiddleware({ query: nationalQuery }),
     returnResult(getCouvertureRegionsRoute)
   );
+  router.get(
+    "/stats/couverture-departements",
+    validateRequestMiddleware({ query: couvertureDepartementsQuery }),
+    returnResult(getCouvertureDepartementsRoute)
+  );
+
   router.get("/stats/whatsapp", validateRequestMiddleware({ query: periodQuery }), returnResult(getWhatsAppRoute));
   router.get("/stats/prequalif", validateRequestMiddleware({ query: periodQuery }), returnResult(getPrequalifRoute));
   router.get(
@@ -267,6 +275,15 @@ const getTraitementExportRoute: IndicateursHandler<z.infer<typeof exportQuery>> 
   const scope = await resolveStatsScope(req.query, locals.regions);
 
   return await getTraitementExportData(scope);
+};
+
+const getCouvertureDepartementsRoute: IndicateursHandler<z.infer<typeof couvertureDepartementsQuery>> = async (
+  req,
+  { locals }
+) => {
+  assertRegionAllowed(req.query.region, locals.regions);
+
+  return await getDepartementalStats(req.query.period || "30days", req.query.region);
 };
 
 const getCouvertureRegionsRoute: IndicateursHandler<z.infer<typeof nationalQuery>> = async (req, { locals }) => {
