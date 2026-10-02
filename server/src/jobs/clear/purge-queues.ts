@@ -1,7 +1,6 @@
-import { captureException } from "@sentry/node";
-
 import logger from "@/common/logger";
 import { effectifsQueueDb } from "@/common/model/collections";
+import { createErrorAggregator } from "@/common/utils/errorAggregator";
 
 /**
  * purge de la collection effectifsQueue
@@ -14,6 +13,7 @@ export const purgeQueues = async (NB_DAYS_TO_KEEP = 15) => {
     return;
   }
 
+  const errors = createErrorAggregator("purge-queues");
   for (const org of organisme) {
     try {
       if (!org) {
@@ -63,10 +63,13 @@ export const purgeQueues = async (NB_DAYS_TO_KEEP = 15) => {
       });
       logger.info(`Deleted ${deleteResult.deletedCount} records for organisme_id: ${org}`);
     } catch (error) {
-      captureException(error);
+      logger.error({ err: error, organisme_id: org }, "Échec de la purge pour un organisme");
+      errors.record(error);
       continue;
     }
   }
 
+  errors.ok(organisme.length - errors.failed);
+  errors.flush();
   logger.info("End Purging effectifsQueue");
 };

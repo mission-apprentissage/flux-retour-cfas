@@ -10,6 +10,7 @@ import { TOUS_LES_SECTEURS_CODE } from "shared/constants/franceTravail";
 import { FullTable } from "@/app/_components/table/FullTable";
 import { ColumnData } from "@/app/_components/table/types";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { reportError } from "@/common/reportError";
 import { publicConfig } from "@/config.public";
 
 import badges from "./FTBadges.module.css";
@@ -146,7 +147,7 @@ export function FTEffectifsTable({
 
       trackPlausibleEvent("isc_liste_telechargement");
     } catch (error) {
-      console.error("Erreur lors du téléchargement:", error);
+      reportError(error, { action: "telechargement-effectifs-ft" });
       setDownloadError("Une erreur est survenue lors du téléchargement du fichier. Veuillez réessayer.");
     }
   };

@@ -27,8 +27,13 @@ export function logMiddleware(req: Request, res: Response, next: NextFunction) {
         },
       };
 
-      if (error || (statusCode >= 400 && statusCode < 600)) {
+      // Un 4xx est un refus attendu (non authentifié, non autorisé, introuvable) : le passer en warn
+      // évite qu'il noie les vraies pannes. Le second cas couvre l'erreur survenue avant qu'un statut
+      // ait pu être posé (connexion coupée), qui resterait sinon en info.
+      if (statusCode >= 500 || (error && statusCode < 400)) {
         logger.error(logInfos, "request errored");
+      } else if (statusCode >= 400) {
+        logger.warn(logInfos, "request failed");
       } else {
         logger.info(logInfos, "request completed");
       }

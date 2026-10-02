@@ -4,6 +4,7 @@ import type { ExtendedRecordMap } from "notion-types";
 
 import { getNotionPage, getNotionPageTitle } from "@/app/_utils/notion.utils";
 import { PAGES } from "@/app/_utils/routes.utils";
+import { reportError } from "@/common/reportError";
 
 import { NotionBody } from "../../_components/NotionBody";
 
@@ -13,7 +14,7 @@ async function fetchDocPage(id: string): Promise<ExtendedRecordMap | null> {
   try {
     return await getNotionPage(id);
   } catch (error) {
-    console.error(`Échec du chargement de la page Notion ${id}`, error);
+    reportError(error, { notionPageId: id });
     return null;
   }
 }

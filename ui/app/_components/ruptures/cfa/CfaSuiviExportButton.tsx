@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Spinner } from "@/app/_components/common/Spinner";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _getBlob } from "@/common/httpClient";
+import { reportError } from "@/common/reportError";
 import { downloadObject } from "@/common/utils/browser";
 
 interface CfaSuiviExportButtonProps {
@@ -28,7 +29,7 @@ export function CfaSuiviExportButton({ organismeId }: CfaSuiviExportButtonProps)
       trackPlausibleEvent("cfa_suivi_ml_export");
       downloadObject(data, fileName, mime.getType("xlsx") ?? "text/plain");
     } catch (error) {
-      console.error("Erreur lors du téléchargement:", error);
+      reportError(error, { action: "export-suivi-cfa" });
       setDownloadError("Une erreur est survenue lors du téléchargement. Veuillez réessayer.");
     } finally {
       setIsFetching(false);

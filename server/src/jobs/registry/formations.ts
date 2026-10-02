@@ -21,9 +21,13 @@ export const formationsJobs = {
 } satisfies Record<string, JobDef>;
 
 export const formationsCrons = {
-  // 03h00 Paris — import quotidien des formations (formation v2)
+  // 04h40 Paris — import quotidien des formations (formation v2).
+  // Déplacé de 03h00 : il attendait 78 min derrière la file du batch de 02h30.
+  // Mesuré sur 90 j : durée max 5,0 min.
   "Import formations": {
-    cron_string: "0 3 * * *",
+    cron_string: "40 4 * * *",
+    checkinMargin: 15,
+    maxRuntimeInMinutes: 15,
     handler: hydrateFormationV2,
   },
 } satisfies Record<string, CronDef>;

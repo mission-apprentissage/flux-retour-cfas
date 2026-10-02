@@ -197,6 +197,20 @@ describe("buildAdresse", () => {
     });
   });
 
+  // getCommune lève désormais sur panne d'api-alternance : l'effectif doit
+  // s'ingérer sans adresse, pas échouer.
+  it("devrait retourner null si getCommune lève", async () => {
+    const dossier = {
+      adresse_apprenant: "123 Rue de Paris",
+      code_postal_apprenant: "75019",
+      code_commune_insee_apprenant: "75056",
+    };
+
+    vi.mocked(getCommune).mockRejectedValue(new Error("api-alternance: échec de rechercheCommune"));
+
+    await expect(buildAdresse(dossier)).resolves.toBeNull();
+  });
+
   it("devrait retourner l'adresse correcte si getCommune retourne des données valides", async () => {
     const dossier = {
       adresse_apprenant: "123 Rue de Paris",

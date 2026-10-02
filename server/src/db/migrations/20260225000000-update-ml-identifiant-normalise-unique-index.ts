@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 
+import logger from "@/common/logger";
 import { getDatabase } from "@/common/mongodb";
 
 const OLD_INDEX_NAME =
@@ -76,9 +77,9 @@ export const up = async () => {
       { _id: { $in: idsToSoftDelete } },
       { $set: { soft_deleted: true }, $unset: { identifiant_normalise: "" } }
     );
-    console.log(`Doublons nettoyés: ${result.modifiedCount} records soft-deleted`);
+    logger.info({ modifiedCount: result.modifiedCount }, "[Migration] Doublons nettoyés (soft-deleted)");
   } else {
-    console.log("Aucun doublon à nettoyer");
+    logger.info("[Migration] Aucun doublon à nettoyer");
   }
 
   // 2. $unset identifiant_normalise sur tous les documents déjà soft-deleted
@@ -88,7 +89,10 @@ export const up = async () => {
     { $unset: { identifiant_normalise: "" } }
   );
   if (cleanupResult.modifiedCount > 0) {
-    console.log(`Nettoyage: ${cleanupResult.modifiedCount} documents soft-deleted avec identifiant_normalise nettoyé`);
+    logger.info(
+      { modifiedCount: cleanupResult.modifiedCount },
+      "[Migration] Documents soft-deleted avec identifiant_normalise nettoyé"
+    );
   }
 
   // 3. Drop l'ancien index (s'il existe)
@@ -97,9 +101,9 @@ export const up = async () => {
 
   if (hasOldIndex) {
     await collection.dropIndex(OLD_INDEX_NAME);
-    console.log(`Ancien index ${OLD_INDEX_NAME} supprimé`);
+    logger.info({ indexName: OLD_INDEX_NAME }, "[Migration] Ancien index supprimé");
   } else {
-    console.log("Ancien index non trouvé, skip drop");
+    logger.info("[Migration] Ancien index non trouvé, drop ignoré");
   }
 
   // 4. Créer le nouvel index unique partiel
@@ -114,7 +118,7 @@ export const up = async () => {
       partialFilterExpression: { "identifiant_normalise.nom": { $exists: true } },
     }
   );
-  console.log("Nouvel index unique partiel créé");
+  logger.info("[Migration] Nouvel index unique partiel créé");
 };
 
 export const down = async () => {

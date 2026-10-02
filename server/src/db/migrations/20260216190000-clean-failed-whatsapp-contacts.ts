@@ -1,3 +1,4 @@
+import logger from "@/common/logger";
 import { getDatabase } from "@/common/mongodb";
 
 export const up = async () => {
@@ -8,7 +9,7 @@ export const up = async () => {
     { "whatsapp_contact.message_status": "failed" },
     { $unset: { whatsapp_contact: "" } }
   );
-  console.log(`Cleaned ${failedResult.modifiedCount} failed whatsapp contacts`);
+  logger.info({ modifiedCount: failedResult.modifiedCount }, "[Migration] Contacts whatsapp en échec nettoyés");
 
   const callbackAfterNoHelpResult = await collection.updateMany(
     {
@@ -29,7 +30,10 @@ export const up = async () => {
       },
     }
   );
-  console.log(`Fixed ${callbackAfterNoHelpResult.modifiedCount} effectifs with callback after no_help mind-change`);
+  logger.info(
+    { modifiedCount: callbackAfterNoHelpResult.modifiedCount },
+    "[Migration] Effectifs corrigés : callback après no_help"
+  );
 
   const noHelpAfterCallbackResult = await collection.updateMany(
     {
@@ -50,5 +54,8 @@ export const up = async () => {
       },
     }
   );
-  console.log(`Fixed ${noHelpAfterCallbackResult.modifiedCount} effectifs with no_help after callback mind-change`);
+  logger.info(
+    { modifiedCount: noHelpAfterCallbackResult.modifiedCount },
+    "[Migration] Effectifs corrigés : no_help après callback"
+  );
 };

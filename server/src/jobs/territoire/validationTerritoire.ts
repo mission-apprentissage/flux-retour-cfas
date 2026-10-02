@@ -1,17 +1,18 @@
 // La liste des territoires est une liste statique, ce job a pour but d'identifier de potentiels changements
 // L'objectif est de vérifier que les territoires sont toujours valides. Avoir les territoires de manière statique permet de na pas avoir à appeler l'API à chaque fois
 
-import { captureException } from "@sentry/node";
+import { captureMessage, withScope } from "@sentry/node";
 import type { IDepartement as IApiDepartement } from "api-alternance-sdk";
-import Boom from "boom";
 import { isEqual } from "lodash-es";
 import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "shared/constants";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 
-function validationRegions(apiDepartements: IApiDepartement[]): number {
-  let count = 0;
+type Divergence = { motif: string; detail: Record<string, unknown> };
+
+function validationRegions(apiDepartements: IApiDepartement[]): Divergence[] {
+  const divergences: Divergence[] = [];
   const seen = new Set<string>();
   const todo = new Set(Object.keys(REGIONS_BY_CODE));
 
@@ -23,10 +24,7 @@ function validationRegions(apiDepartements: IApiDepartement[]): number {
     seen.add(apiDepartement.region.codeInsee);
 
     if (!todo.has(apiDepartement.region.codeInsee)) {
-      const err = Boom.internal(`La région n'est pas dans la liste des régions`, { apiDepartement });
-      captureException(err, { level: "fatal" });
-      logger.error(err, err.data);
-      count++;
+      divergences.push({ motif: "La région n'est pas dans la liste des régions", detail: { apiDepartement } });
       continue;
     }
 
@@ -38,37 +36,30 @@ function validationRegions(apiDepartements: IApiDepartement[]): number {
       nom: apiDepartement.region.nom,
     };
     if (!isEqual(tdbRegion, expectedTdbRegion)) {
-      const err = Boom.internal(`Les informations de la région ont changés`, {
-        tdbRegion,
-        apiDepartement,
-        expectedTdbRegion,
+      divergences.push({
+        motif: "Les informations de la région ont changé",
+        detail: { tdbRegion, apiDepartement, expectedTdbRegion },
       });
-      captureException(err, { level: "fatal" });
-      logger.error(err, err.data);
-      count++;
     }
   }
 
   for (const code of todo) {
-    const err = Boom.internal(`La région n'existe pas`, { code });
-    captureException(err, { level: "fatal" });
-    logger.error(err, err.data);
-    count++;
+    divergences.push({ motif: "La région n'existe pas", detail: { code } });
   }
 
-  return count;
+  return divergences;
 }
 
-function validationDepartements(apiDepartements: IApiDepartement[]): number {
-  let count = 0;
+function validationDepartements(apiDepartements: IApiDepartement[]): Divergence[] {
+  const divergences: Divergence[] = [];
   const todo = new Set(Object.keys(DEPARTEMENTS_BY_CODE));
 
   for (const apiDepartement of apiDepartements) {
     if (!todo.has(apiDepartement.codeInsee)) {
-      const err = Boom.internal(`Le département n'est pas dans la liste des départements`, { apiDepartement });
-      captureException(err, { level: "fatal" });
-      logger.error(err, err.data);
-      count++;
+      divergences.push({
+        motif: "Le département n'est pas dans la liste des départements",
+        detail: { apiDepartement },
+      });
       continue;
     }
 
@@ -89,29 +80,22 @@ function validationDepartements(apiDepartements: IApiDepartement[]): number {
     };
 
     if (!isEqual(tdbDepartement, expectedTdbDepartement)) {
-      const err = Boom.internal(`Les informations du département ont changés`, {
-        tdbDepartement,
-        apiDepartement,
-        expectedTdbDepartement,
+      divergences.push({
+        motif: "Les informations du département ont changé",
+        detail: { tdbDepartement, apiDepartement, expectedTdbDepartement },
       });
-      captureException(err, { level: "fatal" });
-      logger.error(err, err.data);
-      count++;
     }
   }
 
   for (const code of todo) {
-    const err = Boom.internal(`Le département n'existe pas`, { code });
-    captureException(err, { level: "fatal" });
-    logger.error(err, err.data);
-    count++;
+    divergences.push({ motif: "Le département n'existe pas", detail: { code } });
   }
 
-  return count;
+  return divergences;
 }
 
-function validationAcademies(apiDepartements: IApiDepartement[]): number {
-  let count = 0;
+function validationAcademies(apiDepartements: IApiDepartement[]): Divergence[] {
+  const divergences: Divergence[] = [];
   const seen = new Set<string>();
   const todo = new Set(Object.keys(ACADEMIES_BY_CODE));
 
@@ -123,10 +107,7 @@ function validationAcademies(apiDepartements: IApiDepartement[]): number {
     seen.add(apiDepartement.academie.code);
 
     if (!todo.has(apiDepartement.academie.code)) {
-      const err = Boom.internal(`L'académie n'est pas dans la liste des académies`, { apiDepartement });
-      captureException(err, { level: "fatal" });
-      logger.error(err, err.data);
-      count++;
+      divergences.push({ motif: "L'académie n'est pas dans la liste des académies", detail: { apiDepartement } });
       continue;
     }
 
@@ -139,31 +120,44 @@ function validationAcademies(apiDepartements: IApiDepartement[]): number {
     };
 
     if (!isEqual(tdbAcademie, expectedTdbAcademie)) {
-      const err = Boom.internal(`Les informations de l'académie ont changés`, { tdbAcademie, apiDepartement });
-      captureException(err, { level: "fatal" });
-      logger.error(err, err.data);
-      count++;
+      divergences.push({
+        motif: "Les informations de l'académie ont changé",
+        detail: { tdbAcademie, apiDepartement, expectedTdbAcademie },
+      });
     }
   }
 
   for (const code of todo) {
-    const err = Boom.internal(`L'académie n'est pas dans la liste des académies`, { code });
-    captureException(err, { level: "fatal" });
-    logger.error(err, err.data);
-    count++;
+    divergences.push({ motif: "L'académie n'est pas dans la liste des académies", detail: { code } });
   }
 
-  return count;
+  return divergences;
 }
 
 // Attention: en cas de changement des territoires, il faudra probablement remettre à jour les territoires dans la base de données.
 export async function validationTerritoires(): Promise<number> {
   const departements = await apiAlternanceClient.geographie.listDepartements();
 
-  let count = 0;
-  count += validationRegions(departements);
-  count += validationDepartements(departements);
-  count += validationAcademies(departements);
+  const divergences = [
+    ...validationRegions(departements),
+    ...validationDepartements(departements),
+    ...validationAcademies(departements),
+  ];
 
-  return count;
+  if (divergences.length === 0) {
+    return 0;
+  }
+
+  logger.warn({ divergences }, "Dérive du référentiel des territoires");
+
+  // Un renommage de région ne doit pas réveiller une astreinte : warning, pas fatal.
+  withScope((scope) => {
+    scope.setTag("alert_tier", "veille");
+    scope.setTag("error_kind", "data-drift");
+    scope.setFingerprint(["territoires-drift"]);
+    scope.setContext("dérive", { total: divergences.length, divergences: divergences.slice(0, 20) });
+    captureMessage("Dérive du référentiel des territoires", "warning");
+  });
+
+  return divergences.length;
 }

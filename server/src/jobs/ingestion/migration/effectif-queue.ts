@@ -1,8 +1,9 @@
-import { captureException } from "@sentry/node";
 import { ObjectId } from "mongodb";
 
+import logger from "@/common/logger";
 import { effectifsQueueDb } from "@/common/model/collections";
 import { formatDateYYYYMMDD } from "@/common/utils/dateUtils";
+import { createErrorAggregator } from "@/common/utils/errorAggregator";
 
 export const updateEffectifQueueDateAndError = async () => {
   const BATCH_SIZE = 1000;
@@ -14,6 +15,7 @@ export const updateEffectifQueueDateAndError = async () => {
     ],
   });
   let batch: Array<{ _id: ObjectId; computed_day?: string; has_error: boolean }> = [];
+  const errors = createErrorAggregator("migration-effectif-queue");
 
   const processBatch = (currentBatch: Array<{ _id: ObjectId; computed_day?: string; has_error: boolean }>) => {
     if (currentBatch.length === 0) {
@@ -35,7 +37,8 @@ export const updateEffectifQueueDateAndError = async () => {
 
       return effectifsQueueDb().bulkWrite(mapped);
     } catch (e) {
-      captureException(e);
+      logger.error({ err: e }, "Échec du bulkWrite de migration effectifsQueue");
+      errors.record(e);
     }
   };
 
@@ -57,4 +60,5 @@ export const updateEffectifQueueDateAndError = async () => {
   }
 
   await processBatch(batch);
+  errors.flush();
 };

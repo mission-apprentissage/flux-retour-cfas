@@ -9878,7 +9878,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"job-processor@npm:^1.10.3":
+"job-processor@npm:1.10.3":
   version: 1.10.3
   resolution: "job-processor@npm:1.10.3"
   dependencies:
@@ -9904,6 +9904,35 @@ __metadata:
     react:
       optional: true
   checksum: 1ec02b3fc8b159755cb7ae8c9119d9daff1e76912cb0e6d27286aee6bb036fc03ff3c82678c4e61061c8e095defd27cbeb134abe307e9016ab30bb04dc978d0b
+  languageName: node
+  linkType: hard
+
+"job-processor@patch:job-processor@npm%3A1.10.3#./.yarn/patches/job-processor-npm-1.10.3-9ecce2a2c4.patch::locator=mna-tdb%40workspace%3A.":
+  version: 1.10.3
+  resolution: "job-processor@patch:job-processor@npm%3A1.10.3#./.yarn/patches/job-processor-npm-1.10.3-9ecce2a2c4.patch::version=1.10.3&hash=6fef9f&locator=mna-tdb%40workspace%3A."
+  dependencies:
+    cron-parser: ^5.1.0
+    date-fns: ^4.1.0
+    type-fest: ^4.39.0
+  peerDependencies:
+    "@codegouvfr/react-dsfr": ^1.9.11
+    "@mui/material": ^5.15.18
+    "@mui/x-data-grid": ^7.5.0
+    "@sentry/node": ^7.51.1 || ^8.0.0
+    mongodb: "*"
+    react: ^18.0.0 || ^19.0.0
+    zod: ^3.0.0
+    zod-mongodb-schema: ^1.0.0
+  peerDependenciesMeta:
+    "@codegouvfr/react-dsfr":
+      optional: true
+    "@mui/material":
+      optional: true
+    "@mui/x-data-grid":
+      optional: true
+    react:
+      optional: true
+  checksum: 02213999541e980148b32ae655d47cf309e6c060c61a43f14289a9cdb71cdee53980c3afdf2fbece03821b257adbc53a8559aeb420d3ed9b6298d668a37e28b2
   languageName: node
   linkType: hard
 

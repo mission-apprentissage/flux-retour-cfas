@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import { z } from "zod";
 
 import { getReseauById } from "@/common/actions/reseaux/reseaux.actions";
+import logger from "@/common/logger";
 import { organismesDb, reseauxDb } from "@/common/model/collections";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { DefaultParams, DefaultQuery, returnResult, RouteHandler } from "@/http/middlewares/helpers";
@@ -51,7 +52,7 @@ export default () => {
 
         res.json(result[0]);
       } catch (error) {
-        console.error("Error fetching reseau with organismes:", error);
+        logger.error({ err: error, reseauId: id }, "Échec de la récupération du réseau et de ses organismes");
         throw Boom.internal("Failed to fetch reseau with organismes.");
       }
     }
@@ -147,7 +148,7 @@ export default () => {
 
         res.json(result);
       } catch (error) {
-        console.error("Error during deletion:", error);
+        logger.error({ err: error, reseauId: id, organismeId }, "Échec du retrait de l'organisme du réseau");
         throw Boom.internal("Failed to remove organismeId from reseau.");
       }
     }

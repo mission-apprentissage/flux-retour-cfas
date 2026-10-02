@@ -28,33 +28,46 @@ export const emailsJobs = {
 } satisfies Record<string, JobDef>;
 
 export const emailsCrons = {
-  // 07h00 Paris — mise en file des emails de relance
-  "Send reminder emails at 7h": {
+  // Commenté avec le job "send-reminder-emails" ci-dessus : sans définition de job,
+  // il enfilait une tâche introuvable et échouait tous les jours à 7h.
+  /* "Send reminder emails at 7h": {
     cron_string: "0 7 * * *",
     handler: async () => {
       await addJob({ name: "send-reminder-emails", queued: true });
       return 0;
     },
-  },
+  }, */
   // 14h30 Paris le lundi — récap hebdomadaire envoyé aux Missions Locales
+  // Mesuré sur 13 occurrences : durée max 0,02 s.
   "Send ML weekly recap at 14h30 on Mondays": {
     cron_string: "30 14 * * 1",
+    checkinMargin: 15,
+    maxRuntimeInMinutes: 5,
     handler: async () => {
       await addJob({ name: "send-mission-locale-weekly-recap", queued: true });
       return 0;
     },
   },
   // 13h30 Paris — récap quotidien envoyé aux Missions Locales
+  // Attendait jusqu'à 231 min derrière l'import DECA du dimanche, désormais déplacé
+  // à 19h. La marge de 20 min suppose que ce déplacement suffit : si ce cron repasse
+  // au rouge, c'est qu'une autre source d'attente subsiste.
   "Send ML daily recap at 13h30": {
     cron_string: "30 13 * * *",
+    checkinMargin: 20,
+    maxRuntimeInMinutes: 5,
     handler: async () => {
       await addJob({ name: "send-mission-locale-daily-recap", queued: true });
       return 0;
     },
   },
   // 10h30 Paris — récap quotidien envoyé aux CFA
+  // Était planifié à la même minute que l'import DECA du dimanche, qui dure 6h30 :
+  // chaque dimanche, le récap partait vers 17h00 au lieu de 10h30. DECA est passé à 19h.
   "Send CFA daily recap at 10h30": {
     cron_string: "30 10 * * *",
+    checkinMargin: 20,
+    maxRuntimeInMinutes: 5,
     handler: async () => {
       await addJob({ name: "send-cfa-daily-recap", queued: true });
       return 0;
