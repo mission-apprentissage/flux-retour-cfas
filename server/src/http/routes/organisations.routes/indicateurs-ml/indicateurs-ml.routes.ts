@@ -11,6 +11,7 @@ import {
   getMissionLocaleDetail,
   getMissionLocaleMembers,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
+import { getCfaAdoptionStats } from "@/common/actions/cfa/cfa-stats.actions";
 import {
   getRupturantsStats,
   getDossiersTraitesStats,
@@ -141,6 +142,11 @@ export default () => {
     "/stats/couverture-regions",
     validateRequestMiddleware({ query: nationalQuery }),
     returnResult(getCouvertureRegionsRoute)
+  );
+  router.get(
+    "/stats/cfa/adoption",
+    validateRequestMiddleware({ query: syntheseQuery }),
+    returnResult(getCfaAdoptionRoute)
   );
   router.get(
     "/stats/couverture-departements",
@@ -292,6 +298,12 @@ const getTraitementExportRoute: IndicateursHandler<z.infer<typeof exportQuery>> 
   const scope = await resolveStatsScope(req.query, locals.regions);
 
   return await getTraitementExportData(scope);
+};
+
+const getCfaAdoptionRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = async (req, { locals }) => {
+  const scope = await resolveStatsScope(req.query, locals.regions);
+
+  return await getCfaAdoptionStats(req.query.period || "30days", scope.regions);
 };
 
 const getCouvertureDepartementsRoute: IndicateursHandler<z.infer<typeof couvertureDepartementsQuery>> = async (

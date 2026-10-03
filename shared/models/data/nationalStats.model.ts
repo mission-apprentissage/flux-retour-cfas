@@ -363,3 +363,13 @@ const zPrequalifStats = z.object({
 });
 
 export type IPrequalifStats = z.output<typeof zPrequalifStats>;
+
+const zCfaAdoptionStats = z.object({
+  estimation: z.number(),
+  compatibles: z.number(),
+  avec_compte: z.number(),
+  avec_collaboration: zStatWithVariation,
+  period: zStatsPeriod,
+});
+
+export type ICfaAdoptionStats = z.output<typeof zCfaAdoptionStats>;

@@ -4,7 +4,13 @@ import type { IMissionLocaleEffectif, IMissionLocaleStats } from "shared/models"
 import type { IOrganisationCreate } from "shared/models/data/organisations.model";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { missionLocaleEffectifsDb, missionLocaleStatsDb, organisationsDb, regionsDb } from "@/common/model/collections";
+import {
+  missionLocaleEffectifsDb,
+  missionLocaleStatsDb,
+  organisationsDb,
+  organismesDb,
+  regionsDb,
+} from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";
 import { initTestApp, RequestAsOrganisationFunc } from "@tests/utils/testUtils";
@@ -701,6 +707,64 @@ describe("Indicateurs ML routes (territoriales)", () => {
         "/api/v1/organisation/indicateurs-ml/stats/couverture-departements"
       );
       expect(sansRegion.status).toBe(400);
+    });
+  });
+
+  describe("GET /stats/cfa/adoption", () => {
+    const buildOrganisme = (id: ObjectId, region: string, extra: Record<string, unknown> = {}) => ({
+      _id: id,
+      created_at: new Date(),
+      updated_at: new Date(),
+      adresse: { region },
+      est_dans_le_referentiel: "present",
+      ...extra,
+    });
+
+    beforeEach(async () => {
+      await organismesDb().insertMany(
+        [
+          buildOrganisme(CFA_A, "11", { has_account: true }),
+          buildOrganisme(new ObjectId(), "11"),
+          buildOrganisme(new ObjectId(), "11", { ferme: true, has_account: true }),
+          buildOrganisme(new ObjectId(), "11", { est_dans_le_referentiel: "absent" }),
+          buildOrganisme(CFA_B, "84", { has_account: true }),
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+    });
+
+    it("Compte les CFA du référentiel non fermés de la région et ceux qui ont collaboré", async () => {
+      const response = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/cfa/adoption"
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.data).toMatchObject({
+        estimation: 2,
+        compatibles: 0,
+        avec_compte: 1,
+        avec_collaboration: { current: 1 },
+      });
+    });
+
+    it("Ouvre le national et refuse une autre région", async () => {
+      const national = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/cfa/adoption?national=true"
+      );
+      expect(national.data).toMatchObject({ estimation: 3, avec_compte: 2, avec_collaboration: { current: 2 } });
+
+      expectForbidden(
+        await requestAsOrganisation(
+          DREETS_IDF,
+          "get",
+          "/api/v1/organisation/indicateurs-ml/stats/cfa/adoption?region=84"
+        ),
+        "Accès non autorisé à cette région"
+      );
     });
   });
 
