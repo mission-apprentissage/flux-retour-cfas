@@ -6,6 +6,7 @@ import { useEffect } from "react";
 
 import { useUserRegions } from "@/app/_components/statistiques/hooks/useUserRegions";
 import {
+  CfaLabel,
   MissionLocaleLabel,
   NationalLabel,
   RegionItemLabel,
@@ -201,6 +202,12 @@ function buildCollapsedMenuItems(
     isActive: isMissionLocalePage || isMissionLocaleDetailPage,
   });
 
+  items.push({
+    text: <CfaLabel isActive={pathname.startsWith(`${BASE_PATH}/cfa`)} collapsed />,
+    linkProps: { href: `${BASE_PATH}/cfa`, title: "Suivi CFA" },
+    isActive: pathname.startsWith(`${BASE_PATH}/cfa`),
+  });
+
   return items;
 }
 
@@ -259,6 +266,12 @@ function buildExpandedMenuItems(
     text: <MissionLocaleLabel isActive={isMissionLocalePage} />,
     linkProps: { href: `${BASE_PATH}/mission-locale` },
     isActive: isMissionLocalePage,
+  });
+
+  items.push({
+    text: <CfaLabel isActive={pathname.startsWith(`${BASE_PATH}/cfa`)} />,
+    linkProps: { href: `${BASE_PATH}/cfa` },
+    isActive: pathname.startsWith(`${BASE_PATH}/cfa`),
   });
 
   return items;

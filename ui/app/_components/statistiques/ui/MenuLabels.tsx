@@ -40,6 +40,15 @@ export function NationalLabel({ isActive, collapsed }: MenuLabelProps) {
   );
 }
 
+export function CfaLabel({ isActive, collapsed }: MenuLabelProps) {
+  return (
+    <>
+      <i className={`ri-building-2-fill ${styles.menuIcon} ${styles.mlIcon} ${isActive ? styles.mlIconActive : ""}`} />
+      {!collapsed && "Suivi CFA"}
+    </>
+  );
+}
+
 export function MissionLocaleLabel({ isActive, collapsed }: MenuLabelProps) {
   return (
     <>

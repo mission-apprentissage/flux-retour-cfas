@@ -4,6 +4,7 @@ import type {
   ICollaborationSegmentStats,
   IDossiersTraitesStatsResponse,
   IPrequalifStats,
+  ICfaAdoptionStats,
   IDepartementStats,
   IRegionStats,
   IRupturantsSummary,
@@ -190,6 +191,14 @@ export function useDossiersTraitesStats(params: SegmentStatsParams) {
   return useQuery<IDossiersTraitesStatsResponse>({
     queryKey: statsQueryKeys.dossiersTraites(params),
     queryFn: () => _get(request.url, { params: request.params }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+export function useCfaAdoptionStats(period: Period, scope: { region?: string; national?: boolean }) {
+  return useQuery<ICfaAdoptionStats>({
+    queryKey: ["stats", "cfa-adoption", period, scope.region ?? "national"] as const,
+    queryFn: () => _get(`${INDICATEURS_ML_BASE}/stats/cfa/adoption`, { params: { period, ...scope } }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }
