@@ -7,7 +7,6 @@ import { IEffectifMissionLocale } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 
-import { CfaRuptureInfoModal, ruptureInfoModal } from "../../cfa/CfaRuptureInfoModal";
 import { getCfaListeInfo } from "../../cfa/ficheOrigine";
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
@@ -53,11 +52,9 @@ export function CfaCollaborationDetail({ data }: CfaCollaborationDetailProps) {
       />
 
       <div className={styles.columns}>
-        <CfaEffectifInfoColumn effectif={effectif} onToggleRupture={() => ruptureInfoModal.open()} />
+        <CfaEffectifInfoColumn effectif={effectif} />
         <CfaCollaborationColumn effectif={effectif} />
       </div>
-
-      <CfaRuptureInfoModal />
     </div>
   );
 }

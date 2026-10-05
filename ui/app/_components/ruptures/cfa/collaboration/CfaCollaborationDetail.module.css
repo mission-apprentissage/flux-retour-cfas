@@ -38,33 +38,6 @@
   }
 }
 
-.ruptureBlock {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.ruptureBlock :global(.fr-toggle) {
-  border-bottom: none;
-}
-
-.ruptureLabel {
-  margin: 0 0 0.25rem 0;
-  font-family: Marianne, sans-serif;
-  font-size: 0.875rem;
-  font-weight: 700;
-  line-height: 1.25rem;
-  color: var(--text-default-grey);
-}
-
-/* Neutraliser les évènements réserverait le clic au seul input, décalé à gauche. */
-.ruptureBlock :global(.fr-toggle__btn),
-.ruptureBlock :global(.fr-toggle__input),
-.ruptureBlock :global(.fr-toggle__label) {
-  cursor: pointer;
-}
-
 .collaborationColumn {
   padding: 2rem 2rem 0 1.5rem;
   margin-top: -2rem;
