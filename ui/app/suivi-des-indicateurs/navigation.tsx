@@ -26,6 +26,11 @@ export const STATS_NAV_ITEMS = [
     href: `${BASE_PATH}/cfa`,
     isActive: (pathname: string) => pathname.startsWith(`${BASE_PATH}/cfa`),
   },
+  {
+    text: "Collaborations",
+    href: `${BASE_PATH}/collaborations`,
+    isActive: (pathname: string) => pathname.startsWith(`${BASE_PATH}/collaborations`),
+  },
 ];
 
 /** À rendre sous un `Suspense` : lit les filtres de l'URL pour les reporter sur les onglets du header. */

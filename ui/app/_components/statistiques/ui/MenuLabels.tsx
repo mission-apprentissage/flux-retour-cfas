@@ -49,6 +49,15 @@ export function CfaLabel({ isActive, collapsed }: MenuLabelProps) {
   );
 }
 
+export function CollaborationsLabel({ isActive, collapsed }: MenuLabelProps) {
+  return (
+    <>
+      <i className={`fr-icon-team-fill ${styles.menuIcon} ${styles.mlIcon} ${isActive ? styles.mlIconActive : ""}`} />
+      {!collapsed && "Collaborations"}
+    </>
+  );
+}
+
 export function MissionLocaleLabel({ isActive, collapsed }: MenuLabelProps) {
   return (
     <>

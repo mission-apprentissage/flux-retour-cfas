@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useUserRegions } from "@/app/_components/statistiques/hooks/useUserRegions";
 import {
   CfaLabel,
+  CollaborationsLabel,
   MissionLocaleLabel,
   NationalLabel,
   RegionItemLabel,
@@ -208,6 +209,12 @@ function buildCollapsedMenuItems(
     isActive: pathname.startsWith(`${BASE_PATH}/cfa`),
   });
 
+  items.push({
+    text: <CollaborationsLabel isActive={pathname.startsWith(`${BASE_PATH}/collaborations`)} collapsed />,
+    linkProps: { href: `${BASE_PATH}/collaborations`, title: "Collaborations" },
+    isActive: pathname.startsWith(`${BASE_PATH}/collaborations`),
+  });
+
   return items;
 }
 
@@ -272,6 +279,12 @@ function buildExpandedMenuItems(
     text: <CfaLabel isActive={pathname.startsWith(`${BASE_PATH}/cfa`)} />,
     linkProps: { href: `${BASE_PATH}/cfa` },
     isActive: pathname.startsWith(`${BASE_PATH}/cfa`),
+  });
+
+  items.push({
+    text: <CollaborationsLabel isActive={pathname.startsWith(`${BASE_PATH}/collaborations`)} />,
+    linkProps: { href: `${BASE_PATH}/collaborations` },
+    isActive: pathname.startsWith(`${BASE_PATH}/collaborations`),
   });
 
   return items;

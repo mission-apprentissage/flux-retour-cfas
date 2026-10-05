@@ -4,6 +4,9 @@ import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, type ReactNode } from "react";
 
+import { STATS_FILTER_PARAMS } from "../hooks/useStatsFilters";
+
+import styles from "./StatsTabs.module.css";
 import { resolveTabId, type StatsTabDefinition } from "./StatsTabs.utils";
 
 export interface StatsTab extends StatsTabDefinition {
@@ -40,7 +43,12 @@ export function StatsTabs({ tabs, className }: StatsTabsProps) {
 
   const handleTabChange = useCallback(
     (tabId: string) => {
-      const params = new URLSearchParams(searchParams?.toString());
+      // Seuls les filtres de l'en-tête suivent d'un onglet à l'autre ; ceux des tableaux repartent de zéro.
+      const params = new URLSearchParams();
+      STATS_FILTER_PARAMS.forEach((key) => {
+        const value = searchParams?.get(key);
+        if (value) params.set(key, value);
+      });
       params.set(TAB_PARAM, tabId);
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     },
@@ -53,7 +61,7 @@ export function StatsTabs({ tabs, className }: StatsTabsProps) {
 
   return (
     <Tabs
-      className={className}
+      className={`${styles.tabs} ${className ?? ""}`}
       selectedTabId={selectedTabId}
       onTabChange={handleTabChange}
       tabs={tabs.map(({ id, label, iconId }) => ({ tabId: id, label, iconId }))}
