@@ -7,7 +7,9 @@ import {
   ICfaEffectif,
   ICfaSuiviMissionLocaleResponse,
 } from "shared/models/routes/organismes/cfa";
+import { getAnneesScolaireListFromDate } from "shared/utils";
 
+import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.actions";
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
 import {
@@ -46,24 +48,106 @@ function getSuiviSortField(sort: string): string {
   }
 }
 
+function buildDossiersFamilleStages(
+  organismeId: ObjectId,
+  autresOrganismeIds: ObjectId[],
+  isAllowedDeca: boolean
+): Record<string, unknown>[] {
+  const effectifsMatch = {
+    organisme_id: organismeId,
+    annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
+  };
+
+  return [
+    { $match: effectifsMatch },
+    { $addFields: { _source: "effectifs" } },
+    ...(isAllowedDeca
+      ? [
+          {
+            $unionWith: {
+              coll: "effectifsDECA",
+              pipeline: [{ $match: effectifsMatch }, { $addFields: { _source: "effectifsDECA" } }],
+            },
+          },
+        ]
+      : []),
+    {
+      $lookup: {
+        from: "missionLocaleEffectif",
+        let: { nom: "$apprenant.nom", prenom: "$apprenant.prenom", dob: "$apprenant.date_de_naissance" },
+        pipeline: [
+          {
+            $match: {
+              soft_deleted: { $ne: true },
+              "effectif_snapshot.organisme_id": { $in: autresOrganismeIds },
+              "organisme_data.acc_conjoint": { $ne: true },
+            },
+          },
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$identifiant_normalise.nom", "$$nom"] },
+                  { $eq: ["$identifiant_normalise.prenom", "$$prenom"] },
+                  { $eq: ["$identifiant_normalise.date_de_naissance", "$$dob"] },
+                ],
+              },
+            },
+          },
+          { $sort: { updated_at: -1 } },
+          { $limit: 1 },
+        ],
+        as: "_dossier",
+      },
+    },
+    { $unwind: "$_dossier" },
+    { $sort: { _source: 1 } },
+    {
+      $group: {
+        _id: "$_dossier._id",
+        dossier: { $first: "$_dossier" },
+        effectif_id: { $first: "$_id" },
+        source: { $first: "$_source" },
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: ["$dossier", { _effectif_courant: { id: "$effectif_id", source: "$source" } }],
+        },
+      },
+    },
+  ];
+}
+
 /**
  * Étapes communes : sélection des dossiers missionLocaleEffectif d'un CFA + champs calculés
  * permettant de distinguer collab (acc_conjoint) et hors-collab contacté (transmis auto + situation ML).
  */
-function buildSuiviBasePipeline(
+async function buildSuiviBasePipeline(
   organisation: IOrganisationOrganismeFormation,
   isAllowedDeca: boolean
-): Record<string, unknown>[] {
+): Promise<Record<string, unknown>[]> {
   if (!organisation.organisme_id) {
     throw new Error("organisme_id is required");
   }
   const organismeId = new ObjectId(organisation.organisme_id);
+  const autresOrganismeIds = (await getFamilyOrganismeIds(organismeId)).filter((id) => !id.equals(organismeId));
 
   const now = new Date();
   const plus25Cutoff = new Date(new Date(now).setFullYear(now.getFullYear() - 25));
   const moins16Cutoff = new Date(new Date(now).setFullYear(now.getFullYear() - 16));
 
   const stages: Record<string, unknown>[] = [{ $match: { "effectif_snapshot.organisme_id": organismeId } }];
+
+  if (autresOrganismeIds.length > 0) {
+    stages.push({
+      $unionWith: {
+        coll: "effectifs",
+        pipeline: buildDossiersFamilleStages(organismeId, autresOrganismeIds, isAllowedDeca),
+      },
+    });
+  }
 
   if (!isAllowedDeca) {
     stages.push({ $match: { "effectif_snapshot.is_deca_compatible": { $exists: false } } });
@@ -167,9 +251,12 @@ function categoryMatchStage(category: CfaSuiviCategory): Record<string, unknown>
 const SUIVI_PROJECT_STAGE = {
   $project: {
     _id: 0,
-    id: "$effectif_snapshot._id",
+    id: { $ifNull: ["$_effectif_courant.id", "$effectif_snapshot._id"] },
     source: {
-      $cond: [{ $ifNull: ["$effectif_snapshot.is_deca_compatible", false] }, "effectifsDECA", "effectifs"],
+      $ifNull: [
+        "$_effectif_courant.source",
+        { $cond: [{ $ifNull: ["$effectif_snapshot.is_deca_compatible", false] }, "effectifsDECA", "effectifs"] },
+      ],
     },
     nom: "$_nom",
     prenom: "$_prenom",
@@ -207,7 +294,7 @@ export async function getCfaSuiviMissionLocale(
   const trieSurMissionLocale = sort === "mission_locale";
 
   const pipeline = [
-    ...buildSuiviBasePipeline(organisation, isAllowedDeca),
+    ...(await buildSuiviBasePipeline(organisation, isAllowedDeca)),
     {
       $facet: {
         effectifs: [
@@ -279,7 +366,7 @@ export async function getCfaSuiviMissionLocaleExportRows(
   isAllowedDeca: boolean
 ): Promise<CfaSuiviExportRow[]> {
   const pipeline = [
-    ...buildSuiviBasePipeline(organisation, isAllowedDeca),
+    ...(await buildSuiviBasePipeline(organisation, isAllowedDeca)),
     {
       $lookup: {
         from: "organisations",
