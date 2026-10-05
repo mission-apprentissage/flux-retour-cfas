@@ -422,6 +422,24 @@ describe("CFA Effectifs Actions", () => {
       expect(match?.collab_status).toBe("contacte_par_ml_hors_collab");
     });
 
+    it("affiche comme contacté par la ML un dossier qualifié non joint, et « démarrer » sans qualification", async () => {
+      const qualifie = await insertEffectif({ apprenant: { nom: "QUALIFIE", prenom: "Jeune" } });
+      const sansQualif = await insertEffectif({ apprenant: { nom: "SANSQUALIF", prenom: "Jeune" } });
+      await missionLocaleEffectifsDb().insertMany(
+        testDocs<IMissionLocaleEffectif>([
+          createMlEffectifDoc(qualifie, { situation: SITUATION_ENUM.COORDONNEES_INCORRECT, soft_deleted: false }),
+          createMlEffectifDoc(sansQualif, { soft_deleted: false }),
+        ])
+      );
+
+      const result = await getCfaEffectifs(organisation, false, defaultParams);
+
+      const statut = (effectifId: ObjectId) =>
+        result.effectifs.find((e) => e.id?.toString() === effectifId.toString())?.collab_status;
+      expect(statut(qualifie._id)).toBe("contacte_par_ml_hors_collab");
+      expect(statut(sansQualif._id)).toBe("demarrer_collab");
+    });
+
     it("fallback identifiant : ne matche PAS un ml record hors famille", async () => {
       const strangerOrgId = new ObjectId(id(45));
       const strangerOrg = {

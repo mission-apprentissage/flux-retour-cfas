@@ -121,23 +121,22 @@ describe("getCfaSuiviMissionLocale", () => {
     expect(horsCollab.effectifs[0].collab_status).toBe("contacte_par_ml_hors_collab");
   });
 
-  it("exclut les hors-collab non joints et inclut la préqualif WhatsApp", async () => {
+  it("inclut toute qualification ML hors collab et la préqualif WhatsApp", async () => {
     const docs = await Promise.all([
-      // Non joints (situation renseignée mais pas de contact abouti) → exclus
       createMlEffectif({ situation: SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES }),
       createMlEffectif({ situation: SITUATION_ENUM.COORDONNEES_INCORRECT }),
       createMlEffectif({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR }),
-      // Préqualif WhatsApp positive, sans situation ML → inclus
       createMlEffectif({ whatsapp_contact: { phone_normalized: "+33600000000", user_response: "prequalif_yes" } }),
+      createMlEffectif({}),
     ]);
     await missionLocaleEffectifsDb().insertMany(testDocs<IMissionLocaleEffectif>(docs));
 
     const tous = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "tous" });
-    expect(tous.counts).toEqual({ collab: 0, hors_collab: 1, tous: 1 });
+    expect(tous.counts).toEqual({ collab: 0, hors_collab: 4, tous: 4 });
 
     const horsCollab = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "hors_collab" });
-    expect(horsCollab.pagination.total).toBe(1);
-    expect(horsCollab.effectifs[0].collab_status).toBe("contacte_par_ml_hors_collab");
+    expect(horsCollab.pagination.total).toBe(4);
+    expect(horsCollab.effectifs.every((e) => e.collab_status === "contacte_par_ml_hors_collab")).toBe(true);
   });
 
   it("trie sur le nom de la Mission Locale sans perdre les filtres", async () => {

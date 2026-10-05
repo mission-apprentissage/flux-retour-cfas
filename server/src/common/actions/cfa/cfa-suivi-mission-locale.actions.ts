@@ -85,7 +85,7 @@ function buildSuiviBasePipeline(
         collab_status: buildCollabStatusSwitch(),
         // Onglet 1 : collaboration initiée par le CFA.
         is_collab: { $eq: ["$organisme_data.acc_conjoint", true] },
-        // Onglet 2 : jeune réellement contacté par la ML hors collaboration (joint OU préqualif WhatsApp).
+        // Onglet 2 : jeune contacté par la ML hors collaboration (situation ML OU préqualif WhatsApp).
         is_hors_collab_contacted: {
           $and: [{ $ne: ["$organisme_data.acc_conjoint", true] }, buildContactedByMlExpr()],
         },
