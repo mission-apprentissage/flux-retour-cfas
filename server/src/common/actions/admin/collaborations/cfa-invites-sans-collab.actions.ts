@@ -6,6 +6,7 @@ import type {
   ICfaInvitesSortBy,
 } from "shared/models/routes/admin/cfa-invites-sans-collab.api";
 
+import { buildCfaTerritoireMatch, type CfaTerritoire } from "@/common/actions/cfa/cfa-stats.actions";
 import { missionLocaleCfaInvitationsDb } from "@/common/model/collections";
 
 const SORT_STAGES: Record<ICfaInvitesSortBy, (direction: 1 | -1) => Record<string, 1 | -1>> = {
@@ -16,11 +17,12 @@ const SORT_STAGES: Record<ICfaInvitesSortBy, (direction: 1 | -1) => Record<strin
 };
 
 export interface CfaInvitesSansCollabOptions {
-  regions?: string[];
+  /** Restreint aux établissements du territoire, sur la même base que la liste des CFA (référentiel, non fermés). */
+  territoire?: CfaTerritoire;
   collaborationsDepuis?: Date;
 }
 
-const buildPipeline = ({ regions, collaborationsDepuis }: CfaInvitesSansCollabOptions): Document[] => [
+const buildPipeline = ({ territoire, collaborationsDepuis }: CfaInvitesSansCollabOptions): Document[] => [
   {
     $group: {
       _id: "$organisme_id",
@@ -36,12 +38,32 @@ const buildPipeline = ({ regions, collaborationsDepuis }: CfaInvitesSansCollabOp
       from: "organismes",
       localField: "_id",
       foreignField: "_id",
-      pipeline: [{ $project: { nom: 1, raison_sociale: 1, enseigne: 1, adresse: 1, has_account: 1 } }],
+      pipeline: [
+        {
+          $project: {
+            nom: 1,
+            raison_sociale: 1,
+            enseigne: 1,
+            adresse: 1,
+            has_account: 1,
+            est_dans_le_referentiel: 1,
+            ferme: 1,
+          },
+        },
+      ],
       as: "organisme",
     },
   },
   { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
-  ...(regions?.length ? [{ $match: { "organisme.adresse.region": { $in: regions } } }] : []),
+  ...(territoire
+    ? [
+        {
+          $match: Object.fromEntries(
+            Object.entries(buildCfaTerritoireMatch(territoire)).map(([key, value]) => [`organisme.${key}`, value])
+          ),
+        },
+      ]
+    : []),
   {
     $lookup: {
       from: "missionLocaleEffectif",

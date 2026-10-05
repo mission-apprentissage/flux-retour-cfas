@@ -6,12 +6,13 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { ICfaInvitesSortBy } from "shared/models/routes/admin/cfa-invites-sans-collab.api";
 
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
 import { useCfaInvitesExport } from "../hooks/useCfaInvitesExport";
+import { usePageForParams } from "../hooks/usePageForParams";
 import { useSortableTable } from "../hooks/useSortableTable";
 import { useStatsFilters } from "../hooks/useStatsFilters";
 import { useCfaInvitesSansCollabStats } from "../hooks/useStatsQueries";
@@ -34,15 +35,12 @@ const COLUMNS: Array<{ column: ICfaInvitesSortBy; label: string; centered?: bool
 export function CfaAlertesSection() {
   const { region } = useStatsFilters();
   const [expanded, setExpanded] = useState(false);
-  const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const { sortColumn, sortDirection, handleSort } = useSortableTable<ICfaInvitesSortBy>("invitations", "desc", {
-    onSortChange: () => setPage(1),
     columnDefaultDirections: { nom: "asc", localisation: "asc" },
   });
   const params = { region, sort_by: sortColumn, sort_order: sortDirection };
-
-  useEffect(() => setPage(1), [region]);
+  const [page, setPage] = usePageForParams(params);
 
   const { data, isLoading, isFetching, isPlaceholderData, error } = useCfaInvitesSansCollabStats({
     ...params,

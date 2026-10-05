@@ -10,6 +10,7 @@ import type { CfaEtablissementsSortBy, ICfaEtablissement } from "shared/models/d
 
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
+import { usePageForParams } from "../hooks/usePageForParams";
 import { type CfaEtablissementsParams, useCfaEtablissements } from "../hooks/useStatsQueries";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
@@ -51,11 +52,8 @@ export function CfaEtablissementsTable({
   onTotalChange,
   hasActiveFilters,
 }: CfaEtablissementsTableProps) {
-  const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const paramsKey = JSON.stringify(params);
-
-  useEffect(() => setPage(1), [paramsKey]);
+  const [page, setPage] = usePageForParams(params);
 
   const { data, isLoading, isFetching, isPlaceholderData, error } = useCfaEtablissements({ ...params, page, limit });
   const rows = data?.data ?? [];

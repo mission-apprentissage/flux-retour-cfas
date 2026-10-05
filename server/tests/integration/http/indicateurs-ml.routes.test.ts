@@ -900,8 +900,20 @@ describe("Indicateurs ML routes (territoriales)", () => {
       const BASE = "/api/v1/organisation/indicateurs-ml/stats/cfa/invites-sans-collab";
       await organismesDb().insertMany(
         [
-          { _id: CFA_A, siret: "11111111100011", nom: "CFA IDF", adresse: { region: "11" } },
-          { _id: CFA_B, siret: "22222222200022", nom: "CFA ARA", adresse: { region: "84" } },
+          {
+            _id: CFA_A,
+            siret: "11111111100011",
+            nom: "CFA IDF",
+            adresse: { region: "11" },
+            est_dans_le_referentiel: "present",
+          },
+          {
+            _id: CFA_B,
+            siret: "22222222200022",
+            nom: "CFA ARA",
+            adresse: { region: "84" },
+            est_dans_le_referentiel: "present",
+          },
         ] as never[],
         { bypassDocumentValidation: true }
       );

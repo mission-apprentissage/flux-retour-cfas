@@ -246,6 +246,9 @@ const assertDepartementsAllowed = (departements: string[] | undefined, userRegio
   });
 };
 
+const scopedRegions = (region: string | undefined, userRegions: string[]) =>
+  region ? [region] : userRegions.length > 0 ? userRegions : undefined;
+
 /**
  * Périmètre des lecteurs de stats : `ml_id` (vérifié) court-circuite tout, `national` ignore le
  * périmètre territorial, sinon la région demandée ou toutes les régions de l'utilisateur.
@@ -366,7 +369,7 @@ const findCfaEtablissements = (query: z.infer<typeof cfaEtablissementsExportQuer
   assertDepartementsAllowed(departements, userRegions);
 
   return listCfaEtablissements({
-    regions: region ? [region] : userRegions.length > 0 ? userRegions : undefined,
+    regions: scopedRegions(region, userRegions),
     departements,
     search,
     natures,
@@ -399,7 +402,7 @@ const getCfaEtablissementsExportRoute: IndicateursHandler<z.infer<typeof cfaEtab
 const cfaInvitesOptions = (region: string | undefined, userRegions: string[]) => {
   assertRegionAllowed(region, userRegions);
   return {
-    regions: region ? [region] : userRegions.length > 0 ? userRegions : undefined,
+    territoire: { regions: scopedRegions(region, userRegions) },
     collaborationsDepuis: COLLABORATION_CUTOFF_DATE,
   };
 };
