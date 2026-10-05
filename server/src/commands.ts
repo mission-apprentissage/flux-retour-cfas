@@ -459,6 +459,11 @@ program
   .option("--cleanup", "Supprime uniquement les effectifs de test (tag SIPA_TEST_NANCY_)", false)
   .option("--verify", "Rejoue uniquement l'agrégation SIPA et rapporte les écarts, sans insérer", false)
   .option("--dry-run", "Simulation d'insertion sans écriture", false)
+  .option(
+    "--maj",
+    "Applique la mise à jour de fin de test (CDT09 contrat déclaré, CDT10 contrat signé, CDT13 rompu) ; avec --verify, vérifie l'état après mise à jour",
+    false
+  )
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("tmp:seed-sipa-test-nancy"));
 
