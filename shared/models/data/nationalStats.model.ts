@@ -373,3 +373,31 @@ const zCfaAdoptionStats = z.object({
 });
 
 export type ICfaAdoptionStats = z.output<typeof zCfaAdoptionStats>;
+
+export const CFA_ETABLISSEMENTS_SORT_FIELDS = ["nom", "localisation", "compte", "collaborations", "activite"] as const;
+export const zCfaEtablissementsSortBy = z.enum(CFA_ETABLISSEMENTS_SORT_FIELDS);
+export type CfaEtablissementsSortBy = z.output<typeof zCfaEtablissementsSortBy>;
+
+const zCfaEtablissement = z.object({
+  id: z.string(),
+  nom: z.string().nullable(),
+  uai: z.string().nullable(),
+  siret: z.string(),
+  nature: z.string().nullable(),
+  qualiopi: z.boolean().nullable(),
+  departement: z.string().nullable(),
+  adresse: z
+    .object({ code_postal: z.string().nullish(), commune: z.string().nullish(), complete: z.string().nullish() })
+    .nullable(),
+  has_account: z.boolean(),
+  collab_active: z.boolean(),
+  nb_collaborations: z.number(),
+  derniere_activite: z.date().nullable(),
+});
+
+export type ICfaEtablissement = z.output<typeof zCfaEtablissement>;
+
+export interface ICfaEtablissementsResponse {
+  data: ICfaEtablissement[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}

@@ -1,6 +1,8 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import type {
+  CfaEtablissementsSortBy,
+  ICfaEtablissementsResponse,
   ICollaborationSegmentStats,
   IDossiersTraitesStatsResponse,
   IPrequalifStats,
@@ -199,6 +201,36 @@ export function useCfaAdoptionStats(period: Period, scope: { region?: string; na
   return useQuery<ICfaAdoptionStats>({
     queryKey: ["stats", "cfa-adoption", period, scope.region ?? "national"] as const,
     queryFn: () => _get(`${INDICATEURS_ML_BASE}/stats/cfa/adoption`, { params: { period, ...scope } }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+export interface CfaEtablissementsParams {
+  region?: string;
+  departements?: string[];
+  search?: string;
+  natures?: string[];
+  utilisateur?: boolean;
+  qualiopi?: boolean;
+  collab_active?: boolean;
+  sort_by: CfaEtablissementsSortBy;
+  sort_order: "asc" | "desc";
+}
+
+export const buildCfaEtablissementsRequestParams = (params: CfaEtablissementsParams) => ({
+  ...params,
+  departements: params.departements?.join(","),
+  natures: params.natures?.join(","),
+});
+
+export function useCfaEtablissements(params: CfaEtablissementsParams & { page: number; limit: number }) {
+  return useQuery<ICfaEtablissementsResponse>({
+    queryKey: ["stats", "cfa-etablissements", params] as const,
+    queryFn: ({ signal }) =>
+      _get(`${INDICATEURS_ML_BASE}/stats/cfa/etablissements`, {
+        params: buildCfaEtablissementsRequestParams(params),
+        signal,
+      }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }

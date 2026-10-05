@@ -2,7 +2,12 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
-import { zStatsPeriod, zStatsSegment, zTraitementMlSortBy } from "shared/models/data/nationalStats.model";
+import {
+  zCfaEtablissementsSortBy,
+  zStatsPeriod,
+  zStatsSegment,
+  zTraitementMlSortBy,
+} from "shared/models/data/nationalStats.model";
 import { zBooleanStringSchema } from "shared/models/parts/zodPrimitives";
 import { getRegionsFromOrganisation, OrganisationWithRegions } from "shared/utils/organisationRegions";
 import { z } from "zod";
@@ -11,7 +16,7 @@ import {
   getMissionLocaleDetail,
   getMissionLocaleMembers,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
-import { getCfaAdoptionStats } from "@/common/actions/cfa/cfa-stats.actions";
+import { getCfaAdoptionStats, listCfaEtablissements } from "@/common/actions/cfa/cfa-stats.actions";
 import {
   getRupturantsStats,
   getDossiersTraitesStats,
@@ -66,6 +71,10 @@ const collaborationsQuery = z.object({
   ml_id: mlIdSchema.optional(),
   national: zBooleanStringSchema.optional(),
 });
+const zCsvList = z
+  .string()
+  .optional()
+  .transform((value) => (value ? value.split(",").filter(Boolean) : undefined));
 const traitementMlQuery = z.object({
   period: zStatsPeriod.optional(),
   region: z.string().optional(),
@@ -75,12 +84,24 @@ const traitementMlQuery = z.object({
   sort_by: zTraitementMlSortBy.default("total_jeunes"),
   sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
   search: z.string().optional(),
-  departements: z
-    .string()
-    .optional()
-    .transform((value) => (value ? value.split(",").filter(Boolean) : undefined)),
+  departements: zCsvList,
   utilise_service: zBooleanStringSchema.optional(),
   engagee: zBooleanStringSchema.optional(),
+});
+const cfaEtablissementsExportQuery = z.object({
+  region: z.string().optional(),
+  departements: zCsvList,
+  search: z.string().optional(),
+  natures: zCsvList,
+  utilisateur: zBooleanStringSchema.optional(),
+  qualiopi: zBooleanStringSchema.optional(),
+  collab_active: zBooleanStringSchema.optional(),
+  sort_by: zCfaEtablissementsSortBy.default("collaborations"),
+  sort_order: z.enum(["asc", "desc"]).default("desc"),
+});
+const cfaEtablissementsQuery = cfaEtablissementsExportQuery.extend({
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(100).default(10),
 });
 const couvertureDepartementsQuery = z.object({ period: zStatsPeriod.optional(), region: z.string() });
 const nationalQuery = z.object({ period: zStatsPeriod.optional(), national: zBooleanStringSchema.optional() });
@@ -149,6 +170,16 @@ export default () => {
     returnResult(getCfaAdoptionRoute)
   );
   router.get(
+    "/stats/cfa/etablissements",
+    validateRequestMiddleware({ query: cfaEtablissementsQuery }),
+    returnResult(getCfaEtablissementsRoute)
+  );
+  router.get(
+    "/stats/cfa/etablissements/export",
+    validateRequestMiddleware({ query: cfaEtablissementsExportQuery }),
+    returnResult(getCfaEtablissementsExportRoute)
+  );
+  router.get(
     "/stats/couverture-departements",
     validateRequestMiddleware({ query: couvertureDepartementsQuery }),
     returnResult(getCouvertureDepartementsRoute)
@@ -186,6 +217,15 @@ const assertRegionAllowed = (region: string | undefined, userRegions: string[]) 
   if (region && userRegions.length > 0 && !userRegions.includes(region)) {
     throw Boom.forbidden("Accès non autorisé à cette région");
   }
+};
+
+const assertDepartementsAllowed = (departements: string[] | undefined, userRegions: string[]) => {
+  departements?.forEach((code) => {
+    const departementRegion = DEPARTEMENTS_BY_CODE[code as keyof typeof DEPARTEMENTS_BY_CODE]?.region.code;
+    if (!departementRegion || (userRegions.length > 0 && !userRegions.includes(departementRegion))) {
+      throw Boom.forbidden("Accès non autorisé à ce département");
+    }
+  });
 };
 
 /**
@@ -251,12 +291,7 @@ const getTraitementMLRoute: IndicateursHandler<z.infer<typeof traitementMlQuery>
   const userRegions = locals.regions;
 
   assertRegionAllowed(region, userRegions);
-  departements?.forEach((code) => {
-    const departementRegion = DEPARTEMENTS_BY_CODE[code as keyof typeof DEPARTEMENTS_BY_CODE]?.region.code;
-    if (!departementRegion || (userRegions.length > 0 && !userRegions.includes(departementRegion))) {
-      throw Boom.forbidden("Accès non autorisé à ce département");
-    }
-  });
+  assertDepartementsAllowed(departements, userRegions);
 
   return await getTraitementStatsByMissionLocale({
     period: period || "30days",
@@ -305,6 +340,43 @@ const getCfaAdoptionRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = a
 
   return await getCfaAdoptionStats(req.query.period || "30days", scope.regions);
 };
+
+const findCfaEtablissements = (query: z.infer<typeof cfaEtablissementsExportQuery>, userRegions: string[]) => {
+  const { region, departements, search, natures, utilisateur, qualiopi, collab_active, sort_by, sort_order } = query;
+
+  assertRegionAllowed(region, userRegions);
+  assertDepartementsAllowed(departements, userRegions);
+
+  return listCfaEtablissements({
+    regions: region ? [region] : userRegions.length > 0 ? userRegions : undefined,
+    departements,
+    search,
+    natures,
+    utilisateur,
+    qualiopi,
+    collabActive: collab_active,
+    sortBy: sort_by,
+    sortOrder: sort_order,
+  });
+};
+
+const getCfaEtablissementsRoute: IndicateursHandler<z.infer<typeof cfaEtablissementsQuery>> = async (
+  req,
+  { locals }
+) => {
+  const { page, limit } = req.query;
+  const rows = await findCfaEtablissements(req.query, locals.regions);
+
+  return {
+    data: rows.slice((page - 1) * limit, page * limit),
+    pagination: { page, limit, total: rows.length, totalPages: Math.ceil(rows.length / limit) },
+  };
+};
+
+const getCfaEtablissementsExportRoute: IndicateursHandler<z.infer<typeof cfaEtablissementsExportQuery>> = async (
+  req,
+  { locals }
+) => ({ data: await findCfaEtablissements(req.query, locals.regions) });
 
 const getCouvertureDepartementsRoute: IndicateursHandler<z.infer<typeof couvertureDepartementsQuery>> = async (
   req,

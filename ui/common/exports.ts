@@ -237,6 +237,23 @@ export const traitementMLExportColumns = [
   { label: "Collab à recontacter", key: "collab_a_recontacter", width: 20 },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
+export const cfaEtablissementsExportColumns = [
+  { label: "Région", key: "region", width: 25 },
+  { label: "Département", key: "departement", width: 22 },
+  { label: "Raison sociale", key: "nom", width: 45 },
+  { label: "UAI", key: "uai", xlsxType: "string", width: 12 },
+  { label: "SIRET", key: "siret", xlsxType: "string", width: 16 },
+  { label: "Nature", key: "nature", width: 22 },
+  { label: "Qualiopi", key: "qualiopi", width: 10 },
+  { label: "Code postal", key: "code_postal", xlsxType: "string", width: 12 },
+  { label: "Commune", key: "commune", width: 25 },
+  { label: "Adresse", key: "adresse", width: 50 },
+  { label: "Compte TBA", key: "compte_tba", width: 12 },
+  { label: "Collaboration active", key: "collab_active", width: 20 },
+  { label: "Collaborations", key: "nb_collaborations", width: 15 },
+  { label: "Dernière activité", key: "derniere_activite", xlsxType: "date", width: 18 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
 export const traitementRegionExportColumns = [
   { label: "Région", key: "region_nom", width: 30 },
   { label: "Total jeunes", key: "total_jeunes", width: 12 },

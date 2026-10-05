@@ -10,6 +10,7 @@ import {
   organisationsDb,
   organismesDb,
   regionsDb,
+  usersMigrationDb,
 } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 import { useNock } from "@tests/jest/setupNock";
@@ -765,6 +766,131 @@ describe("Indicateurs ML routes (territoriales)", () => {
         ),
         "Accès non autorisé à cette région"
       );
+    });
+  });
+
+  describe("GET /stats/cfa/etablissements", () => {
+    const BASE = "/api/v1/organisation/indicateurs-ml/stats/cfa/etablissements";
+    const CFA_ALPHA = new ObjectId();
+    const CFA_GAMMA = new ObjectId();
+    const DERNIERE_CONNEXION = new Date("2026-09-01T10:00:00.000Z");
+
+    const buildOrganisme = (id: ObjectId, adresse: Record<string, unknown>, extra: Record<string, unknown> = {}) => ({
+      _id: id,
+      created_at: new Date(),
+      updated_at: new Date(),
+      siret: id.toString().slice(0, 14),
+      adresse,
+      est_dans_le_referentiel: "present",
+      ...extra,
+    });
+    const noms = (response: { data: { data: Array<{ nom: string }> } }) => response.data.data.map((row) => row.nom);
+
+    beforeEach(async () => {
+      const idf = { region: "11", departement: "75", commune: "Paris", code_postal: "75011" };
+      await organismesDb().insertMany(
+        [
+          buildOrganisme(CFA_A, idf, {
+            enseigne: "Beta",
+            nature: "responsable",
+            qualiopi: true,
+            has_account: true,
+            is_allowed_collab: true,
+          }),
+          buildOrganisme(
+            CFA_ALPHA,
+            { region: "11", departement: "77", commune: "Melun", code_postal: "77000" },
+            { raison_sociale: " Alpha", uai: "0771234A", qualiopi: false }
+          ),
+          buildOrganisme(CFA_GAMMA, idf, {
+            enseigne: "Gamma",
+            nature: "formateur",
+            is_allowed_collab: true,
+            collab_suspended_at: new Date(),
+          }),
+          buildOrganisme(new ObjectId(), idf, { enseigne: "Fermé", ferme: true }),
+          buildOrganisme(CFA_B, { region: "84", departement: "69", commune: "Lyon" }, { enseigne: "Delta" }),
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+      const { insertedId: organisationId } = await organisationsDb().insertOne(
+        { _id: new ObjectId(), type: "ORGANISME_FORMATION", organisme_id: CFA_A.toString() } as never,
+        { bypassDocumentValidation: true }
+      );
+      await usersMigrationDb().insertMany(
+        [
+          {
+            _id: new ObjectId(),
+            organisation_id: organisationId,
+            account_status: "CONFIRMED",
+            last_connection: DERNIERE_CONNEXION,
+          },
+          {
+            _id: new ObjectId(),
+            organisation_id: organisationId,
+            account_status: "PENDING_EMAIL_VALIDATION",
+            last_connection: new Date(),
+          },
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+    });
+
+    it("Liste les CFA de la région, triés par collaborations, avec compte et dernière connexion", async () => {
+      const response = await requestAsOrganisation(DREETS_IDF, "get", BASE);
+
+      expect(response.status).toBe(200);
+      expect(response.data.pagination).toEqual({ page: 1, limit: 10, total: 3, totalPages: 1 });
+      expect(noms(response)).toEqual(["Beta", "Alpha", "Gamma"]);
+      expect(response.data.data[0]).toMatchObject({
+        id: CFA_A.toString(),
+        has_account: true,
+        collab_active: true,
+        derniere_activite: DERNIERE_CONNEXION.toISOString(),
+      });
+      expect(response.data.data[0].nb_collaborations).toBeGreaterThan(0);
+      expect(response.data.data[2]).toMatchObject({
+        collab_active: false,
+        nb_collaborations: 0,
+        derniere_activite: null,
+      });
+    });
+
+    it.each([
+      ["natures=inconnue", ["Alpha"]],
+      ["utilisateur=false", ["Alpha", "Gamma"]],
+      ["qualiopi=true", ["Beta"]],
+      ["collab_active=true", ["Beta"]],
+      ["collab_active=false", ["Alpha", "Gamma"]],
+      ["departements=77", ["Alpha"]],
+      ["search=0771", ["Alpha"]],
+      ["search=melun", ["Alpha"]],
+      ["sort_by=nom&sort_order=asc", ["Alpha", "Beta", "Gamma"]],
+      ["sort_by=activite&sort_order=asc", ["Beta", "Alpha", "Gamma"]],
+    ])("Filtre et trie : %s", async (query, expected) => {
+      const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?${query}`);
+
+      expect(response.status).toBe(200);
+      expect(noms(response)).toEqual(expected);
+    });
+
+    it("Pagine, refuse un territoire hors périmètre et exporte sans pagination", async () => {
+      const page2 = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?limit=2&page=2`);
+      expect(noms(page2)).toEqual(["Gamma"]);
+      expect(page2.data.pagination.totalPages).toBe(2);
+
+      expectForbidden(
+        await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`),
+        "Accès non autorisé à cette région"
+      );
+      expectForbidden(
+        await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?departements=69`),
+        "Accès non autorisé à ce département"
+      );
+
+      const exportAdmin = await requestAsOrganisation(ADMIN, "get", `${BASE}/export?sort_by=nom&sort_order=asc`);
+      expect(exportAdmin.status).toBe(200);
+      expect(noms({ data: exportAdmin.data })).toEqual(["Alpha", "Beta", "Delta", "Gamma"]);
     });
   });
 
