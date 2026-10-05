@@ -18,6 +18,10 @@ import type {
   StatsSegment,
   TraitementMlSortBy,
 } from "shared/models/data/nationalStats.model";
+import type {
+  ICfaInvitesSansCollabResponse,
+  ICfaInvitesSortBy,
+} from "shared/models/routes/admin/cfa-invites-sans-collab.api";
 import type { ICollaborationsCfaSyntheseResponse } from "shared/models/routes/admin/collaboration-stats.api";
 
 import { _get, _put } from "@/common/httpClient";
@@ -231,6 +235,20 @@ export function useCfaEtablissements(params: CfaEtablissementsParams & { page: n
         params: buildCfaEtablissementsRequestParams(params),
         signal,
       }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+export interface CfaInvitesParams {
+  region?: string;
+  sort_by: ICfaInvitesSortBy;
+  sort_order: "asc" | "desc";
+}
+
+export function useCfaInvitesSansCollabStats(params: CfaInvitesParams & { page: number; limit: number }) {
+  return useQuery<ICfaInvitesSansCollabResponse>({
+    queryKey: ["stats", "cfa-invites-sans-collab", params] as const,
+    queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/stats/cfa/invites-sans-collab`, { params, signal }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }

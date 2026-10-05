@@ -3,9 +3,13 @@
 }
 
 .table :global(.fr-table) {
-  width: fit-content;
-  max-width: 100%;
-  margin-inline: auto;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table :global(.fr-table table) {
+  display: table;
+  width: 100%;
 }
 
 .table th:first-child,

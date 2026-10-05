@@ -26,7 +26,7 @@ const COLUMNS: Array<{ column: CfaEtablissementsSortBy; label: string; centered?
   { column: "activite", label: "Activité", centered: true },
 ];
 
-function Localisation({ adresse }: { adresse: ICfaEtablissement["adresse"] }) {
+export function Localisation({ adresse }: { adresse: ICfaEtablissement["adresse"] }) {
   const ville = [adresse?.code_postal, adresse?.commune].filter(Boolean).join(" ");
   if (!adresse || (!ville && !adresse.complete)) return <span className={styles.emptyValue}>-</span>;
   const voie = ville && adresse.complete ? adresse.complete.replace(ville, "").trim() : null;

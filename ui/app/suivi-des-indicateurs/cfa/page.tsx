@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 
 import { CfaAdoptionKpis } from "@/app/_components/statistiques/sections/CfaAdoptionKpis";
+import { CfaAlertesSection } from "@/app/_components/statistiques/sections/CfaAlertesSection";
 import { CfaEtablissementsCard } from "@/app/_components/statistiques/sections/CfaEtablissementsCard";
 import { OverviewSection } from "@/app/_components/statistiques/sections/OverviewSection";
 import { StatsPageHeader } from "@/app/_components/statistiques/ui/StatsPageHeader";
@@ -17,6 +18,7 @@ export default function SuiviCfaPage() {
       <OverviewSection title="Déploiement et activité des CFA">
         <CfaAdoptionKpis />
         <CfaEtablissementsCard />
+        <CfaAlertesSection />
       </OverviewSection>
     </Suspense>
   );

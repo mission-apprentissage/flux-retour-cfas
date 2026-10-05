@@ -5,6 +5,7 @@ import type { IOrganisationCreate } from "shared/models/data/organisations.model
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
+  missionLocaleCfaInvitationsDb,
   missionLocaleEffectifsDb,
   missionLocaleStatsDb,
   organisationsDb,
@@ -891,6 +892,45 @@ describe("Indicateurs ML routes (territoriales)", () => {
       const exportAdmin = await requestAsOrganisation(ADMIN, "get", `${BASE}/export?sort_by=nom&sort_order=asc`);
       expect(exportAdmin.status).toBe(200);
       expect(noms({ data: exportAdmin.data })).toEqual(["Alpha", "Beta", "Delta", "Gamma"]);
+    });
+  });
+
+  describe("GET /stats/cfa/invites-sans-collab", () => {
+    it("Limite les alertes à la région de la DREETS et refuse une autre région", async () => {
+      const BASE = "/api/v1/organisation/indicateurs-ml/stats/cfa/invites-sans-collab";
+      await organismesDb().insertMany(
+        [
+          { _id: CFA_A, siret: "11111111100011", nom: "CFA IDF", adresse: { region: "11" } },
+          { _id: CFA_B, siret: "22222222200022", nom: "CFA ARA", adresse: { region: "84" } },
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+      await missionLocaleCfaInvitationsDb().insertMany(
+        [CFA_A, CFA_B].map((organismeId) => ({
+          _id: new ObjectId(),
+          mission_locale_id: ML_IDF,
+          author_id: new ObjectId(),
+          organisme_id: organismeId,
+          organisation_id: new ObjectId(),
+          siret: "00000000000000",
+          destinataires: [],
+          created_at: new Date(),
+        })) as never[],
+        { bypassDocumentValidation: true }
+      );
+      await missionLocaleEffectifsDb().deleteMany({});
+
+      const region = await requestAsOrganisation(DREETS_IDF, "get", BASE);
+      expect(region.status).toBe(200);
+      expect(region.data.data.map((row: { raison_sociale: string }) => row.raison_sociale)).toEqual(["CFA IDF"]);
+
+      const exportAdmin = await requestAsOrganisation(ADMIN, "get", `${BASE}/export`);
+      expect(exportAdmin.data.data).toHaveLength(2);
+
+      expectForbidden(
+        await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`),
+        "Accès non autorisé à cette région"
+      );
     });
   });
 

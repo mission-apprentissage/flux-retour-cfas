@@ -1,6 +1,7 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
+import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import {
   zCfaEtablissementsSortBy,
@@ -9,9 +10,14 @@ import {
   zTraitementMlSortBy,
 } from "shared/models/data/nationalStats.model";
 import { zBooleanStringSchema } from "shared/models/parts/zodPrimitives";
+import { zCfaInvitesSansCollabQuery } from "shared/models/routes/admin/cfa-invites-sans-collab.api";
 import { getRegionsFromOrganisation, OrganisationWithRegions } from "shared/utils/organisationRegions";
 import { z } from "zod";
 
+import {
+  getCfaInvitesSansCollab,
+  listCfaInvitesSansCollab,
+} from "@/common/actions/admin/collaborations/cfa-invites-sans-collab.actions";
 import {
   getMissionLocaleDetail,
   getMissionLocaleMembers,
@@ -103,6 +109,8 @@ const cfaEtablissementsQuery = cfaEtablissementsExportQuery.extend({
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(100).default(10),
 });
+const cfaInvitesQuery = zCfaInvitesSansCollabQuery.extend({ region: z.string().optional() });
+const cfaInvitesExportQuery = cfaInvitesQuery.omit({ page: true, limit: true });
 const couvertureDepartementsQuery = z.object({ period: zStatsPeriod.optional(), region: z.string() });
 const nationalQuery = z.object({ period: zStatsPeriod.optional(), national: zBooleanStringSchema.optional() });
 const traitementRegionsQuery = nationalQuery.extend({ segment: zStatsSegment.default("all") });
@@ -178,6 +186,16 @@ export default () => {
     "/stats/cfa/etablissements/export",
     validateRequestMiddleware({ query: cfaEtablissementsExportQuery }),
     returnResult(getCfaEtablissementsExportRoute)
+  );
+  router.get(
+    "/stats/cfa/invites-sans-collab",
+    validateRequestMiddleware({ query: cfaInvitesQuery }),
+    returnResult(getCfaInvitesRoute)
+  );
+  router.get(
+    "/stats/cfa/invites-sans-collab/export",
+    validateRequestMiddleware({ query: cfaInvitesExportQuery }),
+    returnResult(getCfaInvitesExportRoute)
   );
   router.get(
     "/stats/couverture-departements",
@@ -377,6 +395,22 @@ const getCfaEtablissementsExportRoute: IndicateursHandler<z.infer<typeof cfaEtab
   req,
   { locals }
 ) => ({ data: await findCfaEtablissements(req.query, locals.regions) });
+
+const cfaInvitesOptions = (region: string | undefined, userRegions: string[]) => {
+  assertRegionAllowed(region, userRegions);
+  return {
+    regions: region ? [region] : userRegions.length > 0 ? userRegions : undefined,
+    collaborationsDepuis: COLLABORATION_CUTOFF_DATE,
+  };
+};
+
+const getCfaInvitesRoute: IndicateursHandler<z.infer<typeof cfaInvitesQuery>> = async (req, { locals }) =>
+  getCfaInvitesSansCollab(req.query, cfaInvitesOptions(req.query.region, locals.regions));
+
+const getCfaInvitesExportRoute: IndicateursHandler<z.infer<typeof cfaInvitesExportQuery>> = async (
+  req,
+  { locals }
+) => ({ data: await listCfaInvitesSansCollab(req.query, cfaInvitesOptions(req.query.region, locals.regions)) });
 
 const getCouvertureDepartementsRoute: IndicateursHandler<z.infer<typeof couvertureDepartementsQuery>> = async (
   req,

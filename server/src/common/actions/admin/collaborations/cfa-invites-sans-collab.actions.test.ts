@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 import { missionLocaleCfaInvitationsDb, missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 
-import { getCfaInvitesSansCollab } from "./cfa-invites-sans-collab.actions";
+import { getCfaInvitesSansCollab, listCfaInvitesSansCollab } from "./cfa-invites-sans-collab.actions";
 
 useMongo();
 
@@ -46,7 +46,7 @@ const insertInvitation = async (organismeId: ObjectId, missionLocaleId: ObjectId
   } as IMissionLocaleCfaInvitation);
 };
 
-const insertCollab = async (organismeId: ObjectId, softDeleted = false) => {
+const insertCollab = async (organismeId: ObjectId, softDeleted = false, reponseAt?: Date) => {
   await missionLocaleEffectifsDb().insertOne(
     {
       _id: new ObjectId(),
@@ -54,7 +54,11 @@ const insertCollab = async (organismeId: ObjectId, softDeleted = false) => {
       effectif_id: new ObjectId(),
       created_at: new Date(),
       effectif_snapshot: { organisme_id: organismeId },
-      organisme_data: { acc_conjoint: true, has_unread_notification: false },
+      organisme_data: {
+        acc_conjoint: true,
+        has_unread_notification: false,
+        ...(reponseAt ? { reponse_at: reponseAt } : {}),
+      },
       ...(softDeleted ? { soft_deleted: true } : {}),
     } as unknown as IMissionLocaleEffectif,
     { bypassDocumentValidation: true }
@@ -123,5 +127,33 @@ describe("getCfaInvitesSansCollab", () => {
     expect(page2.total).toBe(3);
     expect(page2.pagination).toEqual({ page: 2, limit: 10, total_pages: 1 });
     expect(page2.data).toEqual([]);
+  });
+
+  it("restreint au territoire et ignore les collaborations antérieures au cutoff", async () => {
+    const idf = { code_postal: "75001", commune: "Paris", region: "11" };
+    const sansCollab = await insertOrganisme({ nom: "Sans collab", adresse: idf, has_account: true });
+    const autreRegion = await insertOrganisme({ nom: "Autre région", adresse: { commune: "Lyon", region: "84" } });
+    const collabAncienne = await insertOrganisme({ nom: "Collab 2025", adresse: idf });
+    const collabRecente = await insertOrganisme({ nom: "Collab 2026", adresse: idf });
+    for (const id of [sansCollab, autreRegion, collabAncienne, collabRecente]) {
+      await insertInvitation(id, ML_A, new Date("2026-02-01"));
+    }
+    await insertCollab(collabAncienne, false, new Date("2025-11-15"));
+    await insertCollab(collabRecente, false, new Date("2026-03-01"));
+
+    const options = { regions: ["11"], collaborationsDepuis: new Date("2026-01-01") };
+    const result = await getCfaInvitesSansCollab({ ...defaultQuery, sort_by: "nom", sort_order: "asc" }, options);
+    expect(result.total).toBe(2);
+    expect(result.data.map((row) => [row.raison_sociale, row.has_account])).toEqual([
+      ["Collab 2025", false],
+      ["Sans collab", true],
+    ]);
+
+    const sansOptions = await getCfaInvitesSansCollab(defaultQuery);
+    expect(sansOptions.total).toBe(2);
+    expect(sansOptions.data.map((row) => row.raison_sociale).sort()).toEqual(["Autre région", "Sans collab"]);
+
+    const all = await listCfaInvitesSansCollab({ sort_by: "compte", sort_order: "desc" }, options);
+    expect(all.map((row) => row.raison_sociale)).toEqual(["Sans collab", "Collab 2025"]);
   });
 });
