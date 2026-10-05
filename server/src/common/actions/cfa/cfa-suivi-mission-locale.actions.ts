@@ -353,7 +353,7 @@ export interface CfaSuiviExportRow {
 const SUIVI_COLLAB_STATUS_EXPORT_LABELS: Record<string, string> = {
   demarrer_collab: "Pas encore de collaboration",
   collab_demandee: "Demande collab envoyée",
-  contacte_par_ml_hors_collab: "Contacté par la ML hors collaboration",
+  contacte_par_ml_hors_collab: "Contacté•e par la ML hors collaboration",
   traite_par_ml: "Traité par la ML",
 };
 

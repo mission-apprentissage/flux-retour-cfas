@@ -482,6 +482,27 @@ describe("CFA Effectifs Actions", () => {
   });
 
   describe("getCfaEffectifDetail", () => {
+    it("renvoie le même statut de collaboration que les listes", async () => {
+      const sansDossier = await insertEffectif({ apprenant: { nom: "SANSDOSSIER", prenom: "Jeune" } });
+      const horsCollab = await insertEffectif({ apprenant: { nom: "HORSCOLLAB", prenom: "Jeune" } });
+      const demandee = await insertEffectif({ apprenant: { nom: "DEMANDEE", prenom: "Jeune" } });
+      const traitee = await insertEffectif({ apprenant: { nom: "TRAITEE", prenom: "Jeune" } });
+      await missionLocaleEffectifsDb().insertMany(
+        testDocs<IMissionLocaleEffectif>([
+          createMlEffectifDoc(horsCollab, { situation: SITUATION_ENUM.COORDONNEES_INCORRECT }),
+          createMlEffectifDoc(demandee, { organisme_data: { acc_conjoint: true } }),
+          createMlEffectifDoc(traitee, { situation: SITUATION_ENUM.RDV_PRIS, organisme_data: { acc_conjoint: true } }),
+        ])
+      );
+
+      const statut = async (effectif: IEffectif) =>
+        (await getCfaEffectifDetail(organismeId, effectif._id.toString())).effectif;
+      expect(await statut(sansDossier)).toMatchObject({ collab_status: "demarrer_collab" });
+      expect(await statut(horsCollab)).toMatchObject({ collab_status: "contacte_par_ml_hors_collab" });
+      expect(await statut(demandee)).toMatchObject({ collab_status: "collab_demandee" });
+      expect(await statut(traitee)).toMatchObject({ collab_status: "traite_par_ml" });
+    });
+
     it("retourne les données depuis missionLocaleEffectif si présent", async () => {
       const effectif = await insertEffectif({ apprenant: { nom: "DUPONT", prenom: "Jean" } });
       await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(createMlEffectifDoc(effectif)));
