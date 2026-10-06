@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
+import { getBornesNaissanceMissionLocale } from "shared/utils";
 
 import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "@/common/actions/mission-locale/mission-locale.constants";
 import parentLogger from "@/common/logger";
@@ -33,6 +34,7 @@ interface EligibleRow {
 async function getEligibleEffectifs(): Promise<EligibleRow[]> {
   const failedRetryThreshold = new Date(Date.now() - RETRY_FAILED_AFTER_MS);
   const ruptureCutoff = new Date(Date.now() - PREQUALIF_RUPTURE_MAX_DAYS * 24 * 60 * 60 * 1000);
+  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
   return missionLocaleEffectifsDb()
     .aggregate<EligibleRow>([
       {
@@ -45,6 +47,7 @@ async function getEligibleEffectifs(): Promise<EligibleRow[]> {
           "organisme_data.acc_conjoint": { $ne: true },
           "whatsapp_contact.opted_out": { $ne: true },
           "effectif_snapshot.apprenant.telephone": { $exists: true, $nin: [null, ""] },
+          "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
           date_rupture: { $gte: ruptureCutoff },
           $or: [
             { whatsapp_contact: { $exists: false } },

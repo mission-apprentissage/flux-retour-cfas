@@ -1,4 +1,5 @@
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { getBornesNaissanceMissionLocale } from "shared/utils";
 
 import parentLogger from "@/common/logger";
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
@@ -18,6 +19,7 @@ async function getEligibleEffectifs() {
   const now = new Date();
   const threeMonthsAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
   const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale(now);
 
   return missionLocaleEffectifsDb()
     .aggregate([
@@ -25,6 +27,7 @@ async function getEligibleEffectifs() {
         $match: {
           situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
           date_rupture: { $gte: threeMonthsAgo },
+          "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
           soft_deleted: { $ne: true },
           $or: [
             { whatsapp_contact: { $exists: false } },
