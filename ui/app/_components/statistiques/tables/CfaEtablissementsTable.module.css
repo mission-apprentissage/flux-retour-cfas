@@ -4,6 +4,7 @@
 
 .table :global(.fr-table) {
   width: 100%;
+  margin-bottom: 0;
   overflow-x: auto;
 }
 
@@ -51,12 +52,4 @@
 
 .emptyMessage {
   composes: emptyMessage from "./common.module.css";
-}
-
-.paginationContainer {
-  composes: paginationContainer from "./TraitementTable.module.css";
-}
-
-.pageSizeSelector {
-  composes: pageSizeSelector from "./TraitementTable.module.css";
 }

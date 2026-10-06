@@ -59,7 +59,6 @@ function CfaInvitesAlerte() {
 
   return (
     <AlerteCard
-      id="cfa-invites"
       title={
         <>
           Les CFA ont reçu des invitations des Missions Locales mais n&apos;ont{" "}
@@ -111,7 +110,6 @@ function CfaInjoignablesAlerte() {
 
   return (
     <AlerteCard
-      id="cfa-injoignables"
       title={
         <>
           Les CFA qui envoient des dossiers qui se concluent par un{" "}

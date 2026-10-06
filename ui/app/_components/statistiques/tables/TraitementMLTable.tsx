@@ -1,8 +1,6 @@
 "use client";
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
-import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
-import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import Link from "next/link";
@@ -19,6 +17,7 @@ import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 import { formatActivityDuration, formatPercentageBadge } from "../utils";
 
 import { SortableTableHeader } from "./SortableTableHeader";
+import { StatsTablePagination } from "./StatsTablePagination";
 import { TraitementDetailsBar } from "./TraitementDetailsBar";
 import styles from "./TraitementTable.module.css";
 
@@ -50,6 +49,9 @@ interface TraitementMLTableProps {
   region?: string;
   search?: string;
   hideDescription?: boolean;
+  description?: React.ReactNode;
+  hideActivite?: boolean;
+  defaultSortColumn?: TraitementMLSortColumn;
   initialState?: TraitementMLTableState;
   filters?: TraitementMLFilters;
   onTotalChange?: (total: number) => void;
@@ -64,6 +66,9 @@ export function TraitementMLTable({
   region,
   search,
   hideDescription,
+  description,
+  hideActivite = false,
+  defaultSortColumn = "jours_depuis_activite",
   initialState,
   filters,
   onTotalChange,
@@ -88,7 +93,7 @@ export function TraitementMLTable({
     sortDirection,
     handleSort: baseSortHandler,
   } = useSortableTable<SortColumn>(
-    initialState?.sortColumn ?? "jours_depuis_activite",
+    initialState?.sortColumn ?? defaultSortColumn,
     initialState?.sortDirection ?? "desc",
     {
       onSortChange: resetPage,
@@ -226,7 +231,7 @@ export function TraitementMLTable({
         "Détails",
         "% Traités",
         ...(isCollab ? ["Délai moy."] : []),
-        "Activité",
+        ...(hideActivite ? [] : ["Activité"]),
       ];
     }
 
@@ -292,17 +297,21 @@ export function TraitementMLTable({
         centered
       />,
       ...delaiHeader,
-      <SortableTableHeader
-        key="jours_depuis_activite"
-        column="jours_depuis_activite"
-        label="Activité"
-        currentSortColumn={sortColumn}
-        sortDirection={sortDirection}
-        onSort={handleSort}
-        centered
-      />,
+      ...(hideActivite
+        ? []
+        : [
+            <SortableTableHeader
+              key="jours_depuis_activite"
+              column="jours_depuis_activite"
+              label="Activité"
+              currentSortColumn={sortColumn}
+              sortDirection={sortDirection}
+              onSort={handleSort}
+              centered
+            />,
+          ]),
     ];
-  }, [isSearching, sortColumn, sortDirection, handleSort, totalLabel, isCollab]);
+  }, [isSearching, sortColumn, sortDirection, handleSort, totalLabel, isCollab, hideActivite]);
 
   return (
     <div className={styles.tableContainer}>
@@ -321,9 +330,14 @@ export function TraitementMLTable({
           <>
             {!hideDescription && (
               <p className={styles.tableDescription}>
-                <strong>Sur ce tableau :</strong> Suivez les statistiques de traitement des dossiers à l&apos;échelle
-                des Missions Locales. Par défaut, le tableau classe la présentation des Missions Locales par leur
-                dernière activité sur le service, vous pouvez modifier cet ordre en manipulant les options de tris.
+                <strong>Sur ce tableau :</strong>{" "}
+                {description ?? (
+                  <>
+                    Suivez les statistiques de traitement des dossiers à l&apos;échelle des Missions Locales. Par
+                    défaut, le tableau classe la présentation des Missions Locales par leur dernière activité sur le
+                    service, vous pouvez modifier cet ordre en manipulant les options de tris.
+                  </>
+                )}
               </p>
             )}
             <div className={`${styles.traitementTable} ${styles.mlTable}`}>
@@ -384,43 +398,28 @@ export function TraitementMLTable({
                           </div>,
                         ]
                       : []),
-                    <div className={`${styles.centeredCell} ${activity.className}`} key={`activity-${ml.id}`}>
-                      {activity.text}
-                    </div>,
+                    ...(hideActivite
+                      ? []
+                      : [
+                          <div className={`${styles.centeredCell} ${activity.className}`} key={`activity-${ml.id}`}>
+                            {activity.text}
+                          </div>,
+                        ]),
                   ];
                 })}
               />
             </div>
 
-            {pagination && pagination.totalPages > 1 && (
-              <div className={styles.paginationContainer}>
-                <Pagination
-                  key={page}
-                  count={pagination.totalPages}
-                  defaultPage={page}
-                  getPageLinkProps={(pageNumber) => ({
-                    href: `#page-${pageNumber}`,
-                    onClick: (e) => {
-                      e.preventDefault();
-                      handlePageChange(pageNumber);
-                    },
-                  })}
-                  showFirstLast
-                />
-                <div className={styles.pageSizeSelector}>
-                  <Select
-                    label=""
-                    options={[5, 10, 20, 50].map((size) => ({
-                      value: size.toString(),
-                      label: `Voir par ${size}`,
-                    }))}
-                    nativeSelectProps={{
-                      value: limit.toString(),
-                      onChange: (e) => handlePageSizeChange(Number(e.target.value)),
-                    }}
-                  />
-                </div>
-              </div>
+            {pagination && (
+              <StatsTablePagination
+                page={page}
+                totalPages={pagination.totalPages}
+                onPageChange={handlePageChange}
+                limit={limit}
+                onLimitChange={handlePageSizeChange}
+                label="Missions Locales"
+                className={styles.mlPagination}
+              />
             )}
           </>
         )}

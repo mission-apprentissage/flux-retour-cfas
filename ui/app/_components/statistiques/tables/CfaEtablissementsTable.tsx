@@ -1,8 +1,6 @@
 "use client";
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
-import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
-import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import { format } from "date-fns/format";
 import { useEffect, useState } from "react";
@@ -16,8 +14,7 @@ import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import styles from "./CfaEtablissementsTable.module.css";
 import { SortableTableHeader } from "./SortableTableHeader";
-
-const PAGE_SIZES = [10, 20, 50];
+import { StatsTablePagination } from "./StatsTablePagination";
 
 const COLUMNS: Array<{ column: CfaEtablissementsSortBy; label: string; centered?: boolean }> = [
   { column: "nom", label: "Raison sociale" },
@@ -117,35 +114,15 @@ export function CfaEtablissementsTable({
               />
             </div>
 
-            {pagination && pagination.total > PAGE_SIZES[0] && (
-              <div className={styles.paginationContainer}>
-                <Pagination
-                  key={page}
-                  count={pagination.totalPages}
-                  defaultPage={page}
-                  getPageLinkProps={(pageNumber) => ({
-                    href: `#cfa-etablissements-page-${pageNumber}`,
-                    onClick: (e) => {
-                      e.preventDefault();
-                      setPage(pageNumber);
-                    },
-                  })}
-                  showFirstLast
-                />
-                <div className={styles.pageSizeSelector}>
-                  <Select
-                    label=""
-                    options={PAGE_SIZES.map((size) => ({ value: size.toString(), label: `Voir par ${size}` }))}
-                    nativeSelectProps={{
-                      value: limit.toString(),
-                      onChange: (e) => {
-                        setLimit(Number(e.target.value));
-                        setPage(1);
-                      },
-                    }}
-                  />
-                </div>
-              </div>
+            {pagination && (
+              <StatsTablePagination
+                page={page}
+                totalPages={pagination.totalPages}
+                onPageChange={setPage}
+                limit={limit}
+                onLimitChange={setLimit}
+                label="établissements de formation"
+              />
             )}
           </>
         )}

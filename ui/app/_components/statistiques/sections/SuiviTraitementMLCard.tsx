@@ -47,7 +47,18 @@ const readTableState = (params: URLSearchParams | null): TraitementMLTableState 
   };
 };
 
-export function SuiviTraitementMLCard() {
+const SEGMENT_CONFIG = {
+  rupture: { totalLabel: "Total ruptures", description: undefined, hideActivite: false, defaultSortColumn: undefined },
+  collab: {
+    totalLabel: "Total collab",
+    hideActivite: true,
+    defaultSortColumn: "total_jeunes",
+    description:
+      "Suivez les statistiques de traitement des dossiers de jeunes issus des collaborations sollicitées par les CFA uniquement. Toutes les Missions Locales du territoire ne reçoivent pas forcément de collaboration en raison du déploiement en cours du service auprès des CFA.",
+  },
+} as const;
+
+export function SuiviTraitementMLCard({ segment = "rupture" }: { segment?: "rupture" | "collab" }) {
   const searchParams = useSearchParams();
   const { period, region, scope, territoireOptions } = useStatsFilters();
   const { filters, setDepartements, setUtiliseService, setEngagee } = useMlTableFilters();
@@ -118,13 +129,16 @@ export function SuiviTraitementMLCard() {
       </div>
       <TraitementMLTable
         period={period}
-        segment="rupture"
+        segment={segment}
+        description={SEGMENT_CONFIG[segment].description}
         region={region}
         search={debouncedSearch}
         initialState={tableState}
         filters={tableFilters}
         onTotalChange={setTotal}
-        totalLabel="Total ruptures"
+        totalLabel={SEGMENT_CONFIG[segment].totalLabel}
+        hideActivite={SEGMENT_CONFIG[segment].hideActivite}
+        defaultSortColumn={SEGMENT_CONFIG[segment].defaultSortColumn}
       />
     </OverviewCard>
   );

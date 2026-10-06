@@ -62,7 +62,3 @@
   font-weight: 700;
   color: var(--text-default-grey);
 }
-
-.card :global(.fr-table) {
-  margin-bottom: 0;
-}
