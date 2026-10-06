@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 
+import { CollabActiviteCfaPanel } from "@/app/_components/statistiques/sections/CollabActiviteCfaPanel";
 import { CollabChiffresClesPanel } from "@/app/_components/statistiques/sections/CollabChiffresClesPanel";
 import { StatsPageHeader } from "@/app/_components/statistiques/ui/StatsPageHeader";
 import { StatsTabs } from "@/app/_components/statistiques/ui/StatsTabs";
@@ -20,6 +21,12 @@ export default function CollaborationsPage() {
             label: "Chiffres clés",
             iconId: "fr-icon-file-text-line",
             content: <CollabChiffresClesPanel />,
+          },
+          {
+            id: "activite-cfa",
+            label: "Activité des CFA",
+            iconId: "fr-icon-bar-chart-box-line",
+            content: <CollabActiviteCfaPanel />,
           },
         ]}
       />

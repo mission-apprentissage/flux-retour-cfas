@@ -1,169 +1,162 @@
 "use client";
 
-import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
-import { Button } from "@codegouvfr/react-dsfr/Button";
-import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
-import { Select } from "@codegouvfr/react-dsfr/SelectNext";
-import { Table } from "@codegouvfr/react-dsfr/Table";
 import { useState } from "react";
+import type { CfaInjoignablesSortBy } from "shared/models/data/nationalStats.model";
 import type { ICfaInvitesSortBy } from "shared/models/routes/admin/cfa-invites-sans-collab.api";
 
-import { TableSkeleton } from "@/app/_components/common/Skeleton";
-
+import { useCfaInjoignablesExport } from "../hooks/useCfaInjoignablesExport";
 import { useCfaInvitesExport } from "../hooks/useCfaInvitesExport";
 import { usePageForParams } from "../hooks/usePageForParams";
 import { useSortableTable } from "../hooks/useSortableTable";
 import { useStatsFilters } from "../hooks/useStatsFilters";
-import { useCfaInvitesSansCollabStats } from "../hooks/useStatsQueries";
+import { useCfaInjoignablesStats, useCfaInvitesSansCollabStats } from "../hooks/useStatsQueries";
 import { Localisation } from "../tables/CfaEtablissementsTable";
 import tableStyles from "../tables/CfaEtablissementsTable.module.css";
 import { SortableTableHeader } from "../tables/SortableTableHeader";
-import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
+import { AlerteCard } from "./AlerteCard";
 import styles from "./CfaAlertesSection.module.css";
 
-const PAGE_SIZES = [10, 20, 50];
+function sortableHeaders<T extends string>(
+  columns: Array<{ column: T; label: string; centered?: boolean }>,
+  sort: { sortColumn: T; sortDirection: "asc" | "desc"; handleSort: (column: T) => void }
+) {
+  return columns.map(({ column, label, centered }) => (
+    <SortableTableHeader
+      key={column}
+      column={column}
+      label={label}
+      currentSortColumn={sort.sortColumn}
+      sortDirection={sort.sortDirection}
+      onSort={sort.handleSort}
+      centered={centered}
+    />
+  ));
+}
 
-const COLUMNS: Array<{ column: ICfaInvitesSortBy; label: string; centered?: boolean }> = [
-  { column: "nom", label: "Raison sociale" },
-  { column: "compte", label: "Compte TBA", centered: true },
-  { column: "localisation", label: "Localisation" },
-  { column: "invitations", label: "Invitations reçues", centered: true },
-];
+function RaisonSociale({ nom, uai, siret }: { nom: string | null; uai: string | null; siret: string }) {
+  return (
+    <div className={tableStyles.nameCell}>
+      <span className={tableStyles.name}>{nom ?? "Raison sociale inconnue"}</span>
+      <span className={tableStyles.meta}>
+        UAI : {uai ?? "—"} · SIRET : {siret}
+      </span>
+    </div>
+  );
+}
 
-export function CfaAlertesSection() {
+function CfaInvitesAlerte() {
   const { region } = useStatsFilters();
-  const [expanded, setExpanded] = useState(false);
   const [limit, setLimit] = useState(10);
-  const { sortColumn, sortDirection, handleSort } = useSortableTable<ICfaInvitesSortBy>("invitations", "desc", {
+  const sort = useSortableTable<ICfaInvitesSortBy>("invitations", "desc", {
     columnDefaultDirections: { nom: "asc", localisation: "asc" },
   });
-  const params = { region, sort_by: sortColumn, sort_order: sortDirection };
+  const params = { region, sort_by: sort.sortColumn, sort_order: sort.sortDirection };
   const [page, setPage] = usePageForParams(params);
+  const query = useCfaInvitesSansCollabStats({ ...params, page, limit });
+  const exporter = useCfaInvitesExport(params);
 
-  const { data, isLoading, isFetching, isPlaceholderData, error } = useCfaInvitesSansCollabStats({
-    ...params,
-    page,
-    limit,
+  return (
+    <AlerteCard
+      id="cfa-invites"
+      title={
+        <>
+          Les CFA ont reçu des invitations des Missions Locales mais n&apos;ont{" "}
+          <span className={styles.highlight}>pas encore fait de collaborations</span>
+        </>
+      }
+      query={query}
+      loadingRows={query.isLoading || (query.isFetching && query.isPlaceholderData)}
+      exporter={exporter}
+      headers={sortableHeaders<ICfaInvitesSortBy>(
+        [
+          { column: "nom", label: "Raison sociale" },
+          { column: "compte", label: "Compte TBA", centered: true },
+          { column: "localisation", label: "Localisation" },
+          { column: "invitations", label: "Invitations reçues", centered: true },
+        ],
+        sort
+      )}
+      rows={(query.data?.data ?? []).map((row) => [
+        <RaisonSociale key="nom" nom={row.raison_sociale} uai={row.uai} siret={row.siret} />,
+        <div key="compte" className={tableStyles.centeredCell}>
+          <Badge as="span" noIcon small severity={row.has_account ? "success" : "error"}>
+            {row.has_account ? "Oui" : "Non"}
+          </Badge>
+        </div>,
+        <Localisation key="loc" adresse={row.adresse} />,
+        <div key="inv" className={tableStyles.centeredCell}>
+          {row.invitations_recues}
+        </div>,
+      ])}
+      page={page}
+      onPageChange={setPage}
+      limit={limit}
+      onLimitChange={setLimit}
+    />
+  );
+}
+
+function CfaInjoignablesAlerte() {
+  const { region } = useStatsFilters();
+  const [limit, setLimit] = useState(10);
+  const sort = useSortableTable<CfaInjoignablesSortBy>("taux", "desc", {
+    columnDefaultDirections: { nom: "asc", localisation: "asc" },
   });
-  const { exportData, isExporting, error: exportError, clearError } = useCfaInvitesExport(params);
-  const rows = data?.data ?? [];
+  const params = { region, sort_by: sort.sortColumn, sort_order: sort.sortDirection };
+  const [page, setPage] = usePageForParams(params);
+  const query = useCfaInjoignablesStats({ ...params, page, limit });
+  const exporter = useCfaInjoignablesExport(params);
 
+  return (
+    <AlerteCard
+      id="cfa-injoignables"
+      title={
+        <>
+          Les CFA qui envoient des dossiers qui se concluent par un{" "}
+          <span className={styles.highlight}>taux élevé de jeunes injoignables</span>
+        </>
+      }
+      query={query}
+      loadingRows={query.isLoading || (query.isFetching && query.isPlaceholderData)}
+      exporter={exporter}
+      headers={sortableHeaders<CfaInjoignablesSortBy>(
+        [
+          { column: "nom", label: "Raison sociale" },
+          { column: "localisation", label: "Localisation" },
+          { column: "taux", label: "Taux injoignables", centered: true },
+        ],
+        sort
+      )}
+      rows={(query.data?.data ?? []).map((row) => [
+        <RaisonSociale key="nom" nom={row.nom} uai={row.uai} siret={row.siret} />,
+        <Localisation key="loc" adresse={row.adresse} />,
+        <div
+          key="taux"
+          className={tableStyles.centeredCell}
+          title={`${row.injoignables} injoignables sur ${row.traites} dossiers traités`}
+        >
+          {row.taux} %
+        </div>,
+      ])}
+      page={page}
+      onPageChange={setPage}
+      limit={limit}
+      onLimitChange={setLimit}
+    />
+  );
+}
+
+export function CfaAlertesSection({ injoignables = false }: { injoignables?: boolean }) {
   return (
     <section className={styles.section}>
       <h3 className={styles.sectionTitle}>
         <span className={`fr-icon-error-warning-line ${styles.sectionIcon}`} aria-hidden="true" />
         Les alertes à surveiller
       </h3>
-      <div className={styles.card}>
-        <div className={styles.header}>
-          <h4 className={styles.alertTitle}>
-            <span className={`fr-icon-information-line ${styles.alertIcon}`} aria-hidden="true" />
-            <span>
-              Les CFA ont reçu des invitations des Missions Locales mais n&apos;ont{" "}
-              <span className={styles.highlight}>pas encore fait de collaborations</span>
-            </span>
-          </h4>
-          <div className={styles.actions}>
-            {data && <span className={styles.count}>{data.total.toLocaleString("fr-FR")} CFA</span>}
-            <Button
-              iconId="fr-icon-download-line"
-              iconPosition="right"
-              priority="secondary"
-              onClick={exportData}
-              disabled={isExporting || !data?.total}
-            >
-              {isExporting ? "Export en cours..." : "Exporter les données"}
-            </Button>
-            <Button
-              iconId={expanded ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line"}
-              iconPosition="right"
-              priority="secondary"
-              onClick={() => setExpanded((value) => !value)}
-              disabled={!data?.total}
-              nativeButtonProps={{ "aria-expanded": expanded }}
-            >
-              {expanded ? "Masquer" : "Voir"}
-            </Button>
-          </div>
-        </div>
-        {exportError && (
-          <Alert severity="error" title="Erreur" description={exportError} closable onClose={clearError} small />
-        )}
-        {expanded && (
-          <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
-            {isLoading || (isFetching && isPlaceholderData) ? (
-              <TableSkeleton rows={Math.min(limit, rows.length || limit)} />
-            ) : (
-              <div className={tableStyles.tableContainer}>
-                <div className={tableStyles.table}>
-                  <Table
-                    headers={COLUMNS.map(({ column, label, centered }) => (
-                      <SortableTableHeader
-                        key={column}
-                        column={column}
-                        label={label}
-                        currentSortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                        centered={centered}
-                      />
-                    ))}
-                    data={rows.map((row) => [
-                      <div key={`nom-${row.organisme_id}`} className={tableStyles.nameCell}>
-                        <span className={tableStyles.name}>{row.raison_sociale ?? "Raison sociale inconnue"}</span>
-                        <span className={tableStyles.meta}>
-                          UAI : {row.uai ?? "—"} · SIRET : {row.siret}
-                        </span>
-                      </div>,
-                      <div key={`compte-${row.organisme_id}`} className={tableStyles.centeredCell}>
-                        <Badge as="span" noIcon small severity={row.has_account ? "success" : "error"}>
-                          {row.has_account ? "Oui" : "Non"}
-                        </Badge>
-                      </div>,
-                      <Localisation key={`loc-${row.organisme_id}`} adresse={row.adresse} />,
-                      <div key={`inv-${row.organisme_id}`} className={tableStyles.centeredCell}>
-                        {row.invitations_recues}
-                      </div>,
-                    ])}
-                  />
-                </div>
-                {data && data.total > PAGE_SIZES[0] && (
-                  <div className={tableStyles.paginationContainer}>
-                    <Pagination
-                      key={page}
-                      count={data.pagination.total_pages}
-                      defaultPage={page}
-                      getPageLinkProps={(pageNumber) => ({
-                        href: `#cfa-alertes-page-${pageNumber}`,
-                        onClick: (e) => {
-                          e.preventDefault();
-                          setPage(pageNumber);
-                        },
-                      })}
-                      showFirstLast
-                    />
-                    <div className={tableStyles.pageSizeSelector}>
-                      <Select
-                        label=""
-                        options={PAGE_SIZES.map((size) => ({ value: size.toString(), label: `Voir par ${size}` }))}
-                        nativeSelectProps={{
-                          value: limit.toString(),
-                          onChange: (e) => {
-                            setLimit(Number(e.target.value));
-                            setPage(1);
-                          },
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </StatsErrorHandler>
-        )}
-      </div>
+      <CfaInvitesAlerte />
+      {injoignables && <CfaInjoignablesAlerte />}
     </section>
   );
 }

@@ -5,6 +5,7 @@ import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import {
   zCfaEtablissementsSortBy,
+  zCfaInjoignablesSortBy,
   zStatsPeriod,
   zStatsSegment,
   zTraitementMlSortBy,
@@ -22,6 +23,7 @@ import {
   getMissionLocaleDetail,
   getMissionLocaleMembers,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
+import { getCfaNpsStats, listCfaInjoignables } from "@/common/actions/cfa/cfa-collaboration-stats.actions";
 import { getCfaAdoptionStats, listCfaEtablissements } from "@/common/actions/cfa/cfa-stats.actions";
 import {
   getRupturantsStats,
@@ -112,6 +114,15 @@ const cfaEtablissementsQuery = cfaEtablissementsExportQuery.extend({
 });
 const cfaInvitesQuery = zCfaInvitesSansCollabQuery.extend({ region: z.string().optional() });
 const cfaInvitesExportQuery = cfaInvitesQuery.omit({ page: true, limit: true });
+const cfaInjoignablesExportQuery = z.object({
+  region: z.string().optional(),
+  sort_by: zCfaInjoignablesSortBy.default("taux"),
+  sort_order: z.enum(["asc", "desc"]).default("desc"),
+});
+const cfaInjoignablesQuery = cfaInjoignablesExportQuery.extend({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+});
 const couvertureDepartementsQuery = z.object({ period: zStatsPeriod.optional(), region: z.string() });
 const nationalQuery = z.object({ period: zStatsPeriod.optional(), national: zBooleanStringSchema.optional() });
 const traitementRegionsQuery = nationalQuery.extend({ segment: zStatsSegment.default("all") });
@@ -202,6 +213,17 @@ export default () => {
     "/stats/cfa/invites-sans-collab/export",
     validateRequestMiddleware({ query: cfaInvitesExportQuery }),
     returnResult(getCfaInvitesExportRoute)
+  );
+  router.get("/stats/cfa/nps", validateRequestMiddleware({ query: syntheseQuery }), returnResult(getCfaNpsRoute));
+  router.get(
+    "/stats/cfa/injoignables",
+    validateRequestMiddleware({ query: cfaInjoignablesQuery }),
+    returnResult(getCfaInjoignablesRoute)
+  );
+  router.get(
+    "/stats/cfa/injoignables/export",
+    validateRequestMiddleware({ query: cfaInjoignablesExportQuery }),
+    returnResult(getCfaInjoignablesExportRoute)
   );
   router.get(
     "/stats/couverture-departements",
@@ -429,6 +451,33 @@ const getCfaInvitesExportRoute: IndicateursHandler<z.infer<typeof cfaInvitesExpo
   req,
   { locals }
 ) => ({ data: await listCfaInvitesSansCollab(req.query, cfaInvitesOptions(req.query.region, locals.regions)) });
+
+const getCfaNpsRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = async (req, { locals }) => {
+  const scope = await resolveStatsScope(req.query, locals.regions);
+
+  return await getCfaNpsStats({ regions: scope.regions });
+};
+
+const findCfaInjoignables = (query: z.infer<typeof cfaInjoignablesExportQuery>, userRegions: string[]) => {
+  assertRegionAllowed(query.region, userRegions);
+  return listCfaInjoignables({ regions: scopedRegions(query.region, userRegions) }, query);
+};
+
+const getCfaInjoignablesRoute: IndicateursHandler<z.infer<typeof cfaInjoignablesQuery>> = async (req, { locals }) => {
+  const { page, limit } = req.query;
+  const rows = await findCfaInjoignables(req.query, locals.regions);
+
+  return {
+    total: rows.length,
+    pagination: { page, limit, total_pages: Math.ceil(rows.length / limit) },
+    data: rows.slice((page - 1) * limit, page * limit),
+  };
+};
+
+const getCfaInjoignablesExportRoute: IndicateursHandler<z.infer<typeof cfaInjoignablesExportQuery>> = async (
+  req,
+  { locals }
+) => ({ data: await findCfaInjoignables(req.query, locals.regions) });
 
 const getCouvertureDepartementsRoute: IndicateursHandler<z.infer<typeof couvertureDepartementsQuery>> = async (
   req,

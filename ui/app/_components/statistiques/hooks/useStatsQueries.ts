@@ -2,6 +2,9 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { useCallback } from "react";
 import type {
   CfaEtablissementsSortBy,
+  CfaInjoignablesSortBy,
+  ICfaInjoignablesRow,
+  ICfaNpsStats,
   ICfaEtablissementsResponse,
   ICollaborationMensuelStats,
   ICollaborationSegmentStats,
@@ -250,6 +253,32 @@ export function useCfaInvitesSansCollabStats(params: CfaInvitesParams & { page: 
   return useQuery<ICfaInvitesSansCollabResponse>({
     queryKey: ["stats", "cfa-invites-sans-collab", params] as const,
     queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/stats/cfa/invites-sans-collab`, { params, signal }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+export interface CfaInjoignablesParams {
+  region?: string;
+  sort_by: CfaInjoignablesSortBy;
+  sort_order: "asc" | "desc";
+}
+
+export function useCfaInjoignablesStats(params: CfaInjoignablesParams & { page: number; limit: number }) {
+  return useQuery<{
+    total: number;
+    pagination: { page: number; limit: number; total_pages: number };
+    data: ICfaInjoignablesRow[];
+  }>({
+    queryKey: ["stats", "cfa-injoignables", params] as const,
+    queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/stats/cfa/injoignables`, { params, signal }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+export function useCfaNpsStats(scope: { region?: string; national?: boolean }) {
+  return useQuery<ICfaNpsStats>({
+    queryKey: ["stats", "cfa-nps", scope.region ?? "national"] as const,
+    queryFn: () => _get(`${INDICATEURS_ML_BASE}/stats/cfa/nps`, { params: scope }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }

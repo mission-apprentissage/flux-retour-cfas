@@ -267,6 +267,18 @@ export const cfaInvitesSansCollabExportColumns = [
   { label: "Dernière invitation", key: "derniere_invitation_at", xlsxType: "date", width: 18 },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
+export const cfaInjoignablesExportColumns = [
+  { label: "Raison sociale", key: "nom", width: 45 },
+  { label: "UAI", key: "uai", xlsxType: "string", width: 12 },
+  { label: "SIRET", key: "siret", xlsxType: "string", width: 16 },
+  { label: "Code postal", key: "code_postal", xlsxType: "string", width: 12 },
+  { label: "Commune", key: "commune", width: 25 },
+  { label: "Adresse", key: "adresse", width: 50 },
+  { label: "Dossiers traités par la ML", key: "traites", width: 22 },
+  { label: "Jeunes injoignables", key: "injoignables", width: 18 },
+  { label: "Taux injoignables (%)", key: "taux", width: 18 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
 export const traitementRegionExportColumns = [
   { label: "Région", key: "region_nom", width: 30 },
   { label: "Total jeunes", key: "total_jeunes", width: 12 },

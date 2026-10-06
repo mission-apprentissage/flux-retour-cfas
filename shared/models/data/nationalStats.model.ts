@@ -427,3 +427,25 @@ export interface ICollaborationMensuelStats {
   mois: ICollaborationMois[];
   period: StatsPeriod;
 }
+
+export interface ICfaNpsStats {
+  nps: number | null;
+  total_reponses: number;
+  utilisateurs: number;
+  cfa: number;
+}
+
+export const CFA_INJOIGNABLES_SORT_FIELDS = ["nom", "localisation", "taux"] as const;
+export const zCfaInjoignablesSortBy = z.enum(CFA_INJOIGNABLES_SORT_FIELDS);
+export type CfaInjoignablesSortBy = z.output<typeof zCfaInjoignablesSortBy>;
+
+export interface ICfaInjoignablesRow {
+  organisme_id: string;
+  nom: string | null;
+  uai: string | null;
+  siret: string;
+  adresse: { code_postal?: string | null; commune?: string | null; complete?: string | null } | null;
+  traites: number;
+  injoignables: number;
+  taux: number;
+}

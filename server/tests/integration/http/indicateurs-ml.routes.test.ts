@@ -996,6 +996,109 @@ describe("Indicateurs ML routes (territoriales)", () => {
     });
   });
 
+  describe("Activité des CFA : NPS et injoignables", () => {
+    const CFA_C = new ObjectId();
+    const CFA_D = new ObjectId();
+    const UTILISATEUR_1 = new ObjectId();
+    const UTILISATEUR_2 = new ObjectId();
+
+    const dossier = (organismeId: ObjectId, extra: { situation?: string; note?: number; auteur?: ObjectId } = {}) => {
+      const base = buildCollabDossier(ML_IDF, organismeId, []);
+      return {
+        ...base,
+        situation: extra.situation ?? null,
+        organisme_data: {
+          ...base.organisme_data,
+          acc_conjoint_by: extra.auteur,
+          ...(extra.note !== undefined ? { form_feedback: { note: extra.note, responded_at: new Date() } } : {}),
+        },
+      };
+    };
+
+    beforeEach(async () => {
+      const organisme = (id: ObjectId, region: string, nom: string) => ({
+        _id: id,
+        siret: id.toString().slice(0, 14),
+        nom,
+        enseigne: nom,
+        adresse: { region, commune: nom },
+        est_dans_le_referentiel: "present",
+      });
+      await organismesDb().insertMany(
+        [
+          organisme(CFA_A, "11", "CFA A"),
+          organisme(CFA_B, "84", "CFA B"),
+          organisme(CFA_C, "11", "CFA C"),
+          organisme(CFA_D, "11", "CFA D"),
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+    });
+
+    it("Calcule le NPS adapté (5 promoteur, 4 neutre, 0 à 3 détracteur) sur les CFA du territoire", async () => {
+      await missionLocaleEffectifsDb().insertMany(
+        [
+          dossier(CFA_A, { note: 5, auteur: UTILISATEUR_1 }),
+          dossier(CFA_A, { note: 5, auteur: UTILISATEUR_1 }),
+          dossier(CFA_A, { note: 4, auteur: UTILISATEUR_2 }),
+          dossier(CFA_A, { note: 2, auteur: UTILISATEUR_2 }),
+          dossier(CFA_B, { note: 5, auteur: new ObjectId() }),
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+
+      const region = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/cfa/nps"
+      );
+      expect(region.data).toEqual({ nps: 25, total_reponses: 4, utilisateurs: 2, cfa: 1 });
+
+      const national = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/cfa/nps?national=true"
+      );
+      expect(national.data).toEqual({ nps: 40, total_reponses: 5, utilisateurs: 3, cfa: 2 });
+    });
+
+    it("Signale les CFA à plus de 25 % d'injoignables, à partir de 4 dossiers traités", async () => {
+      const BASE = "/api/v1/organisation/indicateurs-ml/stats/cfa/injoignables";
+      await missionLocaleEffectifsDb().insertMany(
+        [
+          dossier(CFA_A, { situation: "INJOIGNABLE_APRES_RELANCES" }),
+          dossier(CFA_A, { situation: "COORDONNEES_INCORRECT" }),
+          dossier(CFA_A, { situation: "RDV_PRIS" }),
+          dossier(CFA_A, { situation: "RDV_PRIS" }),
+          ...["INJOIGNABLE_APRES_RELANCES", "RDV_PRIS", "AUTRE", "RDV_PRIS"].map((situation) =>
+            dossier(CFA_C, { situation })
+          ),
+          ...[1, 2, 3].map(() => dossier(CFA_D, { situation: "INJOIGNABLE_APRES_RELANCES" })),
+          dossier(CFA_B, { situation: "INJOIGNABLE_APRES_RELANCES" }),
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+
+      const response = await requestAsOrganisation(DREETS_IDF, "get", BASE);
+      expect(response.status).toBe(200);
+      expect(response.data.total).toBe(1);
+      expect(response.data.data[0]).toMatchObject({
+        organisme_id: CFA_A.toString(),
+        traites: 4,
+        injoignables: 2,
+        taux: 50,
+      });
+
+      const exportResponse = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}/export`);
+      expect(exportResponse.data.data).toHaveLength(1);
+
+      expectForbidden(
+        await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`),
+        "Accès non autorisé à cette région"
+      );
+    });
+  });
+
   describe("GET /stats/collaborations", () => {
     it("Renvoie le bloc collaboration national pour un admin", async () => {
       const response = await requestAsOrganisation(
