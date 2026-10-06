@@ -1618,7 +1618,7 @@
     "/v2/affelnet/suivi": {
       "get": {
         "summary": "Suivi des inscriptions/contrats d'apprentissage (croisement Affelnet)",
-        "description": "Retourne les jeunes de moins de 18 ans inscrits en apprentissage (niveaux 3/4/5) sur la fenêtre de dates et les départements demandés. Dédoublonné (DECA prioritaire sur ERP), paginé par 1000. Une page au-delà de totalPages renvoie 200 avec une liste vide.",
+        "description": "Retourne les jeunes de moins de 18 ans inscrits en apprentissage (niveaux 3/4/5) sur la fenêtre de dates et les départements demandés. Les jeunes dont le contrat le plus récent est rompu (date de rupture passée) ne sont pas renvoyés. Dédoublonné (DECA prioritaire sur ERP), paginé par 1000. Une page au-delà de totalPages renvoie 200 avec une liste vide.",
         "security": [
           {
             "sipaBearerAuth": []
