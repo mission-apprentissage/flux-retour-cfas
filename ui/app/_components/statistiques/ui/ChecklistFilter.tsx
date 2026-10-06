@@ -15,6 +15,7 @@ interface ChecklistFilterProps {
   searchable?: boolean;
   searchPlaceholder?: string;
   getDisplayText?: (selected: string[]) => string;
+  enableSelectAll?: boolean;
 }
 
 /** Liste à cases appliquée au clic sur « Valider » ; fermer sans valider abandonne le brouillon. */
@@ -26,6 +27,7 @@ export function ChecklistFilter({
   searchable,
   searchPlaceholder,
   getDisplayText,
+  enableSelectAll,
 }: ChecklistFilterProps) {
   const [draft, setDraft] = useState(value);
   const valueKey = value.join(",");
@@ -44,8 +46,10 @@ export function ChecklistFilter({
         getDisplayText={getDisplayText ? () => getDisplayText(value) : undefined}
         fitContent
         searchable={searchable}
+        enableSelectAll={enableSelectAll}
         searchPlaceholder={searchPlaceholder}
         onClose={() => setDraft(value)}
+        footerClassName={styles.footer}
         renderFooter={({ close }) => (
           <Button
             priority="primary"
