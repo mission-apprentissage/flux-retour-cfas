@@ -3,14 +3,12 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import { RQTH_DECLARE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { IUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";
+import { AGE_MAX_MISSION_LOCALE, AGE_MIN_MISSION_LOCALE, isAgeEligibleMissionLocale } from "shared/utils";
 
 import logger from "@/common/logger";
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
 
-import {
-  ensureMissionLocaleEffectifRecord,
-  resolveCfaEffectifSource,
-} from "../mission-locale/mission-locale-record.actions";
+import { ensureMissionLocaleEffectifRecord, resolveCfaEffectif } from "../mission-locale/mission-locale-record.actions";
 import { createOrUpdateMissionLocaleStats } from "../mission-locale/mission-locale-stats.actions";
 
 import { ensureCollabOnAfterCollaboration } from "./organismes.admin.actions";
@@ -74,6 +72,19 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
     throw Boom.conflict("Un dossier de collaboration a déjà été envoyé pour cet effectif");
   }
 
+  const cfaEffectif = existing ? null : await resolveCfaEffectif(organismeId, effectifObjectId);
+
+  if (data.acc_conjoint) {
+    const dateDeNaissance = existing
+      ? existing.effectif_snapshot?.apprenant?.date_de_naissance
+      : cfaEffectif?.dateDeNaissance;
+    if (!isAgeEligibleMissionLocale(dateDeNaissance)) {
+      throw Boom.badRequest(
+        `La collaboration avec la Mission Locale est réservée aux jeunes de ${AGE_MIN_MISSION_LOCALE} à ${AGE_MAX_MISSION_LOCALE - 1} ans`
+      );
+    }
+  }
+
   if (data.acc_conjoint === true && !existing?.organisme_data?.acc_conjoint_at) {
     setFields["organisme_data.acc_conjoint_at"] = new Date();
   }
@@ -92,13 +103,11 @@ export const setEffectifMissionLocaleDataFromOrganisme = async (
         }
       : {};
 
-  if (!existing) {
-    const source = await resolveCfaEffectifSource(organismeId, effectifObjectId);
-
+  if (cfaEffectif) {
     const { recordId } = await ensureMissionLocaleEffectifRecord(
       organismeId,
       effectifId.toString(),
-      source,
+      cfaEffectif.source,
       ruptureDeclaration,
       {
         dateRupture,

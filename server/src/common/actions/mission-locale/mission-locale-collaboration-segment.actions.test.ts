@@ -51,7 +51,12 @@ const insertStats = async (
 const insertCollab = async (
   missionLocaleId: ObjectId,
   organismeId: ObjectId,
-  { accConjointAt = daysAgo(5), motif = [] as string[], softDeleted = false } = {}
+  {
+    accConjointAt = daysAgo(5),
+    motif = [] as string[],
+    softDeleted = false,
+    dateDeNaissance = new Date(new Date().getFullYear() - 20, 0, 1),
+  } = {}
 ) => {
   await missionLocaleEffectifsDb().insertOne(
     {
@@ -59,7 +64,7 @@ const insertCollab = async (
       mission_locale_id: missionLocaleId,
       effectif_id: new ObjectId(),
       created_at: daysAgo(40),
-      effectif_snapshot: { organisme_id: organismeId },
+      effectif_snapshot: { organisme_id: organismeId, apprenant: { date_de_naissance: dateDeNaissance } },
       organisme_data: { acc_conjoint: true, acc_conjoint_at: accConjointAt, has_unread_notification: false, motif },
       ...(softDeleted ? { soft_deleted: true } : {}),
     } as unknown as IMissionLocaleEffectif,
@@ -136,7 +141,11 @@ describe("getCollaborationSegmentStats", () => {
     expect(stats.resultats.total).toBe(12);
   });
 
-  it("compte les CFA distincts dans la région de la ML destinataire, à la date d'envoi, hors soft-deleted", async () => {
+  it("compte les CFA distincts dans la région de la ML destinataire, à la date d'envoi, hors soft-deleted et hors 26 ans et plus", async () => {
+    await insertCollab(ML_ARA, CFA_A, {
+      motif: ["MOBILITE"],
+      dateDeNaissance: new Date(new Date().getFullYear() - 27, 0, 1),
+    });
     await insertCollab(ML_IDF, CFA_A, { motif: ["MOBILITE", "SANTE"] });
     await insertCollab(ML_IDF, CFA_A, { motif: ["MOBILITE"] });
     await insertCollab(ML_IDF, CFA_B, { accConjointAt: daysAgo(45) });

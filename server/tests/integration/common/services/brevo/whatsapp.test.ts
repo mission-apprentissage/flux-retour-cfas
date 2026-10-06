@@ -310,6 +310,7 @@ describe("WhatsApp Service", () => {
           nom: "Dupont",
           prenom: "Jean",
           telephone: "0612345678",
+          date_de_naissance: new Date(new Date().getFullYear() - 20, 0, 1),
         },
         formation: {},
         is_lock: false,
@@ -363,6 +364,21 @@ describe("WhatsApp Service", () => {
 
     it("retourne false sans date de rupture (dossier de prévention ou rentrée sans contrat)", () => {
       const effectif = { ...baseEffectif, date_rupture: null } as IMissionLocaleEffectif;
+      assert.strictEqual(isEligibleForWhatsApp(effectif), false);
+    });
+
+    it("retourne false pour un jeune de 26 ans ou plus, même RQTH", () => {
+      const effectif = {
+        ...baseEffectif,
+        effectif_snapshot: {
+          ...baseEffectif.effectif_snapshot,
+          apprenant: {
+            ...baseEffectif.effectif_snapshot?.apprenant,
+            date_de_naissance: new Date(new Date().getFullYear() - 27, 0, 1),
+            rqth: true,
+          },
+        },
+      } as IMissionLocaleEffectif;
       assert.strictEqual(isEligibleForWhatsApp(effectif), false);
     });
   });
@@ -1178,7 +1194,12 @@ describe("WhatsApp Service", () => {
         id_erp_apprenant: "123",
         source: "test",
         annee_scolaire: "2024-2025",
-        apprenant: { nom: "Dupont", prenom: "Jean", telephone: "0612345678" },
+        apprenant: {
+          nom: "Dupont",
+          prenom: "Jean",
+          telephone: "0612345678",
+          date_de_naissance: new Date(new Date().getFullYear() - 20, 0, 1),
+        },
         formation: {},
         is_lock: false,
         created_at: new Date(),
@@ -1285,6 +1306,21 @@ describe("WhatsApp Service", () => {
       const recent = new Date(Date.now() - 179 * 24 * 60 * 60 * 1000);
       const effectif = { ...baseEffectif, date_rupture: recent } as IMissionLocaleEffectif;
       assert.strictEqual(isEligibleForPrequalif(effectif), true);
+    });
+
+    it("retourne false pour un jeune de 26 ans ou plus, même RQTH", () => {
+      const effectif = {
+        ...baseEffectif,
+        effectif_snapshot: {
+          ...baseEffectif.effectif_snapshot,
+          apprenant: {
+            ...baseEffectif.effectif_snapshot?.apprenant,
+            date_de_naissance: new Date(new Date().getFullYear() - 27, 0, 1),
+            rqth: true,
+          },
+        },
+      } as IMissionLocaleEffectif;
+      assert.strictEqual(isEligibleForPrequalif(effectif), false);
     });
   });
 

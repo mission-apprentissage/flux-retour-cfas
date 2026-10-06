@@ -22,29 +22,27 @@ import { getCurrentStatutFromParcours } from "../shared/rupture-pipeline.utils";
 import { isDecaSnapshot, migrateMlRecordEffectifId } from "./mission-locale.actions";
 
 /**
- * Détermine la collection source d'un effectif CFA. L'ERP est interrogé en premier (priorité
- * ERP > DECA) et DECA n'est consulté que si l'organisme y a accès.
+ * Détermine la collection source d'un effectif CFA et sa date de naissance. L'ERP est interrogé
+ * en premier (priorité ERP > DECA) et DECA n'est consulté que si l'organisme y a accès.
  */
-export async function resolveCfaEffectifSource(
+export async function resolveCfaEffectif(
   organismeId: ObjectId,
   effectifId: ObjectId
-): Promise<CfaEffectifSource> {
-  const erpEffectif = await effectifsDb().findOne(
-    { _id: effectifId, organisme_id: organismeId },
-    { projection: { _id: 1 } }
-  );
+): Promise<{ source: CfaEffectifSource; dateDeNaissance: Date | null | undefined }> {
+  const projection = { _id: 1, "apprenant.date_de_naissance": 1 };
+  const erpEffectif = await effectifsDb().findOne({ _id: effectifId, organisme_id: organismeId }, { projection });
   if (erpEffectif) {
-    return "effectifs";
+    return { source: "effectifs", dateDeNaissance: erpEffectif.apprenant?.date_de_naissance };
   }
 
   const organisme = await organismesDb().findOne({ _id: organismeId }, { projection: { is_allowed_deca: 1 } });
   if (organisme?.is_allowed_deca) {
     const decaEffectif = await effectifsDECADb().findOne(
       { _id: effectifId, organisme_id: organismeId },
-      { projection: { _id: 1 } }
+      { projection }
     );
     if (decaEffectif) {
-      return "effectifsDECA";
+      return { source: "effectifsDECA", dateDeNaissance: decaEffectif.apprenant?.date_de_naissance };
     }
   }
 

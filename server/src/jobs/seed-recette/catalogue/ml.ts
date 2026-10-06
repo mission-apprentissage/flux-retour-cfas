@@ -88,7 +88,7 @@ export const ML_CASES: SeedCase[] = [
   {
     n: 4,
     code: "A04 RQTH",
-    titre: "Jeune de 28 ans avec RQTH → visible et prioritaire",
+    titre: "Jeune avec RQTH → visible et prioritaire",
     attendu: {
       ml: {
         ml: "ML_A",
@@ -97,7 +97,7 @@ export const ML_CASES: SeedCase[] = [
         indicateurs: { a_traiter: true, prioritaire: true },
       },
     },
-    build: async (ctx) => (await rupture(ctx, { n: 4, cfa: "CFA_SANS", age: 28, rqth: true })).docs,
+    build: async (ctx) => (await rupture(ctx, { n: 4, cfa: "CFA_SANS", age: 24, rqth: true })).docs,
   },
 
   {

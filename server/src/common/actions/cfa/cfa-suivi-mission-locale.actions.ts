@@ -7,7 +7,7 @@ import {
   ICfaEffectif,
   ICfaSuiviMissionLocaleResponse,
 } from "shared/models/routes/organismes/cfa";
-import { getAnneesScolaireListFromDate } from "shared/utils";
+import { getAnneesScolaireListFromDate, getBornesNaissanceMissionLocale } from "shared/utils";
 
 import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.actions";
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
@@ -138,8 +138,7 @@ async function buildSuiviBasePipeline(
   const autresOrganismeIds = (await getFamilyOrganismeIds(organismeId)).filter((id) => !id.equals(organismeId));
 
   const now = new Date();
-  const plus25Cutoff = new Date(new Date(now).setFullYear(now.getFullYear() - 25));
-  const moins16Cutoff = new Date(new Date(now).setFullYear(now.getFullYear() - 16));
+  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale(now);
 
   const stages: Record<string, unknown>[] = [{ $match: { "effectif_snapshot.organisme_id": organismeId } }];
 
@@ -176,13 +175,8 @@ async function buildSuiviBasePipeline(
         is_hors_collab_contacted: {
           $and: [{ $ne: ["$organisme_data.acc_conjoint", true] }, buildContactedByMlExpr()],
         },
-        is_plus_25: {
-          $and: [
-            { $lt: ["$effectif_snapshot.apprenant.date_de_naissance", plus25Cutoff] },
-            { $ne: [{ $ifNull: ["$effectif_snapshot.apprenant.rqth", false] }, true] },
-          ],
-        },
-        is_moins_16: { $gt: ["$effectif_snapshot.apprenant.date_de_naissance", moins16Cutoff] },
+        is_plus_25: { $lt: ["$effectif_snapshot.apprenant.date_de_naissance", nesApres] },
+        is_moins_16: { $gt: ["$effectif_snapshot.apprenant.date_de_naissance", nesAvant] },
       },
     },
     ...addSituationDossierField(),
