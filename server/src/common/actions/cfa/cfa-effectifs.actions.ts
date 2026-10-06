@@ -3,7 +3,12 @@ import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisationOrganismeFormation, IOrganisme } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import { CfaEffectifSource, ICfaEffectif, ICfaEffectifsResponse } from "shared/models/routes/organismes/cfa";
+import {
+  CFA_COLLAB_STATUS,
+  CfaEffectifSource,
+  ICfaEffectif,
+  ICfaEffectifsResponse,
+} from "shared/models/routes/organismes/cfa";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { ensureMissionLocaleEffectifRecord } from "@/common/actions/mission-locale/mission-locale-record.actions";
@@ -384,6 +389,7 @@ async function formatRawEffectif(
     organisme,
     date_rupture: null,
     organisme_data: null,
+    collab_status: CFA_COLLAB_STATUS.DEMARRER_COLLAB,
     mission_locale_organisation: missionLocaleOrganisation,
     mission_locale_logs: [],
   };
@@ -513,6 +519,7 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
         organisme_data: "$organisme_data",
         cfa_rupture_declaration: "$cfa_rupture_declaration",
         acc_conjoint_by_user: { $arrayElemAt: ["$acc_conjoint_by_user_arr", 0] },
+        collab_status: buildCollabStatusSwitch(),
         date_rupture: "$date_rupture",
         mission_locale_organisation: "$mission_locale_organisation",
         mission_locale_logs: "$ml_logs",

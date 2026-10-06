@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { IEffectifMissionLocale } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { CFA_COLLAB_STATUS } from "@/common/types/cfaRuptures";
 
 import { getSituationLogs } from "../../shared/collaboration/collaboration.utils";
 import { CommentBubbles } from "../../shared/collaboration/CommentBubbles";
@@ -15,6 +16,7 @@ import { NouveauContratBanner } from "../../shared/collaboration/NouveauContratB
 import { withSharedStyles } from "../../shared/collaboration/withSharedStyles";
 
 import localStyles from "./CfaCollaborationDetail.module.css";
+import { CfaContactHorsCollabView } from "./CfaContactHorsCollabView";
 import { CollaborationSentView } from "./CollaborationSentView";
 import { MlInactiveBanner } from "./MlInactiveBanner";
 import { MlOrg } from "./types";
@@ -49,9 +51,8 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
   const router = useRouter();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
   const ml = effectif.mission_locale_organisation;
-  const collabAlreadyStarted = effectif.organisme_data?.acc_conjoint === true;
-  const traitéParMl = !!effectif.situation?.situation;
-  const dossierTraité = collabAlreadyStarted || traitéParMl;
+  const dossierTraité = !!effectif.collab_status && effectif.collab_status !== CFA_COLLAB_STATUS.DEMARRER_COLLAB;
+  const contacteHorsCollab = effectif.collab_status === CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB;
   const situationLogs = dossierTraité ? getSituationLogs(effectif) : [];
 
   const lastLogWithEmail = [...(effectif.mission_locale_logs || [])]
@@ -91,7 +92,11 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
         </>
       ) : (
         <>
-          <CollaborationSentView effectif={effectif} hasMLResponse={situationLogs.length > 0} />
+          {contacteHorsCollab ? (
+            <CfaContactHorsCollabView avecCoordonnees={!!mlContactUser?.email} />
+          ) : (
+            <CollaborationSentView effectif={effectif} hasMLResponse={situationLogs.length > 0} />
+          )}
           {ml && !ml.activated_at && <MlInactiveBanner ml={ml} />}
           <NouveauContratBanner effectif={effectif} />
           {situationLogs.map((log) => (

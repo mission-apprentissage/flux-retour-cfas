@@ -13,7 +13,11 @@ import { MultiSelectDropdown } from "@/app/_components/common/MultiSelectDropdow
 import type { CfaCollaborationStatus, ICfaSuiviMissionLocaleResponse } from "@/common/types/cfaRuptures";
 import { ACTIVE_COLLAB_STATUS_LABELS, CFA_COLLAB_STATUS } from "@/common/types/cfaRuptures";
 
-import { CfaCollaborationBadge } from "./CfaCollaborationBadge";
+import {
+  CfaCollaborationBadge,
+  HORS_COLLAB_TEXTE_COORDONNEES,
+  HORS_COLLAB_TEXTE_IDENTIFICATION,
+} from "./CfaCollaborationBadge";
 import { CfaCollaborationsTable } from "./CfaCollaborationsTable";
 import filterStyles from "./CfaFilters.module.css";
 import cardStyles from "./CfaRuptureSegment.module.css";
@@ -63,9 +67,7 @@ function HorsCollabNotice() {
       {isExpanded && (
         <div className={styles.horsCollabNoticeContent}>
           <p className="fr-mb-1v">
-            À partir de 45 jours après le rupture de contrat d’apprentissage, si le jeune est toujours en rupture son
-            dossier est envoyé automatiquement à sa Mission Locale de rattachement. Le jeune peut donc avoir été
-            contacté par une Mission Locale en dehors du cadre de la collaboration.
+            {HORS_COLLAB_TEXTE_IDENTIFICATION} {HORS_COLLAB_TEXTE_COORDONNEES}
           </p>
           <p className={`fr-mb-0 ${styles.horsCollabNoticeTags}`}>
             Ces jeunes sont identifiés par les étiquettes :

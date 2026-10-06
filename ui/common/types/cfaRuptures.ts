@@ -17,7 +17,7 @@ export { CFA_COLLAB_STATUS, CFA_SUIVI_CATEGORY };
 export const COLLAB_STATUS_LABELS: Record<CfaCollaborationStatus, string> = {
   [CFA_COLLAB_STATUS.DEMARRER_COLLAB]: "Démarrer une collab",
   [CFA_COLLAB_STATUS.COLLAB_DEMANDEE]: "Demande collab envoyée",
-  [CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB]: "Contacté par la ML",
+  [CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB]: "Contacté•e par la ML",
   [CFA_COLLAB_STATUS.TRAITE_PAR_ML]: "Traité par la ML",
 };
 
@@ -25,7 +25,7 @@ export const COLLAB_STATUS_LABELS: Record<CfaCollaborationStatus, string> = {
 export const COLLAB_STATUS_FILTER_LABELS: Record<CfaCollaborationStatus, string> = {
   [CFA_COLLAB_STATUS.DEMARRER_COLLAB]: "Pas encore de collaboration",
   [CFA_COLLAB_STATUS.COLLAB_DEMANDEE]: "Collaboration demandée en attente",
-  [CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB]: "Contacté par la Mission Locale hors collaboration",
+  [CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB]: "Contacté•e par la Mission Locale hors collaboration",
   [CFA_COLLAB_STATUS.TRAITE_PAR_ML]: "Collaboration traitée par la Mission Locale",
 };
 
@@ -39,7 +39,7 @@ export const COLLAB_STATUS_FILTER_OPTIONS: CfaCollaborationStatus[] = [
 
 export const ACTIVE_COLLAB_STATUS_LABELS: Partial<Record<CfaCollaborationStatus, string>> = {
   [CFA_COLLAB_STATUS.COLLAB_DEMANDEE]: "Demande collab envoyée",
-  [CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB]: "Contacté par la ML hors collaboration",
+  [CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB]: "Contacté•e par la ML hors collaboration",
   [CFA_COLLAB_STATUS.TRAITE_PAR_ML]: "Traité par la ML",
 };
 

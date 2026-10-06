@@ -1,9 +1,5 @@
 import { ML_SITUATION_DOSSIER, STATUT_APPRENANT } from "shared/constants";
-import {
-  CFA_RISQUE_RUPTURE_ENUM,
-  CFA_SITUATION_TYPE_ENUM,
-  SITUATION_ENUM,
-} from "shared/models/data/missionLocaleEffectif.model";
+import { CFA_RISQUE_RUPTURE_ENUM, CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { USER_RESPONSE_TYPE } from "shared/models/data/whatsappContact.model";
 import { CFA_COLLAB_STATUS } from "shared/models/routes/organismes/cfa";
 import { getAnneeScolaireListFromDateRange } from "shared/utils";
@@ -33,9 +29,7 @@ export const buildVisibilityWindowMatch = (now: Date = new Date()) => ({
 /**
  * Dossier « en rupture » : rupture déclarée par le CFA, ou statut courant hors sortie de rupture.
  * `keepQualifiedByMl` conserve en plus les dossiers déjà qualifiés par un conseiller ML — comme
- * côté ML, on ne masque que ce sur quoi personne n'a agi. Sans lui, un jeune requalifié en fin de
- * formation et marqué injoignable sort à la fois de la liste ruptures et de l'onglet Suivi ML
- * (`buildContactedByMlExpr` exclut les situations « non joint ») : il disparaît de toute vue CFA.
+ * côté ML, on ne masque que ce sur quoi personne n'a agi.
  * Laissé à false pour le ciblage e-mail, qui compte des ruptures et non des dossiers suivis.
  */
 export const buildRuptureStatusMatch = ({ keepQualifiedByMl = false }: { keepQualifiedByMl?: boolean } = {}) => ({
@@ -99,16 +93,9 @@ export const buildEffRuptureAgeFilter = () => {
   ];
 };
 
-// Situations ML traduisant un jeune NON joint (contacté = non).
-const SITUATION_NON_JOINT: SITUATION_ENUM[] = [
-  SITUATION_ENUM.CONTACTE_SANS_RETOUR,
-  SITUATION_ENUM.COORDONNEES_INCORRECT,
-  SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES,
-];
-
 /**
- * Expression MongoDB : le jeune a réellement été contacté par la Mission Locale.
- * = situation renseignée traduisant un contact abouti (hors situations "non joint")
+ * Expression MongoDB : le jeune a été contacté par la Mission Locale.
+ * = situation ML renseignée, quelle qu'elle soit,
  *   OU préqualif WhatsApp positive (whatsapp_contact.user_response = "prequalif_yes").
  * @param docPrefix - préfixe d'accès aux champs (ex "$ml_doc" pour un lookup). Omis pour un accès direct.
  */
@@ -116,12 +103,7 @@ export function buildContactedByMlExpr(docPrefix?: string) {
   const f = (field: string) => (docPrefix ? `${docPrefix}.${field}` : `$${field}`);
   return {
     $or: [
-      {
-        $and: [
-          { $ne: [{ $ifNull: [f("situation"), null] }, null] },
-          { $not: [{ $in: [f("situation"), SITUATION_NON_JOINT] }] },
-        ],
-      },
+      { $ne: [{ $ifNull: [f("situation"), null] }, null] },
       { $eq: [f("whatsapp_contact.user_response"), USER_RESPONSE_TYPE.PREQUALIF_YES] },
     ],
   };
@@ -153,8 +135,8 @@ export function buildCollabStatusSwitch(docPrefix?: string) {
           case: isCollab,
           then: CFA_COLLAB_STATUS.COLLAB_DEMANDEE,
         },
-        // Dossier hors-collab où le jeune a réellement été contacté (joint OU préqualif WhatsApp) →
-        // badge "Contacté par la ML — Hors collab". Les non-joints retombent en "Démarrer une collab".
+        // Dossier hors-collab qualifié par la ML ou préqualif WhatsApp positive →
+        // badge "Contacté•e par la ML — Hors collab".
         {
           case: buildContactedByMlExpr(docPrefix),
           then: CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB,

@@ -1,7 +1,5 @@
 "use client";
 
-import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
-import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { useState } from "react";
 import { IEffectifMissionLocale } from "shared";
 
@@ -20,16 +18,14 @@ const styles = withSharedStyles(localStyles);
 
 interface CfaEffectifInfoColumnProps {
   effectif: IEffectifMissionLocale["effectif"];
-  onToggleRupture?: () => void;
 }
 
-export function CfaEffectifInfoColumn({ effectif, onToggleRupture }: CfaEffectifInfoColumnProps) {
+export function CfaEffectifInfoColumn({ effectif }: CfaEffectifInfoColumnProps) {
   const [contactsOpen, setContactsOpen] = useState(false);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const age = getAge(effectif.date_de_naissance);
   const isMineur = typeof age === "number" && age < 18;
-  const enRupture = !!effectif.date_rupture || !!effectif.cfa_rupture_declaration;
 
   return (
     <div className={styles.infoColumn}>
@@ -39,50 +35,6 @@ export function CfaEffectifInfoColumn({ effectif, onToggleRupture }: CfaEffectif
           {effectif.prenom} {effectif.nom}
         </h1>
       </div>
-
-      {/* Hors rupture, le statut n'a pas à être posé sur la fiche : la qualification passe par le tunnel. */}
-      {enRupture && (
-        <>
-          <hr className={styles.separator} />
-
-          <div className={styles.ruptureBlock}>
-            <p className={styles.ruptureLabel}>
-              En rupture de contrat ?
-              <span className="fr-ml-1v">
-                <Tooltip
-                  kind="hover"
-                  title={
-                    <>
-                      Sur la version actuelle du Tableau de bord vous ne pouvez pas supprimer le statut &quot;En
-                      rupture&quot; sur le dossier d&apos;un jeune. Si le problème persiste ou que vous souhaitez nous
-                      faire part d&apos;une recommandation{" "}
-                      <a
-                        href="https://cfas.apprentissage.beta.gouv.fr/contact"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Écrivez-nous directement
-                      </a>
-                      , l&apos;équipe du service reste disponible.
-                    </>
-                  }
-                />
-              </span>
-            </p>
-            <ToggleSwitch
-              inputTitle="En rupture de contrat"
-              label=""
-              labelPosition="left"
-              checked
-              onChange={() => {
-                trackPlausibleEvent("cfa_rupture_contestee");
-                onToggleRupture?.();
-              }}
-              showCheckedHint={false}
-            />
-          </div>
-        </>
-      )}
 
       <hr className={styles.separator} />
 
