@@ -136,7 +136,7 @@ export function buildCollabStatusSwitch(docPrefix?: string) {
           then: CFA_COLLAB_STATUS.COLLAB_DEMANDEE,
         },
         // Dossier hors-collab qualifié par la ML ou préqualif WhatsApp positive →
-        // badge "Contacté par la ML — Hors collab".
+        // badge "Contacté•e par la ML — Hors collab".
         {
           case: buildContactedByMlExpr(docPrefix),
           then: CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB,

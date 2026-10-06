@@ -16,7 +16,13 @@ import {
   getCfaSuiviMissionLocaleExportRows,
 } from "@/common/actions/cfa/cfa-suivi-mission-locale.actions";
 import { DATE_START_RUPTURES } from "@/common/actions/shared/rupture-pipeline.utils";
-import { effectifsDECADb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import {
+  effectifsDb,
+  effectifsDECADb,
+  missionLocaleEffectifsDb,
+  organisationsDb,
+  organismesDb,
+} from "@/common/model/collections";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { DeepPartial, id, testDoc, testDocs } from "@tests/utils/testUtils";
@@ -195,6 +201,7 @@ describe("getCfaSuiviMissionLocale", () => {
     const jeune = { nom: "MANCEAU", prenom: "Malika", date_de_naissance: new Date(Date.UTC(2007, 7, 15)) };
 
     beforeEach(async () => {
+      await effectifsDb().deleteMany({});
       await effectifsDECADb().deleteMany({});
       const formateurSiret = "13000460900066";
       await organismesDb().updateOne(
@@ -226,6 +233,19 @@ describe("getCfaSuiviMissionLocale", () => {
         })),
       };
       await effectifsDECADb().insertOne(testDoc<IEffectifDECA>(effectif));
+      return effectif._id;
+    }
+
+    async function insererEffectifErpDuResponsable() {
+      const effectif = {
+        _id: new ObjectId(),
+        ...(await createSampleEffectif({
+          organisme: sampleOrganisme,
+          annee_scolaire: getAnneesScolaireListFromDate(new Date())[0],
+          apprenant: jeune,
+        })),
+      };
+      await effectifsDb().insertOne(testDoc<IEffectif>(effectif));
       return effectif._id;
     }
 
@@ -262,6 +282,27 @@ describe("getCfaSuiviMissionLocale", () => {
 
       const detail = await getCfaEffectifDetail(organismeId, effectifDecaId.toString());
       expect(detail.effectif).toMatchObject({ situation: { situation: SITUATION_ENUM.COORDONNEES_INCORRECT } });
+    });
+
+    it("ne garde qu'une ligne quand le jeune a un effectif ERP et DECA, avec l'effectif ERP", async () => {
+      const effectifErpId = await insererEffectifErpDuResponsable();
+      await insererEffectifDecaDuResponsable();
+      await insererDossierPortePar(formateurId);
+
+      const result = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "hors_collab" });
+
+      expect(result.counts.hors_collab).toBe(1);
+      expect(result.effectifs[0].id?.toString()).toBe(effectifErpId.toString());
+      expect(result.effectifs[0].source).toBe("effectifs");
+    });
+
+    it("sans accès DECA, ne rapproche pas l'effectif DECA de l'établissement", async () => {
+      await insererEffectifDecaDuResponsable();
+      await insererDossierPortePar(formateurId);
+
+      const result = await getCfaSuiviMissionLocale(organisation, false, { ...baseParams, category: "tous" });
+
+      expect(result.counts.tous).toBe(0);
     });
 
     it("n'ajoute pas le dossier d'un jeune que l'établissement n'a pas", async () => {

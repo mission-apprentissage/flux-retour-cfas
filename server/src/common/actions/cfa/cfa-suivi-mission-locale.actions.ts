@@ -56,6 +56,9 @@ function buildDossiersFamilleStages(
   const effectifsMatch = {
     organisme_id: organismeId,
     annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
+    "apprenant.nom": { $type: "string" },
+    "apprenant.prenom": { $type: "string" },
+    "apprenant.date_de_naissance": { $type: "date" },
   };
 
   return [
@@ -74,8 +77,20 @@ function buildDossiersFamilleStages(
     {
       $lookup: {
         from: "missionLocaleEffectif",
-        let: { nom: "$apprenant.nom", prenom: "$apprenant.prenom", dob: "$apprenant.date_de_naissance" },
+        localField: "apprenant.nom",
+        foreignField: "identifiant_normalise.nom",
+        let: { prenom: "$apprenant.prenom", dob: "$apprenant.date_de_naissance" },
         pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$identifiant_normalise.prenom", "$$prenom"] },
+                  { $eq: ["$identifiant_normalise.date_de_naissance", "$$dob"] },
+                ],
+              },
+            },
+          },
           {
             $match: {
               soft_deleted: { $ne: true },
@@ -83,18 +98,6 @@ function buildDossiersFamilleStages(
               "organisme_data.acc_conjoint": { $ne: true },
             },
           },
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ["$identifiant_normalise.nom", "$$nom"] },
-                  { $eq: ["$identifiant_normalise.prenom", "$$prenom"] },
-                  { $eq: ["$identifiant_normalise.date_de_naissance", "$$dob"] },
-                ],
-              },
-            },
-          },
-          { $sort: { updated_at: -1 } },
           { $limit: 1 },
         ],
         as: "_dossier",
