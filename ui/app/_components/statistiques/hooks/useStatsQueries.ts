@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import type {
   CfaEtablissementsSortBy,
   ICfaEtablissementsResponse,
+  ICollaborationMensuelStats,
   ICollaborationSegmentStats,
   IDossiersTraitesStatsResponse,
   IPrequalifStats,
@@ -324,6 +325,15 @@ export function useCollaborationSegmentStats(params: CollaborationStatsParams) {
   return useQuery<ICollaborationSegmentStats>({
     queryKey: statsQueryKeys.collaborations(params),
     queryFn: () => _get(request.url, { params: request.params }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+export function useCollaborationMensuelStats(params: CollaborationStatsParams) {
+  const request = buildCollaborationsRequest(params);
+  return useQuery<ICollaborationMensuelStats>({
+    queryKey: ["stats", "collaborations-mensuel", request.params] as const,
+    queryFn: () => _get(`${request.url}/mensuel`, { params: request.params }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }

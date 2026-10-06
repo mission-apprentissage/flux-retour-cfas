@@ -28,6 +28,7 @@ import {
   getDossiersTraitesStats,
   getTraitementStatsByMissionLocale,
   getSuiviTraitementByRegion,
+  getCollaborationMensuelStats,
   getCollaborationSegmentStats,
   getTraitementStats,
   getDeploymentStats,
@@ -168,6 +169,11 @@ export default () => {
     returnResult(getCollaborationsRoute)
   );
   router.get(
+    "/stats/collaborations/mensuel",
+    validateRequestMiddleware({ query: collaborationsQuery }),
+    returnResult(getCollaborationsMensuelRoute)
+  );
+  router.get(
     "/stats/couverture-regions",
     validateRequestMiddleware({ query: nationalQuery }),
     returnResult(getCouvertureRegionsRoute)
@@ -304,6 +310,15 @@ const getCollaborationsRoute: IndicateursHandler<z.infer<typeof collaborationsQu
   const scope = await resolveStatsScope(req.query, locals.regions);
 
   return await getCollaborationSegmentStats(period || "30days", scope.regions, scope.mlId);
+};
+
+const getCollaborationsMensuelRoute: IndicateursHandler<z.infer<typeof collaborationsQuery>> = async (
+  req,
+  { locals }
+) => {
+  const scope = await resolveStatsScope(req.query, locals.regions);
+
+  return await getCollaborationMensuelStats(req.query.period || "30days", scope.regions, scope.mlId);
 };
 
 const getTraitementMLRoute: IndicateursHandler<z.infer<typeof traitementMlQuery>> = async (req, { locals }) => {

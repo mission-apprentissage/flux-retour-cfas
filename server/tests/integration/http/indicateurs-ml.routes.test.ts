@@ -946,6 +946,56 @@ describe("Indicateurs ML routes (territoriales)", () => {
     });
   });
 
+  describe("GET /stats/collaborations/mensuel", () => {
+    const BASE = "/api/v1/organisation/indicateurs-ml/stats/collaborations/mensuel";
+    const monthKey = (date: Date) =>
+      new Intl.DateTimeFormat("fr-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit" }).format(date);
+
+    it("Regroupe par mois d'envoi les dossiers envoyés, contactés et acceptés du territoire", async () => {
+      const now = new Date();
+      const ceMois = new Date(now.getTime() - 60_000);
+      const moisDernier = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 11));
+      const dossier = (envoi: Date, situation: string | null, extra: Record<string, unknown> = {}) => {
+        const base = buildCollabDossier(ML_IDF, CFA_A, []);
+        return {
+          ...base,
+          situation,
+          organisme_data: { ...base.organisme_data, acc_conjoint_at: envoi },
+          ...extra,
+        };
+      };
+      await missionLocaleEffectifsDb().insertMany(
+        [
+          dossier(moisDernier, "RDV_PRIS"),
+          dossier(moisDernier, "CONTACTE_SANS_RETOUR"),
+          dossier(moisDernier, null),
+          dossier(ceMois, null),
+          dossier(ceMois, "RDV_PRIS", { soft_deleted: true }),
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+
+      const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?period=3months`);
+
+      expect(response.status).toBe(200);
+      const mois = response.data.mois as Array<{ mois: string }>;
+      expect(mois.length).toBeGreaterThanOrEqual(3);
+      expect(mois[mois.length - 1].mois).toBe(monthKey(now));
+      expect(mois.find((row) => row.mois === monthKey(moisDernier))).toEqual({
+        mois: monthKey(moisDernier),
+        envoyes: 3,
+        contactes: 2,
+        acceptes: 1,
+      });
+      expect(mois.find((row) => row.mois === monthKey(now))).toMatchObject({ envoyes: 1, contactes: 0, acceptes: 0 });
+
+      expectForbidden(
+        await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`),
+        "Accès non autorisé à cette région"
+      );
+    });
+  });
+
   describe("GET /stats/collaborations", () => {
     it("Renvoie le bloc collaboration national pour un admin", async () => {
       const response = await requestAsOrganisation(

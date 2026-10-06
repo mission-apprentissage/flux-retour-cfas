@@ -193,6 +193,17 @@ const zCollabSituations = z.object({
 
 export type ICollabSituations = z.output<typeof zCollabSituations>;
 
+const zCollabSituationsVariations = z.object({
+  rupture: z.string(),
+  abandon: z.string(),
+  prevention_inevitable: z.string(),
+  prevention_tres_eleve: z.string(),
+  prevention_modere: z.string(),
+  besoin_aide_hors_rupture: z.string(),
+});
+
+export type ICollabSituationsVariations = z.output<typeof zCollabSituationsVariations>;
+
 const zCollaborationSegmentStats = z.object({
   evaluationDate: z.date(),
   period: zStatsPeriod,
@@ -204,6 +215,7 @@ const zCollaborationSegmentStats = z.object({
   part_deja_connus: z.number(),
   delai_moyen_jours: z.number().nullable(),
   situations: zCollabSituations,
+  situations_variations: zCollabSituationsVariations,
   objectifs: zCollaborationObjectifs.extend({ total_dossiers: z.number() }),
 });
 
@@ -400,4 +412,18 @@ export type ICfaEtablissement = z.output<typeof zCfaEtablissement>;
 export interface ICfaEtablissementsResponse {
   data: ICfaEtablissement[];
   pagination: { page: number; limit: number; total: number; totalPages: number };
+}
+
+const zCollaborationMois = z.object({
+  mois: z.string().describe("AAAA-MM, mois d'envoi de la collaboration (Europe/Paris)"),
+  envoyes: z.number(),
+  contactes: z.number(),
+  acceptes: z.number(),
+});
+
+export type ICollaborationMois = z.output<typeof zCollaborationMois>;
+
+export interface ICollaborationMensuelStats {
+  mois: ICollaborationMois[];
+  period: StatsPeriod;
 }

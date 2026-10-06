@@ -1,9 +1,13 @@
 import { ObjectId } from "bson";
+import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import { IOrganisationMissionLocale } from "shared/models";
+import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type { ICollabSegmentStats } from "shared/models/data/missionLocaleStats.model";
 import {
   ICollabSegmentExportRow,
+  ICollaborationMensuelStats,
+  ICollaborationMois,
   ICollaborationSegmentStats,
   IDetailsDossiersTraitesV2,
   IDossiersTraitesStatsResponse,
@@ -901,6 +905,17 @@ export async function getDossiersTraitesStats(
   };
 }
 
+const buildCollabMatch = (date: Date, missionLocaleIds?: ObjectId[]) => {
+  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
+  return {
+    "organisme_data.acc_conjoint": true,
+    "organisme_data.acc_conjoint_at": { $lte: date },
+    "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
+    soft_deleted: { $ne: true },
+    ...(missionLocaleIds ? { mission_locale_id: { $in: missionLocaleIds } } : {}),
+  };
+};
+
 export async function getCollaborationSegmentStats(
   period: StatsPeriod = "30days",
   regions?: string[],
@@ -909,15 +924,7 @@ export async function getCollaborationSegmentStats(
   const evaluationDate = normalizeToUTCDay(new Date());
   const startDate = await calculateStartDateAsync(period, evaluationDate);
   const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
-  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
-
-  const collabMatch = (date: Date) => ({
-    "organisme_data.acc_conjoint": true,
-    "organisme_data.acc_conjoint_at": { $lte: date },
-    "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
-    soft_deleted: { $ne: true },
-    ...(missionLocaleIds ? { mission_locale_id: { $in: missionLocaleIds } } : {}),
-  });
+  const collabMatch = (date: Date) => buildCollabMatch(date, missionLocaleIds);
 
   const countCfaAyantCollabore = async (date: Date) =>
     (await missionLocaleEffectifsDb().distinct("effectif_snapshot.organisme_id", collabMatch(date))).length;
@@ -959,6 +966,26 @@ export async function getCollaborationSegmentStats(
         ? Math.round((current.delai_premiere_activite_jours_total / current.delai_premiere_activite_count) * 10) / 10
         : null,
     situations: { ...situations, total: Object.values(situations).reduce((sum, value) => sum + value, 0) },
+    situations_variations: {
+      rupture: createStatWithVariation(current.situation_rupture, previous.situation_rupture).variation,
+      abandon: createStatWithVariation(current.situation_abandon, previous.situation_abandon).variation,
+      prevention_inevitable: createStatWithVariation(
+        current.situation_prevention_inevitable,
+        previous.situation_prevention_inevitable
+      ).variation,
+      prevention_tres_eleve: createStatWithVariation(
+        current.situation_prevention_tres_eleve,
+        previous.situation_prevention_tres_eleve
+      ).variation,
+      prevention_modere: createStatWithVariation(
+        current.situation_prevention_modere,
+        previous.situation_prevention_modere
+      ).variation,
+      besoin_aide_hors_rupture: createStatWithVariation(
+        current.situation_besoin_aide_hors_rupture,
+        previous.situation_besoin_aide_hors_rupture
+      ).variation,
+    },
     objectifs: {
       mobilite: motifs.mobilite || 0,
       logement: motifs.logement || 0,
@@ -971,6 +998,65 @@ export async function getCollaborationSegmentStats(
       autre: motifs.autre || 0,
       total_dossiers: objectifsResult?.total?.[0]?.count || 0,
     },
+  };
+}
+
+const PARIS_TIMEZONE = "Europe/Paris";
+
+const toMonthKey = (date: Date) =>
+  new Intl.DateTimeFormat("fr-CA", { timeZone: PARIS_TIMEZONE, year: "numeric", month: "2-digit" }).format(date);
+
+const listMonthKeys = (from: Date, to: Date) => {
+  const toIndex = (date: Date) => {
+    const [year, month] = toMonthKey(date).split("-").map(Number);
+    return year * 12 + month - 1;
+  };
+  const keys: string[] = [];
+  for (let index = toIndex(from); index <= toIndex(to); index++) {
+    keys.push(`${Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, "0")}`);
+  }
+  return keys;
+};
+
+/** Cohortes mensuelles : dossiers envoyés chaque mois, puis ceux contactés et ceux ayant accepté à ce jour. */
+export async function getCollaborationMensuelStats(
+  period: StatsPeriod = "30days",
+  regions?: string[],
+  mlId?: string
+): Promise<ICollaborationMensuelStats> {
+  const now = new Date();
+  const periodStart = await calculateStartDateAsync(period, normalizeToUTCDay(now));
+  const from = periodStart > COLLABORATION_CUTOFF_DATE ? periodStart : COLLABORATION_CUTOFF_DATE;
+  const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
+  const monthKeys = listMonthKeys(from, now);
+
+  const rows = await missionLocaleEffectifsDb()
+    .aggregate<ICollaborationMois>([
+      { $match: buildCollabMatch(now, missionLocaleIds) },
+      {
+        $addFields: {
+          mois: {
+            $dateToString: { format: "%Y-%m", date: "$organisme_data.acc_conjoint_at", timezone: PARIS_TIMEZONE },
+          },
+        },
+      },
+      { $match: { mois: { $gte: monthKeys[0] } } },
+      {
+        $group: {
+          _id: "$mois",
+          envoyes: { $sum: 1 },
+          contactes: { $sum: { $cond: [{ $ifNull: ["$situation", false] }, 1, 0] } },
+          acceptes: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }, 1, 0] } },
+        },
+      },
+      { $project: { _id: 0, mois: "$_id", envoyes: 1, contactes: 1, acceptes: 1 } },
+    ])
+    .toArray();
+
+  const byMonth = new Map(rows.map((row) => [row.mois, row]));
+  return {
+    mois: monthKeys.map((mois) => byMonth.get(mois) ?? { mois, envoyes: 0, contactes: 0, acceptes: 0 }),
+    period,
   };
 }
 

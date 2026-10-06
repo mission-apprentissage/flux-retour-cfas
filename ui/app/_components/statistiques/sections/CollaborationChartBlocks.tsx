@@ -103,7 +103,11 @@ export function CollabSituationsBlock({ data, loading, variant = "panel", classN
       title="La situation du jeune lorsqu'il est envoyé par le CFA"
       tooltip="Situation du jeune telle que qualifiée par le CFA au moment de l'envoi de la collaboration : rupture, abandon, risque de rupture selon trois niveaux, ou besoin d'aide sans rupture."
     >
-      <SituationsPieChart data={data.situations} loading={loading} />
+      <SituationsPieChart
+        data={data.situations}
+        variations={variant === "overview" ? data.situations_variations : undefined}
+        loading={loading}
+      />
     </ChartBlock>
   );
 }

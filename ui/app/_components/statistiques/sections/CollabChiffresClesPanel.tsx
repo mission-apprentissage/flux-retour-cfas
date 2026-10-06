@@ -2,9 +2,11 @@
 
 import { CollaborationCards } from "../cards/CollaborationCards";
 import { KpiFunnel, kpiFunnelCardClassName } from "../cards/KpiFunnel";
+import { OverviewCard } from "../cards/OverviewCard";
+import { CollabMensuelChart } from "../charts/CollabMensuelChart";
 import { isLoadingVariation } from "../hooks/useLoadingVariation";
 import { useStatsFilters } from "../hooks/useStatsFilters";
-import { useCollaborationSegmentStats } from "../hooks/useStatsQueries";
+import { useCollaborationMensuelStats, useCollaborationSegmentStats } from "../hooks/useStatsQueries";
 import { SegmentAboutText } from "../ui/SegmentAboutText";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
@@ -16,6 +18,7 @@ export function CollabChiffresClesPanel() {
   const { period, scope } = useStatsFilters();
   const { data, isLoading, isFetching, error } = useCollaborationSegmentStats({ period, ...scope });
   const loadingVariation = isLoadingVariation(isFetching, isLoading);
+  const mensuel = useCollaborationMensuelStats({ period, ...scope });
 
   return (
     <OverviewSection title="Chiffres clés">
@@ -30,6 +33,11 @@ export function CollabChiffresClesPanel() {
           />
         </StatsErrorHandler>
       </KpiFunnel>
+      <OverviewCard title="Évolution mensuelle">
+        <StatsErrorHandler data={mensuel.data} error={mensuel.error} isLoading={mensuel.isLoading}>
+          <CollabMensuelChart data={mensuel.data?.mois} loading={mensuel.isLoading} />
+        </StatsErrorHandler>
+      </OverviewCard>
       {data && (
         <>
           <h3 className={styles.subtitle}>Nature des dossiers envoyés par les CFA</h3>
