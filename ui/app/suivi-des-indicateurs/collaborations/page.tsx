@@ -1,14 +1,21 @@
 "use client";
 
 import { Suspense } from "react";
+import { ORGANISATION_TYPE } from "shared/constants";
 
 import { CollabActiviteCfaPanel } from "@/app/_components/statistiques/sections/CollabActiviteCfaPanel";
 import { CollabActiviteMlPanel } from "@/app/_components/statistiques/sections/CollabActiviteMlPanel";
 import { CollabChiffresClesPanel } from "@/app/_components/statistiques/sections/CollabChiffresClesPanel";
+import { CollabListePanel } from "@/app/_components/statistiques/sections/CollabListePanel";
 import { StatsPageHeader } from "@/app/_components/statistiques/ui/StatsPageHeader";
 import { StatsTabs } from "@/app/_components/statistiques/ui/StatsTabs";
+import { useAuth } from "@/app/_context/UserContext";
 
 export default function CollaborationsPage() {
+  const { user } = useAuth();
+  // La liste nominative n'est pas ouverte aux ARML (le serveur la refuse aussi).
+  const listeVisible = !!user && user.organisation?.type !== ORGANISATION_TYPE.ARML;
+
   return (
     <Suspense>
       <StatsPageHeader
@@ -35,6 +42,16 @@ export default function CollaborationsPage() {
             iconId: "fr-icon-bar-chart-box-line",
             content: <CollabActiviteMlPanel />,
           },
+          ...(listeVisible
+            ? [
+                {
+                  id: "liste",
+                  label: "Liste des collaborations",
+                  iconId: "fr-icon-list-unordered" as const,
+                  content: <CollabListePanel />,
+                },
+              ]
+            : []),
         ]}
       />
     </Suspense>

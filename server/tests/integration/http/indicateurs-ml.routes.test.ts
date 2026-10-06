@@ -7,10 +7,12 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   missionLocaleCfaInvitationsDb,
   missionLocaleEffectifsDb,
+  missionLocaleEffectifsLogDb,
   missionLocaleStatsDb,
   organisationsDb,
   organismesDb,
   regionsDb,
+  telechargementListesNominativesLogsDb,
   usersMigrationDb,
 } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -22,6 +24,7 @@ const ARML_IDF: IOrganisationCreate = { type: "ARML", nom: "ARML IDF", region_li
 const ARML_IDF_ARA: IOrganisationCreate = { type: "ARML", nom: "ARML IDF ARA", region_list: ["11", "84"] };
 const ARML_SANS_REGION: IOrganisationCreate = { type: "ARML", nom: "ARML sans périmètre", region_list: [] };
 const DREETS_IDF: IOrganisationCreate = { type: "DREETS", code_region: "11" };
+const DDETS_PARIS: IOrganisationCreate = { type: "DDETS", code_departement: "75" };
 
 const expectForbidden = (response: { status: number; data: { error: string; message: string } }, message: string) => {
   expect(response.status).toBe(403);
@@ -1096,6 +1099,136 @@ describe("Indicateurs ML routes (territoriales)", () => {
         await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`),
         "Accès non autorisé à cette région"
       );
+    });
+  });
+
+  describe("GET /stats/collaborations/dossiers", () => {
+    const BASE = "/api/v1/organisation/indicateurs-ml/stats/collaborations/dossiers";
+    const CFA_C = new ObjectId();
+    const ML_USER = new ObjectId();
+    const D_A_TRAITER = new ObjectId();
+    const D_RDV = new ObjectId();
+    const D_RECONTACTER = new ObjectId();
+
+    const dossier = (
+      id: ObjectId,
+      organismeId: ObjectId,
+      {
+        situation = null,
+        envoi = new Date("2026-03-10"),
+        nom = "Martin",
+      }: { situation?: string | null; envoi?: Date; nom?: string }
+    ) => {
+      const base = buildCollabDossier(ML_IDF, organismeId, ["MOBILITE"]);
+      return {
+        ...base,
+        _id: id,
+        situation,
+        effectif_snapshot: {
+          ...base.effectif_snapshot,
+          apprenant: { nom, prenom: "Test", telephone: "0600000000", courriel: "jeune@example.org" },
+        },
+        organisme_data: { ...base.organisme_data, acc_conjoint_at: envoi },
+      };
+    };
+
+    beforeEach(async () => {
+      await missionLocaleEffectifsDb().deleteMany({});
+      await organismesDb().insertMany(
+        [
+          { _id: CFA_A, siret: "11111111100011", nom: "CFA A", adresse: { region: "11", departement: "75" } },
+          { _id: CFA_C, siret: "33333333300033", nom: "Lycée Eiffel", adresse: { region: "11", departement: "77" } },
+          { _id: CFA_B, siret: "22222222200022", nom: "CFA B", adresse: { region: "84", departement: "69" } },
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+      await missionLocaleEffectifsDb().insertMany(
+        [
+          dossier(D_A_TRAITER, CFA_A, {}),
+          dossier(D_RDV, CFA_A, { situation: "RDV_PRIS" }),
+          dossier(D_RECONTACTER, CFA_C, { situation: "CONTACTE_SANS_RETOUR", nom: "Dupont" }),
+          dossier(new ObjectId(), CFA_B, {}),
+          dossier(new ObjectId(), CFA_A, { envoi: new Date("2025-12-01") }),
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+      await usersMigrationDb().insertOne({ _id: ML_USER, organisation_id: ML_IDF } as never, {
+        bypassDocumentValidation: true,
+      });
+      await missionLocaleEffectifsLogDb().insertMany(
+        [
+          { mission_locale_effectif_id: D_RDV, created_at: new Date("2026-03-15"), created_by: ML_USER },
+          { mission_locale_effectif_id: D_RECONTACTER, created_at: new Date("2026-04-05"), created_by: ML_USER },
+        ].map((log) => ({ _id: new ObjectId(), read_by: [], ...log })) as never[],
+        { bypassDocumentValidation: true }
+      );
+    });
+
+    it("Liste les dossiers envoyés depuis 2026 par les CFA de la région, sans coordonnées du jeune", async () => {
+      const response = await requestAsOrganisation(DREETS_IDF, "get", BASE);
+
+      expect(response.status).toBe(200);
+      expect(response.data.total).toBe(3);
+      expect(JSON.stringify(response.data)).not.toMatch(/0600000000|jeune@example\.org|telephone|courriel/);
+      const rdv = response.data.data.find((row: { id: string }) => row.id === D_RDV.toString());
+      expect(Object.keys(rdv.jeune).sort()).toEqual(["nom", "prenom"]);
+      expect(rdv).toMatchObject({
+        statut: "traite",
+        resultat: "rdv_pris",
+        delai_jours: 5,
+        traite_par_ml: true,
+        mission_locale: { id: ML_IDF.toString(), nom: "ML IDF" },
+        cfa: { id: CFA_A.toString(), nom: "CFA A" },
+      });
+      expect(response.data.filtres.cfa.map((cfa: { nom: string }) => cfa.nom)).toEqual(["CFA A", "Lycée Eiffel"]);
+    });
+
+    it.each([
+      ["statuts=a_traiter", [D_A_TRAITER]],
+      ["statuts=a_recontacter,traite", [D_RDV, D_RECONTACTER]],
+      ["delais=0_10", [D_RDV]],
+      ["delais=21_30", [D_RECONTACTER]],
+      ["delais=30_plus", [D_A_TRAITER]],
+      ["resultats=a_recontacter", [D_RECONTACTER]],
+      ["departements=77", [D_RECONTACTER]],
+      [`cfa_ids=${CFA_C}`, [D_RECONTACTER]],
+      ["search=dupont", [D_RECONTACTER]],
+      ["search=eiffel", [D_RECONTACTER]],
+      ["date_fin=2026-01-31", []],
+      ["date_debut=2026-03-10&date_fin=2026-03-10", [D_A_TRAITER, D_RDV, D_RECONTACTER]],
+    ])("Filtre : %s", async (query, expected) => {
+      const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?${query}`);
+
+      expect(response.status).toBe(200);
+      expect(response.data.data.map((row: { id: string }) => row.id).sort()).toEqual(
+        expected.map((id) => id.toString()).sort()
+      );
+    });
+
+    it("Limite la DDETS à son département et refuse l'ARML", async () => {
+      const ddets = await requestAsOrganisation(DDETS_PARIS, "get", BASE);
+      expect(ddets.data.total).toBe(2);
+      expectForbidden(
+        await requestAsOrganisation(DDETS_PARIS, "get", `${BASE}?departements=77`),
+        "Accès non autorisé à ce département"
+      );
+      expectForbidden(
+        await requestAsOrganisation(ARML_IDF, "get", BASE),
+        "Accès non autorisé à la liste des collaborations"
+      );
+      expectForbidden(
+        await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`),
+        "Accès non autorisé à cette région"
+      );
+    });
+
+    it("Journalise l'export nominatif", async () => {
+      const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}/export`);
+
+      expect(response.data.data).toHaveLength(3);
+      const logs = await telechargementListesNominativesLogsDb().find({ type: "indicateurs_collaborations" }).toArray();
+      expect(logs).toHaveLength(1);
+      expect(logs[0].elementList?.sort()).toEqual([D_A_TRAITER, D_RDV, D_RECONTACTER].map(String).sort());
     });
   });
 

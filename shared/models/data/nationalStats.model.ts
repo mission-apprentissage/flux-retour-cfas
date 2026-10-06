@@ -449,3 +449,47 @@ export interface ICfaInjoignablesRow {
   injoignables: number;
   taux: number;
 }
+
+export const COLLAB_DOSSIER_STATUTS = ["a_traiter", "a_recontacter", "traite"] as const;
+export type CollabDossierStatut = (typeof COLLAB_DOSSIER_STATUTS)[number];
+
+export const COLLAB_DOSSIER_DELAIS = ["0_10", "11_20", "21_30", "30_plus"] as const;
+export type CollabDossierDelai = (typeof COLLAB_DOSSIER_DELAIS)[number];
+
+export const COLLAB_DOSSIER_RESULTATS = [
+  "rdv_pris",
+  "projet_pro_securise",
+  "ne_souhaite_pas_accompagnement",
+  "a_recontacter",
+  "injoignable",
+  "autre",
+] as const;
+export type CollabDossierResultat = (typeof COLLAB_DOSSIER_RESULTATS)[number];
+
+export interface ICollaborationDossierStructure {
+  id: string;
+  nom: string | null;
+  commune: string | null;
+}
+
+/** Dossier de collaboration affiché aux profils indicateurs : seuls le prénom et le nom du jeune sont exposés. */
+export interface ICollaborationDossier {
+  id: string;
+  jeune: { prenom: string | null; nom: string | null };
+  mission_locale: ICollaborationDossierStructure;
+  cfa: ICollaborationDossierStructure;
+  statut: CollabDossierStatut;
+  situation: string | null;
+  motifs: string[];
+  resultat: CollabDossierResultat | null;
+  date_envoi: Date;
+  delai_jours: number;
+  traite_par_ml: boolean;
+}
+
+export interface ICollaborationDossiersResponse {
+  total: number;
+  pagination: { page: number; limit: number; total_pages: number };
+  data: ICollaborationDossier[];
+  filtres: { cfa: ICollaborationDossierStructure[]; ml: ICollaborationDossierStructure[] };
+}

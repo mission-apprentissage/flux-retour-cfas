@@ -39,3 +39,5 @@ export const typesMissionLocale = [
 export const typesARML = ["arml"];
 
 export const typesFranceTravail = ["ft_a_traiter", "ft_traite"];
+
+export const typesIndicateursCollaborations = ["indicateurs_collaborations"];

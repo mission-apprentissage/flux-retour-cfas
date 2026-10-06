@@ -1,6 +1,8 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import type {
+  CollabDossierStatut,
+  ICollaborationDossiersResponse,
   CfaEtablissementsSortBy,
   CfaInjoignablesSortBy,
   ICfaInjoignablesRow,
@@ -279,6 +281,35 @@ export function useCfaNpsStats(scope: { region?: string; national?: boolean }) {
   return useQuery<ICfaNpsStats>({
     queryKey: ["stats", "cfa-nps", scope.region ?? "national"] as const,
     queryFn: () => _get(`${INDICATEURS_ML_BASE}/stats/cfa/nps`, { params: scope }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+export const COLLAB_DOSSIER_STATUT_LABELS: Record<CollabDossierStatut, string> = {
+  a_traiter: "Demande envoyée par le CFA",
+  a_recontacter: "À recontacter par la ML",
+  traite: "Traité par la ML",
+};
+
+export interface CollaborationDossiersParams {
+  region?: string;
+  search?: string;
+  departements?: string;
+  statuts?: string;
+  delais?: string;
+  cfa_ids?: string;
+  ml_ids?: string;
+  situations?: string;
+  motifs?: string;
+  resultats?: string;
+  date_debut?: string;
+  date_fin?: string;
+}
+
+export function useCollaborationDossiers(params: CollaborationDossiersParams & { page: number; limit: number }) {
+  return useQuery<ICollaborationDossiersResponse>({
+    queryKey: ["stats", "collaborations-dossiers", params] as const,
+    queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/stats/collaborations/dossiers`, { params, signal }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }

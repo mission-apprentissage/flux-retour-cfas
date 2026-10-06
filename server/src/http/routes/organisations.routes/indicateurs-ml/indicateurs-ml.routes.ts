@@ -1,9 +1,13 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
+import { ORGANISATION_TYPE } from "shared/constants";
 import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import {
+  COLLAB_DOSSIER_DELAIS,
+  COLLAB_DOSSIER_RESULTATS,
+  COLLAB_DOSSIER_STATUTS,
   zCfaEtablissementsSortBy,
   zCfaInjoignablesSortBy,
   zStatsPeriod,
@@ -25,6 +29,7 @@ import {
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getCfaNpsStats, listCfaInjoignables } from "@/common/actions/cfa/cfa-collaboration-stats.actions";
 import { getCfaAdoptionStats, listCfaEtablissements } from "@/common/actions/cfa/cfa-stats.actions";
+import { listCollaborationDossiers } from "@/common/actions/mission-locale/collaboration-dossiers.actions";
 import {
   getRupturantsStats,
   getDossiersTraitesStats,
@@ -41,6 +46,7 @@ import {
   getWhatsAppStats,
   getPrequalifStats,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
+import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { organisationsDb } from "@/common/model/collections";
 import {
   DefaultParams,
@@ -123,6 +129,27 @@ const cfaInjoignablesQuery = cfaInjoignablesExportQuery.extend({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
 });
+const zCsvEnum = <T extends readonly [string, ...string[]]>(values: T) =>
+  zCsvList.pipe(z.array(z.enum(values)).optional());
+const zCsvObjectIds = zCsvList.pipe(z.array(z.string().regex(/^[0-9a-f]{24}$/)).optional());
+const collaborationDossiersExportQuery = z.object({
+  region: z.string().optional(),
+  departements: zCsvList,
+  search: z.string().optional(),
+  date_debut: z.coerce.date().optional(),
+  date_fin: z.coerce.date().optional(),
+  statuts: zCsvEnum(COLLAB_DOSSIER_STATUTS),
+  delais: zCsvEnum(COLLAB_DOSSIER_DELAIS),
+  resultats: zCsvEnum(COLLAB_DOSSIER_RESULTATS),
+  situations: zCsvList,
+  motifs: zCsvList,
+  cfa_ids: zCsvObjectIds,
+  ml_ids: zCsvObjectIds,
+});
+const collaborationDossiersQuery = collaborationDossiersExportQuery.extend({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+});
 const couvertureDepartementsQuery = z.object({ period: zStatsPeriod.optional(), region: z.string() });
 const nationalQuery = z.object({ period: zStatsPeriod.optional(), national: zBooleanStringSchema.optional() });
 const traitementRegionsQuery = nationalQuery.extend({ segment: zStatsSegment.default("all") });
@@ -183,6 +210,16 @@ export default () => {
     "/stats/collaborations/mensuel",
     validateRequestMiddleware({ query: collaborationsQuery }),
     returnResult(getCollaborationsMensuelRoute)
+  );
+  router.get(
+    "/stats/collaborations/dossiers",
+    validateRequestMiddleware({ query: collaborationDossiersQuery }),
+    returnResult(getCollaborationDossiersRoute)
+  );
+  router.get(
+    "/stats/collaborations/dossiers/export",
+    validateRequestMiddleware({ query: collaborationDossiersExportQuery }),
+    returnResult(getCollaborationDossiersExportRoute)
   );
   router.get(
     "/stats/couverture-regions",
@@ -341,6 +378,73 @@ const getCollaborationsMensuelRoute: IndicateursHandler<z.infer<typeof collabora
   const scope = await resolveStatsScope(req.query, locals.regions);
 
   return await getCollaborationMensuelStats(req.query.period || "30days", scope.regions, scope.mlId);
+};
+
+/**
+ * Liste nominative : l'ARML n'y a pas accès, la DDETS est limitée à son département, la DREETS à sa région.
+ */
+const resolveCollaborationDossiersScope = (
+  query: z.infer<typeof collaborationDossiersExportQuery>,
+  { organisation, regions: userRegions }: IndicateursMlLocals
+) => {
+  if (organisation.type === ORGANISATION_TYPE.ARML) {
+    throw Boom.forbidden("Accès non autorisé à la liste des collaborations");
+  }
+  assertRegionAllowed(query.region, userRegions);
+  assertDepartementsAllowed(query.departements, userRegions);
+
+  if (organisation.type === ORGANISATION_TYPE.DDETS) {
+    const departement = (organisation as { code_departement?: string }).code_departement;
+    if (!departement || query.departements?.some((code) => code !== departement)) {
+      throw Boom.forbidden("Accès non autorisé à ce département");
+    }
+    return { regions: userRegions, departements: [departement] };
+  }
+
+  return { regions: scopedRegions(query.region, userRegions), departements: query.departements };
+};
+
+const toCollaborationDossiersFilters = (query: z.infer<typeof collaborationDossiersExportQuery>) => ({
+  search: query.search,
+  dateDebut: query.date_debut,
+  dateFin: query.date_fin,
+  statuts: query.statuts,
+  delais: query.delais,
+  resultats: query.resultats,
+  situations: query.situations,
+  motifs: query.motifs,
+  cfaIds: query.cfa_ids?.map((id) => new ObjectId(id)),
+  mlIds: query.ml_ids?.map((id) => new ObjectId(id)),
+});
+
+const getCollaborationDossiersRoute: IndicateursHandler<z.infer<typeof collaborationDossiersQuery>> = async (
+  req,
+  { locals }
+) => {
+  const { page, limit } = req.query;
+  return await listCollaborationDossiers(
+    resolveCollaborationDossiersScope(req.query, locals),
+    toCollaborationDossiersFilters(req.query),
+    { page, limit }
+  );
+};
+
+const getCollaborationDossiersExportRoute: IndicateursHandler<
+  z.infer<typeof collaborationDossiersExportQuery>
+> = async (req, { locals }) => {
+  const result = await listCollaborationDossiers(
+    resolveCollaborationDossiersScope(req.query, locals),
+    toCollaborationDossiersFilters(req.query)
+  );
+  await createTelechargementListeNomLog(
+    "indicateurs_collaborations",
+    result.data.map((dossier) => dossier.id),
+    new Date(),
+    req.user._id,
+    undefined,
+    locals.organisation._id
+  );
+  return { data: result.data };
 };
 
 const getTraitementMLRoute: IndicateursHandler<z.infer<typeof traitementMlQuery>> = async (req, { locals }) => {

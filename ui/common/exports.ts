@@ -279,6 +279,22 @@ export const cfaInjoignablesExportColumns = [
   { label: "Taux injoignables (%)", key: "taux", width: 18 },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
+export const collaborationDossiersExportColumns = [
+  { label: "Prénom", key: "prenom", width: 18 },
+  { label: "Nom", key: "nom", width: 22 },
+  { label: "Mission Locale", key: "mission_locale", width: 35 },
+  { label: "Commune ML", key: "mission_locale_commune", width: 20 },
+  { label: "CFA", key: "cfa", width: 40 },
+  { label: "Commune CFA", key: "cfa_commune", width: 20 },
+  { label: "Statut", key: "statut", width: 28 },
+  { label: "Situation du jeune", key: "situation", width: 24 },
+  { label: "Objectifs d'accompagnement", key: "objectifs", width: 50 },
+  { label: "Résultat du traitement ML", key: "resultat", width: 30 },
+  { label: "Date d'envoi", key: "date_envoi", xlsxType: "date", width: 14 },
+  { label: "Délai de traitement (jours)", key: "delai_jours", width: 24 },
+  { label: "Traité par la ML", key: "traite_par_ml", width: 16 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
 export const traitementRegionExportColumns = [
   { label: "Région", key: "region_nom", width: 30 },
   { label: "Total jeunes", key: "total_jeunes", width: 12 },
