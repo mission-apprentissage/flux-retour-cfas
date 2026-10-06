@@ -313,6 +313,88 @@ describe("GET /api/v2/affelnet/suivi", () => {
     });
   });
 
+  describe("Contrats rompus (non transmis, contrat v1.10)", () => {
+    const identite = { nom: "DUPONT", prenom: "Jean", date_de_naissance: D("2009-03-10") };
+    const contratRompu = { date_debut: D("2025-10-01"), date_fin: D("2027-06-30"), date_rupture: D("2026-01-15") };
+
+    it("dernier contrat rompu → jeune absent", async () => {
+      await insertEffectif(orgLille, { contrats: [contratRompu] });
+
+      const { data } = await getSuivi();
+
+      assert.strictEqual(data.metadonnees.totalElements, 0);
+      assert.deepStrictEqual(data.effectifs, []);
+    });
+
+    it("rupture future → jeune transmis", async () => {
+      await insertEffectif(orgLille, { contrats: [{ ...contratRompu, date_rupture: D("2099-12-31") }] });
+
+      const { data } = await getSuivi();
+
+      assert.strictEqual(data.metadonnees.totalElements, 1);
+    });
+
+    it("rupture puis nouveau contrat dans le même dossier → transmis avec le nouveau contrat", async () => {
+      await insertEffectif(orgLille, {
+        contrats: [contratRompu, { date_debut: D("2026-02-01"), date_fin: D("2027-06-30"), date_rupture: null }],
+      });
+
+      const { data } = await getSuivi();
+
+      assert.strictEqual(data.metadonnees.totalElements, 1);
+      assert.strictEqual(data.effectifs[0].contrats.dateDebutContrat, "2026-02-01");
+    });
+
+    it("DECA rompu + ERP du même contrat sans rupture → jeune absent", async () => {
+      await insertEffectif(orgLille, {
+        apprenant: identite,
+        contrats: [{ date_debut: D("2025-10-01"), date_fin: D("2027-06-30") }],
+      });
+      await insertEffectifDECA(orgLille, { apprenant: identite, contrats: [contratRompu] });
+
+      const { data } = await getSuivi();
+
+      assert.strictEqual(data.metadonnees.totalElements, 0);
+    });
+
+    it("DECA rompu + ERP sans contrat → jeune absent", async () => {
+      await insertEffectif(orgLille, { apprenant: identite, contrats: [] });
+      await insertEffectifDECA(orgLille, { apprenant: identite, contrats: [contratRompu] });
+
+      const { data } = await getSuivi();
+
+      assert.strictEqual(data.metadonnees.totalElements, 0);
+    });
+
+    it("DECA rompu + ERP avec un contrat plus récent → transmis depuis l'ERP", async () => {
+      await insertEffectif(orgLille, {
+        apprenant: identite,
+        contrats: [{ date_debut: D("2026-02-01"), date_fin: D("2027-06-30") }],
+      });
+      await insertEffectifDECA(orgLille, { apprenant: identite, contrats: [contratRompu] });
+
+      const { data } = await getSuivi();
+
+      assert.strictEqual(data.metadonnees.totalElements, 1);
+      assert.strictEqual(data.effectifs[0].source, "CFA");
+      assert.strictEqual(data.effectifs[0].contrats.dateDebutContrat, "2026-02-01");
+    });
+
+    it("DECA rompu + nouveau DECA → transmis avec le nouveau contrat", async () => {
+      await insertEffectifDECA(orgLille, { apprenant: identite, contrats: [contratRompu] });
+      await insertEffectifDECA(orgLille, {
+        apprenant: identite,
+        contrats: [{ date_debut: D("2026-02-01"), date_fin: D("2027-06-30") }],
+      });
+
+      const { data } = await getSuivi();
+
+      assert.strictEqual(data.metadonnees.totalElements, 1);
+      assert.strictEqual(data.effectifs[0].source, "DECA");
+      assert.strictEqual(data.effectifs[0].contrats.dateDebutContrat, "2026-02-01");
+    });
+  });
+
   describe("Pagination et stabilité", () => {
     it("métadonnées correctes ; page > totalPages → 200 + liste vide ; réponses stables", async () => {
       await insertEffectif(orgLille, { apprenant: { nom: "AAA" } });
@@ -350,11 +432,11 @@ describe("GET /api/v2/affelnet/suivi", () => {
       assert.strictEqual(effectif.organismeFormation.denomination, orgLille.nom);
     });
 
-    it("contrats : dernier par date_debut, rompu transmis, dateConclusionContrat null, date_debut null ignoré", async () => {
+    it("contrats : dernier par date_debut, dateConclusionContrat null, date_debut null ignoré", async () => {
       await insertEffectif(orgLille, {
         contrats: [
           { date_debut: D("2025-10-01"), date_fin: D("2027-06-30") },
-          { date_debut: D("2025-11-01"), date_fin: D("2027-07-31"), date_rupture: D("2026-01-15") },
+          { date_debut: D("2025-11-01"), date_fin: D("2027-07-31") },
           { date_debut: null, date_fin: D("2099-12-31") },
         ],
       });

@@ -22,13 +22,21 @@ const VERIF_DEPARTEMENTS = ["54", "55", "88"];
 
 const d = (s: string) => new Date(`${s}T00:00:00.000Z`);
 
+interface SeedEmployeur {
+  siret: string;
+  denomination: string;
+  naf: string;
+  adresse: { code_postal: string };
+  nombre_de_salaries: number;
+}
+
 interface SeedProfil {
   kind: "CFA" | "DECA";
   uai: string;
   siret: string;
   expectedDepartement: string;
   formation: { cfd: string; rncp: string; date_inscription: string; date_entree: string; date_fin: string };
-  contrat: { date_debut: string; date_fin: string; date_rupture: string | null } | null;
+  contrat: { date_debut: string; date_fin: string; date_rupture: string | null; employeur?: SeedEmployeur } | null;
 }
 
 const PROFILS = {
@@ -101,6 +109,59 @@ const PROFILS = {
       date_fin: "2027-06-30",
     },
     contrat: { date_debut: "2026-09-01", date_fin: "2027-06-30", date_rupture: "2027-07-15" },
+  },
+  DECLARE_54: {
+    kind: "CFA",
+    uai: "0540081V",
+    siret: "19540081700019",
+    expectedDepartement: "54",
+    formation: {
+      cfd: "50022141",
+      rncp: "RNCP4637",
+      date_inscription: "2026-09-02",
+      date_entree: "2026-09-02",
+      date_fin: "2027-08-31",
+    },
+    contrat: { date_debut: "2026-09-01", date_fin: "2027-08-31", date_rupture: null },
+  },
+  DECA_55_0550892W: {
+    kind: "DECA",
+    uai: "0550892W",
+    siret: "78341511000015",
+    expectedDepartement: "55",
+    formation: {
+      cfd: "50022141",
+      rncp: "RNCP4637",
+      date_inscription: "2026-09-02",
+      date_entree: "2026-09-02",
+      date_fin: "2027-08-31",
+    },
+    contrat: {
+      date_debut: "2026-09-01",
+      date_fin: "2027-06-30",
+      date_rupture: null,
+      employeur: {
+        siret: "44556677800019",
+        denomination: "GARAGE DURAND SAS",
+        naf: "4520A",
+        adresse: { code_postal: "69007" },
+        nombre_de_salaries: 15,
+      },
+    },
+  },
+  DECA_88_RUPTURE: {
+    kind: "DECA",
+    uai: "0881269B",
+    siret: "78334702400086",
+    expectedDepartement: "88",
+    formation: {
+      cfd: "40025503",
+      rncp: "RNCP38596",
+      date_inscription: "2026-09-02",
+      date_entree: "2026-09-02",
+      date_fin: "2027-06-30",
+    },
+    contrat: { date_debut: "2026-09-01", date_fin: "2027-06-30", date_rupture: "2026-09-28" },
   },
 } satisfies Record<string, SeedProfil>;
 
@@ -385,8 +446,38 @@ const RECORDS: SeedRecord[] = [
   },
 ];
 
+interface SeedMaj {
+  key: string;
+  profil: keyof typeof PROFILS;
+  mode: "remplace" | "ajoute";
+}
+
+const MISES_A_JOUR: SeedMaj[] = [
+  { key: "CDT09", profil: "DECLARE_54", mode: "remplace" },
+  { key: "CDT10", profil: "DECA_55_0550892W", mode: "ajoute" },
+  { key: "CDT13", profil: "DECA_88_RUPTURE", mode: "remplace" },
+];
+
 const markerId = (key: string) => `${MARKER}_${key}`;
 const profilOf = (record: SeedRecord): SeedProfil => PROFILS[record.profil];
+
+function recordOf(key: string): SeedRecord {
+  const record = RECORDS.find((r) => r.key === key);
+  if (!record) throw new Error(`Enregistrement ${key} introuvable dans RECORDS`);
+  return record;
+}
+
+function cibleMaj(maj: SeedMaj): SeedRecord {
+  const record = recordOf(maj.key);
+  const key = maj.mode === "ajoute" ? `${record.key}_${PROFILS[maj.profil].kind}` : record.key;
+  return { ...record, key, profil: maj.profil };
+}
+
+function recordsAttendus(maj: boolean): SeedRecord[] {
+  if (!maj) return RECORDS;
+  const cibles = new Map(MISES_A_JOUR.map((m) => [m.key, cibleMaj(m)]));
+  return RECORDS.map((record) => cibles.get(record.key) ?? record);
+}
 
 function buildApprenant(record: SeedRecord) {
   return {
@@ -423,6 +514,7 @@ function buildContrats(record: SeedRecord) {
   if (!contrat) return [];
   return [
     {
+      ...contrat.employeur,
       date_debut: d(contrat.date_debut),
       date_fin: d(contrat.date_fin),
       date_rupture: contrat.date_rupture ? d(contrat.date_rupture) : null,
@@ -440,58 +532,82 @@ async function cleanup(): Promise<{ effectifs: number; effectifsDECA: number }> 
   return { effectifs: eff.deletedCount ?? 0, effectifsDECA: deca.deletedCount ?? 0 };
 }
 
+async function buildEffectif(record: SeedRecord, now: Date) {
+  const profil = profilOf(record);
+  const organisme = await getOrganismeByUAIAndSIRET(profil.uai, profil.siret);
+  if (!organisme) {
+    logger.error({ key: record.key, uai: profil.uai, siret: profil.siret }, "Organisme introuvable (UAI+SIRET)");
+    return null;
+  }
+
+  const base = {
+    organisme_id: organisme._id,
+    organisme_responsable_id: organisme._id,
+    organisme_formateur_id: organisme._id,
+    id_erp_apprenant: markerId(record.key),
+    source_organisme_id: MARKER, // pas un id d'organisme : second marqueur des données de test
+    annee_scolaire: ANNEE_SCOLAIRE,
+    apprenant: buildApprenant(record),
+    formation: buildFormation(record),
+    contrats: buildContrats(record),
+    is_lock: false,
+    validation_errors: [],
+    created_at: now,
+    updated_at: now,
+    transmitted_at: now,
+  };
+
+  if (profil.kind === "DECA") {
+    const effectif = (await withComputedFields(
+      {
+        ...base,
+        source: SOURCE_APPRENANT.DECA,
+        deca_raw_id: record.decaRawId ? new ObjectId(record.decaRawId) : new ObjectId(),
+      } as WithoutId<IEffectifDECA>,
+      { organisme, certification: null }
+    )) as WithoutId<IEffectifDECA>;
+    return { organisme, kind: "DECA" as const, effectif };
+  }
+  const effectif = (await withComputedFields({ ...base, source: SOURCE_APPRENANT.ERP } as WithoutId<IEffectif>, {
+    organisme,
+    certification: null,
+  })) as WithoutId<IEffectif>;
+  return { organisme, kind: "CFA" as const, effectif };
+}
+
+async function saveEffectif(built: NonNullable<Awaited<ReturnType<typeof buildEffectif>>>) {
+  const filter = { id_erp_apprenant: built.effectif.id_erp_apprenant };
+  if (built.kind === "DECA") {
+    const existing = await effectifsDECADb().findOne(filter, { projection: { created_at: 1 } });
+    if (existing) {
+      await effectifsDECADb().replaceOne({ _id: existing._id }, { ...built.effectif, created_at: existing.created_at });
+    } else {
+      await effectifsDECADb().insertOne({ ...built.effectif, _id: new ObjectId() });
+    }
+    return;
+  }
+  const existing = await effectifsDb().findOne(filter, { projection: { created_at: 1 } });
+  if (existing) {
+    await effectifsDb().replaceOne({ _id: existing._id }, { ...built.effectif, created_at: existing.created_at });
+  } else {
+    await effectifsDb().insertOne({ ...built.effectif, _id: new ObjectId() });
+  }
+}
+
 async function insertRecords(dryRun: boolean): Promise<{ inserted: number; skipped: string[] }> {
   const now = new Date();
   const skipped: string[] = [];
   let inserted = 0;
 
   for (const record of RECORDS) {
-    const profil = profilOf(record);
-    const organisme = await getOrganismeByUAIAndSIRET(profil.uai, profil.siret);
-    if (!organisme) {
-      logger.error(
-        { key: record.key, uai: profil.uai, siret: profil.siret },
-        "Organisme introuvable (UAI+SIRET) — skip"
-      );
+    const built = await buildEffectif(record, now);
+    if (!built) {
       skipped.push(record.key);
       continue;
     }
+    if (!dryRun) await saveEffectif(built);
 
-    const base = {
-      organisme_id: organisme._id,
-      organisme_responsable_id: organisme._id,
-      organisme_formateur_id: organisme._id,
-      id_erp_apprenant: markerId(record.key),
-      source_organisme_id: MARKER, // pas un id d'organisme : second marqueur des données de test
-      annee_scolaire: ANNEE_SCOLAIRE,
-      apprenant: buildApprenant(record),
-      formation: buildFormation(record),
-      contrats: buildContrats(record),
-      is_lock: false,
-      validation_errors: [],
-      created_at: now,
-      updated_at: now,
-      transmitted_at: now,
-    };
-
-    if (profil.kind === "DECA") {
-      const effectif = (await withComputedFields(
-        {
-          ...base,
-          source: SOURCE_APPRENANT.DECA,
-          deca_raw_id: record.decaRawId ? new ObjectId(record.decaRawId) : new ObjectId(),
-        } as WithoutId<IEffectifDECA>,
-        { organisme, certification: null }
-      )) as WithoutId<IEffectifDECA>;
-      if (!dryRun) await effectifsDECADb().insertOne({ ...effectif, _id: new ObjectId() });
-    } else {
-      const effectif = (await withComputedFields({ ...base, source: SOURCE_APPRENANT.ERP } as WithoutId<IEffectif>, {
-        organisme,
-        certification: null,
-      })) as WithoutId<IEffectif>;
-      if (!dryRun) await effectifsDb().insertOne({ ...effectif, _id: new ObjectId() });
-    }
-
+    const { organisme } = built;
     inserted++;
     logger.info(
       {
@@ -507,6 +623,25 @@ async function insertRecords(dryRun: boolean): Promise<{ inserted: number; skipp
 
   logger.info({ inserted, skipped, dryRun }, dryRun ? "Insertion simulée (dry-run)" : "Insertion terminée");
   return { inserted, skipped };
+}
+
+async function applyMaj(dryRun: boolean): Promise<void> {
+  for (const maj of MISES_A_JOUR) {
+    const depart = recordOf(maj.key);
+    const collection = profilOf(depart).kind === "DECA" ? effectifsDECADb() : effectifsDb();
+    if (!(await collection.countDocuments({ id_erp_apprenant: markerId(depart.key) }))) {
+      throw new Error(`Dossier de départ ${depart.key} absent : lancer d'abord le seed sans option`);
+    }
+  }
+
+  const now = new Date();
+  for (const maj of MISES_A_JOUR) {
+    const cible = cibleMaj(maj);
+    const built = await buildEffectif(cible, now);
+    if (!built) throw new Error(`Organisme introuvable pour ${cible.key} (profil ${cible.profil})`);
+    if (!dryRun) await saveEffectif(built);
+    logger.info({ key: cible.key, profil: cible.profil, mode: maj.mode, dryRun }, "Mise à jour appliquée");
+  }
 }
 
 // Récupère toutes les pages : dès que la rentrée 2026 sera transmise par les ERP, la fenêtre
@@ -537,7 +672,8 @@ const verifKey = (nom: unknown, prenom: unknown, ddn: unknown) =>
     .trim()
     .toLowerCase()}|${ddn ?? ""}`;
 
-async function verify(): Promise<void> {
+async function verify(maj: boolean): Promise<void> {
+  const records = recordsAttendus(maj);
   const { totalElements, effectifs } = await fetchAllSipaEffectifs();
 
   logger.info({ totalElements, departements: VERIF_DEPARTEMENTS }, "Vérification SIPA — résultat de l'agrégation");
@@ -545,17 +681,21 @@ async function verify(): Promise<void> {
   const byKey = new Map<string, SipaEffectifs[number]>(
     effectifs.map((e) => [verifKey(e.apprenant?.nom, e.apprenant?.prenom, e.apprenant?.dateNaissance), e] as const)
   );
+  const now = new Date();
   let ok = 0;
   const failures: string[] = [];
 
-  for (const record of RECORDS) {
+  for (const record of records) {
     const profil = profilOf(record);
     const found = byKey.get(verifKey(record.nom, record.prenom, record.date_de_naissance));
     const expectedDept = profil.expectedDepartement.padStart(3, "0");
     const expectedSource = profil.kind;
+    const rompu = !!profil.contrat?.date_rupture && d(profil.contrat.date_rupture) <= now;
     const problems: string[] = [];
 
-    if (!found) {
+    if (rompu) {
+      if (found) problems.push("présent alors que le contrat est rompu");
+    } else if (!found) {
       problems.push("absent du résultat SIPA");
     } else {
       if (found.apprenant?.nom !== record.nom || found.apprenant?.prenom !== record.prenom) {
@@ -571,16 +711,30 @@ async function verify(): Promise<void> {
       if (foundIne !== record.ine) {
         problems.push(`INE ${foundIne ?? "absent"} (attendu ${record.ine ?? "absent"})`);
       }
-      const expectHasContrat = !!profil.contrat;
-      if (!!found.contrats !== expectHasContrat) {
-        problems.push(
-          `contrat ${found.contrats ? "présent" : "absent"} (attendu ${expectHasContrat ? "présent" : "absent"})`
-        );
+      const { contrat } = profil;
+      if (!contrat || !found.contrats) {
+        if (!!found.contrats !== !!contrat) {
+          problems.push(`contrat ${found.contrats ? "présent" : "absent"} (attendu ${contrat ? "présent" : "absent"})`);
+        }
+      } else {
+        const attendus = {
+          dateDebutContrat: contrat.date_debut,
+          dateFinContrat: contrat.date_fin,
+        };
+        for (const [champ, attendu] of Object.entries(attendus) as [keyof typeof attendus, string][]) {
+          if (found.contrats[champ] !== attendu) {
+            problems.push(`${champ} ${found.contrats[champ]} (attendu ${attendu})`);
+          }
+        }
       }
     }
 
     if (problems.length === 0) {
       ok++;
+      if (rompu) {
+        logger.info({ eleve: record.key }, "✅ OK (absent, contrat rompu)");
+        continue;
+      }
       logger.info(
         {
           eleve: record.key,
@@ -599,7 +753,7 @@ async function verify(): Promise<void> {
   }
 
   logger.info(
-    { ok, total: RECORDS.length, failures },
+    { ok, total: records.length, maj, failures },
     failures.length === 0
       ? "✅ Vérification SIPA : tous les élèves ressortent correctement"
       : "❌ Vérification SIPA : écarts détectés"
@@ -610,12 +764,14 @@ interface Options {
   cleanup?: boolean;
   verify?: boolean;
   dryRun?: boolean;
+  maj?: boolean;
 }
 
 export async function seedSipaTestNancy({
   cleanup: cleanupOnly,
   verify: verifyOnly,
   dryRun = false,
+  maj = false,
 }: Options): Promise<number> {
   if (cleanupOnly) {
     await cleanup();
@@ -623,19 +779,23 @@ export async function seedSipaTestNancy({
   }
 
   if (verifyOnly) {
-    await verify();
+    await verify(maj);
     return 0;
   }
 
-  // Insertion idempotente : purge des anciens enregistrements tagués avant réinsertion.
-  if (!dryRun) {
-    await cleanup();
+  if (maj) {
+    await applyMaj(dryRun);
+  } else {
+    // Insertion idempotente : purge des anciens enregistrements tagués avant réinsertion.
+    if (!dryRun) {
+      await cleanup();
+    }
+    await insertRecords(dryRun);
   }
-  await insertRecords(dryRun);
 
   if (!dryRun) {
     try {
-      await verify();
+      await verify(maj);
     } catch (err) {
       logger.error({ err }, "Vérification SIPA échouée (non bloquant, le seed reste appliqué)");
     }

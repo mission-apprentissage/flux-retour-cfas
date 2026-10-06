@@ -25,11 +25,14 @@ export const voeuxAffelnetJobs = {
   },
   "tmp:seed-sipa-test-nancy": {
     handler: async (job) => {
-      const payload = job.payload as { cleanup?: boolean; verify?: boolean; dryRun?: boolean } | undefined;
+      const payload = job.payload as
+        | { cleanup?: boolean; verify?: boolean; dryRun?: boolean; maj?: boolean }
+        | undefined;
       return seedSipaTestNancy({
         cleanup: payload?.cleanup ?? false,
         verify: payload?.verify ?? false,
         dryRun: payload?.dryRun ?? false,
+        maj: payload?.maj ?? false,
       });
     },
   },
