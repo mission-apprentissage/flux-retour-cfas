@@ -1982,6 +1982,28 @@ export const getEffectifsFusionnesByMissionLocaleId = async (
   };
 };
 
+export const getCompteursOngletsMissionLocale = async (organisation: IOrganisationMissionLocale) => {
+  const [result] = await missionLocaleEffectifsDb()
+    .aggregate<Record<"tous" | "prioritaires" | "collaborations", Array<{ total: number }>>>([
+      ...(await missionLocaleBaseAggregation(organisation)),
+      { $match: { a_traiter: true } },
+      {
+        $facet: {
+          tous: [{ $count: "total" }],
+          prioritaires: [{ $match: buildCriteresPrioritairesMatchOr() }, { $count: "total" }],
+          collaborations: [{ $match: { "organisme_data.acc_conjoint": true } }, { $count: "total" }],
+        },
+      },
+    ])
+    .toArray();
+
+  return {
+    prioritaires: result.prioritaires[0]?.total ?? 0,
+    collaborations: result.collaborations[0]?.total ?? 0,
+    tous: result.tous[0]?.total ?? 0,
+  };
+};
+
 export async function getAllEffectifsParMois(
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   userId?: ObjectId
