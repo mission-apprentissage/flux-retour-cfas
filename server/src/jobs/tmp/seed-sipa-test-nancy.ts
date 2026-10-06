@@ -681,6 +681,7 @@ async function verify(maj: boolean): Promise<void> {
   const byKey = new Map<string, SipaEffectifs[number]>(
     effectifs.map((e) => [verifKey(e.apprenant?.nom, e.apprenant?.prenom, e.apprenant?.dateNaissance), e] as const)
   );
+  const now = new Date();
   let ok = 0;
   const failures: string[] = [];
 
@@ -689,9 +690,12 @@ async function verify(maj: boolean): Promise<void> {
     const found = byKey.get(verifKey(record.nom, record.prenom, record.date_de_naissance));
     const expectedDept = profil.expectedDepartement.padStart(3, "0");
     const expectedSource = profil.kind;
+    const rompu = !!profil.contrat?.date_rupture && d(profil.contrat.date_rupture) <= now;
     const problems: string[] = [];
 
-    if (!found) {
+    if (rompu) {
+      if (found) problems.push("présent alors que le contrat est rompu");
+    } else if (!found) {
       problems.push("absent du résultat SIPA");
     } else {
       if (found.apprenant?.nom !== record.nom || found.apprenant?.prenom !== record.prenom) {
@@ -716,9 +720,8 @@ async function verify(maj: boolean): Promise<void> {
         const attendus = {
           dateDebutContrat: contrat.date_debut,
           dateFinContrat: contrat.date_fin,
-          dateRuptureContrat: contrat.date_rupture,
         };
-        for (const [champ, attendu] of Object.entries(attendus) as [keyof typeof attendus, string | null][]) {
+        for (const [champ, attendu] of Object.entries(attendus) as [keyof typeof attendus, string][]) {
           if (found.contrats[champ] !== attendu) {
             problems.push(`${champ} ${found.contrats[champ]} (attendu ${attendu})`);
           }
@@ -728,6 +731,10 @@ async function verify(maj: boolean): Promise<void> {
 
     if (problems.length === 0) {
       ok++;
+      if (rompu) {
+        logger.info({ eleve: record.key }, "✅ OK (absent, contrat rompu)");
+        continue;
+      }
       logger.info(
         {
           eleve: record.key,
