@@ -25,7 +25,7 @@ import {
 } from "shared/models/data/missionLocaleEffectif.model";
 import { IMissionLocaleStats, IMissionLocaleStatsSegments } from "shared/models/data/missionLocaleStats.model";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
-import { getAnneeScolaireListFromDateRange } from "shared/utils";
+import { getAnneeScolaireListFromDateRange, getBornesNaissanceMissionLocale } from "shared/utils";
 
 import { estCommuneParDefaut } from "@/common/apis/apiAlternance/apiAlternance";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
@@ -140,14 +140,7 @@ const unionWithDecaForMissionLocale = (missionLocaleId: number) => [
   },
   {
     $match: {
-      $or: [
-        {
-          "apprenant.date_de_naissance": {
-            $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 26)),
-          },
-        },
-        { "apprenant.rqth": true },
-      ],
+      "apprenant.date_de_naissance": { $gte: getBornesNaissanceMissionLocale().nesApres },
     },
   },
   {
@@ -1543,6 +1536,7 @@ export const getEffectifFromMissionLocaleId = async (
         soft_deleted: { $ne: true },
       },
     },
+    ...(organisation.type === "MISSION_LOCALE" ? buildEffMissionLocaleFilter() : []),
     ...addFieldTraitementStatus(organisation.type),
     ...addDateReceptionField(),
     ...addSituationDossierField(),
@@ -3277,9 +3271,8 @@ export const createMissionLocaleSnapshot = async (
       : null;
 
   const ageFilter = effectif?.apprenant?.date_de_naissance
-    ? effectif?.apprenant?.date_de_naissance >= new Date(new Date().setFullYear(new Date().getFullYear() - 26))
+    ? effectif.apprenant.date_de_naissance >= getBornesNaissanceMissionLocale().nesApres
     : false;
-  const rqthFilter = effectif.apprenant.rqth;
   const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
   const mlFilter = !!effectif.apprenant.adresse?.mission_locale_id;
 
@@ -3317,7 +3310,7 @@ export const createMissionLocaleSnapshot = async (
     );
   }
 
-  const preFilter = !!(rupturantFilter && (ageFilter || rqthFilter) && decaFilter);
+  const preFilter = !!(rupturantFilter && ageFilter && decaFilter);
 
   const mlData = (await organisationsDb().findOne({
     type: "MISSION_LOCALE",

@@ -2,7 +2,7 @@ import { ML_SITUATION_DOSSIER, STATUT_APPRENANT } from "shared/constants";
 import { CFA_RISQUE_RUPTURE_ENUM, CFA_SITUATION_TYPE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { USER_RESPONSE_TYPE } from "shared/models/data/whatsappContact.model";
 import { CFA_COLLAB_STATUS } from "shared/models/routes/organismes/cfa";
-import { getAnneeScolaireListFromDateRange } from "shared/utils";
+import { getAnneeScolaireListFromDateRange, getBornesNaissanceMissionLocale } from "shared/utils";
 
 import { escapeRegex, parseStringToArray } from "@/common/utils/usersFiltersUtils";
 
@@ -56,38 +56,13 @@ export const getCurrentStatutFromParcours = <T extends { date: Date }>(
 };
 
 export const buildEffRuptureAgeFilter = () => {
-  const now = new Date();
-  const ageConditions = {
-    $and: [
-      {
-        $or: [
-          {
-            "effectif_snapshot.apprenant.date_de_naissance": {
-              $gte: new Date(new Date(now).setFullYear(now.getFullYear() - 26)),
-            },
-          },
-          { "effectif_snapshot.apprenant.rqth": true },
-        ],
-      },
-      {
-        "effectif_snapshot.apprenant.date_de_naissance": {
-          $lte: new Date(new Date(now).setFullYear(now.getFullYear() - 16)),
-        },
-      },
-    ],
-  };
+  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
 
   return [
     {
       $match: {
-        // Hors du $or : le soft-delete ne doit jamais être contourné.
         soft_deleted: { $ne: true },
-        $or: [
-          ageConditions,
-          // Un dossier de collaboration envoyé par le CFA ne disparaît plus pour un motif d'âge
-          // (ex : le jeune atteint 26 ans pendant le suivi).
-          { "organisme_data.acc_conjoint": true },
-        ],
+        "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
       },
     },
   ];

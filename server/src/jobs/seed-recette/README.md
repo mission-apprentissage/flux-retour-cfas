@@ -65,7 +65,7 @@ Mot de passe commun : variable `MNA_TDB_SEED_RECETTE_PASSWORD` (sops, `env.recet
 | A01 STANDARD | Lucas Bernard | Rupture récente, CFA sans compte | ML_A › À traiter ou recontacter | `/mission-locale/5eed01000000000000000001` |
 | A02 DECA | Chloé Dubois | Rupture remontée par DECA pour un CFA sans ERP | ML_A › À traiter ou recontacter ; CFA_DECA › Ruptures de 45 j et plus | `/mission-locale/5eed02000000000000000002` |
 | A03 MINEUR | Hugo Thomas | Jeune de 17 ans → prioritaire | ML_A › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed01000000000000000003` |
-| A04 RQTH | Manon Robert | Jeune de 28 ans avec RQTH → visible et prioritaire | ML_A › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed01000000000000000004` |
+| A04 RQTH | Manon Robert | Jeune avec RQTH → visible et prioritaire | ML_A › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed01000000000000000004` |
 | A10 PLUS DE 180 J | Jade Simon | Rupture il y a 200 jours, jeune passé en abandon → groupe « plus de 180 j » | ML_A › À traiter ou recontacter | `/mission-locale/5eed0100000000000000000a` |
 | A11 NOUVEAU CONTRAT | Gabriel Laurent | Jeune reparti en contrat depuis la rupture → bandeau « nouveau contrat » | ML_A › À traiter ou recontacter | `/mission-locale/5eed0100000000000000000b` |
 | B12 FIN DE FORMATION | Sarah Lefebvre | À recontacter, formation terminée depuis | ML_A › À traiter ou recontacter | `/mission-locale/5eed0100000000000000000c` |

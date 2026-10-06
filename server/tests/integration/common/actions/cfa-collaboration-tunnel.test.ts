@@ -168,6 +168,39 @@ describe("Tunnel de collaboration CFA", () => {
     });
   });
 
+  describe("âge du jeune", () => {
+    const ilYA = (annees: number) => new Date(new Date().getFullYear() - annees, 0, 1);
+
+    it("refuse une collaboration pour un jeune de 26 ans ou plus, même RQTH, sans créer de dossier", async () => {
+      await insertEffectif({ date_de_naissance: ilYA(27), rqth: true });
+
+      await expect(send(await parse(brancheA))).rejects.toThrow(/réservée aux jeunes de 16 à 25 ans/);
+
+      expect(await missionLocaleEffectifsDb().countDocuments({ effectif_id: effectifId })).toBe(0);
+    });
+
+    it("refuse une collaboration sur un dossier existant d'un jeune de 26 ans ou plus", async () => {
+      const effectif = await insertEffectif({ date_de_naissance: ilYA(27) });
+      await missionLocaleEffectifsDb().insertOne(
+        testDoc<IMissionLocaleEffectif>({
+          _id: new ObjectId(),
+          mission_locale_id: mlOrganisationId,
+          effectif_id: effectifId,
+          effectif_snapshot: { ...effectif, _id: effectifId, organisme_id: organismeId },
+          effectif_snapshot_date: new Date(),
+          date_rupture: new Date("2026-01-10"),
+          created_at: new Date(),
+          current_status: { value: null, date: null },
+        })
+      );
+
+      await expect(send(await parse(brancheB))).rejects.toThrow(/réservée aux jeunes de 16 à 25 ans/);
+
+      const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+      expect(dossier?.organisme_data?.acc_conjoint).toBeUndefined();
+    });
+  });
+
   describe("validation du payload", () => {
     it("R1 : branche A sans risque de rupture", async () => {
       await expect(parse({ ...brancheA, risque_rupture: undefined })).rejects.toThrow();
