@@ -1,2 +1,8 @@
-export { effectifQueryKeys, useMlBannerStats, useMlParametres, useUpdateMlParametres } from "./useEffectifQueries";
+export {
+  effectifQueryKeys,
+  useMlBannerStats,
+  useMlCompteursOnglets,
+  useMlParametres,
+  useUpdateMlParametres,
+} from "./useEffectifQueries";
 export { useDismissible } from "./useDismissible";
