@@ -1,5 +1,6 @@
 /* DSFR espace tous les onglets via `.fr-nav__list > :first-child:nth-last-child(3) ~ *`. */
-:global(.fr-nav__item):has(.aProposLink) {
+:global(.fr-nav__item):has(.aProposLink),
+:global(.fr-nav__item):has(.inviterCfaLink) {
   margin-left: auto !important;
 }
 
@@ -10,7 +11,8 @@
 }
 
 @media (max-width: 992px) {
-  :global(.fr-nav__item):has(.aProposLink) {
+  :global(.fr-nav__item):has(.aProposLink),
+  :global(.fr-nav__item):has(.inviterCfaLink) {
     margin-left: 0 !important;
   }
 }
@@ -18,6 +20,11 @@
   display: inline-flex;
   gap: 0.5rem;
   align-items: center;
+}
+
+.compteur.compteur {
+  color: var(--artwork-major-blue-france);
+  background-color: var(--artwork-decorative-blue-france);
 }
 
 /* Nav DREETS/DDETS uniquement : onglets resserrés pour absorber les deux entrées supplémentaires. */

@@ -6,6 +6,7 @@ export const effectifQueryKeys = {
   all: ["effectifs"] as const,
   detail: (id: string) => [...effectifQueryKeys.all, "detail", id] as const,
   list: (params: Record<string, unknown>) => [...effectifQueryKeys.all, "list", params] as const,
+  mlCompteursOnglets: () => [...effectifQueryKeys.all, "ml-compteurs-onglets"] as const,
   bannerStats: () => ["ml-banner-stats"] as const,
   mlParametres: () => ["ml-parametres"] as const,
 };
@@ -14,6 +15,14 @@ export function useMlParametres() {
   return useQuery<{ rdv_url: string | null }>({
     queryKey: effectifQueryKeys.mlParametres(),
     queryFn: () => _get(`/api/v1/organisation/mission-locale/parametres`),
+  });
+}
+
+export function useMlCompteursOnglets(enabled: boolean) {
+  return useQuery<{ prioritaires: number; collaborations: number; tous: number }>({
+    queryKey: effectifQueryKeys.mlCompteursOnglets(),
+    queryFn: () => _get(`/api/v1/organisation/mission-locale/compteurs-onglets`),
+    enabled,
   });
 }
 
