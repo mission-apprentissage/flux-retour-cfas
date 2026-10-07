@@ -685,7 +685,7 @@ const ACCENT_EQUIVALENTS: Record<string, string> = {
   y: "yÿ",
 };
 
-function buildAccentInsensitiveRegex(token: string): string {
+export function buildAccentInsensitiveRegex(token: string): string {
   return token
     .split("")
     .map((char) => {

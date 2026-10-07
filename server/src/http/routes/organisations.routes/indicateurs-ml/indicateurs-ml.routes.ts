@@ -46,6 +46,7 @@ import {
   getWhatsAppStats,
   getPrequalifStats,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
+import { rechercherEtablissements } from "@/common/actions/recherche/recherche-etablissements.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { organisationsDb } from "@/common/model/collections";
 import {
@@ -156,6 +157,11 @@ const collaborationDossiersQuery = collaborationDossiersExportQuery.extend({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
 });
+const rechercheQuery = z.object({
+  q: z.string().max(100).default(""),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+});
 const couvertureDepartementsQuery = z.object({ period: zStatsPeriod.optional(), region: z.string() });
 const nationalQuery = z.object({ period: zStatsPeriod.optional(), national: zBooleanStringSchema.optional() });
 const traitementRegionsQuery = nationalQuery.extend({ segment: zStatsSegment.default("all") });
@@ -227,6 +233,7 @@ export default () => {
     validateRequestMiddleware({ query: collaborationDossiersExportQuery }),
     returnResult(getCollaborationDossiersExportRoute)
   );
+  router.get("/stats/recherche", validateRequestMiddleware({ query: rechercheQuery }), returnResult(getRechercheRoute));
   router.get(
     "/stats/couverture-regions",
     validateRequestMiddleware({ query: nationalQuery }),
@@ -451,6 +458,11 @@ const getCollaborationDossiersExportRoute: IndicateursHandler<
     locals.organisation._id
   );
   return { data: result.data };
+};
+
+const getRechercheRoute: IndicateursHandler<z.infer<typeof rechercheQuery>> = async (req, { locals }) => {
+  const { q, page, limit } = req.query;
+  return await rechercherEtablissements(q, scopedRegions(undefined, locals.regions), { page, limit });
 };
 
 const getTraitementMLRoute: IndicateursHandler<z.infer<typeof traitementMlQuery>> = async (req, { locals }) => {

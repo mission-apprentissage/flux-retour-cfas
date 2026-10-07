@@ -493,3 +493,34 @@ export interface ICollaborationDossiersResponse {
   data: ICollaborationDossier[];
   filtres: { cfa: ICollaborationDossierStructure[]; ml: ICollaborationDossierStructure[] };
 }
+
+interface IRechercheResultatBase {
+  id: string;
+  nom: string | null;
+  adresse: { code_postal: string | null; commune: string | null; complete: string | null };
+  derniere_activite: Date | null;
+}
+
+export interface IRechercheResultatCfa extends IRechercheResultatBase {
+  type: "cfa";
+  uai: string | null;
+  siret: string;
+  compte_tba: boolean;
+  invitations_recues: number;
+  collaborations_envoyees: number;
+}
+
+export interface IRechercheResultatMl extends IRechercheResultatBase {
+  type: "ml";
+  compte_tba: boolean;
+  ruptures: { a_traiter: number; traites: number };
+  collaborations: { recues: number; traitees: number };
+}
+
+export type IRechercheResultat = IRechercheResultatCfa | IRechercheResultatMl;
+
+export interface IRechercheResponse {
+  total: number;
+  pagination: { page: number; limit: number; total_pages: number };
+  data: IRechercheResultat[];
+}

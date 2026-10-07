@@ -83,7 +83,7 @@ export interface CfaEtablissementsFilters extends CfaTerritoire {
 
 const COLLAB_ACTIVE_MATCH = { is_allowed_collab: true, collab_suspended_at: null };
 
-const fetchDerniereConnexionByOrgId = async (organismeIds: ObjectId[]): Promise<Map<string, Date>> => {
+export const fetchDerniereConnexionByOrgId = async (organismeIds: ObjectId[]): Promise<Map<string, Date>> => {
   if (organismeIds.length === 0) return new Map();
 
   const organisations = await organisationsDb()

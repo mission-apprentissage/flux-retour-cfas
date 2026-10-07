@@ -1265,6 +1265,84 @@ describe("Indicateurs ML routes (territoriales)", () => {
     });
   });
 
+  describe("GET /stats/recherche", () => {
+    const BASE = "/api/v1/organisation/indicateurs-ml/stats/recherche";
+
+    beforeEach(async () => {
+      const organisme = (id: ObjectId, nom: string, region: string, extra: Record<string, unknown> = {}) => ({
+        _id: id,
+        siret: id.toString().slice(0, 14),
+        enseigne: nom,
+        adresse: { region, commune: "Ville", code_postal: "00000", complete: `1 rue ${nom}` },
+        est_dans_le_referentiel: "present",
+        ...extra,
+      });
+      await organismesDb().insertMany(
+        [
+          organisme(CFA_A, "Campus Tech", "11", { has_account: true }),
+          organisme(CFA_B, "Tech Lyon", "84"),
+          organisme(new ObjectId(), "Tech Fermé", "11", { ferme: true }),
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+      await missionLocaleCfaInvitationsDb().insertOne(
+        {
+          _id: new ObjectId(),
+          mission_locale_id: ML_IDF,
+          author_id: new ObjectId(),
+          organisme_id: CFA_A,
+          organisation_id: new ObjectId(),
+          siret: "00000000000000",
+          destinataires: [],
+          created_at: new Date(),
+        } as never,
+        { bypassDocumentValidation: true }
+      );
+      await organisationsDb().updateOne({ _id: ML_IDF }, { $set: { "adresse.commune": "Créteil" } });
+    });
+
+    it("Renvoie les CFA du référentiel de la région avec leurs indicateurs, sans les CFA fermés ni d'autres régions", async () => {
+      const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?q=tech`);
+
+      expect(response.status).toBe(200);
+      expect(response.data.total).toBe(1);
+      expect(response.data.data[0]).toMatchObject({
+        type: "cfa",
+        id: CFA_A.toString(),
+        nom: "Campus Tech",
+        compte_tba: true,
+        invitations_recues: 1,
+        collaborations_envoyees: 2,
+      });
+    });
+
+    it("Trouve une Mission Locale par sa commune, sans accent, avec ses compteurs de ruptures et de collaborations", async () => {
+      const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?q=creteil`);
+
+      expect(response.data.data).toEqual([
+        expect.objectContaining({
+          type: "ml",
+          id: ML_IDF.toString(),
+          compte_tba: true,
+          ruptures: { a_traiter: 20, traites: 40 },
+          collaborations: { recues: 12, traitees: 10 },
+        }),
+      ]);
+    });
+
+    it("Ouvre toute la France à l'admin, trie par nom, pagine et ignore les recherches trop courtes", async () => {
+      const admin = await requestAsOrganisation(ADMIN, "get", `${BASE}?q=tech`);
+      expect(admin.data.data.map((row: { nom: string }) => row.nom)).toEqual(["Campus Tech", "Tech Lyon"]);
+
+      const page2 = await requestAsOrganisation(ADMIN, "get", `${BASE}?q=tech&limit=1&page=2`);
+      expect(page2.data.pagination).toEqual({ page: 2, limit: 1, total_pages: 2 });
+      expect(page2.data.data.map((row: { nom: string }) => row.nom)).toEqual(["Tech Lyon"]);
+
+      const court = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?q=t`);
+      expect(court.data.total).toBe(0);
+    });
+  });
+
   describe("GET /stats/collaborations", () => {
     it("Renvoie le bloc collaboration national pour un admin", async () => {
       const response = await requestAsOrganisation(
