@@ -38,6 +38,7 @@ function MissionLocalePageContent() {
         }
       />
       <StatsTabs
+        resetTableFilters
         tabs={[
           {
             id: "traitement",

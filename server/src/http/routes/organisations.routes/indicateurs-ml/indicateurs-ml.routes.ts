@@ -136,8 +136,14 @@ const collaborationDossiersExportQuery = z.object({
   region: z.string().optional(),
   departements: zCsvList,
   search: z.string().optional(),
-  date_debut: z.coerce.date().optional(),
-  date_fin: z.coerce.date().optional(),
+  date_debut: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  date_fin: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   statuts: zCsvEnum(COLLAB_DOSSIER_STATUTS),
   delais: zCsvEnum(COLLAB_DOSSIER_DELAIS),
   resultats: zCsvEnum(COLLAB_DOSSIER_RESULTATS),

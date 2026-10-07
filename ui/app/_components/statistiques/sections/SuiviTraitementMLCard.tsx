@@ -10,6 +10,7 @@ import { isAdminUser } from "@/app/suivi-des-indicateurs/access";
 import { OverviewCard } from "../cards/OverviewCard";
 import { useMlTableFilters } from "../hooks/useMlTableFilters";
 import { useStatsFilters } from "../hooks/useStatsFilters";
+import { STATS_PAGE_SIZES } from "../tables/StatsTablePagination";
 import {
   TraitementMLTable,
   type TraitementMLSortColumn,
@@ -41,7 +42,7 @@ const readTableState = (params: URLSearchParams | null): TraitementMLTableState 
   const sortDirection = params?.get("sort_order");
   return {
     ...(Number.isInteger(page) && page > 0 ? { page } : {}),
-    ...([5, 10, 20, 50].includes(limit) ? { limit } : {}),
+    ...(STATS_PAGE_SIZES.includes(limit) ? { limit } : {}),
     ...(sortColumn && SORT_COLUMNS.includes(sortColumn) ? { sortColumn } : {}),
     ...(sortDirection === "asc" || sortDirection === "desc" ? { sortDirection } : {}),
   };

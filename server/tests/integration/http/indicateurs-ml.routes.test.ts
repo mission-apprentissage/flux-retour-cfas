@@ -1205,6 +1205,39 @@ describe("Indicateurs ML routes (territoriales)", () => {
       );
     });
 
+    it("Filtre les dates en heure de Paris et traite un dossier qualifié sans log de conseiller", async () => {
+      const D_NUIT = new ObjectId();
+      const D_WHATSAPP = new ObjectId();
+      await missionLocaleEffectifsDb().insertMany(
+        [
+          // 10/03 23h30 UTC = 11/03 00h30 à Paris
+          dossier(D_NUIT, CFA_A, { envoi: new Date("2026-03-10T23:30:00Z") }),
+          {
+            ...dossier(D_WHATSAPP, CFA_A, {
+              situation: "NE_SOUHAITE_PAS_ETRE_RECONTACTE",
+              envoi: new Date("2026-03-20"),
+            }),
+            date_traitement: new Date("2026-03-23"),
+          },
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+
+      const ids = async (query: string) =>
+        (await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?${query}`)).data.data.map(
+          (row: { id: string }) => row.id
+        );
+      expect(await ids("date_fin=2026-03-10")).not.toContain(D_NUIT.toString());
+      expect(await ids("date_debut=2026-03-11&date_fin=2026-03-11")).toEqual([D_NUIT.toString()]);
+
+      const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?date_debut=2026-03-20`);
+      expect(response.data.data.find((row: { id: string }) => row.id === D_WHATSAPP.toString())).toMatchObject({
+        statut: "traite",
+        traite_par_ml: true,
+        delai_jours: 3,
+      });
+    });
+
     it("Limite la DDETS à son département et refuse l'ARML", async () => {
       const ddets = await requestAsOrganisation(DDETS_PARIS, "get", BASE);
       expect(ddets.data.total).toBe(2);

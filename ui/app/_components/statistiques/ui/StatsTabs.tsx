@@ -16,6 +16,8 @@ export interface StatsTab extends StatsTabDefinition {
 interface StatsTabsProps {
   tabs: StatsTab[];
   className?: string;
+  /** Ne garder que les filtres de l'en-tête au changement d'onglet (filtres de tableau propres à chaque onglet). */
+  resetTableFilters?: boolean;
 }
 
 const TAB_PARAM = "tab";
@@ -24,7 +26,7 @@ const TAB_PARAM = "tab";
  * Onglets DSFR contrôlés par `?tab=`. Un seul panneau est monté : l'état local des sections
  * (période, type de graphique) repart de zéro au changement d'onglet.
  */
-export function StatsTabs({ tabs, className }: StatsTabsProps) {
+export function StatsTabs({ tabs, className, resetTableFilters = false }: StatsTabsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -43,16 +45,17 @@ export function StatsTabs({ tabs, className }: StatsTabsProps) {
 
   const handleTabChange = useCallback(
     (tabId: string) => {
-      // Seuls les filtres de l'en-tête suivent d'un onglet à l'autre ; ceux des tableaux repartent de zéro.
-      const params = new URLSearchParams();
-      STATS_FILTER_PARAMS.forEach((key) => {
-        const value = searchParams?.get(key);
-        if (value) params.set(key, value);
-      });
+      const params = new URLSearchParams(resetTableFilters ? undefined : searchParams?.toString());
+      if (resetTableFilters) {
+        STATS_FILTER_PARAMS.forEach((key) => {
+          const value = searchParams?.get(key);
+          if (value) params.set(key, value);
+        });
+      }
       params.set(TAB_PARAM, tabId);
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [router, pathname, searchParams]
+    [router, pathname, searchParams, resetTableFilters]
   );
 
   if (tabs.length === 0) {

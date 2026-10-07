@@ -22,8 +22,9 @@ export interface CollaborationDossiersTerritoire {
 
 export interface CollaborationDossiersFilters {
   search?: string;
-  dateDebut?: Date;
-  dateFin?: Date;
+  /** Jours d'envoi AAAA-MM-JJ, en heure de Paris, bornes incluses. */
+  dateDebut?: string;
+  dateFin?: string;
   statuts?: CollabDossierStatut[];
   delais?: CollabDossierDelai[];
   cfaIds?: ObjectId[];
@@ -82,20 +83,101 @@ const findTerritoireOrganismeIds = async ({ regions, departements }: Collaborati
   return organismes.map((organisme) => organisme._id);
 };
 
-const buildBaseMatch = (organismeIds: ObjectId[] | undefined, filters: CollaborationDossiersFilters = {}) => {
-  const dateDebut =
-    filters.dateDebut && filters.dateDebut > COLLABORATION_CUTOFF_DATE ? filters.dateDebut : COLLABORATION_CUTOFF_DATE;
-  return {
-    "organisme_data.acc_conjoint": true,
-    soft_deleted: { $ne: true },
-    "organisme_data.acc_conjoint_at": {
-      $gte: dateDebut,
-      // La date de fin est incluse : on s'arrête au lendemain exclu.
-      ...(filters.dateFin ? { $lt: new Date(filters.dateFin.getTime() + 24 * 60 * 60 * 1000) } : {}),
-    },
-    ...(organismeIds ? { "effectif_snapshot.organisme_id": { $in: organismeIds } } : {}),
+const PARIS_TIMEZONE = "Europe/Paris";
+
+const buildBaseMatch = (organismeIds: ObjectId[] | undefined) => ({
+  "organisme_data.acc_conjoint": true,
+  soft_deleted: { $ne: true },
+  "organisme_data.acc_conjoint_at": { $gte: COLLABORATION_CUTOFF_DATE },
+  ...(organismeIds ? { "effectif_snapshot.organisme_id": { $in: organismeIds } } : {}),
+});
+
+const buildPeriodeMatch = ({ dateDebut, dateFin }: CollaborationDossiersFilters): Document[] => {
+  if (!dateDebut && !dateFin) return [];
+  const jourEnvoi = {
+    $dateToString: { format: "%Y-%m-%d", date: "$organisme_data.acc_conjoint_at", timezone: PARIS_TIMEZONE },
   };
+  return [
+    {
+      $match: {
+        $expr: {
+          $and: [
+            ...(dateDebut ? [{ $gte: [jourEnvoi, dateDebut] }] : []),
+            ...(dateFin ? [{ $lte: [jourEnvoi, dateFin] }] : []),
+          ],
+        },
+      },
+    },
+  ];
 };
+
+/**
+ * Délai entre l'envoi et la première action d'un conseiller ML (jusqu'à aujourd'hui sans action). Un dossier avec une
+ * situation mais sans log de conseiller (préqualification WhatsApp, conseiller parti) est traité à sa date de traitement.
+ */
+const buildDelaiStages = (mlUserIds: ObjectId[]): Document[] => [
+  {
+    $lookup: {
+      from: "missionLocaleEffectifLog",
+      let: { effectifId: "$_id" },
+      pipeline: [
+        { $match: { $expr: { $eq: ["$mission_locale_effectif_id", "$$effectifId"] }, created_by: { $in: mlUserIds } } },
+        { $project: { _id: 0, created_at: 1 } },
+      ],
+      as: "logs_ml",
+    },
+  },
+  {
+    $addFields: {
+      premiere_activite_ml_at: {
+        $min: {
+          $map: {
+            input: {
+              $filter: {
+                input: "$logs_ml",
+                as: "log",
+                cond: { $gte: ["$$log.created_at", "$organisme_data.acc_conjoint_at"] },
+              },
+            },
+            as: "log",
+            in: "$$log.created_at",
+          },
+        },
+      },
+      traite_par_ml: {
+        $or: [{ $gt: [{ $size: "$logs_ml" }, 0] }, { $ne: [{ $ifNull: ["$situation", null] }, null] }],
+      },
+    },
+  },
+  {
+    $addFields: {
+      delai_jours: {
+        $max: [
+          0,
+          {
+            $dateDiff: {
+              startDate: "$organisme_data.acc_conjoint_at",
+              endDate: {
+                $cond: [
+                  "$traite_par_ml",
+                  {
+                    $ifNull: [
+                      "$premiere_activite_ml_at",
+                      { $ifNull: ["$date_traitement", "$organisme_data.acc_conjoint_at"] },
+                    ],
+                  },
+                  "$$NOW",
+                ],
+              },
+              unit: "day",
+              timezone: PARIS_TIMEZONE,
+            },
+          },
+        ],
+      },
+    },
+  },
+];
 
 const fetchStructures = async (
   organismeIds: ObjectId[],
@@ -173,7 +255,7 @@ export async function listCollaborationDossiers(
       ).map((user) => user._id)
     : [];
 
-  const conditions: Document[] = [buildBaseMatch(organismeIds, filters)];
+  const conditions: Document[] = [buildBaseMatch(organismeIds)];
   if (filters.cfaIds?.length) conditions.push({ "effectif_snapshot.organisme_id": { $in: filters.cfaIds } });
   if (filters.mlIds?.length) conditions.push({ mission_locale_id: { $in: filters.mlIds } });
   if (filters.motifs?.length) conditions.push({ "organisme_data.motif": { $in: filters.motifs } });
@@ -214,100 +296,61 @@ export async function listCollaborationDossiers(
     });
   }
 
-  const postFilters: Document[] = [];
-  if (filters.situations?.length) postFilters.push({ situation_dossier: { $in: filters.situations } });
-  if (filters.delais?.length) postFilters.push({ $or: filters.delais.map((delai) => DELAI_MATCH[delai]) });
+  const delaiStages = buildDelaiStages(mlUserIds);
+  // Sans filtre de délai, le délai n'est calculé que pour les lignes affichées (après pagination)
+  const delaiAvantPagination = !!filters.delais?.length || !pagination;
+  const filteringStages: Document[] = [
+    { $match: { $and: conditions } },
+    ...buildPeriodeMatch(filters),
+    ...addSituationDossierField(),
+    ...(filters.situations?.length ? [{ $match: { situation_dossier: { $in: filters.situations } } }] : []),
+    ...(delaiAvantPagination ? delaiStages : []),
+    ...(filters.delais?.length ? [{ $match: { $or: filters.delais.map((delai) => DELAI_MATCH[delai]) } }] : []),
+  ];
+  const rowStages: Document[] = [
+    ...(delaiAvantPagination ? [] : delaiStages),
+    {
+      $project: {
+        _id: 1,
+        mission_locale_id: 1,
+        organisme_id: "$effectif_snapshot.organisme_id",
+        prenom: "$effectif_snapshot.apprenant.prenom",
+        nom: "$effectif_snapshot.apprenant.nom",
+        situation: 1,
+        situation_dossier: 1,
+        motifs: { $ifNull: ["$organisme_data.motif", []] },
+        date_envoi: "$organisme_data.acc_conjoint_at",
+        delai_jours: 1,
+        traite_par_ml: 1,
+      },
+    },
+  ];
+  const sortStage = { $sort: { "organisme_data.acc_conjoint_at": -1, _id: 1 } };
 
-  const [result] = await missionLocaleEffectifsDb()
-    .aggregate<{ total: { count: number }[]; data: Document[] }>([
-      { $match: { $and: conditions } },
-      ...addSituationDossierField(),
-      {
-        $lookup: {
-          from: "missionLocaleEffectifLog",
-          let: { effectifId: "$_id" },
-          pipeline: [
+  // L'export sort toutes les lignes : pas de $facet, dont le document unique est plafonné à 16 Mo.
+  const result = pagination
+    ? (
+        await missionLocaleEffectifsDb()
+          .aggregate<{ total: { count: number }[]; data: Document[] }>([
+            ...filteringStages,
             {
-              $match: {
-                $expr: { $eq: ["$mission_locale_effectif_id", "$$effectifId"] },
-                created_by: { $in: mlUserIds },
+              $facet: {
+                total: [{ $count: "count" }],
+                data: [
+                  sortStage,
+                  { $skip: (pagination.page - 1) * pagination.limit },
+                  { $limit: pagination.limit },
+                  ...rowStages,
+                ],
               },
             },
-            { $project: { _id: 0, created_at: 1 } },
-          ],
-          as: "logs_ml",
-        },
-      },
-      {
-        $addFields: {
-          premiere_activite_ml_at: {
-            $min: {
-              $map: {
-                input: {
-                  $filter: {
-                    input: "$logs_ml",
-                    as: "log",
-                    cond: { $gte: ["$$log.created_at", "$organisme_data.acc_conjoint_at"] },
-                  },
-                },
-                as: "log",
-                in: "$$log.created_at",
-              },
-            },
-          },
-          traite_par_ml: { $gt: [{ $size: "$logs_ml" }, 0] },
-        },
-      },
-      {
-        $addFields: {
-          delai_jours: {
-            $max: [
-              0,
-              {
-                $dateDiff: {
-                  startDate: "$organisme_data.acc_conjoint_at",
-                  endDate: {
-                    $cond: [
-                      "$traite_par_ml",
-                      { $ifNull: ["$premiere_activite_ml_at", "$organisme_data.acc_conjoint_at"] },
-                      "$$NOW",
-                    ],
-                  },
-                  unit: "day",
-                  timezone: "Europe/Paris",
-                },
-              },
-            ],
-          },
-        },
-      },
-      ...(postFilters.length ? [{ $match: { $and: postFilters } }] : []),
-      {
-        $facet: {
-          total: [{ $count: "count" }],
-          data: [
-            { $sort: { "organisme_data.acc_conjoint_at": -1, _id: 1 } },
-            ...(pagination ? [{ $skip: (pagination.page - 1) * pagination.limit }, { $limit: pagination.limit }] : []),
-            {
-              $project: {
-                _id: 1,
-                mission_locale_id: 1,
-                organisme_id: "$effectif_snapshot.organisme_id",
-                prenom: "$effectif_snapshot.apprenant.prenom",
-                nom: "$effectif_snapshot.apprenant.nom",
-                situation: 1,
-                situation_dossier: 1,
-                motifs: { $ifNull: ["$organisme_data.motif", []] },
-                date_envoi: "$organisme_data.acc_conjoint_at",
-                delai_jours: 1,
-                traite_par_ml: 1,
-              },
-            },
-          ],
-        },
-      },
-    ])
-    .toArray();
+          ])
+          .toArray()
+      )[0]
+    : await missionLocaleEffectifsDb()
+        .aggregate<Document>([...filteringStages, sortStage, ...rowStages], { allowDiskUse: true })
+        .toArray()
+        .then((data) => ({ total: [{ count: data.length }], data }));
 
   const rows = result?.data ?? [];
   const structures = await fetchStructures(territoireOrganismeIds, missionLocaleIds);
