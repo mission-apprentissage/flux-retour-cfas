@@ -30,6 +30,7 @@ import {
 import { getCfaNpsStats, listCfaInjoignables } from "@/common/actions/cfa/cfa-collaboration-stats.actions";
 import { getCfaAdoptionStats, listCfaEtablissements } from "@/common/actions/cfa/cfa-stats.actions";
 import { listCollaborationDossiers } from "@/common/actions/mission-locale/collaboration-dossiers.actions";
+import { getMissionLocaleFicheIndicateurs } from "@/common/actions/mission-locale/mission-locale-fiche.actions";
 import {
   getRupturantsStats,
   getDossiersTraitesStats,
@@ -633,7 +634,12 @@ const getMlDetailRoute: IndicateursHandler<DefaultQuery, z.infer<typeof mlIdPara
 
   await verifyMlInRegions(id, userRegions);
 
-  return getMissionLocaleDetail(new ObjectId(id));
+  const mlId = new ObjectId(id);
+  const [detail, indicateurs] = await Promise.all([
+    getMissionLocaleDetail(mlId),
+    getMissionLocaleFicheIndicateurs(mlId),
+  ]);
+  return { ...detail, indicateurs };
 };
 
 const getMlMembresRoute: IndicateursHandler<DefaultQuery, z.infer<typeof mlIdParams>> = async (req, { locals }) => {

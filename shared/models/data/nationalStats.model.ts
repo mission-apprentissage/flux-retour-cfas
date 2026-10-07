@@ -527,3 +527,32 @@ export interface IRechercheResponse {
   pagination: { page: number; limit: number; total_pages: number };
   data: IRechercheResultat[];
 }
+
+/** Seuils des alertes d'activité de la fiche Mission Locale. */
+export const ML_ALERTE_SEUILS = {
+  delai_collab_jours: 10,
+  a_recontacter: 30,
+  inactivite_jours: 14,
+} as const;
+
+export const ML_ALERTE_TYPES = [
+  "delai_collab",
+  "a_recontacter",
+  "collab_sans_compte",
+  "non_engagee",
+  "inactive",
+] as const;
+export type IMlAlerteType = (typeof ML_ALERTE_TYPES)[number];
+
+export interface IMlAlerte {
+  type: IMlAlerteType;
+  valeur: number | null;
+}
+
+export interface IMlFicheIndicateurs {
+  premier_compte_at: Date | null;
+  derniere_connexion_at: Date | null;
+  taux_traitement: number | null;
+  is_engaged: boolean;
+  alertes: IMlAlerte[];
+}

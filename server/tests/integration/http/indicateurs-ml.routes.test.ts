@@ -1343,6 +1343,159 @@ describe("Indicateurs ML routes (territoriales)", () => {
     });
   });
 
+  describe("GET /mission-locale/:id/detail (fiche)", () => {
+    const DAY = 24 * 60 * 60 * 1000;
+    const getFiche = (mlId: ObjectId, org: IOrganisationCreate = ADMIN) =>
+      requestAsOrganisation(org, "get", `/api/v1/organisation/indicateurs-ml/mission-locale/${mlId}/detail`);
+
+    const insertUser = (organisationId: ObjectId, fields: Record<string, unknown>) =>
+      usersMigrationDb().insertOne(
+        {
+          _id: new ObjectId(),
+          email: `${new ObjectId()}@example.com`,
+          nom: "Nom",
+          prenom: "Prénom",
+          organisation_id: organisationId,
+          account_status: "CONFIRMED",
+          ...fields,
+        } as never,
+        { bypassDocumentValidation: true }
+      );
+
+    const setStats = (mlId: ObjectId, stats: Record<string, number>, collab: Record<string, number> = {}) =>
+      missionLocaleStatsDb().updateOne(
+        { mission_locale_id: mlId },
+        {
+          $set: {
+            stats: { ...STATS_HDF, ...stats } as IMissionLocaleStats["stats"],
+            segments: { ...SEGMENTS_IDF, collab: { ...SEGMENTS_IDF.collab, ...collab } },
+          },
+        }
+      );
+
+    it("Calcule comptes, taux et engagement à partir des utilisateurs confirmés et du dernier snapshot", async () => {
+      const recent = new Date(Date.now() - DAY);
+      await insertUser(ML_IDF, { confirmed_at: new Date("2025-03-01"), last_connection: new Date("2025-06-01") });
+      await insertUser(ML_IDF, { confirmed_at: new Date("2025-05-01"), last_connection: recent });
+      await insertUser(ML_IDF, { account_status: "PENDING_ADMIN_VALIDATION", confirmed_at: new Date("2024-01-01") });
+      await insertUser(ML_IDF, { created_at: new Date("2025-02-01") });
+
+      const response = await getFiche(ML_IDF);
+
+      expect(response.status).toBe(200);
+      expect(response.data.ml.nom).toBe("ML IDF");
+      expect(response.data.indicateurs).toEqual({
+        premier_compte_at: "2025-02-01T00:00:00.000Z",
+        derniere_connexion_at: recent.toISOString(),
+        taux_traitement: 70,
+        is_engaged: true,
+        alertes: [],
+      });
+    });
+
+    it("Signale une ML activée non engagée et sans connexion", async () => {
+      const response = await getFiche(ML_ARA);
+
+      expect(response.data.indicateurs).toMatchObject({
+        premier_compte_at: null,
+        derniere_connexion_at: null,
+        taux_traitement: 60,
+        is_engaged: false,
+        alertes: [
+          { type: "non_engagee", valeur: 60 },
+          { type: "inactive", valeur: null },
+        ],
+      });
+    });
+
+    it("Signale une ML sans compte qui reçoit des collaborations, sans les alertes d'usage", async () => {
+      const mlNonActivee = new ObjectId();
+      await organisationsDb().insertOne({
+        _id: mlNonActivee,
+        created_at: new Date(),
+        adresse: { region: "11" },
+        ml_id: 705,
+        nom: "ML NON ACTIVEE",
+        type: "MISSION_LOCALE",
+        email: "",
+        telephone: "",
+        site_web: "",
+      } as never);
+      await missionLocaleEffectifsDb().insertOne(buildCollabDossier(mlNonActivee, CFA_A, []), {
+        bypassDocumentValidation: true,
+      });
+
+      const response = await getFiche(mlNonActivee, DREETS_IDF);
+
+      expect(response.status).toBe(200);
+      expect(response.data.indicateurs).toMatchObject({
+        taux_traitement: null,
+        is_engaged: false,
+        alertes: [{ type: "collab_sans_compte", valeur: 1 }],
+      });
+    });
+
+    it("Applique les seuils au-delà de la limite seulement", async () => {
+      const connexion = (jours: number) => new Date(Date.now() - jours * DAY + 60 * 1000);
+      await insertUser(ML_HDF, { confirmed_at: new Date("2025-01-01"), last_connection: connexion(14) });
+      await setStats(
+        ML_HDF,
+        { total: 10, traite: 7, contacte_sans_retour: 30 },
+        { delai_premiere_activite_jours_total: 100, delai_premiere_activite_count: 10 }
+      );
+      expect((await getFiche(ML_HDF)).data.indicateurs.alertes).toEqual([]);
+
+      await usersMigrationDb().updateMany(
+        { organisation_id: ML_HDF },
+        { $set: { last_connection: connexion(15) } },
+        { bypassDocumentValidation: true }
+      );
+      await setStats(
+        ML_HDF,
+        { total: 10, traite: 7, contacte_sans_retour: 31 },
+        { delai_premiere_activite_jours_total: 101, delai_premiere_activite_count: 10 }
+      );
+      expect((await getFiche(ML_HDF)).data.indicateurs.alertes).toEqual([
+        { type: "delai_collab", valeur: 10.1 },
+        { type: "a_recontacter", valeur: 31 },
+        { type: "inactive", valeur: null },
+      ]);
+    });
+
+    it("Expose la date d'activation et la dernière action de chaque membre", async () => {
+      const userId = new ObjectId();
+      await insertUser(ML_IDF, { _id: userId, confirmed_at: new Date("2025-04-01") });
+      await insertUser(ML_IDF, { created_at: new Date("2025-04-02") });
+      const effectif = await missionLocaleEffectifsDb().findOne({ mission_locale_id: ML_IDF });
+      await missionLocaleEffectifsLogDb().insertMany(
+        [new Date("2026-02-01"), new Date("2026-02-03")].map((created_at) => ({
+          _id: new ObjectId(),
+          mission_locale_effectif_id: effectif!._id,
+          created_by: userId,
+          created_at,
+        })) as never
+      );
+
+      const response = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        `/api/v1/organisation/indicateurs-ml/mission-locale/${ML_IDF}/membres`
+      );
+
+      expect(response.status).toBe(200);
+      const byId = new Map(response.data.map((m: { _id: string }) => [m._id, m]));
+      expect(byId.get(userId.toString())).toMatchObject({
+        confirmed_at: "2025-04-01T00:00:00.000Z",
+        last_traitement_at: "2026-02-03T00:00:00.000Z",
+      });
+      expect(response.data).toHaveLength(2);
+      expect(response.data.find((m: { _id: string }) => m._id !== userId.toString())).toMatchObject({
+        confirmed_at: "2025-04-02T00:00:00.000Z",
+        last_traitement_at: null,
+      });
+    });
+  });
+
   describe("GET /stats/collaborations", () => {
     it("Renvoie le bloc collaboration national pour un admin", async () => {
       const response = await requestAsOrganisation(
