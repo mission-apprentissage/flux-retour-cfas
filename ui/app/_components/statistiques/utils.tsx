@@ -88,6 +88,16 @@ export function formatDateFr(dateString: string | null): string | null {
   }
 }
 
+export function safeHttpUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const { protocol } = new URL(url);
+    return protocol === "http:" || protocol === "https:" ? url : null;
+  } catch {
+    return null;
+  }
+}
+
 export function formatDateCourte(dateString: string | null): string | null {
   if (!dateString) return null;
   return format(new Date(dateString), "dd/MM/yyyy");

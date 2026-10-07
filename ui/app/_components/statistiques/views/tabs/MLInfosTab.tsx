@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import type { IMissionLocaleDetailResponse } from "../../hooks/useStatsQueries";
 import { CopyButton } from "../../ui/CopyButton";
-import { formatDateCourte } from "../../utils";
+import { formatDateCourte, safeHttpUrl } from "../../utils";
 import { MlAdminRdvUrlEditor } from "../MlAdminRdvUrlEditor";
 
 import styles from "./MLInfosTab.module.css";
@@ -46,6 +46,8 @@ export function MLInfosTab({
   isAdmin: boolean;
 }) {
   const { ml, indicateurs, last_activity_at } = data;
+  const siteWeb = safeHttpUrl(ml.site_web);
+  const rdvUrl = safeHttpUrl(ml.rdv_url);
 
   return (
     <div>
@@ -68,21 +70,21 @@ export function MLInfosTab({
         </Info>
         <Info label="N° de téléphone générique">{avecCopie(ml.telephone, "Copier le numéro de téléphone")}</Info>
         <Info label="Site internet">
-          {ml.site_web ? (
-            <a href={ml.site_web} target="_blank" rel="noopener noreferrer" className={fr.cx("fr-link")}>
-              {ml.site_web}
+          {siteWeb ? (
+            <a href={siteWeb} target="_blank" rel="noopener noreferrer" className={fr.cx("fr-link")}>
+              {siteWeb}
             </a>
           ) : (
-            NON_RENSEIGNE
+            ml.site_web || NON_RENSEIGNE
           )}
         </Info>
         <div className={styles.rdv}>
           <Info label="Lien de prise de rendez-vous à la Mission Locale">
             {isAdmin ? (
               <MlAdminRdvUrlEditor mlId={mlId} rdvUrl={ml.rdv_url} />
-            ) : ml.rdv_url ? (
-              <a href={ml.rdv_url} target="_blank" rel="noopener noreferrer" className={fr.cx("fr-link")}>
-                {ml.rdv_url}
+            ) : rdvUrl ? (
+              <a href={rdvUrl} target="_blank" rel="noopener noreferrer" className={fr.cx("fr-link")}>
+                {rdvUrl}
               </a>
             ) : (
               "Non renseigné"
