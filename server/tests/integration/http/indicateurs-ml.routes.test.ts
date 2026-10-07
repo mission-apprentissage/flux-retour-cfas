@@ -1338,7 +1338,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(page2.data.pagination).toEqual({ page: 2, limit: 1, total_pages: 2 });
       expect(page2.data.data.map((row: { nom: string }) => row.nom)).toEqual(["Tech Lyon"]);
 
-      const court = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?q=t`);
+      const court = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?q=te`);
       expect(court.data.total).toBe(0);
     });
   });

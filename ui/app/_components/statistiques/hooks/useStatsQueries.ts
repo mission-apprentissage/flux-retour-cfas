@@ -25,6 +25,7 @@ import type {
   StatsSegment,
   TraitementMlSortBy,
 } from "shared/models/data/nationalStats.model";
+import { RECHERCHE_LONGUEUR_MIN } from "shared/models/data/nationalStats.model";
 import type {
   ICfaInvitesSansCollabResponse,
   ICfaInvitesSortBy,
@@ -319,7 +320,7 @@ export function useRechercheEtablissements(q: string, page: number, limit: numbe
   return useQuery<IRechercheResponse>({
     queryKey: ["stats", "recherche", q, page, limit] as const,
     queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/stats/recherche`, { params: { q, page, limit }, signal }),
-    enabled: q.trim().length >= 2,
+    enabled: q.trim().length >= RECHERCHE_LONGUEUR_MIN,
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }

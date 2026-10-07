@@ -2,7 +2,8 @@
 
 import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { RECHERCHE_LONGUEUR_MIN } from "shared/models/data/nationalStats.model";
 
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 import { useAuth } from "@/app/_context/UserContext";
@@ -24,23 +25,50 @@ export function RechercheEtablissements() {
   const searchParams = useSearchParams();
   const terme = searchParams?.get("q")?.trim() ?? "";
   const [saisie, setSaisie] = useState(terme);
+  const termeEcritRef = useRef(terme);
   const [limit, setLimit] = useState(10);
   const [page, setPage] = usePageForParams({ terme, limit });
   const { user } = useAuth();
   const { regions } = useUserRegions();
   const perimetre = !isAdminUser(user ?? null) && regions.length ? regions.map(getRegionLabel).join(", ") : null;
 
-  useEffect(() => setSaisie(terme), [terme]);
+  const lancer = useCallback(
+    (valeur: string) => {
+      const recherche = valeur.trim();
+      const cible = recherche.length >= RECHERCHE_LONGUEUR_MIN ? recherche : "";
+      if (cible === terme) return;
+      termeEcritRef.current = cible;
+      const params = new URLSearchParams(searchParams?.toString());
+      if (cible) params.set("q", cible);
+      else params.delete("q");
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [terme, searchParams, router, pathname]
+  );
 
-  const lancer = (valeur: string) => {
-    const params = new URLSearchParams(searchParams?.toString());
-    if (valeur.trim()) params.set("q", valeur.trim());
-    else params.delete("q");
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  };
+  // Recherche à la frappe à partir du 3e caractère, comme la liste des effectifs CFA
+  useEffect(() => {
+    const timer = setTimeout(() => lancer(saisie), 300);
+    return () => clearTimeout(timer);
+  }, [saisie, lancer]);
 
-  const { data, isLoading, isFetching, isPlaceholderData, error } = useRechercheEtablissements(terme, page, limit);
-  const tropCourt = terme.length > 0 && terme.length < 2;
+  // Navigation extérieure (retour arrière, lien) : la saisie suit l'URL, sauf quand c'est nous qui l'avons écrite
+  useEffect(() => {
+    if (terme !== termeEcritRef.current) {
+      termeEcritRef.current = terme;
+      setSaisie(terme);
+    }
+  }, [terme]);
+
+  const { data, isLoading, isPlaceholderData, error } = useRechercheEtablissements(terme, page, limit);
+  // Pendant une nouvelle requête, les résultats précédents restent affichés (atténués) avec leur propre terme
+  const [termeDesResultats, setTermeDesResultats] = useState(terme);
+  useEffect(() => {
+    if (data && !isPlaceholderData) setTermeDesResultats(terme);
+  }, [data, isPlaceholderData, terme]);
+  const termeAffiche = isPlaceholderData ? termeDesResultats : terme;
+  const longueurSaisie = saisie.trim().length;
+  const tropCourt = longueurSaisie > 0 && longueurSaisie < RECHERCHE_LONGUEUR_MIN;
 
   return (
     <>
@@ -59,23 +87,29 @@ export function RechercheEtablissements() {
               type={type}
               value={saisie}
               placeholder="Rechercher nom d'établissement, commune…"
+              maxLength={100}
               onChange={(event) => setSaisie(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") lancer(saisie);
-              }}
             />
           )}
         />
         {perimetre && <p className={styles.perimetre}>Recherche limitée à votre territoire : {perimetre}.</p>}
-        {tropCourt && <p className={styles.perimetre}>Saisissez au moins 2 caractères.</p>}
+        {tropCourt && (
+          <p className={styles.perimetre}>
+            Saisissez au moins {RECHERCHE_LONGUEUR_MIN} caractères pour lancer la recherche.
+          </p>
+        )}
       </section>
 
-      {terme.length >= 2 && (
-        <section className={styles.resultats} aria-live="polite">
+      {terme.length >= RECHERCHE_LONGUEUR_MIN && (
+        <section
+          className={`${styles.resultats} ${isPlaceholderData ? styles.enCours : ""}`}
+          aria-live="polite"
+          aria-busy={isPlaceholderData}
+        >
           <div>
             <h2 className={styles.resultatsTitre}>Résultat(s) pour votre recherche</h2>
             <p className={styles.terme}>
-              <strong>“{terme}”</strong>
+              <strong>“{termeAffiche}”</strong>
               {data && (
                 <span className={styles.total}>
                   {data.total.toLocaleString("fr-FR")} résultat{data.total > 1 ? "s" : ""}
@@ -84,7 +118,7 @@ export function RechercheEtablissements() {
             </p>
           </div>
           <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
-            {isLoading || (isFetching && isPlaceholderData) ? (
+            {isLoading ? (
               <TableSkeleton rows={4} />
             ) : !data?.data.length ? (
               <p className={styles.vide}>Aucune Mission Locale ni aucun CFA ne correspond à cette recherche.</p>

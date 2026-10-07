@@ -72,7 +72,7 @@ export function RechercheResultatCard({ resultat }: { resultat: IRechercheResult
             <Button iconId="fr-icon-arrow-right-line" iconPosition="right" disabled>
               Détails
             </Button>{" "}
-            <Tooltip kind="hover" title="Bientôt disponible : la fiche CFA arrive dans une prochaine version." />
+            <Tooltip kind="click" title="Bientôt disponible : la fiche CFA arrive dans une prochaine version." />
           </span>
         ) : (
           <Button

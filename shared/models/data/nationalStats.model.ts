@@ -494,6 +494,9 @@ export interface ICollaborationDossiersResponse {
   filtres: { cfa: ICollaborationDossierStructure[]; ml: ICollaborationDossierStructure[] };
 }
 
+/** Longueur minimale d'une recherche d'établissements : en dessous, aucune requête n'est lancée. */
+export const RECHERCHE_LONGUEUR_MIN = 3;
+
 interface IRechercheResultatBase {
   id: string;
   nom: string | null;

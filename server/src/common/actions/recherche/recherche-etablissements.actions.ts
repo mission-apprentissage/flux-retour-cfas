@@ -1,9 +1,10 @@
 import type { ObjectId } from "bson";
-import type {
-  IRechercheResponse,
-  IRechercheResultat,
-  IRechercheResultatCfa,
-  IRechercheResultatMl,
+import {
+  RECHERCHE_LONGUEUR_MIN,
+  type IRechercheResponse,
+  type IRechercheResultat,
+  type IRechercheResultatCfa,
+  type IRechercheResultatMl,
 } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
 
@@ -25,20 +26,36 @@ import {
   organismesDb,
 } from "@/common/model/collections";
 
-export const RECHERCHE_LONGUEUR_MIN = 2;
-
 type Candidat = { type: "cfa" | "ml"; id: ObjectId; nom: string | null };
 
-const compareNom = (a: Candidat, b: Candidat) => {
-  if (!a.nom || !b.nom) return a.nom === b.nom ? 0 : a.nom ? -1 : 1;
-  return a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" });
+const collator = new Intl.Collator("fr", { sensitivity: "base" });
+
+// Départage sur le type puis l'id : l'ordre doit être stable d'une page à l'autre
+const compareCandidats = (a: Candidat, b: Candidat) => {
+  if (a.nom !== b.nom) {
+    if (!a.nom || !b.nom) return a.nom ? -1 : 1;
+    const parNom = collator.compare(a.nom, b.nom);
+    if (parNom) return parNom;
+  }
+  return a.type.localeCompare(b.type) || a.id.toString().localeCompare(b.id.toString());
 };
 
 const findCfa = (recherche: string, regions?: string[]) =>
   organismesDb()
     .find(
       { $and: [buildCfaTerritoireMatch({ regions }), buildOrganismeSearchFilter(recherche)] },
-      { projection: { enseigne: 1, raison_sociale: 1, uai: 1, siret: 1, adresse: 1, has_account: 1 } }
+      {
+        projection: {
+          enseigne: 1,
+          raison_sociale: 1,
+          uai: 1,
+          siret: 1,
+          has_account: 1,
+          "adresse.code_postal": 1,
+          "adresse.commune": 1,
+          "adresse.complete": 1,
+        },
+      }
     )
     .toArray();
 
@@ -106,7 +123,7 @@ export async function rechercherEtablissements(
       nom: (cfa.enseigne || cfa.raison_sociale)?.trim() || null,
     })),
     ...missionsLocales.map((ml) => ({ type: "ml" as const, id: ml._id, nom: (ml as { nom?: string }).nom ?? null })),
-  ].sort(compareNom);
+  ].sort(compareCandidats);
   const pageCandidats = candidats.slice((page - 1) * limit, page * limit);
 
   const pageCfaIds = pageCandidats.filter((c) => c.type === "cfa").map((c) => c.id);
