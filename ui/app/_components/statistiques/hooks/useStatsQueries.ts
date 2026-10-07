@@ -12,6 +12,7 @@ import type {
   ICollaborationMensuelStats,
   ICollaborationSegmentStats,
   IDossiersTraitesStatsResponse,
+  IMlFicheIndicateurs,
   IPrequalifStats,
   ICfaAdoptionStats,
   IDepartementStats,
@@ -425,6 +426,7 @@ export interface IMissionLocaleMemberResponse {
   telephone: string;
   email: string;
   last_traitement_at: string | null;
+  confirmed_at: string | null;
 }
 
 export interface IMissionLocaleDetailResponse {
@@ -438,6 +440,10 @@ export interface IMissionLocaleDetailResponse {
     site_web?: string;
     rdv_url?: string | null;
     adresse?: {
+      numero?: number;
+      repetition_voie?: string;
+      voie?: string;
+      complement?: string;
       commune?: string;
       code_postal?: string;
       localite?: string;
@@ -448,6 +454,10 @@ export interface IMissionLocaleDetailResponse {
   last_activity_at: string | null;
   has_cfa_collaboration: boolean;
   traites_count: number;
+  indicateurs: Omit<IMlFicheIndicateurs, "premier_compte_at" | "derniere_connexion_at"> & {
+    premier_compte_at: string | null;
+    derniere_connexion_at: string | null;
+  };
 }
 
 export function useMissionLocaleDetail(mlId: string) {

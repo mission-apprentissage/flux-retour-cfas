@@ -5,6 +5,7 @@ import { Table } from "@codegouvfr/react-dsfr/Table";
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
 import { useMissionLocaleMembres } from "../../hooks/useStatsQueries";
+import { CopyButton } from "../../ui/CopyButton";
 import { NoDataMessage } from "../../ui/NoDataMessage";
 import { StatsErrorHandler } from "../../ui/StatsErrorHandler";
 import { formatDateWithRelativeTime } from "../../utils";
@@ -59,7 +60,16 @@ export function MLEquipeTab({ mlId, noData }: MLEquipeTabProps) {
                 data={data.map((membre) => [
                   formatName(membre),
                   membre.telephone || "-",
-                  membre.email || "-",
+                  membre.email ? (
+                    <span className={styles.courriel}>
+                      <a href={`mailto:${membre.email}`} className="fr-link">
+                        {membre.email}
+                      </a>
+                      <CopyButton value={membre.email} title="Copier l'adresse courriel" />
+                    </span>
+                  ) : (
+                    "-"
+                  ),
                   formatDateWithRelativeTime(membre.last_traitement_at),
                 ])}
               />

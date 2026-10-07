@@ -88,6 +88,11 @@ export function formatDateFr(dateString: string | null): string | null {
   }
 }
 
+export function formatDateCourte(dateString: string | null): string | null {
+  if (!dateString) return null;
+  return format(new Date(dateString), "dd/MM/yyyy");
+}
+
 export function formatDateWithRelativeTime(dateString: string | null): string {
   if (!dateString) return "Aucune activité";
   try {

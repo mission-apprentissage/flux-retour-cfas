@@ -10,7 +10,18 @@
 }
 
 .tableContainer {
+  width: 100%;
+}
+
+.tableContainer :global(.fr-table) {
+  width: 100%;
+  margin-bottom: 0;
   overflow-x: auto;
+}
+
+.tableContainer :global(.fr-table table) {
+  display: table;
+  width: 100%;
 }
 
 .emptyState {
@@ -55,4 +66,10 @@
 
 .noDataMessage {
   composes: noDataMessage from "../../ui/common.module.css";
+}
+
+.courriel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }

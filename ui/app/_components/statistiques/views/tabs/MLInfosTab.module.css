@@ -1,0 +1,74 @@
+.titre {
+  margin: 0 0 24px;
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  color: var(--text-title-blue-france);
+}
+
+.grille {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+}
+
+.ligne {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.info dt {
+  padding: 0;
+  font-weight: 400;
+  color: var(--text-label-grey);
+}
+
+.info dd {
+  margin: 0;
+  padding: 0;
+  font-weight: 700;
+  color: var(--text-default-grey);
+  overflow-wrap: anywhere;
+}
+
+.valeur {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rdv {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 32px;
+}
+
+.rdv .info {
+  flex: 1 1 437px;
+  max-width: 600px;
+}
+
+.aide {
+  display: flex;
+  gap: 6px;
+  flex: 1 1 280px;
+  max-width: 440px;
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.36;
+  font-style: italic;
+  color: var(--text-mention-grey);
+}
+
+.valeur :global(.fr-btn) {
+  margin-block: -0.25rem;
+}

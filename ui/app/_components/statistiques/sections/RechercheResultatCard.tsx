@@ -3,6 +3,7 @@
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
+import { useSearchParams } from "next/navigation";
 import { Fragment } from "react";
 import type { IRechercheResultat } from "shared/models/data/nationalStats.model";
 
@@ -13,6 +14,7 @@ import styles from "./RechercheResultatCard.module.css";
 const ouiNon = (value: boolean) => (value ? "Oui" : "Non");
 
 export function RechercheResultatCard({ resultat }: { resultat: IRechercheResultat }) {
+  const searchParams = useSearchParams();
   const isCfa = resultat.type === "cfa";
   const ville = [resultat.adresse.code_postal, resultat.adresse.commune].filter(Boolean).join(" ");
   const voie =
@@ -78,7 +80,7 @@ export function RechercheResultatCard({ resultat }: { resultat: IRechercheResult
           <Button
             iconId="fr-icon-arrow-right-line"
             iconPosition="right"
-            linkProps={{ href: `/suivi-des-indicateurs/mission-locale/${resultat.id}` }}
+            linkProps={{ href: buildFicheMlUrl(resultat.id, searchParams?.toString()) }}
           >
             Détails
           </Button>
@@ -87,3 +89,9 @@ export function RechercheResultatCard({ resultat }: { resultat: IRechercheResult
     </li>
   );
 }
+
+const buildFicheMlUrl = (mlId: string, rechercheParams = "") => {
+  const params = new URLSearchParams(rechercheParams);
+  params.set("from", "recherche");
+  return `/suivi-des-indicateurs/mission-locale/${mlId}?${params.toString()}`;
+};
