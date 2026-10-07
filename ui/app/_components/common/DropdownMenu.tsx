@@ -7,10 +7,11 @@ import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import styles from "./DropdownMenu.module.css";
 
 type DropdownMenuProps = {
-  label: ReactNode;
+  label?: ReactNode;
   buttonIconId: FrIconClassName | RiIconClassName;
   ariaLabel?: string;
   priority?: ButtonProps["priority"];
+  size?: ButtonProps["size"];
   align?: "left" | "right";
   children: (api: { close: () => void; open: boolean }) => ReactNode;
 };
@@ -20,6 +21,7 @@ export function DropdownMenu({
   buttonIconId,
   ariaLabel,
   priority = "tertiary no outline",
+  size,
   align = "right",
   children,
 }: DropdownMenuProps) {
@@ -76,20 +78,33 @@ export function DropdownMenu({
   return (
     <div className={styles.container} ref={containerRef} onKeyDown={handleKeyDown}>
       <span data-dropdown-trigger>
-        <Button
-          iconId={buttonIconId}
-          priority={priority}
-          aria-haspopup="menu"
-          aria-expanded={open}
-          aria-label={ariaLabel}
-          onClick={() => setOpen((previous) => !previous)}
-        >
-          {label}
-          <i
-            className={fr.cx(open ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line", "fr-icon--sm")}
-            aria-hidden="true"
+        {label === undefined ? (
+          <Button
+            iconId={buttonIconId}
+            priority={priority}
+            size={size}
+            title={ariaLabel ?? ""}
+            aria-haspopup="menu"
+            aria-expanded={open}
+            onClick={() => setOpen((previous) => !previous)}
           />
-        </Button>
+        ) : (
+          <Button
+            iconId={buttonIconId}
+            priority={priority}
+            size={size}
+            aria-haspopup="menu"
+            aria-expanded={open}
+            aria-label={ariaLabel}
+            onClick={() => setOpen((previous) => !previous)}
+          >
+            {label}
+            <i
+              className={fr.cx(open ? "fr-icon-arrow-up-s-line" : "fr-icon-arrow-down-s-line", "fr-icon--sm")}
+              aria-hidden="true"
+            />
+          </Button>
+        )}
       </span>
 
       {open && (

@@ -47,6 +47,10 @@
   color: var(--text-mention-grey);
 }
 
+.tabs:global(.fr-tabs) {
+  overflow: visible;
+}
+
 .tabs:global(.fr-tabs) :global(.fr-tabs__panel) {
   padding: 32px;
   background-color: var(--background-default-grey);

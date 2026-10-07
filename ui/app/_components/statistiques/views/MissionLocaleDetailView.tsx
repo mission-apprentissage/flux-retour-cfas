@@ -134,7 +134,7 @@ function buildTabs(mlId: string, data: IMissionLocaleDetailResponse, isAdmin: bo
 
   return [
     { id: "infos", label: "Infos et coordonnées", content: <MLInfosTab mlId={mlId} data={data} isAdmin={isAdmin} /> },
-    { id: "equipe", label: "Équipe", content: <MLEquipeTab mlId={mlId} noData={!isActive} /> },
+    { id: "equipe", label: "Équipe", content: <MLEquipeTab mlId={mlId} isAdmin={isAdmin} /> },
     {
       id: "ruptures",
       label: "Suivi des ruptures",
