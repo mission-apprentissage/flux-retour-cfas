@@ -10,6 +10,7 @@ import {
   CollaborationsLabel,
   MissionLocaleLabel,
   NationalLabel,
+  RechercheLabel,
   RegionItemLabel,
   RegionsLabel,
   SyntheseLabel,
@@ -215,6 +216,12 @@ function buildCollapsedMenuItems(
     isActive: pathname.startsWith(`${BASE_PATH}/collaborations`),
   });
 
+  items.push({
+    text: <RechercheLabel isActive={pathname.startsWith(`${BASE_PATH}/recherche`)} collapsed />,
+    linkProps: { href: `${BASE_PATH}/recherche`, title: "Recherche" },
+    isActive: pathname.startsWith(`${BASE_PATH}/recherche`),
+  });
+
   return items;
 }
 
@@ -285,6 +292,12 @@ function buildExpandedMenuItems(
     text: <CollaborationsLabel isActive={pathname.startsWith(`${BASE_PATH}/collaborations`)} />,
     linkProps: { href: `${BASE_PATH}/collaborations` },
     isActive: pathname.startsWith(`${BASE_PATH}/collaborations`),
+  });
+
+  items.push({
+    text: <RechercheLabel isActive={pathname.startsWith(`${BASE_PATH}/recherche`)} />,
+    linkProps: { href: `${BASE_PATH}/recherche` },
+    isActive: pathname.startsWith(`${BASE_PATH}/recherche`),
   });
 
   return items;

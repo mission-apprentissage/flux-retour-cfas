@@ -58,6 +58,15 @@ export function CollaborationsLabel({ isActive, collapsed }: MenuLabelProps) {
   );
 }
 
+export function RechercheLabel({ isActive, collapsed }: MenuLabelProps) {
+  return (
+    <>
+      <i className={`fr-icon-search-line ${styles.menuIcon} ${styles.mlIcon} ${isActive ? styles.mlIconActive : ""}`} />
+      {!collapsed && "Recherche"}
+    </>
+  );
+}
+
 export function MissionLocaleLabel({ isActive, collapsed }: MenuLabelProps) {
   return (
     <>

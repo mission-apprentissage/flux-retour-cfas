@@ -112,3 +112,14 @@ export function formatVariationBadge(variation: string) {
   if (numValue > 0) return <span className={commonStyles.variationPositive}>{variation}</span>;
   return <span className={commonStyles.variationNegative}>{variation}</span>;
 }
+
+/** Dernière activité courte : « aujourd'hui », « hier », sinon « le JJ/MM/AAAA » (jours calendaires locaux). */
+export function formatDerniereActivite(date: Date | string | null): string {
+  if (!date) return "Aucune";
+  const jour = new Date(date);
+  const debutDuJour = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const ecart = Math.round((debutDuJour(new Date()) - debutDuJour(jour)) / 86_400_000);
+  if (ecart <= 0) return "aujourd'hui";
+  if (ecart === 1) return "hier";
+  return `le ${format(jour, "dd/MM/yyyy")}`;
+}

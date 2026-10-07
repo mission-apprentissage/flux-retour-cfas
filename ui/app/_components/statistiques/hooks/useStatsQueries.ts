@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import type {
+  IRechercheResponse,
   CollabDossierStatut,
   ICollaborationDossiersResponse,
   CfaEtablissementsSortBy,
@@ -310,6 +311,15 @@ export function useCollaborationDossiers(params: CollaborationDossiersParams & {
   return useQuery<ICollaborationDossiersResponse>({
     queryKey: ["stats", "collaborations-dossiers", params] as const,
     queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/stats/collaborations/dossiers`, { params, signal }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+export function useRechercheEtablissements(q: string, page: number, limit: number) {
+  return useQuery<IRechercheResponse>({
+    queryKey: ["stats", "recherche", q, page, limit] as const,
+    queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/stats/recherche`, { params: { q, page, limit }, signal }),
+    enabled: q.trim().length >= 2,
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }

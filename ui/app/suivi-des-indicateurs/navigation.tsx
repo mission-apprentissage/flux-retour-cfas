@@ -31,6 +31,11 @@ export const STATS_NAV_ITEMS = [
     href: `${BASE_PATH}/collaborations`,
     isActive: (pathname: string) => pathname.startsWith(`${BASE_PATH}/collaborations`),
   },
+  {
+    text: "Recherche",
+    href: `${BASE_PATH}/recherche`,
+    isActive: (pathname: string) => pathname.startsWith(`${BASE_PATH}/recherche`),
+  },
 ];
 
 /** À rendre sous un `Suspense` : lit les filtres de l'URL pour les reporter sur les onglets du header. */

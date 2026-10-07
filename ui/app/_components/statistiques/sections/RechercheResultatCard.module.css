@@ -1,0 +1,73 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background-color: var(--background-default-grey);
+  border: 1px solid var(--border-default-grey);
+  border-bottom: 4px solid var(--border-plain-grey);
+}
+
+.picto {
+  align-self: flex-start;
+  padding-top: 24px;
+  color: var(--text-action-high-blue-france);
+}
+
+.identite {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 24px 0;
+}
+
+.nom {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-title-grey);
+}
+
+.adresse,
+.codes {
+  margin: 0;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.codes {
+  color: var(--text-mention-grey);
+}
+
+.indicateurs {
+  display: grid;
+  flex: 1 1 0;
+  grid-template-columns: 210px minmax(0, 1fr);
+  column-gap: 12px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--text-default-grey);
+}
+
+.indicateurs dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.action {
+  display: flex;
+  justify-content: center;
+  width: 150px;
+}
+
+@media (max-width: 768px) {
+  .card {
+    flex-wrap: wrap;
+  }
+
+  .indicateurs {
+    flex-basis: 100%;
+  }
+}
