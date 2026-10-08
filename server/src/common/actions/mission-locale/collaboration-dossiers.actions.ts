@@ -20,6 +20,8 @@ export interface CollaborationDossiersTerritoire {
   departements?: string[];
   /** Périmètre de la fiche ML : tous les dossiers reçus par la ML, quelle que soit la région du CFA. */
   missionLocaleId?: ObjectId;
+  /** Périmètre de la fiche CFA : tous les dossiers envoyés par ce CFA, quelle que soit la région de la ML. */
+  organismeId?: ObjectId;
 }
 
 export interface CollaborationDossiersFilters {
@@ -75,7 +77,9 @@ const findTerritoireOrganismeIds = async ({
   regions,
   departements,
   missionLocaleId,
+  organismeId,
 }: CollaborationDossiersTerritoire) => {
+  if (organismeId) return [organismeId];
   if (missionLocaleId || (!regions?.length && !departements?.length)) return undefined;
   const organismes = await organismesDb()
     .find(

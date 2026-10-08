@@ -378,6 +378,7 @@ export interface CollaborationDossiersParams {
   cfa_ids?: string;
   ml_ids?: string;
   ml_id?: string;
+  cfa_id?: string;
   situations?: string;
   motifs?: string;
   resultats?: string;

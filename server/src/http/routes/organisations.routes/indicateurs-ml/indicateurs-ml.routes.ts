@@ -166,6 +166,7 @@ const collaborationDossiersExportQuery = z.object({
   cfa_ids: zCsvObjectIds,
   ml_ids: zCsvObjectIds,
   ml_id: mlIdSchema.optional(),
+  cfa_id: mlIdSchema.optional(),
 });
 const collaborationDossiersQuery = collaborationDossiersExportQuery.extend({
   page: z.coerce.number().int().min(1).default(1),
@@ -452,6 +453,14 @@ const resolveCollaborationDossiersScope = async (
   }
   assertRegionAllowed(query.region, userRegions);
   assertDepartementsAllowed(query.departements, userRegions);
+
+  if (query.cfa_id) {
+    const { nominatif } = await verifyOrganismeInScope(query.cfa_id, { organisation, regions: userRegions });
+    if (!nominatif) {
+      throw Boom.forbidden("Accès non autorisé à ce département");
+    }
+    return { organismeId: new ObjectId(query.cfa_id) };
+  }
 
   if (query.ml_id) {
     await verifyMlInRegions(query.ml_id, userRegions);

@@ -8,20 +8,30 @@ import { ObjectifsBarChart } from "../../charts/ObjectifsBarChart";
 import { SituationsPieChart } from "../../charts/SituationsPieChart";
 import { useCfaCollaborations } from "../../hooks/useStatsQueries";
 import { NPS_TOOLTIP, NpsJauge } from "../../sections/CfaSatisfactionCard";
+import { CollaborationsListCard } from "../../sections/CollaborationsListCard";
 import { CfaCollabMlTable } from "../../tables/CfaCollabMlTable";
 import { NoDataMessage } from "../../ui/NoDataMessage";
 import { StatsErrorHandler } from "../../ui/StatsErrorHandler";
 
-import { Carte, formatJours, Kpi } from "./FicheCollaborations";
+import { BasculeCollaborations, Carte, formatJours, Kpi, useVueCollaborations } from "./FicheCollaborations";
 import styles from "./FicheCollaborations.module.css";
 
 const SANS_COLLABORATION = "Ce CFA n'a pas fait de collaborations avec les Missions Locales pour le moment.";
 
-export function CfaCollaborationsTab({ organismeId }: { organismeId: string }) {
+export function CfaCollaborationsTab({
+  organismeId,
+  listeAutorisee,
+}: {
+  organismeId: string;
+  listeAutorisee: boolean;
+}) {
+  const [vue, setVue] = useVueCollaborations(listeAutorisee);
+
   return (
     <div>
       <h2 className={styles.titre}>Collaborations avec les Missions Locales</h2>
-      <VueChiffree organismeId={organismeId} />
+      {listeAutorisee && <BasculeCollaborations vue={vue} onChange={setVue} />}
+      {vue === "liste" ? <CollaborationsListCard cfaId={organismeId} /> : <VueChiffree organismeId={organismeId} />}
     </div>
   );
 }

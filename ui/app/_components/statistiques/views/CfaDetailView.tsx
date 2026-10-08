@@ -138,7 +138,7 @@ function buildTabs(organismeId: string, data: ICfaFicheResponse, isAdmin: boolea
     id: "collaborations",
     label: "Collaborations ML",
     iconId: "fr-icon-links-line",
-    content: <CfaCollaborationsTab organismeId={organismeId} />,
+    content: <CfaCollaborationsTab organismeId={organismeId} listeAutorisee={data.peut_voir_nominatif} />,
   });
   return tabs;
 }

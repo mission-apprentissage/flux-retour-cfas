@@ -1265,6 +1265,51 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(logs[0].elementList?.sort()).toEqual([D_A_TRAITER, D_RDV, D_RECONTACTER].map(String).sort());
     });
 
+    describe("périmètre fiche CFA (cfa_id)", () => {
+      const D_ARA = new ObjectId();
+
+      beforeEach(async () => {
+        await missionLocaleEffectifsDb().insertOne(
+          { ...dossier(D_ARA, CFA_A, {}), mission_locale_id: ML_ARA } as never,
+          { bypassDocumentValidation: true }
+        );
+      });
+
+      it("Liste tous les dossiers envoyés par le CFA, y compris vers une ML hors région", async () => {
+        const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?cfa_id=${CFA_A}`);
+
+        expect(response.status).toBe(200);
+        expect(response.data.data.map((row: { id: string }) => row.id).sort()).toEqual(
+          [D_A_TRAITER, D_RDV, D_ARA].map(String).sort()
+        );
+        expect(response.data.data.every((row: { cfa: { id: string } }) => row.cfa.id === `${CFA_A}`)).toBe(true);
+      });
+
+      it("Applique les règles nominatives : DDETS dans son département, ni ARML ni hors région", async () => {
+        expect((await requestAsOrganisation(DDETS_PARIS, "get", `${BASE}?cfa_id=${CFA_A}`)).status).toBe(200);
+        expectForbidden(
+          await requestAsOrganisation(DDETS_PARIS, "get", `${BASE}?cfa_id=${CFA_C}`),
+          "Accès non autorisé à ce département"
+        );
+        expectForbidden(
+          await requestAsOrganisation(ARML_IDF, "get", `${BASE}?cfa_id=${CFA_A}`),
+          "Accès non autorisé à la liste des collaborations"
+        );
+        expectForbidden(
+          await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?cfa_id=${CFA_B}`),
+          "Accès non autorisé à cet organisme"
+        );
+      });
+
+      it("Journalise l'export de la liste du CFA", async () => {
+        const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}/export?cfa_id=${CFA_A}`);
+
+        expect(response.data.data).toHaveLength(3);
+        const log = await telechargementListesNominativesLogsDb().findOne({ type: "indicateurs_collaborations" });
+        expect(log?.elementList).toHaveLength(3);
+      });
+    });
+
     describe("périmètre fiche Mission Locale (ml_id)", () => {
       beforeEach(async () => {
         await organisationsDb().updateOne({ _id: ML_IDF }, { $set: { "adresse.departement": "75" } });
