@@ -18,6 +18,8 @@ interface StatsTabsProps {
   className?: string;
   /** Ne garder que les filtres de l'en-tête au changement d'onglet (filtres de tableau propres à chaque onglet). */
   resetTableFilters?: boolean;
+  /** Au changement d'onglet, ne garder que ces paramètres (les onglets embarquent des listes aux clés communes). */
+  paramsConserves?: readonly string[];
 }
 
 const TAB_PARAM = "tab";
@@ -26,7 +28,7 @@ const TAB_PARAM = "tab";
  * Onglets DSFR contrôlés par `?tab=`. Un seul panneau est monté : l'état local des sections
  * (période, type de graphique) repart de zéro au changement d'onglet.
  */
-export function StatsTabs({ tabs, className, resetTableFilters = false }: StatsTabsProps) {
+export function StatsTabs({ tabs, className, resetTableFilters = false, paramsConserves }: StatsTabsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -45,9 +47,10 @@ export function StatsTabs({ tabs, className, resetTableFilters = false }: StatsT
 
   const handleTabChange = useCallback(
     (tabId: string) => {
-      const params = new URLSearchParams(resetTableFilters ? undefined : searchParams?.toString());
-      if (resetTableFilters) {
-        STATS_FILTER_PARAMS.forEach((key) => {
+      const reset = resetTableFilters || paramsConserves !== undefined;
+      const params = new URLSearchParams(reset ? undefined : searchParams?.toString());
+      if (reset) {
+        [...(resetTableFilters ? STATS_FILTER_PARAMS : []), ...(paramsConserves ?? [])].forEach((key) => {
           const value = searchParams?.get(key);
           if (value) params.set(key, value);
         });
@@ -55,7 +58,7 @@ export function StatsTabs({ tabs, className, resetTableFilters = false }: StatsT
       params.set(TAB_PARAM, tabId);
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [router, pathname, searchParams, resetTableFilters]
+    [router, pathname, searchParams, resetTableFilters, paramsConserves]
   );
 
   if (tabs.length === 0) {

@@ -12,6 +12,7 @@ import { formatDateCourte } from "../utils";
 import { AlertesActivite } from "./AlertesActivite";
 import styles from "./FicheDetailView.module.css";
 import { FicheEntete } from "./FicheEntete";
+import { CfaAdminTab, CfaEffectifsTab, CfaOrganismesTab, CfaTransmissionsTab } from "./tabs/CfaAdminTabs";
 import { CfaCollaborationsTab } from "./tabs/CfaCollaborationsTab";
 import { CfaEquipeTab } from "./tabs/CfaEquipeTab";
 import { CfaInfosTab } from "./tabs/CfaInfosTab";
@@ -67,7 +68,11 @@ export function CfaDetailView({ organismeId, isAdmin = false }: CfaDetailViewPro
               ),
             }))}
           />
-          <StatsTabs className={styles.tabs} tabs={buildTabs(organismeId, data, isAdmin)} />
+          <StatsTabs
+            className={styles.tabs}
+            tabs={buildTabs(organismeId, data, isAdmin)}
+            paramsConserves={PARAMS_FICHE}
+          />
         </>
       )}
     </StatsErrorHandler>
@@ -99,6 +104,8 @@ function cfaStatuts(data: ICfaFicheResponse) {
   );
   return statuts;
 }
+
+const PARAMS_FICHE = ["from", "q", "ml_id"] as const;
 
 const PROVENANCES: Record<string, { label: string; href: (params: URLSearchParams) => string }> = {
   recherche: {
@@ -140,5 +147,28 @@ function buildTabs(organismeId: string, data: ICfaFicheResponse, isAdmin: boolea
     iconId: "fr-icon-links-line",
     content: <CfaCollaborationsTab organismeId={organismeId} listeAutorisee={data.peut_voir_nominatif} />,
   });
+  if (isAdmin) {
+    tabs.push(
+      {
+        id: "effectifs",
+        label: "Effectifs",
+        iconId: "fr-icon-list-unordered",
+        content: <CfaEffectifsTab organismeId={organismeId} />,
+      },
+      {
+        id: "transmissions",
+        label: "Transmissions",
+        iconId: "fr-icon-git-branch-line",
+        content: <CfaTransmissionsTab organismeId={organismeId} />,
+      },
+      {
+        id: "organismes",
+        label: "Organismes",
+        iconId: "fr-icon-bank-line",
+        content: <CfaOrganismesTab organismeId={organismeId} />,
+      },
+      { id: "admin", label: "Admin", iconId: "fr-icon-lock-fill", content: <CfaAdminTab organismeId={organismeId} /> }
+    );
+  }
   return tabs;
 }
