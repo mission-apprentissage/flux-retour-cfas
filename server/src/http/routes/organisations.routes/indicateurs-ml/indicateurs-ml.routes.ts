@@ -474,7 +474,7 @@ const resolveCollaborationDossiersScope = async (
         throw Boom.forbidden("Accès non autorisé à ce département");
       }
     }
-    return { missionLocaleId: new ObjectId(query.ml_id) };
+    return { missionLocaleId: new ObjectId(query.ml_id), perimetreRegions: userRegions };
   }
 
   if (organisation.type === ORGANISATION_TYPE.DDETS) {
@@ -659,7 +659,7 @@ const findCfaInjoignables = (query: z.infer<typeof cfaInjoignablesExportQuery>, 
 const getCollabCfaOrigineRoute: IndicateursHandler<z.infer<typeof collabCfaOrigineQuery>> = async (req, { locals }) => {
   const { ml_id, ...options } = req.query;
   await verifyMlInRegions(ml_id, locals.regions);
-  return listCollaborationsCfaOrigine(new ObjectId(ml_id), options);
+  return listCollaborationsCfaOrigine(new ObjectId(ml_id), locals.regions, options);
 };
 
 const getCfaInjoignablesRoute: IndicateursHandler<z.infer<typeof cfaInjoignablesQuery>> = async (req, { locals }) => {

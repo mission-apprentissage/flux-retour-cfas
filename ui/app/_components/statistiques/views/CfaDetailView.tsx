@@ -122,8 +122,9 @@ const PROVENANCES: Record<string, { label: string; href: (params: URLSearchParam
 
 function buildParentLink(currentParams = "") {
   const params = new URLSearchParams(currentParams);
-  const provenance = PROVENANCES[params.get("from") ?? ""];
-  if (provenance && (params.get("from") !== "ml" || /^[0-9a-f]{24}$/.test(params.get("ml_id") ?? ""))) {
+  const from = params.get("from") ?? "";
+  const provenance = Object.hasOwn(PROVENANCES, from) ? PROVENANCES[from] : undefined;
+  if (provenance && (from !== "ml" || /^[0-9a-f]{24}$/.test(params.get("ml_id") ?? ""))) {
     return { label: provenance.label, href: provenance.href(params) };
   }
   return { label: "Établissements de formation et CFA", href: "/suivi-des-indicateurs/cfa" };

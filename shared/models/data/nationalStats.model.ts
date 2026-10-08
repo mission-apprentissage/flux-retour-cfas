@@ -470,6 +470,8 @@ export interface ICollaborationDossierStructure {
   id: string;
   nom: string | null;
   commune: string | null;
+  /** CFA seulement : faux si sa fiche est hors du périmètre régional de l'utilisateur. */
+  dans_perimetre?: boolean;
 }
 
 /** Dossier de collaboration affiché aux profils indicateurs : seuls le prénom et le nom du jeune sont exposés. */
@@ -569,6 +571,7 @@ export interface ICollabCfaOrigineRow {
   commune: string | null;
   adresse: string | null;
   collaborations: number;
+  dans_perimetre: boolean;
 }
 
 export interface ICollabCfaOrigineResponse {
@@ -591,8 +594,6 @@ export interface ICfaFicheSourceDonnees {
   erps: string[];
   fichier: boolean;
   erreurs_transmission: boolean;
-  derniere_transmission_at: Date | null;
-  derniere_maj_deca_at: Date | null;
 }
 
 export interface ICfaFiche {

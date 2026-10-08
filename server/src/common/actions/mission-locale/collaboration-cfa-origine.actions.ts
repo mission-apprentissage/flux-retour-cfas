@@ -22,6 +22,7 @@ const compareRows = (sortBy: CollabCfaOrigineSortBy) => (a: ICollabCfaOrigineRow
 
 export async function listCollaborationsCfaOrigine(
   missionLocaleId: ObjectId,
+  userRegions: string[],
   options: { page: number; limit: number; sort_by: CollabCfaOrigineSortBy; sort_order: "asc" | "desc" },
   now: Date = new Date()
 ): Promise<ICollabCfaOrigineResponse> {
@@ -52,6 +53,7 @@ export async function listCollaborationsCfaOrigine(
           "adresse.code_postal": 1,
           "adresse.commune": 1,
           "adresse.complete": 1,
+          "adresse.region": 1,
         },
       }
     )
@@ -69,6 +71,8 @@ export async function listCollaborationsCfaOrigine(
       commune: organisme?.adresse?.commune ?? null,
       adresse: organisme?.adresse?.complete ?? null,
       collaborations: groupe.collaborations,
+      dans_perimetre:
+        Boolean(organisme) && (userRegions.length === 0 || userRegions.includes(organisme?.adresse?.region ?? "")),
     };
   });
 

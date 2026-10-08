@@ -60,6 +60,25 @@ describe("POST /api/v1/admin/organismes/:id/membres/invitations", () => {
     ]);
   });
 
+  it("Rattache l'organisation créée au CFA de la fiche, même sans UAI quand un homonyme SIRET en a un", async () => {
+    const sansUai = new ObjectId();
+    await organismesDb().insertOne(
+      {
+        _id: sansUai,
+        siret: SIRET,
+        nom: "CAMPUS DU LAC ANNEXE",
+        created_at: new Date(),
+        updated_at: new Date(),
+      } as never,
+      { bypassDocumentValidation: true }
+    );
+
+    expect((await inviter({ emails: ["annexe@example.com"] }, ADMIN, sansUai)).status).toBe(200);
+
+    const organisation = await organisationsDb().findOne({ type: "ORGANISME_FORMATION", siret: SIRET, uai: null });
+    expect(organisation).toMatchObject({ organisme_id: sansUai.toString() });
+  });
+
   it("Réutilise l'organisation existante et signale les doublons", async () => {
     await inviter({ emails: ["membre@example.com"] });
     const response = await inviter({ emails: ["membre@example.com", "autre@example.com"] });

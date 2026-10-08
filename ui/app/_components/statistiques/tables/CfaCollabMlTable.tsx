@@ -81,6 +81,7 @@ export function CfaCollabMlTable({ organismeId }: { organismeId: string }) {
                       <Link
                         href={`/suivi-des-indicateurs/mission-locale/${row.mission_locale_id}`}
                         className="fr-link fr-link--sm fr-link--icon-right fr-icon-arrow-right-line"
+                        aria-label={`Voir la fiche de ${row.nom ?? "la Mission Locale"}`}
                       >
                         Voir la fiche
                       </Link>

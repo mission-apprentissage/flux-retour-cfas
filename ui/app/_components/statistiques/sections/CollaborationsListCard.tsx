@@ -105,6 +105,11 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
     limit,
   });
   const exporter = useCollabDossiersExport(params);
+  const provenanceCfa: Record<string, string> | null = cfaId
+    ? null
+    : mlId
+      ? { from: "ml", ml_id: mlId }
+      : { from: "collaborations" };
 
   return (
     <OverviewCard
@@ -241,7 +246,7 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
           <>
             <ul className={`fr-raw-list ${styles.list}`}>
               {data.data.map((dossier) => (
-                <CollaborationDossierItem key={dossier.id} dossier={dossier} />
+                <CollaborationDossierItem key={dossier.id} dossier={dossier} provenanceCfa={provenanceCfa} />
               ))}
             </ul>
             <StatsTablePagination

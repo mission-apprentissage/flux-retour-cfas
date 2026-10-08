@@ -75,7 +75,11 @@ function VueChiffree({ organismeId }: { organismeId: string }) {
                 <h4 className={styles.sousTitre}>
                   NPS sur la collaboration <Tooltip kind="hover" title={NPS_TOOLTIP} />
                 </h4>
-                <NpsJauge data={data.nps} avecNombreCfa={false} />
+                {data.nps.total_reponses === 0 ? (
+                  <p className="fr-text--sm fr-mb-0">Aucune réponse de ce CFA pour le moment.</p>
+                ) : (
+                  <NpsJauge data={data.nps} avecNombreCfa={false} />
+                )}
               </div>
             </Carte>
 

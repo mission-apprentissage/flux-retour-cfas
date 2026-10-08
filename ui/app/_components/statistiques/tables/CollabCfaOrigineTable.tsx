@@ -72,10 +72,11 @@ export function CollabCfaOrigineTable({ mlId }: { mlId: string }) {
                     <span className={styles.meta}>
                       UAI : {row.uai ?? "—"} · SIRET : {row.siret ?? "—"}
                     </span>
-                    {row.organisme_id && (
+                    {row.organisme_id && row.dans_perimetre && (
                       <Link
                         href={ficheCfaUrl(row.organisme_id, { from: "ml", ml_id: mlId })}
                         className="fr-link fr-link--sm fr-link--icon-right fr-icon-arrow-right-line"
+                        aria-label={`Voir la fiche de ${row.nom ?? "l'établissement"}`}
                       >
                         Voir la fiche
                       </Link>

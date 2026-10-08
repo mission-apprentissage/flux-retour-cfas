@@ -47,7 +47,7 @@ export async function createOrganisation(organisation: IOrganisationCreate): Pro
 
     return {
       ...organisation,
-      organisme_id: organisme?._id.toString(),
+      organisme_id: organisation.organisme_id ?? organisme?._id.toString(),
     } as IOrganisationOrganismeFormation;
   };
 
@@ -571,6 +571,7 @@ export const getOrganisationOrganismeByOrganismeId = async (
       type: "ORGANISME_FORMATION",
       uai: organisme?.uai ?? null,
       siret: organisme.siret ?? null,
+      organisme_id: organismeId.toString(),
     });
 
     return organisationsDb().findOne({

@@ -102,8 +102,6 @@ export async function getCfaFiche(
       erps: organisme.mode_de_transmission === "MANUEL" ? [] : erps,
       fichier: organisme.mode_de_transmission === "MANUEL",
       erreurs_transmission: organisme.has_transmission_errors === true,
-      derniere_transmission_at: organisme.last_erp_transmission_date ?? organisme.last_transmission_date ?? null,
-      derniere_maj_deca_at: organisme.last_effectifs_deca_update ?? null,
     },
     has_account: hasAccount,
     collabore: collaborations > 0,
@@ -177,7 +175,12 @@ export async function inviteCfaMembres(
   const existante = await findCfaOrganisation(organisme);
   const organisationId =
     existante?._id ??
-    (await createOrganisation({ type: "ORGANISME_FORMATION", siret: organisme.siret, uai: organisme.uai ?? null }));
+    (await createOrganisation({
+      type: "ORGANISME_FORMATION",
+      siret: organisme.siret,
+      uai: organisme.uai ?? null,
+      organisme_id: organismeId.toString(),
+    }));
 
   return batchInviteUsersToOrganisation(ctx, emails, organisationId, roles);
 }

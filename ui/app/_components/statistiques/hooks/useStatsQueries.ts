@@ -258,7 +258,7 @@ export function useCfaEtablissements(params: CfaEtablissementsParams & { page: n
 type DatesEnTexte<T, K extends keyof T> = Omit<T, K> & Record<K, string | null>;
 
 export type ICfaFicheResponse = Omit<DatesEnTexte<ICfaFiche, "derniere_connexion_at">, "source_donnees"> & {
-  source_donnees: DatesEnTexte<ICfaFiche["source_donnees"], "derniere_transmission_at" | "derniere_maj_deca_at">;
+  source_donnees: ICfaFiche["source_donnees"];
 };
 
 export function useCfaFiche(organismeId: string) {

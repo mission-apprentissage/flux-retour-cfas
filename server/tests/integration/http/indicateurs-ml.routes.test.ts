@@ -1333,6 +1333,13 @@ describe("Indicateurs ML routes (territoriales)", () => {
         expect(
           response.data.data.every((row: { mission_locale: { id: string } }) => row.mission_locale.id === `${ML_IDF}`)
         ).toBe(true);
+        const perimetre = (row: { cfa: { nom: string; dans_perimetre: boolean } }) =>
+          `${row.cfa.nom}:${row.cfa.dans_perimetre}`;
+        expect([...new Set(response.data.data.map(perimetre))].sort()).toEqual([
+          "CFA A:true",
+          "CFA B:false",
+          "Lycée Eiffel:true",
+        ]);
       });
 
       it("Limite la DDETS aux ML de son département et refuse l'ARML et les ML hors région", async () => {
@@ -1954,9 +1961,18 @@ describe("Indicateurs ML routes (territoriales)", () => {
           commune: "Paris",
           adresse: "1 rue Test 75011 Paris",
           collaborations: 2,
+          dans_perimetre: true,
         },
-        expect.objectContaining({ organisme_id: CFA_B.toString(), nom: "Campus Alpha", uai: null, collaborations: 1 }),
+        expect.objectContaining({
+          organisme_id: CFA_B.toString(),
+          nom: "Campus Alpha",
+          uai: null,
+          collaborations: 1,
+          dans_perimetre: false,
+        }),
       ]);
+      const admin = await requestAsOrganisation(ADMIN, "get", url(`ml_id=${ML_IDF}`));
+      expect(admin.data.data.map((row: { dans_perimetre: boolean }) => row.dans_perimetre)).toEqual([true, true]);
     });
 
     it("Trie et pagine", async () => {

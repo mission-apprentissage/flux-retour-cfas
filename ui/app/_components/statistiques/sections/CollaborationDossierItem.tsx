@@ -19,7 +19,14 @@ const STATUT_SEVERITY = { a_traiter: "info", a_recontacter: "warning", traite: "
 const structureLabel = ({ nom, commune }: ICollaborationDossierStructure) =>
   [nom ?? "Nom inconnu", commune].filter(Boolean).join(", ");
 
-export function CollaborationDossierItem({ dossier }: { dossier: ICollaborationDossier }) {
+export function CollaborationDossierItem({
+  dossier,
+  provenanceCfa,
+}: {
+  dossier: ICollaborationDossier;
+  /** `null` : pas de lien vers la fiche CFA (liste affichée sur cette fiche). */
+  provenanceCfa: Record<string, string> | null;
+}) {
   const situation = dossier.situation
     ? (ML_SITUATION_DOSSIER_LABEL[dossier.situation as keyof typeof ML_SITUATION_DOSSIER_LABEL] ?? dossier.situation)
     : null;
@@ -35,11 +42,8 @@ export function CollaborationDossierItem({ dossier }: { dossier: ICollaborationD
       </p>
       <p className={styles.structure}>
         <span>CFA</span>
-        {dossier.cfa.id ? (
-          <Link
-            href={ficheCfaUrl(dossier.cfa.id, { from: "collaborations" })}
-            className={`fr-link ${styles.lienStructure}`}
-          >
+        {provenanceCfa && dossier.cfa.id && dossier.cfa.dans_perimetre ? (
+          <Link href={ficheCfaUrl(dossier.cfa.id, provenanceCfa)} className={`fr-link ${styles.lienStructure}`}>
             {structureLabel(dossier.cfa)}
           </Link>
         ) : (
