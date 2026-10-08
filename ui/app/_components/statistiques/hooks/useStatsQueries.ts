@@ -2,7 +2,9 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { useCallback } from "react";
 import type {
   IRechercheResponse,
+  CollabCfaOrigineSortBy,
   CollabDossierStatut,
+  ICollabCfaOrigineResponse,
   ICollaborationDossiersResponse,
   CfaEtablissementsSortBy,
   CfaInjoignablesSortBy,
@@ -244,6 +246,23 @@ export function useCfaEtablissements(params: CfaEtablissementsParams & { page: n
         params: buildCfaEtablissementsRequestParams(params),
         signal,
       }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+export interface CollabCfaOrigineParams {
+  mlId: string;
+  page: number;
+  limit: number;
+  sort_by: CollabCfaOrigineSortBy;
+  sort_order: "asc" | "desc";
+}
+
+export function useCollabCfaOrigine({ mlId, ...params }: CollabCfaOrigineParams) {
+  return useQuery<ICollabCfaOrigineResponse>({
+    queryKey: ["stats", "collab-cfa-origine", mlId, params] as const,
+    queryFn: ({ signal }) =>
+      _get(`${INDICATEURS_ML_BASE}/stats/collaborations/cfa-origine`, { params: { ml_id: mlId, ...params }, signal }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }

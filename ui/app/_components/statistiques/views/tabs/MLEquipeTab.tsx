@@ -19,6 +19,7 @@ import {
   useMissionLocaleMembres,
   type IMissionLocaleMemberResponse,
 } from "../../hooks/useStatsQueries";
+import ficheTableStyles from "../../tables/FicheTable.module.css";
 import { CopyButton } from "../../ui/CopyButton";
 import { StatsErrorHandler } from "../../ui/StatsErrorHandler";
 import { formatDateCourte } from "../../utils";
@@ -137,7 +138,7 @@ export function MLEquipeTab({ mlId, isAdmin = false }: MLEquipeTabProps) {
         {isLoading ? (
           <TableSkeleton rows={3} />
         ) : (
-          <div className={`fr-table ${styles.table}`}>
+          <div className={`fr-table ${ficheTableStyles.table} ${styles.table}`}>
             <table>
               <caption className="fr-sr-only">Utilisateurs du Tableau de bord de la Mission Locale</caption>
               <thead>

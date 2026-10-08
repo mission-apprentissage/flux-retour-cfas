@@ -1496,6 +1496,82 @@ describe("Indicateurs ML routes (territoriales)", () => {
     });
   });
 
+  describe("GET /stats/collaborations/cfa-origine", () => {
+    const url = (query: string) => `/api/v1/organisation/indicateurs-ml/stats/collaborations/cfa-origine?${query}`;
+
+    beforeEach(async () => {
+      await organismesDb().insertMany(
+        [
+          {
+            _id: CFA_A,
+            created_at: new Date(),
+            updated_at: new Date(),
+            enseigne: "Lycée Eiffel",
+            uai: "0751234A",
+            siret: "12345678900011",
+            adresse: { region: "11", code_postal: "75011", commune: "Paris", complete: "1 rue Test 75011 Paris" },
+          },
+          {
+            _id: CFA_B,
+            created_at: new Date(),
+            updated_at: new Date(),
+            raison_sociale: "Campus Alpha",
+            siret: "12345678900022",
+            adresse: { region: "84", code_postal: "69001", commune: "Lyon" },
+          },
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+      const supprime = { ...buildCollabDossier(ML_IDF, CFA_B, []), soft_deleted: true } as IMissionLocaleEffectif;
+      const futur = buildCollabDossier(ML_IDF, CFA_B, []);
+      (futur.organisme_data as { acc_conjoint_at: Date }).acc_conjoint_at = new Date(Date.now() + 86_400_000);
+      await missionLocaleEffectifsDb().insertMany([buildCollabDossier(ML_IDF, CFA_B, []), supprime, futur], {
+        bypassDocumentValidation: true,
+      });
+    });
+
+    it("Regroupe les collaborations reçues par CFA d'origine, y compris hors région, triées par nombre", async () => {
+      const response = await requestAsOrganisation(DREETS_IDF, "get", url(`ml_id=${ML_IDF}`));
+
+      expect(response.status).toBe(200);
+      expect(response.data.total).toBe(2);
+      expect(response.data.data).toEqual([
+        {
+          organisme_id: CFA_A.toString(),
+          nom: "Lycée Eiffel",
+          uai: "0751234A",
+          siret: "12345678900011",
+          code_postal: "75011",
+          commune: "Paris",
+          adresse: "1 rue Test 75011 Paris",
+          collaborations: 2,
+        },
+        expect.objectContaining({ organisme_id: CFA_B.toString(), nom: "Campus Alpha", uai: null, collaborations: 1 }),
+      ]);
+    });
+
+    it("Trie et pagine", async () => {
+      const asc = await requestAsOrganisation(ADMIN, "get", url(`ml_id=${ML_IDF}&sort_order=asc&limit=1`));
+      expect(asc.data.data.map((row: { nom: string }) => row.nom)).toEqual(["Campus Alpha"]);
+      expect(asc.data.pagination).toEqual({ page: 1, limit: 1, total_pages: 2 });
+
+      const localisation = await requestAsOrganisation(
+        ADMIN,
+        "get",
+        url(`ml_id=${ML_IDF}&sort_by=localisation&sort_order=asc`)
+      );
+      expect(localisation.data.data.map((row: { commune: string }) => row.commune)).toEqual(["Lyon", "Paris"]);
+    });
+
+    it("Exige une Mission Locale du périmètre", async () => {
+      expect((await requestAsOrganisation(ADMIN, "get", url(""))).status).toBe(400);
+      expectForbidden(
+        await requestAsOrganisation(ARML_IDF, "get", url(`ml_id=${ML_ARA}`)),
+        "Accès non autorisé à cette Mission Locale"
+      );
+    });
+  });
+
   describe("GET /stats/collaborations", () => {
     it("Renvoie le bloc collaboration national pour un admin", async () => {
       const response = await requestAsOrganisation(

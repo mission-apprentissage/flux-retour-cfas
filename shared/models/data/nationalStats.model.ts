@@ -556,3 +556,23 @@ export interface IMlFicheIndicateurs {
   is_engaged: boolean;
   alertes: IMlAlerte[];
 }
+
+export const COLLAB_CFA_ORIGINE_SORT_BY = ["collaborations", "localisation", "nom"] as const;
+export type CollabCfaOrigineSortBy = (typeof COLLAB_CFA_ORIGINE_SORT_BY)[number];
+
+export interface ICollabCfaOrigineRow {
+  organisme_id: string;
+  nom: string | null;
+  uai: string | null;
+  siret: string | null;
+  code_postal: string | null;
+  commune: string | null;
+  adresse: string | null;
+  collaborations: number;
+}
+
+export interface ICollabCfaOrigineResponse {
+  total: number;
+  pagination: { page: number; limit: number; total_pages: number };
+  data: ICollabCfaOrigineRow[];
+}

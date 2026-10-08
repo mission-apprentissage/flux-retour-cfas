@@ -5,6 +5,7 @@ import { ORGANISATION_TYPE } from "shared/constants";
 import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import {
+  COLLAB_CFA_ORIGINE_SORT_BY,
   COLLAB_DOSSIER_DELAIS,
   COLLAB_DOSSIER_RESULTATS,
   COLLAB_DOSSIER_STATUTS,
@@ -29,6 +30,7 @@ import {
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getCfaNpsStats, listCfaInjoignables } from "@/common/actions/cfa/cfa-collaboration-stats.actions";
 import { getCfaAdoptionStats, listCfaEtablissements } from "@/common/actions/cfa/cfa-stats.actions";
+import { listCollaborationsCfaOrigine } from "@/common/actions/mission-locale/collaboration-cfa-origine.actions";
 import { listCollaborationDossiers } from "@/common/actions/mission-locale/collaboration-dossiers.actions";
 import { getMissionLocaleFicheIndicateurs } from "@/common/actions/mission-locale/mission-locale-fiche.actions";
 import {
@@ -87,6 +89,13 @@ const collaborationsQuery = z.object({
   region: z.string().optional(),
   ml_id: mlIdSchema.optional(),
   national: zBooleanStringSchema.optional(),
+});
+const collabCfaOrigineQuery = z.object({
+  ml_id: mlIdSchema,
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+  sort_by: z.enum(COLLAB_CFA_ORIGINE_SORT_BY).default("collaborations"),
+  sort_order: z.enum(["asc", "desc"]).default("desc"),
 });
 const zCsvList = z
   .string()
@@ -223,6 +232,11 @@ export default () => {
     "/stats/collaborations/mensuel",
     validateRequestMiddleware({ query: collaborationsQuery }),
     returnResult(getCollaborationsMensuelRoute)
+  );
+  router.get(
+    "/stats/collaborations/cfa-origine",
+    validateRequestMiddleware({ query: collabCfaOrigineQuery }),
+    returnResult(getCollabCfaOrigineRoute)
   );
   router.get(
     "/stats/collaborations/dossiers",
@@ -584,6 +598,12 @@ const getCfaNpsRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = async 
 const findCfaInjoignables = (query: z.infer<typeof cfaInjoignablesExportQuery>, userRegions: string[]) => {
   assertRegionAllowed(query.region, userRegions);
   return listCfaInjoignables({ regions: scopedRegions(query.region, userRegions) }, query);
+};
+
+const getCollabCfaOrigineRoute: IndicateursHandler<z.infer<typeof collabCfaOrigineQuery>> = async (req, { locals }) => {
+  const { ml_id, ...options } = req.query;
+  await verifyMlInRegions(ml_id, locals.regions);
+  return listCollaborationsCfaOrigine(new ObjectId(ml_id), options);
 };
 
 const getCfaInjoignablesRoute: IndicateursHandler<z.infer<typeof cfaInjoignablesQuery>> = async (req, { locals }) => {

@@ -154,6 +154,22 @@ function buildTabs(mlId: string, data: IMissionLocaleDetailResponse, isAdmin: bo
         <MLSuiviTraitementTab mlId={mlId} noData />
       ),
     },
-    { id: "collaborations", label: "Suivi des collaborations", content: <MLCollaborationsTab mlId={mlId} /> },
+    {
+      id: "collaborations",
+      label: "Suivi des collaborations",
+      content: (
+        <MLCollaborationsTab
+          mlId={mlId}
+          action={
+            <ExportAllButton
+              mlId={mlId}
+              mlNom={data.ml.nom}
+              label="Exporter les données de cette Mission Locale"
+              priority="secondary"
+            />
+          }
+        />
+      ),
+    },
   ];
 }
