@@ -2,6 +2,7 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import type { ICfaFiche, ICfaFicheContactReferent, ICfaMembre } from "shared/models/data/nationalStats.model";
 
+import { batchInviteUsersToOrganisation, createOrganisation } from "@/common/actions/organisations.actions";
 import {
   invitationsDb,
   missionLocaleCfaInvitationsDb,
@@ -10,6 +11,7 @@ import {
   organismesDb,
   usersMigrationDb,
 } from "@/common/model/collections";
+import type { AuthContext } from "@/common/model/internal/AuthContext";
 
 /** L'organisation d'un CFA est rattachée tantôt par `organisme_id`, tantôt par SIRET + UAI selon les parcours. */
 export async function findCfaOrganisation(organisme: { _id: ObjectId; siret: string; uai?: string | null }) {
@@ -161,4 +163,21 @@ export async function getCfaMembres(organismeId: ObjectId, now: Date = new Date(
       })
     ),
   ];
+}
+
+export async function inviteCfaMembres(
+  ctx: AuthContext,
+  organismeId: ObjectId,
+  emails: string[],
+  roles?: Array<"admin" | "member">
+) {
+  const organisme = await organismesDb().findOne({ _id: organismeId }, { projection: { siret: 1, uai: 1 } });
+  if (!organisme) throw Boom.notFound("Organisme introuvable");
+
+  const existante = await findCfaOrganisation(organisme);
+  const organisationId =
+    existante?._id ??
+    (await createOrganisation({ type: "ORGANISME_FORMATION", siret: organisme.siret, uai: organisme.uai ?? null }));
+
+  return batchInviteUsersToOrganisation(ctx, emails, organisationId, roles);
 }
