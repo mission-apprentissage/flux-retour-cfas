@@ -5,17 +5,29 @@ import { Skeleton } from "@/app/_components/common/Skeleton";
 import styles from "./DejaConnuMiniChart.module.css";
 import { DonutChart } from "./DonutChart";
 
+export type DejaConnuFormat = "graphique" | "pourcentage";
+
 interface DejaConnuMiniChartProps {
   dejaConnu: number;
   total: number;
   loading?: boolean;
+  format?: DejaConnuFormat;
 }
 
-export function DejaConnuMiniChart({ dejaConnu, total, loading }: DejaConnuMiniChartProps) {
+export function DejaConnuMiniChart({ dejaConnu, total, loading, format = "graphique" }: DejaConnuMiniChartProps) {
   if (loading) {
     return (
       <div className={styles.section}>
         <Skeleton height="50px" width="100%" />
+      </div>
+    );
+  }
+
+  if (format === "pourcentage") {
+    return (
+      <div className={styles.section}>
+        <span className={styles.label}>Part de jeunes déjà connus des Missions Locales dans les dossiers traités</span>
+        <strong className={styles.pourcentage}>{total > 0 ? Math.round((dejaConnu / total) * 100) : 0} %</strong>
       </div>
     );
   }
