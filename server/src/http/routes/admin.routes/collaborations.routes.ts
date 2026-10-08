@@ -2,6 +2,7 @@ import express from "express";
 import { zCfaInvitesSansCollabQuery } from "shared/models/routes/admin/cfa-invites-sans-collab.api";
 import { z } from "zod";
 
+import { getCfaInvitationsExportData } from "@/common/actions/admin/collaborations/cfa-invitations-export.actions";
 import { getCfaInvitesSansCollab } from "@/common/actions/admin/collaborations/cfa-invites-sans-collab.actions";
 import { getCollaborationExportData } from "@/common/actions/admin/collaborations/collaboration-export.actions";
 import { getCollaborationStats } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
@@ -27,6 +28,11 @@ export default () => {
     "/cfa-invites-sans-collab",
     validateRequestMiddleware({ query: zCfaInvitesSansCollabQuery }),
     returnResult(getCfaInvitesSansCollabRoute)
+  );
+
+  router.get(
+    "/cfa-invitations/export",
+    returnResult(async () => getCfaInvitationsExportData())
   );
 
   return router;
