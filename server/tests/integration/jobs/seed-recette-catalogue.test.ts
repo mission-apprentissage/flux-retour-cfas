@@ -1,11 +1,14 @@
+import { ObjectId } from "bson";
 import type { IOrganisationMissionLocale, IOrganisationOrganismeFormation } from "shared/models";
 import { API_EFFECTIF_LISTE } from "shared/models/data/missionLocaleEffectif.model";
+import { CFA_INVITATION_STATUT } from "shared/models/routes/mission-locale/missionLocale.api";
 import { CFA_SUIVI_CATEGORY } from "shared/models/routes/organismes/cfa/cfa.api";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { getCfaEffectifsEnRupture } from "@/common/actions/cfa/cfa-effectifs-ruptures.actions";
 import { getCfaEffectifs } from "@/common/actions/cfa/cfa-effectifs.actions";
 import { getCfaSuiviMissionLocale } from "@/common/actions/cfa/cfa-suivi-mission-locale.actions";
+import { getCfaListToInviteForMissionLocale } from "@/common/actions/mission-locale/mission-locale-cfa-invitation.actions";
 import {
   getAllEffectifsParMois,
   getEffectifsFusionnesByMissionLocaleId,
@@ -39,13 +42,13 @@ const PAGE = { page: 1, limit: 500, order: "asc" as const };
 
 type Ligne = Record<string, unknown>;
 
-const nomNormalise = (n: number) => {
-  const { nom, prenom } = identite(n);
+const nomNormalise = (seedCase: SeedCase) => {
+  const { nom, prenom } = seedCase.identite ?? identite(seedCase.n);
   return normalisePersonIdentifiant({ nom, prenom, date_de_naissance: new Date() });
 };
 
-const estLeCas = (n: number) => (ligne: Ligne) => {
-  const attendu = nomNormalise(n);
+const estLeCas = (seedCase: SeedCase) => (ligne: Ligne) => {
+  const attendu = nomNormalise(seedCase);
   return (
     String(ligne.nom).toUpperCase() === attendu.nom &&
     String(ligne.prenom).toLowerCase() === attendu.prenom.toLowerCase()
@@ -103,14 +106,26 @@ describe("catalogue du seed recette", () => {
     expect(report.crees?.missionLocaleEffectif).toBe(
       CATALOGUE.filter((c) => c.attendu.ml || c.attendu.cfa?.ruptures || c.attendu.cfa?.suivi).length
     );
-    expect(report.crees?.usersMigration).toBe(7);
+    expect(report.crees?.usersMigration).toBe(10);
     expect(report.crees?.missionLocaleCfaInvitations).toBe(1);
+  });
+
+  it("propose Real Campus à l'invitation par la ML de Clichy, AFTRAL étant déjà actif", async () => {
+    const ml = (await organisationsDb().findOne({
+      _id: hosts.missionsLocales.ML_CLICHY,
+    })) as IOrganisationMissionLocale;
+    const cfas = await getCfaListToInviteForMissionLocale(ml, new ObjectId());
+    const statut = (code: "CFA_REAL_CAMPUS" | "CFA_AFTRAL") =>
+      cfas.find((c) => c.organisme_id === hosts.cfas[code].organismeId.toString())?.statut;
+
+    expect(statut("CFA_REAL_CAMPUS")).toBe(CFA_INVITATION_STATUT.INVITER);
+    expect(statut("CFA_AFTRAL")).toBe(CFA_INVITATION_STATUT.CFA_ACTIF);
   });
 
   const casMl = CATALOGUE.filter((c) => c.attendu.ml);
   it.each(casMl.map((c) => [c.code, c] as const))("ML — %s", (_code, seedCase: SeedCase) => {
     const attendu = seedCase.attendu.ml!;
-    const trouve = (liste: string) => listes.get(`${attendu.ml}:${liste}`)?.find(estLeCas(seedCase.n));
+    const trouve = (liste: string) => listes.get(`${attendu.ml}:${liste}`)?.find(estLeCas(seedCase));
 
     const aTraiter = trouve(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER);
     const traite = trouve(API_EFFECTIF_LISTE.TRAITE);
@@ -131,7 +146,7 @@ describe("catalogue du seed recette", () => {
   const casCfa = CATALOGUE.filter((c) => c.attendu.cfa);
   it.each(casCfa.map((c) => [c.code, c] as const))("CFA — %s", async (_code, seedCase: SeedCase) => {
     const attendu = seedCase.attendu.cfa!;
-    const trouve = (liste: string) => listes.get(`${attendu.cfa}:${liste}`)?.find(estLeCas(seedCase.n));
+    const trouve = (liste: string) => listes.get(`${attendu.cfa}:${liste}`)?.find(estLeCas(seedCase));
 
     const rupture = trouve("ruptures");
     expect(rupture ? (rupture.is_transmis_auto ? "plus_45j" : "moins_45j") : null).toBe(attendu.ruptures);

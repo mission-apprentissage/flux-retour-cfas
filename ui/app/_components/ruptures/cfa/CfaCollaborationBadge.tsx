@@ -8,10 +8,16 @@ import type { CfaCollaborationStatus } from "@/common/types/cfaRuptures";
 
 import styles from "./CfaCollaborationBadge.module.css";
 
+export const HORS_COLLAB_TEXTE_IDENTIFICATION =
+  "Certains jeunes peuvent avoir été identifiés par les Missions Locales en amont d'une initiative de collaboration de votre part. S'ils ont déjà été contactés, nous vous informons avec cette mention «\u00a0Contacté•e par la ML Hors Collab\u00a0».";
+
+export const HORS_COLLAB_TEXTE_COORDONNEES =
+  "Nous vous mettons à disposition les coordonnées de la personne de la Mission Locale qui a contacté le jeune.";
+
 interface CfaCollaborationBadgeProps {
   status: CfaCollaborationStatus;
   effectifId: string;
-  // Affiche les étiquettes "Contacté par la ML" / "Hors collab" côte à côte (contexte bandeau)
+  // Affiche les étiquettes "Contacté•e par la ML" / "Hors collab" côte à côte (contexte bandeau)
   // au lieu de l'empilement vertical utilisé dans le tableau.
   inline?: boolean;
   // Renseigné quand la collaboration est impossible : le CTA est rendu inactif et la raison
@@ -26,10 +32,7 @@ export function CfaHorsCollabTag() {
     <span className={styles.horsCollabTag}>
       Hors collab
       <span className={styles.horsCollabInfo}>
-        <Tooltip
-          kind="hover"
-          title="Ce jeune a été contacté par la Mission Locale en dehors d'une collaboration : son dossier lui a été transmis automatiquement 45 jours après la rupture."
-        />
+        <Tooltip kind="hover" title={`${HORS_COLLAB_TEXTE_IDENTIFICATION} ${HORS_COLLAB_TEXTE_COORDONNEES}`} />
       </span>
     </span>
   );
@@ -81,7 +84,7 @@ export function CfaCollaborationBadge({
       const contacte = (
         <span className={styles.contacteBadge}>
           <i className="fr-icon-message-2-fill fr-icon--sm" />
-          Contacté par la ML
+          Contacté•e par la ML
         </span>
       );
       if (sansTagHorsCollab) return contacte;

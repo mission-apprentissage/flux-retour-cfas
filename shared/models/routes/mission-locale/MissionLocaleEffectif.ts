@@ -13,6 +13,7 @@ import zMissionLocaleEffectif, {
   zVerifiedInfo,
 } from "shared/models/data/missionLocaleEffectif.model";
 import { zWhatsAppContact } from "shared/models/data/whatsappContact.model";
+import { CFA_COLLAB_STATUS } from "shared/models/routes/organismes/cfa/cfa.api";
 
 import { zEffectifComputedOrganisme } from "../../data";
 import { zApprenant } from "../../data/effectifs/apprenant.part";
@@ -170,6 +171,10 @@ const zEffectifMissionLocale = z
         prenom: z.string(),
       })
       .describe("Nom/prénom de l'utilisateur CFA qui a initié la collaboration")
+      .nullish(),
+    collab_status: z
+      .nativeEnum(CFA_COLLAB_STATUS)
+      .describe("Statut de collaboration vu par le CFA, calculé comme dans ses listes")
       .nullish(),
     is_grandfathered: z
       .boolean()

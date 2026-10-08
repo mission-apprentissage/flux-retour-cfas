@@ -38,31 +38,38 @@
   }
 }
 
-.ruptureBlock {
+.horsCollabBandeau {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+  padding: 0.75rem 2rem 1rem 1.5rem;
+  margin: -1rem -2rem 1rem -1.5rem;
+  background-color: var(--background-alt-blue-france);
+}
+
+.horsCollabBandeauTitre {
   display: flex;
   gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.ruptureBlock :global(.fr-toggle) {
-  border-bottom: none;
-}
-
-.ruptureLabel {
-  margin: 0 0 0.25rem 0;
-  font-family: Marianne, sans-serif;
+  align-items: flex-start;
+  margin: 0;
   font-size: 0.875rem;
   font-weight: 700;
-  line-height: 1.25rem;
-  color: var(--text-default-grey);
+  line-height: 1.5rem;
 }
 
-/* Neutraliser les évènements réserverait le clic au seul input, décalé à gauche. */
-.ruptureBlock :global(.fr-toggle__btn),
-.ruptureBlock :global(.fr-toggle__input),
-.ruptureBlock :global(.fr-toggle__label) {
-  cursor: pointer;
+.horsCollabBandeauTexte {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--text-mention-grey);
+}
+
+@media (max-width: 991px) {
+  .horsCollabBandeau {
+    padding: 0.75rem 1rem 1rem;
+    margin: 0 0 1rem;
+  }
 }
 
 .collaborationColumn {

@@ -1,19 +1,31 @@
 import { randomUUID } from "node:crypto";
 
 import { ObjectId } from "mongodb";
-import { STATUT_APPRENANT } from "shared/constants";
+import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
 import { IEffectif, IMissionLocaleEffectif, IOrganisationOrganismeFormation, SITUATION_ENUM } from "shared/models";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IOrganisation } from "shared/models/data/organisations.model";
-import { getAnneeScolaireListFromDateRange } from "shared/utils";
+import type { IOrganisme } from "shared/models/data/organismes.model";
+import { getAnneeScolaireListFromDateRange, getAnneesScolaireListFromDate } from "shared/utils";
 import type { PartialDeep } from "type-fest";
 import { describe, it, beforeEach, expect } from "vitest";
 
-import { getCfaSuiviMissionLocale } from "@/common/actions/cfa/cfa-suivi-mission-locale.actions";
+import { getCfaEffectifDetail } from "@/common/actions/cfa/cfa-effectifs.actions";
+import {
+  getCfaSuiviMissionLocale,
+  getCfaSuiviMissionLocaleExportRows,
+} from "@/common/actions/cfa/cfa-suivi-mission-locale.actions";
 import { DATE_START_RUPTURES } from "@/common/actions/shared/rupture-pipeline.utils";
-import { missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import {
+  effectifsDb,
+  effectifsDECADb,
+  missionLocaleEffectifsDb,
+  organisationsDb,
+  organismesDb,
+} from "@/common/model/collections";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
-import { DeepPartial, id, testDocs } from "@tests/utils/testUtils";
+import { DeepPartial, id, testDoc, testDocs } from "@tests/utils/testUtils";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -121,23 +133,22 @@ describe("getCfaSuiviMissionLocale", () => {
     expect(horsCollab.effectifs[0].collab_status).toBe("contacte_par_ml_hors_collab");
   });
 
-  it("exclut les hors-collab non joints et inclut la préqualif WhatsApp", async () => {
+  it("inclut toute qualification ML hors collab et la préqualif WhatsApp", async () => {
     const docs = await Promise.all([
-      // Non joints (situation renseignée mais pas de contact abouti) → exclus
       createMlEffectif({ situation: SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES }),
       createMlEffectif({ situation: SITUATION_ENUM.COORDONNEES_INCORRECT }),
       createMlEffectif({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR }),
-      // Préqualif WhatsApp positive, sans situation ML → inclus
       createMlEffectif({ whatsapp_contact: { phone_normalized: "+33600000000", user_response: "prequalif_yes" } }),
+      createMlEffectif({}),
     ]);
     await missionLocaleEffectifsDb().insertMany(testDocs<IMissionLocaleEffectif>(docs));
 
     const tous = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "tous" });
-    expect(tous.counts).toEqual({ collab: 0, hors_collab: 1, tous: 1 });
+    expect(tous.counts).toEqual({ collab: 0, hors_collab: 4, tous: 4 });
 
     const horsCollab = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "hors_collab" });
-    expect(horsCollab.pagination.total).toBe(1);
-    expect(horsCollab.effectifs[0].collab_status).toBe("contacte_par_ml_hors_collab");
+    expect(horsCollab.pagination.total).toBe(4);
+    expect(horsCollab.effectifs.every((e) => e.collab_status === "contacte_par_ml_hors_collab")).toBe(true);
   });
 
   it("trie sur le nom de la Mission Locale sans perdre les filtres", async () => {
@@ -182,5 +193,142 @@ describe("getCfaSuiviMissionLocale", () => {
 
     expect(result.effectifs.map((e) => e.mission_locale?.nom)).toEqual(["ML ALPHA", "ML ZEBRE"]);
     expect(result.pagination.total).toBe(2);
+  });
+
+  describe("dossiers portés par un autre établissement de la famille", () => {
+    const formateurId = new ObjectId(id(20));
+    const etrangerId = new ObjectId(id(21));
+    const jeune = { nom: "MANCEAU", prenom: "Malika", date_de_naissance: new Date(Date.UTC(2007, 7, 15)) };
+
+    beforeEach(async () => {
+      await effectifsDb().deleteMany({});
+      await effectifsDECADb().deleteMany({});
+      const formateurSiret = "13000460900066";
+      await organismesDb().updateOne(
+        { _id: organismeId },
+        { $set: { organismesFormateurs: [{ _id: formateurId, siret: formateurSiret }] } }
+      );
+      await organismesDb().insertMany(
+        testDocs<IOrganisme>([
+          {
+            _id: formateurId,
+            ...createRandomOrganisme(),
+            siret: formateurSiret,
+            organismesResponsables: [{ _id: organismeId, siret: sampleOrganisme.siret }],
+          },
+          { _id: etrangerId, ...createRandomOrganisme(), siret: "13000460900017" },
+        ])
+      );
+    });
+
+    async function insererEffectifDecaDuResponsable() {
+      const effectif = {
+        _id: new ObjectId(),
+        deca_raw_id: new ObjectId(),
+        ...(await createSampleEffectif({
+          organisme: sampleOrganisme,
+          annee_scolaire: getAnneesScolaireListFromDate(new Date())[0],
+          apprenant: jeune,
+          source: SOURCE_APPRENANT.DECA,
+        })),
+      };
+      await effectifsDECADb().insertOne(testDoc<IEffectifDECA>(effectif));
+      return effectif._id;
+    }
+
+    async function insererEffectifErpDuResponsable() {
+      const effectif = {
+        _id: new ObjectId(),
+        ...(await createSampleEffectif({
+          organisme: sampleOrganisme,
+          annee_scolaire: getAnneesScolaireListFromDate(new Date())[0],
+          apprenant: jeune,
+        })),
+      };
+      await effectifsDb().insertOne(testDoc<IEffectif>(effectif));
+      return effectif._id;
+    }
+
+    async function insererDossierPortePar(porteurId: ObjectId, overrides: MlEffectifOverrides = {}) {
+      const doc = await createMlEffectif({
+        apprenant: jeune,
+        situation: SITUATION_ENUM.COORDONNEES_INCORRECT,
+        ...overrides,
+      });
+      await missionLocaleEffectifsDb().insertOne(
+        testDoc<IMissionLocaleEffectif>({
+          ...doc,
+          effectif_snapshot: { ...doc.effectif_snapshot, organisme_id: porteurId },
+          identifiant_normalise: jeune,
+        })
+      );
+      return doc._id;
+    }
+
+    it("ajoute au hors collab le dossier qualifié porté par un formateur, avec l'effectif du responsable", async () => {
+      const effectifDecaId = await insererEffectifDecaDuResponsable();
+      await insererDossierPortePar(formateurId);
+
+      const result = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "hors_collab" });
+
+      expect(result.counts).toEqual({ collab: 0, hors_collab: 1, tous: 1 });
+      expect(result.effectifs).toHaveLength(1);
+      expect(result.effectifs[0].id?.toString()).toBe(effectifDecaId.toString());
+      expect(result.effectifs[0].source).toBe("effectifsDECA");
+      expect(result.effectifs[0].collab_status).toBe("contacte_par_ml_hors_collab");
+
+      const rows = await getCfaSuiviMissionLocaleExportRows(organisation, true);
+      expect(rows.map((r) => r.nom)).toEqual(["MANCEAU"]);
+
+      const detail = await getCfaEffectifDetail(organismeId, effectifDecaId.toString());
+      expect(detail.effectif).toMatchObject({ situation: { situation: SITUATION_ENUM.COORDONNEES_INCORRECT } });
+    });
+
+    it("ne garde qu'une ligne quand le jeune a un effectif ERP et DECA, avec l'effectif ERP", async () => {
+      const effectifErpId = await insererEffectifErpDuResponsable();
+      await insererEffectifDecaDuResponsable();
+      await insererDossierPortePar(formateurId);
+
+      const result = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "hors_collab" });
+
+      expect(result.counts.hors_collab).toBe(1);
+      expect(result.effectifs[0].id?.toString()).toBe(effectifErpId.toString());
+      expect(result.effectifs[0].source).toBe("effectifs");
+    });
+
+    it("sans accès DECA, ne rapproche pas l'effectif DECA de l'établissement", async () => {
+      await insererEffectifDecaDuResponsable();
+      await insererDossierPortePar(formateurId);
+
+      const result = await getCfaSuiviMissionLocale(organisation, false, { ...baseParams, category: "tous" });
+
+      expect(result.counts.tous).toBe(0);
+    });
+
+    it("n'ajoute pas le dossier d'un jeune que l'établissement n'a pas", async () => {
+      await insererDossierPortePar(formateurId);
+
+      const result = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "tous" });
+
+      expect(result.counts.tous).toBe(0);
+    });
+
+    it("n'ajoute pas un dossier de la famille en collab", async () => {
+      await insererEffectifDecaDuResponsable();
+      await insererDossierPortePar(formateurId, { organisme_data: { acc_conjoint: true } });
+
+      const result = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "tous" });
+
+      expect(result.counts).toEqual({ collab: 0, hors_collab: 0, tous: 0 });
+    });
+
+    it("n'ajoute pas un dossier porté par un établissement hors famille", async () => {
+      await insererEffectifDecaDuResponsable();
+      await insererDossierPortePar(etrangerId);
+
+      const result = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "tous" });
+
+      expect(result.counts.tous).toBe(0);
+    });
   });
 });

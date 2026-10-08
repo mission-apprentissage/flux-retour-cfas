@@ -105,6 +105,7 @@ export async function parseSuiviQuery(query: unknown): Promise<ISipaSuiviParams>
 export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
   const { dateMin, dateMax, departementsDb, page } = params;
   const dateMaxEndOfDay = new Date(dateMax.getTime() + 24 * 3600 * 1000 - 1);
+  const now = new Date();
 
   const ddnLowerBound = new Date(dateMin.getTime());
   ddnLowerBound.setUTCFullYear(ddnLowerBound.getUTCFullYear() - 18);
@@ -136,6 +137,7 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
     organisme_id: 1,
     "contrats.date_debut": 1,
     "contrats.date_fin": 1,
+    "contrats.date_rupture": 1,
     "apprenant.ine": 1,
     "apprenant.nom": 1,
     "apprenant.prenom": 1,
@@ -161,6 +163,29 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
         _dedup_prenom: stripDiacritics({ $toLower: { $trim: { input: { $ifNull: ["$apprenant.prenom", ""] } } } }),
         _dedup_ddn: { $dateTrunc: { date: "$apprenant.date_de_naissance", unit: "day" } },
         source_priority: { $cond: [{ $eq: ["$source", "DECA"] }, 0, 1] },
+        _dernier_debut: { $max: "$contrats.date_debut" },
+      },
+    },
+    {
+      $addFields: {
+        _rompu: {
+          $anyElementTrue: [
+            {
+              $map: {
+                input: { $ifNull: ["$contrats", []] },
+                as: "c",
+                in: {
+                  $and: [
+                    { $eq: [{ $type: "$$c.date_debut" }, "date"] },
+                    { $eq: ["$$c.date_debut", "$_dernier_debut"] },
+                    { $eq: [{ $type: "$$c.date_rupture" }, "date"] },
+                    { $lte: ["$$c.date_rupture", now] },
+                  ],
+                },
+              },
+            },
+          ],
+        },
       },
     },
     {
@@ -168,13 +193,15 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
         _id: { nom: "$_dedup_nom", prenom: "$_dedup_prenom", ddn: "$_dedup_ddn" },
         doc: {
           $top: {
-            sortBy: { source_priority: 1, "formation.date_inscription": -1, _id: 1 },
+            sortBy: { _rompu: 1, source_priority: 1, "formation.date_inscription": -1, _id: 1 },
             output: "$$ROOT",
           },
         },
+        dernier_contrat_rompu: { $top: { sortBy: { _dernier_debut: -1, _rompu: -1 }, output: "$_rompu" } },
         ines: { $addToSet: "$apprenant.ine" },
       },
     },
+    { $match: { dernier_contrat_rompu: false } },
     { $replaceRoot: { newRoot: { $mergeObjects: ["$doc", { _ines: "$ines" }] } } },
     {
       $facet: {

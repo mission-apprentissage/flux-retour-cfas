@@ -280,7 +280,7 @@ describe("CFA Effectifs Actions", () => {
       expect(result.filters.formations).toContain("CAP Boulangerie");
     });
 
-    it("marque les effectifs de moins de 16 ans et plus de 25 ans", async () => {
+    it("marque les effectifs de moins de 16 ans et de 26 ans ou plus", async () => {
       await insertEffectif({
         apprenant: { nom: "JEUNE", prenom: "Test", date_de_naissance: new Date(new Date().getFullYear() - 14, 0, 1) },
       });
@@ -294,10 +294,15 @@ describe("CFA Effectifs Actions", () => {
       await insertEffectif({
         apprenant: { nom: "AGE", prenom: "Test", date_de_naissance: new Date(new Date().getFullYear() - 30, 0, 1) },
       });
+      const vingtCinqAns = new Date();
+      vingtCinqAns.setFullYear(vingtCinqAns.getFullYear() - 25, vingtCinqAns.getMonth() - 6);
+      await insertEffectif({
+        apprenant: { nom: "VINGTCINQ", prenom: "Test", date_de_naissance: vingtCinqAns, rqth: false },
+      });
 
       const result = await getCfaEffectifs(organisation, false, defaultParams);
 
-      expect(result.pagination.total).toBe(3);
+      expect(result.pagination.total).toBe(4);
       const byNom = Object.fromEntries(result.effectifs.map((e) => [e.nom, e]));
       expect(byNom.JEUNE.is_moins_16).toBe(true);
       expect(byNom.JEUNE.is_plus_25).toBe(false);
@@ -305,6 +310,7 @@ describe("CFA Effectifs Actions", () => {
       expect(byNom.DANSCIBLE.is_plus_25).toBe(false);
       expect(byNom.AGE.is_moins_16).toBe(false);
       expect(byNom.AGE.is_plus_25).toBe(true);
+      expect(byNom.VINGTCINQ.is_plus_25).toBe(false);
     });
 
     it("date_rupture remontée pour un effectif ABANDON avec contrat rupturé", async () => {
@@ -422,6 +428,24 @@ describe("CFA Effectifs Actions", () => {
       expect(match?.collab_status).toBe("contacte_par_ml_hors_collab");
     });
 
+    it("affiche comme contacté par la ML un dossier qualifié non joint, et « démarrer » sans qualification", async () => {
+      const qualifie = await insertEffectif({ apprenant: { nom: "QUALIFIE", prenom: "Jeune" } });
+      const sansQualif = await insertEffectif({ apprenant: { nom: "SANSQUALIF", prenom: "Jeune" } });
+      await missionLocaleEffectifsDb().insertMany(
+        testDocs<IMissionLocaleEffectif>([
+          createMlEffectifDoc(qualifie, { situation: SITUATION_ENUM.COORDONNEES_INCORRECT, soft_deleted: false }),
+          createMlEffectifDoc(sansQualif, { soft_deleted: false }),
+        ])
+      );
+
+      const result = await getCfaEffectifs(organisation, false, defaultParams);
+
+      const statut = (effectifId: ObjectId) =>
+        result.effectifs.find((e) => e.id?.toString() === effectifId.toString())?.collab_status;
+      expect(statut(qualifie._id)).toBe("contacte_par_ml_hors_collab");
+      expect(statut(sansQualif._id)).toBe("demarrer_collab");
+    });
+
     it("fallback identifiant : ne matche PAS un ml record hors famille", async () => {
       const strangerOrgId = new ObjectId(id(45));
       const strangerOrg = {
@@ -464,6 +488,27 @@ describe("CFA Effectifs Actions", () => {
   });
 
   describe("getCfaEffectifDetail", () => {
+    it("renvoie le même statut de collaboration que les listes", async () => {
+      const sansDossier = await insertEffectif({ apprenant: { nom: "SANSDOSSIER", prenom: "Jeune" } });
+      const horsCollab = await insertEffectif({ apprenant: { nom: "HORSCOLLAB", prenom: "Jeune" } });
+      const demandee = await insertEffectif({ apprenant: { nom: "DEMANDEE", prenom: "Jeune" } });
+      const traitee = await insertEffectif({ apprenant: { nom: "TRAITEE", prenom: "Jeune" } });
+      await missionLocaleEffectifsDb().insertMany(
+        testDocs<IMissionLocaleEffectif>([
+          createMlEffectifDoc(horsCollab, { situation: SITUATION_ENUM.COORDONNEES_INCORRECT }),
+          createMlEffectifDoc(demandee, { organisme_data: { acc_conjoint: true } }),
+          createMlEffectifDoc(traitee, { situation: SITUATION_ENUM.RDV_PRIS, organisme_data: { acc_conjoint: true } }),
+        ])
+      );
+
+      const statut = async (effectif: IEffectif) =>
+        (await getCfaEffectifDetail(organismeId, effectif._id.toString())).effectif;
+      expect(await statut(sansDossier)).toMatchObject({ collab_status: "demarrer_collab" });
+      expect(await statut(horsCollab)).toMatchObject({ collab_status: "contacte_par_ml_hors_collab" });
+      expect(await statut(demandee)).toMatchObject({ collab_status: "collab_demandee" });
+      expect(await statut(traitee)).toMatchObject({ collab_status: "traite_par_ml" });
+    });
+
     it("retourne les données depuis missionLocaleEffectif si présent", async () => {
       const effectif = await insertEffectif({ apprenant: { nom: "DUPONT", prenom: "Jean" } });
       await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(createMlEffectifDoc(effectif)));

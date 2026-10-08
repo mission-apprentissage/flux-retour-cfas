@@ -19,6 +19,7 @@ import {
   TraitementMlSortBy,
 } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
+import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
 import { calculatePercentage } from "shared/utils/stats";
 
 import { missionLocaleEffectifsDb, missionLocaleStatsDb, organisationsDb } from "@/common/model/collections";
@@ -823,10 +824,12 @@ export async function getCollaborationSegmentStats(
   const evaluationDate = normalizeToUTCDay(new Date());
   const startDate = await calculateStartDateAsync(period, evaluationDate);
   const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
+  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
 
   const collabMatch = (date: Date) => ({
     "organisme_data.acc_conjoint": true,
     "organisme_data.acc_conjoint_at": { $lte: date },
+    "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
     soft_deleted: { $ne: true },
     ...(missionLocaleIds ? { mission_locale_id: { $in: missionLocaleIds } } : {}),
   });
@@ -1080,10 +1083,12 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
   const collabMissionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
   const collabMlFilter = collabMissionLocaleIds ? { mission_locale_id: { $in: collabMissionLocaleIds } } : {};
 
+  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
   const collabByMlPipeline = [
     {
       $match: {
         "organisme_data.acc_conjoint": true,
+        "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
         soft_deleted: { $ne: true },
         ...collabMlFilter,
       },

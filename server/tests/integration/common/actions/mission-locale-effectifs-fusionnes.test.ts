@@ -13,6 +13,7 @@ import { getAnneesScolaireListFromDate } from "shared/utils";
 import { describe, it, beforeEach, expect } from "vitest";
 
 import {
+  getCompteursOngletsMissionLocale,
   getEffectifFromMissionLocaleId,
   getEffectifsFusionnesByMissionLocaleId,
   getEffectifsListByMissionLocaleId,
@@ -432,6 +433,68 @@ describe("getEffectifsFusionnesByMissionLocaleId", () => {
 
       expect(result.effectifs).toHaveLength(1);
       expect(result.effectifs[0].situation_dossier ?? null).toBe(attendu);
+    });
+  });
+
+  describe("compteurs des onglets", () => {
+    it("renvoie zéro partout sans dossier à traiter", async () => {
+      expect(await getCompteursOngletsMissionLocale(missionLocale)).toEqual({
+        prioritaires: 0,
+        collaborations: 0,
+        tous: 0,
+      });
+    });
+
+    it("compte chaque dossier à traiter dans le périmètre de chaque onglet", async () => {
+      await insertMlRecord("SANSCRITERE");
+      await insertMlRecord("MINEUR", {}, { date_de_naissance: yearsAgo(17) });
+      await insertMlRecord("COLLAB", { organisme_data: collabData() });
+
+      expect(await getCompteursOngletsMissionLocale(missionLocale)).toEqual({
+        prioritaires: 2,
+        collaborations: 1,
+        tous: 3,
+      });
+    });
+
+    it("ignore les dossiers à recontacter et traités", async () => {
+      await insertMlRecord("RECONTACTER", {
+        organisme_data: collabData(),
+        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+      });
+      await insertMlRecord("TRAITE", {
+        organisme_data: collabData(),
+        situation: SITUATION_ENUM.RDV_PRIS,
+        date_traitement: daysAgo(1),
+      });
+
+      expect(await getCompteursOngletsMissionLocale(missionLocale)).toEqual({
+        prioritaires: 0,
+        collaborations: 0,
+        tous: 0,
+      });
+    });
+
+    it("correspond aux dossiers à traiter des listes prioritaires et collaborations", async () => {
+      await insertMlRecord("SANSCRITERE");
+      await insertMlRecord("RDV", { souhaite_rdv: true });
+      await insertMlRecord("RQTH", {}, { rqth: true });
+      await insertMlRecord("RQTHRECONTACTER", { situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR }, { rqth: true });
+      await insertMlRecord("COLLAB", { organisme_data: collabData() });
+      await insertMlRecord("COLLABRECONTACTER", {
+        organisme_data: collabData(),
+        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+      });
+
+      const aTraiter = async (nomListe: Parameters<typeof getEffectifsFusionnesByMissionLocaleId>[1]) =>
+        (await getEffectifsFusionnesByMissionLocaleId(missionLocale, nomListe)).effectifs.filter((e) => e.a_traiter)
+          .length;
+
+      const compteurs = await getCompteursOngletsMissionLocale(missionLocale);
+      expect(compteurs.prioritaires).toBe(await aTraiter(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER_PRIORITAIRE));
+      expect(compteurs.collaborations).toBe(await aTraiter(API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER));
+      expect(compteurs.tous).toBe(await aTraiter(API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER));
+      expect(compteurs).toEqual({ prioritaires: 3, collaborations: 1, tous: 4 });
     });
   });
 });

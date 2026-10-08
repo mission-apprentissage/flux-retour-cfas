@@ -9,7 +9,7 @@ Regénérer : `npx vitest run --project server tests/unit/jobs/seed-recette-read
 - À la main : `yarn cli seed:recette` (`--dry-run` pour simuler, `--uninstall` pour tout retirer et remettre les flags des hôtes).
 - Refuse de tourner hors recette/local/test, et s'arrête sans rien écrire (désinstallation comprise) si un hôte a une activité réelle : effectif ou dossier ML actif hors seed (les anciens dossiers soft-deleted sont ignorés). En cron, l'échec remonte dans Sentry.
 - Tout le jeu est construit avant la moindre écriture : une erreur de construction ne laisse aucun état partiel.
-- La purge ne touche que le jeu fictif : `_id` en `5eed`, dossiers des ML hôtes créés sur un effectif fictif, invitations émises par un compte fictif.
+- La purge ne touche que le jeu fictif : `_id` en `5eed`, dossiers des ML hôtes créés sur un effectif fictif, invitations émises par un compte fictif ou d'une ML hôte vers un CFA hôte. Les invitations de collègues restent.
 - Si un vrai dossier porte déjà le même nom, prénom et date de naissance qu'un jeune fictif, la date de naissance fictive est décalée de quelques jours (l'index est unique sur toutes les ML).
 - Tous les `_id` créés commencent par `5eed` ; les URL ci-dessous restent valides d'une nuit à l'autre.
 - Identités fictives : e-mails en `@example.com` (domaine réservé), téléphones en 06 00 00 (plage de fiction ARCEP 06 39 98 rejetée par la validation serveur).
@@ -23,11 +23,23 @@ Accès par impersonation admin depuis l'organisation, ou avec un compte ci-desso
 | --- | --- | --- | --- |
 | ML_A | Mission Locale Ivry-Vitry-sur-Seine (ml_id 569) | ML activée par le seed, avec lien de RDV | `679b92f1bdd1dd56b488014e` |
 | ML_B | Mission Locale d'Aubervilliers (ml_id 39) | ML non activée | `67b59632ba5ecb4ba6caaaec` |
+| ML_CLICHY | Clichoise pour l'insertion sociale et professionnelle des jeunes, Clichy (ml_id 139) | ML réelle déjà activée, avec ses propres dossiers ; flags jamais modifiés | `67b59632ba5ecb4ba6caab32` |
 | CFA_ON | ESTP, Cachan | Collaboration active | `693e1c17ae4afef0564640f1` |
 | CFA_SUSP | Association Sup de Vinci, Saint-Maur-des-Fossés | Collaboration suspendue pour inactivité | `693e1c07ae4afef056463b30` |
 | CFA_OFF | Maison du Sacré-Cœur, Thiais | Utilise le TDB, sans collaboration | `693e1c20ae4afef056464464` |
 | CFA_SANS | AFASEC Grosbois, Boissy-Saint-Léger | Sans compte TDB | `693e1c18ae4afef056464133` |
 | CFA_DECA | Plateform', Montreuil | Pilote DECA et collaboration active | `693e1c21ae4afef056464503` |
+| CFA_REAL_CAMPUS | Real Campus by L'Oréal, Clichy | CFA réel sans collaboration, à inviter | `68e683565ad4d7d7e66e53d0` |
+| CFA_AFTRAL | AFTRAL, Gennevilliers | CFA réel, collaboration activée à J-7 | `68e6835b5ad4d7d7e66e554b` |
+
+## ML de Clichy (cas Z01 à Z41)
+
+Les 41 dossiers de la ML Clichoise, repris du jeu importé à la main le 22/09/2026. `ML_CLICHY`, `CFA_REAL_CAMPUS` et `CFA_AFTRAL` sont des organisations réelles qui ont déjà leurs propres dossiers et effectifs, visibles à côté des dossiers fictifs :
+
+- le contrôle d'activité réelle ne s'applique pas à elles, et la purge ne touche jamais leurs vrais dossiers ;
+- la ML n'est jamais modifiée (ni activation, ni lien de RDV), même à la désinstallation ;
+- aucun effectif fictif n'est créé chez ces deux CFA ;
+- les traitements passés sont signés par le compte `auteurClichy` de `hosts.ts`, ou sans auteur s'il n'existe pas.
 
 ## Comptes
 
@@ -37,11 +49,14 @@ Mot de passe commun : variable `MNA_TDB_SEED_RECETTE_PASSWORD` (sops, `env.recet
 | --- | --- | --- | --- | --- |
 | Claire Fontaine | claire.fontaine@example.com | ML_A | — | ML_A_CONSEIL_1 |
 | Karim Benali | karim.benali@example.com | ML_A | — | ML_A_CONSEIL_2 |
+| Élodie Marchetti | elodie.marchetti@example.com | ML_CLICHY | — | ML_CLICHY_CONSEIL |
 | Sophie Marchand | sophie.marchand@example.com | CFA_ON | admin | CFA_ON_ADMIN |
 | Julien Carpentier | julien.carpentier@example.com | CFA_ON | member | CFA_ON_MEMBRE |
 | Nadia Haddad | nadia.haddad@example.com | CFA_SUSP | admin | CFA_SUSP_ADMIN |
 | Pierre Lemoine | pierre.lemoine@example.com | CFA_OFF | admin | CFA_OFF_ADMIN |
 | Aurélie Chevalier | aurelie.chevalier@example.com | CFA_DECA | admin | CFA_DECA_ADMIN |
+| Karim BENALI | karim.benali@cfa-metiers-clichy.example | CFA_REAL_CAMPUS | admin | CFA_REAL_CAMPUS_ADMIN |
+| Sophie LAURENT | sophie.laurent@campus92-formation.example | CFA_AFTRAL | admin | CFA_AFTRAL_ADMIN |
 
 ## Jeunes et cas testés
 
@@ -50,7 +65,7 @@ Mot de passe commun : variable `MNA_TDB_SEED_RECETTE_PASSWORD` (sops, `env.recet
 | A01 STANDARD | Lucas Bernard | Rupture récente, CFA sans compte | ML_A › À traiter ou recontacter | `/mission-locale/5eed01000000000000000001` |
 | A02 DECA | Chloé Dubois | Rupture remontée par DECA pour un CFA sans ERP | ML_A › À traiter ou recontacter ; CFA_DECA › Ruptures de 45 j et plus | `/mission-locale/5eed02000000000000000002` |
 | A03 MINEUR | Hugo Thomas | Jeune de 17 ans → prioritaire | ML_A › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed01000000000000000003` |
-| A04 RQTH | Manon Robert | Jeune de 28 ans avec RQTH → visible et prioritaire | ML_A › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed01000000000000000004` |
+| A04 RQTH | Manon Robert | Jeune avec RQTH → visible et prioritaire | ML_A › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed01000000000000000004` |
 | A10 PLUS DE 180 J | Jade Simon | Rupture il y a 200 jours, jeune passé en abandon → groupe « plus de 180 j » | ML_A › À traiter ou recontacter | `/mission-locale/5eed0100000000000000000a` |
 | A11 NOUVEAU CONTRAT | Gabriel Laurent | Jeune reparti en contrat depuis la rupture → bandeau « nouveau contrat » | ML_A › À traiter ou recontacter | `/mission-locale/5eed0100000000000000000b` |
 | B12 FIN DE FORMATION | Sarah Lefebvre | À recontacter, formation terminée depuis | ML_A › À traiter ou recontacter | `/mission-locale/5eed0100000000000000000c` |
@@ -125,6 +140,47 @@ Mot de passe commun : variable `MNA_TDB_SEED_RECETTE_PASSWORD` (sops, `env.recet
 | J142 CFA_DECA APPRENTI | Anaïs Fournier | Tableau des effectifs CFA_DECA : apprenti | CFA_DECA › Effectifs | `/cfa/5eed0200000000000000008e` |
 | J143 CFA_DECA ABANDON (EXCLUSION) | Noah Morel | Tableau des effectifs CFA_DECA : abandon (exclusion) | CFA_DECA › Effectifs | `/cfa/5eed0200000000000000008f` |
 | J144 CFA_DECA FIN DE FORMATION | Maëlys Girard | Tableau des effectifs CFA_DECA : fin de formation | CFA_DECA › Effectifs | `/cfa/5eed02000000000000000090` |
+| Z01 CLICHY | Lisa DUPUIS | Jeune mineur, prioritaire | ML_CLICHY › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed010000000000000003e9` |
+| Z02 CLICHY | Mathis LEFEVRE | Jeune mineur, prioritaire | ML_CLICHY › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed020000000000000003ea` |
+| Z03 CLICHY | Margaux LEROY | Jeune RQTH, prioritaire | ML_CLICHY › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed010000000000000003eb` |
+| Z04 CLICHY | Sacha FLEURY | Jeune RQTH, prioritaire | ML_CLICHY › À traiter ou recontacter (+ Dossiers prioritaires) ; CFA_AFTRAL › Ruptures de moins de 45 j | `/mission-locale/5eed010000000000000003ec` |
+| Z05 CLICHY | Assia RICHARD | A confirmé vouloir être contacté (visible sur la fiche) | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed010000000000000003ed` |
+| Z06 CLICHY | Samuel THOMAS | A confirmé vouloir être contacté (visible sur la fiche) | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed010000000000000003ee` |
+| Z07 CLICHY | Nour MERCIER | A demandé un RDV en réponse au WhatsApp de préqualification | ML_CLICHY › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed010000000000000003ef` |
+| Z08 CLICHY | Jules POIRIER | Injoignable, a demandé à être rappelé par WhatsApp | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed010000000000000003f0` |
+| Z09 CLICHY | Sarah BOYER | Collaboration AFTRAL après rupture | ML_CLICHY › À traiter ou recontacter (+ Dossiers prioritaires, Collaborations) ; CFA_AFTRAL › Ruptures de moins de 45 j, Suivi ML › Collaborations | `/mission-locale/5eed010000000000000003f1` |
+| Z10 CLICHY | Matéo ROCHE | Collaboration AFTRAL, encore en contrat, risque très élevé | ML_CLICHY › À traiter ou recontacter (+ Dossiers prioritaires, Collaborations) ; CFA_AFTRAL › Suivi ML › Collaborations | `/mission-locale/5eed010000000000000003f2` |
+| Z11 CLICHY | Kenza MARCHAL | Jeune mineur, prioritaire | ML_CLICHY › À traiter ou recontacter (+ Dossiers prioritaires) | `/mission-locale/5eed020000000000000003f3` |
+| Z12 CLICHY | Enzo MEYER | Rupture à traiter, score de réponse élevé | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed010000000000000003f4` |
+| Z13 CLICHY | Justine ROUSSEAU | Rupture à traiter | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed010000000000000003f5` |
+| Z14 CLICHY | Ismaël ROYER | Rupture à traiter | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed020000000000000003f6` |
+| Z15 CLICHY | Chloé ROYER | Rupture à traiter | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed010000000000000003f7` |
+| Z16 CLICHY | Enzo RIVIERE | Rupture à traiter | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed010000000000000003f8` |
+| Z17 CLICHY | Nour BARON | Rupture à traiter | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed020000000000000003f9` |
+| Z18 CLICHY | Thomas PEREZ | Rupture à traiter | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed010000000000000003fa` |
+| Z19 CLICHY | Mathilde AUBERT | Rupture à traiter | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed010000000000000003fb` |
+| Z20 CLICHY | Jules HENRY | Rupture à traiter | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed020000000000000003fc` |
+| Z21 CLICHY | Justine LEMAIRE | Rupture à traiter | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed010000000000000003fd` |
+| Z22 CLICHY | Matéo NOEL | Rupture à traiter | ML_CLICHY › À traiter ou recontacter ; CFA_AFTRAL › Ruptures de moins de 45 j | `/mission-locale/5eed010000000000000003fe` |
+| Z23 CLICHY | Inès LACROIX | Rupture à traiter | ML_CLICHY › À traiter ou recontacter ; CFA_AFTRAL › Ruptures de moins de 45 j | `/mission-locale/5eed010000000000000003ff` |
+| Z24 CLICHY | Tom JULIEN | Rupture à traiter | ML_CLICHY › À traiter ou recontacter ; CFA_AFTRAL › Ruptures de 45 j et plus | `/mission-locale/5eed01000000000000000400` |
+| Z25 CLICHY | Charlotte LAURENT | Contacté sans retour | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed01000000000000000401` |
+| Z26 CLICHY | Axel BRUNET | Contacté sans retour, relance WhatsApp envoyée | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed01000000000000000402` |
+| Z27 CLICHY | Candice MORIN | Contacté sans retour, a répondu « pas besoin » au WhatsApp | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed02000000000000000403` |
+| Z28 CLICHY | Adrien DUBOIS | Contacté sans retour | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed01000000000000000404` |
+| Z29 CLICHY | Justine GAILLARD | Contacté sans retour | ML_CLICHY › À traiter ou recontacter | `/mission-locale/5eed01000000000000000405` |
+| Z30 CLICHY | Quentin MARTIN | Dossier traité | ML_CLICHY › Traités | `/mission-locale/5eed01000000000000000406` |
+| Z31 CLICHY | Candice CARRE | Dossier traité | ML_CLICHY › Traités | `/mission-locale/5eed01000000000000000407` |
+| Z32 CLICHY | Nolan ROBERT | Dossier traité | ML_CLICHY › Traités | `/mission-locale/5eed02000000000000000408` |
+| Z33 CLICHY | Alice AUBERT | Dossier traité | ML_CLICHY › Traités | `/mission-locale/5eed01000000000000000409` |
+| Z34 CLICHY | Nathan COUSIN | Dossier traité | ML_CLICHY › Traités | `/mission-locale/5eed0100000000000000040a` |
+| Z35 CLICHY | Lola MARTIN | Dossier traité | ML_CLICHY › Traités | `/mission-locale/5eed0100000000000000040b` |
+| Z36 CLICHY | Paul LEMAIRE | Dossier traité | ML_CLICHY › Traités | `/mission-locale/5eed0200000000000000040c` |
+| Z37 CLICHY | Célia PAUL | Dossier traité | ML_CLICHY › Traités | `/mission-locale/5eed0100000000000000040d` |
+| Z38 CLICHY | Samuel VASSEUR | Dossier traité | ML_CLICHY › Traités | `/mission-locale/5eed0100000000000000040e` |
+| Z39 CLICHY | Amandine DUVAL | Dossier traité | ML_CLICHY › Traités | `/mission-locale/5eed0100000000000000040f` |
+| Z40 CLICHY | Axel REMY | Collaboration AFTRAL traitée par la ML | ML_CLICHY › Traités (+ Collaborations) ; CFA_AFTRAL › Ruptures de 45 j et plus, Suivi ML › Collaborations | `/mission-locale/5eed01000000000000000410` |
+| Z41 CLICHY | Juliette DUVAL | Dossier traité | ML_CLICHY › Traités ; CFA_AFTRAL › Ruptures de 45 j et plus, Suivi ML › Hors collaboration | `/mission-locale/5eed01000000000000000411` |
 
 ## Autres données
 

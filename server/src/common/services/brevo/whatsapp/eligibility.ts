@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import { CONVERSATION_STATE } from "shared/models/data/whatsappContact.model";
+import { isAgeEligibleMissionLocale } from "shared/utils";
 
 import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "@/common/actions/mission-locale/mission-locale.constants";
 import logger from "@/common/logger";
@@ -32,6 +33,8 @@ export function isEligibleForPrequalif(effectif: IMissionLocaleEffectif): boolea
   const phone = effectif.effectif_snapshot?.apprenant?.telephone;
   if (!phone || !normalizePhoneNumber(phone)) return false;
 
+  if (!isAgeEligibleMissionLocale(effectif.effectif_snapshot?.apprenant?.date_de_naissance)) return false;
+
   if (effectif.whatsapp_contact?.last_message_sent_at) return false;
   if (effectif.whatsapp_contact?.opted_out) return false;
 
@@ -58,6 +61,10 @@ export function isEligibleForWhatsApp(effectif: IMissionLocaleEffectif): boolean
   // Pas de téléphone valide
   const phone = effectif.effectif_snapshot?.apprenant?.telephone;
   if (!phone || !normalizePhoneNumber(phone)) {
+    return false;
+  }
+
+  if (!isAgeEligibleMissionLocale(effectif.effectif_snapshot?.apprenant?.date_de_naissance)) {
     return false;
   }
 

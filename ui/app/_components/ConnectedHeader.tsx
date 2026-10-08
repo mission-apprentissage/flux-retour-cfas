@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { usePathname } from "next/navigation";
@@ -15,6 +16,7 @@ import { usePlausibleAppTracking } from "../_hooks/plausible";
 import styles from "./ConnectedHeader.module.css";
 import { Impersonate } from "./Impersonate";
 import { useCfaUnreadNotificationsCount } from "./ruptures/cfa/hooks";
+import { useMlCompteursOnglets } from "./ruptures/shared/hooks";
 import { UserConnectedHeader } from "./UserConnectedHeader";
 
 // Onglets des DREETS/DDETS mis en pause pendant les travaux : les anciennes URL restent valides et affichent la page travaux.
@@ -36,6 +38,22 @@ function OngletEnPause({ label }: { label: string }) {
   );
 }
 
+function OngletAvecCompteur({ label, compteur }: { label: string; compteur: number | undefined }) {
+  return (
+    <span className={styles.navLabel}>
+      {label}
+      {compteur !== undefined && (
+        <>
+          <Badge as="span" small noIcon className={styles.compteur}>
+            {compteur}
+          </Badge>
+          <span className="fr-sr-only">{compteur > 1 ? " dossiers à traiter" : " dossier à traiter"}</span>
+        </>
+      )}
+    </span>
+  );
+}
+
 export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   const { user } = useAuth();
   const pathname = usePathname();
@@ -44,6 +62,9 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   const isCfa = user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION;
   const { data: unreadData } = useCfaUnreadNotificationsCount(isCfa ? getUserOrganismeId(user) : undefined);
   const unreadCount = unreadData?.count ?? 0;
+
+  const isMl = user?.organisation?.type === ORGANISATION_TYPE.MISSION_LOCALE;
+  const { data: compteurs } = useMlCompteursOnglets(isMl && withNav);
 
   // Nav plus dense : ces profils ont deux onglets de plus que les autres pendant les travaux.
   const aOngletsEnPause =
@@ -74,7 +95,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
 
     if (organisationType === ORGANISATION_TYPE.MISSION_LOCALE) {
       baseItems.push({
-        text: "Dossiers prioritaires",
+        text: <OngletAvecCompteur label="Dossiers prioritaires" compteur={compteurs?.prioritaires} />,
         isActive: pathname === "/mission-locale",
         linkProps: {
           href: "/mission-locale",
@@ -83,7 +104,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
         },
       });
       baseItems.push({
-        text: "Collaborations CFA",
+        text: <OngletAvecCompteur label="Collaborations CFA" compteur={compteurs?.collaborations} />,
         isActive: pathname?.startsWith("/mission-locale/collaborations"),
         linkProps: {
           href: "/mission-locale/collaborations",
@@ -92,7 +113,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
         },
       });
       baseItems.push({
-        text: "Tous les dossiers",
+        text: <OngletAvecCompteur label="Tous les dossiers" compteur={compteurs?.tous} />,
         isActive: pathname?.startsWith("/mission-locale/ruptures"),
         linkProps: {
           href: "/mission-locale/ruptures",
@@ -101,11 +122,12 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
         },
       });
       baseItems.push({
-        text: "Inviter les CFA",
+        text: "Inviter des CFA",
         isActive: pathname?.startsWith("/mission-locale/inviter-les-cfa"),
         linkProps: {
           href: "/mission-locale/inviter-les-cfa",
           target: "_self",
+          className: styles.inviterCfaLink,
         },
       });
     } else if (organisationType === ORGANISATION_TYPE.ORGANISME_FORMATION) {

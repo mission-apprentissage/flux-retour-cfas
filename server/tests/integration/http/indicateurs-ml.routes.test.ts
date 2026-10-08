@@ -169,7 +169,10 @@ const buildCollabDossier = (missionLocaleId: ObjectId, organismeId: ObjectId, mo
     effectif_id: new ObjectId(),
     created_at: new Date("2026-03-01"),
     situation: null,
-    effectif_snapshot: { organisme_id: organismeId },
+    effectif_snapshot: {
+      organisme_id: organismeId,
+      apprenant: { date_de_naissance: new Date(new Date().getFullYear() - 20, 0, 1) },
+    },
     organisme_data: {
       acc_conjoint: true,
       acc_conjoint_at: new Date("2026-03-10"),

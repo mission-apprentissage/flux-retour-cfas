@@ -14,7 +14,8 @@ import {
   buildStopConfirmationMessage,
 } from "@/common/services/brevo/whatsapp/messages";
 
-import { buildLog, jour, type SeedContext } from "../factories";
+import { buildLog, jour, type SeedContext, telephoneFictif } from "../factories";
+import type { MlHostCode } from "../hosts";
 import { identite } from "../identites";
 
 import { rupture, traiter } from "./helpers";
@@ -25,17 +26,23 @@ const MODELE_CLASSIFIER = "2026-03-16";
 const RDV_REDIRECT_URL = "https://rdv.seed.recette.invalid/ml-a";
 
 const logN = (n: number) => n * 10;
-const telephone = (n: number) => `+33600000${String(n).padStart(3, "0")}`;
+const telephone = (n: number) => `+33${telephoneFictif(n).slice(1)}`;
 
 type Envoi = Pick<IWhatsAppContact, "message_status" | "conversation_state"> & {
   template: "injoignables" | "prequalif";
   jour: number;
 };
 
-function contact(ctx: SeedContext, n: number, envoi: Envoi, suite: Partial<IWhatsAppContact> = {}): IWhatsAppContact {
+export function contact(
+  ctx: SeedContext,
+  n: number,
+  envoi: Envoi,
+  suite: Partial<IWhatsAppContact> = {},
+  destinataire: { prenom: string; ml: MlHostCode } = { prenom: identite(n).prenom, ml: "ML_A" }
+): IWhatsAppContact {
   const envoye = addHours(jour(ctx, envoi.jour), 10);
-  const { prenom } = identite(n);
-  const ml = ctx.missionsLocales.ML_A.nom;
+  const { prenom } = destinataire;
+  const ml = ctx.missionsLocales[destinataire.ml].nom;
   const initial: IWhatsAppMessageHistory = {
     direction: "outbound",
     content:
@@ -63,7 +70,12 @@ function contact(ctx: SeedContext, n: number, envoi: Envoi, suite: Partial<IWhat
   };
 }
 
-function reponse(ctx: SeedContext, jourReponse: number, entrant: string, sortant: string): IWhatsAppMessageHistory[] {
+export function reponse(
+  ctx: SeedContext,
+  jourReponse: number,
+  entrant: string,
+  sortant: string
+): IWhatsAppMessageHistory[] {
   const recu = addHours(jour(ctx, jourReponse), 18);
   return [
     { direction: "inbound", content: entrant, sent_at: recu },
@@ -75,7 +87,7 @@ const infoMl = (ctx: SeedContext) => ({ nom: ctx.missionsLocales.ML_A.nom });
 
 type Classification = NonNullable<IMissionLocaleEffectif["classification_reponse_appel"]>;
 
-const score = (ctx: SeedContext, valeur: number): Classification => ({
+export const score = (ctx: SeedContext, valeur: number): Classification => ({
   score: valeur,
   model: MODELE_CLASSIFIER,
   scored_at: jour(ctx, -4),

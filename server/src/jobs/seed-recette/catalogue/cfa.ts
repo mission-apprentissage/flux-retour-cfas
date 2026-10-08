@@ -17,7 +17,7 @@ import {
   type SeedContext,
   type SeedParcoursInput,
 } from "../factories";
-import { CFA_HOST_CODES, type CfaHostCode } from "../hosts";
+import { CFA_HOST_CODES_SANS_ACTIVITE, type CfaHostCode } from "../hosts";
 import { email, identite } from "../identites";
 import { seedId } from "../seed-ids";
 
@@ -516,9 +516,9 @@ const PANEL: Array<{ k: number; libelle: string; statut: string; parcours: (ctx:
     },
   ];
 
-const panelN = (cfa: CfaHostCode, k: number) => 100 + CFA_HOST_CODES.indexOf(cfa) * 10 + k;
+const panelN = (cfa: CfaHostCode, k: number) => 100 + CFA_HOST_CODES_SANS_ACTIVITE.indexOf(cfa) * 10 + k;
 
-export const EFFECTIFS_CASES: SeedCase[] = CFA_HOST_CODES.flatMap((cfa) =>
+export const EFFECTIFS_CASES: SeedCase[] = CFA_HOST_CODES_SANS_ACTIVITE.flatMap((cfa) =>
   PANEL.map(({ k, libelle, statut, parcours }) => {
     const n = panelN(cfa, k);
     return {

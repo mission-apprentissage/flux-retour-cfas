@@ -251,6 +251,30 @@ describe("Mission Locale Routes", () => {
       expect(res.data.counts).toEqual({ a_traiter_ou_recontacter: 0, traite: 1 });
     });
 
+    it("décompte un dossier des compteurs d'onglets dès la première action de la ML", async () => {
+      await ingestRupturant("RUPTUREPURE", "Test");
+      const collabId = await ingestRupturant("AVECCOLLAB", "Test");
+      await requestAsOrganisation(
+        { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+        "put",
+        `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectif/${collabId.toString()}`,
+        { rupture: true, acc_conjoint: true }
+      );
+      const getCompteurs = () =>
+        requestAsOrganisation(ML_DATA, "get", "/api/v1/organisation/mission-locale/compteurs-onglets");
+
+      const avant = await getCompteurs();
+      expect(avant.status).toBe(200);
+      expect(avant.data).toEqual({ prioritaires: 1, collaborations: 1, tous: 2 });
+
+      await requestAsOrganisation(ML_DATA, "post", `/api/v1/organisation/mission-locale/effectif/${collabId}`, {
+        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+      });
+
+      const apres = await getCompteurs();
+      expect(apres.data).toEqual({ prioritaires: 0, collaborations: 0, tous: 1 });
+    });
+
     it("aligne le précédent/suivant de la fiche sur l'ordre de la liste", async () => {
       await ingestRupturant("ALPHA", "Test");
       await ingestRupturant("BETA", "Test");

@@ -23,6 +23,7 @@ import {
 } from "@/common/actions/mission-locale/mission-locale-cfa-invitation.actions";
 import {
   getAllEffectifsParMois,
+  getCompteursOngletsMissionLocale,
   getEffectifFromMissionLocaleId,
   getEffectifsFusionnesByMissionLocaleId,
   getEffectifsListByMissionLocaleId,
@@ -42,6 +43,7 @@ export default () => {
   const router = express.Router();
   router.get("/effectif/:id", returnResult(getEffectifMissionLocale));
   router.get("/effectifs", returnResult(getEffectifsFusionnesMissionLocale));
+  router.get("/compteurs-onglets", returnResult(getCompteursOngletsHandler));
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.get("/villes", returnResult(getVillesMissionLocale));
   router.get("/export/effectifs", returnResult(exportEffectifMissionLocale));
@@ -75,6 +77,9 @@ const getMlBannerStats: RouteHandler<MissionLocaleLocals> = async (_req, { local
     .next();
   return { souhaite_rdv_count: result?.souhaite_rdv_count ?? 0 };
 };
+
+const getCompteursOngletsHandler: RouteHandler<MissionLocaleLocals> = async (_req, { locals }) =>
+  getCompteursOngletsMissionLocale(locals.missionLocale);
 
 const zMlParametresBody = z.object({
   rdv_url: httpUrlSchema.nullable(),

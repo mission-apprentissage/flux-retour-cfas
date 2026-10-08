@@ -3,8 +3,13 @@ import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisationOrganismeFormation, IOrganisme } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import { CfaEffectifSource, ICfaEffectif, ICfaEffectifsResponse } from "shared/models/routes/organismes/cfa";
-import { getAnneesScolaireListFromDate } from "shared/utils";
+import {
+  CFA_COLLAB_STATUS,
+  CfaEffectifSource,
+  ICfaEffectif,
+  ICfaEffectifsResponse,
+} from "shared/models/routes/organismes/cfa";
+import { getAnneesScolaireListFromDate, getBornesNaissanceMissionLocale } from "shared/utils";
 
 import { ensureMissionLocaleEffectifRecord } from "@/common/actions/mission-locale/mission-locale-record.actions";
 import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.actions";
@@ -122,19 +127,11 @@ export async function getCfaEffectifs(
     }
   );
 
-  const plus25Cutoff = new Date();
-  plus25Cutoff.setFullYear(plus25Cutoff.getFullYear() - 25);
-  const moins16Cutoff = new Date();
-  moins16Cutoff.setFullYear(moins16Cutoff.getFullYear() - 16);
+  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
   pipeline.push({
     $addFields: {
-      is_plus_25: {
-        $and: [
-          { $lt: ["$apprenant.date_de_naissance", plus25Cutoff] },
-          { $ne: [{ $ifNull: ["$apprenant.rqth", false] }, true] },
-        ],
-      },
-      is_moins_16: { $gt: ["$apprenant.date_de_naissance", moins16Cutoff] },
+      is_plus_25: { $lt: ["$apprenant.date_de_naissance", nesApres] },
+      is_moins_16: { $gt: ["$apprenant.date_de_naissance", nesAvant] },
       en_rupture: { $eq: ["$_computed.statut.en_cours", STATUT_APPRENANT.RUPTURANT] },
       date_rupture_computed: {
         // ABANDON inclus : rupture > 180j toujours pertinente à afficher (sinon date masquée
@@ -384,6 +381,7 @@ async function formatRawEffectif(
     organisme,
     date_rupture: null,
     organisme_data: null,
+    collab_status: CFA_COLLAB_STATUS.DEMARRER_COLLAB,
     mission_locale_organisation: missionLocaleOrganisation,
     mission_locale_logs: [],
   };
@@ -513,6 +511,7 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
         organisme_data: "$organisme_data",
         cfa_rupture_declaration: "$cfa_rupture_declaration",
         acc_conjoint_by_user: { $arrayElemAt: ["$acc_conjoint_by_user_arr", 0] },
+        collab_status: buildCollabStatusSwitch(),
         date_rupture: "$date_rupture",
         mission_locale_organisation: "$mission_locale_organisation",
         mission_locale_logs: "$ml_logs",

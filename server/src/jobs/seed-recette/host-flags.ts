@@ -31,6 +31,8 @@ const CFA_HOST_FLAGS: Record<CfaHostCode, CfaHostFlags> = {
   CFA_OFF: { mlBetaJours: null, organisme: {}, hasAccount: true },
   CFA_SANS: { mlBetaJours: null, organisme: {}, hasAccount: false },
   CFA_DECA: { mlBetaJours: 120, organisme: { is_allowed_collab: true, is_allowed_deca: true }, hasAccount: true },
+  CFA_REAL_CAMPUS: { mlBetaJours: null, organisme: {}, hasAccount: true },
+  CFA_AFTRAL: { mlBetaJours: 7, organisme: { is_allowed_collab: true }, hasAccount: true },
 };
 
 export interface Patch {

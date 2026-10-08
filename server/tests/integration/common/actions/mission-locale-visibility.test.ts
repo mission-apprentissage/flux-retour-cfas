@@ -129,14 +129,36 @@ describe("Visibilité mission locale des dossiers sans date de rupture", () => {
     expect(result.effectifs[0].acc_conjoint).toBe(true);
   });
 
-  it("garde visible un dossier de collaboration au-delà de 26 ans", async () => {
+  it("masque un dossier de collaboration au-delà de 26 ans", async () => {
     await insertMlRecord(collabDossier(monthsAgo(1)), {
       date_de_naissance: new Date(new Date().getFullYear() - 27, 0, 1),
     });
 
     const result = await getEffectifsParMoisByMissionLocaleId(missionLocale, { type: API_EFFECTIF_LISTE.A_TRAITER });
 
-    expect(flatten(result)).toHaveLength(1);
+    expect(flatten(result)).toHaveLength(0);
+  });
+
+  it("masque un dossier RQTH au-delà de 26 ans", async () => {
+    await insertMlRecord(
+      { date_rupture: monthsAgo(1), current_status: { value: STATUT_APPRENANT.RUPTURANT, date: monthsAgo(1) } },
+      { date_de_naissance: new Date(new Date().getFullYear() - 27, 0, 1), rqth: true }
+    );
+
+    const result = await getEffectifsParMoisByMissionLocaleId(missionLocale, { type: API_EFFECTIF_LISTE.A_TRAITER });
+
+    expect(flatten(result)).toHaveLength(0);
+  });
+
+  it("refuse l'ouverture de la fiche d'un jeune de plus de 26 ans", async () => {
+    const doc = await insertMlRecord(
+      { date_rupture: monthsAgo(1), current_status: { value: STATUT_APPRENANT.RUPTURANT, date: monthsAgo(1) } },
+      { date_de_naissance: new Date(new Date().getFullYear() - 27, 0, 1), rqth: true }
+    );
+
+    await expect(
+      getEffectifFromMissionLocaleId(missionLocale, doc.effectif_snapshot._id.toString(), API_EFFECTIF_LISTE.A_TRAITER)
+    ).rejects.toMatchObject({ output: { statusCode: 404 } });
   });
 
   it("laisse hors de la liste un dossier de plus de 26 ans sans collaboration", async () => {
