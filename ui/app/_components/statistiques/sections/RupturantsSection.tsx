@@ -53,6 +53,7 @@ export function RupturantsSection({
       controls={
         <SegmentedControl
           hideLegend
+          legend="Type de graphique"
           segments={[
             {
               label: (

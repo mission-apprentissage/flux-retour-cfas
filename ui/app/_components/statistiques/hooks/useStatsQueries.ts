@@ -464,6 +464,7 @@ export interface IMissionLocaleDetailResponse {
       repetition_voie?: string;
       voie?: string;
       complement?: string;
+      departement?: string;
       commune?: string;
       code_postal?: string;
       localite?: string;

@@ -23,6 +23,7 @@ import styles from "./MLCollaborationsTab.module.css";
 
 interface MLCollaborationsTabProps {
   mlId: string;
+  mlDepartement?: string;
   action?: ReactNode;
 }
 
@@ -66,9 +67,20 @@ function useVueCollaborations(listeAutorisee: boolean) {
   return [vue, setVue] as const;
 }
 
-export function MLCollaborationsTab({ mlId, action }: MLCollaborationsTabProps) {
+/** Même règle que le serveur : pas de liste nominative pour l'ARML, ni pour une DDETS hors de son département. */
+const peutVoirListe = (
+  organisation: { type?: string; code_departement?: string } | undefined,
+  mlDepartement?: string
+) =>
+  organisation?.type !== ORGANISATION_TYPE.ARML &&
+  (organisation?.type !== ORGANISATION_TYPE.DDETS || organisation.code_departement === mlDepartement);
+
+export function MLCollaborationsTab({ mlId, mlDepartement, action }: MLCollaborationsTabProps) {
   const { user } = useAuth();
-  const listeAutorisee = user?.organisation?.type !== ORGANISATION_TYPE.ARML;
+  const listeAutorisee = peutVoirListe(
+    user?.organisation as { type?: string; code_departement?: string },
+    mlDepartement
+  );
   const [vue, setVue] = useVueCollaborations(listeAutorisee);
 
   return (
@@ -98,7 +110,7 @@ export function MLCollaborationsTab({ mlId, action }: MLCollaborationsTabProps) 
   );
 }
 
-function VueChiffree({ mlId, action }: MLCollaborationsTabProps) {
+function VueChiffree({ mlId, action }: Pick<MLCollaborationsTabProps, "mlId" | "action">) {
   const [period, setPeriod] = useState<Period>("30days");
   const { data, isLoading, isFetching, error } = useCollaborationSegmentStats({ period, mlId });
   const mensuel = useCollaborationMensuelStats({ period, mlId });

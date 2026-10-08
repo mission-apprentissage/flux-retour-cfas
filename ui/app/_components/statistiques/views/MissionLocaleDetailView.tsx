@@ -1,11 +1,14 @@
 "use client";
 
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { _post } from "@/common/httpClient";
+import { getApiErrorMessage } from "@/common/rateLimit";
 
 import { useMissionLocaleDetail, type IMissionLocaleDetailResponse } from "../hooks/useStatsQueries";
 import { ExportAllButton } from "../sections/ExportAllButton";
@@ -29,15 +32,29 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
   const searchParams = useSearchParams();
   const { data, isLoading, error } = useMissionLocaleDetail(mlId);
   const isActive = data?.is_active === true;
+  const [impostureEnCours, setImpostureEnCours] = useState(false);
+  const [impostureErreur, setImpostureErreur] = useState<string | null>(null);
+
+  // Next ne remonte pas toujours en haut en arrivant depuis un tableau défilé (fiche déjà en cache).
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [mlId]);
 
   const handleImpersonate = async () => {
-    if (!data?.ml) return;
-    await _post("/api/v1/admin/impersonate", {
-      type: "MISSION_LOCALE",
-      ml_id: data.ml.ml_id,
-      nom: data.ml.nom,
-    });
-    window.location.href = "/mission-locale";
+    if (!data?.ml || impostureEnCours) return;
+    setImpostureEnCours(true);
+    setImpostureErreur(null);
+    try {
+      await _post("/api/v1/admin/impersonate", {
+        type: "MISSION_LOCALE",
+        ml_id: data.ml.ml_id,
+        nom: data.ml.nom,
+      });
+      window.location.href = "/mission-locale";
+    } catch (err) {
+      setImpostureErreur(getApiErrorMessage(err, "L'imposture a échoué. Merci de réessayer."));
+      setImpostureEnCours(false);
+    }
   };
 
   const parent = buildParentLink(searchParams?.toString());
@@ -71,7 +88,7 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
                   iconId="fr-icon-eye-line"
                   iconPosition="right"
                   onClick={handleImpersonate}
-                  disabled={!isActive}
+                  disabled={!isActive || impostureEnCours}
                   className={styles.imposture}
                 >
                   Imposture
@@ -79,6 +96,16 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
               )}
             </div>
             <MlStatutLigne data={data} />
+            {impostureErreur && (
+              <Alert
+                severity="error"
+                title={impostureErreur}
+                description=""
+                small
+                closable
+                onClose={() => setImpostureErreur(null)}
+              />
+            )}
           </header>
 
           <MlAlertesActivite alertes={data.indicateurs.alertes} />
@@ -115,16 +142,18 @@ function MlStatutLigne({ data }: { data: IMissionLocaleDetailResponse }) {
   );
 }
 
-const FICHE_PARAMS = ["from", "tab"];
-
 function buildParentLink(currentParams = "") {
   const params = new URLSearchParams(currentParams);
-  const fromRecherche = params.get("from") === "recherche";
-  FICHE_PARAMS.forEach((key) => params.delete(key));
 
-  if (fromRecherche) {
-    return { label: "Recherche", href: `/suivi-des-indicateurs/recherche?${params.toString()}` };
+  if (params.get("from") === "recherche") {
+    const recherche = new URLSearchParams();
+    const q = params.get("q");
+    if (q) recherche.set("q", q);
+    return { label: "Recherche", href: `/suivi-des-indicateurs/recherche?${recherche.toString()}` };
   }
+  [...params.keys()]
+    .filter((key) => ["from", "tab", "q"].includes(key) || key.startsWith("collab_"))
+    .forEach((key) => params.delete(key));
   params.set("tab", "deploiement");
   return { label: "Missions Locales", href: `/suivi-des-indicateurs/mission-locale?${params.toString()}` };
 }
@@ -160,6 +189,7 @@ function buildTabs(mlId: string, data: IMissionLocaleDetailResponse, isAdmin: bo
       content: (
         <MLCollaborationsTab
           mlId={mlId}
+          mlDepartement={data.ml.adresse?.departement}
           action={
             <ExportAllButton
               mlId={mlId}

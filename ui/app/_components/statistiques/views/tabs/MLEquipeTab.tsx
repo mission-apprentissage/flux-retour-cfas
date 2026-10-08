@@ -60,7 +60,10 @@ export function MLEquipeTab({ mlId, isAdmin = false }: MLEquipeTabProps) {
   const { data, isLoading, error } = useMissionLocaleMembres(mlId);
   const queryClient = useQueryClient();
   const [membreASupprimer, setMembreASupprimer] = useState<IMissionLocaleMemberResponse | null>(null);
-  const [suppressionErreur, setSuppressionErreur] = useState<string | null>(null);
+  const [suppressionRetour, setSuppressionRetour] = useState<{
+    severity: "success" | "error";
+    message: string;
+  } | null>(null);
   const [invitationOuverte, setInvitationOuverte] = useState(false);
   const [invitationMessage, setInvitationMessage] = useState<string | null>(null);
 
@@ -69,21 +72,26 @@ export function MLEquipeTab({ mlId, isAdmin = false }: MLEquipeTabProps) {
   });
 
   const demanderSuppression = (membre: IMissionLocaleMemberResponse) => {
-    setSuppressionErreur(null);
+    setSuppressionRetour(null);
     setMembreASupprimer(membre);
     supprimerMembreModal.open();
   };
 
   const supprimer = async () => {
     if (!membreASupprimer) return;
+    const nom = formatNomComplet(membreASupprimer);
     try {
       await _delete(`/api/v1/admin/users/${membreASupprimer._id}`);
+      setSuppressionRetour({ severity: "success", message: `Le compte de ${nom} a été supprimé.` });
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: statsQueryKeys.missionLocaleMembres(mlId) }),
         queryClient.invalidateQueries({ queryKey: statsQueryKeys.missionLocaleDetail(mlId) }),
       ]);
     } catch {
-      setSuppressionErreur("La suppression a échoué. Merci de réessayer.");
+      setSuppressionRetour({
+        severity: "error",
+        message: `La suppression du compte de ${nom} a échoué. Merci de réessayer.`,
+      });
     }
   };
 
@@ -128,10 +136,16 @@ export function MLEquipeTab({ mlId, isAdmin = false }: MLEquipeTabProps) {
         />
       )}
 
-      {suppressionErreur && (
-        <div className="fr-alert fr-alert--error fr-alert--sm fr-mb-2w" role="alert">
-          <p>{suppressionErreur}</p>
-        </div>
+      {suppressionRetour && (
+        <Alert
+          severity={suppressionRetour.severity}
+          title={suppressionRetour.message}
+          description=""
+          small
+          closable
+          onClose={() => setSuppressionRetour(null)}
+          className="fr-mb-2w"
+        />
       )}
 
       <StatsErrorHandler data={data} error={error} isLoading={isLoading}>

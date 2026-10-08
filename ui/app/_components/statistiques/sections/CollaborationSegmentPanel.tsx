@@ -5,7 +5,6 @@ import { useState } from "react";
 import { CollaborationCards } from "../cards/CollaborationCards";
 import { isLoadingVariation } from "../hooks/useLoadingVariation";
 import { useCollaborationSegmentStats } from "../hooks/useStatsQueries";
-import { NoDataMessage } from "../ui/NoDataMessage";
 import { PeriodSelector, type Period } from "../ui/PeriodSelector";
 import { SegmentAboutText } from "../ui/SegmentAboutText";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
@@ -17,7 +16,6 @@ import { SuiviTraitementSection } from "./SuiviTraitementSection";
 
 interface CollaborationSegmentPanelProps {
   region?: string;
-  mlId?: string;
   national?: boolean;
   isPublic?: boolean;
   isAdmin?: boolean;
@@ -27,7 +25,6 @@ interface CollaborationSegmentPanelProps {
 
 export function CollaborationSegmentPanel({
   region,
-  mlId,
   national = false,
   isPublic = false,
   isAdmin = false,
@@ -38,12 +35,10 @@ export function CollaborationSegmentPanel({
   const { data, isLoading, isFetching, error } = useCollaborationSegmentStats({
     period,
     region,
-    mlId,
     national,
     isPublic,
   });
   const loadingVariation = isLoadingVariation(isFetching, isLoading);
-  const hasNoCollab = !!mlId && !!data && data.objectifs.total_dossiers === 0;
 
   return (
     <div>
@@ -54,17 +49,13 @@ export function CollaborationSegmentPanel({
         controlsPosition="below-left"
       >
         <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
-          {hasNoCollab ? (
-            <NoDataMessage message="Aucun dossier de collaboration n'a encore été envoyé à cette Mission Locale." />
-          ) : (
-            <div className={styles.cards}>
-              <CollaborationCards data={data} loading={isLoading} loadingPercentage={loadingVariation} />
-            </div>
-          )}
+          <div className={styles.cards}>
+            <CollaborationCards data={data} loading={isLoading} loadingPercentage={loadingVariation} />
+          </div>
         </StatsErrorHandler>
       </StatisticsSection>
 
-      {data && !hasNoCollab && (
+      {data && (
         <>
           <StatisticsSection title="Résultats du traitement des dossiers par les Missions Locales">
             <CollabResultatsBlock data={data} loading={isLoading} loadingVariation={loadingVariation} />

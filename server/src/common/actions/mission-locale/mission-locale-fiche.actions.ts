@@ -1,8 +1,7 @@
 import { ObjectId } from "bson";
 import { ML_ALERTE_SEUILS, type IMlAlerte, type IMlFicheIndicateurs } from "shared/models/data/nationalStats.model";
-import { addDaysUTC, normalizeToUTCDay, subtractDaysUTC } from "shared/utils/date";
+import { normalizeToUTCDay, subtractDaysUTC } from "shared/utils/date";
 
-import { buildDossierEnvoyeMatch } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
 import { missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 
 import { getSegmentStatsForPeriod } from "./mission-locale-stats.actions";
@@ -40,8 +39,10 @@ export async function getMissionLocaleFicheIndicateurs(
     getSegmentStatsForPeriod(evaluationDate, [missionLocaleId], "all"),
     getSegmentStatsForPeriod(evaluationDate, [missionLocaleId], "collab"),
     missionLocaleEffectifsDb().countDocuments({
-      ...buildDossierEnvoyeMatch(addDaysUTC(evaluationDate, 1)),
       mission_locale_id: missionLocaleId,
+      "organisme_data.acc_conjoint": true,
+      "organisme_data.acc_conjoint_at": { $lte: now },
+      soft_deleted: { $ne: true },
     }),
   ]);
 

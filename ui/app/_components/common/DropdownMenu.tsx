@@ -84,6 +84,7 @@ export function DropdownMenu({
             priority={priority}
             size={size}
             title={ariaLabel ?? ""}
+            aria-label={ariaLabel}
             aria-haspopup="menu"
             aria-expanded={open}
             onClick={() => setOpen((previous) => !previous)}
