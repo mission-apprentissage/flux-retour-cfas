@@ -5,6 +5,7 @@ import type { IOrganisationCreate } from "shared/models/data/organisations.model
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
+  invitationsDb,
   missionLocaleCfaInvitationsDb,
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogDb,
@@ -1623,6 +1624,20 @@ describe("Indicateurs ML routes (territoriales)", () => {
         ] as never[],
         { bypassDocumentValidation: true }
       );
+      await invitationsDb().insertMany(
+        [
+          { email: "invite@example.com", expires_at: new Date(Date.now() + 86_400_000), role: "admin" },
+          { email: "expire@example.com", expires_at: new Date(Date.now() - 86_400_000) },
+        ].map((invitation) => ({
+          _id: new ObjectId(),
+          organisation_id: organisationId,
+          token: "jeton",
+          author_id: new ObjectId(),
+          created_at: new Date(),
+          ...invitation,
+        })) as never[],
+        { bypassDocumentValidation: true }
+      );
       await missionLocaleCfaInvitationsDb().insertMany(
         [ML_IDF, ML_HDF].map((missionLocaleId) => ({
           _id: new ObjectId(),
@@ -1670,6 +1685,55 @@ describe("Indicateurs ML routes (territoriales)", () => {
         alertes: [{ type: "invitations_sans_compte", valeur: 2 }],
         contact_referent: null,
       });
+    });
+
+    it("Liste l'équipe avec les invitations en attente, sans jeton", async () => {
+      const response = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        `/api/v1/organisation/indicateurs-ml/cfa/${CFA_A}/membres`
+      );
+
+      expect(response.status).toBe(200);
+      expect(JSON.stringify(response.data)).not.toContain("jeton");
+      expect(
+        response.data.map(
+          (membre: { type: string; email: string; invitation_statut: string | null; role: string | null }) => [
+            membre.type,
+            membre.email,
+            membre.invitation_statut,
+            membre.role,
+          ]
+        )
+      ).toEqual([
+        ["utilisateur", "referent@example.com", null, null],
+        ["utilisateur", "second@example.com", null, null],
+        ["invitation", "invite@example.com", "envoyee", "admin"],
+        ["invitation", "expire@example.com", "expiree", null],
+      ]);
+      expect(response.data[0]).toMatchObject({
+        fonction: "Directrice",
+        derniere_activite_at: "2026-05-01T00:00:00.000Z",
+      });
+    });
+
+    it("Refuse l'équipe à l'ARML, à la DDETS hors département et hors région", async () => {
+      const membres = (id: ObjectId) => `/api/v1/organisation/indicateurs-ml/cfa/${id}/membres`;
+      expectForbidden(
+        await requestAsOrganisation(ARML_IDF, "get", membres(CFA_A)),
+        "Accès non autorisé à l'équipe de cet organisme"
+      );
+      expectForbidden(
+        await requestAsOrganisation(DDETS_PARIS, "get", membres(CFA_77)),
+        "Accès non autorisé à l'équipe de cet organisme"
+      );
+      expect((await requestAsOrganisation(DDETS_PARIS, "get", membres(CFA_A))).status).toBe(200);
+      expectForbidden(
+        await requestAsOrganisation(DREETS_IDF, "get", membres(CFA_B)),
+        "Accès non autorisé à cet organisme"
+      );
+      const sansOrganisation = await requestAsOrganisation(ADMIN, "get", membres(CFA_SANS_COMPTE));
+      expect(sansOrganisation.data).toEqual([]);
     });
 
     it("Masque le nominatif à l'ARML et à la DDETS hors de son département, refuse hors région", async () => {

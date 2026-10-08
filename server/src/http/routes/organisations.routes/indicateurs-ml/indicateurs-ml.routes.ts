@@ -29,7 +29,7 @@ import {
   getMissionLocaleMembers,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getCfaNpsStats, listCfaInjoignables } from "@/common/actions/cfa/cfa-collaboration-stats.actions";
-import { getCfaFiche } from "@/common/actions/cfa/cfa-fiche.actions";
+import { getCfaFiche, getCfaMembres } from "@/common/actions/cfa/cfa-fiche.actions";
 import { getCfaAdoptionStats, listCfaEtablissements } from "@/common/actions/cfa/cfa-stats.actions";
 import { listCollaborationsCfaOrigine } from "@/common/actions/mission-locale/collaboration-cfa-origine.actions";
 import { listCollaborationDossiers } from "@/common/actions/mission-locale/collaboration-dossiers.actions";
@@ -315,6 +315,11 @@ export default () => {
     "/cfa/:id/detail",
     validateRequestMiddleware({ params: organismeIdParams }),
     returnResult(getCfaDetailRoute)
+  );
+  router.get(
+    "/cfa/:id/membres",
+    validateRequestMiddleware({ params: organismeIdParams }),
+    returnResult(getCfaMembresRoute)
   );
 
   return router;
@@ -701,6 +706,17 @@ const getCfaDetailRoute: IndicateursHandler<DefaultQuery, z.infer<typeof organis
 ) => {
   const { nominatif } = await verifyOrganismeInScope(req.params.id, locals);
   return getCfaFiche(new ObjectId(req.params.id), { nominatif });
+};
+
+const getCfaMembresRoute: IndicateursHandler<DefaultQuery, z.infer<typeof organismeIdParams>> = async (
+  req,
+  { locals }
+) => {
+  const { nominatif } = await verifyOrganismeInScope(req.params.id, locals);
+  if (!nominatif) {
+    throw Boom.forbidden("Accès non autorisé à l'équipe de cet organisme");
+  }
+  return getCfaMembres(new ObjectId(req.params.id));
 };
 
 const getWhatsAppRoute: IndicateursHandler<z.infer<typeof periodQuery>> = async (req, { locals }) => {

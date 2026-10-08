@@ -1,8 +1,9 @@
 import Boom from "boom";
 import { ObjectId } from "bson";
-import type { ICfaFiche, ICfaFicheContactReferent } from "shared/models/data/nationalStats.model";
+import type { ICfaFiche, ICfaFicheContactReferent, ICfaMembre } from "shared/models/data/nationalStats.model";
 
 import {
+  invitationsDb,
   missionLocaleCfaInvitationsDb,
   missionLocaleEffectifsDb,
   organisationsDb,
@@ -109,4 +110,55 @@ export async function getCfaFiche(
     peut_voir_nominatif: nominatif,
     contact_referent: nominatif ? comptes.referent : null,
   };
+}
+
+export async function getCfaMembres(organismeId: ObjectId, now: Date = new Date()): Promise<ICfaMembre[]> {
+  const organisme = await organismesDb().findOne({ _id: organismeId }, { projection: { siret: 1, uai: 1 } });
+  if (!organisme) throw Boom.notFound("Organisme introuvable");
+  const organisation = await findCfaOrganisation(organisme);
+  if (!organisation) return [];
+
+  const [utilisateurs, invitations] = await Promise.all([
+    usersMigrationDb()
+      .find({ organisation_id: organisation._id, account_status: "CONFIRMED" }, { sort: { created_at: 1 } })
+      .toArray(),
+    invitationsDb()
+      .find({ organisation_id: organisation._id }, { projection: { token: 0 }, sort: { created_at: 1 } })
+      .toArray(),
+  ]);
+
+  return [
+    ...utilisateurs.map(
+      (user): ICfaMembre => ({
+        type: "utilisateur",
+        id: user._id.toString(),
+        civility: user.civility ?? null,
+        nom: user.nom ?? null,
+        prenom: user.prenom ?? null,
+        telephone: user.telephone ?? null,
+        email: user.email,
+        fonction: user.fonction ?? null,
+        role: user.organisation_role ?? null,
+        derniere_activite_at: user.last_connection ?? null,
+        activation_at: user.confirmed_at ?? user.created_at ?? null,
+        invitation_statut: null,
+      })
+    ),
+    ...invitations.map(
+      (invitation): ICfaMembre => ({
+        type: "invitation",
+        id: invitation._id.toString(),
+        civility: null,
+        nom: invitation.nom ?? null,
+        prenom: invitation.prenom ?? null,
+        telephone: null,
+        email: invitation.email,
+        fonction: null,
+        role: invitation.role ?? null,
+        derniere_activite_at: null,
+        activation_at: null,
+        invitation_statut: invitation.expires_at && invitation.expires_at < now ? "expiree" : "envoyee",
+      })
+    ),
+  ];
 }

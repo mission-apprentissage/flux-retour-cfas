@@ -5,8 +5,6 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useQueryClient } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
-import { fr as frLocale } from "date-fns/locale";
 import { useState } from "react";
 
 import { DropdownMenu, DropdownMenuButton, DropdownMenuLink } from "@/app/_components/common/DropdownMenu";
@@ -20,11 +18,10 @@ import {
   type IMissionLocaleMemberResponse,
 } from "../../hooks/useStatsQueries";
 import ficheTableStyles from "../../tables/FicheTable.module.css";
-import { CopyButton } from "../../ui/CopyButton";
 import { StatsErrorHandler } from "../../ui/StatsErrorHandler";
-import { formatDateCourte } from "../../utils";
 
-import styles from "./MLEquipeTab.module.css";
+import { CourrielCopiable, DateRelative, EtatVideEquipe, NomMembre } from "./EquipeCellules";
+import styles from "./EquipeTab.module.css";
 
 const supprimerMembreModal = createModal({ id: "ml-equipe-supprimer-membre", isOpenedByDefault: false });
 
@@ -35,26 +32,8 @@ interface MLEquipeTabProps {
   isAdmin?: boolean;
 }
 
-const formatCivility = (civility: string) => {
-  if (civility === "Monsieur") return "M.";
-  if (civility === "Madame") return "Mme";
-  return "";
-};
-
 const formatNomComplet = (membre: IMissionLocaleMemberResponse) =>
   [membre.prenom, membre.nom].filter(Boolean).join(" ") || "cet utilisateur";
-
-function DateRelative({ date, vide }: { date: string | null; vide: string }) {
-  if (!date) return <span className={styles.vide}>{vide}</span>;
-  return (
-    <span className={styles.date}>
-      <span>{formatDateCourte(date)}</span>
-      <span className={styles.relatif}>
-        {formatDistanceToNow(new Date(date), { locale: frLocale, addSuffix: true })}
-      </span>
-    </span>
-  );
-}
 
 export function MLEquipeTab({ mlId, isAdmin = false }: MLEquipeTabProps) {
   const { data, isLoading, error } = useMissionLocaleMembres(mlId);
@@ -166,36 +145,16 @@ export function MLEquipeTab({ mlId, isAdmin = false }: MLEquipeTabProps) {
               </thead>
               <tbody>
                 {membres.length === 0 ? (
-                  <tr>
-                    <td colSpan={headers.length} className={styles.celluleVide}>
-                      <p className={styles.etatVide}>
-                        <span className="fr-icon-information-fill fr-icon--sm" aria-hidden="true" />
-                        {EMPTY_MESSAGE}
-                      </p>
-                    </td>
-                  </tr>
+                  <EtatVideEquipe colonnes={headers.length} message={EMPTY_MESSAGE} />
                 ) : (
                   membres.map((membre) => (
                     <tr key={membre._id}>
                       <td>
-                        <strong className={styles.nom}>
-                          {[formatCivility(membre.civility), membre.nom.toUpperCase()].filter(Boolean).join(" ")}
-                          <br />
-                          {membre.prenom}
-                        </strong>
+                        <NomMembre civility={membre.civility} nom={membre.nom} prenom={membre.prenom} />
                       </td>
                       <td>{membre.telephone || "-"}</td>
                       <td>
-                        {membre.email ? (
-                          <span className={styles.courriel}>
-                            <a href={`mailto:${membre.email}`} className="fr-link">
-                              {membre.email}
-                            </a>
-                            <CopyButton value={membre.email} title="Copier l'adresse courriel" />
-                          </span>
-                        ) : (
-                          "-"
-                        )}
+                        <CourrielCopiable email={membre.email} />
                       </td>
                       <td>
                         <DateRelative date={membre.last_traitement_at} vide="Aucune activité" />

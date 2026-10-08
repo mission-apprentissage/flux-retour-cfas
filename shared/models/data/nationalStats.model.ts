@@ -614,3 +614,18 @@ export interface ICfaFiche {
   peut_voir_nominatif: boolean;
   contact_referent: ICfaFicheContactReferent | null;
 }
+
+export interface ICfaMembre {
+  type: "utilisateur" | "invitation";
+  id: string;
+  civility: string | null;
+  nom: string | null;
+  prenom: string | null;
+  telephone: string | null;
+  email: string;
+  fonction: string | null;
+  role: "admin" | "member" | null;
+  derniere_activite_at: Date | null;
+  activation_at: Date | null;
+  invitation_statut: "envoyee" | "expiree" | null;
+}

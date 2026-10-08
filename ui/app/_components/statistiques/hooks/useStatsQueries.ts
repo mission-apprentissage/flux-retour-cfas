@@ -6,6 +6,7 @@ import type {
   CollabDossierStatut,
   ICollabCfaOrigineResponse,
   ICfaFiche,
+  ICfaMembre,
   ICollaborationDossiersResponse,
   CfaEtablissementsSortBy,
   CfaInjoignablesSortBy,
@@ -263,6 +264,18 @@ export function useCfaFiche(organismeId: string) {
     queryFn: () => _get(`${INDICATEURS_ML_BASE}/cfa/${organismeId}/detail`),
     ...STATS_QUERY_CONFIG,
     enabled: !!organismeId,
+  });
+}
+
+export type ICfaMembreResponse = DatesEnTexte<ICfaMembre, "derniere_activite_at" | "activation_at">;
+
+export const cfaMembresQueryKey = (organismeId: string) => ["stats", "cfa-membres", organismeId] as const;
+
+export function useCfaMembres(organismeId: string) {
+  return useQuery<ICfaMembreResponse[]>({
+    queryKey: cfaMembresQueryKey(organismeId),
+    queryFn: () => _get(`${INDICATEURS_ML_BASE}/cfa/${organismeId}/membres`),
+    ...STATS_QUERY_CONFIG,
   });
 }
 

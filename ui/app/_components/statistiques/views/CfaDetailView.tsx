@@ -12,6 +12,7 @@ import { formatDateCourte } from "../utils";
 import { AlertesActivite } from "./AlertesActivite";
 import styles from "./FicheDetailView.module.css";
 import { FicheEntete } from "./FicheEntete";
+import { CfaEquipeTab } from "./tabs/CfaEquipeTab";
 import { CfaInfosTab } from "./tabs/CfaInfosTab";
 
 interface CfaDetailViewProps {
@@ -65,7 +66,7 @@ export function CfaDetailView({ organismeId, isAdmin = false }: CfaDetailViewPro
               ),
             }))}
           />
-          <StatsTabs className={styles.tabs} tabs={buildTabs(data)} />
+          <StatsTabs className={styles.tabs} tabs={buildTabs(organismeId, data, isAdmin)} />
         </>
       )}
     </StatsErrorHandler>
@@ -120,6 +121,17 @@ function buildParentLink(currentParams = "") {
   return { label: "Établissements de formation et CFA", href: "/suivi-des-indicateurs/cfa" };
 }
 
-function buildTabs(data: ICfaFicheResponse): StatsTab[] {
-  return [{ id: "infos", label: "Infos", iconId: "fr-icon-phone-line", content: <CfaInfosTab data={data} /> }];
+function buildTabs(organismeId: string, data: ICfaFicheResponse, isAdmin: boolean): StatsTab[] {
+  const tabs: StatsTab[] = [
+    { id: "infos", label: "Infos", iconId: "fr-icon-phone-line", content: <CfaInfosTab data={data} /> },
+  ];
+  if (data.peut_voir_nominatif) {
+    tabs.push({
+      id: "equipe",
+      label: "Équipe",
+      iconId: "fr-icon-team-line",
+      content: <CfaEquipeTab organismeId={organismeId} isAdmin={isAdmin} />,
+    });
+  }
+  return tabs;
 }

@@ -73,3 +73,13 @@
 .etatVide > span {
   color: var(--artwork-major-blue-france);
 }
+
+.invitationEnvoyee {
+  font-weight: 700;
+  color: var(--blue-france-main-525);
+}
+
+.invitationExpiree {
+  font-weight: 700;
+  color: var(--orange-terre-battue-main-645);
+}
