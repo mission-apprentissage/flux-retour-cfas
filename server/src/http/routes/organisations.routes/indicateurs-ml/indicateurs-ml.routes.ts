@@ -29,6 +29,7 @@ import {
   getMissionLocaleMembers,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getCfaNpsStats, listCfaInjoignables } from "@/common/actions/cfa/cfa-collaboration-stats.actions";
+import { getCfaFiche } from "@/common/actions/cfa/cfa-fiche.actions";
 import { getCfaAdoptionStats, listCfaEtablissements } from "@/common/actions/cfa/cfa-stats.actions";
 import { listCollaborationsCfaOrigine } from "@/common/actions/mission-locale/collaboration-cfa-origine.actions";
 import { listCollaborationDossiers } from "@/common/actions/mission-locale/collaboration-dossiers.actions";
@@ -51,7 +52,7 @@ import {
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { rechercherEtablissements } from "@/common/actions/recherche/recherche-etablissements.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
-import { organisationsDb } from "@/common/model/collections";
+import { organisationsDb, organismesDb } from "@/common/model/collections";
 import {
   DefaultParams,
   DefaultQuery,
@@ -182,6 +183,7 @@ const exportQuery = z.object({
   national: zBooleanStringSchema.optional(),
 });
 const mlIdParams = z.object({ id: mlIdSchema });
+const organismeIdParams = z.object({ id: mlIdSchema });
 
 type IndicateursHandler<TQuery = DefaultQuery, TParams = DefaultParams> = RouteHandler<
   IndicateursMlLocals,
@@ -308,6 +310,11 @@ export default () => {
     "/mission-locale/:id/membres",
     validateRequestMiddleware({ params: mlIdParams }),
     returnResult(getMlMembresRoute)
+  );
+  router.get(
+    "/cfa/:id/detail",
+    validateRequestMiddleware({ params: organismeIdParams }),
+    returnResult(getCfaDetailRoute)
   );
 
   return router;
@@ -688,6 +695,14 @@ const getMlMembresRoute: IndicateursHandler<DefaultQuery, z.infer<typeof mlIdPar
   return getMissionLocaleMembers(new ObjectId(id));
 };
 
+const getCfaDetailRoute: IndicateursHandler<DefaultQuery, z.infer<typeof organismeIdParams>> = async (
+  req,
+  { locals }
+) => {
+  const { nominatif } = await verifyOrganismeInScope(req.params.id, locals);
+  return getCfaFiche(new ObjectId(req.params.id), { nominatif });
+};
+
 const getWhatsAppRoute: IndicateursHandler<z.infer<typeof periodQuery>> = async (req, { locals }) => {
   const { period } = req.query;
 
@@ -712,6 +727,29 @@ const getPrequalifRoute: IndicateursHandler<z.infer<typeof periodQuery>> = async
 
   return await getPrequalifStats(period || "all");
 };
+
+/**
+ * Fiche CFA : 404 si l'organisme est inconnu, 403 hors du périmètre régional.
+ * `nominatif` : l'ARML n'y a jamais droit, la DDETS seulement dans son département.
+ */
+async function verifyOrganismeInScope(id: string, { organisation, regions }: IndicateursMlLocals) {
+  const organisme = await organismesDb().findOne(
+    { _id: new ObjectId(id) },
+    { projection: { "adresse.region": 1, "adresse.departement": 1 } }
+  );
+  if (!organisme) {
+    throw Boom.notFound("Organisme non trouvé");
+  }
+  if (regions.length > 0 && !regions.includes(organisme.adresse?.region ?? "")) {
+    throw Boom.forbidden("Accès non autorisé à cet organisme");
+  }
+  const departement = (organisation as { code_departement?: string }).code_departement;
+  const nominatif =
+    organisation.type !== ORGANISATION_TYPE.ARML &&
+    (organisation.type !== ORGANISATION_TYPE.DDETS ||
+      (!!departement && departement === organisme.adresse?.departement));
+  return { nominatif };
+}
 
 async function verifyMlInRegions(mlId: string, userRegions: string[]): Promise<void> {
   if (userRegions.length === 0) return;

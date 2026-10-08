@@ -576,3 +576,41 @@ export interface ICollabCfaOrigineResponse {
   pagination: { page: number; limit: number; total_pages: number };
   data: ICollabCfaOrigineRow[];
 }
+
+export interface ICfaFicheContactReferent {
+  civility: string | null;
+  nom: string | null;
+  prenom: string | null;
+  fonction: string | null;
+  telephone: string | null;
+  email: string | null;
+}
+
+export interface ICfaFicheSourceDonnees {
+  deca: boolean;
+  erps: string[];
+  fichier: boolean;
+  erreurs_transmission: boolean;
+  derniere_transmission_at: Date | null;
+  derniere_maj_deca_at: Date | null;
+}
+
+export interface ICfaFiche {
+  id: string;
+  nom: string | null;
+  raison_sociale: string | null;
+  uai: string | null;
+  siret: string;
+  nature: string | null;
+  qualiopi: boolean;
+  ferme: boolean;
+  adresse: { complete: string | null; code_postal: string | null; commune: string | null };
+  courriels_referentiel: string[];
+  source_donnees: ICfaFicheSourceDonnees;
+  has_account: boolean;
+  collabore: boolean;
+  derniere_connexion_at: Date | null;
+  alertes: Array<{ type: "invitations_sans_compte"; valeur: number }>;
+  peut_voir_nominatif: boolean;
+  contact_referent: ICfaFicheContactReferent | null;
+}

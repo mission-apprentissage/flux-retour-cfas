@@ -1551,6 +1551,146 @@ describe("Indicateurs ML routes (territoriales)", () => {
     });
   });
 
+  describe("GET /cfa/:id/detail (fiche CFA)", () => {
+    const CFA_SANS_COMPTE = new ObjectId();
+    const CFA_77 = new ObjectId();
+    const url = (id: ObjectId) => `/api/v1/organisation/indicateurs-ml/cfa/${id}/detail`;
+    const organisme = (id: ObjectId, departement: string, extra: Record<string, unknown> = {}) => ({
+      _id: id,
+      created_at: new Date(),
+      updated_at: new Date(),
+      siret: id.toString().slice(0, 14),
+      uai: "0751234A",
+      enseigne: "Lycée Eiffel",
+      raison_sociale: "LYCEE EIFFEL",
+      nature: "responsable_formateur",
+      qualiopi: true,
+      adresse: { region: "11", departement, code_postal: "75011", commune: "Paris", complete: "1 rue Test" },
+      contacts_from_referentiel: [{ email: "contact@example.com" }, { email: "contact@example.com" }],
+      ...extra,
+    });
+
+    beforeEach(async () => {
+      const organisationId = new ObjectId();
+      await organismesDb().insertMany(
+        [
+          organisme(CFA_A, "75", {
+            has_account: true,
+            mode_de_transmission: "API",
+            erps: ["ymag"],
+            has_transmission_errors: false,
+          }),
+          organisme(CFA_SANS_COMPTE, "75", { has_account: false, mode_de_transmission: "MANUEL" }),
+          organisme(CFA_77, "77", { has_account: true }),
+          organisme(CFA_B, "69", { adresse: { region: "84", departement: "69" } }),
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+      await organisationsDb().insertOne(
+        {
+          _id: organisationId,
+          type: "ORGANISME_FORMATION",
+          siret: "x",
+          uai: null,
+          organisme_id: CFA_A.toString(),
+          created_at: new Date(),
+        } as never,
+        { bypassDocumentValidation: true }
+      );
+      await usersMigrationDb().insertMany(
+        [
+          {
+            _id: new ObjectId(),
+            email: "referent@example.com",
+            nom: "Nom",
+            prenom: "Prénom",
+            fonction: "Directrice",
+            organisation_id: organisationId,
+            account_status: "CONFIRMED",
+            created_at: new Date("2025-01-01"),
+            last_connection: new Date("2026-05-01"),
+          },
+          {
+            _id: new ObjectId(),
+            email: "second@example.com",
+            nom: "Autre",
+            prenom: "Prénom",
+            organisation_id: organisationId,
+            account_status: "CONFIRMED",
+            created_at: new Date("2025-06-01"),
+            last_connection: new Date("2026-06-15"),
+          },
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+      await missionLocaleCfaInvitationsDb().insertMany(
+        [ML_IDF, ML_HDF].map((missionLocaleId) => ({
+          _id: new ObjectId(),
+          mission_locale_id: missionLocaleId,
+          author_id: new ObjectId(),
+          organisme_id: CFA_SANS_COMPTE,
+          organisation_id: new ObjectId(),
+          siret: "00000000000000",
+          destinataires: [],
+          created_at: new Date(),
+        })) as never[],
+        { bypassDocumentValidation: true }
+      );
+    });
+
+    it("Renvoie l'identité, la source de données, les indicateurs et le contact référent", async () => {
+      const response = await requestAsOrganisation(DREETS_IDF, "get", url(CFA_A));
+
+      expect(response.status).toBe(200);
+      expect(response.data).toMatchObject({
+        id: CFA_A.toString(),
+        nom: "Lycée Eiffel",
+        raison_sociale: "LYCEE EIFFEL",
+        nature: "responsable_formateur",
+        qualiopi: true,
+        ferme: false,
+        courriels_referentiel: ["contact@example.com"],
+        source_donnees: { erps: ["ymag"], fichier: false, erreurs_transmission: false },
+        has_account: true,
+        collabore: true,
+        derniere_connexion_at: "2026-06-15T00:00:00.000Z",
+        alertes: [],
+        peut_voir_nominatif: true,
+        contact_referent: { email: "referent@example.com", fonction: "Directrice" },
+      });
+    });
+
+    it("Signale les invitations de ML reçues par un CFA sans compte", async () => {
+      const response = await requestAsOrganisation(ADMIN, "get", url(CFA_SANS_COMPTE));
+
+      expect(response.data).toMatchObject({
+        has_account: false,
+        collabore: false,
+        source_donnees: { fichier: true, erps: [] },
+        alertes: [{ type: "invitations_sans_compte", valeur: 2 }],
+        contact_referent: null,
+      });
+    });
+
+    it("Masque le nominatif à l'ARML et à la DDETS hors de son département, refuse hors région", async () => {
+      const arml = await requestAsOrganisation(ARML_IDF, "get", url(CFA_A));
+      expect(arml.status).toBe(200);
+      expect(arml.data).toMatchObject({
+        peut_voir_nominatif: false,
+        contact_referent: null,
+        courriels_referentiel: [],
+      });
+
+      const ddetsDansDepartement = await requestAsOrganisation(DDETS_PARIS, "get", url(CFA_A));
+      expect(ddetsDansDepartement.data.peut_voir_nominatif).toBe(true);
+      const ddetsHorsDepartement = await requestAsOrganisation(DDETS_PARIS, "get", url(CFA_77));
+      expect(ddetsHorsDepartement.data).toMatchObject({ peut_voir_nominatif: false, contact_referent: null });
+
+      expectForbidden(await requestAsOrganisation(DREETS_IDF, "get", url(CFA_B)), "Accès non autorisé à cet organisme");
+      expect((await requestAsOrganisation(ADMIN, "get", url(new ObjectId()))).status).toBe(404);
+    });
+  });
+
   describe("GET /stats/collaborations/cfa-origine", () => {
     const url = (query: string) => `/api/v1/organisation/indicateurs-ml/stats/collaborations/cfa-origine?${query}`;
 
