@@ -1,14 +1,8 @@
 "use client";
 
-import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
-import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
-import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-
-import { _post } from "@/common/httpClient";
-import { getApiErrorMessage } from "@/common/rateLimit";
+import { useEffect } from "react";
 
 import { useMissionLocaleDetail, type IMissionLocaleDetailResponse } from "../hooks/useStatsQueries";
 import { ExportAllButton } from "../sections/ExportAllButton";
@@ -16,7 +10,8 @@ import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 import { StatsTabs, type StatsTab } from "../ui/StatsTabs";
 import { formatDateCourte } from "../utils";
 
-import styles from "./MissionLocaleDetailView.module.css";
+import styles from "./FicheDetailView.module.css";
+import { FicheEntete } from "./FicheEntete";
 import { MlAlertesActivite } from "./MlAlertesActivite";
 import { MLCollaborationsTab } from "./tabs/MLCollaborationsTab";
 import { MLEquipeTab } from "./tabs/MLEquipeTab";
@@ -32,30 +27,11 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
   const searchParams = useSearchParams();
   const { data, isLoading, error } = useMissionLocaleDetail(mlId);
   const isActive = data?.is_active === true;
-  const [impostureEnCours, setImpostureEnCours] = useState(false);
-  const [impostureErreur, setImpostureErreur] = useState<string | null>(null);
 
   // Next ne remonte pas toujours en haut en arrivant depuis un tableau défilé (fiche déjà en cache).
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [mlId]);
-
-  const handleImpersonate = async () => {
-    if (!data?.ml || impostureEnCours) return;
-    setImpostureEnCours(true);
-    setImpostureErreur(null);
-    try {
-      await _post("/api/v1/admin/impersonate", {
-        type: "MISSION_LOCALE",
-        ml_id: data.ml.ml_id,
-        nom: data.ml.nom,
-      });
-      window.location.href = "/mission-locale";
-    } catch (err) {
-      setImpostureErreur(getApiErrorMessage(err, "L'imposture a échoué. Merci de réessayer."));
-      setImpostureEnCours(false);
-    }
-  };
 
   const parent = buildParentLink(searchParams?.toString());
 
@@ -72,41 +48,20 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
     <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
       {data && (
         <>
-          <Breadcrumb
-            className={styles.breadcrumb}
-            currentPageLabel={data.ml.nom}
-            segments={[{ label: parent.label, linkProps: { href: parent.href } }]}
+          <FicheEntete
+            parent={parent}
+            titre={data.ml.nom}
+            statuts={mlStatuts(data)}
+            imposture={
+              isAdmin
+                ? {
+                    corps: { type: "MISSION_LOCALE", ml_id: data.ml.ml_id, nom: data.ml.nom },
+                    redirection: "/mission-locale",
+                    desactivee: !isActive,
+                  }
+                : undefined
+            }
           />
-
-          <header className={styles.header}>
-            <div className={styles.titleRow}>
-              <span className={`fr-icon-map-pin-user-line ${styles.titleIcon}`} aria-hidden="true" />
-              <h1 className={styles.title}>{data.ml.nom}</h1>
-              {isAdmin && (
-                <Button
-                  priority="secondary"
-                  iconId="fr-icon-eye-line"
-                  iconPosition="right"
-                  onClick={handleImpersonate}
-                  disabled={!isActive || impostureEnCours}
-                  className={styles.imposture}
-                >
-                  Imposture
-                </Button>
-              )}
-            </div>
-            <MlStatutLigne data={data} />
-            {impostureErreur && (
-              <Alert
-                severity="error"
-                title={impostureErreur}
-                description=""
-                small
-                closable
-                onClose={() => setImpostureErreur(null)}
-              />
-            )}
-          </header>
 
           <MlAlertesActivite alertes={data.indicateurs.alertes} />
 
@@ -117,29 +72,23 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
   );
 }
 
-function MlStatutLigne({ data }: { data: IMissionLocaleDetailResponse }) {
+function mlStatuts(data: IMissionLocaleDetailResponse) {
   const { is_engaged, taux_traitement, derniere_connexion_at } = data.indicateurs;
   const engagement = `ML engagée ${is_engaged ? "oui" : "non"}${
     taux_traitement === null ? "" : ` - taux de traitement ${taux_traitement} %`
   }`;
 
-  return (
-    <p className={styles.statuts}>
-      <Badge as="span" severity={data.is_active ? "success" : "error"} small>
-        {data.is_active ? "A un compte" : "N'a pas de compte"}
-      </Badge>
-      <span aria-hidden="true">•</span>
-      <Badge as="span" severity={is_engaged ? "success" : "error"} small>
-        {engagement}
-      </Badge>
-      <span aria-hidden="true">•</span>
-      <span>
-        {derniere_connexion_at
-          ? `Dernière connexion le ${formatDateCourte(derniere_connexion_at)}`
-          : "Aucune connexion"}
-      </span>
-    </p>
-  );
+  return [
+    <Badge key="compte" as="span" severity={data.is_active ? "success" : "error"} small>
+      {data.is_active ? "A un compte" : "N'a pas de compte"}
+    </Badge>,
+    <Badge key="engagement" as="span" severity={is_engaged ? "success" : "error"} small>
+      {engagement}
+    </Badge>,
+    <span key="connexion">
+      {derniere_connexion_at ? `Dernière connexion le ${formatDateCourte(derniere_connexion_at)}` : "Aucune connexion"}
+    </span>,
+  ];
 }
 
 function buildParentLink(currentParams = "") {

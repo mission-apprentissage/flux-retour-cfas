@@ -6,7 +6,7 @@ import { CopyButton } from "../../ui/CopyButton";
 import { formatDateCourte, safeHttpUrl } from "../../utils";
 import { MlAdminRdvUrlEditor } from "../MlAdminRdvUrlEditor";
 
-import styles from "./MLInfosTab.module.css";
+import styles from "./FicheInfosTab.module.css";
 
 const NON_RENSEIGNE = "-";
 

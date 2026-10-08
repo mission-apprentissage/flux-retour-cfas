@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
+import Link from "next/link";
 import { useState } from "react";
 import type { CfaInjoignablesSortBy } from "shared/models/data/nationalStats.model";
 import type { ICfaInvitesSortBy } from "shared/models/routes/admin/cfa-invites-sans-collab.api";
@@ -14,6 +15,7 @@ import { useCfaInjoignablesStats, useCfaInvitesSansCollabStats } from "../hooks/
 import { Localisation } from "../tables/CfaEtablissementsTable";
 import tableStyles from "../tables/CfaEtablissementsTable.module.css";
 import { SortableTableHeader } from "../tables/SortableTableHeader";
+import { ficheCfaUrl } from "../utils";
 
 import { AlerteCard } from "./AlerteCard";
 import styles from "./CfaAlertesSection.module.css";
@@ -35,13 +37,29 @@ function sortableHeaders<T extends string>(
   ));
 }
 
-function RaisonSociale({ nom, uai, siret }: { nom: string | null; uai: string | null; siret: string }) {
+function RaisonSociale({
+  organismeId,
+  nom,
+  uai,
+  siret,
+}: {
+  organismeId: string;
+  nom: string | null;
+  uai: string | null;
+  siret: string;
+}) {
   return (
     <div className={tableStyles.nameCell}>
       <span className={tableStyles.name}>{nom ?? "Raison sociale inconnue"}</span>
       <span className={tableStyles.meta}>
         UAI : {uai ?? "—"} · SIRET : {siret}
       </span>
+      <Link
+        href={ficheCfaUrl(organismeId)}
+        className="fr-link fr-link--sm fr-link--icon-right fr-icon-arrow-right-line"
+      >
+        Voir la fiche
+      </Link>
     </div>
   );
 }
@@ -78,7 +96,13 @@ function CfaInvitesAlerte() {
         sort
       )}
       rows={(query.data?.data ?? []).map((row) => [
-        <RaisonSociale key="nom" nom={row.raison_sociale} uai={row.uai} siret={row.siret} />,
+        <RaisonSociale
+          key="nom"
+          organismeId={row.organisme_id}
+          nom={row.raison_sociale}
+          uai={row.uai}
+          siret={row.siret}
+        />,
         <div key="compte" className={tableStyles.centeredCell}>
           <Badge as="span" noIcon small severity={row.has_account ? "success" : "error"}>
             {row.has_account ? "Oui" : "Non"}
@@ -128,7 +152,7 @@ function CfaInjoignablesAlerte() {
         sort
       )}
       rows={(query.data?.data ?? []).map((row) => [
-        <RaisonSociale key="nom" nom={row.nom} uai={row.uai} siret={row.siret} />,
+        <RaisonSociale key="nom" organismeId={row.organisme_id} nom={row.nom} uai={row.uai} siret={row.siret} />,
         <Localisation key="loc" adresse={row.adresse} />,
         <div
           key="taux"

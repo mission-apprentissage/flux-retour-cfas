@@ -5,6 +5,7 @@ import type {
   CollabCfaOrigineSortBy,
   CollabDossierStatut,
   ICollabCfaOrigineResponse,
+  ICfaFiche,
   ICollaborationDossiersResponse,
   CfaEtablissementsSortBy,
   CfaInjoignablesSortBy,
@@ -247,6 +248,21 @@ export function useCfaEtablissements(params: CfaEtablissementsParams & { page: n
         signal,
       }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+type DatesEnTexte<T, K extends keyof T> = Omit<T, K> & Record<K, string | null>;
+
+export type ICfaFicheResponse = Omit<DatesEnTexte<ICfaFiche, "derniere_connexion_at">, "source_donnees"> & {
+  source_donnees: DatesEnTexte<ICfaFiche["source_donnees"], "derniere_transmission_at" | "derniere_maj_deca_at">;
+};
+
+export function useCfaFiche(organismeId: string) {
+  return useQuery<ICfaFicheResponse>({
+    queryKey: ["stats", "cfa-fiche", organismeId] as const,
+    queryFn: () => _get(`${INDICATEURS_ML_BASE}/cfa/${organismeId}/detail`),
+    ...STATS_QUERY_CONFIG,
+    enabled: !!organismeId,
   });
 }
 

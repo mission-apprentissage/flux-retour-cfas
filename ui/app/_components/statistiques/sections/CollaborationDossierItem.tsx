@@ -3,12 +3,14 @@
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { format } from "date-fns/format";
+import Link from "next/link";
 import { ML_SITUATION_DOSSIER_LABEL } from "shared/constants/missionLocale";
 import type { ICollaborationDossier, ICollaborationDossierStructure } from "shared/models/data/nationalStats.model";
 
 import { DOSSIERS_TRAITES_V2_LABELS } from "../constants";
 import { motifLabel } from "../hooks/useCollabDossiersExport";
 import { COLLAB_DOSSIER_STATUT_LABELS } from "../hooks/useStatsQueries";
+import { ficheCfaUrl } from "../utils";
 
 import styles from "./CollaborationsListCard.module.css";
 
@@ -33,7 +35,16 @@ export function CollaborationDossierItem({ dossier }: { dossier: ICollaborationD
       </p>
       <p className={styles.structure}>
         <span>CFA</span>
-        <strong>{structureLabel(dossier.cfa)}</strong>
+        {dossier.cfa.id ? (
+          <Link
+            href={ficheCfaUrl(dossier.cfa.id, { from: "collaborations" })}
+            className={`fr-link ${styles.lienStructure}`}
+          >
+            {structureLabel(dossier.cfa)}
+          </Link>
+        ) : (
+          <strong>{structureLabel(dossier.cfa)}</strong>
+        )}
       </p>
       <dl className={styles.details}>
         <dt>Statut</dt>

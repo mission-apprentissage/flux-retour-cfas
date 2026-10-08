@@ -1,8 +1,7 @@
 "use client";
 
-import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Table } from "@codegouvfr/react-dsfr/Table";
-import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
+import Link from "next/link";
 import { useState } from "react";
 import type { CollabCfaOrigineSortBy } from "shared/models/data/nationalStats.model";
 
@@ -11,6 +10,7 @@ import { TableSkeleton } from "@/app/_components/common/Skeleton";
 import { usePageForParams } from "../hooks/usePageForParams";
 import { useCollabCfaOrigine } from "../hooks/useStatsQueries";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
+import { ficheCfaUrl } from "../utils";
 
 import { Localisation } from "./CfaEtablissementsTable";
 import styles from "./CfaEtablissementsTable.module.css";
@@ -72,15 +72,14 @@ export function CollabCfaOrigineTable({ mlId }: { mlId: string }) {
                     <span className={styles.meta}>
                       UAI : {row.uai ?? "—"} · SIRET : {row.siret ?? "—"}
                     </span>
-                    <span>
-                      <Button priority="tertiary no outline" size="small" disabled>
+                    {row.organisme_id && (
+                      <Link
+                        href={ficheCfaUrl(row.organisme_id, { from: "ml", ml_id: mlId })}
+                        className="fr-link fr-link--sm fr-link--icon-right fr-icon-arrow-right-line"
+                      >
                         Voir la fiche
-                      </Button>{" "}
-                      <Tooltip
-                        kind="click"
-                        title="Bientôt disponible : la fiche CFA arrive dans une prochaine version."
-                      />
-                    </span>
+                      </Link>
+                    )}
                   </div>,
                   <Localisation
                     key={`loc-${row.organisme_id}`}

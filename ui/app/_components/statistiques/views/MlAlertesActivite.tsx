@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { ML_ALERTE_SEUILS, type IMlAlerte } from "shared/models/data/nationalStats.model";
 
-import styles from "./MlAlertesActivite.module.css";
+import { AlertesActivite } from "./AlertesActivite";
 
 const formatJours = (valeur: number | null) =>
   valeur === null ? "" : ` (${valeur.toLocaleString("fr-FR")} jours en moyenne)`;
@@ -38,22 +38,9 @@ const ALERTE_LIBELLES: Record<IMlAlerte["type"], (valeur: number | null) => Reac
 };
 
 export function MlAlertesActivite({ alertes }: { alertes: IMlAlerte[] }) {
-  if (alertes.length === 0) return null;
-
   return (
-    <section className={styles.bandeau} aria-labelledby="ml-alertes-titre">
-      <h2 id="ml-alertes-titre" className={styles.titre}>
-        <span className="fr-icon-error-warning-fill" aria-hidden="true" />
-        Alertes activité
-      </h2>
-      <ul className={styles.liste}>
-        {alertes.map((alerte) => (
-          <li key={alerte.type} className={styles.alerte}>
-            <span className="fr-icon-error-warning-line fr-icon--sm" aria-hidden="true" />
-            <p className={styles.texte}>{ALERTE_LIBELLES[alerte.type](alerte.valeur)}</p>
-          </li>
-        ))}
-      </ul>
-    </section>
+    <AlertesActivite
+      alertes={alertes.map((alerte) => ({ cle: alerte.type, contenu: ALERTE_LIBELLES[alerte.type](alerte.valeur) }))}
+    />
   );
 }

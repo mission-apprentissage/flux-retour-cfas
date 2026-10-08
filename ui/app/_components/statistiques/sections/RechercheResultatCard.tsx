@@ -2,12 +2,11 @@
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { useSearchParams } from "next/navigation";
 import { Fragment } from "react";
 import type { IRechercheResultat } from "shared/models/data/nationalStats.model";
 
-import { formatDerniereActivite } from "../utils";
+import { ficheCfaUrl, formatDerniereActivite } from "../utils";
 
 import styles from "./RechercheResultatCard.module.css";
 
@@ -70,12 +69,13 @@ export function RechercheResultatCard({ resultat }: { resultat: IRechercheResult
       </dl>
       <div className={styles.action}>
         {isCfa ? (
-          <span>
-            <Button iconId="fr-icon-arrow-right-line" iconPosition="right" disabled>
-              Détails
-            </Button>{" "}
-            <Tooltip kind="click" title="Bientôt disponible : la fiche CFA arrive dans une prochaine version." />
-          </span>
+          <Button
+            iconId="fr-icon-arrow-right-line"
+            iconPosition="right"
+            linkProps={{ href: ficheCfaUrl(resultat.id, { from: "recherche", q: searchParams?.get("q") }) }}
+          >
+            Détails
+          </Button>
         ) : (
           <Button
             iconId="fr-icon-arrow-right-line"

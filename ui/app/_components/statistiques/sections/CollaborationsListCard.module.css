@@ -85,3 +85,7 @@
     grid-template-columns: 1fr;
   }
 }
+
+.lienStructure {
+  font-weight: 700;
+}

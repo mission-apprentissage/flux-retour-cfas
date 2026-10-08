@@ -3,6 +3,7 @@
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import { format } from "date-fns/format";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { CfaEtablissementsSortBy, ICfaEtablissement } from "shared/models/data/nationalStats.model";
 
@@ -11,6 +12,7 @@ import { TableSkeleton } from "@/app/_components/common/Skeleton";
 import { usePageForParams } from "../hooks/usePageForParams";
 import { type CfaEtablissementsParams, useCfaEtablissements } from "../hooks/useStatsQueries";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
+import { ficheCfaUrl } from "../utils";
 
 import styles from "./CfaEtablissementsTable.module.css";
 import { SortableTableHeader } from "./SortableTableHeader";
@@ -94,6 +96,12 @@ export function CfaEtablissementsTable({
                     <span className={styles.meta}>
                       UAI : {row.uai ?? "—"} · SIRET : {row.siret}
                     </span>
+                    <Link
+                      href={ficheCfaUrl(row.id)}
+                      className="fr-link fr-link--sm fr-link--icon-right fr-icon-arrow-right-line"
+                    >
+                      Voir la fiche
+                    </Link>
                   </div>,
                   <Localisation key={`loc-${row.id}`} adresse={row.adresse} />,
                   <div key={`compte-${row.id}`} className={styles.centeredCell}>

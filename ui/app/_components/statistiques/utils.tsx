@@ -88,6 +88,14 @@ export function formatDateFr(dateString: string | null): string | null {
   }
 }
 
+/** Lien vers la fiche CFA ; la provenance alimente le fil d'Ariane (`from`, `q`, `ml_id`). */
+export function ficheCfaUrl(organismeId: string, provenance: Record<string, string | null | undefined> = {}) {
+  const params = new URLSearchParams();
+  Object.entries(provenance).forEach(([cle, valeur]) => valeur && params.set(cle, valeur));
+  const query = params.toString();
+  return `/suivi-des-indicateurs/cfa/${organismeId}${query ? `?${query}` : ""}`;
+}
+
 export function safeHttpUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   try {

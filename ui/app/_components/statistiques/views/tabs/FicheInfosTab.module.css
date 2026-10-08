@@ -8,7 +8,7 @@
 .grille {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 24px 48px;
   margin: 0;
   padding: 0;
 }
@@ -16,7 +16,7 @@
 .ligne {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
+  gap: 24px 48px;
 }
 
 .info {
@@ -71,4 +71,21 @@
 
 .valeur :global(.fr-btn) {
   margin-block: -0.25rem;
+}
+
+.badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.liens {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  font-weight: 500;
+}
+
+.ligne > .info {
+  min-width: 160px;
 }
