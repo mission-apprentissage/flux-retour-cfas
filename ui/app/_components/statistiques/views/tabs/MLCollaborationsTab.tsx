@@ -1,13 +1,19 @@
 "use client";
 
+import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, type ReactNode } from "react";
+import { ORGANISATION_TYPE } from "shared/constants";
+
+import { useAuth } from "@/app/_context/UserContext";
 
 import { CollabMensuelChart } from "../../charts/CollabMensuelChart";
 import { DetailsDossiersTraitesPieChart } from "../../charts/DetailsDossiersTraitesPieChart";
 import { isLoadingVariation } from "../../hooks/useLoadingVariation";
 import { useCollaborationMensuelStats, useCollaborationSegmentStats } from "../../hooks/useStatsQueries";
 import { CollabObjectifsBlock } from "../../sections/CollaborationChartBlocks";
+import { CollaborationsListCard } from "../../sections/CollaborationsListCard";
 import { CollabCfaOrigineTable } from "../../tables/CollabCfaOrigineTable";
 import { NoDataMessage } from "../../ui/NoDataMessage";
 import { PeriodSelector, type Period } from "../../ui/PeriodSelector";
@@ -44,7 +50,55 @@ function Kpi({ label, tooltip, valeur }: { label: string; tooltip?: string; vale
 const formatJours = (jours: number | null) =>
   jours === null ? "—" : `${jours.toLocaleString("fr-FR")} ${jours > 1 ? "jours" : "jour"}`;
 
+const VUE_PARAM = "collab_vue";
+
+function useVueCollaborations(listeAutorisee: boolean) {
+  const router = useRouter();
+  const pathname = usePathname() ?? "";
+  const searchParams = useSearchParams();
+  const vue = listeAutorisee && searchParams?.get(VUE_PARAM) === "liste" ? "liste" : "chiffres";
+  const setVue = (nouvelle: "chiffres" | "liste") => {
+    const params = new URLSearchParams(searchParams?.toString());
+    if (nouvelle === "liste") params.set(VUE_PARAM, "liste");
+    else params.delete(VUE_PARAM);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+  return [vue, setVue] as const;
+}
+
 export function MLCollaborationsTab({ mlId, action }: MLCollaborationsTabProps) {
+  const { user } = useAuth();
+  const listeAutorisee = user?.organisation?.type !== ORGANISATION_TYPE.ARML;
+  const [vue, setVue] = useVueCollaborations(listeAutorisee);
+
+  return (
+    <div>
+      <h2 className={styles.titre}>Suivi des collaborations avec les CFA</h2>
+      {listeAutorisee && (
+        <SegmentedControl
+          hideLegend
+          legend="Affichage des collaborations"
+          className={styles.bascule}
+          segments={[
+            {
+              label: "Vue chiffrée",
+              iconId: "fr-icon-bar-chart-box-line",
+              nativeInputProps: { checked: vue === "chiffres", onChange: () => setVue("chiffres") },
+            },
+            {
+              label: "Détails des collaborations",
+              iconId: "fr-icon-list-unordered",
+              nativeInputProps: { checked: vue === "liste", onChange: () => setVue("liste") },
+            },
+          ]}
+        />
+      )}
+      {vue === "liste" ? <CollaborationsListCard mlId={mlId} /> : <VueChiffree mlId={mlId} action={action} />}
+    </div>
+  );
+}
+
+function VueChiffree({ mlId, action }: MLCollaborationsTabProps) {
   const [period, setPeriod] = useState<Period>("30days");
   const { data, isLoading, isFetching, error } = useCollaborationSegmentStats({ period, mlId });
   const mensuel = useCollaborationMensuelStats({ period, mlId });
@@ -53,7 +107,6 @@ export function MLCollaborationsTab({ mlId, action }: MLCollaborationsTabProps) 
 
   return (
     <div>
-      <h2 className={styles.titre}>Suivi des collaborations avec les CFA</h2>
       <div className={styles.barreOutils}>
         <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />
         {action}

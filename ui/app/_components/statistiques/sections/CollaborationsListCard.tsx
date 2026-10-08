@@ -60,7 +60,8 @@ const toStructureOptions = (structures: ICollaborationDossierStructure[] = []) =
 const countLabel = (label: string) => (selected: string[]) =>
   selected.length ? `${label} (${selected.length})` : label;
 
-export function CollaborationsListCard() {
+/** Sans `mlId` : liste du territoire. Avec : dossiers reçus par cette Mission Locale (fiche ML). */
+export function CollaborationsListCard({ mlId }: { mlId?: string } = {}) {
   const { region } = useStatsFilters();
   const { user } = useAuth();
   const isDdets = user?.organisation?.type === ORGANISATION_TYPE.DDETS;
@@ -77,21 +78,25 @@ export function CollaborationsListCard() {
 
   const params = useMemo<CollaborationDossiersParams>(() => {
     const csv = (values?: string[]) => (values?.length ? values.join(",") : undefined);
-    return {
-      region,
+    const communs = {
       search: search.length >= 2 ? search : undefined,
-      departements: isDdets ? undefined : csv(selectedDepartements),
       statuts: csv(filters.statuts),
       delais: csv(filters.delais),
-      cfa_ids: csv(filters.cfa),
-      ml_ids: csv(filters.ml),
       situations: csv(filters.situations),
       motifs: csv(filters.motifs),
       resultats: csv(filters.resultats),
       date_debut: filters.debut,
       date_fin: filters.fin,
     };
-  }, [region, search, isDdets, selectedDepartements, filters]);
+    if (mlId) return { ...communs, ml_id: mlId };
+    return {
+      ...communs,
+      region,
+      departements: isDdets ? undefined : csv(selectedDepartements),
+      cfa_ids: csv(filters.cfa),
+      ml_ids: csv(filters.ml),
+    };
+  }, [mlId, region, search, isDdets, selectedDepartements, filters]);
   const [page, setPage] = usePageForParams(params);
   const { data, isLoading, isFetching, isPlaceholderData, error } = useCollaborationDossiers({
     ...params,
@@ -102,7 +107,11 @@ export function CollaborationsListCard() {
 
   return (
     <OverviewCard
-      title="Liste de l'ensemble des collaborations envoyées par les CFA"
+      title={
+        mlId
+          ? "Liste des collaborations reçues par cette Mission Locale"
+          : "Liste de l'ensemble des collaborations envoyées par les CFA"
+      }
       actions={
         <>
           {data && <span className={filterStyles.count}>{data.total.toLocaleString("fr-FR")} dossiers</span>}
@@ -138,7 +147,9 @@ export function CollaborationsListCard() {
         label="Rechercher une collaboration"
         hideLabel
         nativeInputProps={{
-          placeholder: "Rechercher par nom de Mission Locale, de CFA, de jeune…",
+          placeholder: mlId
+            ? "Rechercher par nom de CFA, de jeune…"
+            : "Rechercher par nom de Mission Locale, de CFA, de jeune…",
           value: searchInput,
           onChange: (e) => setSearchInput(e.target.value),
           type: "search",
@@ -153,7 +164,7 @@ export function CollaborationsListCard() {
           onChange={setPeriode}
           emptyLabel="Janv. 2026 - aujourd'hui"
         />
-        {!isDdets && (
+        {!isDdets && !mlId && (
           <TerritoireFilter departements={filters.departements} onChange={(codes) => setList("departements", codes)} />
         )}
         <ChecklistFilter
@@ -170,26 +181,30 @@ export function CollaborationsListCard() {
           onChange={(values) => setList("delais", values)}
           getDisplayText={countLabel("Délai de traitement")}
         />
-        <ChecklistFilter
-          label="CFA émetteur"
-          options={toStructureOptions(data?.filtres.cfa)}
-          value={filters.cfa ?? []}
-          onChange={(values) => setList("cfa", values)}
-          searchable
-          enableSelectAll
-          searchPlaceholder="Rechercher un CFA"
-          getDisplayText={countLabel("CFA émetteur")}
-        />
-        <ChecklistFilter
-          label="ML destinataire"
-          options={toStructureOptions(data?.filtres.ml)}
-          value={filters.ml ?? []}
-          onChange={(values) => setList("ml", values)}
-          searchable
-          enableSelectAll
-          searchPlaceholder="Rechercher une Mission Locale"
-          getDisplayText={countLabel("ML destinataire")}
-        />
+        {!mlId && (
+          <>
+            <ChecklistFilter
+              label="CFA émetteur"
+              options={toStructureOptions(data?.filtres.cfa)}
+              value={filters.cfa ?? []}
+              onChange={(values) => setList("cfa", values)}
+              searchable
+              enableSelectAll
+              searchPlaceholder="Rechercher un CFA"
+              getDisplayText={countLabel("CFA émetteur")}
+            />
+            <ChecklistFilter
+              label="ML destinataire"
+              options={toStructureOptions(data?.filtres.ml)}
+              value={filters.ml ?? []}
+              onChange={(values) => setList("ml", values)}
+              searchable
+              enableSelectAll
+              searchPlaceholder="Rechercher une Mission Locale"
+              getDisplayText={countLabel("ML destinataire")}
+            />
+          </>
+        )}
         <ChecklistFilter
           label="Situation du jeune"
           options={SITUATION_OPTIONS}

@@ -162,6 +162,7 @@ const collaborationDossiersExportQuery = z.object({
   motifs: zCsvList,
   cfa_ids: zCsvObjectIds,
   ml_ids: zCsvObjectIds,
+  ml_id: mlIdSchema.optional(),
 });
 const collaborationDossiersQuery = collaborationDossiersExportQuery.extend({
   page: z.coerce.number().int().min(1).default(1),
@@ -410,8 +411,9 @@ const getCollaborationsMensuelRoute: IndicateursHandler<z.infer<typeof collabora
 
 /**
  * Liste nominative : l'ARML n'y a pas accès, la DDETS est limitée à son département, la DREETS à sa région.
+ * Avec `ml_id` (fiche ML), le périmètre est celui de la ML : sa région, ou son département pour une DDETS.
  */
-const resolveCollaborationDossiersScope = (
+const resolveCollaborationDossiersScope = async (
   query: z.infer<typeof collaborationDossiersExportQuery>,
   { organisation, regions: userRegions }: IndicateursMlLocals
 ) => {
@@ -420,6 +422,21 @@ const resolveCollaborationDossiersScope = (
   }
   assertRegionAllowed(query.region, userRegions);
   assertDepartementsAllowed(query.departements, userRegions);
+
+  if (query.ml_id) {
+    await verifyMlInRegions(query.ml_id, userRegions);
+    if (organisation.type === ORGANISATION_TYPE.DDETS) {
+      const ml = await organisationsDb().findOne(
+        { _id: new ObjectId(query.ml_id), type: "MISSION_LOCALE" },
+        { projection: { "adresse.departement": 1 } }
+      );
+      const departement = (organisation as { code_departement?: string }).code_departement;
+      if (!departement || (ml as { adresse?: { departement?: string } } | null)?.adresse?.departement !== departement) {
+        throw Boom.forbidden("Accès non autorisé à ce département");
+      }
+    }
+    return { missionLocaleId: new ObjectId(query.ml_id) };
+  }
 
   if (organisation.type === ORGANISATION_TYPE.DDETS) {
     const departement = (organisation as { code_departement?: string }).code_departement;
@@ -451,7 +468,7 @@ const getCollaborationDossiersRoute: IndicateursHandler<z.infer<typeof collabora
 ) => {
   const { page, limit } = req.query;
   return await listCollaborationDossiers(
-    resolveCollaborationDossiersScope(req.query, locals),
+    await resolveCollaborationDossiersScope(req.query, locals),
     toCollaborationDossiersFilters(req.query),
     { page, limit }
   );
@@ -461,7 +478,7 @@ const getCollaborationDossiersExportRoute: IndicateursHandler<
   z.infer<typeof collaborationDossiersExportQuery>
 > = async (req, { locals }) => {
   const result = await listCollaborationDossiers(
-    resolveCollaborationDossiersScope(req.query, locals),
+    await resolveCollaborationDossiersScope(req.query, locals),
     toCollaborationDossiersFilters(req.query)
   );
   await createTelechargementListeNomLog(

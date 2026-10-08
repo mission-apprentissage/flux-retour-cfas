@@ -1263,6 +1263,61 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(logs).toHaveLength(1);
       expect(logs[0].elementList?.sort()).toEqual([D_A_TRAITER, D_RDV, D_RECONTACTER].map(String).sort());
     });
+
+    describe("périmètre fiche Mission Locale (ml_id)", () => {
+      beforeEach(async () => {
+        await organisationsDb().updateOne({ _id: ML_IDF }, { $set: { "adresse.departement": "75" } });
+        await missionLocaleEffectifsDb().insertOne(
+          { ...dossier(new ObjectId(), CFA_A, {}), mission_locale_id: ML_ARA } as never,
+          { bypassDocumentValidation: true }
+        );
+      });
+
+      it("Liste tous les dossiers reçus par la ML, y compris ceux d'un CFA hors région", async () => {
+        const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?ml_id=${ML_IDF}`);
+
+        expect(response.status).toBe(200);
+        expect(response.data.total).toBe(4);
+        expect(response.data.data.map((row: { cfa: { nom: string } }) => row.cfa.nom).sort()).toEqual([
+          "CFA A",
+          "CFA A",
+          "CFA B",
+          "Lycée Eiffel",
+        ]);
+        expect(
+          response.data.data.every((row: { mission_locale: { id: string } }) => row.mission_locale.id === `${ML_IDF}`)
+        ).toBe(true);
+      });
+
+      it("Limite la DDETS aux ML de son département et refuse l'ARML et les ML hors région", async () => {
+        const ddets = await requestAsOrganisation(DDETS_PARIS, "get", `${BASE}?ml_id=${ML_IDF}`);
+        expect(ddets.status).toBe(200);
+        expect(ddets.data.total).toBe(4);
+
+        await organisationsDb().updateOne({ _id: ML_IDF }, { $set: { "adresse.departement": "77" } });
+        expectForbidden(
+          await requestAsOrganisation(DDETS_PARIS, "get", `${BASE}?ml_id=${ML_IDF}`),
+          "Accès non autorisé à ce département"
+        );
+        expectForbidden(
+          await requestAsOrganisation(ARML_IDF, "get", `${BASE}?ml_id=${ML_IDF}`),
+          "Accès non autorisé à la liste des collaborations"
+        );
+        expectForbidden(
+          await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?ml_id=${ML_ARA}`),
+          "Accès non autorisé à cette Mission Locale"
+        );
+      });
+
+      it("Journalise l'export de la liste de la ML", async () => {
+        const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}/export?ml_id=${ML_IDF}`);
+
+        expect(response.status).toBe(200);
+        expect(response.data.data).toHaveLength(4);
+        const log = await telechargementListesNominativesLogsDb().findOne({ type: "indicateurs_collaborations" });
+        expect(log?.elementList).toHaveLength(4);
+      });
+    });
   });
 
   describe("GET /stats/recherche", () => {

@@ -6,6 +6,25 @@
   composes: periodRow from "./MLSuiviTraitementTab.module.css";
 }
 
+.bascule {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.bascule :global(.fr-segmented__elements) {
+  display: flex;
+  width: 100%;
+}
+
+.bascule :global(.fr-segmented__element) {
+  flex: 1 1 0;
+}
+
+.bascule :global(.fr-segmented__element label) {
+  justify-content: center;
+  width: 100%;
+}
+
 .cartes {
   display: flex;
   flex-direction: column;
