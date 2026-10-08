@@ -96,6 +96,7 @@ import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
 import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
+import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
@@ -277,12 +278,26 @@ export default async function createServer(): Promise<Application> {
 
   setupRoutes(app);
 
-  // The error handler must be before any other error middleware and after all controllers
-  app.use(Sentry.Handlers.errorHandler());
-
+  // Seul décideur de capture : le handler Sentry s'exécutait avant la normalisation
+  // et traitait donc toute erreur sans statut comme une 500.
   app.use(errorMiddleware());
 
   return app;
+}
+
+/** Le signalement Sentry ne capture qu'à la transition : la sonde passe toutes les 10 s. */
+async function isMongodbHealthy(): Promise<boolean> {
+  let healthy = false;
+  let cause: unknown;
+  try {
+    await usersMigrationDb().findOne({});
+    healthy = true;
+  } catch (err) {
+    cause = err;
+    logger.error({ err }, "healthcheck failed");
+  }
+  reportDependencyHealth("mongodb", healthy, cause);
+  return healthy;
 }
 
 function setupRoutes(app: Application) {
@@ -300,24 +315,27 @@ function setupRoutes(app: Application) {
         };
       })
     )
+    // Readiness : « les dépendances répondent-elles ? ». Renvoie 503 si Mongo est
+    // injoignable, et n'est lue que par la supervision. Docker ne doit pas s'y fier :
+    // redémarrer l'API ne répare pas Mongo, et une base brièvement absente pendant un
+    // déploiement tuerait les deux réplicas au pire moment.
+    .get("/api/healthcheck/readiness", async (_req, res) => {
+      const mongodbHealthy = await isMongodbHealthy();
+      res
+        .status(mongodbHealthy ? 200 : 503)
+        .json({ name: "TDB Apprentissage API", healthcheck: { mongodb: mongodbHealthy } });
+    })
+    // Liveness : « le process répond-il ? ». Reste en 200 quoi qu'il arrive, c'est la
+    // sonde de Docker — un redémarrage est la bonne réponse à un process figé.
     .get(
       "/api/healthcheck",
       returnResult(async () => {
-        let mongodbHealthy = false;
-        try {
-          await usersMigrationDb().findOne({});
-          mongodbHealthy = true;
-        } catch (err) {
-          logger.error({ err }, "healthcheck failed");
-          Sentry.captureException(new Error("healthcheck failed", { cause: err }));
-        }
-
         return {
           name: "TDB Apprentissage API",
           version: config.version,
           env: config.env,
           healthcheck: {
-            mongodb: mongodbHealthy,
+            mongodb: await isMongodbHealthy(),
           },
         };
       })
@@ -537,11 +555,10 @@ function setupRoutes(app: Application) {
 
         void clearIngestionAuthCounter(req.ip);
 
+        // Le siret et l'uai identifient l'organisme : l'_id suffit au diagnostic.
         Sentry.setUser({
           segment: "bearer",
-          ip_address: req.ip,
           id: `organisme-${organisme._id.toString()}`,
-          username: `organisme: ${organisme.siret} / ${organisme.uai}`,
         });
         next();
       } catch (err) {

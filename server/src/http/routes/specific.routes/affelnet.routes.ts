@@ -1,4 +1,3 @@
-import { captureException } from "@sentry/node";
 import Boom from "boom";
 import { format } from "date-fns";
 import express from "express";
@@ -13,6 +12,7 @@ import {
   getAffelnetVoeuxNonConcretise,
 } from "@/common/actions/affelnet.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
+import logger from "@/common/logger";
 import { zCommaSeparated } from "@/common/validation/commaSeparated";
 import {
   DefaultParams,
@@ -193,9 +193,10 @@ const exportNonConcretisee: AffelnetHandler = async (req, { locals }) => {
     const csv = await json2csvParser.parse(transformedVoeux);
     return csv;
   } catch (error) {
-    captureException(error);
-    console.error("Error exporting non-concretise:", error);
-    throw Boom.internal("Failed to export non-concretise");
+    logger.error({ err: error }, "Échec de l'export des voeux non concrétisés");
+    const boom = Boom.internal("Failed to export non-concretise");
+    boom.cause = error;
+    throw boom;
   }
 };
 
@@ -248,8 +249,9 @@ const exportConcretisee: AffelnetHandler = async (req, { locals }) => {
 
     return csv;
   } catch (error) {
-    captureException(error);
-    console.error("Error exporting concretise:", error);
-    throw Boom.internal("Failed to export concretise");
+    logger.error({ err: error }, "Échec de l'export des voeux concrétisés");
+    const boom = Boom.internal("Failed to export concretise");
+    boom.cause = error;
+    throw boom;
   }
 };

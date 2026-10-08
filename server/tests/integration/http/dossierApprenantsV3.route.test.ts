@@ -2,8 +2,9 @@ import { randomUUID } from "node:crypto";
 
 import { AxiosInstance } from "axiosist";
 import type { IOrganisme } from "shared/models";
-import { it, expect, describe, beforeEach } from "vitest";
+import { it, expect, describe, beforeEach, vi, afterEach } from "vitest";
 
+import * as collections from "@/common/model/collections";
 import { organismesDb } from "@/common/model/collections";
 import { createRandomOrganisme, createRandomDossierApprenantApiInputV3 } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -43,5 +44,28 @@ describe("Dossier Apprenants Route V3", () => {
       });
       expect(response.status).toBe(200);
     });
+
+    it("répond 500 sans divulguer le message interne quand l'écriture Mongo échoue", async () => {
+      vi.spyOn(collections, "effectifsQueueDb").mockReturnValue({
+        insertOne: () => Promise.reject(new Error("mongo indisponible")),
+        insertMany: () => Promise.reject(new Error("mongo indisponible")),
+      } as never);
+
+      const dossier = createRandomDossierApprenantApiInputV3({
+        etablissement_formateur_uai: uai,
+        etablissement_formateur_siret: siret,
+      });
+
+      const response = await httpClient.post(`${API_ENDPOINT_URL}`, [dossier], {
+        headers: { Authorization: `Bearer ${api_key}` },
+      });
+
+      expect(response.status).toBe(500);
+      expect(response.data.message).not.toContain("mongo indisponible");
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 });

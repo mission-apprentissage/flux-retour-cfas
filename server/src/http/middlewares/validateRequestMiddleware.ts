@@ -1,3 +1,4 @@
+import Boom from "boom";
 import { RequestHandler } from "express";
 import { ZodError, ZodType, ZodTypeDef } from "zod";
 
@@ -9,10 +10,13 @@ type RequestValidation<TParams, TQuery, TBody> = {
   body?: ZodType<TBody, ZodTypeDef, unknown>;
 };
 
-export type ValidationErrorItem = { type: "Query" | "Params" | "Body"; errors: ZodError };
+type ValidationErrorItem = { type: "Query" | "Params" | "Body"; errors: ZodError };
 
-export function isValidationErrorList(error: unknown): error is ValidationErrorItem[] {
-  return Array.isArray(error) && error.length > 0 && error[0]?.errors instanceof ZodError;
+/** Un tableau brut n'a pas de statut et serait vu comme une 500 non gérée. */
+function toRequestValidationError(errors: ValidationErrorItem[]): Boom {
+  const boomError = Boom.badRequest("Erreur de validation");
+  (boomError.output.payload as Boom.Payload & { details?: unknown }).details = errors[0].errors.issues;
+  return boomError;
 }
 
 /**
@@ -51,7 +55,7 @@ function validateRequestMiddleware<TParams = DefaultParams, TQuery = DefaultQuer
       }
     }
     if (errors.length > 0) {
-      return next(errors);
+      return next(toRequestValidationError(errors));
     }
     return next();
   };

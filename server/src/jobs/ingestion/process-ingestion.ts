@@ -33,6 +33,7 @@ import parentLogger from "@/common/logger";
 import { effectifsDb, effectifsQueueDb, organismesDb } from "@/common/model/collections";
 import { sleep } from "@/common/utils/asyncUtils";
 import { formatDateYYYYMMDD } from "@/common/utils/dateUtils";
+import { createErrorAggregator, type ErrorAggregator } from "@/common/utils/errorAggregator";
 import { formatError } from "@/common/utils/errorUtils";
 import { mergeIgnoringNullPreferringNewArray } from "@/common/utils/mergeIgnoringNullPreferringNewArray";
 import { AddPrefix, addPrefixToProperties } from "@/common/utils/miscUtils";
@@ -96,9 +97,13 @@ export async function processEffectifsQueue(options?: EffectifQueueProcessorOpti
 
   logger.info({ filter, count: itemsToProcess.length }, "traitement des effectifsQueue");
 
+  // Frontière d'agrégation : le lot, pas le job — le processor tourne en while(true).
+  const errors = createErrorAggregator("process-ingestion");
   const res = await PromisePool.withConcurrency(100)
     .for(itemsToProcess)
-    .process(async (effectifQueued) => executeProcessEffectifQueueItem(effectifQueued));
+    .process(async (effectifQueued) => executeProcessEffectifQueueItem(effectifQueued, errors));
+  errors.ok(itemsToProcess.length - errors.failed);
+  errors.flush();
   const totalValidItems = res.results.filter((valid) => valid).length;
 
   return {
@@ -116,7 +121,7 @@ export async function processEffectifQueueById(effectifQueueId: ObjectId): Promi
   await executeProcessEffectifQueueItem(effectifQueue);
 }
 
-function executeProcessEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>) {
+function executeProcessEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>, errors?: ErrorAggregator) {
   return runWithAsyncContext(async () => {
     const hub = getCurrentHub();
     const transaction = hub?.startTransaction({
@@ -142,7 +147,7 @@ function executeProcessEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>) 
     });
     const start = Date.now();
     try {
-      return await processEffectifQueueItem(effectifQueue);
+      return await processEffectifQueueItem(effectifQueue, errors);
     } finally {
       transaction?.setMeasurement("queue.execute", Date.now() - start, "millisecond");
       transaction?.finish();
@@ -153,7 +158,10 @@ function executeProcessEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>) 
 /**
  * @returns true si l'effectif est valide
  */
-async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): Promise<boolean> {
+async function processEffectifQueueItem(
+  effectifQueue: WithId<IEffectifQueue>,
+  errors?: ErrorAggregator
+): Promise<boolean> {
   const ctx = {
     _id: effectifQueue._id,
     siret: effectifQueue.siret_etablissement,
@@ -167,7 +175,7 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
 
   try {
     //Process du nouveau schéma de données
-    const effectifv2 = await handleEffectifTransmission(effectifQueue, currentDate);
+    const effectifv2 = await handleEffectifTransmission(effectifQueue, currentDate, errors);
     // Phase de transformation d'une donnée de queue
     const { result, itemProcessingInfos, organismeTarget } = await transformEffectifQueueV3ToEffectif(effectifQueue);
     // ajout des informations sur le traitement au logger
@@ -239,7 +247,12 @@ async function processEffectifQueueItem(effectifQueue: WithId<IEffectifQueue>): 
   } catch (err) {
     const error = Boom.internal("failed processing item", ctx);
     error.cause = err;
-    captureException(err);
+    // Sans perte : effectifsQueue.error et has_error tracent déjà chaque item en base.
+    if (errors) {
+      errors.record(err);
+    } else {
+      captureException(err);
+    }
     itemLogger.error({ duration: Date.now() - start, err: error, detailedError: err }, error.message);
     await effectifsQueueDb().updateOne(
       { _id: effectifQueue._id },

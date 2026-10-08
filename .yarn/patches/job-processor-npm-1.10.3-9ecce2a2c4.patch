@@ -1,0 +1,12 @@
+diff --git a/dist/index.js b/dist/index.js
+index f300e326f15dff3557afb4e16e156d33d28d96a1..ad41f034c677e560ecb4d46854caccf7d5e202e9 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -887,7 +887,6 @@ function executeJob(job, signal) {
+       try {
+         const s = signal ?? new AbortController().signal;
+         const result = await runner(job, s);
+-        await notifySentryJobEnd(job, true);
+         return result;
+       } catch (err) {
+         await notifySentryJobEnd(job, false);

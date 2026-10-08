@@ -78,8 +78,11 @@ export const effectifsJobs = {
 
 export const effectifsCrons = {
   // 05h00 Paris le samedi — recalcul hebdomadaire des statuts d'effectifs (année courante + N-1 côté ML)
+  // Mesuré sur 13 occurrences : durée max 36 min.
   "Mettre à jour les statuts d'effectifs tous les samedis matin à 5h": {
     cron_string: "0 5 * * 6",
+    checkinMargin: 15,
+    maxRuntimeInMinutes: 75,
     handler: async (signal) => {
       const evaluationDate = new Date();
       await hydrateWeeklyEffectifStatut(signal, evaluationDate);

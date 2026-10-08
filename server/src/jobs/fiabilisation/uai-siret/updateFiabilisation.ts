@@ -1,10 +1,12 @@
-import { captureException } from "@sentry/node";
 import { ApiError, type IRechercheOrganismeResponse } from "api-alternance-sdk";
-import Boom from "boom";
 import { STATUT_FIABILISATION_ORGANISME } from "shared/constants";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { organismesDb } from "@/common/model/collections";
+import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
+
+/** Appelé une fois par organisme du curseur : seule la transition est signalée. */
+const HEALTH_KEY = "api-alternance:rechercheOrganisme";
 
 type FiabilisationUaiSiret = {
   uai: string | null | undefined;
@@ -23,6 +25,7 @@ export async function fiabilisationUaiSiret({
   return apiAlternanceClient.organisme
     .recherche({ siret, uai })
     .then((apiData): FiabilisationUaiSiret => {
+      reportDependencyHealth(HEALTH_KEY, true);
       const couple = apiData.resultat == null ? { uai, siret } : apiData.resultat.organisme.identifiant;
 
       return {
@@ -51,9 +54,11 @@ export async function fiabilisationUaiSiret({
           }
         }
       }
-      const err = Boom.internal("Échec de l'appel API pour la fiabilisation des organismes", { uai, siret });
-      err.cause = error;
-      captureException(err);
+      reportDependencyHealth(HEALTH_KEY, false, error, {
+        tier: "jour",
+        errorKind: "upstream",
+        upstream: "api-alternance",
+      });
 
       return {
         uai,

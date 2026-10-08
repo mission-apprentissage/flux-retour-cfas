@@ -1,7 +1,7 @@
-import { captureException } from "@sentry/node";
 import axios from "axios";
 import { IEmailStatusEnum } from "shared/models";
 
+import { reportConfigurationIssueOnce } from "@/common/services/sentry/reportOnce";
 import config from "@/config";
 
 import getApiClient from "../client";
@@ -10,7 +10,7 @@ let axiosClient: ReturnType<typeof getApiClient> | null = null;
 
 const initClient = () => {
   if (!config.bal || !config.bal.endpoint || !config.bal.bearer_key) {
-    captureException(new Error("BAL API configuration is missing"));
+    reportConfigurationIssueOnce("bal.api", "BAL API configuration is missing");
     return;
   }
   axiosClient = getApiClient({

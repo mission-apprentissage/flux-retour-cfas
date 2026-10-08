@@ -15,6 +15,9 @@ module.exports = {
     ],
     // doesn't support path alias
     "node/no-missing-import": 0,
+    // le serveur logue via bunyan (@/common/logger) : les console.* échappent à
+    // l'agrégation de logs en production (MNA_TDB_LOG_TYPE=json)
+    "no-console": "error",
   },
   env: {
     es2022: true,
@@ -30,6 +33,22 @@ module.exports = {
         // autorise l'import des devDependencies
         "node/no-unpublished-import": "off",
         "node/no-extraneous-import": "error",
+      },
+    },
+    {
+      // sorties CLI destinées à l'opérateur (mot de passe généré affiché une seule fois,
+      // tableaux alignés de jobs:list) : le logger les enverrait en JSON dans l'agrégation de logs
+      files: ["src/commands.ts"],
+      rules: {
+        "no-console": "off",
+      },
+    },
+    {
+      // code de test : le logger est muet en test (streams: [] quand NODE_ENV=test),
+      // console reste donc le seul moyen de remonter une erreur de setup/teardown
+      files: ["tests/**/*.ts", "src/**/*.test.ts"],
+      rules: {
+        "no-console": "off",
       },
     },
   ],

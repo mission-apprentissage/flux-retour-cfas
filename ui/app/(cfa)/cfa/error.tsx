@@ -2,8 +2,15 @@
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
+import { useEffect } from "react";
 
-export default function ErrorComponent({ reset }: { error: Error; reset: () => void }) {
+import { reportBoundaryError } from "@/common/reportError";
+
+export default function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+  useEffect(() => {
+    reportBoundaryError(error, "cfa");
+  }, [error]);
+
   return (
     <div className="fr-container fr-py-4w">
       <Alert

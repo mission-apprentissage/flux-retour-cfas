@@ -71,8 +71,11 @@ export const brevoJobs = {
 
 export const brevoCrons = {
   // 05h00 Paris — synchro complète des contacts TBA vers Brevo (si le toggle daily full sync est actif)
+  // Mesuré sur 90 j : durée max 0,2 s.
   "Synchro Brevo de tous les contacts TBA à 5h": {
     cron_string: "0 5 * * *",
+    checkinMargin: 15,
+    maxRuntimeInMinutes: 5,
     handler: async () => {
       if (!(await isBrevoDailyFullSyncActive())) {
         logger.info("Brevo daily full sync désactivé (toggle/hors prod), skip cron sync full");
