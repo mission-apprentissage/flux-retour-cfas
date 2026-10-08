@@ -10,7 +10,7 @@ interface StatisticsSectionProps {
   className?: string;
   width?: "full" | "two-thirds" | "one-third";
   controls?: ReactNode;
-  controlsPosition?: "right" | "below-left";
+  controlsPosition?: "right" | "right-wrap" | "below-left";
   smallTitle?: boolean;
   wrapTitle?: boolean;
 }
@@ -28,7 +28,13 @@ export function StatisticsSection({
 }: StatisticsSectionProps) {
   const widthClass = width === "one-third" ? styles.oneThird : width === "two-thirds" ? styles.twoThirds : styles.full;
   const titleClass = smallTitle ? fr.cx("fr-h6", "fr-mb-3w") : fr.cx("fr-h4", "fr-mb-3w");
-  const headerClass = wrapTitle ? `${styles.header} ${styles.headerWrap}` : styles.header;
+  const headerClass = [
+    styles.header,
+    wrapTitle && styles.headerWrap,
+    controlsPosition === "right-wrap" && styles.headerControlsWrap,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const isBelowLeft = controlsPosition === "below-left";
 

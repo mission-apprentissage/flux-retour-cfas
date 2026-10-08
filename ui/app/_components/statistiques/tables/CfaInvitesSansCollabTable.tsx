@@ -1,6 +1,8 @@
 "use client";
 
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Pagination } from "@codegouvfr/react-dsfr/Pagination";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { Table } from "@codegouvfr/react-dsfr/Table";
@@ -14,6 +16,7 @@ import type {
 
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
+import { useCfaInvitationsExport } from "../hooks/useCfaInvitationsExport";
 import { useCfaInvitesSansCollab } from "../hooks/useCfaInvitesSansCollab";
 import { useSortableTable } from "../hooks/useSortableTable";
 import { StatisticsSection } from "../sections/StatisticsSection";
@@ -46,6 +49,12 @@ export function CfaInvitesSansCollabTable() {
     sort_order: sortDirection,
   });
 
+  const [exportError, setExportError] = useState<string | null>(null);
+  const { exportData, isExporting } = useCfaInvitationsExport({
+    onError: (e) => setExportError(e.message),
+    onSuccess: () => setExportError(null),
+  });
+
   const rows = data?.data ?? [];
   const pagination = data?.pagination;
 
@@ -60,6 +69,16 @@ export function CfaInvitesSansCollabTable() {
           {data.total.toLocaleString("fr-FR")} CFA
         </Badge>
       )}
+      <Button
+        iconId="fr-icon-download-line"
+        iconPosition="right"
+        priority="secondary"
+        size="small"
+        onClick={exportData}
+        disabled={isExporting}
+      >
+        {isExporting ? "Export en cours..." : "Exporter toutes les invitations"}
+      </Button>
     </div>
   );
 
@@ -67,8 +86,19 @@ export function CfaInvitesSansCollabTable() {
     <StatisticsSection
       title="Les CFA ont reçu des invitations des Missions Locales mais n'ont pas encore fait de collaborations"
       controls={controls}
+      controlsPosition="right-wrap"
       wrapTitle
     >
+      {exportError && (
+        <Alert
+          severity="error"
+          title="Erreur"
+          description={exportError}
+          closable
+          onClose={() => setExportError(null)}
+          className={styles.exportError}
+        />
+      )}
       <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
         {isLoading ? (
           <TableSkeleton rows={Math.min(limit, 10)} />

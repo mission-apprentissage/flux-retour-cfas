@@ -336,3 +336,149 @@ export const collaborationDetailsExportColumns = [
   { label: "RDV pris", key: "rdv_pris", width: 10 },
   { label: "Source", key: "source", width: 10 },
 ] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const cfaInvitationsExportColumns = [
+  { label: "date_invitation", key: "date_invitation", xlsxType: "date", width: 16 },
+  { label: "ml_nom", key: "ml_nom", width: 40 },
+  { label: "region_ml", key: "region_ml", width: 26 },
+  { label: "siret_CFA", key: "siret_cfa", xlsxType: "string", width: 18 },
+  { label: "raison_sociale_CFA", key: "raison_sociale_cfa", width: 40 },
+  { label: "region_cfa", key: "region_cfa", width: 26 },
+  { label: "nb_nouveaux_comptes_apres_CFA", key: "nb_nouveaux_comptes_apres_cfa", width: 30 },
+  { label: "date_derniere_connexion_CFA", key: "date_derniere_connexion_cfa", xlsxType: "date", width: 28 },
+  { label: "collab_apres_invitation_CFA", key: "collab_apres_invitation_cfa", width: 27 },
+  { label: "contacts_CFA_qui_ont_collaboré", key: "contacts_cfa_qui_ont_collabore", width: 45 },
+  { label: "nb_collab_apres_invitation_CFA", key: "nb_collab_apres_invitation_cfa", width: 30 },
+  { label: "date_premiere_collab_apres_CFA", key: "date_premiere_collab_apres_cfa", xlsxType: "date", width: 30 },
+  { label: "date_derniere_collab_CFA", key: "date_derniere_collab_cfa", xlsxType: "date", width: 25 },
+  { label: "Connexion_apres_invitation_CFA", key: "connexion_apres_invitation_cfa", width: 30 },
+  {
+    label: "date_premiere_connexion_apres_invitation_CFA",
+    key: "date_premiere_connexion_apres_invitation_cfa",
+    xlsxType: "date",
+    width: 44,
+  },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const cfaInvitationsChampsExportColumns = [
+  { label: "Champ", key: "champ", width: 44 },
+  { label: "Description", key: "description", width: 90 },
+  { label: "Format", key: "format", width: 40 },
+  { label: "Pourquoi", key: "pourquoi", width: 60 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
+const FORMAT_DATE = "Date (JJ/MM/AAAA)";
+
+export const cfaInvitationsChampsRows = [
+  {
+    champ: "Une ligne",
+    description:
+      "Une invitation envoyée par une Mission Locale à un CFA. Toutes les invitations sont exportées, y compris celles qui ont abouti à une collaboration.",
+    format: "",
+    pourquoi: "",
+  },
+  {
+    champ: "date_invitation",
+    description: "Date d'envoi de l'invitation par la ML",
+    format: FORMAT_DATE,
+    pourquoi: "Point de départ : tout ce qui suit est mesuré après cette date",
+  },
+  {
+    champ: "ml_nom",
+    description: "Nom de la Mission Locale",
+    format: "Texte",
+    pourquoi: "Identifier la ML qui invite",
+  },
+  {
+    champ: "region_ml",
+    description: "Région de la Mission Locale",
+    format: "Texte",
+    pourquoi: "Savoir si la ML est en région pilote",
+  },
+  {
+    champ: "siret_CFA",
+    description: "SIRET du CFA invité, tel qu'au moment de l'envoi",
+    format: "Texte, 14 chiffres (garder les zéros)",
+    pourquoi: "Identifier le CFA et croiser avec nos fichiers",
+  },
+  {
+    champ: "raison_sociale_CFA",
+    description: "Nom du CFA invité (nom d'usage, à défaut raison sociale)",
+    format: "Texte",
+    pourquoi: "Identifier le CFA de façon lisible",
+  },
+  {
+    champ: "region_cfa",
+    description: "Région du CFA invité",
+    format: "Texte",
+    pourquoi: "Savoir si le CFA est en région pilote",
+  },
+  {
+    champ: "nb_nouveaux_comptes_apres_CFA",
+    description: "Nombre de comptes utilisateurs créés sur ce CFA après la date d'invitation, validés ou en attente",
+    format: "Nombre entier",
+    pourquoi: "De nouveaux utilisateurs sont-ils créés ?",
+  },
+  {
+    champ: "date_derniere_connexion_CFA",
+    description: "Date de la dernière connexion d'un utilisateur de ce CFA, tous utilisateurs confondus",
+    format: FORMAT_DATE,
+    pourquoi: "Le CFA s'est-il reconnecté après l'invitation ?",
+  },
+  {
+    champ: "collab_apres_invitation_CFA",
+    description: "Le CFA a-t-il fait au moins une collaboration après la date d'invitation, avec n'importe quelle ML ?",
+    format: "Oui / Non",
+    pourquoi: "Y a-t-il au moins une collab après l'invitation ?",
+  },
+  {
+    champ: "contacts_CFA_qui_ont_collaboré",
+    description: "Emails des comptes du CFA ayant envoyé au moins une collaboration après la date d'invitation",
+    format: "Texte, emails séparés par « ; », vide si aucun",
+    pourquoi: "Savoir qui porte la collaboration au CFA",
+  },
+  {
+    champ: "nb_collab_apres_invitation_CFA",
+    description: "Nombre de collaborations faites par le CFA après la date d'invitation",
+    format: "Nombre entier",
+    pourquoi: "Quel volume de collabs est généré ?",
+  },
+  {
+    champ: "date_premiere_collab_apres_CFA",
+    description: "Date de la première collaboration après la date d'invitation",
+    format: `${FORMAT_DATE}, vide si aucune collab`,
+    pourquoi: "En combien de temps la première collab arrive-t-elle ?",
+  },
+  {
+    champ: "date_derniere_collab_CFA",
+    description: "Date de la dernière collaboration du CFA",
+    format: `${FORMAT_DATE}, vide si aucune collab`,
+    pourquoi: "La collaboration se poursuit-elle ?",
+  },
+  {
+    champ: "Connexion_apres_invitation_CFA",
+    description: "Le CFA s'est-il connecté au moins une fois après la date d'invitation ?",
+    format: "Oui / Non",
+    pourquoi: "Mesurer si l'invitation a été suivie d'une connexion au TBA",
+  },
+  {
+    champ: "date_premiere_connexion_apres_invitation_CFA",
+    description: "Date de la première connexion d'un utilisateur du CFA après la date d'invitation",
+    format: `${FORMAT_DATE}, vide si aucune connexion`,
+    pourquoi: "Mesurer le délai entre l'invitation et la première connexion du CFA",
+  },
+  {
+    champ: "Définition : connexion",
+    description:
+      "Authentification par mot de passe. Un utilisateur dont la session (7 jours) est encore ouverte arrive sur le TBA sans être recompté : la première connexion après l'invitation peut être datée jusqu'à 7 jours trop tard, voire manquer. Un CFA qui se connectait déjà régulièrement apparaît « Oui » sans que l'invitation en soit la cause.",
+    format: "",
+    pourquoi: "",
+  },
+  {
+    champ: "Définition : collaboration",
+    description:
+      "Dossier de jeune envoyé par le CFA à une Mission Locale, daté de son premier envoi, toutes ML confondues. Sont exclus les dossiers supprimés et ceux envoyés par l'équipe du Tableau de bord pour le compte du CFA.",
+    format: "",
+    pourquoi: "",
+  },
+];
