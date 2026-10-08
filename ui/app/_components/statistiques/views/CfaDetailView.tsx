@@ -12,6 +12,7 @@ import { formatDateCourte } from "../utils";
 import { AlertesActivite } from "./AlertesActivite";
 import styles from "./FicheDetailView.module.css";
 import { FicheEntete } from "./FicheEntete";
+import { CfaCollaborationsTab } from "./tabs/CfaCollaborationsTab";
 import { CfaEquipeTab } from "./tabs/CfaEquipeTab";
 import { CfaInfosTab } from "./tabs/CfaInfosTab";
 
@@ -133,5 +134,11 @@ function buildTabs(organismeId: string, data: ICfaFicheResponse, isAdmin: boolea
       content: <CfaEquipeTab organismeId={organismeId} isAdmin={isAdmin} />,
     });
   }
+  tabs.push({
+    id: "collaborations",
+    label: "Collaborations ML",
+    iconId: "fr-icon-links-line",
+    content: <CfaCollaborationsTab organismeId={organismeId} />,
+  });
   return tabs;
 }

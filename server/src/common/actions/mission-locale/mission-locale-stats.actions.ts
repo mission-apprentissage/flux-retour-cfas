@@ -744,7 +744,7 @@ const buildCountIf = (field: string, value: string) => ({
   $sum: { $cond: [{ $eq: [field, value] }, 1, 0] },
 });
 
-const DEFAULT_MOTIFS = {
+export const DEFAULT_MOTIFS = {
   mobilite: 0,
   logement: 0,
   sante: 0,
@@ -756,7 +756,7 @@ const DEFAULT_MOTIFS = {
   autre: 0,
 };
 
-const MOTIFS_PIPELINE = [
+export const MOTIFS_PIPELINE = [
   { $unwind: { path: "$organisme_data.motif", preserveNullAndEmptyArrays: true } },
   {
     $group: {
@@ -1022,17 +1022,24 @@ const listMonthKeys = (from: Date, to: Date) => {
 export async function getCollaborationMensuelStats(
   period: StatsPeriod = "30days",
   regions?: string[],
-  mlId?: string
+  mlId?: string,
+  organismeId?: ObjectId
 ): Promise<ICollaborationMensuelStats> {
   const now = new Date();
   const periodStart = await calculateStartDateAsync(period, normalizeToUTCDay(now));
-  const from = periodStart > COLLABORATION_CUTOFF_DATE ? periodStart : COLLABORATION_CUTOFF_DATE;
-  const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
+  // Fiche CFA : pas de sélecteur de période, l'évolution part de la date de début des collaborations.
+  const from = !organismeId && periodStart > COLLABORATION_CUTOFF_DATE ? periodStart : COLLABORATION_CUTOFF_DATE;
+  const missionLocaleIds = organismeId ? undefined : await resolveMissionLocaleIds(regions, mlId);
   const monthKeys = listMonthKeys(from, now);
 
   const rows = await missionLocaleEffectifsDb()
     .aggregate<ICollaborationMois>([
-      { $match: buildCollabMatch(now, missionLocaleIds) },
+      {
+        $match: {
+          ...buildCollabMatch(now, missionLocaleIds),
+          ...(organismeId ? { "effectif_snapshot.organisme_id": organismeId } : {}),
+        },
+      },
       {
         $addFields: {
           mois: {

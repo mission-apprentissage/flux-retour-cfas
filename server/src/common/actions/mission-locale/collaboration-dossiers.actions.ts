@@ -36,7 +36,7 @@ export interface CollaborationDossiersFilters {
   resultats?: CollabDossierResultat[];
 }
 
-const RESULTAT_SITUATIONS: Record<CollabDossierResultat, SITUATION_ENUM[]> = {
+export const RESULTAT_SITUATIONS: Record<CollabDossierResultat, SITUATION_ENUM[]> = {
   rdv_pris: [SITUATION_ENUM.RDV_PRIS],
   projet_pro_securise: [SITUATION_ENUM.NOUVEAU_PROJET, SITUATION_ENUM.NOUVEAU_CONTRAT],
   ne_souhaite_pas_accompagnement: [

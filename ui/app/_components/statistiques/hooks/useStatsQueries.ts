@@ -5,6 +5,9 @@ import type {
   CollabCfaOrigineSortBy,
   CollabDossierStatut,
   ICollabCfaOrigineResponse,
+  CfaCollabMlSortBy,
+  ICfaCollabMlResponse,
+  ICfaCollaborationStats,
   ICfaFiche,
   ICfaMembre,
   ICollaborationDossiersResponse,
@@ -276,6 +279,30 @@ export function useCfaMembres(organismeId: string) {
     queryKey: cfaMembresQueryKey(organismeId),
     queryFn: () => _get(`${INDICATEURS_ML_BASE}/cfa/${organismeId}/membres`),
     ...STATS_QUERY_CONFIG,
+  });
+}
+
+export function useCfaCollaborations(organismeId: string) {
+  return useQuery<ICfaCollaborationStats>({
+    queryKey: ["stats", "cfa-collaborations", organismeId] as const,
+    queryFn: () => _get(`${INDICATEURS_ML_BASE}/cfa/${organismeId}/collaborations`),
+    ...STATS_QUERY_CONFIG,
+  });
+}
+
+export interface CfaCollabMlParams {
+  organismeId: string;
+  page: number;
+  limit: number;
+  sort_by: CfaCollabMlSortBy;
+  sort_order: "asc" | "desc";
+}
+
+export function useCfaCollabMl({ organismeId, ...params }: CfaCollabMlParams) {
+  return useQuery<ICfaCollabMlResponse>({
+    queryKey: ["stats", "cfa-collab-ml", organismeId, params] as const,
+    queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/cfa/${organismeId}/collaborations/ml`, { params, signal }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }
 

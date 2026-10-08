@@ -1736,6 +1736,111 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(sansOrganisation.data).toEqual([]);
     });
 
+    describe("collaborations du CFA", () => {
+      const D_RDV_ARA = new ObjectId();
+      const ML_ARA_USER = new ObjectId();
+
+      beforeEach(async () => {
+        const dossier = (id: ObjectId, situation: string, extra: Record<string, unknown> = {}) => ({
+          ...buildCollabDossier(ML_ARA, CFA_A, ["MOBILITE"]),
+          _id: id,
+          situation,
+          ...extra,
+        });
+        await missionLocaleEffectifsDb().insertMany(
+          [
+            dossier(D_RDV_ARA, "RDV_PRIS", { deja_connu: true }),
+            dossier(new ObjectId(), "CONTACTE_SANS_RETOUR"),
+          ] as never[],
+          { bypassDocumentValidation: true }
+        );
+        await usersMigrationDb().insertOne(
+          {
+            _id: ML_ARA_USER,
+            email: "conseiller@example.com",
+            organisation_id: ML_ARA,
+            account_status: "CONFIRMED",
+          } as never,
+          { bypassDocumentValidation: true }
+        );
+        await missionLocaleEffectifsLogDb().insertOne(
+          {
+            _id: new ObjectId(),
+            mission_locale_effectif_id: D_RDV_ARA,
+            created_at: new Date("2026-03-15"),
+            created_by: ML_ARA_USER,
+            read_by: [],
+          } as never,
+          { bypassDocumentValidation: true }
+        );
+      });
+
+      it("Calcule les indicateurs, résultats, situations, objectifs et l'évolution mensuelle du CFA", async () => {
+        const response = await requestAsOrganisation(
+          DREETS_IDF,
+          "get",
+          `/api/v1/organisation/indicateurs-ml/cfa/${CFA_A}/collaborations`
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.data).toMatchObject({
+          envoyes: 4,
+          contactes: 2,
+          acceptes: 1,
+          resultats: { rdv_pris: { current: 1 }, a_recontacter: { current: 1 }, total: 2 },
+          part_deja_connus: 50,
+          delai_moyen_jours: 5,
+          situations: { rupture: 4, total: 4 },
+          objectifs: { mobilite: 4, logement: 1, total_dossiers: 4 },
+          nps: { nps: null, total_reponses: 0 },
+        });
+        expect(response.data.mensuel.find((mois: { mois: string }) => mois.mois === "2026-03")).toEqual({
+          mois: "2026-03",
+          envoyes: 4,
+          contactes: 2,
+          acceptes: 1,
+        });
+      });
+
+      it("Répartit les collaborations par Mission Locale destinataire, y compris hors région", async () => {
+        const response = await requestAsOrganisation(
+          DREETS_IDF,
+          "get",
+          `/api/v1/organisation/indicateurs-ml/cfa/${CFA_A}/collaborations/ml?sort_by=traitees`
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.data.total).toBe(2);
+        expect(response.data.data).toEqual([
+          expect.objectContaining({
+            mission_locale_id: ML_ARA.toString(),
+            nom: "ML ARA",
+            dans_perimetre: false,
+            utilise_service: true,
+            envoyees: 2,
+            a_traiter: 0,
+            a_recontacter: 1,
+            traitees: 1,
+          }),
+          expect.objectContaining({
+            mission_locale_id: ML_IDF.toString(),
+            dans_perimetre: true,
+            envoyees: 2,
+            a_traiter: 2,
+            traitees: 0,
+          }),
+        ]);
+        expectForbidden(
+          await requestAsOrganisation(
+            DREETS_IDF,
+            "get",
+            `/api/v1/organisation/indicateurs-ml/cfa/${CFA_B}/collaborations`
+          ),
+          "Accès non autorisé à cet organisme"
+        );
+      });
+    });
+
     it("Masque le nominatif à l'ARML et à la DDETS hors de son département, refuse hors région", async () => {
       const arml = await requestAsOrganisation(ARML_IDF, "get", url(CFA_A));
       expect(arml.status).toBe(200);

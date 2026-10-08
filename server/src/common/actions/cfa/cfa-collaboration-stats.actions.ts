@@ -25,6 +25,10 @@ const findTerritoireOrganismes = (territoire: CfaTerritoire) =>
  */
 export async function getCfaNpsStats(territoire: CfaTerritoire): Promise<ICfaNpsStats> {
   const organismeIds = (await findTerritoireOrganismes(territoire)).map((organisme) => organisme._id);
+  return getNpsStatsForOrganismes(organismeIds);
+}
+
+export async function getNpsStatsForOrganismes(organismeIds: ObjectId[]): Promise<ICfaNpsStats> {
   if (organismeIds.length === 0) return { nps: null, total_reponses: 0, utilisateurs: 0, cfa: 0 };
 
   const [result] = await missionLocaleEffectifsDb()

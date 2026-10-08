@@ -98,3 +98,32 @@
     border-left: 0;
   }
 }
+
+.kpis3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.satisfaction {
+  max-width: 480px;
+}
+
+.sousTitre {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 16px;
+  font-size: 1rem;
+}
+
+.encarts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .kpis3,
+  .encarts {
+    grid-template-columns: 1fr;
+  }
+}

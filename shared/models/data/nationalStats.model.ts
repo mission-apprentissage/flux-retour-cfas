@@ -629,3 +629,38 @@ export interface ICfaMembre {
   activation_at: Date | null;
   invitation_statut: "envoyee" | "expiree" | null;
 }
+
+export interface ICfaCollaborationStats {
+  envoyes: number;
+  contactes: number;
+  acceptes: number;
+  resultats: IDetailsDossiersTraitesV2;
+  part_deja_connus: number;
+  delai_moyen_jours: number | null;
+  situations: ICollabSituations;
+  objectifs: ICollaborationObjectifs & { total_dossiers: number };
+  nps: ICfaNpsStats;
+  mensuel: ICollaborationMensuelStats["mois"];
+}
+
+export const CFA_COLLAB_ML_SORT_BY = ["envoyees", "a_traiter", "traitees", "nom"] as const;
+export type CfaCollabMlSortBy = (typeof CFA_COLLAB_ML_SORT_BY)[number];
+
+export interface ICfaCollabMlRow {
+  mission_locale_id: string;
+  nom: string | null;
+  code_postal: string | null;
+  commune: string | null;
+  utilise_service: boolean;
+  dans_perimetre: boolean;
+  envoyees: number;
+  a_traiter: number;
+  a_recontacter: number;
+  traitees: number;
+}
+
+export interface ICfaCollabMlResponse {
+  total: number;
+  pagination: { page: number; limit: number; total_pages: number };
+  data: ICfaCollabMlRow[];
+}

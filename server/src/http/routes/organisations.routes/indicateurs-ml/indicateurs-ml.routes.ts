@@ -5,6 +5,7 @@ import { ORGANISATION_TYPE } from "shared/constants";
 import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import {
+  CFA_COLLAB_ML_SORT_BY,
   COLLAB_CFA_ORIGINE_SORT_BY,
   COLLAB_DOSSIER_DELAIS,
   COLLAB_DOSSIER_RESULTATS,
@@ -29,6 +30,7 @@ import {
   getMissionLocaleMembers,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getCfaNpsStats, listCfaInjoignables } from "@/common/actions/cfa/cfa-collaboration-stats.actions";
+import { getCfaCollaborationStats, listCfaCollaborationsParMl } from "@/common/actions/cfa/cfa-collaborations.actions";
 import { getCfaFiche, getCfaMembres } from "@/common/actions/cfa/cfa-fiche.actions";
 import { getCfaAdoptionStats, listCfaEtablissements } from "@/common/actions/cfa/cfa-stats.actions";
 import { listCollaborationsCfaOrigine } from "@/common/actions/mission-locale/collaboration-cfa-origine.actions";
@@ -184,6 +186,12 @@ const exportQuery = z.object({
 });
 const mlIdParams = z.object({ id: mlIdSchema });
 const organismeIdParams = z.object({ id: mlIdSchema });
+const cfaCollabMlQuery = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+  sort_by: z.enum(CFA_COLLAB_ML_SORT_BY).default("envoyees"),
+  sort_order: z.enum(["asc", "desc"]).default("desc"),
+});
 
 type IndicateursHandler<TQuery = DefaultQuery, TParams = DefaultParams> = RouteHandler<
   IndicateursMlLocals,
@@ -315,6 +323,16 @@ export default () => {
     "/cfa/:id/detail",
     validateRequestMiddleware({ params: organismeIdParams }),
     returnResult(getCfaDetailRoute)
+  );
+  router.get(
+    "/cfa/:id/collaborations",
+    validateRequestMiddleware({ params: organismeIdParams }),
+    returnResult(getCfaCollaborationsRoute)
+  );
+  router.get(
+    "/cfa/:id/collaborations/ml",
+    validateRequestMiddleware({ params: organismeIdParams, query: cfaCollabMlQuery }),
+    returnResult(getCfaCollaborationsMlRoute)
   );
   router.get(
     "/cfa/:id/membres",
@@ -706,6 +724,22 @@ const getCfaDetailRoute: IndicateursHandler<DefaultQuery, z.infer<typeof organis
 ) => {
   const { nominatif } = await verifyOrganismeInScope(req.params.id, locals);
   return getCfaFiche(new ObjectId(req.params.id), { nominatif });
+};
+
+const getCfaCollaborationsRoute: IndicateursHandler<DefaultQuery, z.infer<typeof organismeIdParams>> = async (
+  req,
+  { locals }
+) => {
+  await verifyOrganismeInScope(req.params.id, locals);
+  return getCfaCollaborationStats(new ObjectId(req.params.id));
+};
+
+const getCfaCollaborationsMlRoute: IndicateursHandler<
+  z.infer<typeof cfaCollabMlQuery>,
+  z.infer<typeof organismeIdParams>
+> = async (req, { locals }) => {
+  await verifyOrganismeInScope(req.params.id, locals);
+  return listCfaCollaborationsParMl(new ObjectId(req.params.id), locals.regions, req.query);
 };
 
 const getCfaMembresRoute: IndicateursHandler<DefaultQuery, z.infer<typeof organismeIdParams>> = async (
