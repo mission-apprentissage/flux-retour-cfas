@@ -241,7 +241,7 @@ export async function batchInviteUsersToOrganisation(
       if (sameOrg) {
         results.errors.push({
           email,
-          message: "Cet utilisateur est déjà membre de votre organisation",
+          message: "Cet utilisateur est déjà membre de cette organisation",
         });
       } else {
         const existingOrg = await getOrganisationById(existingUser.organisation_id);

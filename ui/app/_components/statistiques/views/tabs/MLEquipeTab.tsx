@@ -1,5 +1,7 @@
 "use client";
 
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import { useQueryClient } from "@tanstack/react-query";
@@ -9,6 +11,7 @@ import { useState } from "react";
 
 import { DropdownMenu, DropdownMenuButton, DropdownMenuLink } from "@/app/_components/common/DropdownMenu";
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
+import InvitationSidePanel from "@/app/_components/roles-habilitations/InvitationSidePanel";
 import { _delete } from "@/common/httpClient";
 
 import {
@@ -57,6 +60,8 @@ export function MLEquipeTab({ mlId, isAdmin = false }: MLEquipeTabProps) {
   const queryClient = useQueryClient();
   const [membreASupprimer, setMembreASupprimer] = useState<IMissionLocaleMemberResponse | null>(null);
   const [suppressionErreur, setSuppressionErreur] = useState<string | null>(null);
+  const [invitationOuverte, setInvitationOuverte] = useState(false);
+  const [invitationMessage, setInvitationMessage] = useState<string | null>(null);
 
   useIsModalOpen(supprimerMembreModal, {
     onConceal: () => setMembreASupprimer(null),
@@ -93,6 +98,34 @@ export function MLEquipeTab({ mlId, isAdmin = false }: MLEquipeTabProps) {
         Retrouvez ici les utilisateurs du Tableau de bord dans cette Mission Locale. Cette liste d&apos;équipe ne
         représente pas l&apos;ensemble de l&apos;équipe pédagogique et opérationnelle de la Mission Locale.
       </p>
+
+      {isAdmin && (
+        <div className={styles.barreActions}>
+          <Button
+            priority="secondary"
+            iconId="fr-icon-user-add-line"
+            iconPosition="right"
+            onClick={() => {
+              setInvitationMessage(null);
+              setInvitationOuverte(true);
+            }}
+          >
+            Inviter un utilisateur
+          </Button>
+        </div>
+      )}
+
+      {invitationMessage && (
+        <Alert
+          severity="success"
+          title={invitationMessage}
+          description="Les personnes invitées apparaîtront dans l'équipe une fois leur compte activé."
+          small
+          closable
+          onClose={() => setInvitationMessage(null)}
+          className="fr-mb-2w"
+        />
+      )}
 
       {suppressionErreur && (
         <div className="fr-alert fr-alert--error fr-alert--sm fr-mb-2w" role="alert">
@@ -189,6 +222,20 @@ export function MLEquipeTab({ mlId, isAdmin = false }: MLEquipeTabProps) {
           </div>
         )}
       </StatsErrorHandler>
+
+      {isAdmin && (
+        <InvitationSidePanel
+          isOpen={invitationOuverte}
+          onClose={() => setInvitationOuverte(false)}
+          onSuccess={(message) => {
+            if (message) setInvitationMessage(message);
+          }}
+          endpoint={`/api/v1/admin/mission-locale/${mlId}/membres/invitations`}
+          withRoles={false}
+          submitLabel="Inviter ces utilisateurs"
+          submitIconId="fr-icon-send-plane-fill"
+        />
+      )}
 
       {isAdmin && (
         <supprimerMembreModal.Component

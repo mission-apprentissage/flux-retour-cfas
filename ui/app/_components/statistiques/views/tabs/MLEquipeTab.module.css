@@ -11,6 +11,12 @@
   color: var(--text-mention-grey);
 }
 
+.barreActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+}
+
 .table:global(.fr-table) {
   width: 100%;
   margin-bottom: 0;
