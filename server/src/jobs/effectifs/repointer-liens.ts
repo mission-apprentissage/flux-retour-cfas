@@ -2,6 +2,7 @@ import type { ObjectId } from "mongodb";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 
 import { getCurrentAndNextStatus } from "@/common/actions/effectifs.statut.actions";
+import { computedOrganismeMl } from "@/common/actions/mission-locale/mission-locale-record.actions";
 import { migrateMlRecordEffectifId } from "@/common/actions/mission-locale/mission-locale.actions";
 import { franceTravailEffectifsDb, missionLocaleEffectifsDb, voeuxAffelnetDb } from "@/common/model/collections";
 
@@ -25,9 +26,13 @@ async function repointerDossiersMl(ficheId: ObjectId, jumeau: IEffectif, resulta
   const dossiers = await missionLocaleEffectifsDb()
     .find({ effectif_id: ficheId, soft_deleted: { $ne: true } })
     .toArray();
+  if (dossiers.length === 0) {
+    return;
+  }
+  const extraSet = { "computed.organisme": await computedOrganismeMl(jumeau.organisme_id) };
 
   for (const dossier of dossiers) {
-    const { keeperId, skipped } = await migrateMlRecordEffectifId(dossier._id, ficheId, jumeau);
+    const { keeperId, skipped } = await migrateMlRecordEffectifId(dossier._id, ficheId, jumeau, { extraSet });
     if (skipped) {
       resultat.ml.refuses++;
       continue;

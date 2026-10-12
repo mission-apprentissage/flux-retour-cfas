@@ -144,9 +144,39 @@ describe("repointerLiensVersJumeau", () => {
     expect(migre?.soft_deleted).toBeFalsy();
   });
 
+  it("aligne le mode de visibilité du dossier ML sur le CFA du jumeau", async () => {
+    const activation = new Date("2026-05-01T00:00:00Z");
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        type: "ORGANISME_FORMATION",
+        organisme_id: recent._id.toString(),
+        siret: recent.siret,
+        uai: recent.uai,
+        ml_beta_activated_at: activation,
+        created_at: NOW,
+      })
+    );
+    await organismesDb().updateOne({ _id: recent._id }, { $set: { is_allowed_collab: true } });
+    const dossier = await insererDossierMl(fiche, {
+      computed: {
+        organisme: {
+          ml_beta_activated_at: null,
+          is_allowed_collab: false,
+          collab_suspended_at: new Date("2026-06-01T00:00:00Z"),
+        },
+      },
+    });
+
+    await repointerLiensVersJumeau(fiche._id, jumeau);
+
+    const migre = await missionLocaleEffectifsDb().findOne({ _id: dossier._id });
+    expect(migre?.computed?.organisme).toEqual({ ml_beta_activated_at: activation, is_allowed_collab: true });
+  });
+
   it("fusionne le dossier ML dans celui du jumeau, ré-attache les logs et soft-delete l'ancien", async () => {
     const dossier = await insererDossierMl(fiche, { situation: SITUATION_ENUM.RDV_PRIS });
     const dossierJumeau = await insererDossierMl(jumeau);
+    await organismesDb().updateOne({ _id: recent._id }, { $set: { is_allowed_collab: true } });
     await missionLocaleEffectifsLogDb().insertOne(
       testDoc<IMissionLocaleEffectifLog>({
         mission_locale_effectif_id: dossier._id,
@@ -163,6 +193,7 @@ describe("repointerLiensVersJumeau", () => {
     const keeper = await missionLocaleEffectifsDb().findOne({ _id: dossierJumeau._id });
     expect(keeper?.effectif_id).toEqual(jumeau._id);
     expect(keeper?.situation).toBe(SITUATION_ENUM.RDV_PRIS);
+    expect(keeper?.computed?.organisme).toMatchObject({ is_allowed_collab: true });
     expect((await missionLocaleEffectifsLogDb().findOne({}))?.mission_locale_effectif_id).toEqual(dossierJumeau._id);
   });
 

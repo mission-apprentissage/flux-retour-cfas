@@ -49,6 +49,20 @@ export async function resolveCfaEffectif(
   throw Boom.notFound("Effectif non trouvé");
 }
 
+export async function computedOrganismeMl(organismeId: ObjectId): Promise<Record<string, unknown>> {
+  const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
+  const organisme = await organismesDb().findOne(
+    { _id: organismeId },
+    { projection: { is_allowed_collab: 1, collab_suspended_at: 1, collab_resumed_at: 1 } }
+  );
+  return {
+    ml_beta_activated_at: organisation?.ml_beta_activated_at ?? null,
+    is_allowed_collab: organisme?.is_allowed_collab ?? false,
+    ...(organisme?.collab_suspended_at ? { collab_suspended_at: organisme.collab_suspended_at } : {}),
+    ...(organisme?.collab_resumed_at ? { collab_resumed_at: organisme.collab_resumed_at } : {}),
+  };
+}
+
 export interface IEnsureMissionLocaleEffectifRecordResult {
   recordId: ObjectId | null;
   created: boolean;
@@ -269,12 +283,6 @@ export async function ensureMissionLocaleEffectifRecord(
     return { recordId: softDeletedRecord._id, created: false };
   }
 
-  const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
-  const organisme = await organismesDb().findOne(
-    { _id: organismeId },
-    { projection: { is_allowed_collab: 1, collab_suspended_at: 1, collab_resumed_at: 1 } }
-  );
-
   const document: Record<string, unknown> = {
     mission_locale_id: mlOrganisation._id,
     effectif_id: newEffectifId,
@@ -287,12 +295,7 @@ export async function ensureMissionLocaleEffectifRecord(
       date: currentStatus?.date ?? null,
     },
     computed: {
-      organisme: {
-        ml_beta_activated_at: organisation?.ml_beta_activated_at ?? null,
-        is_allowed_collab: organisme?.is_allowed_collab ?? false,
-        ...(organisme?.collab_suspended_at ? { collab_suspended_at: organisme.collab_suspended_at } : {}),
-        ...(organisme?.collab_resumed_at ? { collab_resumed_at: organisme.collab_resumed_at } : {}),
-      },
+      organisme: await computedOrganismeMl(organismeId),
       ...(mlOrganisation.activated_at ? { mission_locale: { activated_at: mlOrganisation.activated_at } } : {}),
     },
     organisme_data: {
