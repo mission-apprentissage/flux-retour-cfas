@@ -6,9 +6,6 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CfaEtablissementsSortBy } from "shared/models/data/nationalStats.model";
 
-import { useAuth } from "@/app/_context/UserContext";
-import { isAdminUser } from "@/app/suivi-des-indicateurs/access";
-
 import { OverviewCard } from "../cards/OverviewCard";
 import { useCfaEtablissementsExport } from "../hooks/useCfaEtablissementsExport";
 import { useCfaTableFilters } from "../hooks/useCfaTableFilters";
@@ -17,6 +14,7 @@ import { useStatsFilters } from "../hooks/useStatsFilters";
 import type { CfaEtablissementsParams } from "../hooks/useStatsQueries";
 import { CfaEtablissementsTable } from "../tables/CfaEtablissementsTable";
 import { ChecklistFilter } from "../ui/ChecklistFilter";
+import { NotePerimetre } from "../ui/NotePerimetre";
 import { fromChecklist, OUI_NON, toChecklist, withChoice } from "../ui/ouiNonFilter";
 import { TerritoireFilter, useSelectedDepartements } from "../ui/TerritoireFilter";
 
@@ -35,7 +33,7 @@ const COLLABORATION_OPTIONS = [
 ];
 
 export function CfaEtablissementsCard() {
-  const { region, territoireOptions } = useStatsFilters();
+  const { region } = useStatsFilters();
   const { filters, setDepartements, setNatures, setUtilisateur, setQualiopi, setCollabActive } = useCfaTableFilters();
   const selectedDepartements = useSelectedDepartements(filters.departements);
   const [searchInput, setSearchInput] = useState("");
@@ -46,11 +44,6 @@ export function CfaEtablissementsCard() {
     "desc",
     { columnDefaultDirections: { nom: "asc", localisation: "asc" } }
   );
-  const { user } = useAuth();
-  const limitedTo =
-    !region && !isAdminUser(user ?? null)
-      ? territoireOptions.filter((option) => option.value !== "france").map((option) => option.label)
-      : [];
 
   useEffect(() => {
     const timer = setTimeout(() => setSearch(searchInput.trim()), 300);
@@ -119,9 +112,7 @@ export function CfaEtablissementsCard() {
         }}
         className={styles.search}
       />
-      {limitedTo.length > 0 && (
-        <p className={styles.scopeNote}>Liste limitée à votre territoire : {limitedTo.join(", ")}.</p>
-      )}
+      <NotePerimetre />
       <div className={styles.filters}>
         <span className={styles.filtersLabel}>Filtrer</span>
         <TerritoireFilter departements={filters.departements} onChange={setDepartements} />

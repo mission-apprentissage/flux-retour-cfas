@@ -30,6 +30,7 @@ import {
 import { StatsTablePagination } from "../tables/StatsTablePagination";
 import { ChecklistFilter } from "../ui/ChecklistFilter";
 import { DateRangeFilter } from "../ui/DateRangeFilter";
+import { NotePerimetre } from "../ui/NotePerimetre";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 import { TerritoireFilter, useSelectedDepartements } from "../ui/TerritoireFilter";
 
@@ -166,6 +167,15 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
         }}
         className={filterStyles.search}
       />
+      {!mlId && !cfaId && (
+        <NotePerimetre
+          territoire={
+            isDdets
+              ? `département ${(user?.organisation as { code_departement?: string } | undefined)?.code_departement ?? ""}`
+              : undefined
+          }
+        />
+      )}
       <div className={filterStyles.filters}>
         <span className={filterStyles.filtersLabel}>Filtrer</span>
         <DateRangeFilter

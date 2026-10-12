@@ -18,11 +18,16 @@ import styles from "./CfaEtablissementsTable.module.css";
 import { SortableTableHeader } from "./SortableTableHeader";
 import { StatsTablePagination } from "./StatsTablePagination";
 
-const COLUMNS: Array<{ column: CfaEtablissementsSortBy; label: string; centered?: boolean }> = [
+const COLUMNS: Array<{ column: CfaEtablissementsSortBy; label: string; centered?: boolean; tooltip?: string }> = [
   { column: "nom", label: "Raison sociale" },
   { column: "localisation", label: "Localisation" },
   { column: "compte", label: "Compte TBA ?", centered: true },
-  { column: "collaborations", label: "Collaborations", centered: true },
+  {
+    column: "collaborations",
+    label: "Collaborations",
+    centered: true,
+    tooltip: "Dossiers envoyés par le CFA aux Missions Locales depuis le 1er janvier 2026.",
+  },
   { column: "activite", label: "Activité", centered: true },
 ];
 
@@ -79,7 +84,7 @@ export function CfaEtablissementsTable({
           <>
             <div className={styles.table}>
               <Table
-                headers={COLUMNS.map(({ column, label, centered }) => (
+                headers={COLUMNS.map(({ column, label, centered, tooltip }) => (
                   <SortableTableHeader
                     key={column}
                     column={column}
@@ -88,6 +93,7 @@ export function CfaEtablissementsTable({
                     sortDirection={params.sort_order}
                     onSort={onSort}
                     centered={centered}
+                    tooltip={tooltip}
                   />
                 ))}
                 data={rows.map((row) => [
