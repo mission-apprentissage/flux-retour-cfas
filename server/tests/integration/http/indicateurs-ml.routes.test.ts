@@ -955,7 +955,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
     const monthKey = (date: Date) =>
       new Intl.DateTimeFormat("fr-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit" }).format(date);
 
-    it("Regroupe par mois d'envoi les dossiers envoyés, contactés et acceptés du territoire", async () => {
+    it("Regroupe par mois d'envoi les dossiers envoyés, contactés et acceptés du territoire, quel que soit l'âge actuel du jeune", async () => {
       const now = new Date();
       const ceMois = new Date(now.getTime() - 60_000);
       const moisDernier = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 11));
@@ -973,6 +973,12 @@ describe("Indicateurs ML routes (territoriales)", () => {
           dossier(moisDernier, "RDV_PRIS"),
           dossier(moisDernier, "CONTACTE_SANS_RETOUR"),
           dossier(moisDernier, null),
+          dossier(moisDernier, null, {
+            effectif_snapshot: {
+              organisme_id: CFA_A,
+              apprenant: { date_de_naissance: new Date(now.getFullYear() - 30, 0, 1) },
+            },
+          }),
           dossier(ceMois, null),
           dossier(ceMois, "RDV_PRIS", { soft_deleted: true }),
         ] as never[],
@@ -987,7 +993,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(mois[mois.length - 1].mois).toBe(monthKey(now));
       expect(mois.find((row) => row.mois === monthKey(moisDernier))).toEqual({
         mois: monthKey(moisDernier),
-        envoyes: 3,
+        envoyes: 4,
         contactes: 2,
         acceptes: 1,
       });

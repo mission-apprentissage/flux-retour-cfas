@@ -905,16 +905,12 @@ export async function getDossiersTraitesStats(
   };
 }
 
-const buildCollabMatch = (date: Date, missionLocaleIds?: ObjectId[]) => {
-  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
-  return {
-    "organisme_data.acc_conjoint": true,
-    "organisme_data.acc_conjoint_at": { $lte: date },
-    "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
-    soft_deleted: { $ne: true },
-    ...(missionLocaleIds ? { mission_locale_id: { $in: missionLocaleIds } } : {}),
-  };
-};
+const buildCollabMatch = (date: Date, missionLocaleIds?: ObjectId[]) => ({
+  "organisme_data.acc_conjoint": true,
+  "organisme_data.acc_conjoint_at": { $lte: date },
+  soft_deleted: { $ne: true },
+  ...(missionLocaleIds ? { mission_locale_id: { $in: missionLocaleIds } } : {}),
+});
 
 export async function getCollaborationSegmentStats(
   period: StatsPeriod = "30days",
@@ -924,7 +920,11 @@ export async function getCollaborationSegmentStats(
   const evaluationDate = normalizeToUTCDay(new Date());
   const startDate = await calculateStartDateAsync(period, evaluationDate);
   const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
-  const collabMatch = (date: Date) => buildCollabMatch(date, missionLocaleIds);
+  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
+  const collabMatch = (date: Date) => ({
+    ...buildCollabMatch(date, missionLocaleIds),
+    "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
+  });
 
   const countCfaAyantCollabore = async (date: Date) =>
     (await missionLocaleEffectifsDb().distinct("effectif_snapshot.organisme_id", collabMatch(date))).length;
