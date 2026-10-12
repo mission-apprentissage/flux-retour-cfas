@@ -23,6 +23,7 @@ import {
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
 import { createFranceTravailEffectifSnapshot } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
+import { findOrganismeFormateursIds, findOrganismeResponsablesIds } from "@/common/actions/helpers/permissions";
 import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   findOrganismeByUaiAndSiret,
@@ -535,10 +536,10 @@ const createOrUpdateEffectif = async (
   }
 };
 
-const relationsIds = (organisme: Pick<IOrganisme, "organismesFormateurs" | "organismesResponsables">) =>
-  [...(organisme.organismesFormateurs ?? []), ...(organisme.organismesResponsables ?? [])].flatMap((relation) =>
-    relation._id ? [relation._id] : []
-  );
+const relationsIds = (organisme: IOrganisme) => [
+  ...findOrganismeFormateursIds(organisme, true),
+  ...findOrganismeResponsablesIds(organisme),
+];
 
 async function surclasserParTransmetteur(
   siret: string,
