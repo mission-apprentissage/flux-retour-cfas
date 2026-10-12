@@ -4,7 +4,7 @@ import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
 import { scoreExistingEffectifs } from "../classifier/score-effectifs";
 import { updateComputedFields } from "../computed/update-computed";
-import { traiterDoublonsObsoletes } from "../effectifs/doublons-obsoletes";
+import { SEUIL_JOURS_DEFAUT, traiterDoublonsObsoletes } from "../effectifs/doublons-obsoletes";
 import {
   hydrateEffectifsComputedTypesGenerique,
   hydratePreviousYearMissionLocaleEffectifStatut,
@@ -79,10 +79,15 @@ export const effectifsJobs = {
   },
   "effectifs:doublons-obsoletes": {
     handler: async (job) => {
-      return traiterDoublonsObsoletes({
-        seuilJours: payloadNumber(job.payload, "seuilJours"),
-        appliquer: payloadBoolean(job.payload, "appliquer"),
-      });
+      const seuilJours = payloadNumber(job.payload, "seuilJours");
+      const appliquer = payloadBoolean(job.payload, "appliquer");
+      if (seuilJours !== undefined && !(Number.isInteger(seuilJours) && seuilJours >= 0)) {
+        throw new Error(`Seuil invalide : ${seuilJours}`);
+      }
+      if (appliquer && seuilJours !== undefined && seuilJours < SEUIL_JOURS_DEFAUT) {
+        throw new Error(`Seuil de ${seuilJours} jours refusé avec --appliquer : minimum ${SEUIL_JOURS_DEFAUT} jours`);
+      }
+      return traiterDoublonsObsoletes({ seuilJours, appliquer });
     },
   },
 } satisfies Record<string, JobDef>;
