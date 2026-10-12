@@ -267,6 +267,19 @@ export const cfaInvitesSansCollabExportColumns = [
   { label: "Dernière invitation", key: "derniere_invitation_at", xlsxType: "date", width: 18 },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
+export const mlAlertesExportColumns = [
+  { label: "Mission Locale", key: "nom", width: 45 },
+  { label: "Code postal", key: "code_postal", xlsxType: "string", width: 12 },
+  { label: "Commune", key: "commune", width: 25 },
+  { label: "Utilise le service", key: "utilise_service", width: 16 },
+  { label: "Total dossiers", key: "total_jeunes", width: 14 },
+  { label: "À traiter", key: "a_traiter", width: 12 },
+  { label: "À recontacter", key: "a_recontacter", width: 14 },
+  { label: "Traités (%)", key: "pourcentage_traites", width: 12 },
+  { label: "Délai moyen (jours)", key: "delai_moyen_jours", width: 18 },
+  { label: "Jours depuis la dernière activité", key: "jours_depuis_activite", width: 28 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
 export const cfaInjoignablesExportColumns = [
   { label: "Raison sociale", key: "nom", width: 45 },
   { label: "UAI", key: "uai", xlsxType: "string", width: 12 },

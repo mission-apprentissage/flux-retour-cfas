@@ -32,6 +32,9 @@ import type {
   IWhatsAppStats,
   StatsSegment,
   TraitementMlSortBy,
+  IMlAlerteListeResponse,
+  MlAlerteListeSortBy,
+  MlAlerteListeType,
 } from "shared/models/data/nationalStats.model";
 import { RECHERCHE_LONGUEUR_MIN } from "shared/models/data/nationalStats.model";
 import type {
@@ -351,6 +354,20 @@ export function useCfaInjoignablesStats(params: CfaInjoignablesParams & { page: 
   }>({
     queryKey: ["stats", "cfa-injoignables", params] as const,
     queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/stats/cfa/injoignables`, { params, signal }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+export interface MlAlertesParams {
+  region?: string;
+  sort_by: MlAlerteListeSortBy;
+  sort_order: "asc" | "desc";
+}
+
+export function useMlAlertes(type: MlAlerteListeType, params: MlAlertesParams & { page: number; limit: number }) {
+  return useQuery<IMlAlerteListeResponse>({
+    queryKey: ["stats", "ml-alertes", type, params] as const,
+    queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/stats/ml/alertes/${type}`, { params, signal }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }

@@ -15,10 +15,9 @@ import { useCfaInjoignablesStats, useCfaInvitesSansCollabStats } from "../hooks/
 import { Localisation } from "../tables/CfaEtablissementsTable";
 import tableStyles from "../tables/CfaEtablissementsTable.module.css";
 import { SortableTableHeader } from "../tables/SortableTableHeader";
-import { NotePerimetre } from "../ui/NotePerimetre";
 import { ficheCfaUrl } from "../utils";
 
-import { AlerteCard } from "./AlerteCard";
+import { AlerteCard, AlertesSection } from "./AlerteCard";
 import styles from "./CfaAlertesSection.module.css";
 
 function sortableHeaders<T extends string>(
@@ -173,14 +172,9 @@ function CfaInjoignablesAlerte() {
 
 export function CfaAlertesSection({ injoignables = false }: { injoignables?: boolean }) {
   return (
-    <section className={styles.section}>
-      <h3 className={styles.sectionTitle}>
-        <span className={`fr-icon-error-warning-line ${styles.sectionIcon}`} aria-hidden="true" />
-        Les alertes à surveiller
-      </h3>
-      <NotePerimetre />
+    <AlertesSection>
       <CfaInvitesAlerte />
       {injoignables && <CfaInjoignablesAlerte />}
-    </section>
+    </AlertesSection>
   );
 }

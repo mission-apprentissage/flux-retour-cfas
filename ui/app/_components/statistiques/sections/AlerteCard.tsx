@@ -10,6 +10,7 @@ import { TableSkeleton } from "@/app/_components/common/Skeleton";
 import type { useStatsXlsxExport } from "../hooks/useStatsXlsxExport";
 import tableStyles from "../tables/CfaEtablissementsTable.module.css";
 import { StatsTablePagination } from "../tables/StatsTablePagination";
+import { NotePerimetre } from "../ui/NotePerimetre";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import styles from "./CfaAlertesSection.module.css";
@@ -25,6 +26,23 @@ interface AlerteCardProps {
   onPageChange: (page: number) => void;
   limit: number;
   onLimitChange: (limit: number) => void;
+  unite?: string;
+  libellePagination?: string;
+  tableClassName?: string;
+}
+
+/** Bloc « Les alertes à surveiller » qui regroupe les cartes d'alerte d'un onglet. */
+export function AlertesSection({ children }: { children: React.ReactNode }) {
+  return (
+    <section className={styles.section}>
+      <h3 className={styles.sectionTitle}>
+        <span className={`fr-icon-error-warning-line ${styles.sectionIcon}`} aria-hidden="true" />
+        Les alertes à surveiller
+      </h3>
+      <NotePerimetre />
+      {children}
+    </section>
+  );
 }
 
 /** Alerte repliable : compteur, export et tableau paginé, affiché au clic sur « Voir ». */
@@ -39,6 +57,9 @@ export function AlerteCard({
   onPageChange,
   limit,
   onLimitChange,
+  unite = "CFA",
+  libellePagination = "CFA en alerte",
+  tableClassName,
 }: AlerteCardProps) {
   const [expanded, setExpanded] = useState(false);
   const { data, isLoading, error } = query;
@@ -51,7 +72,7 @@ export function AlerteCard({
           <span>{title}</span>
         </h4>
         <div className={styles.actions}>
-          {data && <span className={styles.count}>{data.total.toLocaleString("fr-FR")} CFA</span>}
+          {data && <span className={styles.count}>{`${data.total.toLocaleString("fr-FR")} ${unite}`}</span>}
           <Button
             iconId="fr-icon-download-line"
             iconPosition="right"
@@ -89,7 +110,7 @@ export function AlerteCard({
             <TableSkeleton rows={Math.min(limit, rows.length || limit)} />
           ) : (
             <div className={tableStyles.tableContainer}>
-              <div className={tableStyles.table}>
+              <div className={`${tableStyles.table} ${tableClassName ?? ""}`}>
                 <Table headers={headers} data={rows} />
               </div>
               {data && (
@@ -99,7 +120,7 @@ export function AlerteCard({
                   onPageChange={onPageChange}
                   limit={limit}
                   onLimitChange={onLimitChange}
-                  label="CFA en alerte"
+                  label={libellePagination}
                 />
               )}
             </div>

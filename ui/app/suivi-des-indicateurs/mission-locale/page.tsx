@@ -4,6 +4,7 @@ import { Suspense } from "react";
 
 import { AdoptionKpis } from "@/app/_components/statistiques/sections/AdoptionKpis";
 import { CouvertureTerritoiresCard } from "@/app/_components/statistiques/sections/CouvertureTerritoiresCard";
+import { MlRupturesAlertesSection } from "@/app/_components/statistiques/sections/MlAlertesSection";
 import { OverviewSection } from "@/app/_components/statistiques/sections/OverviewSection";
 import { SuiviTraitementMLCard } from "@/app/_components/statistiques/sections/SuiviTraitementMLCard";
 import { TraitementRupturesPanel } from "@/app/_components/statistiques/sections/TraitementRupturesPanel";
@@ -60,13 +61,15 @@ function MissionLocalePageContent() {
 
 function DeploiementActivitePanel() {
   const { user } = useAuth();
+  const isAdmin = isAdminUser(user ?? null);
 
   return (
     <OverviewSection title="Déploiement et activité des Missions Locales">
       <SegmentAboutText variant="rupture" />
       <AdoptionKpis />
-      <CouvertureTerritoiresCard isAdmin={isAdminUser(user ?? null)} />
+      <CouvertureTerritoiresCard isAdmin={isAdmin} />
       <SuiviTraitementMLCard />
+      {isAdmin && <MlRupturesAlertesSection />}
     </OverviewSection>
   );
 }
