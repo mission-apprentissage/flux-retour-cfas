@@ -2,8 +2,7 @@ import type { ObjectId } from "mongodb";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 
 import { getCurrentAndNextStatus } from "@/common/actions/effectifs.statut.actions";
-import { computedOrganismeMl } from "@/common/actions/mission-locale/mission-locale-record.actions";
-import { migrateMlRecordEffectifId } from "@/common/actions/mission-locale/mission-locale.actions";
+import { computedOrganismeMl, migrateMlRecordEffectifId } from "@/common/actions/mission-locale/mission-locale.actions";
 import { franceTravailEffectifsDb, missionLocaleEffectifsDb, voeuxAffelnetDb } from "@/common/model/collections";
 
 export interface ResultatRepointage {

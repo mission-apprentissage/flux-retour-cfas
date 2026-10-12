@@ -958,6 +958,7 @@ describe("CFA Effectifs Actions", () => {
         effectif_snapshot: { ...otherEffectif, organisme_id: otherOrganismeId },
         identifiant_normalise: { nom: "TESTNOM_F", prenom: "Prenomf", date_de_naissance: ddn },
         soft_deleted: false,
+        computed: { organisme: { ml_beta_activated_at: new Date("2026-01-05"), is_allowed_collab: true } },
       });
       await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(orphanMlRecord));
 
@@ -990,6 +991,7 @@ describe("CFA Effectifs Actions", () => {
       expect(migrated?.effectif_snapshot?.organisme_id).toEqual(organismeId);
       expect(migrated?.cfa_rupture_declaration?.date_rupture).toEqual(dateRupture);
       expect(migrated?.organisme_data?.rupture).toBe(true);
+      expect(migrated?.computed?.organisme).toEqual({ ml_beta_activated_at: null, is_allowed_collab: false });
 
       const allActive = await missionLocaleEffectifsDb()
         .find({
@@ -1042,6 +1044,7 @@ describe("CFA Effectifs Actions", () => {
         situation: SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES,
         commentaires: "déjà appelé par l'ancienne ML",
         current_status: { value: "RUPTURANT", date: new Date("2025-11-20") },
+        computed: { organisme: { ml_beta_activated_at: new Date("2026-01-05"), is_allowed_collab: true } },
       });
       await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(existingMlRecord));
 
@@ -1077,6 +1080,7 @@ describe("CFA Effectifs Actions", () => {
       expect(migrated?.effectif_snapshot?.organisme_id).toEqual(organismeId);
       expect(migrated?.cfa_rupture_declaration?.date_rupture).toEqual(dateRupture);
       expect(migrated?.organisme_data?.rupture).toBe(true);
+      expect(migrated?.computed?.organisme).toEqual({ ml_beta_activated_at: null, is_allowed_collab: false });
 
       // ML d'origine préservée : continuité du suivi côté ML qui a déjà traité.
       expect(migrated?.mission_locale_id).toEqual(otherMlId);
