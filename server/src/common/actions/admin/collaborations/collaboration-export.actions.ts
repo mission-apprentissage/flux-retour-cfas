@@ -13,7 +13,7 @@ import { buildDossierEnvoyeMatch, fetchActivatedOrganismes } from "./collaborati
 
 const REGION_NON_RENSEIGNEE = "Non renseigné";
 
-function formatRegion(code: string | null | undefined): string {
+export function formatRegion(code: string | null | undefined): string {
   if (!code) return REGION_NON_RENSEIGNEE;
   return REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE]?.nom ?? REGION_NON_RENSEIGNEE;
 }

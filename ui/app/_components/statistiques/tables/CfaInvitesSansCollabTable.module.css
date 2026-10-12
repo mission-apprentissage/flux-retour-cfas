@@ -4,6 +4,10 @@
   gap: 12px;
 }
 
+.exportError {
+  margin: 0 1rem 16px;
+}
+
 .tableContainer {
   width: 100%;
   padding: 0 1rem;
