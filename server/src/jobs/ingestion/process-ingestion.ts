@@ -596,8 +596,10 @@ async function findOrganismeWithStats(
   let organisme = await findOrganismeByUaiAndSiret(fiabilisationResult.uai, fiabilisationResult.siret, projection);
   let retenu = { uai: fiabilisationResult.uai, siret: fiabilisationResult.siret };
   let attribution = fiabilisationResult.mode;
+  const siretDuResponsable =
+    fiabilisationResult.api_response?.resultat?.correspondances.siret?.son_responsable === true;
 
-  if (attribution === "lieu" && siret_etablissement) {
+  if (attribution === "lieu" && siret_etablissement && !siretDuResponsable) {
     const surclassement = await surclasserParTransmetteur(siret_etablissement, sourceOrganismeId, projection);
     if (surclassement) {
       organisme = surclassement.organisme;

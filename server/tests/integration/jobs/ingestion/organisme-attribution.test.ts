@@ -236,6 +236,72 @@ describe("Attribution de l'organisme à l'ingestion", () => {
     });
   });
 
+  it("retient le formateur de plus petit identifiant quand plusieurs organismes de la famille partagent le SIRET envoyé", async () => {
+    const tete = { uai: "0461111H", siret: "33333333300032" };
+    const siteA = { uai: "0462222R", siret: "44444444400046" };
+    const siteB = { uai: "0463333Y", siret: siteA.siret };
+    const idA = new ObjectId();
+    const idB = new ObjectId();
+    const teteReseau = organisme(tete, {
+      organismesFormateurs: [
+        { _id: idB, ...siteB },
+        { _id: idA, ...siteA },
+      ],
+    });
+    await organismesDb().insertMany([teteReseau, { ...organisme(siteB), _id: idB }, { ...organisme(siteA), _id: idA }]);
+    mockRecherche(
+      { uai: "0464444F", siret: siteA.siret },
+      reponseParLieu(tete, siteA, { lui_meme: false, son_formateur: true, son_responsable: false })
+    );
+    mockRecherche(tete, reponseExacte(tete));
+    const { insertedId } = await effectifsQueueDb().insertOne(
+      dossier({ uai: "0464444F", siret: siteA.siret }, teteReseau._id.toString(), tete)
+    );
+
+    await processEffectifsQueue();
+
+    const queue = await effectifsQueueDb().findOne({ _id: insertedId });
+    expect(queue).toMatchObject({
+      has_error: false,
+      organisme_id: idA,
+      organisme_attribution: { formateur: { mode: "famille", uai: siteA.uai, siret: siteA.siret } },
+    });
+  });
+
+  it("conserve le formateur rendu par l'API quand le SIRET envoyé est celui de son responsable", async () => {
+    const responsable = { uai: "0451111N", siret: "11111111100014" };
+    const formateur = { uai: "0452222W", siret: "22222222200028" };
+    const responsableId = new ObjectId();
+    const formateurId = new ObjectId();
+    await organismesDb().insertMany([
+      { ...organisme(responsable, { organismesFormateurs: [{ _id: formateurId, ...formateur }] }), _id: responsableId },
+      {
+        ...organisme(formateur, { organismesResponsables: [{ _id: responsableId, ...responsable }] }),
+        _id: formateurId,
+      },
+    ]);
+    mockRecherche(
+      { uai: "0453333D", siret: responsable.siret },
+      reponseParLieu(formateur, responsable, { lui_meme: false, son_formateur: false, son_responsable: true })
+    );
+    mockRecherche(responsable, reponseExacte(responsable));
+    const { insertedId } = await effectifsQueueDb().insertOne(
+      dossier({ uai: "0453333D", siret: responsable.siret }, responsableId.toString(), responsable)
+    );
+
+    await processEffectifsQueue();
+
+    const queue = await effectifsQueueDb().findOne({ _id: insertedId });
+    expect(queue).toMatchObject({
+      has_error: false,
+      organisme_id: formateurId,
+      organisme_attribution: {
+        formateur: { mode: "lieu", uai: formateur.uai, siret: formateur.siret },
+        responsable: { mode: "exact" },
+      },
+    });
+  });
+
   it("conserve le rattachement par lieu quand le SIRET envoyé est fermé au référentiel", async () => {
     const hdf = organisme(CMAR_HDF);
     const abbeville = organisme(ABBEVILLE, { ferme: true, organismesResponsables: [{ _id: hdf._id, ...CMAR_HDF }] });
