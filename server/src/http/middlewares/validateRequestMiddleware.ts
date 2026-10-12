@@ -15,7 +15,10 @@ type ValidationErrorItem = { type: "Query" | "Params" | "Body"; errors: ZodError
 /** Un tableau brut n'a pas de statut et serait vu comme une 500 non gérée. */
 function toRequestValidationError(errors: ValidationErrorItem[]): Boom {
   const boomError = Boom.badRequest("Erreur de validation");
-  (boomError.output.payload as Boom.Payload & { details?: unknown }).details = errors[0].errors.issues;
+  const payload = boomError.output.payload as Boom.Payload & { details?: unknown; issues?: unknown };
+  // `issues` aligne ce chemin sur `toValidationError` : le front lit `issues[].path`.
+  payload.details = errors[0].errors.issues;
+  payload.issues = errors[0].errors.issues;
   return boomError;
 }
 
