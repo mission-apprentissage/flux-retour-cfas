@@ -94,6 +94,10 @@ function mlStatuts(data: IMissionLocaleDetailResponse) {
 function buildParentLink(currentParams = "") {
   const params = new URLSearchParams(currentParams);
 
+  const cfaId = params.get("cfa_id") ?? "";
+  if (params.get("from") === "cfa" && /^[0-9a-f]{24}$/.test(cfaId)) {
+    return { label: "Fiche CFA", href: `/suivi-des-indicateurs/cfa/${cfaId}?tab=collaborations` };
+  }
   if (params.get("from") === "recherche") {
     const recherche = new URLSearchParams();
     const q = params.get("q");
@@ -101,7 +105,7 @@ function buildParentLink(currentParams = "") {
     return { label: "Recherche", href: `/suivi-des-indicateurs/recherche?${recherche.toString()}` };
   }
   [...params.keys()]
-    .filter((key) => ["from", "tab", "q"].includes(key) || key.startsWith("collab_"))
+    .filter((key) => ["from", "tab", "q", "cfa_id"].includes(key) || key.startsWith("collab_"))
     .forEach((key) => params.delete(key));
   params.set("tab", "deploiement");
   return { label: "Missions Locales", href: `/suivi-des-indicateurs/mission-locale?${params.toString()}` };

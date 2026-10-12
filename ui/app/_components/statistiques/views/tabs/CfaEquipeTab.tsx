@@ -109,8 +109,15 @@ export function CfaEquipeTab({ organismeId, isAdmin = false }: CfaEquipeTabProps
     );
 
   const membres = data ?? [];
-  const headers = ["Civilité Nom et prénom", "Téléphone", "Courriel", "Intitulé de poste", "Dernière activité"];
-  if (isAdmin) headers.push("Date d'activation", "Actions");
+  const headers = [
+    "Civilité Nom et prénom",
+    "Téléphone",
+    "Courriel",
+    "Intitulé de poste",
+    "Dernière activité",
+    "Date d'activation",
+  ];
+  if (isAdmin) headers.push("Actions");
 
   return (
     <div>
@@ -181,11 +188,11 @@ export function CfaEquipeTab({ organismeId, isAdmin = false }: CfaEquipeTabProps
                       <td>
                         <DerniereActivite membre={membre} />
                       </td>
+                      <td>
+                        <DateRelative date={membre.activation_at} vide="-" />
+                      </td>
                       {isAdmin && (
                         <>
-                          <td>
-                            <DateRelative date={membre.activation_at} vide="-" />
-                          </td>
                           <td className={styles.actions}>
                             <DropdownMenu
                               buttonIconId="fr-icon-more-fill"

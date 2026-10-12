@@ -79,7 +79,7 @@ export function CfaCollabMlTable({ organismeId }: { organismeId: string }) {
                     )}
                     {row.dans_perimetre && (
                       <Link
-                        href={`/suivi-des-indicateurs/mission-locale/${row.mission_locale_id}`}
+                        href={`/suivi-des-indicateurs/mission-locale/${row.mission_locale_id}?from=cfa&cfa_id=${organismeId}`}
                         className="fr-link fr-link--sm fr-link--icon-right fr-icon-arrow-right-line"
                         aria-label={`Voir la fiche de ${row.nom ?? "la Mission Locale"}`}
                       >
