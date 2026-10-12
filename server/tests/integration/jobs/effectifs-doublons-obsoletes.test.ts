@@ -394,25 +394,70 @@ describe("traiterDoublonsObsoletes", () => {
     expect((await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.effectif_id).toEqual(fiche._id);
   });
 
-  it("conserve une fiche dont l'archivage échoue et poursuit le traitement", async () => {
-    const invalide = await insererEffectif({ organisme: ancien, idErp: "X1", transmisIlYa: 45 });
-    await insererEffectif({ organisme: recent, idErp: "X1", transmisIlYa: 0 });
-    const valide = await insererEffectif({ organisme: ancien, idErp: "X2", transmisIlYa: 45 });
-    await insererEffectif({ organisme: recent, idErp: "X2", transmisIlYa: 0 });
+  it("conserve avec ses liens une fiche dont l'archivage échoue et poursuit le traitement", async () => {
+    const options = { organisme: ancien, transmisIlYa: 45, statut: STATUT_APPRENANT.RUPTURANT };
+    const invalide = await insererEffectif({ ...options, idErp: "X1" });
+    await insererEffectif({ ...options, organisme: recent, idErp: "X1", transmisIlYa: 0 });
+    const valide = await insererEffectif({ ...options, idErp: "X2" });
+    await insererEffectif({ ...options, organisme: recent, idErp: "X2", transmisIlYa: 0 });
+    const dossier = await insererDossierMl(invalide, ML_ID);
     await getDatabase().command({ collMod: "effectifs", validationLevel: "off" });
     await effectifsDb().updateOne({ _id: invalide._id }, { $set: { "apprenant.courriel": 42 } });
     await getDatabase().command({ collMod: "effectifs", validationLevel: "strict" });
 
     const rapport = await traiterDoublonsObsoletes({ date: NOW, appliquer: true });
 
-    expect(rapport.traitement).toMatchObject({ supprimees: 1, conservees: 1 });
+    expect(rapport.traitement).toMatchObject({ supprimees: 1, conservees: 1, ml_repointes: 0 });
     expect(rapport.fiches_detail.find((f) => f.effectif_id.equals(invalide._id))).toMatchObject({
       traitement: "conservee",
       motif_conservation: expect.stringContaining("erreur"),
     });
     expect(await effectifsDb().findOne({ _id: invalide._id })).not.toBeNull();
+    expect((await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.effectif_id).toEqual(invalide._id);
     expect(await effectifsDb().findOne({ _id: valide._id })).toBeNull();
     expect(await effectifsArchiveDb().countDocuments()).toBe(1);
+  });
+
+  it("conserve et désarchive une fiche retransmise pendant le re-pointage de ses liens", async () => {
+    const fiche = await insererEffectif({ organisme: ancien, idErp: "U1", transmisIlYa: 45 });
+    await insererEffectif({ organisme: recent, idErp: "U1", transmisIlYa: 0 });
+    const { repointerLiensVersJumeau: repointerReel } = await vi.importActual<
+      typeof import("@/jobs/effectifs/repointer-liens")
+    >("@/jobs/effectifs/repointer-liens");
+    vi.mocked(repointerLiensVersJumeau).mockImplementationOnce(async (ficheId, jumeau, resultat) => {
+      await effectifsDb().updateOne({ _id: ficheId }, { $set: { transmitted_at: NOW } });
+      return repointerReel(ficheId, jumeau, resultat);
+    });
+
+    const rapport = await traiterDoublonsObsoletes({ date: NOW, appliquer: true });
+
+    expect(rapport.traitement).toMatchObject({ supprimees: 0, conservees: 1 });
+    expect(rapport.fiches_detail[0]).toMatchObject({
+      traitement: "conservee",
+      motif_conservation: "fiche retransmise depuis le rapport",
+    });
+    expect(await effectifsDb().findOne({ _id: fiche._id })).not.toBeNull();
+    expect(await effectifsArchiveDb().countDocuments()).toBe(0);
+  });
+
+  it("désarchive la fiche et rafraîchit les stats des ML déjà re-pointées quand le re-pointage échoue", async () => {
+    const fiche = await insererEffectif({ organisme: ancien, idErp: "V1", transmisIlYa: 45 });
+    await insererEffectif({ organisme: recent, idErp: "V1", transmisIlYa: 0 });
+    vi.mocked(repointerLiensVersJumeau).mockImplementationOnce(async (_ficheId, _jumeau, resultat) => {
+      resultat?.missions_locales.push(ML_ID);
+      throw new Error("France Travail indisponible");
+    });
+
+    const rapport = await traiterDoublonsObsoletes({ date: NOW, appliquer: true });
+
+    expect(rapport.traitement).toMatchObject({ supprimees: 0, conservees: 1 });
+    expect(rapport.fiches_detail[0]).toMatchObject({
+      traitement: "conservee",
+      motif_conservation: "erreur : France Travail indisponible",
+    });
+    expect(await effectifsDb().findOne({ _id: fiche._id })).not.toBeNull();
+    expect(await effectifsArchiveDb().countDocuments()).toBe(0);
+    expect(await missionLocaleStatsDb().countDocuments({ mission_locale_id: ML_ID })).toBe(1);
   });
 
   it("conserve sans toucher à son dossier ML une fiche retransmise depuis le rapport", async () => {
@@ -429,10 +474,10 @@ describe("traiterDoublonsObsoletes", () => {
       typeof import("@/jobs/effectifs/repointer-liens")
     >("@/jobs/effectifs/repointer-liens");
     const suivi: { retransmise?: ObjectId } = {};
-    vi.mocked(repointerLiensVersJumeau).mockImplementationOnce(async (ficheId, jumeau) => {
+    vi.mocked(repointerLiensVersJumeau).mockImplementationOnce(async (ficheId, jumeau, resultat) => {
       suivi.retransmise = ficheId.equals(premiere._id) ? seconde._id : premiere._id;
       await effectifsDb().updateOne({ _id: suivi.retransmise }, { $set: { transmitted_at: NOW } });
-      return repointerReel(ficheId, jumeau);
+      return repointerReel(ficheId, jumeau, resultat);
     });
 
     const rapport = await traiterDoublonsObsoletes({ date: NOW, appliquer: true });

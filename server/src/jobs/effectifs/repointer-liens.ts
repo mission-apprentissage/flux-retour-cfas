@@ -96,8 +96,11 @@ async function repointerVoeux(ficheId: ObjectId, jumeau: IEffectif, resultat: Re
   resultat.voeux += modifiedCount;
 }
 
-export async function repointerLiensVersJumeau(ficheId: ObjectId, jumeau: IEffectif): Promise<ResultatRepointage> {
-  const resultat = resultatRepointageVide();
+export async function repointerLiensVersJumeau(
+  ficheId: ObjectId,
+  jumeau: IEffectif,
+  resultat: ResultatRepointage = resultatRepointageVide()
+): Promise<ResultatRepointage> {
   await repointerDossiersMl(ficheId, jumeau, resultat);
   if (resultat.ml.refuses > 0) {
     return resultat;

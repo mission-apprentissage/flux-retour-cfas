@@ -16,7 +16,7 @@ import {
 } from "@/common/model/collections";
 import { stripDiacritics } from "@/common/utils/mongoUtils";
 
-import { repointerLiensVersJumeau, type ResultatRepointage } from "./repointer-liens";
+import { repointerLiensVersJumeau, resultatRepointageVide, type ResultatRepointage } from "./repointer-liens";
 
 const logger = parentLogger.child({ module: "job:effectifs:doublons-obsoletes" });
 
@@ -324,8 +324,8 @@ export async function rapportDoublonsObsoletes({
   return rapport;
 }
 
-async function archiverEtSupprimer(fiche: DoublonObsolete, effectif: IEffectif, date: Date) {
-  await effectifsArchiveDb().insertOne({
+async function archiver(fiche: DoublonObsolete, effectif: IEffectif, date: Date): Promise<ObjectId> {
+  const { insertedId } = await effectifsArchiveDb().insertOne({
     ...effectif,
     _id: new ObjectId(),
     suppression: {
@@ -335,7 +335,7 @@ async function archiverEtSupprimer(fiche: DoublonObsolete, effectif: IEffectif, 
       date,
     },
   });
-  await effectifsDb().deleteOne({ _id: fiche.effectif_id });
+  return insertedId;
 }
 
 async function traiterFiche(
@@ -358,16 +358,35 @@ async function traiterFiche(
     conserver(fiche, compteurs, "jumeau introuvable");
     return;
   }
-  const liens = await repointerLiensVersJumeau(fiche.effectif_id, jumeau);
-  cumuler(compteurs, liens);
-  for (const missionLocaleId of liens.missions_locales) {
-    missionsLocales.set(missionLocaleId.toString(), missionLocaleId);
+  const archiveId = await archiver(fiche, effectif, date);
+  const liens = resultatRepointageVide();
+  let supprimee = false;
+  try {
+    await repointerLiensVersJumeau(fiche.effectif_id, jumeau, liens);
+    if (liens.ml.refuses === 0) {
+      const { deletedCount } = await effectifsDb().deleteOne({
+        _id: fiche.effectif_id,
+        transmitted_at: effectif.transmitted_at,
+      });
+      supprimee = deletedCount === 1;
+    }
+  } finally {
+    cumuler(compteurs, liens);
+    for (const missionLocaleId of liens.missions_locales) {
+      missionsLocales.set(missionLocaleId.toString(), missionLocaleId);
+    }
+    if (!supprimee) {
+      await effectifsArchiveDb().deleteOne({ _id: archiveId });
+    }
   }
   if (liens.ml.refuses > 0) {
     conserver(fiche, compteurs, "migration du dossier Mission Locale refusée");
     return;
   }
-  await archiverEtSupprimer(fiche, effectif, date);
+  if (!supprimee) {
+    conserver(fiche, compteurs, "fiche retransmise depuis le rapport");
+    return;
+  }
   fiche.traitement = "supprimee";
   compteurs.supprimees++;
   logger.info(
