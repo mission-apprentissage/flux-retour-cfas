@@ -322,6 +322,13 @@ describe("traiterDoublonsObsoletes", () => {
     expect(rapport.traitement).toEqual({
       supprimees: 1,
       conservees: 0,
+      conservees_par_motif: {
+        fiche_introuvable: 0,
+        fiche_retransmise: 0,
+        jumeau_introuvable: 0,
+        migration_ml_refusee: 0,
+        erreur: 0,
+      },
       ml_repointes: 0,
       ml_fusionnes: 0,
       ml_refuses: 0,
@@ -383,11 +390,17 @@ describe("traiterDoublonsObsoletes", () => {
 
     const rapport = await traiterDoublonsObsoletes({ date: NOW, appliquer: true });
 
-    expect(rapport.traitement).toMatchObject({ supprimees: 0, conservees: 1, ml_repointes: 0, ml_refuses: 1 });
+    expect(rapport.traitement).toMatchObject({
+      supprimees: 0,
+      conservees: 1,
+      conservees_par_motif: { migration_ml_refusee: 1 },
+      ml_repointes: 0,
+      ml_refuses: 1,
+    });
     expect(rapport.fiches_detail[0]).toMatchObject({
       effectif_id: fiche._id,
       traitement: "conservee",
-      motif_conservation: expect.stringContaining("Mission Locale"),
+      motif_conservation: "migration_ml_refusee",
     });
     expect(await effectifsDb().findOne({ _id: fiche._id })).not.toBeNull();
     expect(await effectifsArchiveDb().countDocuments()).toBe(0);
@@ -407,10 +420,16 @@ describe("traiterDoublonsObsoletes", () => {
 
     const rapport = await traiterDoublonsObsoletes({ date: NOW, appliquer: true });
 
-    expect(rapport.traitement).toMatchObject({ supprimees: 1, conservees: 1, ml_repointes: 0 });
+    expect(rapport.traitement).toMatchObject({
+      supprimees: 1,
+      conservees: 1,
+      conservees_par_motif: { erreur: 1 },
+      ml_repointes: 0,
+    });
     expect(rapport.fiches_detail.find((f) => f.effectif_id.equals(invalide._id))).toMatchObject({
       traitement: "conservee",
-      motif_conservation: expect.stringContaining("erreur"),
+      motif_conservation: "erreur",
+      erreur: expect.stringContaining("validation"),
     });
     expect(await effectifsDb().findOne({ _id: invalide._id })).not.toBeNull();
     expect((await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.effectif_id).toEqual(invalide._id);
@@ -431,10 +450,14 @@ describe("traiterDoublonsObsoletes", () => {
 
     const rapport = await traiterDoublonsObsoletes({ date: NOW, appliquer: true });
 
-    expect(rapport.traitement).toMatchObject({ supprimees: 0, conservees: 1 });
+    expect(rapport.traitement).toMatchObject({
+      supprimees: 0,
+      conservees: 1,
+      conservees_par_motif: { fiche_retransmise: 1 },
+    });
     expect(rapport.fiches_detail[0]).toMatchObject({
       traitement: "conservee",
-      motif_conservation: "fiche retransmise depuis le rapport",
+      motif_conservation: "fiche_retransmise",
     });
     expect(await effectifsDb().findOne({ _id: fiche._id })).not.toBeNull();
     expect(await effectifsArchiveDb().countDocuments()).toBe(0);
@@ -450,10 +473,11 @@ describe("traiterDoublonsObsoletes", () => {
 
     const rapport = await traiterDoublonsObsoletes({ date: NOW, appliquer: true });
 
-    expect(rapport.traitement).toMatchObject({ supprimees: 0, conservees: 1 });
+    expect(rapport.traitement).toMatchObject({ supprimees: 0, conservees: 1, conservees_par_motif: { erreur: 1 } });
     expect(rapport.fiches_detail[0]).toMatchObject({
       traitement: "conservee",
-      motif_conservation: "erreur : France Travail indisponible",
+      motif_conservation: "erreur",
+      erreur: "France Travail indisponible",
     });
     expect(await effectifsDb().findOne({ _id: fiche._id })).not.toBeNull();
     expect(await effectifsArchiveDb().countDocuments()).toBe(0);
@@ -484,10 +508,15 @@ describe("traiterDoublonsObsoletes", () => {
 
     expect(suivi.retransmise).toBeDefined();
     const id = suivi.retransmise!;
-    expect(rapport.traitement).toMatchObject({ supprimees: 1, conservees: 1, ml_repointes: 1 });
+    expect(rapport.traitement).toMatchObject({
+      supprimees: 1,
+      conservees: 1,
+      conservees_par_motif: { fiche_retransmise: 1 },
+      ml_repointes: 1,
+    });
     expect(rapport.fiches_detail.find((f) => f.effectif_id.equals(id))).toMatchObject({
       traitement: "conservee",
-      motif_conservation: "fiche retransmise depuis le rapport",
+      motif_conservation: "fiche_retransmise",
     });
     expect(await effectifsDb().findOne({ _id: id })).not.toBeNull();
     const dossier = dossiers.get(id.toString());

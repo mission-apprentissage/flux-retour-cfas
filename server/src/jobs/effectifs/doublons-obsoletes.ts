@@ -26,6 +26,13 @@ export type CategorieDoublon = "supprimable" | "oscillation" | "identite_differe
 
 export type Traitement = "supprimee" | "conservee";
 
+export type MotifConservation =
+  | "fiche_introuvable"
+  | "fiche_retransmise"
+  | "jumeau_introuvable"
+  | "migration_ml_refusee"
+  | "erreur";
+
 export interface DoublonObsolete {
   effectif_id: ObjectId;
   organisme_id: ObjectId;
@@ -48,12 +55,14 @@ export interface DoublonObsolete {
     voeux: boolean;
   };
   traitement?: Traitement;
-  motif_conservation?: string;
+  motif_conservation?: MotifConservation;
+  erreur?: string;
 }
 
 export interface CompteursTraitement {
   supprimees: number;
   conservees: number;
+  conservees_par_motif: Record<MotifConservation, number>;
   ml_repointes: number;
   ml_fusionnes: number;
   ml_refuses: number;
@@ -346,16 +355,16 @@ async function traiterFiche(
 ) {
   const effectif = await effectifsDb().findOne({ _id: fiche.effectif_id });
   if (!effectif) {
-    conserver(fiche, compteurs, "fiche introuvable");
+    conserver(fiche, compteurs, "fiche_introuvable");
     return;
   }
   if (effectif.transmitted_at && effectif.transmitted_at > fiche.derniere_transmission) {
-    conserver(fiche, compteurs, "fiche retransmise depuis le rapport");
+    conserver(fiche, compteurs, "fiche_retransmise");
     return;
   }
   const jumeau = await effectifsDb().findOne({ _id: fiche.jumeau_id });
   if (!jumeau) {
-    conserver(fiche, compteurs, "jumeau introuvable");
+    conserver(fiche, compteurs, "jumeau_introuvable");
     return;
   }
   const archiveId = await archiver(fiche, effectif, date);
@@ -380,11 +389,11 @@ async function traiterFiche(
     }
   }
   if (liens.ml.refuses > 0) {
-    conserver(fiche, compteurs, "migration du dossier Mission Locale refusée");
+    conserver(fiche, compteurs, "migration_ml_refusee");
     return;
   }
   if (!supprimee) {
-    conserver(fiche, compteurs, "fiche retransmise depuis le rapport");
+    conserver(fiche, compteurs, "fiche_retransmise");
     return;
   }
   fiche.traitement = "supprimee";
@@ -395,11 +404,18 @@ async function traiterFiche(
   );
 }
 
-function conserver(fiche: DoublonObsolete, compteurs: CompteursTraitement, motif: string) {
+function conserver(fiche: DoublonObsolete, compteurs: CompteursTraitement, motif: MotifConservation, erreur?: string) {
   fiche.traitement = "conservee";
   fiche.motif_conservation = motif;
+  if (erreur) {
+    fiche.erreur = erreur;
+  }
   compteurs.conservees++;
-  logger.warn({ effectif_id: fiche.effectif_id, jumeau_id: fiche.jumeau_id, motif }, "Doublon obsolète conservé");
+  compteurs.conservees_par_motif[motif]++;
+  logger.warn(
+    { effectif_id: fiche.effectif_id, jumeau_id: fiche.jumeau_id, motif, erreur },
+    "Doublon obsolète conservé"
+  );
 }
 
 function cumuler(compteurs: CompteursTraitement, liens: ResultatRepointage) {
@@ -424,6 +440,13 @@ export async function traiterDoublonsObsoletes({
   const compteurs: CompteursTraitement = {
     supprimees: 0,
     conservees: 0,
+    conservees_par_motif: {
+      fiche_introuvable: 0,
+      fiche_retransmise: 0,
+      jumeau_introuvable: 0,
+      migration_ml_refusee: 0,
+      erreur: 0,
+    },
     ml_repointes: 0,
     ml_fusionnes: 0,
     ml_refuses: 0,
@@ -441,7 +464,7 @@ export async function traiterDoublonsObsoletes({
       await traiterFiche(fiche, date, compteurs, missionsLocales);
     } catch (err) {
       logger.error({ err, effectif_id: fiche.effectif_id, jumeau_id: fiche.jumeau_id }, "Doublon obsolète en erreur");
-      conserver(fiche, compteurs, `erreur : ${err instanceof Error ? err.message : String(err)}`);
+      conserver(fiche, compteurs, "erreur", err instanceof Error ? err.message : String(err));
     }
   }
 
