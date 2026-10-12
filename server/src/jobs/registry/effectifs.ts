@@ -109,4 +109,10 @@ export const effectifsCrons = {
     },
     resumable: true,
   },
+  "Supprimer les doublons obsolètes d'effectifs tous les lundis à 6h30": {
+    cron_string: "30 6 * * 1",
+    checkinMargin: 15,
+    maxRuntimeInMinutes: 60,
+    handler: async () => traiterDoublonsObsoletes({ appliquer: true }),
+  },
 } satisfies Record<string, CronDef>;
