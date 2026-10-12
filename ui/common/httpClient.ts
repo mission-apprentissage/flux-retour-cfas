@@ -28,12 +28,14 @@ export class HTTPError extends Error {
   messages: unknown;
   statusCode: number;
   prettyMessage: string;
+  path: string;
 
-  constructor(message: string, json: AxiosResponse, statusCode: number, messages: unknown = null) {
+  constructor(message: string, json: AxiosResponse, statusCode: number, messages: unknown = null, path = "") {
     super(message);
     this.json = json;
     this.messages = messages;
     this.statusCode = statusCode;
+    this.path = path;
     this.prettyMessage =
       statusCode === RATE_LIMIT_STATUS ? formatRateLimitMessage(json) : "Une erreur technique est survenue";
   }
@@ -47,13 +49,8 @@ const handleResponse = <T = unknown>(path: string, response: AxiosResponse): T =
     if (statusCode === 401 || statusCode === 403) {
       throw new AuthError(response, statusCode);
     } else {
-      const messages = response.data;
-      throw new HTTPError(
-        `Server returned ${statusCode} when requesting resource ${path}`,
-        response,
-        statusCode,
-        messages
-      );
+      // Le chemin reste hors du message : il ferait une issue Sentry par URL.
+      throw new HTTPError(`Server returned ${statusCode}`, response, statusCode, response.data, path);
     }
   }
   return response.data;

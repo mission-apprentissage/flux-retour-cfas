@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 import passport from "passport";
 import { Strategy, ExtractJwt, Strategy as JWTStrategy, VerifiedCallback } from "passport-jwt";
 import type { IOrganisation } from "shared";
+import { maskEmail } from "shared/utils/maskEmail";
 
 import { getAcl } from "@/common/actions/helpers/permissions-organisme";
 import { getOrganisationById } from "@/common/actions/organisations.actions";
@@ -122,9 +123,8 @@ export const authMiddleware = () => {
 
       const ctx: AuthContext = req.user;
       Sentry.setUser({
-        ip: req.ip,
         id: ctx._id.toString(),
-        username: ctx.email,
+        username: maskEmail(ctx.email),
         segment: "jwt-2",
       });
       next();

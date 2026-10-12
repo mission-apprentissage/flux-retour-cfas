@@ -25,6 +25,7 @@ import { useAllUsers } from "@/app/_hooks/useAllUsers";
 import { usersExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 import type { User } from "@/common/internal/User";
+import { reportError } from "@/common/reportError";
 import { exportDataAsXlsx } from "@/common/utils/exportUtils";
 import { UserNormalized } from "@/modules/admin/users/models/users";
 import { UsersFiltersQuery, parseUsersFiltersFromQuery } from "@/modules/admin/users/models/users-filters";
@@ -311,7 +312,7 @@ export default function UsersAdminClient() {
 
       exportDataAsXlsx("users.xlsx", exportData, usersExportColumns);
     } catch (error) {
-      console.error("Erreur lors de l'export des utilisateurs:", error);
+      reportError(error, { action: "export-utilisateurs" });
       setExportError(
         "Une erreur est survenue lors de l'export. Veuillez réessayer ou contacter le support si le problème persiste."
       );

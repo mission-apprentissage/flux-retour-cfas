@@ -1,15 +1,37 @@
 import { captureException } from "@sentry/node";
 import type { ICommune, IMissionLocale } from "api-alternance-sdk";
 import { zCfd } from "api-alternance-sdk/internal";
-import Boom from "boom";
 import type { CfdInfo, RncpInfo } from "shared/models/apis/@types/ApiAlternance";
 
 import logger from "@/common/logger";
 import { resoudreCodeInsee } from "@/common/services/commune/resoudreCodeInsee";
+import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 import { getErrorMessage } from "@/common/utils/errorUtils";
-import config from "@/config";
 
 import { apiAlternanceClient } from "./client";
+
+/**
+ * `null` ne signifie plus que « cette certification ou cette commune n'existe
+ * pas » : un échec technique lève. Sans cette distinction, une panne de l'API
+ * faisait ingérer des effectifs sans commune ni niveau, silencieusement, et
+ * répondre 200 avec un corps vide sur quatre routes.
+ *
+ * Le signalement passe par la santé de la dépendance, qui ne capture qu'à la
+ * transition : sur le chemin d'ingestion, une capture par appel produirait un
+ * événement par effectif.
+ */
+const failed = (operation: string, error: unknown): Error => {
+  reportDependencyHealth(`api-alternance:${operation}`, false, error, {
+    tier: "jour",
+    errorKind: "upstream",
+    upstream: "api-alternance",
+  });
+  return new Error(`api-alternance: échec de ${operation}`, { cause: error });
+};
+
+const succeeded = (operation: string): void => {
+  reportDependencyHealth(`api-alternance:${operation}`, true);
+};
 
 const describeApiError = (error: unknown) => {
   const { response } = error as { response?: { data?: unknown } };
@@ -24,6 +46,7 @@ export const getCfdInfo = async (cfd: string): Promise<CfdInfo | null> => {
     }
 
     const certifications = await apiAlternanceClient.certification.index({ identifiant: { cfd } });
+    succeeded("getCfdInfo");
 
     if (certifications.length === 0) {
       return null;
@@ -56,14 +79,14 @@ export const getCfdInfo = async (cfd: string): Promise<CfdInfo | null> => {
     return data;
   } catch (error) {
     logger.error(`getCfdInfo: something went wrong while requesting CFD "${cfd}"`, describeApiError(error));
-    captureException(new Error(`getCfdInfo: something went wrong while requesting CFD "${cfd}"`, { cause: error }));
-    return null;
+    throw failed("getCfdInfo", error);
   }
 };
 
 export const getRncpInfo = async (rncp: string): Promise<RncpInfo | null> => {
   try {
     const certifications = await apiAlternanceClient.certification.index({ identifiant: { rncp } });
+    succeeded("getRncpInfo");
 
     if (certifications.length === 0) {
       return null;
@@ -84,8 +107,7 @@ export const getRncpInfo = async (rncp: string): Promise<RncpInfo | null> => {
     return data;
   } catch (error) {
     logger.error(`getRncpInfo: something went wrong while requesting RNCP "${rncp}"`, describeApiError(error));
-    captureException(new Error(`getRncpInfo: something went wrong while requesting RNCP "${rncp}"`, { cause: error }));
-    return null;
+    throw failed("getRncpInfo", error);
   }
 };
 
@@ -103,19 +125,14 @@ export const getCommune = async ({
   if (!code) return null;
 
   const communeList = await apiAlternanceClient.geographie.rechercheCommune({ code }).catch((error) => {
-    if (config.env === "test") throw error;
-
     logger.error(`getCommune: something went wrong while requesting code postal "${codePostal}": ${error.message}`, {
       error,
       codePostal,
     });
 
-    const err = Boom.internal("Échec de l'appel API pour la recherche de code postal", { codePostal });
-    err.cause = error;
-    captureException(err);
-
-    return [];
+    throw failed("rechercheCommune", error);
   });
+  succeeded("rechercheCommune");
 
   if (!communeList || communeList.length === 0) {
     return null;
@@ -145,11 +162,19 @@ export const getCommune = async ({
     const communesByPostal = communeList.filter(({ code }) => code.postaux.includes(codePostal));
 
     if (communesByPostal.length > 1) {
-      const resolution = await resoudreCodeInsee({ codePostal, adresse }).catch((error) => {
-        logger.error({ error, codePostal }, "getCommune: échec de la résolution du code INSEE");
-        captureException(error);
-        return null;
-      });
+      // Appelé par effectif sur le chemin d'ingestion : une capture par appel
+      // produirait un événement par dossier. Le `then` réarme l'état, sans quoi
+      // le premier échec ferait taire les suivants pour de bon.
+      const resolution = await resoudreCodeInsee({ codePostal, adresse })
+        .then((resultat) => {
+          reportDependencyHealth("resolution-code-insee", true);
+          return resultat;
+        })
+        .catch((error) => {
+          logger.error({ error, codePostal }, "getCommune: échec de la résolution du code INSEE");
+          reportDependencyHealth("resolution-code-insee", false, error, { tier: "jour", errorKind: "db" });
+          return null;
+        });
       const communeResolue = communesByPostal.find(({ code }) => code.insee === resolution?.code_insee);
       if (communeResolue) {
         return communeResolue;
@@ -174,12 +199,12 @@ export const estCommuneParDefaut = async (codePostal: string, codeInsee: string 
   }
 };
 
-export const getMissionsLocales = async (): Promise<IMissionLocale[] | null> => {
+export const getMissionsLocales = async (): Promise<IMissionLocale[]> => {
   try {
     const result = await apiAlternanceClient.geographie.listMissionLocales({});
+    succeeded("getMissionsLocales");
     return result;
   } catch (error) {
-    captureException(new Error(`getMissionsLocales: something went wrong while requesting ML `, { cause: error }));
-    return null;
+    throw failed("getMissionsLocales", error);
   }
 };

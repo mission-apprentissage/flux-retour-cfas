@@ -1,4 +1,3 @@
-import { captureException } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
 import { parse } from "csv-parse/sync";
 import express from "express";
@@ -10,6 +9,7 @@ import { IVoeuAffelnet, IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelne
 import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
+import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import { returnResult, RouteHandler } from "@/http/middlewares/helpers";
 
 const AFFELNET_HEADER = [
@@ -122,6 +122,7 @@ const createVoeux: RouteHandler = async (req, res) => {
 
   const parsedCSV: Array<IVoeuAffelnetRaw> = await parseCsvFile(file.buffer);
   const currentDate = new Date();
+  const errors = createErrorAggregator("admin-import-voeux-affelnet");
 
   await PromisePool.withConcurrency(100)
     .for(parsedCSV)
@@ -233,10 +234,13 @@ const createVoeux: RouteHandler = async (req, res) => {
           );
         }
       } catch (e) {
-        captureException(e);
-        logger.error(e);
+        logger.error({ err: e }, "Échec de mise à jour d'un voeu Affelnet");
+        errors.record(e);
       }
     });
+
+  errors.ok(parsedCSV.length - errors.failed);
+  errors.flush();
 
   logger.info("Voeux mis à jour");
   logger.info("Lancement de la recherche des voeux supprimés");

@@ -1,7 +1,8 @@
-import type { JobDef } from "job-processor";
+import type { CronDef, JobDef } from "job-processor";
 import { ObjectId } from "mongodb";
 
 import { purgeQueues } from "../clear/purge-queues";
+import { heartbeatIngestion } from "../ingestion/heartbeat-ingestion";
 import { updateEffectifQueueDateAndError } from "../ingestion/migration/effectif-queue";
 import { removeDuplicatesEffectifsQueue } from "../ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "../ingestion/process-ingestion";
@@ -40,4 +41,21 @@ export const ingestionJobs = {
   "tmp:migrate:effectifs-queue": {
     handler: updateEffectifQueueDateAndError,
   },
+  "heartbeat:ingestion": {
+    handler: heartbeatIngestion,
+  },
 } satisfies Record<string, JobDef>;
+
+export const ingestionCrons = {
+  // Toutes les 15 minutes — détecte une file d'ingestion qui n'avance plus.
+  //
+  // La marge est large parce que ce cron partage le worker avec le batch de 02h30 :
+  // entre 02h30 et 04h27, il ne s'exécute pas. L'ingestion, elle, tourne sur le
+  // queue_processor et n'est pas bloquée — seule sa surveillance l'est.
+  "Vérifie que l'ingestion avance toutes les 15 min": {
+    cron_string: "*/15 * * * *",
+    checkinMargin: 120,
+    maxRuntimeInMinutes: 10,
+    handler: heartbeatIngestion,
+  },
+} satisfies Record<string, CronDef>;

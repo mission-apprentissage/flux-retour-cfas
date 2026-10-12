@@ -4,7 +4,12 @@ import { IEffectif } from "shared/models/data/effectifs.model";
 
 import parentLogger from "@/common/logger";
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
-import { extractScoreInput, scoreEffectifs, type EffectifScoreInput } from "@/common/services/classifier";
+import {
+  extractScoreInput,
+  reportClassifierFailure,
+  scoreEffectifs,
+  type EffectifScoreInput,
+} from "@/common/services/classifier";
 
 const logger = parentLogger.child({
   module: "job:classifier:score-effectifs",
@@ -119,6 +124,7 @@ async function processBatch(batch: { _id: ObjectId; effectif_snapshot: IEffectif
     return { processed: scorable.length, skipped, failed: 0 };
   } catch (err) {
     logger.error({ err, batchSize: scorable.length }, "Erreur lors du scoring du batch");
+    reportClassifierFailure("score-batch", err, { batchSize: scorable.length });
     return { processed: 0, skipped, failed: scorable.length };
   }
 }

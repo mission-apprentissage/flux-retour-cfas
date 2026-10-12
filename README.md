@@ -349,4 +349,5 @@ docker compose run --rm --no-deps server yarn cli <nom_du_job>
 - [Développement](./docs/developpement/developpement.md)
 - [Debugging](./docs/developpement/debug.md)
 - [Infrastructure](./docs/infrastructure.md)
+- [Observabilité](./docs/observabilite.md)
 - [Sécurité](./docs/securite.md)

@@ -1,8 +1,6 @@
 import { IncomingMessage } from "node:http";
 
-import { captureException } from "@sentry/node";
 import axios from "axios";
-import Boom from "boom";
 import type { AnyBulkWriteOperation } from "mongodb";
 import { IFormationCatalogue, zFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
 import { default as StreamChain } from "stream-chain";
@@ -11,6 +9,7 @@ import { default as StreamArrayPick } from "stream-json/streamers/StreamArray.js
 
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb } from "@/common/model/collections";
+import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import config from "@/config";
 
 const { chain } = StreamChain;
@@ -37,6 +36,7 @@ export const hydrateFormationsCatalogue = async () => {
   });
 
   const queriesInProgress: Promise<unknown>[] = [];
+  const errors = createErrorAggregator("hydrate-formations-catalogue");
   let totalFormations = 0;
   let pendingFormations: IFormationCatalogue[] = [];
 
@@ -62,10 +62,8 @@ export const hydrateFormationsCatalogue = async () => {
         formationsCatalogueDb()
           .bulkWrite(ops, { ordered: false })
           .catch((err) => {
-            const error = Boom.internal("Échec de l'insertion des formations", err.toJSON());
-            error.cause = err;
-            captureException(error);
-            logger.error({ err: error }, "insertion formation échouée");
+            logger.error({ err }, "insertion formation échouée");
+            errors.record(err);
           })
       );
     }
@@ -91,6 +89,8 @@ export const hydrateFormationsCatalogue = async () => {
       try {
         flushPendingFormations();
         await Promise.all(queriesInProgress);
+        errors.ok(totalFormations - errors.failed);
+        errors.flush();
         logger.info({ count: totalFormations }, "insertions terminées");
         resolve();
       } catch (err) {

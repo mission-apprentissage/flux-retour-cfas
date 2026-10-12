@@ -1,9 +1,9 @@
-import { captureException } from "@sentry/node";
 import { ObjectId } from "bson";
 import { getAcademieById } from "shared/constants";
 
 import logger from "@/common/logger";
 import { effectifsDb, effectifsDECADb, voeuxAffelnetDb } from "@/common/model/collections";
+import { createErrorAggregator } from "@/common/utils/errorAggregator";
 
 export const hydrateVoeuxEffectifsRelations = async (anneeScolaireRentree?: string) => {
   let foundCount = 0;
@@ -86,6 +86,7 @@ export const hydrateVoeuxEffectifsDECARelations = async (anneeScolaireRentree?: 
 export const hydrateAcademieInVoeux = async () => {
   const INSERT_BATCH_SIZE = 1_000;
   let batch: Array<{ _id: ObjectId; academie_code?: string }> = [];
+  const errors = createErrorAggregator("hydrate-academie-in-voeux");
 
   const cursor = voeuxAffelnetDb().find({ academie_code: { $exists: false } });
 
@@ -108,7 +109,8 @@ export const hydrateAcademieInVoeux = async () => {
 
       return voeuxAffelnetDb().bulkWrite(mapped);
     } catch (e) {
-      captureException(e);
+      logger.error({ err: e }, "Échec du bulkWrite des voeux Affelnet");
+      errors.record(e);
     }
   };
 
@@ -143,4 +145,5 @@ export const hydrateAcademieInVoeux = async () => {
   }
 
   await processBatch(batch);
+  errors.flush();
 };

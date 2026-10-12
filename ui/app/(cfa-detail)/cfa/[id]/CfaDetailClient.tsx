@@ -7,6 +7,7 @@ import { CfaCollaborationDetail } from "@/app/_components/ruptures/cfa/collabora
 import { useCfaEffectifDetail } from "@/app/_components/ruptures/cfa/collaboration/hooks";
 import { useMarkNotificationAsRead } from "@/app/_components/ruptures/shared/hooks/useNotificationMutations";
 import { useAuth } from "@/app/_context/UserContext";
+import { reportError } from "@/common/reportError";
 
 export default function CfaDetailClient({ id }: { id: string }) {
   const { user } = useAuth();
@@ -21,7 +22,7 @@ export default function CfaDetailClient({ id }: { id: string }) {
     if (hasUnreadNotification && id && !user?.impersonating) {
       markAsReadRef.current(id, {
         onError: (error: unknown) => {
-          console.error("Failed to mark notification as read:", error);
+          reportError(error, { action: "marquer-notification-lue" });
         },
       });
     }

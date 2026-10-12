@@ -133,11 +133,24 @@ function build({ tier, store, config: tierConfig, getKey }: BuildOpts): express.
 
         if (Math.random() < SENTRY_SAMPLE_RATE) {
           import("@sentry/node")
-            .then(({ captureMessage }) => {
-              captureMessage(`[rate-limit] ${tier} blocked`, {
-                level: "warning",
-                tags: { rate_limit_tier: tier, enforced: String(enforced) },
-                extra: meta,
+            .then(({ captureMessage, withScope }) => {
+              withScope((scope) => {
+                scope.setTag("alert_tier", "veille");
+                scope.setTag("error_kind", "rate-limit");
+                scope.setTag("rate_limit_tier", tier);
+                scope.setTag("enforced", String(enforced));
+                scope.setFingerprint(["rate-limit", tier]);
+                // `key` et `ip` restent hors de Sentry : la clé du tier loginEmail
+                // est l'adresse saisie. Le log applicatif, lui, les conserve.
+                scope.setContext("blocage", {
+                  tier,
+                  userId: meta.userId,
+                  route: meta.route,
+                  retryAfter: meta.retryAfter,
+                  enforced,
+                  échantillonnage: SENTRY_SAMPLE_RATE,
+                });
+                captureMessage("[rate-limit] blocked", "warning");
               });
             })
             .catch(() => undefined);
@@ -152,8 +165,15 @@ function build({ tier, store, config: tierConfig, getKey }: BuildOpts): express.
       }
       logger.error({ tier, err }, "[rate-limit] consume failed, failing open");
       import("@sentry/node")
-        .then(({ captureException }) => {
-          captureException(err, { level: "error", tags: { rate_limit_tier: tier } });
+        .then(({ captureException, withScope }) => {
+          withScope((scope) => {
+            // Le store est en panne et on laisse passer : la protection est levée.
+            scope.setTag("alert_tier", "jour");
+            scope.setTag("error_kind", "db");
+            scope.setTag("rate_limit_tier", tier);
+            scope.setFingerprint(["rate-limit-store", tier]);
+            captureException(err, { level: "error" });
+          });
         })
         .catch(() => undefined);
       next();

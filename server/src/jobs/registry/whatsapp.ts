@@ -38,8 +38,11 @@ export const whatsappJobs = {
 
 export const whatsappCrons = {
   // 18h30 Paris — mise en file de l'envoi WhatsApp préqualif quotidien (cap 500, kill-switch Brevo)
+  // Mesuré sur 71 occurrences : attente max 19 min, durée max 0,04 s.
   "Envoi WhatsApp préqualif quotidien à 18h30": {
     cron_string: "30 18 * * *",
+    checkinMargin: 30,
+    maxRuntimeInMinutes: 5,
     handler: async () => {
       const PREQUALIF_DAILY_CRON_ENABLED = true;
       const PREQUALIF_DAILY_CRON_CAP = 500;

@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 
+import logger from "@/common/logger";
 import { getDatabase } from "@/common/mongodb";
 
 // Champs utilisateur à fusionner du record supprimé vers le keeper
@@ -35,18 +36,18 @@ export const up = async () => {
 
   // Étape 0 : Supprimer l'ancien index unique (sans mission_locale_id, sans partial filter)
   // qui bloque la renormalisation des dates (deux docs convergent vers la même date après normalisation)
-  console.log("Step 0: Dropping old unique index on identifiant_normalise...");
+  logger.info("[Migration] Étape 0 : suppression de l'ancien index unique sur identifiant_normalise");
   const OLD_INDEX_NAME =
     "identifiant_normalise.nom_1_identifiant_normalise.prenom_1_identifiant_normalise.date_de_naissance_1";
   try {
     await collection.dropIndex(OLD_INDEX_NAME);
-    console.log(`Dropped old index ${OLD_INDEX_NAME}`);
+    logger.info({ indexName: OLD_INDEX_NAME }, "[Migration] Ancien index supprimé");
   } catch {
-    console.log(`Old index ${OLD_INDEX_NAME} not found, skipping`);
+    logger.info({ indexName: OLD_INDEX_NAME }, "[Migration] Ancien index introuvable, ignoré");
   }
 
   // Étape 1 : Re-normaliser tous les identifiant_normalise.date_de_naissance
-  console.log("Step 1: Re-normalizing identifiant_normalise.date_de_naissance...");
+  logger.info("[Migration] Étape 1 : re-normalisation de identifiant_normalise.date_de_naissance");
   const BATCH_SIZE = 1000;
   const cursor = collection.find({ "identifiant_normalise.date_de_naissance": { $exists: true } });
   let normalizedCount = 0;
@@ -81,10 +82,10 @@ export const up = async () => {
   if (batch.length > 0) {
     await collection.bulkWrite(batch);
   }
-  console.log(`Re-normalized ${normalizedCount} date_de_naissance values`);
+  logger.info({ normalizedCount }, "[Migration] Dates de naissance re-normalisées");
 
   // Étape 2 : Identifier les groupes de doublons (même personne, même ML — SANS date_rupture)
-  console.log("Step 2: Finding and merging duplicate groups...");
+  logger.info("[Migration] Étape 2 : recherche et fusion des groupes de doublons");
   const duplicateGroups = await collection
     .aggregate<{
       _id: {
@@ -113,7 +114,7 @@ export const up = async () => {
     ])
     .toArray();
 
-  console.log(`Found ${duplicateGroups.length} duplicate groups`);
+  logger.info({ duplicateGroupCount: duplicateGroups.length }, "[Migration] Groupes de doublons trouvés");
 
   let totalMerged = 0;
   let totalSoftDeleted = 0;
@@ -150,8 +151,9 @@ export const up = async () => {
     if (Object.keys(mergeUpdate).length > 0) {
       await collection.updateOne({ _id: keeper._id }, { $set: { ...mergeUpdate, updated_at: new Date() } });
       totalMerged++;
-      console.log(
-        `Merged fields [${Object.keys(mergeUpdate).join(", ")}] into keeper ${keeper._id} for ${group._id.nom} ${group._id.prenom}`
+      logger.info(
+        { mergedFields: Object.keys(mergeUpdate), keeperId: keeper._id },
+        "[Migration] Champs fusionnés vers le keeper"
       );
     }
 
@@ -160,12 +162,11 @@ export const up = async () => {
     totalSoftDeleted += deleteIds.length;
   }
 
-  console.log(`Merged user data into ${totalMerged} keepers`);
-  console.log(`Soft-deleted ${totalSoftDeleted} duplicate missionLocaleEffectif records`);
+  logger.info({ totalMerged, totalSoftDeleted }, "[Migration] Doublons fusionnés et soft-deleted");
 
   // Étape 3 : Initialiser soft_deleted: false sur tous les records actifs (nécessaire pour l'index partiel)
   // Bypass validation car certains anciens documents ne passent pas la validation Zod du schéma
-  console.log("Step 3: Setting soft_deleted: false on all active records...");
+  logger.info("[Migration] Étape 3 : initialisation de soft_deleted à false sur les records actifs");
   await db.command({
     collMod: "missionLocaleEffectif",
     validationLevel: "off",
@@ -178,14 +179,17 @@ export const up = async () => {
     collMod: "missionLocaleEffectif",
     validationLevel: "moderate",
   });
-  console.log(`Set soft_deleted: false on ${activeResult.modifiedCount} active records`);
+  logger.info(
+    { modifiedCount: activeResult.modifiedCount },
+    "[Migration] soft_deleted initialisé sur les records actifs"
+  );
 
   // Étape 4 : Créer l'index unique partiel (SANS date_rupture)
   // Note: MongoDB ne supporte pas $ne dans les partialFilterExpression, on utilise $eq: false
-  console.log("Step 4: Creating unique partial index...");
+  logger.info("[Migration] Étape 4 : création de l'index unique partiel");
   try {
     await collection.dropIndex("identifiant_normalise_ml_unique_active");
-    console.log("Dropped existing index identifiant_normalise_ml_unique_active");
+    logger.info("[Migration] Index identifiant_normalise_ml_unique_active existant supprimé");
   } catch {
     // Index might not exist yet
   }
@@ -205,7 +209,7 @@ export const up = async () => {
       },
     }
   );
-  console.log("Created unique partial index identifiant_normalise_ml_unique_active");
+  logger.info("[Migration] Index unique partiel identifiant_normalise_ml_unique_active créé");
 
   // Rapport final
   const totalDocs = await collection.countDocuments();
@@ -217,15 +221,18 @@ export const up = async () => {
   });
   const withSituation = await collection.countDocuments({ soft_deleted: false, situation: { $ne: null } });
 
-  console.log("\n=== RAPPORT MIGRATION ===");
-  console.log(`Documents totaux          : ${totalDocs}`);
-  console.log(`Documents actifs          : ${activeDocs}`);
-  console.log(`Documents soft-deleted    : ${softDeletedDocs}`);
-  console.log(`Actifs avec identifiant   : ${withIdentifiant}`);
-  console.log(`Actifs avec situation     : ${withSituation}`);
-  console.log(`Dates re-normalisées     : ${normalizedCount}`);
-  console.log(`Groupes de doublons       : ${duplicateGroups.length}`);
-  console.log(`Doublons soft-deleted     : ${totalSoftDeleted}`);
-  console.log(`Keepers avec merge        : ${totalMerged}`);
-  console.log("=========================\n");
+  logger.info(
+    {
+      totalDocs,
+      activeDocs,
+      softDeletedDocs,
+      withIdentifiant,
+      withSituation,
+      normalizedCount,
+      duplicateGroupCount: duplicateGroups.length,
+      totalSoftDeleted,
+      totalMerged,
+    },
+    "[Migration] Rapport final"
+  );
 };

@@ -1,6 +1,7 @@
 import type { AnyBulkWriteOperation } from "mongodb";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
+import logger from "@/common/logger";
 import { effectifsDECADb } from "@/common/model/collections";
 
 export const up = async () => {
@@ -31,17 +32,8 @@ export const up = async () => {
       totalUpdated += bulkUpdates.length;
     }
 
-    console.info(`Migration completed successfully: Updated transmitted_at for ${totalUpdated} effectifs.`);
+    logger.info({ totalUpdated }, "[Migration] transmitted_at mis à jour");
   } catch (error) {
-    if (error instanceof Error) {
-      console.error(`[ERROR] Migration failed.`, {
-        message: error.message,
-        stack: error.stack,
-      });
-    } else {
-      console.error(`[ERROR] Migration failed.`, {
-        message: String(error),
-      });
-    }
+    logger.error({ err: error }, "[Migration] Échec de la migration");
   }
 };

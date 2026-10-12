@@ -14,11 +14,13 @@ export async function buildAdresse(dossier: IBuildAdresseParams): Promise<IEffec
     return null;
   }
 
+  // Dégradation assumée : une panne d'api-alternance ingère l'effectif sans
+  // adresse plutôt que de le rejeter. Le wrapper a déjà signalé la panne.
   const communeInfo = await getCommune({
     codeInsee: code_commune_insee_apprenant,
     codePostal: code_postal_apprenant,
     adresse: dossier.adresse_apprenant,
-  });
+  }).catch(() => null);
 
   if (communeInfo == null) {
     return null;

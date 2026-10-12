@@ -1,3 +1,4 @@
+import logger from "@/common/logger";
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
 export const up = async () => {
@@ -6,5 +7,5 @@ export const up = async () => {
     [{ $set: { "organisme_data.acc_conjoint_at": { $ifNull: ["$organisme_data.reponse_at", "$created_at"] } } }]
   );
 
-  console.log(`acc_conjoint_at posé sur ${modifiedCount} dossier(s) de collaboration`);
+  logger.info({ modifiedCount }, "[Migration] acc_conjoint_at posé sur les dossiers de collaboration");
 };

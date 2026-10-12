@@ -1,6 +1,5 @@
 "use client";
 
-import { captureException } from "@sentry/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import type { RncpInfo } from "shared/models/apis/@types/ApiAlternance";
 
@@ -24,7 +23,6 @@ export function RncpDetails({ code }: { code: string | null }) {
   if (rncpInfoQuery.isLoading) return <p>Chargement…</p>;
 
   if (rncpInfoQuery.isError) {
-    captureException(rncpInfoQuery.error, { extra: { code } });
     return <p>Erreur lors de la récupération des informations RNCP</p>;
   }
 

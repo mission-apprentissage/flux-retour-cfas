@@ -12,7 +12,7 @@ import { getErrorMessage } from "@/common/utils/errorUtils";
 import { createSipaUser, deleteSipaUser } from "./common/actions/sipa.actions";
 import logger from "./common/logger";
 import { closeMongodbConnection } from "./common/mongodb";
-import { closeSentry, initSentryProcessor } from "./common/services/sentry/sentry";
+import { closeSentry } from "./common/services/sentry/sentry";
 import { sleep } from "./common/utils/asyncUtils";
 import config from "./config";
 import createServer from "./http/server";
@@ -62,8 +62,6 @@ program
     // on définit le module du logger en global pour distinguer les logs des jobs
     if (command !== "start") {
       logger.fields.module = `cli:${command}`;
-      // Pas besoin d'init Sentry dans le cas du server car il est start automatiquement
-      initSentryProcessor();
     }
   })
   .hook("postAction", async () => {
@@ -122,7 +120,6 @@ program
       await Promise.all(tasks);
     } catch (err) {
       logger.error(err);
-      captureException(err);
       throw err;
     }
   });
@@ -131,7 +128,6 @@ program
   .command("queue_processor:start")
   .description("Démarre le démon qui traite les effectifs en attente")
   .action(async () => {
-    initSentryProcessor();
     const signal = createProcessExitSignal();
 
     if (config.disable_processors) {
@@ -233,10 +229,8 @@ program
     } catch (err) {
       program.error(getErrorMessage(err) || "Command failed", { exitCode: 2 });
     }
-    // eslint-disable-next-line no-console
     console.log(`Compte SIPA créé : ${username}`);
     if (!password) {
-      // eslint-disable-next-line no-console
       console.log(`Mot de passe généré (affiché une seule fois, à ranger dans le coffre) : ${finalPassword}`);
     }
   });
@@ -251,7 +245,6 @@ program
     } catch (err) {
       program.error(getErrorMessage(err) || "Command failed", { exitCode: 2 });
     }
-    // eslint-disable-next-line no-console
     console.log(`Compte SIPA supprimé : ${username}`);
   });
 
@@ -343,11 +336,13 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis"));
 
+/* Commenté avec le job et le cron correspondants dans jobs/registry/emails.ts.
 program
   .command("send-reminder-emails")
   .description("Envoi des emails de relance")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("send-reminder-emails"));
+*/
 
 program
   .command("send-mission-locale-weekly-recap")
@@ -535,7 +530,6 @@ program
   .command("jobs:list")
   .description("Affiche les jobs et crons enregistrés, groupés par domaine (horaires Europe/Paris)")
   .action(() => {
-    /* eslint-disable no-console */
     for (const [domain, def] of Object.entries(registry)) {
       console.log(`\n[${domain}] ${Object.keys(def.jobs).length} jobs`);
       for (const name of Object.keys(def.jobs)) {
@@ -554,7 +548,6 @@ program
     for (const [name, def] of sortedCrons) {
       console.log(`  ${def.cron_string.padEnd(12)} ${name}`);
     }
-    /* eslint-enable no-console */
   });
 
 program

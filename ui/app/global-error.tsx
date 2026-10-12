@@ -1,12 +1,13 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import NextError from "next/error";
 import { useEffect } from "react";
 
+import { reportBoundaryError } from "@/common/reportError";
+
 export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    reportBoundaryError(error, "global");
   }, [error]);
 
   return (

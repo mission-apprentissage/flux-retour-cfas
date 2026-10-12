@@ -4,6 +4,7 @@ import XLSX from "xlsx";
 
 import { FieldConfig, televersementHeaders } from "@/common/constants/televersementHeaders";
 import { _post } from "@/common/httpClient";
+import { reportError } from "@/common/reportError";
 import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
 import { toEffectifsQueue } from "@/common/utils/televersement";
@@ -199,7 +200,7 @@ const useExcelFileProcessor = (organismeId: string) => {
           status: errors.length ? "validation_failure" : "validation_success",
         }));
       } catch (error) {
-        console.error("Erreur de traitement du fichier:", error);
+        reportError(error, { action: "traitement-fichier-excel" });
         const errorMsg = "Erreur de traitement du fichier";
         setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
       }

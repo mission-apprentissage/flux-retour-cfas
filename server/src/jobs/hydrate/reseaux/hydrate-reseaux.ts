@@ -1,8 +1,8 @@
-import { captureException } from "@sentry/node";
 import { ObjectId } from "mongodb";
 
 import logger from "@/common/logger";
 import { organismesDb, reseauxDb } from "@/common/model/collections";
+import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import { __dirname } from "@/common/utils/esmUtils";
 import { readJsonFromCsvFile } from "@/common/utils/fileUtils";
 import { getStaticFilePath } from "@/common/utils/getStaticFilePath";
@@ -55,6 +55,7 @@ const parseReseauxTextFromCsv = (reseauText: string): string[] => {
  */
 export const populateReseauxCollection = async (): Promise<void> => {
   const uniqueReseaux = new Set<string>();
+  const errors = createErrorAggregator("hydrate-reseaux");
 
   for (const file of INPUT_FILES) {
     try {
@@ -68,8 +69,8 @@ export const populateReseauxCollection = async (): Promise<void> => {
 
       logger.info(`Fichier traité avec succès : ${file}`);
     } catch (error) {
-      logger.error(`Erreur lors du traitement du fichier ${file} :`, error);
-      captureException(error);
+      logger.error({ err: error, file }, "Erreur lors du traitement du fichier");
+      errors.record(error);
     }
   }
 
@@ -91,9 +92,12 @@ export const populateReseauxCollection = async (): Promise<void> => {
           { $set: { organismes_ids: reseauToOrganismesMap as ObjectId[], updated_at: new Date() } }
         );
       } catch (error) {
-        logger.error(`Erreur lors de la récupération des organismes pour le réseau ${reseau} :`, error);
-        captureException(error);
+        logger.error({ err: error, reseau }, "Erreur lors de la récupération des organismes du réseau");
+        errors.record(error);
       }
     })
   );
+
+  errors.ok(INPUT_FILES.length + uniqueReseaux.size - errors.failed);
+  errors.finish();
 };

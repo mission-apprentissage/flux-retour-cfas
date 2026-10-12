@@ -1,9 +1,8 @@
-import { captureException } from "@sentry/node";
-
 import { getNiveauFormationLibelle } from "@/common/actions/formations.actions";
 import { getCfdInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import logger from "@/common/logger";
 import { effectifsDb } from "@/common/model/collections";
+import { createErrorAggregator } from "@/common/utils/errorAggregator";
 
 export async function hydrateEffectifsFormationsNiveaux() {
   logger.info("Hydrating effectifs.formation.niveaux ...");
@@ -28,6 +27,8 @@ export async function hydrateEffectifsFormationsNiveaux() {
   let cfdNotFound: string[] = [];
 
   logger.info(`${effectifsCfdWithoutNiveau.length} codes CFD avec niveau vide dans les effectifs`);
+
+  const errors = createErrorAggregator("hydrate-effectifs-formations-niveaux");
 
   // Pour chaque CFD qui a son niveau vide on appelle l'API TCO et on update tous les effectifs concernés avec le niveau récupéré
   for (const currentCfd of effectifsCfdWithoutNiveau) {
@@ -56,10 +57,12 @@ export async function hydrateEffectifsFormationsNiveaux() {
       }
     } catch (err) {
       nbEffectifsNotUpdated++;
-      logger.error(JSON.stringify(err));
-      captureException(err);
+      logger.error({ err, cfd: currentCfd }, "Échec de mise à jour du niveau de formation");
+      errors.record(err);
     }
   }
+  errors.ok(effectifsCfdWithoutNiveau.length - errors.failed);
+  errors.flush();
 
   logger.info(`${nbEffectifsUpdated} effectifs avec niveau vide mis à jour.`);
   logger.info(`${nbEffectifsNotUpdated} effectifs non mis à jour !`);

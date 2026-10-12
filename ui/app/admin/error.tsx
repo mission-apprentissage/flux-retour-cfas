@@ -2,10 +2,17 @@
 
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { notFound } from "next/navigation";
+import { useEffect } from "react";
+
+import { reportBoundaryError } from "@/common/reportError";
 
 import styles from "./error.module.css";
 
-export default function ErrorComponent() {
+export default function ErrorComponent({ error }: { error: Error }) {
+  useEffect(() => {
+    reportBoundaryError(error, "admin");
+  }, [error]);
+
   return (
     <div className="fr-container">
       <div className={styles.content}>

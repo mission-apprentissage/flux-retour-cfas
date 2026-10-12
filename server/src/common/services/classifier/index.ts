@@ -1,2 +1,2 @@
-export { scoreEffectifs, extractScoreInput } from "./classifier";
+export { scoreEffectifs, extractScoreInput, reportClassifierFailure } from "./classifier";
 export type { EffectifScoreInput } from "./classifier";

@@ -26,6 +26,7 @@ import {
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { reportError } from "@/common/reportError";
 
 import styles from "./EffectifDetailClient.module.css";
 import detailStyles from "./EffectifDetailClient.module.css";
@@ -142,7 +143,7 @@ export default function EffectifDetailClient() {
           }, SUCCESS_DISPLAY_DURATION);
         },
         onError: (error) => {
-          console.error("Erreur lors de la mise à jour de l'effectif France Travail:", error);
+          reportError(error, { action: "maj-effectif-france-travail" });
           setSubmissionState({ isSubmitting: false, hasSuccess: false, hasError: true });
         },
       }

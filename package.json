@@ -70,7 +70,8 @@
     "form-data@~2.3.2": "2.5.4",
     "next": "15.5.18",
     "jws": "^3.2.3",
-    "@types/express": "^5.0.6"
+    "@types/express": "^5.0.6",
+    "job-processor@^1.10.3": "patch:job-processor@npm%3A1.10.3#./.yarn/patches/job-processor-npm-1.10.3-9ecce2a2c4.patch"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.8.1",

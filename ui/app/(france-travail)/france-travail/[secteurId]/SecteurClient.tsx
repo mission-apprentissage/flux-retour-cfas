@@ -55,8 +55,7 @@ export default function SecteurClient() {
             setSelectedDepartements(validDepartements);
             return;
           }
-        } catch (e) {
-          console.error("Error parsing stored departements:", e);
+        } catch {
           localStorage.removeItem(LOCAL_STORAGE_KEYS.FT_SELECTED_DEPARTEMENTS);
         }
       }

@@ -16,14 +16,20 @@ import {
 } from "@/common/actions/organismes/mission-locale.actions";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
+import objectIdSchema from "@/common/validation/objectIdSchema";
 import { OrganismeLocals, returnResult, RouteHandler } from "@/http/middlewares/helpers";
+import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 export default () => {
   const router = express.Router();
 
   router.get("/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
   router.get("/effectif/:id", returnResult(getEffectifMissionLocale));
-  router.put("/effectif/:id", returnResult(updateEffectifMissionLocaleData));
+  router.put(
+    "/effectif/:id",
+    validateRequestMiddleware({ params: objectIdSchema("id"), body: zUpdateMissionLocaleEffectifOrganisme }),
+    returnResult(updateEffectifMissionLocaleData)
+  );
   router.put("/effectif/:id/mark-read", returnResult(markNotificationAsRead));
 
   return router;
@@ -41,23 +47,20 @@ const getEffectifsParMoisMissionLocale: RouteHandler<OrganismeLocals> = async (r
   return result;
 };
 
-const updateEffectifMissionLocaleData: RouteHandler<OrganismeLocals> = async (req, { locals }) => {
-  const effectifId = req.params.id;
-
-  if (!ObjectId.isValid(effectifId)) {
-    throw Boom.badRequest("Invalid effectif ID");
-  }
-
+const updateEffectifMissionLocaleData: RouteHandler<
+  OrganismeLocals,
+  { id: ObjectId },
+  unknown,
+  z.infer<typeof zUpdateMissionLocaleEffectifOrganisme>
+> = async (req, { locals }) => {
   const organisme = await getOrganismeById(locals.organismeId);
 
   if (!organisme) {
     throw Boom.forbidden("No organisme found for the provided ID");
   }
 
-  const data = await zUpdateMissionLocaleEffectifOrganisme.parseAsync(req.body);
-
   const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
-  return await setEffectifMissionLocaleDataFromOrganisme(organisme._id, new ObjectId(effectifId), data, userId);
+  return await setEffectifMissionLocaleDataFromOrganisme(organisme._id, req.params.id, req.body, userId);
 };
 
 const getEffectifMissionLocale: RouteHandler<OrganismeLocals> = async (req, { locals }) => {

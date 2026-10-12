@@ -478,7 +478,7 @@ export const removeUser = async (_idStr: string | ObjectId) => {
   const user = await usersMigrationDb().findOne({ _id });
 
   if (!user) {
-    throw new Error("Unable to find user");
+    throw Boom.notFound("Unable to find user");
   }
 
   // Idem rejectMembre : pas de retrait du contact côté Brevo (synchro upsert-only).
@@ -523,7 +523,7 @@ export const updateUser = async (_id: string | ObjectId, data: Partial<IUsersMig
   const user = await usersMigrationDb().findOne({ _id: new ObjectId(_id) });
 
   if (!user) {
-    throw new Error("Unable to find user");
+    throw Boom.notFound("Unable to find user");
   }
 
   if (data.email && data.email !== user.email) {
