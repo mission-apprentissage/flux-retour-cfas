@@ -12,6 +12,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ revision: -1 }, {}],
   [{ "raw.ine": 1 }, {}],
   [{ deleted_at: 1 }, {}],
+  [{ effectif_id: 1 }, {}],
 ];
 
 const zVoeuAffelnetRaw = z.object({
