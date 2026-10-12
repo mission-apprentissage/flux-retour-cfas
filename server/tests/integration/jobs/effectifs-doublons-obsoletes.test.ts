@@ -1,13 +1,10 @@
-import { subDays } from "date-fns";
 import { ObjectId } from "mongodb";
 import { MOTIF_SUPPRESSION, STATUT_APPRENANT } from "shared/constants";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IFranceTravailEffectif } from "shared/models/data/franceTravailEffectif.model";
 import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
-import type { IOrganisation } from "shared/models/data/organisations.model";
 import type { IOrganisme } from "shared/models/data/organismes.model";
 import type { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
-import { getAnneeScolaireFromDate } from "shared/utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -16,87 +13,30 @@ import {
   franceTravailEffectifsDb,
   missionLocaleEffectifsDb,
   missionLocaleStatsDb,
-  organisationsDb,
-  organismesDb,
   voeuxAffelnetDb,
 } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 import { rapportDoublonsObsoletes, traiterDoublonsObsoletes } from "@/jobs/effectifs/doublons-obsoletes";
 import { repointerLiensVersJumeau } from "@/jobs/effectifs/repointer-liens";
-import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
+import { createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
+import {
+  ANNEE,
+  creerMissionLocale,
+  creerOrganisme,
+  identite,
+  insererDossierMl,
+  insererEffectif,
+  ML_ID,
+  NOW,
+  SOURCE,
+} from "@tests/utils/effectifsJumeaux";
 import { testDoc } from "@tests/utils/testUtils";
 
 vi.mock("@/jobs/effectifs/repointer-liens", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/jobs/effectifs/repointer-liens")>();
   return { ...actual, repointerLiensVersJumeau: vi.fn(actual.repointerLiensVersJumeau) };
 });
-
-const NOW = new Date("2026-09-30T12:00:00Z");
-const ANNEE = getAnneeScolaireFromDate(NOW);
-const SOURCE = new ObjectId().toString();
-
-const identite = { nom: "DURAND", prenom: "Léa", date_de_naissance: new Date("2007-03-04T00:00:00Z") };
-
-async function creerOrganisme(nom: string): Promise<IOrganisme> {
-  const organisme = { _id: new ObjectId(), ...createRandomOrganisme(), nom };
-  await organismesDb().insertOne(organisme);
-  return organisme;
-}
-
-type Statut = (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT];
-
-async function insererEffectif({
-  organisme,
-  idErp,
-  transmisIlYa,
-  apprenant = identite,
-  source = SOURCE,
-  statut,
-}: {
-  organisme: IOrganisme;
-  idErp: string;
-  transmisIlYa: number;
-  apprenant?: Partial<IEffectif["apprenant"]>;
-  source?: string;
-  statut?: Statut;
-}) {
-  const base = await createSampleEffectif({
-    organisme,
-    annee_scolaire: ANNEE,
-    id_erp_apprenant: idErp,
-    source_organisme_id: source,
-    apprenant,
-  });
-  const effectif = {
-    _id: new ObjectId(),
-    ...base,
-    transmitted_at: subDays(NOW, transmisIlYa),
-    ...(statut
-      ? {
-          _computed: {
-            ...base._computed,
-            statut: { en_cours: statut, parcours: [{ valeur: statut, date: new Date("2026-01-01T00:00:00Z") }] },
-          },
-        }
-      : {}),
-  };
-  await effectifsDb().insertOne(testDoc<IEffectif>(effectif));
-  return effectif;
-}
-
-async function insererDossierMl(effectif: { _id: ObjectId }, missionLocaleId: ObjectId) {
-  const dossier = testDoc<IMissionLocaleEffectif>({
-    mission_locale_id: missionLocaleId,
-    effectif_id: effectif._id,
-    effectif_snapshot: effectif,
-    effectif_snapshot_date: NOW,
-    created_at: NOW,
-    current_status: { value: null, date: null },
-  });
-  await missionLocaleEffectifsDb().insertOne(dossier);
-  return dossier;
-}
 
 describe("rapportDoublonsObsoletes", () => {
   useMongo();
@@ -277,7 +217,6 @@ describe("rapportDoublonsObsoletes", () => {
 describe("traiterDoublonsObsoletes", () => {
   useMongo();
 
-  const ML_ID = new ObjectId();
   let ancien: IOrganisme;
   let recent: IOrganisme;
 
@@ -285,9 +224,7 @@ describe("traiterDoublonsObsoletes", () => {
     await getDatabase().command({ collMod: "voeuxAffelnet", validationLevel: "off" });
     ancien = await creerOrganisme("CMAR NOUVELLE AQUITAINE");
     recent = await creerOrganisme("CMA FORMATION NIORT");
-    await organisationsDb().insertOne(
-      testDoc<IOrganisation>({ _id: ML_ID, type: "MISSION_LOCALE", ml_id: 42, nom: "ML Niort", created_at: NOW })
-    );
+    await creerMissionLocale();
   });
 
   it("sans appliquer, rapporte sans rien écrire", async () => {
@@ -365,7 +302,7 @@ describe("traiterDoublonsObsoletes", () => {
       transmisIlYa: 0,
       statut: STATUT_APPRENANT.RUPTURANT,
     });
-    const dossier = await insererDossierMl(fiche, ML_ID);
+    const dossier = await insererDossierMl(fiche);
 
     const rapport = await traiterDoublonsObsoletes({ date: NOW, appliquer: true });
 
@@ -386,7 +323,7 @@ describe("traiterDoublonsObsoletes", () => {
       statut: STATUT_APPRENANT.RUPTURANT,
     });
     await insererEffectif({ organisme: recent, idErp: "R1", transmisIlYa: 0, statut: STATUT_APPRENANT.APPRENTI });
-    const dossier = await insererDossierMl(fiche, ML_ID);
+    const dossier = await insererDossierMl(fiche);
 
     const rapport = await traiterDoublonsObsoletes({ date: NOW, appliquer: true });
 
@@ -413,7 +350,7 @@ describe("traiterDoublonsObsoletes", () => {
     await insererEffectif({ ...options, organisme: recent, idErp: "X1", transmisIlYa: 0 });
     const valide = await insererEffectif({ ...options, idErp: "X2" });
     await insererEffectif({ ...options, organisme: recent, idErp: "X2", transmisIlYa: 0 });
-    const dossier = await insererDossierMl(invalide, ML_ID);
+    const dossier = await insererDossierMl(invalide);
     await getDatabase().command({ collMod: "effectifs", validationLevel: "off" });
     await effectifsDb().updateOne({ _id: invalide._id }, { $set: { "apprenant.courriel": 42 } });
     await getDatabase().command({ collMod: "effectifs", validationLevel: "strict" });
@@ -491,8 +428,8 @@ describe("traiterDoublonsObsoletes", () => {
     const seconde = await insererEffectif({ ...options, idErp: "T2" });
     await insererEffectif({ ...options, organisme: recent, idErp: "T2", transmisIlYa: 0 });
     const dossiers = new Map([
-      [premiere._id.toString(), await insererDossierMl(premiere, ML_ID)],
-      [seconde._id.toString(), await insererDossierMl(seconde, ML_ID)],
+      [premiere._id.toString(), await insererDossierMl(premiere)],
+      [seconde._id.toString(), await insererDossierMl(seconde)],
     ]);
     const { repointerLiensVersJumeau: repointerReel } = await vi.importActual<
       typeof import("@/jobs/effectifs/repointer-liens")

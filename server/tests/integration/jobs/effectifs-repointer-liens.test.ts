@@ -5,16 +5,14 @@ import {
   FRANCE_TRAVAIL_SITUATION_ENUM,
   type IFranceTravailEffectif,
 } from "shared/models/data/franceTravailEffectif.model";
-import { SITUATION_ENUM, type IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
+import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
 import type { IOrganisation } from "shared/models/data/organisations.model";
 import type { IOrganisme } from "shared/models/data/organismes.model";
 import type { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
-import { getAnneeScolaireFromDate } from "shared/utils";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
-  effectifsDb,
   franceTravailEffectifsDb,
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogDb,
@@ -24,67 +22,21 @@ import {
 } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 import { repointerLiensVersJumeau } from "@/jobs/effectifs/repointer-liens";
-import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
+import {
+  avecStatut,
+  creerMissionLocale,
+  creerOrganisme,
+  DATE_STATUT,
+  identite,
+  insererDossierMl,
+  insererEffectif,
+  ML_ID,
+  NOW,
+} from "@tests/utils/effectifsJumeaux";
 import { testDoc } from "@tests/utils/testUtils";
 
-const NOW = new Date("2026-09-30T12:00:00Z");
-const DATE_STATUT = new Date("2026-01-01T00:00:00Z");
-const ANNEE = getAnneeScolaireFromDate(NOW);
-const SOURCE = new ObjectId().toString();
-const ML_ID = new ObjectId();
-
-const identite = { nom: "DURAND", prenom: "Léa", date_de_naissance: new Date("2007-03-04T00:00:00Z") };
-
-type Statut = (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT];
-
-const avecStatut = (effectif: IEffectif, statut: Statut): IEffectif => ({
-  ...effectif,
-  _computed: {
-    ...effectif._computed,
-    statut: { en_cours: statut, parcours: [{ valeur: statut, date: DATE_STATUT }] },
-  },
-});
-
-async function creerOrganisme(nom: string): Promise<IOrganisme> {
-  const organisme = { _id: new ObjectId(), ...createRandomOrganisme(), nom };
-  await organismesDb().insertOne(organisme);
-  return organisme;
-}
-
-async function insererEffectif(organisme: IOrganisme, statut: Statut): Promise<IEffectif> {
-  const effectif = avecStatut(
-    {
-      _id: new ObjectId(),
-      ...(await createSampleEffectif({
-        organisme,
-        annee_scolaire: ANNEE,
-        id_erp_apprenant: "A1",
-        source_organisme_id: SOURCE,
-        apprenant: { ...identite, adresse: { mission_locale_id: 42 } },
-      })),
-      transmitted_at: NOW,
-    } as IEffectif,
-    statut
-  );
-  await effectifsDb().insertOne(effectif);
-  return effectif;
-}
-
-async function insererDossierMl(effectif: IEffectif, extra: Partial<IMissionLocaleEffectif> = {}) {
-  const dossier = testDoc<IMissionLocaleEffectif>({
-    mission_locale_id: ML_ID,
-    effectif_id: effectif._id,
-    effectif_snapshot: effectif,
-    effectif_snapshot_date: NOW,
-    date_rupture: null,
-    created_at: NOW,
-    current_status: { value: effectif._computed?.statut?.en_cours ?? null, date: DATE_STATUT },
-    ...extra,
-  });
-  await missionLocaleEffectifsDb().insertOne(dossier);
-  return dossier;
-}
+const apprenant = { ...identite, adresse: { mission_locale_id: 42 } };
 
 const saisie = (situation: FRANCE_TRAVAIL_SITUATION_ENUM) => ({
   situation,
@@ -122,11 +74,9 @@ describe("repointerLiensVersJumeau", () => {
     await getDatabase().command({ collMod: "voeuxAffelnet", validationLevel: "off" });
     ancien = await creerOrganisme("CMAR NOUVELLE AQUITAINE");
     recent = await creerOrganisme("CMA FORMATION NIORT");
-    await organisationsDb().insertOne(
-      testDoc<IOrganisation>({ _id: ML_ID, type: "MISSION_LOCALE", ml_id: 42, nom: "ML Niort", created_at: NOW })
-    );
-    fiche = await insererEffectif(ancien, STATUT_APPRENANT.RUPTURANT);
-    jumeau = await insererEffectif(recent, STATUT_APPRENANT.RUPTURANT);
+    await creerMissionLocale();
+    fiche = await insererEffectif({ organisme: ancien, apprenant, statut: STATUT_APPRENANT.RUPTURANT });
+    jumeau = await insererEffectif({ organisme: recent, apprenant, statut: STATUT_APPRENANT.RUPTURANT });
   });
 
   it("re-pointe le dossier ML vers le jumeau quand celui-ci n'en a pas", async () => {
