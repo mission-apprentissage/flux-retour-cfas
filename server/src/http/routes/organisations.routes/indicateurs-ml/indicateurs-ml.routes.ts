@@ -463,16 +463,9 @@ const resolveCollaborationDossiersScope = async (
   }
 
   if (query.ml_id) {
-    await verifyMlInRegions(query.ml_id, userRegions);
-    if (organisation.type === ORGANISATION_TYPE.DDETS) {
-      const ml = await organisationsDb().findOne(
-        { _id: new ObjectId(query.ml_id), type: "MISSION_LOCALE" },
-        { projection: { "adresse.departement": 1 } }
-      );
-      const departement = (organisation as { code_departement?: string }).code_departement;
-      if (!departement || (ml as { adresse?: { departement?: string } } | null)?.adresse?.departement !== departement) {
-        throw Boom.forbidden("Accès non autorisé à ce département");
-      }
+    const { nominatif } = await verifyMlInScope(query.ml_id, { organisation, regions: userRegions });
+    if (!nominatif) {
+      throw Boom.forbidden("Accès non autorisé à ce département");
     }
     return { missionLocaleId: new ObjectId(query.ml_id), perimetreRegions: userRegions };
   }
@@ -705,26 +698,23 @@ const getCouvertureRegionsRoute: IndicateursHandler<z.infer<typeof nationalQuery
 };
 
 const getMlDetailRoute: IndicateursHandler<DefaultQuery, z.infer<typeof mlIdParams>> = async (req, { locals }) => {
-  const { id } = req.params;
-  const userRegions = locals.regions;
+  const { nominatif } = await verifyMlInScope(req.params.id, locals);
 
-  await verifyMlInRegions(id, userRegions);
-
-  const mlId = new ObjectId(id);
+  const mlId = new ObjectId(req.params.id);
   const [detail, indicateurs] = await Promise.all([
     getMissionLocaleDetail(mlId),
     getMissionLocaleFicheIndicateurs(mlId),
   ]);
-  return { ...detail, indicateurs };
+  return { ...detail, indicateurs, peut_voir_nominatif: nominatif };
 };
 
 const getMlMembresRoute: IndicateursHandler<DefaultQuery, z.infer<typeof mlIdParams>> = async (req, { locals }) => {
-  const { id } = req.params;
-  const userRegions = locals.regions;
+  const { nominatif } = await verifyMlInScope(req.params.id, locals);
+  if (!nominatif) {
+    throw Boom.forbidden("Accès non autorisé à l'équipe de cette Mission Locale");
+  }
 
-  await verifyMlInRegions(id, userRegions);
-
-  return getMissionLocaleMembers(new ObjectId(id));
+  return getMissionLocaleMembers(new ObjectId(req.params.id));
 };
 
 const getCfaDetailRoute: IndicateursHandler<DefaultQuery, z.infer<typeof organismeIdParams>> = async (
@@ -802,12 +792,26 @@ async function verifyOrganismeInScope(id: string, { organisation, regions }: Ind
   if (regions.length > 0 && !regions.includes(organisme.adresse?.region ?? "")) {
     throw Boom.forbidden("Accès non autorisé à cet organisme");
   }
+  return { nominatif: peutVoirNominatif(organisation, organisme.adresse?.departement) };
+}
+
+/** Données nominatives (équipe, liste des jeunes) : jamais pour l'ARML, et une DDETS seulement dans son département. */
+const peutVoirNominatif = (organisation: IndicateursMlLocals["organisation"], departementStructure?: string | null) => {
   const departement = (organisation as { code_departement?: string }).code_departement;
-  const nominatif =
+  return (
     organisation.type !== ORGANISATION_TYPE.ARML &&
-    (organisation.type !== ORGANISATION_TYPE.DDETS ||
-      (!!departement && departement === organisme.adresse?.departement));
-  return { nominatif };
+    (organisation.type !== ORGANISATION_TYPE.DDETS || (!!departement && departement === departementStructure))
+  );
+};
+
+async function verifyMlInScope(mlId: string, { organisation, regions }: IndicateursMlLocals) {
+  await verifyMlInRegions(mlId, regions);
+  const ml = await organisationsDb().findOne(
+    { _id: new ObjectId(mlId), type: "MISSION_LOCALE" },
+    { projection: { "adresse.departement": 1 } }
+  );
+  const departement = (ml as { adresse?: { departement?: string } } | null)?.adresse?.departement;
+  return { nominatif: peutVoirNominatif(organisation, departement) };
 }
 
 async function verifyMlInRegions(mlId: string, userRegions: string[]): Promise<void> {

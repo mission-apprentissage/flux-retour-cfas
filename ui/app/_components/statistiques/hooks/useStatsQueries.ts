@@ -532,6 +532,7 @@ export interface IMissionLocaleDetailResponse {
   last_activity_at: string | null;
   has_cfa_collaboration: boolean;
   traites_count: number;
+  peut_voir_nominatif: boolean;
   indicateurs: Omit<IMlFicheIndicateurs, "premier_compte_at" | "derniere_connexion_at"> & {
     premier_compte_at: string | null;
     derniere_connexion_at: string | null;

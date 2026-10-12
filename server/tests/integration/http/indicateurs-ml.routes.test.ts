@@ -1608,6 +1608,23 @@ describe("Indicateurs ML routes (territoriales)", () => {
         last_traitement_at: null,
       });
     });
+
+    it("Réserve l'équipe aux profils qui ont droit au nominatif : jamais l'ARML, la DDETS dans son département", async () => {
+      await organisationsDb().updateOne({ _id: ML_IDF }, { $set: { "adresse.departement": "75" } });
+      const membres = (org: IOrganisationCreate) =>
+        requestAsOrganisation(org, "get", `/api/v1/organisation/indicateurs-ml/mission-locale/${ML_IDF}/membres`);
+
+      expect((await membres(DREETS_IDF)).status).toBe(200);
+      expect((await membres(DDETS_PARIS)).status).toBe(200);
+      expectForbidden(await membres(ARML_IDF), "Accès non autorisé à l'équipe de cette Mission Locale");
+      expect((await getFiche(ML_IDF, ARML_IDF)).data.peut_voir_nominatif).toBe(false);
+      expect((await getFiche(ML_IDF, DDETS_PARIS)).data.peut_voir_nominatif).toBe(true);
+      expect((await getFiche(ML_IDF, DREETS_IDF)).data.peut_voir_nominatif).toBe(true);
+
+      await organisationsDb().updateOne({ _id: ML_IDF }, { $set: { "adresse.departement": "77" } });
+      expectForbidden(await membres(DDETS_PARIS), "Accès non autorisé à l'équipe de cette Mission Locale");
+      expect((await getFiche(ML_IDF, DDETS_PARIS)).data.peut_voir_nominatif).toBe(false);
+    });
   });
 
   describe("GET /cfa/:id/detail (fiche CFA)", () => {

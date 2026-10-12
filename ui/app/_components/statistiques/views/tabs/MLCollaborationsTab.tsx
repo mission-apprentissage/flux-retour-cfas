@@ -1,9 +1,6 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ORGANISATION_TYPE } from "shared/constants";
-
-import { useAuth } from "@/app/_context/UserContext";
 
 import { CollabMensuelChart } from "../../charts/CollabMensuelChart";
 import { DetailsDossiersTraitesPieChart } from "../../charts/DetailsDossiersTraitesPieChart";
@@ -21,24 +18,11 @@ import styles from "./FicheCollaborations.module.css";
 
 interface MLCollaborationsTabProps {
   mlId: string;
-  mlDepartement?: string;
+  listeAutorisee: boolean;
   action?: ReactNode;
 }
 
-/** Même règle que le serveur : pas de liste nominative pour l'ARML, ni pour une DDETS hors de son département. */
-const peutVoirListe = (
-  organisation: { type?: string; code_departement?: string } | undefined,
-  mlDepartement?: string
-) =>
-  organisation?.type !== ORGANISATION_TYPE.ARML &&
-  (organisation?.type !== ORGANISATION_TYPE.DDETS || organisation.code_departement === mlDepartement);
-
-export function MLCollaborationsTab({ mlId, mlDepartement, action }: MLCollaborationsTabProps) {
-  const { user } = useAuth();
-  const listeAutorisee = peutVoirListe(
-    user?.organisation as { type?: string; code_departement?: string },
-    mlDepartement
-  );
+export function MLCollaborationsTab({ mlId, listeAutorisee, action }: MLCollaborationsTabProps) {
   const [vue, setVue] = useVueCollaborations(listeAutorisee);
 
   return (
