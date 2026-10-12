@@ -1,6 +1,7 @@
 import { differenceInDays } from "date-fns";
 import { ObjectId } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";
+import type { IEffectif } from "shared/models/data/effectifs.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 
 import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
@@ -323,11 +324,7 @@ export async function rapportDoublonsObsoletes({
   return rapport;
 }
 
-async function archiverEtSupprimer(fiche: DoublonObsolete, date: Date): Promise<boolean> {
-  const effectif = await effectifsDb().findOne({ _id: fiche.effectif_id });
-  if (!effectif) {
-    return false;
-  }
+async function archiverEtSupprimer(fiche: DoublonObsolete, effectif: IEffectif, date: Date) {
   await effectifsArchiveDb().insertOne({
     ...effectif,
     _id: new ObjectId(),
@@ -339,7 +336,44 @@ async function archiverEtSupprimer(fiche: DoublonObsolete, date: Date): Promise<
     },
   });
   await effectifsDb().deleteOne({ _id: fiche.effectif_id });
-  return true;
+}
+
+async function traiterFiche(
+  fiche: DoublonObsolete,
+  date: Date,
+  compteurs: CompteursTraitement,
+  missionsLocales: Map<string, ObjectId>
+) {
+  const effectif = await effectifsDb().findOne({ _id: fiche.effectif_id });
+  if (!effectif) {
+    conserver(fiche, compteurs, "fiche introuvable");
+    return;
+  }
+  if (effectif.transmitted_at && effectif.transmitted_at > fiche.derniere_transmission) {
+    conserver(fiche, compteurs, "fiche retransmise depuis le rapport");
+    return;
+  }
+  const jumeau = await effectifsDb().findOne({ _id: fiche.jumeau_id });
+  if (!jumeau) {
+    conserver(fiche, compteurs, "jumeau introuvable");
+    return;
+  }
+  const liens = await repointerLiensVersJumeau(fiche.effectif_id, jumeau);
+  cumuler(compteurs, liens);
+  for (const missionLocaleId of liens.missions_locales) {
+    missionsLocales.set(missionLocaleId.toString(), missionLocaleId);
+  }
+  if (liens.ml.refuses > 0) {
+    conserver(fiche, compteurs, "migration du dossier Mission Locale refusée");
+    return;
+  }
+  await archiverEtSupprimer(fiche, effectif, date);
+  fiche.traitement = "supprimee";
+  compteurs.supprimees++;
+  logger.info(
+    { effectif_id: fiche.effectif_id, jumeau_id: fiche.jumeau_id, organisme_id: fiche.organisme_id, liens },
+    "Doublon obsolète archivé et supprimé"
+  );
 }
 
 function conserver(fiche: DoublonObsolete, compteurs: CompteursTraitement, motif: string) {
@@ -384,30 +418,12 @@ export async function traiterDoublonsObsoletes({
     if (fiche.categorie !== "supprimable") {
       continue;
     }
-    const jumeau = await effectifsDb().findOne({ _id: fiche.jumeau_id });
-    if (!jumeau) {
-      conserver(fiche, compteurs, "jumeau introuvable");
-      continue;
+    try {
+      await traiterFiche(fiche, date, compteurs, missionsLocales);
+    } catch (err) {
+      logger.error({ err, effectif_id: fiche.effectif_id, jumeau_id: fiche.jumeau_id }, "Doublon obsolète en erreur");
+      conserver(fiche, compteurs, `erreur : ${err instanceof Error ? err.message : String(err)}`);
     }
-    const liens = await repointerLiensVersJumeau(fiche.effectif_id, jumeau);
-    cumuler(compteurs, liens);
-    for (const missionLocaleId of liens.missions_locales) {
-      missionsLocales.set(missionLocaleId.toString(), missionLocaleId);
-    }
-    if (liens.ml.refuses > 0) {
-      conserver(fiche, compteurs, "migration du dossier Mission Locale refusée");
-      continue;
-    }
-    if (!(await archiverEtSupprimer(fiche, date))) {
-      conserver(fiche, compteurs, "fiche introuvable");
-      continue;
-    }
-    fiche.traitement = "supprimee";
-    compteurs.supprimees++;
-    logger.info(
-      { effectif_id: fiche.effectif_id, jumeau_id: fiche.jumeau_id, organisme_id: fiche.organisme_id, liens },
-      "Doublon obsolète archivé et supprimé"
-    );
   }
 
   for (const missionLocaleId of missionsLocales.values()) {
