@@ -49,7 +49,9 @@ export async function resolveCfaEffectif(
   throw Boom.notFound("Effectif non trouvé");
 }
 
-export async function computedOrganismeMl(organismeId: ObjectId): Promise<Record<string, unknown>> {
+type IComputedOrganismeMl = NonNullable<NonNullable<IMissionLocaleEffectif["computed"]>["organisme"]>;
+
+export async function computedOrganismeMl(organismeId: ObjectId): Promise<IComputedOrganismeMl> {
   const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
   const organisme = await organismesDb().findOne(
     { _id: organismeId },
