@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import type { IMlAlerteListeRow, MlAlerteListeSortBy, MlAlerteListeType } from "shared/models/data/nationalStats.model";
@@ -28,6 +29,11 @@ function NomMl({ row }: { row: IMlAlerteListeRow }) {
   return (
     <div className={`${tableStyles.nameCell} ${mlStyles.nom}`}>
       <span className={tableStyles.name}>{row.nom}</span>
+      {!row.is_activated && (
+        <Badge as="span" severity="error" small>
+          N&apos;utilise pas le service
+        </Badge>
+      )}
       <Link
         href={`/suivi-des-indicateurs/mission-locale/${row.id}`}
         className="fr-link fr-link--sm fr-link--icon-right fr-icon-arrow-right-line"
@@ -43,6 +49,7 @@ const centre = (contenu: ReactNode) => <div className={tableStyles.centeredCell}
 
 const COLONNES = {
   nom: { column: "nom", label: "Mission Locale", cellule: (row) => <NomMl row={row} /> },
+  raisonSociale: { column: "nom", label: "Raison sociale", cellule: (row) => <NomMl row={row} /> },
   localisation: {
     column: "localisation",
     label: "Localisation",
@@ -66,6 +73,28 @@ const COLONNES = {
         )}
       </div>
     ),
+  },
+  aRecontacter: {
+    column: "a_recontacter",
+    label: "À recontacter",
+    centered: true,
+    cellule: (row) => centre(row.a_recontacter.toLocaleString("fr-FR")),
+  },
+  delai: {
+    column: "delai_moyen_jours",
+    label: "Délai moyen",
+    centered: true,
+    cellule: (row) => (
+      <div className={`${tableStyles.centeredCell} ${styles.highlight}`}>
+        {row.delai_moyen_jours === null ? "-" : `${row.delai_moyen_jours.toLocaleString("fr-FR")} jours`}
+      </div>
+    ),
+  },
+  collabsRecues: {
+    column: "total_jeunes",
+    label: "Collab reçues",
+    centered: true,
+    cellule: (row) => centre(row.total_jeunes.toLocaleString("fr-FR")),
   },
   pourcentageTraites: {
     column: "pourcentage_traites",
@@ -154,6 +183,46 @@ export function MlRupturesAlertesSection() {
           COLONNES.pourcentageTraites,
           COLONNES.activite,
         ]}
+        triParDefaut="total_jeunes"
+      />
+    </AlertesSection>
+  );
+}
+
+/** Onglet Collaborations > Activité des ML, réservé à l'admin : mêmes alertes que la fiche ML, sur les collaborations. */
+export function MlCollabAlertesSection() {
+  return (
+    <AlertesSection>
+      <MlAlerte
+        type="delai_collab"
+        titre={
+          <>
+            Les ML qui ont un <span className={styles.highlight}>délai de traitement</span> des collabs supérieur à 10
+            jours
+          </>
+        }
+        colonnes={[COLONNES.raisonSociale, COLONNES.localisation, COLONNES.aTraiter, COLONNES.delai]}
+        triParDefaut="delai_moyen_jours"
+      />
+      <MlAlerte
+        type="a_recontacter"
+        titre={
+          <>
+            Les ML qui ont <span className={styles.highlight}>le plus de jeunes à recontacter</span>
+          </>
+        }
+        colonnes={[COLONNES.raisonSociale, COLONNES.localisation, COLONNES.aTraiter, COLONNES.aRecontacter]}
+        triParDefaut="a_recontacter"
+      />
+      <MlAlerte
+        type="collab_sans_compte"
+        titre={
+          <>
+            Les ML qui ont <span className={styles.highlight}>reçu des demandes de collaboration</span> mais qui
+            n&apos;utilisent pas encore le service TBA
+          </>
+        }
+        colonnes={[COLONNES.raisonSociale, COLONNES.localisation, COLONNES.collabsRecues]}
         triParDefaut="total_jeunes"
       />
     </AlertesSection>
