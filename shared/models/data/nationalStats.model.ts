@@ -551,6 +551,42 @@ export interface IMlAlerte {
   valeur: number | null;
 }
 
+/** Listes d'alertes sur les Missions Locales d'un territoire (vues admin des onglets Ruptures et Collaborations). */
+export const ML_ALERTE_LISTE_TYPES = ["non_engagee", "delai_collab", "a_recontacter", "collab_sans_compte"] as const;
+export type MlAlerteListeType = (typeof ML_ALERTE_LISTE_TYPES)[number];
+
+export const ML_ALERTE_LISTE_SORT_BY = [
+  "nom",
+  "localisation",
+  "total_jeunes",
+  "a_traiter",
+  "a_recontacter",
+  "pourcentage_traites",
+  "delai_moyen_jours",
+  "activite",
+] as const;
+export type MlAlerteListeSortBy = (typeof ML_ALERTE_LISTE_SORT_BY)[number];
+
+export interface IMlAlerteListeRow {
+  id: string;
+  nom: string;
+  code_postal: string | null;
+  commune: string | null;
+  total_jeunes: number;
+  a_traiter: number;
+  a_recontacter: number;
+  pourcentage_traites: number;
+  delai_moyen_jours: number | null;
+  jours_depuis_activite: number | null;
+  is_activated: boolean;
+}
+
+export interface IMlAlerteListeResponse {
+  total: number;
+  pagination: { page: number; limit: number; total_pages: number };
+  data: IMlAlerteListeRow[];
+}
+
 export interface IMlFicheIndicateurs {
   premier_compte_at: Date | null;
   derniere_connexion_at: Date | null;

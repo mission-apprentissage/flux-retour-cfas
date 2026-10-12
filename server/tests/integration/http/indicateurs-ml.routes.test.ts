@@ -375,6 +375,113 @@ describe("Indicateurs ML routes (territoriales)", () => {
     });
   });
 
+  describe("GET /stats/ml/alertes/:type", () => {
+    const url = (type: string, query = "") => `/api/v1/organisation/indicateurs-ml/stats/ml/alertes/${type}?${query}`;
+    const noms = async (type: string, query = "sort_by=nom&sort_order=asc") => {
+      const response = await requestAsOrganisation(ADMIN, "get", url(type, query));
+      expect(response.status, type).toBe(200);
+      return response.data.data.map((ml: { nom: string }) => ml.nom);
+    };
+    const setCollab = (fields: Record<string, number>) =>
+      missionLocaleStatsDb().updateOne(
+        { mission_locale_id: ML_IDF },
+        { $set: Object.fromEntries(Object.entries(fields).map(([cle, valeur]) => [`segments.collab.${cle}`, valeur])) }
+      );
+
+    it("Liste les ML activées non engagées du territoire (y compris sans dossier), avec leur localisation", async () => {
+      await organisationsDb().updateOne(
+        { _id: ML_ARA },
+        { $set: { "adresse.code_postal": "69001", "adresse.commune": "Lyon" } }
+      );
+
+      expect(await noms("non_engagee")).toEqual(["ML ARA", "ML HDF", "ML SANS REGION"]);
+      const response = await requestAsOrganisation(ADMIN, "get", url("non_engagee", "region=84"));
+      expect(response.data).toMatchObject({ total: 1, pagination: { page: 1, limit: 10, total_pages: 1 } });
+      expect(response.data.data[0]).toMatchObject({
+        nom: "ML ARA",
+        code_postal: "69001",
+        commune: "Lyon",
+        total_jeunes: 50,
+        pourcentage_traites: 60,
+        is_activated: true,
+      });
+    });
+
+    it("Applique les seuils de délai (plus de 10 jours) et de jeunes à recontacter (plus de 30) sur les collaborations", async () => {
+      expect(await noms("delai_collab")).toEqual([]);
+      await setCollab({ delai_premiere_activite_jours_total: 100 });
+      expect(await noms("delai_collab")).toEqual([]);
+      await setCollab({ delai_premiere_activite_jours_total: 101 });
+      expect(await noms("delai_collab")).toEqual(["ML IDF"]);
+
+      await setCollab({ a_recontacter: 30 });
+      expect(await noms("a_recontacter")).toEqual([]);
+      await setCollab({ a_recontacter: 31 });
+      expect(await noms("a_recontacter")).toEqual(["ML IDF"]);
+    });
+
+    it("Liste les ML non activées qui ont reçu des collaborations", async () => {
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const mlNonActivee = (nom: string, collabs: number) => {
+        const _id = new ObjectId();
+        return Promise.all([
+          organisationsDb().insertOne({
+            _id,
+            created_at: new Date(),
+            email: "",
+            telephone: "",
+            site_web: "",
+            adresse: { region: "11" },
+            ml_id: 800 + collabs,
+            nom,
+            type: "MISSION_LOCALE",
+          } as never),
+          missionLocaleStatsDb().insertOne({
+            _id: new ObjectId(),
+            mission_locale_id: _id,
+            computed_day: today,
+            created_at: new Date(),
+            updated_at: new Date(),
+            stats: STATS_HDF as IMissionLocaleStats["stats"],
+            segments: {
+              ...SEGMENTS_IDF,
+              collab: { ...SEGMENTS_IDF.collab, total: collabs, a_traiter: collabs, traite: 0 },
+            },
+          }),
+        ]);
+      };
+      await mlNonActivee("ML SANS COMPTE", 3);
+      await mlNonActivee("ML SANS COMPTE NI COLLAB", 0);
+
+      const response = await requestAsOrganisation(ADMIN, "get", url("collab_sans_compte"));
+      expect(response.data.data).toEqual([
+        expect.objectContaining({ nom: "ML SANS COMPTE", total_jeunes: 3, is_activated: false }),
+      ]);
+    });
+
+    it("Pagine, exporte toutes les lignes et refuse les profils non administrateurs", async () => {
+      const page2 = await requestAsOrganisation(
+        ADMIN,
+        "get",
+        url("non_engagee", "sort_by=nom&sort_order=asc&limit=1&page=2")
+      );
+      expect(page2.data).toMatchObject({ total: 3, pagination: { page: 2, limit: 1, total_pages: 3 } });
+      expect(page2.data.data.map((ml: { nom: string }) => ml.nom)).toEqual(["ML HDF"]);
+
+      const exportAll = await requestAsOrganisation(ADMIN, "get", url("non_engagee/export"));
+      expect(exportAll.data.data).toHaveLength(3);
+
+      for (const organisation of [DREETS_IDF, ARML_IDF]) {
+        expectForbidden(
+          await requestAsOrganisation(organisation, "get", url("non_engagee")),
+          "Accès réservé aux administrateurs"
+        );
+      }
+      expect((await requestAsOrganisation(ADMIN, "get", url("inconnu"))).status).toBe(400);
+    });
+  });
+
   describe("GET /stats/traitement/ml", () => {
     it("Renvoie les tranches V2 et le délai moyen du segment collab, triable", async () => {
       const response = await requestAsOrganisation(

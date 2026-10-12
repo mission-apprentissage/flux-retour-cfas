@@ -10,6 +10,8 @@ import {
   COLLAB_DOSSIER_DELAIS,
   COLLAB_DOSSIER_RESULTATS,
   COLLAB_DOSSIER_STATUTS,
+  ML_ALERTE_LISTE_SORT_BY,
+  ML_ALERTE_LISTE_TYPES,
   zCfaEtablissementsSortBy,
   zCfaInjoignablesSortBy,
   zStatsPeriod,
@@ -35,6 +37,7 @@ import { getCfaFiche, getCfaMembres } from "@/common/actions/cfa/cfa-fiche.actio
 import { getCfaAdoptionStats, listCfaEtablissements } from "@/common/actions/cfa/cfa-stats.actions";
 import { listCollaborationsCfaOrigine } from "@/common/actions/mission-locale/collaboration-cfa-origine.actions";
 import { listCollaborationDossiers } from "@/common/actions/mission-locale/collaboration-dossiers.actions";
+import { listMlAlertes } from "@/common/actions/mission-locale/mission-locale-alertes.actions";
 import { getMissionLocaleFicheIndicateurs } from "@/common/actions/mission-locale/mission-locale-fiche.actions";
 import {
   getRupturantsStats,
@@ -140,6 +143,16 @@ const cfaInjoignablesExportQuery = z.object({
   sort_order: z.enum(["asc", "desc"]).default("desc"),
 });
 const cfaInjoignablesQuery = cfaInjoignablesExportQuery.extend({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+});
+const mlAlertesParams = z.object({ type: z.enum(ML_ALERTE_LISTE_TYPES) });
+const mlAlertesExportQuery = z.object({
+  region: z.string().optional(),
+  sort_by: z.enum(ML_ALERTE_LISTE_SORT_BY).default("total_jeunes"),
+  sort_order: z.enum(["asc", "desc"]).default("desc"),
+});
+const mlAlertesQuery = mlAlertesExportQuery.extend({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
 });
@@ -301,6 +314,16 @@ export default () => {
     "/stats/cfa/injoignables/export",
     validateRequestMiddleware({ query: cfaInjoignablesExportQuery }),
     returnResult(getCfaInjoignablesExportRoute)
+  );
+  router.get(
+    "/stats/ml/alertes/:type",
+    validateRequestMiddleware({ params: mlAlertesParams, query: mlAlertesQuery }),
+    returnResult(getMlAlertesRoute)
+  );
+  router.get(
+    "/stats/ml/alertes/:type/export",
+    validateRequestMiddleware({ params: mlAlertesParams, query: mlAlertesExportQuery }),
+    returnResult(getMlAlertesExportRoute)
   );
   router.get(
     "/stats/couverture-departements",
@@ -670,6 +693,37 @@ const getCfaInjoignablesExportRoute: IndicateursHandler<z.infer<typeof cfaInjoig
   req,
   { locals }
 ) => ({ data: await findCfaInjoignables(req.query, locals.regions) });
+
+const findMlAlertes = (
+  type: z.infer<typeof mlAlertesParams>["type"],
+  query: z.infer<typeof mlAlertesExportQuery>,
+  { organisation, regions }: IndicateursMlLocals
+) => {
+  if (organisation.type !== ORGANISATION_TYPE.ADMINISTRATEUR) {
+    throw Boom.forbidden("Accès réservé aux administrateurs");
+  }
+  assertRegionAllowed(query.region, regions);
+  return listMlAlertes(type, { region: query.region }, query);
+};
+
+const getMlAlertesRoute: IndicateursHandler<z.infer<typeof mlAlertesQuery>, z.infer<typeof mlAlertesParams>> = async (
+  req,
+  { locals }
+) => {
+  const { page, limit } = req.query;
+  const rows = await findMlAlertes(req.params.type, req.query, locals);
+
+  return {
+    total: rows.length,
+    pagination: { page, limit, total_pages: Math.ceil(rows.length / limit) },
+    data: rows.slice((page - 1) * limit, page * limit),
+  };
+};
+
+const getMlAlertesExportRoute: IndicateursHandler<
+  z.infer<typeof mlAlertesExportQuery>,
+  z.infer<typeof mlAlertesParams>
+> = async (req, { locals }) => ({ data: await findMlAlertes(req.params.type, req.query, locals) });
 
 const getCouvertureDepartementsRoute: IndicateursHandler<z.infer<typeof couvertureDepartementsQuery>> = async (
   req,
