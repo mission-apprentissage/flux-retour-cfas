@@ -13,7 +13,10 @@ import { getTraitementStatsByMissionLocale } from "./mission-locale-stats.action
 
 type LigneSuivi = ITraitementMLStatsResponse["data"][number];
 
-/** Mêmes règles que les alertes de la fiche ML, appliquées à toutes les ML du territoire. */
+/**
+ * Règles et seuils des alertes de la fiche ML, appliqués aux ML du territoire. Les alertes de l'onglet Collaborations
+ * portent sur les seules collaborations : « à recontacter » y diffère de la fiche, qui additionne ruptures et collaborations.
+ */
 const CRITERES: Record<
   MlAlerteListeType,
   {

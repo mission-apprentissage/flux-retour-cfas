@@ -114,7 +114,7 @@ function CarteCorrelation({
         <>
           <ul className={styles.barres}>
             {lignes.map((ligne) => (
-              <li key={ligne.cle} style={{ display: "contents" }}>
+              <li key={ligne.cle} className={styles.barre}>
                 <span>{libelle(ligne)}</span>
                 <TraitementDetailsBar details={ligne.resultats} total={ligne.traites} />
               </li>

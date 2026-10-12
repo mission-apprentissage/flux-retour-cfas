@@ -55,9 +55,9 @@ export function CollabChiffresClesPanel() {
             loadingVariation={loadingVariation}
             variant="overview"
           />
-          {isAdminUser(user ?? null) && <CollabCorrelationsSection titreClassName={styles.subtitle} />}
         </>
       )}
+      {isAdminUser(user ?? null) && <CollabCorrelationsSection titreClassName={styles.subtitle} />}
     </OverviewSection>
   );
 }

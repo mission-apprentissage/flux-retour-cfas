@@ -35,13 +35,19 @@
 }
 
 .barres {
-  display: grid;
-  grid-template-columns: minmax(10rem, 14rem) 1fr;
-  gap: 0.75rem 1rem;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.barre {
+  display: grid;
+  grid-template-columns: minmax(10rem, 14rem) 1fr;
+  gap: 1rem;
+  align-items: center;
 }
 
 .legende {
