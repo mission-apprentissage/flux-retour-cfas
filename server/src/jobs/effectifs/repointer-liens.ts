@@ -55,6 +55,14 @@ async function repointerDossiersFranceTravail(ficheId: ObjectId, jumeau: IEffect
     .find({ effectif_id: ficheId, soft_deleted: { $ne: true } })
     .toArray();
   const now = new Date();
+  const region = jumeau.apprenant?.adresse?.region;
+  const rafraichissement = {
+    effectif_snapshot: jumeau,
+    effectif_snapshot_date: now,
+    current_status: statutCourant(jumeau),
+    updated_at: now,
+    ...(region ? { code_region: region } : {}),
+  };
 
   for (const { _id: ancienId, ...dossier } of dossiers) {
     const existant = await franceTravailEffectifsDb().findOne({ _id: jumeau._id });
@@ -66,20 +74,15 @@ async function repointerDossiersFranceTravail(ficheId: ObjectId, jumeau: IEffect
       );
       await franceTravailEffectifsDb().updateOne(
         { _id: existant._id },
-        { $set: { ...donneesManquantes, soft_deleted: false, updated_at: now } }
+        { $set: { ...donneesManquantes, ...rafraichissement, soft_deleted: false } }
       );
       resultat.france_travail.fusionnes++;
     } else {
-      const region = jumeau.apprenant?.adresse?.region ?? dossier.code_region;
       await franceTravailEffectifsDb().insertOne({
         ...dossier,
+        ...rafraichissement,
         _id: jumeau._id,
         effectif_id: jumeau._id,
-        effectif_snapshot: jumeau,
-        effectif_snapshot_date: now,
-        current_status: statutCourant(jumeau),
-        updated_at: now,
-        ...(region ? { code_region: region } : {}),
       });
       resultat.france_travail.repointes++;
     }

@@ -202,6 +202,24 @@ describe("repointerLiensVersJumeau", () => {
     expect((await franceTravailEffectifsDb().findOne({ _id: fiche._id }))?.soft_deleted).toBe(true);
   });
 
+  it("réactive le dossier France Travail soft-deleted du jumeau en rafraîchissant son snapshot et son statut", async () => {
+    await insererDossierFt(fiche, { 1: saisie(FRANCE_TRAVAIL_SITUATION_ENUM.ENTREPRISE) });
+    await insererDossierFt(jumeau, { 1: null });
+    await franceTravailEffectifsDb().updateOne(
+      { _id: jumeau._id },
+      { $set: { soft_deleted: true, effectif_snapshot: fiche, effectif_snapshot_date: DATE_STATUT } }
+    );
+
+    const resultat = await repointerLiensVersJumeau(fiche._id, jumeau);
+
+    expect(resultat.france_travail).toEqual({ repointes: 0, fusionnes: 1 });
+    const keeper = await franceTravailEffectifsDb().findOne({ _id: jumeau._id });
+    expect(keeper?.soft_deleted).toBe(false);
+    expect(keeper?.effectif_snapshot._id).toEqual(jumeau._id);
+    expect(keeper?.effectif_snapshot_date?.getTime()).toBeGreaterThan(DATE_STATUT.getTime());
+    expect(keeper?.current_status).toEqual({ value: STATUT_APPRENANT.RUPTURANT, date: DATE_STATUT });
+  });
+
   it("re-pointe les vœux Affelnet vers le jumeau", async () => {
     await voeuxAffelnetDb().insertOne(testDoc<IVoeuAffelnet>({ effectif_id: fiche._id }));
 
