@@ -36,6 +36,7 @@ import { getCfaCollaborationStats, listCfaCollaborationsParMl } from "@/common/a
 import { getCfaFiche, getCfaMembres } from "@/common/actions/cfa/cfa-fiche.actions";
 import { getCfaAdoptionStats, listCfaEtablissements } from "@/common/actions/cfa/cfa-stats.actions";
 import { listCollaborationsCfaOrigine } from "@/common/actions/mission-locale/collaboration-cfa-origine.actions";
+import { getCollaborationCorrelations } from "@/common/actions/mission-locale/collaboration-correlations.actions";
 import { listCollaborationDossiers } from "@/common/actions/mission-locale/collaboration-dossiers.actions";
 import { listMlAlertes } from "@/common/actions/mission-locale/mission-locale-alertes.actions";
 import { getMissionLocaleFicheIndicateurs } from "@/common/actions/mission-locale/mission-locale-fiche.actions";
@@ -254,6 +255,11 @@ export default () => {
     returnResult(getCollaborationsRoute)
   );
   router.get(
+    "/stats/collaborations/correlations",
+    validateRequestMiddleware({ query: collaborationsQuery }),
+    returnResult(getCollaborationCorrelationsRoute)
+  );
+  router.get(
     "/stats/collaborations/mensuel",
     validateRequestMiddleware({ query: collaborationsQuery }),
     returnResult(getCollaborationsMensuelRoute)
@@ -452,6 +458,18 @@ const getCollaborationsRoute: IndicateursHandler<z.infer<typeof collaborationsQu
   const scope = await resolveStatsScope(req.query, locals.regions);
 
   return await getCollaborationSegmentStats(period || "30days", scope.regions, scope.mlId);
+};
+
+const getCollaborationCorrelationsRoute: IndicateursHandler<z.infer<typeof collaborationsQuery>> = async (
+  req,
+  { locals }
+) => {
+  if (locals.organisation.type !== ORGANISATION_TYPE.ADMINISTRATEUR) {
+    throw Boom.forbidden("Accès réservé aux administrateurs");
+  }
+  const scope = await resolveStatsScope(req.query, locals.regions);
+
+  return getCollaborationCorrelations(scope.regions, scope.mlId);
 };
 
 const getCollaborationsMensuelRoute: IndicateursHandler<z.infer<typeof collaborationsQuery>> = async (

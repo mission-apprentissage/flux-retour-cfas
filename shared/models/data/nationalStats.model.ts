@@ -551,6 +551,19 @@ export interface IMlAlerte {
   valeur: number | null;
 }
 
+/** Croisement des dossiers de collaboration (situation du jeune ou objectif) avec la réponse de la ML. */
+export interface ICollabCorrelationRow {
+  cle: string;
+  total: number;
+  traites: number;
+  resultats: Record<CollabDossierResultat, number>;
+}
+
+export interface ICollabCorrelationsResponse {
+  situations: ICollabCorrelationRow[];
+  objectifs: ICollabCorrelationRow[];
+}
+
 /** Listes d'alertes sur les Missions Locales d'un territoire (vues admin des onglets Ruptures et Collaborations). */
 export const ML_ALERTE_LISTE_TYPES = ["non_engagee", "delai_collab", "a_recontacter", "collab_sans_compte"] as const;
 export type MlAlerteListeType = (typeof ML_ALERTE_LISTE_TYPES)[number];

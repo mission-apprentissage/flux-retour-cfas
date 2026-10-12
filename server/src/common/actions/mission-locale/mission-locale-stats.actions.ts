@@ -371,7 +371,7 @@ export const getDepartementalStats = async (period: StatsPeriod = "30days", regi
 };
 
 /** Périmètre des lecteurs : une ML explicite, sinon les ML des régions données, sinon tout. */
-const resolveMissionLocaleIds = async (regions?: string[], mlId?: string) =>
+export const resolveMissionLocaleIds = async (regions?: string[], mlId?: string) =>
   mlId ? [new ObjectId(mlId)] : regions?.length ? await getMissionLocaleIdsByRegions(regions) : undefined;
 
 const toTraitementStatsData = (stats: ICollabSegmentStats) => ({
@@ -905,7 +905,7 @@ export async function getDossiersTraitesStats(
   };
 }
 
-const buildCollabMatch = (date: Date, missionLocaleIds?: ObjectId[]) => ({
+export const buildCollabMatch = (date: Date, missionLocaleIds?: ObjectId[]) => ({
   "organisme_data.acc_conjoint": true,
   "organisme_data.acc_conjoint_at": { $lte: date },
   soft_deleted: { $ne: true },

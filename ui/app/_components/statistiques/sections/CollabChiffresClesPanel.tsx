@@ -1,5 +1,8 @@
 "use client";
 
+import { useAuth } from "@/app/_context/UserContext";
+import { isAdminUser } from "@/app/suivi-des-indicateurs/access";
+
 import { CollaborationCards } from "../cards/CollaborationCards";
 import { KpiFunnel, kpiFunnelCardClassName } from "../cards/KpiFunnel";
 import { OverviewCard } from "../cards/OverviewCard";
@@ -11,6 +14,7 @@ import { SegmentAboutText } from "../ui/SegmentAboutText";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import styles from "./CollabChiffresClesPanel.module.css";
+import { CollabCorrelationsSection } from "./CollabCorrelationsSection";
 import { CollabObjectifsBlock, CollabResultatsBlock, CollabSituationsBlock } from "./CollaborationChartBlocks";
 import { OverviewSection } from "./OverviewSection";
 
@@ -19,6 +23,7 @@ export function CollabChiffresClesPanel() {
   const { data, isLoading, isFetching, error } = useCollaborationSegmentStats({ period, ...scope });
   const loadingVariation = isLoadingVariation(isFetching, isLoading);
   const mensuel = useCollaborationMensuelStats({ period, ...scope });
+  const { user } = useAuth();
 
   return (
     <OverviewSection title="Chiffres clés">
@@ -50,6 +55,7 @@ export function CollabChiffresClesPanel() {
             loadingVariation={loadingVariation}
             variant="overview"
           />
+          {isAdminUser(user ?? null) && <CollabCorrelationsSection titreClassName={styles.subtitle} />}
         </>
       )}
     </OverviewSection>

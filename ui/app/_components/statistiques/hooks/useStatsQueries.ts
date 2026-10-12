@@ -35,6 +35,7 @@ import type {
   IMlAlerteListeResponse,
   MlAlerteListeSortBy,
   MlAlerteListeType,
+  ICollabCorrelationsResponse,
 } from "shared/models/data/nationalStats.model";
 import { RECHERCHE_LONGUEUR_MIN } from "shared/models/data/nationalStats.model";
 import type {
@@ -500,6 +501,15 @@ export function useCollaborationMensuelStats(params: CollaborationStatsParams) {
   return useQuery<ICollaborationMensuelStats>({
     queryKey: ["stats", "collaborations-mensuel", request.params] as const,
     queryFn: () => _get(`${request.url}/mensuel`, { params: request.params }),
+    ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
+  });
+}
+
+export function useCollaborationCorrelations(params: CollaborationStatsParams) {
+  const { url, params: query } = buildCollaborationsRequest(params);
+  return useQuery<ICollabCorrelationsResponse>({
+    queryKey: ["stats", "collaborations-correlations", query] as const,
+    queryFn: () => _get(`${url}/correlations`, { params: query }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }

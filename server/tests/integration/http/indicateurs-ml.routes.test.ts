@@ -375,6 +375,67 @@ describe("Indicateurs ML routes (territoriales)", () => {
     });
   });
 
+  describe("GET /stats/collaborations/correlations", () => {
+    const url = (query = "") => `/api/v1/organisation/indicateurs-ml/stats/collaborations/correlations?${query}`;
+    const ligne = (rows: Array<{ cle: string }>, cle: string) => rows.find((row) => row.cle === cle);
+
+    it("Croise la situation du jeune et les objectifs avec la réponse de la ML, sur le territoire", async () => {
+      const rdv = buildCollabDossier(ML_IDF, CFA_A, ["MOBILITE", "LOGEMENT"]);
+      const abandonInjoignable = buildCollabDossier(ML_IDF, CFA_A, ["MOBILITE"]);
+      await missionLocaleEffectifsDb().deleteMany({});
+      await missionLocaleEffectifsDb().insertMany(
+        [
+          { ...rdv, situation: "RDV_PRIS" },
+          {
+            ...abandonInjoignable,
+            situation: "INJOIGNABLE_APRES_RELANCES",
+            organisme_data: { ...abandonInjoignable.organisme_data, date_abandon: new Date("2026-03-01") },
+          },
+          buildCollabDossier(ML_ARA, CFA_B, ["LOGEMENT"]),
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+
+      const national = await requestAsOrganisation(ADMIN, "get", url("national=true"));
+      expect(national.status).toBe(200);
+      expect(national.data.situations.map((row: { cle: string }) => row.cle)).toEqual([
+        "rupture",
+        "abandon",
+        "prevention_inevitable",
+        "prevention_tres_eleve",
+        "prevention_modere",
+        "besoin_aide_hors_rupture",
+      ]);
+      expect(ligne(national.data.situations, "rupture")).toMatchObject({
+        total: 2,
+        traites: 1,
+        resultats: { rdv_pris: 1, injoignable: 0 },
+      });
+      expect(ligne(national.data.situations, "abandon")).toMatchObject({
+        total: 1,
+        traites: 1,
+        resultats: { injoignable: 1 },
+      });
+      expect(ligne(national.data.objectifs, "mobilite")).toMatchObject({
+        total: 2,
+        traites: 2,
+        resultats: { rdv_pris: 1, injoignable: 1 },
+      });
+      expect(ligne(national.data.objectifs, "logement")).toMatchObject({ total: 2, traites: 1 });
+      expect(ligne(national.data.objectifs, "sante")).toMatchObject({ total: 0, traites: 0 });
+
+      const idf = await requestAsOrganisation(ADMIN, "get", url("region=11"));
+      expect(ligne(idf.data.situations, "rupture")).toMatchObject({ total: 1 });
+      expect(ligne(idf.data.objectifs, "logement")).toMatchObject({ total: 1, traites: 1 });
+    });
+
+    it("Est réservée aux administrateurs", async () => {
+      for (const organisation of [DREETS_IDF, ARML_IDF]) {
+        expectForbidden(await requestAsOrganisation(organisation, "get", url()), "Accès réservé aux administrateurs");
+      }
+    });
+  });
+
   describe("GET /stats/ml/alertes/:type", () => {
     const url = (type: string, query = "") => `/api/v1/organisation/indicateurs-ml/stats/ml/alertes/${type}?${query}`;
     const noms = async (type: string, query = "sort_by=nom&sort_order=asc") => {
