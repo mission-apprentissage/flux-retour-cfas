@@ -70,7 +70,7 @@ const findMissionsLocales = (recherche: string, regions?: string[]) =>
           .filter(Boolean)
           .map((mot) => {
             const regex = { $regex: buildAccentInsensitiveRegex(mot), $options: "i" };
-            return { $or: [{ nom: regex }, { "adresse.commune": regex }] };
+            return { $or: [{ nom: regex }, { "adresse.commune": regex }, { siret: regex }] };
           }),
       },
       { projection: { nom: 1, adresse: 1, activated_at: 1, derniere_activite: 1 } }

@@ -1444,6 +1444,14 @@ describe("Indicateurs ML routes (territoriales)", () => {
       ]);
     });
 
+    it("Trouve une Mission Locale par son SIRET", async () => {
+      await organisationsDb().updateOne({ _id: ML_IDF }, { $set: { siret: "13002526500013" } });
+
+      const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?q=13002526500013`);
+
+      expect(response.data.data.map((row: { id: string }) => row.id)).toEqual([ML_IDF.toString()]);
+    });
+
     it("Ouvre toute la France à l'admin, trie par nom, pagine et ignore les recherches trop courtes", async () => {
       const admin = await requestAsOrganisation(ADMIN, "get", `${BASE}?q=tech`);
       expect(admin.data.data.map((row: { nom: string }) => row.nom)).toEqual(["Campus Tech", "Tech Lyon"]);

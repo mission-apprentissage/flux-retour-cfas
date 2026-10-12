@@ -13,12 +13,12 @@ import {
 } from "@/common/model/collections";
 import type { AuthContext } from "@/common/model/internal/AuthContext";
 
-/** L'organisation d'un CFA est rattachée tantôt par `organisme_id`, tantôt par SIRET + UAI selon les parcours. */
+/** L'organisation d'un CFA est rattachée tantôt par `organisme_id`, tantôt par SIRET + UAI : le rattachement direct prime. */
 export async function findCfaOrganisation(organisme: { _id: ObjectId; siret: string; uai?: string | null }) {
-  return organisationsDb().findOne({
-    type: "ORGANISME_FORMATION",
-    $or: [{ organisme_id: organisme._id.toString() }, { siret: organisme.siret, uai: organisme.uai ?? null }],
-  });
+  return (
+    (await organisationsDb().findOne({ type: "ORGANISME_FORMATION", organisme_id: organisme._id.toString() })) ??
+    organisationsDb().findOne({ type: "ORGANISME_FORMATION", siret: organisme.siret, uai: organisme.uai ?? null })
+  );
 }
 
 async function getComptes(organisationId: ObjectId | undefined) {
