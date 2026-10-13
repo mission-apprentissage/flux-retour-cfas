@@ -44,6 +44,7 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   "Cleanup organismes": { tier: "veille" },
   "Révoque les clés API des organismes inactifs depuis +12 mois, tous les jours à 4h": { tier: "veille" },
   "Validation des constantes de territoires": { tier: "veille" },
+  "Supprimer les doublons obsolètes d'effectifs tous les lundis à 6h30": { tier: "veille" },
 
   // ─── Jobs enfilés par le cron de 02h30 ────────────────────────────────────
   "hydrate:daily": { tier: "jour" },

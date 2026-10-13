@@ -4,6 +4,7 @@ import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
 import { scoreExistingEffectifs } from "../classifier/score-effectifs";
 import { updateComputedFields } from "../computed/update-computed";
+import { SEUIL_JOURS_DEFAUT, traiterDoublonsObsoletes } from "../effectifs/doublons-obsoletes";
 import {
   hydrateEffectifsComputedTypesGenerique,
   hydratePreviousYearMissionLocaleEffectifStatut,
@@ -16,6 +17,8 @@ import {
 } from "../hydrate/effectifs/update-effectifs-lieu-de-formation";
 import { hydrateInscritSansContrat } from "../hydrate/france-travail/hydrate-france-travail";
 import { updateMissionLocaleEffectifCurrentStatus } from "../hydrate/mission-locale/hydrate-mission-locale";
+
+import { payloadBoolean, payloadNumber } from "./payload";
 
 export const effectifsJobs = {
   "hydrate:effectifs:update_all_computed_statut": {
@@ -74,6 +77,19 @@ export const effectifsJobs = {
       return hydrateInscritSansContrat();
     },
   },
+  "effectifs:doublons-obsoletes": {
+    handler: async (job) => {
+      const seuilJours = payloadNumber(job.payload, "seuilJours");
+      const appliquer = payloadBoolean(job.payload, "appliquer");
+      if (seuilJours !== undefined && !(Number.isInteger(seuilJours) && seuilJours >= 0)) {
+        throw new Error(`Seuil invalide : ${seuilJours}`);
+      }
+      if (appliquer && seuilJours !== undefined && seuilJours < SEUIL_JOURS_DEFAUT) {
+        throw new Error(`Seuil de ${seuilJours} jours refusé avec --appliquer : minimum ${SEUIL_JOURS_DEFAUT} jours`);
+      }
+      return traiterDoublonsObsoletes({ seuilJours, appliquer });
+    },
+  },
 } satisfies Record<string, JobDef>;
 
 export const effectifsCrons = {
@@ -92,5 +108,11 @@ export const effectifsCrons = {
       await updateMissionLocaleEffectifCurrentStatus(signal);
     },
     resumable: true,
+  },
+  "Supprimer les doublons obsolètes d'effectifs tous les lundis à 6h30": {
+    cron_string: "30 6 * * 1",
+    checkinMargin: 15,
+    maxRuntimeInMinutes: 60,
+    handler: async () => traiterDoublonsObsoletes({ appliquer: true }),
   },
 } satisfies Record<string, CronDef>;

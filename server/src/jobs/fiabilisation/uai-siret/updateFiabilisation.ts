@@ -1,5 +1,6 @@
 import { ApiError, type IRechercheOrganismeResponse } from "api-alternance-sdk";
 import { STATUT_FIABILISATION_ORGANISME } from "shared/constants";
+import type { IAttributionOrganisme } from "shared/models/data/effectifsQueue.model";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { organismesDb } from "@/common/model/collections";
@@ -8,12 +9,35 @@ import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 /** Appelé une fois par organisme du curseur : seule la transition est signalée. */
 const HEALTH_KEY = "api-alternance:rechercheOrganisme";
 
-type FiabilisationUaiSiret = {
+export type FiabilisationUaiSiret = {
   uai: string | null | undefined;
   siret: string | null | undefined;
   statut: "FIABLE" | "NON_FIABLE" | "INCONNU";
   api_response: IRechercheOrganismeResponse | null;
+  mode: IAttributionOrganisme["mode"];
 };
+
+export function modeAttribution(
+  uai: string | null | undefined,
+  siret: string | null | undefined,
+  resultat: IRechercheOrganismeResponse["resultat"]
+): IAttributionOrganisme["mode"] {
+  if (!resultat) {
+    return "aucun";
+  }
+  const uaiInchangee = uai == null || resultat.correspondances.uai?.lui_meme === true;
+  const siretInchange = siret == null || resultat.correspondances.siret?.lui_meme === true;
+  if (uaiInchangee && siretInchange) {
+    return "exact";
+  }
+  if (siretInchange) {
+    return "siret";
+  }
+  if (uaiInchangee) {
+    return "uai";
+  }
+  return "lieu";
+}
 
 export async function fiabilisationUaiSiret({
   uai,
@@ -33,6 +57,7 @@ export async function fiabilisationUaiSiret({
         statut:
           apiData.resultat != null ? STATUT_FIABILISATION_ORGANISME.FIABLE : STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
         api_response: apiData,
+        mode: modeAttribution(uai, siret, apiData.resultat),
       };
     })
     .catch((error) => {
@@ -50,6 +75,7 @@ export async function fiabilisationUaiSiret({
               siret,
               statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
               api_response: null,
+              mode: "aucun",
             };
           }
         }
@@ -65,6 +91,7 @@ export async function fiabilisationUaiSiret({
         siret,
         statut: "INCONNU",
         api_response: null,
+        mode: "indisponible",
       };
     });
 }

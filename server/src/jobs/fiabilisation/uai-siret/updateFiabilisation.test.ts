@@ -54,6 +54,7 @@ describe("fiabilisationUaiSiret", () => {
         siret,
         statut: "FIABLE",
         api_response: response,
+        mode: "exact",
       });
       expect(apiAlternanceClient.organisme.recherche).toHaveBeenCalledWith({ uai, siret });
     });
@@ -85,6 +86,7 @@ describe("fiabilisationUaiSiret", () => {
         siret,
         statut: "FIABLE",
         api_response: response,
+        mode: "siret",
       });
       expect(apiAlternanceClient.organisme.recherche).toHaveBeenCalledWith({ uai, siret });
     });
@@ -118,6 +120,7 @@ describe("fiabilisationUaiSiret", () => {
         siret,
         statut: "NON_FIABLE",
         api_response: response,
+        mode: "aucun",
       });
       expect(apiAlternanceClient.organisme.recherche).toHaveBeenCalledWith({ uai, siret });
     });
@@ -151,6 +154,7 @@ describe("fiabilisationUaiSiret", () => {
         siret,
         statut: "NON_FIABLE",
         api_response: null,
+        mode: "aucun",
       });
       expect(apiAlternanceClient.organisme.recherche).toHaveBeenCalledWith({ uai, siret });
       expect(reportDependencyHealth).not.toHaveBeenCalledWith(
@@ -190,6 +194,7 @@ describe("fiabilisationUaiSiret", () => {
         siret,
         statut: "NON_FIABLE",
         api_response: null,
+        mode: "aucun",
       });
       expect(apiAlternanceClient.organisme.recherche).toHaveBeenCalledWith({ uai, siret });
       expect(reportDependencyHealth).not.toHaveBeenCalledWith(
@@ -222,6 +227,7 @@ describe("fiabilisationUaiSiret", () => {
         siret,
         statut: "INCONNU",
         api_response: null,
+        mode: "indisponible",
       });
       expect(apiAlternanceClient.organisme.recherche).toHaveBeenCalledWith({ uai, siret });
       expect(reportDependencyHealth).toHaveBeenCalledWith(
@@ -242,6 +248,7 @@ describe("fiabilisationUaiSiret", () => {
         siret,
         statut: "INCONNU",
         api_response: null,
+        mode: "indisponible",
       });
       expect(apiAlternanceClient.organisme.recherche).toHaveBeenCalledWith({ uai, siret });
       expect(reportDependencyHealth).toHaveBeenCalledWith(

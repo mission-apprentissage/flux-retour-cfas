@@ -9,7 +9,7 @@ import {
   ORGANISME_RESPONSABLE_NOT_FOUND,
   createCustomEffectifIssue,
 } from "shared/models/data/effectifs.model";
-import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
+import { IAttributionOrganisme, IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import dossierApprenantSchemaV3, { type IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 import { NEVER, SafeParseReturnType } from "zod";
@@ -23,6 +23,7 @@ import {
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
 import { createFranceTravailEffectifSnapshot } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
+import { findOrganismeFormateursIds, findOrganismeResponsablesIds } from "@/common/actions/helpers/permissions";
 import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   findOrganismeByUaiAndSiret,
@@ -180,6 +181,10 @@ async function processEffectifQueueItem(
     const { result, itemProcessingInfos, organismeTarget } = await transformEffectifQueueV3ToEffectif(effectifQueue);
     // ajout des informations sur le traitement au logger
     itemLogger = itemLogger.child({ ...itemProcessingInfos, format: effectifQueue.api_version });
+    const organisme_attribution = {
+      formateur: attributionDepuisStats(itemProcessingInfos, "organisme_formateur_"),
+      responsable: attributionDepuisStats(itemProcessingInfos, "organisme_responsable_"),
+    };
 
     if (result.success) {
       const { effectif, organisme } = result.data;
@@ -210,6 +215,7 @@ async function processEffectifQueueItem(
             processed_at: currentDate,
             has_error: false,
             computed_day,
+            organisme_attribution,
           },
           $unset: {
             error: 1,
@@ -232,6 +238,7 @@ async function processEffectifQueueItem(
             processed_at: currentDate,
             has_error: true,
             computed_day,
+            organisme_attribution,
           },
           $unset: {
             error: 1,
@@ -278,6 +285,24 @@ interface OrganismeSearchStatsInfos {
   siret_corrige?: string;
   fiabilisation?: "FIABLE" | "NON_FIABLE" | "INCONNU";
   found?: boolean;
+  attribution?: IAttributionOrganisme["mode"];
+  uai_retenue?: string | null;
+  siret_retenu?: string | null;
+}
+
+function attributionDepuisStats(
+  infos: ItemProcessingInfos,
+  prefixe: "organisme_formateur_" | "organisme_responsable_"
+): IAttributionOrganisme | null {
+  const mode = infos[`${prefixe}attribution`];
+  if (!mode) {
+    return null;
+  }
+  return {
+    mode,
+    uai: infos[`${prefixe}uai_retenue`] ?? null,
+    siret: infos[`${prefixe}siret_retenu`] ?? null,
+  };
 }
 
 type ItemProcessingInfos = {
@@ -306,7 +331,9 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
         (async () => {
           const { organisme, stats } = await findOrganismeWithStats(
             effectifQueued?.etablissement_formateur_uai,
-            effectifQueued?.etablissement_formateur_siret
+            effectifQueued?.etablissement_formateur_siret,
+            {},
+            effectifQueued?.source_organisme_id
           );
           organismeTarget = organisme;
           Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_formateur_", stats));
@@ -316,7 +343,8 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
           const { organisme, stats } = await findOrganismeWithStats(
             effectifQueued?.etablissement_responsable_uai,
             effectifQueued?.etablissement_responsable_siret,
-            { _id: 1 }
+            { _id: 1 },
+            effectifQueued?.source_organisme_id
           );
           Object.assign(itemProcessingInfos, addPrefixToProperties("organisme_responsable_", stats));
           return organisme;
@@ -508,10 +536,53 @@ const createOrUpdateEffectif = async (
   }
 };
 
+const relationsIds = (organisme: IOrganisme) => [
+  ...findOrganismeFormateursIds(organisme, true),
+  ...findOrganismeResponsablesIds(organisme),
+];
+
+async function surclasserParTransmetteur(
+  siret: string,
+  sourceOrganismeId: string | null | undefined,
+  projection: Record<string, unknown>
+): Promise<{ organisme: IOrganisme; mode: "transmetteur" | "famille" } | null> {
+  if (!sourceOrganismeId || !ObjectId.isValid(sourceOrganismeId)) {
+    return null;
+  }
+  const transmetteur = await organismesDb().findOne(
+    { _id: new ObjectId(sourceOrganismeId) },
+    { projection: { organismesFormateurs: 1, organismesResponsables: 1 } }
+  );
+  if (!transmetteur) {
+    return null;
+  }
+
+  const projectionCandidats =
+    Object.keys(projection).length === 0
+      ? {}
+      : { ...projection, uai: 1, siret: 1, organismesFormateurs: 1, organismesResponsables: 1 };
+  const candidats = await organismesDb()
+    .find({ siret, ferme: { $ne: true } }, { projection: projectionCandidats, sort: { _id: 1 } })
+    .toArray();
+
+  const transmetteurLui = candidats.find((candidat) => candidat._id.equals(transmetteur._id));
+  if (transmetteurLui) {
+    return { organisme: transmetteurLui, mode: "transmetteur" };
+  }
+  const relationsTransmetteur = relationsIds(transmetteur);
+  const famille = candidats.find(
+    (candidat) =>
+      relationsTransmetteur.some((id) => id.equals(candidat._id)) ||
+      relationsIds(candidat).some((id) => id.equals(transmetteur._id))
+  );
+  return famille ? { organisme: famille, mode: "famille" } : null;
+}
+
 async function findOrganismeWithStats(
   uai_etablissement: string,
   siret_etablissement?: string,
-  projection = {}
+  projection: Record<string, unknown> = {},
+  sourceOrganismeId?: string | null
 ): Promise<{ organisme: IOrganisme | null; stats: OrganismeSearchStatsInfos }> {
   const stats: OrganismeSearchStatsInfos = {};
 
@@ -522,18 +593,34 @@ async function findOrganismeWithStats(
   });
 
   // 2. On cherche l'organisme avec le couple uai/siret
-  const organisme = await findOrganismeByUaiAndSiret(fiabilisationResult.uai, fiabilisationResult.siret, projection);
+  let organisme = await findOrganismeByUaiAndSiret(fiabilisationResult.uai, fiabilisationResult.siret, projection);
+  let retenu = { uai: fiabilisationResult.uai, siret: fiabilisationResult.siret };
+  let attribution = fiabilisationResult.mode;
+  const siretDuResponsable =
+    fiabilisationResult.api_response?.resultat?.correspondances.siret?.son_responsable === true;
+
+  if (attribution === "lieu" && siret_etablissement && !siretDuResponsable) {
+    const surclassement = await surclasserParTransmetteur(siret_etablissement, sourceOrganismeId, projection);
+    if (surclassement) {
+      organisme = surclassement.organisme;
+      retenu = { uai: surclassement.organisme.uai, siret: surclassement.organisme.siret };
+      attribution = surclassement.mode;
+    }
+  }
 
   // 3. Des indicateurs pour apporter des informations sur le traitement
   stats.uai = uai_etablissement;
-  if (fiabilisationResult.uai !== uai_etablissement) {
-    stats.uai_corrige = fiabilisationResult.uai ?? undefined;
+  if (retenu.uai !== uai_etablissement) {
+    stats.uai_corrige = retenu.uai ?? undefined;
   }
   stats.siret = siret_etablissement;
-  if (fiabilisationResult.siret !== siret_etablissement) {
-    stats.siret_corrige = fiabilisationResult.siret ?? undefined;
+  if (retenu.siret !== siret_etablissement) {
+    stats.siret_corrige = retenu.siret ?? undefined;
   }
   stats.fiabilisation = fiabilisationResult.statut;
+  stats.attribution = attribution;
+  stats.uai_retenue = retenu.uai ?? null;
+  stats.siret_retenu = retenu.siret ?? null;
   stats.found = !!organisme;
   if (organisme) {
     stats.id = organisme._id.toString();
