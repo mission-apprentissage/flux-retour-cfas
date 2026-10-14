@@ -7,6 +7,8 @@ const zCfaInvitationExportRow = z.object({
   siret_cfa: z.string(),
   raison_sociale_cfa: z.string().nullable(),
   region_cfa: z.string(),
+  departement_cfa: z.string(),
+  departement_code_cfa: z.string().nullable(),
   nb_nouveaux_comptes_apres_cfa: z.number(),
   date_derniere_connexion_cfa: z.date().nullable(),
   collab_apres_invitation_cfa: z.enum(["Oui", "Non"]),

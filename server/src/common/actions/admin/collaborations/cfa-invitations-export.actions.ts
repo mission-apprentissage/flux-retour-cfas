@@ -13,11 +13,11 @@ import {
   usersMigrationDb,
 } from "@/common/model/collections";
 
-import { formatRegion } from "./collaboration-export.actions";
+import { formatDepartement, formatRegion } from "./collaboration-export.actions";
 
 type Invitation = { created_at: Date; mission_locale_id: ObjectId; organisme_id: ObjectId; siret: string };
 type MissionLocale = { nom: string | null; region: string };
-type Organisme = { nom: string | null; region: string };
+type Organisme = { nom: string | null; region: string; departement: string; departement_code: string | null };
 type Compte = { created_at: Date | null; last_connection: Date | null; connection_history: Date[] };
 type Collaboration = { date: Date; email: string | null };
 
@@ -62,7 +62,7 @@ async function fetchOrganismes(organismeIds: ObjectId[]): Promise<Map<string, Or
   const organismes = await organismesDb()
     .find(
       { _id: { $in: organismeIds } },
-      { projection: { nom: 1, raison_sociale: 1, enseigne: 1, "adresse.region": 1 } }
+      { projection: { nom: 1, raison_sociale: 1, enseigne: 1, "adresse.region": 1, "adresse.departement": 1 } }
     )
     .toArray();
   return new Map(
@@ -71,6 +71,8 @@ async function fetchOrganismes(organismeIds: ObjectId[]): Promise<Map<string, Or
       {
         nom: organisme.nom ?? organisme.raison_sociale ?? organisme.enseigne ?? null,
         region: formatRegion(organisme.adresse?.region),
+        departement: formatDepartement(organisme.adresse?.departement),
+        departement_code: organisme.adresse?.departement ?? null,
       },
     ])
   );
@@ -200,6 +202,8 @@ function buildRow(invitation: Invitation, ctx: Contexte): ICfaInvitationExportRo
     siret_cfa: invitation.siret,
     raison_sociale_cfa: organisme?.nom ?? null,
     region_cfa: organisme?.region ?? formatRegion(null),
+    departement_cfa: organisme?.departement ?? formatDepartement(null),
+    departement_code_cfa: organisme?.departement_code ?? null,
     nb_nouveaux_comptes_apres_cfa: comptes.filter((compte) => compte.created_at && compte.created_at > depuis).length,
     date_derniere_connexion_cfa: maxDate(comptes.flatMap((compte) => compte.last_connection ?? [])),
     collab_apres_invitation_cfa: collaborationsApres.length > 0 ? "Oui" : "Non",

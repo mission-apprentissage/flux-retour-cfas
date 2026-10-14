@@ -424,6 +424,18 @@ export const cfaInvitationsChampsRows = [
     pourquoi: "Savoir si le CFA est en région pilote",
   },
   {
+    champ: "departement_cfa",
+    description: "Département du CFA invité",
+    format: "Texte",
+    pourquoi: "Cibler un département, croiser avec les ML du territoire",
+  },
+  {
+    champ: "departement_code_cfa",
+    description: "Code INSEE du département du CFA invité",
+    format: "Texte, 2 ou 3 caractères (garder les zéros)",
+    pourquoi: "Croiser avec nos fichiers",
+  },
+  {
     champ: "nb_nouveaux_comptes_apres_CFA",
     description: "Nombre de comptes utilisateurs créés sur ce CFA après la date d'invitation, validés ou en attente",
     format: "Nombre entier",
