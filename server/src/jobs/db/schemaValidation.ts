@@ -8,14 +8,18 @@ async function countInvalidDocuments(collectionName: string): Promise<number> {
   return collection.countDocuments({ $nor: [options.validator] });
 }
 
-async function validateDocuments(collectionName: string) {
-  const invalidCount = await countInvalidDocuments(collectionName);
-  if (invalidCount > 0) {
-    // Le job relance : job-processor capture, inutile de le faire ici.
-    throw new Error(`Collection ${collectionName} contains ${invalidCount} invalid documents`);
-  }
-}
-
 export async function validateModels(): Promise<void> {
-  await Promise.all(modelDescriptors.map((d) => validateDocuments(d.collectionName)));
+  const counts = await Promise.all(
+    modelDescriptors.map(async (d) => ({
+      collectionName: d.collectionName,
+      invalidCount: await countInvalidDocuments(d.collectionName),
+    }))
+  );
+
+  const invalid = counts.filter(({ invalidCount }) => invalidCount > 0);
+  if (invalid.length > 0) {
+    const detail = invalid.map(({ collectionName, invalidCount }) => `${collectionName} (${invalidCount})`).join(", ");
+    // Le job relance : job-processor capture, inutile de le faire ici.
+    throw new Error(`Documents invalides : ${detail}`);
+  }
 }
