@@ -5,7 +5,9 @@ import logger from "@/common/logger";
 import { captureTiered, type ErrorKind } from "./alertContract";
 
 const reportedConfigurationIssues = new Set<string>();
-const degradedDependencies = new Set<string>();
+const incidents = new Map<string, { lastFailureAt: number; recovered: boolean }>();
+
+const RECOVERY_QUIET_MS = 15 * 60_000;
 
 /** Les gardes de configuration sont évaluées à chaque appel du service : une fois suffit. */
 export function reportConfigurationIssueOnce(key: string, message: string): void {
@@ -25,9 +27,12 @@ export function reportConfigurationIssueOnce(key: string, message: string): void
 type DependencyHealthOptions = { tier?: AlertTier; errorKind?: ErrorKind; upstream?: string };
 
 /**
- * Ne capture que le front montant sain → dégradé, et se réarme au retour à la
- * normale. C'est ce qui rend le volume indépendant du débit : une sonde qui
- * passe toutes les 10 s, ou un appel par effectif, produisent le même événement.
+ * Une capture par incident, quel que soit le débit. Un échec n'ouvre un nouvel
+ * incident que si un succès a été vu depuis le précédent **et** qu'il date de
+ * plus de RECOVERY_QUIET_MS : sous des appels concurrents, une panne
+ * intermittente alterne succès et échecs, et un succès isolé ne prouve pas le
+ * retour à la normale. L'évaluation à l'échec, et non au succès, garde une sonde
+ * lente (heartbeat toutes les 15 min) capable de signaler un second incident.
  */
 export function reportDependencyHealth(
   key: string,
@@ -35,15 +40,19 @@ export function reportDependencyHealth(
   cause?: unknown,
   { tier = "oncall", errorKind = "db", upstream }: DependencyHealthOptions = {}
 ): void {
+  const now = Date.now();
+  const incident = incidents.get(key);
+
   if (healthy) {
-    degradedDependencies.delete(key);
+    if (incident) incident.recovered = true;
     return;
   }
 
-  if (degradedDependencies.has(key)) {
+  const ongoing = incident && !(incident.recovered && now - incident.lastFailureAt >= RECOVERY_QUIET_MS);
+  incidents.set(key, { lastFailureAt: now, recovered: false });
+  if (ongoing) {
     return;
   }
-  degradedDependencies.add(key);
 
   captureTiered(new Error(`Dépendance indisponible : ${key}`, { cause }), {
     tier,

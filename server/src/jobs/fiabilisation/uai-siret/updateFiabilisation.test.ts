@@ -5,6 +5,7 @@ import { describe, it, vi, beforeEach, expect } from "vitest";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { organismesDb } from "@/common/model/collections";
+import { captureTiered } from "@/common/services/sentry/alertContract";
 import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 import { useMongo } from "@tests/jest/setupMongo";
 
@@ -24,6 +25,7 @@ vi.mock("@/common/services/sentry/reportOnce", () => {
     reportDependencyHealth: vi.fn(),
   };
 });
+vi.mock("@/common/services/sentry/alertContract", () => ({ captureTiered: vi.fn() }));
 
 describe("fiabilisationUaiSiret", () => {
   const uai = "0596776V";
@@ -202,6 +204,50 @@ describe("fiabilisationUaiSiret", () => {
         false,
         expect.anything(),
         expect.anything()
+      );
+    });
+  });
+
+  describe("when the request is rejected for another reason", () => {
+    it("should return Inconnu without reporting an outage, and capture the rejection once", async () => {
+      const rejected = () =>
+        new ApiError({
+          path: "",
+          params: {},
+          querystring: {},
+          requestHeaders: {},
+          statusCode: 400,
+          message: "Request validation failed",
+          name: "Bad Request",
+          responseHeaders: {},
+          errorData: { validationError: { _errors: ["Expected object, received null"] } },
+        });
+      vi.mocked(apiAlternanceClient.organisme.recherche)
+        .mockRejectedValueOnce(rejected())
+        .mockRejectedValueOnce(rejected());
+
+      await expect(fiabilisationUaiSiret({ uai, siret })).resolves.toEqual({
+        uai,
+        siret,
+        statut: "INCONNU",
+        api_response: null,
+        mode: "indisponible",
+      });
+      await fiabilisationUaiSiret({ uai, siret });
+
+      expect(reportDependencyHealth).not.toHaveBeenCalledWith(
+        expect.anything(),
+        false,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(captureTiered).toHaveBeenCalledOnce();
+      expect(captureTiered).toHaveBeenCalledWith(
+        expect.any(ApiError),
+        expect.objectContaining({
+          tier: "jour",
+          extra: { errorData: { validationError: { _errors: ["Expected object, received null"] } } },
+        })
       );
     });
   });

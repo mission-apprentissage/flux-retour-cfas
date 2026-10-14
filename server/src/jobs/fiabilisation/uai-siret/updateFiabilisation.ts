@@ -4,10 +4,30 @@ import type { IAttributionOrganisme } from "shared/models/data/effectifsQueue.mo
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { organismesDb } from "@/common/model/collections";
+import { captureTiered } from "@/common/services/sentry/alertContract";
 import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 
 /** Appelé une fois par organisme du curseur : seule la transition est signalée. */
 const HEALTH_KEY = "api-alternance:rechercheOrganisme";
+
+let rejectedRequestReported = false;
+
+/**
+ * Un 400 n'est pas une panne : l'API refuse notre requête, donc la faute est de
+ * notre côté. Une capture par processus suffit à savoir pourquoi.
+ */
+function reportRejectedRequestOnce(error: ApiError): void {
+  if (rejectedRequestReported) return;
+  rejectedRequestReported = true;
+
+  captureTiered(error, {
+    tier: "jour",
+    errorKind: "upstream",
+    upstream: "api-alternance",
+    fingerprintKey: `${HEALTH_KEY}:requete-refusee`,
+    extra: { errorData: error.context.errorData },
+  });
+}
 
 export type FiabilisationUaiSiret = {
   uai: string | null | undefined;
@@ -78,6 +98,9 @@ export async function fiabilisationUaiSiret({
               mode: "aucun",
             };
           }
+
+          reportRejectedRequestOnce(error);
+          return { uai, siret, statut: "INCONNU", api_response: null, mode: "indisponible" };
         }
       }
       reportDependencyHealth(HEALTH_KEY, false, error, {
