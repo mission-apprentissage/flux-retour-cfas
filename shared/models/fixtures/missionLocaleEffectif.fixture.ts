@@ -12,6 +12,7 @@ export function generateMissionLocaleEffectifFixture(overrides: {
   situation?: SITUATION_ENUM | null;
   soft_deleted?: boolean;
   snapshot_region?: string | null;
+  snapshot_departement?: string | null;
   computed_activated_at?: Date | null;
   source?: "ERP" | "DECA";
   souhaite_rdv?: boolean;
@@ -21,8 +22,10 @@ export function generateMissionLocaleEffectifFixture(overrides: {
 }): IMissionLocaleEffectif {
   const snapshot: Record<string, unknown> = { organisme_id: overrides.organisme_id };
   if (overrides.source) snapshot.source = overrides.source;
-  if (overrides.snapshot_region !== undefined) {
-    snapshot._computed = { organisme: { region: overrides.snapshot_region } };
+  if (overrides.snapshot_region !== undefined || overrides.snapshot_departement !== undefined) {
+    snapshot._computed = {
+      organisme: { region: overrides.snapshot_region ?? null, departement: overrides.snapshot_departement ?? null },
+    };
   }
 
   return {

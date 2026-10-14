@@ -26,7 +26,7 @@ const insertOrganisme = async (overrides: Partial<IOrganisme> = {}) => {
       _id,
       siret: `${++siretCounter}`,
       nom: "CFA Test",
-      adresse: { region: "53" },
+      adresse: { region: "53", departement: "35" },
       ...overrides,
     } as IOrganisme,
     { bypassDocumentValidation: true }
@@ -134,7 +134,7 @@ describe("getCfaInvitationsExportData", () => {
 
   it("mesure comptes, connexions et collaborations après l'invitation", async () => {
     const ml = await insertMissionLocale("Mission Locale Nord", "32");
-    const cfa = await insertOrganisme({ nom: "CFA Industrie", adresse: { region: "53" } as never });
+    const cfa = await insertOrganisme({ nom: "CFA Industrie", adresse: { region: "53", departement: "35" } as never });
     const organisation = await insertOrganisationCfa(cfa);
     const alice = await insertUser(organisation, {
       email: "alice@cfa.fr",
@@ -163,6 +163,8 @@ describe("getCfaInvitationsExportData", () => {
         siret_cfa: "00000000000042",
         raison_sociale_cfa: "CFA Industrie",
         region_cfa: "Bretagne",
+        departement_cfa: "Ille-et-Vilaine",
+        departement_code_cfa: "35",
         nb_nouveaux_comptes_apres_cfa: 1,
         date_derniere_connexion_cfa: new Date("2026-09-28"),
         collab_apres_invitation_cfa: "Oui",
@@ -284,6 +286,8 @@ describe("getCfaInvitationsExportData", () => {
       siret_cfa: "00000000000099",
       raison_sociale_cfa: null,
       region_cfa: "Non renseigné",
+      departement_cfa: "Non renseigné",
+      departement_code_cfa: null,
       nb_nouveaux_comptes_apres_cfa: 0,
       date_derniere_connexion_cfa: null,
     });
