@@ -43,7 +43,7 @@ describe("createErrorAggregator", () => {
     expect(ctx.failed).toBe(50);
     expect(ctx.processed).toBe(1000);
     expect(ctx.distinctCauses).toBe(1);
-    expect(ctx.topCauses).toEqual([{ key: "Error: effectif <n> invalide", count: 50 }]);
+    expect(ctx.topCauses).toEqual(["50 × Error: effectif <n> invalide"]);
   });
 
   it("distingue les causes de formes différentes", () => {
@@ -55,7 +55,7 @@ describe("createErrorAggregator", () => {
 
     const ctx = contextOf();
     expect(ctx.distinctCauses).toBe(2);
-    expect((ctx.topCauses as { count: number }[])[0].count).toBe(2);
+    expect(ctx.topCauses).toEqual(["2 × Error: siret invalide", "1 × Error: mongo indisponible"]);
   });
 
   it("garde un fingerprint stable entre deux exécutions à compteurs différents", () => {
