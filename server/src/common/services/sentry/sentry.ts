@@ -8,6 +8,7 @@ import config from "../../../config";
 
 import { applyAlertContract } from "./alertContract";
 import { dropJobProcessorNoise } from "./jobProcessorNoise";
+import { stabilizeChunkModules } from "./stableModules";
 
 /** Les quatre façons de démarrer le code serveur, distinguées par le tag `app_runtime`. */
 export type ServerRuntime = "api" | "job-processor" | "queue-processor" | "cli";
@@ -65,7 +66,7 @@ function getSentryOptions(runtime: ServerRuntime, extraIntegrations: Integration
     },
     beforeSend: (event) => {
       const kept = dropJobProcessorNoise(event);
-      return kept ? (applyPolicy(kept) as Sentry.Event | null) : null;
+      return kept ? (applyPolicy(stabilizeChunkModules(kept)) as Sentry.Event | null) : null;
     },
     initialScope: { tags: { app_runtime: runtime } },
     tracePropagationTargets: [/^https:\/\/[^/]*\.apprentissage\.beta\.gouv\.fr/],
