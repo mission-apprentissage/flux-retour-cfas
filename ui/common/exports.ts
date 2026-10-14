@@ -302,12 +302,16 @@ export const collaborationCfaCompatiblesExportColumns = [
   { label: "SIRET", key: "siret", xlsxType: "string", width: 18 },
   { label: "Nom", key: "nom", width: 50 },
   { label: "Région", key: "region", width: 30 },
+  { label: "Département", key: "departement", width: 25 },
+  { label: "Code département", key: "departement_code", xlsxType: "string", width: 18 },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
 export const collaborationCfaActivesExportColumns = [
   { label: "SIRET", key: "siret", xlsxType: "string", width: 18 },
   { label: "Nom", key: "nom", width: 50 },
   { label: "Région", key: "region", width: 30 },
+  { label: "Département", key: "departement", width: 25 },
+  { label: "Code département", key: "departement_code", xlsxType: "string", width: 18 },
   { label: "Date d'activation", key: "date_activation", xlsxType: "date", width: 18 },
   { label: "Sources", key: "sources", width: 16 },
 ] as const satisfies ReadonlyArray<ExportColumn>;
@@ -316,6 +320,8 @@ export const collaborationCfaWithCollabExportColumns = [
   { label: "SIRET", key: "siret", xlsxType: "string", width: 18 },
   { label: "Nom", key: "nom", width: 50 },
   { label: "Région", key: "region", width: 30 },
+  { label: "Département", key: "departement", width: 25 },
+  { label: "Code département", key: "departement_code", xlsxType: "string", width: 18 },
   { label: "Nb collaborations", key: "nb_collaborations", width: 18 },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
@@ -323,6 +329,8 @@ export const collaborationDetailsExportColumns = [
   { label: "SIRET CFA", key: "siret_cfa", xlsxType: "string", width: 18 },
   { label: "Nom CFA", key: "nom_cfa", width: 40 },
   { label: "Région CFA", key: "region_cfa", width: 30 },
+  { label: "Département CFA", key: "departement_cfa", width: 25 },
+  { label: "Code département CFA", key: "departement_code_cfa", xlsxType: "string", width: 22 },
   { label: "Mission Locale", key: "nom_ml", width: 40 },
   { label: "Nom", key: "nom_jeune", width: 25 },
   { label: "Prénom", key: "prenom_jeune", width: 25 },
@@ -344,6 +352,8 @@ export const cfaInvitationsExportColumns = [
   { label: "siret_CFA", key: "siret_cfa", xlsxType: "string", width: 18 },
   { label: "raison_sociale_CFA", key: "raison_sociale_cfa", width: 40 },
   { label: "region_cfa", key: "region_cfa", width: 26 },
+  { label: "departement_cfa", key: "departement_cfa", width: 26 },
+  { label: "departement_code_cfa", key: "departement_code_cfa", xlsxType: "string", width: 24 },
   { label: "nb_nouveaux_comptes_apres_CFA", key: "nb_nouveaux_comptes_apres_cfa", width: 30 },
   { label: "date_derniere_connexion_CFA", key: "date_derniere_connexion_cfa", xlsxType: "date", width: 28 },
   { label: "collab_apres_invitation_CFA", key: "collab_apres_invitation_cfa", width: 27 },

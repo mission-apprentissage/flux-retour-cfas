@@ -1,6 +1,6 @@
 import type { ObjectId } from "bson";
 import { REPONDU_SITUATIONS } from "shared/constants/collaboration";
-import { REGIONS_BY_CODE } from "shared/constants/territoires";
+import { DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE } from "shared/constants/territoires";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type { ICollaborationExportResponseSchema } from "shared/models/routes/admin/collaboration-stats.api";
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
@@ -11,11 +11,16 @@ import { effectifsDb, effectifsDECADb, missionLocaleEffectifsDb } from "@/common
 
 import { buildDossierEnvoyeMatch, fetchActivatedOrganismes } from "./collaboration-stats.actions";
 
-const REGION_NON_RENSEIGNEE = "Non renseigné";
+const NON_RENSEIGNE = "Non renseigné";
 
 export function formatRegion(code: string | null | undefined): string {
-  if (!code) return REGION_NON_RENSEIGNEE;
-  return REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE]?.nom ?? REGION_NON_RENSEIGNEE;
+  if (!code) return NON_RENSEIGNE;
+  return REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE]?.nom ?? NON_RENSEIGNE;
+}
+
+export function formatDepartement(code: string | null | undefined): string {
+  if (!code) return NON_RENSEIGNE;
+  return DEPARTEMENTS_BY_CODE[code as keyof typeof DEPARTEMENTS_BY_CODE]?.nom ?? NON_RENSEIGNE;
 }
 
 type CollaborationDetailRow = {
@@ -23,6 +28,7 @@ type CollaborationDetailRow = {
   siret_cfa: string | null;
   nom_cfa: string | null;
   region_cfa: string | null;
+  departement_cfa: string | null;
   nom_ml: string | null;
   nom_jeune: string | null;
   prenom_jeune: string | null;
@@ -44,7 +50,18 @@ async function fetchCollaborationDetails(endExclusive: Date): Promise<Collaborat
           localField: "effectif_snapshot.organisme_id",
           foreignField: "_id",
           as: "organisme",
-          pipeline: [{ $project: { siret: 1, nom: 1, raison_sociale: 1, enseigne: 1, "adresse.region": 1 } }],
+          pipeline: [
+            {
+              $project: {
+                siret: 1,
+                nom: 1,
+                raison_sociale: 1,
+                enseigne: 1,
+                "adresse.region": 1,
+                "adresse.departement": 1,
+              },
+            },
+          ],
         },
       },
       {
@@ -96,6 +113,12 @@ async function fetchCollaborationDetails(endExclusive: Date): Promise<Collaborat
               "$effectif_snapshot._computed.organisme.region",
             ],
           },
+          departement_cfa: {
+            $ifNull: [
+              { $arrayElemAt: ["$organisme.adresse.departement", 0] },
+              "$effectif_snapshot._computed.organisme.departement",
+            ],
+          },
           nom_ml: { $arrayElemAt: ["$mission_locale.nom", 0] },
           nom_jeune: { $ifNull: ["$effectif_snapshot.apprenant.nom", null] },
           prenom_jeune: { $ifNull: ["$effectif_snapshot.apprenant.prenom", null] },
@@ -113,7 +136,14 @@ async function fetchCollaborationDetails(endExclusive: Date): Promise<Collaborat
     .toArray();
 }
 
-type CfaWithCollabRow = { siret: string; nom: string | null; region: string; nb_collaborations: number };
+type CfaWithCollabRow = {
+  siret: string;
+  nom: string | null;
+  region: string;
+  departement: string;
+  departement_code: string | null;
+  nb_collaborations: number;
+};
 
 function aggregateCfaWithCollab(details: CollaborationDetailRow[]): CfaWithCollabRow[] {
   const byOrg = new Map<string, CfaWithCollabRow>();
@@ -122,6 +152,8 @@ function aggregateCfaWithCollab(details: CollaborationDetailRow[]): CfaWithColla
       siret: d.siret_cfa ?? "",
       nom: d.nom_cfa,
       region: formatRegion(d.region_cfa),
+      departement: formatDepartement(d.departement_cfa),
+      departement_code: d.departement_cfa ?? null,
       nb_collaborations: 0,
     };
     current.nb_collaborations += 1;
@@ -165,7 +197,13 @@ export async function getCollaborationExportData(): Promise<ICollaborationExport
   const sourcesByOrgId = await fetchSourcesByOrgId(activated.map((o) => o._id));
 
   const cfa_compatibles = sortByNom(
-    compatibles.map((c) => ({ siret: c.siret, nom: c.nom, region: formatRegion(c.region) }))
+    compatibles.map((c) => ({
+      siret: c.siret,
+      nom: c.nom,
+      region: formatRegion(c.region),
+      departement: formatDepartement(c.departement),
+      departement_code: c.departement ?? null,
+    }))
   );
 
   const cfa_actives = sortByNom(
@@ -173,6 +211,8 @@ export async function getCollaborationExportData(): Promise<ICollaborationExport
       siret: o.siret ?? "",
       nom: o.nom,
       region: formatRegion(o.region),
+      departement: formatDepartement(o.departement),
+      departement_code: o.departement ?? null,
       date_activation: o.date_activation,
       sources: sourcesByOrgId.get(o._id.toString()) ?? "",
     }))
@@ -189,6 +229,8 @@ export async function getCollaborationExportData(): Promise<ICollaborationExport
         siret_cfa: d.siret_cfa,
         nom_cfa: d.nom_cfa,
         region_cfa: formatRegion(d.region_cfa),
+        departement_cfa: formatDepartement(d.departement_cfa),
+        departement_code_cfa: d.departement_cfa ?? null,
         nom_ml: d.nom_ml,
         nom_jeune: d.nom_jeune,
         prenom_jeune: d.prenom_jeune,
