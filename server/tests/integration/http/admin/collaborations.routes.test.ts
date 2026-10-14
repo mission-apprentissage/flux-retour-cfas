@@ -23,6 +23,8 @@ useMongo();
 
 const HDF = "32";
 const HDF_NOM = "Hauts-de-France";
+const NORD = "59";
+const NORD_NOM = "Nord";
 const CURRENT_ANNEE = getAnneeScolaireFromDate(new Date());
 
 let httpClient: AxiosInstance;
@@ -145,7 +147,7 @@ describe("admin collaborations routes", () => {
       const compatible = await insertCompatibleOrganisme({
         siret: "12345678900018",
         nom: "CFA Test",
-        adresse: { region: HDF } as never,
+        adresse: { region: HDF, departement: NORD } as never,
       });
       await effectifsDECADb().insertOne(
         { _id: new ObjectId(), organisme_id: compatible._id as ObjectId, annee_scolaire: CURRENT_ANNEE } as never,
@@ -205,6 +207,8 @@ describe("admin collaborations routes", () => {
           siret: "12345678900018",
           nom: "CFA Test",
           region: HDF_NOM,
+          departement: NORD_NOM,
+          departement_code: NORD,
           date_activation: "2026-03-01T00:00:00.000Z",
           sources: "ERP, DECA",
         },
@@ -214,6 +218,8 @@ describe("admin collaborations routes", () => {
           siret: "12345678900018",
           nom: "CFA Test",
           region: HDF_NOM,
+          departement: NORD_NOM,
+          departement_code: NORD,
           nb_collaborations: 2,
         },
       ]);
@@ -222,6 +228,8 @@ describe("admin collaborations routes", () => {
         siret_cfa: "12345678900018",
         nom_cfa: "CFA Test",
         region_cfa: HDF_NOM,
+        departement_cfa: NORD_NOM,
+        departement_code_cfa: NORD,
         nom_ml: "ML Paris",
         dossier_envoye: "Oui",
       });
@@ -232,7 +240,7 @@ describe("admin collaborations routes", () => {
         siret: "12345678900042",
         nom: "CCI Responsable",
         nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
-        adresse: { region: HDF } as never,
+        adresse: { region: HDF, departement: NORD } as never,
       });
       await organisationsDb().insertOne(orgFormationFixture(responsable._id as ObjectId, new Date("2026-03-01")));
       await missionLocaleEffectifsDb().insertOne(
@@ -259,12 +267,21 @@ describe("admin collaborations routes", () => {
           siret: "12345678900042",
           nom: "CCI Responsable",
           region: HDF_NOM,
+          departement: NORD_NOM,
+          departement_code: NORD,
           date_activation: "2026-03-01T00:00:00.000Z",
           sources: "ERP",
         },
       ]);
       expect(response.data.cfa_with_collab).toEqual([
-        { siret: "12345678900042", nom: "CCI Responsable", region: HDF_NOM, nb_collaborations: 1 },
+        {
+          siret: "12345678900042",
+          nom: "CCI Responsable",
+          region: HDF_NOM,
+          departement: NORD_NOM,
+          departement_code: NORD,
+          nb_collaborations: 1,
+        },
       ]);
       expect(response.data.details_collaborations).toHaveLength(1);
       expect(response.data.details_collaborations[0]).toMatchObject({ siret_cfa: "12345678900042" });
