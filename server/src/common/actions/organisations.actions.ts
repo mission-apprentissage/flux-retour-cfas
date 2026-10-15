@@ -362,8 +362,8 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
   // Lu AVANT la confirmation, et sur le même critère que les autres chemins
   // (`activated_at` OU un compte déjà confirmé) : se fier au seul retour de
   // `activateMissionLocaleAtAdminValidation` rejouerait l'événement pour une ML
-  // déjà rendue active par une inscription sur invitation, qui ne pose jamais
-  // `activated_at`.
+  // déjà rendue active par une inscription sur invitation antérieure à la pose
+  // d'`activated_at` sur ce chemin.
   const mlWasActivated =
     userOrganisation.type === "MISSION_LOCALE" ? await isMissionLocaleActivated(user.organisation_id) : true;
 

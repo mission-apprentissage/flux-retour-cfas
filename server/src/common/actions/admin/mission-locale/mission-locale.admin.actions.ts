@@ -24,8 +24,8 @@ import { getOrganisationOrganismeByOrganismeId } from "../../organisations.actio
 /**
  * Une Mission Locale est considérée comme active dès qu'elle a été activée
  * explicitement (`activated_at`) OU qu'un de ses agents dispose d'un compte
- * confirmé — les deux chemins existent et ne se recoupent pas toujours
- * (l'inscription par invitation confirme un compte sans poser `activated_at`).
+ * confirmé. Les ML dont un compte a été confirmé sur invitation avant que
+ * l'invitation ne pose `activated_at` restent actives sans date.
  */
 export const isMissionLocaleActivated = async (missionLocaleId: ObjectId): Promise<boolean> => {
   const ml = await organisationsDb().findOne({ type: "MISSION_LOCALE", _id: missionLocaleId });

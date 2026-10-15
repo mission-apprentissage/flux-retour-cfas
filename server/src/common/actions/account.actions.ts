@@ -21,7 +21,10 @@ import config from "@/config";
 
 import { AuthContext } from "../model/internal/AuthContext.js";
 
-import { isMissionLocaleActivated } from "./admin/mission-locale/mission-locale.admin.actions";
+import {
+  activateMissionLocaleAtAdminValidation,
+  isMissionLocaleActivated,
+} from "./admin/mission-locale/mission-locale.admin.actions";
 import { enqueueBrevoContactSync, enqueueBrevoOrganisationContactSync } from "./brevo/contacts/enqueue-sync";
 import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
 import { buildOrganisationLabel, createOrganisation, getOrganisationById } from "./organisations.actions";
@@ -109,10 +112,12 @@ export async function register(registration: RegistrationSchema): Promise<{
     // Transition -> CONFIRMED (invitation) : émet l'événement Brevo pour le scénario d'automation.
     await enqueueBrevoEvent("account-confirmed", { userId: userId.toString() });
 
-    // Ce chemin confirme un compte sans passer par `activateMissionLocale` : la
-    // ML devient active du seul fait de ce compte, il faut donc rafraîchir son
-    // contact générique (et n'émettre l'événement que sur la transition).
+    // L'invitation vaut validation : le premier compte active la ML comme le ferait
+    // l'admin, puis on rafraîchit son contact générique (événement sur la transition seule).
     if (orga.type === "MISSION_LOCALE") {
+      if (!mlWasActivated) {
+        await activateMissionLocaleAtAdminValidation(organisationId, new Date());
+      }
       await enqueueBrevoOrganisationContactSync(organisationId);
       if (!mlWasActivated) {
         await enqueueBrevoEvent("account-confirmed-ml-generic", { userId: userId.toString() });
@@ -233,6 +238,9 @@ export async function activateUser(ctx: AuthContext) {
       // Cas marginal mais réel : un agent de ML invité avec un rôle passe ici
       // sans repasser par la validation admin.
       if (organisation.type === "MISSION_LOCALE") {
+        if (!mlWasActivated) {
+          await activateMissionLocaleAtAdminValidation(ctx.organisation_id, new Date());
+        }
         await enqueueBrevoOrganisationContactSync(ctx.organisation_id);
         if (!mlWasActivated) {
           await enqueueBrevoEvent("account-confirmed-ml-generic", { userId: ctx._id.toString() });
