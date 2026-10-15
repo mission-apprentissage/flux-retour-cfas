@@ -1,9 +1,19 @@
 {
   "workspaces": {
     "server": {
-      "entry": ["src/main.ts!", "src/dev.ts", "src/db/migrations/*.ts!", "scripts/**/*.ts"],
+      "entry": [
+        "src/main.ts!",
+        "src/dev.ts",
+        "src/db/migrations/*.ts!",
+        "scripts/**/*.ts",
+        "tests/jest/setupFiles.ts",
+        "tests/jest/globalSetup.ts"
+      ],
       "project": ["src/**/*.ts!", "tests/**/*.ts", "scripts/**/*.ts", "!src/**/*.test.ts!"],
       "ignoreDependencies": ["@sentry/cli", "tsx"]
+    },
+    "ui": {
+      "entry": ["tests/setup.ts"]
     },
     "shared": {
       "entry": ["./**/*.ts!", "!./dist/**/*", "!./**/*.test.ts"],
