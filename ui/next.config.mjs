@@ -33,6 +33,12 @@ const nextConfig = {
   productionBrowserSourceMaps: true,
   outputFileTracingRoot: path.join(path.dirname(fileURLToPath(import.meta.url)), "../"),
   output: "standalone",
+  images: {
+    unoptimized: true,
+  },
+  sassOptions: {
+    charset: false,
+  },
   sentry: {
     hideSourceMaps: false,
   },

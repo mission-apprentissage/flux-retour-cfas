@@ -29,7 +29,7 @@
     "@tanstack/react-table": "^8.20.5",
     "@types/qs": "^6.9.18",
     "api-alternance-sdk": "2.14.0",
-    "axios": "1.15.2",
+    "axios": "1.20.0",
     "bson": "^6.10.4",
     "crisp-sdk-web": "^1.0.27",
     "date-fns": "^3.6.0",
@@ -38,7 +38,7 @@
     "lodash.get": "4.4.2",
     "luxon": "^3.5.0",
     "mime": "^4.0.6",
-    "next": "15.5.18",
+    "next": "15.5.27",
     "next-plausible": "^3.12.2",
     "notion-client": "^8.0.2",
     "notion-types": "^8.0.2",
@@ -67,7 +67,7 @@
     "@types/react-dom": "^18.3.1",
     "dotenv": "^16.4.5",
     "sass": "^1.85.1",
-    "sharp": "^0.33.5",
+    "sharp": "^0.35.5",
     "typescript": "^5.6.3",
     "vitest": "^2.1.4"
   }
