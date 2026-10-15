@@ -3340,15 +3340,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/nodemailer@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "@types/nodemailer@npm:8.0.1"
-  dependencies:
-    "@types/node": "*"
-  checksum: d06cfd8dd9437a1b788d5954ec2a364f30974954af462a7f399330112716b2515f08d8fc2f5ec362190fc7fe01e1c68348b0b18ffbdafd1adba7034403626153
-  languageName: node
-  linkType: hard
-
 "@types/normalize-package-data@npm:^2.4.0, @types/normalize-package-data@npm:^2.4.3, @types/normalize-package-data@npm:^2.4.4":
   version: 2.4.4
   resolution: "@types/normalize-package-data@npm:2.4.4"
@@ -11834,10 +11825,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:^8.0.5":
-  version: 8.0.5
-  resolution: "nodemailer@npm:8.0.5"
-  checksum: 72f3ba14b11b047caec0d850e241fefb52e13230cd99babb7e9c3f481c2ba76ea58c82a6a47351022fb630d5b9192a8c275af1d185634f88d1a83209cfb78608
+"nodemailer@npm:^10.1.1":
+  version: 10.1.1
+  resolution: "nodemailer@npm:10.1.1"
+  checksum: b60d08c6f653b8381a82113f0aee2365af323d6ff028e7b7610d809f4c3c1f63077435388fda53d02082e0df25f28618b245814a1c0b304db30fdfec76528bef
   languageName: node
   linkType: hard
 
@@ -14428,7 +14419,6 @@ __metadata:
     "@types/multer": ^2.2.0
     "@types/netmask": ^2.0.6
     "@types/node": ^24.0.0
-    "@types/nodemailer": ^8.0.1
     "@types/sax": ^1.2.7
     "@types/stream-chain": ^2.1.0
     "@types/stream-json": ^1.7.7
@@ -14467,7 +14457,7 @@ __metadata:
     multer: ^2.4.0
     netmask: ^2.1.1
     nock: ^14.0.0-beta.15
-    nodemailer: ^8.0.5
+    nodemailer: ^10.1.1
     nodemailer-html-to-text: 3.2.0
     passport: 0.7.0
     passport-jwt: ^4.0.1
