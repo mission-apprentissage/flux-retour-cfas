@@ -15,7 +15,6 @@
       "commitlint": true,
       "ignoreDependencies": [
         "@commitlint/config-conventional",
-        "@semantic-release/changelog",
         "@semantic-release/commit-analyzer",
         "@semantic-release/github",
         "@semantic-release/release-notes-generator"

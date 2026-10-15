@@ -82,7 +82,6 @@
   "devDependencies": {
     "@commitlint/cli": "^17.8.1",
     "@commitlint/config-conventional": "^17.8.1",
-    "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^6.0.3",
     "@types/node": "^24.0.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
@@ -102,7 +101,7 @@
     "postcss": "^8.5.30",
     "postcss-scss": "^4.0.9",
     "prettier": "^3.3.3",
-    "semantic-release": "^21.1.2",
+    "semantic-release": "^25.0.9",
     "semantic-release-slack-bot": "^4.0.2",
     "stylelint": "^17.10.0",
     "stylelint-config-recess-order": "^7.7.0",
