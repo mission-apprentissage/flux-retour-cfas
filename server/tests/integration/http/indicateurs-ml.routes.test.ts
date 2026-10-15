@@ -521,7 +521,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       ]);
     });
 
-    it("Pagine, exporte toutes les lignes et refuse les profils non administrateurs", async () => {
+    it("Pagine et exporte toutes les lignes", async () => {
       const page2 = await requestAsOrganisation(
         ADMIN,
         "get",
@@ -532,14 +532,29 @@ describe("Indicateurs ML routes (territoriales)", () => {
 
       const exportAll = await requestAsOrganisation(ADMIN, "get", url("non_engagee/export"));
       expect(exportAll.data.data).toHaveLength(3);
+      expect((await requestAsOrganisation(ADMIN, "get", url("inconnu"))).status).toBe(400);
+    });
 
-      for (const organisation of [DREETS_IDF, ARML_IDF]) {
+    it("Limite les ARML, DREETS et DDETS à leur territoire", async () => {
+      const nomsPour = async (organisation: IOrganisationCreate, query = "") => {
+        const response = await requestAsOrganisation(organisation, "get", url("non_engagee", query));
+        expect(response.status).toBe(200);
+        return response.data.data.map((ml: { nom: string }) => ml.nom);
+      };
+
+      expect(await nomsPour(ARML_IDF_ARA)).toEqual(["ML ARA"]);
+      expect(await nomsPour(ARML_IDF_ARA, "region=11")).toEqual([]);
+      expect(await nomsPour(DREETS_IDF)).toEqual([]);
+      expect(await nomsPour(DDETS_PARIS)).toEqual([]);
+
+      for (const organisation of [DREETS_IDF, DDETS_PARIS, ARML_IDF]) {
         expectForbidden(
-          await requestAsOrganisation(organisation, "get", url("non_engagee")),
-          "Accès réservé aux administrateurs"
+          await requestAsOrganisation(organisation, "get", url("non_engagee", "region=84")),
+          "Accès non autorisé à cette région"
         );
       }
-      expect((await requestAsOrganisation(ADMIN, "get", url("inconnu"))).status).toBe(400);
+      const exportArml = await requestAsOrganisation(ARML_IDF_ARA, "get", url("non_engagee/export"));
+      expect(exportArml.data.data.map((ml: { nom: string }) => ml.nom)).toEqual(["ML ARA"]);
     });
   });
 
@@ -819,7 +834,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
   });
 
   describe("GET /stats/couverture-departements", () => {
-    it("Ventile les ML de la région par département", async () => {
+    it("Ventile les ML de la région par département, en ne comptant que les ruptures", async () => {
       await organisationsDb().updateOne({ _id: ML_IDF }, { $set: { "adresse.departement": "92" } });
       await organisationsDb().insertOne({
         _id: new ObjectId(),
@@ -848,8 +863,8 @@ describe("Indicateurs ML routes (territoriales)", () => {
         ml_total: 1,
         ml_activees: 1,
         ml_engagees: 1,
-        a_traiter: 30,
-        traites: 70,
+        a_traiter: 20,
+        traites: 40,
       });
       expect(byCode["75"]).toMatchObject({ nom: "Paris", ml_total: 1, ml_activees: 1, ml_engagees: 0, traites: 0 });
     });
@@ -862,7 +877,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       );
 
       expect(response.data.departements).toEqual([
-        expect.objectContaining({ code: "inconnu", nom: "Département inconnu", ml_total: 1, traites: 70 }),
+        expect.objectContaining({ code: "inconnu", nom: "Département inconnu", ml_total: 1, traites: 40 }),
       ]);
     });
 
@@ -1240,7 +1255,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(national.data).toEqual({ nps: 40, total_reponses: 5, utilisateurs: 3, cfa: 2 });
     });
 
-    it("Signale les CFA à plus de 25 % d'injoignables, à partir de 4 dossiers traités", async () => {
+    it("Signale les CFA à plus de 25 % d'injoignables, à partir de 4 dossiers traités hors « à recontacter »", async () => {
       const BASE = "/api/v1/organisation/indicateurs-ml/stats/cfa/injoignables";
       await missionLocaleEffectifsDb().insertMany(
         [
@@ -1248,10 +1263,12 @@ describe("Indicateurs ML routes (territoriales)", () => {
           dossier(CFA_A, { situation: "COORDONNEES_INCORRECT" }),
           dossier(CFA_A, { situation: "RDV_PRIS" }),
           dossier(CFA_A, { situation: "RDV_PRIS" }),
+          dossier(CFA_A, { situation: "CONTACTE_SANS_RETOUR" }),
           ...["INJOIGNABLE_APRES_RELANCES", "RDV_PRIS", "AUTRE", "RDV_PRIS"].map((situation) =>
             dossier(CFA_C, { situation })
           ),
           ...[1, 2, 3].map(() => dossier(CFA_D, { situation: "INJOIGNABLE_APRES_RELANCES" })),
+          dossier(CFA_D, { situation: "CONTACTE_SANS_RETOUR" }),
           dossier(CFA_B, { situation: "INJOIGNABLE_APRES_RELANCES" }),
         ] as never[],
         { bypassDocumentValidation: true }
@@ -1663,7 +1680,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
         }
       );
 
-    it("Calcule comptes, taux et engagement à partir des utilisateurs confirmés et du dernier snapshot", async () => {
+    it("Calcule activation, connexion, taux et engagement à partir des utilisateurs confirmés et du snapshot", async () => {
       const recent = new Date(Date.now() - DAY);
       await insertUser(ML_IDF, { confirmed_at: new Date("2025-03-01"), last_connection: new Date("2025-06-01") });
       await insertUser(ML_IDF, { confirmed_at: new Date("2025-05-01"), last_connection: recent });
@@ -1675,7 +1692,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(response.status).toBe(200);
       expect(response.data.ml.nom).toBe("ML IDF");
       expect(response.data.indicateurs).toEqual({
-        premier_compte_at: "2025-02-01T00:00:00.000Z",
+        premier_compte_at: "2025-01-01T00:00:00.000Z",
         derniere_connexion_at: recent.toISOString(),
         taux_traitement: 70,
         is_engaged: true,
@@ -1687,7 +1704,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       const response = await getFiche(ML_ARA);
 
       expect(response.data.indicateurs).toMatchObject({
-        premier_compte_at: null,
+        premier_compte_at: "2025-01-01T00:00:00.000Z",
         derniere_connexion_at: null,
         taux_traitement: 60,
         is_engaged: false,
@@ -1719,6 +1736,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
 
       expect(response.status).toBe(200);
       expect(response.data.indicateurs).toMatchObject({
+        premier_compte_at: null,
         taux_traitement: null,
         is_engaged: false,
         alertes: [{ type: "collab_sans_compte", valeur: 1 }],

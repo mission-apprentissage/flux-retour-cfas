@@ -165,7 +165,7 @@ function MlAlerte({
   );
 }
 
-/** Onglet Ruptures, réservé à l'admin : les ML activées qui ne sont pas engagées. */
+/** Onglet Ruptures : les ML activées qui ne sont pas engagées. */
 export function MlRupturesAlertesSection() {
   return (
     <AlertesSection>
@@ -189,7 +189,7 @@ export function MlRupturesAlertesSection() {
   );
 }
 
-/** Onglet Collaborations > Activité des ML, réservé à l'admin : mêmes alertes que la fiche ML, sur les collaborations. */
+/** Onglet Collaborations > Activité des ML : mêmes alertes que la fiche ML, sur les collaborations. */
 export function MlCollabAlertesSection() {
   return (
     <AlertesSection>

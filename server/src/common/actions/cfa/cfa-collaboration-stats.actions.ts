@@ -76,7 +76,7 @@ const INJOIGNABLES_COMPARATORS: Record<
   taux: (a, b) => a.taux - b.taux,
 };
 
-/** CFA du territoire dont plus de 25 % des dossiers traités par la ML aboutissent à un jeune injoignable. */
+/** CFA du territoire dont plus de 25 % des dossiers traités par la ML, hors « à recontacter », finissent injoignables. */
 export async function listCfaInjoignables(
   territoire: CfaTerritoire,
   { sort_by, sort_order }: { sort_by: CfaInjoignablesSortBy; sort_order: "asc" | "desc" }
@@ -92,7 +92,7 @@ export async function listCfaInjoignables(
             new Date(),
             organismes.map((organisme) => organisme._id)
           ),
-          situation: { $ne: null },
+          situation: { $nin: [null, SITUATION_ENUM.CONTACTE_SANS_RETOUR] },
         },
       },
       {

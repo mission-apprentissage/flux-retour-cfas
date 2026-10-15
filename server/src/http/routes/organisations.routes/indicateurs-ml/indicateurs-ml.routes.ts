@@ -715,13 +715,10 @@ const getCfaInjoignablesExportRoute: IndicateursHandler<z.infer<typeof cfaInjoig
 const findMlAlertes = (
   type: z.infer<typeof mlAlertesParams>["type"],
   query: z.infer<typeof mlAlertesExportQuery>,
-  { organisation, regions }: IndicateursMlLocals
+  { regions }: IndicateursMlLocals
 ) => {
-  if (organisation.type !== ORGANISATION_TYPE.ADMINISTRATEUR) {
-    throw Boom.forbidden("Accès réservé aux administrateurs");
-  }
   assertRegionAllowed(query.region, regions);
-  return listMlAlertes(type, { region: query.region }, query);
+  return listMlAlertes(type, { regions: scopedRegions(query.region, regions) }, query);
 };
 
 const getMlAlertesRoute: IndicateursHandler<z.infer<typeof mlAlertesQuery>, z.infer<typeof mlAlertesParams>> = async (

@@ -69,7 +69,7 @@ function DeploiementActivitePanel() {
       <AdoptionKpis />
       <CouvertureTerritoiresCard isAdmin={isAdmin} />
       <SuiviTraitementMLCard />
-      {isAdmin && <MlRupturesAlertesSection />}
+      <MlRupturesAlertesSection />
     </OverviewSection>
   );
 }

@@ -44,6 +44,8 @@ export function NpsJauge({ data, avecNombreCfa = true }: { data: ICfaNpsStats; a
   );
 }
 
+export const NPS_TITRE = "Simplicité de la demande de collaboration";
+
 export const NPS_TOOLTIP =
   "Calculé à partir de la note donnée par les CFA à la fin du formulaire de collaboration (de 0 à 5) : 5 = promoteur, 4 = neutre, 0 à 3 = détracteur. Score = % de promoteurs − % de détracteurs, de −100 à 100.";
 
@@ -55,7 +57,7 @@ export function CfaSatisfactionCard() {
     <OverviewCard title="Satisfaction des CFA">
       <div className={styles.gauge}>
         <h4 className={styles.subtitle}>
-          NPS sur la collaboration
+          {NPS_TITRE}
           <Tooltip kind="hover" title={NPS_TOOLTIP} />
         </h4>
         <StatsErrorHandler data={data} error={error} isLoading={isLoading}>

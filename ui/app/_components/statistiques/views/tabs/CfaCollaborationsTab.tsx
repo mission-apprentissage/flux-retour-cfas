@@ -7,7 +7,7 @@ import { DetailsDossiersTraitesPieChart } from "../../charts/DetailsDossiersTrai
 import { ObjectifsBarChart } from "../../charts/ObjectifsBarChart";
 import { SituationsPieChart } from "../../charts/SituationsPieChart";
 import { useCfaCollaborations } from "../../hooks/useStatsQueries";
-import { NPS_TOOLTIP, NpsJauge } from "../../sections/CfaSatisfactionCard";
+import { NPS_TITRE, NPS_TOOLTIP, NpsJauge } from "../../sections/CfaSatisfactionCard";
 import { CollaborationsListCard } from "../../sections/CollaborationsListCard";
 import { CfaCollabMlTable } from "../../tables/CfaCollabMlTable";
 import { NoDataMessage } from "../../ui/NoDataMessage";
@@ -73,7 +73,7 @@ function VueChiffree({ organismeId }: { organismeId: string }) {
             <Carte titre="Satisfaction du CFA">
               <div className={styles.satisfaction}>
                 <h4 className={styles.sousTitre}>
-                  NPS sur la collaboration <Tooltip kind="hover" title={NPS_TOOLTIP} />
+                  {NPS_TITRE} <Tooltip kind="hover" title={NPS_TOOLTIP} />
                 </h4>
                 {data.nps.total_reponses === 0 ? (
                   <p className="fr-text--sm fr-mb-0">Aucune réponse de ce CFA pour le moment.</p>

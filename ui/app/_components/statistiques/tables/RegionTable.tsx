@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import Link from "next/link";
 import { useState } from "react";
@@ -13,7 +12,6 @@ import { SortableTableHeader } from "./SortableTableHeader";
 export interface RegionStats {
   code: string;
   nom: string;
-  deployed: boolean;
   ml_total: number;
   ml_activees: number;
   ml_activees_delta: number;
@@ -30,15 +28,10 @@ interface RegionTableProps {
 
 export function RegionTable({ regions, loadingDeltas = false, detailRegions = [] }: RegionTableProps) {
   const showDetailColumn = detailRegions.length > 0;
-  const [showInactive, setShowInactive] = useState(false);
   const [sortColumn, setSortColumn] = useState<keyof RegionStats>("ml_total");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
-  // Une région hors des régions pilotes reste affichée quand c'est la seule du tableau (région sélectionnée).
-  const filteredRegions =
-    showInactive || !regions.some((r) => r.deployed) ? regions : regions.filter((r) => r.deployed);
-
-  const sortedDisplayedRegions = [...filteredRegions].sort((a, b) => {
+  const sortedDisplayedRegions = [...regions].sort((a, b) => {
     const aVal = a[sortColumn];
     const bVal = b[sortColumn];
     const comparison = aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
@@ -48,8 +41,6 @@ export function RegionTable({ regions, loadingDeltas = false, detailRegions = []
     if (a.ml_activees !== b.ml_activees) return b.ml_activees - a.ml_activees;
     return b.ml_engagees - a.ml_engagees;
   });
-
-  const hasInactiveRegions = regions.some((r) => !r.deployed);
 
   const handleSort = (column: keyof RegionStats) => {
     if (sortColumn === column) {
@@ -78,10 +69,7 @@ export function RegionTable({ regions, loadingDeltas = false, detailRegions = []
   return (
     <div>
       {sortedDisplayedRegions.length === 0 ? (
-        <p className={styles.emptyMessage}>
-          Aucune région à afficher.{" "}
-          {!showInactive && hasInactiveRegions && "Cliquez sur le bouton ci-dessous pour afficher toutes les régions."}
-        </p>
+        <p className={styles.emptyMessage}>Aucune région à afficher.</p>
       ) : (
         <div className={`${styles.regionStatsTable} ${sortedDisplayedRegions.length < 4 ? styles.fewRows : ""}`}>
           <Table
@@ -160,14 +148,6 @@ export function RegionTable({ regions, loadingDeltas = false, detailRegions = []
                 : []),
             ])}
           />
-        </div>
-      )}
-
-      {hasInactiveRegions && (
-        <div className={styles.buttonContainer}>
-          <Button priority="secondary" size="small" onClick={() => setShowInactive(!showInactive)}>
-            {showInactive ? "Masquer les régions inactives" : "Afficher les régions inactives"}
-          </Button>
         </div>
       )}
     </div>

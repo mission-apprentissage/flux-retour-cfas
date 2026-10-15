@@ -157,7 +157,7 @@ function CfaInjoignablesAlerte() {
         <div
           key="taux"
           className={tableStyles.centeredCell}
-          title={`${row.injoignables} injoignables sur ${row.traites} dossiers traités`}
+          title={`${row.injoignables} injoignables sur ${row.traites} dossiers traités (hors « à recontacter »)`}
         >
           {row.taux} %
         </div>,

@@ -71,7 +71,6 @@ export type IDossiersTraitesStatsResponse = z.output<typeof zDossiersTraitesStat
 const zRegionStats = z.object({
   code: z.string(),
   nom: z.string(),
-  deployed: z.boolean(),
   ml_total: z.number(),
   ml_activees: z.number(),
   ml_activees_delta: z.number(),
@@ -88,9 +87,7 @@ export type IRegionStats = z.output<typeof zRegionStats>;
 /** Code de la ligne regroupant les ML sans département renseigné. */
 export const UNKNOWN_DEPARTEMENT_CODE = "inconnu";
 
-const zDepartementStats = zRegionStats.omit({ deployed: true });
-
-export type IDepartementStats = z.output<typeof zDepartementStats>;
+export type IDepartementStats = IRegionStats;
 
 const zTraitementStatsData = z.object({
   total: z.number(),

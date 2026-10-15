@@ -30,10 +30,6 @@ export function CouvertureTerritoiresCard({ isAdmin = false }: { isAdmin?: boole
       ) : (
         <CouvertureRegionsContent period={period} isAdmin={isAdmin} national />
       )}
-      <p className={styles.note}>
-        Les colonnes « À traiter » et « Traités » comptent l&apos;ensemble des dossiers transmis aux Missions Locales :
-        ruptures et collaborations.
-      </p>
     </OverviewCard>
   );
 }

@@ -278,6 +278,7 @@ async function getTerritoryStatsAtDate(
       [
         ...buildLatestPerMlStages(buildLatestStatsMatch(date, missionLocaleIds)),
         ...buildOrgLookupPipeline({ checkActivation: false, localField: "_id" }),
+        { $addFields: { view: buildSegmentViewExpr("rupture") } },
         {
           $group: {
             _id: `$ml.adresse.${level}`,
@@ -296,8 +297,8 @@ async function getTerritoryStatsAtDate(
                 ],
               },
             },
-            a_traiter: { $sum: "$latest_stats.a_traiter" },
-            traites: { $sum: "$latest_stats.traite" },
+            a_traiter: { $sum: "$view.a_traiter" },
+            traites: { $sum: "$view.traite" },
           },
         },
       ],
@@ -346,14 +347,12 @@ async function getTerritoryStats(period: StatsPeriod, level: TerritoryLevel, reg
 }
 
 export const getRegionalStats = async (period: StatsPeriod = "30days") => {
-  const { isRegionDeployed } = await import("shared/constants/deployedRegions");
   const territories = await getTerritoryStats(period, "region");
 
   return {
     regions: territories.map((territory) => ({
       ...territory,
       nom: territory.nom || "Région inconnue",
-      deployed: isRegionDeployed(territory.code),
     })),
   };
 };
@@ -808,7 +807,7 @@ export async function getDeploymentStats(period: StatsPeriod = "30days", scopeRe
       previousEngagedMlCount,
       date: evaluationDate,
     },
-    regionsActives: regions.filter((r) => r.deployed).map((r) => r.code),
+    regionsActives: regions.map((r) => r.code),
     evaluationDate,
     period,
   };
