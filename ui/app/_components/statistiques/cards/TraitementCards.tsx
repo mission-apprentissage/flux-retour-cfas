@@ -15,6 +15,7 @@ interface TraitementCardsProps {
   firstStats?: TraitementStats;
   loading?: boolean;
   loadingPercentage?: boolean;
+  cardClassName?: string;
 }
 
 const TooltipWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -48,6 +49,7 @@ export function TraitementCards({
   firstStats,
   loading = false,
   loadingPercentage = false,
+  cardClassName,
 }: TraitementCardsProps) {
   return (
     <>
@@ -57,6 +59,7 @@ export function TraitementCards({
         previousValue={firstStats?.total}
         loading={loading}
         loadingPercentage={loadingPercentage}
+        className={cardClassName}
       />
       <StatCard
         label="Total jeunes contactés par les Missions Locales"
@@ -64,6 +67,7 @@ export function TraitementCards({
         previousValue={firstStats?.total_contacte}
         loading={loading}
         loadingPercentage={loadingPercentage}
+        className={cardClassName}
         tooltip={
           <TooltipWrapper>
             <TooltipHeader>Total jeunes contactés par les Missions locales</TooltipHeader>
@@ -93,6 +97,7 @@ export function TraitementCards({
         previousValue={firstStats?.total_repondu}
         loading={loading}
         loadingPercentage={loadingPercentage}
+        className={cardClassName}
         tooltip={
           <TooltipWrapper>
             <TooltipHeader>Total jeunes ayant répondu</TooltipHeader>
@@ -125,6 +130,7 @@ export function TraitementCards({
         previousValue={firstStats?.total_accompagne}
         loading={loading}
         loadingPercentage={loadingPercentage}
+        className={cardClassName}
         tooltip={
           <TooltipWrapper>
             <TooltipHeader>Total jeunes accompagnés découverts par le service</TooltipHeader>

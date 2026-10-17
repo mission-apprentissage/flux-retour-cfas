@@ -40,6 +40,33 @@ export function NationalLabel({ isActive, collapsed }: MenuLabelProps) {
   );
 }
 
+export function CfaLabel({ isActive, collapsed }: MenuLabelProps) {
+  return (
+    <>
+      <i className={`ri-building-2-fill ${styles.menuIcon} ${styles.mlIcon} ${isActive ? styles.mlIconActive : ""}`} />
+      {!collapsed && "Suivi CFA"}
+    </>
+  );
+}
+
+export function CollaborationsLabel({ isActive, collapsed }: MenuLabelProps) {
+  return (
+    <>
+      <i className={`fr-icon-team-fill ${styles.menuIcon} ${styles.mlIcon} ${isActive ? styles.mlIconActive : ""}`} />
+      {!collapsed && "Collaborations"}
+    </>
+  );
+}
+
+export function RechercheLabel({ isActive, collapsed }: MenuLabelProps) {
+  return (
+    <>
+      <i className={`fr-icon-search-line ${styles.menuIcon} ${styles.mlIcon} ${isActive ? styles.mlIconActive : ""}`} />
+      {!collapsed && "Recherche"}
+    </>
+  );
+}
+
 export function MissionLocaleLabel({ isActive, collapsed }: MenuLabelProps) {
   return (
     <>

@@ -1,0 +1,15 @@
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: center;
+}
+
+.chart {
+  flex: 3 1 480px;
+  min-width: 0;
+}
+
+.legend {
+  flex: 1 1 220px;
+}

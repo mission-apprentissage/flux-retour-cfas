@@ -28,10 +28,12 @@ import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
 } from "@/common/actions/mission-locale/mission-locale.actions";
+import { batchInviteUsersToOrganisation } from "@/common/actions/organisations.actions";
 import { getMissionsLocales } from "@/common/apis/apiAlternance/apiAlternance";
 import { organisationsDb, organismesDb } from "@/common/model/collections";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { DefaultParams, DefaultQuery, returnResult, RouteHandler } from "@/http/middlewares/helpers";
+import { heavyLimiter } from "@/http/middlewares/rateLimit";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 const mlIdSchema = z.string().regex(/^[0-9a-f]{24}$/);
@@ -52,6 +54,9 @@ const activateOrganismesBody = z.object({
 });
 const mlIdParams = z.object({ id: mlIdSchema });
 const parametresBody = z.object({ rdv_url: httpUrlSchema.nullable() });
+const invitationsBody = z.object({
+  emails: z.array(z.string().trim().toLowerCase().email()).min(1).max(50),
+});
 const mlStatsQuery = z.object({
   rqth_only: z.enum(["true", "false"]).optional(),
   mineur_only: z.enum(["true", "false"]).optional(),
@@ -93,6 +98,12 @@ export default () => {
     "/:id/parametres",
     validateRequestMiddleware({ params: mlIdParams, body: parametresBody }),
     returnResult(updateMlParametresAdmin)
+  );
+  router.post(
+    "/:id/membres/invitations",
+    heavyLimiter,
+    validateRequestMiddleware({ params: mlIdParams, body: invitationsBody }),
+    returnResult(inviteMlMembres)
   );
   router.get("/:id/stats", validateRequestMiddleware({ query: mlStatsQuery }), returnResult(getMlStats));
   router.get("/:id/effectifs-per-month", returnResult(getEffectifsParMoisMissionLocale));
@@ -256,6 +267,16 @@ const updateMlParametresAdmin: AdminHandler<
   }
 
   return { rdv_url };
+};
+
+const inviteMlMembres: AdminHandler<DefaultQuery, z.infer<typeof mlIdParams>, z.infer<typeof invitationsBody>> = async (
+  req
+) => {
+  const ml = await organisationsDb().findOne({ _id: new ObjectId(req.params.id), type: "MISSION_LOCALE" });
+  if (!ml) {
+    throw Boom.notFound(`No Mission Locale found for id: ${req.params.id}`);
+  }
+  return batchInviteUsersToOrganisation(req.user, req.body.emails, ml._id);
 };
 
 const getMlMembres: AdminHandler = async (req) => {

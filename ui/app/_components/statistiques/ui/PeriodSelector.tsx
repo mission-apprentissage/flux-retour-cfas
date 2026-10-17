@@ -17,14 +17,8 @@ interface PeriodSelectorProps {
   hideLabel?: boolean;
 }
 
-export function PeriodSelector({
-  value,
-  onChange,
-  className,
-  includeAll = false,
-  hideLabel = false,
-}: PeriodSelectorProps) {
-  const options = [
+export function getPeriodOptions(includeAll = false): Array<{ label: string; value: StatsPeriod }> {
+  const options: Array<{ label: string; value: StatsPeriod }> = [
     { label: "30 derniers jours", value: "30days" },
     { label: "3 derniers mois", value: "3months" },
   ];
@@ -32,6 +26,18 @@ export function PeriodSelector({
   if (includeAll) {
     options.push({ label: `Depuis le lancement (${STATS_LAUNCH_DATE_LABEL})`, value: "all" });
   }
+
+  return options;
+}
+
+export function PeriodSelector({
+  value,
+  onChange,
+  className,
+  includeAll = false,
+  hideLabel = false,
+}: PeriodSelectorProps) {
+  const options = getPeriodOptions(includeAll);
 
   return (
     <div className={styles.selector}>

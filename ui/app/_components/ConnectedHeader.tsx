@@ -4,9 +4,11 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { usePathname } from "next/navigation";
+import { Suspense, useState } from "react";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
 import { PAGES } from "@/app/_utils/routes.utils";
+import { STATS_NAV_ITEMS, StatsFiltersQueryReader } from "@/app/suivi-des-indicateurs/navigation";
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 import { getUserOrganismeId } from "@/common/internal/AuthContext";
 
@@ -18,25 +20,6 @@ import { Impersonate } from "./Impersonate";
 import { useCfaUnreadNotificationsCount } from "./ruptures/cfa/hooks";
 import { useMlCompteursOnglets } from "./ruptures/shared/hooks";
 import { UserConnectedHeader } from "./UserConnectedHeader";
-
-// Onglets des DREETS/DDETS mis en pause pendant les travaux : les anciennes URL restent valides et affichent la page travaux.
-const ONGLETS_EN_PAUSE = [
-  { text: "Mon Tableau de bord", href: "/home" },
-  { text: "Mon territoire", href: "/organismes" },
-  { text: "Mes indicateurs", href: "/indicateurs" },
-  { text: "Vœux Affelnet", href: "/voeux-affelnet" },
-  { text: "Indicateurs nationaux", href: "/national/indicateurs" },
-];
-
-function OngletEnPause({ label }: { label: string }) {
-  return (
-    <span>
-      {label}
-      <i className={`ri-tools-fill ${styles.pausedMark}`} aria-hidden="true" />
-      <span className="fr-sr-only">(fonctionnalité en pause pendant les travaux)</span>
-    </span>
-  );
-}
 
 function OngletAvecCompteur({ label, compteur }: { label: string; compteur: number | undefined }) {
   return (
@@ -59,16 +42,16 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   const pathname = usePathname();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
+  const [statsFiltersQuery, setStatsFiltersQuery] = useState("");
+
   const isCfa = user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION;
+  const isDreetsPersona =
+    user?.organisation?.type === ORGANISATION_TYPE.DREETS || user?.organisation?.type === ORGANISATION_TYPE.DDETS;
   const { data: unreadData } = useCfaUnreadNotificationsCount(isCfa ? getUserOrganismeId(user) : undefined);
   const unreadCount = unreadData?.count ?? 0;
 
   const isMl = user?.organisation?.type === ORGANISATION_TYPE.MISSION_LOCALE;
   const { data: compteurs } = useMlCompteursOnglets(isMl && withNav);
-
-  // Nav plus dense : ces profils ont deux onglets de plus que les autres pendant les travaux.
-  const aOngletsEnPause =
-    user?.organisation?.type === ORGANISATION_TYPE.DREETS || user?.organisation?.type === ORGANISATION_TYPE.DDETS;
 
   const getMesOrganismesLabel = (type: string) => {
     switch (type) {
@@ -193,23 +176,12 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           },
         });
       }
-      if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) {
-        baseItems.push({
-          text: "Suivi des indicateurs",
-          isActive: pathname?.startsWith("/suivi-des-indicateurs"),
-          linkProps: {
-            href: "/suivi-des-indicateurs",
-            target: "_self",
-          },
-        });
-        ONGLETS_EN_PAUSE.forEach(({ text, href }) => {
+      if (isDreetsPersona) {
+        STATS_NAV_ITEMS.forEach(({ text, href, isActive }) => {
           baseItems.push({
-            text: <OngletEnPause label={text} />,
-            isActive: pathname === href || pathname?.startsWith(`${href}/`),
-            linkProps: {
-              href,
-              target: "_self",
-            },
+            text,
+            isActive: isActive(pathname ?? ""),
+            linkProps: { href: `${href}${statsFiltersQuery}`, target: "_self" },
           });
         });
       }
@@ -352,18 +324,24 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   };
 
   return (
-    <DsfrHeader
-      className={aOngletsEnPause ? styles.headerOngletsEnPause : undefined}
-      brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
-      homeLinkProps={{
-        href: "/",
-        title: `Accueil - ${PRODUCT_NAME_TITLE}`,
-      }}
-      id="fr-header-simple-header-with-service-title-and-tagline"
-      serviceTitle={PRODUCT_NAME_TITLE}
-      quickAccessItems={[<Impersonate key="impersonate" />, <UserConnectedHeader key="user-connected" />]}
-      navigation={getNavigationItems()}
-      disableDisplay
-    />
+    <>
+      {isDreetsPersona && (
+        <Suspense fallback={null}>
+          <StatsFiltersQueryReader onChange={setStatsFiltersQuery} />
+        </Suspense>
+      )}
+      <DsfrHeader
+        brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
+        homeLinkProps={{
+          href: "/",
+          title: `Accueil - ${PRODUCT_NAME_TITLE}`,
+        }}
+        id="fr-header-simple-header-with-service-title-and-tagline"
+        serviceTitle={PRODUCT_NAME_TITLE}
+        quickAccessItems={[<Impersonate key="impersonate" />, <UserConnectedHeader key="user-connected" />]}
+        navigation={getNavigationItems()}
+        disableDisplay
+      />
+    </>
   );
 }

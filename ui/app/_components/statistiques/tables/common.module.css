@@ -16,9 +16,22 @@
   gap: 0.5rem;
 }
 
+.sortButton {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--border-default-grey);
+}
+
+.sortButtonActive {
+  border-color: var(--border-action-high-blue-france);
+}
+
 .sortIcon {
-  font-size: 1rem;
-  color: #000091;
+  color: var(--text-action-high-blue-france);
 }
 
 .centeredCell {

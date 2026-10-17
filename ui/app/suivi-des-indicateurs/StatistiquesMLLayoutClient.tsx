@@ -3,29 +3,37 @@
 import type { SideMenuProps } from "@codegouvfr/react-dsfr/SideMenu";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { REGIONS_BY_CODE, REGIONS_WITH_SVG_SORTED } from "shared/constants/territoires";
 
 import { useUserRegions } from "@/app/_components/statistiques/hooks/useUserRegions";
 import {
+  CfaLabel,
+  CollaborationsLabel,
   MissionLocaleLabel,
   NationalLabel,
+  RechercheLabel,
   RegionItemLabel,
   RegionsLabel,
   SyntheseLabel,
 } from "@/app/_components/statistiques/ui/MenuLabels";
+import { getRegionLabel } from "@/app/_components/statistiques/utils";
 
-import { ADMIN_DEFAULT_REGION_CODE } from "./access";
+import { ADMIN_DEFAULT_REGION_CODE, ADMIN_REGION_CODES } from "./access";
 import { StatistiquesLayoutBase } from "./StatistiquesLayoutBase";
+import styles from "./StatistiquesMLLayoutClient.module.css";
 
 const BASE_PATH = "/suivi-des-indicateurs";
-const ADMIN_REGION_CODES = REGIONS_WITH_SVG_SORTED.map((region) => region.code);
 
 interface StatistiquesMLLayoutClientProps {
   children: React.ReactNode;
   isAdmin?: boolean;
+  isDreets?: boolean;
 }
 
-export function StatistiquesMLLayoutClient({ children, isAdmin = false }: StatistiquesMLLayoutClientProps) {
+export function StatistiquesMLLayoutClient({
+  children,
+  isAdmin = false,
+  isDreets = false,
+}: StatistiquesMLLayoutClientProps) {
   const pathname = usePathname() ?? "";
   const { regions: ownRegions, isLoading } = useUserRegions();
   const userRegions = isAdmin ? ADMIN_REGION_CODES : ownRegions;
@@ -37,6 +45,14 @@ export function StatistiquesMLLayoutClient({ children, isAdmin = false }: Statis
     window.addEventListener("pageshow", reloadIfRestoredFromCache);
     return () => window.removeEventListener("pageshow", reloadIfRestoredFromCache);
   }, []);
+
+  if (isDreets) {
+    return (
+      <div className={styles.dreetsPage}>
+        <div className="fr-container">{children}</div>
+      </div>
+    );
+  }
 
   const isRegionPage = pathname.includes(`${BASE_PATH}/region/`) || pathname === `${BASE_PATH}/region`;
   const isMissionLocalePage = pathname === `${BASE_PATH}/mission-locale`;
@@ -176,9 +192,7 @@ function buildCollapsedMenuItems(
       ),
       linkProps: {
         href: regionMenuHref,
-        title: isMonoRegion
-          ? REGIONS_BY_CODE[defaultRegionCode as keyof typeof REGIONS_BY_CODE]?.nom || defaultRegionCode
-          : regionsLabel,
+        title: isMonoRegion ? getRegionLabel(defaultRegionCode) : regionsLabel,
       },
       isActive: isRegionPage,
     });
@@ -188,6 +202,24 @@ function buildCollapsedMenuItems(
     text: <MissionLocaleLabel isActive={isMissionLocalePage || isMissionLocaleDetailPage} collapsed />,
     linkProps: { href: `${BASE_PATH}/mission-locale`, title: "Par Mission Locale" },
     isActive: isMissionLocalePage || isMissionLocaleDetailPage,
+  });
+
+  items.push({
+    text: <CfaLabel isActive={pathname.startsWith(`${BASE_PATH}/cfa`)} collapsed />,
+    linkProps: { href: `${BASE_PATH}/cfa`, title: "Suivi CFA" },
+    isActive: pathname.startsWith(`${BASE_PATH}/cfa`),
+  });
+
+  items.push({
+    text: <CollaborationsLabel isActive={pathname.startsWith(`${BASE_PATH}/collaborations`)} collapsed />,
+    linkProps: { href: `${BASE_PATH}/collaborations`, title: "Collaborations" },
+    isActive: pathname.startsWith(`${BASE_PATH}/collaborations`),
+  });
+
+  items.push({
+    text: <RechercheLabel isActive={pathname.startsWith(`${BASE_PATH}/recherche`)} collapsed />,
+    linkProps: { href: `${BASE_PATH}/recherche`, title: "Recherche" },
+    isActive: pathname.startsWith(`${BASE_PATH}/recherche`),
   });
 
   return items;
@@ -248,6 +280,24 @@ function buildExpandedMenuItems(
     text: <MissionLocaleLabel isActive={isMissionLocalePage} />,
     linkProps: { href: `${BASE_PATH}/mission-locale` },
     isActive: isMissionLocalePage,
+  });
+
+  items.push({
+    text: <CfaLabel isActive={pathname.startsWith(`${BASE_PATH}/cfa`)} />,
+    linkProps: { href: `${BASE_PATH}/cfa` },
+    isActive: pathname.startsWith(`${BASE_PATH}/cfa`),
+  });
+
+  items.push({
+    text: <CollaborationsLabel isActive={pathname.startsWith(`${BASE_PATH}/collaborations`)} />,
+    linkProps: { href: `${BASE_PATH}/collaborations` },
+    isActive: pathname.startsWith(`${BASE_PATH}/collaborations`),
+  });
+
+  items.push({
+    text: <RechercheLabel isActive={pathname.startsWith(`${BASE_PATH}/recherche`)} />,
+    linkProps: { href: `${BASE_PATH}/recherche` },
+    isActive: pathname.startsWith(`${BASE_PATH}/recherche`),
   });
 
   return items;

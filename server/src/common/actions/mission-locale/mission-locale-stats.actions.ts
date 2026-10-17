@@ -1,9 +1,13 @@
 import { ObjectId } from "bson";
+import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import { IOrganisationMissionLocale } from "shared/models";
+import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type { ICollabSegmentStats } from "shared/models/data/missionLocaleStats.model";
 import {
   ICollabSegmentExportRow,
+  ICollaborationMensuelStats,
+  ICollaborationMois,
   ICollaborationSegmentStats,
   IDetailsDossiersTraitesV2,
   IDossiersTraitesStatsResponse,
@@ -17,6 +21,7 @@ import {
   StatsPeriod,
   StatsSegment,
   TraitementMlSortBy,
+  UNKNOWN_DEPARTEMENT_CODE,
 } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
 import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
@@ -38,7 +43,6 @@ import {
   buildSegmentSumAccumulators,
   buildSegmentViewExpr,
   buildTotalTraitesV2Expression,
-  calculateStartDate,
   calculateStartDateAsync,
   createStatWithVariation,
   EMPTY_COLLAB_SEGMENT_STATS,
@@ -201,13 +205,21 @@ export const getEvenlySpacedDates = async (period: StatsPeriod, referenceDate: D
   return dates;
 };
 
-async function getRegionsMissionLocales(evaluationDate: Date, startDate: Date) {
-  return await organisationsDb()
+type TerritoryLevel = "region" | "departement";
+
+/** ML totales et activées par région ou par département, éventuellement restreintes à une région. */
+async function getMissionLocalesByTerritory(
+  evaluationDate: Date,
+  startDate: Date,
+  level: TerritoryLevel,
+  regionCode?: string
+) {
+  return (await organisationsDb()
     .aggregate([
-      { $match: { type: "MISSION_LOCALE" } },
+      { $match: { type: "MISSION_LOCALE", ...(regionCode ? { "adresse.region": regionCode } : {}) } },
       {
         $group: {
-          _id: "$adresse.region",
+          _id: `$adresse.${level}`,
           ml_total: { $sum: 1 },
           ml_activees_current: {
             $sum: {
@@ -236,35 +248,39 @@ async function getRegionsMissionLocales(evaluationDate: Date, startDate: Date) {
           },
         },
       },
-      {
-        $lookup: {
-          from: "regions",
-          localField: "_id",
-          foreignField: "code",
-          as: "region_info",
-        },
-      },
-      {
-        $addFields: {
-          nom: { $arrayElemAt: ["$region_info.nom", 0] },
-        },
-      },
+      ...(level === "region"
+        ? [
+            { $lookup: { from: "regions", localField: "_id", foreignField: "code", as: "region_info" } },
+            { $addFields: { nom: { $arrayElemAt: ["$region_info.nom", 0] } } },
+          ]
+        : []),
       { $sort: { ml_total: -1 } },
     ])
-    .toArray();
+    .toArray()) as Array<{
+    _id: string | null;
+    nom?: string;
+    ml_total: number;
+    ml_activees_current: number;
+    ml_activees_previous: number;
+  }>;
 }
 
-type RegionalStatsAtDate = { engaged: number; a_traiter: number; traites: number };
+type TerritoryStatsAtDate = { engaged: number; a_traiter: number; traites: number };
 
-async function getRegionalStatsAtDate(date: Date): Promise<Map<string, RegionalStatsAtDate>> {
+async function getTerritoryStatsAtDate(
+  date: Date,
+  level: TerritoryLevel,
+  regionCode?: string
+): Promise<Map<string | null, TerritoryStatsAtDate>> {
+  const missionLocaleIds = regionCode ? await getMissionLocaleIdsByRegions([regionCode]) : undefined;
   const rows = (await missionLocaleStatsDb()
     .aggregate(
       [
-        ...buildLatestPerMlStages(buildLatestStatsMatch(date)),
+        ...buildLatestPerMlStages(buildLatestStatsMatch(date, missionLocaleIds)),
         ...buildOrgLookupPipeline({ checkActivation: false, localField: "_id" }),
         {
           $group: {
-            _id: "$ml.adresse.region",
+            _id: `$ml.adresse.${level}`,
             engaged: {
               $sum: {
                 $cond: [
@@ -287,56 +303,75 @@ async function getRegionalStatsAtDate(date: Date): Promise<Map<string, RegionalS
       ],
       { allowDiskUse: true }
     )
-    .toArray()) as Array<{ _id: string; engaged: number; a_traiter: number; traites: number }>;
+    .toArray()) as Array<{ _id: string | null; engaged: number; a_traiter: number; traites: number }>;
 
   return new Map(
     rows.map((row) => [row._id, { engaged: row.engaged, a_traiter: row.a_traiter, traites: row.traites }])
   );
 }
 
-export const getRegionalStats = async (period: StatsPeriod = "30days") => {
+const EMPTY_TERRITORY_STATS: TerritoryStatsAtDate = { engaged: 0, a_traiter: 0, traites: 0 };
+
+async function getTerritoryStats(period: StatsPeriod, level: TerritoryLevel, regionCode?: string) {
   const evaluationDate = normalizeToUTCDay(new Date());
-  const startDate = calculateStartDate(period, evaluationDate);
+  const startDate = await calculateStartDateAsync(period, evaluationDate);
 
-  const { DEPLOYED_REGION_CODES } = await import("shared/constants/deployedRegions");
-
-  const [regions, currentByRegion, previousByRegion] = await Promise.all([
-    getRegionsMissionLocales(evaluationDate, startDate),
-    getRegionalStatsAtDate(evaluationDate),
-    getRegionalStatsAtDate(startDate),
+  const [territories, currentByCode, previousByCode] = await Promise.all([
+    getMissionLocalesByTerritory(evaluationDate, startDate, level, regionCode),
+    getTerritoryStatsAtDate(evaluationDate, level, regionCode),
+    getTerritoryStatsAtDate(startDate, level, regionCode),
   ]);
 
-  const emptyStats: RegionalStatsAtDate = { engaged: 0, a_traiter: 0, traites: 0 };
-
-  const regionsWithEngagement = regions
-    .filter((region) => region._id != null)
-    .map((region) => {
-      const current = currentByRegion.get(region._id) || emptyStats;
-      const previous = previousByRegion.get(region._id) || emptyStats;
+  // Une ML sans département reste visible (ligne « inconnu ») ; sans région, elle n'a pas de ligne régionale.
+  return territories
+    .filter((territory) => level === "departement" || territory._id != null)
+    .map((territory) => {
+      const current = currentByCode.get(territory._id) || EMPTY_TERRITORY_STATS;
+      const previous = previousByCode.get(territory._id) || EMPTY_TERRITORY_STATS;
 
       return {
-        code: region._id,
-        nom: region.nom || "Région inconnue",
-        deployed: DEPLOYED_REGION_CODES.includes(region._id),
-        ml_total: region.ml_total,
-        ml_activees: region.ml_activees_current,
-        ml_activees_delta: region.ml_activees_current - region.ml_activees_previous,
+        code: territory._id ?? UNKNOWN_DEPARTEMENT_CODE,
+        nom: territory.nom,
+        ml_total: territory.ml_total,
+        ml_activees: territory.ml_activees_current,
+        ml_activees_delta: territory.ml_activees_current - territory.ml_activees_previous,
         ml_engagees: current.engaged,
         ml_engagees_delta: current.engaged - previous.engaged,
-        engagement_rate: region.ml_activees_current > 0 ? current.engaged / region.ml_activees_current : 0,
+        engagement_rate: territory.ml_activees_current > 0 ? current.engaged / territory.ml_activees_current : 0,
         a_traiter: current.a_traiter,
         traites: current.traites,
         traites_variation: calculatePercentage(current.traites, previous.traites),
       };
     });
+}
+
+export const getRegionalStats = async (period: StatsPeriod = "30days") => {
+  const { isRegionDeployed } = await import("shared/constants/deployedRegions");
+  const territories = await getTerritoryStats(period, "region");
 
   return {
-    regions: regionsWithEngagement,
+    regions: territories.map((territory) => ({
+      ...territory,
+      nom: territory.nom || "Région inconnue",
+      deployed: isRegionDeployed(territory.code),
+    })),
+  };
+};
+
+/** Couverture par département d'une région, sur le modèle de `getRegionalStats`. */
+export const getDepartementalStats = async (period: StatsPeriod = "30days", regionCode: string) => {
+  const territories = await getTerritoryStats(period, "departement", regionCode);
+
+  return {
+    departements: territories.map((territory) => ({
+      ...territory,
+      nom: DEPARTEMENTS_BY_CODE[territory.code as keyof typeof DEPARTEMENTS_BY_CODE]?.nom || "Département inconnu",
+    })),
   };
 };
 
 /** Périmètre des lecteurs : une ML explicite, sinon les ML des régions données, sinon tout. */
-const resolveMissionLocaleIds = async (regions?: string[], mlId?: string) =>
+export const resolveMissionLocaleIds = async (regions?: string[], mlId?: string) =>
   mlId ? [new ObjectId(mlId)] : regions?.length ? await getMissionLocaleIdsByRegions(regions) : undefined;
 
 const toTraitementStatsData = (stats: ICollabSegmentStats) => ({
@@ -382,6 +417,9 @@ interface TraitementMLParams {
   sort_by: TraitementMlSortBy;
   sort_order: "asc" | "desc";
   search?: string;
+  departements?: string[];
+  utiliseService?: boolean;
+  engagee?: boolean;
 }
 
 const TRAITEMENT_ML_SORT_FIELD_MAP: Record<TraitementMlSortBy, string> = {
@@ -414,9 +452,22 @@ const buildTranchesProjection = (viewPath: string) => ({
 export const getTraitementStatsByMissionLocale = async (
   params: TraitementMLParams
 ): Promise<ITraitementMLStatsResponse> => {
-  const { period, segment, region, regions, page, limit, sort_by, sort_order, search } = params;
+  const {
+    period,
+    segment,
+    region,
+    regions,
+    page,
+    limit,
+    sort_by,
+    sort_order,
+    search,
+    departements,
+    utiliseService,
+    engagee,
+  } = params;
   const evaluationDate = normalizeToUTCDay(new Date());
-  const startDate = calculateStartDate(period, evaluationDate);
+  const startDate = await calculateStartDateAsync(period, evaluationDate);
 
   const mongoSortField = TRAITEMENT_ML_SORT_FIELD_MAP[sort_by];
   const sortDirection = sort_order === "desc" ? -1 : 1;
@@ -433,6 +484,7 @@ export const getTraitementStatsByMissionLocale = async (
       $match: {
         type: "MISSION_LOCALE",
         ...regionFilter,
+        ...(departements?.length && { "adresse.departement": { $in: departements } }),
         ...(search && { nom: { $regex: escapeRegex(search), $options: "i" } }),
       },
     },
@@ -517,9 +569,27 @@ export const getTraitementStatsByMissionLocale = async (
         a_traiter: "$view.a_traiter",
         traites: "$view.traite",
         delai_moyen_jours: segment === "collab" ? buildDelaiMoyenExpr() : { $literal: null },
-        is_activated: { $ne: ["$activated_at", null] },
+        is_activated: { $ne: [{ $ifNull: ["$activated_at", null] }, null] },
+        is_engaged: {
+          $and: [
+            { $ne: [{ $ifNull: ["$activated_at", null] }, null] },
+            { $gt: [{ $ifNull: ["$latest_stats.total", 0] }, 0] },
+            { $gte: [{ $divide: ["$latest_stats.traite", "$latest_stats.total"] }, ENGAGEMENT_THRESHOLD] },
+          ],
+        },
+        departement_code: "$adresse.departement",
       },
     },
+    ...(utiliseService !== undefined || engagee !== undefined
+      ? [
+          {
+            $match: {
+              ...(utiliseService !== undefined && { is_activated: utiliseService }),
+              ...(engagee !== undefined && { is_engaged: engagee }),
+            },
+          },
+        ]
+      : []),
     {
       $addFields: {
         delai_moyen_jours_sort: {
@@ -572,6 +642,8 @@ export const getTraitementStatsByMissionLocale = async (
               traites: 1,
               pourcentage_traites: 1,
               is_activated: 1,
+              is_engaged: 1,
+              departement_code: 1,
               details: buildTranchesProjection("$view"),
               delai_moyen_jours: 1,
               derniere_activite: { $ifNull: ["$derniere_activite", null] },
@@ -672,7 +744,7 @@ const buildCountIf = (field: string, value: string) => ({
   $sum: { $cond: [{ $eq: [field, value] }, 1, 0] },
 });
 
-const DEFAULT_MOTIFS = {
+export const DEFAULT_MOTIFS = {
   mobilite: 0,
   logement: 0,
   sante: 0,
@@ -684,7 +756,7 @@ const DEFAULT_MOTIFS = {
   autre: 0,
 };
 
-const MOTIFS_PIPELINE = [
+export const MOTIFS_PIPELINE = [
   { $unwind: { path: "$organisme_data.motif", preserveNullAndEmptyArrays: true } },
   {
     $group: {
@@ -702,34 +774,51 @@ const MOTIFS_PIPELINE = [
   },
 ];
 
-export async function getDeploymentStats(period: StatsPeriod = "30days") {
+export async function getDeploymentStats(period: StatsPeriod = "30days", scopeRegions?: string[]) {
   const evaluationDate = normalizeToUTCDay(new Date());
 
-  const [summary, regional] = await Promise.all([getSummaryStats(evaluationDate, period), getRegionalStats(period)]);
+  const scope = scopeRegions?.length ? scopeRegions : undefined;
+  const [summary, regional] = await Promise.all([
+    scope ? null : getSummaryStats(evaluationDate, period),
+    getRegionalStats(period),
+  ]);
 
-  const engagedMlCount = regional.regions.reduce((sum, r) => sum + r.ml_engagees, 0);
-  const previousEngagedMlCount = regional.regions.reduce((sum, r) => sum + (r.ml_engagees - r.ml_engagees_delta), 0);
+  const regions = scope ? regional.regions.filter((r) => scope.includes(r.code)) : regional.regions;
+
+  const engagedMlCount = regions.reduce((sum, r) => sum + r.ml_engagees, 0);
+  const previousEngagedMlCount = regions.reduce((sum, r) => sum + (r.ml_engagees - r.ml_engagees_delta), 0);
+
+  // Le national passe par getSummaryStats pour compter aussi les ML sans région.
+  const mlCounts = !summary
+    ? {
+        mlCount: regions.reduce((sum, r) => sum + r.ml_total, 0),
+        activatedMlCount: regions.reduce((sum, r) => sum + r.ml_activees, 0),
+        previousActivatedMlCount: regions.reduce((sum, r) => sum + (r.ml_activees - r.ml_activees_delta), 0),
+      }
+    : {
+        mlCount: summary.mlCount,
+        activatedMlCount: summary.activatedMlCount,
+        previousActivatedMlCount: summary.previousActivatedMlCount,
+      };
 
   return {
     summary: {
-      mlCount: summary.mlCount,
-      activatedMlCount: summary.activatedMlCount,
-      previousActivatedMlCount: summary.previousActivatedMlCount,
+      ...mlCounts,
       engagedMlCount,
       previousEngagedMlCount,
-      date: summary.date,
+      date: evaluationDate,
     },
-    regionsActives: regional.regions.filter((r) => r.deployed).map((r) => r.code),
+    regionsActives: regions.filter((r) => r.deployed).map((r) => r.code),
     evaluationDate,
     period,
   };
 }
 
-export async function getSyntheseRegionsStats(period: StatsPeriod = "30days") {
+export async function getSyntheseRegionsStats(period: StatsPeriod = "30days", scopeRegions?: string[]) {
   const regional = await getRegionalStats(period);
 
   return {
-    regions: regional.regions,
+    regions: scopeRegions?.length ? regional.regions.filter((r) => scopeRegions.includes(r.code)) : regional.regions,
     period,
   };
 }
@@ -816,6 +905,13 @@ export async function getDossiersTraitesStats(
   };
 }
 
+export const buildCollabMatch = (date: Date, missionLocaleIds?: ObjectId[]) => ({
+  "organisme_data.acc_conjoint": true,
+  "organisme_data.acc_conjoint_at": { $lte: date },
+  soft_deleted: { $ne: true },
+  ...(missionLocaleIds ? { mission_locale_id: { $in: missionLocaleIds } } : {}),
+});
+
 export async function getCollaborationSegmentStats(
   period: StatsPeriod = "30days",
   regions?: string[],
@@ -825,13 +921,9 @@ export async function getCollaborationSegmentStats(
   const startDate = await calculateStartDateAsync(period, evaluationDate);
   const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
   const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
-
   const collabMatch = (date: Date) => ({
-    "organisme_data.acc_conjoint": true,
-    "organisme_data.acc_conjoint_at": { $lte: date },
+    ...buildCollabMatch(date, missionLocaleIds),
     "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
-    soft_deleted: { $ne: true },
-    ...(missionLocaleIds ? { mission_locale_id: { $in: missionLocaleIds } } : {}),
   });
 
   const countCfaAyantCollabore = async (date: Date) =>
@@ -874,6 +966,26 @@ export async function getCollaborationSegmentStats(
         ? Math.round((current.delai_premiere_activite_jours_total / current.delai_premiere_activite_count) * 10) / 10
         : null,
     situations: { ...situations, total: Object.values(situations).reduce((sum, value) => sum + value, 0) },
+    situations_variations: {
+      rupture: createStatWithVariation(current.situation_rupture, previous.situation_rupture).variation,
+      abandon: createStatWithVariation(current.situation_abandon, previous.situation_abandon).variation,
+      prevention_inevitable: createStatWithVariation(
+        current.situation_prevention_inevitable,
+        previous.situation_prevention_inevitable
+      ).variation,
+      prevention_tres_eleve: createStatWithVariation(
+        current.situation_prevention_tres_eleve,
+        previous.situation_prevention_tres_eleve
+      ).variation,
+      prevention_modere: createStatWithVariation(
+        current.situation_prevention_modere,
+        previous.situation_prevention_modere
+      ).variation,
+      besoin_aide_hors_rupture: createStatWithVariation(
+        current.situation_besoin_aide_hors_rupture,
+        previous.situation_besoin_aide_hors_rupture
+      ).variation,
+    },
     objectifs: {
       mobilite: motifs.mobilite || 0,
       logement: motifs.logement || 0,
@@ -886,6 +998,72 @@ export async function getCollaborationSegmentStats(
       autre: motifs.autre || 0,
       total_dossiers: objectifsResult?.total?.[0]?.count || 0,
     },
+  };
+}
+
+const PARIS_TIMEZONE = "Europe/Paris";
+
+const toMonthKey = (date: Date) =>
+  new Intl.DateTimeFormat("fr-CA", { timeZone: PARIS_TIMEZONE, year: "numeric", month: "2-digit" }).format(date);
+
+const listMonthKeys = (from: Date, to: Date) => {
+  const toIndex = (date: Date) => {
+    const [year, month] = toMonthKey(date).split("-").map(Number);
+    return year * 12 + month - 1;
+  };
+  const keys: string[] = [];
+  for (let index = toIndex(from); index <= toIndex(to); index++) {
+    keys.push(`${Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, "0")}`);
+  }
+  return keys;
+};
+
+/** Cohortes mensuelles : dossiers envoyés chaque mois, puis ceux contactés et ceux ayant accepté à ce jour. */
+export async function getCollaborationMensuelStats(
+  period: StatsPeriod = "30days",
+  regions?: string[],
+  mlId?: string,
+  organismeId?: ObjectId
+): Promise<ICollaborationMensuelStats> {
+  const now = new Date();
+  const periodStart = await calculateStartDateAsync(period, normalizeToUTCDay(now));
+  // Fiche CFA : pas de sélecteur de période, l'évolution part de la date de début des collaborations.
+  const from = !organismeId && periodStart > COLLABORATION_CUTOFF_DATE ? periodStart : COLLABORATION_CUTOFF_DATE;
+  const missionLocaleIds = organismeId ? undefined : await resolveMissionLocaleIds(regions, mlId);
+  const monthKeys = listMonthKeys(from, now);
+
+  const rows = await missionLocaleEffectifsDb()
+    .aggregate<ICollaborationMois>([
+      {
+        $match: {
+          ...buildCollabMatch(now, missionLocaleIds),
+          ...(organismeId ? { "effectif_snapshot.organisme_id": organismeId } : {}),
+        },
+      },
+      {
+        $addFields: {
+          mois: {
+            $dateToString: { format: "%Y-%m", date: "$organisme_data.acc_conjoint_at", timezone: PARIS_TIMEZONE },
+          },
+        },
+      },
+      { $match: { mois: { $gte: monthKeys[0] } } },
+      {
+        $group: {
+          _id: "$mois",
+          envoyes: { $sum: 1 },
+          contactes: { $sum: { $cond: [{ $ifNull: ["$situation", false] }, 1, 0] } },
+          acceptes: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }, 1, 0] } },
+        },
+      },
+      { $project: { _id: 0, mois: "$_id", envoyes: 1, contactes: 1, acceptes: 1 } },
+    ])
+    .toArray();
+
+  const byMonth = new Map(rows.map((row) => [row.mois, row]));
+  return {
+    mois: monthKeys.map((mois) => byMonth.get(mois) ?? { mois, envoyes: 0, contactes: 0, acceptes: 0 }),
+    period,
   };
 }
 

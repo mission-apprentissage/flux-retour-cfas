@@ -1,0 +1,20 @@
+.detailButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  color: var(--text-action-high-blue-france);
+  cursor: pointer;
+  background: none;
+}
+
+.detailButton:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-mention-grey);
+}

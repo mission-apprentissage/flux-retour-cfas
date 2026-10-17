@@ -1,22 +1,21 @@
 "use client";
 
-import { Button } from "@codegouvfr/react-dsfr/Button";
-import Link from "next/link";
+import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
-import { _post } from "@/common/httpClient";
-
-import { useMissionLocaleDetail } from "../hooks/useStatsQueries";
+import { useMissionLocaleDetail, type IMissionLocaleDetailResponse } from "../hooks/useStatsQueries";
 import { ExportAllButton } from "../sections/ExportAllButton";
-import { NO_DATA_ML_MESSAGE } from "../ui/NoDataMessage";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 import { StatsTabs, type StatsTab } from "../ui/StatsTabs";
-import { formatDateFr } from "../utils";
+import { formatDateCourte } from "../utils";
 
-import styles from "./MissionLocaleDetailView.module.css";
-import { MlAdminRdvUrlEditor } from "./MlAdminRdvUrlEditor";
+import styles from "./FicheDetailView.module.css";
+import { FicheEntete } from "./FicheEntete";
+import { MlAlertesActivite } from "./MlAlertesActivite";
 import { MLCollaborationsTab } from "./tabs/MLCollaborationsTab";
 import { MLEquipeTab } from "./tabs/MLEquipeTab";
+import { MLInfosTab } from "./tabs/MLInfosTab";
 import { MLSuiviTraitementTab } from "./tabs/MLSuiviTraitementTab";
 
 interface MissionLocaleDetailViewProps {
@@ -29,33 +28,12 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
   const { data, isLoading, error } = useMissionLocaleDetail(mlId);
   const isActive = data?.is_active === true;
 
-  const handleImpersonate = async () => {
-    if (!data?.ml) return;
-    await _post("/api/v1/admin/impersonate", {
-      type: "MISSION_LOCALE",
-      ml_id: data.ml.ml_id,
-      nom: data.ml.nom,
-    });
-    window.location.href = "/mission-locale";
-  };
+  // Next ne remonte pas toujours en haut en arrivant depuis un tableau défilé (fiche déjà en cache).
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [mlId]);
 
-  const buildBackUrl = () => {
-    const params = new URLSearchParams();
-    const page = searchParams?.get("page");
-    const limit = searchParams?.get("limit");
-    const sort_by = searchParams?.get("sort_by");
-    const sort_order = searchParams?.get("sort_order");
-    const search = searchParams?.get("search");
-
-    if (page) params.set("page", page);
-    if (limit) params.set("limit", limit);
-    if (sort_by) params.set("sort_by", sort_by);
-    if (sort_order) params.set("sort_order", sort_order);
-    if (search) params.set("search", search);
-
-    const queryString = params.toString();
-    return `/suivi-des-indicateurs/mission-locale${queryString ? `?${queryString}` : ""}`;
-  };
+  const parent = buildParentLink(searchParams?.toString());
 
   if (isLoading) {
     return (
@@ -68,155 +46,115 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
 
   return (
     <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
-      <Link href={buildBackUrl()} className="fr-link fr-link--sm">
-        <i className="fr-icon-arrow-left-line fr-icon--sm" aria-hidden="true" />
-        Retour à la liste des Missions Locales
-      </Link>
+      {data && (
+        <>
+          <FicheEntete
+            parent={parent}
+            titre={data.ml.nom}
+            statuts={mlStatuts(data)}
+            imposture={
+              isAdmin
+                ? {
+                    corps: { type: "MISSION_LOCALE", ml_id: data.ml.ml_id, nom: data.ml.nom },
+                    redirection: "/mission-locale",
+                    desactivee: !isActive,
+                  }
+                : undefined
+            }
+          />
 
-      <div className={styles.pageLayout}>
-        <div className={styles.mainContent}>
-          <div className={styles.headerContainer}>
-            <div className={styles.iconContainer}>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M23 18.9999H22V8.99991H18V6.58569L12 0.585693L6 6.58569V8.99991H2V18.9999H1V20.9999H23V18.9999ZM6 19H4V11H6V19ZM18 11H20V19H18V11ZM11 12H13V19H11V12Z"
-                  fill="#6A6AF4"
-                />
-              </svg>
-            </div>
+          <MlAlertesActivite alertes={data.indicateurs.alertes} />
 
-            <h1 className={styles.title}>Mission Locale : {data?.ml?.nom || "—"}</h1>
-          </div>
-
-          {!isActive ? (
-            <div className={styles.warningBanner}>
-              <span className="fr-icon-info-fill" aria-hidden="true" />
-              <span>{NO_DATA_ML_MESSAGE}</span>
-            </div>
-          ) : (
-            data?.has_cfa_collaboration && (
-              <span className={styles.cfaBadge}>
-                <span className={styles.cfaBadgeIcon}>
-                  <i className="fr-icon-check-line fr-icon--sm" aria-hidden="true" />
-                </span>
-                En collaboration avec des CFA partenaires
-              </span>
-            )
-          )}
-
-          {data && (
-            <div className={styles.tabsContainer}>
-              <StatsTabs tabs={buildTabs(mlId, isActive, data?.ml?.nom)} />
-            </div>
-          )}
-        </div>
-
-        <aside className={styles.sidebar}>
-          {isAdmin && (
-            <Button
-              iconId="ri-user-follow-line"
-              priority="primary"
-              onClick={handleImpersonate}
-              className={styles.sidebarButton}
-              disabled={!isActive}
-            >
-              Voir le suivi des jeunes
-            </Button>
-          )}
-
-          <div className={styles.aboutBox}>
-            <h2 className={styles.sidebarTitle}>À propos</h2>
-            <div className={styles.infoList}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>SIRET</span>
-                <span className={styles.infoValue}>{data?.ml?.siret || "—"}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Adresse</span>
-                <span className={styles.infoValue}>
-                  {data?.ml?.adresse
-                    ? `${data.ml.adresse.commune || ""} ${data.ml.adresse.code_postal || ""}`.trim() || "—"
-                    : "—"}
-                </span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Courriel</span>
-                <span className={styles.infoValue}>{data?.ml?.email || "—"}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Site internet</span>
-                <span className={styles.infoValue}>
-                  {data?.ml?.site_web ? (
-                    <a href={data.ml.site_web} target="_blank" rel="noopener noreferrer" className="fr-link">
-                      {data.ml.site_web}
-                    </a>
-                  ) : (
-                    "—"
-                  )}
-                </span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Téléphone</span>
-                <span className={styles.infoValue}>{data?.ml?.telephone || "—"}</span>
-              </div>
-              {isAdmin && data?.ml && (
-                <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>Lien RDV</span>
-                  <span className={styles.infoValue}>
-                    <MlAdminRdvUrlEditor mlId={mlId} rdvUrl={data.ml.rdv_url} />
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {!isActive ? (
-              <div className={styles.sidebarWarningBanner}>
-                <span className="fr-icon-info-fill" aria-hidden="true" />
-                <span>{NO_DATA_ML_MESSAGE}</span>
-              </div>
-            ) : (
-              <div className={styles.activityBox}>
-                {data?.activated_at && (
-                  <div className={styles.aboutItem}>
-                    <i className="fr-icon-calendar-line fr-icon--sm" aria-hidden="true" />
-                    <span>Activée le {formatDateFr(data.activated_at)}</span>
-                  </div>
-                )}
-                {data?.last_activity_at && (
-                  <div className={styles.aboutItem}>
-                    <i className="fr-icon-time-line fr-icon--sm" aria-hidden="true" />
-                    <span>Dernière activité le {formatDateFr(data.last_activity_at)}</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </aside>
-      </div>
+          <StatsTabs className={styles.tabs} tabs={buildTabs(mlId, data, isAdmin)} />
+        </>
+      )}
     </StatsErrorHandler>
   );
 }
 
-function buildTabs(mlId: string, isActive: boolean, mlNom?: string): StatsTab[] {
-  if (!isActive) {
-    return [
-      { id: "ruptures", label: "Suivi traitement", content: <MLSuiviTraitementTab mlId={mlId} noData /> },
-      { id: "equipe", label: "Équipe", content: <MLEquipeTab mlId={mlId} noData /> },
-    ];
-  }
+function mlStatuts(data: IMissionLocaleDetailResponse) {
+  const { is_engaged, taux_traitement, derniere_connexion_at } = data.indicateurs;
+  const engagement = `ML engagée ${is_engaged ? "oui" : "non"}${
+    taux_traitement === null ? "" : ` - taux de traitement ${taux_traitement} %`
+  }`;
 
   return [
+    <Badge key="compte" as="span" severity={data.is_active ? "success" : "error"} small>
+      {data.is_active ? "A un compte" : "N'a pas de compte"}
+    </Badge>,
+    <Badge key="engagement" as="span" severity={is_engaged ? "success" : "error"} small>
+      {engagement}
+    </Badge>,
+    <span key="connexion">
+      {derniere_connexion_at ? `Dernière connexion le ${formatDateCourte(derniere_connexion_at)}` : "Aucune connexion"}
+    </span>,
+  ];
+}
+
+function buildParentLink(currentParams = "") {
+  const params = new URLSearchParams(currentParams);
+
+  const cfaId = params.get("cfa_id") ?? "";
+  if (params.get("from") === "cfa" && /^[0-9a-f]{24}$/.test(cfaId)) {
+    return { label: "Fiche CFA", href: `/suivi-des-indicateurs/cfa/${cfaId}?tab=collaborations` };
+  }
+  if (params.get("from") === "recherche") {
+    const recherche = new URLSearchParams();
+    const q = params.get("q");
+    if (q) recherche.set("q", q);
+    return { label: "Recherche", href: `/suivi-des-indicateurs/recherche?${recherche.toString()}` };
+  }
+  [...params.keys()]
+    .filter((key) => ["from", "tab", "q", "cfa_id"].includes(key) || key.startsWith("collab_"))
+    .forEach((key) => params.delete(key));
+  params.set("tab", "deploiement");
+  return { label: "Missions Locales", href: `/suivi-des-indicateurs/mission-locale?${params.toString()}` };
+}
+
+function buildTabs(mlId: string, data: IMissionLocaleDetailResponse, isAdmin: boolean): StatsTab[] {
+  const isActive = data.is_active;
+
+  return [
+    { id: "infos", label: "Infos et coordonnées", content: <MLInfosTab mlId={mlId} data={data} isAdmin={isAdmin} /> },
+    ...(data.peut_voir_nominatif
+      ? [{ id: "equipe", label: "Équipe", content: <MLEquipeTab mlId={mlId} isAdmin={isAdmin} /> }]
+      : []),
     {
       id: "ruptures",
-      label: "Suivi traitement ruptures",
-      content: (
+      label: "Suivi des ruptures",
+      content: isActive ? (
         <MLSuiviTraitementTab
           mlId={mlId}
-          action={<ExportAllButton mlId={mlId} mlNom={mlNom} label="Exporter les données de cette Mission Locale" />}
+          action={
+            <ExportAllButton
+              mlId={mlId}
+              mlNom={data.ml.nom}
+              label="Exporter les données de cette Mission Locale"
+              priority="secondary"
+            />
+          }
+        />
+      ) : (
+        <MLSuiviTraitementTab mlId={mlId} noData />
+      ),
+    },
+    {
+      id: "collaborations",
+      label: "Suivi des collaborations",
+      content: (
+        <MLCollaborationsTab
+          mlId={mlId}
+          listeAutorisee={data.peut_voir_nominatif}
+          action={
+            <ExportAllButton
+              mlId={mlId}
+              mlNom={data.ml.nom}
+              label="Exporter les données de cette Mission Locale"
+              priority="secondary"
+            />
+          }
         />
       ),
     },
-    { id: "collaborations", label: "Suivi traitement collaborations", content: <MLCollaborationsTab mlId={mlId} /> },
-    { id: "equipe", label: "Équipe", content: <MLEquipeTab mlId={mlId} /> },
   ];
 }

@@ -47,7 +47,7 @@ export async function createOrganisation(organisation: IOrganisationCreate): Pro
 
     return {
       ...organisation,
-      organisme_id: organisme?._id.toString(),
+      organisme_id: organisation.organisme_id ?? organisme?._id.toString(),
     } as IOrganisationOrganismeFormation;
   };
 
@@ -241,7 +241,7 @@ export async function batchInviteUsersToOrganisation(
       if (sameOrg) {
         results.errors.push({
           email,
-          message: "Cet utilisateur est déjà membre de votre organisation",
+          message: "Cet utilisateur est déjà membre de cette organisation",
         });
       } else {
         const existingOrg = await getOrganisationById(existingUser.organisation_id);
@@ -571,6 +571,7 @@ export const getOrganisationOrganismeByOrganismeId = async (
       type: "ORGANISME_FORMATION",
       uai: organisme?.uai ?? null,
       siret: organisme.siret ?? null,
+      organisme_id: organismeId.toString(),
     });
 
     return organisationsDb().findOne({

@@ -1,0 +1,85 @@
+.titre {
+  margin: 0 0 24px;
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  color: var(--text-title-blue-france);
+}
+
+.intro {
+  margin-bottom: 24px;
+  font-weight: 500;
+  color: var(--text-mention-grey);
+}
+
+.barreActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+}
+
+.table th:not(:first-child),
+.table td:not(:first-child) {
+  text-align: center;
+}
+
+.nom {
+  color: var(--text-default-grey);
+}
+
+.courriel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.date {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.relatif {
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--text-mention-grey);
+}
+
+.vide {
+  color: var(--text-mention-grey);
+}
+
+.actions :global(.fr-btn--tertiary)::before {
+  transform: rotate(90deg);
+}
+
+.table:global(.fr-table) > table > tbody > tr > .celluleVide {
+  padding: 24px 0;
+  border-bottom: 0;
+}
+
+.etatVide {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 730px;
+  margin: 0 auto;
+  padding: 24px;
+  text-align: left;
+  border: 1px solid var(--border-contrast-grey);
+}
+
+.etatVide > span {
+  color: var(--artwork-major-blue-france);
+}
+
+.invitationEnvoyee {
+  font-weight: 700;
+  color: var(--blue-france-main-525);
+}
+
+.invitationExpiree {
+  font-weight: 700;
+  color: var(--orange-terre-battue-main-645);
+}

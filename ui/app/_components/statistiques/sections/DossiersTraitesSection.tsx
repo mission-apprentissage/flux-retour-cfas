@@ -1,5 +1,6 @@
 "use client";
 
+import type { DejaConnuFormat } from "../charts/DejaConnuMiniChart";
 import { DetailsDossiersTraitesPieChart } from "../charts/DetailsDossiersTraitesPieChart";
 import { isLoadingVariation } from "../hooks/useLoadingVariation";
 import { useDossiersTraitesStats, type SegmentStatsParams } from "../hooks/useStatsQueries";
@@ -18,7 +19,7 @@ import type {
 type DossiersTraitesSectionProps = SectionWithPeriodAndMlProps &
   SectionWithNoDataProps &
   SectionWithLayoutProps &
-  SegmentSectionProps & { title?: string };
+  SegmentSectionProps & { title?: string; className?: string; dejaConnuFormat?: DejaConnuFormat };
 
 export function DossiersTraitesSection({
   period = "30days",
@@ -30,9 +31,11 @@ export function DossiersTraitesSection({
   noData,
   national = false,
   title = "Dossiers traités",
+  className,
+  dejaConnuFormat,
 }: DossiersTraitesSectionProps) {
   return (
-    <StatisticsSection title={title} width={fullWidth ? "full" : "two-thirds"} smallTitle>
+    <StatisticsSection title={title} width={fullWidth ? "full" : "two-thirds"} smallTitle className={className}>
       {noData ? (
         <div className={styles.noDataContainer}>
           <div className={styles.noDataPieChartPlaceholder} />
@@ -46,13 +49,17 @@ export function DossiersTraitesSection({
           mlId={mlId}
           national={national}
           isPublic={isPublic}
+          dejaConnuFormat={dejaConnuFormat}
         />
       )}
     </StatisticsSection>
   );
 }
 
-function DossiersTraitesChart(params: SegmentStatsParams) {
+function DossiersTraitesChart({
+  dejaConnuFormat,
+  ...params
+}: SegmentStatsParams & { dejaConnuFormat?: DejaConnuFormat }) {
   const { data, isLoading, isFetching, error } = useDossiersTraitesStats(params);
   const loadingVariation = isLoadingVariation(isFetching, isLoading);
 
@@ -65,6 +72,7 @@ function DossiersTraitesChart(params: SegmentStatsParams) {
             ? { value: data.deja_connu_accompagne, total: data.traites }
             : undefined
         }
+        dejaConnuFormat={dejaConnuFormat}
         loading={isLoading}
         loadingVariation={loadingVariation}
       />

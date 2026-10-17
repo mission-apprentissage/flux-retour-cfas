@@ -204,3 +204,11 @@ export const WHATSAPP_OUTCOMES_LABELS = {
 } as const;
 
 export const STATS_LAUNCH_DATE_LABEL = "février 2025";
+
+export const NATURE_LABELS: Record<string, string> = {
+  responsable: "Responsable",
+  formateur: "Formateur",
+  responsable_formateur: "Responsable formateur",
+  lieu_formation: "Lieu de formation",
+  inconnue: "Inconnue",
+};

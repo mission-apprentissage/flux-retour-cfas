@@ -237,6 +237,77 @@ export const traitementMLExportColumns = [
   { label: "Collab à recontacter", key: "collab_a_recontacter", width: 20 },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
+export const cfaEtablissementsExportColumns = [
+  { label: "Région", key: "region", width: 25 },
+  { label: "Département", key: "departement", width: 22 },
+  { label: "Raison sociale", key: "nom", width: 45 },
+  { label: "UAI", key: "uai", xlsxType: "string", width: 12 },
+  { label: "SIRET", key: "siret", xlsxType: "string", width: 16 },
+  { label: "Nature", key: "nature", width: 22 },
+  { label: "Qualiopi", key: "qualiopi", width: 10 },
+  { label: "Code postal", key: "code_postal", xlsxType: "string", width: 12 },
+  { label: "Commune", key: "commune", width: 25 },
+  { label: "Adresse", key: "adresse", width: 50 },
+  { label: "Compte TBA", key: "compte_tba", width: 12 },
+  { label: "Collaboration active", key: "collab_active", width: 20 },
+  { label: "Collaborations", key: "nb_collaborations", width: 15 },
+  { label: "Dernière activité", key: "derniere_activite", xlsxType: "date", width: 18 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const cfaInvitesSansCollabExportColumns = [
+  { label: "Raison sociale", key: "raison_sociale", width: 45 },
+  { label: "UAI", key: "uai", xlsxType: "string", width: 12 },
+  { label: "SIRET", key: "siret", xlsxType: "string", width: 16 },
+  { label: "Compte TBA", key: "compte_tba", width: 12 },
+  { label: "Code postal", key: "code_postal", xlsxType: "string", width: 12 },
+  { label: "Commune", key: "commune", width: 25 },
+  { label: "Adresse", key: "adresse", width: 50 },
+  { label: "Invitations reçues", key: "invitations_recues", width: 18 },
+  { label: "ML invitantes", key: "ml_invitantes", width: 14 },
+  { label: "Dernière invitation", key: "derniere_invitation_at", xlsxType: "date", width: 18 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const mlAlertesExportColumns = [
+  { label: "Mission Locale", key: "nom", width: 45 },
+  { label: "Code postal", key: "code_postal", xlsxType: "string", width: 12 },
+  { label: "Commune", key: "commune", width: 25 },
+  { label: "Utilise le service", key: "utilise_service", width: 16 },
+  { label: "Total dossiers", key: "total_jeunes", width: 14 },
+  { label: "À traiter", key: "a_traiter", width: 12 },
+  { label: "À recontacter", key: "a_recontacter", width: 14 },
+  { label: "Traités (%)", key: "pourcentage_traites", width: 12 },
+  { label: "Délai moyen (jours)", key: "delai_moyen_jours", width: 18 },
+  { label: "Jours depuis la dernière activité", key: "jours_depuis_activite", width: 28 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const cfaInjoignablesExportColumns = [
+  { label: "Raison sociale", key: "nom", width: 45 },
+  { label: "UAI", key: "uai", xlsxType: "string", width: 12 },
+  { label: "SIRET", key: "siret", xlsxType: "string", width: 16 },
+  { label: "Code postal", key: "code_postal", xlsxType: "string", width: 12 },
+  { label: "Commune", key: "commune", width: 25 },
+  { label: "Adresse", key: "adresse", width: 50 },
+  { label: "Dossiers traités par la ML", key: "traites", width: 22 },
+  { label: "Jeunes injoignables", key: "injoignables", width: 18 },
+  { label: "Taux injoignables (%)", key: "taux", width: 18 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const collaborationDossiersExportColumns = [
+  { label: "Prénom", key: "prenom", width: 18 },
+  { label: "Nom", key: "nom", width: 22 },
+  { label: "Mission Locale", key: "mission_locale", width: 35 },
+  { label: "Commune ML", key: "mission_locale_commune", width: 20 },
+  { label: "CFA", key: "cfa", width: 40 },
+  { label: "Commune CFA", key: "cfa_commune", width: 20 },
+  { label: "Statut", key: "statut", width: 28 },
+  { label: "Situation du jeune", key: "situation", width: 24 },
+  { label: "Objectifs d'accompagnement", key: "objectifs", width: 50 },
+  { label: "Résultat du traitement ML", key: "resultat", width: 30 },
+  { label: "Date d'envoi", key: "date_envoi", xlsxType: "date", width: 14 },
+  { label: "Délai de traitement (jours)", key: "delai_jours", width: 24 },
+  { label: "Traité par la ML", key: "traite_par_ml", width: 16 },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
 export const traitementRegionExportColumns = [
   { label: "Région", key: "region_nom", width: 30 },
   { label: "Total jeunes", key: "total_jeunes", width: 12 },

@@ -34,7 +34,9 @@ export function RegionTable({ regions, loadingDeltas = false, detailRegions = []
   const [sortColumn, setSortColumn] = useState<keyof RegionStats>("ml_total");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
-  const filteredRegions = showInactive ? regions : regions.filter((r) => r.deployed);
+  // Une région hors des régions pilotes reste affichée quand c'est la seule du tableau (région sélectionnée).
+  const filteredRegions =
+    showInactive || !regions.some((r) => r.deployed) ? regions : regions.filter((r) => r.deployed);
 
   const sortedDisplayedRegions = [...filteredRegions].sort((a, b) => {
     const aVal = a[sortColumn];
@@ -112,7 +114,7 @@ export function RegionTable({ regions, loadingDeltas = false, detailRegions = []
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 centered
-                tooltip="Les Missions Locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur à 70%."
+                tooltip="Les Missions Locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur ou égal à 70%."
               />,
               ...(showDetailColumn ? ["Détail"] : []),
             ]}
@@ -146,7 +148,7 @@ export function RegionTable({ regions, loadingDeltas = false, detailRegions = []
                     detailRegions.includes(region.code) ? (
                       <Link
                         key={`detail-${region.code}`}
-                        href={`/suivi-des-indicateurs/region/${region.code}`}
+                        href={`/suivi-des-indicateurs/mission-locale?territoire=${region.code}`}
                         className={`${styles.detailLink} ${styles.stretchedLink}`}
                       >
                         <span className={`fr-icon-arrow-right-line ${styles.detailArrow}`} aria-hidden="true" />

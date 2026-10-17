@@ -1,0 +1,25 @@
+.nom {
+  max-width: 16rem;
+}
+
+.empile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mention {
+  font-size: 0.75rem;
+  color: var(--text-mention-grey);
+}
+
+/* Les largeurs minimales du tableau CFA réutilisé (nom, localisation) font déborder les colonnes chiffrées des ML. */
+.tableMl.tableMl th:first-child,
+.tableMl.tableMl td:first-child {
+  min-width: 14rem;
+}
+
+.tableMl.tableMl th:nth-child(2),
+.tableMl.tableMl td:nth-child(2) {
+  min-width: 0;
+}

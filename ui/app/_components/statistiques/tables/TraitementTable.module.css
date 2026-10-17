@@ -184,6 +184,26 @@
   text-align: center;
 }
 
+.mlTable {
+  width: calc(100% + 2rem);
+  margin-inline: -1rem;
+}
+
+.mlPagination {
+  margin-inline: -1rem;
+}
+
+.mlTable :global(.fr-table) {
+  width: 100%;
+  margin-bottom: 0;
+  overflow-x: auto;
+}
+
+.mlTable :global(.fr-table table) {
+  display: table;
+  width: 100%;
+}
+
 .mlTable th:first-child,
 .mlTable td:first-child {
   width: 200px;
@@ -205,7 +225,8 @@
 
 .mlTable th:nth-child(5),
 .mlTable td:nth-child(5) {
-  width: 60px;
+  width: 80px;
+  white-space: nowrap;
 }
 
 .mlTable th:nth-child(6),
