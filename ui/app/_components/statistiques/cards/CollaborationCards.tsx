@@ -23,7 +23,7 @@ export function CollaborationCards({
         variation={data?.cfa_ayant_collabore.variation}
         loading={loading}
         loadingPercentage={loadingPercentage}
-        tooltip="CFA distincts ayant envoyé au moins un dossier de collaboration aux Missions Locales du périmètre."
+        tooltip="CFA du territoire ayant envoyé au moins un dossier de collaboration, quelle que soit la région de la Mission Locale. Sur la fiche d'une Mission Locale : CFA lui ayant envoyé un dossier."
         className={cardClassName}
       />
       <StatCard
@@ -32,7 +32,7 @@ export function CollaborationCards({
         variation={data?.jeunes_envoyes.variation}
         loading={loading}
         loadingPercentage={loadingPercentage}
-        tooltip="Dossiers de collaboration reçus par les Missions Locales, toutes situations confondues."
+        tooltip="Dossiers de collaboration envoyés par les CFA du territoire, quelle que soit la région de la Mission Locale. Le tableau par région ne compte que les CFA dont la collaboration est activée : ses totaux peuvent légèrement différer. Sur la fiche d'une Mission Locale : dossiers qu'elle a reçus."
         className={cardClassName}
       />
       <StatCard

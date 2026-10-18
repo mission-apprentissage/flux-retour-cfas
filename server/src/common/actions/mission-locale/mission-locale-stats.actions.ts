@@ -26,7 +26,12 @@ import { normalizeToUTCDay } from "shared/utils/date";
 import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
 import { calculatePercentage } from "shared/utils/stats";
 
-import { missionLocaleEffectifsDb, missionLocaleStatsDb, organisationsDb } from "@/common/model/collections";
+import {
+  missionLocaleEffectifsDb,
+  missionLocaleStatsDb,
+  organisationsDb,
+  organismesDb,
+} from "@/common/model/collections";
 import { escapeRegex } from "@/common/utils/usersFiltersUtils";
 
 import { getOrganisationById } from "../organisations.actions";
@@ -910,6 +915,21 @@ export const buildCollabMatch = (date: Date, missionLocaleIds?: ObjectId[]) => (
   ...(missionLocaleIds ? { mission_locale_id: { $in: missionLocaleIds } } : {}),
 });
 
+/**
+ * Périmètre des dossiers de collaboration : ceux reçus par la ML d'une fiche, sinon ceux envoyés par les CFA du
+ * territoire, quelle que soit la région de la ML qui les reçoit (décision 1.1).
+ */
+export const buildCollabPerimetreMatch = async (
+  regions?: string[],
+  mlId?: string
+): Promise<Record<string, unknown>> => {
+  if (mlId) return { mission_locale_id: new ObjectId(mlId) };
+  if (!regions?.length) return {};
+  const organismeIds = await organismesDb().distinct("_id", { "adresse.region": { $in: regions } });
+  return { "effectif_snapshot.organisme_id": { $in: organismeIds } };
+};
+
+/** Chiffres clés des collaborations d'une ML, à partir de ses snapshots (les territoires passent par les CFA). */
 export async function getCollaborationSegmentStats(
   period: StatsPeriod = "30days",
   regions?: string[],
@@ -1027,15 +1047,14 @@ export async function getCollaborationMensuelStats(
   // Fiche CFA et « depuis le lancement » : l'évolution part du premier dossier envoyé, sans mois vides avant.
   const debutPeriode =
     organismeId || period === "all" ? null : await calculateStartDateAsync(period, normalizeToUTCDay(now));
-  const missionLocaleIds = organismeId ? undefined : await resolveMissionLocaleIds(regions, mlId);
+  const perimetre = organismeId
+    ? { "effectif_snapshot.organisme_id": organismeId }
+    : await buildCollabPerimetreMatch(regions, mlId);
 
   const rows = await missionLocaleEffectifsDb()
     .aggregate<ICollaborationMois>([
       {
-        $match: {
-          ...buildCollabMatch(now, missionLocaleIds),
-          ...(organismeId ? { "effectif_snapshot.organisme_id": organismeId } : {}),
-        },
+        $match: { ...buildCollabMatch(now), ...perimetre },
       },
       {
         $addFields: {

@@ -6,16 +6,25 @@ import type {
   ICfaCollabMlResponse,
   ICfaCollabMlRow,
   ICfaCollaborationStats,
+  ICollaborationSegmentStats,
   ICollabSituations,
+  StatsPeriod,
 } from "shared/models/data/nationalStats.model";
+import { normalizeToUTCDay } from "shared/utils/date";
+import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
 
 import { getNpsStatsForOrganismes } from "@/common/actions/cfa/cfa-collaboration-stats.actions";
 import { RESULTAT_SITUATIONS } from "@/common/actions/mission-locale/collaboration-dossiers.actions";
 import {
+  buildCollabPerimetreMatch,
   DEFAULT_MOTIFS,
   getCollaborationMensuelStats,
   MOTIFS_PIPELINE,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
+import {
+  calculateStartDateAsync,
+  createStatWithVariation,
+} from "@/common/actions/mission-locale/mission-locale-stats.helpers";
 import {
   addCollabSituationField,
   addPremiereActiviteMlField,
@@ -25,12 +34,15 @@ import {
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 
-const buildCfaCollabMatch = (organismeId: ObjectId, now: Date) => ({
-  "effectif_snapshot.organisme_id": organismeId,
+const buildCollabDossiersMatch = (perimetre: Record<string, unknown>, now: Date) => ({
+  ...perimetre,
   "organisme_data.acc_conjoint": true,
   "organisme_data.acc_conjoint_at": { $lte: now },
   soft_deleted: { $ne: true },
 });
+
+const buildCfaCollabMatch = (organismeId: ObjectId, now: Date) =>
+  buildCollabDossiersMatch({ "effectif_snapshot.organisme_id": organismeId }, now);
 
 const countIf = (condition: Document) => ({ $sum: { $cond: [condition, 1, 0] } });
 const situationIn = (situations: SITUATION_ENUM[]) => ({ $in: [{ $ifNull: ["$situation", null] }, situations] });
@@ -53,113 +65,196 @@ type Kpis = {
   delai_count: number;
 } & Record<keyof typeof RESULTAT_SITUATIONS, number>;
 
-async function fetchMlUserIds(organismeId: ObjectId, now: Date) {
-  const missionLocaleIds = await missionLocaleEffectifsDb().distinct(
-    "mission_locale_id",
-    buildCfaCollabMatch(organismeId, now)
-  );
+async function fetchMlUserIds(match: Document) {
+  const missionLocaleIds = await missionLocaleEffectifsDb().distinct("mission_locale_id", match);
   if (missionLocaleIds.length === 0) return [];
   return usersMigrationDb().distinct("_id", { organisation_id: { $in: missionLocaleIds } });
 }
+
+type CollabFacets = {
+  kpis: Kpis[];
+  situations: Array<{ _id: keyof ICollabSituations; n: number }>;
+  motifs: Array<Record<string, number>>;
+};
+
+/** Chiffres des dossiers de collaboration d'un périmètre, à leur situation actuelle (règles des snapshots ML). */
+async function aggregateCollabDossiers(match: Document, now: Date) {
+  const mlUserIds = await fetchMlUserIds(match);
+  const resultatsAccumulators = Object.fromEntries(
+    Object.entries(RESULTAT_SITUATIONS).map(([cle, situations]) => [cle, countIf(situationIn(situations))])
+  );
+
+  const facets = await missionLocaleEffectifsDb()
+    .aggregate<CollabFacets>([
+      { $match: match },
+      {
+        $lookup: {
+          from: "missionLocaleEffectifLog",
+          localField: "_id",
+          foreignField: "mission_locale_effectif_id",
+          pipeline: [{ $match: { created_at: { $lte: now } } }, { $project: { created_at: 1, created_by: 1 } }],
+          as: "filteredLogs",
+        },
+      },
+      { $addFields: { computed_connaissance_ml: "$connaissance_ml", computed_deja_connu: "$deja_connu" } },
+      addCollabSituationField(),
+      addPremiereActiviteMlField(mlUserIds),
+      {
+        $facet: {
+          kpis: [
+            {
+              $group: {
+                _id: null,
+                envoyes: { $sum: 1 },
+                traites: countIf({ $ne: [{ $ifNull: ["$situation", null] }, null] }),
+                deja_connus: countIf({
+                  $and: [{ $ne: [{ $ifNull: ["$situation", null] }, null] }, DEJA_CONNU_ACCOMPAGNE_CONDITION],
+                }),
+                delai_total: {
+                  $sum: { $cond: [HAS_PREMIERE_ACTIVITE_CONDITION, DELAI_PREMIERE_ACTIVITE_EXPR, 0] },
+                },
+                delai_count: countIf(HAS_PREMIERE_ACTIVITE_CONDITION),
+                ...resultatsAccumulators,
+              },
+            },
+          ],
+          situations: [{ $group: { _id: "$collab_situation", n: { $sum: 1 } } }],
+          motifs: MOTIFS_PIPELINE,
+        },
+      },
+    ])
+    .next();
+
+  return {
+    kpis: facets?.kpis[0],
+    situations: toSituations(facets?.situations ?? []),
+    motifs: { ...DEFAULT_MOTIFS, ...facets?.motifs[0] },
+  };
+}
+
+const toSituations = (rows: CollabFacets["situations"]): ICollabSituations => {
+  const situations = { ...EMPTY_SITUATIONS };
+  for (const { _id, n } of rows) {
+    if (_id in situations) situations[_id] = n;
+    situations.total += n;
+  }
+  return situations;
+};
+
+const toObjectifs = (motifs: Record<string, number>, totalDossiers: number) => ({
+  mobilite: motifs.mobilite || 0,
+  logement: motifs.logement || 0,
+  sante: motifs.sante || 0,
+  finance: motifs.finance || 0,
+  administratif: motifs.administratif || 0,
+  social_familial: motifs.social_familial || 0,
+  reorientation: motifs.reorientation || 0,
+  recherche_emploi: motifs.recherche_emploi || 0,
+  autre: motifs.autre || 0,
+  total_dossiers: totalDossiers,
+});
+
+const sansVariation = (current: number) => ({ current, variation: "" });
+
+const toResultats = (kpis: Kpis | undefined) => ({
+  rdv_pris: sansVariation(kpis?.rdv_pris ?? 0),
+  projet_pro_securise: sansVariation(kpis?.projet_pro_securise ?? 0),
+  ne_souhaite_pas_accompagnement: sansVariation(kpis?.ne_souhaite_pas_accompagnement ?? 0),
+  a_recontacter: sansVariation(kpis?.a_recontacter ?? 0),
+  injoignable: sansVariation(kpis?.injoignable ?? 0),
+  autre: sansVariation(kpis?.autre ?? 0),
+  total: kpis?.traites ?? 0,
+});
+
+const partDejaConnus = (kpis: Kpis | undefined) =>
+  kpis?.traites ? Math.round((kpis.deja_connus / kpis.traites) * 100) : 0;
+
+const delaiMoyen = (kpis: Kpis | undefined) =>
+  kpis?.delai_count ? Math.round((kpis.delai_total / kpis.delai_count) * 10) / 10 : null;
 
 /** Mêmes règles que les snapshots ML (situation du jeune, délai de première action ML, déjà connus), limitées à un CFA. */
 export async function getCfaCollaborationStats(
   organismeId: ObjectId,
   now: Date = new Date()
 ): Promise<ICfaCollaborationStats> {
-  const mlUserIds = await fetchMlUserIds(organismeId, now);
-  const resultatsAccumulators = Object.fromEntries(
-    Object.entries(RESULTAT_SITUATIONS).map(([cle, situations]) => [cle, countIf(situationIn(situations))])
-  );
-
-  const [facets, nps, mensuel] = await Promise.all([
-    missionLocaleEffectifsDb()
-      .aggregate<{
-        kpis: Kpis[];
-        situations: Array<{ _id: keyof ICollabSituations; n: number }>;
-        motifs: Array<Record<string, number>>;
-      }>([
-        { $match: buildCfaCollabMatch(organismeId, now) },
-        {
-          $lookup: {
-            from: "missionLocaleEffectifLog",
-            localField: "_id",
-            foreignField: "mission_locale_effectif_id",
-            pipeline: [{ $match: { created_at: { $lte: now } } }, { $project: { created_at: 1, created_by: 1 } }],
-            as: "filteredLogs",
-          },
-        },
-        { $addFields: { computed_connaissance_ml: "$connaissance_ml", computed_deja_connu: "$deja_connu" } },
-        addCollabSituationField(),
-        addPremiereActiviteMlField(mlUserIds),
-        {
-          $facet: {
-            kpis: [
-              {
-                $group: {
-                  _id: null,
-                  envoyes: { $sum: 1 },
-                  traites: countIf({ $ne: [{ $ifNull: ["$situation", null] }, null] }),
-                  deja_connus: countIf({
-                    $and: [{ $ne: [{ $ifNull: ["$situation", null] }, null] }, DEJA_CONNU_ACCOMPAGNE_CONDITION],
-                  }),
-                  delai_total: {
-                    $sum: { $cond: [HAS_PREMIERE_ACTIVITE_CONDITION, DELAI_PREMIERE_ACTIVITE_EXPR, 0] },
-                  },
-                  delai_count: countIf(HAS_PREMIERE_ACTIVITE_CONDITION),
-                  ...resultatsAccumulators,
-                },
-              },
-            ],
-            situations: [{ $group: { _id: "$collab_situation", n: { $sum: 1 } } }],
-            motifs: MOTIFS_PIPELINE,
-          },
-        },
-      ])
-      .next(),
+  const [{ kpis, situations, motifs }, nps, mensuel] = await Promise.all([
+    aggregateCollabDossiers(buildCfaCollabMatch(organismeId, now), now),
     getNpsStatsForOrganismes([organismeId]),
     getCollaborationMensuelStats("all", undefined, undefined, organismeId),
   ]);
-
-  const kpis = facets?.kpis[0];
-  const situations = { ...EMPTY_SITUATIONS };
-  for (const { _id, n } of facets?.situations ?? []) {
-    if (_id in situations) situations[_id] = n;
-    situations.total += n;
-  }
-  const motifs = { ...DEFAULT_MOTIFS, ...facets?.motifs[0] };
-  const sansVariation = (current: number) => ({ current, variation: "" });
 
   return {
     envoyes: kpis?.envoyes ?? 0,
     contactes: kpis?.traites ?? 0,
     acceptes: kpis?.rdv_pris ?? 0,
-    resultats: {
-      rdv_pris: sansVariation(kpis?.rdv_pris ?? 0),
-      projet_pro_securise: sansVariation(kpis?.projet_pro_securise ?? 0),
-      ne_souhaite_pas_accompagnement: sansVariation(kpis?.ne_souhaite_pas_accompagnement ?? 0),
-      a_recontacter: sansVariation(kpis?.a_recontacter ?? 0),
-      injoignable: sansVariation(kpis?.injoignable ?? 0),
-      autre: sansVariation(kpis?.autre ?? 0),
-      total: kpis?.traites ?? 0,
-    },
-    part_deja_connus: kpis?.traites ? Math.round((kpis.deja_connus / kpis.traites) * 100) : 0,
-    delai_moyen_jours: kpis?.delai_count ? Math.round((kpis.delai_total / kpis.delai_count) * 10) / 10 : null,
+    resultats: toResultats(kpis),
+    part_deja_connus: partDejaConnus(kpis),
+    delai_moyen_jours: delaiMoyen(kpis),
     situations,
-    objectifs: {
-      mobilite: motifs.mobilite || 0,
-      logement: motifs.logement || 0,
-      sante: motifs.sante || 0,
-      finance: motifs.finance || 0,
-      administratif: motifs.administratif || 0,
-      social_familial: motifs.social_familial || 0,
-      reorientation: motifs.reorientation || 0,
-      recherche_emploi: motifs.recherche_emploi || 0,
-      autre: motifs.autre || 0,
-      total_dossiers: kpis?.envoyes ?? 0,
-    },
+    objectifs: toObjectifs(motifs, kpis?.envoyes ?? 0),
     nps,
     mensuel: mensuel.mois,
+  };
+}
+
+/**
+ * Chiffres clés des collaborations d'un territoire, comptées côté CFA (décision 1.1) et calculées à partir des
+ * dossiers. Seuls les chiffres qui ne dépendent que de l'envoi (jeunes envoyés, CFA, situations) ont une variation :
+ * la situation passée des dossiers n'est pas connue sans rejouer leur historique.
+ */
+export async function getTerritoireCollaborationStats(
+  period: StatsPeriod,
+  regions?: string[],
+  now: Date = new Date()
+): Promise<ICollaborationSegmentStats> {
+  const evaluationDate = normalizeToUTCDay(now);
+  const startDate = await calculateStartDateAsync(period, evaluationDate);
+  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
+  const perimetre = {
+    ...(await buildCollabPerimetreMatch(regions)),
+    "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
+  };
+  const matchAu = (date: Date) => buildCollabDossiersMatch(perimetre, date);
+  const compterCfa = async (date: Date) =>
+    (await missionLocaleEffectifsDb().distinct("effectif_snapshot.organisme_id", matchAu(date))).length;
+
+  const [actuel, cfaActuels, cfaDebut, situationsDebut] = await Promise.all([
+    aggregateCollabDossiers(matchAu(now), now),
+    compterCfa(now),
+    compterCfa(startDate),
+    missionLocaleEffectifsDb()
+      .aggregate<CollabFacets["situations"][number]>([
+        { $match: matchAu(startDate) },
+        addCollabSituationField(),
+        { $group: { _id: "$collab_situation", n: { $sum: 1 } } },
+      ])
+      .toArray()
+      .then(toSituations),
+  ]);
+  const { kpis, situations, motifs } = actuel;
+  const variationSituation = (cle: Exclude<keyof ICollabSituations, "total">) =>
+    createStatWithVariation(situations[cle], situationsDebut[cle]).variation;
+
+  return {
+    evaluationDate,
+    period,
+    cfa_ayant_collabore: createStatWithVariation(cfaActuels, cfaDebut),
+    jeunes_envoyes: createStatWithVariation(situations.total, situationsDebut.total),
+    jeunes_contactes: sansVariation(kpis?.traites ?? 0),
+    jeunes_accompagnement_accepte: sansVariation(kpis?.rdv_pris ?? 0),
+    resultats: toResultats(kpis),
+    part_deja_connus: partDejaConnus(kpis),
+    delai_moyen_jours: delaiMoyen(kpis),
+    situations,
+    situations_variations: {
+      rupture: variationSituation("rupture"),
+      abandon: variationSituation("abandon"),
+      prevention_inevitable: variationSituation("prevention_inevitable"),
+      prevention_tres_eleve: variationSituation("prevention_tres_eleve"),
+      prevention_modere: variationSituation("prevention_modere"),
+      besoin_aide_hors_rupture: variationSituation("besoin_aide_hors_rupture"),
+    },
+    objectifs: toObjectifs(motifs, kpis?.envoyes ?? 0),
   };
 }
 

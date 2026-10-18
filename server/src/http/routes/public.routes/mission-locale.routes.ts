@@ -3,8 +3,8 @@ import { zPublicStatsPeriod, zStatsSegment } from "shared/models/data/nationalSt
 import { z } from "zod";
 
 import { getCollaborationsCfaSynthese } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
+import { getTerritoireCollaborationStats } from "@/common/actions/cfa/cfa-collaborations.actions";
 import {
-  getCollaborationSegmentStats,
   getDeploymentStats,
   getDossiersTraitesStats,
   getRupturantsStats,
@@ -121,7 +121,7 @@ const getDossiersTraitesRoute: PublicHandler<z.infer<typeof segmentQuery>> = asy
 
 const getCollaborationsRoute: PublicHandler<z.infer<typeof strictPeriodQuery>> = async (req) => {
   const period = req.query.period || "30days";
-  return await cachedPublicStats("collaborations", { period }, () => getCollaborationSegmentStats(period));
+  return await cachedPublicStats("collaborations", { period }, () => getTerritoireCollaborationStats(period));
 };
 
 const getDeploymentRoute: PublicHandler<z.infer<typeof periodQuery>> = async (req) => {

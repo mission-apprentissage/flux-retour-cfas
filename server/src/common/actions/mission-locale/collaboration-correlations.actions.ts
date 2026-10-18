@@ -10,7 +10,7 @@ import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
 import { RESULTAT_SITUATIONS } from "./collaboration-dossiers.actions";
-import { buildCollabMatch, resolveMissionLocaleIds } from "./mission-locale-stats.actions";
+import { buildCollabMatch, buildCollabPerimetreMatch } from "./mission-locale-stats.actions";
 import { addCollabSituationField } from "./mission-locale.actions";
 
 const SITUATIONS = [
@@ -66,19 +66,20 @@ const versLigne = (cle: string, groupe: Groupe | undefined): ICollabCorrelationR
   };
 };
 
-/** Même périmètre de dossiers que les objectifs des chiffres clés (territoire de la ML, tranche d'âge actuelle). */
+/** Même périmètre de dossiers que les chiffres clés (CFA du territoire ou ML de la fiche, tranche d'âge actuelle). */
 export async function getCollaborationCorrelations(
   regions?: string[],
   mlId?: string
 ): Promise<ICollabCorrelationsResponse> {
-  const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
+  const perimetre = await buildCollabPerimetreMatch(regions, mlId);
   const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
 
   const [result] = await missionLocaleEffectifsDb()
     .aggregate<{ situations: Groupe[]; objectifs: Groupe[] }>([
       {
         $match: {
-          ...buildCollabMatch(normalizeToUTCDay(new Date()), missionLocaleIds),
+          ...buildCollabMatch(normalizeToUTCDay(new Date())),
+          ...perimetre,
           "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
         },
       },

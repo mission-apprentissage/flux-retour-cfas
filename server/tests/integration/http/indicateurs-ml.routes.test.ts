@@ -195,6 +195,28 @@ const buildCollabDossier = (missionLocaleId: ObjectId, organismeId: ObjectId, mo
     },
   }) as unknown as IMissionLocaleEffectif;
 
+/** Rattache les CFA des fixtures communes à leur région : les collaborations d'un territoire se comptent côté CFA. */
+const insertCfaRegions = () =>
+  organismesDb().insertMany(
+    [
+      {
+        _id: CFA_A,
+        siret: "11111111100011",
+        adresse: { region: "11" },
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        _id: CFA_B,
+        siret: "22222222200022",
+        adresse: { region: "84" },
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ] as never[],
+    { bypassDocumentValidation: true }
+  );
+
 describe("Indicateurs ML routes (territoriales)", () => {
   useNock();
   useMongo();
@@ -398,6 +420,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
     const ligne = (rows: Array<{ cle: string }>, cle: string) => rows.find((row) => row.cle === cle);
 
     it("Croise la situation du jeune et les objectifs avec la réponse de la ML, sur le territoire", async () => {
+      await insertCfaRegions();
       const rdv = buildCollabDossier(ML_IDF, CFA_A, ["MOBILITE", "LOGEMENT"]);
       const abandonInjoignable = buildCollabDossier(ML_IDF, CFA_A, ["MOBILITE"]);
       await missionLocaleEffectifsDb().deleteMany({});
@@ -733,6 +756,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
     });
 
     it("Restreint chaque lecteur au périmètre de l'ARML, avec ou sans paramètre", async () => {
+      await insertCfaRegions();
       const scoped: Array<[string, (data: Record<string, unknown>) => unknown, unknown]> = [
         ["/traitement", (d) => (d.latest as { total: number }).total, 60],
         ["/stats/rupturants", (d) => (d.summary as { total: number }).total, 60],
@@ -1182,7 +1206,8 @@ describe("Indicateurs ML routes (territoriales)", () => {
     const monthKey = (date: Date) =>
       new Intl.DateTimeFormat("fr-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit" }).format(date);
 
-    it("Regroupe par mois d'envoi les dossiers envoyés, contactés et acceptés du territoire, quel que soit l'âge actuel du jeune", async () => {
+    it("Regroupe par mois d'envoi les dossiers envoyés par les CFA du territoire, quel que soit l'âge actuel du jeune", async () => {
+      await insertCfaRegions();
       const now = new Date();
       const ceMois = new Date(now.getTime() - 60_000);
       const moisDernier = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 11));
@@ -1208,6 +1233,15 @@ describe("Indicateurs ML routes (territoriales)", () => {
           }),
           dossier(ceMois, null),
           dossier(ceMois, "RDV_PRIS", { soft_deleted: true }),
+          // Envoyé par un CFA d'Île-de-France à une ML d'une autre région : compté en Île-de-France.
+          dossier(moisDernier, null, { mission_locale_id: ML_ARA }),
+          // Reçu par une ML d'Île-de-France d'un CFA d'une autre région : compté dans la région du CFA.
+          dossier(moisDernier, null, {
+            effectif_snapshot: {
+              organisme_id: CFA_B,
+              apprenant: { date_de_naissance: new Date(now.getFullYear() - 20, 0, 1) },
+            },
+          }),
         ] as never[],
         { bypassDocumentValidation: true }
       );
@@ -1220,7 +1254,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(mois[mois.length - 1].mois).toBe(monthKey(now));
       expect(mois.find((row) => row.mois === monthKey(moisDernier))).toEqual({
         mois: monthKey(moisDernier),
-        envoyes: 4,
+        envoyes: 5,
         contactes: 2,
         acceptes: 1,
       });
@@ -2261,16 +2295,16 @@ describe("Indicateurs ML routes (territoriales)", () => {
   });
 
   describe("GET /stats/collaborations", () => {
-    it("Renvoie le bloc collaboration national pour un admin", async () => {
+    it("Lit les snapshots de la Mission Locale sur sa fiche", async () => {
       const response = await requestAsOrganisation(
         ADMIN,
         "get",
-        "/api/v1/organisation/indicateurs-ml/stats/collaborations?national=true"
+        `/api/v1/organisation/indicateurs-ml/stats/collaborations?ml_id=${ML_IDF}`
       );
 
       expect(response.status).toBe(200);
       expect(response.data).toMatchObject({
-        cfa_ayant_collabore: { current: 2 },
+        cfa_ayant_collabore: { current: 1 },
         jeunes_envoyes: { current: 12 },
         jeunes_contactes: { current: 10 },
         jeunes_accompagnement_accepte: { current: 5 },
@@ -2285,12 +2319,46 @@ describe("Indicateurs ML routes (territoriales)", () => {
           besoin_aide_hors_rupture: 0,
           total: 12,
         },
-        objectifs: { mobilite: 2, logement: 1, total_dossiers: 3 },
+        objectifs: { mobilite: 2, logement: 1, total_dossiers: 2 },
       });
       expect(response.data.resultats.total).toBe(10);
     });
 
+    it("Compte les dossiers du territoire côté CFA, sans variation sur ce qui dépend de la situation passée", async () => {
+      await insertCfaRegions();
+      await missionLocaleEffectifsDb().updateOne(
+        { "effectif_snapshot.organisme_id": CFA_B },
+        { $set: { situation: "RDV_PRIS", mission_locale_id: ML_IDF } },
+        { bypassDocumentValidation: true }
+      );
+
+      const national = await requestAsOrganisation(
+        ADMIN,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/collaborations?national=true"
+      );
+      expect(national.status).toBe(200);
+      expect(national.data).toMatchObject({
+        cfa_ayant_collabore: { current: 2 },
+        jeunes_envoyes: { current: 3 },
+        jeunes_contactes: { current: 1, variation: "" },
+        jeunes_accompagnement_accepte: { current: 1, variation: "" },
+        situations: { rupture: 3, total: 3 },
+        objectifs: { mobilite: 2, logement: 1, total_dossiers: 3 },
+      });
+      expect(national.data.resultats).toMatchObject({ rdv_pris: { current: 1, variation: "" }, total: 1 });
+
+      // Le dossier du CFA d'Auvergne-Rhône-Alpes, reçu en Île-de-France, compte dans la région du CFA.
+      const ara = await requestAsOrganisation(
+        ADMIN,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/collaborations?region=84"
+      );
+      expect(ara.data).toMatchObject({ cfa_ayant_collabore: { current: 1 }, jeunes_envoyes: { current: 1 } });
+    });
+
     it("Scope par région pour une ARML et par ml_id vérifié", async () => {
+      await insertCfaRegions();
       const region = await requestAsOrganisation(
         ARML_IDF,
         "get",

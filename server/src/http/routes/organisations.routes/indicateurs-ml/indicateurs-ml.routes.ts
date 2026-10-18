@@ -31,7 +31,11 @@ import {
   getMissionLocaleMembers,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getCfaNpsStats, listCfaInjoignables } from "@/common/actions/cfa/cfa-collaboration-stats.actions";
-import { getCfaCollaborationStats, listCfaCollaborationsParMl } from "@/common/actions/cfa/cfa-collaborations.actions";
+import {
+  getCfaCollaborationStats,
+  getTerritoireCollaborationStats,
+  listCfaCollaborationsParMl,
+} from "@/common/actions/cfa/cfa-collaborations.actions";
 import { getCfaFiche, getCfaMembres } from "@/common/actions/cfa/cfa-fiche.actions";
 import { getCfaAdoptionStats, listCfaEtablissements } from "@/common/actions/cfa/cfa-stats.actions";
 import { listCollaborationsCfaOrigine } from "@/common/actions/mission-locale/collaboration-cfa-origine.actions";
@@ -456,7 +460,9 @@ const getCollaborationsRoute: IndicateursHandler<z.infer<typeof collaborationsQu
   const { period } = req.query;
   const scope = await resolveStatsScope(req.query, locals.regions);
 
-  return await getCollaborationSegmentStats(period || "30days", scope.regions, scope.mlId);
+  return scope.mlId
+    ? await getCollaborationSegmentStats(period || "30days", undefined, scope.mlId)
+    : await getTerritoireCollaborationStats(period || "30days", scope.regions);
 };
 
 const getCollaborationCorrelationsRoute: IndicateursHandler<z.infer<typeof collaborationsQuery>> = async (
