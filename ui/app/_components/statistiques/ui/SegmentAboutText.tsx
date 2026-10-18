@@ -27,8 +27,8 @@ export function SegmentAboutText({ variant }: SegmentAboutTextProps) {
           envoyé par son CFA est donc aussi compté dans le suivi des ruptures. Ces chiffres reflètent l&apos;état actuel
           des dossiers, classés par date d&apos;envoi de la collaboration : les compteurs d&apos;une période passée
           décrivent la situation d&apos;aujourd&apos;hui des dossiers envoyés pendant cette période. La table «
-          Déploiement aux CFA » de l&apos;onglet Suivi déploiement compte, elle, les collaborations depuis le 1er
-          janvier 2026 à la date de réponse du CFA : ses totaux peuvent différer de ceux affichés ici.
+          Déploiement aux CFA » de l&apos;onglet Suivi déploiement compte, elle, toutes les collaborations à la date de
+          réponse du CFA, sans filtre de période : ses totaux peuvent différer de ceux affichés ici.
         </p>
       )}
     </div>

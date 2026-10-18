@@ -26,7 +26,7 @@ const COLUMNS: Array<{ column: CfaEtablissementsSortBy; label: string; centered?
     column: "collaborations",
     label: "Collaborations",
     centered: true,
-    tooltip: "Dossiers envoyés par le CFA aux Missions Locales depuis le 1er janvier 2026.",
+    tooltip: "Dossiers envoyés par le CFA aux Missions Locales, depuis le lancement de la collaboration.",
   },
   { column: "activite", label: "Activité", centered: true },
 ];

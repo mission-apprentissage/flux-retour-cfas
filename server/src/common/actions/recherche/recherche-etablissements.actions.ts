@@ -130,7 +130,7 @@ export async function rechercherEtablissements(
   const pageMlIds = pageCandidats.filter((c) => c.type === "ml").map((c) => c.id);
   const [invitations, collaborations, connexions, mlStats] = await Promise.all([
     countInvitationsByOrgId(pageCfaIds),
-    fetchCollaborationsByOrgId(pageCfaIds, new Date()),
+    fetchCollaborationsByOrgId(pageCfaIds, new Date(), null),
     fetchDerniereConnexionByOrgId(pageCfaIds),
     fetchMlStatsById(pageMlIds),
   ]);

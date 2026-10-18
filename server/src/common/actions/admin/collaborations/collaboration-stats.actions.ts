@@ -96,12 +96,20 @@ export async function fetchActivationDatesByOrgId(
   return new Map(activations.map((a) => [a._id, a.date_activation]));
 }
 
-export function buildDossierEnvoyeMatch(endExclusive: Date, organismeIds?: ObjectId[]): Record<string, unknown> {
+/**
+ * Dossiers envoyés par les CFA avant `endExclusive`. Les stats admin et Brevo comptent depuis le lancement de la V2
+ * (`COLLABORATION_CUTOFF_DATE`) ; les stats territoriales passent `depuis: null` pour inclure les collaborations de 2025.
+ */
+export function buildDossierEnvoyeMatch(
+  endExclusive: Date,
+  organismeIds?: ObjectId[],
+  depuis: Date | null = COLLABORATION_CUTOFF_DATE
+): Record<string, unknown> {
   return {
     soft_deleted: { $ne: true },
     ...(organismeIds ? { "effectif_snapshot.organisme_id": { $in: organismeIds } } : {}),
     "organisme_data.acc_conjoint": true,
-    "organisme_data.reponse_at": { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive },
+    "organisme_data.reponse_at": { ...(depuis ? { $gte: depuis } : {}), $lt: endExclusive },
   };
 }
 
@@ -109,13 +117,14 @@ export type ICollaborationsByOrg = { nb: number; last: Date };
 
 export async function fetchCollaborationsByOrgId(
   organismeIds: ObjectId[],
-  endExclusive: Date
+  endExclusive: Date,
+  depuis: Date | null = COLLABORATION_CUTOFF_DATE
 ): Promise<Map<string, ICollaborationsByOrg>> {
   if (organismeIds.length === 0) return new Map();
 
   const rows = await missionLocaleEffectifsDb()
     .aggregate<{ _id: ObjectId; nb: number; last: Date }>([
-      { $match: buildDossierEnvoyeMatch(endExclusive, organismeIds) },
+      { $match: buildDossierEnvoyeMatch(endExclusive, organismeIds, depuis) },
       {
         $group: {
           _id: "$effectif_snapshot.organisme_id",
@@ -199,7 +208,8 @@ type RegionUsageAccumulator = {
 
 async function computeUsage(
   endExclusive: Date,
-  activatedOrganismeIds: Set<string>
+  activatedOrganismeIds: Set<string>,
+  depuis: Date | null
 ): Promise<{
   national: ICollaborationStatsSnapshot["national"]["usage"];
   perRegion: Map<string, RegionUsageAccumulator>;
@@ -213,20 +223,20 @@ async function computeUsage(
         soft_deleted: { $ne: true },
         "effectif_snapshot.organisme_id": { $in: activatedObjectIds },
         $or: [
-          { created_at: { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive } },
-          { "organisme_data.reponse_at": { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive } },
+          { created_at: { ...(depuis ? { $gte: depuis } : {}), $lt: endExclusive } },
+          { "organisme_data.reponse_at": { ...(depuis ? { $gte: depuis } : {}), $lt: endExclusive } },
         ],
       },
     },
     {
       $addFields: {
         is_rupturant: {
-          $and: [{ $gte: ["$created_at", COLLABORATION_CUTOFF_DATE] }, { $lt: ["$created_at", endExclusive] }],
+          $and: [{ $gte: ["$created_at", depuis ?? new Date(0)] }, { $lt: ["$created_at", endExclusive] }],
         },
         is_envoye: {
           $and: [
             { $eq: ["$organisme_data.acc_conjoint", true] },
-            { $gte: ["$organisme_data.reponse_at", COLLABORATION_CUTOFF_DATE] },
+            { $gte: ["$organisme_data.reponse_at", depuis ?? new Date(0)] },
             { $lt: ["$organisme_data.reponse_at", endExclusive] },
           ],
         },
@@ -349,14 +359,15 @@ function aggregateActivation(
 async function computeStatsForEligible(
   endExclusive: Date,
   eligible: IEligibleOrganismeRow[],
-  orgIdsWithCompte?: Set<string>
+  orgIdsWithCompte?: Set<string>,
+  depuis: Date | null = COLLABORATION_CUTOFF_DATE
 ): Promise<ICollaborationStatsSnapshot> {
   const [resolvedOrgIdsWithCompte, activated] = await Promise.all([
     orgIdsWithCompte ?? fetchOrganismeIdsWithConfirmedAccount(eligible.map((o) => o._id)),
     fetchActivatedOrganismes(endExclusive),
   ]);
   const activation = aggregateActivation(eligible, resolvedOrgIdsWithCompte, activated);
-  const usage = await computeUsage(endExclusive, activation.activatedOrganismeIds);
+  const usage = await computeUsage(endExclusive, activation.activatedOrganismeIds, depuis);
 
   const regionCodes = new Set<string>([...activation.perRegion.keys(), ...usage.perRegion.keys()]);
 
@@ -390,9 +401,12 @@ async function computeStatsForEligible(
   };
 }
 
-export async function computeStatsForDate(endExclusive: Date): Promise<ICollaborationStatsSnapshot> {
+export async function computeStatsForDate(
+  endExclusive: Date,
+  depuis: Date | null = COLLABORATION_CUTOFF_DATE
+): Promise<ICollaborationStatsSnapshot> {
   const eligible = await findEligibleOrganismes();
-  return computeStatsForEligible(endExclusive, eligible);
+  return computeStatsForEligible(endExclusive, eligible, undefined, depuis);
 }
 
 function buildVariation(current: number, previous: number | null): IStatWithVariation {
@@ -465,10 +479,13 @@ export async function getCollaborationStats(referenceDate?: Date): Promise<IColl
   };
 }
 
-/** Synthèse publique du déploiement CFA (calcul sur tous les organismes éligibles : à mettre en cache côté route). */
+/**
+ * Synthèse publique du déploiement CFA (calcul sur tous les organismes éligibles : à mettre en cache côté route).
+ * Contrairement aux stats admin, elle compte aussi les collaborations antérieures à la V2.
+ */
 export async function getCollaborationsCfaSynthese(referenceDate?: Date): Promise<ICollaborationsCfaSyntheseResponse> {
   const today = normalizeToUTCDay(referenceDate ?? new Date());
-  const snapshot = await computeStatsForDate(addDaysUTC(today, 1));
+  const snapshot = await computeStatsForDate(addDaysUTC(today, 1), null);
 
   return {
     evaluationDate: today,

@@ -42,7 +42,7 @@ export function CfaAdoptionKpis() {
           loading={isLoading}
           loadingPercentage={isLoadingVariation(isFetching, isLoading)}
           className={kpiFunnelCardClassName}
-          tooltip="CFA ayant envoyé au moins un dossier de collaboration à une Mission Locale depuis le 1er janvier 2026."
+          tooltip="CFA ayant envoyé au moins un dossier de collaboration à une Mission Locale, depuis le lancement de la collaboration."
         />
       </StatsErrorHandler>
     </KpiFunnel>

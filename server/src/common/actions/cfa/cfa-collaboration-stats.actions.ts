@@ -35,7 +35,7 @@ export async function getNpsStatsForOrganismes(organismeIds: ObjectId[]): Promis
     .aggregate<{ total: number; promoteurs: number; detracteurs: number; utilisateurs: unknown[]; cfa: unknown[] }>([
       {
         $match: {
-          ...buildDossierEnvoyeMatch(new Date(), organismeIds),
+          ...buildDossierEnvoyeMatch(new Date(), organismeIds, null),
           "organisme_data.form_feedback.note": { $type: "number" },
         },
       },
@@ -90,7 +90,8 @@ export async function listCfaInjoignables(
         $match: {
           ...buildDossierEnvoyeMatch(
             new Date(),
-            organismes.map((organisme) => organisme._id)
+            organismes.map((organisme) => organisme._id),
+            null
           ),
           situation: { $nin: [null, SITUATION_ENUM.CONTACTE_SANS_RETOUR] },
         },

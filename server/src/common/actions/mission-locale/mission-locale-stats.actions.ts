@@ -1,5 +1,4 @@
 import { ObjectId } from "bson";
-import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import { IOrganisationMissionLocale } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
@@ -1005,13 +1004,13 @@ const PARIS_TIMEZONE = "Europe/Paris";
 const toMonthKey = (date: Date) =>
   new Intl.DateTimeFormat("fr-CA", { timeZone: PARIS_TIMEZONE, year: "numeric", month: "2-digit" }).format(date);
 
-const listMonthKeys = (from: Date, to: Date) => {
-  const toIndex = (date: Date) => {
-    const [year, month] = toMonthKey(date).split("-").map(Number);
+const listMonthKeys = (fromKey: string, to: Date) => {
+  const toIndex = (monthKey: string) => {
+    const [year, month] = monthKey.split("-").map(Number);
     return year * 12 + month - 1;
   };
   const keys: string[] = [];
-  for (let index = toIndex(from); index <= toIndex(to); index++) {
+  for (let index = toIndex(fromKey); index <= toIndex(toMonthKey(to)); index++) {
     keys.push(`${Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, "0")}`);
   }
   return keys;
@@ -1025,11 +1024,10 @@ export async function getCollaborationMensuelStats(
   organismeId?: ObjectId
 ): Promise<ICollaborationMensuelStats> {
   const now = new Date();
-  const periodStart = await calculateStartDateAsync(period, normalizeToUTCDay(now));
-  // Fiche CFA : pas de sélecteur de période, l'évolution part de la date de début des collaborations.
-  const from = !organismeId && periodStart > COLLABORATION_CUTOFF_DATE ? periodStart : COLLABORATION_CUTOFF_DATE;
+  // Fiche CFA et « depuis le lancement » : l'évolution part du premier dossier envoyé, sans mois vides avant.
+  const debutPeriode =
+    organismeId || period === "all" ? null : await calculateStartDateAsync(period, normalizeToUTCDay(now));
   const missionLocaleIds = organismeId ? undefined : await resolveMissionLocaleIds(regions, mlId);
-  const monthKeys = listMonthKeys(from, now);
 
   const rows = await missionLocaleEffectifsDb()
     .aggregate<ICollaborationMois>([
@@ -1046,7 +1044,7 @@ export async function getCollaborationMensuelStats(
           },
         },
       },
-      { $match: { mois: { $gte: monthKeys[0] } } },
+      ...(debutPeriode ? [{ $match: { mois: { $gte: toMonthKey(debutPeriode) } } }] : []),
       {
         $group: {
           _id: "$mois",
@@ -1059,6 +1057,8 @@ export async function getCollaborationMensuelStats(
     ])
     .toArray();
 
+  const premierMois = debutPeriode ? toMonthKey(debutPeriode) : rows.map((row) => row.mois).sort()[0];
+  const monthKeys = premierMois ? listMonthKeys(premierMois, now) : [toMonthKey(now)];
   const byMonth = new Map(rows.map((row) => [row.mois, row]));
   return {
     mois: monthKeys.map((mois) => byMonth.get(mois) ?? { mois, envoyes: 0, contactes: 0, acceptes: 0 }),

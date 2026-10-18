@@ -512,4 +512,25 @@ describe("getCollaborationsCfaSynthese", () => {
       dossiers_envoyes_cfa: 0,
     });
   });
+
+  it("compte aussi les collaborations de 2025, contrairement aux stats admin", async () => {
+    const compatibleOrg = await insertCompatible({ adresse: { region: HDF } as never });
+    const envoi2025 = new Date("2025-11-15");
+    await missionLocaleEffectifsDb().insertOne(
+      buildMlEffectif({
+        organisme_id: compatibleOrg._id,
+        created_at: envoi2025,
+        reponse_at: envoi2025,
+        acc_conjoint: true,
+      }),
+      { bypassDocumentValidation: true }
+    );
+    const reference = new Date("2026-05-25");
+
+    const synthese = await getCollaborationsCfaSynthese(reference);
+    const admin = await computeStatsForDate(addDaysUTC(reference, 1));
+
+    expect(synthese.national).toMatchObject({ cfa_with_collab: 1, dossiers_envoyes_cfa: 1 });
+    expect(admin.national.usage.dossiers_envoyes_cfa).toBe(0);
+  });
 });

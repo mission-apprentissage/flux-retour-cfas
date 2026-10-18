@@ -2,7 +2,6 @@ import Boom from "boom";
 import { ObjectId } from "bson";
 import express from "express";
 import { ORGANISATION_TYPE } from "shared/constants";
-import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import {
   CFA_COLLAB_ML_SORT_BY,
@@ -665,10 +664,7 @@ const getCfaEtablissementsExportRoute: IndicateursHandler<z.infer<typeof cfaEtab
 
 const cfaInvitesOptions = (region: string | undefined, userRegions: string[]) => {
   assertRegionAllowed(region, userRegions);
-  return {
-    territoire: { regions: scopedRegions(region, userRegions) },
-    collaborationsDepuis: COLLABORATION_CUTOFF_DATE,
-  };
+  return { territoire: { regions: scopedRegions(region, userRegions) } };
 };
 
 const getCfaInvitesRoute: IndicateursHandler<z.infer<typeof cfaInvitesQuery>> = async (req, { locals }) =>

@@ -103,7 +103,7 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
             sortDirection={sortDirection}
             onSort={handleSort}
             centered
-            tooltip="CFA compatibles ayant envoyé au moins un dossier de collaboration à une Mission Locale depuis le 1er janvier 2026, rapportés au nombre de CFA compatibles."
+            tooltip="CFA compatibles ayant envoyé au moins un dossier de collaboration à une Mission Locale, rapportés au nombre de CFA compatibles."
           />,
           <SortableTableHeader
             key="dossiers"
@@ -113,7 +113,7 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
             sortDirection={sortDirection}
             onSort={handleSort}
             centered
-            tooltip="Dossiers de collaboration envoyés par les CFA de la région depuis le 1er janvier 2026, comptés à la date de réponse du CFA."
+            tooltip="Dossiers de collaboration envoyés par les CFA de la région, comptés à la date de réponse du CFA."
           />,
         ]}
         data={sorted.map((r) => [

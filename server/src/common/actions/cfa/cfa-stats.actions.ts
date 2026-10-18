@@ -43,7 +43,7 @@ const countOrganismesWithCollaboration = async (organismeIds: ObjectId[], endExc
     : (
         await missionLocaleEffectifsDb().distinct(
           "effectif_snapshot.organisme_id",
-          buildDossierEnvoyeMatch(endExclusive, organismeIds)
+          buildDossierEnvoyeMatch(endExclusive, organismeIds, null)
         )
       ).length;
 
@@ -80,8 +80,6 @@ export interface CfaEtablissementsFilters extends CfaTerritoire {
   sortBy: CfaEtablissementsSortBy;
   sortOrder: "asc" | "desc";
 }
-
-const COLLAB_ACTIVE_MATCH = { is_allowed_collab: true, collab_suspended_at: null };
 
 export const fetchDerniereConnexionByOrgId = async (organismeIds: ObjectId[]): Promise<Map<string, Date>> => {
   if (organismeIds.length === 0) return new Map();
@@ -155,7 +153,6 @@ export async function listCfaEtablissements({
   if (natures?.length) filters.push(buildOrganismeNatureFilter(natures));
   if (utilisateur !== undefined) filters.push({ has_account: utilisateur ? true : { $ne: true } });
   if (qualiopi !== undefined) filters.push({ qualiopi: qualiopi ? true : { $ne: true } });
-  if (collabActive !== undefined) filters.push(collabActive ? COLLAB_ACTIVE_MATCH : { $nor: [COLLAB_ACTIVE_MATCH] });
   if (search && search.trim().length >= 2) filters.push(buildOrganismeSearchFilter(search));
 
   const organismes = await organismesDb()
@@ -184,7 +181,7 @@ export async function listCfaEtablissements({
   const organismeIds = organismes.map((organisme) => organisme._id);
 
   const [collaborations, connexions] = await Promise.all([
-    fetchCollaborationsByOrgId(organismeIds, new Date()),
+    fetchCollaborationsByOrgId(organismeIds, new Date(), null),
     fetchDerniereConnexionByOrgId(organismeIds),
   ]);
 
@@ -214,5 +211,7 @@ export async function listCfaEtablissements({
 
   const direction = sortOrder === "asc" ? 1 : -1;
   const compare = ETABLISSEMENT_COMPARATORS[sortBy];
-  return rows.sort((a, b) => compare(a, b, direction) || ETABLISSEMENT_COMPARATORS.nom(a, b, 1));
+  return rows
+    .filter((row) => collabActive === undefined || row.nb_collaborations > 0 === collabActive)
+    .sort((a, b) => compare(a, b, direction) || ETABLISSEMENT_COMPARATORS.nom(a, b, 1));
 }

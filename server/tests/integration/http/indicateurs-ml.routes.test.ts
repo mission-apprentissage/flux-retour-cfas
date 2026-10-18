@@ -1080,6 +1080,32 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(noms(response)).toEqual(expected);
     });
 
+    it("Compte comme collaborant un CFA qui a envoyé un dossier, même en 2025 et sans collaboration activée", async () => {
+      const envoi2025 = buildCollabDossier(ML_IDF, CFA_ALPHA, []);
+      await missionLocaleEffectifsDb().insertOne(
+        {
+          ...envoi2025,
+          organisme_data: {
+            ...envoi2025.organisme_data,
+            acc_conjoint_at: new Date("2025-11-15"),
+            reponse_at: new Date("2025-11-15"),
+          },
+        } as never,
+        { bypassDocumentValidation: true }
+      );
+
+      const actives = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        `${BASE}?collab_active=true&sort_by=nom&sort_order=asc`
+      );
+      expect(noms(actives)).toEqual(["Alpha", "Beta"]);
+      expect(actives.data.data[0]).toMatchObject({ nb_collaborations: 1, collab_active: false });
+
+      const aucune = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?collab_active=false`);
+      expect(noms(aucune)).toEqual(["Gamma"]);
+    });
+
     it("Pagine, refuse un territoire hors périmètre et exporte sans pagination", async () => {
       const page2 = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?limit=2&page=2`);
       expect(noms(page2)).toEqual(["Gamma"]);
@@ -1319,6 +1345,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
     const D_A_TRAITER = new ObjectId();
     const D_RDV = new ObjectId();
     const D_RECONTACTER = new ObjectId();
+    const D_2025 = new ObjectId();
 
     const dossier = (
       id: ObjectId,
@@ -1358,7 +1385,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
           dossier(D_RDV, CFA_A, { situation: "RDV_PRIS" }),
           dossier(D_RECONTACTER, CFA_C, { situation: "CONTACTE_SANS_RETOUR", nom: "Dupont" }),
           dossier(new ObjectId(), CFA_B, {}),
-          dossier(new ObjectId(), CFA_A, { envoi: new Date("2025-12-01") }),
+          dossier(D_2025, CFA_A, { envoi: new Date("2025-12-01") }),
         ] as never[],
         { bypassDocumentValidation: true }
       );
@@ -1374,11 +1401,11 @@ describe("Indicateurs ML routes (territoriales)", () => {
       );
     });
 
-    it("Liste les dossiers envoyés depuis 2026 par les CFA de la région, sans coordonnées du jeune", async () => {
+    it("Liste les dossiers envoyés par les CFA de la région, 2025 compris, sans coordonnées du jeune", async () => {
       const response = await requestAsOrganisation(DREETS_IDF, "get", BASE);
 
       expect(response.status).toBe(200);
-      expect(response.data.total).toBe(3);
+      expect(response.data.total).toBe(4);
       expect(JSON.stringify(response.data)).not.toMatch(/0600000000|jeune@example\.org|telephone|courriel/);
       const rdv = response.data.data.find((row: { id: string }) => row.id === D_RDV.toString());
       expect(Object.keys(rdv.jeune).sort()).toEqual(["nom", "prenom"]);
@@ -1394,17 +1421,17 @@ describe("Indicateurs ML routes (territoriales)", () => {
     });
 
     it.each([
-      ["statuts=a_traiter", [D_A_TRAITER]],
+      ["statuts=a_traiter", [D_A_TRAITER, D_2025]],
       ["statuts=a_recontacter,traite", [D_RDV, D_RECONTACTER]],
       ["delais=0_10", [D_RDV]],
       ["delais=21_30", [D_RECONTACTER]],
-      ["delais=30_plus", [D_A_TRAITER]],
+      ["delais=30_plus", [D_A_TRAITER, D_2025]],
       ["resultats=a_recontacter", [D_RECONTACTER]],
       ["departements=77", [D_RECONTACTER]],
       [`cfa_ids=${CFA_C}`, [D_RECONTACTER]],
       ["search=dupont", [D_RECONTACTER]],
       ["search=eiffel", [D_RECONTACTER]],
-      ["date_fin=2026-01-31", []],
+      ["date_fin=2026-01-31", [D_2025]],
       ["date_debut=2026-03-10&date_fin=2026-03-10", [D_A_TRAITER, D_RDV, D_RECONTACTER]],
     ])("Filtre : %s", async (query, expected) => {
       const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?${query}`);
@@ -1450,7 +1477,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
 
     it("Limite la DDETS à son département et refuse l'ARML", async () => {
       const ddets = await requestAsOrganisation(DDETS_PARIS, "get", BASE);
-      expect(ddets.data.total).toBe(2);
+      expect(ddets.data.total).toBe(3);
       expectForbidden(
         await requestAsOrganisation(DDETS_PARIS, "get", `${BASE}?departements=77`),
         "Accès non autorisé à ce département"
@@ -1468,10 +1495,10 @@ describe("Indicateurs ML routes (territoriales)", () => {
     it("Journalise l'export nominatif", async () => {
       const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}/export`);
 
-      expect(response.data.data).toHaveLength(3);
+      expect(response.data.data).toHaveLength(4);
       const logs = await telechargementListesNominativesLogsDb().find({ type: "indicateurs_collaborations" }).toArray();
       expect(logs).toHaveLength(1);
-      expect(logs[0].elementList?.sort()).toEqual([D_A_TRAITER, D_RDV, D_RECONTACTER].map(String).sort());
+      expect(logs[0].elementList?.sort()).toEqual([D_A_TRAITER, D_RDV, D_RECONTACTER, D_2025].map(String).sort());
     });
 
     describe("périmètre fiche CFA (cfa_id)", () => {
@@ -1489,7 +1516,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
 
         expect(response.status).toBe(200);
         expect(response.data.data.map((row: { id: string }) => row.id).sort()).toEqual(
-          [D_A_TRAITER, D_RDV, D_ARA].map(String).sort()
+          [D_A_TRAITER, D_RDV, D_ARA, D_2025].map(String).sort()
         );
         expect(response.data.data.every((row: { cfa: { id: string } }) => row.cfa.id === `${CFA_A}`)).toBe(true);
       });
@@ -1513,9 +1540,9 @@ describe("Indicateurs ML routes (territoriales)", () => {
       it("Journalise l'export de la liste du CFA", async () => {
         const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}/export?cfa_id=${CFA_A}`);
 
-        expect(response.data.data).toHaveLength(3);
+        expect(response.data.data).toHaveLength(4);
         const log = await telechargementListesNominativesLogsDb().findOne({ type: "indicateurs_collaborations" });
-        expect(log?.elementList).toHaveLength(3);
+        expect(log?.elementList).toHaveLength(4);
       });
     });
 
@@ -1532,8 +1559,9 @@ describe("Indicateurs ML routes (territoriales)", () => {
         const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?ml_id=${ML_IDF}`);
 
         expect(response.status).toBe(200);
-        expect(response.data.total).toBe(4);
+        expect(response.data.total).toBe(5);
         expect(response.data.data.map((row: { cfa: { nom: string } }) => row.cfa.nom).sort()).toEqual([
+          "CFA A",
           "CFA A",
           "CFA A",
           "CFA B",
@@ -1554,7 +1582,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       it("Limite la DDETS aux ML de son département et refuse l'ARML et les ML hors région", async () => {
         const ddets = await requestAsOrganisation(DDETS_PARIS, "get", `${BASE}?ml_id=${ML_IDF}`);
         expect(ddets.status).toBe(200);
-        expect(ddets.data.total).toBe(4);
+        expect(ddets.data.total).toBe(5);
 
         await organisationsDb().updateOne({ _id: ML_IDF }, { $set: { "adresse.departement": "77" } });
         expectForbidden(
@@ -1575,9 +1603,9 @@ describe("Indicateurs ML routes (territoriales)", () => {
         const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}/export?ml_id=${ML_IDF}`);
 
         expect(response.status).toBe(200);
-        expect(response.data.data).toHaveLength(4);
+        expect(response.data.data).toHaveLength(5);
         const log = await telechargementListesNominativesLogsDb().findOne({ type: "indicateurs_collaborations" });
-        expect(log?.elementList).toHaveLength(4);
+        expect(log?.elementList).toHaveLength(5);
       });
     });
   });

@@ -1,6 +1,5 @@
 import type { ObjectId } from "bson";
 import type { Document } from "mongodb";
-import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type {
   CollabDossierDelai,
@@ -101,7 +100,6 @@ const buildBaseMatch = (organismeIds: ObjectId[] | undefined, missionLocaleId?: 
   ...(missionLocaleId ? { mission_locale_id: missionLocaleId } : {}),
   "organisme_data.acc_conjoint": true,
   soft_deleted: { $ne: true },
-  "organisme_data.acc_conjoint_at": { $gte: COLLABORATION_CUTOFF_DATE },
   ...(organismeIds ? { "effectif_snapshot.organisme_id": { $in: organismeIds } } : {}),
 });
 
