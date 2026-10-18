@@ -1796,6 +1796,13 @@ describe("Mission Locale Stats Routes - Public", () => {
       expect(response.status).toBe(400);
     });
 
+    it("Refuse les périodes réservées aux pages connectées", async () => {
+      for (const period of ["6months", "since-2026"]) {
+        const response = await httpClient.get(`/api/v1/mission-locale/stats/traitement?period=${period}`);
+        expect(response.status, period).toBe(400);
+      }
+    });
+
     it("Refuse le paramètre region (route nationale uniquement)", async () => {
       const response = await httpClient.get("/api/v1/mission-locale/stats/traitement?region=11");
 

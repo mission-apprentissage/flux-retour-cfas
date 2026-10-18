@@ -44,7 +44,7 @@ function VueChiffree({ mlId, action }: Pick<MLCollaborationsTabProps, "mlId" | "
   return (
     <div>
       <div className={styles.barreOutils}>
-        <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />
+        <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} etendues />
         {action}
       </div>
 

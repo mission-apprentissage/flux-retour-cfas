@@ -1,7 +1,7 @@
 "use client";
 
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
-import type { StatsPeriod } from "shared/models/data/nationalStats.model";
+import { anneesDepuis, statsPeriodDepuis, type StatsPeriod } from "shared/models/data/nationalStats.model";
 
 import { STATS_LAUNCH_DATE_LABEL } from "../constants";
 
@@ -15,13 +15,22 @@ interface PeriodSelectorProps {
   className?: string;
   includeAll?: boolean;
   hideLabel?: boolean;
+  /** 6 mois et « Depuis janv. <année> », réservés aux pages connectées (l'API publique ne les accepte pas). */
+  etendues?: boolean;
 }
 
-export function getPeriodOptions(includeAll = false): Array<{ label: string; value: StatsPeriod }> {
+export function getPeriodOptions(includeAll = false, etendues = false): Array<{ label: string; value: StatsPeriod }> {
   const options: Array<{ label: string; value: StatsPeriod }> = [
     { label: "30 derniers jours", value: "30days" },
     { label: "3 derniers mois", value: "3months" },
   ];
+
+  if (etendues) {
+    options.push({ label: "6 derniers mois", value: "6months" });
+    anneesDepuis().forEach((annee) =>
+      options.push({ label: `Depuis janv. ${annee}`, value: statsPeriodDepuis(annee) })
+    );
+  }
 
   if (includeAll) {
     options.push({ label: `Depuis le lancement (${STATS_LAUNCH_DATE_LABEL})`, value: "all" });
@@ -36,8 +45,9 @@ export function PeriodSelector({
   className,
   includeAll = false,
   hideLabel = false,
+  etendues = false,
 }: PeriodSelectorProps) {
-  const options = getPeriodOptions(includeAll);
+  const options = getPeriodOptions(includeAll, etendues);
 
   return (
     <div className={styles.selector}>

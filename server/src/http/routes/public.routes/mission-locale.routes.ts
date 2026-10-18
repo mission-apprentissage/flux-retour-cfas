@@ -1,5 +1,5 @@
 import express from "express";
-import { zStatsPeriod, zStatsSegment } from "shared/models/data/nationalStats.model";
+import { zPublicStatsPeriod, zStatsSegment } from "shared/models/data/nationalStats.model";
 import { z } from "zod";
 
 import { getCollaborationsCfaSynthese } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
@@ -18,8 +18,8 @@ import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddlew
 
 const PUBLIC_STATS_CACHE_SECONDS = 300;
 
-const segmentQuery = z.object({ period: zStatsPeriod.optional(), segment: zStatsSegment.optional() }).strict();
-const periodQuery = z.object({ period: zStatsPeriod.optional() });
+const segmentQuery = z.object({ period: zPublicStatsPeriod.optional(), segment: zStatsSegment.optional() }).strict();
+const periodQuery = z.object({ period: zPublicStatsPeriod.optional() });
 const strictPeriodQuery = periodQuery.strict();
 const emptyQuery = z.object({}).strict();
 type PublicHandler<TQuery> = RouteHandler<Record<string, unknown>, DefaultParams, TQuery>;

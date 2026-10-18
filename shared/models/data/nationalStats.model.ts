@@ -1,7 +1,33 @@
 import { z } from "zod";
 
-const STATS_PERIODS = ["30days", "3months", "all"] as const;
-export const zStatsPeriod = z.enum(STATS_PERIODS);
+/** Périodes de l'API publique, inchangées : les suivantes sont réservées aux pages connectées. */
+export const zPublicStatsPeriod = z.enum(["30days", "3months", "all"]);
+
+/** Première année proposée en « Depuis janvier <année> » ; une option s'ajoute à chaque nouvelle année. */
+export const STATS_PREMIERE_ANNEE = 2026;
+
+export type StatsPeriodDepuis = `since-${number}`;
+
+export const statsPeriodDepuis = (annee: number): StatsPeriodDepuis => `since-${annee}`;
+
+export const anneeDePeriodeDepuis = (period: string): number | null => {
+  const match = /^since-(\d{4})$/.exec(period);
+  return match ? Number(match[1]) : null;
+};
+
+/** Années proposées en « Depuis janvier <année> », de la plus récente à la plus ancienne. */
+export const anneesDepuis = (now: Date = new Date()): number[] =>
+  Array.from(
+    { length: Math.max(0, now.getUTCFullYear() - STATS_PREMIERE_ANNEE + 1) },
+    (_, index) => now.getUTCFullYear() - index
+  );
+
+const zStatsPeriodDepuis = z.custom<StatsPeriodDepuis>((value) => {
+  const annee = typeof value === "string" ? anneeDePeriodeDepuis(value) : null;
+  return annee !== null && anneesDepuis().includes(annee);
+}, "Période invalide");
+
+export const zStatsPeriod = z.union([z.enum(["30days", "3months", "6months", "all"]), zStatsPeriodDepuis]);
 export type StatsPeriod = z.output<typeof zStatsPeriod>;
 
 const STATS_SEGMENTS = ["all", "rupture", "collab"] as const;

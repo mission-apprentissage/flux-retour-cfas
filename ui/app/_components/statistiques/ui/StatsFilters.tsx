@@ -7,7 +7,7 @@ import { useStatsFilters } from "../hooks/useStatsFilters";
 import { getPeriodOptions } from "./PeriodSelector";
 import styles from "./StatsFilters.module.css";
 
-const PERIOD_OPTIONS = getPeriodOptions(true);
+const PERIOD_OPTIONS = getPeriodOptions(true, true);
 
 export function StatsFilters() {
   const { period, setPeriod, territoire, territoireLabel, territoireOptions, setTerritoire } = useStatsFilters();

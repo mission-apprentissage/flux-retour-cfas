@@ -353,6 +353,24 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(response.data.timeSeries.at(-1).stats[0].total).toBe(12);
     });
 
+    it("accepte les périodes 6 mois et « Depuis janvier » de l'année en cours", async () => {
+      for (const period of ["6months", `since-${new Date().getUTCFullYear()}`]) {
+        const response = await requestAsOrganisation(
+          DREETS_IDF,
+          "get",
+          `/api/v1/organisation/indicateurs-ml/stats/rupturants?segment=rupture&period=${period}`
+        );
+        expect(response.status, period).toBe(200);
+        expect(response.data.period).toBe(period);
+      }
+      const avant = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/rupturants?period=since-2025"
+      );
+      expect(avant.status).toBe(400);
+    });
+
     it("traitement/regions lit tous les segments par défaut et accepte segment=collab", async () => {
       const all = await requestAsOrganisation(
         ADMIN,

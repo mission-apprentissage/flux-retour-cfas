@@ -23,7 +23,7 @@ export function MLSuiviTraitementTab({ mlId, noData, action }: MLSuiviTraitement
       <h2 className={styles.titre}>Suivi des ruptures</h2>
       {!noData && (
         <div className={styles.periodRow}>
-          <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />
+          <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} etendues />
           {action}
         </div>
       )}
