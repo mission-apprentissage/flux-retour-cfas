@@ -134,6 +134,18 @@ export async function listContactsOrganisation(organisationId: ObjectId): Promis
     .toArray();
 }
 
+/** Un administrateur, en propre ou en imposture, invite au nom de l'équipe du Tableau de bord et non sous son nom. */
+const inviteAuNomDeLEquipe = (ctx: AuthContext) =>
+  ctx.organisation?.type === "ADMINISTRATEUR" || Boolean(ctx.impersonating);
+
+const auteurInvitationOrganisation = (ctx: AuthContext) =>
+  inviteAuNomDeLEquipe(ctx)
+    ? undefined
+    : { civility: ctx.civility, nom: ctx.nom, prenom: ctx.prenom, email: ctx.email };
+
+const auteurInvitationCfa = (ctx: AuthContext) =>
+  inviteAuNomDeLEquipe(ctx) ? undefined : { prenom: ctx.prenom, nom: ctx.nom, fonction: ctx.fonction || "" };
+
 export async function listOrganisationPendingInvitations(ctx: AuthContext) {
   return await invitationsDb()
     .find({ organisation_id: ctx.organisation_id }, { projection: { token: 0 } })
@@ -176,22 +188,13 @@ export async function inviteUserToOrganisation(
   if (organisation.type === "ORGANISME_FORMATION") {
     const cfaName = await getCfaNameForOrganisation(organisation);
     await sendEmail(email, "invitation_cfa_member", {
-      admin: {
-        prenom: ctx.prenom,
-        nom: ctx.nom,
-        fonction: ctx.fonction || "",
-      },
+      admin: auteurInvitationCfa(ctx),
       cfaName,
       invitationToken,
     });
   } else {
     await sendEmail(email, "invitation_organisation", {
-      author: {
-        civility: ctx.civility,
-        nom: ctx.nom,
-        prenom: ctx.prenom,
-        email: ctx.email,
-      },
+      author: auteurInvitationOrganisation(ctx),
       organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
       invitationToken,
     });
@@ -270,22 +273,13 @@ export async function batchInviteUsersToOrganisation(
 
     if (isCfa) {
       await sendEmail(email, "invitation_cfa_member", {
-        admin: {
-          prenom: ctx.prenom,
-          nom: ctx.nom,
-          fonction: ctx.fonction || "",
-        },
+        admin: auteurInvitationCfa(ctx),
         cfaName: cfaName!,
         invitationToken,
       });
     } else {
       await sendEmail(email, "invitation_organisation", {
-        author: {
-          civility: ctx.civility,
-          nom: ctx.nom,
-          prenom: ctx.prenom,
-          email: ctx.email,
-        },
+        author: auteurInvitationOrganisation(ctx),
         organisationLabel: organisationLabel!,
         invitationToken,
       });
@@ -309,22 +303,13 @@ export async function resendInvitationEmail(ctx: AuthContext, invitationId: stri
   if (organisation.type === "ORGANISME_FORMATION") {
     const cfaName = await getCfaNameForOrganisation(organisation);
     await sendEmail(invitation.email, "invitation_cfa_member", {
-      admin: {
-        prenom: ctx.prenom,
-        nom: ctx.nom,
-        fonction: ctx.fonction || "",
-      },
+      admin: auteurInvitationCfa(ctx),
       cfaName,
       invitationToken: newToken,
     });
   } else {
     await sendEmail(invitation.email, "invitation_organisation", {
-      author: {
-        civility: ctx.civility,
-        nom: ctx.nom,
-        prenom: ctx.prenom,
-        email: ctx.email,
-      },
+      author: auteurInvitationOrganisation(ctx),
       organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
       invitationToken: newToken,
     });

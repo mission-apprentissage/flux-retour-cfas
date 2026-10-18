@@ -58,6 +58,10 @@ describe("POST /api/v1/admin/organismes/:id/membres/invitations", () => {
       "invitation_cfa_member",
       "invitation_cfa_member",
     ]);
+    expect(vi.mocked(sendEmail).mock.calls.map((call) => (call[2] as { admin?: unknown }).admin)).toEqual([
+      undefined,
+      undefined,
+    ]);
   });
 
   it("Rattache l'organisation créée au CFA de la fiche, même sans UAI quand un homonyme SIRET en a un", async () => {

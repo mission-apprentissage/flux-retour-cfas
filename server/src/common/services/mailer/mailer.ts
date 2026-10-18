@@ -90,7 +90,9 @@ export function getEmailInfos<T extends TemplateName>(template: T, payload: Temp
 const templatesTitleFuncs: TemplateTitleFuncs = {
   activation_user: () => "Activation de votre compte",
   invitation_organisation: (payload) =>
-    `${payload.author.civility} ${payload.author.nom} vous invite à rejoindre le tableau de bord de l'apprentissage`,
+    payload.author
+      ? `${payload.author.civility} ${payload.author.nom} vous invite à rejoindre le tableau de bord de l'apprentissage`
+      : "Invitation à rejoindre le Tableau de bord de l'apprentissage",
   notify_access_granted: () => "Votre demande d'accès a été acceptée",
   notify_access_granted_ofa: () => "Votre demande d’accès a été acceptée",
   notify_access_rejected: () => "Votre demande d'accès a été refusée",
@@ -120,7 +122,9 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
     `❌ ${payload.effectif.prenom} ${payload.effectif.nom} ne souhaite pas être recontacté(e)`,
   invitation_cfa_admin: () => "Invitation | Tableau de bord de l'apprentissage : activez votre compte d'administrateur",
   invitation_cfa_member: (payload) =>
-    `${payload.admin.prenom} ${payload.admin.nom} vous invite à rejoindre ${payload.cfaName}`,
+    payload.admin
+      ? `${payload.admin.prenom} ${payload.admin.nom} vous invite à rejoindre ${payload.cfaName}`
+      : `Invitation à rejoindre ${payload.cfaName} sur le Tableau de bord de l'apprentissage`,
   confirmation_cfa: () => "Confirmation email | Bienvenue, vous pouvez accéder au service",
   activation_cfa: () => "Confirmation email | Dernier clic pour accéder au service",
 };
@@ -138,7 +142,8 @@ export type TemplatePayloads = {
     activationToken: string;
   };
   invitation_organisation: {
-    author: {
+    /** Absent quand un administrateur invite : le mail part au nom de l'équipe du Tableau de bord. */
+    author?: {
       civility?: string;
       nom: string;
       prenom: string;
@@ -336,7 +341,8 @@ export type TemplatePayloads = {
     invitationToken: string;
   };
   invitation_cfa_member: {
-    admin: {
+    /** Absent quand un administrateur invite : le mail part au nom de l'équipe du Tableau de bord. */
+    admin?: {
       prenom: string;
       nom: string;
       fonction: string;

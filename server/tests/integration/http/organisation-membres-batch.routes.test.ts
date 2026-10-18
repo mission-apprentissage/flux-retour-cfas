@@ -114,7 +114,7 @@ describe("POST /api/v1/organisation/membres/batch", () => {
     expect(sendEmail).toHaveBeenCalledWith(
       "new1@cfa.local",
       "invitation_cfa_member",
-      expect.objectContaining({ cfaName: "CAMPUS DU LAC" })
+      expect.objectContaining({ cfaName: "CAMPUS DU LAC", admin: expect.objectContaining({ nom: expect.any(String) }) })
     );
   });
 

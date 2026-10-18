@@ -59,6 +59,7 @@ describe("POST /api/v1/admin/mission-locale/:id/membres/invitations", () => {
     ]);
     expect(vi.mocked(sendEmail)).toHaveBeenCalledTimes(2);
     expect(vi.mocked(sendEmail).mock.calls[0][1]).toBe("invitation_organisation");
+    expect(vi.mocked(sendEmail).mock.calls[0][2]).toMatchObject({ author: undefined });
   });
 
   it("Signale par adresse les doublons et les comptes déjà rattachés ailleurs", async () => {
