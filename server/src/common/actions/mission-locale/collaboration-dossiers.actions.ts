@@ -21,8 +21,6 @@ export interface CollaborationDossiersTerritoire {
   missionLocaleId?: ObjectId;
   /** Périmètre de la fiche CFA : tous les dossiers envoyés par ce CFA, quelle que soit la région de la ML. */
   organismeId?: ObjectId;
-  /** Régions de l'utilisateur (vide pour l'admin) : marque les CFA dont la fiche lui est accessible. */
-  perimetreRegions?: string[];
 }
 
 export interface CollaborationDossiersFilters {
@@ -192,15 +190,14 @@ const buildDelaiStages = (mlUserIds: ObjectId[]): Document[] => [
 
 const fetchStructures = async (
   organismeIds: ObjectId[],
-  missionLocaleIds: ObjectId[],
-  perimetreRegions: string[] = []
+  missionLocaleIds: ObjectId[]
 ): Promise<{ cfa: Map<string, ICollaborationDossierStructure>; ml: Map<string, ICollaborationDossierStructure> }> => {
   const [organismes, missionsLocales] = await Promise.all([
     organismeIds.length
       ? organismesDb()
           .find(
             { _id: { $in: organismeIds } },
-            { projection: { enseigne: 1, raison_sociale: 1, nom: 1, "adresse.commune": 1, "adresse.region": 1 } }
+            { projection: { enseigne: 1, raison_sociale: 1, nom: 1, "adresse.commune": 1 } }
           )
           .toArray()
       : [],
@@ -223,14 +220,11 @@ const fetchStructures = async (
     cfa: new Map(
       organismes.map((organisme): [string, ICollaborationDossierStructure] => [
         organisme._id.toString(),
-        {
-          ...toStructure(
-            organisme._id,
-            organisme.enseigne || organisme.raison_sociale || organisme.nom,
-            organisme.adresse?.commune
-          ),
-          dans_perimetre: perimetreRegions.length === 0 || perimetreRegions.includes(organisme.adresse?.region ?? ""),
-        },
+        toStructure(
+          organisme._id,
+          organisme.enseigne || organisme.raison_sociale || organisme.nom,
+          organisme.adresse?.commune
+        ),
       ])
     ),
     ml: new Map(
@@ -368,7 +362,7 @@ export async function listCollaborationDossiers(
         .then((data) => ({ total: [{ count: data.length }], data }));
 
   const rows = result?.data ?? [];
-  const structures = await fetchStructures(territoireOrganismeIds, missionLocaleIds, territoire.perimetreRegions);
+  const structures = await fetchStructures(territoireOrganismeIds, missionLocaleIds);
   const resultatOf = (situation: string | null) =>
     situation
       ? ((Object.entries(RESULTAT_SITUATIONS).find(([, situations]) =>

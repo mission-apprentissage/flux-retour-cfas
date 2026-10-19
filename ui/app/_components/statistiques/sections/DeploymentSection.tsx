@@ -7,7 +7,6 @@ import { TableSkeleton } from "@/app/_components/common/Skeleton";
 import { DeploymentRow } from "../cards/DeploymentRow";
 import { getVariationColorFromString } from "../constants";
 import { useDeploymentStats, useSyntheseRegionsStats } from "../hooks/useStatsQueries";
-import { useUserRegions } from "../hooks/useUserRegions";
 import { RegionTable } from "../tables/RegionTable";
 import { FranceMapSVG } from "../ui/FranceMapSVGLazy";
 import { PeriodSelector, type Period } from "../ui/PeriodSelector";
@@ -18,10 +17,9 @@ import { StatisticsSection } from "./StatisticsSection";
 
 interface DeploymentSectionProps {
   defaultPeriod?: Period;
-  isAdmin?: boolean;
 }
 
-export function DeploymentSection({ defaultPeriod = "30days", isAdmin = false }: DeploymentSectionProps) {
+export function DeploymentSection({ defaultPeriod = "30days" }: DeploymentSectionProps) {
   const [period, setPeriod] = useState<Period>(defaultPeriod);
 
   return (
@@ -31,7 +29,7 @@ export function DeploymentSection({ defaultPeriod = "30days", isAdmin = false }:
       controls={<PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />}
       controlsPosition="below-left"
     >
-      <DeploymentContent period={period} isAdmin={isAdmin} />
+      <DeploymentContent period={period} />
     </StatisticsSection>
   );
 }
@@ -39,12 +37,9 @@ export function DeploymentSection({ defaultPeriod = "30days", isAdmin = false }:
 interface DeploymentContentProps {
   period: Period;
   region?: string;
-  isAdmin?: boolean;
 }
 
-export function DeploymentContent({ period, region, isAdmin = false }: DeploymentContentProps) {
-  const { regions: userRegions } = useUserRegions();
-
+export function DeploymentContent({ period, region }: DeploymentContentProps) {
   const {
     data: deploymentData,
     isLoading: deploymentLoading,
@@ -134,7 +129,7 @@ export function DeploymentContent({ period, region, isAdmin = false }: Deploymen
           <RegionTable
             regions={regionalStats}
             loadingDeltas={loadingPercentage}
-            detailRegions={isAdmin ? regionalStats.map((stat) => stat.code) : userRegions}
+            detailRegions={regionalStats.map((stat) => stat.code)}
           />
         )}
       </div>

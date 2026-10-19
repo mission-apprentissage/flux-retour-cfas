@@ -68,7 +68,7 @@ export function VueEnsembleView({ isAdmin = false, isPublic = false }: VueEnsemb
           description="Retrouvez ici les chiffres des indicateurs principaux du déploiement et de l'activité des Missions Locales et des CFA sur le Tableau de bord de l'apprentissage sur le territoire de votre choix."
         />
         <RupturesOverviewSection />
-        <DeploymentOverviewSection isAdmin={isAdmin} />
+        <DeploymentOverviewSection />
         <CollaborationsOverviewSection />
         {isAdmin && <StatsTabs tabs={ADMIN_TABS} />}
       </div>

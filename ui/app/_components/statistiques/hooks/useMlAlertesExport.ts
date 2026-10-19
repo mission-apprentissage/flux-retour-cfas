@@ -4,7 +4,7 @@ import { mlAlertesExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 
 import { INDICATEURS_ML_BASE } from "./statsRoutes";
-import type { MlAlertesParams } from "./useStatsQueries";
+import { avecVueFrance, type MlAlertesParams } from "./useStatsQueries";
 import { useStatsXlsxExport } from "./useStatsXlsxExport";
 
 const PREFIXES: Record<MlAlerteListeType, string> = {
@@ -19,7 +19,7 @@ export function useMlAlertesExport(type: MlAlerteListeType, params: MlAlertesPar
     const { data } = await _get<{ data: IMlAlerteListeRow[] }>(
       `${INDICATEURS_ML_BASE}/stats/ml/alertes/${type}/export`,
       {
-        params,
+        params: avecVueFrance(params),
       }
     );
     return data.map((row) => ({

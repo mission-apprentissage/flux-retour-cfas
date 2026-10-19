@@ -33,6 +33,11 @@ const expectForbidden = (response: { status: number; data: { error: string; mess
   expect(response.data).toEqual({ error: "Forbidden", message });
 };
 
+const expectBadRequest = (response: { status: number; data: { message: string } }, message: string) => {
+  expect(response.status).toBe(400);
+  expect(response.data.message).toBe(message);
+};
+
 const ML_IDF = new ObjectId();
 const ML_ARA = new ObjectId();
 const ML_HDF = new ObjectId();
@@ -592,7 +597,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect((await requestAsOrganisation(ADMIN, "get", url("inconnu"))).status).toBe(400);
     });
 
-    it("Limite les ARML, DREETS et DDETS à leur territoire", async () => {
+    it("Ouvre les alertes de toutes les régions, par défaut sur le territoire de l'utilisateur", async () => {
       const nomsPour = async (organisation: IOrganisationCreate, query = "") => {
         const response = await requestAsOrganisation(organisation, "get", url("non_engagee", query));
         expect(response.status).toBe(200);
@@ -605,10 +610,8 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(await nomsPour(DDETS_PARIS)).toEqual([]);
 
       for (const organisation of [DREETS_IDF, DDETS_PARIS, ARML_IDF]) {
-        expectForbidden(
-          await requestAsOrganisation(organisation, "get", url("non_engagee", "region=84")),
-          "Accès non autorisé à cette région"
-        );
+        expect(await nomsPour(organisation, "region=84")).toEqual(["ML ARA"]);
+        expect(await nomsPour(organisation, "national=true")).toContain("ML ARA");
       }
       const exportArml = await requestAsOrganisation(ARML_IDF_ARA, "get", url("non_engagee/export"));
       expect(exportArml.data.data.map((ml: { nom: string }) => ml.nom)).toEqual(["ML ARA"]);
@@ -701,15 +704,21 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(await noms("engagee=false&utilise_service=true")).toEqual([]);
     });
 
-    it("Refuse un département hors périmètre ou inconnu", async () => {
-      for (const departements of ["69", "XX"]) {
-        expectForbidden(
+    it("Accepte un département d'une autre région et refuse un département inconnu", async () => {
+      const autreRegion = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/traitement/ml?region=84&departements=69"
+      );
+      expect(autreRegion.status).toBe(200);
+      for (const departements of ["XX"]) {
+        expectBadRequest(
           await requestAsOrganisation(
             DREETS_IDF,
             "get",
             `/api/v1/organisation/indicateurs-ml/stats/traitement/ml?departements=${departements}`
           ),
-          "Accès non autorisé à ce département"
+          "Département inconnu"
         );
       }
     });
@@ -749,7 +758,39 @@ describe("Indicateurs ML routes (territoriales)", () => {
   });
 
   describe("périmètre territorial", () => {
-    it("Une ARML ne voit que sa région et ne peut pas en demander une autre", async () => {
+    it("Ouvre la fiche d'une ML hors territoire sans son équipe ni sa liste nominative", async () => {
+      for (const organisation of [DREETS_IDF, DDETS_PARIS, ARML_IDF]) {
+        const fiche = await requestAsOrganisation(
+          organisation,
+          "get",
+          `/api/v1/organisation/indicateurs-ml/mission-locale/${ML_ARA}/detail`
+        );
+        expect(fiche.status).toBe(200);
+        expect(fiche.data.peut_voir_nominatif).toBe(false);
+        expectForbidden(
+          await requestAsOrganisation(
+            organisation,
+            "get",
+            `/api/v1/organisation/indicateurs-ml/mission-locale/${ML_ARA}/membres`
+          ),
+          "Accès non autorisé à l'équipe de cette Mission Locale"
+        );
+        const liste = await requestAsOrganisation(
+          organisation,
+          "get",
+          `/api/v1/organisation/indicateurs-ml/stats/collaborations/dossiers?ml_id=${ML_ARA}`
+        );
+        expect(liste.status).toBe(403);
+      }
+      const dreetsDansRegion = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        `/api/v1/organisation/indicateurs-ml/mission-locale/${ML_IDF}/detail`
+      );
+      expect(dreetsDansRegion.data.peut_voir_nominatif).toBe(true);
+    });
+
+    it("Une ARML voit sa région par défaut et peut en demander une autre", async () => {
       const own = await requestAsOrganisation(ARML_IDF, "get", "/api/v1/organisation/indicateurs-ml/stats/rupturants");
       expect(own.status).toBe(200);
       expect(own.data.summary.total).toBe(60);
@@ -759,7 +800,8 @@ describe("Indicateurs ML routes (territoriales)", () => {
         "get",
         "/api/v1/organisation/indicateurs-ml/stats/rupturants?region=84"
       );
-      expectForbidden(other, "Accès non autorisé à cette région");
+      expect(other.status).toBe(200);
+      expect(other.data.summary.total).not.toBe(60);
     });
 
     it("Refuse une organisation territoriale sans périmètre au lieu de lui ouvrir le national", async () => {
@@ -771,7 +813,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expectForbidden(response, "Aucun périmètre territorial n'est rattaché à votre organisation");
     });
 
-    it("Restreint chaque lecteur au périmètre de l'ARML, avec ou sans paramètre", async () => {
+    it("Limite par défaut chaque lecteur au périmètre de l'ARML, et ouvre les autres régions sur demande", async () => {
       await insertCfaRegions();
       const scoped: Array<[string, (data: Record<string, unknown>) => unknown, unknown]> = [
         ["/traitement", (d) => (d.latest as { total: number }).total, 60],
@@ -795,17 +837,24 @@ describe("Indicateurs ML routes (territoriales)", () => {
           "get",
           `/api/v1/organisation/indicateurs-ml${path}?region=84`
         );
-        expectForbidden(other, "Accès non autorisé à cette région");
+        expect(other.status, path).toBe(200);
       }
 
-      for (const path of ["detail", "membres"]) {
-        const other = await requestAsOrganisation(
+      const fiche = await requestAsOrganisation(
+        ARML_IDF,
+        "get",
+        `/api/v1/organisation/indicateurs-ml/mission-locale/${ML_ARA}/detail`
+      );
+      expect(fiche.status).toBe(200);
+      expect(fiche.data.peut_voir_nominatif).toBe(false);
+      expectForbidden(
+        await requestAsOrganisation(
           ARML_IDF,
           "get",
-          `/api/v1/organisation/indicateurs-ml/mission-locale/${ML_ARA}/${path}`
-        );
-        expectForbidden(other, "Accès non autorisé à cette Mission Locale");
-      }
+          `/api/v1/organisation/indicateurs-ml/mission-locale/${ML_ARA}/membres`
+        ),
+        "Accès non autorisé à l'équipe de cette Mission Locale"
+      );
 
       for (const path of ["/stats/whatsapp", "/stats/prequalif"]) {
         const response = await requestAsOrganisation(ARML_IDF, "get", `/api/v1/organisation/indicateurs-ml${path}`);
@@ -881,8 +930,8 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(national.data.summary).toMatchObject({ activatedMlCount: 4, previousActivatedMlCount: 4 });
     });
 
-    it("Refuse à une DREETS une autre région", async () => {
-      expectForbidden(await deployment(DREETS_IDF, "?region=84"), "Accès non autorisé à cette région");
+    it("Ouvre à une DREETS les autres régions", async () => {
+      expect((await deployment(DREETS_IDF, "?region=84")).status).toBe(200);
     });
 
     it("Un admin peut cibler n'importe quelle région", async () => {
@@ -939,15 +988,16 @@ describe("Indicateurs ML routes (territoriales)", () => {
       ]);
     });
 
-    it("Refuse une région hors périmètre et exige une région", async () => {
-      expectForbidden(
-        await requestAsOrganisation(
-          DREETS_IDF,
-          "get",
-          "/api/v1/organisation/indicateurs-ml/stats/couverture-departements?region=84"
-        ),
-        "Accès non autorisé à cette région"
-      );
+    it("Ouvre toutes les régions et exige une région", async () => {
+      expect(
+        (
+          await requestAsOrganisation(
+            DREETS_IDF,
+            "get",
+            "/api/v1/organisation/indicateurs-ml/stats/couverture-departements?region=84"
+          )
+        ).status
+      ).toBe(200);
       const sansRegion = await requestAsOrganisation(
         DREETS_IDF,
         "get",
@@ -996,7 +1046,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       });
     });
 
-    it("Ouvre le national et refuse une autre région", async () => {
+    it("Ouvre le national et les autres régions", async () => {
       const national = await requestAsOrganisation(
         DREETS_IDF,
         "get",
@@ -1004,14 +1054,15 @@ describe("Indicateurs ML routes (territoriales)", () => {
       );
       expect(national.data).toMatchObject({ estimation: 3, avec_compte: 2, avec_collaboration: { current: 2 } });
 
-      expectForbidden(
-        await requestAsOrganisation(
-          DREETS_IDF,
-          "get",
-          "/api/v1/organisation/indicateurs-ml/stats/cfa/adoption?region=84"
-        ),
-        "Accès non autorisé à cette région"
-      );
+      expect(
+        (
+          await requestAsOrganisation(
+            DREETS_IDF,
+            "get",
+            "/api/v1/organisation/indicateurs-ml/stats/cfa/adoption?region=84"
+          )
+        ).status
+      ).toBe(200);
     });
   });
 
@@ -1161,19 +1212,13 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(noms(aucune)).toEqual(["Gamma"]);
     });
 
-    it("Pagine, refuse un territoire hors périmètre et exporte sans pagination", async () => {
+    it("Pagine, ouvre les autres territoires et exporte sans pagination", async () => {
       const page2 = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?limit=2&page=2`);
       expect(noms(page2)).toEqual(["Gamma"]);
       expect(page2.data.pagination.totalPages).toBe(2);
 
-      expectForbidden(
-        await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`),
-        "Accès non autorisé à cette région"
-      );
-      expectForbidden(
-        await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?departements=69`),
-        "Accès non autorisé à ce département"
-      );
+      expect((await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`)).status).toBe(200);
+      expect((await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?departements=69`)).status).toBe(200);
 
       const exportAdmin = await requestAsOrganisation(ADMIN, "get", `${BASE}/export?sort_by=nom&sort_order=asc`);
       expect(exportAdmin.status).toBe(200);
@@ -1182,7 +1227,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
   });
 
   describe("GET /stats/cfa/invites-sans-collab", () => {
-    it("Limite les alertes à la région de la DREETS et refuse une autre région", async () => {
+    it("Limite par défaut les alertes à la région de la DREETS et ouvre les autres régions", async () => {
       const BASE = "/api/v1/organisation/indicateurs-ml/stats/cfa/invites-sans-collab";
       await organismesDb().insertMany(
         [
@@ -1225,10 +1270,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       const exportAdmin = await requestAsOrganisation(ADMIN, "get", `${BASE}/export`);
       expect(exportAdmin.data.data).toHaveLength(2);
 
-      expectForbidden(
-        await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`),
-        "Accès non autorisé à cette région"
-      );
+      expect((await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`)).status).toBe(200);
     });
   });
 
@@ -1291,10 +1333,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       });
       expect(mois.find((row) => row.mois === monthKey(now))).toMatchObject({ envoyes: 1, contactes: 0, acceptes: 0 });
 
-      expectForbidden(
-        await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`),
-        "Accès non autorisé à cette région"
-      );
+      expect((await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`)).status).toBe(200);
     });
   });
 
@@ -1396,10 +1435,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       const exportResponse = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}/export`);
       expect(exportResponse.data.data).toHaveLength(1);
 
-      expectForbidden(
-        await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`),
-        "Accès non autorisé à cette région"
-      );
+      expect((await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`)).status).toBe(200);
     });
   });
 
@@ -1555,6 +1591,19 @@ describe("Indicateurs ML routes (territoriales)", () => {
         await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`),
         "Accès non autorisé à cette région"
       );
+      expectForbidden(
+        await requestAsOrganisation(DDETS_PARIS, "get", `${BASE}?region=11&departements=75,77`),
+        "Accès non autorisé à ce département"
+      );
+      expectForbidden(
+        await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?departements=69`),
+        "Accès non autorisé à ce département"
+      );
+      expectBadRequest(await requestAsOrganisation(ADMIN, "get", `${BASE}?departements=XX`), "Département inconnu");
+      const territoire = await requestAsOrganisation(DREETS_IDF, "get", BASE);
+      const mlHorsRegion = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?ml_ids=${ML_ARA}`);
+      expect(mlHorsRegion.status).toBe(200);
+      expect(mlHorsRegion.data.total).toBeLessThanOrEqual(territoire.data.total);
     });
 
     it("Journalise l'export nominatif", async () => {
@@ -1635,13 +1684,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
         expect(
           response.data.data.every((row: { mission_locale: { id: string } }) => row.mission_locale.id === `${ML_IDF}`)
         ).toBe(true);
-        const perimetre = (row: { cfa: { nom: string; dans_perimetre: boolean } }) =>
-          `${row.cfa.nom}:${row.cfa.dans_perimetre}`;
-        expect([...new Set(response.data.data.map(perimetre))].sort()).toEqual([
-          "CFA A:true",
-          "CFA B:false",
-          "Lycée Eiffel:true",
-        ]);
+        expect(response.data.data.every((row: { cfa: object }) => !("dans_perimetre" in row.cfa))).toBe(true);
       });
 
       it("Limite la DDETS aux ML de son département et refuse l'ARML et les ML hors région", async () => {
@@ -1711,12 +1754,12 @@ describe("Indicateurs ML routes (territoriales)", () => {
       await organisationsDb().updateOne({ _id: ML_IDF }, { $set: { "adresse.commune": "Créteil" } });
     });
 
-    it("Renvoie les CFA du référentiel de la région avec leurs indicateurs, sans les CFA fermés ni d'autres régions", async () => {
+    it("Renvoie les CFA du référentiel de toutes les régions avec leurs indicateurs, sans les CFA fermés", async () => {
       const response = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?q=tech`);
 
       expect(response.status).toBe(200);
-      expect(response.data.total).toBe(1);
-      expect(response.data.data[0]).toMatchObject({
+      expect(response.data.total).toBe(2);
+      expect(response.data.data.find((row: { id: string }) => row.id === CFA_A.toString())).toMatchObject({
         type: "cfa",
         id: CFA_A.toString(),
         nom: "Campus Tech",
@@ -2126,7 +2169,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       });
     });
 
-    it("Refuse l'équipe à l'ARML, à la DDETS hors département et hors région", async () => {
+    it("Refuse l'équipe à l'ARML, à la DDETS hors département et à la DREETS hors région", async () => {
       const membres = (id: ObjectId) => `/api/v1/organisation/indicateurs-ml/cfa/${id}/membres`;
       expectForbidden(
         await requestAsOrganisation(ARML_IDF, "get", membres(CFA_A)),
@@ -2139,7 +2182,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect((await requestAsOrganisation(DDETS_PARIS, "get", membres(CFA_A))).status).toBe(200);
       expectForbidden(
         await requestAsOrganisation(DREETS_IDF, "get", membres(CFA_B)),
-        "Accès non autorisé à cet organisme"
+        "Accès non autorisé à l'équipe de cet organisme"
       );
       const sansOrganisation = await requestAsOrganisation(ADMIN, "get", membres(CFA_SANS_COMPTE));
       expect(sansOrganisation.data).toEqual([]);
@@ -2224,7 +2267,6 @@ describe("Indicateurs ML routes (territoriales)", () => {
           expect.objectContaining({
             mission_locale_id: ML_ARA.toString(),
             nom: "ML ARA",
-            dans_perimetre: false,
             utilise_service: true,
             envoyees: 2,
             a_traiter: 0,
@@ -2233,24 +2275,21 @@ describe("Indicateurs ML routes (territoriales)", () => {
           }),
           expect.objectContaining({
             mission_locale_id: ML_IDF.toString(),
-            dans_perimetre: true,
             envoyees: 2,
             a_traiter: 2,
             traitees: 0,
           }),
         ]);
-        expectForbidden(
-          await requestAsOrganisation(
-            DREETS_IDF,
-            "get",
-            `/api/v1/organisation/indicateurs-ml/cfa/${CFA_B}/collaborations`
-          ),
-          "Accès non autorisé à cet organisme"
+        const horsRegion = await requestAsOrganisation(
+          DREETS_IDF,
+          "get",
+          `/api/v1/organisation/indicateurs-ml/cfa/${CFA_B}/collaborations`
         );
+        expect(horsRegion.status).toBe(200);
       });
     });
 
-    it("Masque le nominatif à l'ARML et à la DDETS hors de son département, refuse hors région", async () => {
+    it("Ouvre la fiche à tous et masque le nominatif à l'ARML, à la DDETS hors département et à la DREETS hors région", async () => {
       const arml = await requestAsOrganisation(ARML_IDF, "get", url(CFA_A));
       expect(arml.status).toBe(200);
       expect(arml.data).toMatchObject({
@@ -2264,7 +2303,14 @@ describe("Indicateurs ML routes (territoriales)", () => {
       const ddetsHorsDepartement = await requestAsOrganisation(DDETS_PARIS, "get", url(CFA_77));
       expect(ddetsHorsDepartement.data).toMatchObject({ peut_voir_nominatif: false, contact_referent: null });
 
-      expectForbidden(await requestAsOrganisation(DREETS_IDF, "get", url(CFA_B)), "Accès non autorisé à cet organisme");
+      const dreetsHorsRegion = await requestAsOrganisation(DREETS_IDF, "get", url(CFA_B));
+      expect(dreetsHorsRegion.status).toBe(200);
+      expect(dreetsHorsRegion.data).toMatchObject({
+        peut_voir_nominatif: false,
+        contact_referent: null,
+        courriels_referentiel: [],
+      });
+      expect((await requestAsOrganisation(DREETS_IDF, "get", url(CFA_A))).data.peut_voir_nominatif).toBe(true);
       expect((await requestAsOrganisation(ADMIN, "get", url(new ObjectId()))).status).toBe(404);
     });
   });
@@ -2318,18 +2364,16 @@ describe("Indicateurs ML routes (territoriales)", () => {
           commune: "Paris",
           adresse: "1 rue Test 75011 Paris",
           collaborations: 2,
-          dans_perimetre: true,
+          organisme_connu: true,
         },
         expect.objectContaining({
           organisme_id: CFA_B.toString(),
           nom: "Campus Alpha",
           uai: null,
           collaborations: 1,
-          dans_perimetre: false,
+          organisme_connu: true,
         }),
       ]);
-      const admin = await requestAsOrganisation(ADMIN, "get", url(`ml_id=${ML_IDF}`));
-      expect(admin.data.data.map((row: { dans_perimetre: boolean }) => row.dans_perimetre)).toEqual([true, true]);
     });
 
     it("Trie et pagine", async () => {
@@ -2345,12 +2389,10 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(localisation.data.data.map((row: { commune: string }) => row.commune)).toEqual(["Lyon", "Paris"]);
     });
 
-    it("Exige une Mission Locale du périmètre", async () => {
+    it("Exige une Mission Locale existante, quelle que soit sa région", async () => {
       expect((await requestAsOrganisation(ADMIN, "get", url(""))).status).toBe(400);
-      expectForbidden(
-        await requestAsOrganisation(ARML_IDF, "get", url(`ml_id=${ML_ARA}`)),
-        "Accès non autorisé à cette Mission Locale"
-      );
+      expect((await requestAsOrganisation(ARML_IDF, "get", url(`ml_id=${ML_ARA}`))).status).toBe(200);
+      expect((await requestAsOrganisation(ARML_IDF, "get", url(`ml_id=${new ObjectId()}`))).status).toBe(404);
     });
   });
 
@@ -2448,7 +2490,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(total).toBe(4);
     });
 
-    it("Scope par région pour une ARML et par ml_id vérifié", async () => {
+    it("Scope par région pour une ARML et par ml_id existant, quelle que soit sa région", async () => {
       await insertCfaRegions();
       const region = await requestAsOrganisation(
         ARML_IDF,
@@ -2464,14 +2506,14 @@ describe("Indicateurs ML routes (territoriales)", () => {
         "get",
         `/api/v1/organisation/indicateurs-ml/stats/collaborations?ml_id=${ML_ARA}`
       );
-      expectForbidden(otherMl, "Accès non autorisé à cette Mission Locale");
+      expect(otherMl.status).toBe(200);
 
       const mlSansRegion = await requestAsOrganisation(
         ARML_IDF,
         "get",
         `/api/v1/organisation/indicateurs-ml/stats/collaborations?ml_id=${ML_SANS_REGION}`
       );
-      expectForbidden(mlSansRegion, "Accès non autorisé à cette Mission Locale");
+      expect(mlSansRegion.status).toBe(200);
 
       const adminSansRegion = await requestAsOrganisation(
         ADMIN,
@@ -2484,13 +2526,13 @@ describe("Indicateurs ML routes (territoriales)", () => {
   });
 
   describe("GET /stats/traitement/export", () => {
-    it("Refuse un ml_id hors région et renvoie les feuilles par segment", async () => {
-      const forbidden = await requestAsOrganisation(
+    it("Accepte un ml_id hors région et renvoie les feuilles par segment", async () => {
+      const horsRegion = await requestAsOrganisation(
         ARML_IDF,
         "get",
         `/api/v1/organisation/indicateurs-ml/stats/traitement/export?ml_id=${ML_ARA}`
       );
-      expectForbidden(forbidden, "Accès non autorisé à cette Mission Locale");
+      expect(horsRegion.status).toBe(200);
 
       const response = await requestAsOrganisation(
         ADMIN,

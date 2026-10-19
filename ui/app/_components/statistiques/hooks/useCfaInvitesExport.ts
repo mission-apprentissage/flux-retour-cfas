@@ -4,14 +4,14 @@ import { cfaInvitesSansCollabExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 
 import { INDICATEURS_ML_BASE } from "./statsRoutes";
-import type { CfaInvitesParams } from "./useStatsQueries";
+import { avecVueFrance, type CfaInvitesParams } from "./useStatsQueries";
 import { useStatsXlsxExport } from "./useStatsXlsxExport";
 
 export function useCfaInvitesExport(params: CfaInvitesParams) {
   return useStatsXlsxExport("CFA-invites-sans-collaboration", cfaInvitesSansCollabExportColumns, async () => {
     const { data } = await _get<{ data: ICfaInviteSansCollabRow[] }>(
       `${INDICATEURS_ML_BASE}/stats/cfa/invites-sans-collab/export`,
-      { params }
+      { params: avecVueFrance(params) }
     );
     return data.map((row) => ({
       raison_sociale: row.raison_sociale ?? "",

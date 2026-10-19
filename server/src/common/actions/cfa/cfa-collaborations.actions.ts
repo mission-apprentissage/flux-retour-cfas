@@ -271,7 +271,6 @@ const ML_COMPARATORS: Record<CfaCollabMlSortBy, (a: ICfaCollabMlRow, b: ICfaColl
 
 export async function listCfaCollaborationsParMl(
   organismeId: ObjectId,
-  userRegions: string[],
   options: { page: number; limit: number; sort_by: CfaCollabMlSortBy; sort_order: "asc" | "desc" },
   now: Date = new Date()
 ): Promise<ICfaCollabMlResponse> {
@@ -295,12 +294,12 @@ export async function listCfaCollaborationsParMl(
   const missionsLocales = await organisationsDb()
     .find(
       { _id: { $in: groupes.map((groupe) => groupe._id) } },
-      { projection: { nom: 1, "adresse.code_postal": 1, "adresse.commune": 1, "adresse.region": 1, activated_at: 1 } }
+      { projection: { nom: 1, "adresse.code_postal": 1, "adresse.commune": 1, activated_at: 1 } }
     )
     .toArray();
   type MlProjection = {
     nom?: string;
-    adresse?: { code_postal?: string; commune?: string; region?: string };
+    adresse?: { code_postal?: string; commune?: string };
     activated_at?: Date;
   };
   const mlById = new Map(missionsLocales.map((ml) => [ml._id.toString(), ml as MlProjection]));
@@ -313,7 +312,6 @@ export async function listCfaCollaborationsParMl(
       code_postal: ml?.adresse?.code_postal ?? null,
       commune: ml?.adresse?.commune ?? null,
       utilise_service: Boolean(ml?.activated_at),
-      dans_perimetre: userRegions.length === 0 || userRegions.includes(ml?.adresse?.region ?? ""),
       envoyees: groupe.envoyees,
       a_traiter: groupe.a_traiter,
       a_recontacter: groupe.a_recontacter,

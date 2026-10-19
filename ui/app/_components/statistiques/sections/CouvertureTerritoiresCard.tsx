@@ -17,7 +17,7 @@ import styles from "./CouvertureTerritoiresCard.module.css";
 import { ExportAllButton } from "./ExportAllButton";
 import { SUIVI_TRAITEMENT_ML_ANCHOR } from "./SuiviTraitementMLCard";
 
-export function CouvertureTerritoiresCard({ isAdmin = false }: { isAdmin?: boolean }) {
+export function CouvertureTerritoiresCard() {
   const { period, region, scope } = useStatsFilters();
 
   return (
@@ -28,7 +28,7 @@ export function CouvertureTerritoiresCard({ isAdmin = false }: { isAdmin?: boole
       {region ? (
         <CouvertureDepartements period={period} region={region} />
       ) : (
-        <CouvertureRegionsContent period={period} isAdmin={isAdmin} national />
+        <CouvertureRegionsContent period={period} national />
       )}
     </OverviewCard>
   );

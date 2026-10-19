@@ -21,4 +21,5 @@ export function isAdminUser(user: AuthContext | null): boolean {
 
 export const ADMIN_DEFAULT_REGION_CODE = "84";
 
-export const ADMIN_REGION_CODES = REGIONS_WITH_SVG_SORTED.map((region) => region.code);
+/** Toutes les régions : les chiffres agrégés sont ouverts à tous les profils, quel que soit leur territoire. */
+export const TOUTES_REGIONS_CODES = REGIONS_WITH_SVG_SORTED.map((region) => region.code);

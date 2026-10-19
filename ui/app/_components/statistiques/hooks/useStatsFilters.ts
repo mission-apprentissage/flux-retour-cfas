@@ -3,7 +3,7 @@ import { useCallback, useMemo } from "react";
 import { zStatsPeriod, type StatsPeriod } from "shared/models/data/nationalStats.model";
 
 import { useAuth } from "@/app/_context/UserContext";
-import { ADMIN_REGION_CODES, isAdminUser } from "@/app/suivi-des-indicateurs/access";
+import { isAdminUser, TOUTES_REGIONS_CODES } from "@/app/suivi-des-indicateurs/access";
 
 import { getRegionLabel } from "../utils";
 
@@ -38,15 +38,14 @@ export function useStatsFilters() {
   const { regions: ownRegions, isLoading } = useUserRegions();
 
   const isAdmin = isAdminUser(user ?? null);
-  const allowedRegions = isAdmin ? ADMIN_REGION_CODES : ownRegions;
   const defaultTerritoire = !isAdmin && ownRegions.length === 1 ? ownRegions[0] : TERRITOIRE_FRANCE;
 
   const territoireOptions = useMemo<TerritoireOption[]>(
     () => [
       { value: TERRITOIRE_FRANCE, label: "France" },
-      ...allowedRegions.map((code) => ({ value: code, label: getRegionLabel(code) })),
+      ...TOUTES_REGIONS_CODES.map((code) => ({ value: code, label: getRegionLabel(code) })),
     ],
-    [allowedRegions]
+    []
   );
 
   const parsedPeriod = zStatsPeriod.safeParse(searchParams?.get("periode"));

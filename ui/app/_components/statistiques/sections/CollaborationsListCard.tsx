@@ -30,7 +30,7 @@ import {
 import { StatsTablePagination } from "../tables/StatsTablePagination";
 import { ChecklistFilter } from "../ui/ChecklistFilter";
 import { DateRangeFilter } from "../ui/DateRangeFilter";
-import { NotePerimetre } from "../ui/NotePerimetre";
+import { NotePerimetre, usePerimetreNominatif } from "../ui/NotePerimetre";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 import { TerritoireFilter, useSelectedDepartements } from "../ui/TerritoireFilter";
 
@@ -67,7 +67,10 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
   const { user } = useAuth();
   const isDdets = user?.organisation?.type === ORGANISATION_TYPE.DDETS;
   const { filters, setList, setPeriode } = useCollabDossiersFilters();
-  const selectedDepartements = useSelectedDepartements(filters.departements);
+  const perimetre = usePerimetreNominatif();
+  const listeTerritoire = !mlId && !cfaId;
+  const horsPerimetre = listeTerritoire && !!region && !!perimetre.regions && !perimetre.regions.includes(region);
+  const selectedDepartements = useSelectedDepartements(filters.departements, perimetre.regions);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [limit, setLimit] = useState(10);
@@ -100,11 +103,10 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
     };
   }, [mlId, cfaId, region, search, isDdets, selectedDepartements, filters]);
   const [page, setPage] = usePageForParams(params);
-  const { data, isLoading, isFetching, isPlaceholderData, error } = useCollaborationDossiers({
-    ...params,
-    page,
-    limit,
-  });
+  const { data, isLoading, isFetching, isPlaceholderData, error } = useCollaborationDossiers(
+    { ...params, page, limit },
+    !horsPerimetre
+  );
   const exporter = useCollabDossiersExport(params);
   const provenanceCfa: Record<string, string> | null = cfaId
     ? null
@@ -123,12 +125,14 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
       }
       actions={
         <>
-          {data && <span className={filterStyles.count}>{data.total.toLocaleString("fr-FR")} dossiers</span>}
+          {data && !horsPerimetre && (
+            <span className={filterStyles.count}>{data.total.toLocaleString("fr-FR")} dossiers</span>
+          )}
           <Button
             iconId="fr-icon-download-line"
             iconPosition="right"
             onClick={exporter.exportData}
-            disabled={exporter.isExporting || !data?.total}
+            disabled={horsPerimetre || exporter.isExporting || !data?.total}
           >
             {exporter.isExporting ? "Export en cours..." : "Exporter les données"}
           </Button>
@@ -167,15 +171,7 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
         }}
         className={filterStyles.search}
       />
-      {!mlId && !cfaId && (
-        <NotePerimetre
-          territoire={
-            isDdets
-              ? `département ${(user?.organisation as { code_departement?: string } | undefined)?.code_departement ?? ""}`
-              : undefined
-          }
-        />
-      )}
+      {listeTerritoire && !horsPerimetre && (!region || isDdets) && <NotePerimetre />}
       <div className={filterStyles.filters}>
         <span className={filterStyles.filtersLabel}>Filtrer</span>
         <DateRangeFilter
@@ -185,7 +181,11 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
           emptyLabel="Janv. 2026 - aujourd'hui"
         />
         {!isDdets && !mlId && !cfaId && (
-          <TerritoireFilter departements={filters.departements} onChange={(codes) => setList("departements", codes)} />
+          <TerritoireFilter
+            departements={filters.departements}
+            onChange={(codes) => setList("departements", codes)}
+            perimetre={perimetre.regions}
+          />
         )}
         <ChecklistFilter
           label="Statut de collaboration"
@@ -247,29 +247,35 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
           getDisplayText={countLabel("Résultat contact jeune")}
         />
       </div>
-      <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
-        {isLoading || (isFetching && isPlaceholderData) ? (
-          <TableSkeleton rows={limit} />
-        ) : !data?.data.length ? (
-          <p className={styles.empty}>Aucun dossier de collaboration ne correspond à ces critères.</p>
-        ) : (
-          <>
-            <ul className={`fr-raw-list ${styles.list}`}>
-              {data.data.map((dossier) => (
-                <CollaborationDossierItem key={dossier.id} dossier={dossier} provenanceCfa={provenanceCfa} />
-              ))}
-            </ul>
-            <StatsTablePagination
-              page={page}
-              totalPages={data.pagination.total_pages}
-              onPageChange={setPage}
-              limit={limit}
-              onLimitChange={setLimit}
-              label="dossiers de collaboration"
-            />
-          </>
-        )}
-      </StatsErrorHandler>
+      {horsPerimetre ? (
+        <p className={styles.empty}>
+          La liste détaillée des collaborations est limitée à votre territoire : {perimetre.label}.
+        </p>
+      ) : (
+        <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
+          {isLoading || (isFetching && isPlaceholderData) ? (
+            <TableSkeleton rows={limit} />
+          ) : !data?.data.length ? (
+            <p className={styles.empty}>Aucun dossier de collaboration ne correspond à ces critères.</p>
+          ) : (
+            <>
+              <ul className={`fr-raw-list ${styles.list}`}>
+                {data.data.map((dossier) => (
+                  <CollaborationDossierItem key={dossier.id} dossier={dossier} provenanceCfa={provenanceCfa} />
+                ))}
+              </ul>
+              <StatsTablePagination
+                page={page}
+                totalPages={data.pagination.total_pages}
+                onPageChange={setPage}
+                limit={limit}
+                onLimitChange={setLimit}
+                label="dossiers de collaboration"
+              />
+            </>
+          )}
+        </StatsErrorHandler>
+      )}
     </OverviewCard>
   );
 }

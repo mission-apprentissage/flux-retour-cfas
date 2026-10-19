@@ -6,15 +6,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { RECHERCHE_LONGUEUR_MIN } from "shared/models/data/nationalStats.model";
 
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
-import { useAuth } from "@/app/_context/UserContext";
-import { isAdminUser } from "@/app/suivi-des-indicateurs/access";
 
 import { usePageForParams } from "../hooks/usePageForParams";
 import { useRechercheEtablissements } from "../hooks/useStatsQueries";
-import { useUserRegions } from "../hooks/useUserRegions";
 import { StatsTablePagination } from "../tables/StatsTablePagination";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
-import { getRegionLabel } from "../utils";
 
 import styles from "./RechercheEtablissements.module.css";
 import { RechercheResultatCard } from "./RechercheResultatCard";
@@ -28,9 +24,6 @@ export function RechercheEtablissements() {
   const termeEcritRef = useRef(terme);
   const [limit, setLimit] = useState(10);
   const [page, setPage] = usePageForParams({ terme, limit });
-  const { user } = useAuth();
-  const { regions } = useUserRegions();
-  const perimetre = !isAdminUser(user ?? null) && regions.length ? regions.map(getRegionLabel).join(", ") : null;
 
   const lancer = useCallback(
     (valeur: string) => {
@@ -92,7 +85,6 @@ export function RechercheEtablissements() {
             />
           )}
         />
-        {perimetre && <p className={styles.perimetre}>Recherche limitée à votre territoire : {perimetre}.</p>}
         {tropCourt && (
           <p className={styles.perimetre}>
             Saisissez au moins {RECHERCHE_LONGUEUR_MIN} caractères pour lancer la recherche.

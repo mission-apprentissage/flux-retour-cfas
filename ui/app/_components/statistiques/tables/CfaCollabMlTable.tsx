@@ -77,7 +77,7 @@ export function CfaCollabMlTable({ organismeId }: { organismeId: string }) {
                         N&apos;utilise pas le service
                       </Badge>
                     )}
-                    {row.dans_perimetre && (
+                    {row.mission_locale_id && (
                       <Link
                         href={`/suivi-des-indicateurs/mission-locale/${row.mission_locale_id}?from=cfa&cfa_id=${organismeId}`}
                         className="fr-link fr-link--sm fr-link--icon-right fr-icon-arrow-right-line"

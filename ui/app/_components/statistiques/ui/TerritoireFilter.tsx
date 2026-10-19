@@ -9,22 +9,27 @@ import { ChecklistFilter } from "./ChecklistFilter";
 
 const departementsOf = (regionCode: string) => DEPARTEMENTS.filter((d) => d.region.code === regionCode);
 
-/** Options du filtre : départements de la région de l'en-tête, sinon régions accessibles (dépliées en départements). */
-function useTerritoireOptions() {
+/**
+ * Options du filtre : départements de la région de l'en-tête, sinon régions (dépliées en départements),
+ * limitées à `perimetre` quand il est fourni (liste nominative).
+ */
+function useTerritoireOptions(perimetre?: string[] | null) {
   const { region, territoireOptions } = useStatsFilters();
   return useMemo(
     () =>
       region
         ? departementsOf(region).map((d) => ({ value: d.code, label: `${d.nom} (${d.code})` }))
-        : territoireOptions.filter((option) => option.value !== "france"),
-    [region, territoireOptions]
+        : territoireOptions.filter(
+            (option) => option.value !== "france" && (!perimetre || perimetre.includes(option.value))
+          ),
+    [region, territoireOptions, perimetre]
   );
 }
 
 /** Départements de l'URL restreints au territoire de l'en-tête. */
-export function useSelectedDepartements(departements: string[] | undefined) {
+export function useSelectedDepartements(departements: string[] | undefined, perimetre?: string[] | null) {
   const { region } = useStatsFilters();
-  const options = useTerritoireOptions();
+  const options = useTerritoireOptions(perimetre);
   return useMemo(() => {
     const allowed = new Set<string>(
       region ? options.map((o) => o.value) : options.flatMap((o) => departementsOf(o.value).map((d) => d.code))
@@ -36,13 +41,15 @@ export function useSelectedDepartements(departements: string[] | undefined) {
 export function TerritoireFilter({
   departements,
   onChange,
+  perimetre,
 }: {
   departements: string[] | undefined;
   onChange: (codes: string[]) => void;
+  perimetre?: string[] | null;
 }) {
   const { region, territoireLabel } = useStatsFilters();
-  const options = useTerritoireOptions();
-  const selectedDepartements = useSelectedDepartements(departements);
+  const options = useTerritoireOptions(perimetre);
+  const selectedDepartements = useSelectedDepartements(departements, perimetre);
 
   const value = region
     ? selectedDepartements

@@ -163,11 +163,15 @@ export interface TraitementMLParams {
   engagee?: boolean;
 }
 
+/** Listes de structures : sans région, la vue France couvre tout le pays (le serveur retomberait sinon sur le territoire de l'utilisateur). */
+export const avecVueFrance = <T extends { region?: string }>(params: T) =>
+  params.region ? params : { ...params, national: true };
+
 function buildTraitementMLRequestParams(params: TraitementMLParams): Record<string, unknown> {
   return {
     period: params.period,
     segment: params.segment,
-    ...(params.region && { region: params.region }),
+    ...(params.region ? { region: params.region } : { national: true }),
     page: params.page,
     limit: params.limit,
     sort_by: params.sort_by,
@@ -245,7 +249,7 @@ export interface CfaEtablissementsParams {
 }
 
 export const buildCfaEtablissementsRequestParams = (params: CfaEtablissementsParams) => ({
-  ...params,
+  ...avecVueFrance(params),
   departements: params.departements?.join(","),
   natures: params.natures?.join(","),
 });
@@ -339,7 +343,8 @@ export interface CfaInvitesParams {
 export function useCfaInvitesSansCollabStats(params: CfaInvitesParams & { page: number; limit: number }) {
   return useQuery<ICfaInvitesSansCollabResponse>({
     queryKey: ["stats", "cfa-invites-sans-collab", params] as const,
-    queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/stats/cfa/invites-sans-collab`, { params, signal }),
+    queryFn: ({ signal }) =>
+      _get(`${INDICATEURS_ML_BASE}/stats/cfa/invites-sans-collab`, { params: avecVueFrance(params), signal }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }
@@ -357,7 +362,8 @@ export function useCfaInjoignablesStats(params: CfaInjoignablesParams & { page: 
     data: ICfaInjoignablesRow[];
   }>({
     queryKey: ["stats", "cfa-injoignables", params] as const,
-    queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/stats/cfa/injoignables`, { params, signal }),
+    queryFn: ({ signal }) =>
+      _get(`${INDICATEURS_ML_BASE}/stats/cfa/injoignables`, { params: avecVueFrance(params), signal }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }
@@ -371,7 +377,8 @@ export interface MlAlertesParams {
 export function useMlAlertes(type: MlAlerteListeType, params: MlAlertesParams & { page: number; limit: number }) {
   return useQuery<IMlAlerteListeResponse>({
     queryKey: ["stats", "ml-alertes", type, params] as const,
-    queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/stats/ml/alertes/${type}`, { params, signal }),
+    queryFn: ({ signal }) =>
+      _get(`${INDICATEURS_ML_BASE}/stats/ml/alertes/${type}`, { params: avecVueFrance(params), signal }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }
@@ -407,10 +414,14 @@ export interface CollaborationDossiersParams {
   date_fin?: string;
 }
 
-export function useCollaborationDossiers(params: CollaborationDossiersParams & { page: number; limit: number }) {
+export function useCollaborationDossiers(
+  params: CollaborationDossiersParams & { page: number; limit: number },
+  enabled = true
+) {
   return useQuery<ICollaborationDossiersResponse>({
     queryKey: ["stats", "collaborations-dossiers", params] as const,
     queryFn: ({ signal }) => _get(`${INDICATEURS_ML_BASE}/stats/collaborations/dossiers`, { params, signal }),
+    enabled,
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
 }

@@ -10,7 +10,6 @@ import { TableSkeleton } from "@/app/_components/common/Skeleton";
 import type { useStatsXlsxExport } from "../hooks/useStatsXlsxExport";
 import tableStyles from "../tables/CfaEtablissementsTable.module.css";
 import { StatsTablePagination } from "../tables/StatsTablePagination";
-import { NotePerimetre } from "../ui/NotePerimetre";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 import styles from "./CfaAlertesSection.module.css";
@@ -39,7 +38,6 @@ export function AlertesSection({ children }: { children: React.ReactNode }) {
         <span className={`fr-icon-error-warning-line ${styles.sectionIcon}`} aria-hidden="true" />
         Les alertes à surveiller
       </h3>
-      <NotePerimetre />
       {children}
     </section>
   );

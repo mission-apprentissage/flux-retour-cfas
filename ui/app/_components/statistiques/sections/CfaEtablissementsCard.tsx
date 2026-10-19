@@ -14,7 +14,6 @@ import { useStatsFilters } from "../hooks/useStatsFilters";
 import type { CfaEtablissementsParams } from "../hooks/useStatsQueries";
 import { CfaEtablissementsTable } from "../tables/CfaEtablissementsTable";
 import { ChecklistFilter } from "../ui/ChecklistFilter";
-import { NotePerimetre } from "../ui/NotePerimetre";
 import { fromChecklist, OUI_NON, toChecklist, withChoice } from "../ui/ouiNonFilter";
 import { TerritoireFilter, useSelectedDepartements } from "../ui/TerritoireFilter";
 
@@ -112,7 +111,6 @@ export function CfaEtablissementsCard() {
         }}
         className={styles.search}
       />
-      <NotePerimetre />
       <div className={styles.filters}>
         <span className={styles.filtersLabel}>Filtrer</span>
         <TerritoireFilter departements={filters.departements} onChange={setDepartements} />

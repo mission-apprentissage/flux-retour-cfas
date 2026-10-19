@@ -4,9 +4,6 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { useAuth } from "@/app/_context/UserContext";
-import { isAdminUser } from "@/app/suivi-des-indicateurs/access";
-
 import { OverviewCard } from "../cards/OverviewCard";
 import { useMlTableFilters } from "../hooks/useMlTableFilters";
 import { useStatsFilters } from "../hooks/useStatsFilters";
@@ -61,17 +58,12 @@ const SEGMENT_CONFIG = {
 
 export function SuiviTraitementMLCard({ segment = "rupture" }: { segment?: "rupture" | "collab" }) {
   const searchParams = useSearchParams();
-  const { period, region, scope, territoireOptions } = useStatsFilters();
+  const { period, region, scope } = useStatsFilters();
   const { filters, setDepartements, setUtiliseService, setEngagee } = useMlTableFilters();
   const [tableState] = useState(() => readTableState(searchParams));
   const [searchInput, setSearchInput] = useState(() => searchParams?.get("search") ?? "");
   const [debouncedSearch, setDebouncedSearch] = useState(searchInput);
   const [total, setTotal] = useState<number>();
-  const { user } = useAuth();
-  const limitedTo =
-    !region && !isAdminUser(user ?? null)
-      ? territoireOptions.filter((option) => option.value !== "france").map((option) => option.label)
-      : [];
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchInput), 300);
@@ -107,9 +99,6 @@ export function SuiviTraitementMLCard({ segment = "rupture" }: { segment?: "rupt
         }}
         className={styles.search}
       />
-      {limitedTo.length > 0 && (
-        <p className={styles.scopeNote}>Tableau limité à votre territoire : {limitedTo.join(", ")}.</p>
-      )}
       <div className={styles.filters}>
         <span className={styles.filtersLabel}>Filtrer</span>
         <TerritoireFilter departements={filters.departements} onChange={setDepartements} />

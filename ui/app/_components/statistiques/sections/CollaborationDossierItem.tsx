@@ -42,7 +42,7 @@ export function CollaborationDossierItem({
       </p>
       <p className={styles.structure}>
         <span>CFA</span>
-        {provenanceCfa && dossier.cfa.id && dossier.cfa.dans_perimetre ? (
+        {provenanceCfa && dossier.cfa.id ? (
           <Link href={ficheCfaUrl(dossier.cfa.id, provenanceCfa)} className={`fr-link ${styles.lienStructure}`}>
             {structureLabel(dossier.cfa)}
           </Link>

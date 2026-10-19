@@ -12,7 +12,7 @@ interface DeploymentPanelProps {
 export function DeploymentPanel({ isAdmin = false, withMissionLocales = true }: DeploymentPanelProps) {
   return (
     <div>
-      {withMissionLocales && <DeploymentSection isAdmin={isAdmin} />}
+      {withMissionLocales && <DeploymentSection />}
       {isAdmin ? <CollaborationsAdminSection /> : <CollaborationsCfaSection />}
     </div>
   );

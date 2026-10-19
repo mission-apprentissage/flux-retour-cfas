@@ -4,14 +4,14 @@ import { cfaInjoignablesExportColumns } from "@/common/exports";
 import { _get } from "@/common/httpClient";
 
 import { INDICATEURS_ML_BASE } from "./statsRoutes";
-import type { CfaInjoignablesParams } from "./useStatsQueries";
+import { avecVueFrance, type CfaInjoignablesParams } from "./useStatsQueries";
 import { useStatsXlsxExport } from "./useStatsXlsxExport";
 
 export function useCfaInjoignablesExport(params: CfaInjoignablesParams) {
   return useStatsXlsxExport("CFA-taux-eleve-injoignables", cfaInjoignablesExportColumns, async () => {
     const { data } = await _get<{ data: ICfaInjoignablesRow[] }>(
       `${INDICATEURS_ML_BASE}/stats/cfa/injoignables/export`,
-      { params }
+      { params: avecVueFrance(params) }
     );
     return data.map((row) => ({
       nom: row.nom ?? "",

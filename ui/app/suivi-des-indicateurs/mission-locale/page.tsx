@@ -11,8 +11,6 @@ import { TraitementRupturesPanel } from "@/app/_components/statistiques/sections
 import { SegmentAboutText } from "@/app/_components/statistiques/ui/SegmentAboutText";
 import { StatsPageHeader } from "@/app/_components/statistiques/ui/StatsPageHeader";
 import { StatsTabs } from "@/app/_components/statistiques/ui/StatsTabs";
-import { useAuth } from "@/app/_context/UserContext";
-import { isAdminUser } from "@/app/suivi-des-indicateurs/access";
 
 export default function MissionLocalePage() {
   return (
@@ -60,14 +58,11 @@ function MissionLocalePageContent() {
 }
 
 function DeploiementActivitePanel() {
-  const { user } = useAuth();
-  const isAdmin = isAdminUser(user ?? null);
-
   return (
     <OverviewSection title="Déploiement et activité des Missions Locales">
       <SegmentAboutText variant="rupture" />
       <AdoptionKpis />
-      <CouvertureTerritoiresCard isAdmin={isAdmin} />
+      <CouvertureTerritoiresCard />
       <SuiviTraitementMLCard />
       <MlRupturesAlertesSection />
     </OverviewSection>

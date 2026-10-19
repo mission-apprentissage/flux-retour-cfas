@@ -114,6 +114,7 @@ const zCsvList = z
 const traitementMlQuery = z.object({
   period: zStatsPeriod.optional(),
   region: z.string().optional(),
+  national: zBooleanStringSchema.optional(),
   segment: zStatsSegment.default("rupture"),
   page: z.coerce.number().min(1).optional().default(1),
   limit: z.coerce.number().min(1).max(100).optional().default(10),
@@ -126,6 +127,7 @@ const traitementMlQuery = z.object({
 });
 const cfaEtablissementsExportQuery = z.object({
   region: z.string().optional(),
+  national: zBooleanStringSchema.optional(),
   departements: zCsvList,
   search: z.string().optional(),
   natures: zCsvList,
@@ -139,10 +141,14 @@ const cfaEtablissementsQuery = cfaEtablissementsExportQuery.extend({
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(100).default(10),
 });
-const cfaInvitesQuery = zCfaInvitesSansCollabQuery.extend({ region: z.string().optional() });
+const cfaInvitesQuery = zCfaInvitesSansCollabQuery.extend({
+  region: z.string().optional(),
+  national: zBooleanStringSchema.optional(),
+});
 const cfaInvitesExportQuery = cfaInvitesQuery.omit({ page: true, limit: true });
 const cfaInjoignablesExportQuery = z.object({
   region: z.string().optional(),
+  national: zBooleanStringSchema.optional(),
   sort_by: zCfaInjoignablesSortBy.default("taux"),
   sort_order: z.enum(["asc", "desc"]).default("desc"),
 });
@@ -153,6 +159,7 @@ const cfaInjoignablesQuery = cfaInjoignablesExportQuery.extend({
 const mlAlertesParams = z.object({ type: z.enum(ML_ALERTE_LISTE_TYPES) });
 const mlAlertesExportQuery = z.object({
   region: z.string().optional(),
+  national: zBooleanStringSchema.optional(),
   sort_by: z.enum(ML_ALERTE_LISTE_SORT_BY).default("total_jeunes"),
   sort_order: z.enum(["asc", "desc"]).default("desc"),
 });
@@ -403,36 +410,33 @@ const assertDepartementsAllowed = (departements: string[] | undefined, userRegio
   });
 };
 
+const assertDepartementsConnus = (departements: string[] | undefined) => {
+  if (departements?.some((code) => !DEPARTEMENTS_BY_CODE[code as keyof typeof DEPARTEMENTS_BY_CODE])) {
+    throw Boom.badRequest("Département inconnu");
+  }
+};
+
 const scopedRegions = (region: string | undefined, userRegions: string[]) =>
   region ? [region] : userRegions.length > 0 ? userRegions : undefined;
 
 /**
- * Périmètre des lecteurs de stats : `ml_id` (vérifié) court-circuite tout, `national` ignore le
- * périmètre territorial, sinon la région demandée ou toutes les régions de l'utilisateur.
- * Un admin (aucune région) sans paramètre voit tout.
+ * Chiffres agrégés et listes de structures, ouverts à tous les territoires : la région demandée,
+ * la France entière avec `national`, sinon par défaut les régions de l'utilisateur.
  */
+const territoireRegions = (query: { region?: string; national?: boolean }, userRegions: string[]) =>
+  query.region ? [query.region] : query.national ? undefined : scopedRegions(undefined, userRegions);
+
+/** Périmètre des stats : `ml_id` court-circuite le territoire. */
 const resolveStatsScope = async (
   query: { region?: string; ml_id?: string; national?: boolean },
   userRegions: string[]
 ): Promise<{ regions?: string[]; mlId?: string }> => {
-  const { region, ml_id, national } = query;
-
-  assertRegionAllowed(region, userRegions);
-
-  if (ml_id) {
-    await verifyMlInRegions(ml_id, userRegions);
-    return { mlId: ml_id };
+  if (query.ml_id) {
+    await findMlOrThrow(query.ml_id);
+    return { mlId: query.ml_id };
   }
-
-  if (national) {
-    return {};
-  }
-
-  if (region) {
-    return { regions: [region] };
-  }
-
-  return userRegions.length > 0 ? { regions: userRegions } : {};
+  const regions = territoireRegions(query, userRegions);
+  return regions ? { regions } : {};
 };
 
 const getTraitementRoute: IndicateursHandler<z.infer<typeof traitementQuery>> = async (req, { locals }) => {
@@ -486,6 +490,9 @@ const getCollaborationsMensuelRoute: IndicateursHandler<z.infer<typeof collabora
   return await getCollaborationMensuelStats(req.query.period || "30days", scope.regions, scope.mlId);
 };
 
+const refusNominatif = (organisation: IndicateursMlLocals["organisation"], horsRegion: string) =>
+  organisation.type === ORGANISATION_TYPE.DDETS ? "Accès non autorisé à ce département" : horsRegion;
+
 /**
  * Liste nominative : l'ARML n'y a pas accès, la DDETS est limitée à son département, la DREETS à sa région.
  * Avec `ml_id` (fiche ML), le périmètre est celui de la ML : sa région, ou son département pour une DDETS.
@@ -494,16 +501,18 @@ const resolveCollaborationDossiersScope = async (
   query: z.infer<typeof collaborationDossiersExportQuery>,
   { organisation, regions: userRegions }: IndicateursMlLocals
 ) => {
-  if (organisation.type === ORGANISATION_TYPE.ARML) {
+  const autorises: string[] = [ORGANISATION_TYPE.ADMINISTRATEUR, ORGANISATION_TYPE.DREETS, ORGANISATION_TYPE.DDETS];
+  if (!autorises.includes(organisation.type)) {
     throw Boom.forbidden("Accès non autorisé à la liste des collaborations");
   }
+  assertDepartementsConnus(query.departements);
   assertRegionAllowed(query.region, userRegions);
   assertDepartementsAllowed(query.departements, userRegions);
 
   if (query.cfa_id) {
     const { nominatif } = await verifyOrganismeInScope(query.cfa_id, { organisation, regions: userRegions });
     if (!nominatif) {
-      throw Boom.forbidden("Accès non autorisé à ce département");
+      throw Boom.forbidden(refusNominatif(organisation, "Accès non autorisé à cet organisme"));
     }
     return { organismeId: new ObjectId(query.cfa_id) };
   }
@@ -511,9 +520,9 @@ const resolveCollaborationDossiersScope = async (
   if (query.ml_id) {
     const { nominatif } = await verifyMlInScope(query.ml_id, { organisation, regions: userRegions });
     if (!nominatif) {
-      throw Boom.forbidden("Accès non autorisé à ce département");
+      throw Boom.forbidden(refusNominatif(organisation, "Accès non autorisé à cette Mission Locale"));
     }
-    return { missionLocaleId: new ObjectId(query.ml_id), perimetreRegions: userRegions };
+    return { missionLocaleId: new ObjectId(query.ml_id) };
   }
 
   if (organisation.type === ORGANISATION_TYPE.DDETS) {
@@ -570,24 +579,21 @@ const getCollaborationDossiersExportRoute: IndicateursHandler<
   return { data: result.data };
 };
 
-const getRechercheRoute: IndicateursHandler<z.infer<typeof rechercheQuery>> = async (req, { locals }) => {
+const getRechercheRoute: IndicateursHandler<z.infer<typeof rechercheQuery>> = async (req) => {
   const { q, page, limit } = req.query;
-  return await rechercherEtablissements(q, scopedRegions(undefined, locals.regions), { page, limit });
+  return await rechercherEtablissements(q, undefined, { page, limit });
 };
 
 const getTraitementMLRoute: IndicateursHandler<z.infer<typeof traitementMlQuery>> = async (req, { locals }) => {
   const { period, region, segment, page, limit, sort_by, sort_order, search, departements, utilise_service, engagee } =
     req.query;
-  const userRegions = locals.regions;
-
-  assertRegionAllowed(region, userRegions);
-  assertDepartementsAllowed(departements, userRegions);
+  assertDepartementsConnus(departements);
 
   return await getTraitementStatsByMissionLocale({
     period: period || "30days",
     segment,
     region,
-    regions: !region && userRegions.length > 0 ? userRegions : undefined,
+    regions: region ? undefined : territoireRegions(req.query, locals.regions),
     page: Number(page) || 1,
     limit: Number(limit) || 10,
     sort_by,
@@ -603,20 +609,9 @@ const getTraitementRegionsRoute: IndicateursHandler<z.infer<typeof traitementReg
   req,
   { locals }
 ) => {
-  const { national, segment } = req.query;
-  const userRegions = locals.regions;
-
-  const allRegions = await getSuiviTraitementByRegion(segment);
-
-  if (national) {
-    return allRegions;
-  }
-
-  if (userRegions.length > 0) {
-    return allRegions.filter((r) => userRegions.includes(r.code));
-  }
-
-  return allRegions;
+  const regions = territoireRegions(req.query, locals.regions);
+  const allRegions = await getSuiviTraitementByRegion(req.query.segment);
+  return regions ? allRegions.filter((r) => regions.includes(r.code)) : allRegions;
 };
 
 const getTraitementExportRoute: IndicateursHandler<z.infer<typeof exportQuery>> = async (req, { locals }) => {
@@ -632,13 +627,12 @@ const getCfaAdoptionRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = a
 };
 
 const findCfaEtablissements = (query: z.infer<typeof cfaEtablissementsExportQuery>, userRegions: string[]) => {
-  const { region, departements, search, natures, utilisateur, qualiopi, collab_active, sort_by, sort_order } = query;
+  const { departements, search, natures, utilisateur, qualiopi, collab_active, sort_by, sort_order } = query;
 
-  assertRegionAllowed(region, userRegions);
-  assertDepartementsAllowed(departements, userRegions);
+  assertDepartementsConnus(departements);
 
   return listCfaEtablissements({
-    regions: scopedRegions(region, userRegions),
+    regions: territoireRegions(query, userRegions),
     departements,
     search,
     natures,
@@ -668,18 +662,17 @@ const getCfaEtablissementsExportRoute: IndicateursHandler<z.infer<typeof cfaEtab
   { locals }
 ) => ({ data: await findCfaEtablissements(req.query, locals.regions) });
 
-const cfaInvitesOptions = (region: string | undefined, userRegions: string[]) => {
-  assertRegionAllowed(region, userRegions);
-  return { territoire: { regions: scopedRegions(region, userRegions) } };
-};
+const cfaInvitesOptions = (query: { region?: string; national?: boolean }, userRegions: string[]) => ({
+  territoire: { regions: territoireRegions(query, userRegions) },
+});
 
 const getCfaInvitesRoute: IndicateursHandler<z.infer<typeof cfaInvitesQuery>> = async (req, { locals }) =>
-  getCfaInvitesSansCollab(req.query, cfaInvitesOptions(req.query.region, locals.regions));
+  getCfaInvitesSansCollab(req.query, cfaInvitesOptions(req.query, locals.regions));
 
 const getCfaInvitesExportRoute: IndicateursHandler<z.infer<typeof cfaInvitesExportQuery>> = async (
   req,
   { locals }
-) => ({ data: await listCfaInvitesSansCollab(req.query, cfaInvitesOptions(req.query.region, locals.regions)) });
+) => ({ data: await listCfaInvitesSansCollab(req.query, cfaInvitesOptions(req.query, locals.regions)) });
 
 const getCfaNpsRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = async (req, { locals }) => {
   const scope = await resolveStatsScope(req.query, locals.regions);
@@ -687,15 +680,13 @@ const getCfaNpsRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = async 
   return await getCfaNpsStats({ regions: scope.regions });
 };
 
-const findCfaInjoignables = (query: z.infer<typeof cfaInjoignablesExportQuery>, userRegions: string[]) => {
-  assertRegionAllowed(query.region, userRegions);
-  return listCfaInjoignables({ regions: scopedRegions(query.region, userRegions) }, query);
-};
+const findCfaInjoignables = (query: z.infer<typeof cfaInjoignablesExportQuery>, userRegions: string[]) =>
+  listCfaInjoignables({ regions: territoireRegions(query, userRegions) }, query);
 
-const getCollabCfaOrigineRoute: IndicateursHandler<z.infer<typeof collabCfaOrigineQuery>> = async (req, { locals }) => {
+const getCollabCfaOrigineRoute: IndicateursHandler<z.infer<typeof collabCfaOrigineQuery>> = async (req) => {
   const { ml_id, ...options } = req.query;
-  await verifyMlInRegions(ml_id, locals.regions);
-  return listCollaborationsCfaOrigine(new ObjectId(ml_id), locals.regions, options);
+  await findMlOrThrow(ml_id);
+  return listCollaborationsCfaOrigine(new ObjectId(ml_id), options);
 };
 
 const getCfaInjoignablesRoute: IndicateursHandler<z.infer<typeof cfaInjoignablesQuery>> = async (req, { locals }) => {
@@ -717,18 +708,15 @@ const getCfaInjoignablesExportRoute: IndicateursHandler<z.infer<typeof cfaInjoig
 const findMlAlertes = (
   type: z.infer<typeof mlAlertesParams>["type"],
   query: z.infer<typeof mlAlertesExportQuery>,
-  { regions }: IndicateursMlLocals
-) => {
-  assertRegionAllowed(query.region, regions);
-  return listMlAlertes(type, { regions: scopedRegions(query.region, regions) }, query);
-};
+  userRegions: string[]
+) => listMlAlertes(type, { regions: territoireRegions(query, userRegions) }, query);
 
 const getMlAlertesRoute: IndicateursHandler<z.infer<typeof mlAlertesQuery>, z.infer<typeof mlAlertesParams>> = async (
   req,
   { locals }
 ) => {
   const { page, limit } = req.query;
-  const rows = await findMlAlertes(req.params.type, req.query, locals);
+  const rows = await findMlAlertes(req.params.type, req.query, locals.regions);
 
   return {
     total: rows.length,
@@ -740,32 +728,15 @@ const getMlAlertesRoute: IndicateursHandler<z.infer<typeof mlAlertesQuery>, z.in
 const getMlAlertesExportRoute: IndicateursHandler<
   z.infer<typeof mlAlertesExportQuery>,
   z.infer<typeof mlAlertesParams>
-> = async (req, { locals }) => ({ data: await findMlAlertes(req.params.type, req.query, locals) });
+> = async (req, { locals }) => ({ data: await findMlAlertes(req.params.type, req.query, locals.regions) });
 
-const getCouvertureDepartementsRoute: IndicateursHandler<z.infer<typeof couvertureDepartementsQuery>> = async (
-  req,
-  { locals }
-) => {
-  assertRegionAllowed(req.query.region, locals.regions);
-
-  return await getDepartementalStats(req.query.period || "30days", req.query.region);
-};
+const getCouvertureDepartementsRoute: IndicateursHandler<z.infer<typeof couvertureDepartementsQuery>> = async (req) =>
+  getDepartementalStats(req.query.period || "30days", req.query.region);
 
 const getCouvertureRegionsRoute: IndicateursHandler<z.infer<typeof nationalQuery>> = async (req, { locals }) => {
-  const { period, national } = req.query;
-  const userRegions = locals.regions;
-
-  const stats = await getCouvertureRegionsStats(period || "30days");
-
-  if (national) {
-    return stats;
-  }
-
-  if (userRegions.length > 0) {
-    stats.regions = stats.regions.filter((r) => userRegions.includes(r.code));
-  }
-
-  return stats;
+  const regions = territoireRegions(req.query, locals.regions);
+  const stats = await getCouvertureRegionsStats(req.query.period || "30days");
+  return regions ? { ...stats, regions: stats.regions.filter((r) => regions.includes(r.code)) } : stats;
 };
 
 const getMlDetailRoute: IndicateursHandler<DefaultQuery, z.infer<typeof mlIdParams>> = async (req, { locals }) => {
@@ -809,7 +780,7 @@ const getCfaCollaborationsMlRoute: IndicateursHandler<
   z.infer<typeof organismeIdParams>
 > = async (req, { locals }) => {
   await verifyOrganismeInScope(req.params.id, locals);
-  return listCfaCollaborationsParMl(new ObjectId(req.params.id), locals.regions, req.query);
+  return listCfaCollaborationsParMl(new ObjectId(req.params.id), req.query);
 };
 
 const getCfaMembresRoute: IndicateursHandler<DefaultQuery, z.infer<typeof organismeIdParams>> = async (
@@ -848,11 +819,8 @@ const getPrequalifRoute: IndicateursHandler<z.infer<typeof periodQuery>> = async
   return await getPrequalifStats(period || "all");
 };
 
-/**
- * Fiche CFA : 404 si l'organisme est inconnu, 403 hors du périmètre régional.
- * `nominatif` : l'ARML n'y a jamais droit, la DDETS seulement dans son département.
- */
-async function verifyOrganismeInScope(id: string, { organisation, regions }: IndicateursMlLocals) {
+/** Fiche CFA, ouverte à tous les territoires : 404 si l'organisme est inconnu. */
+async function verifyOrganismeInScope(id: string, locals: IndicateursMlLocals) {
   const organisme = await organismesDb().findOne(
     { _id: new ObjectId(id) },
     { projection: { "adresse.region": 1, "adresse.departement": 1 } }
@@ -860,48 +828,47 @@ async function verifyOrganismeInScope(id: string, { organisation, regions }: Ind
   if (!organisme) {
     throw Boom.notFound("Organisme non trouvé");
   }
-  if (regions.length > 0 && !regions.includes(organisme.adresse?.region ?? "")) {
-    throw Boom.forbidden("Accès non autorisé à cet organisme");
-  }
-  return { nominatif: peutVoirNominatif(organisation, organisme.adresse?.departement) };
+  return { nominatif: peutVoirNominatif(locals, organisme.adresse) };
 }
 
-/** Données nominatives (équipe, liste des jeunes) : jamais pour l'ARML, et une DDETS seulement dans son département. */
-const peutVoirNominatif = (organisation: IndicateursMlLocals["organisation"], departementStructure?: string | null) => {
-  const departement = (organisation as { code_departement?: string }).code_departement;
-  return (
-    organisation.type !== ORGANISATION_TYPE.ARML &&
-    (organisation.type !== ORGANISATION_TYPE.DDETS || (!!departement && departement === departementStructure))
-  );
+/**
+ * Données nominatives (équipe, liste des jeunes, contacts) : jamais pour l'ARML, la DREETS dans sa région,
+ * la DDETS dans son département.
+ */
+const peutVoirNominatif = (
+  { organisation, regions }: IndicateursMlLocals,
+  structure?: { region?: string | null; departement?: string | null } | null
+) => {
+  switch (organisation.type) {
+    case ORGANISATION_TYPE.ADMINISTRATEUR:
+      return true;
+    case ORGANISATION_TYPE.DREETS:
+      return !!structure?.region && regions.includes(structure.region);
+    case ORGANISATION_TYPE.DDETS: {
+      const departement = (organisation as { code_departement?: string }).code_departement;
+      return !!departement && departement === structure?.departement;
+    }
+    default:
+      return false;
+  }
 };
 
-async function verifyMlInScope(mlId: string, { organisation, regions }: IndicateursMlLocals) {
-  await verifyMlInRegions(mlId, regions);
-  const ml = await organisationsDb().findOne(
-    { _id: new ObjectId(mlId), type: "MISSION_LOCALE" },
-    { projection: { "adresse.departement": 1 } }
-  );
-  const departement = (ml as { adresse?: { departement?: string } } | null)?.adresse?.departement;
-  return { nominatif: peutVoirNominatif(organisation, departement) };
+async function verifyMlInScope(mlId: string, locals: IndicateursMlLocals) {
+  const ml = await findMlOrThrow(mlId);
+  return {
+    nominatif: peutVoirNominatif(locals, (ml as { adresse?: { region?: string; departement?: string } }).adresse),
+  };
 }
 
-async function verifyMlInRegions(mlId: string, userRegions: string[]): Promise<void> {
-  if (userRegions.length === 0) return;
-
-  const ml = await organisationsDb().findOne({
-    _id: new ObjectId(mlId),
-    type: "MISSION_LOCALE",
-  });
-
+async function findMlOrThrow(mlId: string) {
+  const ml = await organisationsDb().findOne(
+    { _id: new ObjectId(mlId), type: "MISSION_LOCALE" },
+    { projection: { "adresse.region": 1, "adresse.departement": 1 } }
+  );
   if (!ml) {
     throw Boom.notFound(`Mission Locale non trouvée: ${mlId}`);
   }
-
-  const mlRegion = (ml as { adresse?: { region?: string } }).adresse?.region;
-
-  if (!mlRegion || !userRegions.includes(mlRegion)) {
-    throw Boom.forbidden("Accès non autorisé à cette Mission Locale");
-  }
+  return ml;
 }
 
 export { getRegionsFromOrganisation };
