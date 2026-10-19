@@ -7,12 +7,12 @@ import { useStatsFilters } from "../hooks/useStatsFilters";
 import { getPeriodOptions } from "./PeriodSelector";
 import styles from "./StatsFilters.module.css";
 
-const PERIOD_OPTIONS = getPeriodOptions(true, true);
-
 export function StatsFilters() {
   const { period, setPeriod, territoire, territoireLabel, territoireOptions, setTerritoire } = useStatsFilters();
+  // Calculées au rendu : l'option « Depuis janv. <année> » apparaît au 1er janvier sans redéploiement.
+  const periodOptions = getPeriodOptions(true, true);
 
-  const periodLabel = PERIOD_OPTIONS.find((option) => option.value === period)?.label;
+  const periodLabel = periodOptions.find((option) => option.value === period)?.label;
 
   return (
     <div className={styles.filters}>
@@ -24,7 +24,7 @@ export function StatsFilters() {
         align="left"
       >
         {() =>
-          PERIOD_OPTIONS.map((option) => (
+          periodOptions.map((option) => (
             <DropdownMenuButton
               key={option.value}
               selected={option.value === period}

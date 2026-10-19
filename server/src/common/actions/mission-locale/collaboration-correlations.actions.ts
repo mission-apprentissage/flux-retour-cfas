@@ -4,7 +4,6 @@ import type {
   ICollabCorrelationRow,
   ICollabCorrelationsResponse,
 } from "shared/models/data/nationalStats.model";
-import { normalizeToUTCDay } from "shared/utils/date";
 import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
 
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
@@ -78,7 +77,7 @@ export async function getCollaborationCorrelations(
     .aggregate<{ situations: Groupe[]; objectifs: Groupe[] }>([
       {
         $match: {
-          ...buildCollabMatch(normalizeToUTCDay(new Date())),
+          ...buildCollabMatch(new Date()),
           ...perimetre,
           "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
         },

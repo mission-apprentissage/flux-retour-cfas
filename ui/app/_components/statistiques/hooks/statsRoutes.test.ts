@@ -15,6 +15,15 @@ describe("buildTraitementRequest", () => {
     });
   });
 
+  it("lit sur la route territoriale nationale une période que la route publique ne sert pas", () => {
+    for (const period of ["6months", "since-2026"] as const) {
+      expect(buildTraitementRequest({ period, segment: "rupture" })).toEqual({
+        url: "/api/v1/organisation/indicateurs-ml/traitement",
+        params: { period, segment: "rupture", national: true },
+      });
+    }
+  });
+
   it("va sur la route territoriale avec une région", () => {
     expect(buildTraitementRequest({ period: "all", segment: "collab", region: "11" })).toEqual({
       url: "/api/v1/organisation/indicateurs-ml/traitement",
@@ -83,6 +92,13 @@ describe("buildSyntheseRequest", () => {
     expect(buildSyntheseRequest("deployment", "30days")).toEqual({
       url: "/api/v1/mission-locale/stats/synthese/deployment",
       params: { period: "30days" },
+    });
+  });
+
+  it("lit sur la route territoriale nationale une période que la route publique ne sert pas", () => {
+    expect(buildSyntheseRequest("deployment", "6months")).toEqual({
+      url: "/api/v1/organisation/indicateurs-ml/synthese/deployment",
+      params: { period: "6months", national: true },
     });
   });
 

@@ -195,7 +195,7 @@ export async function inviteUserToOrganisation(
   } else {
     await sendEmail(email, "invitation_organisation", {
       author: auteurInvitationOrganisation(ctx),
-      organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
+      organisationLabel: await buildOrganisationLabel(organisation_id),
       invitationToken,
     });
   }

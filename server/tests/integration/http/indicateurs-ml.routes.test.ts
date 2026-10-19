@@ -1,6 +1,7 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "bson";
 import type { IMissionLocaleEffectif, IMissionLocaleStats } from "shared/models";
+import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type { IOrganisationCreate } from "shared/models/data/organisations.model";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -2328,7 +2329,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       await insertCfaRegions();
       await missionLocaleEffectifsDb().updateOne(
         { "effectif_snapshot.organisme_id": CFA_B },
-        { $set: { situation: "RDV_PRIS", mission_locale_id: ML_IDF } },
+        { $set: { situation: SITUATION_ENUM.RDV_PRIS, mission_locale_id: ML_IDF } },
         { bypassDocumentValidation: true }
       );
 

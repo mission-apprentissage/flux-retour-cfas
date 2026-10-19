@@ -1,4 +1,4 @@
-import type { StatsSegment } from "shared/models/data/nationalStats.model";
+import { zPublicStatsPeriod, type StatsSegment } from "shared/models/data/nationalStats.model";
 
 import type { Period } from "../ui/PeriodSelector";
 
@@ -23,6 +23,9 @@ export interface StatsRequest {
   params: Record<string, unknown>;
 }
 
+/** Les périodes ajoutées pour les pages connectées (6 mois, depuis janvier) ne sont pas servies par l'API publique. */
+const isPublicPeriod = (period: Period) => zPublicStatsPeriod.safeParse(period).success;
+
 const territorialParams = ({ period, segment, region, mlId, national }: SegmentStatsParams) => ({
   period,
   segment,
@@ -31,12 +34,19 @@ const territorialParams = ({ period, segment, region, mlId, national }: SegmentS
   ...(national && { national: true }),
 });
 
-/** Sans périmètre (ni région ni ML), les cartes de l'entonnoir sont nationales : la route publique suffit, connecté ou non. */
+/**
+ * Sans périmètre (ni région ni ML), les cartes de l'entonnoir sont nationales : la route publique suffit, connecté ou
+ * non, sauf pour une période qu'elle ne sert pas, lue alors sur la route territoriale nationale.
+ */
 export function buildTraitementRequest(params: SegmentStatsParams): StatsRequest {
   const { period, segment, region, mlId, isPublic } = params;
-  return isPublic || (!region && !mlId)
-    ? { url: `${PUBLIC_STATS_BASE}/traitement`, params: { period, segment } }
-    : { url: `${INDICATEURS_ML_BASE}/traitement`, params: territorialParams(params) };
+  if (isPublic || (!region && !mlId && isPublicPeriod(period))) {
+    return { url: `${PUBLIC_STATS_BASE}/traitement`, params: { period, segment } };
+  }
+  return {
+    url: `${INDICATEURS_ML_BASE}/traitement`,
+    params: territorialParams({ ...params, national: params.national || (!region && !mlId) }),
+  };
 }
 
 /** Graphes rupturants / dossiers traités : route anonyme nationale en public, sinon route territoriale scopée. */
@@ -68,13 +78,17 @@ export function buildCollaborationsRequest(params: CollaborationStatsParams): St
   };
 }
 
-/** Sans région, le déploiement national passe par la route publique ; avec une région, par la route territoriale scopée. */
+/**
+ * Sans région, le déploiement national passe par la route publique, ou par la route territoriale nationale pour une
+ * période qu'elle ne sert pas ; avec une région, par la route territoriale scopée.
+ */
 export function buildSyntheseRequest(
   resource: "deployment" | "regions",
   period: Period,
   region?: string
 ): StatsRequest {
-  return region
-    ? { url: `${INDICATEURS_ML_BASE}/synthese/${resource}`, params: { period, region } }
-    : { url: `${PUBLIC_STATS_BASE}/synthese/${resource}`, params: { period } };
+  if (region) return { url: `${INDICATEURS_ML_BASE}/synthese/${resource}`, params: { period, region } };
+  return isPublicPeriod(period)
+    ? { url: `${PUBLIC_STATS_BASE}/synthese/${resource}`, params: { period } }
+    : { url: `${INDICATEURS_ML_BASE}/synthese/${resource}`, params: { period, national: true } };
 }

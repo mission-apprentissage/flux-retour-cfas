@@ -98,7 +98,8 @@ export async function fetchActivationDatesByOrgId(
 
 /**
  * Dossiers envoyés par les CFA avant `endExclusive`. Les stats admin et Brevo comptent depuis le lancement de la V2
- * (`COLLABORATION_CUTOFF_DATE`) ; les stats territoriales passent `depuis: null` pour inclure les collaborations de 2025.
+ * (`COLLABORATION_CUTOFF_DATE`), à la date de réponse du CFA. Les stats territoriales passent `depuis: null` : toutes
+ * les collaborations, 2025 comprise, datées à l'envoi (`reponse_at` bouge à chaque modification du dossier).
  */
 export function buildDossierEnvoyeMatch(
   endExclusive: Date,
@@ -109,7 +110,9 @@ export function buildDossierEnvoyeMatch(
     soft_deleted: { $ne: true },
     ...(organismeIds ? { "effectif_snapshot.organisme_id": { $in: organismeIds } } : {}),
     "organisme_data.acc_conjoint": true,
-    "organisme_data.reponse_at": { ...(depuis ? { $gte: depuis } : {}), $lt: endExclusive },
+    ...(depuis
+      ? { "organisme_data.reponse_at": { $gte: depuis, $lt: endExclusive } }
+      : { "organisme_data.acc_conjoint_at": { $lt: endExclusive } }),
   };
 }
 

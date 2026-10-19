@@ -5,13 +5,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { organisationsDb, usersMigrationDb } from "@/common/model/collections";
 import type { AuthContext } from "@/common/model/internal/AuthContext";
+import { sendEmail } from "@/common/services/mailer/mailer";
 import { useMongo } from "@tests/jest/setupMongo";
 import { testDoc, testDocs } from "@tests/utils/testUtils";
 
 import { enqueueBrevoContactSync } from "./brevo/contacts/enqueue-sync";
 import { buildOrgaOf, buildUser, NOW } from "./brevo/contacts/fixtures";
 import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
-import { getCfaAccountsByOrganismeIds, rejectMembre, validateMembre } from "./organisations.actions";
+import {
+  getCfaAccountsByOrganismeIds,
+  inviteUserToOrganisation,
+  rejectMembre,
+  validateMembre,
+} from "./organisations.actions";
 
 // Voir account.actions.test.ts : on espionne le câblage, pas le comportement interne
 // de l'enqueue (qui est no-op hors prod).
@@ -94,5 +100,26 @@ describe("getCfaAccountsByOrganismeIds", () => {
     const entry = accounts.get(organismeId);
     expect(entry?.destinataires.map((d) => d.email).sort()).toEqual(["alice@cfa.fr", "bob@cfa.fr"]);
     expect(entry?.ml_beta_activated_at).toEqual(NOW);
+  });
+});
+
+describe("inviteUserToOrganisation", () => {
+  it("nomme l'organisation invitante et non celle de l'administrateur, au nom de l'équipe", async () => {
+    const mlId = new ObjectId();
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({ _id: mlId, type: "MISSION_LOCALE", nom: "ML DE TEST", ml_id: 9201, created_at: NOW })
+    );
+    vi.mocked(sendEmail).mockClear();
+
+    await inviteUserToOrganisation(
+      { ...adminCtx(), email: "admin@example.com" } as AuthContext,
+      "conseil@example.com",
+      mlId
+    );
+
+    expect(vi.mocked(sendEmail).mock.calls[0][2]).toMatchObject({
+      author: undefined,
+      organisationLabel: "Mission locale ML DE TEST",
+    });
   });
 });

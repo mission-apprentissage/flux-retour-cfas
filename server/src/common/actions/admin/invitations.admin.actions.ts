@@ -36,7 +36,12 @@ function parseSort(sort?: string): { field: string; order: 1 | -1 } {
 
 /** Auteur d'une invitation, sauf s'il est administrateur : son invitation part alors au nom de l'équipe. */
 async function findAuteurNonAdministrateur(authorId: ObjectId | null | undefined) {
-  const author = authorId ? await usersMigrationDb().findOne({ _id: authorId }) : null;
+  const author = authorId
+    ? await usersMigrationDb().findOne(
+        { _id: authorId },
+        { projection: { civility: 1, nom: 1, prenom: 1, email: 1, fonction: 1, organisation_id: 1 } }
+      )
+    : null;
   if (!author) return null;
   const organisation = await organisationsDb().findOne({ _id: author.organisation_id }, { projection: { type: 1 } });
   return organisation?.type === "ADMINISTRATEUR" ? null : author;

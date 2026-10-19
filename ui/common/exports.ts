@@ -249,7 +249,7 @@ export const cfaEtablissementsExportColumns = [
   { label: "Commune", key: "commune", width: 25 },
   { label: "Adresse", key: "adresse", width: 50 },
   { label: "Compte TBA", key: "compte_tba", width: 12 },
-  { label: "Collaboration active", key: "collab_active", width: 20 },
+  { label: "Collaboration activée", key: "collab_active", width: 20 },
   { label: "Collaborations", key: "nb_collaborations", width: 15 },
   { label: "Dernière activité", key: "derniere_activite", xlsxType: "date", width: 18 },
 ] as const satisfies ReadonlyArray<ExportColumn>;

@@ -39,6 +39,15 @@ import {
   updateUserLastConnection,
 } from "./users.actions";
 
+/** Le compte est déjà confirmé : un échec de l'activation (snapshots, stats) est journalisé sans faire échouer la requête. */
+async function activerMissionLocaleSansBloquer(missionLocaleId: ObjectId) {
+  try {
+    await activateMissionLocaleAtAdminValidation(missionLocaleId, new Date());
+  } catch (err) {
+    logger.error({ err, missionLocaleId }, "activation de la Mission Locale à l'inscription d'un invité échouée");
+  }
+}
+
 export async function register(registration: RegistrationSchema): Promise<{
   account_status: "PENDING_EMAIL_VALIDATION" | "CONFIRMED";
 }> {
@@ -116,7 +125,7 @@ export async function register(registration: RegistrationSchema): Promise<{
     // l'admin, puis on rafraîchit son contact générique (événement sur la transition seule).
     if (orga.type === "MISSION_LOCALE") {
       if (!mlWasActivated) {
-        await activateMissionLocaleAtAdminValidation(organisationId, new Date());
+        await activerMissionLocaleSansBloquer(organisationId);
       }
       await enqueueBrevoOrganisationContactSync(organisationId);
       if (!mlWasActivated) {
@@ -239,7 +248,7 @@ export async function activateUser(ctx: AuthContext) {
       // sans repasser par la validation admin.
       if (organisation.type === "MISSION_LOCALE") {
         if (!mlWasActivated) {
-          await activateMissionLocaleAtAdminValidation(ctx.organisation_id, new Date());
+          await activerMissionLocaleSansBloquer(ctx.organisation_id);
         }
         await enqueueBrevoOrganisationContactSync(ctx.organisation_id);
         if (!mlWasActivated) {
