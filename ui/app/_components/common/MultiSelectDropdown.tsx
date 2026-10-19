@@ -64,6 +64,9 @@ export function MultiSelectDropdown({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  // Un clic sur un libellé non focusable donne le focus au premier ancêtre focusable (ex. panneau d'onglet DSFR) :
+  // cette perte de focus ne doit pas fermer le panneau comme une sortie au clavier.
+  const clicDansLePanneauRef = useRef(false);
 
   const optionsVisibles =
     searchable && recherche.trim()
@@ -202,8 +205,15 @@ export function MultiSelectDropdown({
       className={`${styles.container} ${fitContent ? styles.containerFit : ""}`}
       ref={dropdownRef}
       onKeyDown={handleKeyDown}
+      onMouseDownCapture={() => {
+        clicDansLePanneauRef.current = true;
+        setTimeout(() => {
+          clicDansLePanneauRef.current = false;
+        }, 0);
+      }}
       onBlur={(e) => {
         // Tab hors du panneau : on le ferme comme un clic à l'extérieur
+        if (clicDansLePanneauRef.current) return;
         if (isOpen && e.relatedTarget && !dropdownRef.current?.contains(e.relatedTarget as Node)) dismiss();
       }}
     >
