@@ -510,6 +510,21 @@ describe("Indicateurs ML routes (territoriales)", () => {
       });
     });
 
+    it("Affiche pour les ML non engagées les chiffres de tous leurs dossiers, qui décident de l'engagement", async () => {
+      await missionLocaleStatsDb().updateOne(
+        { mission_locale_id: ML_ARA },
+        {
+          $set: {
+            segments: { ...SEGMENTS_IDF, rupture: { ...SEGMENTS_IDF.rupture, total: 8, a_traiter: 8, traite: 0 } },
+          },
+        }
+      );
+
+      const response = await requestAsOrganisation(ADMIN, "get", url("non_engagee", "region=84"));
+
+      expect(response.data.data[0]).toMatchObject({ nom: "ML ARA", total_jeunes: 50, pourcentage_traites: 60 });
+    });
+
     it("Applique les seuils de délai (plus de 10 jours) et de jeunes à recontacter (plus de 30) sur les collaborations", async () => {
       expect(await noms("delai_collab")).toEqual([]);
       await setCollab({ delai_premiere_activite_jours_total: 100 });

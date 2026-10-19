@@ -22,6 +22,7 @@ interface Colonne {
   column: MlAlerteListeSortBy;
   label: string;
   centered?: boolean;
+  tooltip?: string;
   cellule: (row: IMlAlerteListeRow) => ReactNode;
 }
 
@@ -55,9 +56,11 @@ const COLONNES = {
     label: "Localisation",
     cellule: (row) => [row.code_postal, row.commune].filter(Boolean).join(" ") || "-",
   },
-  totalRuptures: {
+  totalDossiers: {
     column: "total_jeunes",
-    label: "Total ruptures",
+    label: "Total dossiers",
+    tooltip:
+      "Ruptures et collaborations : l'engagement d'une Mission Locale (70 % de dossiers traités) se mesure sur tous ses dossiers.",
     centered: true,
     cellule: (row) => centre(row.total_jeunes.toLocaleString("fr-FR")),
   },
@@ -140,7 +143,7 @@ function MlAlerte({
       query={query}
       loadingRows={query.isLoading || (query.isFetching && query.isPlaceholderData)}
       exporter={exporter}
-      headers={colonnes.map(({ column, label, centered }) => (
+      headers={colonnes.map(({ column, label, centered, tooltip }) => (
         <SortableTableHeader
           key={column}
           column={column}
@@ -149,6 +152,7 @@ function MlAlerte({
           sortDirection={sort.sortDirection}
           onSort={sort.handleSort}
           centered={centered}
+          tooltip={tooltip}
         />
       ))}
       rows={(query.data?.data ?? []).map((row) =>
@@ -178,7 +182,7 @@ export function MlRupturesAlertesSection() {
         }
         colonnes={[
           COLONNES.nom,
-          COLONNES.totalRuptures,
+          COLONNES.totalDossiers,
           COLONNES.aTraiter,
           COLONNES.pourcentageTraites,
           COLONNES.activite,

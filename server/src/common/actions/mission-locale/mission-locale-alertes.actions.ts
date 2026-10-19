@@ -20,13 +20,14 @@ type LigneSuivi = ITraitementMLStatsResponse["data"][number];
 const CRITERES: Record<
   MlAlerteListeType,
   {
-    segment: "rupture" | "collab";
+    segment: "all" | "collab";
     utiliseService?: boolean;
     engagee?: boolean;
     retenir: (ligne: LigneSuivi) => boolean;
   }
 > = {
-  non_engagee: { segment: "rupture", utiliseService: true, engagee: false, retenir: () => true },
+  // L'engagement se mesure sur tous les dossiers (décision 3.2) : la liste affiche les chiffres qui l'ont décidé.
+  non_engagee: { segment: "all", utiliseService: true, engagee: false, retenir: () => true },
   delai_collab: {
     segment: "collab",
     retenir: (ligne) =>
