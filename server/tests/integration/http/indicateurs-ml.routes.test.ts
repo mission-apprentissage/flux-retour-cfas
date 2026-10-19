@@ -1811,6 +1811,20 @@ describe("Indicateurs ML routes (territoriales)", () => {
       });
     });
 
+    it("Affiche le premier compte confirmé d'une ML datée par le rattrapage au 01/01/2022", async () => {
+      await organisationsDb().updateOne(
+        { _id: ML_IDF },
+        { $set: { activated_at: new Date("2022-01-01T00:00:00.000Z") } },
+        { bypassDocumentValidation: true }
+      );
+      await insertUser(ML_IDF, { confirmed_at: new Date("2025-06-03") });
+      await insertUser(ML_IDF, { confirmed_at: new Date("2025-04-02") });
+
+      const response = await getFiche(ML_IDF);
+
+      expect(response.data.indicateurs.premier_compte_at).toBe("2025-04-02T00:00:00.000Z");
+    });
+
     it("Signale une ML sans compte qui reçoit des collaborations, sans les alertes d'usage", async () => {
       const mlNonActivee = new ObjectId();
       await organisationsDb().insertOne({

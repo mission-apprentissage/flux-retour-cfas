@@ -4,18 +4,29 @@ import { normalizeToUTCDay, subtractDaysUTC } from "shared/utils/date";
 
 import { missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 
+import { ACTIVATION_RATTRAPAGE_DATE } from "../admin/mission-locale/mission-locale.admin.actions";
+
 import { getSegmentStatsForPeriod } from "./mission-locale-stats.actions";
 import { ENGAGEMENT_THRESHOLD } from "./mission-locale-stats.helpers";
 
-async function getDerniereConnexion(missionLocaleId: ObjectId): Promise<Date | null> {
+async function getComptesStats(missionLocaleId: ObjectId) {
   const [result] = await usersMigrationDb()
-    .aggregate<{ derniere_connexion_at: Date | null }>([
+    .aggregate<{ premier_compte_at: Date | null; derniere_connexion_at: Date | null }>([
       { $match: { organisation_id: missionLocaleId, account_status: "CONFIRMED" } },
-      { $group: { _id: null, derniere_connexion_at: { $max: "$last_connection" } } },
+      {
+        $group: {
+          _id: null,
+          premier_compte_at: { $min: { $ifNull: ["$confirmed_at", "$created_at"] } },
+          derniere_connexion_at: { $max: "$last_connection" },
+        },
+      },
     ])
     .toArray();
 
-  return result?.derniere_connexion_at ?? null;
+  return {
+    premier_compte_at: result?.premier_compte_at ?? null,
+    derniere_connexion_at: result?.derniere_connexion_at ?? null,
+  };
 }
 
 export async function getMissionLocaleFicheIndicateurs(
@@ -24,9 +35,9 @@ export async function getMissionLocaleFicheIndicateurs(
 ): Promise<IMlFicheIndicateurs> {
   const evaluationDate = normalizeToUTCDay(now);
 
-  const [ml, derniereConnexionAt, all, collab, collabsRecues] = await Promise.all([
+  const [ml, comptes, all, collab, collabsRecues] = await Promise.all([
     organisationsDb().findOne({ _id: missionLocaleId, type: "MISSION_LOCALE" }, { projection: { activated_at: 1 } }),
-    getDerniereConnexion(missionLocaleId),
+    getComptesStats(missionLocaleId),
     getSegmentStatsForPeriod(evaluationDate, [missionLocaleId], "all"),
     getSegmentStatsForPeriod(evaluationDate, [missionLocaleId], "collab"),
     missionLocaleEffectifsDb().countDocuments({
@@ -60,12 +71,15 @@ export async function getMissionLocaleFicheIndicateurs(
   if (isActivated && !isEngaged) {
     alertes.push({ type: "non_engagee", valeur: tauxTraitement === null ? null : Math.round(tauxTraitement * 100) });
   }
+  const derniereConnexionAt = comptes.derniere_connexion_at;
   if (isActivated && (!derniereConnexionAt || derniereConnexionAt < limiteInactivite)) {
     alertes.push({ type: "inactive", valeur: null });
   }
 
   return {
-    premier_compte_at: activatedAt,
+    // La date du rattrapage n'est pas une vraie date d'activation : on montre alors le premier compte confirmé.
+    premier_compte_at:
+      activatedAt?.getTime() === ACTIVATION_RATTRAPAGE_DATE.getTime() ? comptes.premier_compte_at : activatedAt,
     derniere_connexion_at: derniereConnexionAt,
     taux_traitement: tauxTraitement === null ? null : Math.round(tauxTraitement * 100),
     is_engaged: isEngaged,

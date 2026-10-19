@@ -22,6 +22,12 @@ import { getMissionLocaleStat } from "../../mission-locale/mission-locale.action
 import { getOrganisationOrganismeByOrganismeId } from "../../organisations.actions";
 
 /**
+ * Date posée par la migration de rattrapage sur les ML déjà actives sans date d'activation. Antérieure au service,
+ * elle ne masque aucun dossier à la ML ; la fiche ML lui préfère la date du premier compte confirmé.
+ */
+export const ACTIVATION_RATTRAPAGE_DATE = new Date("2022-01-01T00:00:00.000Z");
+
+/**
  * Une Mission Locale est considérée comme active dès qu'elle a été activée
  * explicitement (`activated_at`) OU qu'un de ses agents dispose d'un compte
  * confirmé. Les ML dont un compte a été confirmé sur invitation avant que
