@@ -19,7 +19,7 @@ export function CfaAdoptionKpis() {
           value={data?.estimation}
           loading={isLoading}
           className={kpiFunnelCardClassName}
-          tooltip="Établissements de formation présents dans le référentiel et non fermés sur le territoire sélectionné."
+          tooltip="Source : référentiel ONISEP des organismes de formation. Établissements présents dans le référentiel, non fermés, toutes natures confondues, sur le territoire sélectionné."
         />
         <StatCard
           label="Total CFA compatibles avec la collaboration ML"
