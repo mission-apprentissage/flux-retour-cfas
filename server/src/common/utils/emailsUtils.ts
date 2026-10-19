@@ -18,6 +18,6 @@ export async function generateHtml(
     utils: { getPublicUrl },
   });
 
-  const { html } = mjml(buffer.toString(), { minify: true });
+  const { html } = await mjml(buffer.toString());
   return html;
 }
