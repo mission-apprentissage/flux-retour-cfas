@@ -78,6 +78,10 @@ describe("normalizeToBoom", () => {
     expect(normalizeToBoom(Object.assign(new Error("nope"), { status: 418 })).output.statusCode).toBe(418);
   });
 
+  it.each([0, Number.NaN, 302, 600])("retombe sur 500 quand le status %s n'est pas un code d'erreur HTTP", (status) => {
+    expect(normalizeToBoom(Object.assign(new Error("nope"), { status })).output.statusCode).toBe(500);
+  });
+
   it("accepte une valeur qui n'est pas une Error", () => {
     expect(normalizeToBoom("cassé").output.statusCode).toBe(500);
   });

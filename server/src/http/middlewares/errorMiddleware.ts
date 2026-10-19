@@ -78,7 +78,10 @@ export function normalizeToBoom(rawError: unknown): Boom.Boom {
     return boomError;
   }
 
-  const status = "status" in error && typeof error.status === "number" ? error.status : 500;
+  const status =
+    "status" in error && typeof error.status === "number" && error.status >= 400 && error.status < 600
+      ? error.status
+      : 500;
   const boomError = Boom.boomify(error, {
     statusCode: status,
     ...(!error.message ? { message: "Une erreur est survenue" } : {}),
