@@ -3,18 +3,14 @@ import { IncomingMessage } from "node:http";
 import axios from "axios";
 import type { AnyBulkWriteOperation } from "mongodb";
 import { IFormationCatalogue, zFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
-import { default as StreamChain } from "stream-chain";
-import { default as StreamJson } from "stream-json";
-import { default as StreamArrayPick } from "stream-json/streamers/StreamArray.js";
+import { chain } from "stream-chain";
+import { parser } from "stream-json";
+import { streamArray } from "stream-json/streamers/stream-array.js";
 
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb } from "@/common/model/collections";
 import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import config from "@/config";
-
-const { chain } = StreamChain;
-const { parser } = StreamJson;
-const { streamArray } = StreamArrayPick;
 
 const logger = parentLogger.child({
   module: "job:hydrate:formations-catalogue",
