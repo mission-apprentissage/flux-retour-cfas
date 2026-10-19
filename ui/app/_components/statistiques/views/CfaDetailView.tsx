@@ -97,9 +97,9 @@ function cfaStatuts(data: ICfaFicheResponse) {
   }
   statuts.push(
     <span key="connexion">
-      {data.derniere_connexion_at
-        ? `Dernière connexion le ${formatDateCourte(data.derniere_connexion_at)}`
-        : "Aucune connexion"}
+      {data.derniere_activite_at
+        ? `Dernière activité le ${formatDateCourte(data.derniere_activite_at)}`
+        : "Aucune activité"}
     </span>
   );
   return statuts;

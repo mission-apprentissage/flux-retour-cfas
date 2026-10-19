@@ -264,7 +264,7 @@ export function useCfaEtablissements(params: CfaEtablissementsParams & { page: n
 
 type DatesEnTexte<T, K extends keyof T> = Omit<T, K> & Record<K, string | null>;
 
-export type ICfaFicheResponse = Omit<DatesEnTexte<ICfaFiche, "derniere_connexion_at">, "source_donnees"> & {
+export type ICfaFicheResponse = Omit<DatesEnTexte<ICfaFiche, "derniere_activite_at">, "source_donnees"> & {
   source_donnees: ICfaFiche["source_donnees"];
 };
 
@@ -563,9 +563,9 @@ export interface IMissionLocaleDetailResponse {
   has_cfa_collaboration: boolean;
   traites_count: number;
   peut_voir_nominatif: boolean;
-  indicateurs: Omit<IMlFicheIndicateurs, "premier_compte_at" | "derniere_connexion_at"> & {
+  indicateurs: Omit<IMlFicheIndicateurs, "premier_compte_at" | "derniere_activite_at"> & {
     premier_compte_at: string | null;
-    derniere_connexion_at: string | null;
+    derniere_activite_at: string | null;
   };
 }
 

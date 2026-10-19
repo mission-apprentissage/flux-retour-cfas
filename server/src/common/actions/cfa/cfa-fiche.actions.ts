@@ -21,8 +21,9 @@ export async function findCfaOrganisation(organisme: { _id: ObjectId; siret: str
   );
 }
 
-async function getComptes(organisationId: ObjectId | undefined) {
-  if (!organisationId) return { derniereConnexion: null, referent: null };
+async function getComptes(organisation: { _id: ObjectId; derniere_activite?: Date | null } | null) {
+  const organisationId = organisation?._id;
+  if (!organisationId) return { derniereActivite: null, referent: null };
   const [connexion, referent] = await Promise.all([
     usersMigrationDb()
       .find(
@@ -48,7 +49,8 @@ async function getComptes(organisationId: ObjectId | undefined) {
         email: referent.email ?? null,
       }
     : null;
-  return { derniereConnexion: connexion?.last_connection ?? null, referent: contact };
+  // Avant le traçage de l'activité réelle, on se replie sur la dernière connexion.
+  return { derniereActivite: organisation?.derniere_activite ?? connexion?.last_connection ?? null, referent: contact };
 }
 
 export async function getCfaFiche(
@@ -61,7 +63,7 @@ export async function getCfaFiche(
 
   const organisation = await findCfaOrganisation(organisme);
   const [comptes, invitations, collaborations] = await Promise.all([
-    getComptes(organisation?._id),
+    getComptes(organisation as { _id: ObjectId; derniere_activite?: Date | null } | null),
     missionLocaleCfaInvitationsDb().countDocuments({ organisme_id: organismeId }),
     missionLocaleEffectifsDb().countDocuments(
       {
@@ -105,7 +107,7 @@ export async function getCfaFiche(
     },
     has_account: hasAccount,
     collabore: collaborations > 0,
-    derniere_connexion_at: comptes.derniereConnexion,
+    derniere_activite_at: comptes.derniereActivite,
     alertes: !hasAccount && invitations > 0 ? [{ type: "invitations_sans_compte", valeur: invitations }] : [],
     peut_voir_nominatif: nominatif,
     contact_referent: nominatif ? comptes.referent : null,

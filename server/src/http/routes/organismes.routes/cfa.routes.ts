@@ -15,8 +15,10 @@ import {
   getCfaSuiviMissionLocale,
   getCfaSuiviMissionLocaleExportRows,
 } from "@/common/actions/cfa/cfa-suivi-mission-locale.actions";
+import { enregistrerActiviteOrganisation } from "@/common/actions/organisations-activite.actions";
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import { missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
+import type { AuthContext } from "@/common/model/internal/AuthContext";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { formatJsonToXlsx, XlsxColumn } from "@/common/utils/xlsxUtils";
 import { OrganismeLocals, returnResult, RouteHandler } from "@/http/middlewares/helpers";
@@ -159,6 +161,8 @@ export default () => {
       }
       const { organismeId } = await getOrganismeWithDeca(locals);
       const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
+      const ctx = req.user as AuthContext | undefined;
+      await enregistrerActiviteOrganisation(ctx, ctx?.organisation_id);
       return await getCfaEffectifDetail(organismeId, req.params.id, userId);
     })
   );

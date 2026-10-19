@@ -73,7 +73,7 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
 }
 
 function mlStatuts(data: IMissionLocaleDetailResponse) {
-  const { is_engaged, taux_traitement, derniere_connexion_at } = data.indicateurs;
+  const { is_engaged, taux_traitement, derniere_activite_at } = data.indicateurs;
   const engagement = `ML engagée ${is_engaged ? "oui" : "non"}${
     taux_traitement === null ? "" : ` - taux de traitement ${taux_traitement} %`
   }`;
@@ -86,7 +86,7 @@ function mlStatuts(data: IMissionLocaleDetailResponse) {
       {engagement}
     </Badge>,
     <span key="connexion">
-      {derniere_connexion_at ? `Dernière connexion le ${formatDateCourte(derniere_connexion_at)}` : "Aucune connexion"}
+      {derniere_activite_at ? `Dernière activité le ${formatDateCourte(derniere_activite_at)}` : "Aucune activité"}
     </span>,
   ];
 }

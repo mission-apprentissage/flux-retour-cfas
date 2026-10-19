@@ -630,7 +630,7 @@ export interface IMlAlerteListeResponse {
 
 export interface IMlFicheIndicateurs {
   premier_compte_at: Date | null;
-  derniere_connexion_at: Date | null;
+  derniere_activite_at: Date | null;
   taux_traitement: number | null;
   is_engaged: boolean;
   alertes: IMlAlerte[];
@@ -687,7 +687,7 @@ export interface ICfaFiche {
   source_donnees: ICfaFicheSourceDonnees;
   has_account: boolean;
   collabore: boolean;
-  derniere_connexion_at: Date | null;
+  derniere_activite_at: Date | null;
   alertes: Array<{ type: "invitations_sans_compte"; valeur: number }>;
   peut_voir_nominatif: boolean;
   contact_referent: ICfaFicheContactReferent | null;

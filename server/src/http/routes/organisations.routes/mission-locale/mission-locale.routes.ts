@@ -31,8 +31,10 @@ import {
   missionLocaleBaseAggregation,
   setEffectifMissionLocaleData,
 } from "@/common/actions/mission-locale/mission-locale.actions";
+import { enregistrerActiviteOrganisation } from "@/common/actions/organisations-activite.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
+import type { AuthContext } from "@/common/model/internal/AuthContext";
 import { getAgeFromDate } from "@/common/utils/miscUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { addSheetToXlscFile, XlsxColumn } from "@/common/utils/xlsxUtils";
@@ -175,6 +177,7 @@ const getEffectifMissionLocale: RouteHandler<MissionLocaleLocals> = async (req, 
 
   const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
   const codesPostaux = code_postal ? code_postal.split(",").filter(Boolean) : undefined;
+  await enregistrerActiviteOrganisation(req.user as AuthContext | undefined, missionLocale._id);
   return await getEffectifFromMissionLocaleId(
     missionLocale,
     effectifId,

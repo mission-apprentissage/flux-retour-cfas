@@ -9,7 +9,7 @@ import {
 import { normalizeToUTCDay } from "shared/utils/date";
 
 import { fetchCollaborationsByOrgId } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
-import { buildCfaTerritoireMatch, fetchDerniereConnexionByOrgId } from "@/common/actions/cfa/cfa-stats.actions";
+import { buildCfaTerritoireMatch, fetchDerniereActiviteByOrgId } from "@/common/actions/cfa/cfa-stats.actions";
 import {
   buildLatestPerMlStages,
   buildLatestStatsMatch,
@@ -131,7 +131,7 @@ export async function rechercherEtablissements(
   const [invitations, collaborations, connexions, mlStats] = await Promise.all([
     countInvitationsByOrgId(pageCfaIds),
     fetchCollaborationsByOrgId(pageCfaIds, new Date(), null),
-    fetchDerniereConnexionByOrgId(pageCfaIds),
+    fetchDerniereActiviteByOrgId(pageCfaIds),
     fetchMlStatsById(pageMlIds),
   ]);
 

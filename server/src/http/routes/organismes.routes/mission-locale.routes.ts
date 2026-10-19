@@ -9,12 +9,14 @@ import {
   getAllEffectifsParMois,
   getEffectifFromMissionLocaleId,
 } from "@/common/actions/mission-locale/mission-locale.actions";
+import { enregistrerActiviteOrganisation } from "@/common/actions/organisations-activite.actions";
 import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import {
   setEffectifMissionLocaleDataFromOrganisme,
   markEffectifNotificationAsRead,
 } from "@/common/actions/organismes/mission-locale.actions";
 import { getOrganismeById } from "@/common/actions/organismes/organismes.actions";
+import type { AuthContext } from "@/common/model/internal/AuthContext";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import { OrganismeLocals, returnResult, RouteHandler } from "@/http/middlewares/helpers";
@@ -60,6 +62,8 @@ const updateEffectifMissionLocaleData: RouteHandler<
   }
 
   const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
+  const ctx = req.user as AuthContext | undefined;
+  await enregistrerActiviteOrganisation(ctx, ctx?.organisation_id);
   return await setEffectifMissionLocaleDataFromOrganisme(organisme._id, req.params.id, req.body, userId);
 };
 
@@ -81,6 +85,8 @@ const getEffectifMissionLocale: RouteHandler<OrganismeLocals> = async (req, { lo
   }
 
   const userId = req.user?._id ? new ObjectId(req.user._id) : undefined;
+  const ctx = req.user as AuthContext | undefined;
+  await enregistrerActiviteOrganisation(ctx, ctx?.organisation_id);
   return await getEffectifFromMissionLocaleId(organisme, effectifId, nom_liste, userId);
 };
 

@@ -1102,6 +1102,21 @@ describe("Indicateurs ML routes (territoriales)", () => {
       });
     });
 
+    it("Retient la dernière activité enregistrée du CFA plutôt que la dernière connexion", async () => {
+      const activite = new Date("2025-02-03T00:00:00.000Z");
+      await organisationsDb().updateOne(
+        { type: "ORGANISME_FORMATION", organisme_id: CFA_A.toString() },
+        { $set: { derniere_activite: activite } },
+        { bypassDocumentValidation: true }
+      );
+
+      const response = await requestAsOrganisation(DREETS_IDF, "get", BASE);
+
+      expect(response.data.data.find((cfa: { id: string }) => cfa.id === CFA_A.toString())).toMatchObject({
+        derniere_activite: activite.toISOString(),
+      });
+    });
+
     it.each([
       ["natures=inconnue", ["Alpha"]],
       ["utilisateur=false", ["Alpha", "Gamma"]],
@@ -1789,7 +1804,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(response.data.ml.nom).toBe("ML IDF");
       expect(response.data.indicateurs).toEqual({
         premier_compte_at: "2025-01-01T00:00:00.000Z",
-        derniere_connexion_at: recent.toISOString(),
+        derniere_activite_at: recent.toISOString(),
         taux_traitement: 70,
         is_engaged: true,
         alertes: [],
@@ -1801,7 +1816,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
 
       expect(response.data.indicateurs).toMatchObject({
         premier_compte_at: "2025-01-01T00:00:00.000Z",
-        derniere_connexion_at: null,
+        derniere_activite_at: null,
         taux_traitement: 60,
         is_engaged: false,
         alertes: [
@@ -1823,6 +1838,21 @@ describe("Indicateurs ML routes (territoriales)", () => {
       const response = await getFiche(ML_IDF);
 
       expect(response.data.indicateurs.premier_compte_at).toBe("2025-04-02T00:00:00.000Z");
+    });
+
+    it("Retient la dernière activité enregistrée plutôt que la dernière connexion", async () => {
+      const ancienne = new Date("2025-01-15T00:00:00.000Z");
+      await organisationsDb().updateOne(
+        { _id: ML_IDF },
+        { $set: { derniere_activite: ancienne } },
+        { bypassDocumentValidation: true }
+      );
+      await insertUser(ML_IDF, { confirmed_at: new Date("2025-03-01"), last_connection: new Date(Date.now() - DAY) });
+
+      const response = await getFiche(ML_IDF);
+
+      expect(response.data.indicateurs.derniere_activite_at).toBe(ancienne.toISOString());
+      expect(response.data.indicateurs.alertes).toContainEqual({ type: "inactive", valeur: null });
     });
 
     it("Signale une ML sans compte qui reçoit des collaborations, sans les alertes d'usage", async () => {
@@ -2047,7 +2077,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
         source_donnees: { erps: ["ymag"], fichier: false, erreurs_transmission: false },
         has_account: true,
         collabore: true,
-        derniere_connexion_at: "2026-06-15T00:00:00.000Z",
+        derniere_activite_at: "2026-06-15T00:00:00.000Z",
         alertes: [],
         peut_voir_nominatif: true,
         contact_referent: { email: "referent@example.com", fonction: "Directrice" },

@@ -36,7 +36,10 @@ export async function getMissionLocaleFicheIndicateurs(
   const evaluationDate = normalizeToUTCDay(now);
 
   const [ml, comptes, all, collab, collabsRecues] = await Promise.all([
-    organisationsDb().findOne({ _id: missionLocaleId, type: "MISSION_LOCALE" }, { projection: { activated_at: 1 } }),
+    organisationsDb().findOne(
+      { _id: missionLocaleId, type: "MISSION_LOCALE" },
+      { projection: { activated_at: 1, derniere_activite: 1 } }
+    ),
     getComptesStats(missionLocaleId),
     getSegmentStatsForPeriod(evaluationDate, [missionLocaleId], "all"),
     getSegmentStatsForPeriod(evaluationDate, [missionLocaleId], "collab"),
@@ -71,8 +74,10 @@ export async function getMissionLocaleFicheIndicateurs(
   if (isActivated && !isEngaged) {
     alertes.push({ type: "non_engagee", valeur: tauxTraitement === null ? null : Math.round(tauxTraitement * 100) });
   }
-  const derniereConnexionAt = comptes.derniere_connexion_at;
-  if (isActivated && (!derniereConnexionAt || derniereConnexionAt < limiteInactivite)) {
+  // Activité réelle (consultation ou traitement d'un dossier), à défaut la dernière connexion d'un conseiller.
+  const derniereActiviteAt =
+    (ml as { derniere_activite?: Date | null } | null)?.derniere_activite ?? comptes.derniere_connexion_at;
+  if (isActivated && (!derniereActiviteAt || derniereActiviteAt < limiteInactivite)) {
     alertes.push({ type: "inactive", valeur: null });
   }
 
@@ -80,7 +85,7 @@ export async function getMissionLocaleFicheIndicateurs(
     // La date du rattrapage n'est pas une vraie date d'activation : on montre alors le premier compte confirmé.
     premier_compte_at:
       activatedAt?.getTime() === ACTIVATION_RATTRAPAGE_DATE.getTime() ? comptes.premier_compte_at : activatedAt,
-    derniere_connexion_at: derniereConnexionAt,
+    derniere_activite_at: derniereActiviteAt,
     taux_traitement: tauxTraitement === null ? null : Math.round(tauxTraitement * 100),
     is_engaged: isEngaged,
     alertes,

@@ -88,13 +88,17 @@ export interface CfaEtablissementsFilters extends CfaTerritoire {
   sortOrder: "asc" | "desc";
 }
 
-export const fetchDerniereConnexionByOrgId = async (organismeIds: ObjectId[]): Promise<Map<string, Date>> => {
+/**
+ * Dernière activité réelle des CFA (consultation d'une fiche jeune, collaboration), par organisme. Tant qu'aucune
+ * activité n'a été enregistrée pour une organisation, on se replie sur la dernière connexion de ses utilisateurs.
+ */
+export const fetchDerniereActiviteByOrgId = async (organismeIds: ObjectId[]): Promise<Map<string, Date>> => {
   if (organismeIds.length === 0) return new Map();
 
   const organisations = await organisationsDb()
     .find(
       { type: "ORGANISME_FORMATION", organisme_id: { $in: organismeIds.map((id) => id.toString()) } },
-      { projection: { _id: 1, organisme_id: 1 } }
+      { projection: { _id: 1, organisme_id: 1, derniere_activite: 1 } }
     )
     .toArray();
   if (organisations.length === 0) return new Map();
@@ -115,8 +119,11 @@ export const fetchDerniereConnexionByOrgId = async (organismeIds: ObjectId[]): P
 
   const result = new Map<string, Date>();
   for (const organisation of organisations) {
-    const organismeId = (organisation as { organisme_id?: string }).organisme_id;
-    const last = lastByOrganisation.get(organisation._id.toString());
+    const { organisme_id: organismeId, derniere_activite: derniereActivite } = organisation as {
+      organisme_id?: string;
+      derniere_activite?: Date | null;
+    };
+    const last = derniereActivite ?? lastByOrganisation.get(organisation._id.toString());
     if (!organismeId || !last) continue;
     const current = result.get(organismeId);
     if (!current || last > current) result.set(organismeId, last);
@@ -189,7 +196,7 @@ export async function listCfaEtablissements({
 
   const [collaborations, connexions] = await Promise.all([
     fetchCollaborationsByOrgId(organismeIds, new Date(), null),
-    fetchDerniereConnexionByOrgId(organismeIds),
+    fetchDerniereActiviteByOrgId(organismeIds),
   ]);
 
   const rows: ICfaEtablissement[] = organismes.map((organisme) => {
