@@ -190,13 +190,27 @@ export const getCumulativeStatsForDates = async (
   });
 };
 
-export const getEvenlySpacedDates = async (period: StatsPeriod, referenceDate: Date): Promise<Date[]> => {
+/** Points de la courbe : répartis sur 30 jours, sinon le début de période, le 1er de chaque mois et le jour même. */
+export const getTimeSeriesDates = async (period: StatsPeriod, referenceDate: Date): Promise<Date[]> => {
   const startDate = await calculateStartDateAsync(period, referenceDate);
 
   const timeDiff = referenceDate.getTime() - startDate.getTime();
 
   if (timeDiff <= 0) {
     return [referenceDate];
+  }
+
+  if (period !== "30days") {
+    const dates = [startDate];
+    let mois = startDate.getUTCMonth() + 1;
+    let premierDuMois = new Date(Date.UTC(startDate.getUTCFullYear(), mois, 1));
+    while (premierDuMois < referenceDate) {
+      dates.push(premierDuMois);
+      mois += 1;
+      premierDuMois = new Date(Date.UTC(startDate.getUTCFullYear(), mois, 1));
+    }
+    dates.push(referenceDate);
+    return dates;
   }
 
   const dates: Date[] = [];
@@ -838,9 +852,9 @@ export async function getRupturantsStats(
 
   const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
 
-  const evenlySpacedDates = await getEvenlySpacedDates(period, endDate);
+  const timeSeriesDates = await getTimeSeriesDates(period, endDate);
   const rupturantsTimeSeries: ITimeSeriesPoint[] = await getCumulativeStatsForDates(
-    evenlySpacedDates,
+    timeSeriesDates,
     missionLocaleIds,
     segment
   );
