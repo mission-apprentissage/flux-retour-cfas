@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.0",
-    "@getbrevo/brevo": "^2.2.0",
+    "@getbrevo/brevo": "6.0.3",
     "@hapi/boom": "^10.0.1",
     "@sentry/cli": "^2.37.0",
     "@sentry/integrations": "^7.114.0",

@@ -3,25 +3,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const { sendTransacEmailMock } = vi.hoisted(() => ({ sendTransacEmailMock: vi.fn() }));
 
 vi.mock("@getbrevo/brevo", () => {
-  class TransactionalEmailsApi {
-    setApiKey() {}
-    sendTransacEmail = sendTransacEmailMock;
+  class BrevoClient {
+    transactionalEmails = { sendTransacEmail: sendTransacEmailMock };
   }
-  class ContactsApi {
-    setApiKey() {}
-  }
-  class EventsApi {
-    setApiKey() {}
-  }
-  class SendSmtpEmail {}
+  class BrevoError extends Error {}
 
-  return {
-    default: { TransactionalEmailsApi, ContactsApi, EventsApi, SendSmtpEmail },
-    AccountApiApiKeys: { apiKey: "api-key" },
-    ContactsApiApiKeys: { apiKey: "api-key" },
-    EventsApiApiKeys: { apiKey: "api-key" },
-    TransactionalEmailsApiApiKeys: { apiKey: "api-key" },
-  };
+  return { BrevoClient, BrevoError };
 });
 
 const { sendTransactionalEmail } = await import("@/common/services/brevo/brevo");

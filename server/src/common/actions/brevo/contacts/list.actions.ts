@@ -54,19 +54,19 @@ export const getOrCreateContactList = async (params: {
   }
 
   const res = await createBrevoList({ name: params.name, folderId: params.folderId });
-  if (res?.response.statusCode !== 201) {
+  if (!res?.id) {
     throw new Error(`Error creating Brevo list for contact list ${params.slug}`);
   }
 
   await brevoContactListDb().insertOne({
     _id: new ObjectId(),
     slug: params.slug,
-    listId: res.body.id,
+    listId: res.id,
     listName: params.name,
     folderId: params.folderId,
     created_at: now,
     updated_at: now,
   });
 
-  return res.body.id;
+  return res.id;
 };
