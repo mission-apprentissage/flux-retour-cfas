@@ -1,5 +1,5 @@
 import { omit } from "lodash-es";
-import nodemailer from "nodemailer";
+import nodemailer, { type Transporter } from "nodemailer";
 import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import { htmlToText } from "nodemailer-html-to-text";
 
@@ -27,7 +27,7 @@ export interface EmailTemplate<T extends TemplateName = TemplateName> {
 }
 
 export function createMailerService(
-  transporter = createTransporter({
+  transporter: Transporter = createTransporter({
     ...config.smtp,
     port: config.smtp.port ? Number(config.smtp.port) : undefined,
     secure: false,
@@ -38,8 +38,8 @@ export function createMailerService(
     const { subject, data } = template;
 
     const from = options?.noreply
-      ? `${config.email_noreply_from} <${config.email_noreply}>`
-      : `${config.email_from} <${config.email}>`;
+      ? { name: config.email_noreply_from, address: config.email_noreply }
+      : { name: config.email_from, address: config.email };
 
     const { messageId } = await transporter.sendMail({
       from,
