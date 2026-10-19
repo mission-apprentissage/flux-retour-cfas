@@ -11979,10 +11979,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:^10.1.1":
-  version: 10.1.1
-  resolution: "nodemailer@npm:10.1.1"
-  checksum: b60d08c6f653b8381a82113f0aee2365af323d6ff028e7b7610d809f4c3c1f63077435388fda53d02082e0df25f28618b245814a1c0b304db30fdfec76528bef
+"nodemailer@npm:~10.0.16":
+  version: 10.0.16
+  resolution: "nodemailer@npm:10.0.16"
+  checksum: 3ec5ea520bdd1465f70a591b1c78a026606d783b5a165d66b69bc4f2644917c27a6be0173fd7ad687bc9dbcf8e61cd4c88434ef37b6b822fd5ac7bce934b8b12
   languageName: node
   linkType: hard
 
@@ -14912,7 +14912,7 @@ __metadata:
     multer: ^2.4.0
     netmask: ^2.1.1
     nock: ^14.0.0-beta.15
-    nodemailer: ^10.1.1
+    nodemailer: ~10.0.16
     nodemailer-html-to-text: 3.2.0
     passport: 0.7.0
     passport-jwt: ^4.0.1

@@ -61,7 +61,7 @@
     "mongodb": "^6.21.0",
     "multer": "^2.4.0",
     "netmask": "^2.1.1",
-    "nodemailer": "^10.1.1",
+    "nodemailer": "~10.0.16",
     "nodemailer-html-to-text": "3.2.0",
     "passport": "0.7.0",
     "passport-jwt": "^4.0.1",
