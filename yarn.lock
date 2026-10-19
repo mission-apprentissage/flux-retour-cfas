@@ -5841,10 +5841,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csv-parse@npm:^5.5.6":
-  version: 5.5.6
-  resolution: "csv-parse@npm:5.5.6"
-  checksum: ee06f97f674487dc1d001b360de8ea510a41b9d971abf43bcf9c3be22c83a3634df0d3ebfbe52fd49d145077066be7ff9f25de3fc6b71aefb973099b04147a25
+"csv-parse@npm:^7.0.3":
+  version: 7.0.3
+  resolution: "csv-parse@npm:7.0.3"
+  checksum: f0c87af822c462b70a56590d57201bdfddcd5badb70e6eece8eadab462bd2646c46112627651f773ae2638f1ba682d286ae2925cf94919ff001e2b0cc48a3e10
   languageName: node
   linkType: hard
 
@@ -14878,7 +14878,7 @@ __metadata:
     convert-csv-to-json: ^1.5.0
     cookie-parser: ^1.4.7
     cors: ^2.8.5
-    csv-parse: ^5.5.6
+    csv-parse: ^7.0.3
     date-fns: ^3.6.0
     dotenv: ^16.4.5
     ejs: ^3.1.10
