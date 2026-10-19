@@ -11,7 +11,6 @@ import type {
   StatsPeriod,
 } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
-import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
 
 import { getNpsStatsForOrganismes } from "@/common/actions/cfa/cfa-collaboration-stats.actions";
 import { RESULTAT_SITUATIONS } from "@/common/actions/mission-locale/collaboration-dossiers.actions";
@@ -209,11 +208,7 @@ export async function getTerritoireCollaborationStats(
 ): Promise<ICollaborationSegmentStats> {
   const evaluationDate = normalizeToUTCDay(now);
   const startDate = await calculateStartDateAsync(period, evaluationDate);
-  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
-  const perimetre = {
-    ...(await buildCollabPerimetreMatch(regions)),
-    "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
-  };
+  const perimetre = await buildCollabPerimetreMatch(regions);
   const matchAu = (date: Date) => buildCollabDossiersMatch(perimetre, date);
   const compterCfa = async (date: Date) =>
     (await missionLocaleEffectifsDb().distinct("effectif_snapshot.organisme_id", matchAu(date))).length;

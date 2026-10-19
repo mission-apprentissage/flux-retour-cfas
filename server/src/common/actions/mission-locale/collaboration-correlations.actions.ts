@@ -4,7 +4,6 @@ import type {
   ICollabCorrelationRow,
   ICollabCorrelationsResponse,
 } from "shared/models/data/nationalStats.model";
-import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
 
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
@@ -65,13 +64,12 @@ const versLigne = (cle: string, groupe: Groupe | undefined): ICollabCorrelationR
   };
 };
 
-/** Même périmètre de dossiers que les chiffres clés (CFA du territoire ou ML de la fiche, tranche d'âge actuelle). */
+/** Même périmètre de dossiers que les chiffres clés : CFA du territoire ou ML de la fiche, tous les dossiers envoyés. */
 export async function getCollaborationCorrelations(
   regions?: string[],
   mlId?: string
 ): Promise<ICollabCorrelationsResponse> {
   const perimetre = await buildCollabPerimetreMatch(regions, mlId);
-  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
 
   const [result] = await missionLocaleEffectifsDb()
     .aggregate<{ situations: Groupe[]; objectifs: Groupe[] }>([
@@ -79,7 +77,6 @@ export async function getCollaborationCorrelations(
         $match: {
           ...buildCollabMatch(new Date()),
           ...perimetre,
-          "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
         },
       },
       addCollabSituationField(),

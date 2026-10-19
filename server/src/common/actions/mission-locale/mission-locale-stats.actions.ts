@@ -1279,12 +1279,10 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
   const collabMissionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
   const collabMlFilter = collabMissionLocaleIds ? { mission_locale_id: { $in: collabMissionLocaleIds } } : {};
 
-  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
   const collabByMlPipeline = [
     {
       $match: {
         "organisme_data.acc_conjoint": true,
-        "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
         soft_deleted: { $ne: true },
         ...collabMlFilter,
       },

@@ -2373,6 +2373,37 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(ara.data).toMatchObject({ cfa_ayant_collabore: { current: 1 }, jeunes_envoyes: { current: 1 } });
     });
 
+    it("Compte tous les dossiers envoyés, quel que soit l'âge actuel du jeune", async () => {
+      const ancien = buildCollabDossier(ML_IDF, CFA_A, ["MOBILITE"]);
+      await missionLocaleEffectifsDb().insertOne(
+        {
+          ...ancien,
+          effectif_snapshot: {
+            ...ancien.effectif_snapshot,
+            apprenant: { date_de_naissance: new Date(new Date().getFullYear() - 30, 0, 1) },
+          },
+        } as never,
+        { bypassDocumentValidation: true }
+      );
+
+      const chiffres = await requestAsOrganisation(
+        ADMIN,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/collaborations?national=true"
+      );
+      expect(chiffres.data.jeunes_envoyes.current).toBe(4);
+      const correlations = await requestAsOrganisation(
+        ADMIN,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/collaborations/correlations?national=true"
+      );
+      const total = correlations.data.situations.reduce(
+        (somme: number, ligne: { total: number }) => somme + ligne.total,
+        0
+      );
+      expect(total).toBe(4);
+    });
+
     it("Scope par région pour une ARML et par ml_id vérifié", async () => {
       await insertCfaRegions();
       const region = await requestAsOrganisation(
