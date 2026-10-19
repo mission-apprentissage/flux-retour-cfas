@@ -15,7 +15,8 @@ import {
 } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
 import {
   calculateStartDateAsync,
-  createStatWithVariation,
+  calculatePreviousStartDate,
+  createCumulStatWithVariation,
 } from "@/common/actions/mission-locale/mission-locale-stats.helpers";
 import { findEligibleOrganismes } from "@/common/actions/organismes/deca-cfa-eligibility";
 import { buildOrganismeNatureFilter, buildOrganismeSearchFilter } from "@/common/actions/organismes/organismes.actions";
@@ -56,17 +57,23 @@ export async function getCfaAdoptionStats(period: StatsPeriod, regions?: string[
     .toArray();
   const organismeIds = organismes.map((organisme) => organisme._id);
 
-  const [eligibles, avecCollaboration, avecCollaborationDebut] = await Promise.all([
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
+  const [eligibles, avecCollaboration, avecCollaborationDebut, avecCollaborationPrecedent] = await Promise.all([
     organismeIds.length ? findEligibleOrganismes(organismeIds) : Promise.resolve([]),
     countOrganismesWithCollaboration(organismeIds, new Date()),
     countOrganismesWithCollaboration(organismeIds, startDate),
+    previousStartDate ? countOrganismesWithCollaboration(organismeIds, previousStartDate) : Promise.resolve(null),
   ]);
 
   return {
     estimation: organismes.length,
     compatibles: eligibles.length,
     avec_compte: organismes.filter((organisme) => organisme.has_account === true).length,
-    avec_collaboration: createStatWithVariation(avecCollaboration, avecCollaborationDebut),
+    avec_collaboration: createCumulStatWithVariation(
+      avecCollaboration,
+      avecCollaborationDebut,
+      avecCollaborationPrecedent
+    ),
     period,
   };
 }

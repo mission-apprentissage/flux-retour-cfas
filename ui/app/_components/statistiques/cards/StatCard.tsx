@@ -64,7 +64,11 @@ export function StatCard({
               ) : (
                 percentage &&
                 percentage !== "0%" && (
-                  <p className={styles.cardPercentage} style={{ color: percentageColor }}>
+                  <p
+                    className={styles.cardPercentage}
+                    style={{ color: percentageColor }}
+                    title="Évolution par rapport à la période précédente de même durée"
+                  >
                     {percentage}
                   </p>
                 )

@@ -82,7 +82,8 @@ describe("getRegionalStats", () => {
       ml_engagees_delta: 1,
       a_traiter: 10,
       traites: 10,
-      traites_variation: "+80%",
+      // 8 dossiers traités ces 30 jours contre 2 les 30 jours d'avant
+      traites_variation: "+300%",
     });
     expect(regions.find((region) => region.code === "84")).toMatchObject({
       ml_total: 1,

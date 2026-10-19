@@ -19,7 +19,7 @@ export function RupturesOverviewSection() {
         <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
           <TraitementCards
             latestStats={data?.latest}
-            firstStats={data?.first}
+            variations={data?.variations}
             loading={isLoading}
             loadingPercentage={isLoadingVariation(isFetching, isLoading)}
             cardClassName={kpiFunnelCardClassName}

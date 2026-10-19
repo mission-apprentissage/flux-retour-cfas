@@ -21,8 +21,9 @@ import {
   MOTIFS_PIPELINE,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import {
+  calculatePreviousStartDate,
   calculateStartDateAsync,
-  createStatWithVariation,
+  createCumulStatWithVariation,
 } from "@/common/actions/mission-locale/mission-locale-stats.helpers";
 import {
   addCollabSituationField,
@@ -213,28 +214,34 @@ export async function getTerritoireCollaborationStats(
   const compterCfa = async (date: Date) =>
     (await missionLocaleEffectifsDb().distinct("effectif_snapshot.organisme_id", matchAu(date))).length;
 
-  const [actuel, cfaActuels, cfaDebut, situationsDebut] = await Promise.all([
-    aggregateCollabDossiers(matchAu(now), now),
-    compterCfa(now),
-    compterCfa(startDate),
+  const situationsAu = (date: Date) =>
     missionLocaleEffectifsDb()
       .aggregate<CollabFacets["situations"][number]>([
-        { $match: matchAu(startDate) },
+        { $match: matchAu(date) },
         addCollabSituationField(),
         { $group: { _id: "$collab_situation", n: { $sum: 1 } } },
       ])
       .toArray()
-      .then(toSituations),
+      .then(toSituations);
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
+
+  const [actuel, cfaActuels, cfaDebut, cfaPrecedent, situationsDebut, situationsPrecedent] = await Promise.all([
+    aggregateCollabDossiers(matchAu(now), now),
+    compterCfa(now),
+    compterCfa(startDate),
+    previousStartDate ? compterCfa(previousStartDate) : Promise.resolve(null),
+    situationsAu(startDate),
+    previousStartDate ? situationsAu(previousStartDate) : Promise.resolve(null),
   ]);
   const { kpis, situations, motifs } = actuel;
-  const variationSituation = (cle: Exclude<keyof ICollabSituations, "total">) =>
-    createStatWithVariation(situations[cle], situationsDebut[cle]).variation;
+  const variationSituation = (cle: keyof ICollabSituations) =>
+    createCumulStatWithVariation(situations[cle], situationsDebut[cle], situationsPrecedent?.[cle] ?? null).variation;
 
   return {
     evaluationDate,
     period,
-    cfa_ayant_collabore: createStatWithVariation(cfaActuels, cfaDebut),
-    jeunes_envoyes: createStatWithVariation(situations.total, situationsDebut.total),
+    cfa_ayant_collabore: createCumulStatWithVariation(cfaActuels, cfaDebut, cfaPrecedent),
+    jeunes_envoyes: { current: situations.total, variation: variationSituation("total") },
     jeunes_contactes: sansVariation(kpis?.traites ?? 0),
     jeunes_accompagnement_accepte: sansVariation(kpis?.rdv_pris ?? 0),
     resultats: toResultats(kpis),

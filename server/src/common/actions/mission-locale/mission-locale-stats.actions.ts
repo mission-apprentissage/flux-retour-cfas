@@ -24,7 +24,6 @@ import {
 } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
 import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
-import { calculatePercentage } from "shared/utils/stats";
 
 import {
   missionLocaleEffectifsDb,
@@ -48,7 +47,9 @@ import {
   buildSegmentViewExpr,
   buildTotalTraitesV2Expression,
   calculateStartDateAsync,
-  createStatWithVariation,
+  calculatePreviousStartDate,
+  createCumulStatWithVariation,
+  createEtatStatWithVariation,
   EMPTY_COLLAB_SEGMENT_STATS,
   ENGAGEMENT_THRESHOLD,
   getLatestStatsLowerBound,
@@ -335,10 +336,12 @@ async function getTerritoryStats(period: StatsPeriod, level: TerritoryLevel, reg
   const evaluationDate = normalizeToUTCDay(new Date());
   const startDate = await calculateStartDateAsync(period, evaluationDate);
 
-  const [territories, currentByCode, previousByCode] = await Promise.all([
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
+  const [territories, currentByCode, previousByCode, precedentByCode] = await Promise.all([
     getMissionLocalesByTerritory(evaluationDate, startDate, level, regionCode),
     getTerritoryStatsAtDate(evaluationDate, level, regionCode),
     getTerritoryStatsAtDate(startDate, level, regionCode),
+    previousStartDate ? getTerritoryStatsAtDate(previousStartDate, level, regionCode) : Promise.resolve(null),
   ]);
 
   // Une ML sans département reste visible (ligne « inconnu ») ; sans région, elle n'a pas de ligne régionale.
@@ -347,6 +350,7 @@ async function getTerritoryStats(period: StatsPeriod, level: TerritoryLevel, reg
     .map((territory) => {
       const current = currentByCode.get(territory._id) || EMPTY_TERRITORY_STATS;
       const previous = previousByCode.get(territory._id) || EMPTY_TERRITORY_STATS;
+      const precedent = precedentByCode ? precedentByCode.get(territory._id) || EMPTY_TERRITORY_STATS : null;
 
       return {
         code: territory._id ?? UNKNOWN_DEPARTEMENT_CODE,
@@ -359,7 +363,8 @@ async function getTerritoryStats(period: StatsPeriod, level: TerritoryLevel, reg
         engagement_rate: territory.ml_activees_current > 0 ? current.engaged / territory.ml_activees_current : 0,
         a_traiter: current.a_traiter,
         traites: current.traites,
-        traites_variation: calculatePercentage(current.traites, previous.traites),
+        traites_variation: createCumulStatWithVariation(current.traites, previous.traites, precedent?.traites ?? null)
+          .variation,
       };
     });
 }
@@ -410,14 +415,29 @@ export const getTraitementStats = async (
 
   const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
 
-  const [latest, first] = await Promise.all([
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
+  const [latest, first, precedent] = await Promise.all([
     getSegmentStatsForPeriod(endDate, missionLocaleIds, segment),
     getFirstSegmentStatsInPeriod(startDate, endDate, missionLocaleIds, segment),
+    previousStartDate
+      ? getFirstSegmentStatsInPeriod(previousStartDate, startDate, missionLocaleIds, segment)
+      : Promise.resolve(null),
   ]);
+  const fin = toTraitementStatsData(latest);
+  const debut = toTraitementStatsData(first);
+  const debutPrecedent = precedent ? toTraitementStatsData(precedent) : null;
+  const variation = (cle: keyof typeof fin) =>
+    createCumulStatWithVariation(fin[cle], debut[cle], debutPrecedent?.[cle] ?? null).variation;
 
   return {
-    latest: toTraitementStatsData(latest),
-    first: toTraitementStatsData(first),
+    latest: fin,
+    first: debut,
+    variations: {
+      total: variation("total"),
+      total_contacte: variation("total_contacte"),
+      total_repondu: variation("total_repondu"),
+      total_accompagne: variation("total_accompagne"),
+    },
     evaluationDate: endDate,
     period,
     segment,
@@ -680,14 +700,17 @@ export const getTraitementStatsByMissionLocale = async (
   const total = result.total[0]?.count || 0;
   const data = result.data || [];
 
+  // « Depuis janvier » et « Depuis le lancement » n'ont pas de période comparable : pas d'évolution affichée.
+  const evolutionComparable = calculatePreviousStartDate(period, startDate) !== null;
   const resultsWithEvolution = data.map((item: Record<string, unknown>) => {
     const evolutionValue = (item.pourcentage_evolution_value as number) || 0;
-    let pourcentage_evolution = "=";
-    if (evolutionValue > 0) {
-      pourcentage_evolution = `+${evolutionValue}%`;
-    } else if (evolutionValue < 0) {
-      pourcentage_evolution = `${evolutionValue}%`;
-    }
+    const pourcentage_evolution = !evolutionComparable
+      ? ""
+      : evolutionValue > 0
+        ? `+${evolutionValue}%`
+        : evolutionValue < 0
+          ? `${evolutionValue}%`
+          : "=";
 
     const { pourcentage_evolution_value: _pourcentage_evolution_value, ...rest } = item;
     return {
@@ -791,6 +814,14 @@ export const MOTIFS_PIPELINE = [
   },
 ];
 
+/** ML activées à une date, sur le périmètre (toutes les ML, y compris sans région, au national). */
+const countActivatedMissionLocales = (date: Date, regions?: string[]) =>
+  organisationsDb().countDocuments({
+    type: "MISSION_LOCALE",
+    activated_at: { $lte: date },
+    ...(regions ? { "adresse.region": { $in: regions } } : {}),
+  });
+
 export async function getDeploymentStats(period: StatsPeriod = "30days", scopeRegions?: string[]) {
   const evaluationDate = normalizeToUTCDay(new Date());
 
@@ -818,11 +849,24 @@ export async function getDeploymentStats(period: StatsPeriod = "30days", scopeRe
         previousActivatedMlCount: summary.previousActivatedMlCount,
       };
 
+  const startDate = await calculateStartDateAsync(period, evaluationDate);
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
+  const activeesAvantPeriodePrecedente = previousStartDate
+    ? await countActivatedMissionLocales(previousStartDate, scope)
+    : null;
+
   return {
     summary: {
       ...mlCounts,
       engagedMlCount,
       previousEngagedMlCount,
+      activatedMlVariation: createCumulStatWithVariation(
+        mlCounts.activatedMlCount,
+        mlCounts.previousActivatedMlCount,
+        activeesAvantPeriodePrecedente
+      ).variation,
+      engagedMlVariation: createEtatStatWithVariation(engagedMlCount, previousEngagedMlCount, !!previousStartDate)
+        .variation,
       date: evaluationDate,
     },
     regionsActives: regions.map((r) => r.code),
@@ -859,14 +903,16 @@ export async function getRupturantsStats(
     segment
   );
 
-  const [currentStats, previousStats] = await Promise.all([
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
+  const [currentStats, previousStats, precedentStats] = await Promise.all([
     getSegmentStatsForPeriod(endDate, missionLocaleIds, segment),
     getSegmentStatsForPeriod(startDate, missionLocaleIds, segment),
+    previousStartDate ? getSegmentStatsForPeriod(previousStartDate, missionLocaleIds, segment) : Promise.resolve(null),
   ]);
 
   const rupturantsSummary: IRupturantsSummary = {
-    a_traiter: createStatWithVariation(currentStats.a_traiter, previousStats.a_traiter),
-    traites: createStatWithVariation(currentStats.traite, previousStats.traite),
+    a_traiter: createEtatStatWithVariation(currentStats.a_traiter, previousStats.a_traiter, !!previousStartDate),
+    traites: createCumulStatWithVariation(currentStats.traite, previousStats.traite, precedentStats?.traite ?? null),
     total: currentStats.total,
   };
 
@@ -881,19 +927,28 @@ export async function getRupturantsStats(
 
 const buildDetailsTraitesV2 = (
   current: ICollabSegmentStats,
-  previous: ICollabSegmentStats
-): IDetailsDossiersTraitesV2 => ({
-  rdv_pris: createStatWithVariation(current.rdv_pris, previous.rdv_pris),
-  projet_pro_securise: createStatWithVariation(current.projet_pro_securise, previous.projet_pro_securise),
-  ne_souhaite_pas_accompagnement: createStatWithVariation(
-    current.ne_souhaite_pas_accompagnement,
-    previous.ne_souhaite_pas_accompagnement
-  ),
-  a_recontacter: createStatWithVariation(current.a_recontacter, previous.a_recontacter),
-  injoignable: createStatWithVariation(current.injoignable, previous.injoignable),
-  autre: createStatWithVariation(current.autre, previous.autre),
-  total: current.traite,
-});
+  previous: ICollabSegmentStats,
+  precedent: ICollabSegmentStats | null
+): IDetailsDossiersTraitesV2 => {
+  const cumul = (
+    cle:
+      | "rdv_pris"
+      | "projet_pro_securise"
+      | "ne_souhaite_pas_accompagnement"
+      | "a_recontacter"
+      | "injoignable"
+      | "autre"
+  ) => createCumulStatWithVariation(current[cle], previous[cle], precedent?.[cle] ?? null);
+  return {
+    rdv_pris: cumul("rdv_pris"),
+    projet_pro_securise: cumul("projet_pro_securise"),
+    ne_souhaite_pas_accompagnement: cumul("ne_souhaite_pas_accompagnement"),
+    a_recontacter: cumul("a_recontacter"),
+    injoignable: cumul("injoignable"),
+    autre: cumul("autre"),
+    total: current.traite,
+  };
+};
 
 export async function getDossiersTraitesStats(
   period: StatsPeriod = "30days",
@@ -907,13 +962,15 @@ export async function getDossiersTraitesStats(
 
   const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
 
-  const [currentStats, previousStats] = await Promise.all([
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
+  const [currentStats, previousStats, precedentStats] = await Promise.all([
     getSegmentStatsForPeriod(endDate, missionLocaleIds, segment),
     getSegmentStatsForPeriod(startDate, missionLocaleIds, segment),
+    previousStartDate ? getSegmentStatsForPeriod(previousStartDate, missionLocaleIds, segment) : Promise.resolve(null),
   ]);
 
   return {
-    detailsV2: buildDetailsTraitesV2(currentStats, previousStats),
+    detailsV2: buildDetailsTraitesV2(currentStats, previousStats, precedentStats),
     traites: currentStats.traite,
     deja_connu_accompagne: segment === "all" ? null : currentStats.deja_connu_accompagne,
     evaluationDate,
@@ -961,11 +1018,14 @@ export async function getCollaborationSegmentStats(
   const countCfaAyantCollabore = async (date: Date) =>
     (await missionLocaleEffectifsDb().distinct("effectif_snapshot.organisme_id", collabMatch(date))).length;
 
-  const [current, previous, cfaCurrent, cfaPrevious, objectifsResult] = await Promise.all([
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
+  const [current, previous, precedent, cfaCurrent, cfaPrevious, cfaPrecedent, objectifsResult] = await Promise.all([
     getSegmentStatsForPeriod(evaluationDate, missionLocaleIds, "collab"),
     getSegmentStatsForPeriod(startDate, missionLocaleIds, "collab"),
+    previousStartDate ? getSegmentStatsForPeriod(previousStartDate, missionLocaleIds, "collab") : Promise.resolve(null),
     countCfaAyantCollabore(evaluationDate),
     countCfaAyantCollabore(startDate),
+    previousStartDate ? countCfaAyantCollabore(previousStartDate) : Promise.resolve(null),
     missionLocaleEffectifsDb()
       .aggregate([
         { $match: collabMatch(evaluationDate) },
@@ -975,6 +1035,8 @@ export async function getCollaborationSegmentStats(
   ]);
 
   const motifs = { ...DEFAULT_MOTIFS, ...objectifsResult?.motifs?.[0] };
+  const variationSituation = (cle: keyof ICollabSegmentStats & `situation_${string}`) =>
+    createCumulStatWithVariation(current[cle], previous[cle], precedent?.[cle] ?? null).variation;
   const situations = {
     rupture: current.situation_rupture,
     abandon: current.situation_abandon,
@@ -987,11 +1049,15 @@ export async function getCollaborationSegmentStats(
   return {
     evaluationDate,
     period,
-    cfa_ayant_collabore: createStatWithVariation(cfaCurrent, cfaPrevious),
-    jeunes_envoyes: createStatWithVariation(current.total, previous.total),
-    jeunes_contactes: createStatWithVariation(current.traite, previous.traite),
-    jeunes_accompagnement_accepte: createStatWithVariation(current.rdv_pris, previous.rdv_pris),
-    resultats: buildDetailsTraitesV2(current, previous),
+    cfa_ayant_collabore: createCumulStatWithVariation(cfaCurrent, cfaPrevious, cfaPrecedent),
+    jeunes_envoyes: createCumulStatWithVariation(current.total, previous.total, precedent?.total ?? null),
+    jeunes_contactes: createCumulStatWithVariation(current.traite, previous.traite, precedent?.traite ?? null),
+    jeunes_accompagnement_accepte: createCumulStatWithVariation(
+      current.rdv_pris,
+      previous.rdv_pris,
+      precedent?.rdv_pris ?? null
+    ),
+    resultats: buildDetailsTraitesV2(current, previous, precedent),
     part_deja_connus: current.traite > 0 ? Math.round((current.deja_connu_accompagne / current.traite) * 100) : 0,
     delai_moyen_jours:
       current.delai_premiere_activite_count > 0
@@ -999,24 +1065,12 @@ export async function getCollaborationSegmentStats(
         : null,
     situations: { ...situations, total: Object.values(situations).reduce((sum, value) => sum + value, 0) },
     situations_variations: {
-      rupture: createStatWithVariation(current.situation_rupture, previous.situation_rupture).variation,
-      abandon: createStatWithVariation(current.situation_abandon, previous.situation_abandon).variation,
-      prevention_inevitable: createStatWithVariation(
-        current.situation_prevention_inevitable,
-        previous.situation_prevention_inevitable
-      ).variation,
-      prevention_tres_eleve: createStatWithVariation(
-        current.situation_prevention_tres_eleve,
-        previous.situation_prevention_tres_eleve
-      ).variation,
-      prevention_modere: createStatWithVariation(
-        current.situation_prevention_modere,
-        previous.situation_prevention_modere
-      ).variation,
-      besoin_aide_hors_rupture: createStatWithVariation(
-        current.situation_besoin_aide_hors_rupture,
-        previous.situation_besoin_aide_hors_rupture
-      ).variation,
+      rupture: variationSituation("situation_rupture"),
+      abandon: variationSituation("situation_abandon"),
+      prevention_inevitable: variationSituation("situation_prevention_inevitable"),
+      prevention_tres_eleve: variationSituation("situation_prevention_tres_eleve"),
+      prevention_modere: variationSituation("situation_prevention_modere"),
+      besoin_aide_hors_rupture: variationSituation("situation_besoin_aide_hors_rupture"),
     },
     objectifs: {
       mobilite: motifs.mobilite || 0,

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
 import { DeploymentRow } from "../cards/DeploymentRow";
-import { calculatePercentage, getPercentageColor } from "../constants";
+import { getVariationColorFromString } from "../constants";
 import { useDeploymentStats, useSyntheseRegionsStats } from "../hooks/useStatsQueries";
 import { useUserRegions } from "../hooks/useUserRegions";
 import { RegionTable } from "../tables/RegionTable";
@@ -87,8 +87,8 @@ export function DeploymentContent({ period, region, isAdmin = false }: Deploymen
               loading={loading}
               loadingPercentage={loadingPercentage}
               color="#6A6AF4"
-              percentage={calculatePercentage(stats?.activatedMlCount || 0, stats?.previousActivatedMlCount || 0)}
-              percentageColor={getPercentageColor(stats?.activatedMlCount || 0, stats?.previousActivatedMlCount || 0)}
+              percentage={stats?.activatedMlVariation}
+              percentageColor={getVariationColorFromString(stats?.activatedMlVariation ?? "")}
               tooltip="Missions Locales dont l'accès au suivi des jeunes a été activé sur le Tableau de bord à la date d'évaluation."
             />
 
@@ -97,8 +97,8 @@ export function DeploymentContent({ period, region, isAdmin = false }: Deploymen
               value={stats?.engagedMlCount}
               loading={loading}
               loadingPercentage={loadingPercentage}
-              percentage={calculatePercentage(stats?.engagedMlCount || 0, stats?.previousEngagedMlCount || 0)}
-              percentageColor={getPercentageColor(stats?.engagedMlCount || 0, stats?.previousEngagedMlCount || 0)}
+              percentage={stats?.engagedMlVariation}
+              percentageColor={getVariationColorFromString(stats?.engagedMlVariation ?? "")}
               tooltip="Les Missions Locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur ou égal à 70%."
               indented
             />

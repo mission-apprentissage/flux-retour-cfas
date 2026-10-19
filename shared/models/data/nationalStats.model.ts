@@ -128,6 +128,8 @@ const zTraitementStatsData = z.object({
 const zTraitementStatsResponse = z.object({
   latest: zTraitementStatsData,
   first: zTraitementStatsData,
+  /** Variation de chaque cumul : ajouts de la période comparés à la période précédente (vide sans période comparable). */
+  variations: z.record(zTraitementStatsData.keyof(), z.string()),
   evaluationDate: z.date(),
   period: zStatsPeriod,
   segment: zStatsSegment,

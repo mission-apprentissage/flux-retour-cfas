@@ -67,6 +67,9 @@ interface IDeploymentStatsResponse {
     previousActivatedMlCount: number;
     engagedMlCount: number;
     previousEngagedMlCount: number;
+    /** Variations calculées par le serveur : ML activées sur la période vs la précédente, ML engagées vs début de période. */
+    activatedMlVariation: string;
+    engagedMlVariation: string;
     date: string;
   };
   regionsActives: string[];

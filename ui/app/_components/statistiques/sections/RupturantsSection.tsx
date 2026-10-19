@@ -90,7 +90,12 @@ export function RupturantsSection({
       <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
         <div className={styles.rupturantsContainer}>
           {chartType === "bar" ? (
-            <RupturantsBarChart data={data?.timeSeries || []} loading={isLoading} loadingVariation={loadingVariation} />
+            <RupturantsBarChart
+              data={data?.timeSeries || []}
+              variationTraites={data?.summary.traites.variation}
+              loading={isLoading}
+              loadingVariation={loadingVariation}
+            />
           ) : (
             <RupturantsPieChart data={data?.summary} loading={isLoading} loadingVariation={loadingVariation} />
           )}

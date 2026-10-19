@@ -290,13 +290,33 @@ export const buildTotalTraitesV2Expression = (statsPath = "$latest_stats") => ({
 });
 
 /**
- * Crée un objet IStatWithVariation à partir de valeurs courante et précédente
+ * Début de la période précédente de même durée. « Depuis janvier » et « Depuis le lancement » n'en ont pas :
+ * aucune variation n'est alors affichée.
  */
-export function createStatWithVariation(current: number, previous: number) {
+export function calculatePreviousStartDate(period: StatsPeriod, startDate: Date): Date | null {
+  switch (period) {
+    case "30days":
+      return calculateStartDate("30days", startDate);
+    case "3months":
+      return calculateStartDate("3months", startDate);
+    case "6months":
+      return calculateStartDate("6months", startDate);
+    default:
+      return null;
+  }
+}
+
+/** Cumul (dossiers traités, jeunes envoyés…) : ce qui s'est ajouté pendant la période, comparé à la période précédente. */
+export function createCumulStatWithVariation(fin: number, debut: number, debutPrecedent: number | null) {
   return {
-    current,
-    variation: calculatePercentage(current, previous),
+    current: fin,
+    variation: debutPrecedent === null ? "" : calculatePercentage(fin - debut, debut - debutPrecedent),
   };
+}
+
+/** État (dossiers à traiter, ML engagées…) : valeur actuelle comparée à celle du début de période. */
+export function createEtatStatWithVariation(fin: number, debut: number, comparable: boolean) {
+  return { current: fin, variation: comparable ? calculatePercentage(fin, debut) : "" };
 }
 
 /**

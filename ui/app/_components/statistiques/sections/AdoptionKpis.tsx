@@ -26,7 +26,7 @@ export function AdoptionKpis() {
         <StatCard
           label="Missions Locales actives sur le Tableau de bord"
           value={summary?.activatedMlCount}
-          previousValue={summary?.previousActivatedMlCount}
+          variation={summary?.activatedMlVariation}
           loading={isLoading}
           loadingPercentage={loadingPercentage}
           className={kpiFunnelCardClassName}
@@ -35,7 +35,7 @@ export function AdoptionKpis() {
         <StatCard
           label="Missions Locales engagées sur le Tableau de bord"
           value={summary?.engagedMlCount}
-          previousValue={summary?.previousEngagedMlCount}
+          variation={summary?.engagedMlVariation}
           loading={isLoading}
           loadingPercentage={loadingPercentage}
           className={kpiFunnelCardClassName}
