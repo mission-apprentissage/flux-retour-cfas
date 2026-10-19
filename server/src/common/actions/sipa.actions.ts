@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { Document, ObjectId } from "mongodb";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants";
 import { IContrat } from "shared/models/data/effectifs/contrat.part";

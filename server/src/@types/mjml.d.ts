@@ -13,5 +13,8 @@ declare module "mjml" {
     formattedMessage: string;
   }
 
-  export default function mjml2html(mjml: string, options?: MjmlOptions): { html: string; errors: MjmlError[] };
+  export default function mjml2html(
+    mjml: string,
+    options?: MjmlOptions
+  ): Promise<{ html: string; errors: MjmlError[] }>;
 }

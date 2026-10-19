@@ -1,5 +1,5 @@
+import * as Boom from "@hapi/boom";
 import type { ICertification } from "api-alternance-sdk";
-import Boom from "boom";
 import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
 import { Collection, ObjectId, type WithoutId } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";

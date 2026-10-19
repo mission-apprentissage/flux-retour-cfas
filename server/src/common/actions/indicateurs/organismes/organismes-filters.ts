@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { Filter, ObjectId } from "mongodb";
 import { PermissionScope, assertUnreachable, entries } from "shared";
 import { IOrganisme } from "shared/models/data/organismes.model";

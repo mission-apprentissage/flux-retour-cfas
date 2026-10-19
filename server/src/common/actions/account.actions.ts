@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { ObjectId } from "mongodb";
 import type { IOrganisationMissionLocale } from "shared/models";
 import { IInvitation } from "shared/models/data/invitations.model";

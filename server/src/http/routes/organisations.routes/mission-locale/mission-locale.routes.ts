@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { ObjectId } from "bson";
 import express from "express";
 import { ML_SITUATION_DOSSIER, ML_SITUATION_DOSSIER_LABEL } from "shared/constants";

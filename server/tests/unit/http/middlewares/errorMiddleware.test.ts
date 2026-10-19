@@ -1,5 +1,5 @@
+import * as Boom from "@hapi/boom";
 import { captureException } from "@sentry/node";
-import Boom from "boom";
 import type { Request, Response } from "express";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { z, ZodError } from "zod";
@@ -76,6 +76,10 @@ describe("normalizeToBoom", () => {
 
   it("respecte un champ status porté par l'erreur", () => {
     expect(normalizeToBoom(Object.assign(new Error("nope"), { status: 418 })).output.statusCode).toBe(418);
+  });
+
+  it.each([0, Number.NaN, 302, 600])("retombe sur 500 quand le status %s n'est pas un code d'erreur HTTP", (status) => {
+    expect(normalizeToBoom(Object.assign(new Error("nope"), { status })).output.statusCode).toBe(500);
   });
 
   it("accepte une valeur qui n'est pas une Error", () => {

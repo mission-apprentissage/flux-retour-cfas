@@ -1,7 +1,7 @@
+import * as Boom from "@hapi/boom";
 import { captureException } from "@sentry/node";
 import type { ICertification } from "api-alternance-sdk";
 import { zCfd, zRncp } from "api-alternance-sdk/internal";
-import Boom from "boom";
 import type { IEffectif } from "shared/models";
 
 import { getNiveauFormationLibelle } from "@/common/actions/formations.actions";

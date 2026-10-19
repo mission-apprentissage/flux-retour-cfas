@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { z, ZodError } from "zod";
 
 export async function validateFullZodObjectSchema<Shape extends z.ZodRawShape>(
@@ -9,7 +9,7 @@ export async function validateFullZodObjectSchema<Shape extends z.ZodRawShape>(
 }
 
 /** `issues` et `details` sont lus par des consommateurs externes : ne pas en changer la forme. */
-export function toValidationError(zodError: ZodError): Boom {
+export function toValidationError(zodError: ZodError): Boom.Boom {
   const boomError = Boom.badRequest("Erreur de validation");
   const payload = boomError.output.payload as Boom.Payload & { issues?: unknown; details?: unknown };
   payload.issues = zodError.issues;

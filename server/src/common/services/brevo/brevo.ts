@@ -4,8 +4,8 @@ import brevo, {
   EventsApiApiKeys,
   TransactionalEmailsApiApiKeys,
 } from "@getbrevo/brevo";
+import * as Boom from "@hapi/boom";
 import { captureException } from "@sentry/node";
-import Boom from "boom";
 import { format } from "date-fns";
 
 import logger from "@/common/logger";

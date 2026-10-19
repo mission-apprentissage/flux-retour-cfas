@@ -1,9 +1,9 @@
 import fs from "fs";
 import type { IncomingMessage } from "node:http";
 
+import * as Boom from "@hapi/boom";
 import * as Sentry from "@sentry/node";
 import { zUai } from "api-alternance-sdk/internal";
-import Boom from "boom";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application } from "express";

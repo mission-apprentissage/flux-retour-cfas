@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { ObjectId } from "mongodb";
 
 import { erpDb } from "../model/collections";

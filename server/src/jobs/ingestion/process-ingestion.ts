@@ -1,6 +1,6 @@
+import * as Boom from "@hapi/boom";
 import { captureException, getCurrentHub, runWithAsyncContext } from "@sentry/node";
 import { PromisePool } from "@supercharge/promise-pool";
-import Boom from "boom";
 import { Filter, ObjectId, WithId, type WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import {
