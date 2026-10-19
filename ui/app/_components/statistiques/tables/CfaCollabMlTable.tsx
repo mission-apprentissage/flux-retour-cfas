@@ -93,7 +93,7 @@ export function CfaCollabMlTable({ organismeId }: { organismeId: string }) {
                   <div key={`a-traiter-${row.mission_locale_id}`} className={styles.centeredCell}>
                     {row.a_traiter.toLocaleString("fr-FR")}
                     {row.a_recontacter > 0 && (
-                      <span className={styles.meta}>et {row.a_recontacter.toLocaleString("fr-FR")} à recontacter</span>
+                      <span className={styles.meta}>+ {row.a_recontacter.toLocaleString("fr-FR")} à recontacter</span>
                     )}
                   </div>,
                   <div key={`traitees-${row.mission_locale_id}`} className={styles.centeredCell}>

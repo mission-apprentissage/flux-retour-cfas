@@ -373,8 +373,13 @@ export function TraitementMLTable({
                     <div className={styles.centeredCell} key={`total-${ml.id}`}>
                       {ml.total_jeunes}
                     </div>,
-                    <div className={styles.centeredCell} key={`a-traiter-${ml.id}`}>
+                    <div className={styles.aTraiterCell} key={`a-traiter-${ml.id}`}>
                       {ml.a_traiter}
+                      {ml.details.a_recontacter > 0 && (
+                        <span className={styles.mention}>
+                          + {ml.details.a_recontacter.toLocaleString("fr-FR")} à recontacter
+                        </span>
+                      )}
                     </div>,
                     <div className={styles.centeredCell} key={`traites-${ml.id}`}>
                       {ml.traites}
