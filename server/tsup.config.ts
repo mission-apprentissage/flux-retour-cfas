@@ -30,6 +30,7 @@ export default defineConfig((options) => {
     format: ["esm"],
     splitting: true,
     shims: false,
+    removeNodeProtocol: false,
     minify: false,
     sourcemap: true,
     noExternal: ["shared"],
