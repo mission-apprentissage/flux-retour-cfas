@@ -60,7 +60,7 @@ const COMPARATEURS: Record<MlAlerteListeSortBy, (a: IMlAlerteListeRow, b: IMlAle
 
 export async function listMlAlertes(
   type: MlAlerteListeType,
-  territoire: { region?: string; regions?: string[] },
+  territoire: { region?: string; regions?: string[]; departements?: string[] },
   tri: { sort_by: MlAlerteListeSortBy; sort_order: "asc" | "desc" }
 ): Promise<IMlAlerteListeRow[]> {
   const critere = CRITERES[type];
@@ -69,6 +69,7 @@ export async function listMlAlertes(
     segment: critere.segment,
     region: territoire.region,
     regions: territoire.regions,
+    departements: territoire.departements,
     page: 1,
     limit: TOUTES_LES_LIGNES,
     sort_by: "nom",

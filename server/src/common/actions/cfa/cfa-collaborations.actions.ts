@@ -24,6 +24,7 @@ import {
   calculatePreviousStartDate,
   calculateStartDateAsync,
   createCumulStatWithVariation,
+  type Territoire,
 } from "@/common/actions/mission-locale/mission-locale-stats.helpers";
 import {
   addCollabSituationField,
@@ -204,12 +205,12 @@ export async function getCfaCollaborationStats(
  */
 export async function getTerritoireCollaborationStats(
   period: StatsPeriod,
-  regions?: string[],
+  territoire: Territoire = {},
   now: Date = new Date()
 ): Promise<ICollaborationSegmentStats> {
   const evaluationDate = normalizeToUTCDay(now);
   const startDate = await calculateStartDateAsync(period, evaluationDate);
-  const perimetre = await buildCollabPerimetreMatch(regions);
+  const perimetre = await buildCollabPerimetreMatch(territoire);
   const matchAu = (date: Date) => buildCollabDossiersMatch(perimetre, date);
   const compterCfa = async (date: Date) =>
     (await missionLocaleEffectifsDb().distinct("effectif_snapshot.organisme_id", matchAu(date))).length;

@@ -9,6 +9,7 @@ import { missionLocaleEffectifsDb } from "@/common/model/collections";
 
 import { RESULTAT_SITUATIONS } from "./collaboration-dossiers.actions";
 import { buildCollabMatch, buildCollabPerimetreMatch } from "./mission-locale-stats.actions";
+import type { Territoire } from "./mission-locale-stats.helpers";
 import { addCollabSituationField } from "./mission-locale.actions";
 
 const SITUATIONS = [
@@ -66,10 +67,10 @@ const versLigne = (cle: string, groupe: Groupe | undefined): ICollabCorrelationR
 
 /** Même périmètre de dossiers que les chiffres clés : CFA du territoire ou ML de la fiche, tous les dossiers envoyés. */
 export async function getCollaborationCorrelations(
-  regions?: string[],
+  territoire: Territoire = {},
   mlId?: string
 ): Promise<ICollabCorrelationsResponse> {
-  const perimetre = await buildCollabPerimetreMatch(regions, mlId);
+  const perimetre = await buildCollabPerimetreMatch(territoire, mlId);
 
   const [result] = await missionLocaleEffectifsDb()
     .aggregate<{ situations: Groupe[]; objectifs: Groupe[] }>([

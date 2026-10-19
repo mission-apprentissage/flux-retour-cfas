@@ -17,15 +17,13 @@ import {
   calculateStartDateAsync,
   calculatePreviousStartDate,
   createCumulStatWithVariation,
+  type Territoire,
 } from "@/common/actions/mission-locale/mission-locale-stats.helpers";
 import { findEligibleOrganismes } from "@/common/actions/organismes/deca-cfa-eligibility";
 import { buildOrganismeNatureFilter, buildOrganismeSearchFilter } from "@/common/actions/organismes/organismes.actions";
 import { missionLocaleEffectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 
-export interface CfaTerritoire {
-  regions?: string[];
-  departements?: string[];
-}
+export type CfaTerritoire = Territoire;
 
 /**
  * Établissements de formation retenus sur un territoire : présents dans le référentiel et non fermés.
@@ -48,12 +46,15 @@ const countOrganismesWithCollaboration = async (organismeIds: ObjectId[], endExc
         )
       ).length;
 
-export async function getCfaAdoptionStats(period: StatsPeriod, regions?: string[]): Promise<ICfaAdoptionStats> {
+export async function getCfaAdoptionStats(
+  period: StatsPeriod,
+  territoire: Territoire = {}
+): Promise<ICfaAdoptionStats> {
   const evaluationDate = normalizeToUTCDay(new Date());
   const startDate = await calculateStartDateAsync(period, evaluationDate);
 
   const organismes = await organismesDb()
-    .find(buildCfaTerritoireMatch({ regions }), { projection: { _id: 1, has_account: 1 } })
+    .find(buildCfaTerritoireMatch(territoire), { projection: { _id: 1, has_account: 1 } })
     .toArray();
   const organismeIds = organismes.map((organisme) => organisme._id);
 

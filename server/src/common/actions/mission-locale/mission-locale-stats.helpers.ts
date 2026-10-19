@@ -87,12 +87,27 @@ export const buildPercentageExpression = (numerator: MongoExpression, denominato
   ],
 });
 
-/**
- * Récupère les IDs des Missions Locales d'une région donnée
- */
-export const getMissionLocaleIdsByRegions = async (regions: string[]): Promise<ObjectId[]> => {
+/** Territoire des indicateurs : des régions et, en vue département, des départements. */
+export interface Territoire {
+  regions?: string[];
+  departements?: string[];
+}
+
+export const isTerritoireRestreint = ({ regions, departements }: Territoire = {}) =>
+  !!regions?.length || !!departements?.length;
+
+/** Filtre sur l'adresse d'une ML ou d'un organisme ; `prefix` vise un document joint (ex. `ml.`). */
+export const buildTerritoireMatch = ({ regions, departements }: Territoire = {}, prefix = "") => ({
+  ...(regions?.length ? { [`${prefix}adresse.region`]: { $in: regions } } : {}),
+  ...(departements?.length ? { [`${prefix}adresse.departement`]: { $in: departements } } : {}),
+});
+
+export const getMissionLocaleIdsByRegions = async (regions: string[]): Promise<ObjectId[]> =>
+  getMissionLocaleIdsByTerritoire({ regions });
+
+export const getMissionLocaleIdsByTerritoire = async (territoire: Territoire): Promise<ObjectId[]> => {
   const mls = await organisationsDb()
-    .find({ type: "MISSION_LOCALE", "adresse.region": { $in: regions } }, { projection: { _id: 1 } })
+    .find({ type: "MISSION_LOCALE", ...buildTerritoireMatch(territoire) }, { projection: { _id: 1 } })
     .toArray();
 
   return mls.map((ml) => ml._id);

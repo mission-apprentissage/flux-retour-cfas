@@ -59,6 +59,7 @@ import {
   getWhatsAppStats,
   getPrequalifStats,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
+import type { Territoire } from "@/common/actions/mission-locale/mission-locale-stats.helpers";
 import { rechercherEtablissements } from "@/common/actions/recherche/recherche-etablissements.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
 import { organisationsDb, organismesDb } from "@/common/model/collections";
@@ -78,11 +79,13 @@ const periodQuery = z.object({ period: zStatsPeriod.optional() });
 const syntheseQuery = z.object({
   period: zStatsPeriod.optional(),
   region: z.string().optional(),
+  departement: z.string().optional(),
   national: zBooleanStringSchema.optional(),
 });
 const traitementQuery = z.object({
   period: zStatsPeriod.optional(),
   region: z.string().optional(),
+  departement: z.string().optional(),
   ml_id: mlIdSchema.optional(),
   national: zBooleanStringSchema.optional(),
   segment: zStatsSegment.default("rupture"),
@@ -90,6 +93,7 @@ const traitementQuery = z.object({
 const statsQuery = z.object({
   period: zStatsPeriod.optional(),
   region: z.string().optional(),
+  departement: z.string().optional(),
   ml_id: mlIdSchema.optional(),
   national: zBooleanStringSchema.optional(),
   segment: zStatsSegment.default("rupture"),
@@ -97,6 +101,7 @@ const statsQuery = z.object({
 const collaborationsQuery = z.object({
   period: zStatsPeriod.optional(),
   region: z.string().optional(),
+  departement: z.string().optional(),
   ml_id: mlIdSchema.optional(),
   national: zBooleanStringSchema.optional(),
 });
@@ -114,6 +119,7 @@ const zCsvList = z
 const traitementMlQuery = z.object({
   period: zStatsPeriod.optional(),
   region: z.string().optional(),
+  departement: z.string().optional(),
   national: zBooleanStringSchema.optional(),
   segment: zStatsSegment.default("rupture"),
   page: z.coerce.number().min(1).optional().default(1),
@@ -127,6 +133,7 @@ const traitementMlQuery = z.object({
 });
 const cfaEtablissementsExportQuery = z.object({
   region: z.string().optional(),
+  departement: z.string().optional(),
   national: zBooleanStringSchema.optional(),
   departements: zCsvList,
   search: z.string().optional(),
@@ -143,11 +150,13 @@ const cfaEtablissementsQuery = cfaEtablissementsExportQuery.extend({
 });
 const cfaInvitesQuery = zCfaInvitesSansCollabQuery.extend({
   region: z.string().optional(),
+  departement: z.string().optional(),
   national: zBooleanStringSchema.optional(),
 });
 const cfaInvitesExportQuery = cfaInvitesQuery.omit({ page: true, limit: true });
 const cfaInjoignablesExportQuery = z.object({
   region: z.string().optional(),
+  departement: z.string().optional(),
   national: zBooleanStringSchema.optional(),
   sort_by: zCfaInjoignablesSortBy.default("taux"),
   sort_order: z.enum(["asc", "desc"]).default("desc"),
@@ -159,6 +168,7 @@ const cfaInjoignablesQuery = cfaInjoignablesExportQuery.extend({
 const mlAlertesParams = z.object({ type: z.enum(ML_ALERTE_LISTE_TYPES) });
 const mlAlertesExportQuery = z.object({
   region: z.string().optional(),
+  departement: z.string().optional(),
   national: zBooleanStringSchema.optional(),
   sort_by: z.enum(ML_ALERTE_LISTE_SORT_BY).default("total_jeunes"),
   sort_order: z.enum(["asc", "desc"]).default("desc"),
@@ -202,10 +212,15 @@ const rechercheQuery = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(10),
 });
 const couvertureDepartementsQuery = z.object({ period: zStatsPeriod.optional(), region: z.string() });
-const nationalQuery = z.object({ period: zStatsPeriod.optional(), national: zBooleanStringSchema.optional() });
+const nationalQuery = z.object({
+  period: zStatsPeriod.optional(),
+  departement: z.string().optional(),
+  national: zBooleanStringSchema.optional(),
+});
 const traitementRegionsQuery = nationalQuery.extend({ segment: zStatsSegment.default("all") });
 const exportQuery = z.object({
   region: z.string().optional(),
+  departement: z.string().optional(),
   ml_id: mlIdSchema.optional(),
   national: zBooleanStringSchema.optional(),
 });
@@ -386,13 +401,13 @@ export default () => {
 const getDeploymentRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = async (req, { locals }) => {
   const scope = await resolveStatsScope(req.query, locals.regions);
 
-  return await getDeploymentStats(req.query.period || "30days", scope.regions);
+  return await getDeploymentStats(req.query.period || "30days", scope.territoire);
 };
 
 const getSyntheseRegionsRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = async (req, { locals }) => {
   const scope = await resolveStatsScope(req.query, locals.regions);
 
-  return await getSyntheseRegionsStats(req.query.period || "30days", scope.regions);
+  return await getSyntheseRegionsStats(req.query.period || "30days", scope.territoire.regions);
 };
 
 const assertRegionAllowed = (region: string | undefined, userRegions: string[]) => {
@@ -419,45 +434,59 @@ const assertDepartementsConnus = (departements: string[] | undefined) => {
 const scopedRegions = (region: string | undefined, userRegions: string[]) =>
   region ? [region] : userRegions.length > 0 ? userRegions : undefined;
 
+type TerritoireQuery = { region?: string; departement?: string; national?: boolean };
+
 /**
- * Chiffres agrégés et listes de structures, ouverts à tous les territoires : la région demandée,
- * la France entière avec `national`, sinon par défaut les régions de l'utilisateur.
+ * Chiffres agrégés et listes de structures, ouverts à tous les territoires : le département demandé (dans sa
+ * région), sinon la région demandée, la France entière avec `national`, ou par défaut les régions de l'utilisateur.
  */
-const territoireRegions = (query: { region?: string; national?: boolean }, userRegions: string[]) =>
-  query.region ? [query.region] : query.national ? undefined : scopedRegions(undefined, userRegions);
+const resolveTerritoire = (query: TerritoireQuery, userRegions: string[]): Territoire => {
+  if (query.departement) {
+    const region = DEPARTEMENTS_BY_CODE[query.departement as keyof typeof DEPARTEMENTS_BY_CODE]?.region.code;
+    if (!region) {
+      throw Boom.badRequest("Département inconnu");
+    }
+    if (query.region && query.region !== region) {
+      throw Boom.badRequest("Département hors de la région demandée");
+    }
+    return { regions: [region], departements: [query.departement] };
+  }
+  return {
+    regions: query.region ? [query.region] : query.national ? undefined : scopedRegions(undefined, userRegions),
+  };
+};
 
 /** Périmètre des stats : `ml_id` court-circuite le territoire. */
 const resolveStatsScope = async (
-  query: { region?: string; ml_id?: string; national?: boolean },
+  query: TerritoireQuery & { ml_id?: string },
   userRegions: string[]
-): Promise<{ regions?: string[]; mlId?: string }> => {
+): Promise<{ territoire: Territoire; mlId?: string }> => {
   if (query.ml_id) {
     await findMlOrThrow(query.ml_id);
-    return { mlId: query.ml_id };
+    return { territoire: {}, mlId: query.ml_id };
   }
-  const regions = territoireRegions(query, userRegions);
-  return regions ? { regions } : {};
+  return { territoire: resolveTerritoire(query, userRegions) };
 };
 
 const getTraitementRoute: IndicateursHandler<z.infer<typeof traitementQuery>> = async (req, { locals }) => {
   const { period, segment } = req.query;
   const scope = await resolveStatsScope(req.query, locals.regions);
 
-  return await getTraitementStats(period || "30days", undefined, scope.regions, segment, scope.mlId);
+  return await getTraitementStats(period || "30days", undefined, scope.territoire, segment, scope.mlId);
 };
 
 const getRupturantsRoute: IndicateursHandler<z.infer<typeof statsQuery>> = async (req, { locals }) => {
   const { period, segment } = req.query;
   const scope = await resolveStatsScope(req.query, locals.regions);
 
-  return await getRupturantsStats(period || "30days", scope.regions, scope.mlId, segment);
+  return await getRupturantsStats(period || "30days", scope.territoire, scope.mlId, segment);
 };
 
 const getDossiersTraitesRoute: IndicateursHandler<z.infer<typeof statsQuery>> = async (req, { locals }) => {
   const { period, segment } = req.query;
   const scope = await resolveStatsScope(req.query, locals.regions);
 
-  return await getDossiersTraitesStats(period || "30days", scope.regions, scope.mlId, segment);
+  return await getDossiersTraitesStats(period || "30days", scope.territoire, scope.mlId, segment);
 };
 
 const getCollaborationsRoute: IndicateursHandler<z.infer<typeof collaborationsQuery>> = async (req, { locals }) => {
@@ -465,8 +494,8 @@ const getCollaborationsRoute: IndicateursHandler<z.infer<typeof collaborationsQu
   const scope = await resolveStatsScope(req.query, locals.regions);
 
   return scope.mlId
-    ? await getCollaborationSegmentStats(period || "30days", undefined, scope.mlId)
-    : await getTerritoireCollaborationStats(period || "30days", scope.regions);
+    ? await getCollaborationSegmentStats(period || "30days", {}, scope.mlId)
+    : await getTerritoireCollaborationStats(period || "30days", scope.territoire);
 };
 
 const getCollaborationCorrelationsRoute: IndicateursHandler<z.infer<typeof collaborationsQuery>> = async (
@@ -478,7 +507,7 @@ const getCollaborationCorrelationsRoute: IndicateursHandler<z.infer<typeof colla
   }
   const scope = await resolveStatsScope(req.query, locals.regions);
 
-  return getCollaborationCorrelations(scope.regions, scope.mlId);
+  return getCollaborationCorrelations(scope.territoire, scope.mlId);
 };
 
 const getCollaborationsMensuelRoute: IndicateursHandler<z.infer<typeof collaborationsQuery>> = async (
@@ -487,7 +516,7 @@ const getCollaborationsMensuelRoute: IndicateursHandler<z.infer<typeof collabora
 ) => {
   const scope = await resolveStatsScope(req.query, locals.regions);
 
-  return await getCollaborationMensuelStats(req.query.period || "30days", scope.regions, scope.mlId);
+  return await getCollaborationMensuelStats(req.query.period || "30days", scope.territoire, scope.mlId);
 };
 
 const refusNominatif = (organisation: IndicateursMlLocals["organisation"], horsRegion: string) =>
@@ -585,21 +614,21 @@ const getRechercheRoute: IndicateursHandler<z.infer<typeof rechercheQuery>> = as
 };
 
 const getTraitementMLRoute: IndicateursHandler<z.infer<typeof traitementMlQuery>> = async (req, { locals }) => {
-  const { period, region, segment, page, limit, sort_by, sort_order, search, departements, utilise_service, engagee } =
+  const { period, segment, page, limit, sort_by, sort_order, search, departements, utilise_service, engagee } =
     req.query;
   assertDepartementsConnus(departements);
+  const territoire = resolveTerritoire(req.query, locals.regions);
 
   return await getTraitementStatsByMissionLocale({
     period: period || "30days",
     segment,
-    region,
-    regions: region ? undefined : territoireRegions(req.query, locals.regions),
+    regions: territoire.regions,
     page: Number(page) || 1,
     limit: Number(limit) || 10,
     sort_by,
     sort_order: sort_order || "desc",
     search,
-    departements,
+    departements: territoire.departements ?? departements,
     utiliseService: utilise_service,
     engagee,
   });
@@ -609,7 +638,7 @@ const getTraitementRegionsRoute: IndicateursHandler<z.infer<typeof traitementReg
   req,
   { locals }
 ) => {
-  const regions = territoireRegions(req.query, locals.regions);
+  const { regions } = resolveTerritoire(req.query, locals.regions);
   const allRegions = await getSuiviTraitementByRegion(req.query.segment);
   return regions ? allRegions.filter((r) => regions.includes(r.code)) : allRegions;
 };
@@ -617,23 +646,24 @@ const getTraitementRegionsRoute: IndicateursHandler<z.infer<typeof traitementReg
 const getTraitementExportRoute: IndicateursHandler<z.infer<typeof exportQuery>> = async (req, { locals }) => {
   const scope = await resolveStatsScope(req.query, locals.regions);
 
-  return await getTraitementExportData(scope);
+  return await getTraitementExportData({ ...scope.territoire, mlId: scope.mlId });
 };
 
 const getCfaAdoptionRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = async (req, { locals }) => {
   const scope = await resolveStatsScope(req.query, locals.regions);
 
-  return await getCfaAdoptionStats(req.query.period || "30days", scope.regions);
+  return await getCfaAdoptionStats(req.query.period || "30days", scope.territoire);
 };
 
 const findCfaEtablissements = (query: z.infer<typeof cfaEtablissementsExportQuery>, userRegions: string[]) => {
   const { departements, search, natures, utilisateur, qualiopi, collab_active, sort_by, sort_order } = query;
 
   assertDepartementsConnus(departements);
+  const territoire = resolveTerritoire(query, userRegions);
 
   return listCfaEtablissements({
-    regions: territoireRegions(query, userRegions),
-    departements,
+    regions: territoire.regions,
+    departements: territoire.departements ?? departements,
     search,
     natures,
     utilisateur,
@@ -662,8 +692,8 @@ const getCfaEtablissementsExportRoute: IndicateursHandler<z.infer<typeof cfaEtab
   { locals }
 ) => ({ data: await findCfaEtablissements(req.query, locals.regions) });
 
-const cfaInvitesOptions = (query: { region?: string; national?: boolean }, userRegions: string[]) => ({
-  territoire: { regions: territoireRegions(query, userRegions) },
+const cfaInvitesOptions = (query: TerritoireQuery, userRegions: string[]) => ({
+  territoire: resolveTerritoire(query, userRegions),
 });
 
 const getCfaInvitesRoute: IndicateursHandler<z.infer<typeof cfaInvitesQuery>> = async (req, { locals }) =>
@@ -677,11 +707,11 @@ const getCfaInvitesExportRoute: IndicateursHandler<z.infer<typeof cfaInvitesExpo
 const getCfaNpsRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = async (req, { locals }) => {
   const scope = await resolveStatsScope(req.query, locals.regions);
 
-  return await getCfaNpsStats({ regions: scope.regions });
+  return await getCfaNpsStats(scope.territoire);
 };
 
 const findCfaInjoignables = (query: z.infer<typeof cfaInjoignablesExportQuery>, userRegions: string[]) =>
-  listCfaInjoignables({ regions: territoireRegions(query, userRegions) }, query);
+  listCfaInjoignables(resolveTerritoire(query, userRegions), query);
 
 const getCollabCfaOrigineRoute: IndicateursHandler<z.infer<typeof collabCfaOrigineQuery>> = async (req) => {
   const { ml_id, ...options } = req.query;
@@ -709,7 +739,7 @@ const findMlAlertes = (
   type: z.infer<typeof mlAlertesParams>["type"],
   query: z.infer<typeof mlAlertesExportQuery>,
   userRegions: string[]
-) => listMlAlertes(type, { regions: territoireRegions(query, userRegions) }, query);
+) => listMlAlertes(type, resolveTerritoire(query, userRegions), query);
 
 const getMlAlertesRoute: IndicateursHandler<z.infer<typeof mlAlertesQuery>, z.infer<typeof mlAlertesParams>> = async (
   req,
@@ -734,7 +764,7 @@ const getCouvertureDepartementsRoute: IndicateursHandler<z.infer<typeof couvertu
   getDepartementalStats(req.query.period || "30days", req.query.region);
 
 const getCouvertureRegionsRoute: IndicateursHandler<z.infer<typeof nationalQuery>> = async (req, { locals }) => {
-  const regions = territoireRegions(req.query, locals.regions);
+  const { regions } = resolveTerritoire(req.query, locals.regions);
   const stats = await getCouvertureRegionsStats(req.query.period || "30days");
   return regions ? { ...stats, regions: stats.regions.filter((r) => regions.includes(r.code)) } : stats;
 };

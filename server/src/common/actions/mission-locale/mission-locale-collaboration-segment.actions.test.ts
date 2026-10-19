@@ -161,7 +161,7 @@ describe("getCollaborationSegmentStats", () => {
     expect(national.cfa_ayant_collabore).toEqual({ current: 3, variation: "+100%" });
     expect(national.objectifs).toMatchObject({ mobilite: 2, sante: 1, autre: 1, total_dossiers: 4 });
 
-    const idf = await getCollaborationSegmentStats("30days", ["11"]);
+    const idf = await getCollaborationSegmentStats("30days", { regions: ["11"] });
     expect(idf.cfa_ayant_collabore.current).toBe(2);
     expect(idf.objectifs.total_dossiers).toBe(3);
 

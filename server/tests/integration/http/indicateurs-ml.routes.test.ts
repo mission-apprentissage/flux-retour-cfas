@@ -758,6 +758,44 @@ describe("Indicateurs ML routes (territoriales)", () => {
   });
 
   describe("périmètre territorial", () => {
+    it("Restreint chiffres et listes au département demandé, pour tous les profils", async () => {
+      await organisationsDb().updateOne({ _id: ML_IDF }, { $set: { "adresse.departement": "75" } });
+      const lire = async (organisation: IOrganisationCreate, path: string, query: string) => {
+        const response = await requestAsOrganisation(
+          organisation,
+          "get",
+          `/api/v1/organisation/indicateurs-ml${path}?${query}`
+        );
+        expect(response.status, `${path}?${query}`).toBe(200);
+        return response.data;
+      };
+      const familles: Array<[string, (data: Record<string, unknown>) => unknown]> = [
+        ["/traitement", (d) => (d.latest as { total: number }).total],
+        ["/stats/rupturants", (d) => (d.summary as { total: number }).total],
+        ["/stats/dossiers-traites", (d) => d.traites],
+        ["/stats/traitement/ml", (d) => (d.pagination as { total: number }).total],
+        ["/synthese/deployment", (d) => (d.summary as { mlCount: number }).mlCount],
+      ];
+      for (const organisation of [DREETS_IDF, DDETS_PARIS, ARML_IDF_ARA]) {
+        for (const [path, pick] of familles) {
+          const region = pick(await lire(organisation, path, "region=11"));
+          expect(pick(await lire(organisation, path, "departement=75")), path).toEqual(region);
+          expect(pick(await lire(organisation, path, "departement=77")), path).toEqual(0);
+        }
+      }
+      const deploiement = await lire(DREETS_IDF, "/synthese/deployment", "departement=75");
+      expect(deploiement.regionsActives).toEqual(["11"]);
+    });
+
+    it("Refuse un département inconnu ou hors de la région demandée", async () => {
+      const url = (query: string) => `/api/v1/organisation/indicateurs-ml/stats/rupturants?${query}`;
+      expectBadRequest(await requestAsOrganisation(DREETS_IDF, "get", url("departement=XX")), "Département inconnu");
+      expectBadRequest(
+        await requestAsOrganisation(DREETS_IDF, "get", url("region=84&departement=75")),
+        "Département hors de la région demandée"
+      );
+    });
+
     it("Ouvre la fiche d'une ML hors territoire sans son équipe ni sa liste nominative", async () => {
       for (const organisation of [DREETS_IDF, DDETS_PARIS, ARML_IDF]) {
         const fiche = await requestAsOrganisation(
@@ -1175,6 +1213,8 @@ describe("Indicateurs ML routes (territoriales)", () => {
       ["collab_active=true", ["Beta"]],
       ["collab_active=false", ["Alpha", "Gamma"]],
       ["departements=77", ["Alpha"]],
+      ["departement=77", ["Alpha"]],
+      ["departement=69", ["Delta"]],
       ["search=0771", ["Alpha"]],
       ["search=melun", ["Alpha"]],
       ["sort_by=nom&sort_order=asc", ["Alpha", "Beta", "Gamma"]],
@@ -1574,6 +1614,34 @@ describe("Indicateurs ML routes (territoriales)", () => {
         traite_par_ml: true,
         delai_jours: 3,
       });
+    });
+
+    it("Compte les collaborations par département du CFA, la somme des départements valant la région", async () => {
+      const lire = async (path: string, query: string) =>
+        (
+          await requestAsOrganisation(
+            DREETS_IDF,
+            "get",
+            `/api/v1/organisation/indicateurs-ml${path}?period=all&${query}`
+          )
+        ).data;
+      const dossiers = async (query: string) =>
+        ((await lire("/stats/collaborations", query)).objectifs as { total_dossiers: number }).total_dossiers;
+      const mensuel = async (query: string) =>
+        ((await lire("/stats/collaborations/mensuel", query)).mois as Array<{ envoyes: number }>).reduce(
+          (total, mois) => total + mois.envoyes,
+          0
+        );
+      for (const compter of [dossiers, mensuel]) {
+        const [region, paris, seineEtMarne] = await Promise.all([
+          compter("region=11"),
+          compter("departement=75"),
+          compter("departement=77"),
+        ]);
+        expect(paris).toBeGreaterThan(0);
+        expect(seineEtMarne).toBeGreaterThan(0);
+        expect(paris + seineEtMarne).toBe(region);
+      }
     });
 
     it("Limite la DDETS à son département et refuse l'ARML", async () => {
