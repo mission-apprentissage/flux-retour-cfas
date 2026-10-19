@@ -1,9 +1,4 @@
-import brevo, {
-  AccountApiApiKeys,
-  ContactsApiApiKeys,
-  EventsApiApiKeys,
-  TransactionalEmailsApiApiKeys,
-} from "@getbrevo/brevo";
+import { type Brevo, BrevoClient, BrevoError } from "@getbrevo/brevo";
 import * as Boom from "@hapi/boom";
 import { captureException } from "@sentry/node";
 import { format } from "date-fns";
@@ -13,42 +8,16 @@ import { reportConfigurationIssueOnce } from "@/common/services/sentry/reportOnc
 import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import config from "@/config";
 
-const initContactApi = () => {
-  const apiContactInstance = new brevo.ContactsApi();
+const initClient = () => {
   const apiKey = config.brevo.apiKey;
   if (!apiKey) {
     reportConfigurationIssueOnce("brevo.apiKey", "Brevo API key not set");
     return null;
   }
-  apiContactInstance.setApiKey(ContactsApiApiKeys.apiKey, apiKey);
-  return apiContactInstance;
+  return new BrevoClient({ apiKey, maxRetries: 0 });
 };
 
-const initEmailApi = () => {
-  const apiEmailInstance = new brevo.TransactionalEmailsApi();
-  const apiKey = config.brevo.apiKey;
-  if (!apiKey) {
-    reportConfigurationIssueOnce("brevo.apiKey", "Brevo API key not set");
-    return null;
-  }
-  apiEmailInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, apiKey);
-  return apiEmailInstance;
-};
-
-const initEventApi = () => {
-  const apiEventInstance = new brevo.EventsApi();
-  const apiKey = config.brevo.apiKey;
-  if (!apiKey) {
-    reportConfigurationIssueOnce("brevo.apiKey", "Brevo API key not set");
-    return null;
-  }
-  apiEventInstance.setApiKey(EventsApiApiKeys.apiKey, apiKey);
-  return apiEventInstance;
-};
-
-const ContactInstance: brevo.ContactsApi | null = initContactApi();
-const EmailInstance: brevo.TransactionalEmailsApi | null = initEmailApi();
-const EventInstance: brevo.EventsApi | null = initEventApi();
+const client: BrevoClient | null = initClient();
 
 export interface SendTransactionalEmailOptions {
   cc?: string[];
@@ -60,13 +29,18 @@ export interface SendTransactionalEmailOptions {
   redirectRecipientInNonProdTo: string | undefined;
 }
 
-/** Forme des erreurs remontées par le SDK Brevo : le corps de la réponse porte la vraie cause. */
-interface BrevoApiError {
-  message?: string;
-  statusCode?: number;
-  body?: { message?: string; code?: string };
-  response?: { statusCode?: number; body?: { message?: string; code?: string } };
-}
+/** Corps des erreurs renvoyées par l'API Brevo : il porte la vraie cause. */
+type BrevoErrorBody = { message?: string; code?: string };
+
+const brevoErrorBody = (error: unknown): BrevoErrorBody | undefined =>
+  error instanceof BrevoError && typeof error.body === "object" && error.body !== null
+    ? (error.body as BrevoErrorBody)
+    : undefined;
+
+const brevoErrorStatus = (error: unknown): number | "?" =>
+  (error instanceof BrevoError ? error.statusCode : undefined) ?? "?";
+
+const errorMessage = (error: unknown): string | undefined => (error instanceof Error ? error.message : undefined);
 
 export const sendTransactionalEmail = async (
   recipientEmail: string,
@@ -74,7 +48,7 @@ export const sendTransactionalEmail = async (
   params: Record<string, unknown>,
   options: SendTransactionalEmailOptions
 ) => {
-  if (!EmailInstance) {
+  if (!client) {
     throw Boom.internal("Brevo instance not initialized");
   }
 
@@ -100,25 +74,25 @@ export const sendTransactionalEmail = async (
     );
   }
 
-  const sendSmtpEmail = new brevo.SendSmtpEmail();
-  sendSmtpEmail.templateId = templateId;
-  sendSmtpEmail.to = [{ email: finalRecipient }];
-  // En mode redirigé, on expose le vrai destinataire dans les variables pour information du testeur.
-  sendSmtpEmail.params = isRedirected ? { ...params, DESTINATAIRE_REEL: recipientEmail } : params;
+  const sendSmtpEmail: Brevo.SendTransacEmailRequest = {
+    templateId,
+    to: [{ email: finalRecipient }],
+    // En mode redirigé, on expose le vrai destinataire dans les variables pour information du testeur.
+    params: isRedirected ? { ...params, DESTINATAIRE_REEL: recipientEmail } : params,
+  };
   // Pas de CC quand l'email est redirigé (le testeur est déjà le destinataire principal).
   if (options?.cc?.length && !isRedirected) {
     sendSmtpEmail.cc = options.cc.map((email) => ({ email }));
   }
   try {
-    return await EmailInstance.sendTransacEmail(sendSmtpEmail);
+    return await client.transactionalEmails.sendTransacEmail(sendSmtpEmail);
   } catch (e) {
     captureException(e);
     // Sans ce log, l'appelant ne voit qu'un `undefined` : la cause renvoyée par Brevo (template
     // inexistant, IP non autorisée, quota...) serait perdue dès que Sentry n'est pas actif.
-    const err = e as BrevoApiError;
-    const brevoBody = err?.response?.body ?? err?.body;
-    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? err?.message ?? "unknown error";
-    const status = err?.response?.statusCode ?? err?.statusCode ?? "?";
+    const brevoBody = brevoErrorBody(e);
+    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? errorMessage(e) ?? "unknown error";
+    const status = brevoErrorStatus(e);
     logger.error(
       { templateId, recipient: finalRecipient, status, brevoMsg },
       "Échec d'envoi de l'email transactionnel Brevo"
@@ -161,16 +135,6 @@ export type EnsureBrevoAttributesReport = {
  * attribut existant avec un type différent : signale le conflit dans le
  * rapport, l'admin doit aligner manuellement.
  */
-interface BrevoErrorShape {
-  message?: string;
-  statusCode?: number;
-  body?: { message?: string; code?: string };
-  response?: { statusCode?: number; body?: { message?: string; code?: string } };
-}
-
-const asBrevoError = (error: unknown): BrevoErrorShape =>
-  (typeof error === "object" && error !== null ? error : {}) as BrevoErrorShape;
-
 export const ensureBrevoAttributes = async (
   schema: Record<string, BrevoAttributeType>
 ): Promise<EnsureBrevoAttributesReport> => {
@@ -180,18 +144,17 @@ export const ensureBrevoAttributes = async (
     conflicts: [],
     casingMismatches: [],
   };
-  if (!ContactInstance) {
+  if (!client) {
     throw Boom.internal("Brevo instance not initialized");
   }
   if (Object.keys(schema).length === 0) return report;
 
   let existing: Array<{ name?: string; category?: string; type?: string }> = [];
   try {
-    const res = await ContactInstance.getAttributes();
-    existing = (res?.body?.attributes ?? []) as unknown as typeof existing;
+    const res = await client.contacts.getAttributes();
+    existing = res?.attributes ?? [];
   } catch (error) {
-    const e = asBrevoError(error);
-    const brevoMsg = e.response?.body?.message ?? e.message ?? "unknown error";
+    const brevoMsg = brevoErrorBody(error)?.message ?? errorMessage(error) ?? "unknown error";
     throw new Error(`Brevo API error when listing attributes: ${brevoMsg}`, { cause: error });
   }
   const existingByLowerName = new Map(
@@ -210,17 +173,15 @@ export const ensureBrevoAttributes = async (
       }
       continue;
     }
-    const attr = new brevo.CreateAttribute();
-    attr.type = type as unknown as brevo.CreateAttribute.TypeEnum;
     try {
-      await ContactInstance.createAttribute("normal", name, attr);
+      await client.contacts.createAttribute({ attributeCategory: "normal", attributeName: name, type });
       report.created.push(name);
     } catch (error) {
       // Brevo répond de plusieurs façons sur un doublon (casse différente non
       // détectée par le GET, race condition). On tolère tous les signaux connus.
-      const e = asBrevoError(error);
-      const brevoCode = e.response?.body?.code;
-      const brevoMsg = e.response?.body?.message ?? "";
+      const brevoBody = brevoErrorBody(error);
+      const brevoCode = brevoBody?.code;
+      const brevoMsg = brevoBody?.message ?? "";
       const isDuplicate =
         brevoCode === "duplicate_parameter" ||
         brevoCode === "unique_attribute_name" ||
@@ -229,10 +190,10 @@ export const ensureBrevoAttributes = async (
         report.skipped.push(name);
         continue;
       }
-      const status = e?.response?.statusCode ?? e?.statusCode ?? "?";
+      const status = brevoErrorStatus(error);
       throw new Error(
-        `Brevo API error [${status}] when creating attribute "${name}" (${type}): ${brevoMsg || e?.message || "unknown error"}`,
-        { cause: e }
+        `Brevo API error [${status}] when creating attribute "${name}" (${type}): ${brevoMsg || errorMessage(error) || "unknown error"}`,
+        { cause: error }
       );
     }
   }
@@ -240,21 +201,17 @@ export const ensureBrevoAttributes = async (
 };
 
 export const createBrevoList = async (params: { name: string; folderId: number }) => {
-  if (!ContactInstance) {
+  if (!client) {
     throw Boom.internal("Brevo instance not initialized");
   }
 
-  const contactList = new brevo.CreateList();
-  contactList.name = params.name;
-  contactList.folderId = params.folderId;
   try {
-    return await ContactInstance.createList(contactList);
+    return await client.contacts.createList({ name: params.name, folderId: params.folderId });
   } catch (error) {
     // Propage le message Brevo réel (folderId invalide, clé API erronée, quota, …).
-    const e = asBrevoError(error);
-    const brevoBody = e.response?.body ?? e.body;
-    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e.message ?? "unknown error";
-    const status = e.response?.statusCode ?? e.statusCode ?? "?";
+    const brevoBody = brevoErrorBody(error);
+    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? errorMessage(error) ?? "unknown error";
+    const status = brevoErrorStatus(error);
     throw new Error(
       `Brevo API error [${status}] when creating list "${params.name}" (folderId=${params.folderId}): ${brevoMsg}`
     );
@@ -262,30 +219,34 @@ export const createBrevoList = async (params: { name: string; folderId: number }
 };
 
 export const importContactsToBrevoList = async (listeId: number, contacts: BrevoContact[]) => {
-  if (!ContactInstance) {
+  if (!client) {
     throw Boom.internal("Brevo instance not initialized");
   }
   if (contacts.length === 0) {
     return [];
   }
 
-  const results: Array<Awaited<ReturnType<NonNullable<typeof ContactInstance>["importContacts"]>> | undefined> = [];
+  const results: Array<Brevo.ImportContactsResponse | undefined> = [];
   const errors = createErrorAggregator("brevo-import-contacts");
 
   for (let i = 0; i < contacts.length; i += BREVO_IMPORT_BATCH_SIZE) {
     const batch = contacts.slice(i, i + BREVO_IMPORT_BATCH_SIZE);
 
-    const contactImport = new brevo.RequestContactImport();
-    contactImport.listIds = [listeId];
-    contactImport.jsonBody = batch.map((contact) => {
-      const contactData = new brevo.RequestContactImportJsonBodyInner();
-      contactData.email = contact.email;
-      contactData.attributes = serializeBrevoAttributes(contact.attributes);
-      return contactData;
-    });
-
     try {
-      results.push(await ContactInstance.importContacts(contactImport));
+      results.push(
+        await client.contacts.importContacts({
+          listIds: [listeId],
+          jsonBody: batch.map((contact) => ({
+            email: contact.email,
+            attributes: serializeBrevoAttributes(contact.attributes),
+          })),
+          emailBlacklist: false,
+          disableNotification: false,
+          smsBlacklist: false,
+          updateExistingContacts: true,
+          emptyContactsAttributes: false,
+        })
+      );
       errors.ok();
     } catch (e) {
       logger.error({ err: e, listeId }, "Échec d'import d'un lot de contacts Brevo");
@@ -311,10 +272,7 @@ export type BrevoHealthReport = {
 };
 
 // Helper interne : message court (3 lignes max) à partir d'une erreur Brevo.
-const briefError = (e: unknown): string => {
-  const err = e as { response?: { body?: { message?: string }; statusCode?: number }; message?: string };
-  return err?.response?.body?.message ?? err?.message ?? "erreur inconnue";
-};
+const briefError = (e: unknown): string => brevoErrorBody(e)?.message ?? errorMessage(e) ?? "erreur inconnue";
 
 /**
  * Health-check pour le panneau admin : vérifie que la clé API Brevo et la liste
@@ -335,14 +293,12 @@ export const checkBrevoHealth = async (): Promise<BrevoHealthReport> => {
     };
   } else {
     try {
-      const accountApi = new brevo.AccountApi();
-      accountApi.setApiKey(AccountApiApiKeys.apiKey, apiKey);
-      const { body } = await accountApi.getAccount();
+      const account = await new BrevoClient({ apiKey, maxRetries: 0 }).account.getAccount();
       apiKeyCheck = {
         configured: true,
         ok: true,
         label: "Clé API Brevo",
-        detail: `Connectée — ${body.companyName ?? body.email ?? "compte sans nom"}`,
+        detail: `Connectée — ${account.companyName ?? account.email ?? "compte sans nom"}`,
       };
     } catch (e) {
       apiKeyCheck = {
@@ -373,12 +329,12 @@ export const checkBrevoHealth = async (): Promise<BrevoHealthReport> => {
     };
   } else {
     try {
-      const { body } = await ContactInstance!.getList(listId);
+      const list = await client!.contacts.getList({ listId });
       listCheck = {
         configured: true,
         ok: true,
         label: "Liste cible tba-contacts",
-        detail: `Liste #${listId} « ${body.name ?? "(sans nom)"} » accessible`,
+        detail: `Liste #${listId} « ${list.name ?? "(sans nom)"} » accessible`,
       };
     } catch (e) {
       listCheck = {
@@ -414,24 +370,30 @@ export type BrevoEventPayload = {
  * que le job appelant puisse retry — l'`enqueue` en amont, lui, ne throw jamais.
  */
 export const sendBrevoEvent = async (payload: BrevoEventPayload) => {
-  if (!EventInstance) {
+  if (!client) {
     throw Boom.internal("Brevo instance not initialized");
   }
 
-  const event = new brevo.Event();
-  event.eventName = payload.eventName;
-  event.identifiers = payload.identifiers;
-  if (payload.eventDate) event.eventDate = payload.eventDate;
-  if (payload.contactProperties) event.contactProperties = payload.contactProperties;
-  if (payload.eventProperties) event.eventProperties = payload.eventProperties;
+  const event: Brevo.CreateEventRequest = {
+    event_name: payload.eventName,
+    identifiers: {
+      email_id: payload.identifiers.emailId,
+      ext_id: payload.identifiers.extId,
+      phone_id: payload.identifiers.phoneId,
+    },
+  };
+  if (payload.eventDate) event.event_date = payload.eventDate;
+  if (payload.contactProperties)
+    event.contact_properties = payload.contactProperties as Brevo.CreateEventRequest["contact_properties"];
+  if (payload.eventProperties)
+    event.event_properties = payload.eventProperties as Brevo.CreateEventRequest["event_properties"];
 
   try {
-    return await EventInstance.createEvent(event);
+    return await client.event.createEvent(event);
   } catch (error) {
-    const e = asBrevoError(error);
-    const brevoBody = e.response?.body ?? e.body;
-    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? e.message ?? "unknown error";
-    const status = e.response?.statusCode ?? e.statusCode ?? "?";
+    const brevoBody = brevoErrorBody(error);
+    const brevoMsg = brevoBody?.message ?? brevoBody?.code ?? errorMessage(error) ?? "unknown error";
+    const status = brevoErrorStatus(error);
     throw new Error(`Brevo API error [${status}] when creating event "${payload.eventName}": ${brevoMsg}`);
   }
 };
