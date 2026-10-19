@@ -31,6 +31,7 @@ export function createMailerService(
     ...config.smtp,
     port: config.smtp.port ? Number(config.smtp.port) : undefined,
     secure: false,
+    requireTLS: config.env === "production",
   })
 ) {
   async function sendEmailMessage(to: string, template: EmailTemplate, options?: SendEmailOptions) {
