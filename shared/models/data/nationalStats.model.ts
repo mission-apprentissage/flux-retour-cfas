@@ -113,6 +113,9 @@ export type IRegionStats = z.output<typeof zRegionStats>;
 /** Code de la ligne regroupant les ML sans département renseigné. */
 export const UNKNOWN_DEPARTEMENT_CODE = "inconnu";
 
+/** Code de la ligne regroupant les CFA sans région, pour que la somme des régions égale le national. */
+export const UNKNOWN_REGION_CODE = "inconnu";
+
 export type IDepartementStats = IRegionStats;
 
 const zTraitementStatsData = z.object({

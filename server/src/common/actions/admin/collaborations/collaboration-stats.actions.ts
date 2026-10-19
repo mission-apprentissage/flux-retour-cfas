@@ -2,6 +2,7 @@ import { ObjectId } from "bson";
 import { COLLABORATION_CUTOFF_DATE, REPONDU_SITUATIONS } from "shared/constants/collaboration";
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { UNKNOWN_REGION_CODE } from "shared/models/data/nationalStats.model";
 import type { ICollaborationsCfaSyntheseResponse } from "shared/models/routes/admin/collaboration-stats.api";
 import { addDaysUTC, normalizeToUTCDay, subtractDaysUTC } from "shared/utils/date";
 
@@ -308,8 +309,7 @@ async function computeUsage(
     national.rdv_pris += row.rdv_pris;
     if (hasEnvoye) cfaWithCollabNational += 1;
 
-    const code = row.region ?? null;
-    if (!code) continue;
+    const code = row.region || UNKNOWN_REGION_CODE;
     const current = perRegion.get(code) ?? { rupturants: 0, dossiers_envoyes_cfa: 0, cfa_with_collab: 0 };
     current.rupturants += row.rupturants;
     current.dossiers_envoyes_cfa += row.dossiers_envoyes_cfa;
@@ -337,9 +337,9 @@ function aggregateActivation(
   const national: ActivationCounters = { cfa_compatibles: 0, cfa_avec_compte: 0, cfa_actives: 0 };
 
   const countersFor = (region: string | null): ActivationCounters[] => {
-    if (!region) return [national];
-    const current = perRegion.get(region) ?? { cfa_compatibles: 0, cfa_avec_compte: 0, cfa_actives: 0 };
-    perRegion.set(region, current);
+    const code = region || UNKNOWN_REGION_CODE;
+    const current = perRegion.get(code) ?? { cfa_compatibles: 0, cfa_avec_compte: 0, cfa_actives: 0 };
+    perRegion.set(code, current);
     return [national, current];
   };
 
@@ -381,7 +381,7 @@ async function computeStatsForEligible(
       const region = REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE];
       return {
         region_code: code,
-        region_nom: region?.nom ?? code,
+        region_nom: code === UNKNOWN_REGION_CODE ? "Région inconnue" : (region?.nom ?? code),
         cfa_compatibles: activ.cfa_compatibles,
         cfa_avec_compte: activ.cfa_avec_compte,
         cfa_actives: activ.cfa_actives,
@@ -390,7 +390,11 @@ async function computeStatsForEligible(
         dossiers_envoyes_cfa: us.dossiers_envoyes_cfa,
       };
     })
-    .sort((a, b) => a.region_nom.localeCompare(b.region_nom, "fr"));
+    .sort(
+      (a, b) =>
+        Number(a.region_code === UNKNOWN_REGION_CODE) - Number(b.region_code === UNKNOWN_REGION_CODE) ||
+        a.region_nom.localeCompare(b.region_nom, "fr")
+    );
 
   return {
     national: {

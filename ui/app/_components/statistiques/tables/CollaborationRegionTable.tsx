@@ -2,6 +2,7 @@
 
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import { useMemo } from "react";
+import { UNKNOWN_REGION_CODE } from "shared/models/data/nationalStats.model";
 
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
@@ -46,7 +47,9 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
           return r.dossiers_envoyes_cfa;
       }
     };
+    const inconnue = (r: CollaborationRegionRow) => Number(r.region_code === UNKNOWN_REGION_CODE);
     return [...regions].sort((a, b) => {
+      if (inconnue(a) !== inconnue(b)) return inconnue(a) - inconnue(b);
       const va = get(a);
       const vb = get(b);
       const cmp =
