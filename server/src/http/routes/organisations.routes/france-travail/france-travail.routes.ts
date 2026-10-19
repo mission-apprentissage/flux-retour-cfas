@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import express from "express";
 import { FRANCE_TRAVAIL_SITUATION_LABELS, FranceTravailSituationKey, TOUS_LES_SECTEURS_CODE } from "shared/constants";
 import { API_EFFECTIF_LISTE } from "shared/models";

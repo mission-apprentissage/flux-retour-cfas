@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { ObjectId, type AnyBulkWriteOperation } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
 import { IOrganisme, type IFormationCatalogue, type IRelatedOrganisme } from "shared/models";

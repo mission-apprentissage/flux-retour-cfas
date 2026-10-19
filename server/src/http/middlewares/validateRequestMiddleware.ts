@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { RequestHandler } from "express";
 import { ZodError, ZodType, ZodTypeDef } from "zod";
 
@@ -13,7 +13,7 @@ type RequestValidation<TParams, TQuery, TBody> = {
 type ValidationErrorItem = { type: "Query" | "Params" | "Body"; errors: ZodError };
 
 /** Un tableau brut n'a pas de statut et serait vu comme une 500 non gérée. */
-function toRequestValidationError(errors: ValidationErrorItem[]): Boom {
+function toRequestValidationError(errors: ValidationErrorItem[]): Boom.Boom {
   const boomError = Boom.badRequest("Erreur de validation");
   const payload = boomError.output.payload as Boom.Payload & { details?: unknown; issues?: unknown };
   // `issues` aligne ce chemin sur `toValidationError` : le front lit `issues[].path`.

@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { ObjectId } from "bson";
 import express from "express";
 import { zStatsPeriod, zStatsSegment, zTraitementMlSortBy } from "shared/models/data/nationalStats.model";

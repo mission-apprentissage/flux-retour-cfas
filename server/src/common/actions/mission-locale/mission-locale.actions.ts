@@ -1,6 +1,6 @@
+import * as Boom from "@hapi/boom";
 import { captureException } from "@sentry/node";
 import type { IMissionLocale } from "api-alternance-sdk";
-import Boom from "boom";
 import { ObjectId } from "bson";
 import { AggregationCursor, Document, MongoServerError } from "mongodb";
 import { ML_DELAI_RELANCE_JOURS, ML_TRI_COLONNE, STATUT_APPRENANT } from "shared/constants";

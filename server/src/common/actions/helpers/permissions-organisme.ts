@@ -1,5 +1,5 @@
+import * as Boom from "@hapi/boom";
 import { IMissionLocale } from "api-alternance-sdk";
-import Boom from "boom";
 import { ObjectId } from "mongodb";
 import {
   throwUnexpectedError,

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
+import * as Boom from "@hapi/boom";
 import { captureException } from "@sentry/node";
-import Boom from "boom";
 
 import logger from "@/common/logger";
 import { usersMigrationDb } from "@/common/model/collections";

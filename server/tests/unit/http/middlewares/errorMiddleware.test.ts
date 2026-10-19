@@ -1,5 +1,5 @@
+import * as Boom from "@hapi/boom";
 import { captureException } from "@sentry/node";
-import Boom from "boom";
 import type { Request, Response } from "express";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { z, ZodError } from "zod";

@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import express from "express";
 import { Document, ObjectId } from "mongodb";
 import { SIRET_REGEX, UAI_REGEX } from "shared/constants/validations";

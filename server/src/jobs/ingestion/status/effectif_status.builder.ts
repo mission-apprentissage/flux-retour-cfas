@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { addDays, differenceInCalendarDays, eachDayOfInterval, formatISO, min } from "date-fns";
 import { STATUT_APPRENANT, StatutApprenant } from "shared/constants";
 import type { IEffectifComputedStatut, IEffectifV2 } from "shared/models";

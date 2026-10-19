@@ -1,5 +1,5 @@
+import * as Boom from "@hapi/boom";
 import { captureException, withScope } from "@sentry/node";
-import Boom from "boom";
 import { ErrorRequestHandler, Request } from "express";
 import { ZodError } from "zod";
 
@@ -45,7 +45,7 @@ export function routeGroupOf(req: Request): string {
   return match;
 }
 
-export function errorKindOf(boomError: Boom): ErrorKind {
+export function errorKindOf(boomError: Boom.Boom): ErrorKind {
   const status = boomError.output.statusCode;
   if (status === 401 || status === 403) return "auth";
   if (status === 429) return "rate-limit";
@@ -60,9 +60,9 @@ function toError(rawError: unknown): Error {
   return new Error(typeof rawError === "string" ? rawError : "Une erreur est survenue");
 }
 
-export function normalizeToBoom(rawError: unknown): Boom {
+export function normalizeToBoom(rawError: unknown): Boom.Boom {
   const error = toError(rawError);
-  const payloadOf = (boom: Boom): ErrorPayload => boom.output.payload;
+  const payloadOf = (boom: Boom.Boom): ErrorPayload => boom.output.payload;
 
   if (Boom.isBoom(error)) {
     return error;
@@ -90,7 +90,7 @@ export function normalizeToBoom(rawError: unknown): Boom {
 }
 
 /** Seule règle de capture du serveur HTTP. */
-export function shouldReportError(boomError: Boom): boolean {
+export function shouldReportError(boomError: Boom.Boom): boolean {
   return boomError.isServer;
 }
 

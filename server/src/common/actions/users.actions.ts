@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { Document, ObjectId, WithId } from "mongodb";
 import { getOrganisationLabel } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";

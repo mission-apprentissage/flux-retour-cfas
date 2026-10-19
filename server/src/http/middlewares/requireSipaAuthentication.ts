@@ -1,5 +1,5 @@
+import * as Boom from "@hapi/boom";
 import * as Sentry from "@sentry/node";
-import Boom from "boom";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 

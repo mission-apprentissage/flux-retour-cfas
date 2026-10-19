@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { ObjectId } from "bson";
 import ExcelJs from "exceljs";
 import express, { Response } from "express";
