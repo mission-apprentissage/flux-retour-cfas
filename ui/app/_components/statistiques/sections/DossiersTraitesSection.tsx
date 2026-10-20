@@ -26,6 +26,7 @@ export function DossiersTraitesSection({
   segment,
   isPublic = false,
   region,
+  departement,
   mlId,
   fullWidth,
   noData,
@@ -46,6 +47,7 @@ export function DossiersTraitesSection({
           period={period}
           segment={segment}
           region={region}
+          departement={departement}
           mlId={mlId}
           national={national}
           isPublic={isPublic}

@@ -109,3 +109,19 @@ describe("buildSyntheseRequest", () => {
     });
   });
 });
+
+describe("vue département", () => {
+  const scope = { region: "75", departement: "33" };
+
+  it("transmet le département aux routes territoriales", () => {
+    expect(buildTraitementRequest({ period: "30days", segment: "rupture", ...scope }).params).toMatchObject(scope);
+    expect(
+      buildSegmentStatsRequest("rupturants", { period: "30days", segment: "rupture", ...scope }).params
+    ).toMatchObject(scope);
+    expect(buildCollaborationsRequest({ period: "30days", ...scope }).params).toMatchObject(scope);
+    expect(buildSyntheseRequest("deployment", "30days", "75", "33")).toEqual({
+      url: "/api/v1/organisation/indicateurs-ml/synthese/deployment",
+      params: { period: "30days", ...scope },
+    });
+  });
+});

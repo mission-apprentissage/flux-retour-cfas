@@ -8,7 +8,19 @@ import { getPeriodOptions } from "./PeriodSelector";
 import styles from "./StatsFilters.module.css";
 
 export function StatsFilters() {
-  const { period, setPeriod, territoire, territoireLabel, territoireOptions, setTerritoire } = useStatsFilters();
+  const {
+    period,
+    setPeriod,
+    territoire,
+    regionLabel,
+    territoireOptions,
+    setTerritoire,
+    region,
+    departement,
+    departementOptions,
+    setDepartement,
+  } = useStatsFilters();
+  const departementLabel = departementOptions.find((option) => option.value === departement)?.label;
   // Calculées au rendu : l'option « Depuis janv. <année> » apparaît au 1er janvier sans redéploiement.
   const periodOptions = getPeriodOptions(true, true);
 
@@ -37,9 +49,9 @@ export function StatsFilters() {
       </DropdownMenu>
 
       <DropdownMenu
-        label={territoireLabel}
+        label={regionLabel}
         buttonIconId="ri-map-pin-2-line"
-        ariaLabel={`Territoire : ${territoireLabel}`}
+        ariaLabel={`Territoire : ${regionLabel}`}
         priority="secondary"
         align="left"
       >
@@ -55,6 +67,31 @@ export function StatsFilters() {
           ))
         }
       </DropdownMenu>
+
+      {region && (
+        <DropdownMenu
+          label={departementLabel ?? "Tous les départements"}
+          buttonIconId="ri-map-pin-2-line"
+          ariaLabel={`Département : ${departementLabel ?? "tous les départements"}`}
+          priority="secondary"
+          align="left"
+        >
+          {() => [
+            <DropdownMenuButton key="tous" selected={!departement} onClick={() => setDepartement(null)}>
+              Tous les départements
+            </DropdownMenuButton>,
+            ...departementOptions.map((option) => (
+              <DropdownMenuButton
+                key={option.value}
+                selected={option.value === departement}
+                onClick={() => setDepartement(option.value)}
+              >
+                {option.label}
+              </DropdownMenuButton>
+            )),
+          ]}
+        </DropdownMenu>
+      )}
     </div>
   );
 }

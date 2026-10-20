@@ -127,12 +127,12 @@ function MlAlerte({
   colonnes: Colonne[];
   triParDefaut: MlAlerteListeSortBy;
 }) {
-  const { region } = useStatsFilters();
+  const { region, departement } = useStatsFilters();
   const [limit, setLimit] = useState(10);
   const sort = useSortableTable<MlAlerteListeSortBy>(triParDefaut, "desc", {
     columnDefaultDirections: { nom: "asc", localisation: "asc", activite: "asc" },
   });
-  const params = { region, sort_by: sort.sortColumn, sort_order: sort.sortDirection };
+  const params = { region, departement, sort_by: sort.sortColumn, sort_order: sort.sortDirection };
   const [page, setPage] = usePageForParams(params);
   const query = useMlAlertes(type, { ...params, page, limit });
   const exporter = useMlAlertesExport(type, params);

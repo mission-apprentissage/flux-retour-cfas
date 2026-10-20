@@ -8,6 +8,7 @@ import { useTraitementExport } from "../hooks/useTraitementExport";
 
 interface ExportAllButtonProps {
   region?: string;
+  departement?: string;
   mlId?: string;
   national?: boolean;
   mlNom?: string;
@@ -17,6 +18,7 @@ interface ExportAllButtonProps {
 
 export function ExportAllButton({
   region,
+  departement,
   mlId,
   national,
   mlNom,
@@ -26,6 +28,7 @@ export function ExportAllButton({
   const [exportError, setExportError] = useState<string | null>(null);
   const { exportData, isExporting } = useTraitementExport({
     region,
+    departement,
     mlId,
     national,
     mlNom,

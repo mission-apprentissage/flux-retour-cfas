@@ -8,8 +8,8 @@ import { useDeploymentStats } from "../hooks/useStatsQueries";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
 
 export function AdoptionKpis() {
-  const { period, region } = useStatsFilters();
-  const { data, isLoading, isFetching, error } = useDeploymentStats(period, region);
+  const { period, region, departement } = useStatsFilters();
+  const { data, isLoading, isFetching, error } = useDeploymentStats(period, region, departement);
   const summary = data?.summary;
   const loadingPercentage = isLoadingVariation(isFetching, isLoading);
 

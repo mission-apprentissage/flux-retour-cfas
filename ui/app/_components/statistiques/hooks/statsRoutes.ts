@@ -13,6 +13,7 @@ export interface SegmentStatsParams {
   period: Period;
   segment: StatsSegment;
   region?: string;
+  departement?: string;
   mlId?: string;
   national?: boolean;
   isPublic?: boolean;
@@ -26,10 +27,11 @@ export interface StatsRequest {
 /** Les périodes ajoutées pour les pages connectées (6 mois, depuis janvier) ne sont pas servies par l'API publique. */
 const isPublicPeriod = (period: Period) => zPublicStatsPeriod.safeParse(period).success;
 
-const territorialParams = ({ period, segment, region, mlId, national }: SegmentStatsParams) => ({
+const territorialParams = ({ period, segment, region, departement, mlId, national }: SegmentStatsParams) => ({
   period,
   segment,
   ...(region && { region }),
+  ...(departement && { departement }),
   ...(mlId && { ml_id: mlId }),
   ...(national && { national: true }),
 });
@@ -66,12 +68,13 @@ export function buildCollaborationsRequest(params: CollaborationStatsParams): St
   if (params.isPublic) {
     return { url: `${PUBLIC_STATS_BASE}/collaborations`, params: { period: params.period } };
   }
-  const { period, region, mlId, national } = params;
+  const { period, region, departement, mlId, national } = params;
   return {
     url: `${INDICATEURS_ML_BASE}/stats/collaborations`,
     params: {
       period,
       ...(region && { region }),
+      ...(departement && { departement }),
       ...(mlId && { ml_id: mlId }),
       ...(national && { national: true }),
     },
@@ -85,9 +88,15 @@ export function buildCollaborationsRequest(params: CollaborationStatsParams): St
 export function buildSyntheseRequest(
   resource: "deployment" | "regions",
   period: Period,
-  region?: string
+  region?: string,
+  departement?: string
 ): StatsRequest {
-  if (region) return { url: `${INDICATEURS_ML_BASE}/synthese/${resource}`, params: { period, region } };
+  if (region) {
+    return {
+      url: `${INDICATEURS_ML_BASE}/synthese/${resource}`,
+      params: { period, region, ...(departement && { departement }) },
+    };
+  }
   return isPublicPeriod(period)
     ? { url: `${PUBLIC_STATS_BASE}/synthese/${resource}`, params: { period } }
     : { url: `${INDICATEURS_ML_BASE}/synthese/${resource}`, params: { period, national: true } };

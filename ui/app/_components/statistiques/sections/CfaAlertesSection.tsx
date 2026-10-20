@@ -65,12 +65,12 @@ function RaisonSociale({
 }
 
 function CfaInvitesAlerte() {
-  const { region } = useStatsFilters();
+  const { region, departement } = useStatsFilters();
   const [limit, setLimit] = useState(10);
   const sort = useSortableTable<ICfaInvitesSortBy>("invitations", "desc", {
     columnDefaultDirections: { nom: "asc", localisation: "asc" },
   });
-  const params = { region, sort_by: sort.sortColumn, sort_order: sort.sortDirection };
+  const params = { region, departement, sort_by: sort.sortColumn, sort_order: sort.sortDirection };
   const [page, setPage] = usePageForParams(params);
   const query = useCfaInvitesSansCollabStats({ ...params, page, limit });
   const exporter = useCfaInvitesExport(params);
@@ -122,12 +122,12 @@ function CfaInvitesAlerte() {
 }
 
 function CfaInjoignablesAlerte() {
-  const { region } = useStatsFilters();
+  const { region, departement } = useStatsFilters();
   const [limit, setLimit] = useState(10);
   const sort = useSortableTable<CfaInjoignablesSortBy>("taux", "desc", {
     columnDefaultDirections: { nom: "asc", localisation: "asc" },
   });
-  const params = { region, sort_by: sort.sortColumn, sort_order: sort.sortDirection };
+  const params = { region, departement, sort_by: sort.sortColumn, sort_order: sort.sortDirection };
   const [page, setPage] = usePageForParams(params);
   const query = useCfaInjoignablesStats({ ...params, page, limit });
   const exporter = useCfaInjoignablesExport(params);

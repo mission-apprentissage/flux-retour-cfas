@@ -32,7 +32,7 @@ const COLLABORATION_OPTIONS = [
 ];
 
 export function CfaEtablissementsCard() {
-  const { region } = useStatsFilters();
+  const { region, departement } = useStatsFilters();
   const { filters, setDepartements, setNatures, setUtilisateur, setQualiopi, setCollabActive } = useCfaTableFilters();
   const selectedDepartements = useSelectedDepartements(filters.departements);
   const [searchInput, setSearchInput] = useState("");
@@ -59,7 +59,7 @@ export function CfaEtablissementsCard() {
   const params = useMemo<CfaEtablissementsParams>(
     () => ({
       region,
-      departements: selectedDepartements.length ? selectedDepartements : undefined,
+      departements: departement ? [departement] : selectedDepartements.length ? selectedDepartements : undefined,
       search: search.length >= 2 ? search : undefined,
       natures: filters.natures,
       utilisateur: filters.utilisateur,
@@ -68,7 +68,7 @@ export function CfaEtablissementsCard() {
       sort_by: sortColumn,
       sort_order: sortDirection,
     }),
-    [region, selectedDepartements, search, filters, sortColumn, sortDirection]
+    [region, departement, selectedDepartements, search, filters, sortColumn, sortDirection]
   );
   const { exportData, isExporting, error: exportError, clearError } = useCfaEtablissementsExport(params);
 

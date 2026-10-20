@@ -58,7 +58,7 @@ const SEGMENT_CONFIG = {
 
 export function SuiviTraitementMLCard({ segment = "rupture" }: { segment?: "rupture" | "collab" }) {
   const searchParams = useSearchParams();
-  const { period, region, scope } = useStatsFilters();
+  const { period, region, departement, scope } = useStatsFilters();
   const { filters, setDepartements, setUtiliseService, setEngagee } = useMlTableFilters();
   const [tableState] = useState(() => readTableState(searchParams));
   const [searchInput, setSearchInput] = useState(() => searchParams?.get("search") ?? "");
@@ -73,8 +73,11 @@ export function SuiviTraitementMLCard({ segment = "rupture" }: { segment?: "rupt
   const selectedDepartements = useSelectedDepartements(filters.departements);
 
   const tableFilters = useMemo(
-    () => ({ ...filters, departements: selectedDepartements.length ? selectedDepartements : undefined }),
-    [filters, selectedDepartements]
+    () => ({
+      ...filters,
+      departements: departement ? [departement] : selectedDepartements.length ? selectedDepartements : undefined,
+    }),
+    [filters, departement, selectedDepartements]
   );
 
   return (

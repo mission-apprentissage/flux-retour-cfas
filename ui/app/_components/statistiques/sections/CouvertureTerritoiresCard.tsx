@@ -18,7 +18,7 @@ import { ExportAllButton } from "./ExportAllButton";
 import { SUIVI_TRAITEMENT_ML_ANCHOR } from "./SuiviTraitementMLCard";
 
 export function CouvertureTerritoiresCard() {
-  const { period, region, scope } = useStatsFilters();
+  const { period, region, departement, scope } = useStatsFilters();
 
   return (
     <OverviewCard
@@ -26,7 +26,7 @@ export function CouvertureTerritoiresCard() {
       actions={<ExportAllButton label="Exporter les données" priority="secondary" {...scope} />}
     >
       {region ? (
-        <CouvertureDepartements period={period} region={region} />
+        <CouvertureDepartements period={period} region={region} departement={departement} />
       ) : (
         <CouvertureRegionsContent period={period} national />
       )}
@@ -34,7 +34,15 @@ export function CouvertureTerritoiresCard() {
   );
 }
 
-function CouvertureDepartements({ period, region }: { period: Period; region: string }) {
+function CouvertureDepartements({
+  period,
+  region,
+  departement,
+}: {
+  period: Period;
+  region: string;
+  departement?: string;
+}) {
   const { data, isLoading, isFetching, isPlaceholderData, error } = useCouvertureDepartementsStats(period, region);
   const { setDepartements } = useMlTableFilters();
 
@@ -49,7 +57,7 @@ function CouvertureDepartements({ period, region }: { period: Period; region: st
         <TableSkeleton rows={6} />
       ) : (
         <NationalRegionTable
-          regions={data?.departements ?? []}
+          regions={(data?.departements ?? []).filter((ligne) => !departement || ligne.code === departement)}
           loadingDeltas={isFetching && !isLoading}
           territoryLabel="Département"
           formatName={(departement) =>

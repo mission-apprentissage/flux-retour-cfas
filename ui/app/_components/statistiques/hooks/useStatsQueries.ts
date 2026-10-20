@@ -129,9 +129,13 @@ function buildStatsParams(params: {
   };
 }
 
+/** Périmètre territorial d'une lecture : `useStatsFilters().scope`. */
+export type StatsScope = { region?: string; departement?: string; national?: boolean };
+
 export const statsQueryKeys = {
   traitement: (params: SegmentStatsParams) => ["stats", "traitement", params] as const,
-  deployment: (period: Period, region?: string) => ["stats", "deployment", period, region] as const,
+  deployment: (period: Period, region?: string, departement?: string) =>
+    ["stats", "deployment", period, region, departement] as const,
   syntheseRegions: (period: Period, region?: string) => ["stats", "synthese-regions", period, region] as const,
   rupturants: (params: SegmentStatsParams) => ["stats", "rupturants", params] as const,
   dossiersTraites: (params: SegmentStatsParams) => ["stats", "dossiers-traites", params] as const,
@@ -153,6 +157,7 @@ export interface TraitementMLParams {
   period: Period;
   segment: StatsSegment;
   region?: string;
+  departement?: string;
   page: number;
   limit: number;
   sort_by: TraitementMlSortBy;
@@ -172,6 +177,7 @@ function buildTraitementMLRequestParams(params: TraitementMLParams): Record<stri
     period: params.period,
     segment: params.segment,
     ...(params.region ? { region: params.region } : { national: true }),
+    ...(params.departement && { departement: params.departement }),
     page: params.page,
     limit: params.limit,
     sort_by: params.sort_by,
@@ -192,10 +198,10 @@ export function useTraitementStats(params: SegmentStatsParams) {
   });
 }
 
-export function useDeploymentStats(period: Period, region?: string) {
-  const request = buildSyntheseRequest("deployment", period, region);
+export function useDeploymentStats(period: Period, region?: string, departement?: string) {
+  const request = buildSyntheseRequest("deployment", period, region, departement);
   return useQuery<IDeploymentStatsResponse>({
-    queryKey: statsQueryKeys.deployment(period, region),
+    queryKey: statsQueryKeys.deployment(period, region, departement),
     queryFn: () => _get(request.url, { params: request.params }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
@@ -228,9 +234,9 @@ export function useDossiersTraitesStats(params: SegmentStatsParams) {
   });
 }
 
-export function useCfaAdoptionStats(period: Period, scope: { region?: string; national?: boolean }) {
+export function useCfaAdoptionStats(period: Period, scope: StatsScope) {
   return useQuery<ICfaAdoptionStats>({
-    queryKey: ["stats", "cfa-adoption", period, scope.region ?? "national"] as const,
+    queryKey: ["stats", "cfa-adoption", period, scope] as const,
     queryFn: () => _get(`${INDICATEURS_ML_BASE}/stats/cfa/adoption`, { params: { period, ...scope } }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });
@@ -238,6 +244,7 @@ export function useCfaAdoptionStats(period: Period, scope: { region?: string; na
 
 export interface CfaEtablissementsParams {
   region?: string;
+  departement?: string;
   departements?: string[];
   search?: string;
   natures?: string[];
@@ -336,6 +343,7 @@ export function useCollabCfaOrigine({ mlId, ...params }: CollabCfaOrigineParams)
 
 export interface CfaInvitesParams {
   region?: string;
+  departement?: string;
   sort_by: ICfaInvitesSortBy;
   sort_order: "asc" | "desc";
 }
@@ -351,6 +359,7 @@ export function useCfaInvitesSansCollabStats(params: CfaInvitesParams & { page: 
 
 export interface CfaInjoignablesParams {
   region?: string;
+  departement?: string;
   sort_by: CfaInjoignablesSortBy;
   sort_order: "asc" | "desc";
 }
@@ -370,6 +379,7 @@ export function useCfaInjoignablesStats(params: CfaInjoignablesParams & { page: 
 
 export interface MlAlertesParams {
   region?: string;
+  departement?: string;
   sort_by: MlAlerteListeSortBy;
   sort_order: "asc" | "desc";
 }
@@ -383,9 +393,9 @@ export function useMlAlertes(type: MlAlerteListeType, params: MlAlertesParams & 
   });
 }
 
-export function useCfaNpsStats(scope: { region?: string; national?: boolean }) {
+export function useCfaNpsStats(scope: StatsScope) {
   return useQuery<ICfaNpsStats>({
-    queryKey: ["stats", "cfa-nps", scope.region ?? "national"] as const,
+    queryKey: ["stats", "cfa-nps", scope] as const,
     queryFn: () => _get(`${INDICATEURS_ML_BASE}/stats/cfa/nps`, { params: scope }),
     ...STATS_QUERY_CONFIG_WITH_PREVIOUS_DATA,
   });

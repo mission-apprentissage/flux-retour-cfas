@@ -47,9 +47,10 @@ export function TerritoireFilter({
   onChange: (codes: string[]) => void;
   perimetre?: string[] | null;
 }) {
-  const { region, territoireLabel } = useStatsFilters();
+  const { region, regionLabel: territoireLabel, departement } = useStatsFilters();
   const options = useTerritoireOptions(perimetre);
   const selectedDepartements = useSelectedDepartements(departements, perimetre);
+  if (departement) return null;
 
   const value = region
     ? selectedDepartements

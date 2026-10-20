@@ -63,13 +63,19 @@ const countLabel = (label: string) => (selected: string[]) =>
 
 /** Sans `mlId` ni `cfaId` : liste du territoire. Avec `cfaId` : dossiers envoyés par ce CFA. Avec `mlId` : dossiers reçus par cette Mission Locale (fiche ML). */
 export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?: string } = {}) {
-  const { region } = useStatsFilters();
+  const { region, departement } = useStatsFilters();
   const { user } = useAuth();
   const isDdets = user?.organisation?.type === ORGANISATION_TYPE.DDETS;
   const { filters, setList, setPeriode } = useCollabDossiersFilters();
   const perimetre = usePerimetreNominatif();
   const listeTerritoire = !mlId && !cfaId;
-  const horsPerimetre = listeTerritoire && !!region && !!perimetre.regions && !perimetre.regions.includes(region);
+  const departementDdets = isDdets
+    ? (user?.organisation as { code_departement?: string } | undefined)?.code_departement
+    : undefined;
+  const horsPerimetre =
+    listeTerritoire &&
+    ((!!region && !!perimetre.regions && !perimetre.regions.includes(region)) ||
+      (!!departement && !!departementDdets && departement !== departementDdets));
   const selectedDepartements = useSelectedDepartements(filters.departements, perimetre.regions);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -97,11 +103,11 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
     return {
       ...communs,
       region,
-      departements: isDdets ? undefined : csv(selectedDepartements),
+      departements: departement ?? (isDdets ? undefined : csv(selectedDepartements)),
       cfa_ids: csv(filters.cfa),
       ml_ids: csv(filters.ml),
     };
-  }, [mlId, cfaId, region, search, isDdets, selectedDepartements, filters]);
+  }, [mlId, cfaId, region, departement, search, isDdets, selectedDepartements, filters]);
   const [page, setPage] = usePageForParams(params);
   const { data, isLoading, isFetching, isPlaceholderData, error } = useCollaborationDossiers(
     { ...params, page, limit },

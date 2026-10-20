@@ -37,15 +37,16 @@ export function DeploymentSection({ defaultPeriod = "30days" }: DeploymentSectio
 interface DeploymentContentProps {
   period: Period;
   region?: string;
+  departement?: string;
 }
 
-export function DeploymentContent({ period, region }: DeploymentContentProps) {
+export function DeploymentContent({ period, region, departement }: DeploymentContentProps) {
   const {
     data: deploymentData,
     isLoading: deploymentLoading,
     isFetching: deploymentFetching,
     error: deploymentError,
-  } = useDeploymentStats(period, region);
+  } = useDeploymentStats(period, region, departement);
   const {
     data: regionsData,
     isLoading: regionsLoading,
