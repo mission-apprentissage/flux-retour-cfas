@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { ObjectId } from "bson";
 import type { ICfaFiche, ICfaFicheContactReferent, ICfaMembre } from "shared/models/data/nationalStats.model";
 
