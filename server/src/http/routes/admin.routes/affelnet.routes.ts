@@ -106,7 +106,7 @@ const findDeletedVoeux = async (date: Date) => {
 };
 
 const parseCsvFile = async (buffer: Buffer) => {
-  const records = parse(buffer, {
+  const records = parse<IVoeuAffelnetRaw>(buffer, {
     columns: AFFELNET_HEADER,
     skip_empty_lines: true,
     delimiter: ";",

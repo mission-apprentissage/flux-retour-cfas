@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { MongoServerError } from "mongodb";
 import type { IBrevoSyncSettings } from "shared/models/data/brevoSyncSettings.model";
 

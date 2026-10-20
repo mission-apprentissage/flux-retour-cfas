@@ -1,19 +1,63 @@
 import { ApiError, type IRechercheOrganismeResponse } from "api-alternance-sdk";
 import { STATUT_FIABILISATION_ORGANISME } from "shared/constants";
+import type { IAttributionOrganisme } from "shared/models/data/effectifsQueue.model";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { organismesDb } from "@/common/model/collections";
+import { captureTiered } from "@/common/services/sentry/alertContract";
 import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 
 /** Appelé une fois par organisme du curseur : seule la transition est signalée. */
 const HEALTH_KEY = "api-alternance:rechercheOrganisme";
 
-type FiabilisationUaiSiret = {
+let rejectedRequestReported = false;
+
+/**
+ * Un 400 n'est pas une panne : l'API refuse notre requête, donc la faute est de
+ * notre côté. Une capture par processus suffit à savoir pourquoi.
+ */
+function reportRejectedRequestOnce(error: ApiError): void {
+  if (rejectedRequestReported) return;
+  rejectedRequestReported = true;
+
+  captureTiered(error, {
+    tier: "jour",
+    errorKind: "upstream",
+    upstream: "api-alternance",
+    fingerprintKey: `${HEALTH_KEY}:requete-refusee`,
+    extra: { errorData: error.context.errorData },
+  });
+}
+
+export type FiabilisationUaiSiret = {
   uai: string | null | undefined;
   siret: string | null | undefined;
   statut: "FIABLE" | "NON_FIABLE" | "INCONNU";
   api_response: IRechercheOrganismeResponse | null;
+  mode: IAttributionOrganisme["mode"];
 };
+
+export function modeAttribution(
+  uai: string | null | undefined,
+  siret: string | null | undefined,
+  resultat: IRechercheOrganismeResponse["resultat"]
+): IAttributionOrganisme["mode"] {
+  if (!resultat) {
+    return "aucun";
+  }
+  const uaiInchangee = uai == null || resultat.correspondances.uai?.lui_meme === true;
+  const siretInchange = siret == null || resultat.correspondances.siret?.lui_meme === true;
+  if (uaiInchangee && siretInchange) {
+    return "exact";
+  }
+  if (siretInchange) {
+    return "siret";
+  }
+  if (uaiInchangee) {
+    return "uai";
+  }
+  return "lieu";
+}
 
 export async function fiabilisationUaiSiret({
   uai,
@@ -33,6 +77,7 @@ export async function fiabilisationUaiSiret({
         statut:
           apiData.resultat != null ? STATUT_FIABILISATION_ORGANISME.FIABLE : STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
         api_response: apiData,
+        mode: modeAttribution(uai, siret, apiData.resultat),
       };
     })
     .catch((error) => {
@@ -50,8 +95,12 @@ export async function fiabilisationUaiSiret({
               siret,
               statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
               api_response: null,
+              mode: "aucun",
             };
           }
+
+          reportRejectedRequestOnce(error);
+          return { uai, siret, statut: "INCONNU", api_response: null, mode: "indisponible" };
         }
       }
       reportDependencyHealth(HEALTH_KEY, false, error, {
@@ -65,6 +114,7 @@ export async function fiabilisationUaiSiret({
         siret,
         statut: "INCONNU",
         api_response: null,
+        mode: "indisponible",
       };
     });
 }

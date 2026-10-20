@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { ObjectId } from "bson";
 import express from "express";
 import { API_EFFECTIF_LISTE } from "shared/models";

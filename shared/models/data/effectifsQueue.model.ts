@@ -34,6 +34,27 @@ const organismeProps = organismesModel.zod.shape;
 const contratProps = zContrat.shape;
 const apprenantProps = effectifsProps.apprenant.shape;
 
+export const ATTRIBUTION_ORGANISME_MODES = [
+  "exact",
+  "uai",
+  "siret",
+  "lieu",
+  "transmetteur",
+  "famille",
+  "aucun",
+  "indisponible",
+] as const;
+
+export const zAttributionOrganisme = z.object({
+  mode: z
+    .enum(ATTRIBUTION_ORGANISME_MODES)
+    .describe("Comment l'organisme retenu a été rapproché du couple UAI/SIRET envoyé"),
+  uai: z.string().nullish().describe("UAI retenue"),
+  siret: z.string().nullish().describe("SIRET retenu"),
+});
+
+export type IAttributionOrganisme = z.output<typeof zAttributionOrganisme>;
+
 // internal fields (shared with api V3)
 const internalFields = {
   source: SourceApprenantEnum,
@@ -62,6 +83,12 @@ const internalFields = {
     .nullish(),
   computed_day: z.string().optional(),
   has_error: z.boolean().optional(),
+  organisme_attribution: z
+    .object({
+      formateur: zAttributionOrganisme.nullish(),
+      responsable: zAttributionOrganisme.nullish(),
+    })
+    .nullish(),
 };
 
 /**

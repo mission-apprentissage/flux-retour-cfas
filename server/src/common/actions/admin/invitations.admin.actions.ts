@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { format } from "date-fns";
 import { Document, ObjectId } from "mongodb";
 

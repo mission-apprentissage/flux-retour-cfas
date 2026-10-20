@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
+import * as Boom from "@hapi/boom";
 import { IMissionLocale } from "api-alternance-sdk";
-import Boom from "boom";
 import { subMonths } from "date-fns";
 import type { Request } from "express";
 import { Document, ObjectId, WithId } from "mongodb";

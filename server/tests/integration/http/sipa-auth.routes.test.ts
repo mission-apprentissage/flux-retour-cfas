@@ -1,8 +1,8 @@
 import { strict as assert } from "assert";
 
+import * as Boom from "@hapi/boom";
 import type { AxiosResponse } from "axios";
 import { AxiosInstance } from "axiosist";
-import Boom from "boom";
 import type { Request, Response } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import { ObjectId } from "mongodb";
@@ -27,7 +27,7 @@ const sipaTestPasswordHash = hash(SIPA_PASSWORD);
 let app: Awaited<ReturnType<typeof initTestApp>>;
 let httpClient: AxiosInstance;
 
-const statusOf = (err: unknown) => (err as Boom).output.statusCode;
+const statusOf = (err: unknown) => (err as Boom.Boom).output.statusCode;
 
 function runSipaMiddleware(authHeader?: string): Promise<{ err: unknown; req: Request }> {
   return new Promise((resolve) => {
@@ -192,25 +192,28 @@ describe("Authentification SIPA", () => {
     it("Refuse un username en doublon", async () => {
       await assert.rejects(
         createSipaUser(SIPA_USERNAME, "un-mot-de-passe-de-vingt-caracteres"),
-        (err: Boom) => err.output.statusCode === 409
+        (err: Boom.Boom) => err.output.statusCode === 409
       );
     });
 
     it("Refuse un mot de passe trop court (RGS : 20 caractères minimum)", async () => {
-      await assert.rejects(createSipaUser("autre-compte", "trop-court"), (err: Boom) => err.output.statusCode === 400);
+      await assert.rejects(
+        createSipaUser("autre-compte", "trop-court"),
+        (err: Boom.Boom) => err.output.statusCode === 400
+      );
     });
 
     it("Refuse un mot de passe trop long (>128, borne du login : un compte créé doit pouvoir se connecter)", async () => {
       await assert.rejects(
         createSipaUser("autre-compte", "x".repeat(129)),
-        (err: Boom) => err.output.statusCode === 400
+        (err: Boom.Boom) => err.output.statusCode === 400
       );
     });
 
     it("Refuse un username hors format", async () => {
       await assert.rejects(
         createSipaUser("bad username!", "un-mot-de-passe-de-vingt-caracteres"),
-        (err: Boom) => err.output.statusCode === 400
+        (err: Boom.Boom) => err.output.statusCode === 400
       );
     });
 
@@ -218,7 +221,7 @@ describe("Authentification SIPA", () => {
       await deleteSipaUser(SIPA_USERNAME);
       assert.strictEqual(await sipaUsersDb().findOne({ username: SIPA_USERNAME }), null);
 
-      await assert.rejects(deleteSipaUser(SIPA_USERNAME), (err: Boom) => err.output.statusCode === 404);
+      await assert.rejects(deleteSipaUser(SIPA_USERNAME), (err: Boom.Boom) => err.output.statusCode === 404);
     });
   });
 

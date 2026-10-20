@@ -15,13 +15,15 @@ export type UiRuntime = "next-client" | "next-server" | "next-edge";
 
 /**
  * Le navigateur est le seul runtime concerné par les chunks, le réseau coupé et
- * les extensions. Le contrôle de flux de Next, lui, est levé au rendu, donc
- * aussi bien côté serveur et edge.
+ * les extensions. Le contrôle de flux de Next et les 401/403 de l'API, eux, sont
+ * levés au rendu, donc aussi bien côté serveur et edge.
  */
+const RENDER_DROP_REASONS: readonly DropReason[] = [...NEXT_DROP_REASONS, "expected-auth"];
+
 const DROP_REASONS: Record<UiRuntime, readonly DropReason[]> = {
   "next-client": [...BROWSER_DROP_REASONS, ...NEXT_DROP_REASONS],
-  "next-server": NEXT_DROP_REASONS,
-  "next-edge": NEXT_DROP_REASONS,
+  "next-server": RENDER_DROP_REASONS,
+  "next-edge": RENDER_DROP_REASONS,
 };
 
 export function buildUiSentryOptions(runtime: UiRuntime) {

@@ -48,6 +48,7 @@ export type IEligibleOrganismeRow = {
   uai: string | null;
   nom: string | null;
   region: string | null;
+  departement: string | null;
   is_allowed_deca: boolean;
   has_effectifs_erp: boolean;
   has_effectifs_deca: boolean;
@@ -146,6 +147,7 @@ export async function findEligibleOrganismes(organismeIds?: ObjectId[]): Promise
           uai: 1,
           nom: { $ifNull: ["$nom", { $ifNull: ["$raison_sociale", "$enseigne"] }] },
           region: "$adresse.region",
+          departement: "$adresse.departement",
           is_allowed_deca: { $eq: ["$is_allowed_deca", true] },
           has_effectifs_erp: { $gt: [{ $size: "$_effectifs_erp" }, 0] },
           has_effectifs_deca: { $gt: [{ $size: "$_effectifs_deca" }, 0] },

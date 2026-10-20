@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { ObjectId } from "bson";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IEffectif, IOrganisationOrganismeFormation, IOrganisme } from "shared/models";

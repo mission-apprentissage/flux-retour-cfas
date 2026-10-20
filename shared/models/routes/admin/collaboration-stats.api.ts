@@ -43,12 +43,16 @@ const zCfaCompatibleExportRow = z.object({
   siret: z.string(),
   nom: z.string().nullable(),
   region: z.string().nullable(),
+  departement: z.string(),
+  departement_code: z.string().nullable(),
 });
 
 const zCfaActiveExportRow = z.object({
   siret: z.string(),
   nom: z.string().nullable(),
   region: z.string().nullable(),
+  departement: z.string(),
+  departement_code: z.string().nullable(),
   date_activation: z.date(),
   sources: z.string(),
 });
@@ -57,6 +61,8 @@ const zCfaWithCollabExportRow = z.object({
   siret: z.string(),
   nom: z.string().nullable(),
   region: z.string().nullable(),
+  departement: z.string(),
+  departement_code: z.string().nullable(),
   nb_collaborations: z.number(),
 });
 
@@ -64,6 +70,8 @@ const zCollaborationDetailRow = z.object({
   siret_cfa: z.string().nullable(),
   nom_cfa: z.string().nullable(),
   region_cfa: z.string().nullable(),
+  departement_cfa: z.string(),
+  departement_code_cfa: z.string().nullable(),
   nom_ml: z.string().nullable(),
   nom_jeune: z.string().nullable(),
   prenom_jeune: z.string().nullable(),

@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import express from "express";
 import { ObjectId } from "mongodb";
 import { dossierApprenantSchemaV3Input, stripModelAdditionalKeys } from "shared/models/parts/dossierApprenantSchemaV3";

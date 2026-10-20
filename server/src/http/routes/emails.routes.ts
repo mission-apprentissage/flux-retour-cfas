@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import express, { NextFunction, Request, Response } from "express";
 import passport from "passport";
 import { Strategy as LocalAPIKeyStrategy } from "passport-localapikey";

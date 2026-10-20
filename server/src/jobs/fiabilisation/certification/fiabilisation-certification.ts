@@ -1,7 +1,6 @@
 import { captureException } from "@sentry/node";
 import type { ICertification } from "api-alternance-sdk";
 import { zCfd, zRncp } from "api-alternance-sdk/internal";
-import Boom from "boom";
 import type { IEffectif } from "shared/models";
 
 import { getNiveauFormationLibelle } from "@/common/actions/formations.actions";
@@ -98,19 +97,14 @@ async function resolveEffectiveCFD(formation: { cfd?: string | null; rncp?: stri
   const cfd = rawCfd.padStart(8, "0");
 
   if (!zCfd.safeParse(cfd).success) {
-    logger.warn(Boom.internal("fiabilisation-certification: invalid cfd", { cfd, formation }));
+    logger.warn({ cfd, formation }, "fiabilisation-certification: invalid cfd");
     return rawCfd;
   }
 
   const certifications = await apiAlternanceClient.certification.index({ identifiant: { cfd } });
 
   if (certifications.length === 0) {
-    logger.warn(
-      Boom.internal("fiabilisation-certification: cfd non found on API alternance", {
-        cfd,
-        formation,
-      })
-    );
+    logger.warn({ cfd, formation }, "fiabilisation-certification: cfd non found on API alternance");
     return rawCfd;
   }
 
@@ -124,23 +118,12 @@ async function resolveEffectiveCFD(formation: { cfd?: string | null; rncp?: stri
   const continuite = filterCertificationContinuiteValidity(certifications[0].continuite, session);
 
   if (!continuite.cfd || continuite.cfd.length === 0) {
-    logger.warn(
-      Boom.internal("fiabilisation-certification: no replacement found for cfd", {
-        cfd,
-        formation,
-      })
-    );
+    logger.warn({ cfd, formation }, "fiabilisation-certification: no replacement found for cfd");
     return cfd;
   }
 
   if (continuite.cfd.length > 1) {
-    logger.warn(
-      Boom.internal("fiabilisation-certification: multiple replacement found for cfd", {
-        cfd,
-        continuite,
-        formation,
-      })
-    );
+    logger.warn({ cfd, continuite, formation }, "fiabilisation-certification: multiple replacement found for cfd");
     return cfd;
   }
 
@@ -165,12 +148,7 @@ async function resolveEffectiveRNCP(formation: IFormation): Promise<string | nul
   const certifications = await apiAlternanceClient.certification.index({ identifiant: { rncp } });
 
   if (certifications.length === 0) {
-    logger.warn(
-      Boom.internal("fiabilisation-certification: rncp non found on API alternance", {
-        rncp,
-        formation,
-      })
-    );
+    logger.warn({ rncp, formation }, "fiabilisation-certification: rncp non found on API alternance");
     return rncp;
   }
 
@@ -184,24 +162,12 @@ async function resolveEffectiveRNCP(formation: IFormation): Promise<string | nul
   const continuite = filterCertificationContinuiteValidity(certifications[0].continuite, session);
 
   if (!continuite.rncp || continuite.rncp.length === 0) {
-    logger.warn(
-      Boom.internal("fiabilisation-certification: no replacement found for rncp", {
-        rncp,
-        formation,
-        continuite,
-      })
-    );
+    logger.warn({ rncp, formation, continuite }, "fiabilisation-certification: no replacement found for rncp");
     return rncp;
   }
 
   if (continuite.rncp.length > 1) {
-    logger.warn(
-      Boom.internal("fiabilisation-certification: multiple replacement found for rncp", {
-        rncp,
-        continuite,
-        formation,
-      })
-    );
+    logger.warn({ rncp, continuite, formation }, "fiabilisation-certification: multiple replacement found for rncp");
     return rncp;
   }
 
@@ -221,11 +187,12 @@ export function getSessionCertification<C extends Pick<ICertification, "periode_
 
   if (candidats.length > 1) {
     logger.warn(
-      Boom.internal("fiabilisation-certification: multiple certification found for session", {
+      {
         session,
-        candidats,
+        candidats: candidats.map((c) => c.identifiant),
         certifications: certifications.map((c) => c.identifiant),
-      })
+      },
+      "fiabilisation-certification: multiple certification found for session"
     );
   }
 
@@ -268,7 +235,7 @@ export async function getEffectifCertification(formation: IFormation): Promise<I
     return getSessionCertification(session, certifications);
   } catch (err) {
     captureException(err);
-    logger.error("fiabilisation-certification: error while getting effectif certification", { err, formation });
+    logger.error({ err, formation }, "fiabilisation-certification: error while getting effectif certification");
     return null;
   }
 }

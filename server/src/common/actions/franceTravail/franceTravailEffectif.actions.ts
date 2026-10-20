@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { ObjectId } from "bson";
 import { differenceInYears } from "date-fns";
 import type { Document } from "mongodb";

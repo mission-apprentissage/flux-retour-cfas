@@ -1,5 +1,5 @@
+import * as Boom from "@hapi/boom";
 import * as Sentry from "@sentry/node";
-import Boom from "boom";
 import { RequestHandler } from "express";
 import { ObjectId } from "mongodb";
 import passport from "passport";

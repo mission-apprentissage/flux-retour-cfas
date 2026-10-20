@@ -17,6 +17,7 @@ export type IActivatedOrganisme = {
   siret: string | null;
   nom: string | null;
   region: string | null;
+  departement: string | null;
   date_activation: Date;
 };
 
@@ -176,7 +177,16 @@ export async function fetchActivatedOrganismes(endExclusive: Date): Promise<IAct
           as: "organisme",
           pipeline: [
             { $match: { ferme: { $ne: true } } },
-            { $project: { siret: 1, nom: 1, raison_sociale: 1, enseigne: 1, "adresse.region": 1 } },
+            {
+              $project: {
+                siret: 1,
+                nom: 1,
+                raison_sociale: 1,
+                enseigne: 1,
+                "adresse.region": 1,
+                "adresse.departement": 1,
+              },
+            },
           ],
         },
       },
@@ -187,6 +197,7 @@ export async function fetchActivatedOrganismes(endExclusive: Date): Promise<IAct
           siret: { $ifNull: ["$organisme.siret", null] },
           nom: { $ifNull: ["$organisme.nom", { $ifNull: ["$organisme.raison_sociale", "$organisme.enseigne"] }] },
           region: { $ifNull: ["$organisme.adresse.region", null] },
+          departement: { $ifNull: ["$organisme.adresse.departement", null] },
           date_activation: 1,
         },
       },

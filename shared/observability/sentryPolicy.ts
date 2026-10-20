@@ -10,7 +10,7 @@ import { DROP_PATTERNS, EXTENSION_PROTOCOLS, type DropReason } from "./sentryNoi
  * est déprécié.
  */
 
-export type SentryFrame = { filename?: string; abs_path?: string; in_app?: boolean };
+export type SentryFrame = { filename?: string; abs_path?: string; module?: string; in_app?: boolean };
 
 export type SentryExceptionValue = {
   type?: string;

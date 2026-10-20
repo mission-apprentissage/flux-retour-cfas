@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { ObjectId } from "bson";
 import { MongoServerError } from "mongodb";
 import { IEffectif, IMissionLocaleEffectif, IOrganisationMissionLocale } from "shared/models";
@@ -15,11 +15,10 @@ import {
 } from "@/common/model/collections";
 import { extractScoreInput, reportClassifierFailure, scoreEffectifs } from "@/common/services/classifier";
 
-import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
 import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
 import { getCurrentStatutFromParcours } from "../shared/rupture-pipeline.utils";
 
-import { isDecaSnapshot, migrateMlRecordEffectifId } from "./mission-locale.actions";
+import { computedOrganismeMl, isDecaSnapshot, migrateMlRecordEffectifId } from "./mission-locale.actions";
 
 /**
  * Détermine la collection source d'un effectif CFA et sa date de naissance. L'ERP est interrogé
@@ -193,7 +192,7 @@ export async function ensureMissionLocaleEffectifRecord(
         crossOrganismeOrphan._id,
         crossOrganismeOrphan.effectif_id,
         effectif,
-        { extraSet }
+        { extraSet: { ...extraSet, "computed.organisme": await computedOrganismeMl(organismeId) } }
       );
       scoreEffectifInBackground(result.keeperId, effectif);
       return { recordId: result.keeperId, created: false };
@@ -234,7 +233,7 @@ export async function ensureMissionLocaleEffectifRecord(
       }
 
       const result = await migrateMlRecordEffectifId(crossMlOrphan._id, crossMlOrphan.effectif_id, effectif, {
-        extraSet,
+        extraSet: { ...extraSet, "computed.organisme": await computedOrganismeMl(organismeId) },
         skipCurrentStatus: true,
       });
       scoreEffectifInBackground(result.keeperId, effectif);
@@ -269,12 +268,6 @@ export async function ensureMissionLocaleEffectifRecord(
     return { recordId: softDeletedRecord._id, created: false };
   }
 
-  const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
-  const organisme = await organismesDb().findOne(
-    { _id: organismeId },
-    { projection: { is_allowed_collab: 1, collab_suspended_at: 1, collab_resumed_at: 1 } }
-  );
-
   const document: Record<string, unknown> = {
     mission_locale_id: mlOrganisation._id,
     effectif_id: newEffectifId,
@@ -287,12 +280,7 @@ export async function ensureMissionLocaleEffectifRecord(
       date: currentStatus?.date ?? null,
     },
     computed: {
-      organisme: {
-        ml_beta_activated_at: organisation?.ml_beta_activated_at ?? null,
-        is_allowed_collab: organisme?.is_allowed_collab ?? false,
-        ...(organisme?.collab_suspended_at ? { collab_suspended_at: organisme.collab_suspended_at } : {}),
-        ...(organisme?.collab_resumed_at ? { collab_resumed_at: organisme.collab_resumed_at } : {}),
-      },
+      organisme: await computedOrganismeMl(organismeId),
       ...(mlOrganisation.activated_at ? { mission_locale: { activated_at: mlOrganisation.activated_at } } : {}),
     },
     organisme_data: {

@@ -1,5 +1,5 @@
+import * as Boom from "@hapi/boom";
 import { zUai } from "api-alternance-sdk/internal";
-import Boom from "boom";
 import { subYears } from "date-fns";
 import { Filter, ObjectId } from "mongodb";
 import { PermissionScope, assertUnreachable, entries, getAnneesScolaireListFromDate, SIRET_REGEX } from "shared";

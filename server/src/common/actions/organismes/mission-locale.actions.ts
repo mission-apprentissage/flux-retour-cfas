@@ -1,5 +1,5 @@
+import * as Boom from "@hapi/boom";
 import { captureException } from "@sentry/node";
-import Boom from "boom";
 import { ObjectId } from "bson";
 import { RQTH_DECLARE_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { IUpdateMissionLocaleEffectifOrganisme } from "shared/models/routes/organismes/mission-locale/missions-locale.api";

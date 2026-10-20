@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { formatISO } from "date-fns";
 import { isEqual } from "lodash-es";
 import { ObjectId } from "mongodb";

@@ -8671,6 +8671,107 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     },
     "nom_referent_handicap_formation": {},
     "obtention_diplome_formation": {},
+    "organisme_attribution": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "formateur": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "mode": {
+                      "bsonType": "string",
+                      "description": "Comment l'organisme retenu a été rapproché du couple UAI/SIRET envoyé",
+                      "enum": [
+                        "exact",
+                        "uai",
+                        "siret",
+                        "lieu",
+                        "transmetteur",
+                        "famille",
+                        "aucun",
+                        "indisponible",
+                      ],
+                    },
+                    "siret": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                      "description": "SIRET retenu",
+                    },
+                    "uai": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                      "description": "UAI retenue",
+                    },
+                  },
+                  "required": [
+                    "mode",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "responsable": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "bsonType": "object",
+                  "properties": {
+                    "mode": {
+                      "bsonType": "string",
+                      "description": "Comment l'organisme retenu a été rapproché du couple UAI/SIRET envoyé",
+                      "enum": [
+                        "exact",
+                        "uai",
+                        "siret",
+                        "lieu",
+                        "transmetteur",
+                        "famille",
+                        "aucun",
+                        "indisponible",
+                      ],
+                    },
+                    "siret": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                      "description": "SIRET retenu",
+                    },
+                    "uai": {
+                      "bsonType": [
+                        "string",
+                        "null",
+                      ],
+                      "description": "UAI retenue",
+                    },
+                  },
+                  "required": [
+                    "mode",
+                  ],
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+    },
     "organisme_id": {
       "anyOf": [
         {

@@ -48,7 +48,8 @@ export function createErrorAggregator(name: string, options: ErrorAggregatorOpti
         failed,
         failureRate: processed > 0 ? failed / processed : 1,
         distinctCauses: distinct.length,
-        topCauses: top.map(({ key, count }) => ({ key, count })),
+        // À plat : au-delà de normalizeDepth, Sentry remplace un objet par "[Object]".
+        topCauses: top.map(({ key, count }) => `${count} × ${key}`),
       });
       captureException(new Error(`[${name}] échecs agrégés`, { cause: top[0]?.sample }));
     });

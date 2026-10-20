@@ -2,6 +2,7 @@ import type { ICertification } from "api-alternance-sdk";
 import { describe, it, expect, vi } from "vitest";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
+import logger from "@/common/logger";
 
 import { getSessionCertification, getEffectifCertification, getEffectifSession } from "./fiabilisation-certification";
 
@@ -169,6 +170,19 @@ describe("getEffectifCertification", () => {
     expect(apiAlternanceClient.certification.index).toHaveBeenNthCalledWith(3, {
       identifiant: { cfd: "32321014", rncp: "RNCP24440" },
     });
+  });
+
+  it("should log the context when the cfd is not found", async () => {
+    const warn = vi.spyOn(logger, "warn");
+    vi.mocked(apiAlternanceClient.certification.index).mockResolvedValue([]);
+    const formation = { cfd: "32321014", rncp: null, date_entree: new Date("2021-09-01") };
+
+    await getEffectifCertification(formation);
+
+    expect(warn).toHaveBeenCalledWith(
+      { cfd: "32321014", formation },
+      "fiabilisation-certification: cfd non found on API alternance"
+    );
   });
 
   const certificationsByRncp = [

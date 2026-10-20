@@ -74,7 +74,7 @@ module.exports = {
           "**/*{.,_}{test,spec,bench,fixture}.{js,jsx,ts,tsx}",
           "**/dev.ts",
           "**/tsup.config.ts",
-          "**/vitest.workspace.ts",
+          "**/vitest.config.ts",
           "**/next.config.js",
         ],
         optionalDependencies: false,

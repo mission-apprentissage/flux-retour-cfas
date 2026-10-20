@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import { format } from "date-fns";
 import express from "express";
 import { Parser } from "json2csv";

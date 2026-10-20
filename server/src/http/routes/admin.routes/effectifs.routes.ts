@@ -1,4 +1,4 @@
-import Boom from "boom";
+import * as Boom from "@hapi/boom";
 import express from "express";
 import { Document } from "mongodb";
 import { z } from "zod";

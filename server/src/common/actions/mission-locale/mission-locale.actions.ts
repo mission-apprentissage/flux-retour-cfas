@@ -1,6 +1,6 @@
+import * as Boom from "@hapi/boom";
 import { captureException } from "@sentry/node";
 import type { IMissionLocale } from "api-alternance-sdk";
-import Boom from "boom";
 import { ObjectId } from "bson";
 import { AggregationCursor, Document, MongoServerError } from "mongodb";
 import { ML_DELAI_RELANCE_JOURS, ML_TRI_COLONNE, STATUT_APPRENANT } from "shared/constants";
@@ -3141,6 +3141,22 @@ interface IMissionLocaleSnapshotResult {
   upserted: boolean;
 }
 
+type IComputedOrganismeMl = NonNullable<NonNullable<IMissionLocaleEffectif["computed"]>["organisme"]>;
+
+export async function computedOrganismeMl(organismeId: ObjectId): Promise<IComputedOrganismeMl> {
+  const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
+  const organisme = await organismesDb().findOne(
+    { _id: organismeId },
+    { projection: { is_allowed_collab: 1, collab_suspended_at: 1, collab_resumed_at: 1 } }
+  );
+  return {
+    ml_beta_activated_at: organisation?.ml_beta_activated_at ?? null,
+    is_allowed_collab: organisme?.is_allowed_collab ?? false,
+    ...(organisme?.collab_suspended_at ? { collab_suspended_at: organisme.collab_suspended_at } : {}),
+    ...(organisme?.collab_resumed_at ? { collab_resumed_at: organisme.collab_resumed_at } : {}),
+  };
+}
+
 /**
  * Migre l'`effectif_id` d'un ml record orphelin (typiquement DECA) vers un nouvel effectif (typiquement ERP).
  *
@@ -3372,11 +3388,7 @@ export const createMissionLocaleSnapshot = async (
   const shouldUpsert = preFilter && duplicateFilter;
 
   const date = new Date();
-  const organisation = await getOrganisationOrganismeByOrganismeId(effectif.organisme_id);
-  const organisme = await organismesDb().findOne(
-    { _id: effectif.organisme_id },
-    { projection: { is_allowed_collab: 1, collab_suspended_at: 1, collab_resumed_at: 1 } }
-  );
+  const computedOrganisme = await computedOrganismeMl(effectif.organisme_id);
 
   let mongoInfo;
   try {
@@ -3398,12 +3410,7 @@ export const createMissionLocaleSnapshot = async (
           date_rupture: currentStatus?.date,
           created_at: date,
           computed: {
-            organisme: {
-              ml_beta_activated_at: organisation?.ml_beta_activated_at,
-              is_allowed_collab: organisme?.is_allowed_collab ?? false,
-              ...(organisme?.collab_suspended_at ? { collab_suspended_at: organisme.collab_suspended_at } : {}),
-              ...(organisme?.collab_resumed_at ? { collab_resumed_at: organisme.collab_resumed_at } : {}),
-            },
+            organisme: computedOrganisme,
             ...(mlData.activated_at ? { mission_locale: { activated_at: mlData.activated_at } } : {}),
           },
           ...(normalizedIdentifiant ? { identifiant_normalise: normalizedIdentifiant } : {}),

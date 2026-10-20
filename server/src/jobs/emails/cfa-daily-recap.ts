@@ -20,16 +20,16 @@ export async function sendCfaDailyRecap() {
 
   logger.info({ count: cfaStats.length }, "Found CFAs with ML actions in last 24h");
 
-  let emailsSent = 0;
-  let cfasSkipped = 0;
+  const compteurs = {
+    cfas: cfaStats.length,
+    emailsSent: 0,
+    organisationsIntrouvables: 0,
+    repondantsIntrouvables: 0,
+    erreurs: 0,
+  };
 
   for (const cfaStat of cfaStats) {
     try {
-      if (cfaStat.total === 0) {
-        cfasSkipped++;
-        continue;
-      }
-
       logger.info(
         {
           cfa_nom: cfaStat.cfa.nom,
@@ -45,11 +45,13 @@ export async function sendCfaDailyRecap() {
         const { organisation, users } = await getCfaUsers(cfaStat.cfa._id, userId);
 
         if (!organisation) {
+          compteurs.organisationsIntrouvables++;
           logger.warn({ cfa_id: cfaStat.cfa._id }, "No organisation found for CFA");
           continue;
         }
 
         if (users.length === 0) {
+          compteurs.repondantsIntrouvables++;
           logger.warn(
             {
               cfa_nom: cfaStat.cfa.nom,
@@ -102,8 +104,9 @@ export async function sendCfaDailyRecap() {
               "CFA daily recap email sent for specific ML"
             );
 
-            emailsSent++;
+            compteurs.emailsSent++;
           } catch (emailError) {
+            compteurs.erreurs++;
             logger.error(
               {
                 email: user.email,
@@ -116,6 +119,7 @@ export async function sendCfaDailyRecap() {
         }
       }
     } catch (error) {
+      compteurs.erreurs++;
       logger.error(
         {
           cfa_nom: cfaStat.cfa.nom,
@@ -126,14 +130,7 @@ export async function sendCfaDailyRecap() {
     }
   }
 
-  logger.info(
-    {
-      totalCfas: cfaStats.length,
-      emailsSent,
-      cfasSkipped,
-    },
-    "CFA daily recap job completed (1 email per ML)"
-  );
+  logger.info(compteurs, "CFA daily recap job completed (1 email per ML)");
 
-  return 0;
+  return compteurs;
 }
