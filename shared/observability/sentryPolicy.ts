@@ -27,7 +27,10 @@ export type SentryEventLike = {
   user?: Record<string, unknown>;
   request?: { headers?: Record<string, string>; cookies?: Record<string, string>; data?: unknown; url?: string };
   fingerprint?: string[];
+  spans?: Array<{ data?: Record<string, unknown> }>;
 };
+
+export type SentryBreadcrumbLike = { category?: string; data?: Record<string, unknown> };
 
 export const ALERT_TIERS = ["oncall", "jour", "veille"] as const;
 export type AlertTier = (typeof ALERT_TIERS)[number];
@@ -87,6 +90,7 @@ const MAX_SCRUB_DEPTH = 16;
 const EMAIL_PATTERN = /(?<!\*)[\w.+-]+@[\w-]+\.[\w.-]+/g;
 const SENSITIVE_HEADERS = ["authorization", "cookie", "set-cookie", "x-api-key", "proxy-authorization"];
 const ABSOLUTE_URL_PATTERN = /^([a-z][a-z\d+\-.]*:)?\/\//i;
+const OUTGOING_QUERY_KEYS = ["http.query", "http.fragment"];
 
 /** Neutralise les valeurs variables, sinon chaque identifiant fabrique son propre groupe. */
 export function normalizeForGrouping(text: string): string {
@@ -162,6 +166,10 @@ function isHttpExchange(value: object): value is Record<string, unknown> {
   return isAxiosError === true || (isRecord(config) && typeof config.url === "string");
 }
 
+function stripQueryAndFragment(url: string): string {
+  return url.split(/[?#]/)[0];
+}
+
 function joinUrl(baseURL: unknown, url: unknown): string | undefined {
   if (typeof url !== "string" || url === "") return typeof baseURL === "string" ? baseURL : undefined;
   if (typeof baseURL !== "string" || ABSOLUTE_URL_PATTERN.test(url)) return url;
@@ -176,7 +184,7 @@ function summarizeHttpExchange(exchange: Record<string, unknown>): Record<string
 
   const summary = {
     method: typeof config.method === "string" ? config.method.toUpperCase() : undefined,
-    url: url === undefined ? undefined : maskEmailsInText(url.split(/[?#]/)[0]),
+    url: url === undefined ? undefined : maskEmailsInText(stripQueryAndFragment(url)),
     status: typeof status === "number" ? status : undefined,
     code: typeof exchange.code === "string" ? exchange.code : undefined,
   };
@@ -236,6 +244,26 @@ export function scrubPii<T extends SentryEventLike>(event: T): T {
     if (value.value) value.value = maskEmailsInText(value.value);
   }
 
+  return event;
+}
+
+function deleteOutgoingQuery(data: Record<string, unknown>): void {
+  for (const key of OUTGOING_QUERY_KEYS) delete data[key];
+}
+
+export function scrubBreadcrumb<T extends SentryBreadcrumbLike>(breadcrumb: T): T {
+  const { data } = breadcrumb;
+  if (!data) return breadcrumb;
+
+  deleteOutgoingQuery(data);
+  if (typeof data.url === "string") data.url = stripQueryAndFragment(data.url);
+  return breadcrumb;
+}
+
+export function scrubTransaction<T extends SentryEventLike>(event: T): T {
+  for (const span of event.spans ?? []) {
+    if (span.data) deleteOutgoingQuery(span.data);
+  }
   return event;
 }
 

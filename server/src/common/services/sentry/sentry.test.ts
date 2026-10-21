@@ -87,4 +87,29 @@ describe("événements envoyés à Sentry", () => {
     });
     expect(sentWithoutStack()).not.toMatch(/xkeysib-factice|Camille|33600000000/);
   });
+
+  it("n'envoie pas la query string d'un appel sortant, ni en breadcrumb ni en span", async () => {
+    const url = "https://entreprise.api.gouv.fr/v3/insee/sirene/etablissements/diffusibles/12345678900011";
+    nock("https://entreprise.api.gouv.fr")
+      .get("/v3/insee/sirene/etablissements/diffusibles/12345678900011")
+      .query(true)
+      .reply(200, { data: {} });
+
+    await Sentry.startSpan({ name: "hydrate:organismes", op: "processor.job" }, async () => {
+      await axios.get(url, { params: { token: "jeton-factice" } });
+      Sentry.captureException(new Error("échec après l'appel"));
+    });
+    await Sentry.flush();
+
+    const items = sentItems();
+    const transaction = items.find((item) => item.type === "transaction" && "contexts" in item);
+    const event = items.find((item) => "exception" in item);
+    expect(transaction.spans).toContainEqual(
+      expect.objectContaining({ op: "http.client", data: expect.objectContaining({ url }) })
+    );
+    expect(event.breadcrumbs).toContainEqual(
+      expect.objectContaining({ category: "http", data: expect.objectContaining({ url }) })
+    );
+    expect(sentWithoutStack()).not.toContain("jeton-factice");
+  });
 });

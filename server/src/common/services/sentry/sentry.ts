@@ -2,7 +2,12 @@ import { ExtraErrorData } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import type { Integration } from "@sentry/types";
 import type { Express } from "express";
-import { buildBeforeSend, type SentryEventLike } from "shared/observability/sentryPolicy";
+import {
+  buildBeforeSend,
+  scrubBreadcrumb,
+  scrubTransaction,
+  type SentryEventLike,
+} from "shared/observability/sentryPolicy";
 
 import config from "../../../config";
 
@@ -68,6 +73,8 @@ export function getSentryOptions(runtime: ServerRuntime, extraIntegrations: Inte
       const kept = dropJobProcessorNoise(event);
       return kept ? (applyPolicy(stabilizeChunkModules(kept)) as Sentry.Event | null) : null;
     },
+    beforeSendTransaction: (event) => scrubTransaction(event as SentryEventLike) as typeof event,
+    beforeBreadcrumb: (breadcrumb) => scrubBreadcrumb(breadcrumb),
     initialScope: { tags: { app_runtime: runtime } },
     tracePropagationTargets: [/^https:\/\/[^/]*\.apprentissage\.beta\.gouv\.fr/],
     environment: config.env,

@@ -6,7 +6,9 @@ import {
   classifyDrop,
   enforceTagPolicy,
   normalizeForGrouping,
+  scrubBreadcrumb,
   scrubPii,
+  scrubTransaction,
   type SentryEventLike,
 } from "./sentryPolicy";
 
@@ -312,6 +314,61 @@ describe("scrubPii sur les échanges HTTP", () => {
     };
 
     expect(scrubPii({ contexts: structuredClone(contexts) }).contexts).toEqual(contexts);
+  });
+});
+
+describe("scrubBreadcrumb", () => {
+  it("retire la query string d'un appel sortant", () => {
+    const breadcrumb = scrubBreadcrumb({
+      category: "http",
+      data: {
+        url: "https://entreprise.api.gouv.fr/v3/insee/sirene",
+        "http.method": "GET",
+        "http.query": "token=jeton-factice&context=TBA",
+        "http.fragment": "section",
+        status_code: 200,
+      },
+    });
+
+    expect(breadcrumb.data).toEqual({
+      url: "https://entreprise.api.gouv.fr/v3/insee/sirene",
+      "http.method": "GET",
+      status_code: 200,
+    });
+  });
+
+  it("coupe la query de l'URL d'un breadcrumb fetch", () => {
+    const breadcrumb = scrubBreadcrumb({
+      category: "http",
+      data: { method: "GET", url: "https://api.example/v1/communes?token=jeton-factice#x", status_code: 200 },
+    });
+
+    expect(breadcrumb.data).toEqual({ method: "GET", url: "https://api.example/v1/communes", status_code: 200 });
+  });
+
+  it("laisse intact un breadcrumb sans données", () => {
+    expect(scrubBreadcrumb({ category: "console", message: "démarrage" })).toEqual({
+      category: "console",
+      message: "démarrage",
+    });
+  });
+});
+
+describe("scrubTransaction", () => {
+  it("retire la query string des spans en conservant les instances", () => {
+    class FakeSpan {
+      data: Record<string, unknown> = {
+        url: "https://entreprise.api.gouv.fr/v3/insee/sirene",
+        "http.query": "token=jeton-factice",
+        "http.fragment": "section",
+      };
+    }
+    const span = new FakeSpan();
+
+    const event = scrubTransaction({ spans: [span, {}] });
+
+    expect(event.spans?.[0]).toBe(span);
+    expect(span.data).toEqual({ url: "https://entreprise.api.gouv.fr/v3/insee/sirene" });
   });
 });
 
