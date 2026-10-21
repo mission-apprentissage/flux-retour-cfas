@@ -142,6 +142,14 @@ describe("scrubPii", () => {
     expect(event.request?.headers).toEqual({ "Content-Type": "application/json" });
   });
 
+  it("retire les cookies de la requête entrante", () => {
+    const event = scrubPii({
+      request: { url: "https://tba.example/api/v1/effectifs", cookies: { session: "eyJ.jwt" } },
+    });
+
+    expect(event.request).toEqual({ url: "https://tba.example/api/v1/effectifs" });
+  });
+
   // Les sites d'appel masquent déjà à la source : un second passage ne doit rien changer.
   it("est idempotent", () => {
     const once = scrubPii({ message: "envoi à jean.dupont@example.com" }).message;
@@ -156,6 +164,154 @@ describe("scrubPii", () => {
 
     expect(() => scrubPii({ extra })).not.toThrow();
     expect(extra.nom).toBe("*@b.fr");
+  });
+});
+
+describe("scrubPii sur les échanges HTTP", () => {
+  const brevoConfig = () => ({
+    method: "post",
+    url: "https://api.brevo.com/v3/contacts",
+    headers: { "api-key": "xkeysib-factice", "Content-Type": "application/json" },
+    data: '{"attributes":{"PRENOM":"Camille","SMS":"+33600000000"}}',
+  });
+
+  const brevoAxiosError = () => ({
+    message: "Request failed with status code 400",
+    name: "AxiosError",
+    isAxiosError: true,
+    code: "ERR_BAD_REQUEST",
+    status: 400,
+    config: brevoConfig(),
+    request: { _header: "POST /v3/contacts HTTP/1.1\r\napi-key: xkeysib-factice\r\n" },
+    response: {
+      status: 400,
+      data: { code: "invalid_parameter", message: "Invalid phone number +33600000000" },
+      config: brevoConfig(),
+    },
+  });
+
+  it("résume une AxiosError sans clé ni corps", () => {
+    const event = scrubPii({ contexts: { AxiosError: brevoAxiosError() } });
+
+    expect(event.contexts?.AxiosError).toEqual({
+      method: "POST",
+      url: "https://api.brevo.com/v3/contacts",
+      status: 400,
+      code: "ERR_BAD_REQUEST",
+    });
+    expect(JSON.stringify(event)).not.toMatch(/xkeysib-factice|Camille|33600000000/);
+  });
+
+  it("reconstruit l'URL absolue sans query", () => {
+    const event = scrubPii({
+      contexts: {
+        AxiosError: {
+          isAxiosError: true,
+          code: "ERR_BAD_REQUEST",
+          status: 404,
+          config: {
+            method: "get",
+            baseURL: "https://entreprise.api.gouv.fr/v3/",
+            url: "insee/sirene/etablissements/diffusibles/12345678900011",
+            params: { token: "jeton-factice" },
+          },
+          request: { path: "/v3/insee/sirene/etablissements/diffusibles/12345678900011?token=jeton-factice" },
+        },
+      },
+    });
+
+    expect(event.contexts?.AxiosError).toEqual({
+      method: "GET",
+      url: "https://entreprise.api.gouv.fr/v3/insee/sirene/etablissements/diffusibles/12345678900011",
+      status: 404,
+      code: "ERR_BAD_REQUEST",
+    });
+    expect(JSON.stringify(event)).not.toContain("jeton-factice");
+  });
+
+  it.each([
+    ["https://autre.example", "https://api.brevo.com/v3/contacts?email=a@b.fr#x", "https://api.brevo.com/v3/contacts"],
+    ["http://server-classifier:8000/", "/model/score", "http://server-classifier:8000/model/score"],
+    ["http://server-classifier:8000", "model/score", "http://server-classifier:8000/model/score"],
+    [
+      undefined,
+      "https://api.brevo.com/v3/contacts/jean.dupont@example.com",
+      "https://api.brevo.com/v3/contacts/jea*******t@example.com",
+    ],
+  ])("combine %s et %s comme axios", (baseURL, url, expected) => {
+    const event = scrubPii({
+      contexts: { AxiosError: { isAxiosError: true, config: { method: "post", baseURL, url } } },
+    });
+
+    expect(event.contexts?.AxiosError).toEqual({ method: "POST", url: expected });
+  });
+
+  it("résume une erreur réseau renommée par AxiosError.from", () => {
+    const event = scrubPii({
+      contexts: {
+        Error: {
+          name: "Error",
+          message: "socket hang up",
+          isAxiosError: true,
+          code: "ECONNRESET",
+          config: brevoConfig(),
+        },
+      },
+    });
+
+    expect(event.contexts?.Error).toEqual({
+      method: "POST",
+      url: "https://api.brevo.com/v3/contacts",
+      code: "ECONNRESET",
+    });
+  });
+
+  it("résume la réponse portée par une HTTPError de l'UI", () => {
+    const event = scrubPii({
+      contexts: {
+        HTTPError: {
+          statusCode: 500,
+          path: "/api/v1/organisation/effectifs",
+          prettyMessage: "Une erreur technique est survenue",
+          json: {
+            status: 500,
+            data: { message: "boom" },
+            headers: { "content-type": "application/json" },
+            config: {
+              method: "post",
+              url: "https://tba.example/api/v1/organisation/effectifs",
+              data: '{"nom":"Martin","telephone":"0600000000"}',
+            },
+          },
+        },
+      },
+    });
+
+    expect(event.contexts?.HTTPError).toEqual({
+      statusCode: 500,
+      path: "/api/v1/organisation/effectifs",
+      prettyMessage: "Une erreur technique est survenue",
+      json: { method: "POST", url: "https://tba.example/api/v1/organisation/effectifs", status: 500 },
+    });
+  });
+
+  it("résume un échange rangé dans extra ou en profondeur", () => {
+    const event = scrubPii({
+      extra: { reponse: { status: 502, config: brevoConfig() } },
+      contexts: { ApiError: { details: { a: { b: { c: { d: { e: { erreur: brevoAxiosError() } } } } } } } },
+    });
+
+    expect(event.extra?.reponse).toEqual({ method: "POST", url: "https://api.brevo.com/v3/contacts", status: 502 });
+    expect(JSON.stringify(event)).not.toMatch(/xkeysib-factice|Camille/);
+  });
+
+  it("laisse intacts les contextes ordinaires", () => {
+    const contexts = {
+      job: { name: "hydrate:daily" },
+      détail: { effectif_id: "64f0a1b2c3d4e5f6a7b8c9d0", config: { retries: 3 } },
+    };
+
+    expect(scrubPii({ contexts: structuredClone(contexts) }).contexts).toEqual(contexts);
   });
 });
 

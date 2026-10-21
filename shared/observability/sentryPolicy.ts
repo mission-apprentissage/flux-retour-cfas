@@ -25,7 +25,7 @@ export type SentryEventLike = {
   extra?: Record<string, unknown>;
   contexts?: Record<string, unknown>;
   user?: Record<string, unknown>;
-  request?: { headers?: Record<string, string>; data?: unknown; url?: string };
+  request?: { headers?: Record<string, string>; cookies?: Record<string, string>; data?: unknown; url?: string };
   fingerprint?: string[];
 };
 
@@ -79,13 +79,14 @@ export const TAG_ALLOWLIST: readonly string[] = [
 ];
 
 const MAX_TAG_VALUE_LENGTH = 200;
-const MAX_SCRUB_DEPTH = 6;
+const MAX_SCRUB_DEPTH = 16;
 /**
  * Le `(?<!\*)` rend le masquage idempotent : sans lui, `jea*******t@cfa.fr`
  * serait re-matché à partir du `t` et perdrait un caractère à chaque passage.
  */
 const EMAIL_PATTERN = /(?<!\*)[\w.+-]+@[\w-]+\.[\w.-]+/g;
 const SENSITIVE_HEADERS = ["authorization", "cookie", "set-cookie", "x-api-key", "proxy-authorization"];
+const ABSOLUTE_URL_PATTERN = /^([a-z][a-z\d+\-.]*:)?\/\//i;
 
 /** Neutralise les valeurs variables, sinon chaque identifiant fabrique son propre groupe. */
 export function normalizeForGrouping(text: string): string {
@@ -152,6 +153,36 @@ function maskEmailsInText(text: string): string {
   return text.replace(EMAIL_PATTERN, (email) => maskEmail(email));
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isHttpExchange(value: object): value is Record<string, unknown> {
+  const { isAxiosError, config } = value as Record<string, unknown>;
+  return isAxiosError === true || (isRecord(config) && typeof config.url === "string");
+}
+
+function joinUrl(baseURL: unknown, url: unknown): string | undefined {
+  if (typeof url !== "string" || url === "") return typeof baseURL === "string" ? baseURL : undefined;
+  if (typeof baseURL !== "string" || ABSOLUTE_URL_PATTERN.test(url)) return url;
+  return `${baseURL.replace(/\/?\/$/, "")}/${url.replace(/^\/+/, "")}`;
+}
+
+function summarizeHttpExchange(exchange: Record<string, unknown>): Record<string, unknown> {
+  const config = isRecord(exchange.config) ? exchange.config : {};
+  const response = isRecord(exchange.response) ? exchange.response : {};
+  const url = joinUrl(config.baseURL, config.url);
+  const status = typeof exchange.status === "number" ? exchange.status : response.status;
+
+  const summary = {
+    method: typeof config.method === "string" ? config.method.toUpperCase() : undefined,
+    url: url === undefined ? undefined : maskEmailsInText(url.split(/[?#]/)[0]),
+    status: typeof status === "number" ? status : undefined,
+    code: typeof exchange.code === "string" ? exchange.code : undefined,
+  };
+  return Object.fromEntries(Object.entries(summary).filter(([, value]) => value !== undefined));
+}
+
 function scrubValue(value: unknown, depth: number, seen: WeakSet<object>): unknown {
   if (typeof value === "string") return maskEmailsInText(value);
   if (depth >= MAX_SCRUB_DEPTH || value === null || typeof value !== "object") return value;
@@ -160,6 +191,10 @@ function scrubValue(value: unknown, depth: number, seen: WeakSet<object>): unkno
 
   if (Array.isArray(value)) {
     return value.map((item) => scrubValue(item, depth + 1, seen));
+  }
+
+  if (isHttpExchange(value)) {
+    return summarizeHttpExchange(value);
   }
 
   const entries = Object.entries(value as Record<string, unknown>);
@@ -179,6 +214,8 @@ export function scrubPii<T extends SentryEventLike>(event: T): T {
     delete event.user.ip;
   }
 
+  if (event.request) delete event.request.cookies;
+
   if (event.request?.headers) {
     for (const header of Object.keys(event.request.headers)) {
       if (SENSITIVE_HEADERS.includes(header.toLowerCase())) {
@@ -189,7 +226,7 @@ export function scrubPii<T extends SentryEventLike>(event: T): T {
 
   for (const section of ["user", "tags", "extra", "contexts"] as const) {
     const value = event[section];
-    if (value) scrubValue(value, 0, seen);
+    if (value) event[section] = scrubValue(value, 0, seen) as Record<string, unknown>;
   }
   if (event.request?.data !== undefined) {
     event.request.data = scrubValue(event.request.data, 0, seen);

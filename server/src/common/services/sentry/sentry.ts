@@ -39,7 +39,7 @@ export function detectRuntime(argv: readonly string[] = process.argv): ServerRun
  */
 const applyPolicy = buildBeforeSend<SentryEventLike>({ enrich: applyAlertContract });
 
-function getSentryOptions(runtime: ServerRuntime, extraIntegrations: Integration[]): Sentry.NodeOptions {
+export function getSentryOptions(runtime: ServerRuntime, extraIntegrations: Integration[]): Sentry.NodeOptions {
   return {
     tracesSampler: (samplingContext) => {
       if (samplingContext.transactionContext?.op === "queue.item") {
