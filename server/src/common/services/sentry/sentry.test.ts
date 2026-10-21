@@ -112,4 +112,31 @@ describe("événements envoyés à Sentry", () => {
     );
     expect(sentWithoutStack()).not.toContain("jeton-factice");
   });
+
+  it("retire des transactions les en-têtes et cookies de la requête entrante", async () => {
+    const request = {
+      method: "POST",
+      url: "/api/v1/effectifs",
+      originalUrl: "/api/v1/effectifs",
+      headers: {
+        host: "tba.example",
+        authorization: "Bearer cle-erp-factice",
+        cookie: "session=jwt-factice",
+        "content-type": "application/json",
+      },
+      cookies: { session: "jwt-factice" },
+    };
+
+    await Sentry.startSpan({ name: "POST /api/v1/effectifs", op: "http.server", parentSampled: true }, async () => {
+      Sentry.getCurrentScope().setSDKProcessingMetadata({ request });
+    });
+    await Sentry.flush();
+
+    const transaction = sentItems().find((item) => item.type === "transaction" && "contexts" in item);
+    expect(transaction.request).toEqual(
+      expect.objectContaining({ url: expect.stringContaining("/api/v1/effectifs"), method: "POST" })
+    );
+    expect(transaction.request.headers).toEqual(expect.objectContaining({ "content-type": "application/json" }));
+    expect(sentWithoutStack()).not.toMatch(/cle-erp-factice|jwt-factice/);
+  });
 });
