@@ -2,6 +2,7 @@
 
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import { useMemo } from "react";
+import { UNKNOWN_REGION_CODE } from "shared/models/data/nationalStats.model";
 
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
@@ -46,7 +47,9 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
           return r.dossiers_envoyes_cfa;
       }
     };
+    const inconnue = (r: CollaborationRegionRow) => Number(r.region_code === UNKNOWN_REGION_CODE);
     return [...regions].sort((a, b) => {
+      if (inconnue(a) !== inconnue(b)) return inconnue(a) - inconnue(b);
       const va = get(a);
       const vb = get(b);
       const cmp =
@@ -103,7 +106,7 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
             sortDirection={sortDirection}
             onSort={handleSort}
             centered
-            tooltip="CFA compatibles ayant envoyé au moins un dossier de collaboration à une Mission Locale depuis le 1er janvier 2026, rapportés au nombre de CFA compatibles."
+            tooltip="CFA compatibles ayant envoyé au moins un dossier de collaboration à une Mission Locale, rapportés au nombre de CFA compatibles."
           />,
           <SortableTableHeader
             key="dossiers"
@@ -113,7 +116,7 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
             sortDirection={sortDirection}
             onSort={handleSort}
             centered
-            tooltip="Dossiers de collaboration envoyés par les CFA de la région depuis le 1er janvier 2026, comptés à la date de réponse du CFA."
+            tooltip="Dossiers de collaboration envoyés par les CFA de la région, comptés à la date de réponse du CFA."
           />,
         ]}
         data={sorted.map((r) => [

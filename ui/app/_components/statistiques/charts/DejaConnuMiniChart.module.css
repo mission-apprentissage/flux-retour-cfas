@@ -13,3 +13,10 @@
 .value {
   composes: dejaConnuValue from "../ui/common.module.css";
 }
+
+.pourcentage {
+  margin-left: auto;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  white-space: nowrap;
+}

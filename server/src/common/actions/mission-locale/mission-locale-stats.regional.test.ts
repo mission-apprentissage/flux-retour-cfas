@@ -20,7 +20,12 @@ const daysAgo = (n: number) => {
   return d;
 };
 
-const insertStats = async (missionLocaleId: ObjectId, computedDay: Date, stats: Record<string, number>) => {
+const insertStats = async (
+  missionLocaleId: ObjectId,
+  computedDay: Date,
+  stats: Record<string, number>,
+  segments?: Record<string, Record<string, number>>
+) => {
   await missionLocaleStatsDb().insertOne(
     {
       _id: new ObjectId(),
@@ -29,6 +34,7 @@ const insertStats = async (missionLocaleId: ObjectId, computedDay: Date, stats: 
       created_at: new Date(),
       updated_at: new Date(),
       stats,
+      ...(segments && { segments }),
     } as never,
     { bypassDocumentValidation: true }
   );
@@ -76,7 +82,8 @@ describe("getRegionalStats", () => {
       ml_engagees_delta: 1,
       a_traiter: 10,
       traites: 10,
-      traites_variation: "+80%",
+      // 8 dossiers traités ces 30 jours contre 2 les 30 jours d'avant
+      traites_variation: "+300%",
     });
     expect(regions.find((region) => region.code === "84")).toMatchObject({
       ml_total: 1,
@@ -93,5 +100,22 @@ describe("getRegionalStats", () => {
     const { regions } = await getRegionalStats("30days");
 
     expect(regions.find((region) => region.code === "11")).toMatchObject({ ml_engagees: 0, traites: 0 });
+  });
+
+  it("compte les dossiers à traiter et traités sur les seules ruptures, l'engagement sur tous les dossiers", async () => {
+    await insertStats(
+      ML_ENGAGEE,
+      daysAgo(1),
+      { total: 10, traite: 8, a_traiter: 2 },
+      { rupture: { total: 6, traite: 5, a_traiter: 1 }, collab: { total: 4, traite: 3, a_traiter: 1 } }
+    );
+
+    const { regions } = await getRegionalStats("30days");
+
+    expect(regions.find((region) => region.code === "11")).toMatchObject({
+      ml_engagees: 1,
+      a_traiter: 1,
+      traites: 5,
+    });
   });
 });

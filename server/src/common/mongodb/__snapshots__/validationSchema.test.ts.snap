@@ -19866,6 +19866,10 @@ exports[`validation-schema > should create validation schema for organisations >
           "bsonType": "date",
           "description": "Date de création en base de données",
         },
+        "derniere_activite": {
+          "bsonType": "date",
+          "description": "Date de la dernière activité d'un utilisateur du CFA (consultation d'une fiche jeune, collaboration)",
+        },
         "ml_beta_activated_at": {
           "bsonType": "date",
           "description": "Date d'activation de la feature mission locale",
@@ -21584,6 +21588,7 @@ exports[`validation-schema > should create validation schema for telechargementL
         "arml",
         "ft_a_traiter",
         "ft_traite",
+        "indicateurs_collaborations",
       ],
     },
     "user_id": {

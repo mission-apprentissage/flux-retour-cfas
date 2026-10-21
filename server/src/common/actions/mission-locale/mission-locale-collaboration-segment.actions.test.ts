@@ -120,12 +120,16 @@ describe("getCollaborationSegmentStats", () => {
       delai_premiere_activite_count: 2,
     });
     await insertStats(ML_IDF, daysAgo(30), { total: 6, traite: 3, rdv_pris: 2 });
+    await insertStats(ML_IDF, daysAgo(60), { total: 2, traite: 1, rdv_pris: 1 });
 
     const stats = await getCollaborationSegmentStats("30days");
 
-    expect(stats.jeunes_envoyes).toEqual({ current: 15, variation: "+60%" });
+    // Ajouts des 30 derniers jours comparés aux 30 jours d'avant : 9 envoyés contre 4, 3 RDV contre 1.
+    expect(stats.jeunes_envoyes).toEqual({ current: 15, variation: "+125%" });
     expect(stats.jeunes_contactes.current).toBe(12);
-    expect(stats.jeunes_accompagnement_accepte).toEqual({ current: 5, variation: "+60%" });
+    expect(stats.jeunes_accompagnement_accepte).toEqual({ current: 5, variation: "+200%" });
+    const depuisJanvier = await getCollaborationSegmentStats("since-2026");
+    expect(depuisJanvier.jeunes_envoyes).toEqual({ current: 15, variation: "" });
     expect(stats.part_deja_connus).toBe(50);
     expect(stats.delai_moyen_jours).toBe(4);
     expect(stats.situations).toEqual({
@@ -153,10 +157,11 @@ describe("getCollaborationSegmentStats", () => {
     await insertCollab(ML_ARA, CFA_B, { softDeleted: true });
 
     const national = await getCollaborationSegmentStats("30days");
-    expect(national.cfa_ayant_collabore).toEqual({ current: 3, variation: "+67%" });
+    // 2 CFA ont commencé à collaborer ces 30 jours (A et C), contre 1 les 30 jours d'avant (B).
+    expect(national.cfa_ayant_collabore).toEqual({ current: 3, variation: "+100%" });
     expect(national.objectifs).toMatchObject({ mobilite: 2, sante: 1, autre: 1, total_dossiers: 4 });
 
-    const idf = await getCollaborationSegmentStats("30days", ["11"]);
+    const idf = await getCollaborationSegmentStats("30days", { regions: ["11"] });
     expect(idf.cfa_ayant_collabore.current).toBe(2);
     expect(idf.objectifs.total_dossiers).toBe(3);
 

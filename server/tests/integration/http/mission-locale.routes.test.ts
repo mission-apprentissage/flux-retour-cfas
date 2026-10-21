@@ -215,6 +215,29 @@ describe("Mission Locale Routes", () => {
       expect(rupturantId).toBeDefined();
     });
 
+    it("date l'activité de la ML à la consultation d'une fiche jeune, et celle du CFA à l'envoi d'une collaboration", async () => {
+      const effectifId = await ingestRupturant("ACTIVITE", "Test");
+      await requestAsOrganisation(
+        { type: "ORGANISME_FORMATION", uai: UAI, siret: SIRET },
+        "put",
+        `/api/v1/organismes/${ORGANISME_ID.toString()}/mission-locale/effectif/${effectifId.toString()}`,
+        { rupture: true, acc_conjoint: true }
+      );
+      const liste = await getListe(API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER);
+
+      const fiche = await requestAsOrganisation(
+        ML_DATA,
+        "get",
+        `/api/v1/organisation/mission-locale/effectif/${liste.data.effectifs[0].id}?nom_liste=${API_EFFECTIF_LISTE.COLLAB_A_TRAITER_OU_RECONTACTER}`
+      );
+
+      expect(fiche.status).toBe(200);
+      const ml = await organisationsDb().findOne({ _id: ML_ID });
+      const cfa = await organisationsDb().findOne({ type: "ORGANISME_FORMATION", uai: UAI });
+      expect((ml as { derniere_activite?: Date } | null)?.derniere_activite).toBeInstanceOf(Date);
+      expect((cfa as { derniere_activite?: Date } | null)?.derniere_activite).toBeInstanceOf(Date);
+    });
+
     it("rejette une liste non fusionnée", async () => {
       const res = await getListe(API_EFFECTIF_LISTE.PRIORITAIRE);
       expect(res.status).toBe(400);
@@ -1794,6 +1817,13 @@ describe("Mission Locale Stats Routes - Public", () => {
       const response = await httpClient.get("/api/v1/mission-locale/stats/traitement?period=invalid");
 
       expect(response.status).toBe(400);
+    });
+
+    it("Refuse les périodes réservées aux pages connectées", async () => {
+      for (const period of ["6months", "since-2026"]) {
+        const response = await httpClient.get(`/api/v1/mission-locale/stats/traitement?period=${period}`);
+        expect(response.status, period).toBe(400);
+      }
     });
 
     it("Refuse le paramètre region (route nationale uniquement)", async () => {

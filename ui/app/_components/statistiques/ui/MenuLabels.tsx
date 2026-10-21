@@ -1,9 +1,4 @@
-import { REGIONS_BY_CODE } from "shared/constants/territoires";
-
-import { FranceIcon } from "./FranceIcon";
-import { FranceMapSVG } from "./FranceMapSVG";
 import styles from "./MenuLabels.module.css";
-import { RegionSVG } from "./RegionSVG";
 
 interface MenuLabelProps {
   isActive: boolean;
@@ -27,54 +22,6 @@ export function SyntheseLabel({ isActive, collapsed }: MenuLabelProps) {
         />
       </svg>
       {!collapsed && "Vue d'ensemble"}
-    </>
-  );
-}
-
-export function NationalLabel({ isActive, collapsed }: MenuLabelProps) {
-  return (
-    <>
-      <FranceIcon isActive={isActive} width={22} height={22} className={styles.menuIcon} />
-      {!collapsed && "National"}
-    </>
-  );
-}
-
-export function MissionLocaleLabel({ isActive, collapsed }: MenuLabelProps) {
-  return (
-    <>
-      <i className={`ri-school-fill ${styles.menuIcon} ${styles.mlIcon} ${isActive ? styles.mlIconActive : ""}`} />
-      {!collapsed && "Par Mission Locale"}
-    </>
-  );
-}
-
-interface RegionsLabelProps extends MenuLabelProps {
-  regionCodes: string[];
-  label?: string;
-}
-
-export function RegionsLabel({ isActive, collapsed, regionCodes, label }: RegionsLabelProps) {
-  return (
-    <>
-      <div className={`${styles.regionsIcon} ${isActive ? "" : styles.regionsIconInactive}`}>
-        <FranceMapSVG regionsActives={regionCodes} />
-      </div>
-      {!collapsed && (label ?? (regionCodes.length === 1 ? "Ma région" : "Mes régions"))}
-    </>
-  );
-}
-
-interface RegionItemLabelProps extends MenuLabelProps {
-  regionCode: string;
-}
-
-export function RegionItemLabel({ regionCode, isActive, collapsed }: RegionItemLabelProps) {
-  const region = REGIONS_BY_CODE[regionCode as keyof typeof REGIONS_BY_CODE];
-  return (
-    <>
-      <RegionSVG regionCode={regionCode} className={styles.regionItemIcon} fill={isActive ? "#6A6AF4" : "#CECECE"} />
-      {!collapsed && (region?.nom || regionCode)}
     </>
   );
 }

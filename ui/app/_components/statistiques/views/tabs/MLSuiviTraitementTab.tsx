@@ -6,7 +6,6 @@ import { DossiersTraitesSection } from "../../sections/DossiersTraitesSection";
 import { RupturantsSection } from "../../sections/RupturantsSection";
 import type { Period } from "../../ui/PeriodSelector";
 import { PeriodSelector } from "../../ui/PeriodSelector";
-import { SegmentAboutText } from "../../ui/SegmentAboutText";
 
 import styles from "./MLSuiviTraitementTab.module.css";
 
@@ -20,15 +19,13 @@ export function MLSuiviTraitementTab({ mlId, noData, action }: MLSuiviTraitement
   const [period, setPeriod] = useState<Period>("30days");
 
   return (
-    <div className={styles.container}>
+    <div>
+      <h2 className={styles.titre}>Suivi des ruptures</h2>
       {!noData && (
-        <>
-          <SegmentAboutText variant="rupture" />
-          <div className={styles.periodRow}>
-            <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} />
-            {action}
-          </div>
-        </>
+        <div className={styles.periodRow}>
+          <PeriodSelector value={period} onChange={setPeriod} includeAll={true} hideLabel={true} etendues />
+          {action}
+        </div>
       )}
 
       <div className={styles.chartsContainer}>
@@ -38,7 +35,8 @@ export function MLSuiviTraitementTab({ mlId, noData, action }: MLSuiviTraitement
             segment="rupture"
             mlId={mlId}
             fullWidth
-            title="Jeunes identifiés en rupture"
+            title="Suivi de traitement"
+            className={styles.carte}
           />
         )}
         <DossiersTraitesSection
@@ -47,7 +45,9 @@ export function MLSuiviTraitementTab({ mlId, noData, action }: MLSuiviTraitement
           mlId={mlId}
           fullWidth
           noData={noData}
-          title="Dossiers en rupture traités"
+          title="Dossiers traités"
+          className={styles.carte}
+          dejaConnuFormat="pourcentage"
         />
       </div>
     </div>

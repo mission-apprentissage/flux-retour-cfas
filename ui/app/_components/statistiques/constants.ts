@@ -203,4 +203,12 @@ export const WHATSAPP_OUTCOMES_LABELS = {
   en_attente: "En attente de traitement",
 } as const;
 
-export const STATS_LAUNCH_DATE_LABEL = "février 2025";
+export const STATS_LAUNCH_DATE_LABEL = "mai 2025";
+
+export const NATURE_LABELS: Record<string, string> = {
+  responsable: "Responsable",
+  formateur: "Formateur",
+  responsable_formateur: "Responsable formateur",
+  lieu_formation: "Lieu de formation",
+  inconnue: "Inconnue",
+};

@@ -1,4 +1,5 @@
 import { ORGANISATION_TYPE } from "shared/constants/organisations";
+import { REGIONS_WITH_SVG_SORTED } from "shared/constants/territoires";
 
 import type { AuthContext } from "@/common/internal/AuthContext";
 
@@ -19,3 +20,6 @@ export function isAdminUser(user: AuthContext | null): boolean {
 }
 
 export const ADMIN_DEFAULT_REGION_CODE = "84";
+
+/** Toutes les régions : les chiffres agrégés sont ouverts à tous les profils, quel que soit leur territoire. */
+export const TOUTES_REGIONS_CODES = REGIONS_WITH_SVG_SORTED.map((region) => region.code);

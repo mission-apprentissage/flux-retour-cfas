@@ -5,7 +5,7 @@ import { ITimeSeriesPoint } from "shared/models/data/nationalStats.model";
 
 import { Skeleton } from "@/app/_components/common/Skeleton";
 
-import { calculatePercentage, getPercentageColor, RUPTURANTS_COLORS, RUPTURANTS_LABELS } from "../constants";
+import { getVariationColorFromString, RUPTURANTS_COLORS, RUPTURANTS_LABELS } from "../constants";
 
 import { ChartLegend } from "./ChartLegend";
 import { AxisChartTooltip } from "./ChartTooltip";
@@ -14,6 +14,8 @@ import { niceTicks } from "./ticks";
 
 interface RupturantsBarChartProps {
   data: ITimeSeriesPoint[];
+  /** Variation des dossiers traités calculée par le serveur (période contre période précédente). */
+  variationTraites?: string;
   loading?: boolean;
   loadingVariation?: boolean;
 }
@@ -38,7 +40,12 @@ const formatYAxis = (value: number) => {
   return value.toString();
 };
 
-export function RupturantsBarChart({ data, loading, loadingVariation }: RupturantsBarChartProps) {
+export function RupturantsBarChart({
+  data,
+  variationTraites = "",
+  loading,
+  loadingVariation,
+}: RupturantsBarChartProps) {
   if (loading || !data || data.length === 0) {
     return (
       <>
@@ -62,9 +69,7 @@ export function RupturantsBarChart({ data, loading, loadingVariation }: Rupturan
 
   const yTicks = niceTicks(Math.max(...rows.map((row) => row.a_traiter + row.traites)), 5);
 
-  const firstTraites = rows[0].traites;
-  const variationTraites = calculatePercentage(totalTraites, firstTraites);
-  const variationColor = getPercentageColor(totalTraites, firstTraites);
+  const variationColor = getVariationColorFromString(variationTraites);
 
   return (
     <div className={styles.chart}>

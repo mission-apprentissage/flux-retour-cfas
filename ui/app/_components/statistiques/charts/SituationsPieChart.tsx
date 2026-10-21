@@ -1,10 +1,10 @@
 "use client";
 
-import type { ICollabSituations } from "shared/models/data/nationalStats.model";
+import type { ICollabSituations, ICollabSituationsVariations } from "shared/models/data/nationalStats.model";
 
 import { Skeleton } from "@/app/_components/common/Skeleton";
 
-import { SITUATIONS_COLLAB } from "../constants";
+import { getVariationColorFromString, SITUATIONS_COLLAB } from "../constants";
 
 import { ChartLegend } from "./ChartLegend";
 import { DonutChart } from "./DonutChart";
@@ -12,10 +12,11 @@ import styles from "./SituationsPieChart.module.css";
 
 interface SituationsPieChartProps {
   data?: ICollabSituations;
+  variations?: ICollabSituationsVariations;
   loading?: boolean;
 }
 
-export function SituationsPieChart({ data, loading }: SituationsPieChartProps) {
+export function SituationsPieChart({ data, variations, loading }: SituationsPieChartProps) {
   if (loading || !data) {
     return <Skeleton height="250px" width="100%" />;
   }
@@ -49,6 +50,10 @@ export function SituationsPieChart({ data, loading }: SituationsPieChartProps) {
             sublabel: situation.sublabel,
             color: situation.color,
             value: data[situation.key],
+            ...(variations && {
+              variation: variations[situation.key],
+              variationColor: getVariationColorFromString(variations[situation.key]),
+            }),
           }))}
         />
         <div className={styles.total}>

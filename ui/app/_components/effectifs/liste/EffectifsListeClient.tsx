@@ -19,6 +19,7 @@ import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { DataTable } from "@/app/_components/table/DataTable";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { conserverParamsHote } from "@/app/_utils/params-conserves.utils";
 import { _get } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { capitalizeWords } from "@/common/utils/stringUtils";
@@ -360,7 +361,9 @@ export function EffectifsListeClient({ organisme, modePublique }: { organisme: O
                 onClick={() => {
                   setSearchValue("");
                   setFiltersCleared(true);
-                  router.replace("?", { scroll: false });
+                  router.replace(`?${conserverParamsHote(searchParams, new URLSearchParams()).toString()}`, {
+                    scroll: false,
+                  });
                 }}
               >
                 Réinitialiser

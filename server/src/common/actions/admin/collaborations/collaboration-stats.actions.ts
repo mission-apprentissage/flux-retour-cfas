@@ -2,6 +2,7 @@ import { ObjectId } from "bson";
 import { COLLABORATION_CUTOFF_DATE, REPONDU_SITUATIONS } from "shared/constants/collaboration";
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import { UNKNOWN_REGION_CODE } from "shared/models/data/nationalStats.model";
 import type { ICollaborationsCfaSyntheseResponse } from "shared/models/routes/admin/collaboration-stats.api";
 import { addDaysUTC, normalizeToUTCDay, subtractDaysUTC } from "shared/utils/date";
 
@@ -97,12 +98,23 @@ export async function fetchActivationDatesByOrgId(
   return new Map(activations.map((a) => [a._id, a.date_activation]));
 }
 
-export function buildDossierEnvoyeMatch(endExclusive: Date, organismeIds?: ObjectId[]): Record<string, unknown> {
+/**
+ * Dossiers envoyés par les CFA avant `endExclusive`. Les stats admin et Brevo comptent depuis le lancement de la V2
+ * (`COLLABORATION_CUTOFF_DATE`), à la date de réponse du CFA. Les stats territoriales passent `depuis: null` : toutes
+ * les collaborations, 2025 comprise, datées à l'envoi (`reponse_at` bouge à chaque modification du dossier).
+ */
+export function buildDossierEnvoyeMatch(
+  endExclusive: Date,
+  organismeIds?: ObjectId[],
+  depuis: Date | null = COLLABORATION_CUTOFF_DATE
+): Record<string, unknown> {
   return {
     soft_deleted: { $ne: true },
     ...(organismeIds ? { "effectif_snapshot.organisme_id": { $in: organismeIds } } : {}),
     "organisme_data.acc_conjoint": true,
-    "organisme_data.reponse_at": { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive },
+    ...(depuis
+      ? { "organisme_data.reponse_at": { $gte: depuis, $lt: endExclusive } }
+      : { "organisme_data.acc_conjoint_at": { $lt: endExclusive } }),
   };
 }
 
@@ -110,13 +122,14 @@ export type ICollaborationsByOrg = { nb: number; last: Date };
 
 export async function fetchCollaborationsByOrgId(
   organismeIds: ObjectId[],
-  endExclusive: Date
+  endExclusive: Date,
+  depuis: Date | null = COLLABORATION_CUTOFF_DATE
 ): Promise<Map<string, ICollaborationsByOrg>> {
   if (organismeIds.length === 0) return new Map();
 
   const rows = await missionLocaleEffectifsDb()
     .aggregate<{ _id: ObjectId; nb: number; last: Date }>([
-      { $match: buildDossierEnvoyeMatch(endExclusive, organismeIds) },
+      { $match: buildDossierEnvoyeMatch(endExclusive, organismeIds, depuis) },
       {
         $group: {
           _id: "$effectif_snapshot.organisme_id",
@@ -210,7 +223,8 @@ type RegionUsageAccumulator = {
 
 async function computeUsage(
   endExclusive: Date,
-  activatedOrganismeIds: Set<string>
+  activatedOrganismeIds: Set<string>,
+  depuis: Date | null
 ): Promise<{
   national: ICollaborationStatsSnapshot["national"]["usage"];
   perRegion: Map<string, RegionUsageAccumulator>;
@@ -224,20 +238,20 @@ async function computeUsage(
         soft_deleted: { $ne: true },
         "effectif_snapshot.organisme_id": { $in: activatedObjectIds },
         $or: [
-          { created_at: { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive } },
-          { "organisme_data.reponse_at": { $gte: COLLABORATION_CUTOFF_DATE, $lt: endExclusive } },
+          { created_at: { ...(depuis ? { $gte: depuis } : {}), $lt: endExclusive } },
+          { "organisme_data.reponse_at": { ...(depuis ? { $gte: depuis } : {}), $lt: endExclusive } },
         ],
       },
     },
     {
       $addFields: {
         is_rupturant: {
-          $and: [{ $gte: ["$created_at", COLLABORATION_CUTOFF_DATE] }, { $lt: ["$created_at", endExclusive] }],
+          $and: [{ $gte: ["$created_at", depuis ?? new Date(0)] }, { $lt: ["$created_at", endExclusive] }],
         },
         is_envoye: {
           $and: [
             { $eq: ["$organisme_data.acc_conjoint", true] },
-            { $gte: ["$organisme_data.reponse_at", COLLABORATION_CUTOFF_DATE] },
+            { $gte: ["$organisme_data.reponse_at", depuis ?? new Date(0)] },
             { $lt: ["$organisme_data.reponse_at", endExclusive] },
           ],
         },
@@ -306,8 +320,7 @@ async function computeUsage(
     national.rdv_pris += row.rdv_pris;
     if (hasEnvoye) cfaWithCollabNational += 1;
 
-    const code = row.region ?? null;
-    if (!code) continue;
+    const code = row.region || UNKNOWN_REGION_CODE;
     const current = perRegion.get(code) ?? { rupturants: 0, dossiers_envoyes_cfa: 0, cfa_with_collab: 0 };
     current.rupturants += row.rupturants;
     current.dossiers_envoyes_cfa += row.dossiers_envoyes_cfa;
@@ -335,9 +348,9 @@ function aggregateActivation(
   const national: ActivationCounters = { cfa_compatibles: 0, cfa_avec_compte: 0, cfa_actives: 0 };
 
   const countersFor = (region: string | null): ActivationCounters[] => {
-    if (!region) return [national];
-    const current = perRegion.get(region) ?? { cfa_compatibles: 0, cfa_avec_compte: 0, cfa_actives: 0 };
-    perRegion.set(region, current);
+    const code = region || UNKNOWN_REGION_CODE;
+    const current = perRegion.get(code) ?? { cfa_compatibles: 0, cfa_avec_compte: 0, cfa_actives: 0 };
+    perRegion.set(code, current);
     return [national, current];
   };
 
@@ -360,14 +373,15 @@ function aggregateActivation(
 async function computeStatsForEligible(
   endExclusive: Date,
   eligible: IEligibleOrganismeRow[],
-  orgIdsWithCompte?: Set<string>
+  orgIdsWithCompte?: Set<string>,
+  depuis: Date | null = COLLABORATION_CUTOFF_DATE
 ): Promise<ICollaborationStatsSnapshot> {
   const [resolvedOrgIdsWithCompte, activated] = await Promise.all([
     orgIdsWithCompte ?? fetchOrganismeIdsWithConfirmedAccount(eligible.map((o) => o._id)),
     fetchActivatedOrganismes(endExclusive),
   ]);
   const activation = aggregateActivation(eligible, resolvedOrgIdsWithCompte, activated);
-  const usage = await computeUsage(endExclusive, activation.activatedOrganismeIds);
+  const usage = await computeUsage(endExclusive, activation.activatedOrganismeIds, depuis);
 
   const regionCodes = new Set<string>([...activation.perRegion.keys(), ...usage.perRegion.keys()]);
 
@@ -378,7 +392,7 @@ async function computeStatsForEligible(
       const region = REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE];
       return {
         region_code: code,
-        region_nom: region?.nom ?? code,
+        region_nom: code === UNKNOWN_REGION_CODE ? "Région inconnue" : (region?.nom ?? code),
         cfa_compatibles: activ.cfa_compatibles,
         cfa_avec_compte: activ.cfa_avec_compte,
         cfa_actives: activ.cfa_actives,
@@ -387,7 +401,11 @@ async function computeStatsForEligible(
         dossiers_envoyes_cfa: us.dossiers_envoyes_cfa,
       };
     })
-    .sort((a, b) => a.region_nom.localeCompare(b.region_nom, "fr"));
+    .sort(
+      (a, b) =>
+        Number(a.region_code === UNKNOWN_REGION_CODE) - Number(b.region_code === UNKNOWN_REGION_CODE) ||
+        a.region_nom.localeCompare(b.region_nom, "fr")
+    );
 
   return {
     national: {
@@ -401,9 +419,12 @@ async function computeStatsForEligible(
   };
 }
 
-export async function computeStatsForDate(endExclusive: Date): Promise<ICollaborationStatsSnapshot> {
+export async function computeStatsForDate(
+  endExclusive: Date,
+  depuis: Date | null = COLLABORATION_CUTOFF_DATE
+): Promise<ICollaborationStatsSnapshot> {
   const eligible = await findEligibleOrganismes();
-  return computeStatsForEligible(endExclusive, eligible);
+  return computeStatsForEligible(endExclusive, eligible, undefined, depuis);
 }
 
 function buildVariation(current: number, previous: number | null): IStatWithVariation {
@@ -476,10 +497,13 @@ export async function getCollaborationStats(referenceDate?: Date): Promise<IColl
   };
 }
 
-/** Synthèse publique du déploiement CFA (calcul sur tous les organismes éligibles : à mettre en cache côté route). */
+/**
+ * Synthèse publique du déploiement CFA (calcul sur tous les organismes éligibles : à mettre en cache côté route).
+ * Contrairement aux stats admin, elle compte aussi les collaborations antérieures à la V2.
+ */
 export async function getCollaborationsCfaSynthese(referenceDate?: Date): Promise<ICollaborationsCfaSyntheseResponse> {
   const today = normalizeToUTCDay(referenceDate ?? new Date());
-  const snapshot = await computeStatsForDate(addDaysUTC(today, 1));
+  const snapshot = await computeStatsForDate(addDaysUTC(today, 1), null);
 
   return {
     evaluationDate: today,

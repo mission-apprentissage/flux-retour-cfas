@@ -1,7 +1,33 @@
 import { z } from "zod";
 
-const STATS_PERIODS = ["30days", "3months", "all"] as const;
-export const zStatsPeriod = z.enum(STATS_PERIODS);
+/** Périodes de l'API publique, inchangées : les suivantes sont réservées aux pages connectées. */
+export const zPublicStatsPeriod = z.enum(["30days", "3months", "all"]);
+
+/** Première année proposée en « Depuis janvier <année> » ; une option s'ajoute à chaque nouvelle année. */
+export const STATS_PREMIERE_ANNEE = 2026;
+
+export type StatsPeriodDepuis = `since-${number}`;
+
+export const statsPeriodDepuis = (annee: number): StatsPeriodDepuis => `since-${annee}`;
+
+export const anneeDePeriodeDepuis = (period: string): number | null => {
+  const match = /^since-(\d{4})$/.exec(period);
+  return match ? Number(match[1]) : null;
+};
+
+/** Années proposées en « Depuis janvier <année> », de la plus récente à la plus ancienne. */
+export const anneesDepuis = (now: Date = new Date()): number[] =>
+  Array.from(
+    { length: Math.max(0, now.getUTCFullYear() - STATS_PREMIERE_ANNEE + 1) },
+    (_, index) => now.getUTCFullYear() - index
+  );
+
+const zStatsPeriodDepuis = z.custom<StatsPeriodDepuis>((value) => {
+  const annee = typeof value === "string" ? anneeDePeriodeDepuis(value) : null;
+  return annee !== null && anneesDepuis().includes(annee);
+}, "Période invalide");
+
+export const zStatsPeriod = z.union([z.enum(["30days", "3months", "6months", "all"]), zStatsPeriodDepuis]);
 export type StatsPeriod = z.output<typeof zStatsPeriod>;
 
 const STATS_SEGMENTS = ["all", "rupture", "collab"] as const;
@@ -71,7 +97,6 @@ export type IDossiersTraitesStatsResponse = z.output<typeof zDossiersTraitesStat
 const zRegionStats = z.object({
   code: z.string(),
   nom: z.string(),
-  deployed: z.boolean(),
   ml_total: z.number(),
   ml_activees: z.number(),
   ml_activees_delta: z.number(),
@@ -85,6 +110,14 @@ const zRegionStats = z.object({
 
 export type IRegionStats = z.output<typeof zRegionStats>;
 
+/** Code de la ligne regroupant les ML sans département renseigné. */
+export const UNKNOWN_DEPARTEMENT_CODE = "inconnu";
+
+/** Code de la ligne regroupant les CFA sans région, pour que la somme des régions égale le national. */
+export const UNKNOWN_REGION_CODE = "inconnu";
+
+export type IDepartementStats = IRegionStats;
+
 const zTraitementStatsData = z.object({
   total: z.number(),
   total_contacte: z.number(),
@@ -95,6 +128,8 @@ const zTraitementStatsData = z.object({
 const zTraitementStatsResponse = z.object({
   latest: zTraitementStatsData,
   first: zTraitementStatsData,
+  /** Variation de chaque cumul : ajouts de la période comparés à la période précédente (vide sans période comparable). */
+  variations: z.record(zTraitementStatsData.keyof(), z.string()),
   evaluationDate: z.date(),
   period: zStatsPeriod,
   segment: zStatsSegment,
@@ -117,6 +152,8 @@ const zMissionLocaleTraitementStats = z.object({
   derniere_activite: z.date().nullable(),
   jours_depuis_activite: z.number().nullable(),
   is_activated: z.boolean(),
+  is_engaged: z.boolean(),
+  departement_code: z.string().nullish(),
 });
 
 export const TRAITEMENT_ML_SORT_FIELDS = [
@@ -184,6 +221,17 @@ const zCollabSituations = z.object({
 
 export type ICollabSituations = z.output<typeof zCollabSituations>;
 
+const zCollabSituationsVariations = z.object({
+  rupture: z.string(),
+  abandon: z.string(),
+  prevention_inevitable: z.string(),
+  prevention_tres_eleve: z.string(),
+  prevention_modere: z.string(),
+  besoin_aide_hors_rupture: z.string(),
+});
+
+export type ICollabSituationsVariations = z.output<typeof zCollabSituationsVariations>;
+
 const zCollaborationSegmentStats = z.object({
   evaluationDate: z.date(),
   period: zStatsPeriod,
@@ -195,6 +243,7 @@ const zCollaborationSegmentStats = z.object({
   part_deja_connus: z.number(),
   delai_moyen_jours: z.number().nullable(),
   situations: zCollabSituations,
+  situations_variations: zCollabSituationsVariations,
   objectifs: zCollaborationObjectifs.extend({ total_dossiers: z.number() }),
 });
 
@@ -354,3 +403,340 @@ const zPrequalifStats = z.object({
 });
 
 export type IPrequalifStats = z.output<typeof zPrequalifStats>;
+
+const zCfaAdoptionStats = z.object({
+  estimation: z.number(),
+  compatibles: z.number(),
+  avec_compte: z.number(),
+  avec_collaboration: zStatWithVariation,
+  period: zStatsPeriod,
+});
+
+export type ICfaAdoptionStats = z.output<typeof zCfaAdoptionStats>;
+
+export const CFA_ETABLISSEMENTS_SORT_FIELDS = ["nom", "localisation", "compte", "collaborations", "activite"] as const;
+export const zCfaEtablissementsSortBy = z.enum(CFA_ETABLISSEMENTS_SORT_FIELDS);
+export type CfaEtablissementsSortBy = z.output<typeof zCfaEtablissementsSortBy>;
+
+const zCfaEtablissement = z.object({
+  id: z.string(),
+  nom: z.string().nullable(),
+  uai: z.string().nullable(),
+  siret: z.string(),
+  nature: z.string().nullable(),
+  qualiopi: z.boolean().nullable(),
+  departement: z.string().nullable(),
+  adresse: z
+    .object({ code_postal: z.string().nullish(), commune: z.string().nullish(), complete: z.string().nullish() })
+    .nullable(),
+  has_account: z.boolean(),
+  collab_active: z.boolean(),
+  nb_collaborations: z.number(),
+  derniere_activite: z.date().nullable(),
+});
+
+export type ICfaEtablissement = z.output<typeof zCfaEtablissement>;
+
+export interface ICfaEtablissementsResponse {
+  data: ICfaEtablissement[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}
+
+const zCollaborationMois = z.object({
+  mois: z.string().describe("AAAA-MM, mois d'envoi de la collaboration (Europe/Paris)"),
+  envoyes: z.number(),
+  contactes: z.number(),
+  acceptes: z.number(),
+});
+
+export type ICollaborationMois = z.output<typeof zCollaborationMois>;
+
+export interface ICollaborationMensuelStats {
+  mois: ICollaborationMois[];
+  period: StatsPeriod;
+}
+
+export interface ICfaNpsStats {
+  nps: number | null;
+  total_reponses: number;
+  utilisateurs: number;
+  cfa: number;
+}
+
+export const CFA_INJOIGNABLES_SORT_FIELDS = ["nom", "localisation", "taux"] as const;
+export const zCfaInjoignablesSortBy = z.enum(CFA_INJOIGNABLES_SORT_FIELDS);
+export type CfaInjoignablesSortBy = z.output<typeof zCfaInjoignablesSortBy>;
+
+export interface ICfaInjoignablesRow {
+  organisme_id: string;
+  nom: string | null;
+  uai: string | null;
+  siret: string;
+  adresse: { code_postal?: string | null; commune?: string | null; complete?: string | null } | null;
+  traites: number;
+  injoignables: number;
+  taux: number;
+}
+
+export const COLLAB_DOSSIER_STATUTS = ["a_traiter", "a_recontacter", "traite"] as const;
+export type CollabDossierStatut = (typeof COLLAB_DOSSIER_STATUTS)[number];
+
+export const COLLAB_DOSSIER_DELAIS = ["0_10", "11_20", "21_30", "30_plus"] as const;
+export type CollabDossierDelai = (typeof COLLAB_DOSSIER_DELAIS)[number];
+
+export const COLLAB_DOSSIER_RESULTATS = [
+  "rdv_pris",
+  "projet_pro_securise",
+  "ne_souhaite_pas_accompagnement",
+  "a_recontacter",
+  "injoignable",
+  "autre",
+] as const;
+export type CollabDossierResultat = (typeof COLLAB_DOSSIER_RESULTATS)[number];
+
+export interface ICollaborationDossierStructure {
+  id: string;
+  nom: string | null;
+  commune: string | null;
+}
+
+/** Dossier de collaboration affiché aux profils indicateurs : seuls le prénom et le nom du jeune sont exposés. */
+export interface ICollaborationDossier {
+  id: string;
+  jeune: { prenom: string | null; nom: string | null };
+  mission_locale: ICollaborationDossierStructure;
+  cfa: ICollaborationDossierStructure;
+  statut: CollabDossierStatut;
+  situation: string | null;
+  motifs: string[];
+  resultat: CollabDossierResultat | null;
+  date_envoi: Date;
+  delai_jours: number;
+  traite_par_ml: boolean;
+}
+
+export interface ICollaborationDossiersResponse {
+  total: number;
+  pagination: { page: number; limit: number; total_pages: number };
+  data: ICollaborationDossier[];
+  filtres: { cfa: ICollaborationDossierStructure[]; ml: ICollaborationDossierStructure[] };
+}
+
+/** Longueur minimale d'une recherche d'établissements : en dessous, aucune requête n'est lancée. */
+export const RECHERCHE_LONGUEUR_MIN = 3;
+
+interface IRechercheResultatBase {
+  id: string;
+  nom: string | null;
+  adresse: { code_postal: string | null; commune: string | null; complete: string | null };
+  derniere_activite: Date | null;
+}
+
+export interface IRechercheResultatCfa extends IRechercheResultatBase {
+  type: "cfa";
+  uai: string | null;
+  siret: string;
+  compte_tba: boolean;
+  invitations_recues: number;
+  collaborations_envoyees: number;
+}
+
+export interface IRechercheResultatMl extends IRechercheResultatBase {
+  type: "ml";
+  compte_tba: boolean;
+  ruptures: { a_traiter: number; traites: number };
+  collaborations: { recues: number; traitees: number };
+}
+
+export type IRechercheResultat = IRechercheResultatCfa | IRechercheResultatMl;
+
+export interface IRechercheResponse {
+  total: number;
+  pagination: { page: number; limit: number; total_pages: number };
+  data: IRechercheResultat[];
+}
+
+/** Seuils des alertes d'activité de la fiche Mission Locale. */
+export const ML_ALERTE_SEUILS = {
+  delai_collab_jours: 10,
+  a_recontacter: 30,
+  inactivite_jours: 14,
+} as const;
+
+export const ML_ALERTE_TYPES = [
+  "delai_collab",
+  "a_recontacter",
+  "collab_sans_compte",
+  "non_engagee",
+  "inactive",
+] as const;
+export type IMlAlerteType = (typeof ML_ALERTE_TYPES)[number];
+
+export interface IMlAlerte {
+  type: IMlAlerteType;
+  valeur: number | null;
+}
+
+/** Croisement des dossiers de collaboration (situation du jeune ou objectif) avec la réponse de la ML. */
+export interface ICollabCorrelationRow {
+  cle: string;
+  total: number;
+  traites: number;
+  resultats: Record<CollabDossierResultat, number>;
+}
+
+export interface ICollabCorrelationsResponse {
+  situations: ICollabCorrelationRow[];
+  objectifs: ICollabCorrelationRow[];
+}
+
+/** Listes d'alertes sur les Missions Locales d'un territoire (vues admin des onglets Ruptures et Collaborations). */
+export const ML_ALERTE_LISTE_TYPES = ["non_engagee", "delai_collab", "a_recontacter", "collab_sans_compte"] as const;
+export type MlAlerteListeType = (typeof ML_ALERTE_LISTE_TYPES)[number];
+
+export const ML_ALERTE_LISTE_SORT_BY = [
+  "nom",
+  "localisation",
+  "total_jeunes",
+  "a_traiter",
+  "a_recontacter",
+  "pourcentage_traites",
+  "delai_moyen_jours",
+  "activite",
+] as const;
+export type MlAlerteListeSortBy = (typeof ML_ALERTE_LISTE_SORT_BY)[number];
+
+export interface IMlAlerteListeRow {
+  id: string;
+  nom: string;
+  code_postal: string | null;
+  commune: string | null;
+  total_jeunes: number;
+  a_traiter: number;
+  a_recontacter: number;
+  pourcentage_traites: number;
+  delai_moyen_jours: number | null;
+  jours_depuis_activite: number | null;
+  is_activated: boolean;
+}
+
+export interface IMlAlerteListeResponse {
+  total: number;
+  pagination: { page: number; limit: number; total_pages: number };
+  data: IMlAlerteListeRow[];
+}
+
+export interface IMlFicheIndicateurs {
+  premier_compte_at: Date | null;
+  derniere_activite_at: Date | null;
+  taux_traitement: number | null;
+  is_engaged: boolean;
+  alertes: IMlAlerte[];
+}
+
+export const COLLAB_CFA_ORIGINE_SORT_BY = ["collaborations", "localisation", "nom"] as const;
+export type CollabCfaOrigineSortBy = (typeof COLLAB_CFA_ORIGINE_SORT_BY)[number];
+
+export interface ICollabCfaOrigineRow {
+  organisme_id: string;
+  nom: string | null;
+  uai: string | null;
+  siret: string | null;
+  code_postal: string | null;
+  commune: string | null;
+  adresse: string | null;
+  collaborations: number;
+  /** Faux si l'organisme d'origine n'est plus dans le référentiel : pas de fiche à ouvrir. */
+  organisme_connu: boolean;
+}
+
+export interface ICollabCfaOrigineResponse {
+  total: number;
+  pagination: { page: number; limit: number; total_pages: number };
+  data: ICollabCfaOrigineRow[];
+}
+
+export interface ICfaFicheContactReferent {
+  civility: string | null;
+  nom: string | null;
+  prenom: string | null;
+  fonction: string | null;
+  telephone: string | null;
+  email: string | null;
+}
+
+export interface ICfaFicheSourceDonnees {
+  deca: boolean;
+  erps: string[];
+  fichier: boolean;
+  erreurs_transmission: boolean;
+}
+
+export interface ICfaFiche {
+  id: string;
+  nom: string | null;
+  raison_sociale: string | null;
+  uai: string | null;
+  siret: string;
+  nature: string | null;
+  qualiopi: boolean;
+  ferme: boolean;
+  adresse: { complete: string | null; code_postal: string | null; commune: string | null };
+  courriels_referentiel: string[];
+  source_donnees: ICfaFicheSourceDonnees;
+  has_account: boolean;
+  collabore: boolean;
+  derniere_activite_at: Date | null;
+  alertes: Array<{ type: "invitations_sans_compte"; valeur: number }>;
+  peut_voir_nominatif: boolean;
+  contact_referent: ICfaFicheContactReferent | null;
+}
+
+export interface ICfaMembre {
+  type: "utilisateur" | "invitation";
+  id: string;
+  civility: string | null;
+  nom: string | null;
+  prenom: string | null;
+  telephone: string | null;
+  email: string;
+  fonction: string | null;
+  role: "admin" | "member" | null;
+  derniere_activite_at: Date | null;
+  activation_at: Date | null;
+  invitation_statut: "envoyee" | "expiree" | null;
+}
+
+export interface ICfaCollaborationStats {
+  envoyes: number;
+  contactes: number;
+  acceptes: number;
+  resultats: IDetailsDossiersTraitesV2;
+  part_deja_connus: number;
+  delai_moyen_jours: number | null;
+  situations: ICollabSituations;
+  objectifs: ICollaborationObjectifs & { total_dossiers: number };
+  nps: ICfaNpsStats;
+  mensuel: ICollaborationMensuelStats["mois"];
+}
+
+export const CFA_COLLAB_ML_SORT_BY = ["envoyees", "a_traiter", "traitees", "nom"] as const;
+export type CfaCollabMlSortBy = (typeof CFA_COLLAB_ML_SORT_BY)[number];
+
+export interface ICfaCollabMlRow {
+  mission_locale_id: string;
+  nom: string | null;
+  code_postal: string | null;
+  commune: string | null;
+  utilise_service: boolean;
+  envoyees: number;
+  a_traiter: number;
+  a_recontacter: number;
+  traitees: number;
+}
+
+export interface ICfaCollabMlResponse {
+  total: number;
+  pagination: { page: number; limit: number; total_pages: number };
+  data: ICfaCollabMlRow[];
+}

@@ -34,6 +34,19 @@ function parseSort(sort?: string): { field: string; order: 1 | -1 } {
   return { field, order: dir === "1" ? 1 : -1 };
 }
 
+/** Auteur d'une invitation, sauf s'il est administrateur : son invitation part alors au nom de l'équipe. */
+async function findAuteurNonAdministrateur(authorId: ObjectId | null | undefined) {
+  const author = authorId
+    ? await usersMigrationDb().findOne(
+        { _id: authorId },
+        { projection: { civility: 1, nom: 1, prenom: 1, email: 1, fonction: 1, organisation_id: 1 } }
+      )
+    : null;
+  if (!author) return null;
+  const organisation = await organisationsDb().findOne({ _id: author.organisation_id }, { projection: { type: 1 } });
+  return organisation?.type === "ADMINISTRATEUR" ? null : author;
+}
+
 export async function listAdminInvitations(params: ListAdminInvitationsParams) {
   const { status, type, role, organisation_id, search, page = 1, limit = 20, sort } = params;
   const { field, order } = parseSort(sort);
@@ -176,29 +189,15 @@ export async function resendAdminInvitation(invitationId: string): Promise<{ ema
         invitationToken: invitation.token,
       });
     } else {
-      const author = invitation.author_id
-        ? await usersMigrationDb().findOne(
-            { _id: invitation.author_id },
-            { projection: { prenom: 1, nom: 1, fonction: 1 } }
-          )
-        : null;
+      const author = await findAuteurNonAdministrateur(invitation.author_id);
       await sendEmail(invitation.email, "invitation_cfa_member", {
-        admin: {
-          prenom: author?.prenom || "Administrateur",
-          nom: author?.nom || "",
-          fonction: author?.fonction || "",
-        },
+        admin: author ? { prenom: author.prenom, nom: author.nom, fonction: author.fonction || "" } : undefined,
         cfaName,
         invitationToken: invitation.token,
       });
     }
   } else {
-    const author = invitation.author_id
-      ? await usersMigrationDb().findOne(
-          { _id: invitation.author_id },
-          { projection: { civility: 1, prenom: 1, nom: 1, email: 1 } }
-        )
-      : null;
+    const author = await findAuteurNonAdministrateur(invitation.author_id);
     const organisationLabel =
       organisation.type === "MISSION_LOCALE"
         ? `Mission locale ${organisation.nom ?? ""}`
@@ -206,12 +205,9 @@ export async function resendAdminInvitation(invitationId: string): Promise<{ ema
           ? "France Travail"
           : organisation.type;
     await sendEmail(invitation.email, "invitation_organisation", {
-      author: {
-        civility: author?.civility,
-        nom: author?.nom || "",
-        prenom: author?.prenom || "",
-        email: author?.email || "",
-      },
+      author: author
+        ? { civility: author.civility, nom: author.nom, prenom: author.prenom, email: author.email }
+        : undefined,
       organisationLabel,
       invitationToken: invitation.token,
     });

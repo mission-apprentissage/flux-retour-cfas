@@ -8,7 +8,7 @@ import { TravauxBanner } from "@/app/_components/TravauxBanner";
 import { getSession } from "@/app/_utils/session.utils";
 import { Providers } from "@/app/providers";
 
-import { isAdminUser, isIndicateursUser } from "./access";
+import { isIndicateursUser } from "./access";
 import { ImpersonationNotice } from "./ImpersonationNotice";
 import { StatistiquesMLLayoutClient } from "./StatistiquesMLLayoutClient";
 import { StatistiquesPublicLayoutClient } from "./StatistiquesPublicLayoutClient";
@@ -38,7 +38,7 @@ export default async function StatistiquesLayout({ children }: { children: JSX.E
         <UserContextProvider user={user}>
           <TravauxBanner />
           <ConnectedHeader />
-          <StatistiquesMLLayoutClient isAdmin={isAdminUser(user)}>{children}</StatistiquesMLLayoutClient>
+          <StatistiquesMLLayoutClient>{children}</StatistiquesMLLayoutClient>
           <Footer />
         </UserContextProvider>
       </Providers>

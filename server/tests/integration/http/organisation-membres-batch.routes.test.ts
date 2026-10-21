@@ -114,7 +114,7 @@ describe("POST /api/v1/organisation/membres/batch", () => {
     expect(sendEmail).toHaveBeenCalledWith(
       "new1@cfa.local",
       "invitation_cfa_member",
-      expect.objectContaining({ cfaName: "CAMPUS DU LAC" })
+      expect.objectContaining({ cfaName: "CAMPUS DU LAC", admin: expect.objectContaining({ nom: expect.any(String) }) })
     );
   });
 
@@ -166,7 +166,7 @@ describe("POST /api/v1/organisation/membres/batch", () => {
     const response = await batchInvite({ emails: ["member@cfa.local"] });
 
     expect(response.data.errors).toEqual([
-      { email: "member@cfa.local", message: "Cet utilisateur est déjà membre de votre organisation" },
+      { email: "member@cfa.local", message: "Cet utilisateur est déjà membre de cette organisation" },
     ]);
   });
 

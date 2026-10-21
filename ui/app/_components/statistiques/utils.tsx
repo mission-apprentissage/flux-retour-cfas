@@ -3,11 +3,16 @@
 import { format } from "date-fns/format";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { fr } from "date-fns/locale";
+import { REGIONS_BY_CODE } from "shared/constants/territoires";
 
 import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import commonStyles from "./tables/common.module.css";
 import styles from "./tables/TraitementTable.module.css";
+
+export function getRegionLabel(code: string) {
+  return REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE]?.nom ?? code;
+}
 
 export function formatPercentageBadge(percentage: number, evolution?: string, loadingEvolution?: boolean) {
   let badgeClass = styles.percentageBadgeMedium;
@@ -83,6 +88,29 @@ export function formatDateFr(dateString: string | null): string | null {
   }
 }
 
+/** Lien vers la fiche CFA ; la provenance alimente le fil d'Ariane (`from`, `q`, `ml_id`). */
+export function ficheCfaUrl(organismeId: string, provenance: Record<string, string | null | undefined> = {}) {
+  const params = new URLSearchParams();
+  Object.entries(provenance).forEach(([cle, valeur]) => valeur && params.set(cle, valeur));
+  const query = params.toString();
+  return `/suivi-des-indicateurs/cfa/${organismeId}${query ? `?${query}` : ""}`;
+}
+
+export function safeHttpUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const { protocol } = new URL(url);
+    return protocol === "http:" || protocol === "https:" ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+export function formatDateCourte(dateString: string | null): string | null {
+  if (!dateString) return null;
+  return format(new Date(dateString), "dd/MM/yyyy");
+}
+
 export function formatDateWithRelativeTime(dateString: string | null): string {
   if (!dateString) return "Aucune activité";
   try {
@@ -106,4 +134,15 @@ export function formatVariationBadge(variation: string) {
   if (numValue === 0) return <span className={commonStyles.variationZero}>{variation}</span>;
   if (numValue > 0) return <span className={commonStyles.variationPositive}>{variation}</span>;
   return <span className={commonStyles.variationNegative}>{variation}</span>;
+}
+
+/** Dernière activité courte : « aujourd'hui », « hier », sinon « le JJ/MM/AAAA » (jours calendaires locaux). */
+export function formatDerniereActivite(date: Date | string | null): string {
+  if (!date) return "Aucune";
+  const jour = new Date(date);
+  const debutDuJour = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const ecart = Math.round((debutDuJour(new Date()) - debutDuJour(jour)) / 86_400_000);
+  if (ecart <= 0) return "aujourd'hui";
+  if (ecart === 1) return "hier";
+  return `le ${format(jour, "dd/MM/yyyy")}`;
 }
