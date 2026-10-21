@@ -107,7 +107,7 @@ export async function upsertBrevoContact(phoneNumber: string, attributes: Record
       {
         phoneNumber: maskPhone(formattedPhone),
         status: axios.isAxiosError(error) ? error.response?.status : undefined,
-        error: getErrorMessage(error),
+        error: getBrevoErrorMessage(error),
       },
       "Failed to upsert Brevo contact — template will be sent without custom attributes"
     );
