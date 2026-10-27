@@ -188,6 +188,34 @@ describe("GET /api/v2/affelnet/suivi", () => {
       assert.strictEqual(response.data.metadonnees.totalElements, 0);
     });
 
+    it("âge : ddn stockée la veille à 22h UTC → borne des 18 ans calculée sur le jour réel", async () => {
+      await insertEffectif(orgLille, {
+        apprenant: { nom: "GESTI", date_de_naissance: new Date("2007-09-15T22:00:00.000Z") },
+      });
+
+      const response = await getSuivi();
+
+      assert.strictEqual(response.data.metadonnees.totalElements, 1);
+      assert.strictEqual(response.data.effectifs[0].apprenant.dateNaissance, "2007-09-16");
+    });
+
+    it("plage de dates : date d'entrée stockée la veille à 22h UTC comptée pour le lendemain", async () => {
+      await insertEffectif(orgLille, {
+        apprenant: { nom: "DEBUTFENETRE" },
+        formation: { date_entree: new Date("2025-08-31T22:00:00.000Z") },
+      });
+      await insertEffectif(orgLille, {
+        apprenant: { nom: "APRESFENETRE" },
+        formation: { date_entree: new Date("2025-09-30T22:00:00.000Z") },
+      });
+
+      const response = await getSuivi({ dateDebutFormationMin: "2025-09-01", dateDebutFormationMax: "2025-09-30" });
+
+      assert.strictEqual(response.data.metadonnees.totalElements, 1);
+      assert.strictEqual(response.data.effectifs[0].apprenant.nom, "DEBUTFENETRE");
+      assert.strictEqual(response.data.effectifs[0].formation.dateDebutFormation, "2025-09-01");
+    });
+
     it("niveau : seuls 3/4/5 transmis (niveau 6 ou null exclus)", async () => {
       await insertEffectif(orgLille, { apprenant: { nom: "NIVEAUTROIS" }, formation: { niveau: "3" } });
       await insertEffectif(orgLille, { apprenant: { nom: "NIVEAUSIX" }, formation: { niveau: "6" } });
@@ -311,6 +339,46 @@ describe("GET /api/v2/affelnet/suivi", () => {
 
       assert.strictEqual(response.data.metadonnees.totalElements, 1);
     });
+
+    it("ddn ERP stockée la veille à 23h UTC + DECA à minuit → dédupliquées, quel que soit le gagnant", async () => {
+      const ddnErp = new Date("2009-03-09T23:00:00.000Z");
+      const ddnDeca = new Date("2009-03-10T00:00:00.000Z");
+      await insertEffectif(orgLille, { apprenant: { ...identite, date_de_naissance: ddnErp } });
+      await insertEffectifDECA(orgLille, { apprenant: { ...identite, date_de_naissance: ddnDeca } });
+
+      const decaGagnant = await getSuivi();
+
+      assert.strictEqual(decaGagnant.data.metadonnees.totalElements, 1);
+      assert.strictEqual(decaGagnant.data.effectifs[0].source, "DECA");
+      assert.strictEqual(decaGagnant.data.effectifs[0].apprenant.dateNaissance, "2009-03-10");
+
+      await effectifsDb().deleteMany({});
+      await effectifsDECADb().deleteMany({});
+      await insertEffectif(orgLille, {
+        apprenant: { ...identite, date_de_naissance: ddnErp },
+        contrats: [{ date_debut: D("2026-02-01"), date_fin: D("2027-06-30") }],
+      });
+      await insertEffectifDECA(orgLille, {
+        apprenant: { ...identite, date_de_naissance: ddnDeca },
+        contrats: [{ date_debut: D("2025-10-01"), date_fin: D("2027-06-30"), date_rupture: D("2026-01-15") }],
+      });
+
+      const erpGagnant = await getSuivi();
+
+      assert.strictEqual(erpGagnant.data.metadonnees.totalElements, 1);
+      assert.strictEqual(erpGagnant.data.effectifs[0].source, "CFA");
+      assert.strictEqual(erpGagnant.data.effectifs[0].apprenant.dateNaissance, "2009-03-10");
+    });
+
+    it("noms composés : 'ROUSSEAU--CHAUVET' ERP et 'ROUSSEAU-CHAUVET' DECA sont dédupliqués", async () => {
+      await insertEffectif(orgLille, { apprenant: { ...identite, nom: "ROUSSEAU--CHAUVET" } });
+      await insertEffectifDECA(orgLille, { apprenant: { ...identite, nom: "ROUSSEAU-CHAUVET" } });
+
+      const response = await getSuivi();
+
+      assert.strictEqual(response.data.metadonnees.totalElements, 1);
+      assert.strictEqual(response.data.effectifs[0].source, "DECA");
+    });
   });
 
   describe("Contrats rompus (non transmis, contrat v1.10)", () => {
@@ -430,6 +498,29 @@ describe("GET /api/v2/affelnet/suivi", () => {
       assert.strictEqual(effectif.organismeFormation.uaiCfa, orgLille.uai);
       assert.strictEqual(effectif.organismeFormation.siret, orgLille.siret);
       assert.strictEqual(effectif.organismeFormation.denomination, orgLille.nom);
+    });
+
+    it("dates métier stockées la veille à 22h ou 23h UTC → jour du lendemain", async () => {
+      await insertEffectif(orgLille, {
+        apprenant: { date_de_naissance: new Date("2009-03-09T23:00:00.000Z") },
+        contrats: [
+          { date_debut: new Date("2025-08-31T22:00:00.000Z"), date_fin: new Date("2027-06-29T22:00:00.000Z") },
+        ],
+      });
+
+      const { data } = await getSuivi();
+
+      assert.strictEqual(data.effectifs[0].apprenant.dateNaissance, "2009-03-10");
+      assert.strictEqual(data.effectifs[0].contrats.dateDebutContrat, "2025-09-01");
+      assert.strictEqual(data.effectifs[0].contrats.dateFinContrat, "2027-06-30");
+    });
+
+    it("dateActualisation garde le jour UTC de l'horodatage", async () => {
+      await insertEffectif(orgLille, { updated_at: new Date("2026-10-20T22:30:00.000Z") });
+
+      const { data } = await getSuivi();
+
+      assert.strictEqual(data.effectifs[0].dateActualisation, "2026-10-20");
     });
 
     it("contrats : dernier par date_debut, dateConclusionContrat null, date_debut null ignoré", async () => {
