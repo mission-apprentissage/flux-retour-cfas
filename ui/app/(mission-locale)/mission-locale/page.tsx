@@ -23,9 +23,10 @@ export default async function Page({ searchParams }: PageProps) {
   const versListeRuptures = ["statut", "rupture", "filter"].some((cle) => params?.[cle] !== undefined);
   if (versListeRuptures) {
     const query = new URLSearchParams(
-      Object.entries(params).flatMap(([cle, valeur]) =>
-        valeur === undefined ? [] : Array.isArray(valeur) ? valeur.map((v) => [cle, v]) : [[cle, valeur]]
-      ) as string[][]
+      Object.entries(params).flatMap(([cle, valeur]) => {
+        const cible = cle === "filter" ? "criteres" : cle;
+        return valeur === undefined ? [] : Array.isArray(valeur) ? valeur.map((v) => [cible, v]) : [[cible, valeur]];
+      }) as string[][]
     ).toString();
     redirect(`/mission-locale/ruptures${query ? `?${query}` : ""}`);
   }
