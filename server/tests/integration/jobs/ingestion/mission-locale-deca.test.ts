@@ -490,6 +490,34 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       expect(keeper?.date_derniere_action_ml).toEqual(dateRecontact);
     });
 
+    it("DECA fléché vers son formateur, puis ERP du responsable pour même personne → dossier migré vers l'ERP", async () => {
+      const responsableId = new ObjectId();
+      const decaEffectif = createBaseDecaEffectif({
+        apprenant: makeApprenant("FLECHE", "Lina", 20),
+        organisme_responsable_id: responsableId,
+      });
+      await createMissionLocaleSnapshot(decaEffectif);
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: decaEffectif._id },
+        { $set: { situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR } }
+      );
+
+      const erpEffectif = createBaseErpEffectif({
+        _id: new ObjectId(),
+        apprenant: makeApprenant("FLECHE", "Lina", 20),
+        organisme_id: responsableId,
+      });
+      await createMissionLocaleSnapshot(erpEffectif);
+
+      const actifs = await missionLocaleEffectifsDb()
+        .find({ soft_deleted: { $ne: true } })
+        .toArray();
+      expect(actifs).toHaveLength(1);
+      expect(actifs[0].effectif_id).toEqual(erpEffectif._id);
+      expect(actifs[0].situation).toBe(SITUATION_ENUM.CONTACTE_SANS_RETOUR);
+      expect(await missionLocaleEffectifsDb().countDocuments({ soft_deleted: true })).toBe(0);
+    });
+
     it("ERP existe, puis DECA arrive pour même personne → DECA rejeté, ERP intact", async () => {
       const erpEffectif = createBaseErpEffectif({ apprenant: makeApprenant("MARTIN", "Marie", 22) });
       const erpResult = await createMissionLocaleSnapshot(erpEffectif);

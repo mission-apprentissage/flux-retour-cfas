@@ -8071,6 +8071,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
       ],
       "description": "SIRET du lieu principal de formation déclaré au contrat DECA, brut (non résolu, non routé)",
     },
+    "fleche": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "description": "Fléchage du contrat de l'organisme responsable vers son établissement de formation",
+      "properties": {
+        "annule_le": {
+          "bsonType": "date",
+        },
+        "le": {
+          "bsonType": "date",
+        },
+        "regle": {
+          "bsonType": "string",
+          "enum": [
+            "lieu_declare",
+            "erp_formateur",
+          ],
+        },
+      },
+      "required": [
+        "regle",
+        "le",
+      ],
+    },
     "formation": {
       "anyOf": [
         {
@@ -17692,6 +17716,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "null",
               ],
               "description": "SIRET du lieu principal de formation déclaré au contrat DECA, brut (non résolu, non routé)",
+            },
+            "fleche": {
+              "additionalProperties": false,
+              "bsonType": "object",
+              "description": "Fléchage du contrat de l'organisme responsable vers son établissement de formation",
+              "properties": {
+                "annule_le": {
+                  "bsonType": "date",
+                },
+                "le": {
+                  "bsonType": "date",
+                },
+                "regle": {
+                  "bsonType": "string",
+                  "enum": [
+                    "lieu_declare",
+                    "erp_formateur",
+                  ],
+                },
+              },
+              "required": [
+                "regle",
+                "le",
+              ],
             },
             "formation": {
               "anyOf": [

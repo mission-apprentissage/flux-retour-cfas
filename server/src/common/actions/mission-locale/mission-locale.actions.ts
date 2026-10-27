@@ -3395,7 +3395,10 @@ export const createMissionLocaleSnapshot = async (
       "identifiant_normalise.nom": normalizedIdentifiant.nom,
       "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
       "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
-      "effectif_snapshot.organisme_id": effectif.organisme_id,
+      $or: [
+        { "effectif_snapshot.organisme_id": effectif.organisme_id },
+        { "effectif_snapshot.organisme_responsable_id": effectif.organisme_id },
+      ],
       mission_locale_id: mlData._id,
       soft_deleted: { $ne: true },
     });
