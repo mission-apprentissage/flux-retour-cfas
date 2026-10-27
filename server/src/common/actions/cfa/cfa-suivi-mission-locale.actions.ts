@@ -252,7 +252,13 @@ const SUIVI_PROJECT_STAGE = {
     source: {
       $ifNull: [
         "$_effectif_courant.source",
-        { $cond: [{ $ifNull: ["$effectif_snapshot.is_deca_compatible", false] }, "effectifsDECA", "effectifs"] },
+        {
+          $cond: [
+            { $ne: [{ $type: "$effectif_snapshot.is_deca_compatible" }, "missing"] },
+            "effectifsDECA",
+            "effectifs",
+          ],
+        },
       ],
     },
     nom: "$_nom",

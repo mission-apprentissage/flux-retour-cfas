@@ -75,6 +75,7 @@ describe("registre des jobs", () => {
       "computed:update",
       "db:find-invalid-documents",
       "db:validate",
+      "deca:flechage",
       "dev:generate-open-api",
       "effectifs:doublons-obsoletes",
       "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis",

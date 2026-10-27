@@ -1,17 +1,34 @@
 import { ObjectId } from "bson";
 import type { WithoutId } from "mongodb";
 import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
+import type { IMissionLocaleEffectif } from "shared/models";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IOrganisme } from "shared/models/data/organismes.model";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { appliquerCible, chargerResponsablesFleches } from "@/common/actions/deca/deca-flechage.actions";
+import {
+  appliquerCible,
+  chargerResponsablesFleches,
+  flecherContratsDeca,
+  rendreContratsDeca,
+} from "@/common/actions/deca/deca-flechage.actions";
 import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
-import { effectifsDECADb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import {
+  effectifsDb,
+  effectifsDECADb,
+  formationsCatalogueDb,
+  missionLocaleEffectifsDb,
+  organisationsDb,
+  organismesDb,
+  usersMigrationDb,
+} from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes";
+import { getDatabase } from "@/common/mongodb";
+import { dedupDateDeNaissance, dedupDateDeNaissanceExpr, dedupNom, dedupNomExpr } from "@/common/utils/mongoUtils";
 import { upsertEffectifDeca } from "@/jobs/hydrate/deca/hydrate-deca-raw";
-import { createRandomOrganisme } from "@tests/data/randomizedSample";
+import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
+import { DeepPartial, testDoc } from "@tests/utils/testUtils";
 
 const mockUpdateVoeux = vi.fn();
 
@@ -30,6 +47,7 @@ vi.mock("@/common/services/classifier/classifier", async (importOriginal) => ({
 }));
 
 const ML_ID = 609;
+const ML_ORGANISATION_ID = new ObjectId();
 const DATE_FLECHAGE = new Date("2025-11-20T03:00:00.000Z");
 
 const responsable: IOrganisme = {
@@ -124,6 +142,62 @@ async function insererChezCible(cible: IOrganisme, overrides: Partial<WithoutId<
 
 const responsablesFleches = () => new Set([responsable._id.toString()]);
 
+async function insererContrat(document: WithoutId<IEffectifDECA> = contratIngere()) {
+  const contrat = { ...document, _id: new ObjectId() };
+  await effectifsDECADb().insertOne(contrat);
+  return contrat;
+}
+
+async function insererDossier(contrat: IEffectifDECA, overrides: DeepPartial<IMissionLocaleEffectif> = {}) {
+  const dossier = testDoc<IMissionLocaleEffectif>({
+    _id: new ObjectId(),
+    mission_locale_id: ML_ORGANISATION_ID,
+    effectif_id: contrat._id,
+    effectif_snapshot: contrat,
+    effectif_snapshot_date: new Date(),
+    date_rupture: new Date("2025-12-01"),
+    current_status: { value: STATUT_APPRENANT.RUPTURANT, date: new Date("2025-12-01") },
+    created_at: new Date("2025-12-05"),
+    brevo: { token: null, token_created_at: null },
+    computed: { organisme: { ml_beta_activated_at: null, is_allowed_collab: false } },
+    ...overrides,
+  });
+  await missionLocaleEffectifsDb().insertOne(dossier);
+  return dossier;
+}
+
+async function insererCible(overrides: Partial<IOrganisme> = {}) {
+  const cible = creerCible(overrides);
+  await organismesDb().insertOne(cible);
+  await formationsCatalogueDb().insertOne(
+    {
+      _id: new ObjectId(),
+      cle_ministere_educatif: new ObjectId().toString(),
+      published: true,
+      etablissement_gestionnaire_siret: responsable.siret,
+      etablissement_formateur_siret: cible.siret,
+      cfd: "50022137",
+      rncp_code: null,
+    } as never,
+    { bypassDocumentValidation: true }
+  );
+  return cible;
+}
+
+async function insererErp(organisme: IOrganisme, formation = { cfd: "50022137", rncp: "RNCP12345" }) {
+  await effectifsDb().insertOne({
+    _id: new ObjectId(),
+    ...(await createSampleEffectif({
+      organisme,
+      annee_scolaire: "2025-2026",
+      apprenant: { nom: "Dupont", prenom: "JEAN", date_de_naissance: new Date("2004-12-31T23:00:00.000Z") },
+      formation,
+    })),
+  });
+}
+
+const chezQui = async (contrat: IEffectifDECA) => (await effectifsDECADb().findOne({ _id: contrat._id }))?.organisme_id;
+
 describe("fléchage des contrats DECA", () => {
   useMongo();
 
@@ -137,7 +211,7 @@ describe("fléchage des contrats DECA", () => {
     mockUpdateVoeux.mockReset();
     await organismesDb().insertOne(responsable);
     await organisationsDb().insertOne({
-      _id: new ObjectId(),
+      _id: ML_ORGANISATION_ID,
       type: "MISSION_LOCALE",
       nom: "MISSION LOCALE DE NANTES",
       created_at: new Date(),
@@ -283,6 +357,406 @@ describe("fléchage des contrats DECA", () => {
       });
 
       expect(await chargerResponsablesFleches()).toEqual(new Set([responsable._id.toString()]));
+    });
+  });
+
+  describe("job deca:flechage", () => {
+    beforeEach(async () => {
+      await organismesDb().updateOne({ _id: responsable._id }, { $set: { is_allowed_deca: true } });
+    });
+
+    it("calcule en JS les mêmes clés d'identité que les expressions Mongo de la dédup", async () => {
+      const valeurs = [
+        { nom: "ROUSSEAU--CHAUVET", prenom: "Léa", ddn: new Date("2008-08-07T22:00:00.000Z") },
+        { nom: "  Louet - Le Cam ", prenom: "Jean-François", ddn: new Date("2008-01-14T23:00:00.000Z") },
+        { nom: "D’ARC", prenom: "ÉLODIE", ddn: new Date("2008-03-10T00:00:00.000Z") },
+        { nom: "Núñez García", prenom: "Zoë", ddn: new Date("2008-03-10T21:59:00.000Z") },
+        { nom: null, prenom: "O'Neil", ddn: null },
+      ];
+
+      const resultats = await getDatabase()
+        .aggregate([
+          { $documents: valeurs },
+          {
+            $project: {
+              nom: dedupNomExpr("$nom"),
+              prenom: dedupNomExpr("$prenom"),
+              ddn: { $dateToString: { date: dedupDateDeNaissanceExpr("$ddn"), format: "%Y-%m-%d" } },
+            },
+          },
+        ])
+        .toArray();
+
+      expect(resultats.map(({ nom, prenom, ddn }) => ({ nom, prenom, ddn: ddn ?? null }))).toEqual(
+        valeurs.map(({ nom, prenom, ddn }) => ({
+          nom: dedupNom(nom),
+          prenom: dedupNom(prenom),
+          ddn: dedupDateDeNaissance(ddn),
+        }))
+      );
+    });
+
+    describe("cas qui bougent", () => {
+      it("flèche vers le lieu déclaré activé DECA, avec tous ses dossiers ML", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        const contrat = await insererContrat(contratRompu());
+        const dossier = await insererDossier(contrat);
+        const supprime = await insererDossier(contrat, { mission_locale_id: new ObjectId(), soft_deleted: true });
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.fleches).toEqual({ lieu_declare: 1, erp_formateur: 0 });
+        expect(await effectifsDECADb().findOne({ _id: contrat._id })).toMatchObject({
+          organisme_id: cible._id,
+          organisme_responsable_id: responsable._id,
+          organisme_formateur_id: cible._id,
+          fleche: { regle: "lieu_declare", le: new Date("2025-12-15T10:00:00.000Z") },
+          _computed: { organisme: { siret: cible.siret, uai: cible.uai } },
+        });
+        for (const { _id } of [dossier, supprime]) {
+          expect(await missionLocaleEffectifsDb().findOne({ _id })).toMatchObject({
+            effectif_snapshot: {
+              organisme_id: cible._id,
+              _computed: { organisme: { siret: cible.siret } },
+              fleche: { regle: "lieu_declare" },
+            },
+          });
+        }
+        expect(bilan.parCfa.get(responsable._id.toString())).toMatchObject({ perdus: 1, dossiersMlPerdus: 1 });
+        expect(bilan.parCfa.get(cible._id.toString())).toMatchObject({ gagnes: 1, dossiersMlGagnes: 1 });
+      });
+
+      it("flèche vers le seul formateur lié qui a le jeune dans son ERP", async () => {
+        const formateur = await insererCible({ siret: "19440001400017", uai: "0442097N", is_allowed_deca: true });
+        await organismesDb().updateOne(
+          { _id: responsable._id },
+          { $set: { organismesFormateurs: [{ _id: formateur._id, siret: formateur.siret }] } }
+        );
+        await insererErp(formateur);
+        const contrat = await insererContrat(contratIngere({ etablissement_formation_siret: null }));
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.fleches).toEqual({ lieu_declare: 0, erp_formateur: 1 });
+        expect(await effectifsDECADb().findOne({ _id: contrat._id })).toMatchObject({
+          organisme_id: formateur._id,
+          fleche: { regle: "erp_formateur" },
+        });
+      });
+
+      it("déplace tout le groupe d'un contrat sur deux années", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        const premiere = await insererContrat(contratRompu());
+        const seconde = await insererContrat(contratIngere({ annee_scolaire: "2026-2027" }));
+        const dossier = await insererDossier(premiere);
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.fleches.lieu_declare).toBe(1);
+        expect(await chezQui(premiere)).toEqual(cible._id);
+        expect(await chezQui(seconde)).toEqual(cible._id);
+        expect(
+          (await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.effectif_snapshot.organisme_id
+        ).toEqual(cible._id);
+      });
+
+      it("fait basculer le groupe d'une cible retenue quand elle est activée DECA", async () => {
+        const cible = await insererCible();
+        const contrat = await insererContrat();
+
+        const avant = await flecherContratsDeca();
+        const activation = await flecherContratsDeca({ perimetre: [cible._id], flagsSimules: [cible._id] });
+
+        expect(avant.retenus).toBe(1);
+        expect(activation.fleches.lieu_declare).toBe(1);
+        expect(await chezQui(contrat)).toEqual(cible._id);
+      });
+    });
+
+    describe("cas qui ne bougent pas", () => {
+      it("garde chez le responsable le contrat d'une cible avec compte mais sans flag DECA", async () => {
+        const cible = await insererCible();
+        const organisationId = new ObjectId();
+        await organisationsDb().insertOne({
+          _id: organisationId,
+          type: "ORGANISME_FORMATION",
+          siret: cible.siret,
+          uai: cible.uai ?? null,
+          organisme_id: cible._id.toString(),
+          created_at: new Date(),
+        });
+        await usersMigrationDb().insertOne(
+          {
+            _id: new ObjectId(),
+            email: "admin@cible.fr",
+            password: "hash",
+            nom: "ADMIN",
+            prenom: "Cible",
+            organisation_id: organisationId,
+            account_status: "CONFIRMED",
+            created_at: new Date(),
+          } as never,
+          { bypassDocumentValidation: true }
+        );
+        const contrat = await insererContrat();
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.retenus).toBe(1);
+        expect(bilan.retenusParSite.get(`${responsable._id.toString()}>${cible._id.toString()}`)).toBe(1);
+        expect(await effectifsDECADb().findOne({ _id: contrat._id })).toEqual(contrat);
+      });
+
+      it("traite à part deux contrats d'une même personne vers deux lieux", async () => {
+        const premiereCible = await insererCible({ is_allowed_deca: true });
+        const secondeCible = await insererCible({ siret: "13002374000454", uai: "0442098P", is_allowed_deca: true });
+        const premier = await insererContrat(contratIngere({ annee_scolaire: "2025-2025" }));
+        const second = await insererContrat(
+          contratIngere({ deca_raw_id: new ObjectId(), etablissement_formation_siret: secondeCible.siret })
+        );
+
+        await flecherContratsDeca();
+
+        expect(await chezQui(premier)).toEqual(premiereCible._id);
+        expect(await chezQui(second)).toEqual(secondeCible._id);
+      });
+
+      it("ne flèche pas un jeune présent dans l'ERP d'un autre organisme pour la même formation", async () => {
+        await insererCible({ is_allowed_deca: true });
+        await insererErp({ ...creerCible(), siret: "19440001400017", uai: "0442097N" });
+        const contrat = await insererContrat();
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.fleches).toEqual({ lieu_declare: 0, erp_formateur: 0 });
+        expect(await chezQui(contrat)).toEqual(responsable._id);
+      });
+
+      it("ne flèche pas un jeune présent dans l'ERP du responsable, même si un formateur l'a aussi", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        await insererErp(responsable);
+        await insererErp(cible);
+        const contrat = await insererContrat();
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.erpResponsable).toBe(1);
+        expect(await chezQui(contrat)).toEqual(responsable._id);
+      });
+
+      it("ne flèche pas vers une cible sans UAI", async () => {
+        await insererCible({ uai: null, is_allowed_deca: true });
+        const contrat = await insererContrat();
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.ciblesSansUai).toBe(1);
+        expect(await chezQui(contrat)).toEqual(responsable._id);
+      });
+
+      it("ne flèche pas vers un responsable pur", async () => {
+        await insererCible({ nature: "responsable", is_allowed_deca: true });
+        const contrat = await insererContrat();
+
+        await flecherContratsDeca();
+
+        expect(await chezQui(contrat)).toEqual(responsable._id);
+      });
+
+      it("ignore les contrats dont ni le responsable ni le lieu ne sont activés DECA", async () => {
+        await organismesDb().updateOne({ _id: responsable._id }, { $set: { is_allowed_deca: false } });
+        await insererCible();
+        await insererContrat();
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.groupes).toBe(0);
+      });
+
+      it("gèle tout le groupe quand le CFA a agi sur le dossier de l'autre année", async () => {
+        await insererCible({ is_allowed_deca: true });
+        const premiere = await insererContrat();
+        const seconde = await insererContrat(contratRompu({ annee_scolaire: "2026-2027" }));
+        await insererDossier(seconde, { organisme_data: { acc_conjoint: true } });
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.gels).toBe(1);
+        expect(await chezQui(premiere)).toEqual(responsable._id);
+        expect(await chezQui(seconde)).toEqual(responsable._id);
+      });
+
+      it("journalise un conflit quand la cible a déjà ce jeune la même année", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        await insererContrat(
+          contratIngere({
+            deca_raw_id: new ObjectId(),
+            organisme_id: cible._id,
+            organisme_responsable_id: cible._id,
+            organisme_formateur_id: cible._id,
+          })
+        );
+        const contrat = await insererContrat();
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.conflits).toBe(1);
+        expect(await chezQui(contrat)).toEqual(responsable._id);
+      });
+    });
+
+    describe("robustesse", () => {
+      it("donne le même résultat au second passage", async () => {
+        await insererCible({ is_allowed_deca: true });
+        const contrat = await insererContrat(contratRompu());
+        await insererDossier(contrat);
+
+        await flecherContratsDeca();
+        const apresPremier = await effectifsDECADb().find({}).toArray();
+        const second = await flecherContratsDeca();
+
+        expect(second.fleches).toEqual({ lieu_declare: 0, erp_formateur: 0 });
+        expect(second.dossiersMlRepares).toBe(0);
+        expect(await effectifsDECADb().find({}).toArray()).toEqual(apresPremier);
+      });
+
+      it("répare le dossier ML d'un contrat fléché resté sur le responsable", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        const contrat = await insererChezCible(cible);
+        const dossier = await insererDossier({ ...contrat, organisme_id: responsable._id });
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.dossiersMlRepares).toBe(1);
+        expect(
+          (await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.effectif_snapshot.organisme_id
+        ).toEqual(cible._id);
+      });
+
+      it("compte les dossiers ML qui deviendraient invisibles de la Mission Locale", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        await organisationsDb().insertOne({
+          _id: new ObjectId(),
+          type: "ORGANISME_FORMATION",
+          siret: cible.siret,
+          uai: cible.uai ?? null,
+          organisme_id: cible._id.toString(),
+          ml_beta_activated_at: new Date("2025-10-01"),
+          created_at: new Date(),
+        });
+        const contrat = await insererContrat(contratRompu());
+        const dossier = await insererDossier(contrat);
+
+        const bilan = await flecherContratsDeca({ dryRun: true });
+
+        expect(bilan.dossiersMlInvisibles).toEqual([
+          { dossierId: dossier._id, missionLocaleId: ML_ORGANISATION_ID, cibleId: cible._id },
+        ]);
+        expect(await chezQui(contrat)).toEqual(responsable._id);
+      });
+    });
+
+    describe("annulation", () => {
+      it("--annuler rend durablement le groupe au responsable", async () => {
+        await insererCible({ is_allowed_deca: true });
+        const contrat = await insererContrat(contratRompu());
+        const dossier = await insererDossier(contrat);
+        await flecherContratsDeca();
+
+        await rendreContratsDeca({ mode: "annuler", responsables: [responsable._id] });
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.exclusParAnnulation).toBe(1);
+        expect(await effectifsDECADb().findOne({ _id: contrat._id })).toMatchObject({
+          organisme_id: responsable._id,
+          organisme_formateur_id: responsable._id,
+          fleche: { regle: "lieu_declare", annule_le: new Date("2025-12-15T10:00:00.000Z") },
+          _computed: { organisme: { siret: responsable.siret } },
+        });
+        expect(await missionLocaleEffectifsDb().findOne({ _id: dossier._id })).toMatchObject({
+          effectif_snapshot: { organisme_id: responsable._id, fleche: { annule_le: expect.any(Date) } },
+        });
+      });
+
+      it("--annuler puis une nouvelle année du même contrat : elle reste chez le responsable", async () => {
+        await insererCible({ is_allowed_deca: true });
+        await insererContrat();
+        await flecherContratsDeca();
+        await rendreContratsDeca({ mode: "annuler", responsables: [responsable._id] });
+
+        await upsertEffectifDeca(contratIngere({ annee_scolaire: "2026-2027" }), await chargerResponsablesFleches());
+        await flecherContratsDeca();
+
+        expect((await effectifsDECADb().findOne({ annee_scolaire: "2026-2027" }))?.organisme_id).toEqual(
+          responsable._id
+        );
+      });
+
+      it("--refaire rend le groupe au responsable et le job le redéplace", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        const contrat = await insererContrat(contratRompu());
+        const dossier = await insererDossier(contrat);
+        await flecherContratsDeca();
+
+        await rendreContratsDeca({ mode: "refaire", responsables: [responsable._id] });
+        const rendu = await effectifsDECADb().findOne({ _id: contrat._id });
+        const dossierRendu = await missionLocaleEffectifsDb().findOne({ _id: dossier._id });
+        await flecherContratsDeca();
+
+        expect(rendu?.organisme_id).toEqual(responsable._id);
+        expect(rendu).not.toHaveProperty("fleche");
+        expect(dossierRendu?.effectif_snapshot).not.toHaveProperty("fleche");
+        expect(await chezQui(contrat)).toEqual(cible._id);
+      });
+
+      it("cible désactivée puis --refaire --cible : ses groupes reviennent chez leur responsable et y restent", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        const contrat = await insererContrat();
+        await flecherContratsDeca();
+        await organismesDb().updateOne({ _id: cible._id }, { $set: { is_allowed_deca: false } });
+
+        await rendreContratsDeca({ mode: "refaire", cibles: [cible._id] });
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.retenus).toBe(1);
+        expect(await chezQui(contrat)).toEqual(responsable._id);
+      });
+
+      it("--refaire sans portée laisse chez sa cible un groupe en conflit chez le responsable", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        const contrat = await insererContrat();
+        await flecherContratsDeca();
+        await insererContrat(contratIngere({ deca_raw_id: new ObjectId() }));
+
+        const bilan = await rendreContratsDeca({ mode: "refaire" });
+
+        expect(bilan.conflits).toHaveLength(1);
+        expect(await effectifsDECADb().findOne({ _id: contrat._id })).toMatchObject({
+          organisme_id: cible._id,
+          fleche: { regle: "lieu_declare" },
+        });
+      });
+
+      it("--annuler garde chez la cible un groupe dont le CFA a agi depuis le fléchage", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        const contrat = await insererContrat(contratRompu());
+        const dossier = await insererDossier(contrat);
+        await flecherContratsDeca();
+        await missionLocaleEffectifsDb().updateOne(
+          { _id: dossier._id },
+          {
+            $set: {
+              "organisme_data.acc_conjoint": true,
+              "organisme_data.reponse_at": new Date("2025-12-16T09:00:00.000Z"),
+            },
+          }
+        );
+
+        const bilan = await rendreContratsDeca({ mode: "annuler", responsables: [responsable._id] });
+
+        expect(bilan.gels).toBe(1);
+        expect(await chezQui(contrat)).toEqual(cible._id);
+      });
     });
   });
 });

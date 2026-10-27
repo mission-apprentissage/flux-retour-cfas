@@ -439,7 +439,7 @@ const addFieldFromActivationDate = () => {
   ];
 };
 
-const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
+export const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
   const MISSION_LOCALE_CONDITION = {
     $or: [
       // Organisme pas activé ML ET pas collab → visible (comportement existant)
@@ -3174,8 +3174,16 @@ interface IMissionLocaleSnapshotResult {
 
 type IComputedOrganismeMl = NonNullable<NonNullable<IMissionLocaleEffectif["computed"]>["organisme"]>;
 
-export async function computedOrganismeMl(organismeId: ObjectId): Promise<IComputedOrganismeMl> {
-  const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
+export async function computedOrganismeMl(
+  organismeId: ObjectId,
+  { lectureSeule = false }: { lectureSeule?: boolean } = {}
+): Promise<IComputedOrganismeMl> {
+  const organisation = lectureSeule
+    ? ((await organisationsDb().findOne({
+        type: "ORGANISME_FORMATION",
+        organisme_id: organismeId.toString(),
+      })) as IOrganisationOrganismeFormation | null)
+    : await getOrganisationOrganismeByOrganismeId(organismeId);
   const organisme = await organismesDb().findOne(
     { _id: organismeId },
     { projection: { is_allowed_collab: 1, collab_suspended_at: 1, collab_resumed_at: 1 } }

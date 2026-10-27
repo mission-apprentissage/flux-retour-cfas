@@ -133,6 +133,26 @@ describe("getCfaSuiviMissionLocale", () => {
     expect(horsCollab.effectifs[0].collab_status).toBe("contacte_par_ml_hors_collab");
   });
 
+  it("étiquette effectifsDECA un dossier DECA dont le snapshot est sorti de l'union ML batch", async () => {
+    const doc = await createMlEffectif({ situation: SITUATION_ENUM.RDV_PRIS });
+    await missionLocaleEffectifsDb().insertOne(
+      testDoc<IMissionLocaleEffectif>({
+        ...doc,
+        effectif_snapshot: {
+          ...doc.effectif_snapshot,
+          deca_raw_id: new ObjectId(),
+          source: SOURCE_APPRENANT.DECA,
+          is_deca_compatible: false,
+        },
+      })
+    );
+
+    const result = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "tous" });
+
+    expect(result.effectifs).toHaveLength(1);
+    expect(result.effectifs[0].source).toBe("effectifsDECA");
+  });
+
   it("inclut toute qualification ML hors collab et la préqualif WhatsApp", async () => {
     const docs = await Promise.all([
       createMlEffectif({ situation: SITUATION_ENUM.INJOIGNABLE_APRES_RELANCES }),

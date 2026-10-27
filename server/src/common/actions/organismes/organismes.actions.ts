@@ -1116,7 +1116,9 @@ async function getMemberIdsOfOrganisme(organismeId: ObjectId): Promise<ObjectId[
   return res.map((doc) => doc._id);
 }
 
-export const generateOrganismeComputed = (orga: IOrganisme) => {
+export const generateOrganismeComputed = (
+  orga: Pick<IOrganisme, "adresse" | "uai" | "siret" | "reseaux" | "fiabilisation_statut" | "ferme">
+) => {
   const { adresse, uai, siret, reseaux, fiabilisation_statut, ferme } = orga;
 
   return {
