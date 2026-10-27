@@ -71,6 +71,20 @@ const zDemandeActivationCfa = z.object({
   a_envoyer: z.boolean({ description: "Ligne cochée pour l'envoi" }),
   statut: zStatutDemandeActivation,
   motif_echec: z.string({ description: "Motif du dernier échec d'envoi" }).nullish(),
+  envoye_par_id: zObjectId.nullish().describe("Admin TBA qui a lancé le dernier envoi"),
+  envoye_par_email: z.string({ description: "Email de l'admin TBA qui a lancé le dernier envoi" }).nullish(),
+  envoi_en_cours_at: z.date({ description: "Date de mise en file du dernier envoi" }).nullish(),
+  envoyee_at: z.date({ description: "Date du dernier envoi réussi" }).nullish(),
+  invitation_id: zObjectId.nullish().describe("Invitation admin créée ou reprise par l'envoi"),
+  etapes: z
+    .object({
+      flag_at: z.date().nullish(),
+      compte_at: z.date().nullish(),
+      invitation_at: z.date().nullish(),
+      email_at: z.date().nullish(),
+    })
+    .nullish()
+    .describe("Étapes de l'envoi déjà faites"),
   created_at: z.date(),
   updated_at: z.date(),
 });

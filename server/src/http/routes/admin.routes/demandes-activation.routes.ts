@@ -6,9 +6,11 @@ import { zModificationDemandeActivation } from "shared/models/routes/admin/deman
 import { z } from "zod";
 
 import {
+  envoyerDemandesActivation,
   importerDemandesActivation,
   listerDemandesActivation,
   modifierDemandeActivation,
+  renvoyerDemandeActivation,
   TAILLE_MAX_IMPORT_DEMANDES,
 } from "@/common/actions/admin/demandes-activation.actions";
 import objectIdSchema from "@/common/validation/objectIdSchema";
@@ -43,6 +45,19 @@ export default () => {
     "/:id",
     validateRequestMiddleware({ params: objectIdSchema("id"), body: zModificationDemandeActivation }),
     returnResult(async ({ params, body }) => modifierDemandeActivation(new ObjectId(params.id), body))
+  );
+
+  router.post(
+    "/envoyer",
+    returnResult(async (req) => envoyerDemandesActivation({ _id: req.user._id, email: req.user.email }))
+  );
+
+  router.post(
+    "/:id/renvoyer",
+    validateRequestMiddleware({ params: objectIdSchema("id") }),
+    returnResult(async (req) =>
+      renvoyerDemandeActivation(new ObjectId(req.params.id), { _id: req.user._id, email: req.user.email })
+    )
   );
 
   router.post(

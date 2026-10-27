@@ -36,13 +36,15 @@ import { getServerErrorMessage } from "@/common/rateLimit";
 import styles from "./demandes-activation.module.scss";
 
 const correctionModal = createModal({ id: "demande-activation-correction", isOpenedByDefault: false });
+const envoiModal = createModal({ id: "demandes-activation-envoi", isOpenedByDefault: false });
 
 const URL_DEMANDES = "/api/v1/admin/demandes-activation";
 const CLE_REQUETE = ["admin", "demandes-activation"];
 const PAGE_SIZE = 20;
 
 type BilanImport = { creees: number; misesAJour: number; fusionnees: number; inchangees: number; erreurs: number };
-type Retour = { severity: "success" | "warning" | "error"; message: string };
+type Retour = { severity: "success" | "info" | "warning" | "error"; message: string };
+type BilanEnvoi = { demandes: number; organismes: number };
 
 const LIBELLES_VUES: Record<VueDemandeActivation, string> = {
   a_envoyer: "À envoyer",
@@ -221,6 +223,38 @@ export default function DemandesActivationClient() {
     }
   };
 
+  const envoiMutation = useMutation({
+    mutationFn: () => _post<undefined, BilanEnvoi>(`${URL_DEMANDES}/envoyer`),
+  });
+
+  const renvoiMutation = useMutation({
+    mutationFn: (id: string) => _post<undefined, IDemandeActivationLigne>(`${URL_DEMANDES}/${id}/renvoyer`),
+  });
+
+  const envoyer = async () => {
+    try {
+      const bilan = await envoiMutation.mutateAsync();
+      setRetourLigne({
+        severity: "info",
+        message: `${bilan.demandes} demande(s) en cours d'envoi pour ${bilan.organismes} établissement(s). La liste se met à jour automatiquement.`,
+      });
+      await queryClient.invalidateQueries({ queryKey: CLE_REQUETE });
+    } catch (err) {
+      setRetourLigne({ severity: "error", message: getServerErrorMessage(err, "L'envoi n'a pas pu être lancé") });
+    }
+    envoiModal.close();
+  };
+
+  const renvoyer = async (demande: IDemandeActivationLigne) => {
+    try {
+      await renvoiMutation.mutateAsync(demande._id);
+      setRetourLigne({ severity: "info", message: `Envoi relancé pour ${demande.email}.` });
+      await queryClient.invalidateQueries({ queryKey: CLE_REQUETE });
+    } catch (err) {
+      setRetourLigne({ severity: "error", message: getServerErrorMessage(err, "Le renvoi n'a pas pu être lancé") });
+    }
+  };
+
   const ouvrirCorrection = (demande: IDemandeActivationLigne) => {
     setEnCorrection(demande);
     setSiretCorrige(demande.siret_corrige ?? "");
@@ -251,6 +285,7 @@ export default function DemandesActivationClient() {
   };
 
   const demandesDeLaVue = (data?.demandes ?? []).filter((demande) => demande.vue === vue);
+  const cochees = (data?.demandes ?? []).filter((demande) => demande.a_envoyer && demande.cochable);
   const lastPage = Math.max(1, Math.ceil(demandesDeLaVue.length / pageSize));
   const currentPage = Math.min(page, lastPage);
 
@@ -328,9 +363,27 @@ export default function DemandesActivationClient() {
       ),
       actions:
         demande.vue === "envoyees" || demande.statut === "envoi_en_cours" ? null : (
-          <Button priority="tertiary" size="small" iconId="fr-icon-edit-line" onClick={() => ouvrirCorrection(demande)}>
-            Corriger
-          </Button>
+          <div className="fr-btns-group fr-btns-group--sm">
+            <Button
+              priority="tertiary"
+              size="small"
+              iconId="fr-icon-edit-line"
+              onClick={() => ouvrirCorrection(demande)}
+            >
+              Corriger
+            </Button>
+            {(demande.statut === "echec" || demande.statut === "invitation_expiree") && (
+              <Button
+                priority="tertiary"
+                size="small"
+                iconId="fr-icon-refresh-line"
+                onClick={() => renvoyer(demande)}
+                disabled={renvoiMutation.isPending}
+              >
+                Renvoyer
+              </Button>
+            )}
+          </div>
         ),
     },
   }));
@@ -416,7 +469,20 @@ export default function DemandesActivationClient() {
         <TableSkeleton />
       ) : (
         <>
-          <SegmentedControl legend="Vue" hideLegend small segments={segments} className="fr-mb-3w" />
+          <div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters fr-mb-1w">
+            <div className="fr-col-12 fr-col-lg">
+              <SegmentedControl legend="Vue" hideLegend small segments={segments} />
+            </div>
+            <div className="fr-col-12 fr-col-lg-auto">
+              <Button
+                iconId="fr-icon-mail-line"
+                onClick={() => envoiModal.open()}
+                disabled={cochees.length === 0 || envoiMutation.isPending}
+              >
+                Envoyer les e-mails ({cochees.length})
+              </Button>
+            </div>
+          </div>
           {retourLigne && (
             <Alert
               severity={retourLigne.severity}
@@ -489,6 +555,38 @@ export default function DemandesActivationClient() {
           </>
         )}
       </correctionModal.Component>
+
+      <envoiModal.Component
+        title="Envoyer les e-mails"
+        buttons={[
+          { children: "Annuler", priority: "secondary", doClosesModal: true },
+          {
+            children: "Confirmer l'envoi",
+            doClosesModal: false,
+            disabled: envoiMutation.isPending || cochees.length === 0,
+            nativeButtonProps: { type: "button" },
+            onClick: envoyer,
+          },
+        ]}
+      >
+        <p>
+          {cochees.length} demande(s) cochée(s) :{" "}
+          {(["activation", "compte_existant", "refus"] as const)
+            .map(
+              (branche) =>
+                `${cochees.filter((demande) => demande.branche === branche).length} ${LIBELLES_BRANCHES[branche].toLowerCase()}`
+            )
+            .join(", ")}
+          . DECA est activé pour les établissements en activation ou compte existant, puis chaque e-mail part.
+        </p>
+        <ul>
+          {cochees.map((demande) => (
+            <li key={demande._id}>
+              {nomCfa(demande)} : {demande.email} ({LIBELLES_BRANCHES[demande.branche].toLowerCase()})
+            </li>
+          ))}
+        </ul>
+      </envoiModal.Component>
     </>
   );
 }

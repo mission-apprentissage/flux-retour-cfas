@@ -1,7 +1,9 @@
 import * as Boom from "@hapi/boom";
 import AdmZip from "adm-zip";
 import { parse } from "csv-parse/sync";
+import { format } from "date-fns";
 import escapeStringRegexp from "escape-string-regexp";
+import { addJob } from "job-processor";
 import { ObjectId } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
 import {
@@ -11,7 +13,9 @@ import {
   MOTIFS_DEMANDE_ACTIVATION,
   MOTIFS_LEVES_PAR_BRANCHE_FORCEE,
 } from "shared/models/data/demandesActivationCfa.model";
+import { IInvitation } from "shared/models/data/invitations.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
+import { IUsersMigration } from "shared/models/data/usersMigration.model";
 import {
   IDemandeActivationLigne,
   IDemandesActivationResponse,
@@ -22,15 +26,29 @@ import {
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { z } from "zod";
 
+import { confirmMembre, getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import { checkEligibilityForLoaded } from "@/common/actions/organismes/deca-cfa-eligibility";
+import {
+  activerDecaOrganisme,
+  poserGardeActivationDeca,
+  retirerGardeActivationDeca,
+} from "@/common/actions/organismes/organismes.admin.actions";
+import { adminUpdateUserRole } from "@/common/actions/users.actions";
+import parentLogger from "@/common/logger";
 import {
   demandesActivationCfaDb,
   effectifsDb,
   effectifsDECADb,
+  invitationsDb,
   organisationsDb,
   organismesDb,
   usersMigrationDb,
 } from "@/common/model/collections";
+import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
+import { generateKey } from "@/common/utils/cryptoUtils";
+import config from "@/config";
+
+const logger = parentLogger.child({ module: "demandes-activation" });
 
 export const TAILLE_MAX_IMPORT_DEMANDES = 1024 * 1024;
 
@@ -550,4 +568,344 @@ export async function modifierDemandeActivation(
 
   const [ligne] = await versLignes([await enregistrer(misAJour)]);
   return ligne;
+}
+
+export const DUREE_INVITATION_DEMANDE_MS = 14 * 24 * 3600 * 1000;
+
+class EchecEnvoi extends Error {}
+
+const MOTIFS_ECHEC_ACTIVATION = {
+  non_eligible: "L'établissement n'est plus éligible à DECA",
+  annule: "Activation DECA annulée par une désactivation",
+} as const;
+
+type Expediteur = { _id: ObjectId; email: string };
+
+const nomOrganisme = (organisme: Pick<IOrganisme, "nom" | "raison_sociale" | "enseigne"> | null | undefined) =>
+  organisme?.enseigne || organisme?.raison_sociale || organisme?.nom || "votre établissement";
+
+async function envoyerEmailBrevo(
+  templateId: number,
+  destinataire: string,
+  params: Record<string, unknown>,
+  redirection: string | null | undefined
+) {
+  if (!templateId) {
+    throw new EchecEnvoi("Template Brevo non configuré");
+  }
+  let reponse: unknown;
+  try {
+    reponse = await sendTransactionalEmail(destinataire, templateId, params, {
+      redirectRecipientInNonProdTo: redirection ?? undefined,
+    });
+  } catch (err) {
+    throw new EchecEnvoi(`Envoi Brevo impossible : ${(err as Error).message}`);
+  }
+  if (!reponse) {
+    throw new EchecEnvoi("Envoi Brevo en échec");
+  }
+}
+
+async function nomOrganismeDeLOrganisation(organisationId: ObjectId) {
+  const organisation = await organisationsDb().findOne({ _id: organisationId });
+  const organismeId = organisation?.type === "ORGANISME_FORMATION" ? organisation.organisme_id : null;
+  const organisme = organismeId
+    ? await organismesDb().findOne(
+        { _id: new ObjectId(organismeId) },
+        { projection: { nom: 1, raison_sociale: 1, enseigne: 1 } }
+      )
+    : null;
+  return nomOrganisme(organisme);
+}
+
+async function inviterAdminDemande({
+  email,
+  organisationId,
+  auteurId,
+  demandeId,
+}: {
+  email: string;
+  organisationId: ObjectId;
+  auteurId: ObjectId;
+  demandeId: ObjectId;
+}): Promise<IInvitation> {
+  const expires_at = new Date(Date.now() + DUREE_INVITATION_DEMANDE_MS);
+  const existante = await invitationsDb().findOne({ email, organisation_id: organisationId });
+  if (existante) {
+    await invitationsDb().updateOne(
+      { _id: existante._id },
+      { $set: { role: "admin", demande_id: demandeId, expires_at } }
+    );
+    return { ...existante, role: "admin", demande_id: demandeId, expires_at };
+  }
+  const invitation: IInvitation = {
+    _id: new ObjectId(),
+    token: generateKey(50, "hex"),
+    email,
+    organisation_id: organisationId,
+    author_id: auteurId,
+    role: "admin",
+    demande_id: demandeId,
+    created_at: new Date(),
+    expires_at,
+  };
+  await invitationsDb().insertOne(invitation);
+  return invitation;
+}
+
+async function envoyerInvitationAdminDemande(
+  invitation: Pick<IInvitation, "email" | "token" | "organisation_id">,
+  expiresAt: Date,
+  redirection: string | null | undefined
+) {
+  await envoyerEmailBrevo(
+    config.brevo.templatesDemandesActivation.activationSansCompte,
+    invitation.email,
+    {
+      NOM_CFA: await nomOrganismeDeLOrganisation(invitation.organisation_id),
+      LIEN_INSCRIPTION: `${config.publicUrl}/auth/inscription-cfa?invitationToken=${invitation.token}`,
+      DATE_EXPIRATION: format(expiresAt, "dd/MM/yyyy"),
+    },
+    redirection
+  );
+}
+
+export async function renvoyerInvitationAdminDemande(invitation: IInvitation): Promise<Date> {
+  const demande = invitation.demande_id
+    ? await demandesActivationCfaDb().findOne({ _id: invitation.demande_id })
+    : null;
+  const expiresAt = new Date(Date.now() + DUREE_INVITATION_DEMANDE_MS);
+  try {
+    await envoyerInvitationAdminDemande(invitation, expiresAt, demande?.envoye_par_email);
+  } catch (err) {
+    throw err instanceof EchecEnvoi ? Boom.internal(err.message) : err;
+  }
+  await invitationsDb().updateOne({ _id: invitation._id }, { $set: { expires_at: expiresAt } });
+  if (demande?.statut === "invitation_expiree") {
+    await demandesActivationCfaDb().updateOne(
+      { _id: demande._id, statut: "invitation_expiree" },
+      { $set: { statut: "envoyee", envoyee_at: new Date(), updated_at: new Date() } }
+    );
+  }
+  return expiresAt;
+}
+
+async function mettreEnCoursDEnvoi(demande: IDemandeActivationCfa, expediteur: Expediteur): Promise<boolean> {
+  const maintenant = new Date();
+  const { modifiedCount } = await demandesActivationCfaDb().updateOne(
+    { _id: demande._id, statut: demande.statut },
+    {
+      $set: {
+        statut: "envoi_en_cours",
+        a_envoyer: false,
+        envoi_en_cours_at: maintenant,
+        envoye_par_id: expediteur._id,
+        envoye_par_email: expediteur.email,
+        motif_echec: null,
+        updated_at: maintenant,
+      },
+    }
+  );
+  return modifiedCount === 1;
+}
+
+async function planifierEnvois(demandes: IDemandeActivationCfa[]) {
+  const organismes = new Set(demandes.map((demande) => demande.organisme_id?.toString() ?? null));
+  for (const organismeId of organismes) {
+    await addJob({ name: "demandes-activation:envoyer", payload: { organismeId }, queued: true });
+  }
+  return organismes.size;
+}
+
+export async function envoyerDemandesActivation(expediteur: Expediteur) {
+  const cochees = await demandesActivationCfaDb()
+    .find({ a_envoyer: true, statut: { $in: ["pret", "envoyee"] } })
+    .toArray();
+  const enCours: IDemandeActivationCfa[] = [];
+  for (const demande of cochees) {
+    const evaluee = await enregistrer(await reevaluer(demande));
+    if (evaluee.a_envoyer && (await mettreEnCoursDEnvoi(evaluee, expediteur))) {
+      enCours.push(evaluee);
+    }
+  }
+  return { demandes: enCours.length, organismes: await planifierEnvois(enCours) };
+}
+
+export async function renvoyerDemandeActivation(id: ObjectId, expediteur: Expediteur) {
+  const demande = await demandesActivationCfaDb().findOne({ _id: id });
+  if (!demande) {
+    throw Boom.notFound("Demande introuvable");
+  }
+  if (demande.statut !== "echec" && demande.statut !== "invitation_expiree") {
+    throw Boom.badRequest("Seule une demande en échec ou dont l'invitation a expiré peut être renvoyée");
+  }
+  const evaluee = await enregistrer(await reevaluer(demande));
+  if (evaluee.branche === "refus" && !evaluee.motifs.every((motif) => MOTIFS_DEMANDE_ACTIVATION[motif].avecMail)) {
+    throw Boom.badRequest("Cette demande est refusée sans mail : corrigez-la avant de la renvoyer");
+  }
+  if (!(await mettreEnCoursDEnvoi(evaluee, expediteur))) {
+    throw Boom.conflict("Un envoi est déjà en cours pour cette demande");
+  }
+  await planifierEnvois([evaluee]);
+  const enCours = await demandesActivationCfaDb().findOne({ _id: id });
+  const [ligne] = await versLignes(enCours ? [enCours] : []);
+  return ligne;
+}
+
+async function activerPourEnvois(organismeId: ObjectId): Promise<string | null> {
+  if (!(await poserGardeActivationDeca(organismeId))) {
+    return "Activation DECA déjà en cours pour cet établissement : renvoyer plus tard";
+  }
+  try {
+    const resultat = await activerDecaOrganisme(organismeId, { flecher: config.deca.flechageAuto });
+    return resultat === "flag_pose" || resultat === "deja_actif" ? null : MOTIFS_ECHEC_ACTIVATION[resultat];
+  } catch (err) {
+    return `Activation DECA en échec : ${(err as Error).message}`;
+  } finally {
+    await retirerGardeActivationDeca(organismeId);
+  }
+}
+
+type Compte = IUsersMigration;
+type Organisation = NonNullable<Awaited<ReturnType<typeof getOrganisationOrganismeByOrganismeId>>>;
+
+async function verifierInvariants(demande: IDemandeActivationCfa, organisation: Organisation | null) {
+  if (!organisation) {
+    throw new EchecEnvoi("Établissement introuvable");
+  }
+  const compte = await usersMigrationDb().findOne({ email: demande.email });
+  if (compte && !compte.organisation_id.equals(organisation._id)) {
+    throw new EchecEnvoi("Le demandeur a un compte rattaché à une autre organisation");
+  }
+  if (demande.branche === "compte_existant" && !compte) {
+    throw new EchecEnvoi("Le compte du demandeur n'existe plus");
+  }
+  return compte;
+}
+
+async function traiterDemande(
+  demande: IDemandeActivationCfa,
+  organisme: Pick<IOrganisme, "_id" | "nom" | "raison_sociale" | "enseigne"> | null,
+  organisation: Organisation | null,
+  compte: Compte | null,
+  etapes: NonNullable<IDemandeActivationCfa["etapes"]>
+) {
+  const templates = config.brevo.templatesDemandesActivation;
+  const params = { NOM_CFA: nomOrganisme(organisme) };
+
+  if (demande.branche === "refus") {
+    if (!demande.motifs.every((motif) => MOTIFS_DEMANDE_ACTIVATION[motif].avecMail)) {
+      throw new EchecEnvoi("Refus sans mail : rien n'est envoyé");
+    }
+    await envoyerEmailBrevo(
+      templates.refus,
+      demande.email,
+      { ...params, EMAIL_CONTACT: demande.envoye_par_email ?? "" },
+      demande.envoye_par_email
+    );
+  } else if (compte) {
+    if (compte.account_status !== "CONFIRMED") {
+      await confirmMembre(compte._id, { notifier: false });
+    }
+    if (compte.organisation_role !== "admin") {
+      await adminUpdateUserRole(compte._id.toString(), "admin");
+    }
+    etapes.compte_at = new Date();
+    await envoyerEmailBrevo(
+      templates.activationAvecCompte,
+      demande.email,
+      { ...params, PRENOM: compte.prenom ?? "", LIEN_CONNEXION: `${config.publicUrl}/auth/connexion` },
+      demande.envoye_par_email
+    );
+  } else {
+    if (!organisation || !demande.envoye_par_id) {
+      throw new EchecEnvoi("Établissement ou expéditeur de l'envoi introuvable");
+    }
+    const invitation = await inviterAdminDemande({
+      email: demande.email,
+      organisationId: organisation._id,
+      auteurId: demande.envoye_par_id,
+      demandeId: demande._id,
+    });
+    etapes.invitation_at = new Date();
+    await demandesActivationCfaDb().updateOne({ _id: demande._id }, { $set: { invitation_id: invitation._id } });
+    await envoyerInvitationAdminDemande(invitation, invitation.expires_at ?? new Date(), demande.envoye_par_email);
+  }
+  etapes.email_at = new Date();
+}
+
+async function marquerEchec(
+  demande: IDemandeActivationCfa,
+  err: unknown,
+  etapes: NonNullable<IDemandeActivationCfa["etapes"]>
+) {
+  if (!(err instanceof EchecEnvoi)) {
+    logger.error({ err, demandeId: demande._id }, "Envoi d'une demande d'activation en échec");
+  }
+  await demandesActivationCfaDb().updateOne(
+    { _id: demande._id, statut: "envoi_en_cours" },
+    {
+      $set: {
+        statut: "echec",
+        motif_echec: err instanceof EchecEnvoi ? err.message : `Erreur inattendue : ${(err as Error).message}`,
+        etapes,
+        updated_at: new Date(),
+      },
+    }
+  );
+}
+
+export async function traiterEnvoisDemandesActivation(organismeId: ObjectId | null) {
+  const demandes = await demandesActivationCfaDb()
+    .find({ statut: "envoi_en_cours", organisme_id: organismeId })
+    .toArray();
+  if (demandes.length === 0) return;
+
+  const organisme = organismeId
+    ? await organismesDb().findOne({ _id: organismeId }, { projection: { nom: 1, raison_sociale: 1, enseigne: 1 } })
+    : null;
+  const organisation = organisme ? await getOrganisationOrganismeByOrganismeId(organisme._id) : null;
+
+  const preparees: { demande: IDemandeActivationCfa; compte: Compte | null }[] = [];
+  for (const demande of demandes) {
+    try {
+      preparees.push({
+        demande,
+        compte: demande.branche === "refus" ? null : await verifierInvariants(demande, organisation),
+      });
+    } catch (err) {
+      await marquerEchec(demande, err, { ...demande.etapes });
+    }
+  }
+
+  const echecActivation =
+    organismeId && preparees.some(({ demande }) => demande.branche !== "refus")
+      ? await activerPourEnvois(organismeId)
+      : null;
+
+  for (const { demande, compte } of preparees) {
+    const etapes = { ...demande.etapes };
+    try {
+      if (demande.branche !== "refus") {
+        if (echecActivation) throw new EchecEnvoi(echecActivation);
+        etapes.flag_at ??= new Date();
+      }
+      await traiterDemande(demande, organisme, organisation, compte, etapes);
+      await demandesActivationCfaDb().updateOne(
+        { _id: demande._id, statut: "envoi_en_cours" },
+        {
+          $set: {
+            statut: "envoyee",
+            branche_envoyee: demande.branche,
+            envoyee_at: new Date(),
+            etapes,
+            motif_echec: null,
+            updated_at: new Date(),
+          },
+        }
+      );
+    } catch (err) {
+      await marquerEchec(demande, err, etapes);
+    }
+  }
 }

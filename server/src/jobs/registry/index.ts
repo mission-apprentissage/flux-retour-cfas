@@ -4,6 +4,7 @@ import { brevoCrons, brevoJobs } from "./brevo";
 import { dailyCrons, dailyJobs } from "./daily";
 import { dbMaintenanceJobs } from "./db-maintenance";
 import { decaCrons, decaJobs } from "./deca";
+import { demandesActivationJobs } from "./demandes-activation";
 import { diversCrons, diversJobs } from "./divers";
 import { effectifsCrons, effectifsJobs } from "./effectifs";
 import { emailsCrons, emailsJobs } from "./emails";
@@ -31,6 +32,7 @@ export const registry = {
   effectifs: { jobs: effectifsJobs, crons: effectifsCrons },
   "mission-locale": { jobs: missionLocaleJobs, crons: missionLocaleCrons },
   deca: { jobs: decaJobs, crons: decaCrons },
+  "demandes-activation": { jobs: demandesActivationJobs },
   "voeux-affelnet": { jobs: voeuxAffelnetJobs },
   ingestion: { jobs: ingestionJobs, crons: ingestionCrons },
   fiabilisation: { jobs: fiabilisationJobs },

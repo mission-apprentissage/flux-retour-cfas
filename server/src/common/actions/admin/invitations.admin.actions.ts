@@ -2,6 +2,7 @@ import * as Boom from "@hapi/boom";
 import { format } from "date-fns";
 import { Document, ObjectId } from "mongodb";
 
+import { renvoyerInvitationAdminDemande } from "@/common/actions/admin/demandes-activation.actions";
 import { INVITATION_EXPIRATION_MS } from "@/common/actions/organisations.actions";
 import {
   invitationsArchiveDb,
@@ -154,6 +155,10 @@ export async function resendAdminInvitation(invitationId: string): Promise<{ ema
   const organisation = await organisationsDb().findOne({ _id: invitation.organisation_id });
   if (!organisation) {
     throw Boom.notFound("Organisation introuvable");
+  }
+
+  if (invitation.demande_id) {
+    return { email: invitation.email, expiresAt: await renvoyerInvitationAdminDemande(invitation) };
   }
 
   const newExpiresAt = new Date(Date.now() + INVITATION_EXPIRATION_MS);

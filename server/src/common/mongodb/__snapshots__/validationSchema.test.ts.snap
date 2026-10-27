@@ -315,6 +315,102 @@ exports[`validation-schema > should create validation schema for demandesActivat
       "bsonType": "string",
       "description": "Email du demandeur, en minuscules et sans espaces",
     },
+    "envoi_en_cours_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de mise en file du dernier envoi",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de mise en file du dernier envoi",
+    },
+    "envoye_par_email": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Email de l'admin TBA qui a lancé le dernier envoi",
+    },
+    "envoye_par_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Admin TBA qui a lancé le dernier envoi",
+    },
+    "envoyee_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date du dernier envoi réussi",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date du dernier envoi réussi",
+    },
+    "etapes": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "compte_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "email_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "flag_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "invitation_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Étapes de l'envoi déjà faites",
+    },
     "evalue_at": {
       "bsonType": "date",
       "description": "Date de la dernière évaluation",
@@ -344,6 +440,17 @@ exports[`validation-schema > should create validation schema for demandesActivat
         "null",
       ],
       "description": "Horodateur du formulaire, tel quel",
+    },
+    "invitation_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Invitation admin créée ou reprise par l'envoi",
     },
     "motif_echec": {
       "bsonType": [
@@ -12731,6 +12838,10 @@ exports[`validation-schema > should create validation schema for invitations > i
       "bsonType": "date",
       "description": "Date de création en base de données",
     },
+    "demande_id": {
+      "bsonType": "objectId",
+      "description": "Demande d'activation à l'origine de l'invitation",
+    },
     "email": {
       "bsonType": "string",
       "description": "Email destinataire",
@@ -12790,6 +12901,10 @@ exports[`validation-schema > should create validation schema for invitationsArch
     "created_at": {
       "bsonType": "date",
       "description": "Date de création en base de données",
+    },
+    "demande_id": {
+      "bsonType": "objectId",
+      "description": "Demande d'activation à l'origine de l'invitation",
     },
     "email": {
       "bsonType": "string",

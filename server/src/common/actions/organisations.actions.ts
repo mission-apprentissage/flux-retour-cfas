@@ -357,6 +357,11 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
     }
   }
 
+  await confirmMembre(user._id, { notifier: true });
+}
+
+export async function confirmMembre(userId: ObjectId, { notifier }: { notifier: boolean }): Promise<void> {
+  const user = await getUserById(userId);
   const userOrganisation = await getOrganisationById(user.organisation_id);
 
   // Lu AVANT la confirmation, et sur le même critère que les autres chemins
@@ -382,18 +387,20 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
     await activateMissionLocaleAtAdminValidation(user.organisation_id, new Date());
   }
 
-  await sendEmail(
-    user.email,
-    userOrganisation.type === "ORGANISME_FORMATION" ? "notify_access_granted_ofa" : "notify_access_granted",
-    {
-      recipient: {
-        civility: user.civility,
-        nom: user.nom,
-        prenom: user.prenom,
-      },
-      organisationLabel: await buildOrganisationLabel(user.organisation_id),
-    }
-  );
+  if (notifier) {
+    await sendEmail(
+      user.email,
+      userOrganisation.type === "ORGANISME_FORMATION" ? "notify_access_granted_ofa" : "notify_access_granted",
+      {
+        recipient: {
+          civility: user.civility,
+          nom: user.nom,
+          prenom: user.prenom,
+        },
+        organisationLabel: await buildOrganisationLabel(user.organisation_id),
+      }
+    );
+  }
 
   // Le compte passe à CONFIRMED : on synchronise le contact Brevo et on émet l'événement.
   await enqueueBrevoContactSync(user._id);

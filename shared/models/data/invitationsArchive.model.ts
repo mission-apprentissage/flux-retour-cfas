@@ -17,6 +17,7 @@ const zInvitationArchive = z.object({
   nom: z.string().optional().describe("Nom de l'invité (si fourni à la création)"),
   created_at: z.date({ description: "Date de création en base de données" }),
   expires_at: z.date().optional().describe("Date d'expiration de l'invitation (96h après création)"),
+  demande_id: zObjectId.optional().describe("Demande d'activation à l'origine de l'invitation"),
 });
 
 export type IInvitationArchive = z.output<typeof zInvitationArchive>;
