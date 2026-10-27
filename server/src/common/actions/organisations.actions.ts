@@ -22,9 +22,11 @@ import {
   usersMigrationDb,
 } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
+import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { generateKey } from "@/common/utils/cryptoUtils";
 import { getCurrentTime } from "@/common/utils/timeUtils";
+import config from "@/config";
 
 import {
   activateMissionLocaleAtAdminValidation,
@@ -161,7 +163,7 @@ export async function inviteUserToOrganisation(
     throw Boom.badRequest("Une invitation a déjà été envoyée à cette adresse email");
   }
   const invitationToken = generateKey(50, "hex");
-  await invitationsDb().insertOne({
+  const invitation = {
     _id: new ObjectId(),
     organisation_id,
     email,
@@ -169,21 +171,18 @@ export async function inviteUserToOrganisation(
     author_id: ctx._id,
     created_at: getCurrentTime(),
     expires_at: new Date(Date.now() + INVITATION_EXPIRATION_MS),
-  });
+  };
+  await invitationsDb().insertOne(invitation);
 
   const organisation = await getOrganisationById(organisation_id);
 
   if (organisation.type === "ORGANISME_FORMATION") {
-    const cfaName = await getCfaNameForOrganisation(organisation);
-    await sendEmail(email, "invitation_cfa_member", {
-      admin: {
-        prenom: ctx.prenom,
-        nom: ctx.nom,
-        fonction: ctx.fonction || "",
-      },
-      cfaName,
-      invitationToken,
-    });
+    try {
+      await envoyerInvitationCollaborateurCfa(invitation, organisation);
+    } catch (err) {
+      await invitationsDb().deleteOne({ _id: invitation._id });
+      throw err;
+    }
   } else {
     await sendEmail(email, "invitation_organisation", {
       author: {
@@ -220,7 +219,6 @@ export async function batchInviteUsersToOrganisation(
 
   const organisation = await getOrganisationById(organisation_id);
   const isCfa = organisation.type === "ORGANISME_FORMATION";
-  const cfaName = isCfa ? await getCfaNameForOrganisation(organisation) : undefined;
   const organisationLabel = !isCfa ? await buildOrganisationLabel(organisation_id) : undefined;
 
   for (const { email, role } of uniquePairs) {
@@ -257,7 +255,7 @@ export async function batchInviteUsersToOrganisation(
     }
 
     const invitationToken = generateKey(50, "hex");
-    await invitationsDb().insertOne({
+    const invitation = {
       _id: new ObjectId(),
       organisation_id,
       email,
@@ -266,18 +264,17 @@ export async function batchInviteUsersToOrganisation(
       role,
       created_at: getCurrentTime(),
       expires_at: new Date(Date.now() + INVITATION_EXPIRATION_MS),
-    });
+    };
+    await invitationsDb().insertOne(invitation);
 
-    if (isCfa) {
-      await sendEmail(email, "invitation_cfa_member", {
-        admin: {
-          prenom: ctx.prenom,
-          nom: ctx.nom,
-          fonction: ctx.fonction || "",
-        },
-        cfaName: cfaName!,
-        invitationToken,
-      });
+    if (organisation.type === "ORGANISME_FORMATION") {
+      try {
+        await envoyerInvitationCollaborateurCfa(invitation, organisation);
+      } catch {
+        await invitationsDb().deleteOne({ _id: invitation._id });
+        results.errors.push({ email, message: "L'email d'invitation n'a pas pu être envoyé" });
+        continue;
+      }
     } else {
       await sendEmail(email, "invitation_organisation", {
         author: {
@@ -302,22 +299,13 @@ export async function resendInvitationEmail(ctx: AuthContext, invitationId: stri
 
   const newToken = generateKey(50, "hex");
   const newExpiresAt = new Date(Date.now() + INVITATION_EXPIRATION_MS);
-  await invitationsDb().updateOne({ _id: invitation._id }, { $set: { token: newToken, expires_at: newExpiresAt } });
-
   const organisation = await getOrganisationById(ctx.organisation_id);
 
   if (organisation.type === "ORGANISME_FORMATION") {
-    const cfaName = await getCfaNameForOrganisation(organisation);
-    await sendEmail(invitation.email, "invitation_cfa_member", {
-      admin: {
-        prenom: ctx.prenom,
-        nom: ctx.nom,
-        fonction: ctx.fonction || "",
-      },
-      cfaName,
-      invitationToken: newToken,
-    });
+    await envoyerInvitationCollaborateurCfa({ ...invitation, token: newToken }, organisation);
+    await invitationsDb().updateOne({ _id: invitation._id }, { $set: { token: newToken, expires_at: newExpiresAt } });
   } else {
+    await invitationsDb().updateOne({ _id: invitation._id }, { $set: { token: newToken, expires_at: newExpiresAt } });
     await sendEmail(invitation.email, "invitation_organisation", {
       author: {
         civility: ctx.civility,
@@ -644,6 +632,37 @@ async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Prom
     throw Boom.notFound(`missing invitation ${invitationId}`);
   }
   return invitation;
+}
+
+export async function envoyerInvitationCollaborateurCfa(
+  invitation: Pick<IInvitation, "email" | "token" | "author_id">,
+  organisation: IOrganisation & { type: "ORGANISME_FORMATION" }
+): Promise<void> {
+  const templateId = config.brevo.templateInvitationCollaborateurCfaId;
+  if (!templateId) {
+    throw Boom.internal(
+      "Template Brevo d'invitation des collaborateurs CFA non configuré (MNA_TDB_BREVO_TEMPLATE_INVITATION_COLLABORATEUR_CFA_ID)"
+    );
+  }
+  const auteur = await usersMigrationDb().findOne(
+    { _id: invitation.author_id },
+    { projection: { prenom: 1, nom: 1, fonction: 1, email: 1 } }
+  );
+  const reponse = await sendTransactionalEmail(
+    invitation.email,
+    templateId,
+    {
+      PRENOM_ADMIN: auteur?.prenom ?? "",
+      NOM_ADMIN: auteur?.nom ?? "",
+      FONCTION_ADMIN: auteur?.fonction ?? "",
+      NOM_CFA: await getCfaNameForOrganisation(organisation),
+      LIEN_INSCRIPTION: `${config.publicUrl}/auth/inscription-cfa?invitationToken=${invitation.token}`,
+    },
+    { redirectRecipientInNonProdTo: auteur?.email }
+  );
+  if (!reponse) {
+    throw Boom.internal("L'email d'invitation n'a pas pu être envoyé");
+  }
 }
 
 async function getCfaNameForOrganisation(
