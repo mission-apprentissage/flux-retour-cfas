@@ -205,6 +205,13 @@ export const PAGES = {
         title: `Gestion des réseaux | ${SITE_NAME}`,
       }),
     },
+    adminDemandesActivation: {
+      getPath: () => "/admin/demandes-activation",
+      title: "Demandes d'activation des CFA",
+      getMetadata: () => ({
+        title: `Demandes d'activation des CFA | ${SITE_NAME}`,
+      }),
+    },
     adminFusionOrganismes: {
       getPath: () => "/admin/fusion-organismes",
       title: "Vérifier les duplicats d’organisme",

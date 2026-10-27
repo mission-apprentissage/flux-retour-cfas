@@ -1,4 +1,5 @@
 export * from "./auditLogs.model";
+export * from "./demandesActivationCfa.model";
 export * from "./effectifs.model";
 export * from "./effectifsArchive.model";
 export * from "./effectifsQueue.model";

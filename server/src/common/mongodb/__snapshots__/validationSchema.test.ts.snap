@@ -222,6 +222,262 @@ exports[`validation-schema > should create validation schema for connexionInvita
 }
 `;
 
+exports[`validation-schema > should create validation schema for demandesActivationCfa > demandesActivationCfa 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "a_envoyer": {
+      "bsonType": "bool",
+      "description": "Ligne cochée pour l'envoi",
+    },
+    "branche": {
+      "bsonType": "string",
+      "enum": [
+        "activation",
+        "compte_existant",
+        "refus",
+      ],
+    },
+    "branche_envoyee": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "activation",
+            "compte_existant",
+            "refus",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Branche du dernier envoi",
+    },
+    "branche_forcee": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "activation",
+            "compte_existant",
+            "refus",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Branche forcée par l'équipe",
+    },
+    "branche_initiale": {
+      "bsonType": "string",
+      "description": "Branche de la première évaluation",
+      "enum": [
+        "activation",
+        "compte_existant",
+        "refus",
+      ],
+    },
+    "commentaire": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Questions ou remarques du formulaire",
+    },
+    "created_at": {
+      "bsonType": "date",
+    },
+    "domaine_inconnu": {
+      "bsonType": "bool",
+      "description": "Domaine de l'email jamais vu dans le TBA (avertissement)",
+    },
+    "effectifs_deca": {
+      "bsonType": [
+        "number",
+        "null",
+      ],
+      "description": "Effectifs DECA sur les années actives",
+    },
+    "effectifs_erp": {
+      "bsonType": [
+        "number",
+        "null",
+      ],
+      "description": "Effectifs ERP sur les années actives",
+    },
+    "email": {
+      "bsonType": "string",
+      "description": "Email du demandeur, en minuscules et sans espaces",
+    },
+    "evalue_at": {
+      "bsonType": "date",
+      "description": "Date de la dernière évaluation",
+    },
+    "fonction": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Fonction déclarée dans le formulaire",
+    },
+    "horodatage": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Horodateur du formulaire, lu",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Horodateur du formulaire, lu",
+    },
+    "horodatage_brut": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Horodateur du formulaire, tel quel",
+    },
+    "motif_echec": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Motif du dernier échec d'envoi",
+    },
+    "motifs": {
+      "bsonType": "array",
+      "description": "Motifs de refus",
+      "items": {
+        "bsonType": "string",
+        "enum": [
+          "aucun_effectif",
+          "siret_inconnu",
+          "sans_uai",
+          "siret_mal_forme",
+          "email_mal_forme",
+          "messagerie_grand_public",
+          "responsable_pur",
+          "nature_inconnue",
+          "compte_autre_organisation",
+          "ferme",
+          "refus_force",
+        ],
+      },
+    },
+    "organisation_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Organisation de l'organisme retenu",
+    },
+    "organisme_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Organisme retenu",
+    },
+    "siret": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "SIRET retenu",
+    },
+    "siret_corrige": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "SIRET corrigé par l'équipe",
+    },
+    "siret_propose": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "SIRET ouvert de même UAI, proposé quand le SIRET est fermé",
+    },
+    "siret_saisi": {
+      "bsonType": "string",
+      "description": "SIRET saisi, réduit à ses chiffres",
+    },
+    "siret_saisi_brut": {
+      "bsonType": "string",
+      "description": "SIRET saisi dans le formulaire, tel quel",
+    },
+    "source": {
+      "bsonType": "string",
+      "description": "Nom de la source saisi à l'import (informatif)",
+    },
+    "statut": {
+      "bsonType": "string",
+      "enum": [
+        "pret",
+        "envoi_en_cours",
+        "envoyee",
+        "echec",
+        "invitation_expiree",
+      ],
+    },
+    "uai": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "UAI retenu",
+    },
+    "updated_at": {
+      "bsonType": "date",
+    },
+    "user_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Compte trouvé pour l'email du demandeur",
+    },
+  },
+  "required": [
+    "_id",
+    "source",
+    "email",
+    "siret_saisi_brut",
+    "siret_saisi",
+    "motifs",
+    "domaine_inconnu",
+    "branche",
+    "branche_initiale",
+    "evalue_at",
+    "a_envoyer",
+    "statut",
+    "created_at",
+    "updated_at",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for effectifV2 > effectifV2 1`] = `
 {
   "additionalProperties": false,

@@ -5,6 +5,9 @@ import communesVoiesModelDescriptor, { ICommunesVoies } from "shared/models/data
 import connexionInvitationsModelDescriptor, {
   IConnexionInvitation,
 } from "shared/models/data/connexionInvitations.model";
+import demandesActivationCfaModelDescriptor, {
+  IDemandeActivationCfa,
+} from "shared/models/data/demandesActivationCfa.model";
 import effectifsModelDescriptor, { IEffectif } from "shared/models/data/effectifs.model";
 import effectifsArchiveModelDescriptor, { IEffectifArchive } from "shared/models/data/effectifsArchive.model";
 import effectifsDECAModelDescriptor, { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -59,6 +62,7 @@ export const modelDescriptors = [
   JwtSessionsModelDescriptor,
   invitationsModelDescriptor,
   invitationsArchiveModelDescriptor,
+  demandesActivationCfaModelDescriptor,
   organisationsModelDescriptor,
   OrganismesModelDescriptor,
   effectifsModelDescriptor,
@@ -98,6 +102,8 @@ export const jwtSessionsDb = () => getDbCollection<IJwtSession>(JwtSessionsModel
 export const sipaUsersDb = () => getDbCollection<ISipaUser>(sipaUsersModelDescriptor.collectionName);
 export const organismesDb = () => getDbCollection<IOrganisme>(OrganismesModelDescriptor.collectionName);
 export const invitationsDb = () => getDbCollection<IInvitation>(invitationsModelDescriptor.collectionName);
+export const demandesActivationCfaDb = () =>
+  getDbCollection<IDemandeActivationCfa>(demandesActivationCfaModelDescriptor.collectionName);
 export const invitationsArchiveDb = () =>
   getDbCollection<IInvitationArchive>(invitationsArchiveModelDescriptor.collectionName);
 export const organisationsDb = () => getDbCollection<IOrganisation>(organisationsModelDescriptor.collectionName);
