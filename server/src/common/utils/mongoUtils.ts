@@ -73,6 +73,30 @@ export function stripDiacritics(expr: Record<string, unknown>) {
 }
 
 /**
+ * Clé de dédoublonnage d'un nom ou d'un prénom : sans casse, accents ni séparateurs
+ */
+export function dedupNomExpr(champ: string | Record<string, unknown>) {
+  let result = stripDiacritics({ $toLower: { $trim: { input: { $ifNull: [champ, ""] } } } });
+  for (const separateur of ["-", " ", "'", "’", "‘"]) {
+    result = { $replaceAll: { input: result, find: separateur, replacement: "" } };
+  }
+  return result;
+}
+
+/**
+ * Clé de dédoublonnage d'une date de naissance : jour UTC, une date stockée à partir de 22h compte pour le lendemain
+ */
+export function dedupDateDeNaissanceExpr(champ: string | Record<string, unknown>) {
+  return {
+    $cond: {
+      if: { $eq: [{ $type: champ }, "date"] },
+      then: { $dateTrunc: { date: { $dateAdd: { startDate: champ, unit: "hour", amount: 2 } }, unit: "day" } },
+      else: null,
+    },
+  };
+}
+
+/**
  * Supprime toutes les attributs à false ou 0 pour éviter une erreur mongodb
  */
 export function cleanProjection<Document = object, Projection = Partial<Record<keyof WithId<Document>, unknown>>>(

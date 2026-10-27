@@ -68,6 +68,22 @@ async function insertEffectif({ apprenant, ...params }: Parameters<typeof create
   return effectif;
 }
 
+async function insertDecaEffectif(apprenant: Partial<IEffectif["apprenant"]>) {
+  const decaEffectif = {
+    _id: new ObjectId(),
+    deca_raw_id: new ObjectId(),
+    ...(await createSampleEffectif({
+      organisme: sampleOrganisme,
+      annee_scolaire: ANNEE_SCOLAIRE,
+      apprenant,
+      source: SOURCE_APPRENANT.DECA,
+    })),
+    is_deca_compatible: true,
+  };
+  await effectifsDECADb().insertOne(testDoc<IEffectifDECA>(decaEffectif));
+  return decaEffectif;
+}
+
 function createMlEffectifDoc(effectif: IEffectif, overrides: DeepPartial<IMissionLocaleEffectif> = {}) {
   return {
     _id: new ObjectId(),
@@ -379,6 +395,110 @@ describe("CFA Effectifs Actions", () => {
       expect(result.effectifs[0].source).toBe("effectifs");
     });
 
+    it("déduplique ERP/DECA quand l'ERP stocke la date de naissance la veille à 22h ou 23h UTC", async () => {
+      await insertEffectif({
+        apprenant: { nom: "ETE", prenom: "Jean", date_de_naissance: new Date("2008-08-07T22:00:00.000Z") },
+      });
+      await insertDecaEffectif({ nom: "ETE", prenom: "Jean", date_de_naissance: new Date("2008-08-08T00:00:00.000Z") });
+      await insertEffectif({
+        apprenant: { nom: "HIVER", prenom: "Jean", date_de_naissance: new Date("2008-01-14T23:00:00.000Z") },
+      });
+      await insertDecaEffectif({
+        nom: "HIVER",
+        prenom: "Jean",
+        date_de_naissance: new Date("2008-01-15T00:00:00.000Z"),
+      });
+
+      const result = await getCfaEffectifs(organisation, true, defaultParams);
+
+      expect(result.pagination.total).toBe(2);
+      expect(result.effectifs.map((e) => e.source)).toEqual(["effectifs", "effectifs"]);
+    });
+
+    it("déduplique ERP/DECA malgré les séparateurs des noms composés", async () => {
+      const ddn = new Date("2008-08-08T00:00:00.000Z");
+      await insertEffectif({ apprenant: { nom: "ROUSSEAU--CHAUVET", prenom: "Léa", date_de_naissance: ddn } });
+      await insertDecaEffectif({ nom: "ROUSSEAU-CHAUVET", prenom: "Lea", date_de_naissance: ddn });
+      await insertEffectif({ apprenant: { nom: "LOUET - LE CAM", prenom: "Jean-Marc", date_de_naissance: ddn } });
+      await insertDecaEffectif({ nom: "LOUET LE CAM", prenom: "Jean Marc", date_de_naissance: ddn });
+
+      const result = await getCfaEffectifs(organisation, true, defaultParams);
+
+      expect(result.pagination.total).toBe(2);
+      expect(result.effectifs.map((e) => e.source)).toEqual(["effectifs", "effectifs"]);
+    });
+
+    it("ne fusionne pas deux dates de naissance à un jour d'écart", async () => {
+      await insertEffectif({
+        apprenant: { nom: "DUPONT", prenom: "Jean", date_de_naissance: new Date("2008-08-07T00:00:00.000Z") },
+      });
+      await insertDecaEffectif({
+        nom: "DUPONT",
+        prenom: "Jean",
+        date_de_naissance: new Date("2008-08-08T00:00:00.000Z"),
+      });
+
+      const result = await getCfaEffectifs(organisation, true, defaultParams);
+
+      expect(result.pagination.total).toBe(2);
+    });
+
+    it("porte sur la ligne ERP le statut du dossier ML rattaché au seul jumeau DECA", async () => {
+      const erpEffectif = await insertEffectif({
+        apprenant: { nom: "ROUSSEAU--CHAUVET", prenom: "Léa", date_de_naissance: new Date("2008-08-07T22:00:00.000Z") },
+      });
+      const apprenantDeca = {
+        nom: "ROUSSEAU-CHAUVET",
+        prenom: "Lea",
+        date_de_naissance: new Date("2008-08-08T00:00:00.000Z"),
+      };
+      const decaEffectif = await insertDecaEffectif(apprenantDeca);
+      await missionLocaleEffectifsDb().insertOne(
+        testDoc<IMissionLocaleEffectif>(
+          createMlEffectifDoc(testDoc<IEffectif>(decaEffectif), {
+            identifiant_normalise: apprenantDeca,
+            organisme_data: { acc_conjoint: true },
+            soft_deleted: false,
+          })
+        )
+      );
+
+      const result = await getCfaEffectifs(organisation, true, defaultParams);
+
+      expect(result.effectifs).toHaveLength(1);
+      expect(result.effectifs[0]).toMatchObject({ id: erpEffectif._id, collab_status: "collab_demandee" });
+    });
+
+    it("répond quand une date de naissance est stockée en chaîne", async () => {
+      const effectif = await createSampleEffectif({
+        organisme: sampleOrganisme,
+        annee_scolaire: ANNEE_SCOLAIRE,
+        apprenant: { nom: "CHAINE", prenom: "Jean" },
+      });
+      await effectifsDb().insertOne(
+        { ...effectif, apprenant: { ...effectif.apprenant, date_de_naissance: "2008-08-08" } } as unknown as IEffectif,
+        { bypassDocumentValidation: true }
+      );
+
+      const result = await getCfaEffectifs(organisation, true, defaultParams);
+
+      expect(result.effectifs).toHaveLength(1);
+      expect(result.effectifs[0].nom).toBe("CHAINE");
+    });
+
+    it("garde l'id du jumeau ERP mis à jour le plus récemment, d'un appel à l'autre", async () => {
+      const apprenant = { nom: "JUMEAU", prenom: "Jean", date_de_naissance: new Date("2008-08-08T00:00:00.000Z") };
+      await insertEffectif({ apprenant, updated_at: new Date("2025-01-01T00:00:00.000Z") });
+      const recent = await insertEffectif({ apprenant, updated_at: new Date("2026-01-01T00:00:00.000Z") });
+
+      const premier = await getCfaEffectifs(organisation, false, defaultParams);
+      const second = await getCfaEffectifs(organisation, false, defaultParams);
+
+      expect(premier.effectifs).toHaveLength(1);
+      expect(premier.effectifs[0].id).toEqual(recent._id);
+      expect(second.effectifs[0].id).toEqual(recent._id);
+    });
+
     it("fallback identifiant scopé famille : remonte un ml record d'un organisme apparenté", async () => {
       const rOrgId = new ObjectId(id(40));
       const rOrgSiret = "13002374000439";
@@ -602,7 +722,6 @@ describe("CFA Effectifs Actions", () => {
         { $set: { organismesResponsables: [{ _id: rOrgId, siret: rOrgSiret }] } }
       );
 
-      // UTC midnight requis : normalisePersonIdentifiant (côté detail) sinon décale la date.
       const ddn = new Date("2005-06-15T00:00:00.000Z");
       const apprenantBase = { nom: "TESTNOM_A", prenom: "Prenoma", date_de_naissance: ddn };
 
@@ -634,6 +753,31 @@ describe("CFA Effectifs Actions", () => {
       expect(result.effectif).toMatchObject({
         situation: { situation: "INJOIGNABLE_APRES_RELANCES", commentaires: "déjà traité par la ML" },
       });
+    });
+
+    it("affiche sur la fiche ERP le dossier ML du jumeau DECA, nom composé compris", async () => {
+      const erpEffectif = await insertEffectif({
+        apprenant: { nom: "ROUSSEAU--CHAUVET", prenom: "Léa", date_de_naissance: new Date("2008-08-07T22:00:00.000Z") },
+      });
+      const apprenantDeca = {
+        nom: "ROUSSEAU-CHAUVET",
+        prenom: "Lea",
+        date_de_naissance: new Date("2008-08-08T00:00:00.000Z"),
+      };
+      const decaEffectif = await insertDecaEffectif(apprenantDeca);
+      await missionLocaleEffectifsDb().insertOne(
+        testDoc<IMissionLocaleEffectif>(
+          createMlEffectifDoc(testDoc<IEffectif>(decaEffectif), {
+            identifiant_normalise: apprenantDeca,
+            organisme_data: { acc_conjoint: true },
+            soft_deleted: false,
+          })
+        )
+      );
+
+      const result = await getCfaEffectifDetail(organismeId, erpEffectif._id.toString());
+
+      expect(result.effectif).toMatchObject({ id: decaEffectif._id, collab_status: "collab_demandee" });
     });
   });
 

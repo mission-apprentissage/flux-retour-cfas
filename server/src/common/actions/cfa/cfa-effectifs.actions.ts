@@ -13,7 +13,6 @@ import { getAnneesScolaireListFromDate, getBornesNaissanceMissionLocale } from "
 
 import { ensureMissionLocaleEffectifRecord } from "@/common/actions/mission-locale/mission-locale-record.actions";
 import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.actions";
-import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import {
   buildCollabStatusSwitch,
   buildCsvInConditions,
@@ -27,7 +26,7 @@ import {
   organisationsDb,
   organismesDb,
 } from "@/common/model/collections";
-import { stripDiacritics } from "@/common/utils/mongoUtils";
+import { dedupDateDeNaissanceExpr, dedupNomExpr } from "@/common/utils/mongoUtils";
 
 interface CfaEffectifsQueryParams {
   page: number;
@@ -101,19 +100,21 @@ export async function getCfaEffectifs(
     {
       $addFields: {
         source_priority: { $cond: [{ $eq: ["$source_collection", "effectifs"] }, 0, 1] },
-        _dedup_nom: stripDiacritics({ $toLower: { $trim: { input: { $ifNull: ["$apprenant.nom", ""] } } } }),
-        _dedup_prenom: stripDiacritics({ $toLower: { $trim: { input: { $ifNull: ["$apprenant.prenom", ""] } } } }),
+        _dedup_nom: dedupNomExpr("$apprenant.nom"),
+        _dedup_prenom: dedupNomExpr("$apprenant.prenom"),
+        _dedup_ddn: dedupDateDeNaissanceExpr("$apprenant.date_de_naissance"),
       },
     },
-    { $sort: { source_priority: 1 as const } },
+    { $sort: { source_priority: 1 as const, updated_at: -1 as const, _id: 1 as const } },
     {
       $group: {
         _id: {
           nom: "$_dedup_nom",
           prenom: "$_dedup_prenom",
-          ddn: "$apprenant.date_de_naissance",
+          ddn: "$_dedup_ddn",
         },
         effectif_id: { $first: "$_id" },
+        effectif_ids: { $push: "$_id" },
         source_collection: { $first: "$source_collection" },
         doc: { $first: "$$ROOT" },
       },
@@ -121,7 +122,10 @@ export async function getCfaEffectifs(
     {
       $replaceRoot: {
         newRoot: {
-          $mergeObjects: ["$doc", { effectif_id: "$effectif_id", source_collection: "$source_collection" }],
+          $mergeObjects: [
+            "$doc",
+            { effectif_id: "$effectif_id", effectif_ids: "$effectif_ids", source_collection: "$source_collection" },
+          ],
         },
       },
     }
@@ -151,10 +155,15 @@ export async function getCfaEffectifs(
     {
       $lookup: {
         from: "missionLocaleEffectif",
-        localField: "effectif_id",
+        localField: "effectif_ids",
         foreignField: "effectif_id",
         as: "ml_data",
-        pipeline: [{ $match: { soft_deleted: { $ne: true } } }, { $limit: 1 }],
+        pipeline: [
+          { $match: { soft_deleted: { $ne: true } } },
+          { $addFields: { _est_erp: { $eq: [{ $type: "$effectif_snapshot.is_deca_compatible" }, "missing"] } } },
+          { $sort: { _est_erp: -1, updated_at: -1 } },
+          { $limit: 1 },
+        ],
       },
     },
     // Fallback identifiant scopé famille (rattrape les double-ingestions formateur/responsable).
@@ -536,7 +545,7 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
   const decaEffectif = erpEffectif ? null : await effectifsDECADb().findOne({ _id: eid, organisme_id: organismeId });
   const baseEffectif = erpEffectif ?? decaEffectif;
 
-  // Fallback identifiant scopé famille (normalisation JS-side, tolère effectif legacy).
+  // Fallback identifiant scopé famille, avec la clé de dédoublonnage de la liste.
   if (
     baseEffectif &&
     baseEffectif.apprenant?.nom &&
@@ -544,17 +553,22 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
     baseEffectif.apprenant?.date_de_naissance
   ) {
     const familyOrganismeIds = await getFamilyOrganismeIds(organismeId);
-    const ident = normalisePersonIdentifiant({
-      nom: baseEffectif.apprenant.nom,
-      prenom: baseEffectif.apprenant.prenom,
-      date_de_naissance: baseEffectif.apprenant.date_de_naissance,
-    });
+    const { nom, prenom, date_de_naissance } = baseEffectif.apprenant;
     const fallbackMatch = {
-      "identifiant_normalise.nom": ident.nom,
-      "identifiant_normalise.prenom": ident.prenom,
-      "identifiant_normalise.date_de_naissance": ident.date_de_naissance,
       "effectif_snapshot.organisme_id": { $in: familyOrganismeIds },
       soft_deleted: { $ne: true },
+      $expr: {
+        $and: [
+          { $eq: [dedupNomExpr("$identifiant_normalise.nom"), dedupNomExpr({ $literal: nom })] },
+          { $eq: [dedupNomExpr("$identifiant_normalise.prenom"), dedupNomExpr({ $literal: prenom })] },
+          {
+            $eq: [
+              dedupDateDeNaissanceExpr("$identifiant_normalise.date_de_naissance"),
+              dedupDateDeNaissanceExpr({ $literal: date_de_naissance }),
+            ],
+          },
+        ],
+      },
     };
     mlEffectif = await missionLocaleEffectifsDb().aggregate(buildMlAggregation(fallbackMatch)).next();
     if (mlEffectif) {
