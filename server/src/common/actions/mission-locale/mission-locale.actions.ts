@@ -115,6 +115,18 @@ const cfaForceVisibleExpr = () => ({
  */
 const souhaiteRdvForceVisibleExpr = () => ({ $eq: [{ $ifNull: ["$souhaite_rdv", false] }, true] });
 
+const anterieurActivationCollabExpr = () => ({
+  $and: [
+    { $ne: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null] },
+    {
+      $lt: [
+        "$created_at",
+        { $max: ["$computed.organisme.ml_beta_activated_at", "$computed.organisme.collab_resumed_at"] },
+      ],
+    },
+  ],
+});
+
 /**
  * Vérifie si un nouveau contrat est arrivé après une rupture déclarée par le CFA.
  * Retourne true si cfa_rupture_declaration doit être nettoyé.
@@ -448,17 +460,7 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
       },
       // Antériorité : un dossier créé avant l'activation ML de son organisme ou avant sa dernière
       // reprise après suspension reste visible. Activer ou réactiver ne retire rien aux ML.
-      {
-        $and: [
-          { $ne: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null] },
-          {
-            $lt: [
-              "$created_at",
-              { $max: ["$computed.organisme.ml_beta_activated_at", "$computed.organisme.collab_resumed_at"] },
-            ],
-          },
-        ],
-      },
+      anterieurActivationCollabExpr(),
     ],
   };
 
@@ -789,16 +791,42 @@ const addDateReferenceField = () => [
   },
 ];
 
-/** Réception du dossier par la ML : envoi du CFA si collaboration, sinon création. Jamais la date de rupture. */
+/** Réception du dossier par la ML : demande de collaboration ou envoi automatique du CFA, sinon création. */
 const addDateReceptionField = () => [
   {
     $addFields: {
       date_reception: {
-        $cond: [
-          { $eq: ["$organisme_data.acc_conjoint", true] },
-          { $ifNull: ["$organisme_data.reponse_at", "$created_at"] },
-          "$created_at",
-        ],
+        $switch: {
+          branches: [
+            {
+              case: { $eq: ["$organisme_data.acc_conjoint", true] },
+              then: { $ifNull: ["$organisme_data.reponse_at", "$created_at"] },
+            },
+            {
+              case: {
+                $and: [
+                  { $eq: ["$computed.organisme.is_allowed_collab", true] },
+                  { $ne: [{ $ifNull: ["$date_rupture", null] }, null] },
+                  { $not: [anterieurActivationCollabExpr()] },
+                ],
+              },
+              then: {
+                $max: [
+                  "$created_at",
+                  {
+                    $min: [
+                      {
+                        $dateAdd: { startDate: "$date_rupture", unit: "day", amount: CFA_COLLAB_AUTO_SEND_DELAI_DAYS },
+                      },
+                      "$computed.organisme.collab_suspended_at",
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+          default: "$created_at",
+        },
       },
     },
   },
