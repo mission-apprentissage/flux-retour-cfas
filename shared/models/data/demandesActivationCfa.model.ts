@@ -76,6 +76,12 @@ const zDemandeActivationCfa = z.object({
   envoi_en_cours_at: z.date({ description: "Date de mise en file du dernier envoi" }).nullish(),
   envoyee_at: z.date({ description: "Date du dernier envoi réussi" }).nullish(),
   invitation_id: zObjectId.nullish().describe("Invitation admin créée ou reprise par l'envoi"),
+  invitez_queued_at: z.date({ description: "Mise en file de l'email « invitez vos collaborateurs »" }).nullish(),
+  invitez_sent_at: z.date({ description: "Envoi de l'email « invitez vos collaborateurs »" }).nullish(),
+  relance_sans_compte_at: z.date({ description: "Relance de l'admin sans compte à J+7" }).nullish(),
+  relance_validation_email_at: z.date({ description: "Renvoi de la validation d'email à J+2" }).nullish(),
+  relance_avec_compte_at: z.date({ description: "Relance de l'admin avec compte à J+7" }).nullish(),
+  relance_sans_invitation_at: z.date({ description: "Relance de l'admin qui n'a invité personne" }).nullish(),
   etapes: z
     .object({
       flag_at: z.date().nullish(),

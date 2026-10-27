@@ -43,6 +43,10 @@ export const zUsersMigration = z.object({
     .optional()
     .describe("Date du dernier envoi du mail d'activation (pour cooldown de renvoi)"),
   last_connection: z.date().optional().describe("Date de dernière connexion"),
+  onboarding_collaborateur_at: z
+    .date()
+    .optional()
+    .describe("Envoi de l'email d'accueil du collaborateur invité par un admin activé"),
   connection_history: z.array(z.date()).optional().describe("Historique des dates de connexion"),
   password_updated_at: z.date().optional().describe("Date de dernière mise à jour mot de passe"),
   reminder_missing_data_sent_date: z

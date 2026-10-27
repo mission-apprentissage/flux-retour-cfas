@@ -452,6 +452,30 @@ exports[`validation-schema > should create validation schema for demandesActivat
       ],
       "description": "Invitation admin créée ou reprise par l'envoi",
     },
+    "invitez_queued_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Mise en file de l'email « invitez vos collaborateurs »",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Mise en file de l'email « invitez vos collaborateurs »",
+    },
+    "invitez_sent_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Envoi de l'email « invitez vos collaborateurs »",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Envoi de l'email « invitez vos collaborateurs »",
+    },
     "motif_echec": {
       "bsonType": [
         "string",
@@ -500,6 +524,54 @@ exports[`validation-schema > should create validation schema for demandesActivat
         },
       ],
       "description": "Organisme retenu",
+    },
+    "relance_avec_compte_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Relance de l'admin avec compte à J+7",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Relance de l'admin avec compte à J+7",
+    },
+    "relance_sans_compte_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Relance de l'admin sans compte à J+7",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Relance de l'admin sans compte à J+7",
+    },
+    "relance_sans_invitation_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Relance de l'admin qui n'a invité personne",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Relance de l'admin qui n'a invité personne",
+    },
+    "relance_validation_email_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Renvoi de la validation d'email à J+2",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Renvoi de la validation d'email à J+2",
     },
     "siret": {
       "bsonType": [
@@ -12862,6 +12934,10 @@ exports[`validation-schema > should create validation schema for invitations > i
       "bsonType": "string",
       "description": "Prénom de l'invité (si fourni à la création)",
     },
+    "relance_admin_at": {
+      "bsonType": "date",
+      "description": "Relance de l'admin auteur, invitation restée en attente 48 h",
+    },
     "role": {
       "bsonType": "string",
       "description": "Rôle attribué à l'utilisateur invité (CFA)",
@@ -12925,6 +13001,10 @@ exports[`validation-schema > should create validation schema for invitationsArch
     "prenom": {
       "bsonType": "string",
       "description": "Prénom de l'invité (si fourni à la création)",
+    },
+    "relance_admin_at": {
+      "bsonType": "date",
+      "description": "Relance de l'admin auteur, invitation restée en attente 48 h",
     },
     "role": {
       "bsonType": "string",
@@ -22199,6 +22279,10 @@ exports[`validation-schema > should create validation schema for usersMigration 
     "nom": {
       "bsonType": "string",
       "description": "Le nom de l'utilisateur",
+    },
+    "onboarding_collaborateur_at": {
+      "bsonType": "date",
+      "description": "Envoi de l'email d'accueil du collaborateur invité par un admin activé",
     },
     "organisation_id": {
       "bsonType": "objectId",

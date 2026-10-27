@@ -4,7 +4,7 @@ import { zObjectId } from "zod-mongodb-schema";
 
 const collectionName = "invitationsArchive";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ author_id: 1 }, { name: "author_id" }]];
 
 const zInvitationArchive = z.object({
   _id: zObjectId,
@@ -18,6 +18,7 @@ const zInvitationArchive = z.object({
   created_at: z.date({ description: "Date de création en base de données" }),
   expires_at: z.date().optional().describe("Date d'expiration de l'invitation (96h après création)"),
   demande_id: zObjectId.optional().describe("Demande d'activation à l'origine de l'invitation"),
+  relance_admin_at: z.date().optional().describe("Relance de l'admin auteur, invitation restée en attente 48 h"),
 });
 
 export type IInvitationArchive = z.output<typeof zInvitationArchive>;

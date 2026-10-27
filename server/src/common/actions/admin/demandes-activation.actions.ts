@@ -581,10 +581,10 @@ const MOTIFS_ECHEC_ACTIVATION = {
 
 type Expediteur = { _id: ObjectId; email: string };
 
-const nomOrganisme = (organisme: Pick<IOrganisme, "nom" | "raison_sociale" | "enseigne"> | null | undefined) =>
+export const nomOrganisme = (organisme: Pick<IOrganisme, "nom" | "raison_sociale" | "enseigne"> | null | undefined) =>
   organisme?.enseigne || organisme?.raison_sociale || organisme?.nom || "votre établissement";
 
-async function envoyerEmailBrevo(
+export async function envoyerEmailBrevo(
   templateId: number,
   destinataire: string,
   params: Record<string, unknown>,
@@ -897,6 +897,7 @@ export async function traiterEnvoisDemandesActivation(organismeId: ObjectId | nu
           $set: {
             statut: "envoyee",
             branche_envoyee: demande.branche,
+            organisation_id: organisation?._id ?? demande.organisation_id ?? null,
             envoyee_at: new Date(),
             etapes,
             motif_echec: null,
