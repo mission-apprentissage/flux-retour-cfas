@@ -72,7 +72,7 @@ describe("checkActivationEligibility", () => {
       expect(result.organisme).toBeNull();
       expect(result.checks.exists_with_siret_uai.passed).toBe(false);
       expect(result.checks.nature.passed).toBe(false);
-      expect(result.checks.no_formateurs_tiers.passed).toBe(false);
+      expect(result.checks.not_closed.passed).toBe(false);
       expect(result.checks.has_effectifs.passed).toBe(false);
       expect(result.eligible).toBe(false);
     });
@@ -111,35 +111,19 @@ describe("checkActivationEligibility", () => {
     });
   });
 
-  describe("no_formateurs_tiers", () => {
-    it("fails when catalogue contains a published doc gestionnaire=self / formateur=tiers", async () => {
-      const organisme = await insertOrganisme();
-      await insertFormationCatalogue({
-        etablissement_formateur_siret: SIRET_TIERS,
-        etablissement_formateur_uai: UAI_TIERS,
-      });
+  describe("not_closed", () => {
+    it("fails when the organisme is closed", async () => {
+      const organisme = await insertOrganisme({ ferme: true });
+      await insertEffectif(organisme._id as ObjectId, currentAnnee);
       const result = await checkActivationEligibility((organisme._id as ObjectId).toHexString());
-      expect(result.checks.no_formateurs_tiers.passed).toBe(false);
-      expect(result.checks.no_formateurs_tiers.details?.formateursTiersCount).toBe(1);
+      expect(result.checks.not_closed.passed).toBe(false);
+      expect(result.eligible).toBe(false);
     });
 
-    it("passes when catalogue contains only self-referencing formations", async () => {
-      const organisme = await insertOrganisme();
-      await insertFormationCatalogue({});
+    it("passes when the organisme is open", async () => {
+      const organisme = await insertOrganisme({ ferme: false });
       const result = await checkActivationEligibility((organisme._id as ObjectId).toHexString());
-      expect(result.checks.no_formateurs_tiers.passed).toBe(true);
-      expect(result.checks.no_formateurs_tiers.details?.formateursTiersCount).toBe(0);
-    });
-
-    it("ignores unpublished tier formations", async () => {
-      const organisme = await insertOrganisme();
-      await insertFormationCatalogue({
-        etablissement_formateur_siret: SIRET_TIERS,
-        etablissement_formateur_uai: UAI_TIERS,
-        published: false,
-      });
-      const result = await checkActivationEligibility((organisme._id as ObjectId).toHexString());
-      expect(result.checks.no_formateurs_tiers.passed).toBe(true);
+      expect(result.checks.not_closed.passed).toBe(true);
     });
   });
 
@@ -210,7 +194,7 @@ describe("checkActivationEligibility", () => {
       expect(result.eligible).toBe(true);
     });
 
-    it("returns eligible=false for nature=responsable_formateur chapeautant un formateur tiers", async () => {
+    it("returns eligible=true for nature=responsable_formateur chapeautant un formateur tiers", async () => {
       const organisme = await insertOrganisme({
         nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
       });
@@ -220,8 +204,7 @@ describe("checkActivationEligibility", () => {
       });
       await insertEffectif(organisme._id as ObjectId, currentAnnee);
       const result = await checkActivationEligibility((organisme._id as ObjectId).toHexString());
-      expect(result.checks.no_formateurs_tiers.passed).toBe(false);
-      expect(result.eligible).toBe(false);
+      expect(result.eligible).toBe(true);
     });
   });
 });

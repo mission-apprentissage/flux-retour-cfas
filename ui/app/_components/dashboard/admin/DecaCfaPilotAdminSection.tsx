@@ -1,6 +1,7 @@
 "use client";
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -24,7 +25,7 @@ type EligibilityResult = {
   checks: {
     exists_with_siret_uai: EligibilityCheck;
     nature: EligibilityCheck;
-    no_formateurs_tiers: EligibilityCheck;
+    not_closed: EligibilityCheck;
     has_effectifs: EligibilityCheck;
     not_already_active: EligibilityCheck;
   };
@@ -34,7 +35,11 @@ type EligibilityResult = {
     uai: string | null;
     nature?: string;
     is_allowed_deca?: boolean | null;
+    deca_activation_queued_at?: string | null;
   } | null;
+  activationEnCours: boolean;
+  flechageAuto: boolean;
+  contratsFleches: number;
 };
 
 type BatchResult = {
@@ -45,12 +50,13 @@ type BatchResult = {
 
 export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }) {
   const [action, setAction] = useState<"activate" | "deactivate" | null>(null);
-  const [feedback, setFeedback] = useState<{ severity: "success" | "error"; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ severity: "success" | "info" | "error"; message: string } | null>(null);
 
   const { data, isLoading, isFetching, refetch } = useQuery<EligibilityResult>({
     queryKey: ["admin/organismes/deca-cfa-pilot-eligibility", organisme._id],
     queryFn: () => _get(`/api/v1/admin/organismes/${organisme._id}/deca-cfa-pilot-eligibility`),
     enabled: !!organisme._id,
+    refetchInterval: (query) => (query.state.data?.activationEnCours ? 30_000 : false),
   });
 
   const activateMutation = useMutation({
@@ -71,6 +77,8 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
   const checks = data?.checks;
   const eligible = data?.eligible === true;
   const alreadyActive = data?.alreadyActive === true;
+  const activationEnCours = data?.activationEnCours === true;
+  const contratsFleches = data?.contratsFleches ?? 0;
   const siret = organisme.siret;
   const uai = organisme.uai;
 
@@ -91,11 +99,18 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
       const result = await mutation.mutateAsync(items);
       const item = result.items[0];
       const verb = action === "activate" ? "Activation" : "Désactivation";
-      const isOk = ["activated", "already_active", "deactivated"].includes(item?.status ?? "");
-      setFeedback({
-        severity: isOk ? "success" : "error",
-        message: `${verb} DECA-CFA pilot — statut : ${item?.status ?? "erreur"}`,
-      });
+      const isOk = ["already_active", "deactivated"].includes(item?.status ?? "");
+      setFeedback(
+        item?.status === "queued"
+          ? {
+              severity: "info",
+              message: "Activation DECA mise en file : le flag sera posé à la fin du job.",
+            }
+          : {
+              severity: isOk ? "success" : "error",
+              message: `${verb} DECA-CFA pilot — statut : ${item?.status ?? "erreur"}`,
+            }
+      );
       decaCfaPilotConfirmModal.close();
       await refetch();
     } catch (err) {
@@ -130,10 +145,7 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
             Nature «&nbsp;formateur&nbsp;» / «&nbsp;responsable_formateur&nbsp;» (actuelle&nbsp;:{" "}
             <strong>{checks.nature.details?.natureActuelle ?? "—"}</strong>)
           </CheckLine>
-          <CheckLine passed={checks.no_formateurs_tiers.passed}>
-            Aucun formateur tiers dans le catalogue publié (
-            {checks.no_formateurs_tiers.details?.formateursTiersCount ?? 0} trouvé(s))
-          </CheckLine>
+          <CheckLine passed={checks.not_closed.passed}>Établissement ouvert</CheckLine>
           <CheckLine passed={checks.has_effectifs.passed}>
             Effectifs sur années scolaires actives (ERP&nbsp;: {checks.has_effectifs.details?.effectifsErpCount ?? 0},
             DECA&nbsp;: {checks.has_effectifs.details?.effectifsDecaCount ?? 0})
@@ -161,6 +173,16 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
           >
             Désactiver DECA-CFA pilot
           </Button>
+        ) : activationEnCours ? (
+          <>
+            <Badge severity="info" small>
+              Activation en cours
+            </Badge>
+            <span className={styles.muted}>
+              Le job d&apos;activation tourne, jusqu&apos;à plusieurs heures le dimanche soir pendant l&apos;import
+              DECA.
+            </span>
+          </>
         ) : (
           <Button
             priority="primary"
@@ -189,8 +211,16 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
         ]}
       >
         {action === "activate"
-          ? `Activer le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_deca sera posé : les effectifs DECA deviennent visibles côté CFA. La collaboration n'est pas modifiée.`
-          : `Désactiver le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_deca sera retiré. La collaboration, la date d'activation ML et les snapshots déjà transmis restent inchangés.`}
+          ? `Activer le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? ${
+              data?.flechageAuto
+                ? "Un job lui fléchera d'abord les contrats DECA de son lieu de formation et de ses sites, puis posera le flag is_allowed_deca"
+                : "Un job posera le flag is_allowed_deca"
+            } : les effectifs DECA deviennent visibles côté CFA. La collaboration n'est pas modifiée.`
+          : `Désactiver le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_deca sera retiré. La collaboration, la date d'activation ML et les snapshots déjà transmis restent inchangés.${
+              contratsFleches > 0
+                ? ` ${contratsFleches} contrat(s) DECA fléché(s) vers cet établissement ne seront plus affichés par aucun CFA tant que « deca:flechage --refaire --cible ${siret} » n'a pas tourné.`
+                : ""
+            }`}
       </decaCfaPilotConfirmModal.Component>
     </>
   );

@@ -2,6 +2,7 @@ import { normalize } from "path";
 
 import { captureException } from "@sentry/node";
 import * as Sentry from "@sentry/node";
+import { addJob } from "job-processor";
 import { MongoClient, MongoError, ObjectId, WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IRawBalDeca } from "shared/models/data/airbyteRawBalDeca.model";
@@ -228,6 +229,9 @@ export async function hydrateDecaRaw({ dryRun = false, limit }: { dryRun?: boole
       logger.info({ ...dryRunStats, totalCount }, "DECA dry-run : aucune écriture");
     } else if (totalCount > 0) {
       await updateOrganismesLastEffectifUpdate(totalStats.organismesId);
+      if (config.deca.flechageAuto && !limit) {
+        await addJob({ name: "deca:flechage", payload: {}, queued: true });
+      }
     } else {
       logger.error("No documents found matching the criteria.");
     }

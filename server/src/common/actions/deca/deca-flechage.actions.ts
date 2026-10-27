@@ -208,6 +208,10 @@ export function appliquerCible<
   return { ...document, ...champs, _computed: { ...document._computed, organisme: organismeComputed } };
 }
 
+export async function compterContratsFlechesVers(organismeId: ObjectId): Promise<number> {
+  return effectifsDECADb().countDocuments({ organisme_id: organismeId, ...FILTRE_CHEZ_CIBLE });
+}
+
 export async function chargerResponsablesFleches(): Promise<Set<string>> {
   const responsables = await effectifsDECADb().distinct("organisme_responsable_id", FILTRE_CHEZ_CIBLE);
   return new Set(responsables.filter((id): id is ObjectId => !!id).map((id) => id.toString()));

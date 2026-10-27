@@ -4,6 +4,7 @@ import { Document, ObjectId } from "mongodb";
 import { SIRET_REGEX, UAI_REGEX } from "shared/constants/validations";
 import { z } from "zod";
 
+import { compterContratsFlechesVers } from "@/common/actions/deca/deca-flechage.actions";
 import { checkCollabV2Eligibility } from "@/common/actions/organismes/collab-v2-eligibility";
 import { checkActivationEligibility } from "@/common/actions/organismes/deca-cfa-eligibility";
 import { findOrganismeById, getAllOrganismes } from "@/common/actions/organismes/organismes.actions";
@@ -11,6 +12,7 @@ import {
   activateCollabV2,
   activateDecaCfaPilotBatch,
   deactivateDecaCfaPilotBatch,
+  estActivationDecaEnCours,
   getArchivableOrganismes,
   resumeCollab,
   searchOrganismesSupportInfoBySiret,
@@ -20,6 +22,7 @@ import objectIdSchema from "@/common/validation/objectIdSchema";
 import organismesFilterSchema from "@/common/validation/organismesFilterSchema";
 import paginationShema from "@/common/validation/paginationSchema";
 import searchShema from "@/common/validation/searchSchema";
+import config from "@/config";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 const listSchema = paginationShema({ defaultSort: "created_at:-1" })
@@ -87,7 +90,12 @@ export default () => {
     }),
     async ({ params }, res) => {
       const result = await checkActivationEligibility(params.id);
-      res.json(result);
+      res.json({
+        ...result,
+        activationEnCours: estActivationDecaEnCours(result.organisme?.deca_activation_queued_at),
+        flechageAuto: config.deca.flechageAuto,
+        contratsFleches: result.organisme ? await compterContratsFlechesVers(result.organisme._id) : 0,
+      });
     }
   );
 

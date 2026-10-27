@@ -163,6 +163,9 @@ const config = {
   seedRecette: {
     password: env.get("MNA_TDB_SEED_RECETTE_PASSWORD").default("").asString(),
   },
+  deca: {
+    flechageAuto: env.get("MNA_TDB_DECA_FLECHAGE_AUTO").default("false").asBool(),
+  },
 };
 
 export default config;

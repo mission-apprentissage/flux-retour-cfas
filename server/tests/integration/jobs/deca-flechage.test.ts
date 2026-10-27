@@ -1,5 +1,6 @@
 import { ObjectId } from "bson";
-import type { WithoutId } from "mongodb";
+import { addJob } from "job-processor";
+import { MongoClient, type WithoutId } from "mongodb";
 import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
 import type { IMissionLocaleEffectif } from "shared/models";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -13,6 +14,7 @@ import {
   rendreContratsDeca,
 } from "@/common/actions/deca/deca-flechage.actions";
 import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
+import { activerDecaOrganisme, poserGardeActivationDeca } from "@/common/actions/organismes/organismes.admin.actions";
 import {
   effectifsDb,
   effectifsDECADb,
@@ -23,14 +25,20 @@ import {
   usersMigrationDb,
 } from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes";
-import { getDatabase } from "@/common/mongodb";
+import { getBALMongodbUri, getDatabase } from "@/common/mongodb";
 import { dedupDateDeNaissance, dedupDateDeNaissanceExpr, dedupNom, dedupNomExpr } from "@/common/utils/mongoUtils";
-import { upsertEffectifDeca } from "@/jobs/hydrate/deca/hydrate-deca-raw";
+import config from "@/config";
+import { hydrateDecaRaw, upsertEffectifDeca } from "@/jobs/hydrate/deca/hydrate-deca-raw";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { DeepPartial, testDoc } from "@tests/utils/testUtils";
 
 const mockUpdateVoeux = vi.fn();
+
+vi.mock("job-processor", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("job-processor")>()),
+  addJob: vi.fn(),
+}));
 
 vi.mock("@/common/actions/affelnet.actions", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/common/actions/affelnet.actions")>()),
@@ -224,6 +232,7 @@ describe("fléchage des contrats DECA", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    config.deca.flechageAuto = false;
   });
 
   describe("ré-ingestion d'un contrat chez sa cible", () => {
@@ -653,6 +662,77 @@ describe("fléchage des contrats DECA", () => {
           { dossierId: dossier._id, missionLocaleId: ML_ORGANISATION_ID, cibleId: cible._id },
         ]);
         expect(await chezQui(contrat)).toEqual(responsable._id);
+      });
+    });
+
+    describe("activation et fin d'import", () => {
+      async function cibleActivable() {
+        const cible = await insererCible({ ferme: false });
+        await effectifsDb().insertOne({
+          _id: new ObjectId(),
+          ...(await createSampleEffectif({ organisme: cible, annee_scolaire: "2025-2026" })),
+        });
+        await poserGardeActivationDeca(cible._id);
+        return cible;
+      }
+
+      it("flèche vers l'organisme activé les contrats dont il est le lieu, puis pose son flag", async () => {
+        const cible = await cibleActivable();
+        const contrat = await insererContrat();
+
+        const resultat = await activerDecaOrganisme(cible._id, { flecher: true });
+
+        expect(resultat).toBe("flag_pose");
+        expect(await chezQui(contrat)).toEqual(cible._id);
+        expect((await organismesDb().findOne({ _id: cible._id }))?.is_allowed_deca).toBe(true);
+      });
+
+      it("pose le flag sans flécher quand l'interrupteur est coupé", async () => {
+        const cible = await cibleActivable();
+        const contrat = await insererContrat();
+
+        expect(await activerDecaOrganisme(cible._id, { flecher: false })).toBe("flag_pose");
+        expect(await chezQui(contrat)).toEqual(responsable._id);
+      });
+
+      describe("fin de l'import DECA", () => {
+        const bal = new MongoClient(getBALMongodbUri(config.mongodb.dbNameBal));
+        const contratBrutId = new ObjectId();
+
+        beforeEach(async () => {
+          vi.mocked(addJob).mockReset();
+          await bal.connect();
+          await bal
+            .db()
+            .collection(config.mongodb.decaDbCollectionBal)
+            .insertOne({
+              _id: contratBrutId,
+              dispositif: "APPR",
+              organisme_formation: { uai_cfa: "0000000A", siret: "00000000000000" },
+              formation: { date_debut_formation: "2025-09-01", date_fin_formation: "2026-06-30" },
+            });
+        });
+
+        afterEach(async () => {
+          await bal.db().collection(config.mongodb.decaDbCollectionBal).deleteOne({ _id: contratBrutId });
+          await bal.close();
+        });
+
+        it("met le fléchage en file après un import complet quand l'interrupteur est allumé", async () => {
+          config.deca.flechageAuto = true;
+
+          await hydrateDecaRaw();
+
+          expect(addJob).toHaveBeenCalledWith({ name: "deca:flechage", payload: {}, queued: true });
+        });
+
+        it("ne met rien en file interrupteur coupé, ni après un import limité", async () => {
+          await hydrateDecaRaw();
+          config.deca.flechageAuto = true;
+          await hydrateDecaRaw({ limit: 1 });
+
+          expect(addJob).not.toHaveBeenCalled();
+        });
       });
     });
 

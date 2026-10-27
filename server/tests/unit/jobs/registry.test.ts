@@ -75,6 +75,7 @@ describe("registre des jobs", () => {
       "computed:update",
       "db:find-invalid-documents",
       "db:validate",
+      "deca:activer",
       "deca:flechage",
       "dev:generate-open-api",
       "effectifs:doublons-obsoletes",

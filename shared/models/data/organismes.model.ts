@@ -215,6 +215,9 @@ export const zOrganisme = z
     is_allowed_deca: z
       .boolean({ description: "Organisme du programme DECA-CFA (effectifs DECA visibles côté CFA)" })
       .nullish(),
+    deca_activation_queued_at: z
+      .date({ description: "Date de mise en file de l'activation DECA en cours (absent = aucune activation en cours)" })
+      .nullish(),
     collab_inactivity_email_sent_at: z
       .date({ description: "Date d'envoi de la relance d'inactivité collaboration (verrou, retiré à la reconnexion)" })
       .nullish(),

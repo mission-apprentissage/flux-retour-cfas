@@ -20840,6 +20840,18 @@ exports[`validation-schema > should create validation schema for organismes > or
       "bsonType": "date",
       "description": "Date d'ajout en base de données",
     },
+    "deca_activation_queued_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de mise en file de l'activation DECA en cours (absent = aucune activation en cours)",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de mise en file de l'activation DECA en cours (absent = aucune activation en cours)",
+    },
     "effectifs_count": {
       "bsonType": "int",
       "description": "Compteur sur le nombre d'effectifs de l'organisme",

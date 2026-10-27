@@ -1,12 +1,14 @@
 import type { CronDef, JobDef } from "job-processor";
+import { ObjectId } from "mongodb";
 
 import { flecherContratsDeca, idsDesSirets, rendreContratsDeca } from "@/common/actions/deca/deca-flechage.actions";
+import { activerDecaOrganisme, retirerGardeActivationDeca } from "@/common/actions/organismes/organismes.admin.actions";
 import logger from "@/common/logger";
 import config from "@/config";
 
 import { hydrateDecaRaw, hydrateDecaFromExistingEffectifs } from "../hydrate/deca/hydrate-deca-raw";
 
-import { payloadBoolean, payloadNumber, payloadString, payloadStringArray } from "./payload";
+import { payloadBoolean, payloadNumber, payloadString, payloadStringArray, requirePayloadString } from "./payload";
 
 export const decaJobs = {
   "hydrate:contrats-deca-raw": {
@@ -23,6 +25,17 @@ export const decaJobs = {
   "hydrate:mission-locale-from-deca": {
     handler: async () => {
       return hydrateDecaFromExistingEffectifs();
+    },
+  },
+  "deca:activer": {
+    handler: async (job) => {
+      const organismeId = new ObjectId(requirePayloadString(job.payload, "organismeId"));
+      try {
+        const resultat = await activerDecaOrganisme(organismeId, { flecher: config.deca.flechageAuto });
+        logger.info({ organismeId, resultat }, "deca:activer");
+      } finally {
+        await retirerGardeActivationDeca(organismeId);
+      }
     },
   },
   "deca:flechage": {
