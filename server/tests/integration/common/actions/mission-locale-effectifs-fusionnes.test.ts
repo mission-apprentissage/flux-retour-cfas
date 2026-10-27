@@ -266,6 +266,30 @@ describe("getEffectifsFusionnesByMissionLocaleId", () => {
 
       expect(await receptionDe("ANTERIEUR")).toEqual(daysAgo(40));
     });
+
+    it("date du jour de la demande de RDV un dossier rendu visible par le jeune avant l'envoi automatique", async () => {
+      await insertMlRecord("RDV", {
+        computed: collabV2(),
+        date_rupture: daysAgo(10),
+        created_at: daysAgo(8),
+        souhaite_rdv: true,
+        souhaite_rdv_at: daysAgo(3),
+      });
+
+      expect(await receptionDe("RDV")).toEqual(daysAgo(3));
+    });
+
+    it("ne date pas dans le futur un dossier déjà suivi dont la rupture a été repoussée", async () => {
+      await insertMlRecord("REPOUSSE", {
+        computed: collabV2(),
+        date_rupture: daysAgo(5),
+        created_at: daysAgo(100),
+        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+        date_derniere_action_ml: daysAgo(2),
+      });
+
+      expect(await receptionDe("REPOUSSE")).toEqual(daysAgo(2));
+    });
   });
 
   describe("liste des dossiers prioritaires", () => {
