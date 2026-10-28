@@ -277,22 +277,6 @@
   color: var(--text-mention-grey);
 }
 
-.evolutionBadge {
-  composes: evolutionBadge from "./common.module.css";
-}
-
-.evolutionPositive {
-  composes: evolutionPositive from "./common.module.css";
-}
-
-.evolutionNegative {
-  composes: evolutionNegative from "./common.module.css";
-}
-
-.evolutionZero {
-  composes: evolutionZero from "./common.module.css";
-}
-
 .mlNameCell {
   display: flex;
   flex-direction: column;

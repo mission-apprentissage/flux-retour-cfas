@@ -5,49 +5,11 @@ import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { fr } from "date-fns/locale";
 import { REGIONS_BY_CODE } from "shared/constants/territoires";
 
-import { Skeleton } from "@/app/_components/common/Skeleton";
-
 import commonStyles from "./tables/common.module.css";
 import styles from "./tables/TraitementTable.module.css";
 
 export function getRegionLabel(code: string) {
   return REGIONS_BY_CODE[code as keyof typeof REGIONS_BY_CODE]?.nom ?? code;
-}
-
-export function formatPercentageBadge(percentage: number, evolution?: string, loadingEvolution?: boolean) {
-  let badgeClass = styles.percentageBadgeMedium;
-  if (percentage >= 70) {
-    badgeClass = styles.percentageBadgeHigh;
-  } else if (percentage === 0) {
-    badgeClass = styles.percentageBadgeZero;
-  }
-
-  const getEvolutionDisplay = (evo: string): { icon: string | null; className: string } => {
-    if (evo.startsWith("+")) return { icon: "fr-icon-arrow-up-s-line", className: styles.evolutionPositive };
-    if (evo.startsWith("-")) return { icon: "fr-icon-arrow-down-s-line", className: styles.evolutionNegative };
-    return { icon: null, className: styles.evolutionZero };
-  };
-
-  const evolutionDisplay = evolution && evolution !== "" ? getEvolutionDisplay(evolution) : null;
-
-  return (
-    <span>
-      <span className={badgeClass}>{percentage}%</span>
-      {loadingEvolution ? (
-        <Skeleton width="32px" height="16px" inline />
-      ) : (
-        evolutionDisplay &&
-        (evolutionDisplay.icon ? (
-          <>
-            <span className={`${evolutionDisplay.icon} ${evolutionDisplay.className}`} aria-hidden="true" />
-            <span className="fr-sr-only">{evolution?.startsWith("+") ? "en hausse" : "en baisse"}</span>
-          </>
-        ) : (
-          <span className={evolutionDisplay.className}>=</span>
-        ))
-      )}
-    </span>
-  );
 }
 
 export function formatPercentageBadgeSimple(percentage: number) {

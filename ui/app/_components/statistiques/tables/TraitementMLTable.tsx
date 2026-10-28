@@ -10,11 +10,10 @@ import type { StatsPeriod, StatsSegment } from "shared/models/data/nationalStats
 
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
-import { isLoadingVariation } from "../hooks/useLoadingVariation";
 import { useSortableTable } from "../hooks/useSortableTable";
 import { useTraitementMLStats, usePrefetchTraitementML } from "../hooks/useStatsQueries";
 import { StatsErrorHandler } from "../ui/StatsErrorHandler";
-import { formatActivityDuration, formatPercentageBadge } from "../utils";
+import { formatActivityDuration, formatPercentageBadgeSimple } from "../utils";
 
 import { SortableTableHeader } from "./SortableTableHeader";
 import { StatsTablePagination } from "./StatsTablePagination";
@@ -199,8 +198,6 @@ export function TraitementMLTable({
     search,
     filterParams,
   ]);
-
-  const loadingEvolution = isLoadingVariation(isFetching, isLoading);
 
   const mlList = data?.data || [];
   const pagination = data?.pagination;
@@ -391,7 +388,7 @@ export function TraitementMLTable({
                       tooltipPosition={tooltipPosition}
                     />,
                     <div className={styles.centeredCell} key={`pct-${ml.id}`}>
-                      {formatPercentageBadge(ml.pourcentage_traites, ml.pourcentage_evolution, loadingEvolution)}
+                      {formatPercentageBadgeSimple(ml.pourcentage_traites)}
                     </div>,
                     ...(isCollab
                       ? [
