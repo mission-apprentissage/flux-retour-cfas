@@ -101,7 +101,7 @@ export function CollaborationDossierItem({
   );
 }
 
-/** Ouvre le dossier sous l'identité du CFA émetteur, en lecture seule. */
+/** Ouvre le dossier sous l'identité du CFA émetteur : en lecture seule, sauf pour l'administrateur. */
 function VoirDetailButton({ dossier }: { dossier: ICollaborationDossier }) {
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);

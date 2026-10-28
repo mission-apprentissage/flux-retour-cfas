@@ -1140,11 +1140,24 @@ describe("Indicateurs ML routes (territoriales)", () => {
       );
     });
 
-    it("Réserve les CFA à la DREETS et à la DDETS, les Missions Locales à l'ARML, et exclut l'administrateur", async () => {
+    it("Réserve les CFA à l'administrateur, à la DREETS et à la DDETS, les Missions Locales à l'ARML", async () => {
       const refus = "Imposture non autorisée pour votre organisation";
       expectForbidden(await requestAsOrganisation(DREETS_IDF, "post", BASE, { ml_id: ML_IDF.toString() }), refus);
       expectForbidden(await requestAsOrganisation(ARML_IDF, "post", BASE, { cfa_id: CFA_A.toString() }), refus);
-      expectForbidden(await requestAsOrganisation(ADMIN, "post", BASE, { cfa_id: CFA_A.toString() }), refus);
+      expectForbidden(await requestAsOrganisation(ADMIN, "post", BASE, { ml_id: ML_IDF.toString() }), refus);
+    });
+
+    it("Ouvre pour l'administrateur une imposture classique, sans lecture seule, sur tout CFA", async () => {
+      for (const cfa of [CFA_A, CFA_B]) {
+        const response = await requestAsOrganisation(ADMIN, "post", BASE, { cfa_id: cfa.toString() });
+        expect(response.status).toBe(200);
+        const session = await avecCookie(cookieOf(response), "get", "/api/v1/session");
+        expect(session.data).toMatchObject({
+          impersonating: true,
+          organisation: { type: "ORGANISME_FORMATION", organisme_id: cfa.toString() },
+        });
+        expect(session.data.readOnly).toBeUndefined();
+      }
     });
 
     it("Indique sur les fiches si l'imposture est possible pour le profil", async () => {
@@ -1736,7 +1749,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(response.data.filtres.cfa.map((cfa: { nom: string }) => cfa.nom)).toEqual(["CFA A", "Lycée Eiffel"]);
     });
 
-    it("Indique si le CFA émetteur peut être imité en lecture seule, avec l'effectif à ouvrir", async () => {
+    it("Indique si le CFA émetteur peut être imité, avec l'effectif à ouvrir", async () => {
       const mlEffectif = await missionLocaleEffectifsDb().findOne({ _id: D_RDV });
 
       const dreets = await requestAsOrganisation(DREETS_IDF, "get", BASE);
@@ -1751,7 +1764,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
 
       const admin = await requestAsOrganisation(ADMIN, "get", BASE);
       expect(admin.data.data.length).toBeGreaterThan(0);
-      expect(admin.data.data.some((row: { peut_imiter: boolean }) => row.peut_imiter)).toBe(false);
+      expect(admin.data.data.every((row: { peut_imiter: boolean }) => row.peut_imiter)).toBe(true);
     });
 
     it.each([

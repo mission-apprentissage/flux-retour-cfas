@@ -881,7 +881,7 @@ const getPrequalifRoute: IndicateursHandler<z.infer<typeof periodQuery>> = async
 /**
  * POST /api/v1/organisation/indicateurs-ml/impersonate
  * Imposture en lecture seule : la DREETS et la DDETS sur un CFA de leur territoire, l'ARML sur une Mission Locale
- * de ses régions. L'administrateur passe par l'imposture classique.
+ * de ses régions. L'administrateur ouvre une imposture classique (écriture possible) sur n'importe quel CFA.
  */
 const impersonateRoute: RouteHandler<
   IndicateursMlLocals,
@@ -894,7 +894,10 @@ const impersonateRoute: RouteHandler<
   const { type } = locals.organisation;
 
   let cible: Awaited<ReturnType<typeof findImpersonationTarget>>;
-  if (req.body.cfa_id && (type === ORGANISATION_TYPE.DREETS || type === ORGANISATION_TYPE.DDETS)) {
+  if (
+    req.body.cfa_id &&
+    (type === ORGANISATION_TYPE.ADMINISTRATEUR || type === ORGANISATION_TYPE.DREETS || type === ORGANISATION_TYPE.DDETS)
+  ) {
     cible = await findImpersonationTarget("cfa", req.body.cfa_id, locals);
   } else if (req.body.ml_id && type === ORGANISATION_TYPE.ARML) {
     cible = await findImpersonationTarget("ml", req.body.ml_id, locals);
@@ -902,18 +905,22 @@ const impersonateRoute: RouteHandler<
     throw Boom.forbidden("Imposture non autorisée pour votre organisation");
   }
 
+  const readOnly = type !== ORGANISATION_TYPE.ADMINISTRATEUR;
   logger.info(
     {
-      event: "imposture_lecture_seule",
+      event: readOnly ? "imposture_lecture_seule" : "imposture_admin",
       utilisateur_id: user._id.toString(),
       depuis_imposture_admin: user.impersonating === true,
       organisation_origine: { id: locals.organisation._id.toString(), type },
       cible: { id: cible._id.toString(), type: cible.type },
     },
-    "Imposture en lecture seule"
+    readOnly ? "Imposture en lecture seule" : "Imposture administrateur"
   );
 
-  const sessionToken = await createSession(user.email, { impersonatedOrganisation: cible, readOnly: true });
+  const sessionToken = await createSession(user.email, {
+    impersonatedOrganisation: cible,
+    ...(readOnly && { readOnly }),
+  });
   responseWithCookie(res, sessionToken);
 };
 
@@ -984,8 +991,8 @@ const peutVoirNominatif = (
 };
 
 /**
- * Imposture en lecture seule : la DREETS et la DDETS sur un CFA de leur territoire, l'ARML sur une Mission Locale de
- * ses régions.
+ * Imposture : l'administrateur sur tout CFA, la DREETS et la DDETS sur un CFA de leur territoire (en lecture seule),
+ * l'ARML sur une Mission Locale de ses régions (en lecture seule).
  */
 const peutImiter = (
   locals: IndicateursMlLocals,
@@ -995,7 +1002,8 @@ const peutImiter = (
   const { type } = locals.organisation;
   if (cible === "cfa") {
     return (
-      (type === ORGANISATION_TYPE.DREETS || type === ORGANISATION_TYPE.DDETS) && peutVoirNominatif(locals, structure)
+      type === ORGANISATION_TYPE.ADMINISTRATEUR ||
+      ((type === ORGANISATION_TYPE.DREETS || type === ORGANISATION_TYPE.DDETS) && peutVoirNominatif(locals, structure))
     );
   }
   return type === ORGANISATION_TYPE.ARML && !!structure?.region && locals.regions.includes(structure.region);
