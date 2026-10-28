@@ -15,7 +15,7 @@ import {
   updateMissionLocaleEffectifComputedCollab,
   updateMissionLocaleEffectifComputedOrganisme,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
-import { flecherContratsDeca } from "@/common/actions/deca/deca-flechage.actions";
+import { flecherContratsDeca, rendreContratsDeca } from "@/common/actions/deca/deca-flechage.actions";
 import { getCfdInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { getEtablissement } from "@/common/apis/ApiEntreprise";
 import { fetchOrganismeReferentielBySiret } from "@/common/apis/apiReferentielMna";
@@ -572,7 +572,7 @@ export type ActivationDecaResultat = "flag_pose" | "deja_actif" | "non_eligible"
 
 export async function activerDecaOrganisme(
   organismeId: ObjectId,
-  { flecher }: { flecher: boolean }
+  { flecher, ignorerEffectifs = false }: { flecher: boolean; ignorerEffectifs?: boolean }
 ): Promise<ActivationDecaResultat> {
   const organisme = await organismesDb().findOne(
     { _id: organismeId },
@@ -591,17 +591,27 @@ export async function activerDecaOrganisme(
   if (!organisme) return "non_eligible";
   if (organisme.is_allowed_deca === true) return "deja_actif";
   if (!organisme.deca_activation_queued_at) return "annule";
-  if (!(await checkEligibilityForLoaded(organisme)).eligible) return "non_eligible";
+  const { eligible, checks } = await checkEligibilityForLoaded(organisme);
+  const eligibleSansEffectifs = checks.exists_with_siret_uai.passed && checks.nature.passed && checks.not_closed.passed;
+  if (!(ignorerEffectifs ? eligibleSansEffectifs : eligible)) return "non_eligible";
 
+  const rendreLesContrats = () => rendreContratsDeca({ mode: "refaire", cibles: [organismeId] });
   if (flecher) {
-    await flecherContratsDeca({ perimetre: [organismeId], flagsSimules: [organismeId] });
+    try {
+      await flecherContratsDeca({ perimetre: [organismeId], flagsSimules: [organismeId] });
+    } catch (err) {
+      await rendreLesContrats();
+      throw err;
+    }
   }
 
   const { modifiedCount } = await organismesDb().updateOne(
     { _id: organismeId, deca_activation_queued_at: { $ne: null } },
     { $set: { is_allowed_deca: true } }
   );
-  return modifiedCount === 1 ? "flag_pose" : "annule";
+  if (modifiedCount === 1) return "flag_pose";
+  if (flecher) await rendreLesContrats();
+  return "annule";
 }
 
 export async function deactivateDecaCfaPilotBatch(

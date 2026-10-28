@@ -779,6 +779,57 @@ describe("CFA Effectifs Actions", () => {
 
       expect(result.effectif).toMatchObject({ id: decaEffectif._id, collab_status: "collab_demandee" });
     });
+
+    it("affiche le dossier ML du jumeau DECA malgré une lettre hors ASCII dans le nom", async () => {
+      const erpEffectif = await insertEffectif({
+        apprenant: { nom: "Doğan", prenom: "ayşe", date_de_naissance: new Date("2008-03-02T00:00:00.000Z") },
+      });
+      const decaEffectif = await insertDecaEffectif({
+        nom: "DOĞAN",
+        prenom: "Ayşe",
+        date_de_naissance: new Date("2008-03-02T00:00:00.000Z"),
+      });
+      await missionLocaleEffectifsDb().insertOne(
+        testDoc<IMissionLocaleEffectif>(
+          createMlEffectifDoc(testDoc<IEffectif>(decaEffectif), {
+            identifiant_normalise: { nom: "DOĞAN", prenom: "Ayşe", date_de_naissance: new Date("2008-03-02") },
+            soft_deleted: false,
+          })
+        )
+      );
+
+      const result = await getCfaEffectifDetail(organismeId, erpEffectif._id.toString());
+
+      expect(result.effectif).toMatchObject({ id: decaEffectif._id });
+    });
+
+    it("préfère le dossier ML d'un jumeau ERP à celui d'un jumeau DECA plus récent", async () => {
+      const apprenant = { nom: "MARTIN", prenom: "Lou", date_de_naissance: new Date("2008-05-04T00:00:00.000Z") };
+      const identifiant_normalise = { nom: "MARTIN", prenom: "Lou", date_de_naissance: new Date("2008-05-04") };
+      const sansDossier = await insertEffectif({ apprenant });
+      const jumeauErp = await insertEffectif({ apprenant });
+      const jumeauDeca = await insertDecaEffectif(apprenant);
+      await missionLocaleEffectifsDb().insertMany([
+        testDoc<IMissionLocaleEffectif>(
+          createMlEffectifDoc(testDoc<IEffectif>(jumeauDeca), {
+            identifiant_normalise,
+            soft_deleted: false,
+            updated_at: new Date("2026-01-01"),
+          })
+        ),
+        testDoc<IMissionLocaleEffectif>(
+          createMlEffectifDoc(jumeauErp, {
+            identifiant_normalise,
+            soft_deleted: false,
+            updated_at: new Date("2025-01-01"),
+          })
+        ),
+      ]);
+
+      const result = await getCfaEffectifDetail(organismeId, sansDossier._id.toString());
+
+      expect(result.effectif).toMatchObject({ id: jumeauErp._id });
+    });
   });
 
   describe("declareCfaEffectifRupture", () => {

@@ -14,7 +14,11 @@ import {
   rendreContratsDeca,
 } from "@/common/actions/deca/deca-flechage.actions";
 import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
-import { activerDecaOrganisme, poserGardeActivationDeca } from "@/common/actions/organismes/organismes.admin.actions";
+import {
+  activerDecaOrganisme,
+  poserGardeActivationDeca,
+  retirerGardeActivationDeca,
+} from "@/common/actions/organismes/organismes.admin.actions";
 import {
   effectifsDb,
   effectifsDECADb,
@@ -26,14 +30,16 @@ import {
 } from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes";
 import { getBALMongodbUri, getDatabase } from "@/common/mongodb";
-import { dedupDateDeNaissance, dedupDateDeNaissanceExpr, dedupNom, dedupNomExpr } from "@/common/utils/mongoUtils";
+import { dateMetier, dateMetierExpr, dedupNom, dedupNomExpr } from "@/common/utils/mongoUtils";
 import config from "@/config";
 import { hydrateDecaRaw, upsertEffectifDeca } from "@/jobs/hydrate/deca/hydrate-deca-raw";
+import { decaJobs } from "@/jobs/registry/deca";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { DeepPartial, testDoc } from "@tests/utils/testUtils";
 
 const mockUpdateVoeux = vi.fn();
+const apresFlechage = vi.fn();
 
 vi.mock("job-processor", async (importOriginal) => ({
   ...(await importOriginal<typeof import("job-processor")>()),
@@ -44,6 +50,18 @@ vi.mock("@/common/actions/affelnet.actions", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/common/actions/affelnet.actions")>()),
   updateVoeuxAffelnetEffectifDeca: (...args: unknown[]) => mockUpdateVoeux(...args),
 }));
+
+vi.mock("@/common/actions/deca/deca-flechage.actions", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/common/actions/deca/deca-flechage.actions")>();
+  return {
+    ...original,
+    flecherContratsDeca: async (...args: Parameters<typeof original.flecherContratsDeca>) => {
+      const bilan = await original.flecherContratsDeca(...args);
+      await apresFlechage();
+      return bilan;
+    },
+  };
+});
 
 vi.mock("@/common/apis/apiAlternance/client", () => ({
   apiAlternanceClient: { geographie: { rechercheCommune: vi.fn() } },
@@ -217,6 +235,7 @@ describe("fléchage des contrats DECA", () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(new Date("2025-12-15T10:00:00.000Z"));
     mockUpdateVoeux.mockReset();
+    apresFlechage.mockReset();
     await organismesDb().insertOne(responsable);
     await organisationsDb().insertOne({
       _id: ML_ORGANISATION_ID,
@@ -298,6 +317,23 @@ describe("fléchage des contrats DECA", () => {
         expect.objectContaining({ organisme_formateur_id: cible._id }),
         cible._id.toString()
       );
+    });
+
+    it("met à jour chez le responsable l'année qu'il porte déjà, sans la recréer chez la cible", async () => {
+      const cible = creerCible();
+      await organismesDb().insertOne(cible);
+      await insererChezCible(cible);
+      const autreContrat = await insererContrat(
+        contratIngere({ annee_scolaire: "2026-2027", deca_raw_id: new ObjectId() })
+      );
+
+      const resultat = await upsertEffectifDeca(contratIngere({ annee_scolaire: "2026-2027" }), responsablesFleches());
+
+      expect(resultat).toEqual({ created: false });
+      const annee = await effectifsDECADb().find({ annee_scolaire: "2026-2027" }).toArray();
+      expect(annee).toHaveLength(1);
+      expect(annee[0]).toMatchObject({ _id: autreContrat._id, organisme_id: responsable._id });
+      expect(annee[0]).not.toHaveProperty("fleche");
     });
 
     it("met à jour le document chez la cible quand le CFD change, sans doublon chez le responsable", async () => {
@@ -390,7 +426,7 @@ describe("fléchage des contrats DECA", () => {
             $project: {
               nom: dedupNomExpr("$nom"),
               prenom: dedupNomExpr("$prenom"),
-              ddn: { $dateToString: { date: dedupDateDeNaissanceExpr("$ddn"), format: "%Y-%m-%d" } },
+              ddn: { $dateToString: { date: dateMetierExpr("$ddn"), format: "%Y-%m-%d" } },
             },
           },
         ])
@@ -400,7 +436,7 @@ describe("fléchage des contrats DECA", () => {
         valeurs.map(({ nom, prenom, ddn }) => ({
           nom: dedupNom(nom),
           prenom: dedupNom(prenom),
-          ddn: dedupDateDeNaissance(ddn),
+          ddn: dateMetier(ddn),
         }))
       );
     });
@@ -563,6 +599,21 @@ describe("fléchage des contrats DECA", () => {
         expect(await chezQui(contrat)).toEqual(responsable._id);
       });
 
+      it("compte dans les cibles sans UAI le seul formateur lié qui a le jeune dans son ERP", async () => {
+        const formateur = await insererCible({ siret: "19440001400017", uai: null, is_allowed_deca: true });
+        await organismesDb().updateOne(
+          { _id: responsable._id },
+          { $set: { organismesFormateurs: [{ _id: formateur._id, siret: formateur.siret }] } }
+        );
+        await insererErp(formateur);
+        const contrat = await insererContrat(contratIngere({ etablissement_formation_siret: null }));
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.ciblesSansUai).toBe(1);
+        expect(await chezQui(contrat)).toEqual(responsable._id);
+      });
+
       it("ne flèche pas vers un responsable pur", async () => {
         await insererCible({ nature: "responsable", is_allowed_deca: true });
         const contrat = await insererContrat();
@@ -615,6 +666,16 @@ describe("fléchage des contrats DECA", () => {
     });
 
     describe("robustesse", () => {
+      it("refuse --simuler-flag sans --dry-run", async () => {
+        const cible = await insererCible();
+        const contrat = await insererContrat();
+
+        await expect(
+          decaJobs["deca:flechage"].handler({ payload: { simulerFlag: [cible.siret] } } as never)
+        ).rejects.toThrow("--simuler-flag ne s'utilise qu'avec --dry-run");
+        expect(await chezQui(contrat)).toEqual(responsable._id);
+      });
+
       it("donne le même résultat au second passage", async () => {
         await insererCible({ is_allowed_deca: true });
         const contrat = await insererContrat(contratRompu());
@@ -685,6 +746,38 @@ describe("fléchage des contrats DECA", () => {
         expect(resultat).toBe("flag_pose");
         expect(await chezQui(contrat)).toEqual(cible._id);
         expect((await organismesDb().findOne({ _id: cible._id }))?.is_allowed_deca).toBe(true);
+      });
+
+      it("rend ses contrats au responsable quand une désactivation annule l'activation pendant le fléchage", async () => {
+        const cible = await cibleActivable();
+        const contrat = await insererContrat();
+        apresFlechage.mockImplementationOnce(() => retirerGardeActivationDeca(cible._id));
+
+        const resultat = await activerDecaOrganisme(cible._id, { flecher: true });
+
+        expect(resultat).toBe("annule");
+        expect(await chezQui(contrat)).toEqual(responsable._id);
+        expect(await effectifsDECADb().findOne({ _id: contrat._id })).not.toHaveProperty("fleche");
+        expect((await organismesDb().findOne({ _id: cible._id }))?.is_allowed_deca).toBeUndefined();
+      });
+
+      it("rend ses contrats au responsable quand le fléchage échoue", async () => {
+        const cible = await cibleActivable();
+        const contrat = await insererContrat();
+        apresFlechage.mockRejectedValueOnce(new Error("panne"));
+
+        await expect(activerDecaOrganisme(cible._id, { flecher: true })).rejects.toThrow("panne");
+
+        expect(await chezQui(contrat)).toEqual(responsable._id);
+        expect((await organismesDb().findOne({ _id: cible._id }))?.is_allowed_deca).toBeUndefined();
+      });
+
+      it("active sans effectifs un organisme dont la branche a été forcée", async () => {
+        const cible = await insererCible({ ferme: false });
+        await poserGardeActivationDeca(cible._id);
+
+        expect(await activerDecaOrganisme(cible._id, { flecher: false })).toBe("non_eligible");
+        expect(await activerDecaOrganisme(cible._id, { flecher: false, ignorerEffectifs: true })).toBe("flag_pose");
       });
 
       it("pose le flag sans flécher quand l'interrupteur est coupé", async () => {
@@ -800,6 +893,22 @@ describe("fléchage des contrats DECA", () => {
 
         expect(bilan.retenus).toBe(1);
         expect(await chezQui(contrat)).toEqual(responsable._id);
+      });
+
+      it("--refaire --cible sur un responsable ne lève pas l'annulation de ses propres contrats", async () => {
+        await insererCible({ is_allowed_deca: true });
+        const contrat = await insererContrat();
+        await flecherContratsDeca();
+        await rendreContratsDeca({ mode: "annuler", responsables: [responsable._id] });
+
+        await rendreContratsDeca({ mode: "refaire", cibles: [responsable._id] });
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.exclusParAnnulation).toBe(1);
+        expect(await effectifsDECADb().findOne({ _id: contrat._id })).toMatchObject({
+          organisme_id: responsable._id,
+          fleche: { annule_le: expect.any(Date) },
+        });
       });
 
       it("--refaire sans portée laisse chez sa cible un groupe en conflit chez le responsable", async () => {

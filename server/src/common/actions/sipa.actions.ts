@@ -7,7 +7,7 @@ import { z } from "zod";
 
 import { effectifsDb, sipaUsersDb } from "@/common/model/collections";
 import { createSipaToken } from "@/common/utils/jwtUtils";
-import { dedupDateDeNaissanceExpr, dedupNomExpr } from "@/common/utils/mongoUtils";
+import { DECALAGE_DATE_METIER_MS, dateMetier, dateMetierExpr, dedupNomExpr } from "@/common/utils/mongoUtils";
 import { compareWithTimingSafety, hash } from "@/common/utils/passwordUtils";
 import config from "@/config";
 
@@ -52,7 +52,6 @@ export async function deleteSipaUser(username: string): Promise<void> {
 }
 
 const SIPA_PAGE_SIZE = 1000;
-const DECALAGE_DATE_METIER_MS = 2 * 3600 * 1000;
 
 // Conversion codes départements en 0xx
 export function sipaDeptToDb(code: string): string {
@@ -122,10 +121,10 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
     "apprenant.date_de_naissance": { $gt: ddnLowerBound },
     $expr: {
       $lt: [
-        dedupDateDeNaissanceExpr("$formation.date_entree"),
+        dateMetierExpr("$formation.date_entree"),
         {
           $dateAdd: {
-            startDate: dedupDateDeNaissanceExpr("$apprenant.date_de_naissance"),
+            startDate: dateMetierExpr("$apprenant.date_de_naissance"),
             unit: "year",
             amount: 18,
           },
@@ -165,7 +164,7 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
       $addFields: {
         _dedup_nom: dedupNomExpr("$apprenant.nom"),
         _dedup_prenom: dedupNomExpr("$apprenant.prenom"),
-        _dedup_ddn: dedupDateDeNaissanceExpr("$apprenant.date_de_naissance"),
+        _dedup_ddn: dateMetierExpr("$apprenant.date_de_naissance"),
         source_priority: { $cond: [{ $eq: ["$source", "DECA"] }, 0, 1] },
         _dernier_debut: { $max: "$contrats.date_debut" },
       },
@@ -244,9 +243,6 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
 
 const toDateStr = (d: Date | null | undefined) => (d ? d.toISOString().slice(0, 10) : null);
 
-const toDateMetierStr = (d: Date | null | undefined) =>
-  d ? toDateStr(new Date(d.getTime() + DECALAGE_DATE_METIER_MS)) : null;
-
 const truncate = (v: string | null | undefined, max: number) => (v == null ? null : v.slice(0, max));
 
 function dernierContrat(contrats: IContrat[] | null | undefined) {
@@ -254,8 +250,8 @@ function dernierContrat(contrats: IContrat[] | null | undefined) {
   if (!avecDate.length) return null;
   const dernier = avecDate.reduce((a, b) => (a.date_debut! > b.date_debut! ? a : b));
   return {
-    dateDebutContrat: toDateMetierStr(dernier.date_debut),
-    dateFinContrat: toDateMetierStr(dernier.date_fin),
+    dateDebutContrat: dateMetier(dernier.date_debut),
+    dateFinContrat: dateMetier(dernier.date_fin),
     dateConclusionContrat: null, // absent de nos modèles et du flux DECA ingéré
   };
 }
@@ -275,12 +271,12 @@ function serializeSipaEffectif(doc: Document) {
       ine: truncate(doc.apprenant?.ine || ineFallback, 11),
       nom: truncate(doc.apprenant?.nom, 200),
       prenom: truncate(doc.apprenant?.prenom, 50),
-      dateNaissance: toDateMetierStr(doc.apprenant?.date_de_naissance),
+      dateNaissance: dateMetier(doc.apprenant?.date_de_naissance),
     },
     formation: {
-      dateDebutFormation: toDateMetierStr(doc.formation?.date_entree),
-      dateFinFormation: toDateMetierStr(doc.formation?.date_fin),
-      dateInscriptionCfa: toDateMetierStr(doc.formation?.date_inscription),
+      dateDebutFormation: dateMetier(doc.formation?.date_entree),
+      dateFinFormation: dateMetier(doc.formation?.date_fin),
+      dateInscriptionCfa: dateMetier(doc.formation?.date_inscription),
       diplomeNiveau: truncate(doc.formation?.niveau, 1),
       intituleDiplome: truncate(doc.formation?.libelle_long, 500),
     },

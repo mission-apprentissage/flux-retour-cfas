@@ -74,9 +74,6 @@ export function stripDiacritics(expr: Record<string, unknown>) {
   return result;
 }
 
-/**
- * Clé de dédoublonnage d'un nom ou d'un prénom : sans casse, accents ni séparateurs
- */
 export function dedupNomExpr(champ: string | Record<string, unknown>) {
   let result = stripDiacritics({ $toLower: { $trim: { input: { $ifNull: [champ, ""] } } } });
   for (const separateur of SEPARATEURS_NOM) {
@@ -85,22 +82,23 @@ export function dedupNomExpr(champ: string | Record<string, unknown>) {
   return result;
 }
 
-/**
- * Clé de dédoublonnage d'une date de naissance : jour UTC, une date stockée à partir de 22h compte pour le lendemain
- */
-export function dedupDateDeNaissanceExpr(champ: string | Record<string, unknown>) {
+export const DECALAGE_DATE_METIER_MS = 2 * 3600 * 1000;
+
+export function dateMetierExpr(champ: string | Record<string, unknown>) {
   return {
     $cond: {
       if: { $eq: [{ $type: champ }, "date"] },
-      then: { $dateTrunc: { date: { $dateAdd: { startDate: champ, unit: "hour", amount: 2 } }, unit: "day" } },
+      then: {
+        $dateTrunc: {
+          date: { $dateAdd: { startDate: champ, unit: "millisecond", amount: DECALAGE_DATE_METIER_MS } },
+          unit: "day",
+        },
+      },
       else: null,
     },
   };
 }
 
-/**
- * Même clé que `dedupNomExpr`, calculée en JS
- */
 export function dedupNom(valeur: string | null | undefined): string {
   let result = (valeur ?? "").trim().replace(/[A-Z]/g, (lettre) => lettre.toLowerCase());
   for (const [from, to] of DIACRITIQUES) {
@@ -112,11 +110,8 @@ export function dedupNom(valeur: string | null | undefined): string {
   return result;
 }
 
-/**
- * Même clé que `dedupDateDeNaissanceExpr`, calculée en JS, au format AAAA-MM-JJ
- */
-export function dedupDateDeNaissance(date: Date | null | undefined): string | null {
-  return date instanceof Date ? new Date(date.getTime() + 2 * 3600 * 1000).toISOString().slice(0, 10) : null;
+export function dateMetier(date: Date | null | undefined): string | null {
+  return date instanceof Date ? new Date(date.getTime() + DECALAGE_DATE_METIER_MS).toISOString().slice(0, 10) : null;
 }
 
 /**

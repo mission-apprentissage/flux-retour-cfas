@@ -289,7 +289,7 @@ async function upsertEffectifDecaChezCible(
   });
   const documentFleche =
     memeAnnee ?? (await effectifsDECADb().findOne({ ...filtre, deca_raw_id: effectif.deca_raw_id }));
-  if (!documentFleche) {
+  if (!documentFleche || (!memeAnnee && (await checkIfEffectifExists<IEffectifDECA>(effectif, effectifsDECADb())))) {
     return null;
   }
 

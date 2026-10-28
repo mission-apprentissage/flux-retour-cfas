@@ -390,8 +390,9 @@ program
   .option("--annuler", "Rend durablement au responsable de --organisme ses contrats fléchés", false)
   .option("--refaire", "Rend les contrats fléchés à leur responsable pour que le job recalcule leur cible", false)
   .option("--cible <siret>", "Avec --refaire : les contrats fléchés vers cet organisme")
-  .option("-q, --queued", "Run job asynchronously", false)
-  .action(createJobAction("deca:flechage"));
+  .action((options: Record<string, unknown>) =>
+    createJobAction("deca:flechage")({ ...options, queued: options.dryRun !== true })
+  );
 
 program
   .command("hydrate:effectifs:update_computed_statut")

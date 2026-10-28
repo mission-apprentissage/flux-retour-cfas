@@ -15,7 +15,7 @@ import {
   missionLocaleEffectifsDb,
   organismesDb,
 } from "@/common/model/collections";
-import { dedupDateDeNaissance, dedupNom } from "@/common/utils/mongoUtils";
+import { dateMetier, dedupNom } from "@/common/utils/mongoUtils";
 
 const logger = parentLogger.child({ module: "deca:flechage" });
 
@@ -217,18 +217,14 @@ export async function chargerResponsablesFleches(): Promise<Set<string>> {
   return new Set(responsables.filter((id): id is ObjectId => !!id).map((id) => id.toString()));
 }
 
-export const cleIdentite = (apprenant: {
-  nom?: string | null;
-  prenom?: string | null;
-  date_de_naissance?: Date | null;
-}) =>
-  `${dedupNom(apprenant.nom)}|${dedupNom(apprenant.prenom)}|${dedupDateDeNaissance(apprenant.date_de_naissance) ?? ""}`;
+const cleApprenant = (apprenant: { nom?: string | null; prenom?: string | null; date_de_naissance?: Date | null }) =>
+  `${dedupNom(apprenant.nom)}|${dedupNom(apprenant.prenom)}|${dateMetier(apprenant.date_de_naissance) ?? ""}`;
 
 const memeFormation = (a: Formation, b: Formation) => (!!a.cfd && a.cfd === b.cfd) || (!!a.rncp && a.rncp === b.rncp);
 
 const libelleOrganisme = (organisme: OrganismeFlechage | undefined) =>
   organisme
-    ? `${organisme.siret} ${organisme.enseigne ?? organisme.raison_sociale ?? organisme.nom ?? ""}`.trim()
+    ? `${organisme.siret} ${organisme.nom || organisme.enseigne || organisme.raison_sociale || ""}`.trim()
     : "organisme inconnu";
 
 function ajouter<K, V>(map: Map<K, Set<V>>, cle: K, valeur: V) {
@@ -329,7 +325,7 @@ async function chargerContexte(annees: string[], flagsSimules: ObjectId[]): Prom
     }
   )) {
     const organismeId = effectif.organisme_id.toString();
-    const cle = cleIdentite(effectif.apprenant);
+    const cle = cleApprenant(effectif.apprenant);
     const identites = ctx.erp.get(cle) ?? [];
     identites.push({
       organismeId,
@@ -400,7 +396,7 @@ const avecFlag = (ctx: Contexte, cible: OrganismeFlechage, regle: Regle): Evalua
 });
 
 function evaluerGroupe(ctx: Contexte, responsable: OrganismeFlechage, recent: DocumentFlechage): Evaluation {
-  const cle = cleIdentite(recent.apprenant);
+  const cle = cleApprenant(recent.apprenant);
   const formation = recent.formation ?? {};
   const responsableId = responsable._id.toString();
 
@@ -428,8 +424,10 @@ function evaluerGroupe(ctx: Contexte, responsable: OrganismeFlechage, recent: Do
   const candidats: OrganismeFlechage[] = [];
   for (const siret of formateursLies(ctx, responsable)) {
     const formateur = ouvertUnique(ctx, siret);
-    if (!formateur || formateur.nature === "responsable" || !formateur.uai) continue;
-    if (dansErp(ctx, cle, formateur._id.toString(), formation)) candidats.push(formateur);
+    if (!formateur || formateur.nature === "responsable") continue;
+    if (!dansErp(ctx, cle, formateur._id.toString(), formation)) continue;
+    if (formateur.uai) candidats.push(formateur);
+    else cibleSansUai = true;
   }
   if (candidats.length === 1) {
     return avecFlag(ctx, candidats[0], "erp_formateur");
@@ -527,19 +525,20 @@ async function deplacerGroupe(deplacement: Deplacement, fleche: Fleche): Promise
         { _id: document._id, organisme_id: responsable._id, fleche: { $exists: false } },
         { $set: { ...champsCible(cible), fleche } }
       );
-      if (modifiedCount) deplaces.push(document._id);
+      if (modifiedCount === 0) break;
+      deplaces.push(document._id);
     }
-    return true;
   } catch (err) {
     if (!estConflit(err)) throw err;
-    if (deplaces.length > 0) {
-      await effectifsDECADb().updateMany(
-        { _id: { $in: deplaces } },
-        { $set: champsCible(responsable), $unset: { fleche: "" } }
-      );
-    }
-    return false;
   }
+  if (deplaces.length === documents.length) return true;
+  if (deplaces.length > 0) {
+    await effectifsDECADb().updateMany(
+      { _id: { $in: deplaces } },
+      { $set: champsCible(responsable), $unset: { fleche: "" } }
+    );
+  }
+  return false;
 }
 
 async function reecrireDossiers(
@@ -624,7 +623,7 @@ async function deplacer(
     const gagnant = bilanCfa(bilan, cible._id.toString());
     gagnant.gagnes += affiches;
     gagnant.dossiersMlGagnes += actifs.length;
-    const cle = cleIdentite(documents[0].apprenant);
+    const cle = cleApprenant(documents[0].apprenant);
     if ((ctx.erp.get(cle) ?? []).some((identite) => identite.organismeId === cible._id.toString())) {
       gagnant.gagnesDejaErp += affiches;
     }
@@ -833,16 +832,16 @@ export async function rendreContratsDeca({ mode, responsables, cibles, dryRun = 
       : responsables
         ? { organisme_responsable_id: { $in: responsables }, fleche: { $exists: true } }
         : cibles
-          ? { organisme_id: { $in: cibles }, fleche: { $exists: true } }
+          ? { organisme_id: { $in: cibles }, ...FILTRE_CHEZ_CIBLE }
           : { fleche: { $exists: true } };
   const documents = await effectifsDECADb().find(filtre, { projection: PROJECTION_DOCUMENT }).toArray();
   const dossiers = await chargerDossiersMl(documents.map((document) => document._id));
-  const chargerResponsable = memoriser((id) => organismesDb().findOne({ _id: id }));
+  const chargerOrganisme = memoriser((id) => organismesDb().findOne({ _id: id }));
   const computedResponsable = memoriser((id) => computedOrganismeMl(id, { lectureSeule: dryRun }));
   const bilan: BilanRetour = { groupes: 0, contrats: 0, dossiersMl: 0, gels: 0, conflits: [] };
 
   for (const groupe of grouper(documents)) {
-    const responsable = await chargerResponsable(new ObjectId(groupe.responsableId));
+    const responsable = await chargerOrganisme(new ObjectId(groupe.responsableId));
     const fleche = groupe.documents.find((document) => document.fleche)?.fleche;
     const libelle = `${responsable?.siret ?? groupe.responsableId} ${groupe.documents[0].id_erp_apprenant} ${groupe.documents[0].deca_raw_id.toString()}`;
     if (!responsable || !fleche) {
@@ -866,6 +865,7 @@ export async function rendreContratsDeca({ mode, responsables, cibles, dryRun = 
 
     if (!dryRun) {
       const flecheAnnulee = { ...fleche, annule_le: maintenant };
+      const rendus: DocumentFlechage[] = [];
       try {
         for (const document of groupe.documents) {
           await effectifsDECADb().updateOne(
@@ -874,9 +874,19 @@ export async function rendreContratsDeca({ mode, responsables, cibles, dryRun = 
               ? { $set: { ...champsCible(responsable), fleche: flecheAnnulee } }
               : { $set: champsCible(responsable), $unset: { fleche: "" } }
           );
+          rendus.push(document);
         }
       } catch (err) {
         if (!estConflit(err)) throw err;
+        for (const document of rendus) {
+          const cible = await chargerOrganisme(document.organisme_id);
+          if (cible) {
+            await effectifsDECADb().updateOne(
+              { _id: document._id },
+              { $set: { ...champsCible(cible), fleche: document.fleche } }
+            );
+          }
+        }
         bilan.conflits.push(libelle);
         continue;
       }

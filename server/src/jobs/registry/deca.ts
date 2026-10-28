@@ -51,8 +51,13 @@ export const decaJobs = {
         return organismeIds;
       };
 
+      const simulerFlag = payloadStringArray(job.payload, "simulerFlag");
+
       if (annuler && refaire) {
         throw new Error("--annuler et --refaire ne se combinent pas");
+      }
+      if (simulerFlag.length > 0 && !dryRun) {
+        throw new Error("--simuler-flag ne s'utilise qu'avec --dry-run");
       }
       if (cible && (!refaire || organisme)) {
         throw new Error("--cible ne s'utilise qu'avec --refaire, sans --organisme");
@@ -74,7 +79,7 @@ export const decaJobs = {
       await flecherContratsDeca({
         dryRun,
         perimetre: organisme ? await ids(organisme) : undefined,
-        flagsSimules: await idsDesSirets(payloadStringArray(job.payload, "simulerFlag")),
+        flagsSimules: await idsDesSirets(simulerFlag),
       });
     },
   },

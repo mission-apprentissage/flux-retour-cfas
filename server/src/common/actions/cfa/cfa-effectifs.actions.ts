@@ -13,6 +13,7 @@ import { getAnneesScolaireListFromDate, getBornesNaissanceMissionLocale } from "
 
 import { ensureMissionLocaleEffectifRecord } from "@/common/actions/mission-locale/mission-locale-record.actions";
 import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.actions";
+import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import {
   buildCollabStatusSwitch,
   buildCsvInConditions,
@@ -26,7 +27,7 @@ import {
   organisationsDb,
   organismesDb,
 } from "@/common/model/collections";
-import { dedupDateDeNaissanceExpr, dedupNomExpr } from "@/common/utils/mongoUtils";
+import { dateMetierExpr, dedupNomExpr } from "@/common/utils/mongoUtils";
 
 interface CfaEffectifsQueryParams {
   page: number;
@@ -102,7 +103,7 @@ export async function getCfaEffectifs(
         source_priority: { $cond: [{ $eq: ["$source_collection", "effectifs"] }, 0, 1] },
         _dedup_nom: dedupNomExpr("$apprenant.nom"),
         _dedup_prenom: dedupNomExpr("$apprenant.prenom"),
-        _dedup_ddn: dedupDateDeNaissanceExpr("$apprenant.date_de_naissance"),
+        _dedup_ddn: dateMetierExpr("$apprenant.date_de_naissance"),
       },
     },
     { $sort: { source_priority: 1 as const, updated_at: -1 as const, _id: 1 as const } },
@@ -398,8 +399,9 @@ async function formatRawEffectif(
 
 export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: string, userId?: ObjectId) {
   const eid = new ObjectId(effectifId);
-  const buildMlAggregation = (initialMatch: Record<string, unknown>) => [
+  const buildMlAggregation = (initialMatch: Record<string, unknown>, tri?: Record<string, 1 | -1>) => [
     { $match: initialMatch },
+    ...(tri ? [{ $sort: tri }] : []),
     {
       $lookup: {
         from: "organismes",
@@ -545,7 +547,7 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
   const decaEffectif = erpEffectif ? null : await effectifsDECADb().findOne({ _id: eid, organisme_id: organismeId });
   const baseEffectif = erpEffectif ?? decaEffectif;
 
-  // Fallback identifiant scopé famille, avec la clé de dédoublonnage de la liste.
+  // Fallback identifiant scopé famille (normalisation JS-side, tolère effectif legacy).
   if (
     baseEffectif &&
     baseEffectif.apprenant?.nom &&
@@ -553,24 +555,30 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
     baseEffectif.apprenant?.date_de_naissance
   ) {
     const familyOrganismeIds = await getFamilyOrganismeIds(organismeId);
-    const { nom, prenom, date_de_naissance } = baseEffectif.apprenant;
+    const ident = normalisePersonIdentifiant({
+      nom: baseEffectif.apprenant.nom,
+      prenom: baseEffectif.apprenant.prenom,
+      date_de_naissance: baseEffectif.apprenant.date_de_naissance,
+    });
     const fallbackMatch = {
       "effectif_snapshot.organisme_id": { $in: familyOrganismeIds },
       soft_deleted: { $ne: true },
       $expr: {
         $and: [
-          { $eq: [dedupNomExpr("$identifiant_normalise.nom"), dedupNomExpr({ $literal: nom })] },
-          { $eq: [dedupNomExpr("$identifiant_normalise.prenom"), dedupNomExpr({ $literal: prenom })] },
+          { $eq: [dedupNomExpr("$identifiant_normalise.nom"), dedupNomExpr({ $literal: ident.nom })] },
+          { $eq: [dedupNomExpr("$identifiant_normalise.prenom"), dedupNomExpr({ $literal: ident.prenom })] },
           {
             $eq: [
-              dedupDateDeNaissanceExpr("$identifiant_normalise.date_de_naissance"),
-              dedupDateDeNaissanceExpr({ $literal: date_de_naissance }),
+              dateMetierExpr("$identifiant_normalise.date_de_naissance"),
+              dateMetierExpr({ $literal: ident.date_de_naissance }),
             ],
           },
         ],
       },
     };
-    mlEffectif = await missionLocaleEffectifsDb().aggregate(buildMlAggregation(fallbackMatch)).next();
+    mlEffectif = await missionLocaleEffectifsDb()
+      .aggregate(buildMlAggregation(fallbackMatch, { "effectif_snapshot.is_deca_compatible": 1, updated_at: -1 }))
+      .next();
     if (mlEffectif) {
       return { effectif: mlEffectif, currentIndex: 0, total: 1 };
     }
