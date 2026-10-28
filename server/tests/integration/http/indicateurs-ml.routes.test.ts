@@ -1147,6 +1147,22 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expectForbidden(await requestAsOrganisation(ADMIN, "post", BASE, { cfa_id: CFA_A.toString() }), refus);
     });
 
+    it("Indique sur les fiches si l'imposture est possible pour le profil", async () => {
+      const BASE_ML = "/api/v1/organisation/indicateurs-ml/mission-locale";
+      const BASE_CFA = "/api/v1/organisation/indicateurs-ml/cfa";
+      const peutImiter = async (organisation: IOrganisationCreate, url: string) =>
+        (await requestAsOrganisation(organisation, "get", url)).data.peut_imiter;
+
+      expect(await peutImiter(DREETS_IDF, `${BASE_CFA}/${CFA_A}/detail`)).toBe(true);
+      expect(await peutImiter(DREETS_IDF, `${BASE_CFA}/${CFA_B}/detail`)).toBe(false);
+      expect(await peutImiter(DDETS_PARIS, `${BASE_CFA}/${CFA_A}/detail`)).toBe(true);
+      expect(await peutImiter(ARML_IDF, `${BASE_CFA}/${CFA_A}/detail`)).toBe(false);
+
+      expect(await peutImiter(ARML_IDF, `${BASE_ML}/${ML_IDF}/detail`)).toBe(true);
+      expect(await peutImiter(ARML_IDF, `${BASE_ML}/${ML_ARA}/detail`)).toBe(false);
+      expect(await peutImiter(DREETS_IDF, `${BASE_ML}/${ML_IDF}/detail`)).toBe(false);
+    });
+
     it("Exige un CFA ou une Mission Locale, et un seul", async () => {
       expect((await requestAsOrganisation(DREETS_IDF, "post", BASE, {})).status).toBe(400);
       expect(

@@ -10,7 +10,11 @@ import { getApiErrorMessage } from "@/common/rateLimit";
 
 import styles from "./FicheDetailView.module.css";
 
+export const IMPOSTURE_TERRITOIRE_URL = "/api/v1/organisation/indicateurs-ml/impersonate";
+
 export interface FicheImposture {
+  /** Imposture admin par défaut ; IMPOSTURE_TERRITOIRE_URL pour l'imposture en lecture seule des acteurs de territoire. */
+  url?: string;
   corps: Record<string, unknown>;
   redirection: string;
   desactivee?: boolean;
@@ -32,7 +36,7 @@ export function FicheEntete({ parent, titre, statuts, imposture }: FicheEntetePr
     setEnCours(true);
     setErreur(null);
     try {
-      await _post("/api/v1/admin/impersonate", imposture.corps);
+      await _post(imposture.url ?? "/api/v1/admin/impersonate", imposture.corps);
       window.location.href = imposture.redirection;
     } catch (err) {
       setErreur(getApiErrorMessage(err, "L'imposture a échoué. Merci de réessayer."));

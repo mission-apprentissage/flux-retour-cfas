@@ -11,7 +11,7 @@ import { formatDateCourte } from "../utils";
 
 import { AlertesActivite } from "./AlertesActivite";
 import styles from "./FicheDetailView.module.css";
-import { FicheEntete } from "./FicheEntete";
+import { FicheEntete, IMPOSTURE_TERRITOIRE_URL } from "./FicheEntete";
 import { CfaAdminTab, CfaEffectifsTab, CfaOrganismesTab, CfaTransmissionsTab } from "./tabs/CfaAdminTabs";
 import { CfaCollaborationsTab } from "./tabs/CfaCollaborationsTab";
 import { CfaEquipeTab } from "./tabs/CfaEquipeTab";
@@ -50,7 +50,9 @@ export function CfaDetailView({ organismeId, isAdmin = false }: CfaDetailViewPro
             imposture={
               isAdmin
                 ? { corps: { type: "ORGANISME_FORMATION", siret: data.siret, uai: data.uai }, redirection: "/" }
-                : undefined
+                : data.peut_imiter
+                  ? { url: IMPOSTURE_TERRITOIRE_URL, corps: { cfa_id: organismeId }, redirection: "/" }
+                  : undefined
             }
           />
           <AlertesActivite

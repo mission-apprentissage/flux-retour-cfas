@@ -277,6 +277,7 @@ type DatesEnTexte<T, K extends keyof T> = Omit<T, K> & Record<K, string | null>;
 
 export type ICfaFicheResponse = Omit<DatesEnTexte<ICfaFiche, "derniere_activite_at">, "source_donnees"> & {
   source_donnees: ICfaFiche["source_donnees"];
+  peut_imiter: boolean;
 };
 
 export function useCfaFiche(organismeId: string) {
@@ -584,6 +585,7 @@ export interface IMissionLocaleDetailResponse {
   has_cfa_collaboration: boolean;
   traites_count: number;
   peut_voir_nominatif: boolean;
+  peut_imiter: boolean;
   indicateurs: Omit<IMlFicheIndicateurs, "premier_compte_at" | "derniere_activite_at"> & {
     premier_compte_at: string | null;
     derniere_activite_at: string | null;

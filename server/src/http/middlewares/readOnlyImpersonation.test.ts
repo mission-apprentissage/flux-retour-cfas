@@ -32,6 +32,35 @@ describe("restrictReadOnlyImpersonation", () => {
     expect(sortie.next).toHaveBeenCalledTimes(1);
   });
 
+  it("autorise la lecture des espaces CFA et Mission Locale, sans les exports", () => {
+    const id = "69e81fa9a7cd2cbd2d495a66";
+    const lectures = [
+      "/api/v1/erps",
+      "/api/v1/organisation/organisme",
+      `/api/v1/organismes/${id}/cfa/effectifs`,
+      `/api/v1/organismes/${id}/cfa/unread-notifications-count`,
+      `/api/v1/organismes/${id}/cfa/effectif/${id}`,
+      `/api/v1/organismes/${id}/mission-locale/effectifs-per-month`,
+      "/api/v1/organisation/mission-locale/effectifs",
+      `/api/v1/organisation/mission-locale/effectif/${id}`,
+    ];
+    for (const path of lectures) {
+      const { call, next } = run("GET", path, { impersonating: true, readOnly: true });
+      call();
+      expect(next, path).toHaveBeenCalledTimes(1);
+    }
+
+    const exports = [
+      `/api/v1/organismes/${id}/cfa/suivi-mission-locale/export`,
+      "/api/v1/organisation/mission-locale/export/effectifs",
+      "/api/v1/organisation/mission-locale/effectif/pas-un-id",
+    ];
+    for (const path of exports) {
+      const { call } = run("GET", path, { impersonating: true, readOnly: true });
+      expect(call, path).toThrow("Cette imposture est en lecture seule");
+    }
+  });
+
   it("refuse toute écriture en lecture seule", () => {
     for (const method of ["POST", "PUT", "PATCH", "DELETE"]) {
       const { call, next } = run(method, "/api/v1/session", { impersonating: true, readOnly: true });

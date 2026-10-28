@@ -11,7 +11,7 @@ import { StatsTabs, type StatsTab } from "../ui/StatsTabs";
 import { formatDateCourte } from "../utils";
 
 import styles from "./FicheDetailView.module.css";
-import { FicheEntete } from "./FicheEntete";
+import { FicheEntete, IMPOSTURE_TERRITOIRE_URL } from "./FicheEntete";
 import { MlAlertesActivite } from "./MlAlertesActivite";
 import { MLCollaborationsTab } from "./tabs/MLCollaborationsTab";
 import { MLEquipeTab } from "./tabs/MLEquipeTab";
@@ -59,7 +59,14 @@ export function MissionLocaleDetailView({ mlId, isAdmin = false }: MissionLocale
                     redirection: "/mission-locale",
                     desactivee: !isActive,
                   }
-                : undefined
+                : data.peut_imiter
+                  ? {
+                      url: IMPOSTURE_TERRITOIRE_URL,
+                      corps: { ml_id: mlId },
+                      redirection: "/mission-locale",
+                      desactivee: !isActive,
+                    }
+                  : undefined
             }
           />
 

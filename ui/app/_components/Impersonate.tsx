@@ -21,7 +21,7 @@ export const Impersonate = () => {
     <>
       {user && user.impersonating && (
         <Button iconId="ri-logout-box-line" className={styles.button} onClick={handleImpersonationExit}>
-          Imposture en cours
+          {user.readOnly ? "Imposture en cours (lecture seule)" : "Imposture en cours"}
         </Button>
       )}
     </>

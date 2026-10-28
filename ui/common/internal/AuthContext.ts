@@ -22,6 +22,8 @@ export interface AuthContext<IOrganisation extends IOrganisationJson = IOrganisa
 
   // only admins can impersonate organisations
   impersonating?: boolean;
+  // imposture limitée à la lecture (DREETS, DDETS, ARML)
+  readOnly?: boolean;
 
   acl: Acl;
 }

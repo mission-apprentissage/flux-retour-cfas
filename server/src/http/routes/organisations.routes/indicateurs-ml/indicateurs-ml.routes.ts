@@ -779,14 +779,14 @@ const getCouvertureRegionsRoute: IndicateursHandler<z.infer<typeof nationalQuery
 };
 
 const getMlDetailRoute: IndicateursHandler<DefaultQuery, z.infer<typeof mlIdParams>> = async (req, { locals }) => {
-  const { nominatif } = await verifyMlInScope(req.params.id, locals);
+  const { nominatif, imitable } = await verifyMlInScope(req.params.id, locals);
 
   const mlId = new ObjectId(req.params.id);
   const [detail, indicateurs] = await Promise.all([
     getMissionLocaleDetail(mlId),
     getMissionLocaleFicheIndicateurs(mlId),
   ]);
-  return { ...detail, indicateurs, peut_voir_nominatif: nominatif };
+  return { ...detail, indicateurs, peut_voir_nominatif: nominatif, peut_imiter: imitable };
 };
 
 const getMlMembresRoute: IndicateursHandler<DefaultQuery, z.infer<typeof mlIdParams>> = async (req, { locals }) => {
@@ -802,8 +802,8 @@ const getCfaDetailRoute: IndicateursHandler<DefaultQuery, z.infer<typeof organis
   req,
   { locals }
 ) => {
-  const { nominatif } = await verifyOrganismeInScope(req.params.id, locals);
-  return getCfaFiche(new ObjectId(req.params.id), { nominatif });
+  const { nominatif, imitable } = await verifyOrganismeInScope(req.params.id, locals);
+  return { ...(await getCfaFiche(new ObjectId(req.params.id), { nominatif })), peut_imiter: imitable };
 };
 
 const getCfaCollaborationsRoute: IndicateursHandler<DefaultQuery, z.infer<typeof organismeIdParams>> = async (
@@ -873,10 +873,6 @@ const impersonateRoute: RouteHandler<
   const user = req.user as AuthContext;
   const { type } = locals.organisation;
 
-  if (user.impersonating) {
-    throw Boom.forbidden("Une imposture est déjà en cours");
-  }
-
   let cible: Awaited<ReturnType<typeof findImpersonationTarget>>;
   if (req.body.cfa_id && (type === ORGANISATION_TYPE.DREETS || type === ORGANISATION_TYPE.DDETS)) {
     cible = await findImpersonationTarget("cfa", req.body.cfa_id, locals);
@@ -890,6 +886,7 @@ const impersonateRoute: RouteHandler<
     {
       event: "imposture_lecture_seule",
       utilisateur_id: user._id.toString(),
+      depuis_imposture_admin: user.impersonating === true,
       organisation_origine: { id: locals.organisation._id.toString(), type },
       cible: { id: cible._id.toString(), type: cible.type },
     },
@@ -909,7 +906,7 @@ async function findImpersonationTarget(kind: "cfa" | "ml", id: string, locals: I
     if (!organisme) {
       throw Boom.notFound("Organisme non trouvé");
     }
-    if (!peutVoirNominatif(locals, organisme.adresse)) {
+    if (!peutImiter(locals, "cfa", organisme.adresse)) {
       throw Boom.forbidden("Accès non autorisé à cet organisme");
     }
     const organisation = await getOrganisationOrganismeByOrganismeId(organisme._id);
@@ -923,8 +920,7 @@ async function findImpersonationTarget(kind: "cfa" | "ml", id: string, locals: I
   if (!ml) {
     throw Boom.notFound(`Mission Locale non trouvée: ${id}`);
   }
-  const region = (ml as { adresse?: { region?: string } }).adresse?.region;
-  if (!region || !locals.regions.includes(region)) {
+  if (!peutImiter(locals, "ml", (ml as { adresse?: { region?: string } }).adresse)) {
     throw Boom.forbidden("Accès non autorisé à cette Mission Locale");
   }
   return ml;
@@ -939,7 +935,10 @@ async function verifyOrganismeInScope(id: string, locals: IndicateursMlLocals) {
   if (!organisme) {
     throw Boom.notFound("Organisme non trouvé");
   }
-  return { nominatif: peutVoirNominatif(locals, organisme.adresse) };
+  return {
+    nominatif: peutVoirNominatif(locals, organisme.adresse),
+    imitable: peutImiter(locals, "cfa", organisme.adresse),
+  };
 }
 
 /**
@@ -964,11 +963,28 @@ const peutVoirNominatif = (
   }
 };
 
+/**
+ * Imposture en lecture seule : la DREETS et la DDETS sur un CFA de leur territoire, l'ARML sur une Mission Locale de
+ * ses régions.
+ */
+const peutImiter = (
+  locals: IndicateursMlLocals,
+  cible: "cfa" | "ml",
+  structure?: { region?: string | null; departement?: string | null } | null
+) => {
+  const { type } = locals.organisation;
+  if (cible === "cfa") {
+    return (
+      (type === ORGANISATION_TYPE.DREETS || type === ORGANISATION_TYPE.DDETS) && peutVoirNominatif(locals, structure)
+    );
+  }
+  return type === ORGANISATION_TYPE.ARML && !!structure?.region && locals.regions.includes(structure.region);
+};
+
 async function verifyMlInScope(mlId: string, locals: IndicateursMlLocals) {
   const ml = await findMlOrThrow(mlId);
-  return {
-    nominatif: peutVoirNominatif(locals, (ml as { adresse?: { region?: string; departement?: string } }).adresse),
-  };
+  const adresse = (ml as { adresse?: { region?: string; departement?: string } }).adresse;
+  return { nominatif: peutVoirNominatif(locals, adresse), imitable: peutImiter(locals, "ml", adresse) };
 }
 
 async function findMlOrThrow(mlId: string) {
