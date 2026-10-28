@@ -35,6 +35,8 @@ export function StatsTablePagination({
 }: StatsTablePaginationProps) {
   const selectId = useId();
   const count = Math.max(totalPages, 1);
+  if (count === 1 && limit <= STATS_PAGE_SIZES[0]) return null;
+
   const goTo = (target: number) => (event: React.MouseEvent) => {
     event.preventDefault();
     if (target >= 1 && target <= count && target !== page) onPageChange(target);
