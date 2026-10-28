@@ -3398,6 +3398,8 @@ export const createMissionLocaleSnapshot = async (
     return null;
   }
 
+  const computedOrganisme = await computedOrganismeMl(effectif.organisme_id);
+
   if (normalizedIdentifiant && !isDeca(effectif)) {
     const orphan = await missionLocaleEffectifsDb().findOne({
       "identifiant_normalise.nom": normalizedIdentifiant.nom,
@@ -3414,7 +3416,10 @@ export const createMissionLocaleSnapshot = async (
     if (orphan && !orphan.effectif_id.equals(effectif._id) && isDecaSnapshot(orphan.effectif_snapshot)) {
       // skipCurrentStatus: le findOneAndUpdate ci-dessous filtre par effectif_id (qui matche désormais
       // le record migré) et $set current_status — pas la peine de le faire deux fois.
-      await migrateMlRecordEffectifId(orphan._id, orphan.effectif_id, effectif, { skipCurrentStatus: true });
+      await migrateMlRecordEffectifId(orphan._id, orphan.effectif_id, effectif, {
+        skipCurrentStatus: true,
+        extraSet: { "computed.organisme": computedOrganisme },
+      });
     }
   }
 
@@ -3430,7 +3435,6 @@ export const createMissionLocaleSnapshot = async (
   const shouldUpsert = preFilter && duplicateFilter;
 
   const date = new Date();
-  const computedOrganisme = await computedOrganismeMl(effectif.organisme_id);
 
   let mongoInfo;
   try {
