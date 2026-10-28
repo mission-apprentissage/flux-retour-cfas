@@ -158,7 +158,7 @@ interface BilanCfa {
   dossiersMlGagnes: number;
 }
 
-export interface BilanFlechage {
+interface BilanFlechage {
   groupes: number;
   fleches: Record<Regle, number>;
   erpResponsable: number;
@@ -178,7 +178,7 @@ export interface BilanFlechage {
   responsablesSansEffectifs: string[];
 }
 
-export interface BilanRetour {
+interface BilanRetour {
   groupes: number;
   contrats: number;
   dossiersMl: number;
@@ -216,7 +216,10 @@ export async function compterContratsFlechesVers(organismeId: ObjectId): Promise
 }
 
 export async function chargerResponsablesFleches(): Promise<Set<string>> {
-  const responsables = await effectifsDECADb().distinct("organisme_responsable_id", FILTRE_CHEZ_CIBLE);
+  const responsables = await effectifsDECADb().distinct("organisme_responsable_id", {
+    organisme_responsable_id: { $exists: true },
+    ...FILTRE_CHEZ_CIBLE,
+  });
   return new Set(responsables.filter((id): id is ObjectId => !!id).map((id) => id.toString()));
 }
 
@@ -492,7 +495,7 @@ async function conflitChez(organismeId: ObjectId, documents: DocumentFlechage[])
   return false;
 }
 
-const estConflit = (err: unknown) => err instanceof MongoServerError && err.code === 11000;
+export const estConflit = (err: unknown) => err instanceof MongoServerError && err.code === 11000;
 
 async function dossiersRendusInvisibles(
   dossierIds: ObjectId[],
@@ -564,6 +567,17 @@ async function deplacerGroupe(deplacement: Deplacement, fleche: Fleche): Promise
 const estGele = (dossiers: DossierFlechage[]) =>
   dossiers.some((dossier) => !dossier.soft_deleted && (dossier.organisme_data || dossier.cfa_rupture_declaration));
 
+const filtreDossiers = (dossiers: DossierFlechage[]) => ({
+  _id: { $in: dossiers.map((dossier) => dossier._id) },
+  effectif_id: { $in: dossiers.map((dossier) => dossier.effectif_id) },
+});
+
+const dossiersDe = (dossiers: Map<string, DossierFlechage[]>, documents: DocumentFlechage[]) =>
+  documents.flatMap((document) => dossiers.get(document._id.toString()) ?? []);
+
+const relireDossiers = async (documents: DocumentFlechage[]) =>
+  dossiersDe(await chargerDossiersMl(documents.map((document) => document._id)), documents);
+
 async function reecrireDossiers(
   dossiers: DossierFlechage[],
   organisme: OrganismeCible,
@@ -571,10 +585,9 @@ async function reecrireDossiers(
   fleche: Fleche
 ) {
   if (dossiers.length === 0) return;
-  await missionLocaleEffectifsDb().updateMany(
-    { _id: { $in: dossiers.map((dossier) => dossier._id) } },
-    { $set: { ...champsSnapshot(organisme), "effectif_snapshot.fleche": fleche, "computed.organisme": computed } }
-  );
+  await missionLocaleEffectifsDb().updateMany(filtreDossiers(dossiers), {
+    $set: { ...champsSnapshot(organisme), "effectif_snapshot.fleche": fleche, "computed.organisme": computed },
+  });
 }
 
 function memoriser<T>(charger: (id: ObjectId) => Promise<T>) {
@@ -597,7 +610,7 @@ async function deplacer(
 
   for (const deplacement of deplacements) {
     const { responsable, cible, regle, documents, affiches } = deplacement;
-    const dossiersGroupe = documents.flatMap((document) => dossiers.get(document._id.toString()) ?? []);
+    const dossiersGroupe = dossiersDe(dossiers, documents);
     const actifs = dossiersGroupe.filter((dossier) => !dossier.soft_deleted);
 
     if (estGele(dossiersGroupe)) {
@@ -617,8 +630,7 @@ async function deplacer(
     const fleche = { regle, le: maintenant };
 
     if (!dryRun) {
-      const dossiersFrais = await chargerDossiersMl(documents.map((document) => document._id));
-      const dossiersAEcrire = documents.flatMap((document) => dossiersFrais.get(document._id.toString()) ?? []);
+      const dossiersAEcrire = await relireDossiers(documents);
       if (estGele(dossiersAEcrire)) {
         bilan.gels++;
         continue;
@@ -783,6 +795,8 @@ function completerGroupe(
     !cible ||
     !regle ||
     !ctx.flagges.has(cibleId) ||
+    cible.ferme ||
+    !cible.uai ||
     fleches.some((document) => document.organisme_id.toString() !== cibleId)
   ) {
     return null;
@@ -797,7 +811,7 @@ function completerGroupe(
   };
 }
 
-export interface OptionsFlechage {
+interface OptionsFlechage {
   dryRun?: boolean;
   perimetre?: ObjectId[];
   flagsSimules?: ObjectId[];
@@ -893,7 +907,10 @@ const activiteCfaDepuis = (dossier: DossierFlechage, depuis: Date) =>
     dossier.cfa_rupture_declaration?.declared_at,
   ].some((date) => !!date && date >= depuis);
 
-export interface OptionsRetour {
+const geleDepuis = (dossiers: DossierFlechage[], depuis: Date) =>
+  dossiers.some((dossier) => !dossier.soft_deleted && activiteCfaDepuis(dossier, depuis));
+
+interface OptionsRetour {
   mode: "annuler" | "refaire";
   responsables?: ObjectId[];
   cibles?: ObjectId[];
@@ -925,11 +942,8 @@ export async function rendreContratsDeca({ mode, responsables, cibles, dryRun = 
       continue;
     }
 
-    const dossiersGroupe = groupe.documents.flatMap((document) => dossiers.get(document._id.toString()) ?? []);
-    if (
-      mode === "annuler" &&
-      dossiersGroupe.some((dossier) => !dossier.soft_deleted && activiteCfaDepuis(dossier, fleche.le))
-    ) {
+    const dossiersGroupe = dossiersDe(dossiers, groupe.documents);
+    if (mode === "annuler" && geleDepuis(dossiersGroupe, fleche.le)) {
       bilan.gels++;
       continue;
     }
@@ -940,38 +954,16 @@ export async function rendreContratsDeca({ mode, responsables, cibles, dryRun = 
     }
 
     if (!dryRun) {
-      const flecheAnnulee = { ...fleche, annule_le: maintenant };
-      const rendu = await ecrireToutOuRien(
-        groupe.documents,
-        async (document) => {
-          await effectifsDECADb().updateOne(
-            { _id: document._id, fleche: { $exists: true } },
-            mode === "annuler"
-              ? { $set: { ...champsCible(responsable), fleche: flecheAnnulee } }
-              : { $set: champsCible(responsable), $unset: { fleche: "" } }
-          );
-          return true;
-        },
-        async (faits) => {
-          for (const document of faits) {
-            const cible = await chargerOrganisme(document.organisme_id);
-            if (cible) {
-              await effectifsDECADb().updateOne(
-                { _id: document._id },
-                { $set: { ...champsCible(cible), fleche: document.fleche } }
-              );
-            }
-          }
-        }
-      );
-      if (!rendu) {
-        bilan.conflits.push(libelle);
+      const dossiersAEcrire = await relireDossiers(groupe.documents);
+      if (mode === "annuler" && geleDepuis(dossiersAEcrire, fleche.le)) {
+        bilan.gels++;
         continue;
       }
+      const flecheAnnulee = { ...fleche, annule_le: maintenant };
       const computed = await computedResponsable(responsable._id);
-      if (dossiersGroupe.length > 0) {
+      if (dossiersAEcrire.length > 0) {
         await missionLocaleEffectifsDb().updateMany(
-          { _id: { $in: dossiersGroupe.map((dossier) => dossier._id) } },
+          filtreDossiers(dossiersAEcrire),
           mode === "annuler"
             ? {
                 $set: {
@@ -985,6 +977,44 @@ export async function rendreContratsDeca({ mode, responsables, cibles, dryRun = 
                 $unset: { "effectif_snapshot.fleche": "" },
               }
         );
+      }
+      const remettreDossiersChezCible = async () => {
+        const cible = chezCible[0] && (await chargerOrganisme(chezCible[0].organisme_id));
+        if (cible && chezCible[0].fleche) {
+          await reecrireDossiers(dossiersAEcrire, cible, await computedOrganismeMl(cible._id), chezCible[0].fleche);
+        }
+      };
+      let rendu = false;
+      try {
+        rendu = await ecrireToutOuRien(
+          groupe.documents,
+          async (document) => {
+            await effectifsDECADb().updateOne(
+              { _id: document._id, fleche: { $exists: true } },
+              mode === "annuler"
+                ? { $set: { ...champsCible(responsable), fleche: flecheAnnulee } }
+                : { $set: champsCible(responsable), $unset: { fleche: "" } }
+            );
+            return true;
+          },
+          async (faits) => {
+            for (const document of faits) {
+              const cible = await chargerOrganisme(document.organisme_id);
+              if (cible) {
+                await effectifsDECADb().updateOne(
+                  { _id: document._id },
+                  { $set: { ...champsCible(cible), fleche: document.fleche } }
+                );
+              }
+            }
+          }
+        );
+      } finally {
+        if (!rendu) await remettreDossiersChezCible();
+      }
+      if (!rendu) {
+        bilan.conflits.push(libelle);
+        continue;
       }
     }
 

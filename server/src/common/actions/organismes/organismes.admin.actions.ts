@@ -544,10 +544,10 @@ export async function activateDecaCfaPilotBatch(
   return { total: items.length, counts, items: results };
 }
 
-export const DUREE_GARDE_ACTIVATION_DECA_MS = 12 * 3600 * 1000;
+const DUREE_GARDE_ACTIVATION_DECA_MS = 12 * 3600 * 1000;
 
-export const estActivationDecaEnCours = (queuedAt: Date | null | undefined, maintenant = new Date()) =>
-  !!queuedAt && maintenant.getTime() - queuedAt.getTime() < DUREE_GARDE_ACTIVATION_DECA_MS;
+export const estActivationDecaEnCours = (queuedAt: Date | null | undefined) =>
+  !!queuedAt && Date.now() - queuedAt.getTime() < DUREE_GARDE_ACTIVATION_DECA_MS;
 
 export async function poserGardeActivationDeca(organismeId: ObjectId): Promise<boolean> {
   const maintenant = new Date();

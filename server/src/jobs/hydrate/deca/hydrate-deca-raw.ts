@@ -17,6 +17,7 @@ import { updateVoeuxAffelnetEffectifDeca } from "@/common/actions/affelnet.actio
 import {
   appliquerCible,
   chargerResponsablesFleches,
+  estConflit,
   FILTRE_CHEZ_CIBLE,
 } from "@/common/actions/deca/deca-flechage.actions";
 import { withComputedFields } from "@/common/actions/effectifs.actions";
@@ -314,7 +315,7 @@ async function upsertEffectifDecaChezCible(
   try {
     await effectifsDECADb().insertOne(nouveau);
   } catch (err) {
-    if (err instanceof MongoError && err.code === 11000) {
+    if (estConflit(err)) {
       return retry ? upsertEffectifDecaChezCible(effectif, false) : null;
     }
     throw err;

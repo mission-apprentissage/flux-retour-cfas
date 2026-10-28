@@ -122,9 +122,15 @@ const LETTRES_SPECIALES = [
   ["̊", ""],
 ];
 
-const SEPARATEURS_NOM = ["-", " ", "'", "’", "‘"];
+const SEPARATEURS_NOM = ["-", " ", "'", "’", "‘", "—", "–", " "];
 
-const REMPLACEMENTS_NOM = [...LETTRES_SPECIALES, ...SEPARATEURS_NOM.map((separateur) => [separateur, ""])];
+const REMPLACEMENTS_DEDUP_NOM = [
+  ...DIACRITIQUES,
+  ...LETTRES_SPECIALES,
+  ...SEPARATEURS_NOM.map((separateur) => [separateur, ""]),
+];
+
+const SEPARATEURS_ASCII = SEPARATEURS_NOM.filter((separateur) => /^[ -~]$/.test(separateur));
 
 /**
  * Normalisation des accents en agrégation Mongo
@@ -139,14 +145,28 @@ export function stripDiacritics(expr: Record<string, unknown>) {
 
 export function dedupNomExpr(champ: string | Record<string, unknown>) {
   return {
-    $reduce: {
-      input: { $literal: [...DIACRITIQUES, ...REMPLACEMENTS_NOM] },
-      initialValue: { $toLower: { $trim: { input: { $ifNull: [champ, ""] } } } },
+    $let: {
+      vars: { nom: { $toLower: { $trim: { input: { $ifNull: [champ, ""] } } } } },
       in: {
-        $replaceAll: {
-          input: "$$value",
-          find: { $arrayElemAt: ["$$this", 0] },
-          replacement: { $arrayElemAt: ["$$this", 1] },
+        $cond: {
+          if: { $regexMatch: { input: "$$nom", regex: /[^ -~]/ } },
+          then: {
+            $reduce: {
+              input: { $literal: REMPLACEMENTS_DEDUP_NOM },
+              initialValue: "$$nom",
+              in: {
+                $replaceAll: {
+                  input: "$$value",
+                  find: { $arrayElemAt: ["$$this", 0] },
+                  replacement: { $arrayElemAt: ["$$this", 1] },
+                },
+              },
+            },
+          },
+          else: SEPARATEURS_ASCII.reduce<unknown>(
+            (input, find) => ({ $replaceAll: { input, find, replacement: "" } }),
+            "$$nom"
+          ),
         },
       },
     },
@@ -170,7 +190,7 @@ export function dateMetierExpr(champ: string | Record<string, unknown>) {
 
 export function dedupNom(valeur: string | null | undefined): string {
   let result = (valeur ?? "").trim().replace(/[A-Z]/g, (lettre) => lettre.toLowerCase());
-  for (const [from, to] of [...DIACRITIQUES, ...REMPLACEMENTS_NOM]) {
+  for (const [from, to] of REMPLACEMENTS_DEDUP_NOM) {
     result = result.replaceAll(from, to);
   }
   return result;

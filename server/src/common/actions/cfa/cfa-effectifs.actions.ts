@@ -13,6 +13,7 @@ import { getAnneesScolaireListFromDate, getBornesNaissanceMissionLocale } from "
 
 import { ensureMissionLocaleEffectifRecord } from "@/common/actions/mission-locale/mission-locale-record.actions";
 import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.actions";
+import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import {
   buildCollabStatusSwitch,
   buildCsvInConditions,
@@ -27,7 +28,6 @@ import {
   organisationsDb,
   organismesDb,
 } from "@/common/model/collections";
-import { jourMetier } from "@/common/utils/dateUtils";
 import { dateMetierExpr, dedupNom, dedupNomExpr } from "@/common/utils/mongoUtils";
 
 interface CfaEffectifsQueryParams {
@@ -558,21 +558,19 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
     baseEffectif.apprenant?.date_de_naissance
   ) {
     const familyOrganismeIds = await getFamilyOrganismeIds(organismeId);
+    const identite = normalisePersonIdentifiant({
+      nom: baseEffectif.apprenant.nom,
+      prenom: baseEffectif.apprenant.prenom,
+      date_de_naissance: baseEffectif.apprenant.date_de_naissance,
+    });
     const fallbackMatch = {
       "effectif_snapshot.organisme_id": { $in: familyOrganismeIds },
       soft_deleted: { $ne: true },
       $expr: {
         $and: [
-          { $eq: [dedupNomExpr("$identifiant_normalise.nom"), { $literal: dedupNom(baseEffectif.apprenant.nom) }] },
-          {
-            $eq: [dedupNomExpr("$identifiant_normalise.prenom"), { $literal: dedupNom(baseEffectif.apprenant.prenom) }],
-          },
-          {
-            $eq: [
-              dateMetierExpr("$identifiant_normalise.date_de_naissance"),
-              jourMetier(baseEffectif.apprenant.date_de_naissance),
-            ],
-          },
+          { $eq: [dedupNomExpr("$identifiant_normalise.nom"), { $literal: dedupNom(identite.nom) }] },
+          { $eq: [dedupNomExpr("$identifiant_normalise.prenom"), { $literal: dedupNom(identite.prenom) }] },
+          { $eq: [dateMetierExpr("$identifiant_normalise.date_de_naissance"), identite.date_de_naissance] },
         ],
       },
     };

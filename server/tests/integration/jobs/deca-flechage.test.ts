@@ -429,6 +429,8 @@ describe("fléchage des contrats DECA", () => {
         { nom: "D’ARC", prenom: "ÉLODIE", ddn: new Date("2008-03-10T00:00:00.000Z") },
         { nom: "Núñez García", prenom: "Zoë", ddn: new Date("2008-03-10T21:59:00.000Z") },
         { nom: null, prenom: "O'Neil", ddn: null },
+        { nom: "DIGET—BRUNI", prenom: "Marie–Anne", ddn: null },
+        { nom: "Le Cam", prenom: "ANNE", ddn: null },
       ];
 
       const resultats = await getDatabase()
@@ -463,6 +465,9 @@ describe("fléchage des contrats DECA", () => {
         ["Søren", "SØREN"],
         ["Strauß", "STRAUSS"],
         ["Ayşe".normalize("NFD"), "AYŞE"],
+        ["DIGET—BRUNI", "Diget-Bruni"],
+        ["LETHUILLIER–GILLE", "Lethuillier Gille"],
+        ["Le Cam", "LE CAM"],
       ];
 
       const resultats = await getDatabase()
@@ -739,6 +744,75 @@ describe("fléchage des contrats DECA", () => {
           fleche: { regle: "lieu_declare" },
         });
         expect(await chezQui(seconde)).toEqual(cible._id);
+      });
+
+      it("laisse les dossiers ML chez la cible quand une erreur coupe le retour du groupe", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        const premiere = await insererContrat(contratRompu());
+        await insererContrat(contratIngere({ annee_scolaire: "2026-2027" }));
+        const dossier = await insererDossier(premiere);
+        await flecherContratsDeca();
+        espion = couperAuDeuxiemeEcrit();
+
+        await expect(rendreContratsDeca({ mode: "annuler", responsables: [responsable._id] })).rejects.toThrow(
+          "coupure réseau"
+        );
+
+        const apres = await missionLocaleEffectifsDb().findOne({ _id: dossier._id });
+        expect(apres?.effectif_snapshot).toMatchObject({ organisme_id: cible._id, fleche: { regle: "lieu_declare" } });
+        expect(apres?.effectif_snapshot).not.toHaveProperty("fleche.annule_le");
+      });
+
+      it("laisse le groupe chez sa cible quand l'écriture des dossiers ML échoue pendant le retour", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        const contrat = await insererContrat(contratRompu());
+        const dossier = await insererDossier(contrat);
+        await flecherContratsDeca();
+        const original = Collection.prototype.updateMany;
+        espion = vi.spyOn(Collection.prototype, "updateMany").mockImplementation(function (this: Collection, ...args) {
+          if (this.collectionName === "missionLocaleEffectif") {
+            return Promise.reject(new Error("coupure réseau"));
+          }
+          return original.apply(this, args as never);
+        } as typeof original);
+
+        await expect(rendreContratsDeca({ mode: "annuler", responsables: [responsable._id] })).rejects.toThrow(
+          "coupure réseau"
+        );
+
+        expect(await effectifsDECADb().findOne({ _id: contrat._id })).toMatchObject({
+          organisme_id: cible._id,
+          fleche: { regle: "lieu_declare" },
+        });
+        expect((await effectifsDECADb().findOne({ _id: contrat._id }))?.fleche).not.toHaveProperty("annule_le");
+        expect(
+          (await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.effectif_snapshot.organisme_id
+        ).toEqual(cible._id);
+      });
+
+      it("--annuler garde chez la cible un groupe dont le CFA agit sur le dossier pendant le retour", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        const contrat = await insererContrat(contratRompu());
+        const dossier = await insererDossier(contrat);
+        await flecherContratsDeca();
+        const original = Collection.prototype.findOne;
+        espion = vi.spyOn(Collection.prototype, "findOne").mockImplementation(async function (
+          this: Collection,
+          ...args: unknown[]
+        ) {
+          if (this.collectionName === "effectifsDECA") {
+            await missionLocaleEffectifsDb().updateOne(
+              { _id: dossier._id },
+              { $set: { "organisme_data.reponse_at": new Date("2025-12-16T09:00:00.000Z") } }
+            );
+          }
+          return original.apply(this, args as never);
+        } as typeof original);
+
+        const bilan = await rendreContratsDeca({ mode: "annuler", responsables: [responsable._id] });
+
+        expect(bilan.gels).toBe(1);
+        expect(await chezQui(contrat)).toEqual(cible._id);
       });
 
       it("complète au passage suivant un groupe resté coupé entre son responsable et sa cible", async () => {

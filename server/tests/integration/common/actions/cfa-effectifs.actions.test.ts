@@ -803,6 +803,29 @@ describe("CFA Effectifs Actions", () => {
       expect(result.effectif).toMatchObject({ id: decaEffectif._id });
     });
 
+    it("affiche le dossier ML du jumeau DECA pour une lettre absente des tables de dédup", async () => {
+      const erpEffectif = await insertEffectif({
+        apprenant: { nom: "Nguyễn", prenom: "THỊ", date_de_naissance: new Date("2008-03-02T00:00:00.000Z") },
+      });
+      const decaEffectif = await insertDecaEffectif({
+        nom: "NGUYỄN",
+        prenom: "Thị",
+        date_de_naissance: new Date("2008-03-02T00:00:00.000Z"),
+      });
+      await missionLocaleEffectifsDb().insertOne(
+        testDoc<IMissionLocaleEffectif>(
+          createMlEffectifDoc(testDoc<IEffectif>(decaEffectif), {
+            identifiant_normalise: { nom: "NGUYỄN", prenom: "Thị", date_de_naissance: new Date("2008-03-02") },
+            soft_deleted: false,
+          })
+        )
+      );
+
+      const result = await getCfaEffectifDetail(organismeId, erpEffectif._id.toString());
+
+      expect(result.effectif).toMatchObject({ id: decaEffectif._id });
+    });
+
     it("préfère le dossier ML d'un jumeau ERP à celui d'un jumeau DECA plus récent", async () => {
       const apprenant = { nom: "MARTIN", prenom: "Lou", date_de_naissance: new Date("2008-05-04T00:00:00.000Z") };
       const identifiant_normalise = { nom: "MARTIN", prenom: "Lou", date_de_naissance: new Date("2008-05-04") };
