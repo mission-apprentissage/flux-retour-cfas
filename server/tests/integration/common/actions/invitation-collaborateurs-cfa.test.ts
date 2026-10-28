@@ -30,7 +30,13 @@ describe("invitation des collaborateurs CFA par Brevo", () => {
     brevoMock.mockReset().mockResolvedValue({ messageId: "message" } as never);
     const organismeId = new ObjectId();
     await organismesDb().insertOne(
-      generateOrganismeFixture({ _id: organismeId, siret: SIRET, uai: UAI, nom: "CAMPUS DU LAC" })
+      generateOrganismeFixture({
+        _id: organismeId,
+        siret: SIRET,
+        uai: UAI,
+        nom: "CAMPUS DU LAC",
+        adresse: { departement: "33", region: "75", academie: "04", commune: "Bordeaux", code_postal: "33300" },
+      })
     );
     organisationId = new ObjectId();
     await organisationsDb().insertOne(
@@ -74,6 +80,25 @@ describe("invitation des collaborateurs CFA par Brevo", () => {
   });
 
   it("envoie l'invitation par le template Brevo, au nom de l'admin qui invite", async () => {
+    const missionLocale = (region: string, activated_at?: Date) =>
+      testDoc<IOrganisation>({
+        _id: new ObjectId(),
+        type: "MISSION_LOCALE",
+        nom: `ML ${new ObjectId().toString()}`,
+        adresse: { region },
+        activated_at,
+        created_at: new Date(),
+      });
+    await organisationsDb().insertMany(
+      [
+        missionLocale("75", new Date()),
+        missionLocale("75", new Date()),
+        missionLocale("75"),
+        missionLocale("52", new Date()),
+      ],
+      { bypassDocumentValidation: true }
+    );
+
     await inviteUserToOrganisation(ctx, "collegue@campus.fr", organisationId);
 
     const invitation = await invitationsDb().findOne({ email: "collegue@campus.fr" });
@@ -86,8 +111,22 @@ describe("invitation des collaborateurs CFA par Brevo", () => {
         FONCTION_ADMIN: "Directrice",
         NOM_CFA: "CAMPUS DU LAC",
         LIEN_INSCRIPTION: `${config.publicUrl}/auth/inscription-cfa?invitationToken=${invitation?.token}`,
+        NB_ML_PARTENAIRES: 2,
       },
       { redirectRecipientInNonProdTo: "admin@campus.fr" }
+    );
+  });
+
+  it("compte zéro Mission Locale partenaire pour un établissement sans région", async () => {
+    await organismesDb().updateOne({ siret: SIRET }, { $unset: { "adresse.region": "" } });
+
+    await inviteUserToOrganisation(ctx, "collegue@campus.fr", organisationId);
+
+    expect(brevoMock).toHaveBeenCalledWith(
+      "collegue@campus.fr",
+      expect.any(Number),
+      expect.objectContaining({ NB_ML_PARTENAIRES: 0 }),
+      expect.anything()
     );
   });
 

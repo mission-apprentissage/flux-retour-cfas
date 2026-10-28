@@ -821,12 +821,7 @@ async function traiterDemande(
     if (!refusAvecMail(demande.motifs)) {
       throw new EchecEnvoi("Refus sans mail : rien n'est envoyé");
     }
-    await envoyerEmailBrevo(
-      templates.refus,
-      demande.email,
-      { ...params, EMAIL_CONTACT: demande.envoye_par_email ?? "" },
-      demande.envoye_par_email
-    );
+    await envoyerEmailBrevo(templates.refus, demande.email, params, demande.envoye_par_email);
   } else if (compte) {
     if (compte.organisation_role !== "admin") {
       await adminUpdateUserRole(compte._id.toString(), "admin");
@@ -841,7 +836,12 @@ async function traiterDemande(
       await envoyerEmailBrevo(
         templates.activationAvecCompte,
         demande.email,
-        { ...params, PRENOM: compte.prenom ?? "", LIEN_CONNEXION: `${config.publicUrl}/auth/connexion` },
+        {
+          ...params,
+          PRENOM: compte.prenom ?? "",
+          EMAIL: compte.email,
+          LIEN_CONNEXION: `${config.publicUrl}/auth/connexion`,
+        },
         demande.envoye_par_email
       );
     }

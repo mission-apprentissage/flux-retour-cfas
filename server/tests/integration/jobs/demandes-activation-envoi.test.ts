@@ -316,7 +316,11 @@ describe("envoi des demandes d'activation", () => {
       expect(brevoMock).toHaveBeenCalledWith(
         "direction@cfa-tests.fr",
         config.brevo.templatesDemandesActivation.activationAvecCompte,
-        expect.objectContaining({ PRENOM: "Camille", LIEN_CONNEXION: expect.stringContaining("/auth/connexion") }),
+        expect.objectContaining({
+          PRENOM: "Camille",
+          EMAIL: "direction@cfa-tests.fr",
+          LIEN_CONNEXION: expect.stringContaining("/auth/connexion"),
+        }),
         { redirectRecipientInNonProdTo: EXPEDITEUR.email }
       );
       expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "compte_existant" });
@@ -459,7 +463,7 @@ describe("envoi des demandes d'activation", () => {
       expect(brevoMock).toHaveBeenCalledWith(
         "compta@inconnu.fr",
         config.brevo.templatesDemandesActivation.refus,
-        expect.objectContaining({ EMAIL_CONTACT: EXPEDITEUR.email }),
+        { NOM_CFA: "votre établissement" },
         { redirectRecipientInNonProdTo: EXPEDITEUR.email }
       );
       expect(await relire(aucunApprenti)).toMatchObject({ statut: "envoyee", branche_envoyee: "refus" });

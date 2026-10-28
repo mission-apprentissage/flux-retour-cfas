@@ -651,6 +651,13 @@ export async function envoyerInvitationCollaborateurCfa(
     { _id: invitation.author_id },
     { projection: { prenom: 1, nom: 1, fonction: 1, email: 1 } }
   );
+  const organisme = await organismesDb().findOne(
+    { siret: organisation.siret, ...(organisation.uai ? { uai: organisation.uai } : {}) },
+    { projection: { nom: 1, enseigne: 1, raison_sociale: 1, "adresse.region": 1 } }
+  );
+  const mlActives = organisme?.adresse?.region
+    ? await getActiveMissionLocalesByRegions([organisme.adresse.region])
+    : [];
   const reponse = await sendTransactionalEmail(
     invitation.email,
     templateId,
@@ -658,24 +665,15 @@ export async function envoyerInvitationCollaborateurCfa(
       PRENOM_ADMIN: auteur?.prenom ?? "",
       NOM_ADMIN: auteur?.nom ?? "",
       FONCTION_ADMIN: auteur?.fonction ?? "",
-      NOM_CFA: await getCfaNameForOrganisation(organisation),
+      NOM_CFA: organisme?.nom || organisme?.enseigne || organisme?.raison_sociale || "Organisme",
       LIEN_INSCRIPTION: lienInscriptionCfa(invitation.token),
+      NB_ML_PARTENAIRES: mlActives.length,
     },
     { redirectRecipientInNonProdTo: auteur?.email }
   );
   if (!reponse) {
     throw Boom.internal("L'email d'invitation n'a pas pu être envoyé");
   }
-}
-
-async function getCfaNameForOrganisation(
-  organisation: IOrganisation & { type: "ORGANISME_FORMATION" }
-): Promise<string> {
-  const organisme = await organismesDb().findOne({
-    siret: organisation.siret,
-    ...(organisation.uai ? { uai: organisation.uai } : {}),
-  });
-  return organisme?.nom || organisme?.enseigne || organisme?.raison_sociale || "Organisme";
 }
 
 export async function buildOrganisationLabel(organisationId: ObjectId): Promise<string> {

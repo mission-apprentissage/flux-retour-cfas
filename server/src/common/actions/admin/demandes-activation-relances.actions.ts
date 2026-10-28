@@ -118,7 +118,7 @@ export async function envoyerInvitezCollaborateurs(demandeId: ObjectId) {
   const envoye = await envoyer(
     config.brevo.templatesDemandesActivation.invitezCollaborateurs,
     demande.email,
-    { NOM_CFA: await nomCfa(demande), PRENOM: admin?.prenom ?? "", LIEN_INVITER: lienInviter() },
+    { NOM_CFA: await nomCfa(demande), PRENOM: admin?.prenom ?? "", NOM: admin?.nom ?? "", LIEN_INVITER: lienInviter() },
     demande
   );
   if (!envoye) {
@@ -225,6 +225,7 @@ async function relancerAdminsAvecCompte(maintenant: Date) {
           {
             NOM_CFA: await nomCfa(demande),
             PRENOM: compte.prenom ?? "",
+            EMAIL: compte.email,
             LIEN_CONNEXION: `${config.publicUrl}/auth/connexion`,
           },
           demande
@@ -256,7 +257,12 @@ async function relancerAdminsSansInvitation(maintenant: Date) {
     const envoye = await envoyer(
       templateId,
       demande.email,
-      { NOM_CFA: await nomCfa(demande), PRENOM: admin?.prenom ?? "", LIEN_INVITER: lienInviter() },
+      {
+        NOM_CFA: await nomCfa(demande),
+        PRENOM: admin?.prenom ?? "",
+        NOM: admin?.nom ?? "",
+        LIEN_INVITER: lienInviter(),
+      },
       demande
     );
     if (!envoye) await leverVerrou(demande, "relance_sans_invitation_at");

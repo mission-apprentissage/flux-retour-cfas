@@ -227,6 +227,7 @@ describe("relances du workflow d'activation", () => {
         templates.invitezCollaborateurs,
         expect.objectContaining({
           PRENOM: "Camille",
+          NOM: "Martin",
           LIEN_INVITER: expect.stringContaining("/cfa/roles-habilitations"),
         }),
         { redirectRecipientInNonProdTo: ADMIN_TBA }
@@ -327,6 +328,7 @@ describe("relances du workflow d'activation", () => {
       expect(templatesEnvoyes()).toEqual([
         { destinataire: "direction@cfa-tests.fr", templateId: templates.relanceAvecCompte },
       ]);
+      expect(brevoMock.mock.calls[0][2]).toMatchObject({ EMAIL: "direction@cfa-tests.fr" });
     });
 
     it("reçoit à J+7 le lien de validation, et non le lien de connexion, si son email n'est pas validé", async () => {
@@ -366,6 +368,9 @@ describe("relances du workflow d'activation", () => {
         destinataire: "direction@cfa-tests.fr",
         templateId: templates.relanceSansInvitation,
       });
+      expect(
+        brevoMock.mock.calls.find(([, templateId]) => templateId === templates.relanceSansInvitation)?.[2]
+      ).toMatchObject({ PRENOM: "Camille", NOM: "Martin" });
       expect(templatesEnvoyes()).not.toContainEqual({
         destinataire: "adjoint@cfa-tests.fr",
         templateId: templates.relanceSansInvitation,
