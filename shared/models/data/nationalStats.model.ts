@@ -503,6 +503,10 @@ export interface ICollaborationDossierStructure {
 /** Dossier de collaboration affiché aux profils indicateurs : seuls le prénom et le nom du jeune sont exposés. */
 export interface ICollaborationDossier {
   id: string;
+  /** Identifiant de l'effectif, utilisé par la page de détail du CFA. */
+  effectif_id: string;
+  /** Renseigné par la liste des collaborations : le CFA émetteur peut être imité en lecture seule. */
+  peut_imiter?: boolean;
   jeune: { prenom: string | null; nom: string | null };
   mission_locale: ICollaborationDossierStructure;
   cfa: ICollaborationDossierStructure;

@@ -9,6 +9,7 @@ import {
   COLLAB_DOSSIER_DELAIS,
   COLLAB_DOSSIER_RESULTATS,
   COLLAB_DOSSIER_STATUTS,
+  type ICollaborationDossier,
   ML_ALERTE_LISTE_SORT_BY,
   ML_ALERTE_LISTE_TYPES,
   zCfaEtablissementsSortBy,
@@ -592,12 +593,31 @@ const getCollaborationDossiersRoute: IndicateursHandler<z.infer<typeof collabora
   { locals }
 ) => {
   const { page, limit } = req.query;
-  return await listCollaborationDossiers(
+  const liste = await listCollaborationDossiers(
     await resolveCollaborationDossiersScope(req.query, locals),
     toCollaborationDossiersFilters(req.query),
     { page, limit }
   );
+  return { ...liste, data: await withPeutImiter(liste.data, locals) };
 };
+
+/** Marque les dossiers dont le CFA émetteur peut être imité en lecture seule par l'organisation connectée. */
+async function withPeutImiter(dossiers: ICollaborationDossier[], locals: IndicateursMlLocals) {
+  const ids = [...new Set(dossiers.map((dossier) => dossier.cfa.id).filter((id) => ObjectId.isValid(id)))];
+  const organismes = ids.length
+    ? await organismesDb()
+        .find(
+          { _id: { $in: ids.map((id) => new ObjectId(id)) } },
+          { projection: { "adresse.region": 1, "adresse.departement": 1 } }
+        )
+        .toArray()
+    : [];
+  const adresses = new Map(organismes.map((organisme) => [organisme._id.toString(), organisme.adresse]));
+  return dossiers.map((dossier) => ({
+    ...dossier,
+    peut_imiter: peutImiter(locals, "cfa", adresses.get(dossier.cfa.id)),
+  }));
+}
 
 const getCollaborationDossiersExportRoute: IndicateursHandler<
   z.infer<typeof collaborationDossiersExportQuery>

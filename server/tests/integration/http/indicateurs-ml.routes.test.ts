@@ -1736,6 +1736,24 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(response.data.filtres.cfa.map((cfa: { nom: string }) => cfa.nom)).toEqual(["CFA A", "Lycée Eiffel"]);
     });
 
+    it("Indique si le CFA émetteur peut être imité en lecture seule, avec l'effectif à ouvrir", async () => {
+      const mlEffectif = await missionLocaleEffectifsDb().findOne({ _id: D_RDV });
+
+      const dreets = await requestAsOrganisation(DREETS_IDF, "get", BASE);
+      expect(dreets.data.data.every((row: { peut_imiter: boolean }) => row.peut_imiter)).toBe(true);
+      expect(dreets.data.data.find((row: { id: string }) => row.id === D_RDV.toString()).effectif_id).toBe(
+        mlEffectif?.effectif_id.toString()
+      );
+
+      const ddets = await requestAsOrganisation(DDETS_PARIS, "get", BASE);
+      expect(ddets.data.data.length).toBeGreaterThan(0);
+      expect(ddets.data.data.every((row: { peut_imiter: boolean }) => row.peut_imiter)).toBe(true);
+
+      const admin = await requestAsOrganisation(ADMIN, "get", BASE);
+      expect(admin.data.data.length).toBeGreaterThan(0);
+      expect(admin.data.data.some((row: { peut_imiter: boolean }) => row.peut_imiter)).toBe(false);
+    });
+
     it.each([
       ["statuts=a_traiter", [D_A_TRAITER, D_2025]],
       ["statuts=a_recontacter,traite", [D_RDV, D_RECONTACTER]],

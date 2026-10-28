@@ -1,16 +1,22 @@
 "use client";
 
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { format } from "date-fns/format";
 import Link from "next/link";
+import { useState } from "react";
 import { ML_SITUATION_DOSSIER_LABEL } from "shared/constants/missionLocale";
 import type { ICollaborationDossier, ICollaborationDossierStructure } from "shared/models/data/nationalStats.model";
+
+import { _post } from "@/common/httpClient";
+import { getApiErrorMessage } from "@/common/rateLimit";
 
 import { DOSSIERS_TRAITES_V2_LABELS } from "../constants";
 import { motifLabel } from "../hooks/useCollabDossiersExport";
 import { COLLAB_DOSSIER_STATUT_LABELS } from "../hooks/useStatsQueries";
 import { ficheCfaUrl } from "../utils";
+import { IMPOSTURE_TERRITOIRE_URL } from "../views/FicheEntete";
 
 import styles from "./CollaborationsListCard.module.css";
 
@@ -90,6 +96,42 @@ export function CollaborationDossierItem({
           {dossier.delai_jours} j{dossier.traite_par_ml ? "" : " (pas encore traité par la ML)"}
         </strong>
       </p>
+      {dossier.peut_imiter && <VoirDetailButton dossier={dossier} />}
     </li>
+  );
+}
+
+/** Ouvre le dossier sous l'identité du CFA émetteur, en lecture seule. */
+function VoirDetailButton({ dossier }: { dossier: ICollaborationDossier }) {
+  const [enCours, setEnCours] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+
+  const ouvrir = async () => {
+    if (enCours) return;
+    setEnCours(true);
+    setErreur(null);
+    try {
+      await _post(IMPOSTURE_TERRITOIRE_URL, { cfa_id: dossier.cfa.id });
+      window.location.href = `/cfa/${dossier.effectif_id}`;
+    } catch (err) {
+      setErreur(getApiErrorMessage(err, "L'imposture a échoué. Merci de réessayer."));
+      setEnCours(false);
+    }
+  };
+
+  return (
+    <div className={styles.actions}>
+      <Button
+        priority="secondary"
+        size="small"
+        iconId="fr-icon-eye-line"
+        iconPosition="right"
+        onClick={ouvrir}
+        disabled={enCours}
+      >
+        Voir le détail
+      </Button>
+      {erreur && <p className={`fr-error-text ${styles.erreur}`}>{erreur}</p>}
+    </div>
   );
 }

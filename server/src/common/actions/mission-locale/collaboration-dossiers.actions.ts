@@ -321,6 +321,7 @@ export async function listCollaborationDossiers(
     {
       $project: {
         _id: 1,
+        effectif_id: 1,
         mission_locale_id: 1,
         organisme_id: "$effectif_snapshot.organisme_id",
         prenom: "$effectif_snapshot.apprenant.prenom",
@@ -373,6 +374,7 @@ export async function listCollaborationDossiers(
 
   const data: ICollaborationDossier[] = rows.map((row) => ({
     id: row._id.toString(),
+    effectif_id: row.effectif_id.toString(),
     jeune: { prenom: row.prenom ?? null, nom: row.nom ?? null },
     mission_locale: structures.ml.get(row.mission_locale_id?.toString()) ?? unknown(row.mission_locale_id),
     cfa: structures.cfa.get(row.organisme_id?.toString()) ?? unknown(row.organisme_id),
