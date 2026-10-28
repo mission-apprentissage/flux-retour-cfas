@@ -141,3 +141,7 @@
   padding: 40px 0 64px;
   background-color: var(--background-alt-grey);
 }
+
+.fiche {
+  background-color: var(--background-default-grey);
+}
