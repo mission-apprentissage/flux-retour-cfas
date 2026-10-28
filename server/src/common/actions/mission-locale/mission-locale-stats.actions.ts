@@ -822,14 +822,6 @@ export const MOTIFS_PIPELINE = [
   },
 ];
 
-/** ML activées à une date, sur le périmètre (toutes les ML, y compris sans région, au national). */
-const countActivatedMissionLocales = (date: Date, territoire: Territoire) =>
-  organisationsDb().countDocuments({
-    type: "MISSION_LOCALE",
-    activated_at: { $lte: date },
-    ...buildTerritoireMatch(territoire),
-  });
-
 const regionDuDepartement = (code: string): string | undefined =>
   DEPARTEMENTS_BY_CODE[code as keyof typeof DEPARTEMENTS_BY_CODE]?.region.code;
 
@@ -876,19 +868,16 @@ export async function getDeploymentStats(period: StatsPeriod = "30days", territo
 
   const startDate = await calculateStartDateAsync(period, evaluationDate);
   const previousStartDate = calculatePreviousStartDate(period, startDate);
-  const activeesAvantPeriodePrecedente = previousStartDate
-    ? await countActivatedMissionLocales(previousStartDate, territoire)
-    : null;
 
   return {
     summary: {
       ...mlCounts,
       engagedMlCount,
       previousEngagedMlCount,
-      activatedMlVariation: createCumulStatWithVariation(
+      activatedMlVariation: createEtatStatWithVariation(
         mlCounts.activatedMlCount,
         mlCounts.previousActivatedMlCount,
-        activeesAvantPeriodePrecedente
+        !!previousStartDate
       ).variation,
       engagedMlVariation: createEtatStatWithVariation(engagedMlCount, previousEngagedMlCount, !!previousStartDate)
         .variation,
