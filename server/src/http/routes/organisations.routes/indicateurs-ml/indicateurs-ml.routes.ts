@@ -60,9 +60,14 @@ import {
   getPrequalifStats,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import type { Territoire } from "@/common/actions/mission-locale/mission-locale-stats.helpers";
+import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import { rechercherEtablissements } from "@/common/actions/recherche/recherche-etablissements.actions";
+import { createSession } from "@/common/actions/sessions.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
+import logger from "@/common/logger";
 import { organisationsDb, organismesDb } from "@/common/model/collections";
+import type { AuthContext } from "@/common/model/internal/AuthContext";
+import { responseWithCookie } from "@/common/utils/httpUtils";
 import {
   DefaultParams,
   DefaultQuery,
@@ -224,6 +229,9 @@ const exportQuery = z.object({
   ml_id: mlIdSchema.optional(),
   national: zBooleanStringSchema.optional(),
 });
+const impersonateBody = z
+  .object({ cfa_id: mlIdSchema.optional(), ml_id: mlIdSchema.optional() })
+  .refine((body) => Boolean(body.cfa_id) !== Boolean(body.ml_id), "Indiquer un CFA ou une Mission Locale");
 const mlIdParams = z.object({ id: mlIdSchema });
 const organismeIdParams = z.object({ id: mlIdSchema });
 const cfaCollabMlQuery = z.object({
@@ -394,6 +402,7 @@ export default () => {
     validateRequestMiddleware({ params: organismeIdParams }),
     returnResult(getCfaMembresRoute)
   );
+  router.post("/impersonate", validateRequestMiddleware({ body: impersonateBody }), returnResult(impersonateRoute));
 
   return router;
 };
@@ -848,6 +857,78 @@ const getPrequalifRoute: IndicateursHandler<z.infer<typeof periodQuery>> = async
 
   return await getPrequalifStats(period || "all");
 };
+
+/**
+ * POST /api/v1/organisation/indicateurs-ml/impersonate
+ * Imposture en lecture seule : la DREETS et la DDETS sur un CFA de leur territoire, l'ARML sur une Mission Locale
+ * de ses régions. L'administrateur passe par l'imposture classique.
+ */
+const impersonateRoute: RouteHandler<
+  IndicateursMlLocals,
+  DefaultParams,
+  DefaultQuery,
+  z.infer<typeof impersonateBody>
+> = async (req, res) => {
+  const locals = res.locals;
+  const user = req.user as AuthContext;
+  const { type } = locals.organisation;
+
+  if (user.impersonating) {
+    throw Boom.forbidden("Une imposture est déjà en cours");
+  }
+
+  let cible: Awaited<ReturnType<typeof findImpersonationTarget>>;
+  if (req.body.cfa_id && (type === ORGANISATION_TYPE.DREETS || type === ORGANISATION_TYPE.DDETS)) {
+    cible = await findImpersonationTarget("cfa", req.body.cfa_id, locals);
+  } else if (req.body.ml_id && type === ORGANISATION_TYPE.ARML) {
+    cible = await findImpersonationTarget("ml", req.body.ml_id, locals);
+  } else {
+    throw Boom.forbidden("Imposture non autorisée pour votre organisation");
+  }
+
+  logger.info(
+    {
+      event: "imposture_lecture_seule",
+      utilisateur_id: user._id.toString(),
+      organisation_origine: { id: locals.organisation._id.toString(), type },
+      cible: { id: cible._id.toString(), type: cible.type },
+    },
+    "Imposture en lecture seule"
+  );
+
+  const sessionToken = await createSession(user.email, { impersonatedOrganisation: cible, readOnly: true });
+  responseWithCookie(res, sessionToken);
+};
+
+async function findImpersonationTarget(kind: "cfa" | "ml", id: string, locals: IndicateursMlLocals) {
+  if (kind === "cfa") {
+    const organisme = await organismesDb().findOne(
+      { _id: new ObjectId(id) },
+      { projection: { "adresse.region": 1, "adresse.departement": 1 } }
+    );
+    if (!organisme) {
+      throw Boom.notFound("Organisme non trouvé");
+    }
+    if (!peutVoirNominatif(locals, organisme.adresse)) {
+      throw Boom.forbidden("Accès non autorisé à cet organisme");
+    }
+    const organisation = await getOrganisationOrganismeByOrganismeId(organisme._id);
+    if (!organisation) {
+      throw Boom.notFound("Organisation du CFA non trouvée");
+    }
+    return organisation;
+  }
+
+  const ml = await organisationsDb().findOne({ _id: new ObjectId(id), type: "MISSION_LOCALE" });
+  if (!ml) {
+    throw Boom.notFound(`Mission Locale non trouvée: ${id}`);
+  }
+  const region = (ml as { adresse?: { region?: string } }).adresse?.region;
+  if (!region || !locals.regions.includes(region)) {
+    throw Boom.forbidden("Accès non autorisé à cette Mission Locale");
+  }
+  return ml;
+}
 
 /** Fiche CFA, ouverte à tous les territoires : 404 si l'organisme est inconnu. */
 async function verifyOrganismeInScope(id: string, locals: IndicateursMlLocals) {

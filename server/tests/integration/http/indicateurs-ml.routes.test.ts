@@ -1045,6 +1045,117 @@ describe("Indicateurs ML routes (territoriales)", () => {
     });
   });
 
+  describe("POST /impersonate", () => {
+    const BASE = "/api/v1/organisation/indicateurs-ml/impersonate";
+    const cookieOf = (response: { headers: Record<string, unknown> }) =>
+      (response.headers["set-cookie"] as string[])[0].split(";")[0];
+    const avecCookie = (cookie: string, method: "get" | "post" | "delete", url: string, data?: unknown) =>
+      httpClient.request({ method, url, data, headers: { cookie } });
+
+    beforeEach(async () => {
+      const cfa = (id: ObjectId, siret: string, adresse: Record<string, string>) => ({
+        _id: id,
+        siret,
+        uai: null,
+        nom: `CFA ${siret}`,
+        adresse,
+        est_dans_le_referentiel: "present",
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+      await organismesDb().insertMany(
+        [
+          cfa(CFA_A, "19040492100016", { region: "11", departement: "75" }),
+          cfa(CFA_B, "13002526500013", { region: "84", departement: "69" }),
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+      await organisationsDb().insertMany(
+        [CFA_A, CFA_B].map((id, index) => ({
+          _id: new ObjectId(),
+          type: "ORGANISME_FORMATION",
+          siret: index === 0 ? "19040492100016" : "13002526500013",
+          uai: null,
+          organisme_id: id.toString(),
+          created_at: new Date(),
+        })) as never[],
+        { bypassDocumentValidation: true }
+      );
+    });
+
+    it("Ouvre une imposture en lecture seule sur un CFA du territoire de la DREETS, puis permet d'en sortir", async () => {
+      const response = await requestAsOrganisation(DREETS_IDF, "post", BASE, { cfa_id: CFA_A.toString() });
+      expect(response.status).toBe(200);
+      const cookie = cookieOf(response);
+
+      const session = await avecCookie(cookie, "get", "/api/v1/session");
+      expect(session.status).toBe(200);
+      expect(session.data).toMatchObject({
+        impersonating: true,
+        readOnly: true,
+        organisation: { type: "ORGANISME_FORMATION", organisme_id: CFA_A.toString() },
+      });
+
+      const ecriture = await avecCookie(cookie, "post", BASE, { cfa_id: CFA_B.toString() });
+      expectForbidden(ecriture, "Cette imposture est en lecture seule");
+      const lectureHorsListe = await avecCookie(
+        cookie,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/synthese/deployment"
+      );
+      expectForbidden(lectureHorsListe, "Cette imposture est en lecture seule");
+
+      const sortie = await avecCookie(cookie, "delete", "/api/v1/admin/impersonate");
+      expect(sortie.status).toBe(200);
+      const retour = await avecCookie(cookieOf(sortie), "get", "/api/v1/session");
+      expect(retour.data.impersonating).toBeUndefined();
+      expect(retour.data.organisation.type).toBe("DREETS");
+    });
+
+    it("Refuse un CFA hors du territoire de la DREETS ou du département de la DDETS", async () => {
+      expectForbidden(
+        await requestAsOrganisation(DREETS_IDF, "post", BASE, { cfa_id: CFA_B.toString() }),
+        "Accès non autorisé à cet organisme"
+      );
+      expectForbidden(
+        await requestAsOrganisation(DDETS_PARIS, "post", BASE, { cfa_id: CFA_B.toString() }),
+        "Accès non autorisé à cet organisme"
+      );
+      expect((await requestAsOrganisation(DDETS_PARIS, "post", BASE, { cfa_id: CFA_A.toString() })).status).toBe(200);
+    });
+
+    it("Ouvre une imposture en lecture seule sur une Mission Locale des régions de l'ARML", async () => {
+      const response = await requestAsOrganisation(ARML_IDF, "post", BASE, { ml_id: ML_IDF.toString() });
+      expect(response.status).toBe(200);
+      const session = await avecCookie(cookieOf(response), "get", "/api/v1/session");
+      expect(session.data).toMatchObject({
+        impersonating: true,
+        readOnly: true,
+        organisation: { type: "MISSION_LOCALE" },
+      });
+
+      expectForbidden(
+        await requestAsOrganisation(ARML_IDF, "post", BASE, { ml_id: ML_ARA.toString() }),
+        "Accès non autorisé à cette Mission Locale"
+      );
+    });
+
+    it("Réserve les CFA à la DREETS et à la DDETS, les Missions Locales à l'ARML, et exclut l'administrateur", async () => {
+      const refus = "Imposture non autorisée pour votre organisation";
+      expectForbidden(await requestAsOrganisation(DREETS_IDF, "post", BASE, { ml_id: ML_IDF.toString() }), refus);
+      expectForbidden(await requestAsOrganisation(ARML_IDF, "post", BASE, { cfa_id: CFA_A.toString() }), refus);
+      expectForbidden(await requestAsOrganisation(ADMIN, "post", BASE, { cfa_id: CFA_A.toString() }), refus);
+    });
+
+    it("Exige un CFA ou une Mission Locale, et un seul", async () => {
+      expect((await requestAsOrganisation(DREETS_IDF, "post", BASE, {})).status).toBe(400);
+      expect(
+        (await requestAsOrganisation(DREETS_IDF, "post", BASE, { cfa_id: CFA_A.toString(), ml_id: ML_IDF.toString() }))
+          .status
+      ).toBe(400);
+    });
+  });
+
   describe("GET /stats/cfa/adoption", () => {
     const buildOrganisme = (id: ObjectId, region: string, extra: Record<string, unknown> = {}) => ({
       _id: id,
