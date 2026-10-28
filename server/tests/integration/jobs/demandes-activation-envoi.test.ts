@@ -1,4 +1,5 @@
 import * as Boom from "@hapi/boom";
+import { format } from "date-fns";
 import { addJob } from "job-processor";
 import { ObjectId } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
@@ -128,9 +129,10 @@ async function insererOrganisation(organismeId: ObjectId) {
 async function insererCompte(
   email: string,
   organisationId: ObjectId,
-  overrides: { account_status?: IUsersMigration["account_status"] } = {}
+  overrides: { account_status?: IUsersMigration["account_status"]; organisation_role?: "admin" | "member" | null } = {}
 ) {
   const _id = new ObjectId();
+  const { organisation_role = "member", ...autres } = overrides;
   await usersMigrationDb().insertOne({
     _id,
     email,
@@ -145,10 +147,10 @@ async function insererCompte(
     emails: [],
     has_accept_cgu_version: "v0.1",
     organisation_id: organisationId,
-    organisation_role: "member",
+    ...(organisation_role ? { organisation_role } : {}),
     account_status: "CONFIRMED",
     created_at: new Date(),
-    ...overrides,
+    ...autres,
   });
   return _id;
 }
@@ -175,8 +177,11 @@ async function insererDemande(email: string, siret = SIRET, overrides: Partial<I
 
 const relire = (demande: IDemandeActivationCfa) => demandesActivationCfaDb().findOne({ _id: demande._id });
 
+const cochees = async () =>
+  (await demandesActivationCfaDb().find({ a_envoyer: true }).toArray()).map((demande) => demande._id);
+
 async function envoyerEtTraiter() {
-  const bilan = await envoyerDemandesActivation(EXPEDITEUR);
+  const bilan = await envoyerDemandesActivation(await cochees(), EXPEDITEUR);
   for (const [{ payload }] of addJobMock.mock.calls) {
     const organismeId = payload?.organismeId;
     await traiterEnvoisDemandesActivation(typeof organismeId === "string" ? new ObjectId(organismeId) : null);
@@ -226,6 +231,7 @@ describe("envoi des demandes d'activation", () => {
         expect.objectContaining({
           NOM_CFA: "CFA DES TESTS",
           LIEN_INSCRIPTION: expect.stringContaining(`invitationToken=${invitation?.token}`),
+          DATE_EXPIRATION: format(invitation!.expires_at!, "dd/MM/yyyy"),
         }),
         { redirectRecipientInNonProdTo: EXPEDITEUR.email }
       );
@@ -330,37 +336,91 @@ describe("envoi des demandes d'activation", () => {
       expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "compte_existant" });
     });
 
-    it.each(["PENDING_EMAIL_VALIDATION", "PENDING_ADMIN_VALIDATION"] as const)(
-      "remplace un compte %s par une invitation admin, sans le valider ni le promouvoir",
-      async (account_status) => {
-        const organisme = await insererOrganisme();
-        const organisationId = await insererOrganisation(organisme._id);
-        await insererCompte("direction@cfa-tests.fr", organisationId, { account_status });
-        const demande = await insererDemande("direction@cfa-tests.fr");
-        expect(demande.branche).toBe("activation");
+    it("remplace par une invitation admin un compte PENDING_EMAIL_VALIDATION créé sans invitation", async () => {
+      const organisme = await insererOrganisme();
+      const organisationId = await insererOrganisation(organisme._id);
+      await insererCompte("direction@cfa-tests.fr", organisationId, {
+        account_status: "PENDING_EMAIL_VALIDATION",
+        organisation_role: null,
+      });
+      const demande = await insererDemande("direction@cfa-tests.fr");
+      expect(demande.branche).toBe("activation");
 
-        await envoyerEtTraiter();
+      await envoyerEtTraiter();
 
-        expect(await usersMigrationDb().countDocuments({ email: "direction@cfa-tests.fr" })).toBe(0);
-        expect(await invitationsDb().findOne({ email: "direction@cfa-tests.fr" })).toMatchObject({
-          role: "admin",
-          demande_id: demande._id,
-        });
-        expect(sendEmailMock).not.toHaveBeenCalled();
-        expect(brevoMock).toHaveBeenCalledTimes(1);
-        expect(brevoMock).toHaveBeenCalledWith(
-          "direction@cfa-tests.fr",
-          config.brevo.templatesDemandesActivation.activationSansCompte,
-          expect.anything(),
-          expect.anything()
-        );
-        expect(await relire(demande)).toMatchObject({
-          statut: "envoyee",
-          branche_envoyee: "activation",
-          etapes: { compte_at: expect.any(Date), invitation_at: expect.any(Date) },
-        });
-      }
-    );
+      expect(await usersMigrationDb().countDocuments({ email: "direction@cfa-tests.fr" })).toBe(0);
+      expect(await invitationsDb().findOne({ email: "direction@cfa-tests.fr" })).toMatchObject({
+        role: "admin",
+        demande_id: demande._id,
+      });
+      expect(sendEmailMock).not.toHaveBeenCalled();
+      expect(brevoMock).toHaveBeenCalledTimes(1);
+      expect(brevoMock).toHaveBeenCalledWith(
+        "direction@cfa-tests.fr",
+        config.brevo.templatesDemandesActivation.activationSansCompte,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(await relire(demande)).toMatchObject({
+        statut: "envoyee",
+        branche_envoyee: "activation",
+        etapes: { compte_at: expect.any(Date), invitation_at: expect.any(Date) },
+      });
+    });
+
+    it("valide et passe admin un compte PENDING_ADMIN_VALIDATION, sans prévenir l'OFA", async () => {
+      const organisme = await insererOrganisme();
+      const organisationId = await insererOrganisation(organisme._id);
+      const compteId = await insererCompte("direction@cfa-tests.fr", organisationId, {
+        account_status: "PENDING_ADMIN_VALIDATION",
+        organisation_role: null,
+      });
+      const demande = await insererDemande("direction@cfa-tests.fr");
+      expect(demande.branche).toBe("compte_existant");
+
+      await envoyerEtTraiter();
+
+      expect(await usersMigrationDb().findOne({ _id: compteId })).toMatchObject({
+        account_status: "CONFIRMED",
+        confirmed_at: expect.any(Date),
+        organisation_role: "admin",
+      });
+      expect(sendEmailMock).not.toHaveBeenCalled();
+      expect(await invitationsDb().countDocuments()).toBe(0);
+      expect(brevoMock).toHaveBeenCalledWith(
+        "direction@cfa-tests.fr",
+        config.brevo.templatesDemandesActivation.activationAvecCompte,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "compte_existant" });
+    });
+
+    it("garde le compte créé avec le lien d'une invitation et lui renvoie son lien de validation", async () => {
+      const organisme = await insererOrganisme();
+      const organisationId = await insererOrganisation(organisme._id);
+      const compteId = await insererCompte("direction@cfa-tests.fr", organisationId, {
+        account_status: "PENDING_EMAIL_VALIDATION",
+        organisation_role: "member",
+      });
+      const demande = await insererDemande("direction@cfa-tests.fr");
+      expect(demande.branche).toBe("activation");
+
+      await envoyerEtTraiter();
+
+      expect(await usersMigrationDb().findOne({ _id: compteId })).toMatchObject({
+        account_status: "PENDING_EMAIL_VALIDATION",
+        organisation_role: "admin",
+      });
+      expect(sendEmailMock).toHaveBeenCalledWith(
+        "direction@cfa-tests.fr",
+        "activation_cfa",
+        expect.objectContaining({ isAdmin: true })
+      );
+      expect(brevoMock).not.toHaveBeenCalled();
+      expect(await invitationsDb().countDocuments()).toBe(0);
+      expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "activation" });
+    });
 
     it("ne laisse pas un tiers inscrit avec l'email du demandeur devenir admin", async () => {
       await insererOrganisme();
@@ -396,7 +456,7 @@ describe("envoi des demandes d'activation", () => {
         account_status: "PENDING_ADMIN_VALIDATION",
       });
       const demande = await insererDemande("direction@cfa-tests.fr");
-      await envoyerDemandesActivation(EXPEDITEUR);
+      await envoyerDemandesActivation(await cochees(), EXPEDITEUR);
       await usersMigrationDb().updateOne({ _id: compteId }, { $set: { account_status: "CONFIRMED" } });
 
       await traiterEnvoisDemandesActivation(organisme._id);
@@ -442,7 +502,7 @@ describe("envoi des demandes d'activation", () => {
       const organisationId = await insererOrganisation(organisme._id);
       const demande = await insererDemande("direction@cfa-tests.fr");
       expect(demande.branche).toBe("activation");
-      await envoyerDemandesActivation(EXPEDITEUR);
+      await envoyerDemandesActivation(await cochees(), EXPEDITEUR);
       await insererCompte("direction@cfa-tests.fr", organisationId);
 
       await traiterEnvoisDemandesActivation(organisme._id);
@@ -465,7 +525,7 @@ describe("envoi des demandes d'activation", () => {
       const organisme = await insererOrganisme();
       await insererOrganisation(organisme._id);
       const demande = await insererDemande("direction@cfa-tests.fr");
-      await envoyerDemandesActivation(EXPEDITEUR);
+      await envoyerDemandesActivation(await cochees(), EXPEDITEUR);
       await insererCompte("direction@cfa-tests.fr", new ObjectId());
 
       await traiterEnvoisDemandesActivation(organisme._id);
@@ -484,7 +544,7 @@ describe("envoi des demandes d'activation", () => {
       const organisationId = await insererOrganisation(organisme._id);
       const compteId = await insererCompte("direction@cfa-tests.fr", organisationId);
       const demande = await insererDemande("direction@cfa-tests.fr");
-      await envoyerDemandesActivation(EXPEDITEUR);
+      await envoyerDemandesActivation(await cochees(), EXPEDITEUR);
       await usersMigrationDb().updateOne({ _id: compteId }, { $set: { organisation_id: new ObjectId() } });
 
       await traiterEnvoisDemandesActivation(organisme._id);
@@ -659,7 +719,7 @@ describe("envoi des demandes d'activation", () => {
     it("met en échec sans email les demandes d'un CFA fermé entre l'envoi et le job", async () => {
       const organisme = await insererOrganisme();
       const demande = await insererDemande("direction@cfa-tests.fr");
-      await envoyerDemandesActivation(EXPEDITEUR);
+      await envoyerDemandesActivation(await cochees(), EXPEDITEUR);
       await organismesDb().updateOne({ _id: organisme._id }, { $set: { ferme: true } });
 
       await traiterEnvoisDemandesActivation(organisme._id);
@@ -678,13 +738,25 @@ describe("envoi des demandes d'activation", () => {
       await insererDemande("direction@cfa-tests.fr");
       const nonCochee = await insererDemande("adjoint@cfa-tests.fr", SIRET, { a_envoyer: false });
 
-      const premier = await envoyerDemandesActivation(EXPEDITEUR);
-      const second = await envoyerDemandesActivation(EXPEDITEUR);
+      const premier = await envoyerDemandesActivation(await cochees(), EXPEDITEUR);
+      const second = await envoyerDemandesActivation(await cochees(), EXPEDITEUR);
 
       expect(premier.demandes).toBe(1);
       expect(second.demandes).toBe(0);
       expect(addJobMock).toHaveBeenCalledTimes(1);
       expect((await relire(nonCochee))?.statut).toBe("pret");
+    });
+
+    it("n'envoie que les demandes confirmées dans la modale", async () => {
+      await insererOrganisme();
+      const confirmee = await insererDemande("direction@cfa-tests.fr");
+      const cocheeAilleurs = await insererDemande("adjoint@cfa-tests.fr");
+
+      const bilan = await envoyerDemandesActivation([confirmee._id], EXPEDITEUR);
+
+      expect(bilan.demandes).toBe(1);
+      expect((await relire(confirmee))?.statut).toBe("envoi_en_cours");
+      expect(await relire(cocheeAilleurs)).toMatchObject({ statut: "pret", a_envoyer: true });
     });
 
     it("un récapitulatif lu avant le clic ne remet pas à envoyer une ligne partie entre-temps", async () => {
@@ -747,6 +819,42 @@ describe("envoi des demandes d'activation", () => {
         { redirectRecipientInNonProdTo: EXPEDITEUR.email }
       );
       expect(sendEmailMock).not.toHaveBeenCalled();
+    });
+
+    it("repasse en envoyée une demande en échec dont l'invitation est renvoyée depuis l'écran admin", async () => {
+      await insererOrganisme();
+      const demande = await insererDemande("direction@cfa-tests.fr");
+      brevoMock.mockResolvedValueOnce(undefined as never);
+      await envoyerEtTraiter();
+      expect((await relire(demande))?.statut).toBe("echec");
+      const invitation = await invitationsDb().findOne({ email: "direction@cfa-tests.fr" });
+
+      await resendAdminInvitation(invitation!._id.toString());
+
+      expect(await relire(demande)).toMatchObject({
+        statut: "envoyee",
+        branche_envoyee: "activation",
+        invitation_id: invitation!._id,
+        motif_echec: null,
+      });
+    });
+
+    it("n'invite pas une personne déjà invitée pour un autre établissement", async () => {
+      const autre = await insererOrganisme({ siret: "13002374000447", uai: "0442096M" });
+      await insererOrganisme();
+      const premiere = await insererDemande("direction@cfa-tests.fr", "13002374000447");
+      await envoyerEtTraiter();
+      addJobMock.mockReset();
+      const seconde = await insererDemande("direction@cfa-tests.fr");
+
+      await envoyerEtTraiter();
+
+      expect(await relire(premiere)).toMatchObject({ statut: "envoyee", organisme_id: autre._id });
+      expect(await relire(seconde)).toMatchObject({
+        statut: "echec",
+        motif_echec: "Une invitation est déjà en attente pour cette personne dans un autre établissement",
+      });
+      expect(await invitationsDb().countDocuments({ email: "direction@cfa-tests.fr" })).toBe(1);
     });
 
     it("n'active qu'une fois une personne qui a deux demandes vers le même établissement", async () => {

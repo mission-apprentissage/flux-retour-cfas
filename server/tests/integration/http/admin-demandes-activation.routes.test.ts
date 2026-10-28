@@ -219,7 +219,7 @@ describe("récapitulatif des demandes d'activation", () => {
     expect(demandes.find((demande) => demande.email === "directrice@cfa-exemple.fr")).toMatchObject({
       vue: "a_envoyer",
       cochable: true,
-      organisme: { _id: expect.any(String) },
+      organisme: { nom: null },
     });
   });
 
@@ -242,7 +242,7 @@ describe("récapitulatif des demandes d'activation", () => {
       siret_corrige: CFA_SIRET,
       motifs: [],
       branche: "activation",
-      vue: "devenus_eligibles",
+      vue: "a_envoyer",
       cochable: true,
     });
   });
@@ -254,7 +254,7 @@ describe("récapitulatif des demandes d'activation", () => {
     expect((await modifier(_id, { branche_forcee: "activation" })).data).toMatchObject({
       branche_forcee: "activation",
       branche: "activation",
-      vue: "devenus_eligibles",
+      vue: "a_envoyer",
     });
   });
 
@@ -283,6 +283,36 @@ describe("récapitulatif des demandes d'activation", () => {
     );
 
     expect(await ligne("direction@cfa-exemple.fr")).toMatchObject({ vue: "devenus_eligibles", cochable: true });
+  });
+
+  it("ne propose que le refus forcé quand un motif ne peut pas être levé", async () => {
+    await organismesDb().insertOne(
+      generateOrganismeFixture({
+        _id: new ObjectId(),
+        siret: "13002374000447",
+        uai: "0442096M",
+        nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
+        ferme: false,
+      }),
+      { bypassDocumentValidation: true }
+    );
+    await importer(Buffer.from('"Adresse email","SIRET de votre CFA"\n"direction@cfa-exemple.fr","13002374000447"\n'));
+    const { _id, branches_forcables } = (await ligne("direction@cfa-exemple.fr")) as unknown as {
+      _id: string;
+      branches_forcables: string[];
+    };
+
+    expect(branches_forcables).toEqual(["refus"]);
+    expect((await modifier(_id, { branche_forcee: "activation" })).status).toBe(400);
+    expect((await modifier(_id, { branche_forcee: "refus" })).data).toMatchObject({
+      motifs: expect.arrayContaining(["refus_force"]),
+    });
+  });
+
+  it("refuse un envoi sans demande confirmée", async () => {
+    const response = await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "post", `${URL_LISTE}/envoyer`, {});
+
+    expect(response.status).toBe(400);
   });
 
   it("refuse de modifier une demande en cours d'envoi", async () => {

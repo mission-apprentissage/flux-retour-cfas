@@ -13,7 +13,8 @@ import {
   mettreEnFileInvitezCollaborateurs,
   relancerDemandesActivation,
 } from "@/common/actions/admin/demandes-activation-relances.actions";
-import { renvoyerDemandeActivation } from "@/common/actions/admin/demandes-activation.actions";
+import { MOTIF_COMPTE_AILLEURS, renvoyerDemandeActivation } from "@/common/actions/admin/demandes-activation.actions";
+import { rejectInvitation } from "@/common/actions/organisations.actions";
 import {
   demandesActivationCfaDb,
   invitationsArchiveDb,
@@ -336,6 +337,46 @@ describe("relances du workflow d'activation", () => {
       expect(sendEmailMock.mock.calls.filter(([, template]) => template === "activation_cfa")).toHaveLength(1);
     });
 
+    it("ne renvoie pas la validation à un compte créé sans invitation", async () => {
+      const invitation = await insererInvitation();
+      await insererDemande({ invitation_id: invitation._id });
+      const compteId = await insererCompte("direction@cfa-tests.fr", {
+        account_status: "PENDING_EMAIL_VALIDATION",
+        created_at: plus(0.5),
+      });
+      await usersMigrationDb().updateOne({ _id: compteId }, { $unset: { organisation_role: "" } });
+
+      await relancerDemandesActivation(plus(3));
+
+      expect(sendEmailMock).not.toHaveBeenCalled();
+    });
+
+    it("passe en échec quand un compte est créé avec son email dans une autre organisation", async () => {
+      const invitation = await insererInvitation();
+      const demande = await insererDemande({ invitation_id: invitation._id });
+      await insererCompte("direction@cfa-tests.fr", { organisation_id: new ObjectId(), created_at: plus(1) });
+
+      await relancerDemandesActivation(plus(8));
+
+      expect(await relire(demande)).toMatchObject({ statut: "echec", motif_echec: MOTIF_COMPTE_AILLEURS });
+      expect(brevoMock).not.toHaveBeenCalled();
+    });
+
+    it("passe en échec quand l'invité refuse l'invitation", async () => {
+      const auteur = await insererCompte(ADMIN_TBA, { organisation_id: new ObjectId() });
+      const demande = await insererDemande();
+      const invitation = await insererInvitation({ author_id: auteur, demande_id: demande._id });
+      await demandesActivationCfaDb().updateOne({ _id: demande._id }, { $set: { invitation_id: invitation._id } });
+
+      await rejectInvitation(invitation.token);
+      await relancerDemandesActivation(plus(1));
+
+      expect(await relire(demande)).toMatchObject({
+        statut: "echec",
+        motif_echec: "Invitation refusée par le destinataire",
+      });
+    });
+
     it("passe en échec, renvoyable, quand son invitation a été annulée", async () => {
       const invitation = await insererInvitation();
       const demande = await insererDemande({ invitation_id: invitation._id });
@@ -506,9 +547,9 @@ describe("relances du workflow d'activation", () => {
         role: "member",
         created_at: plus(-300),
       });
-      await insererCompte("ancien@cfa-tests.fr", { organisation_role: "member", connection_history: [plus(-290)] });
+      await insererCompte("ancien@cfa-tests.fr", { organisation_role: "member", connection_history: [plus(0.5)] });
 
-      await relancerDemandesActivation(plus(1));
+      await relancerDemandesActivation(plus(2));
 
       expect(templatesEnvoyes()).not.toContainEqual(
         expect.objectContaining({ templateId: templates.onboardingCollaborateur })

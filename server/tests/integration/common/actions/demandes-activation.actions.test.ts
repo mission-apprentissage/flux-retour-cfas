@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
+import { refusAvecMail } from "shared/models/data/demandesActivationCfa.model";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IOrganisation } from "shared/models/data/organisations.model";
 import type { IOrganisme } from "shared/models/data/organismes.model";
@@ -230,5 +231,23 @@ describe("lireHorodatage", () => {
     expect(lireHorodatage("2026/10/16 3:45:45 PM UTC+3")).toEqual(new Date("2026-10-16T12:45:45.000Z"));
     expect(lireHorodatage("2026/10/16 12:05:00 AM UTC+2")).toEqual(new Date("2026-10-15T22:05:00.000Z"));
     expect(lireHorodatage("16/10/2026 15:45")).toBeNull();
+  });
+});
+
+describe("refusAvecMail", () => {
+  it.each([
+    ["aucun_effectif", true],
+    ["siret_inconnu", true],
+    ["sans_uai", true],
+    ["siret_mal_forme", false],
+    ["email_mal_forme", false],
+    ["messagerie_grand_public", false],
+    ["responsable_pur", false],
+    ["nature_inconnue", false],
+    ["compte_autre_organisation", false],
+    ["ferme", false],
+    ["refus_force", false],
+  ] as const)("classe le motif %s : refus avec mail = %s", (motif, avecMail) => {
+    expect(refusAvecMail([motif])).toBe(avecMail);
   });
 });

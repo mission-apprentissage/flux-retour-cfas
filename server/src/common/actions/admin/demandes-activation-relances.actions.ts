@@ -1,11 +1,16 @@
-import { format } from "date-fns";
 import { addJob } from "job-processor";
 import { ObjectId } from "mongodb";
 import type { IDemandeActivationCfa } from "shared/models/data/demandesActivationCfa.model";
 import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 
-import { envoyerEmailBrevo, paramsActivationAvecCompte } from "@/common/actions/admin/demandes-activation.actions";
-import { lienInscriptionCfa, nomCfaPourEmail } from "@/common/actions/organisations.actions";
+import {
+  envoyerEmailBrevo,
+  MOTIF_COMPTE_AILLEURS,
+  organisationDuCompteDans,
+  paramsActivationAvecCompte,
+  paramsActivationSansCompte,
+} from "@/common/actions/admin/demandes-activation.actions";
+import { nomCfaPourEmail } from "@/common/actions/organisations.actions";
 import { getUserByEmailIgnoringCase, resendConfirmationEmail } from "@/common/actions/users.actions";
 import parentLogger from "@/common/logger";
 import {
@@ -38,6 +43,16 @@ async function nomCfa(demande: Pick<IDemandeActivationCfa, "organisme_id">) {
       )
     : null;
   return nomCfaPourEmail(organisme);
+}
+
+async function paramsInviter(demande: IDemandeActivationCfa) {
+  const admin = demande.user_id ? await usersMigrationDb().findOne({ _id: demande.user_id }) : null;
+  return {
+    NOM_CFA: await nomCfa(demande),
+    PRENOM: admin?.prenom ?? "",
+    NOM: admin?.nom ?? "",
+    LIEN_INVITER: lienInviter(),
+  };
 }
 
 async function envoyer(
@@ -139,11 +154,10 @@ export async function envoyerInvitezCollaborateurs(demandeId: ObjectId) {
     { $set: { invitez_sent_at: new Date(), updated_at: new Date() } }
   );
   if (!demande) return;
-  const admin = demande.user_id ? await usersMigrationDb().findOne({ _id: demande.user_id }) : null;
   const envoye = await envoyer(
     config.brevo.templatesDemandesActivation.invitezCollaborateurs,
     demande.email,
-    { NOM_CFA: await nomCfa(demande), PRENOM: admin?.prenom ?? "", NOM: admin?.nom ?? "", LIEN_INVITER: lienInviter() },
+    await paramsInviter(demande),
     demande
   );
   if (!envoye) {
@@ -161,14 +175,26 @@ async function debloquerEnvois(maintenant: Date) {
   );
 }
 
+async function compteDejaCree(demande: IDemandeActivationCfa, maintenant: Date): Promise<boolean> {
+  const compte = await getUserByEmailIgnoringCase(demande.email);
+  if (!compte) return false;
+  if (!(await organisationDuCompteDans(compte, demande.organisme_id))) {
+    await demandesActivationCfaDb().updateOne(
+      { _id: demande._id, statut: "envoyee" },
+      { $set: { statut: "echec", motif_echec: MOTIF_COMPTE_AILLEURS, updated_at: maintenant } }
+    );
+  }
+  return true;
+}
+
 async function marquerInvitationsExpirees(maintenant: Date) {
   const demandes = await demandesActivationCfaDb()
     .find({ statut: "envoyee", branche_envoyee: "activation", invitation_id: { $ne: null } })
     .toArray();
   for (const demande of demandes) {
     const invitation = await invitationsDb().findOne({ _id: demande.invitation_id ?? undefined });
+    if (await compteDejaCree(demande, maintenant)) continue;
     if (invitation && (!invitation.expires_at || invitation.expires_at > maintenant)) continue;
-    if (await getUserByEmailIgnoringCase(demande.email)) continue;
     await demandesActivationCfaDb().updateOne(
       { _id: demande._id, statut: "envoyee" },
       {
@@ -191,7 +217,7 @@ async function relancerAdminsSansCompte(maintenant: Date) {
     })
     .toArray();
   for (const demande of demandes) {
-    if (await getUserByEmailIgnoringCase(demande.email)) continue;
+    if (await compteDejaCree(demande, maintenant)) continue;
     const invitation = demande.invitation_id ? await invitationsDb().findOne({ _id: demande.invitation_id }) : null;
     const expiresAt = invitation?.expires_at;
     if (!invitation || !expiresAt || expiresAt <= maintenant) continue;
@@ -199,11 +225,7 @@ async function relancerAdminsSansCompte(maintenant: Date) {
       templateId,
       verrouDemande(demande, "relance_sans_compte_at"),
       demande.email,
-      async () => ({
-        NOM_CFA: await nomCfa(demande),
-        LIEN_INSCRIPTION: lienInscriptionCfa(invitation.token),
-        DATE_EXPIRATION: format(expiresAt, "dd/MM/yyyy"),
-      }),
+      async () => paramsActivationSansCompte(await nomCfa(demande), invitation.token, expiresAt),
       demande
     );
   }
@@ -217,6 +239,7 @@ async function renvoyerValidationEmail(maintenant: Date) {
     const compte = await getUserByEmailIgnoringCase(demande.email);
     if (
       compte?.account_status !== "PENDING_EMAIL_VALIDATION" ||
+      !compte.organisation_role ||
       !demande.organisation_id ||
       !compte.organisation_id.equals(demande.organisation_id) ||
       !compte.created_at ||
@@ -278,15 +301,7 @@ async function relancerAdminsSansInvitation(maintenant: Date) {
       templateId,
       verrouDemande(demande, "relance_sans_invitation_at"),
       demande.email,
-      async () => {
-        const admin = await usersMigrationDb().findOne({ _id: demande.user_id ?? undefined });
-        return {
-          NOM_CFA: await nomCfa(demande),
-          PRENOM: admin?.prenom ?? "",
-          NOM: admin?.nom ?? "",
-          LIEN_INVITER: lienInviter(),
-        };
-      },
+      () => paramsInviter(demande),
       demande
     );
   }

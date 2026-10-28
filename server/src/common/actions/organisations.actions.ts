@@ -16,6 +16,7 @@ import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import logger from "@/common/logger";
 import {
+  demandesActivationCfaDb,
   invitationsArchiveDb,
   invitationsDb,
   organisationsDb,
@@ -618,6 +619,12 @@ export async function rejectInvitation(token: string): Promise<void> {
     token,
   });
   await invitationsArchiveDb().insertOne(invitation);
+  if (invitation.demande_id) {
+    await demandesActivationCfaDb().updateOne(
+      { _id: invitation.demande_id, statut: "envoyee" },
+      { $set: { statut: "echec", motif_echec: "Invitation refusée par le destinataire", updated_at: new Date() } }
+    );
+  }
 }
 
 // utilitaires

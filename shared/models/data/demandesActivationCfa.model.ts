@@ -15,17 +15,57 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
 ];
 
 export const MOTIFS_DEMANDE_ACTIVATION = {
-  aucun_effectif: { libelle: "Aucun apprenti sur les années actives", avecMail: true },
-  siret_inconnu: { libelle: "SIRET inconnu du TBA", avecMail: true },
-  sans_uai: { libelle: "Établissement sans UAI", avecMail: true },
-  siret_mal_forme: { libelle: "SIRET mal formé", avecMail: false },
-  email_mal_forme: { libelle: "Email mal formé", avecMail: false },
-  messagerie_grand_public: { libelle: "Messagerie grand public", avecMail: false },
-  responsable_pur: { libelle: "Organisme responsable sans formation en propre", avecMail: false },
-  nature_inconnue: { libelle: "Nature de l'organisme inconnue", avecMail: false },
-  compte_autre_organisation: { libelle: "Compte rattaché à une autre organisation", avecMail: false },
-  ferme: { libelle: "Établissement fermé", avecMail: false },
-  refus_force: { libelle: "Refus forcé par l'équipe", avecMail: false },
+  aucun_effectif: {
+    libelle: "Aucun apprenti sur les années actives",
+    detail: "Aucun effectif ERP ni DECA sur les années scolaires actives",
+    avecMail: true,
+  },
+  siret_inconnu: {
+    libelle: "SIRET inconnu du TBA",
+    detail: "Aucun établissement de ce SIRET dans le Tableau de bord",
+    avecMail: true,
+  },
+  sans_uai: {
+    libelle: "Établissement sans UAI",
+    detail: "L'établissement n'a pas d'UAI : DECA ne peut pas lui être ouvert",
+    avecMail: true,
+  },
+  siret_mal_forme: {
+    libelle: "SIRET mal formé",
+    detail: "Le SIRET saisi n'a pas 14 chiffres : corrigez-le",
+    avecMail: false,
+  },
+  email_mal_forme: {
+    libelle: "Email mal formé",
+    detail: "L'adresse saisie n'est pas un email valide",
+    avecMail: false,
+  },
+  messagerie_grand_public: {
+    libelle: "Messagerie grand public",
+    detail: "Adresse Gmail, Orange… : si elle appartient bien au CFA, forcez la branche",
+    avecMail: false,
+  },
+  responsable_pur: {
+    libelle: "Organisme responsable sans formation en propre",
+    detail: "Organisme de nature « responsable » : il ne forme pas lui-même",
+    avecMail: false,
+  },
+  nature_inconnue: {
+    libelle: "Nature de l'organisme inconnue",
+    detail: "La nature de l'organisme est inconnue du référentiel",
+    avecMail: false,
+  },
+  compte_autre_organisation: {
+    libelle: "Compte rattaché à une autre organisation",
+    detail: "Cet email a déjà un compte dans une autre organisation",
+    avecMail: false,
+  },
+  ferme: {
+    libelle: "Établissement fermé",
+    detail: "Le SIRET saisi est fermé : corrigez-le avec le SIRET ouvert de même UAI s'il est proposé",
+    avecMail: false,
+  },
+  refus_force: { libelle: "Refus forcé par l'équipe", detail: "Refus décidé par l'équipe", avecMail: false },
 } as const;
 
 export type MotifDemandeActivation = keyof typeof MOTIFS_DEMANDE_ACTIVATION;
@@ -39,7 +79,7 @@ export const MOTIFS_LEVES_PAR_BRANCHE_FORCEE: ReadonlyArray<MotifDemandeActivati
 ];
 
 export const zBrancheDemandeActivation = z.enum(["activation", "compte_existant", "refus"]);
-export const zStatutDemandeActivation = z.enum(["pret", "envoi_en_cours", "envoyee", "echec", "invitation_expiree"]);
+const zStatutDemandeActivation = z.enum(["pret", "envoi_en_cours", "envoyee", "echec", "invitation_expiree"]);
 const zMotifDemandeActivation = z.enum(
   Object.keys(MOTIFS_DEMANDE_ACTIVATION) as [MotifDemandeActivation, ...MotifDemandeActivation[]]
 );

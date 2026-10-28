@@ -2,7 +2,10 @@ import * as Boom from "@hapi/boom";
 import express, { RequestHandler } from "express";
 import { ObjectId } from "mongodb";
 import multer from "multer";
-import { zModificationDemandeActivation } from "shared/models/routes/admin/demandes-activation.api";
+import {
+  zEnvoiDemandesActivation,
+  zModificationDemandeActivation,
+} from "shared/models/routes/admin/demandes-activation.api";
 import { z } from "zod";
 
 import {
@@ -49,7 +52,13 @@ export default () => {
 
   router.post(
     "/envoyer",
-    returnResult(async (req) => envoyerDemandesActivation({ _id: req.user._id, email: req.user.email }))
+    validateRequestMiddleware({ body: zEnvoiDemandesActivation }),
+    returnResult(async (req) =>
+      envoyerDemandesActivation(
+        req.body.ids.map((id: string) => new ObjectId(id)),
+        { _id: req.user._id, email: req.user.email }
+      )
+    )
   );
 
   router.post(
