@@ -17,6 +17,7 @@ import { usePlausibleAppTracking } from "../_hooks/plausible";
 
 import styles from "./ConnectedHeader.module.css";
 import { Impersonate } from "./Impersonate";
+import { LectureSeuleNotice } from "./LectureSeuleNotice";
 import { useCfaUnreadNotificationsCount } from "./ruptures/cfa/hooks";
 import { useMlCompteursOnglets } from "./ruptures/shared/hooks";
 import { UserConnectedHeader } from "./UserConnectedHeader";
@@ -310,6 +311,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
         navigation={getNavigationItems()}
         disableDisplay
       />
+      <LectureSeuleNotice />
     </>
   );
 }
