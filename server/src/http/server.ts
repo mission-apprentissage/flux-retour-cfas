@@ -149,6 +149,7 @@ import {
   resendEmailLimiter,
   webhookLimiter,
 } from "./middlewares/rateLimit";
+import { restrictReadOnlyImpersonation } from "./middlewares/readOnlyImpersonation";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
 import requireBearerAuthentication from "./middlewares/requireBearerAuthentication";
 import requireSipaAuthentication from "./middlewares/requireSipaAuthentication";
@@ -587,6 +588,7 @@ function setupRoutes(app: Application) {
   const authRouter = express.Router();
   authRouter
     .use(authMiddleware())
+    .use(restrictReadOnlyImpersonation)
     // Rate limit global des routes authed (userId, 1000/min). `heavyLimiter` se superpose sur les routes coûteuses.
     .use(apiLimiter)
     .get(
