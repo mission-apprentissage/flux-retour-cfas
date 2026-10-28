@@ -38,7 +38,7 @@ export function CollabChiffresClesPanel() {
           />
         </StatsErrorHandler>
       </KpiFunnel>
-      <OverviewCard title="Évolution mensuelle">
+      <OverviewCard title="Évolution mensuelle cumulée">
         <StatsErrorHandler data={mensuel.data} error={mensuel.error} isLoading={mensuel.isLoading}>
           <CollabMensuelChart data={mensuel.data?.mois} loading={mensuel.isLoading} />
         </StatsErrorHandler>

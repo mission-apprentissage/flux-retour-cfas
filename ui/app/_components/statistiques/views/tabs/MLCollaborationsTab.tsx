@@ -74,7 +74,7 @@ function VueChiffree({ mlId, action }: Pick<MLCollaborationsTabProps, "mlId" | "
               </div>
             </Carte>
 
-            <Carte titre="Évolution mensuelle">
+            <Carte titre="Évolution mensuelle cumulée">
               <StatsErrorHandler data={mensuel.data} error={mensuel.error} isLoading={mensuel.isLoading}>
                 <CollabMensuelChart data={mensuel.data?.mois} loading={mensuel.isLoading} />
               </StatsErrorHandler>

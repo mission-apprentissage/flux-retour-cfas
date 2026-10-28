@@ -26,8 +26,10 @@ const formatMonth = (mois: string) => {
   return `${label.charAt(0).toUpperCase()}${label.slice(1)} ${year}`;
 };
 
+type CumulRow = ICollaborationMois & { cumul: Record<(typeof SERIES)[number]["key"], number> };
+
 function MensuelTooltip({ active, payload, label }: Partial<TooltipContentProps>) {
-  const row = payload?.[0]?.payload as ICollaborationMois | undefined;
+  const row = payload?.[0]?.payload as CumulRow | undefined;
   if (!active || !row) return null;
 
   return (
@@ -40,7 +42,9 @@ function MensuelTooltip({ active, payload, label }: Partial<TooltipContentProps>
               <div className={tooltipStyles.tooltipColorDot} style={{ backgroundColor: serie.color }} />
               <span className={tooltipStyles.tooltipLabel}>{serie.label}</span>
             </div>
-            <span className={tooltipStyles.tooltipValue}>{row[serie.key].toLocaleString("fr-FR")}</span>
+            <span className={tooltipStyles.tooltipValue}>
+              {row.cumul[serie.key].toLocaleString("fr-FR")} (+{row[serie.key].toLocaleString("fr-FR")})
+            </span>
           </div>
         ))}
       </div>
@@ -48,18 +52,28 @@ function MensuelTooltip({ active, payload, label }: Partial<TooltipContentProps>
   );
 }
 
-/** Cohortes par mois d'envoi : les barres s'emboîtent (acceptés ⊂ contactés ⊂ envoyés), d'où l'empilement des écarts. */
+/**
+ * Cumul des cohortes par mois d'envoi, sur la période affichée. Les barres s'emboîtent (acceptés ⊂ contactés ⊂ envoyés),
+ * d'où l'empilement des écarts ; l'infobulle donne le cumul et, entre parenthèses, l'apport du mois.
+ */
 export function CollabMensuelChart({ data, loading }: { data?: ICollaborationMois[]; loading?: boolean }) {
   if (loading || !data) return <Skeleton height="280px" width="100%" />;
 
-  const rows = data.map((row) => ({
-    ...row,
-    label: formatMonth(row.mois),
-    part_acceptes: row.acceptes,
-    part_contactes: Math.max(row.contactes - row.acceptes, 0),
-    part_envoyes: Math.max(row.envoyes - row.contactes, 0),
-  }));
-  const yTicks = niceTicks(Math.max(1, ...rows.map((row) => row.envoyes)), 4);
+  const cumul = { envoyes: 0, contactes: 0, acceptes: 0 };
+  const rows = data.map((row) => {
+    cumul.envoyes += row.envoyes;
+    cumul.contactes += row.contactes;
+    cumul.acceptes += row.acceptes;
+    return {
+      ...row,
+      cumul: { ...cumul },
+      label: formatMonth(row.mois),
+      part_acceptes: cumul.acceptes,
+      part_contactes: Math.max(cumul.contactes - cumul.acceptes, 0),
+      part_envoyes: Math.max(cumul.envoyes - cumul.contactes, 0),
+    };
+  });
+  const yTicks = niceTicks(Math.max(1, cumul.envoyes), 4);
   const totals = SERIES.map((serie) => ({
     label: serie.label,
     color: serie.color,
