@@ -457,7 +457,7 @@ export interface ICollaborationMensuelStats {
 }
 
 export interface ICfaNpsStats {
-  nps: number | null;
+  note_moyenne: number | null;
   total_reponses: number;
   utilisateurs: number;
   cfa: number;

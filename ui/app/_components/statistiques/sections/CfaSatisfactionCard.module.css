@@ -32,16 +32,6 @@
   color: var(--text-title-grey);
 }
 
-.marker {
-  position: absolute;
-  top: -4px;
-  width: 3px;
-  height: 19px;
-  transform: translateX(-50%);
-  border-radius: 2px;
-  background-color: var(--text-title-grey);
-}
-
 .scale {
   display: flex;
   justify-content: space-between;

@@ -15,24 +15,22 @@ import styles from "./CfaSatisfactionCard.module.css";
 const pluriel = (count: number, singulier: string, plurielForm: string) =>
   `${count.toLocaleString("fr-FR")} ${count > 1 ? plurielForm : singulier}`;
 
+const NOTE_MAX = 5;
+
 export function NpsJauge({ data, avecNombreCfa = true }: { data: ICfaNpsStats; avecNombreCfa?: boolean }) {
-  const position = data.nps === null ? null : ((data.nps + 100) / 200) * 100;
+  const position = data.note_moyenne === null ? null : (data.note_moyenne / NOTE_MAX) * 100;
   return (
     <>
       <div className={styles.track}>
         {position !== null && (
-          <>
-            <span className={styles.value} style={{ left: `${position}%` }}>
-              {data.nps}
-            </span>
-            <span className={styles.marker} style={{ left: `${position}%` }} aria-hidden="true" />
-          </>
+          <span className={styles.value} style={{ left: `${position}%` }}>
+            {data.note_moyenne?.toLocaleString("fr-FR", { maximumFractionDigits: 1 })}
+          </span>
         )}
       </div>
       <div className={styles.scale} aria-hidden="true">
-        <span>-100</span>
         <span>0</span>
-        <span>100</span>
+        <span>{NOTE_MAX}</span>
       </div>
       <p className={styles.meta}>
         Total réponses {data.total_reponses.toLocaleString("fr-FR")}
@@ -46,8 +44,7 @@ export function NpsJauge({ data, avecNombreCfa = true }: { data: ICfaNpsStats; a
 
 export const NPS_TITRE = "Simplicité de la demande de collaboration";
 
-export const NPS_TOOLTIP =
-  "Calculé à partir de la note donnée par les CFA à la fin du formulaire de collaboration (de 0 à 5) : 5 = promoteur, 4 = neutre, 0 à 3 = détracteur. Score = % de promoteurs − % de détracteurs, de −100 à 100.";
+export const NPS_TOOLTIP = "Moyenne des notes (de 0 à 5) données par les CFA à la fin du formulaire de collaboration.";
 
 export function CfaSatisfactionCard() {
   const { scope } = useStatsFilters();

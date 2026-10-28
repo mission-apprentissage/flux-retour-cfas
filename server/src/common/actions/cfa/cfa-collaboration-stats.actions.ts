@@ -19,20 +19,17 @@ const findTerritoireOrganismes = (territoire: CfaTerritoire) =>
     })
     .toArray();
 
-/**
- * NPS adapté à la note de fin de formulaire de collaboration (0 à 5, « facilité du formulaire ») :
- * 5 = promoteur, 4 = passif, 0 à 3 = détracteur. Méthode provisoire, à valider avec le métier.
- */
+/** Note moyenne (0 à 5) donnée par les CFA à la fin du formulaire de collaboration (« facilité du formulaire »). */
 export async function getCfaNpsStats(territoire: CfaTerritoire): Promise<ICfaNpsStats> {
   const organismeIds = (await findTerritoireOrganismes(territoire)).map((organisme) => organisme._id);
   return getNpsStatsForOrganismes(organismeIds);
 }
 
 export async function getNpsStatsForOrganismes(organismeIds: ObjectId[]): Promise<ICfaNpsStats> {
-  if (organismeIds.length === 0) return { nps: null, total_reponses: 0, utilisateurs: 0, cfa: 0 };
+  if (organismeIds.length === 0) return { note_moyenne: null, total_reponses: 0, utilisateurs: 0, cfa: 0 };
 
   const [result] = await missionLocaleEffectifsDb()
-    .aggregate<{ total: number; promoteurs: number; detracteurs: number; utilisateurs: unknown[]; cfa: unknown[] }>([
+    .aggregate<{ total: number; moyenne: number; utilisateurs: unknown[]; cfa: unknown[] }>([
       {
         $match: {
           ...buildDossierEnvoyeMatch(new Date(), organismeIds, null),
@@ -43,8 +40,7 @@ export async function getNpsStatsForOrganismes(organismeIds: ObjectId[]): Promis
         $group: {
           _id: null,
           total: { $sum: 1 },
-          promoteurs: { $sum: { $cond: [{ $eq: ["$organisme_data.form_feedback.note", 5] }, 1, 0] } },
-          detracteurs: { $sum: { $cond: [{ $lte: ["$organisme_data.form_feedback.note", 3] }, 1, 0] } },
+          moyenne: { $avg: "$organisme_data.form_feedback.note" },
           utilisateurs: { $addToSet: "$organisme_data.acc_conjoint_by" },
           cfa: { $addToSet: "$effectif_snapshot.organisme_id" },
         },
@@ -52,10 +48,10 @@ export async function getNpsStatsForOrganismes(organismeIds: ObjectId[]): Promis
     ])
     .toArray();
 
-  if (!result?.total) return { nps: null, total_reponses: 0, utilisateurs: 0, cfa: 0 };
+  if (!result?.total) return { note_moyenne: null, total_reponses: 0, utilisateurs: 0, cfa: 0 };
 
   return {
-    nps: Math.round(((result.promoteurs - result.detracteurs) / result.total) * 100),
+    note_moyenne: Math.round(result.moyenne * 10) / 10,
     total_reponses: result.total,
     utilisateurs: result.utilisateurs.filter(Boolean).length,
     cfa: result.cfa.length,

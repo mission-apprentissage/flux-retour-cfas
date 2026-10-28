@@ -1416,7 +1416,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       );
     });
 
-    it("Calcule le NPS adapté (5 promoteur, 4 neutre, 0 à 3 détracteur) sur les CFA du territoire", async () => {
+    it("Calcule la note moyenne sur 5 des CFA du territoire", async () => {
       await missionLocaleEffectifsDb().insertMany(
         [
           dossier(CFA_A, { note: 5, auteur: UTILISATEUR_1 }),
@@ -1433,14 +1433,14 @@ describe("Indicateurs ML routes (territoriales)", () => {
         "get",
         "/api/v1/organisation/indicateurs-ml/stats/cfa/nps"
       );
-      expect(region.data).toEqual({ nps: 25, total_reponses: 4, utilisateurs: 2, cfa: 1 });
+      expect(region.data).toEqual({ note_moyenne: 4, total_reponses: 4, utilisateurs: 2, cfa: 1 });
 
       const national = await requestAsOrganisation(
         DREETS_IDF,
         "get",
         "/api/v1/organisation/indicateurs-ml/stats/cfa/nps?national=true"
       );
-      expect(national.data).toEqual({ nps: 40, total_reponses: 5, utilisateurs: 3, cfa: 2 });
+      expect(national.data).toEqual({ note_moyenne: 4.2, total_reponses: 5, utilisateurs: 3, cfa: 2 });
     });
 
     it("Signale les CFA à plus de 25 % d'injoignables, à partir de 4 dossiers traités hors « à recontacter »", async () => {
@@ -2312,7 +2312,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
           delai_moyen_jours: 5,
           situations: { rupture: 4, total: 4 },
           objectifs: { mobilite: 4, logement: 1, total_dossiers: 4 },
-          nps: { nps: null, total_reponses: 0 },
+          nps: { note_moyenne: null, total_reponses: 0 },
         });
         expect(response.data.mensuel.find((mois: { mois: string }) => mois.mois === "2026-03")).toEqual({
           mois: "2026-03",
