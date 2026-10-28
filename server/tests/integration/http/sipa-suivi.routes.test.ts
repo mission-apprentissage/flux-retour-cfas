@@ -425,6 +425,21 @@ describe("GET /api/v2/affelnet/suivi", () => {
       assert.strictEqual(data.metadonnees.totalElements, 0);
     });
 
+    it("ERP rompu au début stocké la veille à 22h UTC + DECA du même contrat sans rupture → jeune absent", async () => {
+      await insertEffectif(orgLille, {
+        apprenant: identite,
+        contrats: [{ ...contratRompu, date_debut: new Date("2025-09-30T22:00:00.000Z") }],
+      });
+      await insertEffectifDECA(orgLille, {
+        apprenant: identite,
+        contrats: [{ date_debut: D("2025-10-01"), date_fin: D("2027-06-30") }],
+      });
+
+      const { data } = await getSuivi();
+
+      assert.strictEqual(data.metadonnees.totalElements, 0);
+    });
+
     it("DECA rompu + ERP sans contrat → jeune absent", async () => {
       await insertEffectif(orgLille, { apprenant: identite, contrats: [] });
       await insertEffectifDECA(orgLille, { apprenant: identite, contrats: [contratRompu] });

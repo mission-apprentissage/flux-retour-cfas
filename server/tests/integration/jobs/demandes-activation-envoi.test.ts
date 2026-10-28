@@ -10,10 +10,12 @@ import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixtu
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { login, register } from "@/common/actions/account.actions";
 import {
   DUREE_INVITATION_DEMANDE_MS,
   envoyerDemandesActivation,
   evaluerDemande,
+  importerDemandesActivation,
   listerDemandesActivation,
   modifierDemandeActivation,
   renvoyerDemandeActivation,
@@ -290,19 +292,22 @@ describe("envoi des demandes d'activation", () => {
       await envoyerEtTraiter();
 
       const invitation = await invitationsDb().findOne({ _id: invitationId });
-      expect(invitation).toMatchObject({ role: "admin", demande_id: demande._id, token: "jeton-existant" });
+      expect(invitation).toMatchObject({
+        role: "admin",
+        demande_id: demande._id,
+        token: "jeton-existant",
+        author_id: EXPEDITEUR._id,
+      });
       expect(invitation?.expires_at?.getTime()).toBeGreaterThan(Date.now() + DUREE_INVITATION_DEMANDE_MS - 60_000);
       expect(await invitationsDb().countDocuments()).toBe(1);
     });
   });
 
   describe("branche compte existant", () => {
-    it("valide un compte en attente sans notify_access_granted_ofa, le passe admin et envoie le template avec compte", async () => {
+    it("passe admin un compte confirmé et lui envoie le template avec compte", async () => {
       const organisme = await insererOrganisme();
       const organisationId = await insererOrganisation(organisme._id);
-      const compteId = await insererCompte("direction@cfa-tests.fr", organisationId, {
-        account_status: "PENDING_ADMIN_VALIDATION",
-      });
+      const compteId = await insererCompte("direction@cfa-tests.fr", organisationId);
       const demande = await insererDemande("direction@cfa-tests.fr");
       expect(demande.branche).toBe("compte_existant");
 
@@ -312,7 +317,6 @@ describe("envoi des demandes d'activation", () => {
         account_status: "CONFIRMED",
         organisation_role: "admin",
       });
-      expect(sendEmailMock).not.toHaveBeenCalledWith(expect.anything(), "notify_access_granted_ofa", expect.anything());
       expect(brevoMock).toHaveBeenCalledWith(
         "direction@cfa-tests.fr",
         config.brevo.templatesDemandesActivation.activationAvecCompte,
@@ -326,27 +330,111 @@ describe("envoi des demandes d'activation", () => {
       expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "compte_existant" });
     });
 
-    it("passe admin sans le confirmer un compte dont l'email n'est pas validé, et lui renvoie le lien de validation", async () => {
-      const organisme = await insererOrganisme();
-      const organisationId = await insererOrganisation(organisme._id);
-      const compteId = await insererCompte("direction@cfa-tests.fr", organisationId, {
-        account_status: "PENDING_EMAIL_VALIDATION",
-      });
+    it.each(["PENDING_EMAIL_VALIDATION", "PENDING_ADMIN_VALIDATION"] as const)(
+      "remplace un compte %s par une invitation admin, sans le valider ni le promouvoir",
+      async (account_status) => {
+        const organisme = await insererOrganisme();
+        const organisationId = await insererOrganisation(organisme._id);
+        await insererCompte("direction@cfa-tests.fr", organisationId, { account_status });
+        const demande = await insererDemande("direction@cfa-tests.fr");
+        expect(demande.branche).toBe("activation");
+
+        await envoyerEtTraiter();
+
+        expect(await usersMigrationDb().countDocuments({ email: "direction@cfa-tests.fr" })).toBe(0);
+        expect(await invitationsDb().findOne({ email: "direction@cfa-tests.fr" })).toMatchObject({
+          role: "admin",
+          demande_id: demande._id,
+        });
+        expect(sendEmailMock).not.toHaveBeenCalled();
+        expect(brevoMock).toHaveBeenCalledTimes(1);
+        expect(brevoMock).toHaveBeenCalledWith(
+          "direction@cfa-tests.fr",
+          config.brevo.templatesDemandesActivation.activationSansCompte,
+          expect.anything(),
+          expect.anything()
+        );
+        expect(await relire(demande)).toMatchObject({
+          statut: "envoyee",
+          branche_envoyee: "activation",
+          etapes: { compte_at: expect.any(Date), invitation_at: expect.any(Date) },
+        });
+      }
+    );
+
+    it("ne laisse pas un tiers inscrit avec l'email du demandeur devenir admin", async () => {
+      await insererOrganisme();
+      const inscription = {
+        user: {
+          email: "direction@cfa-tests.fr",
+          civility: "Monsieur" as const,
+          nom: "Tiers",
+          prenom: "Usurpateur",
+          fonction: "Directeur",
+          telephone: "0102030405",
+          password: "MotDePasseDuTiers1!",
+          has_accept_cgu_version: "v0.4",
+        },
+        organisation: { type: "ORGANISME_FORMATION" as const, siret: SIRET, uai: UAI },
+      };
+      await register(inscription);
+      addJobMock.mockReset();
       const demande = await insererDemande("direction@cfa-tests.fr");
 
       await envoyerEtTraiter();
 
-      expect(await usersMigrationDb().findOne({ _id: compteId })).toMatchObject({
-        account_status: "PENDING_EMAIL_VALIDATION",
-        organisation_role: "admin",
+      expect(await usersMigrationDb().countDocuments({ email: "direction@cfa-tests.fr" })).toBe(0);
+      expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "activation" });
+      await expect(login("direction@cfa-tests.fr", "MotDePasseDuTiers1!")).rejects.toThrow();
+      await expect(register(inscription)).rejects.toThrow("Une invitation CFA est en attente pour cet email");
+    });
+
+    it("garde un compte confirmé entre le clic et le job, et l'envoie en compte existant", async () => {
+      const organisme = await insererOrganisme();
+      const organisationId = await insererOrganisation(organisme._id);
+      const compteId = await insererCompte("direction@cfa-tests.fr", organisationId, {
+        account_status: "PENDING_ADMIN_VALIDATION",
       });
-      expect(sendEmailMock).toHaveBeenCalledWith(
-        "direction@cfa-tests.fr",
-        "activation_cfa",
-        expect.objectContaining({ isAdmin: true })
-      );
-      expect(brevoMock).not.toHaveBeenCalled();
+      const demande = await insererDemande("direction@cfa-tests.fr");
+      await envoyerDemandesActivation(EXPEDITEUR);
+      await usersMigrationDb().updateOne({ _id: compteId }, { $set: { account_status: "CONFIRMED" } });
+
+      await traiterEnvoisDemandesActivation(organisme._id);
+
+      expect(await usersMigrationDb().findOne({ _id: compteId })).toMatchObject({ organisation_role: "admin" });
       expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "compte_existant" });
+      expect(await invitationsDb().countDocuments()).toBe(0);
+    });
+
+    it("trouve le compte malgré les majuscules de son email", async () => {
+      const organisme = await insererOrganisme();
+      const organisationId = await insererOrganisation(organisme._id);
+      const compteId = await insererCompte("Direction@CFA-tests.fr", organisationId);
+      const demande = await insererDemande("direction@cfa-tests.fr");
+      expect(demande).toMatchObject({ branche: "compte_existant", user_id: compteId });
+
+      await envoyerEtTraiter();
+
+      expect(await usersMigrationDb().findOne({ _id: compteId })).toMatchObject({ organisation_role: "admin" });
+      expect(await invitationsDb().countDocuments()).toBe(0);
+    });
+
+    it("reconnaît un compte rattaché à une autre organisation du même établissement", async () => {
+      const organisme = await insererOrganisme();
+      await insererOrganisation(organisme._id);
+      const doublon = await insererOrganisation(organisme._id);
+      const compteId = await insererCompte("direction@cfa-tests.fr", doublon);
+      const demande = await insererDemande("direction@cfa-tests.fr");
+      expect(demande).toMatchObject({ branche: "compte_existant", motifs: [], organisation_id: doublon });
+
+      await envoyerEtTraiter();
+
+      expect(await usersMigrationDb().findOne({ _id: compteId })).toMatchObject({ organisation_role: "admin" });
+      expect(await relire(demande)).toMatchObject({
+        statut: "envoyee",
+        branche_envoyee: "compte_existant",
+        organisation_id: doublon,
+      });
     });
 
     it("enregistre en compte existant un compte apparu dans l'organisation entre le clic et le job", async () => {
@@ -659,6 +747,110 @@ describe("envoi des demandes d'activation", () => {
         { redirectRecipientInNonProdTo: EXPEDITEUR.email }
       );
       expect(sendEmailMock).not.toHaveBeenCalled();
+    });
+
+    it("n'active qu'une fois une personne qui a deux demandes vers le même établissement", async () => {
+      await insererOrganisme();
+      const premiere = await insererDemande("direction@cfa-tests.fr");
+      const corrigee = await insererDemande("direction@cfa-tests.fr", "13002374000400", { a_envoyer: false });
+      await modifierDemandeActivation(corrigee._id, { siret_corrige: SIRET });
+      await modifierDemandeActivation(corrigee._id, { a_envoyer: true });
+
+      await envoyerEtTraiter();
+
+      expect(await relire(premiere)).toMatchObject({ statut: "envoyee" });
+      expect(await relire(corrigee)).toMatchObject({
+        statut: "echec",
+        motif_echec: "Une autre demande de cette personne pour cet établissement a déjà été envoyée",
+      });
+      expect(brevoMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("repasse en activation une branche forcée en compte existant dont le compte a disparu", async () => {
+      const organisme = await insererOrganisme();
+      const organisationId = await insererOrganisation(organisme._id);
+      const compteId = await insererCompte("direction@gmail.com", organisationId);
+      const demande = await insererDemande("direction@gmail.com", SIRET, { a_envoyer: false });
+      await modifierDemandeActivation(demande._id, { branche_forcee: "compte_existant" });
+      await usersMigrationDb().deleteOne({ _id: compteId });
+      await listerDemandesActivation();
+
+      const ligne = await modifierDemandeActivation(demande._id, { a_envoyer: true });
+      await envoyerEtTraiter();
+
+      expect(ligne).toMatchObject({ branche: "activation", branche_forcee: "activation", motifs: [] });
+      expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "activation" });
+    });
+
+    it("active de bout en bout une adresse grand public forcée en compte existant", async () => {
+      const organisme = await insererOrganisme();
+      const organisationId = await insererOrganisation(organisme._id);
+      const compteId = await insererCompte("henriman.direction@gmail.com", organisationId);
+      const demande = await insererDemande("henriman.direction@gmail.com", SIRET, { a_envoyer: false });
+      expect(demande.motifs).toEqual(["messagerie_grand_public"]);
+
+      await modifierDemandeActivation(demande._id, { branche_forcee: "compte_existant" });
+      await modifierDemandeActivation(demande._id, { a_envoyer: true });
+      await envoyerEtTraiter();
+
+      expect((await organismesDb().findOne({ _id: organisme._id }))?.is_allowed_deca).toBe(true);
+      expect(await usersMigrationDb().findOne({ _id: compteId })).toMatchObject({ organisation_role: "admin" });
+      expect(brevoMock).toHaveBeenCalledWith(
+        "henriman.direction@gmail.com",
+        config.brevo.templatesDemandesActivation.activationAvecCompte,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "compte_existant" });
+    });
+
+    it("n'écrit pas une ligne inchangée en relisant le récapitulatif", async () => {
+      await insererOrganisme();
+      const demande = await insererDemande("direction@cfa-tests.fr");
+      await listerDemandesActivation();
+      const lue = await relire(demande);
+
+      await listerDemandesActivation();
+
+      expect((await relire(demande))?.updated_at).toEqual(lue?.updated_at);
+    });
+
+    it("refuse une modification croisée par une autre écriture", async () => {
+      await insererOrganisme();
+      const demande = await insererDemande("direction@cfa-tests.fr", SIRET, { a_envoyer: false });
+      pendantEvaluation.mockImplementationOnce(() =>
+        demandesActivationCfaDb().updateOne({ _id: demande._id }, { $set: { updated_at: new Date() } })
+      );
+
+      await expect(modifierDemandeActivation(demande._id, { siret_corrige: SIRET })).rejects.toThrow(
+        "La demande a changé entre-temps"
+      );
+    });
+
+    it("réimporte une ligne croisée par une autre écriture sans perdre cette écriture", async () => {
+      await insererOrganisme();
+      const csv = (fonction: string) => ({
+        buffer: Buffer.from(
+          `Horodateur,Adresse email,SIRET de votre CFA,Fonction occupée,Questions ou remarques\n2026/10/16 3:45:45 PM UTC+3,direction@cfa-tests.fr,${SIRET},${fonction},\n`
+        ),
+        originalname: "export.csv",
+      });
+      await importerDemandesActivation(csv("Directrice"), "Webinaire");
+      const demande = await demandesActivationCfaDb().findOne({ email: "direction@cfa-tests.fr" });
+      pendantEvaluation.mockImplementationOnce(() =>
+        demandesActivationCfaDb().updateOne(
+          { _id: demande?._id },
+          { $set: { a_envoyer: true, updated_at: new Date() } }
+        )
+      );
+
+      const bilan = await importerDemandesActivation(csv("Directrice générale"), "Webinaire");
+
+      expect(bilan).toMatchObject({ misesAJour: 1, inchangees: 0 });
+      expect(await demandesActivationCfaDb().findOne({ _id: demande?._id })).toMatchObject({
+        fonction: "Directrice générale",
+        a_envoyer: true,
+      });
     });
   });
 });

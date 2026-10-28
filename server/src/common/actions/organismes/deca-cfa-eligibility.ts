@@ -174,7 +174,8 @@ export async function checkEligibilityForLoaded(
     | "nom"
     | "raison_sociale"
     | "enseigne"
-  >
+  >,
+  { ignorerEffectifs = false }: { ignorerEffectifs?: boolean } = {}
 ): Promise<EligibilityResult> {
   const { _id, siret, uai, nature, ferme, is_allowed_deca, deca_activation_queued_at, nom, raison_sociale, enseigne } =
     organisme;
@@ -239,7 +240,7 @@ export async function checkEligibilityForLoaded(
     exists_with_siret_uai.passed &&
     natureCheck.passed &&
     not_closed.passed &&
-    has_effectifs.passed &&
+    (ignorerEffectifs || has_effectifs.passed) &&
     not_already_active.passed;
 
   return {

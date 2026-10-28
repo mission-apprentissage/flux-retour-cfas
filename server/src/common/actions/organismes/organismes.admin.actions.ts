@@ -591,9 +591,8 @@ export async function activerDecaOrganisme(
   if (!organisme) return "non_eligible";
   if (organisme.is_allowed_deca === true) return "deja_actif";
   if (!organisme.deca_activation_queued_at) return "annule";
-  const { eligible, checks } = await checkEligibilityForLoaded(organisme);
-  const eligibleSansEffectifs = checks.exists_with_siret_uai.passed && checks.nature.passed && checks.not_closed.passed;
-  if (!(ignorerEffectifs ? eligibleSansEffectifs : eligible)) return "non_eligible";
+  const { eligible } = await checkEligibilityForLoaded(organisme, { ignorerEffectifs });
+  if (!eligible) return "non_eligible";
 
   const rendreLesContrats = () => rendreContratsDeca({ mode: "refaire", cibles: [organismeId] });
   if (flecher) {

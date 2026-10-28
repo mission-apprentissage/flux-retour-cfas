@@ -69,7 +69,6 @@ const zDemandeActivationCfa = z.object({
   branche: zBrancheDemandeActivation,
   branche_initiale: zBrancheDemandeActivation.describe("Branche de la première évaluation"),
   branche_envoyee: zBrancheDemandeActivation.nullish().describe("Branche du dernier envoi"),
-  evalue_at: z.date({ description: "Date de la dernière évaluation" }),
   a_envoyer: z.boolean({ description: "Ligne cochée pour l'envoi" }),
   statut: zStatutDemandeActivation,
   motif_echec: z.string({ description: "Motif du dernier échec d'envoi" }).nullish(),

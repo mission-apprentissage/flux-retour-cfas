@@ -6,8 +6,9 @@ import { SIPA_PASSWORD_MAX_LENGTH, SIPA_PASSWORD_MIN_LENGTH, zSipaUsername } fro
 import { z } from "zod";
 
 import { effectifsDb, sipaUsersDb } from "@/common/model/collections";
+import { DECALAGE_DATE_METIER_MS, dateMetier } from "@/common/utils/dateUtils";
 import { createSipaToken } from "@/common/utils/jwtUtils";
-import { DECALAGE_DATE_METIER_MS, dateMetier, dateMetierExpr, dedupNomExpr } from "@/common/utils/mongoUtils";
+import { dateMetierExpr, dedupNomExpr } from "@/common/utils/mongoUtils";
 import { compareWithTimingSafety, hash } from "@/common/utils/passwordUtils";
 import config from "@/config";
 
@@ -166,7 +167,9 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
         _dedup_prenom: dedupNomExpr("$apprenant.prenom"),
         _dedup_ddn: dateMetierExpr("$apprenant.date_de_naissance"),
         source_priority: { $cond: [{ $eq: ["$source", "DECA"] }, 0, 1] },
-        _dernier_debut: { $max: "$contrats.date_debut" },
+        _dernier_debut: {
+          $max: { $map: { input: { $ifNull: ["$contrats", []] }, as: "c", in: dateMetierExpr("$$c.date_debut") } },
+        },
       },
     },
     {
@@ -180,7 +183,7 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
                 in: {
                   $and: [
                     { $eq: [{ $type: "$$c.date_debut" }, "date"] },
-                    { $eq: ["$$c.date_debut", "$_dernier_debut"] },
+                    { $eq: [dateMetierExpr("$$c.date_debut"), "$_dernier_debut"] },
                     { $eq: [{ $type: "$$c.date_rupture" }, "date"] },
                     { $lte: ["$$c.date_rupture", now] },
                   ],

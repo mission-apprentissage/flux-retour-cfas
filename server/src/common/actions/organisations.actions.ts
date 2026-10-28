@@ -11,6 +11,7 @@ import {
   IOrganisationOrganismeFormation,
   IOrganisationFranceTravail,
 } from "shared/models/data/organisations.model";
+import { IOrganisme } from "shared/models/data/organismes.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import logger from "@/common/logger";
@@ -296,13 +297,18 @@ export async function batchInviteUsersToOrganisation(
 
 export async function resendInvitationEmail(ctx: AuthContext, invitationId: string): Promise<void> {
   const invitation = await getInvitationById(ctx, new ObjectId(invitationId));
+  if (invitation.demande_id) {
+    const { renvoyerInvitationAdminDemande } = await import("@/common/actions/admin/demandes-activation.actions");
+    await renvoyerInvitationAdminDemande(invitation);
+    return;
+  }
 
   const newToken = generateKey(50, "hex");
   const newExpiresAt = new Date(Date.now() + INVITATION_EXPIRATION_MS);
   const organisation = await getOrganisationById(ctx.organisation_id);
 
   if (organisation.type === "ORGANISME_FORMATION") {
-    await envoyerInvitationCollaborateurCfa({ ...invitation, token: newToken }, organisation);
+    await envoyerInvitationCollaborateurCfa({ ...invitation, token: newToken }, organisation, ctx);
     await invitationsDb().updateOne({ _id: invitation._id }, { $set: { token: newToken, expires_at: newExpiresAt } });
   } else {
     await invitationsDb().updateOne({ _id: invitation._id }, { $set: { token: newToken, expires_at: newExpiresAt } });
@@ -345,11 +351,6 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
     }
   }
 
-  await confirmMembre(user._id, { notifier: true });
-}
-
-export async function confirmMembre(userId: ObjectId, { notifier }: { notifier: boolean }): Promise<void> {
-  const user = await getUserById(userId);
   const userOrganisation = await getOrganisationById(user.organisation_id);
 
   // Lu AVANT la confirmation, et sur le même critère que les autres chemins
@@ -375,20 +376,18 @@ export async function confirmMembre(userId: ObjectId, { notifier }: { notifier: 
     await activateMissionLocaleAtAdminValidation(user.organisation_id, new Date());
   }
 
-  if (notifier) {
-    await sendEmail(
-      user.email,
-      userOrganisation.type === "ORGANISME_FORMATION" ? "notify_access_granted_ofa" : "notify_access_granted",
-      {
-        recipient: {
-          civility: user.civility,
-          nom: user.nom,
-          prenom: user.prenom,
-        },
-        organisationLabel: await buildOrganisationLabel(user.organisation_id),
-      }
-    );
-  }
+  await sendEmail(
+    user.email,
+    userOrganisation.type === "ORGANISME_FORMATION" ? "notify_access_granted_ofa" : "notify_access_granted",
+    {
+      recipient: {
+        civility: user.civility,
+        nom: user.nom,
+        prenom: user.prenom,
+      },
+      organisationLabel: await buildOrganisationLabel(user.organisation_id),
+    }
+  );
 
   // Le compte passe à CONFIRMED : on synchronise le contact Brevo et on émet l'événement.
   await enqueueBrevoContactSync(user._id);
@@ -637,9 +636,21 @@ async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Prom
 export const lienInscriptionCfa = (token: string) =>
   `${config.publicUrl}/auth/inscription-cfa?invitationToken=${token}`;
 
+export const lienConnexion = () => `${config.publicUrl}/auth/connexion`;
+
+export const nomOrganisme = (organisme: Pick<IOrganisme, "nom" | "enseigne" | "raison_sociale"> | null | undefined) =>
+  organisme?.nom || organisme?.enseigne || organisme?.raison_sociale || null;
+
+export const nomCfaPourEmail = (
+  organisme: Pick<IOrganisme, "nom" | "enseigne" | "raison_sociale"> | null | undefined
+) => nomOrganisme(organisme) ?? "votre établissement";
+
+type AuteurInvitation = Pick<IUsersMigration, "prenom" | "nom" | "fonction" | "email">;
+
 export async function envoyerInvitationCollaborateurCfa(
   invitation: Pick<IInvitation, "email" | "token" | "author_id">,
-  organisation: IOrganisation & { type: "ORGANISME_FORMATION" }
+  organisation: IOrganisation & { type: "ORGANISME_FORMATION" },
+  repli?: AuteurInvitation
 ): Promise<void> {
   const templateId = config.brevo.templateInvitationCollaborateurCfaId;
   if (!templateId) {
@@ -647,10 +658,11 @@ export async function envoyerInvitationCollaborateurCfa(
       "Template Brevo d'invitation des collaborateurs CFA non configuré (MNA_TDB_BREVO_TEMPLATE_INVITATION_COLLABORATEUR_CFA_ID)"
     );
   }
-  const auteur = await usersMigrationDb().findOne(
-    { _id: invitation.author_id },
-    { projection: { prenom: 1, nom: 1, fonction: 1, email: 1 } }
-  );
+  const auteur =
+    (await usersMigrationDb().findOne(
+      { _id: invitation.author_id },
+      { projection: { prenom: 1, nom: 1, fonction: 1, email: 1 } }
+    )) ?? repli;
   const organisme = await organismesDb().findOne(
     { siret: organisation.siret, ...(organisation.uai ? { uai: organisation.uai } : {}) },
     { projection: { nom: 1, enseigne: 1, raison_sociale: 1, "adresse.region": 1 } }
@@ -665,7 +677,7 @@ export async function envoyerInvitationCollaborateurCfa(
       PRENOM_ADMIN: auteur?.prenom ?? "",
       NOM_ADMIN: auteur?.nom ?? "",
       FONCTION_ADMIN: auteur?.fonction ?? "",
-      NOM_CFA: organisme?.nom || organisme?.enseigne || organisme?.raison_sociale || "Organisme",
+      NOM_CFA: nomCfaPourEmail(organisme),
       LIEN_INSCRIPTION: lienInscriptionCfa(invitation.token),
       NB_ML_PARTENAIRES: mlActives.length,
     },

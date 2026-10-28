@@ -31,9 +31,11 @@ import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { z } from "zod";
 
 import {
-  confirmMembre,
   getOrganisationOrganismeByOrganismeId,
+  lienConnexion,
   lienInscriptionCfa,
+  nomCfaPourEmail,
+  nomOrganisme,
 } from "@/common/actions/organisations.actions";
 import { checkEligibilityForLoaded } from "@/common/actions/organismes/deca-cfa-eligibility";
 import {
@@ -41,7 +43,7 @@ import {
   poserGardeActivationDeca,
   retirerGardeActivationDeca,
 } from "@/common/actions/organismes/organismes.admin.actions";
-import { adminUpdateUserRole, resendConfirmationEmail } from "@/common/actions/users.actions";
+import { adminUpdateUserRole, getUserByEmailIgnoringCase } from "@/common/actions/users.actions";
 import parentLogger from "@/common/logger";
 import {
   demandesActivationCfaDb,
@@ -59,6 +61,8 @@ import config from "@/config";
 const logger = parentLogger.child({ module: "demandes-activation" });
 
 export const TAILLE_MAX_IMPORT_DEMANDES = 1024 * 1024;
+
+const ESSAIS_ECRITURE = 3;
 
 const MESSAGERIES_GRAND_PUBLIC = new Set([
   "gmail.com",
@@ -145,10 +149,12 @@ type EvaluationDemande = Pick<
   | "domaine_inconnu"
   | "branche"
   | "branche_forcee"
-  | "evalue_at"
 >;
 
 const texteOuNull = (valeur: string | undefined) => (valeur?.trim() ? valeur.trim() : null);
+
+const estConfirme = <T extends Pick<IUsersMigration, "account_status">>(compte: T | null | undefined): compte is T =>
+  compte?.account_status === "CONFIRMED";
 
 export const normaliserEmail = (valeur: string | undefined) => (valeur ?? "").toLowerCase().replace(/\s+/g, "");
 
@@ -317,13 +323,6 @@ export async function evaluerDemande({
     }
   }
 
-  const organisation = organisme
-    ? await organisationsDb().findOne(
-        { type: "ORGANISME_FORMATION", organisme_id: organisme._id.toString() },
-        { projection: { _id: 1 } }
-      )
-    : null;
-
   const domaine = email.split("@")[1] ?? "";
   const emailValide = z.string().email().safeParse(email).success;
   if (!emailValide) {
@@ -333,22 +332,31 @@ export async function evaluerDemande({
   }
   const domaineInconnu = emailValide && !MESSAGERIES_GRAND_PUBLIC.has(domaine) && !(await domaineConnu(domaine));
 
-  const compte = email
-    ? await usersMigrationDb().findOne({ email }, { projection: { _id: 1, organisation_id: 1 } })
-    : null;
-  const compteDansOrganisation =
-    !!compte && !!organisation && compte.organisation_id?.equals(organisation._id) === true;
-  if (compte && !compteDansOrganisation) motifs.add("compte_autre_organisation");
+  const compte = email ? await getUserByEmailIgnoringCase(email) : null;
+  const organisationDuCompte = compte ? await organisationsDb().findOne({ _id: compte.organisation_id }) : null;
+  const compteDansOrganisme =
+    !!organisme &&
+    organisationDuCompte?.type === "ORGANISME_FORMATION" &&
+    organisationDuCompte.organisme_id === organisme._id.toString();
+  if (compte && !compteDansOrganisme) motifs.add("compte_autre_organisation");
+  const organisation = compteDansOrganisme
+    ? organisationDuCompte
+    : organisme
+      ? await organisationsDb().findOne(
+          { type: "ORGANISME_FORMATION", organisme_id: organisme._id.toString() },
+          { projection: { _id: 1 } }
+        )
+      : null;
 
-  const brancheForcee = branche_forcee === "activation" && compteDansOrganisation ? "compte_existant" : branche_forcee;
+  const brancheParDefaut = compteDansOrganisme && estConfirme(compte) ? "compte_existant" : "activation";
+  const brancheForcee = branche_forcee && branche_forcee !== "refus" ? brancheParDefaut : branche_forcee;
   if (brancheForcee === "refus") {
     motifs.add("refus_force");
   } else if (brancheForcee) {
     for (const motif of MOTIFS_LEVES_PAR_BRANCHE_FORCEE) motifs.delete(motif);
   }
 
-  const branche: BrancheDemandeActivation =
-    motifs.size > 0 ? "refus" : (brancheForcee ?? (compteDansOrganisation ? "compte_existant" : "activation"));
+  const branche: BrancheDemandeActivation = motifs.size > 0 ? "refus" : brancheParDefaut;
 
   return {
     siret: organisme?.siret ?? (siret || null),
@@ -363,7 +371,6 @@ export async function evaluerDemande({
     domaine_inconnu: domaineInconnu,
     branche,
     branche_forcee: brancheForcee ?? null,
-    evalue_at: new Date(),
   };
 }
 
@@ -388,14 +395,24 @@ export async function importerDemandesActivation(
   }
 
   for (const provenance of parCle.values()) {
+    bilan[await importerDemande(provenance, source)]++;
+  }
+
+  return bilan;
+}
+
+async function importerDemande(
+  provenance: ProvenanceDemande,
+  source: string
+): Promise<"creees" | "misesAJour" | "inchangees"> {
+  for (let essai = 0; essai < ESSAIS_ECRITURE; essai++) {
     const maintenant = new Date();
     const existante = await demandesActivationCfaDb().findOne({
       email: provenance.email,
       siret_saisi: provenance.siret_saisi,
     });
     if (existante && (existante.statut === "envoi_en_cours" || existante.statut === "envoyee")) {
-      bilan.inchangees++;
-      continue;
+      return "inchangees";
     }
 
     const evaluation = await evaluerDemande({
@@ -403,14 +420,7 @@ export async function importerDemandesActivation(
       siret_corrige: existante?.siret_corrige,
       branche_forcee: existante?.branche_forcee,
     });
-    if (existante) {
-      const { matchedCount } = await demandesActivationCfaDb().updateOne(
-        { _id: existante._id, updated_at: existante.updated_at },
-        { $set: { ...provenance, ...evaluation, source, updated_at: maintenant } }
-      );
-      if (matchedCount === 1) bilan.misesAJour++;
-      else bilan.inchangees++;
-    } else {
+    if (!existante) {
       await demandesActivationCfaDb().insertOne({
         _id: new ObjectId(),
         ...provenance,
@@ -422,11 +432,15 @@ export async function importerDemandesActivation(
         created_at: maintenant,
         updated_at: maintenant,
       });
-      bilan.creees++;
+      return "creees";
     }
+    const { matchedCount } = await demandesActivationCfaDb().updateOne(
+      { _id: existante._id, updated_at: existante.updated_at },
+      { $set: { ...provenance, ...evaluation, source, updated_at: maintenant } }
+    );
+    if (matchedCount === 1) return "misesAJour";
   }
-
-  return bilan;
+  return "inchangees";
 }
 
 const refusEnvoye = (demande: IDemandeActivationCfa) =>
@@ -450,9 +464,12 @@ function vueDemande(demande: IDemandeActivationCfa): VueDemandeActivation {
   return demande.statut === "envoyee" ? "envoyees" : "a_envoyer";
 }
 
-function branchesForcables(demande: Pick<IDemandeActivationCfa, "user_id" | "motifs">): BrancheDemandeActivation[] {
-  if (!demande.user_id) return ["activation", "refus"];
-  return demande.motifs.includes("compte_autre_organisation") ? ["refus"] : ["compte_existant", "refus"];
+function branchesForcables(
+  demande: Pick<IDemandeActivationCfa, "motifs">,
+  compte: Pick<IUsersMigration, "account_status"> | null | undefined
+): BrancheDemandeActivation[] {
+  if (demande.motifs.includes("compte_autre_organisation")) return ["refus"];
+  return estConfirme(compte) ? ["compte_existant", "refus"] : ["activation", "refus"];
 }
 
 async function reevaluer(demande: IDemandeActivationCfa, modifications: Partial<IDemandeActivationCfa> = {}) {
@@ -470,6 +487,36 @@ async function enregistrer(
     { $set: champs }
   );
   return matchedCount === 1 ? modifiee : null;
+}
+
+const CHAMPS_EVALUES = [
+  "siret",
+  "uai",
+  "siret_propose",
+  "organisme_id",
+  "organisation_id",
+  "user_id",
+  "effectifs_erp",
+  "effectifs_deca",
+  "motifs",
+  "domaine_inconnu",
+  "branche",
+  "branche_forcee",
+  "a_envoyer",
+] as const satisfies ReadonlyArray<keyof IDemandeActivationCfa>;
+
+const memeEvaluation = (a: IDemandeActivationCfa, b: IDemandeActivationCfa) =>
+  CHAMPS_EVALUES.every((champ) => JSON.stringify(a[champ] ?? null) === JSON.stringify(b[champ] ?? null));
+
+async function reevaluerEtEnregistrer(demande: IDemandeActivationCfa): Promise<IDemandeActivationCfa | null> {
+  let lue: IDemandeActivationCfa | null = demande;
+  for (let essai = 0; essai < ESSAIS_ECRITURE && lue && aReevaluer(lue); essai++) {
+    const evaluee = await reevaluer(lue);
+    if (memeEvaluation(lue, evaluee)) return lue;
+    if (await enregistrer(lue, evaluee)) return evaluee;
+    lue = await demandesActivationCfaDb().findOne({ _id: demande._id });
+  }
+  return lue;
 }
 
 async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeActivationLigne[]> {
@@ -503,7 +550,7 @@ async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeAc
       organisme: organisme
         ? {
             _id: organisme._id.toString(),
-            nom: organisme.nom || organisme.enseigne || organisme.raison_sociale || null,
+            nom: nomOrganisme(organisme),
           }
         : null,
       compte: compte
@@ -519,7 +566,7 @@ async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeAc
       a_envoyer: demande.a_envoyer,
       vue: vueDemande(demande),
       cochable: estCochable(demande),
-      branches_forcables: branchesForcables(demande),
+      branches_forcables: branchesForcables(demande, compte),
     };
   });
 }
@@ -527,8 +574,7 @@ async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeAc
 export async function listerDemandesActivation(): Promise<IDemandesActivationResponse> {
   const demandes: IDemandeActivationCfa[] = [];
   for (const demande of await demandesActivationCfaDb().find({}).toArray()) {
-    const evaluee = aReevaluer(demande) ? await enregistrer(demande, await reevaluer(demande)) : demande;
-    const affichee = evaluee ?? (await demandesActivationCfaDb().findOne({ _id: demande._id }));
+    const affichee = await reevaluerEtEnregistrer(demande);
     if (affichee) demandes.push(affichee);
   }
 
@@ -567,7 +613,10 @@ export async function modifierDemandeActivation(
   }
 
   let misAJour = Object.keys(modifications).length > 0 ? await reevaluer(demande, modifications) : demande;
-  if (modification.branche_forcee && !branchesForcables(misAJour).includes(modification.branche_forcee)) {
+  const compte = misAJour.user_id
+    ? await usersMigrationDb().findOne({ _id: misAJour.user_id }, { projection: { account_status: 1 } })
+    : null;
+  if (modification.branche_forcee && !branchesForcables(misAJour, compte).includes(modification.branche_forcee)) {
     throw Boom.badRequest("Branche non permise pour cette demande");
   }
   if (modification.a_envoyer !== undefined) {
@@ -596,8 +645,12 @@ const MOTIFS_ECHEC_ACTIVATION = {
 
 type Expediteur = { _id: ObjectId; email: string };
 
-export const nomOrganisme = (organisme: Pick<IOrganisme, "nom" | "raison_sociale" | "enseigne"> | null | undefined) =>
-  organisme?.nom || organisme?.enseigne || organisme?.raison_sociale || "votre établissement";
+export const paramsActivationAvecCompte = (nomCfa: string, compte: Pick<IUsersMigration, "prenom" | "email">) => ({
+  NOM_CFA: nomCfa,
+  PRENOM: compte.prenom ?? "",
+  EMAIL: compte.email,
+  LIEN_CONNEXION: lienConnexion(),
+});
 
 export async function envoyerEmailBrevo(
   templateId: number,
@@ -630,7 +683,7 @@ async function nomOrganismeDeLOrganisation(organisationId: ObjectId) {
         { projection: { nom: 1, raison_sociale: 1, enseigne: 1 } }
       )
     : null;
-  return nomOrganisme(organisme);
+  return nomCfaPourEmail(organisme);
 }
 
 async function inviterAdminDemande({
@@ -683,6 +736,12 @@ async function envoyerInvitationAdminDemande(
   );
 }
 
+const RELANCES_A_REFAIRE = {
+  relance_sans_compte_at: null,
+  relance_validation_email_at: null,
+  relance_avec_compte_at: null,
+} as const;
+
 export async function renvoyerInvitationAdminDemande(invitation: IInvitation): Promise<Date> {
   const demande = invitation.demande_id
     ? await demandesActivationCfaDb().findOne({ _id: invitation.demande_id })
@@ -697,7 +756,7 @@ export async function renvoyerInvitationAdminDemande(invitation: IInvitation): P
   if (demande?.statut === "invitation_expiree") {
     await demandesActivationCfaDb().updateOne(
       { _id: demande._id, statut: "invitation_expiree" },
-      { $set: { statut: "envoyee", envoyee_at: new Date(), updated_at: new Date() } }
+      { $set: { statut: "envoyee", envoyee_at: new Date(), ...RELANCES_A_REFAIRE, updated_at: new Date() } }
     );
   }
   return expiresAt;
@@ -715,6 +774,7 @@ async function mettreEnCoursDEnvoi(demande: IDemandeActivationCfa, expediteur: E
         envoye_par_id: expediteur._id,
         envoye_par_email: expediteur.email,
         motif_echec: null,
+        ...RELANCES_A_REFAIRE,
         updated_at: maintenant,
       },
     }
@@ -736,7 +796,7 @@ export async function envoyerDemandesActivation(expediteur: Expediteur): Promise
     .toArray();
   const enCours: IDemandeActivationCfa[] = [];
   for (const demande of cochees) {
-    const evaluee = await enregistrer(demande, await reevaluer(demande));
+    const evaluee = await reevaluerEtEnregistrer(demande);
     if (evaluee?.a_envoyer && (await mettreEnCoursDEnvoi(evaluee, expediteur))) {
       enCours.push(evaluee);
     }
@@ -752,7 +812,7 @@ export async function renvoyerDemandeActivation(id: ObjectId, expediteur: Expedi
   if (!estRenvoyable(demande.statut)) {
     throw Boom.badRequest("Seule une demande en échec ou dont l'invitation a expiré peut être renvoyée");
   }
-  const evaluee = await enregistrer(demande, await reevaluer(demande));
+  const evaluee = await reevaluerEtEnregistrer(demande);
   if (evaluee?.branche === "refus" && !refusAvecMail(evaluee.motifs)) {
     throw Boom.badRequest("Cette demande est refusée sans mail : corrigez-la avant de la renvoyer");
   }
@@ -785,11 +845,18 @@ async function verifierInvariants(demande: IDemandeActivationCfa, organisation: 
   if (!organisation) {
     throw new EchecEnvoi("Établissement introuvable");
   }
-  const compte = await usersMigrationDb().findOne({ email: demande.email });
-  if (compte && !compte.organisation_id.equals(organisation._id)) {
+  const compte = await getUserByEmailIgnoringCase(demande.email);
+  const organisationDuCompte = compte ? await organisationsDb().findOne({ _id: compte.organisation_id }) : null;
+  if (
+    compte &&
+    !(
+      organisationDuCompte?.type === "ORGANISME_FORMATION" &&
+      organisationDuCompte.organisme_id === organisation.organisme_id
+    )
+  ) {
     throw new EchecEnvoi("Le demandeur a un compte rattaché à une autre organisation");
   }
-  if (demande.branche === "compte_existant" && !compte) {
+  if (demande.branche === "compte_existant" && !estConfirme(compte)) {
     throw new EchecEnvoi("Le compte du demandeur n'existe plus");
   }
   return compte;
@@ -797,14 +864,39 @@ async function verifierInvariants(demande: IDemandeActivationCfa, organisation: 
 
 function brancheEnvoyee(demande: IDemandeActivationCfa, compte: IUsersMigration | null): BrancheDemandeActivation {
   if (demande.branche === "refus") return "refus";
-  return compte ? "compte_existant" : "activation";
+  return estConfirme(compte) ? "compte_existant" : "activation";
 }
 
-function templateDeLEnvoi(demande: IDemandeActivationCfa, compte: IUsersMigration | null): number | null {
-  const templates = config.brevo.templatesDemandesActivation;
-  if (demande.branche === "refus") return templates.refus;
-  if (!compte) return templates.activationSansCompte;
-  return compte.account_status === "PENDING_EMAIL_VALIDATION" ? null : templates.activationAvecCompte;
+const TEMPLATE_PAR_BRANCHE = {
+  refus: "refus",
+  activation: "activationSansCompte",
+  compte_existant: "activationAvecCompte",
+} as const satisfies Record<BrancheDemandeActivation, keyof typeof config.brevo.templatesDemandesActivation>;
+
+const templateDeLaBranche = (branche: BrancheDemandeActivation) =>
+  config.brevo.templatesDemandesActivation[TEMPLATE_PAR_BRANCHE[branche]];
+
+async function supprimerCompteNonConfirme(compte: IUsersMigration) {
+  const { deletedCount } = await usersMigrationDb().deleteOne({
+    _id: compte._id,
+    account_status: { $ne: "CONFIRMED" },
+  });
+  if (deletedCount === 0) {
+    throw new EchecEnvoi("Le compte du demandeur a été confirmé entre-temps : à renvoyer");
+  }
+}
+
+async function dejaActivee(demande: IDemandeActivationCfa) {
+  return !!(await demandesActivationCfaDb().findOne(
+    {
+      _id: { $ne: demande._id },
+      email: demande.email,
+      organisme_id: demande.organisme_id,
+      statut: "envoyee",
+      branche_envoyee: { $in: ["activation", "compte_existant"] },
+    },
+    { projection: { _id: 1 } }
+  ));
 }
 
 async function traiterDemande(
@@ -814,40 +906,32 @@ async function traiterDemande(
   compte: IUsersMigration | null,
   etapes: NonNullable<IDemandeActivationCfa["etapes"]>
 ) {
-  const templates = config.brevo.templatesDemandesActivation;
-  const params = { NOM_CFA: nomOrganisme(organisme) };
+  const nomCfa = nomCfaPourEmail(organisme);
+  const branche = brancheEnvoyee(demande, compte);
 
-  if (demande.branche === "refus") {
+  if (branche === "refus") {
     if (!refusAvecMail(demande.motifs)) {
       throw new EchecEnvoi("Refus sans mail : rien n'est envoyé");
     }
-    await envoyerEmailBrevo(templates.refus, demande.email, params, demande.envoye_par_email);
-  } else if (compte) {
+    await envoyerEmailBrevo(templateDeLaBranche(branche), demande.email, { NOM_CFA: nomCfa }, demande.envoye_par_email);
+  } else if (branche === "compte_existant" && compte) {
     if (compte.organisation_role !== "admin") {
       await adminUpdateUserRole(compte._id.toString(), "admin");
     }
-    if (compte.account_status === "PENDING_ADMIN_VALIDATION") {
-      await confirmMembre(compte._id, { notifier: false });
-    }
     etapes.compte_at = new Date();
-    if (compte.account_status === "PENDING_EMAIL_VALIDATION") {
-      await resendConfirmationEmail(compte._id);
-    } else {
-      await envoyerEmailBrevo(
-        templates.activationAvecCompte,
-        demande.email,
-        {
-          ...params,
-          PRENOM: compte.prenom ?? "",
-          EMAIL: compte.email,
-          LIEN_CONNEXION: `${config.publicUrl}/auth/connexion`,
-        },
-        demande.envoye_par_email
-      );
-    }
+    await envoyerEmailBrevo(
+      templateDeLaBranche(branche),
+      demande.email,
+      paramsActivationAvecCompte(nomCfa, compte),
+      demande.envoye_par_email
+    );
   } else {
     if (!organisation || !demande.envoye_par_id) {
       throw new EchecEnvoi("Établissement ou expéditeur de l'envoi introuvable");
+    }
+    if (compte) {
+      await supprimerCompteNonConfirme(compte);
+      etapes.compte_at = new Date();
     }
     const invitation = await inviterAdminDemande({
       email: demande.email,
@@ -895,11 +979,18 @@ export async function traiterEnvoisDemandesActivation(organismeId: ObjectId | nu
   const organisation = organisme ? await getOrganisationOrganismeByOrganismeId(organisme._id) : null;
 
   const preparees: { demande: IDemandeActivationCfa; compte: IUsersMigration | null }[] = [];
+  const emailsActives = new Set<string>();
   for (const demande of demandes) {
     try {
       const compte = demande.branche === "refus" ? null : await verifierInvariants(demande, organisation);
-      if (templateDeLEnvoi(demande, compte) === 0) {
+      if (!templateDeLaBranche(brancheEnvoyee(demande, compte))) {
         throw new EchecEnvoi("Template Brevo non configuré");
+      }
+      if (demande.branche !== "refus") {
+        if (emailsActives.has(demande.email) || (await dejaActivee(demande))) {
+          throw new EchecEnvoi("Une autre demande de cette personne pour cet établissement a déjà été envoyée");
+        }
+        emailsActives.add(demande.email);
       }
       preparees.push({ demande, compte });
     } catch (err) {
@@ -931,7 +1022,9 @@ export async function traiterEnvoisDemandesActivation(organismeId: ObjectId | nu
             statut: "envoyee",
             branche: brancheEnvoyee(demande, compte),
             branche_envoyee: brancheEnvoyee(demande, compte),
-            organisation_id: organisation?._id ?? demande.organisation_id ?? null,
+            organisation_id: estConfirme(compte)
+              ? compte.organisation_id
+              : (organisation?._id ?? demande.organisation_id ?? null),
             envoyee_at: new Date(),
             etapes,
             motif_echec: null,

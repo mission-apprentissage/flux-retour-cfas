@@ -411,10 +411,6 @@ exports[`validation-schema > should create validation schema for demandesActivat
       ],
       "description": "Étapes de l'envoi déjà faites",
     },
-    "evalue_at": {
-      "bsonType": "date",
-      "description": "Date de la dernière évaluation",
-    },
     "fonction": {
       "bsonType": [
         "string",
@@ -648,7 +644,6 @@ exports[`validation-schema > should create validation schema for demandesActivat
     "domaine_inconnu",
     "branche",
     "branche_initiale",
-    "evalue_at",
     "a_envoyer",
     "statut",
     "created_at",

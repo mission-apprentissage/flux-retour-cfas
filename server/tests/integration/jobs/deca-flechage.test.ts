@@ -1,11 +1,11 @@
 import { ObjectId } from "bson";
 import { addJob } from "job-processor";
-import { MongoClient, type WithoutId } from "mongodb";
+import { Collection, MongoClient, type WithoutId } from "mongodb";
 import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
 import type { IMissionLocaleEffectif } from "shared/models";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IOrganisme } from "shared/models/data/organismes.model";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, type MockInstance, vi } from "vitest";
 
 import {
   appliquerCible,
@@ -30,7 +30,8 @@ import {
 } from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes";
 import { getBALMongodbUri, getDatabase } from "@/common/mongodb";
-import { dateMetier, dateMetierExpr, dedupNom, dedupNomExpr } from "@/common/utils/mongoUtils";
+import { dateMetier } from "@/common/utils/dateUtils";
+import { dateMetierExpr, dedupNom, dedupNomExpr } from "@/common/utils/mongoUtils";
 import config from "@/config";
 import { hydrateDecaRaw, upsertEffectifDeca } from "@/jobs/hydrate/deca/hydrate-deca-raw";
 import { decaJobs } from "@/jobs/registry/deca";
@@ -220,6 +221,17 @@ async function insererErp(organisme: IOrganisme, formation = { cfd: "50022137", 
       formation,
     })),
   });
+}
+
+function couperAuDeuxiemeEcrit() {
+  const original = Collection.prototype.updateOne;
+  let ecrits = 0;
+  return vi.spyOn(Collection.prototype, "updateOne").mockImplementation(function (this: Collection, ...args) {
+    if (this.collectionName === "effectifsDECA" && ++ecrits === 2) {
+      return Promise.reject(new Error("coupure réseau"));
+    }
+    return original.apply(this, args as never);
+  } as typeof original);
 }
 
 const chezQui = async (contrat: IEffectifDECA) => (await effectifsDECADb().findOne({ _id: contrat._id }))?.organisme_id;
@@ -439,6 +451,31 @@ describe("fléchage des contrats DECA", () => {
           ddn: dateMetier(ddn),
         }))
       );
+    });
+
+    it("rapproche les majuscules et minuscules hors ASCII, en JS comme en Mongo", async () => {
+      const paires = [
+        ["Bogusław", "BOGUSŁAW"],
+        ["Ayşe", "AYŞE"],
+        ["Çağla", "ÇAĞLA"],
+        ["Lætitia", "LÆTITIA"],
+        ["Chœur", "CHŒUR"],
+        ["Søren", "SØREN"],
+        ["Strauß", "STRAUSS"],
+        ["Ayşe".normalize("NFD"), "AYŞE"],
+      ];
+
+      const resultats = await getDatabase()
+        .aggregate([
+          { $documents: paires.map(([a, b]) => ({ a, b })) },
+          { $project: { _id: 0, a: dedupNomExpr("$a"), b: dedupNomExpr("$b") } },
+        ])
+        .toArray();
+
+      for (const [index, [a, b]] of paires.entries()) {
+        expect(dedupNom(a)).toBe(dedupNom(b));
+        expect(resultats[index]).toEqual({ a: dedupNom(a), b: dedupNom(b) });
+      }
     });
 
     describe("cas qui bougent", () => {
@@ -666,6 +703,108 @@ describe("fléchage des contrats DECA", () => {
     });
 
     describe("robustesse", () => {
+      let espion: MockInstance | undefined;
+
+      afterEach(() => {
+        espion?.mockRestore();
+        espion = undefined;
+      });
+
+      it("rend au responsable le début d'un groupe quand une erreur coupe son déplacement", async () => {
+        await insererCible({ is_allowed_deca: true });
+        const premiere = await insererContrat(contratRompu());
+        const seconde = await insererContrat(contratIngere({ annee_scolaire: "2026-2027" }));
+        espion = couperAuDeuxiemeEcrit();
+
+        await expect(flecherContratsDeca()).rejects.toThrow("coupure réseau");
+
+        expect(await chezQui(premiere)).toEqual(responsable._id);
+        expect(await chezQui(seconde)).toEqual(responsable._id);
+        expect(await effectifsDECADb().countDocuments({ fleche: { $exists: true } })).toBe(0);
+      });
+
+      it("laisse tout le groupe chez sa cible quand une erreur coupe son retour", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        const premiere = await insererContrat(contratRompu());
+        const seconde = await insererContrat(contratIngere({ annee_scolaire: "2026-2027" }));
+        await flecherContratsDeca();
+        espion = couperAuDeuxiemeEcrit();
+
+        await expect(rendreContratsDeca({ mode: "refaire", responsables: [responsable._id] })).rejects.toThrow(
+          "coupure réseau"
+        );
+
+        expect(await effectifsDECADb().findOne({ _id: premiere._id })).toMatchObject({
+          organisme_id: cible._id,
+          fleche: { regle: "lieu_declare" },
+        });
+        expect(await chezQui(seconde)).toEqual(cible._id);
+      });
+
+      it("complète au passage suivant un groupe resté coupé entre son responsable et sa cible", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        await insererChezCible(cible);
+        const restee = await insererContrat(contratIngere({ annee_scolaire: "2026-2027" }));
+
+        const bilan = await flecherContratsDeca();
+        const suivant = await flecherContratsDeca();
+
+        expect(bilan.groupesCoupes).toHaveLength(1);
+        expect(await effectifsDECADb().findOne({ _id: restee._id })).toMatchObject({
+          organisme_id: cible._id,
+          fleche: { regle: "lieu_declare" },
+        });
+        expect(suivant.groupesCoupes).toEqual([]);
+      });
+
+      it("signale un groupe coupé que la cible empêche de compléter", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        await insererChezCible(cible);
+        await insererContrat(
+          contratIngere({
+            deca_raw_id: new ObjectId(),
+            annee_scolaire: "2026-2027",
+            organisme_id: cible._id,
+            organisme_responsable_id: cible._id,
+            organisme_formateur_id: cible._id,
+          })
+        );
+        const restee = await insererContrat(contratIngere({ annee_scolaire: "2026-2027" }));
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.groupesCoupes).toHaveLength(1);
+        expect(bilan.conflits).toBe(1);
+        expect(await chezQui(restee)).toEqual(responsable._id);
+      });
+
+      it("ne déplace pas un groupe dont le CFA agit sur le dossier pendant le passage", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        const contrat = await insererContrat(contratRompu());
+        const dossier = await insererDossier(contrat);
+        const original = Collection.prototype.findOne;
+        espion = vi.spyOn(Collection.prototype, "findOne").mockImplementation(async function (
+          this: Collection,
+          ...args: unknown[]
+        ) {
+          if (
+            this.collectionName === "organisations" &&
+            (args[0] as { organisme_id?: string } | undefined)?.organisme_id === cible._id.toString()
+          ) {
+            await missionLocaleEffectifsDb().updateOne(
+              { _id: dossier._id },
+              { $set: { "organisme_data.acc_conjoint": true } }
+            );
+          }
+          return original.apply(this, args as never);
+        } as typeof original);
+
+        const bilan = await flecherContratsDeca();
+
+        expect(bilan.gels).toBe(1);
+        expect(await chezQui(contrat)).toEqual(responsable._id);
+      });
+
       it("refuse --simuler-flag sans --dry-run", async () => {
         const cible = await insererCible();
         const contrat = await insererContrat();

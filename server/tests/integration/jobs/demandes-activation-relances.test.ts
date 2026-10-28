@@ -97,7 +97,6 @@ async function insererDemande(overrides: Partial<IDemandeActivationCfa> = {}) {
     branche: "activation",
     branche_initiale: "activation",
     branche_envoyee: "activation",
-    evalue_at: ENVOI,
     a_envoyer: false,
     statut: "envoyee",
     envoye_par_id: new ObjectId(),
@@ -190,12 +189,17 @@ describe("relances du workflow d'activation", () => {
       expect(addJobMock).not.toHaveBeenCalled();
     });
 
-    it("ne bloque pas la connexion quand la mise en file échoue", async () => {
-      await insererDemande();
+    it("ne bloque pas la connexion quand la mise en file échoue, et remet en file à la connexion suivante", async () => {
+      const demande = await insererDemande();
       await insererCompte("direction@cfa-tests.fr");
-      addJobMock.mockRejectedValue(new Error("file indisponible"));
+      addJobMock.mockRejectedValueOnce(new Error("file indisponible"));
 
       await expect(login("direction@cfa-tests.fr", "MDP-azerty123")).resolves.toEqual(expect.any(String));
+      expect((await relire(demande))?.invitez_queued_at ?? null).toBeNull();
+      await login("direction@cfa-tests.fr", "MDP-azerty123");
+
+      expect(addJobMock).toHaveBeenCalledTimes(2);
+      expect((await relire(demande))?.invitez_queued_at).toEqual(expect.any(Date));
     });
 
     it("est remis en file à la connexion suivante quand Brevo n'a pas pu l'envoyer", async () => {
@@ -300,6 +304,62 @@ describe("relances du workflow d'activation", () => {
       expect(brevoMock).not.toHaveBeenCalled();
     });
 
+    it("ne renvoie pas la validation à un compte d'une autre organisation", async () => {
+      const invitation = await insererInvitation();
+      await insererDemande({ invitation_id: invitation._id });
+      await insererCompte("direction@cfa-tests.fr", {
+        account_status: "PENDING_EMAIL_VALIDATION",
+        organisation_id: new ObjectId(),
+        created_at: plus(0.5),
+      });
+
+      await relancerDemandesActivation(plus(3));
+
+      expect(sendEmailMock).not.toHaveBeenCalled();
+    });
+
+    it("renvoie la validation au passage suivant quand le délai entre deux renvois n'est pas écoulé", async () => {
+      const invitation = await insererInvitation();
+      const demande = await insererDemande({ invitation_id: invitation._id });
+      const compteId = await insererCompte("direction@cfa-tests.fr", {
+        account_status: "PENDING_EMAIL_VALIDATION",
+        created_at: plus(0.5),
+        last_activation_email_sent_at: new Date(),
+      });
+
+      await relancerDemandesActivation(plus(3));
+      expect(sendEmailMock).not.toHaveBeenCalled();
+      expect((await relire(demande))?.relance_validation_email_at ?? null).toBeNull();
+
+      await usersMigrationDb().updateOne({ _id: compteId }, { $set: { last_activation_email_sent_at: plus(-1) } });
+      await relancerDemandesActivation(plus(3.1));
+      expect(sendEmailMock.mock.calls.filter(([, template]) => template === "activation_cfa")).toHaveLength(1);
+    });
+
+    it("passe en échec, renvoyable, quand son invitation a été annulée", async () => {
+      const invitation = await insererInvitation();
+      const demande = await insererDemande({ invitation_id: invitation._id });
+      await invitationsDb().deleteOne({ _id: invitation._id });
+
+      await relancerDemandesActivation(plus(1));
+
+      expect(await relire(demande)).toMatchObject({ statut: "echec", motif_echec: "Invitation annulée : à renvoyer" });
+      const ligne = await renvoyerDemandeActivation(demande._id, { _id: new ObjectId(), email: ADMIN_TBA });
+      expect(ligne.statut).toBe("envoi_en_cours");
+    });
+
+    it("est relancé à nouveau après un renvoi", async () => {
+      const invitation = await insererInvitation({ expires_at: plus(14) });
+      const demande = await insererDemande({ invitation_id: invitation._id });
+      await relancerDemandesActivation(plus(7));
+      await relancerDemandesActivation(plus(15));
+      expect((await relire(demande))?.statut).toBe("invitation_expiree");
+
+      await renvoyerDemandeActivation(demande._id, { _id: new ObjectId(), email: ADMIN_TBA });
+
+      expect(await relire(demande)).toMatchObject({ relance_sans_compte_at: null, relance_validation_email_at: null });
+    });
+
     it("passe en « invitation expirée » quand l'invitation expire sans compte, puis peut être renvoyé", async () => {
       const invitation = await insererInvitation({ expires_at: plus(14) });
       const demande = await insererDemande({ invitation_id: invitation._id });
@@ -331,18 +391,15 @@ describe("relances du workflow d'activation", () => {
       expect(brevoMock.mock.calls[0][2]).toMatchObject({ EMAIL: "direction@cfa-tests.fr" });
     });
 
-    it("reçoit à J+7 le lien de validation, et non le lien de connexion, si son email n'est pas validé", async () => {
-      await insererCompte("direction@cfa-tests.fr", {
-        account_status: "PENDING_EMAIL_VALIDATION",
-        created_at: plus(-30),
-      });
+    it("est retrouvé malgré les majuscules de son email", async () => {
+      await insererCompte("Direction@CFA-tests.fr", { last_connection: plus(-30) });
       await insererDemande({ branche: "compte_existant", branche_envoyee: "compte_existant" });
 
       await relancerDemandesActivation(plus(7));
-      await relancerDemandesActivation(plus(8));
 
-      expect(sendEmailMock.mock.calls.filter(([, template]) => template === "activation_cfa")).toHaveLength(1);
-      expect(brevoMock).not.toHaveBeenCalled();
+      expect(templatesEnvoyes()).toEqual([
+        { destinataire: "direction@cfa-tests.fr", templateId: templates.relanceAvecCompte },
+      ]);
     });
   });
 
@@ -456,6 +513,64 @@ describe("relances du workflow d'activation", () => {
       expect(templatesEnvoyes()).not.toContainEqual(
         expect.objectContaining({ templateId: templates.onboardingCollaborateur })
       );
+    });
+
+    it("n'accueille pas un collaborateur connecté depuis plus de trois jours", async () => {
+      const admin = await insererCompte("direction@cfa-tests.fr");
+      await insererDemande({ user_id: admin, invitez_sent_at: plus(1) });
+      await invitationsArchiveDb().insertOne({
+        _id: new ObjectId(),
+        token: "jeton-consomme",
+        email: "collegue@cfa-tests.fr",
+        organisation_id: organisationId,
+        author_id: admin,
+        role: "member",
+        created_at: plus(2),
+      });
+      await insererCompte("collegue@cfa-tests.fr", { organisation_role: "member", connection_history: [plus(3)] });
+
+      await relancerDemandesActivation(plus(20));
+
+      expect(templatesEnvoyes()).not.toContainEqual(
+        expect.objectContaining({ templateId: templates.onboardingCollaborateur })
+      );
+    });
+
+    it("ne marque ni relance 48 h ni accueil tant que leur template n'est pas configuré", async () => {
+      const { relanceInvitationEnAttente, onboardingCollaborateur } = templates;
+      const admin = await insererCompte("direction@cfa-tests.fr");
+      await insererDemande({ user_id: admin, invitez_sent_at: plus(1) });
+      const invitation = await insererInvitation({
+        email: "attente@cfa-tests.fr",
+        author_id: admin,
+        role: "member",
+        created_at: plus(1),
+      });
+      await invitationsArchiveDb().insertOne({
+        _id: new ObjectId(),
+        token: "jeton-consomme",
+        email: "collegue@cfa-tests.fr",
+        organisation_id: organisationId,
+        author_id: admin,
+        role: "member",
+        created_at: plus(2),
+      });
+      const collegue = await insererCompte("collegue@cfa-tests.fr", {
+        organisation_role: "member",
+        connection_history: [plus(3)],
+      });
+      templates.relanceInvitationEnAttente = 0;
+      templates.onboardingCollaborateur = 0;
+
+      try {
+        await relancerDemandesActivation(plus(4.5));
+      } finally {
+        Object.assign(templates, { relanceInvitationEnAttente, onboardingCollaborateur });
+      }
+
+      expect(brevoMock).not.toHaveBeenCalled();
+      expect(await invitationsDb().findOne({ _id: invitation._id })).not.toHaveProperty("relance_admin_at");
+      expect(await usersMigrationDb().findOne({ _id: collegue })).not.toHaveProperty("onboarding_collaborateur_at");
     });
 
     it("accueille le collaborateur un jour après sa première connexion", async () => {

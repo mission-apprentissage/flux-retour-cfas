@@ -163,4 +163,58 @@ describe("invitation des collaborateurs CFA par Brevo", () => {
       { redirectRecipientInNonProdTo: "admin@campus.fr" }
     );
   });
+
+  it("au renvoi, signe au nom de l'admin qui renvoie quand l'auteur de l'invitation a été supprimé", async () => {
+    await invitationsDb().insertOne({
+      _id: new ObjectId(),
+      token: "jeton-orphelin",
+      email: "collegue@campus.fr",
+      organisation_id: organisationId,
+      author_id: new ObjectId(),
+      role: "member",
+      created_at: new Date(),
+      expires_at: new Date(Date.now() + 3600_000),
+    });
+    const invitation = await invitationsDb().findOne({ email: "collegue@campus.fr" });
+
+    await resendInvitationEmail(ctx, invitation!._id.toString());
+
+    expect(brevoMock).toHaveBeenCalledWith(
+      "collegue@campus.fr",
+      config.brevo.templateInvitationCollaborateurCfaId,
+      expect.objectContaining({ PRENOM_ADMIN: "Alice", NOM_ADMIN: "Admin" }),
+      { redirectRecipientInNonProdTo: "admin@campus.fr" }
+    );
+  });
+
+  it("renvoie une invitation admin du workflow d'activation par son propre email, sans changer le lien", async () => {
+    const demandeId = new ObjectId();
+    await invitationsDb().insertOne({
+      _id: new ObjectId(),
+      token: "jeton-workflow",
+      email: "direction@campus.fr",
+      organisation_id: organisationId,
+      author_id: new ObjectId(),
+      role: "admin",
+      demande_id: demandeId,
+      created_at: new Date(),
+      expires_at: new Date(Date.now() + 3600_000),
+    });
+    const invitation = await invitationsDb().findOne({ email: "direction@campus.fr" });
+
+    await resendInvitationEmail(ctx, invitation!._id.toString());
+
+    const apres = await invitationsDb().findOne({ _id: invitation!._id });
+    expect(apres?.token).toBe("jeton-workflow");
+    expect(apres?.expires_at?.getTime()).toBeGreaterThan(Date.now() + 13 * 24 * 3600_000);
+    expect(brevoMock).toHaveBeenCalledWith(
+      "direction@campus.fr",
+      config.brevo.templatesDemandesActivation.activationSansCompte,
+      expect.objectContaining({
+        NOM_CFA: "CAMPUS DU LAC",
+        LIEN_INSCRIPTION: expect.stringContaining("jeton-workflow"),
+      }),
+      expect.anything()
+    );
+  });
 });

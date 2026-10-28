@@ -1,5 +1,7 @@
 import { WithId } from "mongodb";
 
+import { DECALAGE_DATE_METIER_MS } from "./dateUtils";
+
 const DIACRITIQUES = [
   ["é", "e"],
   ["è", "e"],
@@ -61,7 +63,68 @@ const DIACRITIQUES = [
   ["̃", ""],
 ];
 
+const LETTRES_SPECIALES = [
+  ["æ", "ae"],
+  ["Æ", "ae"],
+  ["œ", "oe"],
+  ["Œ", "oe"],
+  ["ß", "ss"],
+  ["ø", "o"],
+  ["Ø", "o"],
+  ["å", "a"],
+  ["Å", "a"],
+  ["ł", "l"],
+  ["Ł", "l"],
+  ["ą", "a"],
+  ["Ą", "a"],
+  ["ę", "e"],
+  ["Ę", "e"],
+  ["ć", "c"],
+  ["Ć", "c"],
+  ["ń", "n"],
+  ["Ń", "n"],
+  ["ś", "s"],
+  ["Ś", "s"],
+  ["ź", "z"],
+  ["Ź", "z"],
+  ["ż", "z"],
+  ["Ż", "z"],
+  ["ş", "s"],
+  ["Ş", "s"],
+  ["ș", "s"],
+  ["Ș", "s"],
+  ["ţ", "t"],
+  ["Ţ", "t"],
+  ["ț", "t"],
+  ["Ț", "t"],
+  ["ğ", "g"],
+  ["Ğ", "g"],
+  ["ı", "i"],
+  ["İ", "i"],
+  ["ă", "a"],
+  ["Ă", "a"],
+  ["č", "c"],
+  ["Č", "c"],
+  ["š", "s"],
+  ["Š", "s"],
+  ["ž", "z"],
+  ["Ž", "z"],
+  ["ř", "r"],
+  ["Ř", "r"],
+  ["ě", "e"],
+  ["Ě", "e"],
+  ["ů", "u"],
+  ["Ů", "u"],
+  ["̆", ""],
+  ["̌", ""],
+  ["̨", ""],
+  ["̇", ""],
+  ["̊", ""],
+];
+
 const SEPARATEURS_NOM = ["-", " ", "'", "’", "‘"];
+
+const REMPLACEMENTS_NOM = [...LETTRES_SPECIALES, ...SEPARATEURS_NOM.map((separateur) => [separateur, ""])];
 
 /**
  * Normalisation des accents en agrégation Mongo
@@ -75,14 +138,20 @@ export function stripDiacritics(expr: Record<string, unknown>) {
 }
 
 export function dedupNomExpr(champ: string | Record<string, unknown>) {
-  let result = stripDiacritics({ $toLower: { $trim: { input: { $ifNull: [champ, ""] } } } });
-  for (const separateur of SEPARATEURS_NOM) {
-    result = { $replaceAll: { input: result, find: separateur, replacement: "" } };
-  }
-  return result;
+  return {
+    $reduce: {
+      input: { $literal: [...DIACRITIQUES, ...REMPLACEMENTS_NOM] },
+      initialValue: { $toLower: { $trim: { input: { $ifNull: [champ, ""] } } } },
+      in: {
+        $replaceAll: {
+          input: "$$value",
+          find: { $arrayElemAt: ["$$this", 0] },
+          replacement: { $arrayElemAt: ["$$this", 1] },
+        },
+      },
+    },
+  };
 }
-
-export const DECALAGE_DATE_METIER_MS = 2 * 3600 * 1000;
 
 export function dateMetierExpr(champ: string | Record<string, unknown>) {
   return {
@@ -101,17 +170,10 @@ export function dateMetierExpr(champ: string | Record<string, unknown>) {
 
 export function dedupNom(valeur: string | null | undefined): string {
   let result = (valeur ?? "").trim().replace(/[A-Z]/g, (lettre) => lettre.toLowerCase());
-  for (const [from, to] of DIACRITIQUES) {
+  for (const [from, to] of [...DIACRITIQUES, ...REMPLACEMENTS_NOM]) {
     result = result.replaceAll(from, to);
   }
-  for (const separateur of SEPARATEURS_NOM) {
-    result = result.replaceAll(separateur, "");
-  }
   return result;
-}
-
-export function dateMetier(date: Date | null | undefined): string | null {
-  return date instanceof Date ? new Date(date.getTime() + DECALAGE_DATE_METIER_MS).toISOString().slice(0, 10) : null;
 }
 
 /**

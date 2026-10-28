@@ -110,7 +110,7 @@ function BadgeBranche({ demande }: { demande: IDemandeActivationLigne }) {
   );
 }
 
-function BadgeCompte({ compte }: { compte: IDemandeActivationLigne["compte"] }) {
+function BadgeCompte({ demande: { compte, branche } }: { demande: IDemandeActivationLigne }) {
   if (!compte) {
     return (
       <Badge className={styles.badge} noIcon small>
@@ -127,7 +127,7 @@ function BadgeCompte({ compte }: { compte: IDemandeActivationLigne["compte"] }) 
   }
   return (
     <Badge className={styles.badge} severity="warning" small>
-      {compte.account_status === "PENDING_EMAIL_VALIDATION" ? "Email non validé" : "En attente"}
+      {branche === "activation" ? "Non confirmé : remplacé par une invitation" : "Non confirmé"}
     </Badge>
   );
 }
@@ -321,7 +321,7 @@ export default function DemandesActivationClient() {
           )}
         </>
       ),
-      compte: <BadgeCompte compte={demande.compte} />,
+      compte: <BadgeCompte demande={demande} />,
       effectifs:
         demande.effectifs_erp === null && demande.effectifs_deca === null
           ? "—"
