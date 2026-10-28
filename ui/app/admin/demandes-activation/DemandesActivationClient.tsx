@@ -18,14 +18,17 @@ import {
   BrancheDemandeActivation,
   estRenvoyable,
   MOTIFS_DEMANDE_ACTIVATION,
+  MOTIFS_LEVES_PAR_BRANCHE_FORCEE,
   refusAvecMail,
   StatutDemandeActivation,
+  zBrancheDemandeActivation,
 } from "shared/models/data/demandesActivationCfa.model";
 import {
   IBilanEnvoiDemandes,
   IBilanImportDemandes,
   IDemandeActivationLigne,
   IDemandesActivationResponse,
+  IEnvoiDemandesActivation,
   IModificationDemandeActivation,
   VueDemandeActivation,
 } from "shared/models/routes/admin/demandes-activation.api";
@@ -88,47 +91,82 @@ const COLONNES = [
 const nomCfa = (demande: IDemandeActivationLigne) =>
   demande.organisme?.nom ?? (demande.organisme ? "CFA sans nom" : "Organisme non trouvé");
 
+const emailSecable = (email: string) => {
+  const arobase = email.indexOf("@");
+  return arobase > 0 ? (
+    <>
+      {email.slice(0, arobase)}
+      <wbr />
+      {email.slice(arobase)}
+    </>
+  ) : (
+    email
+  );
+};
+
 const bilanImport = ({ creees, misesAJour, fusionnees, inchangees, erreurs }: IBilanImportDemandes) =>
   `${creees} demande(s) créée(s), ${misesAJour} mise(s) à jour, ${fusionnees} doublon(s) fusionné(s), ${inchangees} déjà envoyée(s) laissée(s) telle(s) quelle(s), ${erreurs} ligne(s) vide(s) ignorée(s).`;
 
 function BadgeBranche({ demande }: { demande: IDemandeActivationLigne }) {
   if (demande.branche !== "refus") {
     return (
-      <Badge className={styles.badge} severity={demande.branche === "activation" ? "success" : "info"} small>
+      <Badge className={styles.insecable} severity={demande.branche === "activation" ? "success" : "info"} small>
         {LIBELLES_BRANCHES[demande.branche]}
       </Badge>
     );
   }
   return refusAvecMail(demande.motifs) ? (
-    <Badge className={styles.badge} severity="error" small>
+    <Badge className={styles.insecable} severity="error" small>
       Refus avec mail
     </Badge>
   ) : (
-    <Badge className={styles.badge} severity="warning" small>
+    <Badge className={styles.insecable} severity="warning" small>
       Refus sans mail
     </Badge>
   );
 }
 
+const LIBELLES_ROLES = { admin: "Rôle : admin", member: "Rôle : membre" } as const;
+
+type EtatCompte = { libelle: string; severity: "success" | "info" | "warning"; note?: string };
+
+function etatCompte(
+  compte: NonNullable<IDemandeActivationLigne["compte"]>,
+  branche: BrancheDemandeActivation
+): EtatCompte {
+  if (compte.account_status === "CONFIRMED") return { libelle: "Confirmé", severity: "success" };
+  if (compte.account_status === "PENDING_ADMIN_VALIDATION") {
+    return { libelle: "Email validé", severity: "info", note: "Compte validé à l'envoi" };
+  }
+  if (compte.organisation_role) {
+    return { libelle: "Email à valider", severity: "warning", note: "Lien de validation renvoyé à l'envoi" };
+  }
+  return {
+    libelle: "Non confirmé",
+    severity: "warning",
+    note: branche === "activation" ? "Remplacé par une invitation" : undefined,
+  };
+}
+
 function BadgeCompte({ demande: { compte, branche } }: { demande: IDemandeActivationLigne }) {
   if (!compte) {
     return (
-      <Badge className={styles.badge} noIcon small>
+      <Badge className={styles.insecable} noIcon small>
         Sans compte
       </Badge>
     );
   }
-  if (compte.account_status === "CONFIRMED") {
-    return (
-      <Badge className={styles.badge} severity="success" small>
-        Confirmé
-      </Badge>
-    );
-  }
+  const { libelle, severity, note } = etatCompte(compte, branche);
   return (
-    <Badge className={styles.badge} severity="warning" small>
-      {branche === "activation" ? "Non confirmé : remplacé par une invitation" : "Non confirmé"}
-    </Badge>
+    <>
+      <Badge className={styles.insecable} severity={severity} small>
+        {libelle}
+      </Badge>
+      {note && <p className="fr-text--xs fr-mb-0">{note}</p>}
+      <p className="fr-text--xs fr-mb-0">
+        {compte.organisation_role ? LIBELLES_ROLES[compte.organisation_role] : "Sans rôle"}
+      </p>
+    </>
   );
 }
 
@@ -141,11 +179,11 @@ function Motifs({ demande }: { demande: IDemandeActivationLigne }) {
             <li key={motif}>
               <Tooltip
                 kind="hover"
-                title={
+                title={`${MOTIFS_DEMANDE_ACTIVATION[motif].detail}. ${
                   MOTIFS_DEMANDE_ACTIVATION[motif].avecMail
-                    ? "Refus avec mail : le message « pas encore » part à l'envoi"
-                    : "Refus sans mail : rien ne part, l'équipe prend contact si besoin"
-                }
+                    ? "Refus avec mail : le message « pas encore » part à l'envoi."
+                    : "Refus sans mail : rien ne part, l'équipe prend contact si besoin."
+                }`}
               >
                 <Tag small>{MOTIFS_DEMANDE_ACTIVATION[motif].libelle}</Tag>
               </Tooltip>
@@ -154,7 +192,7 @@ function Motifs({ demande }: { demande: IDemandeActivationLigne }) {
         </ul>
       )}
       {demande.domaine_inconnu && (
-        <Badge className={styles.badge} severity="warning" small>
+        <Badge className={styles.insecable} severity="warning" small>
           Domaine inconnu
         </Badge>
       )}
@@ -221,7 +259,8 @@ export default function DemandesActivationClient() {
   };
 
   const envoiMutation = useMutation({
-    mutationFn: () => _post<undefined, IBilanEnvoiDemandes>(`${URL_DEMANDES}/envoyer`),
+    mutationFn: (envoi: IEnvoiDemandesActivation) =>
+      _post<IEnvoiDemandesActivation, IBilanEnvoiDemandes>(`${URL_DEMANDES}/envoyer`, envoi),
   });
 
   const renvoiMutation = useMutation({
@@ -230,7 +269,7 @@ export default function DemandesActivationClient() {
 
   const envoyer = async () => {
     try {
-      const bilan = await envoiMutation.mutateAsync();
+      const bilan = await envoiMutation.mutateAsync({ ids: cochees.map((demande) => demande._id) });
       setRetourLigne({
         severity: "info",
         message: `${bilan.demandes} demande(s) en cours d'envoi pour ${bilan.organismes} établissement(s). La liste se met à jour automatiquement.`,
@@ -295,8 +334,16 @@ export default function DemandesActivationClient() {
           <strong>{nomCfa(demande)}</strong>
           <br />
           <span className="fr-text--xs">
-            SIRET {demande.siret ?? demande.siret_saisi_brut}
-            {demande.uai ? ` · UAI ${demande.uai}` : ""}
+            <span className={styles.insecable}>
+              SIRET {demande.siret ?? demande.siret_saisi_brut}
+              {demande.uai && " ·"}
+            </span>
+            {demande.uai && (
+              <>
+                {" "}
+                <span className={styles.insecable}>UAI {demande.uai}</span>
+              </>
+            )}
           </span>
           {demande.siret_propose && (
             <p className="fr-text--xs fr-mb-0">SIRET ouvert de même UAI : {demande.siret_propose}</p>
@@ -305,7 +352,7 @@ export default function DemandesActivationClient() {
       ),
       demandeur: (
         <>
-          {demande.email}
+          {emailSecable(demande.email)}
           {demande.fonction && <p className="fr-text--xs fr-mb-0">{demande.fonction}</p>}
           {demande.compte && (demande.compte.prenom || demande.compte.nom) && (
             <p className="fr-text--xs fr-mb-0">
@@ -330,7 +377,7 @@ export default function DemandesActivationClient() {
       motifs: <Motifs demande={demande} />,
       statut: (
         <Badge
-          className={styles.badge}
+          className={styles.insecable}
           small
           severity={STATUTS[demande.statut].severity}
           noIcon={!STATUTS[demande.statut].severity}
@@ -360,7 +407,7 @@ export default function DemandesActivationClient() {
       ),
       actions:
         demande.vue === "envoyees" || demande.statut === "envoi_en_cours" ? null : (
-          <div className="fr-btns-group fr-btns-group--sm">
+          <div className="fr-btns-group fr-btns-group--sm fr-btns-group--icon-left">
             <Button
               priority="tertiary"
               size="small"
@@ -440,7 +487,7 @@ export default function DemandesActivationClient() {
             />
           </div>
           <div className="fr-col-12 fr-col-md-3">
-            <Button onClick={importer} disabled={!fichier || importMutation.isPending} className="fr-mb-3w">
+            <Button onClick={importer} disabled={!fichier || importMutation.isPending}>
               Importer
             </Button>
           </div>
@@ -452,6 +499,7 @@ export default function DemandesActivationClient() {
             closable
             onClose={() => setRetourImport(null)}
             description={retourImport.message}
+            className="fr-mt-3w"
           />
         )}
       </section>
@@ -466,19 +514,15 @@ export default function DemandesActivationClient() {
         <TableSkeleton />
       ) : (
         <>
-          <div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters fr-mb-1w">
-            <div className="fr-col-12 fr-col-lg">
-              <SegmentedControl legend="Vue" hideLegend small segments={segments} />
-            </div>
-            <div className="fr-col-12 fr-col-lg-auto">
-              <Button
-                iconId="fr-icon-mail-line"
-                onClick={() => envoiModal.open()}
-                disabled={cochees.length === 0 || envoiMutation.isPending}
-              >
-                Envoyer les e-mails ({cochees.length})
-              </Button>
-            </div>
+          <div className={`${styles.barreVues} fr-mb-3w`}>
+            <SegmentedControl legend="Vue" hideLegend small segments={segments} />
+            <Button
+              iconId="fr-icon-mail-line"
+              onClick={() => envoiModal.open()}
+              disabled={cochees.length === 0 || envoiMutation.isPending}
+            >
+              Envoyer les e-mails ({cochees.length})
+            </Button>
           </div>
           {retourLigne && (
             <Alert
@@ -533,7 +577,9 @@ export default function DemandesActivationClient() {
             />
             <SelectNext
               label="Branche forcée"
-              hint="Forcer une branche ne lève que les motifs « messagerie grand public » et « aucun effectif »."
+              hint={`Forcer une branche ne lève que les motifs ${MOTIFS_LEVES_PAR_BRANCHE_FORCEE.map(
+                (motif) => `« ${MOTIFS_DEMANDE_ACTIVATION[motif].libelle} »`
+              ).join(" et ")}.`}
               options={[
                 { value: "", label: "Aucune : branche calculée" },
                 ...enCorrection.branches_forcables.map((branche) => ({
@@ -568,7 +614,7 @@ export default function DemandesActivationClient() {
       >
         <p>
           {cochees.length} demande(s) cochée(s) :{" "}
-          {(["activation", "compte_existant", "refus"] as const)
+          {zBrancheDemandeActivation.options
             .map(
               (branche) =>
                 `${cochees.filter((demande) => demande.branche === branche).length} ${LIBELLES_BRANCHES[branche].toLowerCase()}`

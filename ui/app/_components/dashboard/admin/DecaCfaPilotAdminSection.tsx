@@ -35,7 +35,6 @@ type EligibilityResult = {
     uai: string | null;
     nature?: string;
     is_allowed_deca?: boolean | null;
-    deca_activation_queued_at?: string | null;
   } | null;
   activationEnCours: boolean;
   flechageAuto: boolean;
