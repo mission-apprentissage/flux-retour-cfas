@@ -14,11 +14,14 @@ import {
   DUREE_INVITATION_DEMANDE_MS,
   envoyerDemandesActivation,
   evaluerDemande,
+  listerDemandesActivation,
+  modifierDemandeActivation,
   renvoyerDemandeActivation,
   traiterEnvoisDemandesActivation,
 } from "@/common/actions/admin/demandes-activation.actions";
 import { resendAdminInvitation } from "@/common/actions/admin/invitations.admin.actions";
 import { flecherContratsDeca } from "@/common/actions/deca/deca-flechage.actions";
+import { retirerGardeActivationDeca } from "@/common/actions/organismes/organismes.admin.actions";
 import {
   demandesActivationCfaDb,
   effectifsDb,
@@ -52,6 +55,19 @@ vi.mock("@/common/actions/deca/deca-flechage.actions", async (importOriginal) =>
   ...(await importOriginal<typeof import("@/common/actions/deca/deca-flechage.actions")>()),
   flecherContratsDeca: vi.fn(),
 }));
+
+const pendantEvaluation = vi.fn();
+
+vi.mock("@/common/actions/organismes/deca-cfa-eligibility", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/common/actions/organismes/deca-cfa-eligibility")>();
+  return {
+    ...original,
+    checkEligibilityForLoaded: async (...args: Parameters<typeof original.checkEligibilityForLoaded>) => {
+      await pendantEvaluation();
+      return original.checkEligibilityForLoaded(...args);
+    },
+  };
+});
 
 useMongo();
 
@@ -172,10 +188,12 @@ describe("envoi des demandes d'activation", () => {
     sendEmailMock.mockReset();
     addJobMock.mockReset();
     flecherMock.mockReset();
+    pendantEvaluation.mockReset();
   });
 
   afterEach(() => {
     config.deca.flechageAuto = false;
+    config.brevo.templatesDemandesActivation.activationSansCompte = 102;
   });
 
   describe("branche activation", () => {
@@ -304,6 +322,71 @@ describe("envoi des demandes d'activation", () => {
       expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "compte_existant" });
     });
 
+    it("passe admin sans le confirmer un compte dont l'email n'est pas validé, et lui renvoie le lien de validation", async () => {
+      const organisme = await insererOrganisme();
+      const organisationId = await insererOrganisation(organisme._id);
+      const compteId = await insererCompte("direction@cfa-tests.fr", organisationId, {
+        account_status: "PENDING_EMAIL_VALIDATION",
+      });
+      const demande = await insererDemande("direction@cfa-tests.fr");
+
+      await envoyerEtTraiter();
+
+      expect(await usersMigrationDb().findOne({ _id: compteId })).toMatchObject({
+        account_status: "PENDING_EMAIL_VALIDATION",
+        organisation_role: "admin",
+      });
+      expect(sendEmailMock).toHaveBeenCalledWith(
+        "direction@cfa-tests.fr",
+        "activation_cfa",
+        expect.objectContaining({ isAdmin: true })
+      );
+      expect(brevoMock).not.toHaveBeenCalled();
+      expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "compte_existant" });
+    });
+
+    it("enregistre en compte existant un compte apparu dans l'organisation entre le clic et le job", async () => {
+      const organisme = await insererOrganisme();
+      const organisationId = await insererOrganisation(organisme._id);
+      const demande = await insererDemande("direction@cfa-tests.fr");
+      expect(demande.branche).toBe("activation");
+      await envoyerDemandesActivation(EXPEDITEUR);
+      await insererCompte("direction@cfa-tests.fr", organisationId);
+
+      await traiterEnvoisDemandesActivation(organisme._id);
+
+      expect(await relire(demande)).toMatchObject({
+        statut: "envoyee",
+        branche: "compte_existant",
+        branche_envoyee: "compte_existant",
+      });
+      expect(brevoMock).toHaveBeenCalledWith(
+        "direction@cfa-tests.fr",
+        config.brevo.templatesDemandesActivation.activationAvecCompte,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(await invitationsDb().countDocuments()).toBe(0);
+    });
+
+    it("activation dont l'email a un compte dans une autre organisation avant le job : échec, ni flag, ni email", async () => {
+      const organisme = await insererOrganisme();
+      await insererOrganisation(organisme._id);
+      const demande = await insererDemande("direction@cfa-tests.fr");
+      await envoyerDemandesActivation(EXPEDITEUR);
+      await insererCompte("direction@cfa-tests.fr", new ObjectId());
+
+      await traiterEnvoisDemandesActivation(organisme._id);
+
+      expect(await relire(demande)).toMatchObject({
+        statut: "echec",
+        motif_echec: "Le demandeur a un compte rattaché à une autre organisation",
+      });
+      expect((await organismesDb().findOne({ _id: organisme._id }))?.is_allowed_deca).toBeUndefined();
+      expect(await invitationsDb().countDocuments()).toBe(0);
+      expect(brevoMock).not.toHaveBeenCalled();
+    });
+
     it("compte passé dans une autre organisation avant le job : échec, ni rôle, ni flag, ni email", async () => {
       const organisme = await insererOrganisme();
       const organisationId = await insererOrganisation(organisme._id);
@@ -321,6 +404,41 @@ describe("envoi des demandes d'activation", () => {
       expect((await usersMigrationDb().findOne({ _id: compteId }))?.organisation_role).toBe("member");
       expect((await organismesDb().findOne({ _id: organisme._id }))?.is_allowed_deca).toBeUndefined();
       expect(brevoMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("branche forcée", () => {
+    it("active DECA et invite l'admin d'un CFA sans apprenti dont la branche est forcée", async () => {
+      const organisme = await insererOrganisme({}, 0);
+      const demande = await insererDemande("direction@cfa-tests.fr", SIRET, { a_envoyer: false });
+      expect(demande.motifs).toEqual(["aucun_effectif"]);
+
+      const forcee = await modifierDemandeActivation(demande._id, { branche_forcee: "activation" });
+      expect(forcee.branche).toBe("activation");
+      await modifierDemandeActivation(demande._id, { a_envoyer: true });
+      await envoyerEtTraiter();
+
+      expect((await organismesDb().findOne({ _id: organisme._id }))?.is_allowed_deca).toBe(true);
+      expect(brevoMock).toHaveBeenCalledWith(
+        "direction@cfa-tests.fr",
+        config.brevo.templatesDemandesActivation.activationSansCompte,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "activation" });
+    });
+
+    it("reste modifiable quand un compte apparaît dans l'organisation après le forçage en activation", async () => {
+      const organisme = await insererOrganisme({}, 0);
+      const organisationId = await insererOrganisation(organisme._id);
+      const demande = await insererDemande("direction@cfa-tests.fr", SIRET, { a_envoyer: false });
+      await modifierDemandeActivation(demande._id, { branche_forcee: "activation" });
+      await insererCompte("direction@cfa-tests.fr", organisationId);
+      await listerDemandesActivation();
+
+      const ligne = await modifierDemandeActivation(demande._id, { a_envoyer: true });
+
+      expect(ligne).toMatchObject({ branche: "compte_existant", branche_forcee: "compte_existant", a_envoyer: true });
     });
   });
 
@@ -390,6 +508,48 @@ describe("envoi des demandes d'activation", () => {
       expect(await demandesActivationCfaDb().countDocuments({ statut: "echec" })).toBe(2);
     });
 
+    it("met en échec avant toute activation une demande dont le template Brevo n'est pas configuré", async () => {
+      config.brevo.templatesDemandesActivation.activationSansCompte = 0;
+      const organisme = await insererOrganisme();
+      const demande = await insererDemande("direction@cfa-tests.fr");
+
+      await envoyerEtTraiter();
+
+      expect(await relire(demande)).toMatchObject({ statut: "echec", motif_echec: "Template Brevo non configuré" });
+      expect((await organismesDb().findOne({ _id: organisme._id }))?.is_allowed_deca).toBeUndefined();
+      expect(await invitationsDb().countDocuments()).toBe(0);
+    });
+
+    it("met en échec sans email les demandes d'un CFA désactivé pendant son activation", async () => {
+      config.deca.flechageAuto = true;
+      const organisme = await insererOrganisme();
+      const demande = await insererDemande("direction@cfa-tests.fr");
+      flecherMock.mockImplementation(async () => {
+        await retirerGardeActivationDeca(organisme._id);
+        return {} as never;
+      });
+
+      await envoyerEtTraiter();
+
+      expect(await relire(demande)).toMatchObject({
+        statut: "echec",
+        motif_echec: "Activation DECA annulée par une désactivation",
+      });
+      expect((await organismesDb().findOne({ _id: organisme._id }))?.is_allowed_deca).toBeUndefined();
+      expect(brevoMock).not.toHaveBeenCalled();
+    });
+
+    it("n'envoie rien pour une ligne qui cumule un motif avec mail et un motif sans mail", async () => {
+      const demande = await insererDemande("direction@gmail.com", "99999999999999");
+      expect(demande.motifs).toEqual(expect.arrayContaining(["siret_inconnu", "messagerie_grand_public"]));
+
+      const bilan = await envoyerEtTraiter();
+
+      expect(bilan.demandes).toBe(0);
+      expect(brevoMock).not.toHaveBeenCalled();
+      expect(await relire(demande)).toMatchObject({ statut: "pret", a_envoyer: false });
+    });
+
     it("met en échec les demandes d'un CFA dont l'activation DECA est déjà en cours", async () => {
       const organisme = await insererOrganisme();
       const demande = await insererDemande("direction@cfa-tests.fr");
@@ -433,6 +593,30 @@ describe("envoi des demandes d'activation", () => {
       expect(second.demandes).toBe(0);
       expect(addJobMock).toHaveBeenCalledTimes(1);
       expect((await relire(nonCochee))?.statut).toBe("pret");
+    });
+
+    it("un récapitulatif lu avant le clic ne remet pas à envoyer une ligne partie entre-temps", async () => {
+      await insererOrganisme();
+      const demande = await insererDemande("direction@cfa-tests.fr");
+      pendantEvaluation.mockImplementationOnce(() => envoyerEtTraiter());
+
+      await listerDemandesActivation();
+      expect(await relire(demande)).toMatchObject({ statut: "envoyee", a_envoyer: false });
+      await envoyerEtTraiter();
+
+      expect(brevoMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("ne renvoie pas un refus déjà envoyé qui reste refusé", async () => {
+      const demande = await insererDemande("compta@inconnu.fr", "99999999999999", {
+        statut: "envoyee",
+        branche_envoyee: "refus",
+      });
+
+      await envoyerEtTraiter();
+
+      expect(brevoMock).not.toHaveBeenCalled();
+      expect(await relire(demande)).toMatchObject({ statut: "envoyee", a_envoyer: false });
     });
 
     it("renvoie une demande dont l'invitation a expiré : même invitation, prolongée, puis envoyée", async () => {

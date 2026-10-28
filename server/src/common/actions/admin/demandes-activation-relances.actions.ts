@@ -5,6 +5,7 @@ import type { IDemandeActivationCfa } from "shared/models/data/demandesActivatio
 import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 
 import { envoyerEmailBrevo, nomOrganisme } from "@/common/actions/admin/demandes-activation.actions";
+import { lienInscriptionCfa } from "@/common/actions/organisations.actions";
 import { resendConfirmationEmail } from "@/common/actions/users.actions";
 import parentLogger from "@/common/logger";
 import {
@@ -44,20 +45,42 @@ async function envoyer(
   destinataire: string,
   params: Record<string, unknown>,
   demande: Pick<IDemandeActivationCfa, "_id" | "envoye_par_email">
-) {
+): Promise<boolean> {
   try {
     await envoyerEmailBrevo(templateId, destinataire, params, demande.envoye_par_email);
+    return true;
   } catch (err) {
     logger.warn({ err, demandeId: demande._id, templateId }, "Relance d'une demande d'activation non envoyée");
+    return false;
   }
 }
 
-async function poserVerrou(demande: IDemandeActivationCfa, champ: keyof IDemandeActivationCfa) {
+type Verrou =
+  | "relance_sans_compte_at"
+  | "relance_validation_email_at"
+  | "relance_avec_compte_at"
+  | "relance_sans_invitation_at";
+
+async function poserVerrou(demande: IDemandeActivationCfa, champ: Verrou) {
   const { modifiedCount } = await demandesActivationCfaDb().updateOne(
     { _id: demande._id, [champ]: null },
     { $set: { [champ]: new Date(), updated_at: new Date() } }
   );
   return modifiedCount === 1;
+}
+
+async function leverVerrou(demande: IDemandeActivationCfa, champ: Verrou) {
+  await demandesActivationCfaDb().updateOne({ _id: demande._id }, { $set: { [champ]: null, updated_at: new Date() } });
+}
+
+async function renvoyerValidation(compte: IUsersMigration, demande: IDemandeActivationCfa): Promise<boolean> {
+  try {
+    await resendConfirmationEmail(compte._id);
+    return true;
+  } catch (err) {
+    logger.warn({ err, demandeId: demande._id }, "Renvoi de la validation d'email en échec");
+    return false;
+  }
 }
 
 export async function mettreEnFileInvitezCollaborateurs(
@@ -92,12 +115,18 @@ export async function envoyerInvitezCollaborateurs(demandeId: ObjectId) {
   );
   if (!demande) return;
   const admin = demande.user_id ? await usersMigrationDb().findOne({ _id: demande.user_id }) : null;
-  await envoyer(
+  const envoye = await envoyer(
     config.brevo.templatesDemandesActivation.invitezCollaborateurs,
     demande.email,
     { NOM_CFA: await nomCfa(demande), PRENOM: admin?.prenom ?? "", LIEN_INVITER: lienInviter() },
     demande
   );
+  if (!envoye) {
+    await demandesActivationCfaDb().updateOne(
+      { _id: demande._id },
+      { $set: { invitez_queued_at: null, invitez_sent_at: null, updated_at: new Date() } }
+    );
+  }
 }
 
 async function debloquerEnvois(maintenant: Date) {
@@ -123,6 +152,8 @@ async function marquerInvitationsExpirees(maintenant: Date) {
 }
 
 async function relancerAdminsSansCompte(maintenant: Date) {
+  const templateId = config.brevo.templatesDemandesActivation.relanceSansCompte;
+  if (!templateId) return;
   const demandes = await demandesActivationCfaDb()
     .find({
       statut: "envoyee",
@@ -136,16 +167,17 @@ async function relancerAdminsSansCompte(maintenant: Date) {
     const invitation = demande.invitation_id ? await invitationsDb().findOne({ _id: demande.invitation_id }) : null;
     if (!invitation?.expires_at || invitation.expires_at <= maintenant) continue;
     if (!(await poserVerrou(demande, "relance_sans_compte_at"))) continue;
-    await envoyer(
-      config.brevo.templatesDemandesActivation.relanceSansCompte,
+    const envoye = await envoyer(
+      templateId,
       demande.email,
       {
         NOM_CFA: await nomCfa(demande),
-        LIEN_INSCRIPTION: `${config.publicUrl}/auth/inscription-cfa?invitationToken=${invitation.token}`,
+        LIEN_INSCRIPTION: lienInscriptionCfa(invitation.token),
         DATE_EXPIRATION: format(invitation.expires_at, "dd/MM/yyyy"),
       },
       demande
     );
+    if (!envoye) await leverVerrou(demande, "relance_sans_compte_at");
   }
 }
 
@@ -160,11 +192,7 @@ async function renvoyerValidationEmail(maintenant: Date) {
       created_at: { $lte: new Date(maintenant.getTime() - 2 * JOUR) },
     });
     if (!compte || !(await poserVerrou(demande, "relance_validation_email_at"))) continue;
-    try {
-      await resendConfirmationEmail(compte._id);
-    } catch (err) {
-      logger.warn({ err, demandeId: demande._id }, "Renvoi de la validation d'email en échec");
-    }
+    if (!(await renvoyerValidation(compte, demande))) await leverVerrou(demande, "relance_validation_email_at");
   }
 }
 
@@ -174,6 +202,7 @@ const connecteDepuis = (compte: Pick<IUsersMigration, "connection_history" | "la
   );
 
 async function relancerAdminsAvecCompte(maintenant: Date) {
+  const templateId = config.brevo.templatesDemandesActivation.relanceAvecCompte;
   const demandes = await demandesActivationCfaDb()
     .find({
       statut: "envoyee",
@@ -185,21 +214,28 @@ async function relancerAdminsAvecCompte(maintenant: Date) {
   for (const demande of demandes) {
     const compte = await usersMigrationDb().findOne({ email: demande.email });
     if (!compte || !demande.envoyee_at || connecteDepuis(compte, demande.envoyee_at)) continue;
+    const emailNonValide = compte.account_status === "PENDING_EMAIL_VALIDATION";
+    if (!emailNonValide && !templateId) continue;
     if (!(await poserVerrou(demande, "relance_avec_compte_at"))) continue;
-    await envoyer(
-      config.brevo.templatesDemandesActivation.relanceAvecCompte,
-      demande.email,
-      {
-        NOM_CFA: await nomCfa(demande),
-        PRENOM: compte.prenom ?? "",
-        LIEN_CONNEXION: `${config.publicUrl}/auth/connexion`,
-      },
-      demande
-    );
+    const envoye = emailNonValide
+      ? await renvoyerValidation(compte, demande)
+      : await envoyer(
+          templateId,
+          demande.email,
+          {
+            NOM_CFA: await nomCfa(demande),
+            PRENOM: compte.prenom ?? "",
+            LIEN_CONNEXION: `${config.publicUrl}/auth/connexion`,
+          },
+          demande
+        );
+    if (!envoye) await leverVerrou(demande, "relance_avec_compte_at");
   }
 }
 
 async function relancerAdminsSansInvitation(maintenant: Date) {
+  const templateId = config.brevo.templatesDemandesActivation.relanceSansInvitation;
+  if (!templateId) return;
   const demandes = await demandesActivationCfaDb()
     .find({
       ...DEMANDES_ACTIVEES,
@@ -217,73 +253,83 @@ async function relancerAdminsSansInvitation(maintenant: Date) {
       (await invitationsDb().countDocuments(depuis)) + (await invitationsArchiveDb().countDocuments(depuis));
     if (invitations > 0 || !(await poserVerrou(demande, "relance_sans_invitation_at"))) continue;
     const admin = await usersMigrationDb().findOne({ _id: demande.user_id ?? undefined });
-    await envoyer(
-      config.brevo.templatesDemandesActivation.relanceSansInvitation,
+    const envoye = await envoyer(
+      templateId,
       demande.email,
       { NOM_CFA: await nomCfa(demande), PRENOM: admin?.prenom ?? "", LIEN_INVITER: lienInviter() },
       demande
     );
+    if (!envoye) await leverVerrou(demande, "relance_sans_invitation_at");
   }
 }
 
-async function demandesParAdmin() {
-  const demandes = await demandesActivationCfaDb()
-    .find({ ...DEMANDES_ACTIVEES, user_id: { $ne: null } })
+async function demandesDesAdmins() {
+  return demandesActivationCfaDb()
+    .find({ ...DEMANDES_ACTIVEES, user_id: { $ne: null }, envoyee_at: { $ne: null } })
     .toArray();
-  return new Map(demandes.map((demande) => [demande.user_id?.toString() ?? "", demande]));
 }
 
-async function relancerInvitationsEnAttente(maintenant: Date, parAdmin: Map<string, IDemandeActivationCfa>) {
-  const invitations = await invitationsDb()
-    .find({
-      author_id: { $in: [...parAdmin.keys()].map((id) => new ObjectId(id)) },
-      created_at: { $lte: new Date(maintenant.getTime() - 48 * HEURE) },
-      relance_admin_at: { $exists: false },
-    })
-    .toArray();
-  for (const invitation of invitations) {
-    const demande = parAdmin.get(invitation.author_id.toString());
-    if (!demande) continue;
-    const { modifiedCount } = await invitationsDb().updateOne(
-      { _id: invitation._id, relance_admin_at: { $exists: false } },
-      { $set: { relance_admin_at: maintenant } }
-    );
-    if (modifiedCount === 0) continue;
-    const admin = await usersMigrationDb().findOne({ _id: invitation.author_id });
-    await envoyer(
-      config.brevo.templatesDemandesActivation.relanceInvitationEnAttente,
-      demande.email,
-      { NOM_CFA: await nomCfa(demande), PRENOM: admin?.prenom ?? "", EMAIL_INVITE: invitation.email },
-      demande
-    );
+async function relancerInvitationsEnAttente(maintenant: Date, demandes: IDemandeActivationCfa[]) {
+  const templateId = config.brevo.templatesDemandesActivation.relanceInvitationEnAttente;
+  if (!templateId) return;
+  for (const demande of demandes) {
+    const invitations = await invitationsDb()
+      .find({
+        author_id: demande.user_id ?? undefined,
+        created_at: { $gte: demande.envoyee_at ?? maintenant, $lte: new Date(maintenant.getTime() - 48 * HEURE) },
+        $or: [{ expires_at: { $exists: false } }, { expires_at: { $gt: maintenant } }],
+        relance_admin_at: { $exists: false },
+      })
+      .toArray();
+    for (const invitation of invitations) {
+      const { modifiedCount } = await invitationsDb().updateOne(
+        { _id: invitation._id, relance_admin_at: { $exists: false } },
+        { $set: { relance_admin_at: maintenant } }
+      );
+      if (modifiedCount === 0) continue;
+      const admin = await usersMigrationDb().findOne({ _id: invitation.author_id });
+      const envoye = await envoyer(
+        templateId,
+        demande.email,
+        { NOM_CFA: await nomCfa(demande), PRENOM: admin?.prenom ?? "", EMAIL_INVITE: invitation.email },
+        demande
+      );
+      if (!envoye) await invitationsDb().updateOne({ _id: invitation._id }, { $unset: { relance_admin_at: "" } });
+    }
   }
 }
 
-async function accueillirCollaborateurs(maintenant: Date, parAdmin: Map<string, IDemandeActivationCfa>) {
-  const archives = await invitationsArchiveDb()
-    .find({ author_id: { $in: [...parAdmin.keys()].map((id) => new ObjectId(id)) } })
-    .toArray();
-  for (const archive of archives) {
-    const demande = parAdmin.get(archive.author_id.toString());
-    const collaborateur = await usersMigrationDb().findOne({
-      email: archive.email,
-      organisation_id: archive.organisation_id,
-      onboarding_collaborateur_at: { $exists: false },
-    });
-    const premiereConnexion = collaborateur?.connection_history?.[0] ?? collaborateur?.last_connection;
-    if (!demande || !collaborateur || !premiereConnexion) continue;
-    if (premiereConnexion > new Date(maintenant.getTime() - JOUR)) continue;
-    const { modifiedCount } = await usersMigrationDb().updateOne(
-      { _id: collaborateur._id, onboarding_collaborateur_at: { $exists: false } },
-      { $set: { onboarding_collaborateur_at: maintenant } }
-    );
-    if (modifiedCount === 0) continue;
-    await envoyer(
-      config.brevo.templatesDemandesActivation.onboardingCollaborateur,
-      collaborateur.email,
-      { NOM_CFA: await nomCfa(demande), PRENOM: collaborateur.prenom ?? "" },
-      demande
-    );
+async function accueillirCollaborateurs(maintenant: Date, demandes: IDemandeActivationCfa[]) {
+  const templateId = config.brevo.templatesDemandesActivation.onboardingCollaborateur;
+  if (!templateId) return;
+  for (const demande of demandes) {
+    const archives = await invitationsArchiveDb()
+      .find({ author_id: demande.user_id ?? undefined, created_at: { $gte: demande.envoyee_at ?? maintenant } })
+      .toArray();
+    for (const archive of archives) {
+      const collaborateur = await usersMigrationDb().findOne({
+        email: archive.email,
+        organisation_id: archive.organisation_id,
+        onboarding_collaborateur_at: { $exists: false },
+      });
+      const premiereConnexion = collaborateur?.connection_history?.[0] ?? collaborateur?.last_connection;
+      if (!collaborateur || !premiereConnexion) continue;
+      if (premiereConnexion > new Date(maintenant.getTime() - JOUR)) continue;
+      const { modifiedCount } = await usersMigrationDb().updateOne(
+        { _id: collaborateur._id, onboarding_collaborateur_at: { $exists: false } },
+        { $set: { onboarding_collaborateur_at: maintenant } }
+      );
+      if (modifiedCount === 0) continue;
+      const envoye = await envoyer(
+        templateId,
+        collaborateur.email,
+        { NOM_CFA: await nomCfa(demande), PRENOM: collaborateur.prenom ?? "" },
+        demande
+      );
+      if (!envoye) {
+        await usersMigrationDb().updateOne({ _id: collaborateur._id }, { $unset: { onboarding_collaborateur_at: "" } });
+      }
+    }
   }
 }
 
@@ -294,7 +340,7 @@ export async function relancerDemandesActivation(maintenant = new Date()) {
   await renvoyerValidationEmail(maintenant);
   await relancerAdminsAvecCompte(maintenant);
   await relancerAdminsSansInvitation(maintenant);
-  const parAdmin = await demandesParAdmin();
-  await relancerInvitationsEnAttente(maintenant, parAdmin);
-  await accueillirCollaborateurs(maintenant, parAdmin);
+  const demandes = await demandesDesAdmins();
+  await relancerInvitationsEnAttente(maintenant, demandes);
+  await accueillirCollaborateurs(maintenant, demandes);
 }

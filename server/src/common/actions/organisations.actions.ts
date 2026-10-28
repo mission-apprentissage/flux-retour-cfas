@@ -634,6 +634,9 @@ async function getInvitationById(ctx: AuthContext, invitationId: ObjectId): Prom
   return invitation;
 }
 
+export const lienInscriptionCfa = (token: string) =>
+  `${config.publicUrl}/auth/inscription-cfa?invitationToken=${token}`;
+
 export async function envoyerInvitationCollaborateurCfa(
   invitation: Pick<IInvitation, "email" | "token" | "author_id">,
   organisation: IOrganisation & { type: "ORGANISME_FORMATION" }
@@ -656,7 +659,7 @@ export async function envoyerInvitationCollaborateurCfa(
       NOM_ADMIN: auteur?.nom ?? "",
       FONCTION_ADMIN: auteur?.fonction ?? "",
       NOM_CFA: await getCfaNameForOrganisation(organisation),
-      LIEN_INSCRIPTION: `${config.publicUrl}/auth/inscription-cfa?invitationToken=${invitation.token}`,
+      LIEN_INSCRIPTION: lienInscriptionCfa(invitation.token),
     },
     { redirectRecipientInNonProdTo: auteur?.email }
   );

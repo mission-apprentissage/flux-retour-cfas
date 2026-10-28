@@ -24,9 +24,6 @@ export type IModificationDemandeActivation = z.output<typeof zModificationDemand
 
 export interface IDemandeActivationLigne {
   _id: string;
-  source: string;
-  horodatage: string | null;
-  horodatage_brut: string | null;
   email: string;
   fonction: string | null;
   commentaire: string | null;
@@ -54,4 +51,17 @@ export interface IDemandeActivationLigne {
 export interface IDemandesActivationResponse {
   demandes: IDemandeActivationLigne[];
   compteParVue: Record<VueDemandeActivation, number>;
+}
+
+export interface IBilanImportDemandes {
+  creees: number;
+  misesAJour: number;
+  fusionnees: number;
+  inchangees: number;
+  erreurs: number;
+}
+
+export interface IBilanEnvoiDemandes {
+  demandes: number;
+  organismes: number;
 }

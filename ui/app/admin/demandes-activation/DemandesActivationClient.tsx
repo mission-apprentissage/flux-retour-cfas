@@ -16,10 +16,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   BrancheDemandeActivation,
+  estRenvoyable,
   MOTIFS_DEMANDE_ACTIVATION,
+  refusAvecMail,
   StatutDemandeActivation,
 } from "shared/models/data/demandesActivationCfa.model";
 import {
+  IBilanEnvoiDemandes,
+  IBilanImportDemandes,
   IDemandeActivationLigne,
   IDemandesActivationResponse,
   IModificationDemandeActivation,
@@ -42,9 +46,7 @@ const URL_DEMANDES = "/api/v1/admin/demandes-activation";
 const CLE_REQUETE = ["admin", "demandes-activation"];
 const PAGE_SIZE = 20;
 
-type BilanImport = { creees: number; misesAJour: number; fusionnees: number; inchangees: number; erreurs: number };
 type Retour = { severity: "success" | "info" | "warning" | "error"; message: string };
-type BilanEnvoi = { demandes: number; organismes: number };
 
 const LIBELLES_VUES: Record<VueDemandeActivation, string> = {
   a_envoyer: "À envoyer",
@@ -86,28 +88,18 @@ const COLONNES = [
 const nomCfa = (demande: IDemandeActivationLigne) =>
   demande.organisme?.nom ?? (demande.organisme ? "CFA sans nom" : "Organisme non trouvé");
 
-const refusAvecMail = (demande: IDemandeActivationLigne) =>
-  demande.motifs.every((motif) => MOTIFS_DEMANDE_ACTIVATION[motif].avecMail);
-
-const bilanImport = ({ creees, misesAJour, fusionnees, inchangees, erreurs }: BilanImport) =>
+const bilanImport = ({ creees, misesAJour, fusionnees, inchangees, erreurs }: IBilanImportDemandes) =>
   `${creees} demande(s) créée(s), ${misesAJour} mise(s) à jour, ${fusionnees} doublon(s) fusionné(s), ${inchangees} déjà envoyée(s) laissée(s) telle(s) quelle(s), ${erreurs} ligne(s) vide(s) ignorée(s).`;
 
 function BadgeBranche({ demande }: { demande: IDemandeActivationLigne }) {
-  if (demande.branche === "activation") {
+  if (demande.branche !== "refus") {
     return (
-      <Badge className={styles.badge} severity="success" small>
-        Activation
+      <Badge className={styles.badge} severity={demande.branche === "activation" ? "success" : "info"} small>
+        {LIBELLES_BRANCHES[demande.branche]}
       </Badge>
     );
   }
-  if (demande.branche === "compte_existant") {
-    return (
-      <Badge className={styles.badge} severity="info" small>
-        Compte existant
-      </Badge>
-    );
-  }
-  return refusAvecMail(demande) ? (
+  return refusAvecMail(demande.motifs) ? (
     <Badge className={styles.badge} severity="error" small>
       Refus avec mail
     </Badge>
@@ -126,13 +118,16 @@ function BadgeCompte({ compte }: { compte: IDemandeActivationLigne["compte"] }) 
       </Badge>
     );
   }
-  return compte.account_status === "CONFIRMED" ? (
-    <Badge className={styles.badge} severity="success" small>
-      Confirmé
-    </Badge>
-  ) : (
+  if (compte.account_status === "CONFIRMED") {
+    return (
+      <Badge className={styles.badge} severity="success" small>
+        Confirmé
+      </Badge>
+    );
+  }
+  return (
     <Badge className={styles.badge} severity="warning" small>
-      En attente
+      {compte.account_status === "PENDING_EMAIL_VALIDATION" ? "Email non validé" : "En attente"}
     </Badge>
   );
 }
@@ -191,7 +186,9 @@ export default function DemandesActivationClient() {
 
   const importMutation = useMutation({
     mutationFn: (formulaire: FormData) =>
-      _post<FormData, BilanImport>(`${URL_DEMANDES}/import`, formulaire, { headers: { Accept: "application/json" } }),
+      _post<FormData, IBilanImportDemandes>(`${URL_DEMANDES}/import`, formulaire, {
+        headers: { Accept: "application/json" },
+      }),
   });
 
   const modificationMutation = useMutation({
@@ -224,7 +221,7 @@ export default function DemandesActivationClient() {
   };
 
   const envoiMutation = useMutation({
-    mutationFn: () => _post<undefined, BilanEnvoi>(`${URL_DEMANDES}/envoyer`),
+    mutationFn: () => _post<undefined, IBilanEnvoiDemandes>(`${URL_DEMANDES}/envoyer`),
   });
 
   const renvoiMutation = useMutation({
@@ -372,7 +369,7 @@ export default function DemandesActivationClient() {
             >
               Corriger
             </Button>
-            {(demande.statut === "echec" || demande.statut === "invitation_expiree") && (
+            {estRenvoyable(demande.statut) && (
               <Button
                 priority="tertiary"
                 size="small"

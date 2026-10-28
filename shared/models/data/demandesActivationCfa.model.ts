@@ -12,7 +12,6 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
     { email: 1, siret_saisi: 1 },
     { name: "email_siret_saisi", unique: true },
   ],
-  [{ user_id: 1 }, { name: "user_id" }],
 ];
 
 export const MOTIFS_DEMANDE_ACTIVATION = {
@@ -30,6 +29,9 @@ export const MOTIFS_DEMANDE_ACTIVATION = {
 } as const;
 
 export type MotifDemandeActivation = keyof typeof MOTIFS_DEMANDE_ACTIVATION;
+
+export const refusAvecMail = (motifs: ReadonlyArray<MotifDemandeActivation>) =>
+  motifs.every((motif) => MOTIFS_DEMANDE_ACTIVATION[motif].avecMail);
 
 export const MOTIFS_LEVES_PAR_BRANCHE_FORCEE: ReadonlyArray<MotifDemandeActivation> = [
   "messagerie_grand_public",
@@ -98,5 +100,7 @@ const zDemandeActivationCfa = z.object({
 export type IDemandeActivationCfa = z.output<typeof zDemandeActivationCfa>;
 export type BrancheDemandeActivation = z.output<typeof zBrancheDemandeActivation>;
 export type StatutDemandeActivation = z.output<typeof zStatutDemandeActivation>;
+
+export const estRenvoyable = (statut: StatutDemandeActivation) => statut === "echec" || statut === "invitation_expiree";
 
 export default { zod: zDemandeActivationCfa, indexes, collectionName };

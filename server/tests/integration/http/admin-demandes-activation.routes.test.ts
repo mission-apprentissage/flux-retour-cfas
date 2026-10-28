@@ -109,6 +109,17 @@ describe("POST /api/v1/admin/demandes-activation/import", () => {
     expect(await demande("directrice@cfa-exemple.fr")).toMatchObject({ source: "Webinaire PdL (réponses).csv.zip" });
   });
 
+  it("lit une archive recompressée sous macOS, malgré ses fichiers __MACOSX", async () => {
+    const archive = new AdmZip();
+    archive.addFile("Webinaire PdL (réponses).csv", EXPORT);
+    archive.addFile("__MACOSX/._Webinaire PdL (réponses).csv", Buffer.from([0, 5, 22, 7]));
+
+    const response = await importer(archive.toBuffer(), "Webinaire PdL.zip");
+
+    expect(response.status).toBe(200);
+    expect(response.data.creees).toBe(5);
+  });
+
   it("lit un export rouvert dans Excel, avec d'autres intitulés et un autre ordre de colonnes", async () => {
     const excel = Buffer.from(
       "﻿Votre SIRET;E-mail du demandeur;Votre fonction;Horodatage\r\n13002374000439;Directrice@cfa-exemple.fr;Directrice, pédagogie;2026/10/16 3:45:45 PM UTC+3\r\n"
