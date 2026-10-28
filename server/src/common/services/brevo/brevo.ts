@@ -24,7 +24,8 @@ export interface SendTransactionalEmailOptions {
   /**
    * Hors production, redirige l'email vers cette adresse au lieu du vrai destinataire ; sans effet
    * en production. Obligatoire : la même clé Brevo joint l'API depuis tous les environnements, donc
-   * rien n'empêche structurellement un envoi réel. Une valeur vide bloque l'envoi hors production.
+   * rien n'empêche structurellement un envoi réel. Une valeur vide, ou hors beta.gouv.fr, bloque
+   * l'envoi hors production.
    */
   redirectRecipientInNonProdTo: string | undefined;
 }
@@ -41,6 +42,13 @@ const brevoErrorStatus = (error: unknown): number | "?" =>
   (error instanceof BrevoError ? error.statusCode : undefined) ?? "?";
 
 const errorMessage = (error: unknown): string | undefined => (error instanceof Error ? error.message : undefined);
+
+const DOMAINE_AUTORISE_HORS_PRODUCTION = "beta.gouv.fr";
+
+const estAutoriseeHorsProduction = (email: string) => {
+  const domaine = email.trim().toLowerCase().split("@")[1] ?? "";
+  return domaine === DOMAINE_AUTORISE_HORS_PRODUCTION || domaine.endsWith(`.${DOMAINE_AUTORISE_HORS_PRODUCTION}`);
+};
 
 export const sendTransactionalEmail = async (
   recipientEmail: string,
@@ -60,6 +68,13 @@ export const sendTransactionalEmail = async (
     logger.warn(
       { templateId, realRecipient: recipientEmail, env: config.env },
       "Email Brevo non envoyé : aucune adresse de redirection fournie hors production"
+    );
+    return;
+  }
+  if (redirectTo && !estAutoriseeHorsProduction(redirectTo)) {
+    logger.warn(
+      { templateId, realRecipient: recipientEmail, redirectTo, env: config.env },
+      `Email Brevo non envoyé : adresse de redirection hors ${DOMAINE_AUTORISE_HORS_PRODUCTION} hors production`
     );
     return;
   }
