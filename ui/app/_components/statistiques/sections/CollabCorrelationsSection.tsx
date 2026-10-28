@@ -88,7 +88,7 @@ function CarteCorrelation({
   libelle: (ligne: ICollabCorrelationRow) => ReactNode;
   loading: boolean;
 }) {
-  const [affichage, setAffichage] = useState<Affichage>("tableau");
+  const [affichage, setAffichage] = useState<Affichage>("graphique");
 
   return (
     <OverviewCard title={titre} actions={<Bascule affichage={affichage} onChange={setAffichage} legende={titre} />}>
@@ -112,19 +112,19 @@ function CarteCorrelation({
         </div>
       ) : (
         <>
-          <ul className={styles.barres}>
-            {lignes.map((ligne) => (
-              <li key={ligne.cle} className={styles.barre}>
-                <span>{libelle(ligne)}</span>
-                <TraitementDetailsBar details={ligne.resultats} total={ligne.traites} />
-              </li>
-            ))}
-          </ul>
           <ul className={styles.legende} aria-label="Légende">
             {TRAITEMENT_SEGMENTS_V2.map(({ key, label, color }) => (
               <li key={key}>
                 <span className={styles.pastille} style={{ backgroundColor: color }} aria-hidden="true" />
                 {label}
+              </li>
+            ))}
+          </ul>
+          <ul className={styles.barres}>
+            {lignes.map((ligne) => (
+              <li key={ligne.cle} className={styles.barre}>
+                <span>{libelle(ligne)}</span>
+                <TraitementDetailsBar details={ligne.resultats} total={ligne.traites} />
               </li>
             ))}
           </ul>
