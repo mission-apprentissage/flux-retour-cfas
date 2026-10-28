@@ -533,14 +533,20 @@ const refusNominatif = (organisation: IndicateursMlLocals["organisation"], horsR
   organisation.type === ORGANISATION_TYPE.DDETS ? "Accès non autorisé à ce département" : horsRegion;
 
 /**
- * Liste nominative : l'ARML n'y a pas accès, la DDETS est limitée à son département, la DREETS à sa région.
- * Avec `ml_id` (fiche ML), le périmètre est celui de la ML : sa région, ou son département pour une DDETS.
+ * Liste nominative : la DREETS voit les dossiers des CFA de sa région, la DDETS ceux de son département, l'ARML ceux
+ * reçus par les ML de ses régions. Avec `ml_id` (fiche ML), le périmètre est celui de la ML : sa région, ou son
+ * département pour une DDETS ; l'ARML n'y a pas accès. L'ARML n'a pas accès aux fiches CFA.
  */
 const resolveCollaborationDossiersScope = async (
   query: z.infer<typeof collaborationDossiersExportQuery>,
   { organisation, regions: userRegions }: IndicateursMlLocals
 ) => {
-  const autorises: string[] = [ORGANISATION_TYPE.ADMINISTRATEUR, ORGANISATION_TYPE.DREETS, ORGANISATION_TYPE.DDETS];
+  const autorises: string[] = [
+    ORGANISATION_TYPE.ADMINISTRATEUR,
+    ORGANISATION_TYPE.DREETS,
+    ORGANISATION_TYPE.DDETS,
+    ORGANISATION_TYPE.ARML,
+  ];
   if (!autorises.includes(organisation.type)) {
     throw Boom.forbidden("Accès non autorisé à la liste des collaborations");
   }
@@ -572,6 +578,13 @@ const resolveCollaborationDossiersScope = async (
     return { regions: userRegions, departements: [departement] };
   }
 
+  if (organisation.type === ORGANISATION_TYPE.ARML) {
+    return {
+      missionLocaleRegions: scopedRegions(query.region, userRegions) ?? [],
+      missionLocaleDepartements: query.departements,
+    };
+  }
+
   return { regions: scopedRegions(query.region, userRegions), departements: query.departements };
 };
 
@@ -601,27 +614,43 @@ const getCollaborationDossiersRoute: IndicateursHandler<z.infer<typeof collabora
   return { ...liste, data: await withPeutImiter(liste.data, locals) };
 };
 
-/** Marque les dossiers dont le CFA émetteur peut être imité en lecture seule par l'organisation connectée. */
+type Adresse = { region?: string | null; departement?: string | null };
+
+/**
+ * Marque les dossiers pour lesquels l'organisation connectée peut ouvrir une imposture : sur le CFA émetteur, ou sur la
+ * Mission Locale destinataire pour l'ARML.
+ */
 async function withPeutImiter(dossiers: ICollaborationDossier[], locals: IndicateursMlLocals) {
-  const ids = [...new Set(dossiers.map((dossier) => dossier.cfa.id).filter((id) => ObjectId.isValid(id)))];
-  const organismes = ids.length
-    ? await organismesDb()
-        .find(
-          { _id: { $in: ids.map((id) => new ObjectId(id)) } },
-          { projection: { "adresse.region": 1, "adresse.departement": 1 } }
-        )
-        .toArray()
-    : [];
-  const adresses = new Map(organismes.map((organisme) => [organisme._id.toString(), organisme.adresse]));
+  const cible = locals.organisation.type === ORGANISATION_TYPE.ARML ? "ml" : "cfa";
+  const structureOf = (dossier: ICollaborationDossier) => (cible === "ml" ? dossier.mission_locale : dossier.cfa);
+  const ids = [...new Set(dossiers.map((dossier) => structureOf(dossier).id).filter((id) => ObjectId.isValid(id)))];
+  const filter = { _id: { $in: ids.map((id) => new ObjectId(id)) } };
+  const projection = { "adresse.region": 1, "adresse.departement": 1 };
+  const structures = !ids.length
+    ? []
+    : cible === "ml"
+      ? await organisationsDb()
+          .find({ ...filter, type: "MISSION_LOCALE" }, { projection })
+          .toArray()
+      : await organismesDb().find(filter, { projection }).toArray();
+  const adresses = new Map(
+    structures.map((structure): [string, Adresse | undefined] => [
+      structure._id.toString(),
+      (structure as { adresse?: Adresse }).adresse,
+    ])
+  );
   return dossiers.map((dossier) => ({
     ...dossier,
-    peut_imiter: peutImiter(locals, "cfa", adresses.get(dossier.cfa.id)),
+    peut_imiter: peutImiter(locals, cible, adresses.get(structureOf(dossier).id)),
   }));
 }
 
 const getCollaborationDossiersExportRoute: IndicateursHandler<
   z.infer<typeof collaborationDossiersExportQuery>
 > = async (req, { locals }) => {
+  if (locals.organisation.type === ORGANISATION_TYPE.ARML) {
+    throw Boom.forbidden("Export non autorisé pour votre organisation");
+  }
   const result = await listCollaborationDossiers(
     await resolveCollaborationDossiersScope(req.query, locals),
     toCollaborationDossiersFilters(req.query)

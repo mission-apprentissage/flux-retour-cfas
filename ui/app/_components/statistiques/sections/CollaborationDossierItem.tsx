@@ -6,9 +6,11 @@ import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { format } from "date-fns/format";
 import Link from "next/link";
 import { useState } from "react";
+import { ORGANISATION_TYPE } from "shared/constants";
 import { ML_SITUATION_DOSSIER_LABEL } from "shared/constants/missionLocale";
 import type { ICollaborationDossier, ICollaborationDossierStructure } from "shared/models/data/nationalStats.model";
 
+import { useAuth } from "@/app/_context/UserContext";
 import { _post } from "@/common/httpClient";
 import { getApiErrorMessage } from "@/common/rateLimit";
 
@@ -101,8 +103,13 @@ export function CollaborationDossierItem({
   );
 }
 
-/** Ouvre le dossier sous l'identité du CFA émetteur : en lecture seule, sauf pour l'administrateur. */
+/**
+ * Ouvre le dossier sous l'identité du CFA émetteur, ou de la Mission Locale destinataire pour l'ARML : en lecture
+ * seule, sauf pour l'administrateur.
+ */
 function VoirDetailButton({ dossier }: { dossier: ICollaborationDossier }) {
+  const { user } = useAuth();
+  const surMissionLocale = user?.organisation?.type === ORGANISATION_TYPE.ARML;
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
@@ -111,8 +118,13 @@ function VoirDetailButton({ dossier }: { dossier: ICollaborationDossier }) {
     setEnCours(true);
     setErreur(null);
     try {
-      await _post(IMPOSTURE_TERRITOIRE_URL, { cfa_id: dossier.cfa.id });
-      window.location.href = `/cfa/${dossier.effectif_id}`;
+      if (surMissionLocale) {
+        await _post(IMPOSTURE_TERRITOIRE_URL, { ml_id: dossier.mission_locale.id });
+        window.location.href = `/mission-locale/${dossier.effectif_id}`;
+      } else {
+        await _post(IMPOSTURE_TERRITOIRE_URL, { cfa_id: dossier.cfa.id });
+        window.location.href = `/cfa/${dossier.effectif_id}`;
+      }
     } catch (err) {
       setErreur(getApiErrorMessage(err, "L'imposture a échoué. Merci de réessayer."));
       setEnCours(false);

@@ -1850,16 +1850,12 @@ describe("Indicateurs ML routes (territoriales)", () => {
       }
     });
 
-    it("Limite la DDETS à son département et refuse l'ARML", async () => {
+    it("Limite la DDETS à son département", async () => {
       const ddets = await requestAsOrganisation(DDETS_PARIS, "get", BASE);
       expect(ddets.data.total).toBe(3);
       expectForbidden(
         await requestAsOrganisation(DDETS_PARIS, "get", `${BASE}?departements=77`),
         "Accès non autorisé à ce département"
-      );
-      expectForbidden(
-        await requestAsOrganisation(ARML_IDF, "get", BASE),
-        "Accès non autorisé à la liste des collaborations"
       );
       expectForbidden(
         await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`),
@@ -1878,6 +1874,41 @@ describe("Indicateurs ML routes (territoriales)", () => {
       const mlHorsRegion = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?ml_ids=${ML_ARA}`);
       expect(mlHorsRegion.status).toBe(200);
       expect(mlHorsRegion.data.total).toBeLessThanOrEqual(territoire.data.total);
+    });
+
+    it("Liste pour l'ARML les dossiers reçus par les ML de ses régions, quel que soit le CFA, avec imposture sur la ML", async () => {
+      const arml = await requestAsOrganisation(ARML_IDF, "get", BASE);
+
+      expect(arml.status).toBe(200);
+      expect(arml.data.total).toBe(5);
+      expect(
+        arml.data.data.every(
+          (row: { mission_locale: { id: string }; peut_imiter: boolean }) =>
+            row.mission_locale.id === ML_IDF.toString() && row.peut_imiter
+        )
+      ).toBe(true);
+      expect(arml.data.data.map((row: { cfa: { nom: string } }) => row.cfa.nom)).toContain("CFA B");
+
+      expectForbidden(
+        await requestAsOrganisation(ARML_IDF, "get", `${BASE}?region=84`),
+        "Accès non autorisé à cette région"
+      );
+      expect((await requestAsOrganisation(ARML_IDF_ARA, "get", `${BASE}?region=84`)).data.total).toBe(0);
+      expect((await requestAsOrganisation(ARML_IDF_ARA, "get", BASE)).data.total).toBe(5);
+      expectForbidden(
+        await requestAsOrganisation(ARML_SANS_REGION, "get", BASE),
+        "Aucun périmètre territorial n'est rattaché à votre organisation"
+      );
+    });
+
+    it("Réserve l'export nominatif à l'administrateur, à la DREETS et à la DDETS", async () => {
+      expectForbidden(
+        await requestAsOrganisation(ARML_IDF, "get", `${BASE}/export`),
+        "Export non autorisé pour votre organisation"
+      );
+      expect(await telechargementListesNominativesLogsDb().countDocuments({ type: "indicateurs_collaborations" })).toBe(
+        0
+      );
     });
 
     it("Journalise l'export nominatif", async () => {
@@ -1917,7 +1948,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
         );
         expectForbidden(
           await requestAsOrganisation(ARML_IDF, "get", `${BASE}?cfa_id=${CFA_A}`),
-          "Accès non autorisé à la liste des collaborations"
+          "Accès non autorisé à cet organisme"
         );
         expectForbidden(
           await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?cfa_id=${CFA_B}`),
@@ -1973,7 +2004,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
         );
         expectForbidden(
           await requestAsOrganisation(ARML_IDF, "get", `${BASE}?ml_id=${ML_IDF}`),
-          "Accès non autorisé à la liste des collaborations"
+          "Accès non autorisé à cette Mission Locale"
         );
         expectForbidden(
           await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?ml_id=${ML_ARA}`),

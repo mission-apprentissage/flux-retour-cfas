@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense } from "react";
-import { ORGANISATION_TYPE } from "shared/constants";
 
 import { CollabActiviteCfaPanel } from "@/app/_components/statistiques/sections/CollabActiviteCfaPanel";
 import { CollabActiviteMlPanel } from "@/app/_components/statistiques/sections/CollabActiviteMlPanel";
@@ -13,8 +12,7 @@ import { useAuth } from "@/app/_context/UserContext";
 
 export default function CollaborationsPage() {
   const { user } = useAuth();
-  // La liste nominative n'est pas ouverte aux ARML (le serveur la refuse aussi).
-  const listeVisible = !!user && user.organisation?.type !== ORGANISATION_TYPE.ARML;
+  const listeVisible = !!user;
 
   return (
     <Suspense>

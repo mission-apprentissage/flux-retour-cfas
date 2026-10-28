@@ -19,6 +19,9 @@ export interface CollaborationDossiersTerritoire {
   departements?: string[];
   /** Périmètre de la fiche ML : tous les dossiers reçus par la ML, quelle que soit la région du CFA. */
   missionLocaleId?: ObjectId;
+  /** Périmètre de l'ARML : dossiers reçus par les ML de ces régions (et départements), quelle que soit la région du CFA. */
+  missionLocaleRegions?: string[];
+  missionLocaleDepartements?: string[];
   /** Périmètre de la fiche CFA : tous les dossiers envoyés par ce CFA, quelle que soit la région de la ML. */
   organismeId?: ObjectId;
 }
@@ -76,10 +79,11 @@ const findTerritoireOrganismeIds = async ({
   regions,
   departements,
   missionLocaleId,
+  missionLocaleRegions,
   organismeId,
 }: CollaborationDossiersTerritoire) => {
   if (organismeId) return [organismeId];
-  if (missionLocaleId || (!regions?.length && !departements?.length)) return undefined;
+  if (missionLocaleId || missionLocaleRegions || (!regions?.length && !departements?.length)) return undefined;
   const organismes = await organismesDb()
     .find(
       {
@@ -92,10 +96,30 @@ const findTerritoireOrganismeIds = async ({
   return organismes.map((organisme) => organisme._id);
 };
 
+const findTerritoireMissionLocaleIds = async ({
+  missionLocaleId,
+  missionLocaleRegions,
+  missionLocaleDepartements,
+}: CollaborationDossiersTerritoire) => {
+  if (missionLocaleId) return [missionLocaleId];
+  if (!missionLocaleRegions) return undefined;
+  const missionsLocales = await organisationsDb()
+    .find(
+      {
+        type: "MISSION_LOCALE",
+        "adresse.region": { $in: missionLocaleRegions },
+        ...(missionLocaleDepartements?.length ? { "adresse.departement": { $in: missionLocaleDepartements } } : {}),
+      },
+      { projection: { _id: 1 } }
+    )
+    .toArray();
+  return missionsLocales.map((ml) => ml._id);
+};
+
 const PARIS_TIMEZONE = "Europe/Paris";
 
-const buildBaseMatch = (organismeIds: ObjectId[] | undefined, missionLocaleId?: ObjectId) => ({
-  ...(missionLocaleId ? { mission_locale_id: missionLocaleId } : {}),
+const buildBaseMatch = (organismeIds: ObjectId[] | undefined, missionLocaleIds?: ObjectId[]) => ({
+  ...(missionLocaleIds ? { mission_locale_id: { $in: missionLocaleIds } } : {}),
   "organisme_data.acc_conjoint": true,
   soft_deleted: { $ne: true },
   ...(organismeIds ? { "effectif_snapshot.organisme_id": { $in: organismeIds } } : {}),
@@ -249,7 +273,7 @@ export async function listCollaborationDossiers(
   pagination?: { page: number; limit: number }
 ): Promise<ICollaborationDossiersResponse> {
   const organismeIds = await findTerritoireOrganismeIds(territoire);
-  const baseMatch = buildBaseMatch(organismeIds, territoire.missionLocaleId);
+  const baseMatch = buildBaseMatch(organismeIds, await findTerritoireMissionLocaleIds(territoire));
   const missionLocaleIds = (await missionLocaleEffectifsDb().distinct("mission_locale_id", baseMatch)) as ObjectId[];
   const territoireOrganismeIds = (await missionLocaleEffectifsDb().distinct(
     "effectif_snapshot.organisme_id",

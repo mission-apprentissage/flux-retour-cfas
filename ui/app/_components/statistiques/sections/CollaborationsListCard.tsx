@@ -66,6 +66,7 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
   const { region, departement } = useStatsFilters();
   const { user } = useAuth();
   const isDdets = user?.organisation?.type === ORGANISATION_TYPE.DDETS;
+  const isArml = user?.organisation?.type === ORGANISATION_TYPE.ARML;
   const { filters, setList, setPeriode } = useCollabDossiersFilters();
   const perimetre = usePerimetreNominatif();
   const listeTerritoire = !mlId && !cfaId;
@@ -134,14 +135,16 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
           {data && !horsPerimetre && (
             <span className={filterStyles.count}>{data.total.toLocaleString("fr-FR")} dossiers</span>
           )}
-          <Button
-            iconId="fr-icon-download-line"
-            iconPosition="right"
-            onClick={exporter.exportData}
-            disabled={horsPerimetre || exporter.isExporting || !data?.total}
-          >
-            {exporter.isExporting ? "Export en cours..." : "Exporter les données"}
-          </Button>
+          {!isArml && (
+            <Button
+              iconId="fr-icon-download-line"
+              iconPosition="right"
+              onClick={exporter.exportData}
+              disabled={horsPerimetre || exporter.isExporting || !data?.total}
+            >
+              {exporter.isExporting ? "Export en cours..." : "Exporter les données"}
+            </Button>
+          )}
         </>
       }
     >
