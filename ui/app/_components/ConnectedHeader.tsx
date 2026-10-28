@@ -244,29 +244,24 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
       text: string;
     }> = [];
 
-    if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) {
+    const isActeurTerritorial = [ORGANISATION_TYPE.DREETS, ORGANISATION_TYPE.DDETS, ORGANISATION_TYPE.ARML].includes(
+      organisationType || ""
+    );
+
+    if (!isActeurTerritorial) {
       aideMenuLinks.push({
         linkProps: {
-          href: PAGES.static.docsKitDeploiementTbaOp.getPath(),
+          href: CRISP_FAQ,
           target: "_blank",
           rel: "noopener noreferrer",
         },
-        text: "Kit de déploiement DREETS/DDETS",
+        text: "Centre d'aide",
       });
     }
 
-    aideMenuLinks.push({
-      linkProps: {
-        href: CRISP_FAQ,
-        target: "_blank",
-        rel: "noopener noreferrer",
-      },
-      text: "Centre d'aide",
-    });
-
     if (
+      !isActeurTerritorial &&
       organisationType !== ORGANISATION_TYPE.MISSION_LOCALE &&
-      organisationType !== ORGANISATION_TYPE.ARML &&
       organisationType !== ORGANISATION_TYPE.FRANCE_TRAVAIL
     ) {
       aideMenuLinks.push({
