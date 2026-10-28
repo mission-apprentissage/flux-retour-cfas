@@ -407,7 +407,7 @@ export type IPrequalifStats = z.output<typeof zPrequalifStats>;
 const zCfaAdoptionStats = z.object({
   estimation: z.number(),
   compatibles: z.number(),
-  avec_compte: z.number(),
+  avec_compte: zStatWithVariation,
   avec_collaboration: zStatWithVariation,
   period: zStatsPeriod,
 });

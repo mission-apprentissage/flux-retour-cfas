@@ -1079,9 +1079,53 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expect(response.data).toMatchObject({
         estimation: 2,
         compatibles: 0,
-        avec_compte: 1,
+        avec_compte: { current: 1 },
         avec_collaboration: { current: 1 },
       });
+    });
+
+    it("Date la création du compte d'un CFA par la confirmation de son premier utilisateur", async () => {
+      const organisationId = new ObjectId();
+      const jours = (nombre: number) => new Date(Date.now() - nombre * 24 * 60 * 60 * 1000);
+      await organisationsDb().insertOne(
+        {
+          _id: organisationId,
+          type: "ORGANISME_FORMATION",
+          organisme_id: CFA_A.toString(),
+          created_at: new Date(),
+        } as never,
+        { bypassDocumentValidation: true }
+      );
+      await usersMigrationDb().insertOne(
+        {
+          _id: new ObjectId(),
+          organisation_id: organisationId,
+          account_status: "CONFIRMED",
+          created_at: jours(200),
+          confirmed_at: jours(100),
+        } as never,
+        { bypassDocumentValidation: true }
+      );
+
+      const response = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/cfa/adoption?period=30days"
+      );
+      expect(response.data.avec_compte).toEqual({ current: 1, variation: "0%" });
+
+      await usersMigrationDb().updateOne(
+        { organisation_id: organisationId },
+        { $set: { confirmed_at: jours(10) } },
+        { bypassDocumentValidation: true }
+      );
+      const recent = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/cfa/adoption?period=30days"
+      );
+      expect(recent.data.avec_compte.current).toBe(1);
+      expect(recent.data.avec_compte.variation).not.toBe("0%");
     });
 
     it("Ouvre le national et les autres régions", async () => {
@@ -1090,7 +1134,11 @@ describe("Indicateurs ML routes (territoriales)", () => {
         "get",
         "/api/v1/organisation/indicateurs-ml/stats/cfa/adoption?national=true"
       );
-      expect(national.data).toMatchObject({ estimation: 3, avec_compte: 2, avec_collaboration: { current: 2 } });
+      expect(national.data).toMatchObject({
+        estimation: 3,
+        avec_compte: { current: 2 },
+        avec_collaboration: { current: 2 },
+      });
 
       expect(
         (

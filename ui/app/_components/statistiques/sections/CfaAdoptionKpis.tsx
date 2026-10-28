@@ -30,8 +30,10 @@ export function CfaAdoptionKpis() {
         />
         <StatCard
           label="Total CFA ayant créé un compte sur le Tableau de bord"
-          value={data?.avec_compte}
+          value={data?.avec_compte.current}
+          variation={data?.avec_compte.variation}
           loading={isLoading}
+          loadingPercentage={isLoadingVariation(isFetching, isLoading)}
           className={kpiFunnelCardClassName}
           tooltip="CFA dont au moins un utilisateur a un compte confirmé sur le Tableau de bord, qu'ils soient compatibles avec la collaboration ou non."
         />

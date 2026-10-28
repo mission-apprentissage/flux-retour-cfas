@@ -16,7 +16,7 @@ import {
 import {
   calculateStartDateAsync,
   calculatePreviousStartDate,
-  createCumulStatWithVariation,
+  createEtatStatWithVariation,
   type Territoire,
 } from "@/common/actions/mission-locale/mission-locale-stats.helpers";
 import { findEligibleOrganismes } from "@/common/actions/organismes/deca-cfa-eligibility";
@@ -46,6 +46,38 @@ const countOrganismesWithCollaboration = async (organismeIds: ObjectId[], endExc
         )
       ).length;
 
+/** CFA dont l'organisation compte un utilisateur confirmé avant `endExclusive` (date de confirmation, à défaut de création). */
+const countOrganismesWithAccount = async (organismeIds: ObjectId[], endExclusive: Date) => {
+  if (organismeIds.length === 0) return 0;
+
+  const organisations = await organisationsDb()
+    .find(
+      { type: "ORGANISME_FORMATION", organisme_id: { $in: organismeIds.map((id) => id.toString()) } },
+      { projection: { _id: 1, organisme_id: 1 } }
+    )
+    .toArray();
+  if (organisations.length === 0) return 0;
+
+  const premiersComptes = await usersMigrationDb()
+    .aggregate<{ _id: ObjectId }>([
+      {
+        $match: {
+          organisation_id: { $in: organisations.map((organisation) => organisation._id) },
+          account_status: "CONFIRMED",
+        },
+      },
+      { $group: { _id: "$organisation_id", premier: { $min: { $ifNull: ["$confirmed_at", "$created_at"] } } } },
+      { $match: { premier: { $lt: endExclusive } } },
+    ])
+    .toArray();
+
+  const organisationIds = new Set(premiersComptes.map((row) => row._id.toString()));
+  const organismesAvecCompte = organisations
+    .filter((organisation) => organisationIds.has(organisation._id.toString()))
+    .map((organisation) => (organisation as { organisme_id?: string }).organisme_id);
+  return new Set(organismesAvecCompte).size;
+};
+
 export async function getCfaAdoptionStats(
   period: StatsPeriod,
   territoire: Territoire = {}
@@ -59,22 +91,23 @@ export async function getCfaAdoptionStats(
   const organismeIds = organismes.map((organisme) => organisme._id);
 
   const previousStartDate = calculatePreviousStartDate(period, startDate);
-  const [eligibles, avecCollaboration, avecCollaborationDebut, avecCollaborationPrecedent] = await Promise.all([
+  const comparable = !!previousStartDate;
+  const [eligibles, avecCollaboration, avecCollaborationDebut, avecCompteDebut] = await Promise.all([
     organismeIds.length ? findEligibleOrganismes(organismeIds) : Promise.resolve([]),
     countOrganismesWithCollaboration(organismeIds, new Date()),
     countOrganismesWithCollaboration(organismeIds, startDate),
-    previousStartDate ? countOrganismesWithCollaboration(organismeIds, previousStartDate) : Promise.resolve(null),
+    countOrganismesWithAccount(organismeIds, startDate),
   ]);
 
   return {
     estimation: organismes.length,
     compatibles: eligibles.length,
-    avec_compte: organismes.filter((organisme) => organisme.has_account === true).length,
-    avec_collaboration: createCumulStatWithVariation(
-      avecCollaboration,
-      avecCollaborationDebut,
-      avecCollaborationPrecedent
+    avec_compte: createEtatStatWithVariation(
+      organismes.filter((organisme) => organisme.has_account === true).length,
+      avecCompteDebut,
+      comparable
     ),
+    avec_collaboration: createEtatStatWithVariation(avecCollaboration, avecCollaborationDebut, comparable),
     period,
   };
 }
