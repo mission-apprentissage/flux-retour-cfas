@@ -74,7 +74,7 @@ jobs:
     if: ${{ success() }}
     needs: ["version"]
     name: Deploy ${{ needs.version.outputs.VERSION }} on ${{ inputs.environment }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Notify new deployment on Slack
         uses: ravsamhq/notify-slack-action@v2
