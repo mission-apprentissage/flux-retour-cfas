@@ -4,7 +4,6 @@ import {
   BrancheDemandeActivation,
   MotifDemandeActivation,
   StatutDemandeActivation,
-  zBrancheDemandeActivation,
 } from "../../data/demandesActivationCfa.model";
 import type { IUsersMigration } from "../../data/usersMigration.model";
 
@@ -16,7 +15,6 @@ export const zModificationDemandeActivation = z
   .object({
     siret_corrige: z.string().nullable(),
     email_corrige: z.string().nullable(),
-    branche_forcee: zBrancheDemandeActivation.nullable(),
     a_envoyer: z.boolean(),
   })
   .partial()
@@ -37,7 +35,6 @@ export interface IDemandeActivationLigne {
   commentaire: string | null;
   siret_saisi_brut: string;
   siret_corrige: string | null;
-  branche_forcee: BrancheDemandeActivation | null;
   siret: string | null;
   uai: string | null;
   siret_propose: string | null;
@@ -58,7 +55,6 @@ export interface IDemandeActivationLigne {
   a_envoyer: boolean;
   vue: VueDemandeActivation;
   cochable: boolean;
-  branches_forcables: BrancheDemandeActivation[];
 }
 
 export interface IDemandesActivationResponse {

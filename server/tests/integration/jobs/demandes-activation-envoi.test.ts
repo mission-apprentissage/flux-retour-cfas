@@ -559,41 +559,6 @@ describe("envoi des demandes d'activation", () => {
     });
   });
 
-  describe("branche forcée", () => {
-    it("active DECA et invite l'admin d'un CFA sans apprenti dont la branche est forcée", async () => {
-      const organisme = await insererOrganisme({}, 0);
-      const demande = await insererDemande("direction@cfa-tests.fr", SIRET, { a_envoyer: false });
-      expect(demande.motifs).toEqual(["aucun_effectif"]);
-
-      const forcee = await modifierDemandeActivation(demande._id, { branche_forcee: "activation" });
-      expect(forcee.branche).toBe("activation");
-      await modifierDemandeActivation(demande._id, { a_envoyer: true });
-      await envoyerEtTraiter();
-
-      expect((await organismesDb().findOne({ _id: organisme._id }))?.is_allowed_deca).toBe(true);
-      expect(brevoMock).toHaveBeenCalledWith(
-        "direction@cfa-tests.fr",
-        config.brevo.templatesDemandesActivation.activationSansCompte,
-        expect.anything(),
-        expect.anything()
-      );
-      expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "activation" });
-    });
-
-    it("reste modifiable quand un compte apparaît dans l'organisation après le forçage en activation", async () => {
-      const organisme = await insererOrganisme({}, 0);
-      const organisationId = await insererOrganisation(organisme._id);
-      const demande = await insererDemande("direction@cfa-tests.fr", SIRET, { a_envoyer: false });
-      await modifierDemandeActivation(demande._id, { branche_forcee: "activation" });
-      await insererCompte("direction@cfa-tests.fr", organisationId);
-      await listerDemandesActivation();
-
-      const ligne = await modifierDemandeActivation(demande._id, { a_envoyer: true });
-
-      expect(ligne).toMatchObject({ branche: "compte_existant", branche_forcee: "compte_existant", a_envoyer: true });
-    });
-  });
-
   describe("refus avec mail", () => {
     it("envoie le template refus, par le job de l'organisme ou par le job sans organisme", async () => {
       await insererOrganisme({}, 0);
@@ -872,44 +837,6 @@ describe("envoi des demandes d'activation", () => {
         motif_echec: "Une autre demande de cette personne pour cet établissement a déjà été envoyée",
       });
       expect(brevoMock).toHaveBeenCalledTimes(1);
-    });
-
-    it("repasse en activation une branche forcée en compte existant dont le compte a disparu", async () => {
-      const organisme = await insererOrganisme();
-      const organisationId = await insererOrganisation(organisme._id);
-      const compteId = await insererCompte("direction@gmail.com", organisationId);
-      const demande = await insererDemande("direction@gmail.com", SIRET, { a_envoyer: false });
-      await modifierDemandeActivation(demande._id, { branche_forcee: "compte_existant" });
-      await usersMigrationDb().deleteOne({ _id: compteId });
-      await listerDemandesActivation();
-
-      const ligne = await modifierDemandeActivation(demande._id, { a_envoyer: true });
-      await envoyerEtTraiter();
-
-      expect(ligne).toMatchObject({ branche: "activation", branche_forcee: "activation", motifs: [] });
-      expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "activation" });
-    });
-
-    it("active de bout en bout une adresse grand public forcée en compte existant", async () => {
-      const organisme = await insererOrganisme();
-      const organisationId = await insererOrganisation(organisme._id);
-      const compteId = await insererCompte("henriman.direction@gmail.com", organisationId);
-      const demande = await insererDemande("henriman.direction@gmail.com", SIRET, { a_envoyer: false });
-      expect(demande.motifs).toEqual(["messagerie_grand_public"]);
-
-      await modifierDemandeActivation(demande._id, { branche_forcee: "compte_existant" });
-      await modifierDemandeActivation(demande._id, { a_envoyer: true });
-      await envoyerEtTraiter();
-
-      expect((await organismesDb().findOne({ _id: organisme._id }))?.is_allowed_deca).toBe(true);
-      expect(await usersMigrationDb().findOne({ _id: compteId })).toMatchObject({ organisation_role: "admin" });
-      expect(brevoMock).toHaveBeenCalledWith(
-        "henriman.direction@gmail.com",
-        config.brevo.templatesDemandesActivation.activationAvecCompte,
-        expect.anything(),
-        expect.anything()
-      );
-      expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "compte_existant" });
     });
 
     it("n'écrit pas une ligne inchangée en relisant le récapitulatif", async () => {

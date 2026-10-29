@@ -11,7 +11,6 @@ import {
   estRenvoyable,
   IDemandeActivationCfa,
   MotifDemandeActivation,
-  MOTIFS_LEVES_PAR_BRANCHE_FORCEE,
   refusAvecMail,
 } from "shared/models/data/demandesActivationCfa.model";
 import { IInvitation } from "shared/models/data/invitations.model";
@@ -290,8 +289,7 @@ export async function evaluerDemande(
     email_corrige,
     siret_saisi,
     siret_corrige,
-    branche_forcee,
-  }: Pick<IDemandeActivationCfa, "email_saisi" | "email_corrige" | "siret_saisi" | "siret_corrige" | "branche_forcee">,
+  }: Pick<IDemandeActivationCfa, "email_saisi" | "email_corrige" | "siret_saisi" | "siret_corrige">,
   domaines: CacheDomaines = new Map()
 ): Promise<EvaluationDemande> {
   const motifs = new Set<MotifDemandeActivation>();
@@ -355,15 +353,8 @@ export async function evaluerDemande(
         )
       : null;
 
-  const brancheParDefaut = compteDansOrganisme && emailProuve(compte) ? "compte_existant" : "activation";
-  const brancheForcee = branche_forcee && branche_forcee !== "refus" ? brancheParDefaut : branche_forcee;
-  if (brancheForcee === "refus") {
-    motifs.add("refus_force");
-  } else if (brancheForcee) {
-    for (const motif of MOTIFS_LEVES_PAR_BRANCHE_FORCEE) motifs.delete(motif);
-  }
-
-  const branche: BrancheDemandeActivation = motifs.size > 0 ? "refus" : brancheParDefaut;
+  const branche: BrancheDemandeActivation =
+    motifs.size > 0 ? "refus" : compteDansOrganisme && emailProuve(compte) ? "compte_existant" : "activation";
 
   return {
     email,
@@ -378,7 +369,6 @@ export async function evaluerDemande(
     motifs: [...motifs],
     domaine_inconnu: domaineInconnu,
     branche,
-    branche_forcee: brancheForcee ?? null,
   };
 }
 
@@ -430,7 +420,6 @@ async function importerDemande(
         ...provenance,
         email_corrige: existante?.email_corrige,
         siret_corrige: existante?.siret_corrige,
-        branche_forcee: existante?.branche_forcee,
       },
       domaines
     );
@@ -468,7 +457,7 @@ const estCochable = (demande: IDemandeActivationCfa) =>
     ? demande.branche !== "refus" || refusAvecMail(demande.motifs)
     : refusEnvoye(demande) && demande.branche !== "refus";
 
-const corrigee = (demande: IDemandeActivationCfa) => !!demande.siret_corrige || !!demande.branche_forcee;
+const corrigee = (demande: IDemandeActivationCfa) => !!demande.siret_corrige || !!demande.email_corrige;
 
 function vueDemande(demande: IDemandeActivationCfa): VueDemandeActivation {
   if (estRenvoyable(demande.statut)) return "echecs";
@@ -480,17 +469,6 @@ function vueDemande(demande: IDemandeActivationCfa): VueDemandeActivation {
   if (demande.branche === "refus") return "refus";
   if (refuseeAvant) return "devenus_eligibles";
   return demande.statut === "envoyee" ? "envoyees" : "a_envoyer";
-}
-
-function branchesForcables(
-  demande: Pick<IDemandeActivationCfa, "motifs">,
-  compte: Pick<IUsersMigration, "account_status"> | null | undefined
-): BrancheDemandeActivation[] {
-  const nonLevables = demande.motifs.filter(
-    (motif) => motif !== "refus_force" && !MOTIFS_LEVES_PAR_BRANCHE_FORCEE.includes(motif)
-  );
-  if (nonLevables.length > 0) return ["refus"];
-  return emailProuve(compte) ? ["compte_existant", "refus"] : ["activation", "refus"];
 }
 
 async function reevaluer(
@@ -531,7 +509,6 @@ const CHAMPS_EVALUES = [
   "motifs",
   "domaine_inconnu",
   "branche",
-  "branche_forcee",
   "a_envoyer",
 ] as const satisfies ReadonlyArray<keyof IDemandeActivationCfa>;
 
@@ -578,7 +555,6 @@ async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeAc
       commentaire: demande.commentaire ?? null,
       siret_saisi_brut: demande.siret_saisi_brut,
       siret_corrige: demande.siret_corrige ?? null,
-      branche_forcee: demande.branche_forcee ?? null,
       siret: demande.siret ?? null,
       uai: demande.uai ?? null,
       siret_propose: demande.siret_propose ?? null,
@@ -601,7 +577,6 @@ async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeAc
       a_envoyer: demande.a_envoyer,
       vue: vueDemande(demande),
       cochable: estCochable(demande),
-      branches_forcables: branchesForcables(demande, compte),
     };
   });
 }
@@ -653,20 +628,11 @@ export async function modifierDemandeActivation(
     }
     modifications.email_corrige = normaliserEmail(modification.email_corrige ?? "") || null;
   }
-  if (modification.branche_forcee !== undefined) {
-    modifications.branche_forcee = modification.branche_forcee;
-  }
 
   let misAJour = Object.keys(modifications).length > 0 ? await reevaluer(demande, modifications) : demande;
   if (misAJour.email !== demande.email && demande.invitation_id) {
     await invitationsDb().deleteOne({ _id: demande.invitation_id });
     misAJour = { ...misAJour, invitation_id: null };
-  }
-  const compte = misAJour.user_id
-    ? await usersMigrationDb().findOne({ _id: misAJour.user_id }, { projection: { account_status: 1 } })
-    : null;
-  if (modification.branche_forcee && !branchesForcables(misAJour, compte).includes(modification.branche_forcee)) {
-    throw Boom.badRequest("Branche non permise pour cette demande");
   }
   if (modification.a_envoyer !== undefined) {
     if (modification.a_envoyer && !estCochable(misAJour)) {
@@ -902,12 +868,12 @@ export async function renvoyerDemandeActivation(id: ObjectId, expediteur: Expedi
   return ligne;
 }
 
-async function activerPourEnvois(organismeId: ObjectId, ignorerEffectifs: boolean): Promise<string | null> {
+async function activerPourEnvois(organismeId: ObjectId): Promise<string | null> {
   if (!(await poserGardeActivationDeca(organismeId))) {
     return "Activation DECA déjà en cours pour cet établissement : renvoyer plus tard";
   }
   try {
-    const resultat = await activerDecaOrganisme(organismeId, { flecher: config.deca.flechageAuto, ignorerEffectifs });
+    const resultat = await activerDecaOrganisme(organismeId, { flecher: config.deca.flechageAuto });
     return resultat === "flag_pose" || resultat === "deja_actif" ? null : MOTIFS_ECHEC_ACTIVATION[resultat];
   } catch (err) {
     return `Activation DECA en échec : ${(err as Error).message}`;
@@ -1109,13 +1075,7 @@ export async function traiterEnvoisDemandesActivation(organismeId: ObjectId | nu
   }
 
   const activees = preparees.filter(({ demande }) => demande.branche !== "refus");
-  const echecActivation =
-    organismeId && activees.length > 0
-      ? await activerPourEnvois(
-          organismeId,
-          activees.some(({ demande }) => !!demande.branche_forcee)
-        )
-      : null;
+  const echecActivation = organismeId && activees.length > 0 ? await activerPourEnvois(organismeId) : null;
 
   for (const { demande, compte } of preparees) {
     const etapes = { ...demande.etapes };

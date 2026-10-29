@@ -160,7 +160,7 @@ describe("POST /api/v1/admin/demandes-activation/import", () => {
     await importer(EXPORT, "Webinaire PdL (réponses).csv");
     await demandesActivationCfaDb().updateOne(
       { email: "contact.cfa@gmail.com" },
-      { $set: { branche_forcee: "activation" } }
+      { $set: { email_corrige: "contact@cfa-exemple.fr" } }
     );
     await demandesActivationCfaDb().updateOne({ email: "rh@cfa-exemple.fr" }, { $set: { siret_corrige: CFA_SIRET } });
 
@@ -168,8 +168,9 @@ describe("POST /api/v1/admin/demandes-activation/import", () => {
 
     expect(response.data).toEqual({ creees: 0, misesAJour: 5, fusionnees: 1, inchangees: 0, erreurs: 0 });
     expect(await demandesActivationCfaDb().countDocuments()).toBe(5);
-    expect(await demande("contact.cfa@gmail.com")).toMatchObject({
-      branche_forcee: "activation",
+    expect(await demandesActivationCfaDb().findOne({ email_saisi: "contact.cfa@gmail.com" })).toMatchObject({
+      email_corrige: "contact@cfa-exemple.fr",
+      email: "contact@cfa-exemple.fr",
       motifs: [],
       branche: "activation",
       source: "Webinaire PdL (réponses) (1).csv.zip",
@@ -273,6 +274,8 @@ describe("récapitulatif des demandes d'activation", () => {
       email_saisi: "contact.cfa@gmail.com",
       email_corrige: "direction@cfa-exemple.fr",
       motifs: [],
+      vue: "a_envoyer",
+      cochable: true,
     });
 
     const annulee = await modifier(_id, { email_corrige: null });
@@ -280,17 +283,6 @@ describe("récapitulatif des demandes d'activation", () => {
       email: "contact.cfa@gmail.com",
       email_corrige: null,
       motifs: ["messagerie_grand_public"],
-    });
-  });
-
-  it("lève le motif messagerie grand public par une branche forcée permise, refuse une branche non permise", async () => {
-    const { _id } = await ligne("contact.cfa@gmail.com");
-
-    expect((await modifier(_id, { branche_forcee: "compte_existant" })).status).toBe(400);
-    expect((await modifier(_id, { branche_forcee: "activation" })).data).toMatchObject({
-      branche_forcee: "activation",
-      branche: "activation",
-      vue: "a_envoyer",
     });
   });
 
@@ -319,30 +311,6 @@ describe("récapitulatif des demandes d'activation", () => {
     );
 
     expect(await ligne("direction@cfa-exemple.fr")).toMatchObject({ vue: "devenus_eligibles", cochable: true });
-  });
-
-  it("ne propose que le refus forcé quand un motif ne peut pas être levé", async () => {
-    await organismesDb().insertOne(
-      generateOrganismeFixture({
-        _id: new ObjectId(),
-        siret: "13002374000447",
-        uai: "0442096M",
-        nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
-        ferme: false,
-      }),
-      { bypassDocumentValidation: true }
-    );
-    await importer(Buffer.from('"Adresse email","SIRET de votre CFA"\n"direction@cfa-exemple.fr","13002374000447"\n'));
-    const { _id, branches_forcables } = (await ligne("direction@cfa-exemple.fr")) as unknown as {
-      _id: string;
-      branches_forcables: string[];
-    };
-
-    expect(branches_forcables).toEqual(["refus"]);
-    expect((await modifier(_id, { branche_forcee: "activation" })).status).toBe(400);
-    expect((await modifier(_id, { branche_forcee: "refus" })).data).toMatchObject({
-      motifs: expect.arrayContaining(["refus_force"]),
-    });
   });
 
   it("refuse un envoi sans demande confirmée", async () => {

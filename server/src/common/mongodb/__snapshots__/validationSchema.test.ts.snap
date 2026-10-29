@@ -258,22 +258,6 @@ exports[`validation-schema > should create validation schema for demandesActivat
       ],
       "description": "Branche du dernier envoi",
     },
-    "branche_forcee": {
-      "anyOf": [
-        {
-          "bsonType": "string",
-          "enum": [
-            "activation",
-            "compte_existant",
-            "refus",
-          ],
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Branche forcée par l'équipe",
-    },
     "branche_initiale": {
       "bsonType": "string",
       "description": "Branche de la première évaluation",
@@ -506,7 +490,6 @@ exports[`validation-schema > should create validation schema for demandesActivat
           "nature_inconnue",
           "compte_autre_organisation",
           "ferme",
-          "refus_force",
         ],
       },
     },

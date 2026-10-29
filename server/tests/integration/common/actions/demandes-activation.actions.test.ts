@@ -210,32 +210,18 @@ describe("evaluerDemande", () => {
     });
   });
 
-  describe("branche forcée", () => {
-    it("lève les motifs messagerie grand public et aucun effectif", async () => {
-      await insererOrganisme({}, 0);
+  describe("adresse grand public", () => {
+    it("refuse sans mail une adresse grand public, puis accepte l'adresse corrigée", async () => {
+      await insererOrganisme();
 
-      expect(await evaluer("cfa.direction@gmail.com", { branche_forcee: "activation" })).toMatchObject({
+      expect(await evaluer("cfa.direction@gmail.com")).toMatchObject({
+        motifs: ["messagerie_grand_public"],
+        branche: "refus",
+      });
+      expect(await evaluer("cfa.direction@gmail.com", { email_corrige: "direction@cfa.fr" })).toMatchObject({
+        email: "direction@cfa.fr",
         motifs: [],
         branche: "activation",
-      });
-    });
-
-    it("ne lève pas le motif compte rattaché à une autre organisation", async () => {
-      await insererOrganisme();
-      await insererCompte("direction@cfa.fr", new ObjectId());
-
-      expect(await evaluer("direction@cfa.fr", { branche_forcee: "compte_existant" })).toMatchObject({
-        motifs: ["compte_autre_organisation"],
-        branche: "refus",
-      });
-    });
-
-    it("refuse sans mail une demande dont l'équipe force le refus", async () => {
-      await insererOrganisme();
-
-      expect(await evaluer("direction@cfa.fr", { branche_forcee: "refus" })).toMatchObject({
-        motifs: ["refus_force"],
-        branche: "refus",
       });
     });
   });
@@ -261,7 +247,6 @@ describe("refusAvecMail", () => {
     ["nature_inconnue", false],
     ["compte_autre_organisation", false],
     ["ferme", false],
-    ["refus_force", false],
   ] as const)("classe le motif %s : refus avec mail = %s", (motif, avecMail) => {
     expect(refusAvecMail([motif])).toBe(avecMail);
   });

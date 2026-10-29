@@ -985,14 +985,6 @@ describe("fléchage des contrats DECA", () => {
         expect((await organismesDb().findOne({ _id: cible._id }))?.is_allowed_deca).toBeUndefined();
       });
 
-      it("active sans effectifs un organisme dont la branche a été forcée", async () => {
-        const cible = await insererCible({ ferme: false });
-        await poserGardeActivationDeca(cible._id);
-
-        expect(await activerDecaOrganisme(cible._id, { flecher: false })).toBe("non_eligible");
-        expect(await activerDecaOrganisme(cible._id, { flecher: false, ignorerEffectifs: true })).toBe("flag_pose");
-      });
-
       it("pose le flag sans flécher quand l'interrupteur est coupé", async () => {
         const cible = await cibleActivable();
         const contrat = await insererContrat();

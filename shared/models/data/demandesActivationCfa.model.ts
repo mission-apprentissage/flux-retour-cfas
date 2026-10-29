@@ -42,7 +42,7 @@ export const MOTIFS_DEMANDE_ACTIVATION = {
   },
   messagerie_grand_public: {
     libelle: "Messagerie grand public",
-    detail: "Adresse Gmail, Orange… : si elle appartient bien au CFA, forcez la branche",
+    detail: "Adresse Gmail, Orange… : corrigez-la avec l'adresse professionnelle du CFA",
     avecMail: false,
   },
   responsable_pur: {
@@ -65,18 +65,12 @@ export const MOTIFS_DEMANDE_ACTIVATION = {
     detail: "Le SIRET saisi est fermé : corrigez-le avec le SIRET ouvert de même UAI s'il est proposé",
     avecMail: false,
   },
-  refus_force: { libelle: "Refus forcé par l'équipe", detail: "Refus décidé par l'équipe", avecMail: false },
 } as const;
 
 export type MotifDemandeActivation = keyof typeof MOTIFS_DEMANDE_ACTIVATION;
 
 export const refusAvecMail = (motifs: ReadonlyArray<MotifDemandeActivation>) =>
   motifs.every((motif) => MOTIFS_DEMANDE_ACTIVATION[motif].avecMail);
-
-export const MOTIFS_LEVES_PAR_BRANCHE_FORCEE: ReadonlyArray<MotifDemandeActivation> = [
-  "messagerie_grand_public",
-  "aucun_effectif",
-];
 
 export const zBrancheDemandeActivation = z.enum(["activation", "compte_existant", "refus"]);
 const zStatutDemandeActivation = z.enum(["pret", "envoi_en_cours", "envoyee", "echec", "invitation_expiree"]);
@@ -97,7 +91,6 @@ const zDemandeActivationCfa = z.object({
   siret_saisi: z.string({ description: "SIRET saisi, réduit à ses chiffres" }),
   commentaire: z.string({ description: "Questions ou remarques du formulaire" }).nullish(),
   siret_corrige: z.string({ description: "SIRET corrigé par l'équipe" }).nullish(),
-  branche_forcee: zBrancheDemandeActivation.nullish().describe("Branche forcée par l'équipe"),
   siret: z.string({ description: "SIRET retenu" }).nullish(),
   uai: z.string({ description: "UAI retenu" }).nullish(),
   siret_propose: z.string({ description: "SIRET ouvert de même UAI, proposé quand le SIRET est fermé" }).nullish(),

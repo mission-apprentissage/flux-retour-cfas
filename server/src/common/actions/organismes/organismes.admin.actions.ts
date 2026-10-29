@@ -572,7 +572,7 @@ export type ActivationDecaResultat = "flag_pose" | "deja_actif" | "non_eligible"
 
 export async function activerDecaOrganisme(
   organismeId: ObjectId,
-  { flecher, ignorerEffectifs = false }: { flecher: boolean; ignorerEffectifs?: boolean }
+  { flecher }: { flecher: boolean }
 ): Promise<ActivationDecaResultat> {
   const organisme = await organismesDb().findOne(
     { _id: organismeId },
@@ -591,7 +591,7 @@ export async function activerDecaOrganisme(
   if (!organisme) return "non_eligible";
   if (organisme.is_allowed_deca === true) return "deja_actif";
   if (!organisme.deca_activation_queued_at) return "annule";
-  const { eligible } = await checkEligibilityForLoaded(organisme, { ignorerEffectifs });
+  const { eligible } = await checkEligibilityForLoaded(organisme);
   if (!eligible) return "non_eligible";
 
   const rendreLesContrats = () => rendreContratsDeca({ mode: "refaire", cibles: [organismeId] });

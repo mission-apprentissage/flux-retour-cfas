@@ -8,7 +8,6 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { SegmentedControl, SegmentedControlProps } from "@codegouvfr/react-dsfr/SegmentedControl";
-import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
@@ -18,7 +17,6 @@ import {
   BrancheDemandeActivation,
   estRenvoyable,
   MOTIFS_DEMANDE_ACTIVATION,
-  MOTIFS_LEVES_PAR_BRANCHE_FORCEE,
   refusAvecMail,
   StatutDemandeActivation,
   zBrancheDemandeActivation,
@@ -54,7 +52,7 @@ type Retour = { severity: "success" | "info" | "warning" | "error"; message: str
 const MODE_D_EMPLOI = [
   "Importez l'export Google Forms (« Télécharger les réponses », .zip ou .csv), sans l'ouvrir dans Excel.",
   "Ré-importer un export plus récent ajoute les nouvelles réponses ; les lignes déjà envoyées ne bougent pas.",
-  "Corrigez une ligne avec « Corriger » (SIRET, e-mail, branche), jamais dans le fichier : les corrections sont gardées aux imports suivants.",
+  "Corrigez une ligne avec « Corriger » (SIRET, e-mail), jamais dans le fichier : les corrections sont gardées aux imports suivants.",
   "Cochez les lignes prêtes, puis « Envoyer les e-mails » : DECA est activé et chaque demandeur reçoit son e-mail.",
   "Les refus « sans mail » ne reçoivent rien : à traiter à la main si besoin.",
   "En cas d'échec, corrigez puis « Renvoyer ». Les relances partent automatiquement.",
@@ -222,7 +220,6 @@ export default function DemandesActivationClient() {
   const [enCorrection, setEnCorrection] = useState<IDemandeActivationLigne | null>(null);
   const [siretCorrige, setSiretCorrige] = useState("");
   const [emailCorrige, setEmailCorrige] = useState("");
-  const [brancheForcee, setBrancheForcee] = useState<BrancheDemandeActivation | "">("");
   const [retourCorrection, setRetourCorrection] = useState<Retour | null>(null);
 
   const { data, error, isLoading } = useQuery<IDemandesActivationResponse>({
@@ -307,7 +304,6 @@ export default function DemandesActivationClient() {
     setEnCorrection(demande);
     setSiretCorrige(demande.siret_corrige ?? "");
     setEmailCorrige(demande.email_corrige ?? "");
-    setBrancheForcee(demande.branche_forcee ?? "");
     setRetourCorrection(null);
     correctionModal.open();
   };
@@ -320,7 +316,6 @@ export default function DemandesActivationClient() {
         modification: {
           siret_corrige: siretCorrige || null,
           email_corrige: emailCorrige || null,
-          branche_forcee: brancheForcee || null,
         },
       });
       setEnCorrection(corrigee);
@@ -619,23 +614,6 @@ export default function DemandesActivationClient() {
                 value: siretCorrige,
                 inputMode: "numeric",
                 onChange: (event) => setSiretCorrige(event.target.value),
-              }}
-            />
-            <SelectNext
-              label="Branche forcée"
-              hint={`Forcer une branche ne lève que les motifs ${MOTIFS_LEVES_PAR_BRANCHE_FORCEE.map(
-                (motif) => `« ${MOTIFS_DEMANDE_ACTIVATION[motif].libelle} »`
-              ).join(" et ")}.`}
-              options={[
-                { value: "", label: "Aucune : branche calculée" },
-                ...enCorrection.branches_forcables.map((branche) => ({
-                  value: branche,
-                  label: LIBELLES_BRANCHES[branche],
-                })),
-              ]}
-              nativeSelectProps={{
-                value: brancheForcee,
-                onChange: (event) => setBrancheForcee(event.target.value as BrancheDemandeActivation | ""),
               }}
             />
             {retourCorrection && (
