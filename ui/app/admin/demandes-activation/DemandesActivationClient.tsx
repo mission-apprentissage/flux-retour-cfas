@@ -12,7 +12,7 @@ import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { useIsMutating, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   BrancheDemandeActivation,
   estRenvoyable,
@@ -40,9 +40,10 @@ import { AdminTable } from "@/app/admin/_components/AdminTable";
 import { _get, _post, _put } from "@/common/httpClient";
 import { getServerErrorMessage } from "@/common/rateLimit";
 
+import { CorrectionDemandeModal, correctionModal } from "./CorrectionDemandeModal";
 import styles from "./demandes-activation.module.scss";
+import { nomCfa } from "./libelles";
 
-const correctionModal = createModal({ id: "demande-activation-correction", isOpenedByDefault: false });
 const envoiModal = createModal({ id: "demandes-activation-envoi", isOpenedByDefault: false });
 
 const URL_DEMANDES = "/api/v1/admin/demandes-activation";
@@ -99,9 +100,6 @@ const COLONNES = [
   { label: "À envoyer", dataKey: "a_envoyer", width: "5%", sortable: false },
   { label: "Actions", dataKey: "actions", width: "8%", sortable: false },
 ];
-
-const nomCfa = (demande: IDemandeActivationLigne) =>
-  demande.organisme?.nom ?? (demande.organisme ? "CFA sans nom" : "Organisme non trouvé");
 
 const emailSecable = (email: string) => {
   const arobase = email.indexOf("@");
@@ -223,9 +221,7 @@ export default function DemandesActivationClient() {
   const [retourImport, setRetourImport] = useState<Retour | null>(null);
   const [retourLigne, setRetourLigne] = useState<Retour | null>(null);
   const [enCorrection, setEnCorrection] = useState<IDemandeActivationLigne | null>(null);
-  const [siretCorrige, setSiretCorrige] = useState("");
-  const [emailCorrige, setEmailCorrige] = useState("");
-  const [retourCorrection, setRetourCorrection] = useState<Retour | null>(null);
+  const zoneRetour = useRef<HTMLDivElement>(null);
 
   const { data, error, isLoading } = useQuery<IDemandesActivationResponse>({
     queryKey: CLE_REQUETE,
@@ -338,35 +334,22 @@ export default function DemandesActivationClient() {
   };
 
   const ouvrirCorrection = (demande: IDemandeActivationLigne) => {
-    setEnCorrection(demande);
-    setSiretCorrige(demande.siret_corrige ?? "");
-    setEmailCorrige(demande.email_corrige ?? "");
-    setRetourCorrection(null);
+    setEnCorrection({ ...demande });
     correctionModal.open();
   };
 
-  const enregistrerCorrection = async () => {
-    if (!enCorrection) return;
-    try {
-      const corrigee = await modificationMutation.mutateAsync({
-        id: enCorrection._id,
-        modification: {
-          siret_corrige: siretCorrige || null,
-          email_corrige: emailCorrige || null,
-        },
-      });
-      setEnCorrection(corrigee);
-      setRetourCorrection({
-        severity: corrigee.branche === "refus" ? "warning" : "success",
-        message:
-          corrigee.branche === "refus"
-            ? `Toujours refusée : ${corrigee.motifs.map((motif) => MOTIFS_DEMANDE_ACTIVATION[motif].libelle).join(", ")}.`
-            : `Réévaluée en branche « ${LIBELLES_BRANCHES[corrigee.branche]} ».`,
-      });
-      await queryClient.invalidateQueries({ queryKey: CLE_REQUETE });
-    } catch (err) {
-      setRetourCorrection({ severity: "error", message: getServerErrorMessage(err, "La correction a échoué") });
-    }
+  const corriger = async (demande: IDemandeActivationLigne, modification: IModificationDemandeActivation) => {
+    const corrigee = await modificationMutation.mutateAsync({ id: demande._id, modification });
+    majLignes((ligne) => (ligne._id === corrigee._id ? corrigee : ligne));
+    setRetourLigne({
+      severity: corrigee.branche === "refus" ? "warning" : "success",
+      message: `${nomCfa(corrigee)} (${corrigee.email}) : ${
+        corrigee.branche === "refus"
+          ? `toujours refusée : ${corrigee.motifs.map((motif) => MOTIFS_DEMANDE_ACTIVATION[motif].libelle).join(", ")}.`
+          : `réévaluée en branche « ${LIBELLES_BRANCHES[corrigee.branche]} ».`
+      }`,
+    });
+    requestAnimationFrame(() => zoneRetour.current?.focus());
   };
 
   const demandesDeLaVue = (data?.demandes ?? []).filter((demande) => demande.vue === vue);
@@ -596,16 +579,18 @@ export default function DemandesActivationClient() {
               Envoyer les e-mails ({cochees.length})
             </Button>
           </div>
-          {retourLigne && (
-            <Alert
-              severity={retourLigne.severity}
-              small
-              closable
-              onClose={() => setRetourLigne(null)}
-              description={retourLigne.message}
-              className="fr-mb-3w"
-            />
-          )}
+          <div ref={zoneRetour} tabIndex={-1} aria-live="polite">
+            {retourLigne && (
+              <Alert
+                severity={retourLigne.severity}
+                small
+                closable
+                onClose={() => setRetourLigne(null)}
+                description={retourLigne.message}
+                className="fr-mb-3w"
+              />
+            )}
+          </div>
           {VUES_COCHABLES_EN_BLOC.includes(vue) && (
             <div className="fr-btns-group fr-btns-group--inline-sm fr-btns-group--sm fr-btns-group--icon-left">
               <Button
@@ -645,51 +630,7 @@ export default function DemandesActivationClient() {
         </>
       )}
 
-      <correctionModal.Component
-        title="Corriger la demande"
-        buttons={[
-          { children: "Fermer", priority: "secondary", doClosesModal: true },
-          {
-            children: "Enregistrer",
-            doClosesModal: false,
-            disabled: modificationMutation.isPending,
-            nativeButtonProps: { type: "button" },
-            onClick: enregistrerCorrection,
-          },
-        ]}
-      >
-        {enCorrection && (
-          <>
-            <p className="fr-text--sm">
-              {nomCfa(enCorrection)}. E-mail saisi : {enCorrection.email_saisi || "—"}. SIRET saisi :{" "}
-              {enCorrection.siret_saisi_brut || "—"}
-              {enCorrection.siret_propose ? `. SIRET ouvert de même UAI : ${enCorrection.siret_propose}` : ""}.
-            </p>
-            <Input
-              label="E-mail corrigé"
-              hintText="Laisser vide pour revenir à l'e-mail saisi. Une invitation déjà envoyée à l'ancienne adresse est annulée."
-              nativeInputProps={{
-                type: "email",
-                value: emailCorrige,
-                autoComplete: "off",
-                onChange: (event) => setEmailCorrige(event.target.value),
-              }}
-            />
-            <Input
-              label="SIRET corrigé"
-              hintText="14 chiffres. Laisser vide pour revenir au SIRET saisi."
-              nativeInputProps={{
-                value: siretCorrige,
-                inputMode: "numeric",
-                onChange: (event) => setSiretCorrige(event.target.value),
-              }}
-            />
-            {retourCorrection && (
-              <Alert severity={retourCorrection.severity} small description={retourCorrection.message} />
-            )}
-          </>
-        )}
-      </correctionModal.Component>
+      <CorrectionDemandeModal demande={enCorrection} corriger={corriger} />
 
       <envoiModal.Component
         title="Envoyer les e-mails"
