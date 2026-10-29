@@ -212,3 +212,15 @@ export const NATURE_LABELS: Record<string, string> = {
   lieu_formation: "Lieu de formation",
   inconnue: "Inconnue",
 };
+
+/** Définitions des infobulles de déploiement, partagées par les cartes et les en-têtes de tableaux. */
+export const ML_ACTIVES_DEFINITION =
+  "Missions Locales dont l'accès est activé : elles ont au moins un compte utilisateur sur le Tableau de bord de l'apprentissage";
+
+export const ML_ENGAGEES_DEFINITION =
+  "Missions Locales qui ont actuellement un taux de traitement de dossiers de la plateforme TBA supérieur ou égal à 70%";
+
+export const CFA_COMPATIBLES_DEFINITION =
+  "Un CFA de nature formateur ou responsable formateur pour lequel des effectifs sont lisibles et disponibles soit via DECA, soit via son ERP. Certains CFA ne remplissent pas ces conditions techniques, qui sont celles actuelles du TBA.";
+
+export const CFA_AVEC_COMPTE_DEFINITION = "CFA qui ont au moins un compte utilisateur confirmé dans l'établissement.";

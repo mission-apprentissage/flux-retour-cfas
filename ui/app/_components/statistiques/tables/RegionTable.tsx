@@ -6,6 +6,8 @@ import { useState } from "react";
 
 import { Skeleton } from "@/app/_components/common/Skeleton";
 
+import { ML_ACTIVES_DEFINITION, ML_ENGAGEES_DEFINITION } from "../constants";
+
 import styles from "./RegionTable.module.css";
 import { SortableTableHeader } from "./SortableTableHeader";
 
@@ -92,7 +94,7 @@ export function RegionTable({ regions, loadingDeltas = false, detailRegions = []
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 centered
-                tooltip="Missions Locales dont l'accès au suivi des jeunes a été activé, rapportées au nombre de Missions Locales de la région."
+                tooltip={`${ML_ACTIVES_DEFINITION}, rapportées au nombre de Missions Locales de la région.`}
               />,
               <SortableTableHeader
                 key="ml_engagees"
@@ -102,7 +104,7 @@ export function RegionTable({ regions, loadingDeltas = false, detailRegions = []
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 centered
-                tooltip="Les Missions Locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur ou égal à 70%."
+                tooltip={`${ML_ENGAGEES_DEFINITION}.`}
               />,
               ...(showDetailColumn ? ["Détail"] : []),
             ]}

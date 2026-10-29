@@ -6,6 +6,7 @@ import { UNKNOWN_REGION_CODE } from "shared/models/data/nationalStats.model";
 
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
+import { CFA_COMPATIBLES_DEFINITION } from "../constants";
 import { useSortableTable } from "../hooks/useSortableTable";
 import { formatDelta } from "../utils";
 
@@ -86,7 +87,7 @@ export function CollaborationRegionTable({ regions, loading }: CollaborationRegi
             sortDirection={sortDirection}
             onSort={handleSort}
             centered
-            tooltip="CFA du référentiel avec un SIRET et un UAI, de nature formateur, non fermés, transmettant au moins un effectif sur les années scolaires en cours."
+            tooltip={CFA_COMPATIBLES_DEFINITION}
           />,
           <SortableTableHeader
             key="compte"

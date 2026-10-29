@@ -2,6 +2,7 @@
 
 import { KpiFunnel, kpiFunnelCardClassName } from "../cards/KpiFunnel";
 import { StatCard } from "../cards/StatCard";
+import { CFA_AVEC_COMPTE_DEFINITION, CFA_COMPATIBLES_DEFINITION } from "../constants";
 import { isLoadingVariation } from "../hooks/useLoadingVariation";
 import { useStatsFilters } from "../hooks/useStatsFilters";
 import { useCfaAdoptionStats } from "../hooks/useStatsQueries";
@@ -26,7 +27,7 @@ export function CfaAdoptionKpis() {
           value={data?.compatibles}
           loading={isLoading}
           className={kpiFunnelCardClassName}
-          tooltip="CFA avec un SIRET et un UAI, de nature formateur, non fermés et transmettant au moins un effectif sur les années scolaires en cours."
+          tooltip={CFA_COMPATIBLES_DEFINITION}
         />
         <StatCard
           label="Total CFA ayant créé un compte sur le Tableau de bord"
@@ -35,7 +36,7 @@ export function CfaAdoptionKpis() {
           loading={isLoading}
           loadingPercentage={isLoadingVariation(isFetching, isLoading)}
           className={kpiFunnelCardClassName}
-          tooltip="CFA dont au moins un utilisateur a un compte confirmé sur le Tableau de bord, qu'ils soient compatibles avec la collaboration ou non."
+          tooltip={CFA_AVEC_COMPTE_DEFINITION}
         />
         <StatCard
           label="Total CFA ayant envoyé au moins une collaboration à une Mission Locale"

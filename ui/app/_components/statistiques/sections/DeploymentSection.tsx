@@ -5,7 +5,7 @@ import { useState } from "react";
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
 import { DeploymentRow } from "../cards/DeploymentRow";
-import { getVariationColorFromString } from "../constants";
+import { getVariationColorFromString, ML_ACTIVES_DEFINITION, ML_ENGAGEES_DEFINITION } from "../constants";
 import { useDeploymentStats, useSyntheseRegionsStats } from "../hooks/useStatsQueries";
 import { RegionTable } from "../tables/RegionTable";
 import { FranceMapSVG } from "../ui/FranceMapSVGLazy";
@@ -85,7 +85,7 @@ export function DeploymentContent({ period, region, departement }: DeploymentCon
               color="#6A6AF4"
               percentage={stats?.activatedMlVariation}
               percentageColor={getVariationColorFromString(stats?.activatedMlVariation ?? "")}
-              tooltip="Missions Locales dont l'accès au suivi des jeunes a été activé sur le Tableau de bord à la date d'évaluation."
+              tooltip={`${ML_ACTIVES_DEFINITION}.`}
             />
 
             <DeploymentRow
@@ -95,7 +95,7 @@ export function DeploymentContent({ period, region, departement }: DeploymentCon
               loadingPercentage={loadingPercentage}
               percentage={stats?.engagedMlVariation}
               percentageColor={getVariationColorFromString(stats?.engagedMlVariation ?? "")}
-              tooltip="Les Missions Locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur ou égal à 70%."
+              tooltip={`${ML_ENGAGEES_DEFINITION}.`}
               indented
             />
 
