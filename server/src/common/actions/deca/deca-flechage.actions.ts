@@ -217,7 +217,7 @@ export async function calculerContratsFlechables(organismeIds: ObjectId[]) {
     .toArray();
   if (candidats.length === 0) return;
   const ids = candidats.map((organisme) => organisme._id);
-  const bilan = await flecherContratsDeca({ dryRun: true, perimetre: ids, flagsSimules: ids });
+  const bilan = await flecherContratsDeca({ dryRun: true, perimetre: ids, flagsSimules: ids, journaliser: false });
   const maintenant = new Date();
   await organismesDb().bulkWrite(
     ids.map((id) => ({
@@ -231,6 +231,13 @@ export async function calculerContratsFlechables(organismeIds: ObjectId[]) {
         },
       },
     }))
+  );
+  logger.info(
+    {
+      organismes: ids.length,
+      avecContrats: ids.filter((id) => (bilan.parCfa.get(id.toString())?.gagnes ?? 0) > 0).length,
+    },
+    "DECA : contrats à rattacher calculés"
   );
 }
 
@@ -838,12 +845,14 @@ interface OptionsFlechage {
   dryRun?: boolean;
   perimetre?: ObjectId[];
   flagsSimules?: ObjectId[];
+  journaliser?: boolean;
 }
 
 export async function flecherContratsDeca({
   dryRun = false,
   perimetre,
   flagsSimules = [],
+  journaliser = true,
 }: OptionsFlechage = {}): Promise<BilanFlechage> {
   const maintenant = new Date();
   const annees = getAnneesScolaireListFromDate(maintenant);
@@ -919,7 +928,7 @@ export async function flecherContratsDeca({
     await reparerDossiersMl(ctx, dejaFleches, bilan);
   }
   bilan.responsablesSansEffectifs = await responsablesSansEffectifs(bilan, deplacements, { dryRun, maintenant });
-  journaliserBilan(ctx, bilan, dryRun);
+  if (journaliser) journaliserBilan(ctx, bilan, dryRun);
   return bilan;
 }
 
