@@ -9,3 +9,9 @@
   align-items: center;
   justify-content: space-between;
 }
+
+.actionsVues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}

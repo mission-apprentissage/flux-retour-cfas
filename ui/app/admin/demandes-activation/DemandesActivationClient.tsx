@@ -17,11 +17,9 @@ import { SortingState } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { useRef, useState } from "react";
 import {
-  BrancheDemandeActivation,
   estRenvoyable,
   MOTIFS_DEMANDE_ACTIVATION,
   refusAvecMail,
-  StatutDemandeActivation,
   zBrancheDemandeActivation,
 } from "shared/models/data/demandesActivationCfa.model";
 import {
@@ -45,7 +43,16 @@ import { getServerErrorMessage } from "@/common/rateLimit";
 
 import { CorrectionDemandeModal, correctionModal } from "./CorrectionDemandeModal";
 import styles from "./demandes-activation.module.scss";
-import { nomCfa } from "./libelles";
+import { exporterDemandesActivation } from "./exportDemandesActivation";
+import {
+  etatCompte,
+  libelleBranche,
+  LIBELLES_BRANCHES,
+  LIBELLES_ROLES,
+  LIBELLES_VUES,
+  nomCfa,
+  STATUTS,
+} from "./libelles";
 
 const envoiModal = createModal({ id: "demandes-activation-envoi", isOpenedByDefault: false });
 
@@ -64,34 +71,10 @@ const MODE_D_EMPLOI = [
   "Cochez les lignes prêtes, puis « Envoyer les e-mails » : DECA est activé et chaque demandeur reçoit son e-mail.",
   "Les refus « sans mail » ne reçoivent rien : à traiter à la main si besoin.",
   "En cas d'échec, corrigez puis « Renvoyer ». Les relances partent automatiquement.",
+  "L'export Excel contient des données personnelles : ne le partagez pas hors de l'équipe.",
 ];
 
-const LIBELLES_VUES: Record<VueDemandeActivation, string> = {
-  a_envoyer: "À envoyer",
-  envoyees: "Envoyées",
-  refus: "Refus",
-  devenus_eligibles: "Devenus éligibles",
-  echecs: "Échecs",
-};
-
 const VUES_COCHABLES_EN_BLOC: ReadonlyArray<VueDemandeActivation> = ["a_envoyer", "devenus_eligibles"];
-
-const LIBELLES_BRANCHES: Record<BrancheDemandeActivation, string> = {
-  activation: "Activation",
-  compte_existant: "Compte existant",
-  refus: "Refus",
-};
-
-const STATUTS: Record<
-  StatutDemandeActivation,
-  { libelle: string; severity?: "success" | "info" | "warning" | "error" }
-> = {
-  pret: { libelle: "Prête" },
-  envoi_en_cours: { libelle: "Envoi en cours", severity: "info" },
-  envoyee: { libelle: "Envoyée", severity: "success" },
-  echec: { libelle: "Échec", severity: "error" },
-  invitation_expiree: { libelle: "Invitation expirée", severity: "warning" },
-};
 
 const COLONNES = [
   { label: "CFA", dataKey: "cfa", width: "15%", sortable: false },
@@ -141,44 +124,19 @@ const bilanImport = ({ creees, misesAJour, fusionnees, inchangees, erreurs }: IB
   `${creees} demande(s) créée(s), ${misesAJour} mise(s) à jour, ${fusionnees} doublon(s) fusionné(s), ${inchangees} déjà envoyée(s) laissée(s) telle(s) quelle(s), ${erreurs} ligne(s) vide(s) ignorée(s).`;
 
 function BadgeBranche({ demande }: { demande: IDemandeActivationLigne }) {
-  if (demande.branche !== "refus") {
-    return (
-      <Badge className={styles.insecable} severity={demande.branche === "activation" ? "success" : "info"} small>
-        {LIBELLES_BRANCHES[demande.branche]}
-      </Badge>
-    );
-  }
-  return refusAvecMail(demande.motifs) ? (
-    <Badge className={styles.insecable} severity="error" small>
-      Refus avec mail
-    </Badge>
-  ) : (
-    <Badge className={styles.insecable} severity="warning" small>
-      Refus sans mail
+  const severity =
+    demande.branche === "activation"
+      ? "success"
+      : demande.branche === "compte_existant"
+        ? "info"
+        : refusAvecMail(demande.motifs)
+          ? "error"
+          : "warning";
+  return (
+    <Badge className={styles.insecable} severity={severity} small>
+      {libelleBranche(demande)}
     </Badge>
   );
-}
-
-const LIBELLES_ROLES = { admin: "Rôle : admin", member: "Rôle : membre" } as const;
-
-type EtatCompte = { libelle: string; severity: "success" | "info" | "warning"; note?: string };
-
-function etatCompte(
-  compte: NonNullable<IDemandeActivationLigne["compte"]>,
-  branche: BrancheDemandeActivation
-): EtatCompte {
-  if (compte.account_status === "CONFIRMED") return { libelle: "Confirmé", severity: "success" };
-  if (compte.account_status === "PENDING_ADMIN_VALIDATION") {
-    return { libelle: "Email validé", severity: "info", note: "Compte validé à l'envoi" };
-  }
-  if (compte.organisation_role) {
-    return { libelle: "Email à valider", severity: "warning", note: "Lien de validation renvoyé à l'envoi" };
-  }
-  return {
-    libelle: "Non confirmé",
-    severity: "warning",
-    note: branche === "activation" ? "Remplacé par une invitation" : undefined,
-  };
 }
 
 function BadgeCompte({ demande: { compte, branche } }: { demande: IDemandeActivationLigne }) {
@@ -390,6 +348,14 @@ export default function DemandesActivationClient() {
   const compteParVue = Object.fromEntries(
     VUES_DEMANDES_ACTIVATION.map((cle) => [cle, demandesFiltrees.filter((demande) => demande.vue === cle).length])
   ) as Record<VueDemandeActivation, number>;
+  const exporter = async () => {
+    try {
+      await exporterDemandesActivation(trier(demandesFiltrees, tri), filtreSource);
+    } catch (err) {
+      setRetourLigne({ severity: "error", message: getServerErrorMessage(err, "L'export n'a pas pu être généré") });
+    }
+  };
+
   const lastPage = Math.max(1, Math.ceil(demandesDeLaVue.length / pageSize));
   const currentPage = Math.min(page, lastPage);
 
@@ -638,13 +604,23 @@ export default function DemandesActivationClient() {
           </div>
           <div className={`${styles.barreVues} fr-mb-3w`}>
             <SegmentedControl legend="Vue" hideLegend small segments={segments} />
-            <Button
-              iconId="fr-icon-mail-line"
-              onClick={() => envoiModal.open()}
-              disabled={cochees.length === 0 || envoiMutation.isPending || cocheEnCours}
-            >
-              Envoyer les e-mails ({cochees.length})
-            </Button>
+            <div className={styles.actionsVues}>
+              <Button
+                priority="secondary"
+                iconId="fr-icon-download-line"
+                onClick={exporter}
+                disabled={demandesFiltrees.length === 0}
+              >
+                Télécharger en Excel
+              </Button>
+              <Button
+                iconId="fr-icon-mail-line"
+                onClick={() => envoiModal.open()}
+                disabled={cochees.length === 0 || envoiMutation.isPending || cocheEnCours}
+              >
+                Envoyer les e-mails ({cochees.length})
+              </Button>
+            </div>
           </div>
           <div ref={zoneRetour} tabIndex={-1} aria-live="polite">
             {retourLigne && (
