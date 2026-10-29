@@ -912,7 +912,7 @@ async function activerPourEnvois(organismeId: ObjectId): Promise<string | null> 
     return "Activation DECA déjà en cours pour cet établissement : renvoyer plus tard";
   }
   try {
-    const resultat = await activerDecaOrganisme(organismeId, { flecher: config.deca.flechageAuto });
+    const resultat = await activerDecaOrganisme(organismeId);
     return resultat === "flag_pose" || resultat === "deja_actif" ? null : MOTIFS_ECHEC_ACTIVATION[resultat];
   } catch (err) {
     return `Activation DECA en échec : ${(err as Error).message}`;

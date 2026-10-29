@@ -22,7 +22,6 @@ import objectIdSchema from "@/common/validation/objectIdSchema";
 import organismesFilterSchema from "@/common/validation/organismesFilterSchema";
 import paginationShema from "@/common/validation/paginationSchema";
 import searchShema from "@/common/validation/searchSchema";
-import config from "@/config";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 const listSchema = paginationShema({ defaultSort: "created_at:-1" })
@@ -93,7 +92,6 @@ export default () => {
       res.json({
         ...result,
         activationEnCours: estActivationDecaEnCours(result.organisme?.deca_activation_queued_at),
-        flechageAuto: config.deca.flechageAuto,
         contratsFleches: result.organisme ? await compterContratsFlechesVers(result.organisme._id) : 0,
       });
     }

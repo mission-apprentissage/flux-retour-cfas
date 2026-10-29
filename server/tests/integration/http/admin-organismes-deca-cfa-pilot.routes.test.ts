@@ -89,7 +89,7 @@ describe("admin deca-cfa-pilot routes", () => {
       expect(response.data.eligible).toBe(true);
       expect(response.data.alreadyActive).toBe(false);
       expect(response.data.checks.exists_with_siret_uai.passed).toBe(true);
-      expect(response.data).toMatchObject({ activationEnCours: false, flechageAuto: false, contratsFleches: 0 });
+      expect(response.data).toMatchObject({ activationEnCours: false, contratsFleches: 0 });
     });
 
     it("compte les contrats DECA fléchés vers l'organisme, pour la confirmation de désactivation", async () => {

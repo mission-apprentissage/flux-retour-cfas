@@ -954,7 +954,7 @@ describe("fléchage des contrats DECA", () => {
         const cible = await cibleActivable();
         const contrat = await insererContrat();
 
-        const resultat = await activerDecaOrganisme(cible._id, { flecher: true });
+        const resultat = await activerDecaOrganisme(cible._id);
 
         expect(resultat).toBe("flag_pose");
         expect(await chezQui(contrat)).toEqual(cible._id);
@@ -966,7 +966,7 @@ describe("fléchage des contrats DECA", () => {
         const contrat = await insererContrat();
         apresFlechage.mockImplementationOnce(() => retirerGardeActivationDeca(cible._id));
 
-        const resultat = await activerDecaOrganisme(cible._id, { flecher: true });
+        const resultat = await activerDecaOrganisme(cible._id);
 
         expect(resultat).toBe("annule");
         expect(await chezQui(contrat)).toEqual(responsable._id);
@@ -979,18 +979,19 @@ describe("fléchage des contrats DECA", () => {
         const contrat = await insererContrat();
         apresFlechage.mockRejectedValueOnce(new Error("panne"));
 
-        await expect(activerDecaOrganisme(cible._id, { flecher: true })).rejects.toThrow("panne");
+        await expect(activerDecaOrganisme(cible._id)).rejects.toThrow("panne");
 
         expect(await chezQui(contrat)).toEqual(responsable._id);
         expect((await organismesDb().findOne({ _id: cible._id }))?.is_allowed_deca).toBeUndefined();
       });
 
-      it("pose le flag sans flécher quand l'interrupteur est coupé", async () => {
+      it("flèche aussi à l'activation quand l'interrupteur est coupé", async () => {
         const cible = await cibleActivable();
         const contrat = await insererContrat();
+        config.deca.flechageAuto = false;
 
-        expect(await activerDecaOrganisme(cible._id, { flecher: false })).toBe("flag_pose");
-        expect(await chezQui(contrat)).toEqual(responsable._id);
+        expect(await activerDecaOrganisme(cible._id)).toBe("flag_pose");
+        expect(await chezQui(contrat)).toEqual(cible._id);
       });
 
       describe("fin de l'import DECA", () => {

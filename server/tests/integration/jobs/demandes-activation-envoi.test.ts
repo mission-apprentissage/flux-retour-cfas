@@ -244,8 +244,7 @@ describe("envoi des demandes d'activation", () => {
       });
     });
 
-    it("ne flèche et n'active qu'une fois pour deux demandeurs du même CFA", async () => {
-      config.deca.flechageAuto = true;
+    it("ne flèche et n'active qu'une fois pour deux demandeurs du même CFA, interrupteur coupé", async () => {
       await insererOrganisme();
       await insererDemande("direction@cfa-tests.fr");
       await insererDemande("adjoint@cfa-tests.fr");
@@ -258,8 +257,7 @@ describe("envoi des demandes d'activation", () => {
       expect(await demandesActivationCfaDb().countDocuments({ statut: "envoyee" })).toBe(2);
     });
 
-    it("interrupteur allumé : l'email part après le fléchage et la pose du flag", async () => {
-      config.deca.flechageAuto = true;
+    it("l'email part après le fléchage et la pose du flag", async () => {
       const organisme = await insererOrganisme();
       await insererDemande("direction@cfa-tests.fr");
       const flagAu = async () => (await organismesDb().findOne({ _id: organisme._id }))?.is_allowed_deca ?? false;
@@ -639,7 +637,6 @@ describe("envoi des demandes d'activation", () => {
     });
 
     it("met en échec sans email les demandes d'un CFA désactivé pendant son activation", async () => {
-      config.deca.flechageAuto = true;
       const organisme = await insererOrganisme();
       const demande = await insererDemande("direction@cfa-tests.fr");
       flecherMock.mockImplementation(async () => {

@@ -37,7 +37,6 @@ type EligibilityResult = {
     is_allowed_deca?: boolean | null;
   } | null;
   activationEnCours: boolean;
-  flechageAuto: boolean;
   contratsFleches: number;
 };
 
@@ -210,11 +209,7 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
         ]}
       >
         {action === "activate"
-          ? `Activer le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? ${
-              data?.flechageAuto
-                ? "Un job lui fléchera d'abord les contrats DECA de son lieu de formation et de ses sites, puis posera le flag is_allowed_deca"
-                : "Un job posera le flag is_allowed_deca"
-            } : les effectifs DECA deviennent visibles côté CFA. La collaboration n'est pas modifiée.`
+          ? `Activer le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Un job lui rattachera d'abord ses contrats DECA (lieu de formation déclaré ou jeune présent dans son ERP), puis posera le flag is_allowed_deca : les effectifs DECA deviennent visibles côté CFA. La collaboration n'est pas modifiée.`
           : `Désactiver le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_deca sera retiré. La collaboration, la date d'activation ML et les snapshots déjà transmis restent inchangés.${
               contratsFleches > 0
                 ? ` ${contratsFleches} contrat(s) DECA fléché(s) vers cet établissement ne seront plus affichés par aucun CFA tant que « deca:flechage --refaire --cible ${siret} » n'a pas tourné.`

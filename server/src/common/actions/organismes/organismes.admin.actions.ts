@@ -570,10 +570,7 @@ export async function retirerGardeActivationDeca(organismeId: ObjectId) {
 
 export type ActivationDecaResultat = "flag_pose" | "deja_actif" | "non_eligible" | "annule";
 
-export async function activerDecaOrganisme(
-  organismeId: ObjectId,
-  { flecher }: { flecher: boolean }
-): Promise<ActivationDecaResultat> {
+export async function activerDecaOrganisme(organismeId: ObjectId): Promise<ActivationDecaResultat> {
   const organisme = await organismesDb().findOne(
     { _id: organismeId },
     {
@@ -595,13 +592,11 @@ export async function activerDecaOrganisme(
   if (!eligible) return "non_eligible";
 
   const rendreLesContrats = () => rendreContratsDeca({ mode: "refaire", cibles: [organismeId] });
-  if (flecher) {
-    try {
-      await flecherContratsDeca({ perimetre: [organismeId], flagsSimules: [organismeId] });
-    } catch (err) {
-      await rendreLesContrats();
-      throw err;
-    }
+  try {
+    await flecherContratsDeca({ perimetre: [organismeId], flagsSimules: [organismeId] });
+  } catch (err) {
+    await rendreLesContrats();
+    throw err;
   }
 
   const { modifiedCount } = await organismesDb().updateOne(
@@ -609,7 +604,7 @@ export async function activerDecaOrganisme(
     { $set: { is_allowed_deca: true } }
   );
   if (modifiedCount === 1) return "flag_pose";
-  if (flecher) await rendreLesContrats();
+  await rendreLesContrats();
   return "annule";
 }
 

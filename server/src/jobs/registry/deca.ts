@@ -31,7 +31,7 @@ export const decaJobs = {
     handler: async (job) => {
       const organismeId = new ObjectId(requirePayloadString(job.payload, "organismeId"));
       try {
-        const resultat = await activerDecaOrganisme(organismeId, { flecher: config.deca.flechageAuto });
+        const resultat = await activerDecaOrganisme(organismeId);
         logger.info({ organismeId, resultat }, "deca:activer");
       } finally {
         await retirerGardeActivationDeca(organismeId);

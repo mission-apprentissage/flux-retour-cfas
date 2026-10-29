@@ -308,7 +308,7 @@ describe("activation DECA par job", () => {
     expect(addJobMock).not.toHaveBeenCalled();
   });
 
-  it("interrupteur coupé : le job pose le flag sans flécher et retire la garde", async () => {
+  it("interrupteur coupé : le job flèche l'organisme, pose son flag et retire la garde", async () => {
     const { id } = await seedOrganisme({ siret: "10000000000012", uai: "0010012M" });
 
     await activerParJob("10000000000012", "0010012M");
@@ -316,11 +316,10 @@ describe("activation DECA par job", () => {
     const organisme = await organismesDb().findOne({ _id: id });
     expect(organisme?.is_allowed_deca).toBe(true);
     expect(organisme).not.toHaveProperty("deca_activation_queued_at");
-    expect(flecherMock).not.toHaveBeenCalled();
+    expect(flecherMock).toHaveBeenCalledWith({ perimetre: [id], flagsSimules: [id] });
   });
 
-  it("interrupteur allumé : le job flèche l'organisme avant de poser son flag", async () => {
-    config.deca.flechageAuto = true;
+  it("le job flèche l'organisme avant de poser son flag", async () => {
     const { id } = await seedOrganisme({ siret: "10000000000013", uai: "0010013N" });
     let flagPendantLeFlechage: boolean | null | undefined;
     flecherMock.mockImplementation(async () => {
@@ -336,7 +335,6 @@ describe("activation DECA par job", () => {
   });
 
   it("un job en échec retire la garde", async () => {
-    config.deca.flechageAuto = true;
     const { id } = await seedOrganisme({ siret: "10000000000014", uai: "0010014P" });
     flecherMock.mockRejectedValue(new Error("fléchage en échec"));
     await activateDecaCfaPilotBatch([{ siret: "10000000000014", uai: "0010014P" }], ADMIN_USER_ID);
@@ -354,7 +352,7 @@ describe("activation DECA par job", () => {
     await activateDecaCfaPilotBatch([item], ADMIN_USER_ID);
     await deactivateDecaCfaPilotBatch([item], ADMIN_USER_ID);
 
-    expect(await activerDecaOrganisme(id, { flecher: true })).toBe("annule");
+    expect(await activerDecaOrganisme(id)).toBe("annule");
     expect(flecherMock).not.toHaveBeenCalled();
     expect((await organismesDb().findOne({ _id: id }))?.is_allowed_deca).toBeUndefined();
   });
@@ -364,7 +362,7 @@ describe("activation DECA par job", () => {
     await activateDecaCfaPilotBatch([{ siret: "10000000000016", uai: "0010016R" }], ADMIN_USER_ID);
     await organismesDb().updateOne({ _id: id }, { $set: { ferme: true } });
 
-    expect(await activerDecaOrganisme(id, { flecher: true })).toBe("non_eligible");
+    expect(await activerDecaOrganisme(id)).toBe("non_eligible");
     expect((await organismesDb().findOne({ _id: id }))?.is_allowed_deca).toBeUndefined();
   });
 });
