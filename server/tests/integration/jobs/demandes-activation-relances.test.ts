@@ -504,7 +504,10 @@ describe("relances du workflow d'activation", () => {
       );
       expect(relances).toHaveLength(1);
       expect(relances[0][0]).toBe("direction@cfa-tests.fr");
-      expect(relances[0][2]).toMatchObject({ EMAIL_INVITE: "collegue@cfa-tests.fr" });
+      expect(relances[0][2]).toMatchObject({
+        EMAIL_INVITE: "collegue@cfa-tests.fr",
+        LIEN_INVITER: expect.stringContaining("/cfa/roles-habilitations"),
+      });
     });
 
     it("ne relance pas une invitation antérieure à l'envoi de la demande, ni une invitation expirée", async () => {
@@ -647,7 +650,11 @@ describe("relances du workflow d'activation", () => {
       );
       expect(accueils).toHaveLength(1);
       expect(accueils[0][0]).toBe("collegue@cfa-tests.fr");
-      expect(accueils[0][2]).toMatchObject({ PRENOM: "Sacha" });
+      expect(accueils[0][2]).toMatchObject({
+        PRENOM: "Sacha",
+        LIEN_EFFECTIFS: expect.stringContaining("/cfa/effectifs"),
+        LIEN_COLLABORATIONS: expect.stringContaining("/cfa/collaborations"),
+      });
     });
   });
 

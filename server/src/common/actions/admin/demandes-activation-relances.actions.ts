@@ -341,7 +341,12 @@ async function relancerInvitationsEnAttente(maintenant: Date, demandes: IDemande
         demande.email,
         async () => {
           const admin = await usersMigrationDb().findOne({ _id: invitation.author_id });
-          return { NOM_CFA: await nomCfa(demande), PRENOM: admin?.prenom ?? "", EMAIL_INVITE: invitation.email };
+          return {
+            NOM_CFA: await nomCfa(demande),
+            PRENOM: admin?.prenom ?? "",
+            EMAIL_INVITE: invitation.email,
+            LIEN_INVITER: lienInviter(),
+          };
         },
         demande
       );
@@ -380,7 +385,12 @@ async function accueillirCollaborateurs(maintenant: Date, demandes: IDemandeActi
         templateId,
         verrou,
         collaborateur.email,
-        async () => ({ NOM_CFA: await nomCfa(demande), PRENOM: collaborateur.prenom ?? "" }),
+        async () => ({
+          NOM_CFA: await nomCfa(demande),
+          PRENOM: collaborateur.prenom ?? "",
+          LIEN_EFFECTIFS: `${config.publicUrl}/cfa/effectifs`,
+          LIEN_COLLABORATIONS: `${config.publicUrl}/cfa/collaborations`,
+        }),
         demande
       );
     }
