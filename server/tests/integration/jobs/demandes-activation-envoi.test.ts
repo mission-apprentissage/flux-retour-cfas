@@ -849,6 +849,19 @@ describe("envoi des demandes d'activation", () => {
       expect((await relire(demande))?.updated_at).toEqual(lue?.updated_at);
     });
 
+    it("importe toutes les lignes au-delà d'une tranche", async () => {
+      await insererOrganisme();
+      const lignes = Array.from({ length: 12 }, (_, i) => `direction${i}@cfa-tests.fr,${SIRET}`).join("\n");
+
+      const bilan = await importerDemandesActivation(
+        { buffer: Buffer.from(`Adresse email,SIRET de votre CFA\n${lignes}\n`), originalname: "export.csv" },
+        "Webinaire"
+      );
+
+      expect(bilan).toMatchObject({ creees: 12, misesAJour: 0 });
+      expect(await demandesActivationCfaDb().countDocuments({ branche: "activation" })).toBe(12);
+    });
+
     it("réévalue toutes les demandes au-delà d'une tranche", async () => {
       const demandes = await Promise.all(
         Array.from({ length: 12 }, (_, i) => insererDemande(`direction${i}@cfa-tests.fr`))

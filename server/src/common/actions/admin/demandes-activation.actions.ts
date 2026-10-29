@@ -410,8 +410,14 @@ export async function importerDemandesActivation(
   }
 
   const domaines: CacheDomaines = new Map();
-  for (const provenance of parCle.values()) {
-    bilan[await importerDemande(provenance, source, domaines)]++;
+  const provenances = [...parCle.values()];
+  for (let debut = 0; debut < provenances.length; debut += TAILLE_LOT_EVALUATION) {
+    const resultats = await Promise.all(
+      provenances
+        .slice(debut, debut + TAILLE_LOT_EVALUATION)
+        .map((provenance) => importerDemande(provenance, source, domaines))
+    );
+    for (const resultat of resultats) bilan[resultat]++;
   }
 
   if (bilan.creees + bilan.misesAJour > 0) {
