@@ -51,6 +51,15 @@ const PAGE_SIZE = 20;
 
 type Retour = { severity: "success" | "info" | "warning" | "error"; message: string };
 
+const MODE_D_EMPLOI = [
+  "Importez l'export Google Forms (« Télécharger les réponses », .zip ou .csv), sans l'ouvrir dans Excel.",
+  "Ré-importer un export plus récent ajoute les nouvelles réponses ; les lignes déjà envoyées ne bougent pas.",
+  "Corrigez une ligne avec « Corriger » (SIRET, e-mail, branche), jamais dans le fichier : les corrections sont gardées aux imports suivants.",
+  "Cochez les lignes prêtes, puis « Envoyer les e-mails » : DECA est activé et chaque demandeur reçoit son e-mail.",
+  "Les refus « sans mail » ne reçoivent rien : à traiter à la main si besoin.",
+  "En cas d'échec, corrigez puis « Renvoyer ». Les relances partent automatiquement.",
+];
+
 const LIBELLES_VUES: Record<VueDemandeActivation, string> = {
   a_envoyer: "À envoyer",
   envoyees: "Envoyées",
@@ -468,6 +477,21 @@ export default function DemandesActivationClient() {
       <AdminPageHeader
         title={PAGES.static.adminDemandesActivation.title}
         intro="Importez l'export du formulaire, vérifiez chaque demande, puis cochez celles à envoyer."
+      />
+      <Alert
+        severity="info"
+        small
+        className="fr-mb-6w"
+        description={
+          <>
+            <p className="fr-text--bold fr-mb-1w">Mode d&apos;emploi</p>
+            <ul className="fr-mb-0">
+              {MODE_D_EMPLOI.map((consigne) => (
+                <li key={consigne}>{consigne}</li>
+              ))}
+            </ul>
+          </>
+        }
       />
 
       <section className="fr-mb-6w">
