@@ -212,6 +212,7 @@ export default function DemandesActivationClient() {
   const [retourLigne, setRetourLigne] = useState<Retour | null>(null);
   const [enCorrection, setEnCorrection] = useState<IDemandeActivationLigne | null>(null);
   const [siretCorrige, setSiretCorrige] = useState("");
+  const [emailCorrige, setEmailCorrige] = useState("");
   const [brancheForcee, setBrancheForcee] = useState<BrancheDemandeActivation | "">("");
   const [retourCorrection, setRetourCorrection] = useState<Retour | null>(null);
 
@@ -294,6 +295,7 @@ export default function DemandesActivationClient() {
   const ouvrirCorrection = (demande: IDemandeActivationLigne) => {
     setEnCorrection(demande);
     setSiretCorrige(demande.siret_corrige ?? "");
+    setEmailCorrige(demande.email_corrige ?? "");
     setBrancheForcee(demande.branche_forcee ?? "");
     setRetourCorrection(null);
     correctionModal.open();
@@ -304,7 +306,11 @@ export default function DemandesActivationClient() {
     try {
       const corrigee = await modificationMutation.mutateAsync({
         id: enCorrection._id,
-        modification: { siret_corrige: siretCorrige || null, branche_forcee: brancheForcee || null },
+        modification: {
+          siret_corrige: siretCorrige || null,
+          email_corrige: emailCorrige || null,
+          branche_forcee: brancheForcee || null,
+        },
       });
       setEnCorrection(corrigee);
       setRetourCorrection({
@@ -353,6 +359,9 @@ export default function DemandesActivationClient() {
       demandeur: (
         <>
           {emailSecable(demande.email)}
+          {demande.email_corrige && (
+            <p className="fr-text--xs fr-mb-0">Saisi : {emailSecable(demande.email_saisi || "—")}</p>
+          )}
           {demande.fonction && <p className="fr-text--xs fr-mb-0">{demande.fonction}</p>}
           {demande.compte && (demande.compte.prenom || demande.compte.nom) && (
             <p className="fr-text--xs fr-mb-0">
@@ -563,9 +572,20 @@ export default function DemandesActivationClient() {
         {enCorrection && (
           <>
             <p className="fr-text--sm">
-              {nomCfa(enCorrection)}, {enCorrection.email}. SIRET saisi : {enCorrection.siret_saisi_brut || "—"}
+              {nomCfa(enCorrection)}. E-mail saisi : {enCorrection.email_saisi || "—"}. SIRET saisi :{" "}
+              {enCorrection.siret_saisi_brut || "—"}
               {enCorrection.siret_propose ? `. SIRET ouvert de même UAI : ${enCorrection.siret_propose}` : ""}.
             </p>
+            <Input
+              label="E-mail corrigé"
+              hintText="Laisser vide pour revenir à l'e-mail saisi. Une invitation déjà envoyée à l'ancienne adresse est annulée."
+              nativeInputProps={{
+                type: "email",
+                value: emailCorrige,
+                autoComplete: "off",
+                onChange: (event) => setEmailCorrige(event.target.value),
+              }}
+            />
             <Input
               label="SIRET corrigé"
               hintText="14 chiffres. Laisser vide pour revenir au SIRET saisi."

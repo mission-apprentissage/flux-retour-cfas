@@ -9,8 +9,8 @@ const DOUZE_MOIS_EN_SECONDES = 365 * 24 * 3600;
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ created_at: 1 }, { name: "created_at_ttl", expireAfterSeconds: DOUZE_MOIS_EN_SECONDES }],
   [
-    { email: 1, siret_saisi: 1 },
-    { name: "email_siret_saisi", unique: true },
+    { email_saisi: 1, siret_saisi: 1 },
+    { name: "email_saisi_siret_saisi", unique: true },
   ],
 ];
 
@@ -89,7 +89,9 @@ const zDemandeActivationCfa = z.object({
   source: z.string({ description: "Nom de la source saisi à l'import (informatif)" }),
   horodatage_brut: z.string({ description: "Horodateur du formulaire, tel quel" }).nullish(),
   horodatage: z.date({ description: "Horodateur du formulaire, lu" }).nullish(),
-  email: z.string({ description: "Email du demandeur, en minuscules et sans espaces" }),
+  email_saisi: z.string({ description: "Email saisi dans le formulaire, en minuscules et sans espaces" }),
+  email_corrige: z.string({ description: "Email corrigé par l'équipe" }).nullish(),
+  email: z.string({ description: "Email retenu : corrigé, sinon saisi" }),
   fonction: z.string({ description: "Fonction déclarée dans le formulaire" }).nullish(),
   siret_saisi_brut: z.string({ description: "SIRET saisi dans le formulaire, tel quel" }),
   siret_saisi: z.string({ description: "SIRET saisi, réduit à ses chiffres" }),

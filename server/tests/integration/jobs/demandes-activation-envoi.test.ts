@@ -11,7 +11,7 @@ import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixtu
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { login, register } from "@/common/actions/account.actions";
+import { login, register, registerCfa } from "@/common/actions/account.actions";
 import {
   DUREE_INVITATION_DEMANDE_MS,
   envoyerDemandesActivation,
@@ -156,11 +156,11 @@ async function insererCompte(
 }
 
 async function insererDemande(email: string, siret = SIRET, overrides: Partial<IDemandeActivationCfa> = {}) {
-  const evaluation = await evaluerDemande({ email, siret_saisi: siret });
+  const evaluation = await evaluerDemande({ email_saisi: email, siret_saisi: siret });
   const demande: IDemandeActivationCfa = {
     _id: new ObjectId(),
     source: "Webinaire",
-    email,
+    email_saisi: email,
     siret_saisi_brut: siret,
     siret_saisi: siret,
     ...evaluation,
@@ -959,6 +959,69 @@ describe("envoi des demandes d'activation", () => {
         fonction: "Directrice générale",
         a_envoyer: true,
       });
+    });
+
+    it("envoie l'invitation à l'email corrigé d'une demande saisie sans email valide", async () => {
+      await insererOrganisme();
+      const demande = await insererDemande("cécilerenaud", SIRET, { a_envoyer: false });
+      expect(demande.motifs).toEqual(["email_mal_forme"]);
+
+      await modifierDemandeActivation(demande._id, { email_corrige: "direction@cfa-tests.fr" });
+      await modifierDemandeActivation(demande._id, { a_envoyer: true });
+      await envoyerEtTraiter();
+
+      expect(await invitationsDb().findOne({ email: "direction@cfa-tests.fr" })).toMatchObject({
+        demande_id: demande._id,
+      });
+      expect(brevoMock).toHaveBeenCalledWith(
+        "direction@cfa-tests.fr",
+        config.brevo.templatesDemandesActivation.activationSansCompte,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(await relire(demande)).toMatchObject({ statut: "envoyee", email_saisi: "cécilerenaud" });
+    });
+
+    it("annule l'invitation partie vers l'ancienne adresse quand l'email est corrigé, puis invite la nouvelle", async () => {
+      await insererOrganisme();
+      const demande = await insererDemande("direction@cfa-tset.fr");
+      await envoyerEtTraiter();
+      const ancienne = await invitationsDb().findOne({ email: "direction@cfa-tset.fr" });
+      await demandesActivationCfaDb().updateOne({ _id: demande._id }, { $set: { statut: "invitation_expiree" } });
+      addJobMock.mockClear();
+      brevoMock.mockClear();
+
+      await modifierDemandeActivation(demande._id, { email_corrige: "direction@cfa-tests.fr" });
+
+      expect(await invitationsDb().findOne({ _id: ancienne?._id })).toBeNull();
+      await expect(registerCfa({ token: ancienne!.token } as Parameters<typeof registerCfa>[0])).rejects.toThrow(
+        "Jeton d'invitation non valide"
+      );
+      expect(await relire(demande)).toMatchObject({ email: "direction@cfa-tests.fr", invitation_id: null });
+
+      await renvoyerDemandeActivation(demande._id, EXPEDITEUR);
+      await traiterEnvoisDemandesActivation(demande.organisme_id ?? null);
+
+      const nouvelle = await invitationsDb().findOne({ email: "direction@cfa-tests.fr" });
+      expect(nouvelle).toMatchObject({ demande_id: demande._id });
+      expect(await relire(demande)).toMatchObject({ statut: "envoyee", invitation_id: nouvelle?._id });
+      expect(brevoMock).toHaveBeenCalledWith(
+        "direction@cfa-tests.fr",
+        config.brevo.templatesDemandesActivation.activationSansCompte,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it("refuse de corriger l'email d'une demande déjà envoyée", async () => {
+      await insererOrganisme();
+      const demande = await insererDemande("direction@cfa-tests.fr");
+      await envoyerEtTraiter();
+
+      await expect(modifierDemandeActivation(demande._id, { email_corrige: "autre@cfa-tests.fr" })).rejects.toThrow(
+        "Demande déjà envoyée"
+      );
+      expect(await invitationsDb().countDocuments({ email: "direction@cfa-tests.fr" })).toBe(1);
     });
   });
 });

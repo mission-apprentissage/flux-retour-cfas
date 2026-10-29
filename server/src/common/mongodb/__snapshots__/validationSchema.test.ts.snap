@@ -313,7 +313,18 @@ exports[`validation-schema > should create validation schema for demandesActivat
     },
     "email": {
       "bsonType": "string",
-      "description": "Email du demandeur, en minuscules et sans espaces",
+      "description": "Email retenu : corrigé, sinon saisi",
+    },
+    "email_corrige": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Email corrigé par l'équipe",
+    },
+    "email_saisi": {
+      "bsonType": "string",
+      "description": "Email saisi dans le formulaire, en minuscules et sans espaces",
     },
     "envoi_en_cours_at": {
       "anyOf": [
@@ -637,6 +648,7 @@ exports[`validation-schema > should create validation schema for demandesActivat
   "required": [
     "_id",
     "source",
+    "email_saisi",
     "email",
     "siret_saisi_brut",
     "siret_saisi",

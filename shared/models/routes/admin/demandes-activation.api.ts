@@ -15,6 +15,7 @@ export type VueDemandeActivation = (typeof VUES_DEMANDES_ACTIVATION)[number];
 export const zModificationDemandeActivation = z
   .object({
     siret_corrige: z.string().nullable(),
+    email_corrige: z.string().nullable(),
     branche_forcee: zBrancheDemandeActivation.nullable(),
     a_envoyer: z.boolean(),
   })
@@ -30,6 +31,8 @@ export type IEnvoiDemandesActivation = z.output<typeof zEnvoiDemandesActivation>
 export interface IDemandeActivationLigne {
   _id: string;
   email: string;
+  email_saisi: string;
+  email_corrige: string | null;
   fonction: string | null;
   commentaire: string | null;
   siret_saisi_brut: string;

@@ -181,6 +181,23 @@ describe("POST /api/v1/admin/demandes-activation/import", () => {
     });
   });
 
+  it("garde l'email corrigé au ré-import, sans doublon", async () => {
+    await importer(EXPORT);
+    await demandesActivationCfaDb().updateOne(
+      { email: "rh@cfa-exemple.fr" },
+      { $set: { email_corrige: "drh@cfa-exemple.fr", email: "drh@cfa-exemple.fr" } }
+    );
+
+    const response = await importer(EXPORT);
+
+    expect(response.data).toMatchObject({ creees: 0, misesAJour: 5 });
+    expect(await demandesActivationCfaDb().countDocuments()).toBe(5);
+    expect(await demande("drh@cfa-exemple.fr")).toMatchObject({
+      email_saisi: "rh@cfa-exemple.fr",
+      email_corrige: "drh@cfa-exemple.fr",
+    });
+  });
+
   it("ne touche pas une demande déjà envoyée", async () => {
     await importer(EXPORT);
     await demandesActivationCfaDb().updateOne({ email: "directrice@cfa-exemple.fr" }, { $set: { statut: "envoyee" } });
@@ -244,6 +261,25 @@ describe("récapitulatif des demandes d'activation", () => {
       branche: "activation",
       vue: "a_envoyer",
       cochable: true,
+    });
+  });
+
+  it("corrige l'email d'une demande, puis revient à l'email saisi", async () => {
+    const { _id } = await ligne("contact.cfa@gmail.com");
+
+    const corrigee = await modifier(_id, { email_corrige: " Direction@CFA-exemple.fr " });
+    expect(corrigee.data).toMatchObject({
+      email: "direction@cfa-exemple.fr",
+      email_saisi: "contact.cfa@gmail.com",
+      email_corrige: "direction@cfa-exemple.fr",
+      motifs: [],
+    });
+
+    const annulee = await modifier(_id, { email_corrige: null });
+    expect(annulee.data).toMatchObject({
+      email: "contact.cfa@gmail.com",
+      email_corrige: null,
+      motifs: ["messagerie_grand_public"],
     });
   });
 

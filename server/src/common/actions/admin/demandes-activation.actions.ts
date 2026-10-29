@@ -126,7 +126,7 @@ type OrganismeDemande = Pick<IOrganisme, keyof typeof PROJECTION_ORGANISME>;
 
 type ProvenanceDemande = Pick<
   IDemandeActivationCfa,
-  "horodatage_brut" | "horodatage" | "email" | "fonction" | "siret_saisi_brut" | "siret_saisi" | "commentaire"
+  "horodatage_brut" | "horodatage" | "email_saisi" | "fonction" | "siret_saisi_brut" | "siret_saisi" | "commentaire"
 >;
 
 type EvaluationDemande = Pick<IDemandeActivationCfa, Exclude<(typeof CHAMPS_EVALUES)[number], "a_envoyer">>;
@@ -229,7 +229,7 @@ function lireProvenance(ligne: Record<string, string>, colonnes: Partial<Record<
   return {
     horodatage_brut: horodatageBrut,
     horodatage: lireHorodatage(horodatageBrut),
-    email: normaliserEmail(valeur("email")),
+    email_saisi: normaliserEmail(valeur("email")),
     fonction: texteOuNull(valeur("fonction")),
     siret_saisi_brut: (valeur("siret") ?? "").trim(),
     siret_saisi: normaliserSiret(valeur("siret")),
@@ -272,15 +272,17 @@ async function domaineConnu(domaine: string): Promise<boolean> {
 }
 
 export async function evaluerDemande({
-  email,
+  email_saisi,
+  email_corrige,
   siret_saisi,
   siret_corrige,
   branche_forcee,
 }: Pick<
   IDemandeActivationCfa,
-  "email" | "siret_saisi" | "siret_corrige" | "branche_forcee"
+  "email_saisi" | "email_corrige" | "siret_saisi" | "siret_corrige" | "branche_forcee"
 >): Promise<EvaluationDemande> {
   const motifs = new Set<MotifDemandeActivation>();
+  const email = email_corrige || email_saisi;
   const siret = siret_corrige || siret_saisi;
   let organisme: OrganismeDemande | null = null;
   let siretPropose: string | null = null;
@@ -350,6 +352,7 @@ export async function evaluerDemande({
   const branche: BrancheDemandeActivation = motifs.size > 0 ? "refus" : brancheParDefaut;
 
   return {
+    email,
     siret: organisme?.siret ?? (siret || null),
     uai: organisme?.uai ?? null,
     siret_propose: siretPropose,
@@ -376,11 +379,11 @@ export async function importerDemandesActivation(
   const parCle = new Map<string, ProvenanceDemande>();
   for (const ligne of lignes) {
     const provenance = lireProvenance(ligne, colonnes);
-    if (!provenance.email && !provenance.siret_saisi) {
+    if (!provenance.email_saisi && !provenance.siret_saisi) {
       bilan.erreurs++;
       continue;
     }
-    const cle = `${provenance.email}|${provenance.siret_saisi}`;
+    const cle = `${provenance.email_saisi}|${provenance.siret_saisi}`;
     if (parCle.has(cle)) bilan.fusionnees++;
     parCle.set(cle, provenance);
   }
@@ -399,7 +402,7 @@ async function importerDemande(
   for (let essai = 0; essai < ESSAIS_ECRITURE; essai++) {
     const maintenant = new Date();
     const existante = await demandesActivationCfaDb().findOne({
-      email: provenance.email,
+      email_saisi: provenance.email_saisi,
       siret_saisi: provenance.siret_saisi,
     });
     if (existante && (existante.statut === "envoi_en_cours" || existante.statut === "envoyee")) {
@@ -408,6 +411,7 @@ async function importerDemande(
 
     const evaluation = await evaluerDemande({
       ...provenance,
+      email_corrige: existante?.email_corrige,
       siret_corrige: existante?.siret_corrige,
       branche_forcee: existante?.branche_forcee,
     });
@@ -488,6 +492,7 @@ async function enregistrer(
 }
 
 const CHAMPS_EVALUES = [
+  "email",
   "siret",
   "uai",
   "siret_propose",
@@ -537,6 +542,8 @@ async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeAc
     return {
       _id: demande._id.toString(),
       email: demande.email,
+      email_saisi: demande.email_saisi,
+      email_corrige: demande.email_corrige ?? null,
       fonction: demande.fonction ?? null,
       commentaire: demande.commentaire ?? null,
       siret_saisi_brut: demande.siret_saisi_brut,
@@ -606,11 +613,21 @@ export async function modifierDemandeActivation(
   if (modification.siret_corrige !== undefined) {
     modifications.siret_corrige = normaliserSiret(modification.siret_corrige ?? "") || null;
   }
+  if (modification.email_corrige !== undefined) {
+    if (demande.statut === "envoyee" && demande.branche_envoyee !== "refus") {
+      throw Boom.badRequest("Demande déjà envoyée : annulez son invitation pour corriger l'e-mail");
+    }
+    modifications.email_corrige = normaliserEmail(modification.email_corrige ?? "") || null;
+  }
   if (modification.branche_forcee !== undefined) {
     modifications.branche_forcee = modification.branche_forcee;
   }
 
   let misAJour = Object.keys(modifications).length > 0 ? await reevaluer(demande, modifications) : demande;
+  if (misAJour.email !== demande.email && demande.invitation_id) {
+    await invitationsDb().deleteOne({ _id: demande.invitation_id });
+    misAJour = { ...misAJour, invitation_id: null };
+  }
   const compte = misAJour.user_id
     ? await usersMigrationDb().findOne({ _id: misAJour.user_id }, { projection: { account_status: 1 } })
     : null;

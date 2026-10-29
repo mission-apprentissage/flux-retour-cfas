@@ -74,7 +74,7 @@ async function insererCompte(email: string, organisationId: ObjectId) {
 }
 
 const evaluer = (email: string, overrides: Partial<Parameters<typeof evaluerDemande>[0]> = {}) =>
-  evaluerDemande({ email, siret_saisi: SIRET, ...overrides });
+  evaluerDemande({ email_saisi: email, siret_saisi: SIRET, ...overrides });
 
 describe("evaluerDemande", () => {
   describe("SIRET", () => {
@@ -144,6 +144,21 @@ describe("evaluerDemande", () => {
 
       expect(await evaluer("direction@cfa.fr")).toMatchObject({
         organisation_id: organisationId,
+        user_id: compteId,
+        branche: "compte_existant",
+      });
+    });
+
+    it("évalue l'email corrigé à la place de l'email saisi", async () => {
+      const organisme = await insererOrganisme();
+      const organisationId = await insererOrganisation(organisme._id);
+      const compteId = await insererCompte("direction@cfa-connu.fr", organisationId);
+
+      expect(await evaluer("cécilerenaud")).toMatchObject({ email: "cécilerenaud", motifs: ["email_mal_forme"] });
+      expect(await evaluer("cécilerenaud", { email_corrige: "direction@cfa-connu.fr" })).toMatchObject({
+        email: "direction@cfa-connu.fr",
+        motifs: [],
+        domaine_inconnu: false,
         user_id: compteId,
         branche: "compte_existant",
       });

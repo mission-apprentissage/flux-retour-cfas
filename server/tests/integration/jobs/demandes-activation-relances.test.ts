@@ -84,10 +84,12 @@ async function insererCompte(email: string, overrides: Partial<IUsersMigration> 
 }
 
 async function insererDemande(overrides: Partial<IDemandeActivationCfa> = {}) {
+  const email = overrides.email ?? "direction@cfa-tests.fr";
   const demande: IDemandeActivationCfa = {
     _id: new ObjectId(),
     source: "Webinaire",
-    email: "direction@cfa-tests.fr",
+    email_saisi: email,
+    email,
     siret_saisi_brut: "13002374000439",
     siret_saisi: "13002374000439",
     siret: "13002374000439",
