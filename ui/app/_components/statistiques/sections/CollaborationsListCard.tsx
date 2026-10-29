@@ -180,7 +180,6 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
         }}
         className={filterStyles.search}
       />
-      {listeTerritoire && !horsPerimetre && (!region || isDdets) && <NotePerimetre />}
       <div className={filterStyles.filters}>
         <span className={filterStyles.filtersLabel}>Filtrer</span>
         <DateRangeFilter
@@ -256,6 +255,7 @@ export function CollaborationsListCard({ mlId, cfaId }: { mlId?: string; cfaId?:
           getDisplayText={countLabel("Résultat contact jeune")}
         />
       </div>
+      {listeTerritoire && !horsPerimetre && <NotePerimetre />}
       {horsPerimetre ? (
         <p className={styles.empty}>
           La liste détaillée des collaborations est limitée à votre territoire : {perimetre.label}.

@@ -1,13 +1,15 @@
 "use client";
 
+import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import { ORGANISATION_TYPE } from "shared/constants";
 
 import { useAuth } from "@/app/_context/UserContext";
 import { isAdminUser } from "@/app/suivi-des-indicateurs/access";
 
 import { useUserRegions } from "../hooks/useUserRegions";
-import styles from "../sections/SuiviTraitementMLCard.module.css";
 import { getRegionLabel } from "../utils";
+
+import styles from "./NotePerimetre.module.css";
 
 /**
  * Périmètre des données nominatives (liste des collaborations) : régions de l'utilisateur, ou son département
@@ -22,10 +24,28 @@ export function usePerimetreNominatif() {
     user?.organisation?.type === ORGANISATION_TYPE.DDETS
       ? (user.organisation as { code_departement?: string }).code_departement
       : undefined;
-  return { regions, label: departement ? `département ${departement}` : regions.map(getRegionLabel).join(", ") };
+  const territoireRegions = regions.length
+    ? `${regions.length > 1 ? "régions" : "région"} ${regions.map(getRegionLabel).join(", ")}`
+    : "";
+  return { regions, label: departement ? `département ${departement}` : territoireRegions };
 }
 
 export function NotePerimetre() {
+  const { user } = useAuth();
   const { label } = usePerimetreNominatif();
-  return label ? <p className={styles.scopeNote}>Liste limitée à votre territoire : {label}.</p> : null;
+  if (!label) return null;
+
+  const emetteurs = user?.organisation?.type === ORGANISATION_TYPE.ARML ? "aux Missions Locales" : "par des CFA";
+  return (
+    <Notice
+      classes={{ root: styles.root, title: styles.title, description: styles.description }}
+      title="Information"
+      description={
+        <>
+          Les informations de collaboration affichées concernent uniquement les dossiers de jeunes transmis {emetteurs}{" "}
+          de votre territoire : <strong>{label}</strong>
+        </>
+      }
+    />
+  );
 }
