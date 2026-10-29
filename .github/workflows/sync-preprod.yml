@@ -5,7 +5,7 @@ on:
 jobs:
   deploy:
     name: Synchronisation de la base de donnée Production -> Preprod
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Notify new deployment on Slack
         uses: ravsamhq/notify-slack-action@v2
