@@ -104,7 +104,7 @@ export function CorrectionDemandeModal({
           <fieldset className="fr-fieldset">
             <legend className="fr-fieldset__legend">E-mail</legend>
             <div className="fr-fieldset__element">
-              <p className="fr-text--sm fr-mb-0">
+              <p className="fr-text--sm fr-mb-1w">
                 Saisi dans le formulaire : <strong>{demande.email_saisi || "—"}</strong>
               </p>
             </div>
@@ -127,7 +127,7 @@ export function CorrectionDemandeModal({
           <fieldset className="fr-fieldset">
             <legend className="fr-fieldset__legend">SIRET</legend>
             <div className="fr-fieldset__element">
-              <p className="fr-text--sm fr-mb-0">
+              <p className="fr-text--sm fr-mb-1w">
                 Saisi dans le formulaire : <strong>{demande.siret_saisi_brut || "—"}</strong>
               </p>
             </div>
