@@ -77,6 +77,7 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   "send-cfa-daily-recap": { tier: "jour" },
   "demandes-activation:relances": { tier: "jour" },
   "deca:flechage": { tier: "jour" },
+  "demandes-activation:flechables": { tier: "jour" },
   "organismes:revoke-stale-api-keys": { tier: "veille" },
 };
 

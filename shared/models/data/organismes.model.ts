@@ -218,6 +218,10 @@ export const zOrganisme = z
     deca_activation_queued_at: z
       .date({ description: "Date de mise en file de l'activation DECA en cours (absent = aucune activation en cours)" })
       .nullish(),
+    deca_contrats_flechables: z
+      .number({ description: "Contrats DECA que l'activation rattacherait à l'organisme (calculés en dry-run)" })
+      .nullish(),
+    deca_contrats_flechables_at: z.date({ description: "Date du calcul des contrats DECA à rattacher" }).nullish(),
     collab_inactivity_email_sent_at: z
       .date({ description: "Date d'envoi de la relance d'inactivité collaboration (verrou, retiré à la reconnexion)" })
       .nullish(),

@@ -233,6 +233,9 @@ export async function hydrateDecaRaw({ dryRun = false, limit }: { dryRun?: boole
       if (config.deca.flechageAuto && !limit) {
         await addJob({ name: "deca:flechage", payload: {}, queued: true });
       }
+      if (!limit) {
+        await addJob({ name: "demandes-activation:flechables", payload: {}, queued: true });
+      }
     } else {
       logger.error("No documents found matching the criteria.");
     }

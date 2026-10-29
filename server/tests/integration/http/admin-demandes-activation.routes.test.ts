@@ -7,11 +7,16 @@ import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { demandesActivationCfaDb, effectifsDb, organismesDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 import { initTestApp, RequestAsOrganisationFunc, testDoc } from "@tests/utils/testUtils";
+
+vi.mock("job-processor", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("job-processor")>()),
+  addJob: vi.fn(),
+}));
 
 useMongo();
 

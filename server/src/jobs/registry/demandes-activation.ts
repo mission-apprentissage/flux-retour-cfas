@@ -5,7 +5,10 @@ import {
   envoyerInvitezCollaborateurs,
   relancerDemandesActivation,
 } from "@/common/actions/admin/demandes-activation-relances.actions";
-import { traiterEnvoisDemandesActivation } from "@/common/actions/admin/demandes-activation.actions";
+import {
+  calculerContratsFlechablesDesDemandes,
+  traiterEnvoisDemandesActivation,
+} from "@/common/actions/admin/demandes-activation.actions";
 
 import { payloadString, requirePayloadString } from "./payload";
 
@@ -14,6 +17,11 @@ export const demandesActivationJobs = {
     handler: async (job) => {
       const organismeId = payloadString(job.payload, "organismeId");
       await traiterEnvoisDemandesActivation(organismeId ? new ObjectId(organismeId) : null);
+    },
+  },
+  "demandes-activation:flechables": {
+    handler: async () => {
+      await calculerContratsFlechablesDesDemandes();
     },
   },
   "demandes-activation:inviter-collaborateurs": {

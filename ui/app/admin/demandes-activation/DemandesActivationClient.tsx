@@ -121,7 +121,11 @@ const emailSecable = (email: string) => {
 };
 
 const bilanImport = ({ creees, misesAJour, fusionnees, inchangees, erreurs }: IBilanImportDemandes) =>
-  `${creees} demande(s) créée(s), ${misesAJour} mise(s) à jour, ${fusionnees} doublon(s) fusionné(s), ${inchangees} déjà envoyée(s) laissée(s) telle(s) quelle(s), ${erreurs} ligne(s) vide(s) ignorée(s).`;
+  `${creees} demande(s) créée(s), ${misesAJour} mise(s) à jour, ${fusionnees} doublon(s) fusionné(s), ${inchangees} déjà envoyée(s) laissée(s) telle(s) quelle(s), ${erreurs} ligne(s) vide(s) ignorée(s).${
+    creees + misesAJour > 0
+      ? " Les contrats DECA à rattacher à chaque établissement sont recalculés en arrière-plan : rechargez la page dans quelques minutes."
+      : ""
+  }`;
 
 function BadgeBranche({ demande }: { demande: IDemandeActivationLigne }) {
   const severity =

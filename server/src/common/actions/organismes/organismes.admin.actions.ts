@@ -487,7 +487,7 @@ export async function activateDecaCfaPilotBatch(
     const { siret, uai } = input;
     const organisme = await organismesDb().findOne(
       { siret, uai },
-      { projection: { _id: 1, siret: 1, uai: 1, nature: 1, ferme: 1, is_allowed_deca: 1 } }
+      { projection: { _id: 1, siret: 1, uai: 1, nature: 1, ferme: 1, is_allowed_deca: 1, deca_contrats_flechables: 1 } }
     );
 
     if (!organisme) {
@@ -582,6 +582,7 @@ export async function activerDecaOrganisme(organismeId: ObjectId): Promise<Activ
         ferme: 1,
         is_allowed_deca: 1,
         deca_activation_queued_at: 1,
+        deca_contrats_flechables: 1,
       },
     }
   );

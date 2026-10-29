@@ -21293,6 +21293,25 @@ exports[`validation-schema > should create validation schema for organismes > or
       ],
       "description": "Date de mise en file de l'activation DECA en cours (absent = aucune activation en cours)",
     },
+    "deca_contrats_flechables": {
+      "bsonType": [
+        "number",
+        "null",
+      ],
+      "description": "Contrats DECA que l'activation rattacherait à l'organisme (calculés en dry-run)",
+    },
+    "deca_contrats_flechables_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date du calcul des contrats DECA à rattacher",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date du calcul des contrats DECA à rattacher",
+    },
     "effectifs_count": {
       "bsonType": "int",
       "description": "Compteur sur le nombre d'effectifs de l'organisme",

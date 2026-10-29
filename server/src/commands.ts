@@ -395,6 +395,12 @@ program
   );
 
 program
+  .command("demandes-activation:flechables")
+  .description("Calcule les contrats DECA que l'activation rattacherait aux établissements des demandes d'activation")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("demandes-activation:flechables"));
+
+program
   .command("hydrate:effectifs:update_computed_statut")
   .description("Manually trigger the update of the computed")
   .option("--id <string>", "Id de l'organisme", (organismeId) => organismeId, null)

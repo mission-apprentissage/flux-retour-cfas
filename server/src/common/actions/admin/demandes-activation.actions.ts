@@ -30,6 +30,7 @@ import { z } from "zod";
 
 import { enqueueBrevoContactSync } from "@/common/actions/brevo/contacts/enqueue-sync";
 import { enqueueBrevoEvent } from "@/common/actions/brevo/events/enqueue-event";
+import { calculerContratsFlechables } from "@/common/actions/deca/deca-flechage.actions";
 import {
   getOrganisationOrganismeByOrganismeId,
   lienConnexion,
@@ -117,6 +118,7 @@ const PROJECTION_ORGANISME = {
   ferme: 1,
   is_allowed_deca: 1,
   deca_activation_queued_at: 1,
+  deca_contrats_flechables: 1,
   nom: 1,
   raison_sociale: 1,
   enseigne: 1,
@@ -412,7 +414,18 @@ export async function importerDemandesActivation(
     bilan[await importerDemande(provenance, source, domaines)]++;
   }
 
+  if (bilan.creees + bilan.misesAJour > 0) {
+    await planifierCalculDesContratsFlechables();
+  }
   return bilan;
+}
+
+const planifierCalculDesContratsFlechables = () =>
+  addJob({ name: "demandes-activation:flechables", payload: {}, queued: true });
+
+export async function calculerContratsFlechablesDesDemandes() {
+  const organismeIds = await demandesActivationCfaDb().distinct("organisme_id", { organisme_id: { $ne: null } });
+  await calculerContratsFlechables(organismeIds.filter((id): id is ObjectId => !!id));
 }
 
 async function importerDemande(
@@ -683,6 +696,9 @@ export async function modifierDemandeActivation(
   const enregistree = await enregistrer(demande, misAJour);
   if (!enregistree) {
     throw Boom.conflict("La demande a changé entre-temps : rechargez la page");
+  }
+  if (String(enregistree.organisme_id ?? "") !== String(demande.organisme_id ?? "")) {
+    await planifierCalculDesContratsFlechables();
   }
   const [ligne] = await versLignes([enregistree]);
   return ligne;

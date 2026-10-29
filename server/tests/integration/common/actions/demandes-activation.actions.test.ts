@@ -208,6 +208,16 @@ describe("evaluerDemande", () => {
         effectifs_deca: 0,
       });
     });
+
+    it("compte dans ses effectifs DECA les contrats que l'activation lui rattacherait", async () => {
+      await insererOrganisme({ deca_contrats_flechables: 5 }, 0);
+      expect(await evaluer("direction@cfa.fr")).toMatchObject({
+        motifs: [],
+        branche: "activation",
+        effectifs_erp: 0,
+        effectifs_deca: 5,
+      });
+    });
   });
 
   describe("adresse grand public", () => {

@@ -79,6 +79,7 @@ describe("registre des jobs", () => {
       "deca:activer",
       "deca:flechage",
       "demandes-activation:envoyer",
+      "demandes-activation:flechables",
       "demandes-activation:inviter-collaborateurs",
       "demandes-activation:relances",
       "dev:generate-open-api",

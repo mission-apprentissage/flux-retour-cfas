@@ -171,6 +171,7 @@ export async function checkEligibilityForLoaded(
     | "ferme"
     | "is_allowed_deca"
     | "deca_activation_queued_at"
+    | "deca_contrats_flechables"
     | "nom"
     | "raison_sociale"
     | "enseigne"
@@ -216,7 +217,7 @@ export async function checkEligibilityForLoaded(
 
   const activeAnnees = getActiveAnneesScolaires(new Date());
 
-  const [effectifsErpCount, effectifsDecaCount] = await Promise.all([
+  const [effectifsErpCount, effectifsDecaPropres] = await Promise.all([
     effectifsDb().countDocuments({
       organisme_id: _id as ObjectId,
       annee_scolaire: { $in: activeAnnees },
@@ -226,6 +227,9 @@ export async function checkEligibilityForLoaded(
       annee_scolaire: { $in: activeAnnees },
     }),
   ]);
+
+  const effectifsDecaCount =
+    effectifsDecaPropres + (is_allowed_deca === true ? 0 : (organisme.deca_contrats_flechables ?? 0));
 
   const has_effectifs: EligibilityCheck = {
     passed: effectifsErpCount + effectifsDecaCount > 0,
@@ -293,6 +297,7 @@ export async function checkActivationEligibility(organismeId: string): Promise<E
         ferme: 1,
         is_allowed_deca: 1,
         deca_activation_queued_at: 1,
+        deca_contrats_flechables: 1,
         nom: 1,
         raison_sociale: 1,
         enseigne: 1,

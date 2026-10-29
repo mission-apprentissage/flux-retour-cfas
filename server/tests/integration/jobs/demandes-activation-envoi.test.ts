@@ -183,7 +183,8 @@ const cochees = async () =>
 
 async function envoyerEtTraiter() {
   const bilan = await envoyerDemandesActivation(await cochees(), EXPEDITEUR);
-  for (const [{ payload }] of addJobMock.mock.calls) {
+  for (const [{ name, payload }] of addJobMock.mock.calls) {
+    if (name !== "demandes-activation:envoyer") continue;
     const organismeId = payload?.organismeId;
     await traiterEnvoisDemandesActivation(typeof organismeId === "string" ? new ObjectId(organismeId) : null);
   }
@@ -898,6 +899,26 @@ describe("envoi des demandes d'activation", () => {
         fonction: "Directrice générale",
         a_envoyer: true,
       });
+    });
+
+    it("met en file le calcul des contrats à rattacher après un import et après un changement d'organisme", async () => {
+      await insererOrganisme();
+      const calcul = { name: "demandes-activation:flechables", payload: {}, queued: true };
+      await importerDemandesActivation(
+        {
+          buffer: Buffer.from(`Adresse email,SIRET de votre CFA\ndirection@cfa-tests.fr,${SIRET}\n`),
+          originalname: "export.csv",
+        },
+        "Webinaire"
+      );
+      expect(addJobMock).toHaveBeenCalledWith(calcul);
+
+      addJobMock.mockClear();
+      const demande = await insererDemande("adjoint@cfa-tests.fr", "13002374000400", { a_envoyer: false });
+      await modifierDemandeActivation(demande._id, { email_corrige: "adjointe@cfa-tests.fr" });
+      expect(addJobMock).not.toHaveBeenCalled();
+      await modifierDemandeActivation(demande._id, { siret_corrige: SIRET });
+      expect(addJobMock).toHaveBeenCalledWith(calcul);
     });
 
     it("envoie l'invitation à l'email corrigé d'une demande saisie sans email valide", async () => {

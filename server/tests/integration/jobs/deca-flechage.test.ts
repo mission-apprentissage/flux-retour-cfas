@@ -9,6 +9,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, type MockInstan
 
 import {
   appliquerCible,
+  calculerContratsFlechables,
   chargerResponsablesFleches,
   flecherContratsDeca,
   rendreContratsDeca,
@@ -1025,13 +1026,53 @@ describe("fléchage des contrats DECA", () => {
           expect(addJob).toHaveBeenCalledWith({ name: "deca:flechage", payload: {}, queued: true });
         });
 
-        it("ne met rien en file interrupteur coupé, ni après un import limité", async () => {
+        it("interrupteur coupé, ne met en file que le calcul des contrats à rattacher", async () => {
           await hydrateDecaRaw();
+
+          expect(addJob).toHaveBeenCalledTimes(1);
+          expect(addJob).toHaveBeenCalledWith({ name: "demandes-activation:flechables", payload: {}, queued: true });
+        });
+
+        it("ne met rien en file après un import limité", async () => {
           config.deca.flechageAuto = true;
           await hydrateDecaRaw({ limit: 1 });
 
           expect(addJob).not.toHaveBeenCalled();
         });
+      });
+    });
+
+    describe("contrats à rattacher", () => {
+      it("compte les contrats que l'activation rattacherait, sans rien déplacer", async () => {
+        const cible = await insererCible();
+        const contrat = await insererContrat();
+
+        await calculerContratsFlechables([cible._id]);
+
+        expect(await organismesDb().findOne({ _id: cible._id })).toMatchObject({
+          deca_contrats_flechables: 1,
+          deca_contrats_flechables_at: expect.any(Date),
+        });
+        expect(await effectifsDECADb().findOne({ _id: contrat._id })).toEqual(contrat);
+      });
+
+      it("compte zéro quand le jeune est dans l'ERP du responsable", async () => {
+        const cible = await insererCible();
+        await insererErp(responsable);
+        await insererContrat();
+
+        await calculerContratsFlechables([cible._id]);
+
+        expect(await organismesDb().findOne({ _id: cible._id })).toMatchObject({ deca_contrats_flechables: 0 });
+      });
+
+      it("laisse de côté un organisme déjà activé", async () => {
+        const cible = await insererCible({ is_allowed_deca: true });
+        await insererContrat();
+
+        await calculerContratsFlechables([cible._id]);
+
+        expect(await organismesDb().findOne({ _id: cible._id })).not.toHaveProperty("deca_contrats_flechables");
       });
     });
 

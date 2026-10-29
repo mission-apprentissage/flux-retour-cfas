@@ -211,6 +211,29 @@ export function appliquerCible<
   return { ...document, ...champs, _computed: { ...document._computed, organisme: organismeComputed } };
 }
 
+export async function calculerContratsFlechables(organismeIds: ObjectId[]) {
+  const candidats = await organismesDb()
+    .find({ _id: { $in: organismeIds }, is_allowed_deca: { $ne: true } }, { projection: { _id: 1 } })
+    .toArray();
+  if (candidats.length === 0) return;
+  const ids = candidats.map((organisme) => organisme._id);
+  const bilan = await flecherContratsDeca({ dryRun: true, perimetre: ids, flagsSimules: ids });
+  const maintenant = new Date();
+  await organismesDb().bulkWrite(
+    ids.map((id) => ({
+      updateOne: {
+        filter: { _id: id },
+        update: {
+          $set: {
+            deca_contrats_flechables: bilan.parCfa.get(id.toString())?.gagnes ?? 0,
+            deca_contrats_flechables_at: maintenant,
+          },
+        },
+      },
+    }))
+  );
+}
+
 export async function compterContratsFlechesVers(organismeId: ObjectId): Promise<number> {
   return effectifsDECADb().countDocuments({ organisme_id: organismeId, ...FILTRE_CHEZ_CIBLE });
 }

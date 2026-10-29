@@ -154,6 +154,27 @@ describe("checkActivationEligibility", () => {
       expect(result.checks.has_effectifs.details?.effectifsDecaCount).toBe(1);
     });
 
+    it("compte les contrats DECA que l'activation rattacherait à un organisme non activé", async () => {
+      const organisme = await insertOrganisme({ deca_contrats_flechables: 3 });
+      await insertEffectifDECA(organisme._id as ObjectId, currentAnnee);
+      const result = await checkActivationEligibility((organisme._id as ObjectId).toHexString());
+      expect(result.checks.has_effectifs.passed).toBe(true);
+      expect(result.checks.has_effectifs.details?.effectifsDecaCount).toBe(4);
+    });
+
+    it("passes with only DECA contracts to attach", async () => {
+      const organisme = await insertOrganisme({ deca_contrats_flechables: 2 });
+      const result = await checkActivationEligibility((organisme._id as ObjectId).toHexString());
+      expect(result.checks.has_effectifs.passed).toBe(true);
+      expect(result.checks.has_effectifs.details?.effectifsDecaCount).toBe(2);
+    });
+
+    it("ignores the contracts to attach once the organisme is activated", async () => {
+      const organisme = await insertOrganisme({ is_allowed_deca: true, deca_contrats_flechables: 2 });
+      const result = await checkActivationEligibility((organisme._id as ObjectId).toHexString());
+      expect(result.checks.has_effectifs.details?.effectifsDecaCount).toBe(0);
+    });
+
     it("fails when effectifs are only on inactive annees", async () => {
       const organisme = await insertOrganisme();
       await insertEffectif(organisme._id as ObjectId, "2010-2011");
