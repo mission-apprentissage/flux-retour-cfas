@@ -281,8 +281,10 @@ export default function DemandesActivationClient() {
     try {
       const bilan = await envoiMutation.mutateAsync({ ids: cochees.map((demande) => demande._id) });
       setRetourLigne({
-        severity: "info",
-        message: `${bilan.demandes} demande(s) en cours d'envoi pour ${bilan.organismes} établissement(s). La liste se met à jour automatiquement.`,
+        severity: bilan.ecartees > 0 ? "warning" : "info",
+        message: `${bilan.demandes} demande(s) en cours d'envoi pour ${bilan.organismes} établissement(s).${
+          bilan.ecartees > 0 ? ` ${bilan.ecartees} demande(s) écartée(s) : elles ne sont plus envoyables.` : ""
+        } La liste se met à jour automatiquement.`,
       });
       await queryClient.invalidateQueries({ queryKey: CLE_REQUETE });
     } catch (err) {

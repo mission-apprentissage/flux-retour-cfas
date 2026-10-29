@@ -77,4 +77,5 @@ export interface IBilanImportDemandes {
 export interface IBilanEnvoiDemandes {
   demandes: number;
   organismes: number;
+  ecartees: number;
 }

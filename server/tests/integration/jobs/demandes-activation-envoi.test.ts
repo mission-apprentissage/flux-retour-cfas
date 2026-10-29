@@ -210,7 +210,7 @@ describe("envoi des demandes d'activation", () => {
 
       const bilan = await envoyerEtTraiter();
 
-      expect(bilan).toEqual({ demandes: 1, organismes: 1 });
+      expect(bilan).toEqual({ demandes: 1, organismes: 1, ecartees: 0 });
       expect(addJobMock).toHaveBeenCalledWith({
         name: "demandes-activation:envoyer",
         payload: { organismeId: organisme._id.toString() },
@@ -251,7 +251,7 @@ describe("envoi des demandes d'activation", () => {
 
       const bilan = await envoyerEtTraiter();
 
-      expect(bilan).toEqual({ demandes: 2, organismes: 1 });
+      expect(bilan).toEqual({ demandes: 2, organismes: 1, ecartees: 0 });
       expect(flecherMock).toHaveBeenCalledTimes(1);
       expect(await invitationsDb().countDocuments({ role: "admin" })).toBe(2);
       expect(await demandesActivationCfaDb().countDocuments({ statut: "envoyee" })).toBe(2);
@@ -697,7 +697,7 @@ describe("envoi des demandes d'activation", () => {
 
       const bilan = await envoyerEtTraiter();
 
-      expect(bilan.demandes).toBe(0);
+      expect(bilan).toMatchObject({ demandes: 0, ecartees: 1 });
       expect(brevoMock).not.toHaveBeenCalled();
       expect(await relire(demande)).toMatchObject({ statut: "pret", a_envoyer: false });
     });
@@ -754,7 +754,7 @@ describe("envoi des demandes d'activation", () => {
 
       const bilan = await envoyerDemandesActivation([confirmee._id], EXPEDITEUR);
 
-      expect(bilan.demandes).toBe(1);
+      expect(bilan).toMatchObject({ demandes: 1, ecartees: 0 });
       expect((await relire(confirmee))?.statut).toBe("envoi_en_cours");
       expect(await relire(cocheeAilleurs)).toMatchObject({ statut: "pret", a_envoyer: true });
     });
@@ -921,6 +921,20 @@ describe("envoi des demandes d'activation", () => {
       await listerDemandesActivation();
 
       expect((await relire(demande))?.updated_at).toEqual(lue?.updated_at);
+    });
+
+    it("réévalue toutes les demandes au-delà d'une tranche", async () => {
+      const demandes = await Promise.all(
+        Array.from({ length: 12 }, (_, i) => insererDemande(`direction${i}@cfa-tests.fr`))
+      );
+      await insererOrganisme();
+
+      const { demandes: lignes } = await listerDemandesActivation();
+
+      expect(lignes).toHaveLength(12);
+      for (const demande of demandes) {
+        expect(await relire(demande)).toMatchObject({ branche: "activation", motifs: [] });
+      }
     });
 
     it("refuse une modification croisée par une autre écriture", async () => {

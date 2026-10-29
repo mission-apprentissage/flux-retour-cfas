@@ -70,6 +70,8 @@ export const TAILLE_MAX_IMPORT_DEMANDES = 1024 * 1024;
 
 const ESSAIS_ECRITURE = 3;
 
+const TAILLE_LOT_EVALUATION = 10;
+
 const MESSAGERIES_GRAND_PUBLIC = new Set([
   "gmail.com",
   "googlemail.com",
@@ -263,7 +265,9 @@ async function siretOuvertDeMemeUai(fermes: OrganismeDemande[]): Promise<string 
   return ouvert?.siret ?? null;
 }
 
-async function domaineConnu(domaine: string): Promise<boolean> {
+type CacheDomaines = Map<string, Promise<boolean>>;
+
+async function chercherDomaine(domaine: string): Promise<boolean> {
   const fin = new RegExp(`@${escapeStringRegexp(domaine)}$`, "i");
   return (
     !!(await usersMigrationDb().findOne({ email: fin }, { projection: { _id: 1 } })) ||
@@ -271,16 +275,25 @@ async function domaineConnu(domaine: string): Promise<boolean> {
   );
 }
 
-export async function evaluerDemande({
-  email_saisi,
-  email_corrige,
-  siret_saisi,
-  siret_corrige,
-  branche_forcee,
-}: Pick<
-  IDemandeActivationCfa,
-  "email_saisi" | "email_corrige" | "siret_saisi" | "siret_corrige" | "branche_forcee"
->): Promise<EvaluationDemande> {
+function domaineConnu(domaine: string, domaines: CacheDomaines): Promise<boolean> {
+  let connu = domaines.get(domaine);
+  if (!connu) {
+    connu = chercherDomaine(domaine);
+    domaines.set(domaine, connu);
+  }
+  return connu;
+}
+
+export async function evaluerDemande(
+  {
+    email_saisi,
+    email_corrige,
+    siret_saisi,
+    siret_corrige,
+    branche_forcee,
+  }: Pick<IDemandeActivationCfa, "email_saisi" | "email_corrige" | "siret_saisi" | "siret_corrige" | "branche_forcee">,
+  domaines: CacheDomaines = new Map()
+): Promise<EvaluationDemande> {
   const motifs = new Set<MotifDemandeActivation>();
   const email = email_corrige || email_saisi;
   const siret = siret_corrige || siret_saisi;
@@ -326,7 +339,8 @@ export async function evaluerDemande({
   } else if (MESSAGERIES_GRAND_PUBLIC.has(domaine)) {
     motifs.add("messagerie_grand_public");
   }
-  const domaineInconnu = emailValide && !MESSAGERIES_GRAND_PUBLIC.has(domaine) && !(await domaineConnu(domaine));
+  const domaineInconnu =
+    emailValide && !MESSAGERIES_GRAND_PUBLIC.has(domaine) && !(await domaineConnu(domaine, domaines));
 
   const compte = email ? await getUserByEmailIgnoringCase(email) : null;
   const organisationDuCompte = compte ? await organisationDuCompteDans(compte, organisme?._id) : null;
@@ -388,8 +402,9 @@ export async function importerDemandesActivation(
     parCle.set(cle, provenance);
   }
 
+  const domaines: CacheDomaines = new Map();
   for (const provenance of parCle.values()) {
-    bilan[await importerDemande(provenance, source)]++;
+    bilan[await importerDemande(provenance, source, domaines)]++;
   }
 
   return bilan;
@@ -397,7 +412,8 @@ export async function importerDemandesActivation(
 
 async function importerDemande(
   provenance: ProvenanceDemande,
-  source: string
+  source: string,
+  domaines: CacheDomaines
 ): Promise<"creees" | "misesAJour" | "inchangees"> {
   for (let essai = 0; essai < ESSAIS_ECRITURE; essai++) {
     const maintenant = new Date();
@@ -409,12 +425,15 @@ async function importerDemande(
       return "inchangees";
     }
 
-    const evaluation = await evaluerDemande({
-      ...provenance,
-      email_corrige: existante?.email_corrige,
-      siret_corrige: existante?.siret_corrige,
-      branche_forcee: existante?.branche_forcee,
-    });
+    const evaluation = await evaluerDemande(
+      {
+        ...provenance,
+        email_corrige: existante?.email_corrige,
+        siret_corrige: existante?.siret_corrige,
+        branche_forcee: existante?.branche_forcee,
+      },
+      domaines
+    );
     if (!existante) {
       await demandesActivationCfaDb().insertOne({
         _id: new ObjectId(),
@@ -474,8 +493,16 @@ function branchesForcables(
   return emailProuve(compte) ? ["compte_existant", "refus"] : ["activation", "refus"];
 }
 
-async function reevaluer(demande: IDemandeActivationCfa, modifications: Partial<IDemandeActivationCfa> = {}) {
-  const evaluee = { ...demande, ...modifications, ...(await evaluerDemande({ ...demande, ...modifications })) };
+async function reevaluer(
+  demande: IDemandeActivationCfa,
+  modifications: Partial<IDemandeActivationCfa> = {},
+  domaines: CacheDomaines = new Map()
+) {
+  const evaluee = {
+    ...demande,
+    ...modifications,
+    ...(await evaluerDemande({ ...demande, ...modifications }, domaines)),
+  };
   return { ...evaluee, a_envoyer: evaluee.a_envoyer && estCochable(evaluee), updated_at: new Date() };
 }
 
@@ -511,10 +538,13 @@ const CHAMPS_EVALUES = [
 const memeEvaluation = (a: IDemandeActivationCfa, b: IDemandeActivationCfa) =>
   CHAMPS_EVALUES.every((champ) => JSON.stringify(a[champ] ?? null) === JSON.stringify(b[champ] ?? null));
 
-async function reevaluerEtEnregistrer(demande: IDemandeActivationCfa): Promise<IDemandeActivationCfa | null> {
+async function reevaluerEtEnregistrer(
+  demande: IDemandeActivationCfa,
+  domaines: CacheDomaines
+): Promise<IDemandeActivationCfa | null> {
   let lue: IDemandeActivationCfa | null = demande;
   for (let essai = 0; essai < ESSAIS_ECRITURE && lue && aReevaluer(lue); essai++) {
-    const evaluee = await reevaluer(lue);
+    const evaluee = await reevaluer(lue, {}, domaines);
     if (memeEvaluation(lue, evaluee)) return lue;
     if (await enregistrer(lue, evaluee)) return evaluee;
     lue = await demandesActivationCfaDb().findOne({ _id: demande._id });
@@ -577,10 +607,14 @@ async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeAc
 }
 
 export async function listerDemandesActivation(): Promise<IDemandesActivationResponse> {
+  const lues = await demandesActivationCfaDb().find({}).toArray();
+  const domaines: CacheDomaines = new Map();
   const demandes: IDemandeActivationCfa[] = [];
-  for (const demande of await demandesActivationCfaDb().find({}).toArray()) {
-    const affichee = await reevaluerEtEnregistrer(demande);
-    if (affichee) demandes.push(affichee);
+  for (let debut = 0; debut < lues.length; debut += TAILLE_LOT_EVALUATION) {
+    const affichees = await Promise.all(
+      lues.slice(debut, debut + TAILLE_LOT_EVALUATION).map((demande) => reevaluerEtEnregistrer(demande, domaines))
+    );
+    demandes.push(...affichees.filter((affichee): affichee is IDemandeActivationCfa => !!affichee));
   }
 
   const lignes = (await versLignes(demandes)).sort(
@@ -832,14 +866,19 @@ export async function envoyerDemandesActivation(ids: ObjectId[], expediteur: Exp
   const cochees = await demandesActivationCfaDb()
     .find({ _id: { $in: ids }, a_envoyer: true, statut: { $in: ["pret", "envoyee"] } })
     .toArray();
+  const domaines: CacheDomaines = new Map();
   const enCours: IDemandeActivationCfa[] = [];
   for (const demande of cochees) {
-    const evaluee = await reevaluerEtEnregistrer(demande);
+    const evaluee = await reevaluerEtEnregistrer(demande, domaines);
     if (evaluee?.a_envoyer && (await mettreEnCoursDEnvoi(evaluee, expediteur))) {
       enCours.push(evaluee);
     }
   }
-  return { demandes: enCours.length, organismes: await planifierEnvois(enCours) };
+  return {
+    demandes: enCours.length,
+    organismes: await planifierEnvois(enCours),
+    ecartees: new Set(ids.map((id) => id.toString())).size - enCours.length,
+  };
 }
 
 export async function renvoyerDemandeActivation(id: ObjectId, expediteur: Expediteur) {
@@ -850,7 +889,7 @@ export async function renvoyerDemandeActivation(id: ObjectId, expediteur: Expedi
   if (!estRenvoyable(demande.statut)) {
     throw Boom.badRequest("Seule une demande en échec ou dont l'invitation a expiré peut être renvoyée");
   }
-  const evaluee = await reevaluerEtEnregistrer(demande);
+  const evaluee = await reevaluerEtEnregistrer(demande, new Map());
   if (evaluee?.branche === "refus" && !refusAvecMail(evaluee.motifs)) {
     throw Boom.badRequest("Cette demande est refusée sans mail : corrigez-la avant de la renvoyer");
   }
