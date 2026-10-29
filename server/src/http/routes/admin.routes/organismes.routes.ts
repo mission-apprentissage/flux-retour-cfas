@@ -4,6 +4,7 @@ import { Document, ObjectId } from "mongodb";
 import { SIRET_REGEX, UAI_REGEX } from "shared/constants/validations";
 import { z } from "zod";
 
+import { compterContratsFlechesVers } from "@/common/actions/deca/deca-flechage.actions";
 import { checkCollabV2Eligibility } from "@/common/actions/organismes/collab-v2-eligibility";
 import { checkActivationEligibility } from "@/common/actions/organismes/deca-cfa-eligibility";
 import { findOrganismeById, getAllOrganismes } from "@/common/actions/organismes/organismes.actions";
@@ -11,6 +12,7 @@ import {
   activateCollabV2,
   activateDecaCfaPilotBatch,
   deactivateDecaCfaPilotBatch,
+  estActivationDecaEnCours,
   getArchivableOrganismes,
   resumeCollab,
   searchOrganismesSupportInfoBySiret,
@@ -87,7 +89,11 @@ export default () => {
     }),
     async ({ params }, res) => {
       const result = await checkActivationEligibility(params.id);
-      res.json(result);
+      res.json({
+        ...result,
+        activationEnCours: estActivationDecaEnCours(result.organisme?.deca_activation_queued_at),
+        contratsFleches: result.organisme ? await compterContratsFlechesVers(result.organisme._id) : 0,
+      });
     }
   );
 

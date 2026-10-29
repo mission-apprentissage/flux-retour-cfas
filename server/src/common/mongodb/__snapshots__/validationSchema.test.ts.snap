@@ -222,6 +222,431 @@ exports[`validation-schema > should create validation schema for connexionInvita
 }
 `;
 
+exports[`validation-schema > should create validation schema for demandesActivationCfa > demandesActivationCfa 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "a_envoyer": {
+      "bsonType": "bool",
+      "description": "Ligne cochée pour l'envoi",
+    },
+    "branche": {
+      "bsonType": "string",
+      "enum": [
+        "activation",
+        "compte_existant",
+        "refus",
+      ],
+    },
+    "branche_envoyee": {
+      "anyOf": [
+        {
+          "bsonType": "string",
+          "enum": [
+            "activation",
+            "compte_existant",
+            "refus",
+          ],
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Branche du dernier envoi",
+    },
+    "branche_initiale": {
+      "bsonType": "string",
+      "description": "Branche de la première évaluation",
+      "enum": [
+        "activation",
+        "compte_existant",
+        "refus",
+      ],
+    },
+    "commentaire": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Questions ou remarques du formulaire",
+    },
+    "created_at": {
+      "bsonType": "date",
+    },
+    "domaine_inconnu": {
+      "bsonType": "bool",
+      "description": "Domaine de l'email jamais vu dans le TBA (avertissement)",
+    },
+    "effectifs_deca": {
+      "bsonType": [
+        "number",
+        "null",
+      ],
+      "description": "Effectifs DECA sur les années actives",
+    },
+    "effectifs_erp": {
+      "bsonType": [
+        "number",
+        "null",
+      ],
+      "description": "Effectifs ERP sur les années actives",
+    },
+    "email": {
+      "bsonType": "string",
+      "description": "Email retenu : corrigé, sinon saisi",
+    },
+    "email_corrige": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Email corrigé par l'équipe",
+    },
+    "email_saisi": {
+      "bsonType": "string",
+      "description": "Email saisi dans le formulaire, en minuscules et sans espaces",
+    },
+    "envoi_en_cours_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de mise en file du dernier envoi",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de mise en file du dernier envoi",
+    },
+    "envoye_par_email": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Email de l'admin TBA qui a lancé le dernier envoi",
+    },
+    "envoye_par_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Admin TBA qui a lancé le dernier envoi",
+    },
+    "envoyee_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date du dernier envoi réussi",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date du dernier envoi réussi",
+    },
+    "etapes": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "compte_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "email_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "flag_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+            "invitation_at": {
+              "anyOf": [
+                {
+                  "bsonType": "date",
+                },
+                {
+                  "bsonType": "null",
+                },
+              ],
+            },
+          },
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Étapes de l'envoi déjà faites",
+    },
+    "fonction": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Fonction déclarée dans le formulaire",
+    },
+    "horodatage": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Horodateur du formulaire, lu",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Horodateur du formulaire, lu",
+    },
+    "horodatage_brut": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Horodateur du formulaire, tel quel",
+    },
+    "invitation_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Invitation admin créée ou reprise par l'envoi",
+    },
+    "invitez_queued_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Mise en file de l'email « invitez vos collaborateurs »",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Mise en file de l'email « invitez vos collaborateurs »",
+    },
+    "invitez_sent_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Envoi de l'email « invitez vos collaborateurs »",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Envoi de l'email « invitez vos collaborateurs »",
+    },
+    "motif_echec": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Motif du dernier échec d'envoi",
+    },
+    "motifs": {
+      "bsonType": "array",
+      "description": "Motifs de refus",
+      "items": {
+        "bsonType": "string",
+        "enum": [
+          "aucun_effectif",
+          "siret_inconnu",
+          "sans_uai",
+          "siret_mal_forme",
+          "email_mal_forme",
+          "messagerie_grand_public",
+          "responsable_pur",
+          "nature_inconnue",
+          "compte_autre_organisation",
+          "ferme",
+        ],
+      },
+    },
+    "organisation_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Organisation de l'organisme retenu",
+    },
+    "organisme_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Organisme retenu",
+    },
+    "relance_avec_compte_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Relance de l'admin avec compte à J+7",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Relance de l'admin avec compte à J+7",
+    },
+    "relance_sans_compte_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Relance de l'admin sans compte à J+7",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Relance de l'admin sans compte à J+7",
+    },
+    "relance_sans_invitation_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Relance de l'admin qui n'a invité personne",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Relance de l'admin qui n'a invité personne",
+    },
+    "relance_validation_email_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Renvoi de la validation d'email à J+2",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Renvoi de la validation d'email à J+2",
+    },
+    "siret": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "SIRET retenu",
+    },
+    "siret_corrige": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "SIRET corrigé par l'équipe",
+    },
+    "siret_propose": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "SIRET ouvert de même UAI, proposé quand le SIRET est fermé",
+    },
+    "siret_saisi": {
+      "bsonType": "string",
+      "description": "SIRET saisi, réduit à ses chiffres",
+    },
+    "siret_saisi_brut": {
+      "bsonType": "string",
+      "description": "SIRET saisi dans le formulaire, tel quel",
+    },
+    "source": {
+      "bsonType": "string",
+      "description": "Nom de la source saisi à l'import (informatif)",
+    },
+    "statut": {
+      "bsonType": "string",
+      "enum": [
+        "pret",
+        "envoi_en_cours",
+        "envoyee",
+        "echec",
+        "invitation_expiree",
+      ],
+    },
+    "uai": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "UAI retenu",
+    },
+    "updated_at": {
+      "bsonType": "date",
+    },
+    "user_id": {
+      "anyOf": [
+        {
+          "bsonType": "objectId",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Compte trouvé pour l'email du demandeur",
+    },
+  },
+  "required": [
+    "_id",
+    "source",
+    "email_saisi",
+    "email",
+    "siret_saisi_brut",
+    "siret_saisi",
+    "motifs",
+    "domaine_inconnu",
+    "branche",
+    "branche_initiale",
+    "a_envoyer",
+    "statut",
+    "created_at",
+    "updated_at",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for effectifV2 > effectifV2 1`] = `
 {
   "additionalProperties": false,
@@ -8071,6 +8496,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
       ],
       "description": "SIRET du lieu principal de formation déclaré au contrat DECA, brut (non résolu, non routé)",
     },
+    "fleche": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "description": "Fléchage du contrat de l'organisme responsable vers son établissement de formation",
+      "properties": {
+        "annule_le": {
+          "bsonType": "date",
+        },
+        "le": {
+          "bsonType": "date",
+        },
+        "regle": {
+          "bsonType": "string",
+          "enum": [
+            "lieu_declare",
+            "erp_formateur",
+          ],
+        },
+      },
+      "required": [
+        "regle",
+        "le",
+      ],
+    },
     "formation": {
       "anyOf": [
         {
@@ -12451,6 +12900,10 @@ exports[`validation-schema > should create validation schema for invitations > i
       "bsonType": "date",
       "description": "Date de création en base de données",
     },
+    "demande_id": {
+      "bsonType": "objectId",
+      "description": "Demande d'activation à l'origine de l'invitation",
+    },
     "email": {
       "bsonType": "string",
       "description": "Email destinataire",
@@ -12470,6 +12923,10 @@ exports[`validation-schema > should create validation schema for invitations > i
     "prenom": {
       "bsonType": "string",
       "description": "Prénom de l'invité (si fourni à la création)",
+    },
+    "relance_admin_at": {
+      "bsonType": "date",
+      "description": "Relance de l'admin auteur, invitation restée en attente 48 h",
     },
     "role": {
       "bsonType": "string",
@@ -12511,6 +12968,10 @@ exports[`validation-schema > should create validation schema for invitationsArch
       "bsonType": "date",
       "description": "Date de création en base de données",
     },
+    "demande_id": {
+      "bsonType": "objectId",
+      "description": "Demande d'activation à l'origine de l'invitation",
+    },
     "email": {
       "bsonType": "string",
       "description": "Email destinataire",
@@ -12530,6 +12991,10 @@ exports[`validation-schema > should create validation schema for invitationsArch
     "prenom": {
       "bsonType": "string",
       "description": "Prénom de l'invité (si fourni à la création)",
+    },
+    "relance_admin_at": {
+      "bsonType": "date",
+      "description": "Relance de l'admin auteur, invitation restée en attente 48 h",
     },
     "role": {
       "bsonType": "string",
@@ -17693,6 +18158,30 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               ],
               "description": "SIRET du lieu principal de formation déclaré au contrat DECA, brut (non résolu, non routé)",
             },
+            "fleche": {
+              "additionalProperties": false,
+              "bsonType": "object",
+              "description": "Fléchage du contrat de l'organisme responsable vers son établissement de formation",
+              "properties": {
+                "annule_le": {
+                  "bsonType": "date",
+                },
+                "le": {
+                  "bsonType": "date",
+                },
+                "regle": {
+                  "bsonType": "string",
+                  "enum": [
+                    "lieu_declare",
+                    "erp_formateur",
+                  ],
+                },
+              },
+              "required": [
+                "regle",
+                "le",
+              ],
+            },
             "formation": {
               "anyOf": [
                 {
@@ -20792,6 +21281,37 @@ exports[`validation-schema > should create validation schema for organismes > or
       "bsonType": "date",
       "description": "Date d'ajout en base de données",
     },
+    "deca_activation_queued_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date de mise en file de l'activation DECA en cours (absent = aucune activation en cours)",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date de mise en file de l'activation DECA en cours (absent = aucune activation en cours)",
+    },
+    "deca_contrats_flechables": {
+      "bsonType": [
+        "number",
+        "null",
+      ],
+      "description": "Contrats DECA que l'activation rattacherait à l'organisme (calculés en dry-run)",
+    },
+    "deca_contrats_flechables_at": {
+      "anyOf": [
+        {
+          "bsonType": "date",
+          "description": "Date du calcul des contrats DECA à rattacher",
+        },
+        {
+          "bsonType": "null",
+        },
+      ],
+      "description": "Date du calcul des contrats DECA à rattacher",
+    },
     "effectifs_count": {
       "bsonType": "int",
       "description": "Compteur sur le nombre d'effectifs de l'organisme",
@@ -21768,6 +22288,10 @@ exports[`validation-schema > should create validation schema for usersMigration 
     "nom": {
       "bsonType": "string",
       "description": "Le nom de l'utilisateur",
+    },
+    "onboarding_collaborateur_at": {
+      "bsonType": "date",
+      "description": "Envoi de l'email d'accueil du collaborateur invité par un admin activé",
     },
     "organisation_id": {
       "bsonType": "objectId",

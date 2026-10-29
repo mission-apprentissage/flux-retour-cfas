@@ -1,8 +1,10 @@
 import * as Boom from "@hapi/boom";
 import { format } from "date-fns";
 import { Document, ObjectId } from "mongodb";
+import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
-import { INVITATION_EXPIRATION_MS } from "@/common/actions/organisations.actions";
+import { renvoyerInvitationAdminDemande } from "@/common/actions/admin/demandes-activation.actions";
+import { envoyerInvitationCollaborateurCfa, INVITATION_EXPIRATION_MS } from "@/common/actions/organisations.actions";
 import {
   invitationsArchiveDb,
   invitationsDb,
@@ -145,7 +147,10 @@ export async function cancelAdminInvitation(invitationId: string): Promise<void>
   }
 }
 
-export async function resendAdminInvitation(invitationId: string): Promise<{ email: string; expiresAt: Date }> {
+export async function resendAdminInvitation(
+  invitationId: string,
+  admin?: Pick<IUsersMigration, "prenom" | "nom" | "fonction" | "email">
+): Promise<{ email: string; expiresAt: Date }> {
   const invitation = await invitationsDb().findOne({ _id: new ObjectId(invitationId) });
   if (!invitation) {
     throw Boom.notFound("Invitation introuvable ou déjà consommée");
@@ -156,8 +161,11 @@ export async function resendAdminInvitation(invitationId: string): Promise<{ ema
     throw Boom.notFound("Organisation introuvable");
   }
 
+  if (invitation.demande_id) {
+    return { email: invitation.email, expiresAt: await renvoyerInvitationAdminDemande(invitation) };
+  }
+
   const newExpiresAt = new Date(Date.now() + INVITATION_EXPIRATION_MS);
-  await invitationsDb().updateOne({ _id: invitation._id }, { $set: { expires_at: newExpiresAt } });
 
   if (organisation.type === "ORGANISME_FORMATION") {
     const organisme = await organismesDb().findOne({
@@ -176,21 +184,7 @@ export async function resendAdminInvitation(invitationId: string): Promise<{ ema
         invitationToken: invitation.token,
       });
     } else {
-      const author = invitation.author_id
-        ? await usersMigrationDb().findOne(
-            { _id: invitation.author_id },
-            { projection: { prenom: 1, nom: 1, fonction: 1 } }
-          )
-        : null;
-      await sendEmail(invitation.email, "invitation_cfa_member", {
-        admin: {
-          prenom: author?.prenom || "Administrateur",
-          nom: author?.nom || "",
-          fonction: author?.fonction || "",
-        },
-        cfaName,
-        invitationToken: invitation.token,
-      });
+      await envoyerInvitationCollaborateurCfa(invitation, organisation, admin);
     }
   } else {
     const author = invitation.author_id
@@ -217,6 +211,7 @@ export async function resendAdminInvitation(invitationId: string): Promise<{ ema
     });
   }
 
+  await invitationsDb().updateOne({ _id: invitation._id }, { $set: { expires_at: newExpiresAt } });
   return { email: invitation.email, expiresAt: newExpiresAt };
 }
 

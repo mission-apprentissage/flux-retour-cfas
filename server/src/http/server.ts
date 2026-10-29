@@ -157,6 +157,7 @@ import { openApiFilePath } from "./open-api-path";
 import affelnetRoutesAdmin from "./routes/admin.routes/affelnet.routes";
 import brevoContactsRoutesAdmin from "./routes/admin.routes/brevo-contacts.routes";
 import collaborationsAdmin from "./routes/admin.routes/collaborations.routes";
+import demandesActivationAdmin from "./routes/admin.routes/demandes-activation.routes";
 import effectifsAdmin from "./routes/admin.routes/effectifs.routes";
 import erpsRoutesAdmin from "./routes/admin.routes/erps.routes";
 import invitationsAdmin from "./routes/admin.routes/invitations.routes";
@@ -1033,6 +1034,7 @@ function setupRoutes(app: Application) {
       .use("/mission-locale", missionLocaleRoutesAdmin())
       .use("/collaborations", collaborationsAdmin())
       .use("/brevo-contacts", brevoContactsRoutesAdmin())
+      .use("/demandes-activation", demandesActivationAdmin())
       .get(
         "/stats",
         returnResult(async () => {

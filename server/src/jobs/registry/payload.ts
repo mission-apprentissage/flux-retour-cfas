@@ -13,6 +13,12 @@ export const requirePayloadString = (payload: JobPayload, key: string): string =
   return value;
 };
 
+export const payloadStringArray = (payload: JobPayload, key: string): string[] => {
+  const value = payload?.[key];
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string" && item !== "");
+  return typeof value === "string" && value !== "" ? [value] : [];
+};
+
 export const payloadNumber = (payload: JobPayload, key: string): number | undefined => {
   const value = payload?.[key];
   if (typeof value === "number") return value;

@@ -379,6 +379,28 @@ program
   .action(createJobAction("hydrate:contrats-deca-raw"));
 
 program
+  .command("deca:flechage")
+  .description("Flèche les contrats DECA des CFA ouverts vers leur établissement de formation")
+  .option("--dry-run", "Bilan sans écriture", false)
+  .option(
+    "--organisme <siret>",
+    "Restreint au responsable ou au lieu de ce SIRET ; responsable visé par --annuler et --refaire"
+  )
+  .option("--simuler-flag <sirets...>", "Traite ces SIRET comme activés DECA")
+  .option("--annuler", "Rend durablement au responsable de --organisme ses contrats fléchés", false)
+  .option("--refaire", "Rend les contrats fléchés à leur responsable pour que le job recalcule leur cible", false)
+  .option("--cible <siret>", "Avec --refaire : les contrats fléchés vers cet organisme")
+  .action((options: Record<string, unknown>) =>
+    createJobAction("deca:flechage")({ ...options, queued: options.dryRun !== true })
+  );
+
+program
+  .command("demandes-activation:flechables")
+  .description("Calcule les contrats DECA que l'activation rattacherait aux établissements des demandes d'activation")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("demandes-activation:flechables"));
+
+program
   .command("hydrate:effectifs:update_computed_statut")
   .description("Manually trigger the update of the computed")
   .option("--id <string>", "Id de l'organisme", (organismeId) => organismeId, null)

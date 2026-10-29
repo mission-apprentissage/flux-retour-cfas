@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import type { IOrganisationMissionLocale } from "shared/models";
 import { IInvitation } from "shared/models/data/invitations.model";
 
+import { mettreEnFileInvitezCollaborateurs } from "@/common/actions/admin/demandes-activation-relances.actions";
 import logger from "@/common/logger";
 import {
   auditLogsDb,
@@ -158,6 +159,12 @@ export async function login(email: string, password: string): Promise<string> {
     await resumeCollabOnReconnection(user.organisation_id, user._id);
   } catch (err) {
     logger.error({ err, userId: user._id }, "collab resume on reconnection failed");
+  }
+
+  try {
+    await mettreEnFileInvitezCollaborateurs(user);
+  } catch (err) {
+    logger.error({ err, userId: user._id }, "invitez vos collaborateurs : mise en file en échec");
   }
 
   const sessionToken = await createSession(email);

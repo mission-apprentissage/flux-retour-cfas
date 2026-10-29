@@ -21,6 +21,7 @@ import {
   buildEffRuptureAgeFilter,
   buildVisibilityWindowMatch,
   buildNameSearchConditions,
+  estSnapshotDecaExpr,
 } from "../shared/rupture-pipeline.utils";
 
 export interface CfaSuiviMissionLocaleQueryParams {
@@ -250,10 +251,7 @@ const SUIVI_PROJECT_STAGE = {
     _id: 0,
     id: { $ifNull: ["$_effectif_courant.id", "$effectif_snapshot._id"] },
     source: {
-      $ifNull: [
-        "$_effectif_courant.source",
-        { $cond: [{ $ifNull: ["$effectif_snapshot.is_deca_compatible", false] }, "effectifsDECA", "effectifs"] },
-      ],
+      $ifNull: ["$_effectif_courant.source", { $cond: [estSnapshotDecaExpr, "effectifsDECA", "effectifs"] }],
     },
     nom: "$_nom",
     prenom: "$_prenom",

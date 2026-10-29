@@ -10,6 +10,7 @@ import {
 } from "shared/models/routes/admin/users.api";
 import { z } from "zod";
 
+import { renvoyerInvitationAdminDemande } from "@/common/actions/admin/demandes-activation.actions";
 import { activateMissionLocaleAtAdminValidation } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getFranceTravailOrganisationByCodeRegion } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { getOrCreateMissionLocaleById } from "@/common/actions/mission-locale/mission-locale.actions";
@@ -312,10 +313,14 @@ export default () => {
         throw Boom.notFound("Aucune invitation en cours pour cet email sur cet établissement");
       }
 
+      const cfaName = organisme.nom || organisme.enseigne || organisme.raison_sociale || "Organisme";
+      if (invitation.demande_id) {
+        return { email, organismeNom: cfaName, expiresAt: await renvoyerInvitationAdminDemande(invitation) };
+      }
+
       const newExpiresAt = new Date(Date.now() + INVITATION_EXPIRATION_MS);
       await invitationsDb().updateOne({ _id: invitation._id }, { $set: { expires_at: newExpiresAt } });
 
-      const cfaName = organisme.nom || organisme.enseigne || organisme.raison_sociale || "Organisme";
       const cfaCity = organisme.adresse?.commune || "";
       const cfaPostalCode = organisme.adresse?.code_postal || "";
 

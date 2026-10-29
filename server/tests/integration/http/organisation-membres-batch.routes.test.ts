@@ -8,12 +8,20 @@ import { vi, it, expect, describe, beforeEach } from "vitest";
 import { createSession } from "@/common/actions/sessions.actions";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
+import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { setTime } from "@/common/utils/timeUtils";
+import config from "@/config";
 import { useMongo } from "@tests/jest/setupMongo";
 import { id, initTestApp, testDoc, testPasswordHash } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/mailer/mailer");
+vi.mock("@/common/services/brevo/brevo", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/common/services/brevo/brevo")>()),
+  sendTransactionalEmail: vi.fn(),
+}));
+
+const brevoMock = vi.mocked(sendTransactionalEmail);
 
 const now = "2026-04-20T00:00:00.000Z";
 
@@ -87,6 +95,7 @@ describe("POST /api/v1/organisation/membres/batch", () => {
     httpClient = app.httpClient;
     setTime(new Date(now));
     vi.mocked(sendEmail).mockClear();
+    brevoMock.mockReset().mockResolvedValue({ messageId: "message" } as never);
     await seedCfaOrganisation();
     await seedCfaAdmin();
   });
@@ -110,12 +119,17 @@ describe("POST /api/v1/organisation/membres/batch", () => {
     expect(Math.abs((inv1?.expires_at?.getTime() ?? 0) - expectedExpiration)).toBeLessThan(60_000);
     expect(inv1?.organisation_id.equals(cfaOrganisationId)).toBe(true);
 
-    expect(sendEmail).toHaveBeenCalledTimes(2);
-    expect(sendEmail).toHaveBeenCalledWith(
+    expect(brevoMock).toHaveBeenCalledTimes(2);
+    expect(brevoMock).toHaveBeenCalledWith(
       "new1@cfa.local",
-      "invitation_cfa_member",
-      expect.objectContaining({ cfaName: "CAMPUS DU LAC" })
+      config.brevo.templateInvitationCollaborateurCfaId,
+      expect.objectContaining({
+        NOM_CFA: "CAMPUS DU LAC",
+        LIEN_INSCRIPTION: expect.stringContaining(inv1?.token ?? ""),
+      }),
+      { redirectRecipientInNonProdTo: adminEmail }
     );
+    expect(sendEmail).not.toHaveBeenCalled();
   });
 
   it("rejette l'auto-invitation (email identique à l'appelant)", async () => {
@@ -125,7 +139,7 @@ describe("POST /api/v1/organisation/membres/batch", () => {
     expect(response.data.success).toEqual([]);
     expect(response.data.errors).toEqual([{ email: adminEmail, message: "Vous ne pouvez pas vous inviter vous-même" }]);
     expect(await invitationsDb().countDocuments({ email: adminEmail })).toBe(0);
-    expect(sendEmail).not.toHaveBeenCalled();
+    expect(brevoMock).not.toHaveBeenCalled();
   });
 
   it("rejette un email déjà invité pour la même organisation", async () => {
@@ -268,8 +282,25 @@ describe("POST /api/v1/organisation/membres/batch", () => {
       [adminEmail, "dup@cfa.local"].sort()
     );
 
-    expect(sendEmail).toHaveBeenCalledTimes(1);
-    expect(sendEmail).toHaveBeenCalledWith("ok@cfa.local", "invitation_cfa_member", expect.any(Object));
+    expect(brevoMock).toHaveBeenCalledTimes(1);
+    expect(brevoMock).toHaveBeenCalledWith(
+      "ok@cfa.local",
+      config.brevo.templateInvitationCollaborateurCfaId,
+      expect.any(Object),
+      expect.any(Object)
+    );
+  });
+
+  it("supprime l'invitation et remonte une erreur quand l'envoi Brevo échoue", async () => {
+    brevoMock.mockResolvedValueOnce(undefined as never);
+
+    const response = await batchInvite({ emails: ["ko@cfa.local", "ok@cfa.local"], roles: ["member", "member"] });
+
+    expect(response.data.success).toEqual(["ok@cfa.local"]);
+    expect(response.data.errors).toEqual([
+      { email: "ko@cfa.local", message: "L'email d'invitation n'a pas pu être envoyé" },
+    ]);
+    expect(await invitationsDb().findOne({ email: "ko@cfa.local" })).toBeNull();
   });
 
   it("refuse l'accès à un member CFA (non admin)", async () => {

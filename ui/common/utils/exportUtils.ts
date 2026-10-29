@@ -50,6 +50,7 @@ export interface SheetData {
   sheetName: string;
   rows: Record<string, unknown>[];
   columns: ReadonlyArray<ExportColumn>;
+  dateNF?: string;
 }
 
 export function exportMultiSheetXlsx(filename: string, sheets: SheetData[]) {
@@ -76,6 +77,7 @@ export function exportMultiSheetXlsx(filename: string, sheets: SheetData[]) {
 
     const worksheet = utils.json_to_sheet(processedRows, {
       header: sheet.columns.map((column) => column.key),
+      dateNF: sheet.dateNF,
     });
 
     utils.sheet_add_aoa(worksheet, [sheet.columns.map((column) => column.label)], {

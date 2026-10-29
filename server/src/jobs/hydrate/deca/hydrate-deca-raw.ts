@@ -2,6 +2,7 @@ import { normalize } from "path";
 
 import { captureException } from "@sentry/node";
 import * as Sentry from "@sentry/node";
+import { addJob } from "job-processor";
 import { MongoClient, MongoError, ObjectId, WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IRawBalDeca } from "shared/models/data/airbyteRawBalDeca.model";
@@ -13,6 +14,12 @@ import { zodOpenApi } from "shared/models/zodOpenApi";
 import { cyrb53Hash, getYearFromDate } from "shared/utils";
 
 import { updateVoeuxAffelnetEffectifDeca } from "@/common/actions/affelnet.actions";
+import {
+  appliquerCible,
+  chargerResponsablesFleches,
+  estConflit,
+  FILTRE_CHEZ_CIBLE,
+} from "@/common/actions/deca/deca-flechage.actions";
 import { withComputedFields } from "@/common/actions/effectifs.actions";
 import { checkIfEffectifExists, getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
 import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
@@ -189,6 +196,7 @@ export async function hydrateDecaRaw({ dryRun = false, limit }: { dryRun?: boole
 
   try {
     await client.connect();
+    const responsablesFleches = dryRun ? new Set<string>() : await chargerResponsablesFleches();
 
     const query = {
       dispositif: "APPR",
@@ -204,7 +212,9 @@ export async function hydrateDecaRaw({ dryRun = false, limit }: { dryRun?: boole
 
     let promiseArray: Promise<IProcessingStats>[] = [];
     for await (const document of cursor) {
-      promiseArray.push(dryRun ? inspectEffectifDeca(document, dryRunStats) : updateEffectifDeca(document));
+      promiseArray.push(
+        dryRun ? inspectEffectifDeca(document, dryRunStats) : updateEffectifDeca(document, responsablesFleches)
+      );
 
       if (promiseArray.length === 100) {
         await processBuffer(promiseArray);
@@ -220,6 +230,12 @@ export async function hydrateDecaRaw({ dryRun = false, limit }: { dryRun?: boole
       logger.info({ ...dryRunStats, totalCount }, "DECA dry-run : aucune écriture");
     } else if (totalCount > 0) {
       await updateOrganismesLastEffectifUpdate(totalStats.organismesId);
+      if (config.deca.flechageAuto && !limit) {
+        await addJob({ name: "deca:flechage", payload: {}, queued: true });
+      }
+      if (!limit) {
+        await addJob({ name: "demandes-activation:flechables", payload: {}, queued: true });
+      }
     } else {
       logger.error("No documents found matching the criteria.");
     }
@@ -265,10 +281,65 @@ export async function hydrateDecaFromExistingEffectifs() {
   }
 }
 
-async function upsertEffectifDeca(
+async function upsertEffectifDecaChezCible(
   effectif: WithoutId<IEffectifDECA>,
+  retry: boolean
+): Promise<{ created: boolean } | null> {
+  const filtre = { organisme_responsable_id: effectif.organisme_responsable_id, ...FILTRE_CHEZ_CIBLE };
+  const memeAnnee = await effectifsDECADb().findOne({
+    ...filtre,
+    id_erp_apprenant: effectif.id_erp_apprenant,
+    annee_scolaire: effectif.annee_scolaire,
+  });
+  const documentFleche =
+    memeAnnee ?? (await effectifsDECADb().findOne({ ...filtre, deca_raw_id: effectif.deca_raw_id }));
+  if (!documentFleche || (!memeAnnee && (await checkIfEffectifExists<IEffectifDECA>(effectif, effectifsDECADb())))) {
+    return null;
+  }
+
+  const cible = await organismesDb().findOne({ _id: documentFleche.organisme_id });
+  if (!cible) {
+    return null;
+  }
+
+  const document = appliquerCible(effectif, cible);
+
+  if (memeAnnee) {
+    const transmitted_at = new Date();
+    await effectifsDECADb().updateOne({ _id: memeAnnee._id }, { $set: { ...document, transmitted_at } });
+    const enBase = await effectifsDECADb().findOne({ _id: memeAnnee._id });
+    if (enBase) {
+      await createMissionLocaleSnapshot(enBase);
+    }
+    return { created: false };
+  }
+
+  const nouveau = { ...document, fleche: documentFleche.fleche, _id: new ObjectId() };
+  try {
+    await effectifsDECADb().insertOne(nouveau);
+  } catch (err) {
+    if (estConflit(err)) {
+      return retry ? upsertEffectifDecaChezCible(effectif, false) : null;
+    }
+    throw err;
+  }
+  await updateVoeuxAffelnetEffectifDeca(nouveau._id, nouveau, cible._id.toString());
+  await createMissionLocaleSnapshot(nouveau);
+  return { created: true };
+}
+
+export async function upsertEffectifDeca(
+  effectif: WithoutId<IEffectifDECA>,
+  responsablesFleches: Set<string>,
   retry: boolean = true
 ): Promise<{ created: boolean }> {
+  if (effectif.organisme_responsable_id && responsablesFleches.has(effectif.organisme_responsable_id.toString())) {
+    const resultat = await upsertEffectifDecaChezCible(effectif, retry);
+    if (resultat) {
+      return resultat;
+    }
+  }
+
   const effectifFound = await checkIfEffectifExists<IEffectifDECA>(effectif, effectifsDECADb());
 
   if (!effectifFound) {
@@ -282,7 +353,7 @@ async function upsertEffectifDeca(
       // Le code d'erreur 11000 correspond à une duplication d'index unique
       // Ce cas arrive lors du traitement concurrentiel du meme effectif dans la queue
       if (retry && err instanceof MongoError && err.code === 11000) {
-        return upsertEffectifDeca(effectif, false);
+        return upsertEffectifDeca(effectif, responsablesFleches, false);
       }
       throw err;
     }
@@ -294,7 +365,7 @@ async function upsertEffectifDeca(
   return { created: false };
 }
 
-async function updateEffectifDeca(document: IRawBalDeca): Promise<IProcessingStats> {
+async function updateEffectifDeca(document: IRawBalDeca, responsablesFleches: Set<string>): Promise<IProcessingStats> {
   return Sentry.startSpan(
     {
       name: "DECA Update Effectif",
@@ -306,7 +377,7 @@ async function updateEffectifDeca(document: IRawBalDeca): Promise<IProcessingSta
       const newDocuments: WithoutId<IEffectifDECA>[] = await transformDocument(document);
 
       for (const newDocument of newDocuments) {
-        const result = await upsertEffectifDeca(newDocument);
+        const result = await upsertEffectifDeca(newDocument, responsablesFleches);
 
         if (result.created) {
           stats.created++;

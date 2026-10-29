@@ -5,13 +5,21 @@ import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { vi, it, expect, describe, beforeEach } from "vitest";
 
+import { DUREE_INVITATION_DEMANDE_MS } from "@/common/actions/admin/demandes-activation.actions";
 import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
+import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { setTime } from "@/common/utils/timeUtils";
+import config from "@/config";
 import { useMongo } from "@tests/jest/setupMongo";
 import { RequestAsOrganisationFunc, id, initTestApp, testDoc, testPasswordHash } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/mailer/mailer");
+
+vi.mock("@/common/services/brevo/brevo", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/common/services/brevo/brevo")>()),
+  sendTransactionalEmail: vi.fn(),
+}));
 
 const now = "2026-04-20T00:00:00.000Z";
 
@@ -399,6 +407,41 @@ describe("Admin CFA invite routes", () => {
       const after = await invitationsDb().findOne({ email: "resend@cfa.fr" });
       expect(after?.expires_at?.getTime()).toBeGreaterThan(before!.expires_at!.getTime());
       expect(vi.mocked(sendEmail)).toHaveBeenCalledWith("resend@cfa.fr", "invitation_cfa_admin", expect.any(Object));
+    });
+
+    it("renvoie par Brevo, prolongée de 14 jours, une invitation du workflow d'activation", async () => {
+      const organismeId = new ObjectId(id(2));
+      await seedOrganisme({ organismeId });
+      await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "post", "/api/v1/admin/users/cfa/admin-invite", {
+        email: "workflow@cfa.fr",
+        siret: SIRET,
+        uai: UAI,
+        prenom: "W",
+        nom: "F",
+      });
+      await invitationsDb().updateOne({ email: "workflow@cfa.fr" }, { $set: { demande_id: new ObjectId() } });
+      vi.mocked(sendEmail).mockClear();
+      vi.mocked(sendTransactionalEmail)
+        .mockReset()
+        .mockResolvedValue({ messageId: "message" } as never);
+
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "post",
+        "/api/v1/admin/users/cfa/admin-invite/resend",
+        { email: "workflow@cfa.fr", siret: SIRET, uai: UAI }
+      );
+
+      expect(response.status).toBe(200);
+      const invitation = await invitationsDb().findOne({ email: "workflow@cfa.fr" });
+      expect(invitation?.expires_at?.getTime()).toBeGreaterThan(Date.now() + DUREE_INVITATION_DEMANDE_MS - 60_000);
+      expect(vi.mocked(sendTransactionalEmail)).toHaveBeenCalledWith(
+        "workflow@cfa.fr",
+        config.brevo.templatesDemandesActivation.activationSansCompte,
+        expect.objectContaining({ LIEN_INSCRIPTION: expect.stringContaining(invitation!.token) }),
+        expect.anything()
+      );
+      expect(vi.mocked(sendEmail)).not.toHaveBeenCalled();
     });
 
     it("renvoie 404 si aucune invitation", async () => {

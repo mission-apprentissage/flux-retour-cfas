@@ -267,6 +267,10 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
               linkProps: { href: "/admin/organismes/gestion", target: "_self" },
             },
             { text: "Listes de contacts Brevo", linkProps: { href: "/admin/brevo-contacts", target: "_self" } },
+            {
+              text: "Demandes d'activation des CFA",
+              linkProps: { href: "/admin/demandes-activation", target: "_self" },
+            },
           ],
         });
       }

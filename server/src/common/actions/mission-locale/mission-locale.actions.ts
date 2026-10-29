@@ -439,7 +439,7 @@ const addFieldFromActivationDate = () => {
   ];
 };
 
-const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
+export const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
   const MISSION_LOCALE_CONDITION = {
     $or: [
       // Organisme pas activé ML ET pas collab → visible (comportement existant)
@@ -3174,8 +3174,16 @@ interface IMissionLocaleSnapshotResult {
 
 type IComputedOrganismeMl = NonNullable<NonNullable<IMissionLocaleEffectif["computed"]>["organisme"]>;
 
-export async function computedOrganismeMl(organismeId: ObjectId): Promise<IComputedOrganismeMl> {
-  const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
+export async function computedOrganismeMl(
+  organismeId: ObjectId,
+  { lectureSeule = false }: { lectureSeule?: boolean } = {}
+): Promise<IComputedOrganismeMl> {
+  const organisation = lectureSeule
+    ? ((await organisationsDb().findOne({
+        type: "ORGANISME_FORMATION",
+        organisme_id: organismeId.toString(),
+      })) as IOrganisationOrganismeFormation | null)
+    : await getOrganisationOrganismeByOrganismeId(organismeId);
   const organisme = await organismesDb().findOne(
     { _id: organismeId },
     { projection: { is_allowed_collab: 1, collab_suspended_at: 1, collab_resumed_at: 1 } }
@@ -3390,12 +3398,17 @@ export const createMissionLocaleSnapshot = async (
     return null;
   }
 
+  const computedOrganisme = await computedOrganismeMl(effectif.organisme_id);
+
   if (normalizedIdentifiant && !isDeca(effectif)) {
     const orphan = await missionLocaleEffectifsDb().findOne({
       "identifiant_normalise.nom": normalizedIdentifiant.nom,
       "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
       "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
-      "effectif_snapshot.organisme_id": effectif.organisme_id,
+      $or: [
+        { "effectif_snapshot.organisme_id": effectif.organisme_id },
+        { "effectif_snapshot.organisme_responsable_id": effectif.organisme_id },
+      ],
       mission_locale_id: mlData._id,
       soft_deleted: { $ne: true },
     });
@@ -3403,7 +3416,10 @@ export const createMissionLocaleSnapshot = async (
     if (orphan && !orphan.effectif_id.equals(effectif._id) && isDecaSnapshot(orphan.effectif_snapshot)) {
       // skipCurrentStatus: le findOneAndUpdate ci-dessous filtre par effectif_id (qui matche désormais
       // le record migré) et $set current_status — pas la peine de le faire deux fois.
-      await migrateMlRecordEffectifId(orphan._id, orphan.effectif_id, effectif, { skipCurrentStatus: true });
+      await migrateMlRecordEffectifId(orphan._id, orphan.effectif_id, effectif, {
+        skipCurrentStatus: true,
+        extraSet: { "computed.organisme": computedOrganisme },
+      });
     }
   }
 
@@ -3419,7 +3435,6 @@ export const createMissionLocaleSnapshot = async (
   const shouldUpsert = preFilter && duplicateFilter;
 
   const date = new Date();
-  const computedOrganisme = await computedOrganismeMl(effectif.organisme_id);
 
   let mongoInfo;
   try {

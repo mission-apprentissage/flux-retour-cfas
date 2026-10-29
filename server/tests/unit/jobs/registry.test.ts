@@ -51,6 +51,7 @@ describe("registre des jobs", () => {
       "Send ML weekly recap at 14h30 on Mondays": "30 14 * * 1",
       "Envoi WhatsApp préqualif quotidien à 18h30": "30 18 * * *",
       "Vérifie que l'ingestion avance toutes les 15 min": "*/15 * * * *",
+      "Relances du workflow d'activation des CFA toutes les heures": "20 * * * *",
     });
   });
 
@@ -75,6 +76,12 @@ describe("registre des jobs", () => {
       "computed:update",
       "db:find-invalid-documents",
       "db:validate",
+      "deca:activer",
+      "deca:flechage",
+      "demandes-activation:envoyer",
+      "demandes-activation:flechables",
+      "demandes-activation:inviter-collaborateurs",
+      "demandes-activation:relances",
       "dev:generate-open-api",
       "effectifs:doublons-obsoletes",
       "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis",
