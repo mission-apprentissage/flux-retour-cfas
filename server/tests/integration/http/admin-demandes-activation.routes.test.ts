@@ -84,7 +84,8 @@ describe("POST /api/v1/admin/demandes-activation/import", () => {
       a_envoyer: false,
     });
     expect(await demande("referent@cfa-exemple.fr")).toMatchObject({
-      horodatage: new Date("2026-10-16T13:30:01.000Z"),
+      horodatage_brut: "2026/10/16 4:02:10 PM UTC+3",
+      horodatage: new Date("2026-10-16T13:02:10.000Z"),
       commentaire: "Merci pour le webinaire, très clair",
     });
     expect(await demande("contact.cfa@gmail.com")).toMatchObject({
@@ -118,6 +119,22 @@ describe("POST /api/v1/admin/demandes-activation/import", () => {
 
     expect(response.status).toBe(200);
     expect(response.data.creees).toBe(5);
+  });
+
+  it("garde la date d'inscription la plus ancienne d'un import à l'autre", async () => {
+    const reponse = (horodateur: string) =>
+      Buffer.from(
+        `"Horodateur","Adresse email","SIRET de votre CFA"\n"${horodateur}","directrice@cfa-exemple.fr","${CFA_SIRET}"\n`
+      );
+
+    await importer(reponse("2026/10/17 9:00:00 AM UTC+2"));
+    await importer(EXPORT);
+    await importer(reponse("2026/10/18 9:00:00 AM UTC+2"));
+
+    expect(await demande("directrice@cfa-exemple.fr")).toMatchObject({
+      horodatage_brut: "2026/10/16 3:45:45 PM UTC+3",
+      horodatage: new Date("2026-10-16T12:45:45.000Z"),
+    });
   });
 
   it("lit un export rouvert dans Excel, avec d'autres intitulés et un autre ordre de colonnes", async () => {
@@ -238,6 +255,8 @@ describe("récapitulatif des demandes d'activation", () => {
     expect(demandes.find((demande) => demande.email === "directrice@cfa-exemple.fr")).toMatchObject({
       vue: "a_envoyer",
       cochable: true,
+      horodatage: "2026-10-16T12:45:45.000Z",
+      horodatage_brut: "2026/10/16 3:45:45 PM UTC+3",
       organisme: { nom: null },
     });
   });

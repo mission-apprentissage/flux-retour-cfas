@@ -37,6 +37,7 @@ export interface FullTableProps<R = unknown> {
   onSortingChange?: (sorting: SortingState) => void;
   onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
   sorting?: SortingState;
+  manualSorting?: boolean;
   columnFilters?: ColumnFiltersState;
   pageSize?: number;
   emptyMessage?: string;

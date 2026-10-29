@@ -40,6 +40,9 @@ export interface IDemandeActivationLigne {
   email_corrige: string | null;
   fonction: string | null;
   commentaire: string | null;
+  horodatage: string | null;
+  horodatage_brut: string | null;
+  envoyee_at: string | null;
   siret_saisi_brut: string;
   siret_corrige: string | null;
   siret: string | null;

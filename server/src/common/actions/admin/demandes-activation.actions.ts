@@ -237,6 +237,14 @@ function lireProvenance(ligne: Record<string, string>, colonnes: Partial<Record<
   };
 }
 
+function avecInscriptionLaPlusAncienne(
+  provenance: ProvenanceDemande,
+  autre: Pick<IDemandeActivationCfa, "horodatage" | "horodatage_brut"> | null | undefined
+): ProvenanceDemande {
+  if (!autre?.horodatage || (provenance.horodatage && provenance.horodatage <= autre.horodatage)) return provenance;
+  return { ...provenance, horodatage: autre.horodatage, horodatage_brut: autre.horodatage_brut };
+}
+
 async function compterEffectifs(organismeId: ObjectId) {
   const annees = getActiveAnneesScolaires(new Date());
   const [erp, deca] = await Promise.all([
@@ -387,8 +395,9 @@ export async function importerDemandesActivation(
       continue;
     }
     const cle = `${provenance.email_saisi}|${provenance.siret_saisi}`;
-    if (parCle.has(cle)) bilan.fusionnees++;
-    parCle.set(cle, provenance);
+    const precedente = parCle.get(cle);
+    if (precedente) bilan.fusionnees++;
+    parCle.set(cle, avecInscriptionLaPlusAncienne(provenance, precedente));
   }
 
   const domaines: CacheDomaines = new Map();
@@ -438,7 +447,14 @@ async function importerDemande(
     }
     const { matchedCount } = await demandesActivationCfaDb().updateOne(
       { _id: existante._id, updated_at: existante.updated_at },
-      { $set: { ...provenance, ...evaluation, source, updated_at: maintenant } }
+      {
+        $set: {
+          ...avecInscriptionLaPlusAncienne(provenance, existante),
+          ...evaluation,
+          source,
+          updated_at: maintenant,
+        },
+      }
     );
     if (matchedCount === 1) return "misesAJour";
   }
@@ -552,6 +568,9 @@ async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeAc
       email_corrige: demande.email_corrige ?? null,
       fonction: demande.fonction ?? null,
       commentaire: demande.commentaire ?? null,
+      horodatage: demande.horodatage?.toISOString() ?? null,
+      horodatage_brut: demande.horodatage_brut ?? null,
+      envoyee_at: demande.envoyee_at?.toISOString() ?? null,
       siret_saisi_brut: demande.siret_saisi_brut,
       siret_corrige: demande.siret_corrige ?? null,
       siret: demande.siret ?? null,

@@ -12,6 +12,8 @@ import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
 import { useIsMutating, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query";
+import { SortingState } from "@tanstack/react-table";
+import { format } from "date-fns";
 import { useRef, useState } from "react";
 import {
   BrancheDemandeActivation,
@@ -90,16 +92,33 @@ const STATUTS: Record<
 };
 
 const COLONNES = [
-  { label: "CFA", dataKey: "cfa", width: "16%", sortable: false },
+  { label: "CFA", dataKey: "cfa", width: "17%", sortable: false },
   { label: "Demandeur", dataKey: "demandeur", width: "17%", sortable: false },
+  { label: "Inscrit le", dataKey: "inscription", width: "8%", sortable: true },
   { label: "Compte", dataKey: "compte", width: "9%", sortable: false },
-  { label: "Effectifs ERP / DECA", dataKey: "effectifs", width: "8%", sortable: false },
-  { label: "Branche", dataKey: "branche", width: "11%", sortable: false },
+  { label: "Branche", dataKey: "branche", width: "10%", sortable: false },
   { label: "Motifs", dataKey: "motifs", width: "17%", sortable: false },
   { label: "Statut", dataKey: "statut", width: "9%", sortable: false },
   { label: "À envoyer", dataKey: "a_envoyer", width: "5%", sortable: false },
   { label: "Actions", dataKey: "actions", width: "8%", sortable: false },
 ];
+
+const CLES_DE_TRI: Record<string, (demande: IDemandeActivationLigne) => string | null> = {
+  inscription: (demande) => demande.horodatage,
+};
+
+function trier(demandes: IDemandeActivationLigne[], tri: SortingState) {
+  const [critere] = tri;
+  const cle = critere && CLES_DE_TRI[critere.id];
+  if (!cle) return demandes;
+  const sens = critere.desc ? -1 : 1;
+  return [...demandes].sort((a, b) => {
+    const valeurA = cle(a);
+    const valeurB = cle(b);
+    if (valeurA === null || valeurB === null) return valeurA === valeurB ? 0 : valeurA === null ? 1 : -1;
+    return sens * valeurA.localeCompare(valeurB, "fr", { sensitivity: "base" });
+  });
+}
 
 const emailSecable = (email: string) => {
   const arobase = email.indexOf("@");
@@ -216,6 +235,7 @@ export default function DemandesActivationClient() {
   const [vue, setVue] = useState<VueDemandeActivation>("a_envoyer");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
+  const [tri, setTri] = useState<SortingState>([]);
   const [fichier, setFichier] = useState<File | null>(null);
   const [source, setSource] = useState("");
   const [retourImport, setRetourImport] = useState<Retour | null>(null);
@@ -352,7 +372,10 @@ export default function DemandesActivationClient() {
     requestAnimationFrame(() => zoneRetour.current?.focus());
   };
 
-  const demandesDeLaVue = (data?.demandes ?? []).filter((demande) => demande.vue === vue);
+  const demandesDeLaVue = trier(
+    (data?.demandes ?? []).filter((demande) => demande.vue === vue),
+    tri
+  );
   const cochees = (data?.demandes ?? []).filter((demande) => demande.a_envoyer && demande.cochable);
   const aCocherDansLaVue = demandesDeLaVue.filter((demande) => demande.cochable && !demande.a_envoyer);
   const aDecocherDansLaVue = demandesDeLaVue.filter((demande) => demande.a_envoyer);
@@ -382,6 +405,11 @@ export default function DemandesActivationClient() {
               </>
             )}
           </span>
+          {(demande.effectifs_erp !== null || demande.effectifs_deca !== null) && (
+            <p className="fr-text--xs fr-mb-0">
+              ERP {demande.effectifs_erp ?? 0} · DECA {demande.effectifs_deca ?? 0}
+            </p>
+          )}
           {demande.siret_propose && (
             <p className="fr-text--xs fr-mb-0">SIRET ouvert de même UAI : {demande.siret_propose}</p>
           )}
@@ -409,10 +437,9 @@ export default function DemandesActivationClient() {
         </>
       ),
       compte: <BadgeCompte demande={demande} />,
-      effectifs:
-        demande.effectifs_erp === null && demande.effectifs_deca === null
-          ? "—"
-          : `${demande.effectifs_erp ?? 0} / ${demande.effectifs_deca ?? 0}`,
+      inscription: demande.horodatage
+        ? format(new Date(demande.horodatage), "dd/MM/yyyy HH:mm")
+        : (demande.horodatage_brut ?? "—"),
       branche: <BadgeBranche demande={demande} />,
       motifs: <Motifs demande={demande} />,
       statut: (
@@ -625,6 +652,12 @@ export default function DemandesActivationClient() {
             onPageChange={setPage}
             onPageSizeChange={setPageSize}
             pageSize={pageSize}
+            sorting={tri}
+            onSortingChange={(nouveauTri) => {
+              setTri(nouveauTri);
+              setPage(1);
+            }}
+            manualSorting
             emptyMessage="Aucune demande dans cette vue"
           />
         </>
