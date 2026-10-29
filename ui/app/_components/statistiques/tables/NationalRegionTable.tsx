@@ -8,7 +8,7 @@ import type { IDepartementStats } from "shared/models/data/nationalStats.model";
 
 import { Skeleton } from "@/app/_components/common/Skeleton";
 
-import { ML_ACTIVES_DEFINITION, ML_ENGAGEES_DEFINITION } from "../constants";
+import { ML_ENGAGEES_DEFINITION } from "../constants";
 import { useSortableTable } from "../hooks/useSortableTable";
 import { formatDelta, formatVariationBadge } from "../utils";
 
@@ -114,7 +114,6 @@ export function NationalRegionTable({
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 centered
-                tooltip={`${ML_ACTIVES_DEFINITION}, rapportées au nombre de Missions Locales de la région.`}
               />,
               <SortableTableHeader
                 key="ml_engagees"

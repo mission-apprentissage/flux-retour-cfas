@@ -20,7 +20,6 @@ export function CfaAdoptionKpis() {
           value={data?.estimation}
           loading={isLoading}
           className={kpiFunnelCardClassName}
-          tooltip="Source : référentiel ONISEP des organismes de formation. Établissements présents dans le référentiel, non fermés, toutes natures confondues, sur le territoire sélectionné."
         />
         <StatCard
           label="Total CFA compatibles avec la collaboration ML"
@@ -45,7 +44,6 @@ export function CfaAdoptionKpis() {
           loading={isLoading}
           loadingPercentage={isLoadingVariation(isFetching, isLoading)}
           className={kpiFunnelCardClassName}
-          tooltip="CFA ayant envoyé au moins un dossier de collaboration à une Mission Locale, depuis le lancement de la collaboration."
         />
       </StatsErrorHandler>
     </KpiFunnel>

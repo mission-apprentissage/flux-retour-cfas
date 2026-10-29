@@ -22,7 +22,6 @@ export function AdoptionKpis() {
           value={summary?.mlCount}
           loading={isLoading}
           className={kpiFunnelCardClassName}
-          tooltip="Ensemble des Missions Locales recensées dans le Tableau de bord sur le territoire sélectionné."
         />
         <StatCard
           label="Missions Locales actives sur le Tableau de bord"

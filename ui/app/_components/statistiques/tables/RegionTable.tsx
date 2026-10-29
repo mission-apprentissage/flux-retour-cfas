@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { Skeleton } from "@/app/_components/common/Skeleton";
 
-import { ML_ACTIVES_DEFINITION, ML_ENGAGEES_DEFINITION } from "../constants";
+import { ML_ENGAGEES_DEFINITION } from "../constants";
 
 import styles from "./RegionTable.module.css";
 import { SortableTableHeader } from "./SortableTableHeader";
@@ -94,7 +94,6 @@ export function RegionTable({ regions, loadingDeltas = false, detailRegions = []
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 centered
-                tooltip={`${ML_ACTIVES_DEFINITION}, rapportées au nombre de Missions Locales de la région.`}
               />,
               <SortableTableHeader
                 key="ml_engagees"
