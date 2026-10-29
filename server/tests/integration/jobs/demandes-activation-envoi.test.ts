@@ -13,6 +13,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { login, register, registerCfa } from "@/common/actions/account.actions";
 import {
+  cocherDemandesActivation,
   DUREE_INVITATION_DEMANDE_MS,
   envoyerDemandesActivation,
   evaluerDemande,
@@ -827,7 +828,7 @@ describe("envoi des demandes d'activation", () => {
       const premiere = await insererDemande("direction@cfa-tests.fr");
       const corrigee = await insererDemande("direction@cfa-tests.fr", "13002374000400", { a_envoyer: false });
       await modifierDemandeActivation(corrigee._id, { siret_corrige: SIRET });
-      await modifierDemandeActivation(corrigee._id, { a_envoyer: true });
+      await cocherDemandesActivation([corrigee._id], true);
 
       await envoyerEtTraiter();
 
@@ -908,7 +909,7 @@ describe("envoi des demandes d'activation", () => {
       expect(demande.motifs).toEqual(["email_mal_forme"]);
 
       await modifierDemandeActivation(demande._id, { email_corrige: "direction@cfa-tests.fr" });
-      await modifierDemandeActivation(demande._id, { a_envoyer: true });
+      await cocherDemandesActivation([demande._id], true);
       await envoyerEtTraiter();
 
       expect(await invitationsDb().findOne({ email: "direction@cfa-tests.fr" })).toMatchObject({

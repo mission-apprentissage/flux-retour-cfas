@@ -11,7 +11,7 @@ import { SegmentedControl, SegmentedControlProps } from "@codegouvfr/react-dsfr/
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useIsMutating, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   BrancheDemandeActivation,
@@ -24,10 +24,12 @@ import {
 import {
   IBilanEnvoiDemandes,
   IBilanImportDemandes,
+  ICocheDemandesActivation,
   IDemandeActivationLigne,
   IDemandesActivationResponse,
   IEnvoiDemandesActivation,
   IModificationDemandeActivation,
+  VUES_DEMANDES_ACTIVATION,
   VueDemandeActivation,
 } from "shared/models/routes/admin/demandes-activation.api";
 
@@ -45,6 +47,7 @@ const envoiModal = createModal({ id: "demandes-activation-envoi", isOpenedByDefa
 
 const URL_DEMANDES = "/api/v1/admin/demandes-activation";
 const CLE_REQUETE = ["admin", "demandes-activation"];
+const CLE_COCHE = ["admin", "demandes-activation", "a-envoyer"];
 const PAGE_SIZE = 20;
 
 type Retour = { severity: "success" | "info" | "warning" | "error"; message: string };
@@ -255,15 +258,47 @@ export default function DemandesActivationClient() {
     }
   };
 
-  const basculerEnvoi = async (demande: IDemandeActivationLigne, aEnvoyer: boolean) => {
-    try {
-      await modificationMutation.mutateAsync({ id: demande._id, modification: { a_envoyer: aEnvoyer } });
-      setRetourLigne(null);
-      await queryClient.invalidateQueries({ queryKey: CLE_REQUETE });
-    } catch (err) {
+  const majLignes = (maj: (demande: IDemandeActivationLigne) => IDemandeActivationLigne) =>
+    queryClient.setQueryData<IDemandesActivationResponse>(
+      CLE_REQUETE,
+      (actuelles) => actuelles && { demandes: actuelles.demandes.map(maj) }
+    );
+
+  const cocherMutation = useMutation({
+    mutationKey: CLE_COCHE,
+    mutationFn: (coche: ICocheDemandesActivation) =>
+      _put<IDemandeActivationLigne[]>(`${URL_DEMANDES}/a-envoyer`, coche),
+    onMutate: async ({ ids, a_envoyer }) => {
+      await queryClient.cancelQueries({ queryKey: CLE_REQUETE });
+      const visees = new Set(ids);
+      const precedentes = new Map<string, boolean>();
+      majLignes((demande) => {
+        if (!visees.has(demande._id)) return demande;
+        precedentes.set(demande._id, demande.a_envoyer);
+        return { ...demande, a_envoyer };
+      });
+      return { precedentes };
+    },
+    onError: (err, _coche, contexte) => {
+      majLignes((demande) => {
+        const precedente = contexte?.precedentes.get(demande._id);
+        return precedente === undefined ? demande : { ...demande, a_envoyer: precedente };
+      });
       setRetourLigne({ severity: "error", message: getServerErrorMessage(err, "La demande n'a pas pu être modifiée") });
-    }
-  };
+    },
+    onSuccess: (lignes) => {
+      const parId = new Map(lignes.map((ligne) => [ligne._id, ligne]));
+      majLignes((demande) => parId.get(demande._id) ?? demande);
+    },
+  });
+
+  const idsEnCoche = new Set(
+    useMutationState({
+      filters: { mutationKey: CLE_COCHE, status: "pending" },
+      select: (mutation) => (mutation.state.variables as ICocheDemandesActivation | undefined)?.ids ?? [],
+    }).flat()
+  );
+  const cocheEnCours = useIsMutating({ mutationKey: CLE_COCHE }) > 0;
 
   const envoiMutation = useMutation({
     mutationFn: (envoi: IEnvoiDemandesActivation) =>
@@ -334,6 +369,9 @@ export default function DemandesActivationClient() {
 
   const demandesDeLaVue = (data?.demandes ?? []).filter((demande) => demande.vue === vue);
   const cochees = (data?.demandes ?? []).filter((demande) => demande.a_envoyer && demande.cochable);
+  const compteParVue = Object.fromEntries(
+    VUES_DEMANDES_ACTIVATION.map((cle) => [cle, (data?.demandes ?? []).filter((demande) => demande.vue === cle).length])
+  ) as Record<VueDemandeActivation, number>;
   const lastPage = Math.max(1, Math.ceil(demandesDeLaVue.length / pageSize));
   const currentPage = Math.min(page, lastPage);
 
@@ -412,8 +450,8 @@ export default function DemandesActivationClient() {
               ),
               nativeInputProps: {
                 checked: demande.a_envoyer,
-                disabled: !demande.cochable || modificationMutation.isPending,
-                onChange: (event) => basculerEnvoi(demande, event.target.checked),
+                disabled: !demande.cochable || idsEnCoche.has(demande._id),
+                onChange: (event) => cocherMutation.mutate({ ids: [demande._id], a_envoyer: event.target.checked }),
                 "aria-describedby": demande.cochable ? undefined : `motifs-${demande._id}`,
               },
             },
@@ -448,7 +486,7 @@ export default function DemandesActivationClient() {
   }));
 
   const segment = (cle: VueDemandeActivation) => ({
-    label: `${LIBELLES_VUES[cle]} (${data?.compteParVue[cle] ?? 0})`,
+    label: `${LIBELLES_VUES[cle]} (${compteParVue[cle]})`,
     nativeInputProps: {
       checked: vue === cle,
       onChange: () => {
@@ -549,7 +587,7 @@ export default function DemandesActivationClient() {
             <Button
               iconId="fr-icon-mail-line"
               onClick={() => envoiModal.open()}
-              disabled={cochees.length === 0 || envoiMutation.isPending}
+              disabled={cochees.length === 0 || envoiMutation.isPending || cocheEnCours}
             >
               Envoyer les e-mails ({cochees.length})
             </Button>
@@ -630,7 +668,7 @@ export default function DemandesActivationClient() {
           {
             children: "Confirmer l'envoi",
             doClosesModal: false,
-            disabled: envoiMutation.isPending || cochees.length === 0,
+            disabled: envoiMutation.isPending || cocheEnCours || cochees.length === 0,
             nativeButtonProps: { type: "button" },
             onClick: envoyer,
           },

@@ -15,14 +15,21 @@ export const zModificationDemandeActivation = z
   .object({
     siret_corrige: z.string().nullable(),
     email_corrige: z.string().nullable(),
-    a_envoyer: z.boolean(),
   })
   .partial()
   .strict();
 
 export type IModificationDemandeActivation = z.output<typeof zModificationDemandeActivation>;
 
-export const zEnvoiDemandesActivation = z.object({ ids: z.array(z.string().regex(/^[0-9a-f]{24}$/)).min(1) }).strict();
+const zIdDemande = z.string().regex(/^[0-9a-f]{24}$/);
+
+export const zCocheDemandesActivation = z
+  .object({ ids: z.array(zIdDemande).min(1).max(1000), a_envoyer: z.boolean() })
+  .strict();
+
+export type ICocheDemandesActivation = z.output<typeof zCocheDemandesActivation>;
+
+export const zEnvoiDemandesActivation = z.object({ ids: z.array(zIdDemande).min(1) }).strict();
 
 export type IEnvoiDemandesActivation = z.output<typeof zEnvoiDemandesActivation>;
 
@@ -59,7 +66,6 @@ export interface IDemandeActivationLigne {
 
 export interface IDemandesActivationResponse {
   demandes: IDemandeActivationLigne[];
-  compteParVue: Record<VueDemandeActivation, number>;
 }
 
 export interface IBilanImportDemandes {

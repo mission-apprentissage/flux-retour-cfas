@@ -223,17 +223,18 @@ describe("récapitulatif des demandes d'activation", () => {
   const lister = async () =>
     (await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "get", URL_LISTE)).data as {
       demandes: { _id: string; email: string; vue: string; cochable: boolean; branche: string; motifs: string[] }[];
-      compteParVue: Record<string, number>;
     };
   const ligne = async (email: string) => (await lister()).demandes.find((demande) => demande.email === email)!;
   const modifier = (id: string, modification: Record<string, unknown>) =>
     requestAsOrganisation({ type: "ADMINISTRATEUR" }, "put", `${URL_LISTE}/${id}`, modification);
+  const cocher = (ids: string[], aEnvoyer: boolean) =>
+    requestAsOrganisation({ type: "ADMINISTRATEUR" }, "put", `${URL_LISTE}/a-envoyer`, { ids, a_envoyer: aEnvoyer });
+  const relireDemande = (id: string) => demandesActivationCfaDb().findOne({ _id: new ObjectId(id) });
 
   it("classe chaque demande dans une seule vue, avec son compte", async () => {
-    const { demandes, compteParVue } = await lister();
+    const { demandes } = await lister();
 
-    expect(compteParVue).toEqual({ a_envoyer: 2, envoyees: 0, refus: 3, devenus_eligibles: 0, echecs: 0 });
-    expect(demandes).toHaveLength(5);
+    expect(demandes.map(({ vue }) => vue).sort()).toEqual(["a_envoyer", "a_envoyer", "refus", "refus", "refus"]);
     expect(demandes.find((demande) => demande.email === "directrice@cfa-exemple.fr")).toMatchObject({
       vue: "a_envoyer",
       cochable: true,
@@ -247,8 +248,41 @@ describe("récapitulatif des demandes d'activation", () => {
 
     expect(siretInconnu).toMatchObject({ vue: "refus", cochable: true });
     expect(gmail).toMatchObject({ vue: "refus", cochable: false });
-    expect((await modifier(siretInconnu._id, { a_envoyer: true })).data).toMatchObject({ a_envoyer: true });
-    expect((await modifier(gmail._id, { a_envoyer: true })).status).toBe(400);
+
+    const reponse = await cocher([siretInconnu._id, gmail._id], true);
+
+    expect(reponse.status).toBe(200);
+    expect(reponse.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ _id: siretInconnu._id, a_envoyer: true }),
+        expect.objectContaining({ _id: gmail._id, a_envoyer: false }),
+      ])
+    );
+    expect(await relireDemande(gmail._id)).toMatchObject({ a_envoyer: false });
+  });
+
+  it("décoche des demandes sans toucher une demande en cours d'envoi", async () => {
+    const directrice = await ligne("directrice@cfa-exemple.fr");
+    const referent = await ligne("referent@cfa-exemple.fr");
+    await cocher([directrice._id, referent._id], true);
+    await demandesActivationCfaDb().updateOne(
+      { _id: new ObjectId(referent._id) },
+      { $set: { statut: "envoi_en_cours" } }
+    );
+
+    const reponse = await cocher([directrice._id, referent._id], false);
+
+    expect(reponse.data).toHaveLength(2);
+    expect(await relireDemande(directrice._id)).toMatchObject({ a_envoyer: false });
+    expect(await relireDemande(referent._id)).toMatchObject({ a_envoyer: true, statut: "envoi_en_cours" });
+  });
+
+  it("refuse une coche sans identifiant valide, et la coche par la route de correction", async () => {
+    const { _id } = await ligne("directrice@cfa-exemple.fr");
+
+    expect((await cocher([], true)).status).toBe(400);
+    expect((await cocher(["pas-un-identifiant"], true)).status).toBe(400);
+    expect((await modifier(_id, { a_envoyer: true })).status).toBe(400);
   });
 
   it("réévalue une demande dont le SIRET est corrigé : elle devient éligible et cochable", async () => {
@@ -323,6 +357,6 @@ describe("récapitulatif des demandes d'activation", () => {
     const { _id } = await ligne("directrice@cfa-exemple.fr");
     await demandesActivationCfaDb().updateOne({ _id: new ObjectId(_id) }, { $set: { statut: "envoi_en_cours" } });
 
-    expect((await modifier(_id, { a_envoyer: false })).status).toBe(409);
+    expect((await modifier(_id, { siret_corrige: CFA_SIRET })).status).toBe(409);
   });
 });

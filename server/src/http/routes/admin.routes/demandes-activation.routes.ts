@@ -3,12 +3,14 @@ import express, { RequestHandler } from "express";
 import { ObjectId } from "mongodb";
 import multer from "multer";
 import {
+  zCocheDemandesActivation,
   zEnvoiDemandesActivation,
   zModificationDemandeActivation,
 } from "shared/models/routes/admin/demandes-activation.api";
 import { z } from "zod";
 
 import {
+  cocherDemandesActivation,
   envoyerDemandesActivation,
   importerDemandesActivation,
   listerDemandesActivation,
@@ -42,6 +44,17 @@ export default () => {
   router.get(
     "/",
     returnResult(async () => listerDemandesActivation())
+  );
+
+  router.put(
+    "/a-envoyer",
+    validateRequestMiddleware({ body: zCocheDemandesActivation }),
+    returnResult(async ({ body }) =>
+      cocherDemandesActivation(
+        body.ids.map((id: string) => new ObjectId(id)),
+        body.a_envoyer
+      )
+    )
   );
 
   router.put(

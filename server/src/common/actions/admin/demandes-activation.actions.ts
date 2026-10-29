@@ -22,7 +22,6 @@ import {
   IDemandeActivationLigne,
   IDemandesActivationResponse,
   IModificationDemandeActivation,
-  VUES_DEMANDES_ACTIVATION,
   VueDemandeActivation,
 } from "shared/models/routes/admin/demandes-activation.api";
 import { normalize } from "shared/utils";
@@ -597,13 +596,33 @@ export async function listerDemandesActivation(): Promise<IDemandesActivationRes
       (a.organisme?.nom ?? a.siret ?? "").localeCompare(b.organisme?.nom ?? b.siret ?? "") ||
       a.email.localeCompare(b.email)
   );
-  const compteParVue = Object.fromEntries(VUES_DEMANDES_ACTIVATION.map((vue) => [vue, 0])) as Record<
-    VueDemandeActivation,
-    number
-  >;
-  for (const ligne of lignes) compteParVue[ligne.vue]++;
 
-  return { demandes: lignes, compteParVue };
+  return { demandes: lignes };
+}
+
+export async function cocherDemandesActivation(ids: ObjectId[], aEnvoyer: boolean): Promise<IDemandeActivationLigne[]> {
+  const lues = await demandesActivationCfaDb()
+    .find({ _id: { $in: ids } })
+    .toArray();
+  const aEcrire = lues.filter((demande) =>
+    aEnvoyer ? !demande.a_envoyer && estCochable(demande) : demande.a_envoyer && demande.statut !== "envoi_en_cours"
+  );
+  if (aEcrire.length > 0) {
+    const maintenant = new Date();
+    await demandesActivationCfaDb().bulkWrite(
+      aEcrire.map((demande) => ({
+        updateOne: {
+          filter: { _id: demande._id, updated_at: demande.updated_at },
+          update: { $set: { a_envoyer: aEnvoyer, updated_at: maintenant } },
+        },
+      }))
+    );
+  }
+  return versLignes(
+    await demandesActivationCfaDb()
+      .find({ _id: { $in: ids } })
+      .toArray()
+  );
 }
 
 export async function modifierDemandeActivation(
@@ -633,12 +652,6 @@ export async function modifierDemandeActivation(
   if (misAJour.email !== demande.email && demande.invitation_id) {
     await invitationsDb().deleteOne({ _id: demande.invitation_id });
     misAJour = { ...misAJour, invitation_id: null };
-  }
-  if (modification.a_envoyer !== undefined) {
-    if (modification.a_envoyer && !estCochable(misAJour)) {
-      throw Boom.badRequest("Cette demande ne peut pas être envoyée");
-    }
-    misAJour = { ...misAJour, a_envoyer: modification.a_envoyer, updated_at: new Date() };
   }
 
   const enregistree = await enregistrer(demande, misAJour);
