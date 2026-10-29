@@ -1,6 +1,7 @@
 import { AxiosInstance } from "axiosist";
 import { it, expect, describe, beforeEach } from "vitest";
 
+import { auditLogsDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 import { PermissionsTestConfig, testPermissions } from "@tests/utils/permissions";
 import { RequestAsOrganisationFunc, expectUnauthorizedError, initTestApp } from "@tests/utils/testUtils";
@@ -55,6 +56,16 @@ describe("POST /api/v1/admin/impersonate - démarre une imposture d'organisation
       expect(response.headers["set-cookie"]).toStrictEqual(
         allowed ? [expect.stringMatching("flux-retour-cfas-test-jwt=eyJh.*")] : undefined
       );
+
+      const audits = await auditLogsDb().find({ action: "imposture_admin" }).toArray();
+      expect(audits).toHaveLength(allowed ? 1 : 0);
+      if (allowed) {
+        expect(audits[0].data).toMatchObject({
+          depuis_imposture_admin: false,
+          organisation_origine: { type: "ADMINISTRATEUR" },
+          cible: { type: "DREETS" },
+        });
+      }
     });
   });
 });

@@ -6,6 +6,7 @@ import type { IOrganisationCreate } from "shared/models/data/organisations.model
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
+  auditLogsDb,
   invitationsDb,
   missionLocaleCfaInvitationsDb,
   missionLocaleEffectifsDb,
@@ -1145,6 +1146,53 @@ describe("Indicateurs ML routes (territoriales)", () => {
       expectForbidden(await requestAsOrganisation(DREETS_IDF, "post", BASE, { ml_id: ML_IDF.toString() }), refus);
       expectForbidden(await requestAsOrganisation(ARML_IDF, "post", BASE, { cfa_id: CFA_A.toString() }), refus);
       expectForbidden(await requestAsOrganisation(ADMIN, "post", BASE, { ml_id: ML_IDF.toString() }), refus);
+    });
+
+    it("Journalise chaque imposture ouverte dans les logs d'audit, et aucune quand elle est refusée", async () => {
+      const cibleId = (audit: { data?: unknown } | null) =>
+        (audit?.data as { cible: { id: ObjectId } }).cible.id.toString();
+      const cfaA = await organisationsDb().findOne({ organisme_id: CFA_A.toString() });
+
+      expect((await requestAsOrganisation(DREETS_IDF, "post", BASE, { cfa_id: CFA_A.toString() })).status).toBe(200);
+      expectForbidden(
+        await requestAsOrganisation(DREETS_IDF, "post", BASE, { cfa_id: CFA_B.toString() }),
+        "Accès non autorisé à cet organisme"
+      );
+      expect(await auditLogsDb().countDocuments({ action: /^imposture_/ })).toBe(1);
+
+      const lecture = await auditLogsDb().findOne({ action: "imposture_lecture_seule" });
+      expect(lecture?.date).toBeInstanceOf(Date);
+      expect(lecture?.data).toMatchObject({
+        depuis_imposture_admin: false,
+        organisation_origine: { type: "DREETS" },
+        cible: { type: "ORGANISME_FORMATION" },
+      });
+      expect(cibleId(lecture)).toBe(cfaA?._id.toString());
+      expect(
+        await auditLogsDb().countDocuments({
+          action: "imposture_lecture_seule",
+          "data.utilisateur_id": { $type: "objectId" },
+          "data.organisation_origine.id": { $type: "objectId" },
+          "data.cible.id": { $type: "objectId" },
+        })
+      ).toBe(1);
+
+      expect((await requestAsOrganisation(ADMIN, "post", BASE, { cfa_id: CFA_B.toString() })).status).toBe(200);
+      const admin = await auditLogsDb().findOne({ action: "imposture_admin" });
+      expect(admin?.data).toMatchObject({
+        depuis_imposture_admin: false,
+        organisation_origine: { type: "ADMINISTRATEUR" },
+        cible: { type: "ORGANISME_FORMATION" },
+      });
+
+      expect((await requestAsOrganisation(ARML_IDF, "post", BASE, { ml_id: ML_IDF.toString() })).status).toBe(200);
+      const arml = await auditLogsDb().findOne({
+        action: "imposture_lecture_seule",
+        "data.organisation_origine.type": "ARML",
+      });
+      expect(arml?.data).toMatchObject({ cible: { type: "MISSION_LOCALE" } });
+      expect(cibleId(arml)).toBe(ML_IDF.toString());
+      expect(await auditLogsDb().countDocuments({ action: /^imposture_/ })).toBe(3);
     });
 
     it("Ouvre pour l'administrateur une imposture classique, sans lecture seule, sur tout CFA", async () => {

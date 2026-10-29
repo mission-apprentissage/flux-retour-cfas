@@ -39,6 +39,7 @@ import {
 } from "@/common/actions/cfa/cfa-collaborations.actions";
 import { getCfaFiche, getCfaMembres } from "@/common/actions/cfa/cfa-fiche.actions";
 import { getCfaAdoptionStats, listCfaEtablissements } from "@/common/actions/cfa/cfa-stats.actions";
+import { journaliserImposture } from "@/common/actions/impersonation.actions";
 import { listCollaborationsCfaOrigine } from "@/common/actions/mission-locale/collaboration-cfa-origine.actions";
 import { getCollaborationCorrelations } from "@/common/actions/mission-locale/collaboration-correlations.actions";
 import { listCollaborationDossiers } from "@/common/actions/mission-locale/collaboration-dossiers.actions";
@@ -65,7 +66,6 @@ import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisa
 import { rechercherEtablissements } from "@/common/actions/recherche/recherche-etablissements.actions";
 import { createSession } from "@/common/actions/sessions.actions";
 import { createTelechargementListeNomLog } from "@/common/actions/telechargementListeNomLogs.actions";
-import logger from "@/common/logger";
 import { organisationsDb, organismesDb } from "@/common/model/collections";
 import type { AuthContext } from "@/common/model/internal/AuthContext";
 import { responseWithCookie } from "@/common/utils/httpUtils";
@@ -935,16 +935,7 @@ const impersonateRoute: RouteHandler<
   }
 
   const readOnly = type !== ORGANISATION_TYPE.ADMINISTRATEUR;
-  logger.info(
-    {
-      event: readOnly ? "imposture_lecture_seule" : "imposture_admin",
-      utilisateur_id: user._id.toString(),
-      depuis_imposture_admin: user.impersonating === true,
-      organisation_origine: { id: locals.organisation._id.toString(), type },
-      cible: { id: cible._id.toString(), type: cible.type },
-    },
-    readOnly ? "Imposture en lecture seule" : "Imposture administrateur"
-  );
+  await journaliserImposture({ user, origine: locals.organisation, cible, readOnly });
 
   const sessionToken = await createSession(user.email, {
     impersonatedOrganisation: cible,
