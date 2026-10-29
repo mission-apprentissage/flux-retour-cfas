@@ -15,3 +15,7 @@
   line-height: 1.25rem;
   color: var(--text-mention-grey);
 }
+
+.info {
+  margin-left: 5px;
+}

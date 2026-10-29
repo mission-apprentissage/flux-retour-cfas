@@ -1,3 +1,5 @@
+import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
+
 import styles from "./SegmentAboutText.module.css";
 
 interface SegmentAboutTextProps {
@@ -7,17 +9,20 @@ interface SegmentAboutTextProps {
 export function SegmentAboutText({ variant }: SegmentAboutTextProps) {
   return (
     <div className={styles.about}>
-      <p className={styles.title}>À propos de ces chiffres :</p>
+      {variant === "collab" && <p className={styles.title}>À propos de ces chiffres :</p>}
       {variant === "rupture" ? (
         <p className={styles.text}>
           Ces chiffres couvrent uniquement les dossiers de jeunes en situation de rupture. À partir de septembre 2026,
           le Tableau de bord de l&apos;apprentissage permet aux CFA de solliciter des collaborations pour des jeunes sur
           de la prévention de rupture. Ces dossiers ne sont pas inclus dans ces données chiffrées, seuls sont
           représentés ici les dossiers de rupture identifiés (sources : DECA, les ERP des CFA connectés et le déclaratif
-          des CFA lors de collaborations sollicitées pour ce motif). Ces chiffres reflètent l&apos;état actuel des
-          dossiers, classés par date de transmission à la Mission Locale : les compteurs d&apos;une période passée
-          décrivent la situation d&apos;aujourd&apos;hui des dossiers transmis pendant cette période, et non leur
-          situation à cette date.
+          des CFA lors de collaborations sollicitées pour ce motif).
+          <span className={styles.info}>
+            <Tooltip
+              kind="hover"
+              title="Ces chiffres reflètent l'état actuel des dossiers, classés par date de transmission à la Mission Locale : les compteurs d'une période passée décrivent la situation d'aujourd'hui des dossiers transmis pendant cette période, et non leur situation à cette date."
+            />
+          </span>
         </p>
       ) : (
         <p className={styles.text}>

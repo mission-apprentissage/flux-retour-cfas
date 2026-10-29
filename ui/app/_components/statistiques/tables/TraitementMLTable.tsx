@@ -330,9 +330,9 @@ export function TraitementMLTable({
                 <strong>Sur ce tableau :</strong>{" "}
                 {description ?? (
                   <>
-                    Suivez les statistiques de traitement des dossiers à l&apos;échelle des Missions Locales. Par
-                    défaut, le tableau classe la présentation des Missions Locales par leur dernière activité sur le
-                    service, vous pouvez modifier cet ordre en manipulant les options de tris.
+                    Suivez les statistiques de traitement des dossiers de jeunes en rupture à l&apos;échelle des
+                    Missions Locales. Par défaut, le tableau classe la présentation des Missions Locales par leur
+                    dernière activité sur le service, vous pouvez modifier cet ordre en manipulant les options de tris.
                   </>
                 )}
               </p>
