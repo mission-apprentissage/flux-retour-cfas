@@ -35,6 +35,7 @@ export type IEnvoiDemandesActivation = z.output<typeof zEnvoiDemandesActivation>
 
 export interface IDemandeActivationLigne {
   _id: string;
+  source: string;
   email: string;
   email_saisi: string;
   email_corrige: string | null;

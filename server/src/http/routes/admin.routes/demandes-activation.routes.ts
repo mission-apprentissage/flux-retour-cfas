@@ -93,9 +93,11 @@ export default () => {
         .string()
         .trim()
         .min(1)
-        .catch(req.file.originalname)
-        .parse((req.body as { source?: unknown } | undefined)?.source);
-      return importerDemandesActivation(req.file, source);
+        .safeParse((req.body as { source?: unknown } | undefined)?.source);
+      if (!source.success) {
+        throw Boom.badRequest("Indiquez la source de l'import");
+      }
+      return importerDemandesActivation(req.file, source.data);
     })
   );
 

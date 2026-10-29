@@ -379,10 +379,17 @@ export async function evaluerDemande(
   };
 }
 
+async function sourceRetenue(saisie: string): Promise<string> {
+  const source = saisie.trim().replace(/\s+/g, " ");
+  const existantes: string[] = await demandesActivationCfaDb().distinct("source");
+  return existantes.find((existante) => existante.toLowerCase() === source.toLowerCase()) ?? source;
+}
+
 export async function importerDemandesActivation(
   fichier: { buffer: Buffer; originalname: string },
-  source: string
+  saisie: string
 ): Promise<IBilanImportDemandes> {
+  const source = await sourceRetenue(saisie);
   const lignes = lireLignes(extraireCsv(fichier));
   const colonnes = reconnaitreColonnes(Object.keys(lignes[0] ?? {}));
   const bilan: IBilanImportDemandes = { creees: 0, misesAJour: 0, fusionnees: 0, inchangees: 0, erreurs: 0 };
@@ -451,7 +458,6 @@ async function importerDemande(
         $set: {
           ...avecInscriptionLaPlusAncienne(provenance, existante),
           ...evaluation,
-          source,
           updated_at: maintenant,
         },
       }
@@ -563,6 +569,7 @@ async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeAc
     const compte = demande.user_id ? compteParId.get(demande.user_id.toString()) : undefined;
     return {
       _id: demande._id.toString(),
+      source: demande.source,
       email: demande.email,
       email_saisi: demande.email_saisi,
       email_corrige: demande.email_corrige ?? null,

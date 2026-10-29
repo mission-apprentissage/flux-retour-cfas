@@ -8,6 +8,7 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { SegmentedControl, SegmentedControlProps } from "@codegouvfr/react-dsfr/SegmentedControl";
+import SelectNext from "@codegouvfr/react-dsfr/SelectNext";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { Upload } from "@codegouvfr/react-dsfr/Upload";
@@ -57,6 +58,7 @@ type Retour = { severity: "success" | "info" | "warning" | "error"; message: str
 
 const MODE_D_EMPLOI = [
   "Importez l'export Google Forms (« Télécharger les réponses », .zip ou .csv), sans l'ouvrir dans Excel.",
+  "Indiquez la source à l'import : elle reste attachée aux demandes créées par cet import et sert à filtrer la liste.",
   "Ré-importer un export plus récent ajoute les nouvelles réponses ; les lignes déjà envoyées ne bougent pas.",
   "Corrigez une ligne avec « Corriger » (SIRET, e-mail), jamais dans le fichier : les corrections sont gardées aux imports suivants.",
   "Cochez les lignes prêtes, puis « Envoyer les e-mails » : DECA est activé et chaque demandeur reçoit son e-mail.",
@@ -92,19 +94,21 @@ const STATUTS: Record<
 };
 
 const COLONNES = [
-  { label: "CFA", dataKey: "cfa", width: "17%", sortable: false },
-  { label: "Demandeur", dataKey: "demandeur", width: "17%", sortable: false },
+  { label: "CFA", dataKey: "cfa", width: "15%", sortable: false },
+  { label: "Demandeur", dataKey: "demandeur", width: "16%", sortable: false },
   { label: "Inscrit le", dataKey: "inscription", width: "8%", sortable: true },
-  { label: "Compte", dataKey: "compte", width: "9%", sortable: false },
-  { label: "Branche", dataKey: "branche", width: "10%", sortable: false },
-  { label: "Motifs", dataKey: "motifs", width: "17%", sortable: false },
-  { label: "Statut", dataKey: "statut", width: "9%", sortable: false },
+  { label: "Source", dataKey: "source", width: "9%", sortable: true },
+  { label: "Compte", dataKey: "compte", width: "8%", sortable: false },
+  { label: "Branche", dataKey: "branche", width: "9%", sortable: false },
+  { label: "Motifs", dataKey: "motifs", width: "14%", sortable: false },
+  { label: "Statut", dataKey: "statut", width: "8%", sortable: false },
   { label: "À envoyer", dataKey: "a_envoyer", width: "5%", sortable: false },
   { label: "Actions", dataKey: "actions", width: "8%", sortable: false },
 ];
 
 const CLES_DE_TRI: Record<string, (demande: IDemandeActivationLigne) => string | null> = {
   inscription: (demande) => demande.horodatage,
+  source: (demande) => demande.source,
 };
 
 function trier(demandes: IDemandeActivationLigne[], tri: SortingState) {
@@ -236,6 +240,7 @@ export default function DemandesActivationClient() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const [tri, setTri] = useState<SortingState>([]);
+  const [filtreSource, setFiltreSource] = useState("");
   const [fichier, setFichier] = useState<File | null>(null);
   const [source, setSource] = useState("");
   const [retourImport, setRetourImport] = useState<Retour | null>(null);
@@ -372,15 +377,18 @@ export default function DemandesActivationClient() {
     requestAnimationFrame(() => zoneRetour.current?.focus());
   };
 
+  const toutes = data?.demandes ?? [];
+  const sources = [...new Set(toutes.map((demande) => demande.source))].sort((a, b) => a.localeCompare(b, "fr"));
+  const demandesFiltrees = filtreSource ? toutes.filter((demande) => demande.source === filtreSource) : toutes;
   const demandesDeLaVue = trier(
-    (data?.demandes ?? []).filter((demande) => demande.vue === vue),
+    demandesFiltrees.filter((demande) => demande.vue === vue),
     tri
   );
-  const cochees = (data?.demandes ?? []).filter((demande) => demande.a_envoyer && demande.cochable);
+  const cochees = toutes.filter((demande) => demande.a_envoyer && demande.cochable);
   const aCocherDansLaVue = demandesDeLaVue.filter((demande) => demande.cochable && !demande.a_envoyer);
   const aDecocherDansLaVue = demandesDeLaVue.filter((demande) => demande.a_envoyer);
   const compteParVue = Object.fromEntries(
-    VUES_DEMANDES_ACTIVATION.map((cle) => [cle, (data?.demandes ?? []).filter((demande) => demande.vue === cle).length])
+    VUES_DEMANDES_ACTIVATION.map((cle) => [cle, demandesFiltrees.filter((demande) => demande.vue === cle).length])
   ) as Record<VueDemandeActivation, number>;
   const lastPage = Math.max(1, Math.ceil(demandesDeLaVue.length / pageSize));
   const currentPage = Math.min(page, lastPage);
@@ -440,6 +448,7 @@ export default function DemandesActivationClient() {
       inscription: demande.horodatage
         ? format(new Date(demande.horodatage), "dd/MM/yyyy HH:mm")
         : (demande.horodatage_brut ?? "—"),
+      source: demande.source,
       branche: <BadgeBranche demande={demande} />,
       motifs: <Motifs demande={demande} />,
       statut: (
@@ -556,20 +565,30 @@ export default function DemandesActivationClient() {
                   const choisi = event.target.files?.[0] ?? null;
                   setFichier(choisi);
                   setRetourImport(null);
-                  if (choisi) setSource(choisi.name.replace(/(\.csv)?(\.zip)?$/i, ""));
                 },
               }}
             />
           </div>
           <div className="fr-col-12 fr-col-md-4">
             <Input
-              label="Nom de la source"
-              hintText="Informatif, prérempli depuis le nom du fichier"
-              nativeInputProps={{ value: source, onChange: (event) => setSource(event.target.value) }}
+              label="Source"
+              hintText="Campagne d'origine, par exemple Webinaire PdL du 16 octobre. Elle n'est posée que sur les nouvelles demandes."
+              nativeInputProps={{
+                value: source,
+                list: "sources-demandes-activation",
+                required: true,
+                autoComplete: "off",
+                onChange: (event) => setSource(event.target.value),
+              }}
             />
+            <datalist id="sources-demandes-activation">
+              {sources.map((nom) => (
+                <option key={nom} value={nom} />
+              ))}
+            </datalist>
           </div>
           <div className="fr-col-12 fr-col-md-3">
-            <Button onClick={importer} disabled={!fichier || importMutation.isPending}>
+            <Button onClick={importer} disabled={!fichier || !source.trim() || importMutation.isPending}>
               Importer
             </Button>
           </div>
@@ -596,6 +615,27 @@ export default function DemandesActivationClient() {
         <TableSkeleton />
       ) : (
         <>
+          <div className="fr-grid-row">
+            <div className="fr-col-12 fr-col-md-4">
+              <SelectNext
+                label="Filtrer par source"
+                options={[
+                  { value: "", label: `Toutes les sources (${toutes.length})` },
+                  ...sources.map((nom) => ({
+                    value: nom,
+                    label: `${nom} (${toutes.filter((demande) => demande.source === nom).length})`,
+                  })),
+                ]}
+                nativeSelectProps={{
+                  value: filtreSource,
+                  onChange: (event) => {
+                    setFiltreSource(event.target.value);
+                    setPage(1);
+                  },
+                }}
+              />
+            </div>
+          </div>
           <div className={`${styles.barreVues} fr-mb-3w`}>
             <SegmentedControl legend="Vue" hideLegend small segments={segments} />
             <Button
@@ -691,7 +731,7 @@ export default function DemandesActivationClient() {
         <ul>
           {cochees.map((demande) => (
             <li key={demande._id}>
-              {nomCfa(demande)} : {demande.email} ({LIBELLES_BRANCHES[demande.branche].toLowerCase()})
+              {nomCfa(demande)} : {demande.email} ({LIBELLES_BRANCHES[demande.branche].toLowerCase()}, {demande.source})
             </li>
           ))}
         </ul>

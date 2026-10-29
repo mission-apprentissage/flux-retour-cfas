@@ -39,7 +39,7 @@ async function insererCfa(siret: string, uai: string) {
   return id;
 }
 
-function importer(contenu: Buffer, nomFichier = "Webinaire PdL (réponses).csv", source?: string) {
+function importer(contenu: Buffer, nomFichier = "Webinaire PdL (réponses).csv", source = "Webinaire PdL") {
   const formulaire = new FormData();
   formulaire.append("fichier", new Blob([contenu]), nomFichier);
   if (source) formulaire.append("source", source);
@@ -107,7 +107,32 @@ describe("POST /api/v1/admin/demandes-activation/import", () => {
     const response = await importer(zipper(EXPORT), "Webinaire PdL (réponses).csv.zip");
 
     expect(response.data.creees).toBe(5);
-    expect(await demande("directrice@cfa-exemple.fr")).toMatchObject({ source: "Webinaire PdL (réponses).csv.zip" });
+    expect(await demande("directrice@cfa-exemple.fr")).toMatchObject({ source: "Webinaire PdL" });
+  });
+
+  it("refuse un import sans source", async () => {
+    const sansSource = await importer(EXPORT, "export.csv", "");
+    const blanche = await importer(EXPORT, "export.csv", "   ");
+
+    expect(sansSource.status).toBe(400);
+    expect(sansSource.data.message).toBe("Indiquez la source de l'import");
+    expect(blanche.status).toBe(400);
+    expect(await demandesActivationCfaDb().countDocuments()).toBe(0);
+  });
+
+  it("pose la source à la création et reprend l'écriture d'une source existante", async () => {
+    const csv = (...emails: string[]) =>
+      Buffer.from(
+        `"Adresse email","SIRET de votre CFA"\n${emails.map((email) => `"${email}","${CFA_SIRET}"`).join("\n")}\n`
+      );
+
+    await importer(EXPORT, "export.csv", "Webinaire PdL");
+    await importer(csv("directrice@cfa-exemple.fr", "nouvelle@cfa-exemple.fr"), "salon.csv", "Salon apprentissage");
+    await importer(csv("autre@cfa-exemple.fr"), "relance.csv", "  webinaire   pdl ");
+
+    expect(await demande("directrice@cfa-exemple.fr")).toMatchObject({ source: "Webinaire PdL" });
+    expect(await demande("nouvelle@cfa-exemple.fr")).toMatchObject({ source: "Salon apprentissage" });
+    expect(await demande("autre@cfa-exemple.fr")).toMatchObject({ source: "Webinaire PdL" });
   });
 
   it("lit une archive recompressée sous macOS, malgré ses fichiers __MACOSX", async () => {
@@ -181,7 +206,7 @@ describe("POST /api/v1/admin/demandes-activation/import", () => {
     );
     await demandesActivationCfaDb().updateOne({ email: "rh@cfa-exemple.fr" }, { $set: { siret_corrige: CFA_SIRET } });
 
-    const response = await importer(zipper(EXPORT), "Webinaire PdL (réponses) (1).csv.zip");
+    const response = await importer(zipper(EXPORT), "Webinaire PdL (réponses) (1).csv.zip", "Relance PdL");
 
     expect(response.data).toEqual({ creees: 0, misesAJour: 5, fusionnees: 1, inchangees: 0, erreurs: 0 });
     expect(await demandesActivationCfaDb().countDocuments()).toBe(5);
@@ -190,7 +215,7 @@ describe("POST /api/v1/admin/demandes-activation/import", () => {
       email: "contact@cfa-exemple.fr",
       motifs: [],
       branche: "activation",
-      source: "Webinaire PdL (réponses) (1).csv.zip",
+      source: "Webinaire PdL",
     });
     expect(await demande("rh@cfa-exemple.fr")).toMatchObject({
       siret_corrige: CFA_SIRET,
