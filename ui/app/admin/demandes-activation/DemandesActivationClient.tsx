@@ -69,6 +69,8 @@ const LIBELLES_VUES: Record<VueDemandeActivation, string> = {
   echecs: "Échecs",
 };
 
+const VUES_COCHABLES_EN_BLOC: ReadonlyArray<VueDemandeActivation> = ["a_envoyer", "devenus_eligibles"];
+
 const LIBELLES_BRANCHES: Record<BrancheDemandeActivation, string> = {
   activation: "Activation",
   compte_existant: "Compte existant",
@@ -369,6 +371,8 @@ export default function DemandesActivationClient() {
 
   const demandesDeLaVue = (data?.demandes ?? []).filter((demande) => demande.vue === vue);
   const cochees = (data?.demandes ?? []).filter((demande) => demande.a_envoyer && demande.cochable);
+  const aCocherDansLaVue = demandesDeLaVue.filter((demande) => demande.cochable && !demande.a_envoyer);
+  const aDecocherDansLaVue = demandesDeLaVue.filter((demande) => demande.a_envoyer);
   const compteParVue = Object.fromEntries(
     VUES_DEMANDES_ACTIVATION.map((cle) => [cle, (data?.demandes ?? []).filter((demande) => demande.vue === cle).length])
   ) as Record<VueDemandeActivation, number>;
@@ -601,6 +605,32 @@ export default function DemandesActivationClient() {
               description={retourLigne.message}
               className="fr-mb-3w"
             />
+          )}
+          {VUES_COCHABLES_EN_BLOC.includes(vue) && (
+            <div className="fr-btns-group fr-btns-group--inline-sm fr-btns-group--sm fr-btns-group--icon-left">
+              <Button
+                priority="tertiary"
+                size="small"
+                iconId="fr-icon-checkbox-line"
+                disabled={aCocherDansLaVue.length === 0}
+                onClick={() =>
+                  cocherMutation.mutate({ ids: aCocherDansLaVue.map((demande) => demande._id), a_envoyer: true })
+                }
+              >
+                Cocher toute la vue ({aCocherDansLaVue.length})
+              </Button>
+              <Button
+                priority="tertiary"
+                size="small"
+                iconId="fr-icon-close-circle-line"
+                disabled={aDecocherDansLaVue.length === 0}
+                onClick={() =>
+                  cocherMutation.mutate({ ids: aDecocherDansLaVue.map((demande) => demande._id), a_envoyer: false })
+                }
+              >
+                Décocher toute la vue ({aDecocherDansLaVue.length})
+              </Button>
+            </div>
           )}
           <AdminTable
             data={tableData}
