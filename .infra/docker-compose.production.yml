@@ -124,7 +124,7 @@ services:
 
   metabase:
     <<: *default
-    image: metabase/metabase:v0.63.13
+    image: metabase/metabase:v0.64.4.1
     deploy:
       <<: *deploy-default
       resources:
@@ -137,6 +137,7 @@ services:
       MB_DB_TYPE: postgres
       MB_DB_CONNECTION_URI: "{{ MNA_TDB_METABASE_DB_URI }}"
       MB_ENCRYPTION_SECRET_KEY: "{{ MNA_TDB_METABASE_ENCRYPTION_SECRET_KEY }}"
+      MB_SESSION_SECRET_KEY: "{{ MNA_TDB_METABASE_SESSION_SECRET_KEY }}"
       MB_EMAIL_FROM_ADDRESS: "{{ METABASE_EMAIL_FROM_ADDRESS }}"
       MB_EMAIL_FROM_NAME: "{{ METABASE_EMAIL_FROM_NAME }}"
       MB_PASSWORD_COMPLEXITY: strong
@@ -151,7 +152,7 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 6m
+      start_period: 15m
     logging:
       driver: "fluentd"
       options:
