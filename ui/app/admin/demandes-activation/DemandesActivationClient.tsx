@@ -48,7 +48,7 @@ const envoiModal = createModal({ id: "demandes-activation-envoi", isOpenedByDefa
 const URL_DEMANDES = "/api/v1/admin/demandes-activation";
 const CLE_REQUETE = ["admin", "demandes-activation"];
 const CLE_COCHE = ["admin", "demandes-activation", "a-envoyer"];
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 100;
 
 type Retour = { severity: "success" | "info" | "warning" | "error"; message: string };
 

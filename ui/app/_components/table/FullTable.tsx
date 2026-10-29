@@ -89,7 +89,7 @@ function PageSizeSelector({
   onPageSizeChange: (pageSize: number) => void;
 }) {
   const selectId = useId();
-  const pageSizeOptions = [5, 10, 20, 50];
+  const pageSizeOptions = [5, 10, 20, 50, 100];
 
   return (
     <div className={fr.cx("fr-select-group")}>
