@@ -1,9 +1,12 @@
 import { ObjectId } from "bson";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import { IOrganisationMissionLocale } from "shared/models";
+import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type { ICollabSegmentStats } from "shared/models/data/missionLocaleStats.model";
 import {
   ICollabSegmentExportRow,
+  ICollaborationMensuelStats,
+  ICollaborationMois,
   ICollaborationSegmentStats,
   IDetailsDossiersTraitesV2,
   IDossiersTraitesStatsResponse,
@@ -17,12 +20,17 @@ import {
   StatsPeriod,
   StatsSegment,
   TraitementMlSortBy,
+  UNKNOWN_DEPARTEMENT_CODE,
 } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
 import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
-import { calculatePercentage } from "shared/utils/stats";
 
-import { missionLocaleEffectifsDb, missionLocaleStatsDb, organisationsDb } from "@/common/model/collections";
+import {
+  missionLocaleEffectifsDb,
+  missionLocaleStatsDb,
+  organisationsDb,
+  organismesDb,
+} from "@/common/model/collections";
 import { escapeRegex } from "@/common/utils/usersFiltersUtils";
 
 import { getOrganisationById } from "../organisations.actions";
@@ -38,13 +46,18 @@ import {
   buildSegmentSumAccumulators,
   buildSegmentViewExpr,
   buildTotalTraitesV2Expression,
-  calculateStartDate,
   calculateStartDateAsync,
-  createStatWithVariation,
+  calculatePreviousStartDate,
+  createCumulStatWithVariation,
+  createEtatStatWithVariation,
   EMPTY_COLLAB_SEGMENT_STATS,
   ENGAGEMENT_THRESHOLD,
   getLatestStatsLowerBound,
   getMissionLocaleIdsByRegions,
+  getMissionLocaleIdsByTerritoire,
+  buildTerritoireMatch,
+  isTerritoireRestreint,
+  type Territoire,
   TIME_SERIES_POINTS_COUNT,
   withMissionLocaleFilter,
 } from "./mission-locale-stats.helpers";
@@ -182,13 +195,27 @@ export const getCumulativeStatsForDates = async (
   });
 };
 
-export const getEvenlySpacedDates = async (period: StatsPeriod, referenceDate: Date): Promise<Date[]> => {
+/** Points de la courbe : répartis sur 30 jours, sinon le début de période, le 1er de chaque mois et le jour même. */
+export const getTimeSeriesDates = async (period: StatsPeriod, referenceDate: Date): Promise<Date[]> => {
   const startDate = await calculateStartDateAsync(period, referenceDate);
 
   const timeDiff = referenceDate.getTime() - startDate.getTime();
 
   if (timeDiff <= 0) {
     return [referenceDate];
+  }
+
+  if (period !== "30days") {
+    const dates = [startDate];
+    let mois = startDate.getUTCMonth() + 1;
+    let premierDuMois = new Date(Date.UTC(startDate.getUTCFullYear(), mois, 1));
+    while (premierDuMois < referenceDate) {
+      dates.push(premierDuMois);
+      mois += 1;
+      premierDuMois = new Date(Date.UTC(startDate.getUTCFullYear(), mois, 1));
+    }
+    dates.push(referenceDate);
+    return dates;
   }
 
   const dates: Date[] = [];
@@ -201,13 +228,21 @@ export const getEvenlySpacedDates = async (period: StatsPeriod, referenceDate: D
   return dates;
 };
 
-async function getRegionsMissionLocales(evaluationDate: Date, startDate: Date) {
-  return await organisationsDb()
+type TerritoryLevel = "region" | "departement";
+
+/** ML totales et activées par région ou par département, éventuellement restreintes à une région. */
+async function getMissionLocalesByTerritory(
+  evaluationDate: Date,
+  startDate: Date,
+  level: TerritoryLevel,
+  regionCode?: string
+) {
+  return (await organisationsDb()
     .aggregate([
-      { $match: { type: "MISSION_LOCALE" } },
+      { $match: { type: "MISSION_LOCALE", ...(regionCode ? { "adresse.region": regionCode } : {}) } },
       {
         $group: {
-          _id: "$adresse.region",
+          _id: `$adresse.${level}`,
           ml_total: { $sum: 1 },
           ml_activees_current: {
             $sum: {
@@ -236,35 +271,40 @@ async function getRegionsMissionLocales(evaluationDate: Date, startDate: Date) {
           },
         },
       },
-      {
-        $lookup: {
-          from: "regions",
-          localField: "_id",
-          foreignField: "code",
-          as: "region_info",
-        },
-      },
-      {
-        $addFields: {
-          nom: { $arrayElemAt: ["$region_info.nom", 0] },
-        },
-      },
+      ...(level === "region"
+        ? [
+            { $lookup: { from: "regions", localField: "_id", foreignField: "code", as: "region_info" } },
+            { $addFields: { nom: { $arrayElemAt: ["$region_info.nom", 0] } } },
+          ]
+        : []),
       { $sort: { ml_total: -1 } },
     ])
-    .toArray();
+    .toArray()) as Array<{
+    _id: string | null;
+    nom?: string;
+    ml_total: number;
+    ml_activees_current: number;
+    ml_activees_previous: number;
+  }>;
 }
 
-type RegionalStatsAtDate = { engaged: number; a_traiter: number; traites: number };
+type TerritoryStatsAtDate = { engaged: number; a_traiter: number; traites: number };
 
-async function getRegionalStatsAtDate(date: Date): Promise<Map<string, RegionalStatsAtDate>> {
+async function getTerritoryStatsAtDate(
+  date: Date,
+  level: TerritoryLevel,
+  regionCode?: string
+): Promise<Map<string | null, TerritoryStatsAtDate>> {
+  const missionLocaleIds = regionCode ? await getMissionLocaleIdsByRegions([regionCode]) : undefined;
   const rows = (await missionLocaleStatsDb()
     .aggregate(
       [
-        ...buildLatestPerMlStages(buildLatestStatsMatch(date)),
+        ...buildLatestPerMlStages(buildLatestStatsMatch(date, missionLocaleIds)),
         ...buildOrgLookupPipeline({ checkActivation: false, localField: "_id" }),
+        { $addFields: { view: buildSegmentViewExpr("rupture") } },
         {
           $group: {
-            _id: "$ml.adresse.region",
+            _id: `$ml.adresse.${level}`,
             engaged: {
               $sum: {
                 $cond: [
@@ -280,64 +320,89 @@ async function getRegionalStatsAtDate(date: Date): Promise<Map<string, RegionalS
                 ],
               },
             },
-            a_traiter: { $sum: "$latest_stats.a_traiter" },
-            traites: { $sum: "$latest_stats.traite" },
+            a_traiter: { $sum: "$view.a_traiter" },
+            traites: { $sum: "$view.traite" },
           },
         },
       ],
       { allowDiskUse: true }
     )
-    .toArray()) as Array<{ _id: string; engaged: number; a_traiter: number; traites: number }>;
+    .toArray()) as Array<{ _id: string | null; engaged: number; a_traiter: number; traites: number }>;
 
   return new Map(
     rows.map((row) => [row._id, { engaged: row.engaged, a_traiter: row.a_traiter, traites: row.traites }])
   );
 }
 
-export const getRegionalStats = async (period: StatsPeriod = "30days") => {
+const EMPTY_TERRITORY_STATS: TerritoryStatsAtDate = { engaged: 0, a_traiter: 0, traites: 0 };
+
+async function getTerritoryStats(period: StatsPeriod, level: TerritoryLevel, regionCode?: string) {
   const evaluationDate = normalizeToUTCDay(new Date());
-  const startDate = calculateStartDate(period, evaluationDate);
+  const startDate = await calculateStartDateAsync(period, evaluationDate);
 
-  const { DEPLOYED_REGION_CODES } = await import("shared/constants/deployedRegions");
-
-  const [regions, currentByRegion, previousByRegion] = await Promise.all([
-    getRegionsMissionLocales(evaluationDate, startDate),
-    getRegionalStatsAtDate(evaluationDate),
-    getRegionalStatsAtDate(startDate),
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
+  const [territories, currentByCode, previousByCode, precedentByCode] = await Promise.all([
+    getMissionLocalesByTerritory(evaluationDate, startDate, level, regionCode),
+    getTerritoryStatsAtDate(evaluationDate, level, regionCode),
+    getTerritoryStatsAtDate(startDate, level, regionCode),
+    previousStartDate ? getTerritoryStatsAtDate(previousStartDate, level, regionCode) : Promise.resolve(null),
   ]);
 
-  const emptyStats: RegionalStatsAtDate = { engaged: 0, a_traiter: 0, traites: 0 };
-
-  const regionsWithEngagement = regions
-    .filter((region) => region._id != null)
-    .map((region) => {
-      const current = currentByRegion.get(region._id) || emptyStats;
-      const previous = previousByRegion.get(region._id) || emptyStats;
+  // Une ML sans département reste visible (ligne « inconnu ») ; sans région, elle n'a pas de ligne régionale.
+  return territories
+    .filter((territory) => level === "departement" || territory._id != null)
+    .map((territory) => {
+      const current = currentByCode.get(territory._id) || EMPTY_TERRITORY_STATS;
+      const previous = previousByCode.get(territory._id) || EMPTY_TERRITORY_STATS;
+      const precedent = precedentByCode ? precedentByCode.get(territory._id) || EMPTY_TERRITORY_STATS : null;
 
       return {
-        code: region._id,
-        nom: region.nom || "Région inconnue",
-        deployed: DEPLOYED_REGION_CODES.includes(region._id),
-        ml_total: region.ml_total,
-        ml_activees: region.ml_activees_current,
-        ml_activees_delta: region.ml_activees_current - region.ml_activees_previous,
+        code: territory._id ?? UNKNOWN_DEPARTEMENT_CODE,
+        nom: territory.nom,
+        ml_total: territory.ml_total,
+        ml_activees: territory.ml_activees_current,
+        ml_activees_delta: territory.ml_activees_current - territory.ml_activees_previous,
         ml_engagees: current.engaged,
         ml_engagees_delta: current.engaged - previous.engaged,
-        engagement_rate: region.ml_activees_current > 0 ? current.engaged / region.ml_activees_current : 0,
+        engagement_rate: territory.ml_activees_current > 0 ? current.engaged / territory.ml_activees_current : 0,
         a_traiter: current.a_traiter,
         traites: current.traites,
-        traites_variation: calculatePercentage(current.traites, previous.traites),
+        traites_variation: createCumulStatWithVariation(current.traites, previous.traites, precedent?.traites ?? null)
+          .variation,
       };
     });
+}
+
+export const getRegionalStats = async (period: StatsPeriod = "30days") => {
+  const territories = await getTerritoryStats(period, "region");
 
   return {
-    regions: regionsWithEngagement,
+    regions: territories.map((territory) => ({
+      ...territory,
+      nom: territory.nom || "Région inconnue",
+    })),
   };
 };
 
-/** Périmètre des lecteurs : une ML explicite, sinon les ML des régions données, sinon tout. */
-const resolveMissionLocaleIds = async (regions?: string[], mlId?: string) =>
-  mlId ? [new ObjectId(mlId)] : regions?.length ? await getMissionLocaleIdsByRegions(regions) : undefined;
+/** Couverture par département d'une région, sur le modèle de `getRegionalStats`. */
+export const getDepartementalStats = async (period: StatsPeriod = "30days", regionCode: string) => {
+  const territories = await getTerritoryStats(period, "departement", regionCode);
+
+  return {
+    departements: territories.map((territory) => ({
+      ...territory,
+      nom: DEPARTEMENTS_BY_CODE[territory.code as keyof typeof DEPARTEMENTS_BY_CODE]?.nom || "Département inconnu",
+    })),
+  };
+};
+
+/** Périmètre des lecteurs : une ML explicite, sinon les ML du territoire, sinon tout. */
+export const resolveMissionLocaleIds = async (territoire: Territoire = {}, mlId?: string) =>
+  mlId
+    ? [new ObjectId(mlId)]
+    : isTerritoireRestreint(territoire)
+      ? await getMissionLocaleIdsByTerritoire(territoire)
+      : undefined;
 
 const toTraitementStatsData = (stats: ICollabSegmentStats) => ({
   total: stats.total,
@@ -349,23 +414,38 @@ const toTraitementStatsData = (stats: ICollabSegmentStats) => ({
 export const getTraitementStats = async (
   period: StatsPeriod = "30days",
   evaluationDate: Date = normalizeToUTCDay(new Date()),
-  regions?: string[],
+  territoire: Territoire = {},
   segment: StatsSegment = "rupture",
   mlId?: string
 ): Promise<ITraitementStatsResponse> => {
   const endDate = evaluationDate;
   const startDate = await calculateStartDateAsync(period, endDate);
 
-  const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
+  const missionLocaleIds = await resolveMissionLocaleIds(territoire, mlId);
 
-  const [latest, first] = await Promise.all([
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
+  const [latest, first, precedent] = await Promise.all([
     getSegmentStatsForPeriod(endDate, missionLocaleIds, segment),
     getFirstSegmentStatsInPeriod(startDate, endDate, missionLocaleIds, segment),
+    previousStartDate
+      ? getFirstSegmentStatsInPeriod(previousStartDate, startDate, missionLocaleIds, segment)
+      : Promise.resolve(null),
   ]);
+  const fin = toTraitementStatsData(latest);
+  const debut = toTraitementStatsData(first);
+  const debutPrecedent = precedent ? toTraitementStatsData(precedent) : null;
+  const variation = (cle: keyof typeof fin) =>
+    createCumulStatWithVariation(fin[cle], debut[cle], debutPrecedent?.[cle] ?? null).variation;
 
   return {
-    latest: toTraitementStatsData(latest),
-    first: toTraitementStatsData(first),
+    latest: fin,
+    first: debut,
+    variations: {
+      total: variation("total"),
+      total_contacte: variation("total_contacte"),
+      total_repondu: variation("total_repondu"),
+      total_accompagne: variation("total_accompagne"),
+    },
     evaluationDate: endDate,
     period,
     segment,
@@ -382,6 +462,9 @@ interface TraitementMLParams {
   sort_by: TraitementMlSortBy;
   sort_order: "asc" | "desc";
   search?: string;
+  departements?: string[];
+  utiliseService?: boolean;
+  engagee?: boolean;
 }
 
 const TRAITEMENT_ML_SORT_FIELD_MAP: Record<TraitementMlSortBy, string> = {
@@ -414,9 +497,22 @@ const buildTranchesProjection = (viewPath: string) => ({
 export const getTraitementStatsByMissionLocale = async (
   params: TraitementMLParams
 ): Promise<ITraitementMLStatsResponse> => {
-  const { period, segment, region, regions, page, limit, sort_by, sort_order, search } = params;
+  const {
+    period,
+    segment,
+    region,
+    regions,
+    page,
+    limit,
+    sort_by,
+    sort_order,
+    search,
+    departements,
+    utiliseService,
+    engagee,
+  } = params;
   const evaluationDate = normalizeToUTCDay(new Date());
-  const startDate = calculateStartDate(period, evaluationDate);
+  const startDate = await calculateStartDateAsync(period, evaluationDate);
 
   const mongoSortField = TRAITEMENT_ML_SORT_FIELD_MAP[sort_by];
   const sortDirection = sort_order === "desc" ? -1 : 1;
@@ -433,6 +529,7 @@ export const getTraitementStatsByMissionLocale = async (
       $match: {
         type: "MISSION_LOCALE",
         ...regionFilter,
+        ...(departements?.length && { "adresse.departement": { $in: departements } }),
         ...(search && { nom: { $regex: escapeRegex(search), $options: "i" } }),
       },
     },
@@ -517,9 +614,27 @@ export const getTraitementStatsByMissionLocale = async (
         a_traiter: "$view.a_traiter",
         traites: "$view.traite",
         delai_moyen_jours: segment === "collab" ? buildDelaiMoyenExpr() : { $literal: null },
-        is_activated: { $ne: ["$activated_at", null] },
+        is_activated: { $ne: [{ $ifNull: ["$activated_at", null] }, null] },
+        is_engaged: {
+          $and: [
+            { $ne: [{ $ifNull: ["$activated_at", null] }, null] },
+            { $gt: [{ $ifNull: ["$latest_stats.total", 0] }, 0] },
+            { $gte: [{ $divide: ["$latest_stats.traite", "$latest_stats.total"] }, ENGAGEMENT_THRESHOLD] },
+          ],
+        },
+        departement_code: "$adresse.departement",
       },
     },
+    ...(utiliseService !== undefined || engagee !== undefined
+      ? [
+          {
+            $match: {
+              ...(utiliseService !== undefined && { is_activated: utiliseService }),
+              ...(engagee !== undefined && { is_engaged: engagee }),
+            },
+          },
+        ]
+      : []),
     {
       $addFields: {
         delai_moyen_jours_sort: {
@@ -572,6 +687,8 @@ export const getTraitementStatsByMissionLocale = async (
               traites: 1,
               pourcentage_traites: 1,
               is_activated: 1,
+              is_engaged: 1,
+              departement_code: 1,
               details: buildTranchesProjection("$view"),
               delai_moyen_jours: 1,
               derniere_activite: { $ifNull: ["$derniere_activite", null] },
@@ -591,14 +708,17 @@ export const getTraitementStatsByMissionLocale = async (
   const total = result.total[0]?.count || 0;
   const data = result.data || [];
 
+  // « Depuis janvier » et « Depuis le lancement » n'ont pas de période comparable : pas d'évolution affichée.
+  const evolutionComparable = calculatePreviousStartDate(period, startDate) !== null;
   const resultsWithEvolution = data.map((item: Record<string, unknown>) => {
     const evolutionValue = (item.pourcentage_evolution_value as number) || 0;
-    let pourcentage_evolution = "=";
-    if (evolutionValue > 0) {
-      pourcentage_evolution = `+${evolutionValue}%`;
-    } else if (evolutionValue < 0) {
-      pourcentage_evolution = `${evolutionValue}%`;
-    }
+    const pourcentage_evolution = !evolutionComparable
+      ? ""
+      : evolutionValue > 0
+        ? `+${evolutionValue}%`
+        : evolutionValue < 0
+          ? `${evolutionValue}%`
+          : "=";
 
     const { pourcentage_evolution_value: _pourcentage_evolution_value, ...rest } = item;
     return {
@@ -672,7 +792,7 @@ const buildCountIf = (field: string, value: string) => ({
   $sum: { $cond: [{ $eq: [field, value] }, 1, 0] },
 });
 
-const DEFAULT_MOTIFS = {
+export const DEFAULT_MOTIFS = {
   mobilite: 0,
   logement: 0,
   sante: 0,
@@ -684,7 +804,7 @@ const DEFAULT_MOTIFS = {
   autre: 0,
 };
 
-const MOTIFS_PIPELINE = [
+export const MOTIFS_PIPELINE = [
   { $unwind: { path: "$organisme_data.motif", preserveNullAndEmptyArrays: true } },
   {
     $group: {
@@ -702,41 +822,87 @@ const MOTIFS_PIPELINE = [
   },
 ];
 
-export async function getDeploymentStats(period: StatsPeriod = "30days") {
+const regionDuDepartement = (code: string): string | undefined =>
+  DEPARTEMENTS_BY_CODE[code as keyof typeof DEPARTEMENTS_BY_CODE]?.region.code;
+
+const regionsDesDepartements = (departements: string[]) => [
+  ...new Set(departements.map(regionDuDepartement).filter((code): code is string => !!code)),
+];
+
+/** Lignes du périmètre : celles des départements demandés, sinon celles des régions. */
+const getLignesTerritoire = async (period: StatsPeriod, { regions, departements }: Territoire) => {
+  if (departements?.length) {
+    const lignes = await Promise.all(
+      regionsDesDepartements(departements).map((code) => getTerritoryStats(period, "departement", code))
+    );
+    return lignes.flat().filter((ligne) => departements.includes(ligne.code));
+  }
+  const regional = await getRegionalStats(period);
+  return regions?.length ? regional.regions.filter((r) => regions.includes(r.code)) : regional.regions;
+};
+
+export async function getDeploymentStats(period: StatsPeriod = "30days", territoire: Territoire = {}) {
   const evaluationDate = normalizeToUTCDay(new Date());
 
-  const [summary, regional] = await Promise.all([getSummaryStats(evaluationDate, period), getRegionalStats(period)]);
+  const restreint = isTerritoireRestreint(territoire);
+  const [summary, regions] = await Promise.all([
+    restreint ? null : getSummaryStats(evaluationDate, period),
+    getLignesTerritoire(period, territoire),
+  ]);
 
-  const engagedMlCount = regional.regions.reduce((sum, r) => sum + r.ml_engagees, 0);
-  const previousEngagedMlCount = regional.regions.reduce((sum, r) => sum + (r.ml_engagees - r.ml_engagees_delta), 0);
+  const engagedMlCount = regions.reduce((sum, r) => sum + r.ml_engagees, 0);
+  const previousEngagedMlCount = regions.reduce((sum, r) => sum + (r.ml_engagees - r.ml_engagees_delta), 0);
+
+  // Le national passe par getSummaryStats pour compter aussi les ML sans région.
+  const mlCounts = !summary
+    ? {
+        mlCount: regions.reduce((sum, r) => sum + r.ml_total, 0),
+        activatedMlCount: regions.reduce((sum, r) => sum + r.ml_activees, 0),
+        previousActivatedMlCount: regions.reduce((sum, r) => sum + (r.ml_activees - r.ml_activees_delta), 0),
+      }
+    : {
+        mlCount: summary.mlCount,
+        activatedMlCount: summary.activatedMlCount,
+        previousActivatedMlCount: summary.previousActivatedMlCount,
+      };
+
+  const startDate = await calculateStartDateAsync(period, evaluationDate);
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
 
   return {
     summary: {
-      mlCount: summary.mlCount,
-      activatedMlCount: summary.activatedMlCount,
-      previousActivatedMlCount: summary.previousActivatedMlCount,
+      ...mlCounts,
       engagedMlCount,
       previousEngagedMlCount,
-      date: summary.date,
+      activatedMlVariation: createEtatStatWithVariation(
+        mlCounts.activatedMlCount,
+        mlCounts.previousActivatedMlCount,
+        !!previousStartDate
+      ).variation,
+      engagedMlVariation: createEtatStatWithVariation(engagedMlCount, previousEngagedMlCount, !!previousStartDate)
+        .variation,
+      date: evaluationDate,
     },
-    regionsActives: regional.regions.filter((r) => r.deployed).map((r) => r.code),
+    regionsActives: territoire.departements?.length
+      ? regionsDesDepartements(territoire.departements)
+      : regions.map((r) => r.code),
     evaluationDate,
     period,
   };
 }
 
-export async function getSyntheseRegionsStats(period: StatsPeriod = "30days") {
+export async function getSyntheseRegionsStats(period: StatsPeriod = "30days", scopeRegions?: string[]) {
   const regional = await getRegionalStats(period);
 
   return {
-    regions: regional.regions,
+    regions: scopeRegions?.length ? regional.regions.filter((r) => scopeRegions.includes(r.code)) : regional.regions,
     period,
   };
 }
 
 export async function getRupturantsStats(
   period: StatsPeriod = "30days",
-  regions?: string[],
+  territoire: Territoire = {},
   mlId?: string,
   segment: StatsSegment = "rupture"
 ) {
@@ -744,23 +910,25 @@ export async function getRupturantsStats(
   const endDate = evaluationDate;
   const startDate = await calculateStartDateAsync(period, endDate);
 
-  const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
+  const missionLocaleIds = await resolveMissionLocaleIds(territoire, mlId);
 
-  const evenlySpacedDates = await getEvenlySpacedDates(period, endDate);
+  const timeSeriesDates = await getTimeSeriesDates(period, endDate);
   const rupturantsTimeSeries: ITimeSeriesPoint[] = await getCumulativeStatsForDates(
-    evenlySpacedDates,
+    timeSeriesDates,
     missionLocaleIds,
     segment
   );
 
-  const [currentStats, previousStats] = await Promise.all([
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
+  const [currentStats, previousStats, precedentStats] = await Promise.all([
     getSegmentStatsForPeriod(endDate, missionLocaleIds, segment),
     getSegmentStatsForPeriod(startDate, missionLocaleIds, segment),
+    previousStartDate ? getSegmentStatsForPeriod(previousStartDate, missionLocaleIds, segment) : Promise.resolve(null),
   ]);
 
   const rupturantsSummary: IRupturantsSummary = {
-    a_traiter: createStatWithVariation(currentStats.a_traiter, previousStats.a_traiter),
-    traites: createStatWithVariation(currentStats.traite, previousStats.traite),
+    a_traiter: createEtatStatWithVariation(currentStats.a_traiter, previousStats.a_traiter, !!previousStartDate),
+    traites: createCumulStatWithVariation(currentStats.traite, previousStats.traite, precedentStats?.traite ?? null),
     total: currentStats.total,
   };
 
@@ -775,23 +943,32 @@ export async function getRupturantsStats(
 
 const buildDetailsTraitesV2 = (
   current: ICollabSegmentStats,
-  previous: ICollabSegmentStats
-): IDetailsDossiersTraitesV2 => ({
-  rdv_pris: createStatWithVariation(current.rdv_pris, previous.rdv_pris),
-  projet_pro_securise: createStatWithVariation(current.projet_pro_securise, previous.projet_pro_securise),
-  ne_souhaite_pas_accompagnement: createStatWithVariation(
-    current.ne_souhaite_pas_accompagnement,
-    previous.ne_souhaite_pas_accompagnement
-  ),
-  a_recontacter: createStatWithVariation(current.a_recontacter, previous.a_recontacter),
-  injoignable: createStatWithVariation(current.injoignable, previous.injoignable),
-  autre: createStatWithVariation(current.autre, previous.autre),
-  total: current.traite,
-});
+  previous: ICollabSegmentStats,
+  precedent: ICollabSegmentStats | null
+): IDetailsDossiersTraitesV2 => {
+  const cumul = (
+    cle:
+      | "rdv_pris"
+      | "projet_pro_securise"
+      | "ne_souhaite_pas_accompagnement"
+      | "a_recontacter"
+      | "injoignable"
+      | "autre"
+  ) => createCumulStatWithVariation(current[cle], previous[cle], precedent?.[cle] ?? null);
+  return {
+    rdv_pris: cumul("rdv_pris"),
+    projet_pro_securise: cumul("projet_pro_securise"),
+    ne_souhaite_pas_accompagnement: cumul("ne_souhaite_pas_accompagnement"),
+    a_recontacter: cumul("a_recontacter"),
+    injoignable: cumul("injoignable"),
+    autre: cumul("autre"),
+    total: current.traite,
+  };
+};
 
 export async function getDossiersTraitesStats(
   period: StatsPeriod = "30days",
-  regions?: string[],
+  territoire: Territoire = {},
   mlId?: string,
   segment: StatsSegment = "rupture"
 ): Promise<IDossiersTraitesStatsResponse> {
@@ -799,15 +976,17 @@ export async function getDossiersTraitesStats(
   const endDate = evaluationDate;
   const startDate = await calculateStartDateAsync(period, endDate);
 
-  const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
+  const missionLocaleIds = await resolveMissionLocaleIds(territoire, mlId);
 
-  const [currentStats, previousStats] = await Promise.all([
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
+  const [currentStats, previousStats, precedentStats] = await Promise.all([
     getSegmentStatsForPeriod(endDate, missionLocaleIds, segment),
     getSegmentStatsForPeriod(startDate, missionLocaleIds, segment),
+    previousStartDate ? getSegmentStatsForPeriod(previousStartDate, missionLocaleIds, segment) : Promise.resolve(null),
   ]);
 
   return {
-    detailsV2: buildDetailsTraitesV2(currentStats, previousStats),
+    detailsV2: buildDetailsTraitesV2(currentStats, previousStats, precedentStats),
     traites: currentStats.traite,
     deja_connu_accompagne: segment === "all" ? null : currentStats.deja_connu_accompagne,
     evaluationDate,
@@ -816,32 +995,53 @@ export async function getDossiersTraitesStats(
   };
 }
 
+export const buildCollabMatch = (date: Date, missionLocaleIds?: ObjectId[]) => ({
+  "organisme_data.acc_conjoint": true,
+  "organisme_data.acc_conjoint_at": { $lte: date },
+  soft_deleted: { $ne: true },
+  ...(missionLocaleIds ? { mission_locale_id: { $in: missionLocaleIds } } : {}),
+});
+
+/**
+ * Périmètre des dossiers de collaboration : ceux reçus par la ML d'une fiche, sinon ceux envoyés par les CFA du
+ * territoire, quelle que soit la région de la ML qui les reçoit (décision 1.1).
+ */
+export const buildCollabPerimetreMatch = async (
+  territoire: Territoire = {},
+  mlId?: string
+): Promise<Record<string, unknown>> => {
+  if (mlId) return { mission_locale_id: new ObjectId(mlId) };
+  if (!isTerritoireRestreint(territoire)) return {};
+  const organismeIds = await organismesDb().distinct("_id", buildTerritoireMatch(territoire));
+  return { "effectif_snapshot.organisme_id": { $in: organismeIds } };
+};
+
+/** Chiffres clés des collaborations d'une ML, à partir de ses snapshots (les territoires passent par les CFA). */
 export async function getCollaborationSegmentStats(
   period: StatsPeriod = "30days",
-  regions?: string[],
+  territoire: Territoire = {},
   mlId?: string
 ): Promise<ICollaborationSegmentStats> {
   const evaluationDate = normalizeToUTCDay(new Date());
   const startDate = await calculateStartDateAsync(period, evaluationDate);
-  const missionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
+  const missionLocaleIds = await resolveMissionLocaleIds(territoire, mlId);
   const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
-
   const collabMatch = (date: Date) => ({
-    "organisme_data.acc_conjoint": true,
-    "organisme_data.acc_conjoint_at": { $lte: date },
+    ...buildCollabMatch(date, missionLocaleIds),
     "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
-    soft_deleted: { $ne: true },
-    ...(missionLocaleIds ? { mission_locale_id: { $in: missionLocaleIds } } : {}),
   });
 
   const countCfaAyantCollabore = async (date: Date) =>
     (await missionLocaleEffectifsDb().distinct("effectif_snapshot.organisme_id", collabMatch(date))).length;
 
-  const [current, previous, cfaCurrent, cfaPrevious, objectifsResult] = await Promise.all([
+  const previousStartDate = calculatePreviousStartDate(period, startDate);
+  const [current, previous, precedent, cfaCurrent, cfaPrevious, cfaPrecedent, objectifsResult] = await Promise.all([
     getSegmentStatsForPeriod(evaluationDate, missionLocaleIds, "collab"),
     getSegmentStatsForPeriod(startDate, missionLocaleIds, "collab"),
+    previousStartDate ? getSegmentStatsForPeriod(previousStartDate, missionLocaleIds, "collab") : Promise.resolve(null),
     countCfaAyantCollabore(evaluationDate),
     countCfaAyantCollabore(startDate),
+    previousStartDate ? countCfaAyantCollabore(previousStartDate) : Promise.resolve(null),
     missionLocaleEffectifsDb()
       .aggregate([
         { $match: collabMatch(evaluationDate) },
@@ -851,6 +1051,8 @@ export async function getCollaborationSegmentStats(
   ]);
 
   const motifs = { ...DEFAULT_MOTIFS, ...objectifsResult?.motifs?.[0] };
+  const variationSituation = (cle: keyof ICollabSegmentStats & `situation_${string}`) =>
+    createCumulStatWithVariation(current[cle], previous[cle], precedent?.[cle] ?? null).variation;
   const situations = {
     rupture: current.situation_rupture,
     abandon: current.situation_abandon,
@@ -863,17 +1065,29 @@ export async function getCollaborationSegmentStats(
   return {
     evaluationDate,
     period,
-    cfa_ayant_collabore: createStatWithVariation(cfaCurrent, cfaPrevious),
-    jeunes_envoyes: createStatWithVariation(current.total, previous.total),
-    jeunes_contactes: createStatWithVariation(current.traite, previous.traite),
-    jeunes_accompagnement_accepte: createStatWithVariation(current.rdv_pris, previous.rdv_pris),
-    resultats: buildDetailsTraitesV2(current, previous),
+    cfa_ayant_collabore: createCumulStatWithVariation(cfaCurrent, cfaPrevious, cfaPrecedent),
+    jeunes_envoyes: createCumulStatWithVariation(current.total, previous.total, precedent?.total ?? null),
+    jeunes_contactes: createCumulStatWithVariation(current.traite, previous.traite, precedent?.traite ?? null),
+    jeunes_accompagnement_accepte: createCumulStatWithVariation(
+      current.rdv_pris,
+      previous.rdv_pris,
+      precedent?.rdv_pris ?? null
+    ),
+    resultats: buildDetailsTraitesV2(current, previous, precedent),
     part_deja_connus: current.traite > 0 ? Math.round((current.deja_connu_accompagne / current.traite) * 100) : 0,
     delai_moyen_jours:
       current.delai_premiere_activite_count > 0
         ? Math.round((current.delai_premiere_activite_jours_total / current.delai_premiere_activite_count) * 10) / 10
         : null,
     situations: { ...situations, total: Object.values(situations).reduce((sum, value) => sum + value, 0) },
+    situations_variations: {
+      rupture: variationSituation("situation_rupture"),
+      abandon: variationSituation("situation_abandon"),
+      prevention_inevitable: variationSituation("situation_prevention_inevitable"),
+      prevention_tres_eleve: variationSituation("situation_prevention_tres_eleve"),
+      prevention_modere: variationSituation("situation_prevention_modere"),
+      besoin_aide_hors_rupture: variationSituation("situation_besoin_aide_hors_rupture"),
+    },
     objectifs: {
       mobilite: motifs.mobilite || 0,
       logement: motifs.logement || 0,
@@ -889,6 +1103,72 @@ export async function getCollaborationSegmentStats(
   };
 }
 
+const PARIS_TIMEZONE = "Europe/Paris";
+
+const toMonthKey = (date: Date) =>
+  new Intl.DateTimeFormat("fr-CA", { timeZone: PARIS_TIMEZONE, year: "numeric", month: "2-digit" }).format(date);
+
+const listMonthKeys = (fromKey: string, to: Date) => {
+  const toIndex = (monthKey: string) => {
+    const [year, month] = monthKey.split("-").map(Number);
+    return year * 12 + month - 1;
+  };
+  const keys: string[] = [];
+  for (let index = toIndex(fromKey); index <= toIndex(toMonthKey(to)); index++) {
+    keys.push(`${Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, "0")}`);
+  }
+  return keys;
+};
+
+/** Cohortes mensuelles : dossiers envoyés chaque mois, puis ceux contactés et ceux ayant accepté à ce jour. */
+export async function getCollaborationMensuelStats(
+  period: StatsPeriod = "30days",
+  territoire: Territoire = {},
+  mlId?: string,
+  organismeId?: ObjectId
+): Promise<ICollaborationMensuelStats> {
+  const now = new Date();
+  // Fiche CFA et « depuis le lancement » : l'évolution part du premier dossier envoyé, sans mois vides avant.
+  const debutPeriode =
+    organismeId || period === "all" ? null : await calculateStartDateAsync(period, normalizeToUTCDay(now));
+  const perimetre = organismeId
+    ? { "effectif_snapshot.organisme_id": organismeId }
+    : await buildCollabPerimetreMatch(territoire, mlId);
+
+  const rows = await missionLocaleEffectifsDb()
+    .aggregate<ICollaborationMois>([
+      {
+        $match: { ...buildCollabMatch(now), ...perimetre },
+      },
+      {
+        $addFields: {
+          mois: {
+            $dateToString: { format: "%Y-%m", date: "$organisme_data.acc_conjoint_at", timezone: PARIS_TIMEZONE },
+          },
+        },
+      },
+      ...(debutPeriode ? [{ $match: { mois: { $gte: toMonthKey(debutPeriode) } } }] : []),
+      {
+        $group: {
+          _id: "$mois",
+          envoyes: { $sum: 1 },
+          contactes: { $sum: { $cond: [{ $ifNull: ["$situation", false] }, 1, 0] } },
+          acceptes: { $sum: { $cond: [{ $eq: ["$situation", SITUATION_ENUM.RDV_PRIS] }, 1, 0] } },
+        },
+      },
+      { $project: { _id: 0, mois: "$_id", envoyes: 1, contactes: 1, acceptes: 1 } },
+    ])
+    .toArray();
+
+  const premierMois = debutPeriode ? toMonthKey(debutPeriode) : rows.map((row) => row.mois).sort()[0];
+  const monthKeys = premierMois ? listMonthKeys(premierMois, now) : [toMonthKey(now)];
+  const byMonth = new Map(rows.map((row) => [row.mois, row]));
+  return {
+    mois: monthKeys.map((mois) => byMonth.get(mois) ?? { mois, envoyes: 0, contactes: 0, acceptes: 0 }),
+    period,
+  };
+}
+
 export async function getCouvertureRegionsStats(period: StatsPeriod = "30days") {
   const regional = await getRegionalStats(period);
 
@@ -898,8 +1178,7 @@ export async function getCouvertureRegionsStats(period: StatsPeriod = "30days") 
   };
 }
 
-interface TraitementExportParams {
-  regions?: string[];
+interface TraitementExportParams extends Territoire {
   mlId?: string;
 }
 
@@ -916,14 +1195,14 @@ const buildPercentageField = (numerator: string, denominator: string) => ({
   ],
 });
 
-const buildExportBasePipeline = (evaluationDate: Date, regions?: string[], mlId?: string) => [
+const buildExportBasePipeline = (evaluationDate: Date, territoire: Territoire, mlId?: string) => [
   ...buildLatestPerMlStages(buildLatestStatsMatch(evaluationDate, mlId ? [new ObjectId(mlId)] : undefined)),
   { $lookup: { from: "organisations", localField: "_id", foreignField: "_id", as: "ml" } },
   { $unwind: "$ml" },
   {
     $match: {
       "ml.type": "MISSION_LOCALE",
-      ...(regions?.length && { "ml.adresse.region": { $in: regions } }),
+      ...buildTerritoireMatch(territoire, "ml."),
     },
   },
 ];
@@ -996,10 +1275,10 @@ const withDepartementNom = <T extends { departement_code: string | null }>(row: 
 };
 
 export const getTraitementExportData = async (params: TraitementExportParams) => {
-  const { regions, mlId } = params;
+  const { mlId, ...territoire } = params;
   const evaluationDate = normalizeToUTCDay(new Date());
 
-  const basePipeline = buildExportBasePipeline(evaluationDate, regions, mlId);
+  const basePipeline = buildExportBasePipeline(evaluationDate, territoire, mlId);
 
   const mlPipeline = [
     ...basePipeline,
@@ -1080,15 +1359,13 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
     { $sort: { region_nom: 1 as const } },
   ];
 
-  const collabMissionLocaleIds = await resolveMissionLocaleIds(regions, mlId);
+  const collabMissionLocaleIds = await resolveMissionLocaleIds(territoire, mlId);
   const collabMlFilter = collabMissionLocaleIds ? { mission_locale_id: { $in: collabMissionLocaleIds } } : {};
 
-  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale();
   const collabByMlPipeline = [
     {
       $match: {
         "organisme_data.acc_conjoint": true,
-        "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
         soft_deleted: { $ne: true },
         ...collabMlFilter,
       },

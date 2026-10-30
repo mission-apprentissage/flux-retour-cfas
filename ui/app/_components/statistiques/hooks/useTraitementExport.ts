@@ -12,6 +12,7 @@ import { exportMultiSheetXlsx } from "@/common/utils/exportUtils";
 
 interface UseTraitementExportOptions {
   region?: string;
+  departement?: string;
   mlId?: string;
   national?: boolean;
   mlNom?: string;
@@ -34,6 +35,7 @@ export function useTraitementExport({
   mlNom,
   onSuccess,
   onError,
+  departement,
 }: UseTraitementExportOptions = {}) {
   const [isExporting, setIsExporting] = useState(false);
 
@@ -45,7 +47,13 @@ export function useTraitementExport({
       const data = await _get<ITraitementExportResponse>(
         "/api/v1/organisation/indicateurs-ml/stats/traitement/export",
         {
-          params: mlId ? { ml_id: mlId } : region ? { region } : national ? { national: true } : {},
+          params: mlId
+            ? { ml_id: mlId }
+            : region
+              ? { region, ...(departement && { departement }) }
+              : national
+                ? { national: true }
+                : {},
         }
       );
 
@@ -89,7 +97,7 @@ export function useTraitementExport({
     } finally {
       setIsExporting(false);
     }
-  }, [region, mlId, national, mlNom, isExporting, onSuccess, onError]);
+  }, [region, departement, mlId, national, mlNom, isExporting, onSuccess, onError]);
 
   return { exportData, isExporting };
 }

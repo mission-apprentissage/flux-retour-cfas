@@ -21,6 +21,7 @@ interface UserJwtPayload {
   exp: number;
   email: string;
   impersonatedOrganisation?: IOrganisation;
+  readOnly?: boolean;
 }
 
 interface TokenJwtPayload {
@@ -84,6 +85,7 @@ export const authMiddleware = () => {
             account_status: user.account_status,
             has_accept_cgu_version: "",
             impersonating,
+            ...(impersonating && jwtPayload.readOnly ? { readOnly: true } : {}),
             organisation,
             organisation_nom,
             organisation_role: user.organisation_role,

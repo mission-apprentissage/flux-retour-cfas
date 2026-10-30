@@ -1,0 +1,55 @@
+.tableContainer {
+  width: 100%;
+}
+
+.table :global(.fr-table) {
+  width: 100%;
+  margin-bottom: 0;
+  overflow-x: auto;
+}
+
+.table :global(.fr-table table) {
+  display: table;
+  width: 100%;
+}
+
+.table th:first-child,
+.table td:first-child {
+  min-width: 280px;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  min-width: 180px;
+}
+
+.nameCell {
+  composes: nameCell from "./CfaInvitesSansCollabTable.module.css";
+}
+
+.name {
+  composes: name from "./CfaInvitesSansCollabTable.module.css";
+}
+
+.meta {
+  composes: meta from "./CfaInvitesSansCollabTable.module.css";
+}
+
+.voie {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-mention-grey);
+}
+
+.centeredCell {
+  composes: centeredCell from "./common.module.css";
+}
+
+.emptyValue {
+  composes: emptyValue from "./common.module.css";
+}
+
+.emptyMessage {
+  composes: emptyMessage from "./common.module.css";
+}

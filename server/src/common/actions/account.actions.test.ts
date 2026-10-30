@@ -19,7 +19,10 @@ import { createOrganisation } from "./organisations.actions";
 // `isBrevoInstantSyncActive()` renvoie false et court-circuiterait l'appel réel.
 // Ce qu'on teste ici, c'est le *câblage* (l'action appelle bien l'enqueue avec le
 // bon userId), pas le comportement interne de l'enqueue (couvert par enqueue-sync.test.ts).
-vi.mock("./brevo/contacts/enqueue-sync", () => ({ enqueueBrevoContactSync: vi.fn() }));
+vi.mock("./brevo/contacts/enqueue-sync", () => ({
+  enqueueBrevoContactSync: vi.fn(),
+  enqueueBrevoOrganisationContactSync: vi.fn(),
+}));
 vi.mock("./brevo/events/enqueue-event", () => ({ enqueueBrevoEvent: vi.fn() }));
 // Le mailer part sur le réseau : on le neutralise.
 vi.mock("@/common/services/mailer/mailer");
@@ -83,6 +86,56 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
       const created = await usersMigrationDb().findOne({ email: "invite@example.com" });
       expect(String(enqueueMock.mock.calls[0][0])).toBe(String(created!._id));
       expect(eventMock).toHaveBeenCalledWith("account-confirmed", { userId: created!._id.toString() });
+    });
+
+    describe("invitation dans une Mission Locale", () => {
+      const ML_ORGA = { type: "MISSION_LOCALE" as const, nom: "ML INVITATION", ml_id: 9101 };
+
+      const inviter = async (email: string, extra: Record<string, unknown> = {}) => {
+        const organisationId = await createOrganisation({ ...ML_ORGA, ...extra });
+        await invitationsDb().insertOne(
+          testDoc<IInvitation>({
+            _id: new ObjectId(),
+            token: `tok-${email}`,
+            email,
+            organisation_id: organisationId,
+            author_id: new ObjectId(),
+            created_at: new Date(),
+          })
+        );
+        return organisationId;
+      };
+
+      it("active la ML à l'inscription de son premier invité, comme une validation admin", async () => {
+        const organisationId = await inviter("premier@example.com");
+
+        await register({ user: buildRegistrationUser("premier@example.com"), organisation: { ...ML_ORGA } });
+
+        const ml = await organisationsDb().findOne({ _id: organisationId });
+        expect((ml as { activated_at?: Date }).activated_at).toBeInstanceOf(Date);
+        expect(eventMock).toHaveBeenCalledWith("account-confirmed-ml-generic", expect.anything());
+      });
+
+      it("ne change pas la date d'une ML déjà activée", async () => {
+        const activatedAt = new Date("2025-03-01T00:00:00.000Z");
+        const organisationId = await inviter("second@example.com", { activated_at: activatedAt });
+
+        await register({ user: buildRegistrationUser("second@example.com"), organisation: { ...ML_ORGA } });
+
+        const ml = await organisationsDb().findOne({ _id: organisationId });
+        expect((ml as { activated_at?: Date }).activated_at).toEqual(activatedAt);
+        expect(eventMock).not.toHaveBeenCalledWith("account-confirmed-ml-generic", expect.anything());
+      });
+
+      it("ne pose pas de date sur une ML déjà rendue active par un compte confirmé", async () => {
+        const organisationId = await inviter("troisieme@example.com");
+        await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser({ _id: organisationId })));
+
+        await register({ user: buildRegistrationUser("troisieme@example.com"), organisation: { ...ML_ORGA } });
+
+        const ml = await organisationsDb().findOne({ _id: organisationId });
+        expect((ml as { activated_at?: Date }).activated_at).toBeUndefined();
+      });
     });
   });
 

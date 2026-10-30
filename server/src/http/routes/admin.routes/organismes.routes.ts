@@ -4,6 +4,7 @@ import { Document, ObjectId } from "mongodb";
 import { SIRET_REGEX, UAI_REGEX } from "shared/constants/validations";
 import { z } from "zod";
 
+import { inviteCfaMembres } from "@/common/actions/cfa/cfa-fiche.actions";
 import { compterContratsFlechesVers } from "@/common/actions/deca/deca-flechage.actions";
 import { checkCollabV2Eligibility } from "@/common/actions/organismes/collab-v2-eligibility";
 import { checkActivationEligibility } from "@/common/actions/organismes/deca-cfa-eligibility";
@@ -18,10 +19,12 @@ import {
   searchOrganismesSupportInfoBySiret,
   suspendCollab,
 } from "@/common/actions/organismes/organismes.admin.actions";
+import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import objectIdSchema from "@/common/validation/objectIdSchema";
 import organismesFilterSchema from "@/common/validation/organismesFilterSchema";
 import paginationShema from "@/common/validation/paginationSchema";
 import searchShema from "@/common/validation/searchSchema";
+import { heavyLimiter } from "@/http/middlewares/rateLimit";
 import validateRequestMiddleware from "@/http/middlewares/validateRequestMiddleware";
 
 const listSchema = paginationShema({ defaultSort: "created_at:-1" })
@@ -29,6 +32,11 @@ const listSchema = paginationShema({ defaultSort: "created_at:-1" })
   .merge(organismesFilterSchema())
   .strict();
 type ListSchema = z.infer<typeof listSchema>;
+
+const invitationsMembresSchema = {
+  emails: z.array(z.string().trim().toLowerCase().email()).min(1).max(50),
+  roles: z.array(z.enum(["admin", "member"])).optional(),
+};
 
 const decaCfaPilotBatchSchema = z.object({
   items: z
@@ -77,6 +85,18 @@ export default () => {
       res.json(await searchOrganismesSupportInfoBySiret(q));
     }
   );
+
+  router.post("/:id/membres/invitations", heavyLimiter, async (req, res) => {
+    const id = String(req.params.id);
+    if (!ObjectId.isValid(id)) {
+      throw Boom.badRequest("ID invalide");
+    }
+    const { emails, roles } = await validateFullZodObjectSchema(req.body, invitationsMembresSchema);
+    if (roles && roles.length !== emails.length) {
+      throw Boom.badRequest("Le champ 'roles' doit être un tableau de même taille que 'emails'");
+    }
+    res.json(await inviteCfaMembres(req.user, new ObjectId(id), emails, roles));
+  });
 
   router.get("/archivables", async (_req, res) => {
     res.json(await getArchivableOrganismes());

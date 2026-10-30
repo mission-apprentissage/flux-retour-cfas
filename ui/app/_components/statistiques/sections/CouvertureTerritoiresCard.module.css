@@ -1,0 +1,14 @@
+.detailButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  color: var(--text-action-high-blue-france);
+  cursor: pointer;
+  background: none;
+}
+
+.detailButton:disabled {
+  cursor: default;
+  opacity: 0.4;
+}

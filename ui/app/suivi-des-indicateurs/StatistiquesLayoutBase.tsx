@@ -79,7 +79,7 @@ function Banner() {
   return (
     <div className={styles.bannerContainer}>
       <div className={styles.bannerContent}>
-        <h1 className={styles.bannerTitle}>Suivi de l&lsquo;activité des Missions Locales sur le service</h1>
+        <p className={styles.bannerTitle}>Suivi de l&lsquo;activité des Missions Locales sur le service</p>
       </div>
     </div>
   );

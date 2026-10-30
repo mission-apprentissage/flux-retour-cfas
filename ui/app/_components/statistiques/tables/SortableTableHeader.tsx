@@ -24,7 +24,11 @@ export function SortableTableHeader<T extends string>({
   tooltip,
 }: SortableTableHeaderProps<T>) {
   const isSorted = currentSortColumn === column;
-  const iconClass = sortDirection === "desc" ? "ri-arrow-down-line" : "ri-arrow-up-line";
+  const iconClass = !isSorted
+    ? "ri-arrow-up-down-line"
+    : sortDirection === "desc"
+      ? "ri-arrow-down-line"
+      : "ri-arrow-up-line";
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -38,7 +42,9 @@ export function SortableTableHeader<T extends string>({
   const sortContent = (
     <>
       {label}
-      {isSorted && <i className={`${iconClass} ${styles.sortIcon}`} aria-hidden="true" />}
+      <span className={`${styles.sortButton} ${isSorted ? styles.sortButtonActive : ""}`}>
+        <i className={`${iconClass} fr-icon--sm ${styles.sortIcon}`} aria-hidden="true" />
+      </span>
     </>
   );
 

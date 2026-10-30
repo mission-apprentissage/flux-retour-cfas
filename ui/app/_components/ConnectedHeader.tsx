@@ -4,9 +4,11 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Header as DsfrHeader } from "@codegouvfr/react-dsfr/Header";
 import { MainNavigationProps } from "@codegouvfr/react-dsfr/MainNavigation";
 import { usePathname } from "next/navigation";
+import { Suspense, useState } from "react";
 import { CRISP_FAQ, ORGANISATION_TYPE } from "shared";
 
 import { PAGES } from "@/app/_utils/routes.utils";
+import { STATS_NAV_ITEMS, StatsFiltersQueryReader } from "@/app/suivi-des-indicateurs/navigation";
 import { PRODUCT_NAME_TITLE } from "@/common/constants/product";
 import { getUserOrganismeId } from "@/common/internal/AuthContext";
 
@@ -15,28 +17,31 @@ import { usePlausibleAppTracking } from "../_hooks/plausible";
 
 import styles from "./ConnectedHeader.module.css";
 import { Impersonate } from "./Impersonate";
+import { LectureSeuleNotice } from "./LectureSeuleNotice";
 import { useCfaUnreadNotificationsCount } from "./ruptures/cfa/hooks";
 import { useMlCompteursOnglets } from "./ruptures/shared/hooks";
 import { UserConnectedHeader } from "./UserConnectedHeader";
 
-// Onglets des DREETS/DDETS mis en pause pendant les travaux : les anciennes URL restent valides et affichent la page travaux.
-const ONGLETS_EN_PAUSE = [
-  { text: "Mon Tableau de bord", href: "/home" },
-  { text: "Mon territoire", href: "/organismes" },
-  { text: "Mes indicateurs", href: "/indicateurs" },
-  { text: "Vœux Affelnet", href: "/voeux-affelnet" },
-  { text: "Indicateurs nationaux", href: "/national/indicateurs" },
+const STATS_NAV_ORGANISATION_TYPES: ReadonlyArray<string> = [
+  ORGANISATION_TYPE.DREETS,
+  ORGANISATION_TYPE.DDETS,
+  ORGANISATION_TYPE.ARML,
+  ORGANISATION_TYPE.ADMINISTRATEUR,
 ];
 
-function OngletEnPause({ label }: { label: string }) {
-  return (
-    <span>
-      {label}
-      <i className={`ri-tools-fill ${styles.pausedMark}`} aria-hidden="true" />
-      <span className="fr-sr-only">(fonctionnalité en pause pendant les travaux)</span>
-    </span>
-  );
-}
+/** Menu « Admin » de la maquette, complété des pages admin qu'elle ne mentionne pas pour ne pas les perdre. */
+const ADMIN_MENU_LINKS = [
+  { text: "Impostures", href: "/admin/impostures" },
+  { text: "Gestion des utilisateurs", href: "/admin/users" },
+  { text: "Gestion des réseaux", href: "/admin/reseaux" },
+  { text: "Demandes d'activation des CFA", href: "/admin/demandes-activation" },
+  { text: "Toutes les transmissions", href: "/admin/transmissions" },
+  { text: "Fusion des organismes", href: "/admin/fusion-organismes" },
+  { text: "Organismes absents du référentiel", href: "/admin/organismes/gestion" },
+  { text: "Listes de contacts Brevo", href: "/admin/brevo-contacts" },
+  { text: "Recherche d'un organisme", href: "/admin/organismes/recherche" },
+  { text: "Tous les organismes", href: "/organismes" },
+];
 
 function OngletAvecCompteur({ label, compteur }: { label: string; compteur: number | undefined }) {
   return (
@@ -59,16 +64,15 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   const pathname = usePathname();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
+  const [statsFiltersQuery, setStatsFiltersQuery] = useState("");
+
   const isCfa = user?.organisation?.type === ORGANISATION_TYPE.ORGANISME_FORMATION;
+  const hasStatsNav = STATS_NAV_ORGANISATION_TYPES.includes(user?.organisation?.type ?? "");
   const { data: unreadData } = useCfaUnreadNotificationsCount(isCfa ? getUserOrganismeId(user) : undefined);
   const unreadCount = unreadData?.count ?? 0;
 
   const isMl = user?.organisation?.type === ORGANISATION_TYPE.MISSION_LOCALE;
   const { data: compteurs } = useMlCompteursOnglets(isMl && withNav);
-
-  // Nav plus dense : ces profils ont deux onglets de plus que les autres pendant les travaux.
-  const aOngletsEnPause =
-    user?.organisation?.type === ORGANISATION_TYPE.DREETS || user?.organisation?.type === ORGANISATION_TYPE.DDETS;
 
   const getMesOrganismesLabel = (type: string) => {
     switch (type) {
@@ -179,44 +183,21 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
         ORGANISATION_TYPE.TETE_DE_RESEAU,
         ORGANISATION_TYPE.DREETS,
         ORGANISATION_TYPE.DDETS,
+        ORGANISATION_TYPE.ARML,
         ORGANISATION_TYPE.ACADEMIE,
         ORGANISATION_TYPE.ADMINISTRATEUR,
       ].includes(organisationType || "")
     ) {
-      if (organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) {
-        baseItems.push({
-          text: "Suivi des indicateurs",
-          isActive: pathname?.startsWith("/suivi-des-indicateurs"),
-          linkProps: {
-            href: "/suivi-des-indicateurs",
-            target: "_self",
-          },
-        });
-      }
-      if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) {
-        baseItems.push({
-          text: "Suivi des indicateurs",
-          isActive: pathname?.startsWith("/suivi-des-indicateurs"),
-          linkProps: {
-            href: "/suivi-des-indicateurs",
-            target: "_self",
-          },
-        });
-        ONGLETS_EN_PAUSE.forEach(({ text, href }) => {
+      if (hasStatsNav) {
+        STATS_NAV_ITEMS.forEach(({ text, href, isActive }) => {
           baseItems.push({
-            text: <OngletEnPause label={text} />,
-            isActive: pathname === href || pathname?.startsWith(`${href}/`),
-            linkProps: {
-              href,
-              target: "_self",
-            },
+            text,
+            isActive: isActive(pathname ?? ""),
+            linkProps: { href: `${href}${statsFiltersQuery}`, target: "_self" },
           });
         });
       }
-      if (
-        organisationType === ORGANISATION_TYPE.TETE_DE_RESEAU ||
-        organisationType === ORGANISATION_TYPE.ADMINISTRATEUR
-      ) {
+      if (organisationType === ORGANISATION_TYPE.TETE_DE_RESEAU) {
         baseItems.push({
           text: getMesOrganismesLabel(organisationType || ""),
           linkProps: {
@@ -236,53 +217,15 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
       }
       if (organisationType === ORGANISATION_TYPE.ADMINISTRATEUR) {
         baseItems.push({
-          text: "Gestion des utilisateurs",
-          isActive: pathname?.startsWith("/admin/users"),
-          linkProps: {
-            href: "/admin/users",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: "Impostures",
-          isActive: pathname?.startsWith("/admin/impostures"),
-          linkProps: {
-            href: "/admin/impostures",
-            target: "_self",
-          },
-        });
-        baseItems.push({
-          text: "Administration",
-          isActive:
-            !!pathname?.startsWith("/admin") &&
-            !pathname?.startsWith("/admin/users") &&
-            !pathname?.startsWith("/admin/impostures"),
-          menuLinks: [
-            { text: "Gestion des réseaux", linkProps: { href: "/admin/reseaux", target: "_self" } },
-            { text: "Toutes les transmissions", linkProps: { href: "/admin/transmissions", target: "_self" } },
-            { text: "Recherche d'un organisme", linkProps: { href: "/admin/organismes/recherche", target: "_self" } },
-            { text: "Fusion d'organismes", linkProps: { href: "/admin/fusion-organismes", target: "_self" } },
-            {
-              text: "Organismes absents du référentiel",
-              linkProps: { href: "/admin/organismes/gestion", target: "_self" },
-            },
-            { text: "Listes de contacts Brevo", linkProps: { href: "/admin/brevo-contacts", target: "_self" } },
-            {
-              text: "Demandes d'activation des CFA",
-              linkProps: { href: "/admin/demandes-activation", target: "_self" },
-            },
-          ],
+          text: "Admin",
+          isActive: !!pathname?.startsWith("/admin") || !!pathname?.startsWith("/organismes"),
+          menuLinks: ADMIN_MENU_LINKS.map(({ text, href }) => ({
+            text,
+            linkProps: { href, target: "_self" },
+            isActive: !!pathname?.startsWith(href),
+          })),
         });
       }
-    } else if (organisationType === ORGANISATION_TYPE.ARML) {
-      baseItems.push({
-        text: "Suivi des indicateurs",
-        isActive: pathname?.startsWith("/suivi-des-indicateurs"),
-        linkProps: {
-          href: "/suivi-des-indicateurs",
-          target: "_self",
-        },
-      });
     } else if (organisationType === ORGANISATION_TYPE.FRANCE_TRAVAIL) {
       baseItems.push({
         text: "Accueil",
@@ -303,29 +246,24 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
       text: string;
     }> = [];
 
-    if (organisationType === ORGANISATION_TYPE.DREETS || organisationType === ORGANISATION_TYPE.DDETS) {
+    const isActeurTerritorial = [ORGANISATION_TYPE.DREETS, ORGANISATION_TYPE.DDETS, ORGANISATION_TYPE.ARML].includes(
+      organisationType || ""
+    );
+
+    if (!isActeurTerritorial) {
       aideMenuLinks.push({
         linkProps: {
-          href: PAGES.static.docsKitDeploiementTbaOp.getPath(),
+          href: CRISP_FAQ,
           target: "_blank",
           rel: "noopener noreferrer",
         },
-        text: "Kit de déploiement DREETS/DDETS",
+        text: "Centre d'aide",
       });
     }
 
-    aideMenuLinks.push({
-      linkProps: {
-        href: CRISP_FAQ,
-        target: "_blank",
-        rel: "noopener noreferrer",
-      },
-      text: "Centre d'aide",
-    });
-
     if (
+      !isActeurTerritorial &&
       organisationType !== ORGANISATION_TYPE.MISSION_LOCALE &&
-      organisationType !== ORGANISATION_TYPE.ARML &&
       organisationType !== ORGANISATION_TYPE.FRANCE_TRAVAIL
     ) {
       aideMenuLinks.push({
@@ -356,18 +294,25 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
   };
 
   return (
-    <DsfrHeader
-      className={aOngletsEnPause ? styles.headerOngletsEnPause : undefined}
-      brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
-      homeLinkProps={{
-        href: "/",
-        title: `Accueil - ${PRODUCT_NAME_TITLE}`,
-      }}
-      id="fr-header-simple-header-with-service-title-and-tagline"
-      serviceTitle={PRODUCT_NAME_TITLE}
-      quickAccessItems={[<Impersonate key="impersonate" />, <UserConnectedHeader key="user-connected" />]}
-      navigation={getNavigationItems()}
-      disableDisplay
-    />
+    <>
+      {hasStatsNav && (
+        <Suspense fallback={null}>
+          <StatsFiltersQueryReader onChange={setStatsFiltersQuery} />
+        </Suspense>
+      )}
+      <DsfrHeader
+        brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
+        homeLinkProps={{
+          href: "/",
+          title: `Accueil - ${PRODUCT_NAME_TITLE}`,
+        }}
+        id="fr-header-simple-header-with-service-title-and-tagline"
+        serviceTitle={PRODUCT_NAME_TITLE}
+        quickAccessItems={[<Impersonate key="impersonate" />, <UserConnectedHeader key="user-connected" />]}
+        navigation={getNavigationItems()}
+        disableDisplay
+      />
+      <LectureSeuleNotice />
+    </>
   );
 }

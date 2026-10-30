@@ -6,6 +6,7 @@ import mime from "mime";
 import { useState } from "react";
 
 import { Spinner } from "@/app/_components/common/Spinner";
+import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _getBlob } from "@/common/httpClient";
 import { reportError } from "@/common/reportError";
@@ -19,6 +20,7 @@ export function CfaSuiviExportButton({ organismeId }: CfaSuiviExportButtonProps)
   const [isFetching, setIsFetching] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
+  const { user } = useAuth();
 
   const onDownload = async () => {
     setIsFetching(true);
@@ -35,6 +37,8 @@ export function CfaSuiviExportButton({ organismeId }: CfaSuiviExportButtonProps)
       setIsFetching(false);
     }
   };
+
+  if (user?.readOnly) return null;
 
   return (
     <>

@@ -51,7 +51,7 @@ export async function createOrganisation(organisation: IOrganisationCreate): Pro
 
     return {
       ...organisation,
-      organisme_id: organisme?._id.toString(),
+      organisme_id: organisation.organisme_id ?? organisme?._id.toString(),
     } as IOrganisationOrganismeFormation;
   };
 
@@ -138,6 +138,15 @@ export async function listContactsOrganisation(organisationId: ObjectId): Promis
     .toArray();
 }
 
+/** Un administrateur, en propre ou en imposture, invite au nom de l'équipe du Tableau de bord et non sous son nom. */
+const inviteAuNomDeLEquipe = (ctx: AuthContext) =>
+  ctx.organisation?.type === "ADMINISTRATEUR" || Boolean(ctx.impersonating);
+
+const auteurInvitationOrganisation = (ctx: AuthContext) =>
+  inviteAuNomDeLEquipe(ctx)
+    ? undefined
+    : { civility: ctx.civility, nom: ctx.nom, prenom: ctx.prenom, email: ctx.email };
+
 export async function listOrganisationPendingInvitations(ctx: AuthContext) {
   return await invitationsDb()
     .find({ organisation_id: ctx.organisation_id }, { projection: { token: 0 } })
@@ -187,13 +196,8 @@ export async function inviteUserToOrganisation(
     }
   } else {
     await sendEmail(email, "invitation_organisation", {
-      author: {
-        civility: ctx.civility,
-        nom: ctx.nom,
-        prenom: ctx.prenom,
-        email: ctx.email,
-      },
-      organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
+      author: auteurInvitationOrganisation(ctx),
+      organisationLabel: await buildOrganisationLabel(organisation_id),
       invitationToken,
     });
   }
@@ -241,7 +245,7 @@ export async function batchInviteUsersToOrganisation(
       if (sameOrg) {
         results.errors.push({
           email,
-          message: "Cet utilisateur est déjà membre de votre organisation",
+          message: "Cet utilisateur est déjà membre de cette organisation",
         });
       } else {
         const existingOrg = await getOrganisationById(existingUser.organisation_id);
@@ -279,12 +283,7 @@ export async function batchInviteUsersToOrganisation(
       }
     } else {
       await sendEmail(email, "invitation_organisation", {
-        author: {
-          civility: ctx.civility,
-          nom: ctx.nom,
-          prenom: ctx.prenom,
-          email: ctx.email,
-        },
+        author: auteurInvitationOrganisation(ctx),
         organisationLabel: organisationLabel!,
         invitationToken,
       });
@@ -314,12 +313,7 @@ export async function resendInvitationEmail(ctx: AuthContext, invitationId: stri
   } else {
     await invitationsDb().updateOne({ _id: invitation._id }, { $set: { token: newToken, expires_at: newExpiresAt } });
     await sendEmail(invitation.email, "invitation_organisation", {
-      author: {
-        civility: ctx.civility,
-        nom: ctx.nom,
-        prenom: ctx.prenom,
-        email: ctx.email,
-      },
+      author: auteurInvitationOrganisation(ctx),
       organisationLabel: await buildOrganisationLabel(ctx.organisation_id),
       invitationToken: newToken,
     });
@@ -357,8 +351,8 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
   // Lu AVANT la confirmation, et sur le même critère que les autres chemins
   // (`activated_at` OU un compte déjà confirmé) : se fier au seul retour de
   // `activateMissionLocaleAtAdminValidation` rejouerait l'événement pour une ML
-  // déjà rendue active par une inscription sur invitation, qui ne pose jamais
-  // `activated_at`.
+  // déjà rendue active par une inscription sur invitation antérieure à la pose
+  // d'`activated_at` sur ce chemin.
   const mlWasActivated =
     userOrganisation.type === "MISSION_LOCALE" ? await isMissionLocaleActivated(user.organisation_id) : true;
 
@@ -566,6 +560,7 @@ export const getOrganisationOrganismeByOrganismeId = async (
       type: "ORGANISME_FORMATION",
       uai: organisme?.uai ?? null,
       siret: organisme.siret ?? null,
+      organisme_id: organismeId.toString(),
     });
 
     return organisationsDb().findOne({

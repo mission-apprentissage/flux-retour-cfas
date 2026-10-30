@@ -15,6 +15,7 @@ interface StatCardProps {
   loadingPercentage?: boolean;
   tooltip?: React.ReactNode;
   suffix?: string;
+  className?: string;
 }
 
 export function StatCard({
@@ -26,6 +27,7 @@ export function StatCard({
   loadingPercentage = false,
   tooltip,
   suffix,
+  className,
 }: StatCardProps) {
   const percentage = variation || (previousValue !== undefined ? calculatePercentage(value || 0, previousValue) : null);
   const percentageColor =
@@ -40,7 +42,7 @@ export function StatCard({
         : undefined;
 
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${className ?? ""}`}>
       <div className={styles.cardBody}>
         <div className={styles.cardContent}>
           <p className={styles.cardLabel}>{label}</p>
@@ -62,7 +64,11 @@ export function StatCard({
               ) : (
                 percentage &&
                 percentage !== "0%" && (
-                  <p className={styles.cardPercentage} style={{ color: percentageColor }}>
+                  <p
+                    className={styles.cardPercentage}
+                    style={{ color: percentageColor }}
+                    title="Évolution par rapport à la période précédente de même durée"
+                  >
                     {percentage}
                   </p>
                 )

@@ -25,7 +25,8 @@ export const createTelechargementListeNomLog = async (
     | "ml_collab_traite"
     | "arml"
     | "ft_a_traiter"
-    | "ft_traite",
+    | "ft_traite"
+    | "indicateurs_collaborations",
   elementList: string[],
   date: Date,
   userId: ObjectId,

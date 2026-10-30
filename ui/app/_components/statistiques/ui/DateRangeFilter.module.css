@@ -1,0 +1,17 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  min-width: 260px;
+}
+
+.panel :global(.fr-input-group) {
+  margin-bottom: 0;
+}
+
+.footer {
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0.5rem;
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import type { FrIconClassName } from "@codegouvfr/react-dsfr";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
@@ -16,6 +17,10 @@ interface InvitationSidePanelProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (message?: string) => void;
+  endpoint?: string;
+  withRoles?: boolean;
+  submitLabel?: string;
+  submitIconId?: FrIconClassName;
 }
 
 const emailSchema = z.string().email("Adresse email invalide");
@@ -58,7 +63,15 @@ function validate(values: FormValues) {
   return errors;
 }
 
-export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: InvitationSidePanelProps) {
+export default function InvitationSidePanel({
+  isOpen,
+  onClose,
+  onSuccess,
+  endpoint = "/api/v1/organisation/membres/batch",
+  withRoles = true,
+  submitLabel,
+  submitIconId,
+}: InvitationSidePanelProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const [feedbacks, setFeedbacks] = useState<Array<{ severity: "success" | "error"; message: string }>>([]);
 
@@ -116,9 +129,9 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
       setFeedbacks([]);
       try {
         const result = await _post<
-          { emails: string[]; roles: Array<"admin" | "member"> },
+          { emails: string[]; roles?: Array<"admin" | "member"> },
           { success?: string[]; errors?: Array<{ email: string; message: string }> }
-        >("/api/v1/organisation/membres/batch", { emails: validEmails, roles });
+        >(endpoint, withRoles ? { emails: validEmails, roles } : { emails: validEmails });
 
         const errors = result.errors ?? [];
         const successes = result.success ?? [];
@@ -169,7 +182,7 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
         setSubmitting(false);
       }
     },
-    [handleClose, onSuccess]
+    [handleClose, onSuccess, endpoint, withRoles]
   );
 
   if (!isOpen) return null;
@@ -193,7 +206,8 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
             const hasReachedMax = values.entries.length >= MAX_INVITATIONS;
             const canSubmit = validEntries.length > 0 && !isSubmitting;
             const ctaLabel =
-              validEntries.length <= 1 ? "Valider et envoyer l'invitation" : "Valider et envoyer les invitations";
+              submitLabel ??
+              (validEntries.length <= 1 ? "Valider et envoyer l'invitation" : "Valider et envoyer les invitations");
 
             return (
               <Form className={styles.form} noValidate>
@@ -258,26 +272,28 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
                                   />
                                 )}
                               </div>
-                              <div className={styles.roleRow}>
-                                <label className={styles.roleLabel}>
-                                  <input
-                                    type="radio"
-                                    name={`entries.${index}.role`}
-                                    checked={entry.role === "admin"}
-                                    onChange={() => setFieldValue(`entries.${index}.role`, "admin")}
-                                  />
-                                  Administrateur
-                                </label>
-                                <label className={styles.roleLabel}>
-                                  <input
-                                    type="radio"
-                                    name={`entries.${index}.role`}
-                                    checked={entry.role === "member"}
-                                    onChange={() => setFieldValue(`entries.${index}.role`, "member")}
-                                  />
-                                  Non-administrateur
-                                </label>
-                              </div>
+                              {withRoles && (
+                                <div className={styles.roleRow}>
+                                  <label className={styles.roleLabel}>
+                                    <input
+                                      type="radio"
+                                      name={`entries.${index}.role`}
+                                      checked={entry.role === "admin"}
+                                      onChange={() => setFieldValue(`entries.${index}.role`, "admin")}
+                                    />
+                                    Administrateur
+                                  </label>
+                                  <label className={styles.roleLabel}>
+                                    <input
+                                      type="radio"
+                                      name={`entries.${index}.role`}
+                                      checked={entry.role === "member"}
+                                      onChange={() => setFieldValue(`entries.${index}.role`, "member")}
+                                    />
+                                    Non-administrateur
+                                  </label>
+                                </div>
+                              )}
                             </div>
                           );
                         })}
@@ -303,9 +319,22 @@ export default function InvitationSidePanel({ isOpen, onClose, onSuccess }: Invi
                 </div>
 
                 <div className={styles.footer}>
-                  <Button type="submit" priority="primary" disabled={!canSubmit} className={styles.submitButton}>
-                    {ctaLabel}
-                  </Button>
+                  {submitIconId ? (
+                    <Button
+                      type="submit"
+                      priority="primary"
+                      disabled={!canSubmit}
+                      className={styles.submitButton}
+                      iconId={submitIconId}
+                      iconPosition="right"
+                    >
+                      {ctaLabel}
+                    </Button>
+                  ) : (
+                    <Button type="submit" priority="primary" disabled={!canSubmit} className={styles.submitButton}>
+                      {ctaLabel}
+                    </Button>
+                  )}
                   <div className={styles.hint}>
                     <i className={`fr-icon-info-line fr-icon--sm ${styles.hintIcon}`} aria-hidden="true" />
                     <span>

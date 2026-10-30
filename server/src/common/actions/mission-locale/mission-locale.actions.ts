@@ -2185,7 +2185,7 @@ const RDV_PRIS_DECOUVERT_CONDITION = {
   ],
 };
 
-const DEJA_CONNU_ACCOMPAGNE_CONDITION = {
+export const DEJA_CONNU_ACCOMPAGNE_CONDITION = {
   $or: [
     { $eq: ["$computed_connaissance_ml", CONNAISSANCE_ML_ENUM.DEJA_ACCOMPAGNE_ACTIVEMENT] },
     {
@@ -2272,7 +2272,7 @@ const COLLAB_SITUATION = {
   BESOIN_AIDE_HORS_RUPTURE: "besoin_aide_hors_rupture",
 } as const;
 
-const addCollabSituationField = () => ({
+export const addCollabSituationField = () => ({
   $addFields: {
     collab_situation: {
       $switch: {
@@ -2327,7 +2327,7 @@ const addCollabSituationField = () => ({
   },
 });
 
-const addPremiereActiviteMlField = (mlUserIds: ObjectId[]) => {
+export const addPremiereActiviteMlField = (mlUserIds: ObjectId[]) => {
   const logsConseiller = {
     $filter: {
       input: "$filteredLogs",
@@ -2357,11 +2357,11 @@ const addPremiereActiviteMlField = (mlUserIds: ObjectId[]) => {
   };
 };
 
-const HAS_PREMIERE_ACTIVITE_CONDITION = {
+export const HAS_PREMIERE_ACTIVITE_CONDITION = {
   $or: [{ $ne: [{ $ifNull: ["$premiere_activite_ml_at", null] }, null] }, { $eq: ["$activite_ml_avant_envoi", true] }],
 };
 
-const DELAI_PREMIERE_ACTIVITE_EXPR = {
+export const DELAI_PREMIERE_ACTIVITE_EXPR = {
   $cond: [
     { $ne: [{ $ifNull: ["$premiere_activite_ml_at", null] }, null] },
     {

@@ -17,17 +17,19 @@ type ChartType = "bar" | "pie";
 
 type RupturantsSectionProps = SectionWithPeriodAndMlProps &
   SectionWithLayoutProps &
-  SegmentSectionProps & { title?: string };
+  SegmentSectionProps & { title?: string; className?: string };
 
 export function RupturantsSection({
   period = "30days",
   segment,
   isPublic = false,
   region,
+  departement,
   mlId,
   fullWidth,
   national = false,
   title = "Jeunes rupturants",
+  className,
 }: RupturantsSectionProps) {
   const [chartType, setChartType] = useState<ChartType>("bar");
 
@@ -35,6 +37,7 @@ export function RupturantsSection({
     period,
     segment,
     region,
+    departement,
     mlId,
     national,
     isPublic,
@@ -46,11 +49,13 @@ export function RupturantsSection({
     <StatisticsSection
       title={title}
       width={fullWidth ? "full" : "one-third"}
+      className={className}
       smallTitle
       wrapTitle
       controls={
         <SegmentedControl
           hideLegend
+          legend="Type de graphique"
           segments={[
             {
               label: (
@@ -87,7 +92,12 @@ export function RupturantsSection({
       <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
         <div className={styles.rupturantsContainer}>
           {chartType === "bar" ? (
-            <RupturantsBarChart data={data?.timeSeries || []} loading={isLoading} loadingVariation={loadingVariation} />
+            <RupturantsBarChart
+              data={data?.timeSeries || []}
+              variationTraites={data?.summary.traites.variation}
+              loading={isLoading}
+              loadingVariation={loadingVariation}
+            />
           ) : (
             <RupturantsPieChart data={data?.summary} loading={isLoading} loadingVariation={loadingVariation} />
           )}

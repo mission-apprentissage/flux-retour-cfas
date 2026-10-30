@@ -22,10 +22,16 @@ import { getMissionLocaleStat } from "../../mission-locale/mission-locale.action
 import { getOrganisationOrganismeByOrganismeId } from "../../organisations.actions";
 
 /**
+ * Date posée par la migration de rattrapage sur les ML déjà actives sans date d'activation. Antérieure au service,
+ * elle ne masque aucun dossier à la ML ; la fiche ML lui préfère la date du premier compte confirmé.
+ */
+export const ACTIVATION_RATTRAPAGE_DATE = new Date("2022-01-01T00:00:00.000Z");
+
+/**
  * Une Mission Locale est considérée comme active dès qu'elle a été activée
  * explicitement (`activated_at`) OU qu'un de ses agents dispose d'un compte
- * confirmé — les deux chemins existent et ne se recoupent pas toujours
- * (l'inscription par invitation confirme un compte sans poser `activated_at`).
+ * confirmé. Les ML dont un compte a été confirmé sur invitation avant que
+ * l'invitation ne pose `activated_at` restent actives sans date.
  */
 export const isMissionLocaleActivated = async (missionLocaleId: ObjectId): Promise<boolean> => {
   const ml = await organisationsDb().findOne({ type: "MISSION_LOCALE", _id: missionLocaleId });
@@ -362,6 +368,7 @@ export interface IMissionLocaleMember {
   telephone: string;
   email: string;
   last_traitement_at: Date | null;
+  confirmed_at: Date | null;
 }
 
 export interface IMissionLocaleDetail {
@@ -381,36 +388,33 @@ export const getMissionLocaleMembers = async (missionLocaleId: ObjectId): Promis
     })
     .toArray();
 
-  const mlEffectifs = await missionLocaleEffectifsDb()
-    .find({ mission_locale_id: missionLocaleId }, { projection: { _id: 1 } })
-    .toArray();
+  if (users.length === 0) return [];
 
-  const mlEffectifIds = mlEffectifs.map((e) => e._id);
+  const mlEffectifIds = await missionLocaleEffectifsDb().distinct("_id", { mission_locale_id: missionLocaleId });
 
-  const membersWithActivity = await Promise.all(
-    users.map(async (user) => {
-      const lastLog = await missionLocaleEffectifsLogDb()
-        .find({
+  const lastLogs = await missionLocaleEffectifsLogDb()
+    .aggregate<{ _id: ObjectId; last: Date }>([
+      {
+        $match: {
           mission_locale_effectif_id: { $in: mlEffectifIds },
-          created_by: user._id,
-        })
-        .sort({ created_at: -1 })
-        .limit(1)
-        .toArray();
+          created_by: { $in: users.map((user) => user._id) },
+        },
+      },
+      { $group: { _id: "$created_by", last: { $max: "$created_at" } } },
+    ])
+    .toArray();
+  const lastByUser = new Map(lastLogs.map((log) => [log._id.toString(), log.last]));
 
-      return {
-        _id: user._id,
-        civility: user.civility || "",
-        nom: user.nom || "",
-        prenom: user.prenom || "",
-        telephone: user.telephone || "",
-        email: user.email || "",
-        last_traitement_at: lastLog.length > 0 ? lastLog[0].created_at : null,
-      };
-    })
-  );
-
-  return membersWithActivity;
+  return users.map((user) => ({
+    _id: user._id,
+    civility: user.civility || "",
+    nom: user.nom || "",
+    prenom: user.prenom || "",
+    telephone: user.telephone || "",
+    email: user.email || "",
+    last_traitement_at: lastByUser.get(user._id.toString()) ?? null,
+    confirmed_at: user.confirmed_at ?? user.created_at ?? null,
+  }));
 };
 
 export const getMissionLocaleDetail = async (missionLocaleId: ObjectId): Promise<IMissionLocaleDetail> => {

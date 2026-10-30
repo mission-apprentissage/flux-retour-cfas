@@ -1,0 +1,149 @@
+"use client";
+
+import { Badge } from "@codegouvfr/react-dsfr/Badge";
+import { Button } from "@codegouvfr/react-dsfr/Button";
+import { Tag } from "@codegouvfr/react-dsfr/Tag";
+import { format } from "date-fns/format";
+import Link from "next/link";
+import { useState } from "react";
+import { ORGANISATION_TYPE } from "shared/constants";
+import { ML_SITUATION_DOSSIER_LABEL } from "shared/constants/missionLocale";
+import type { ICollaborationDossier, ICollaborationDossierStructure } from "shared/models/data/nationalStats.model";
+
+import { useAuth } from "@/app/_context/UserContext";
+import { _post } from "@/common/httpClient";
+import { getApiErrorMessage } from "@/common/rateLimit";
+
+import { DOSSIERS_TRAITES_V2_LABELS } from "../constants";
+import { motifLabel } from "../hooks/useCollabDossiersExport";
+import { COLLAB_DOSSIER_STATUT_LABELS } from "../hooks/useStatsQueries";
+import { ficheCfaUrl } from "../utils";
+import { IMPOSTURE_TERRITOIRE_URL } from "../views/FicheEntete";
+
+import styles from "./CollaborationsListCard.module.css";
+
+const STATUT_SEVERITY = { a_traiter: "info", a_recontacter: "warning", traite: "success" } as const;
+
+const structureLabel = ({ nom, commune }: ICollaborationDossierStructure) =>
+  [nom ?? "Nom inconnu", commune].filter(Boolean).join(", ");
+
+export function CollaborationDossierItem({
+  dossier,
+  provenanceCfa,
+}: {
+  dossier: ICollaborationDossier;
+  /** `null` : pas de lien vers la fiche CFA (liste affichée sur cette fiche). */
+  provenanceCfa: Record<string, string> | null;
+}) {
+  const situation = dossier.situation
+    ? (ML_SITUATION_DOSSIER_LABEL[dossier.situation as keyof typeof ML_SITUATION_DOSSIER_LABEL] ?? dossier.situation)
+    : null;
+
+  return (
+    <li className={styles.item}>
+      <p className={styles.jeune}>
+        {dossier.jeune.prenom} <strong>{dossier.jeune.nom}</strong>
+      </p>
+      <p className={styles.structure}>
+        <span>ML</span>
+        <strong>{structureLabel(dossier.mission_locale)}</strong>
+      </p>
+      <p className={styles.structure}>
+        <span>CFA</span>
+        {provenanceCfa && dossier.cfa.id ? (
+          <Link href={ficheCfaUrl(dossier.cfa.id, provenanceCfa)} className={`fr-link ${styles.lienStructure}`}>
+            {structureLabel(dossier.cfa)}
+          </Link>
+        ) : (
+          <strong>{structureLabel(dossier.cfa)}</strong>
+        )}
+      </p>
+      <dl className={styles.details}>
+        <dt>Statut</dt>
+        <dd>
+          <Badge as="span" small severity={STATUT_SEVERITY[dossier.statut]}>
+            {COLLAB_DOSSIER_STATUT_LABELS[dossier.statut]}
+          </Badge>
+        </dd>
+        <dt>Situation</dt>
+        <dd>{situation ? <Tag small>{situation}</Tag> : "-"}</dd>
+        <dt>Objectif(s) d&apos;accompagnement</dt>
+        <dd>
+          {dossier.motifs.length
+            ? dossier.motifs.map((motif) => (
+                <Tag key={motif} small>
+                  {motifLabel(motif)}
+                </Tag>
+              ))
+            : "-"}
+        </dd>
+        <dt>Résultat traitement ML</dt>
+        <dd>
+          {dossier.resultat ? (
+            <Badge as="span" small noIcon severity="success">
+              {DOSSIERS_TRAITES_V2_LABELS[dossier.resultat]}
+            </Badge>
+          ) : (
+            <Badge as="span" small severity="new">
+              À traiter
+            </Badge>
+          )}
+        </dd>
+      </dl>
+      <p className={styles.footer}>
+        <span>Date d&apos;envoi</span> <strong>{format(new Date(dossier.date_envoi), "dd/MM/yyyy")}</strong>
+        {" • "}
+        <span>Délai de traitement ML</span>{" "}
+        <strong>
+          {dossier.delai_jours} j{dossier.traite_par_ml ? "" : " (pas encore traité par la ML)"}
+        </strong>
+      </p>
+      {dossier.peut_imiter && <VoirDetailButton dossier={dossier} />}
+    </li>
+  );
+}
+
+/**
+ * Ouvre le dossier sous l'identité du CFA émetteur, ou de la Mission Locale destinataire pour l'ARML : en lecture
+ * seule, sauf pour l'administrateur.
+ */
+function VoirDetailButton({ dossier }: { dossier: ICollaborationDossier }) {
+  const { user } = useAuth();
+  const surMissionLocale = user?.organisation?.type === ORGANISATION_TYPE.ARML;
+  const [enCours, setEnCours] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+
+  const ouvrir = async () => {
+    if (enCours) return;
+    setEnCours(true);
+    setErreur(null);
+    try {
+      if (surMissionLocale) {
+        await _post(IMPOSTURE_TERRITOIRE_URL, { ml_id: dossier.mission_locale.id });
+        window.location.href = `/mission-locale/${dossier.effectif_id}`;
+      } else {
+        await _post(IMPOSTURE_TERRITOIRE_URL, { cfa_id: dossier.cfa.id });
+        window.location.href = `/cfa/${dossier.effectif_id}`;
+      }
+    } catch (err) {
+      setErreur(getApiErrorMessage(err, "L'imposture a échoué. Merci de réessayer."));
+      setEnCours(false);
+    }
+  };
+
+  return (
+    <div className={styles.actions}>
+      <Button
+        priority="secondary"
+        size="small"
+        iconId="fr-icon-eye-line"
+        iconPosition="right"
+        onClick={ouvrir}
+        disabled={enCours}
+      >
+        Voir le détail
+      </Button>
+      {erreur && <p className={`fr-error-text ${styles.erreur}`}>{erreur}</p>}
+    </div>
+  );
+}

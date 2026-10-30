@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const CFA_INVITES_SORT_FIELDS = ["localisation", "invitations"] as const;
+export const CFA_INVITES_SORT_FIELDS = ["localisation", "invitations", "nom", "compte"] as const;
 export const zCfaInvitesSortBy = z.enum(CFA_INVITES_SORT_FIELDS);
 export type ICfaInvitesSortBy = z.output<typeof zCfaInvitesSortBy>;
 
@@ -25,6 +25,7 @@ const zCfaInviteSansCollabRow = z.object({
       complete: z.string().nullable(),
     })
     .nullable(),
+  has_account: z.boolean(),
   invitations_recues: z.number(),
   ml_invitantes: z.number(),
   derniere_invitation_at: z.date(),
