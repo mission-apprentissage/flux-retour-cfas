@@ -6,8 +6,9 @@ import { SIPA_PASSWORD_MAX_LENGTH, SIPA_PASSWORD_MIN_LENGTH, zSipaUsername } fro
 import { z } from "zod";
 
 import { effectifsDb, sipaUsersDb } from "@/common/model/collections";
+import { DECALAGE_DATE_METIER_MS, dateMetier } from "@/common/utils/dateUtils";
 import { createSipaToken } from "@/common/utils/jwtUtils";
-import { stripDiacritics } from "@/common/utils/mongoUtils";
+import { dateMetierExpr, dedupNomExpr } from "@/common/utils/mongoUtils";
 import { compareWithTimingSafety, hash } from "@/common/utils/passwordUtils";
 import config from "@/config";
 
@@ -113,15 +114,18 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
 
   const match = {
     "_computed.organisme.departement": { $in: departementsDb },
-    "formation.date_entree": { $gte: dateMin, $lte: dateMaxEndOfDay },
+    "formation.date_entree": {
+      $gte: new Date(dateMin.getTime() - DECALAGE_DATE_METIER_MS),
+      $lte: new Date(dateMaxEndOfDay.getTime() - DECALAGE_DATE_METIER_MS),
+    },
     "formation.niveau": { $in: ["3", "4", "5"] },
     "apprenant.date_de_naissance": { $gt: ddnLowerBound },
     $expr: {
       $lt: [
-        { $dateTrunc: { date: "$formation.date_entree", unit: "day" } },
+        dateMetierExpr("$formation.date_entree"),
         {
           $dateAdd: {
-            startDate: { $dateTrunc: { date: "$apprenant.date_de_naissance", unit: "day" } },
+            startDate: dateMetierExpr("$apprenant.date_de_naissance"),
             unit: "year",
             amount: 18,
           },
@@ -159,11 +163,13 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
     { $unionWith: { coll: "effectifsDECA", pipeline: [{ $match: match }, { $project: projection }] } },
     {
       $addFields: {
-        _dedup_nom: stripDiacritics({ $toLower: { $trim: { input: { $ifNull: ["$apprenant.nom", ""] } } } }),
-        _dedup_prenom: stripDiacritics({ $toLower: { $trim: { input: { $ifNull: ["$apprenant.prenom", ""] } } } }),
-        _dedup_ddn: { $dateTrunc: { date: "$apprenant.date_de_naissance", unit: "day" } },
+        _dedup_nom: dedupNomExpr("$apprenant.nom"),
+        _dedup_prenom: dedupNomExpr("$apprenant.prenom"),
+        _dedup_ddn: dateMetierExpr("$apprenant.date_de_naissance"),
         source_priority: { $cond: [{ $eq: ["$source", "DECA"] }, 0, 1] },
-        _dernier_debut: { $max: "$contrats.date_debut" },
+        _dernier_debut: {
+          $max: { $map: { input: { $ifNull: ["$contrats", []] }, as: "c", in: dateMetierExpr("$$c.date_debut") } },
+        },
       },
     },
     {
@@ -177,7 +183,7 @@ export async function getSuiviSipaEffectifs(params: ISipaSuiviParams) {
                 in: {
                   $and: [
                     { $eq: [{ $type: "$$c.date_debut" }, "date"] },
-                    { $eq: ["$$c.date_debut", "$_dernier_debut"] },
+                    { $eq: [dateMetierExpr("$$c.date_debut"), "$_dernier_debut"] },
                     { $eq: [{ $type: "$$c.date_rupture" }, "date"] },
                     { $lte: ["$$c.date_rupture", now] },
                   ],
@@ -247,8 +253,8 @@ function dernierContrat(contrats: IContrat[] | null | undefined) {
   if (!avecDate.length) return null;
   const dernier = avecDate.reduce((a, b) => (a.date_debut! > b.date_debut! ? a : b));
   return {
-    dateDebutContrat: toDateStr(dernier.date_debut),
-    dateFinContrat: toDateStr(dernier.date_fin),
+    dateDebutContrat: dateMetier(dernier.date_debut),
+    dateFinContrat: dateMetier(dernier.date_fin),
     dateConclusionContrat: null, // absent de nos modèles et du flux DECA ingéré
   };
 }
@@ -268,12 +274,12 @@ function serializeSipaEffectif(doc: Document) {
       ine: truncate(doc.apprenant?.ine || ineFallback, 11),
       nom: truncate(doc.apprenant?.nom, 200),
       prenom: truncate(doc.apprenant?.prenom, 50),
-      dateNaissance: toDateStr(doc.apprenant?.date_de_naissance),
+      dateNaissance: dateMetier(doc.apprenant?.date_de_naissance),
     },
     formation: {
-      dateDebutFormation: toDateStr(doc.formation?.date_entree),
-      dateFinFormation: toDateStr(doc.formation?.date_fin),
-      dateInscriptionCfa: toDateStr(doc.formation?.date_inscription),
+      dateDebutFormation: dateMetier(doc.formation?.date_entree),
+      dateFinFormation: dateMetier(doc.formation?.date_fin),
+      dateInscriptionCfa: dateMetier(doc.formation?.date_inscription),
       diplomeNiveau: truncate(doc.formation?.niveau, 1),
       intituleDiplome: truncate(doc.formation?.libelle_long, 500),
     },

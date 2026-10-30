@@ -140,6 +140,24 @@ const config = {
     tbaContactsListId: env.get("MNA_TDB_BREVO_LIST_ID_TBA_CONTACTS").asInt(),
     // ID du template Brevo "invitation CFA" (varie selon l'environnement → env var plutôt que migration).
     templateInvitationCfaId: env.get("MNA_TDB_BREVO_TEMPLATE_INVITATION_CFA_ID").default("0").asInt(),
+    templateInvitationCollaborateurCfaId: env
+      .get("MNA_TDB_BREVO_TEMPLATE_INVITATION_COLLABORATEUR_CFA_ID")
+      .default("0")
+      .asInt(),
+    templatesDemandesActivation: {
+      refus: env.get("MNA_TDB_BREVO_TEMPLATE_DEMANDE_REFUS_ID").default("0").asInt(),
+      activationSansCompte: env.get("MNA_TDB_BREVO_TEMPLATE_ACTIVATION_SANS_COMPTE_ID").default("0").asInt(),
+      activationAvecCompte: env.get("MNA_TDB_BREVO_TEMPLATE_ACTIVATION_AVEC_COMPTE_ID").default("0").asInt(),
+      invitezCollaborateurs: env.get("MNA_TDB_BREVO_TEMPLATE_INVITEZ_COLLABORATEURS_ID").default("0").asInt(),
+      relanceSansCompte: env.get("MNA_TDB_BREVO_TEMPLATE_RELANCE_SANS_COMPTE_ID").default("0").asInt(),
+      relanceAvecCompte: env.get("MNA_TDB_BREVO_TEMPLATE_RELANCE_AVEC_COMPTE_ID").default("0").asInt(),
+      relanceSansInvitation: env.get("MNA_TDB_BREVO_TEMPLATE_RELANCE_SANS_INVITATION_ID").default("0").asInt(),
+      relanceInvitationEnAttente: env
+        .get("MNA_TDB_BREVO_TEMPLATE_RELANCE_INVITATION_EN_ATTENTE_ID")
+        .default("0")
+        .asInt(),
+      onboardingCollaborateur: env.get("MNA_TDB_BREVO_TEMPLATE_ONBOARDING_COLLABORATEUR_ID").default("0").asInt(),
+    },
     whatsapp: (() => {
       const isProd = env.get("MNA_TDB_ENV").required().asString() === "production";
       const hasTestOverride = !!env.get("MNA_TDB_WHATSAPP_TEST_PHONE_OVERRIDE").default("").asString();
@@ -162,6 +180,9 @@ const config = {
   },
   seedRecette: {
     password: env.get("MNA_TDB_SEED_RECETTE_PASSWORD").default("").asString(),
+  },
+  deca: {
+    flechageAuto: env.get("MNA_TDB_DECA_FLECHAGE_AUTO").default("false").asBool(),
   },
 };
 

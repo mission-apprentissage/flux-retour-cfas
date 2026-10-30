@@ -52,7 +52,7 @@ export default () => {
       if (!ObjectId.isValid(req.params.id)) {
         throw Boom.badRequest("ID invalide");
       }
-      return await resendAdminInvitation(req.params.id);
+      return await resendAdminInvitation(req.params.id, req.user);
     })
   );
 

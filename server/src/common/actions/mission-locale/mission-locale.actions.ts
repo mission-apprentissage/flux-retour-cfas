@@ -115,6 +115,18 @@ const cfaForceVisibleExpr = () => ({
  */
 const souhaiteRdvForceVisibleExpr = () => ({ $eq: [{ $ifNull: ["$souhaite_rdv", false] }, true] });
 
+const anterieurActivationCollabExpr = () => ({
+  $and: [
+    { $ne: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null] },
+    {
+      $lt: [
+        "$created_at",
+        { $max: ["$computed.organisme.ml_beta_activated_at", "$computed.organisme.collab_resumed_at"] },
+      ],
+    },
+  ],
+});
+
 /**
  * Vérifie si un nouveau contrat est arrivé après une rupture déclarée par le CFA.
  * Retourne true si cfa_rupture_declaration doit être nettoyé.
@@ -427,7 +439,7 @@ const addFieldFromActivationDate = () => {
   ];
 };
 
-const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
+export const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMATION") => {
   const MISSION_LOCALE_CONDITION = {
     $or: [
       // Organisme pas activé ML ET pas collab → visible (comportement existant)
@@ -448,17 +460,7 @@ const matchFromJointOrganisme = (visibility: "MISSION_LOCALE" | "ORGANISME_FORMA
       },
       // Antériorité : un dossier créé avant l'activation ML de son organisme ou avant sa dernière
       // reprise après suspension reste visible. Activer ou réactiver ne retire rien aux ML.
-      {
-        $and: [
-          { $ne: [{ $ifNull: ["$computed.organisme.ml_beta_activated_at", null] }, null] },
-          {
-            $lt: [
-              "$created_at",
-              { $max: ["$computed.organisme.ml_beta_activated_at", "$computed.organisme.collab_resumed_at"] },
-            ],
-          },
-        ],
-      },
+      anterieurActivationCollabExpr(),
     ],
   };
 
@@ -789,16 +791,45 @@ const addDateReferenceField = () => [
   },
 ];
 
-/** Réception du dossier par la ML : envoi du CFA si collaboration, sinon création. Jamais la date de rupture. */
+/** Réception du dossier par la ML : demande de collaboration ou envoi automatique du CFA, sinon création. */
 const addDateReceptionField = () => [
   {
     $addFields: {
       date_reception: {
-        $cond: [
-          { $eq: ["$organisme_data.acc_conjoint", true] },
-          { $ifNull: ["$organisme_data.reponse_at", "$created_at"] },
-          "$created_at",
-        ],
+        $switch: {
+          branches: [
+            {
+              case: { $eq: ["$organisme_data.acc_conjoint", true] },
+              then: { $ifNull: ["$organisme_data.reponse_at", "$created_at"] },
+            },
+            {
+              case: {
+                $and: [
+                  { $eq: ["$computed.organisme.is_allowed_collab", true] },
+                  { $ne: [{ $ifNull: ["$date_rupture", null] }, null] },
+                  { $not: [anterieurActivationCollabExpr()] },
+                ],
+              },
+              then: {
+                $max: [
+                  "$created_at",
+                  {
+                    $min: [
+                      {
+                        $dateAdd: { startDate: "$date_rupture", unit: "day", amount: CFA_COLLAB_AUTO_SEND_DELAI_DAYS },
+                      },
+                      "$computed.organisme.collab_suspended_at",
+                      "$souhaite_rdv_at",
+                      "$date_derniere_action_ml",
+                      "$$NOW",
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+          default: "$created_at",
+        },
       },
     },
   },
@@ -3143,8 +3174,16 @@ interface IMissionLocaleSnapshotResult {
 
 type IComputedOrganismeMl = NonNullable<NonNullable<IMissionLocaleEffectif["computed"]>["organisme"]>;
 
-export async function computedOrganismeMl(organismeId: ObjectId): Promise<IComputedOrganismeMl> {
-  const organisation = await getOrganisationOrganismeByOrganismeId(organismeId);
+export async function computedOrganismeMl(
+  organismeId: ObjectId,
+  { lectureSeule = false }: { lectureSeule?: boolean } = {}
+): Promise<IComputedOrganismeMl> {
+  const organisation = lectureSeule
+    ? ((await organisationsDb().findOne({
+        type: "ORGANISME_FORMATION",
+        organisme_id: organismeId.toString(),
+      })) as IOrganisationOrganismeFormation | null)
+    : await getOrganisationOrganismeByOrganismeId(organismeId);
   const organisme = await organismesDb().findOne(
     { _id: organismeId },
     { projection: { is_allowed_collab: 1, collab_suspended_at: 1, collab_resumed_at: 1 } }
@@ -3359,12 +3398,17 @@ export const createMissionLocaleSnapshot = async (
     return null;
   }
 
+  const computedOrganisme = await computedOrganismeMl(effectif.organisme_id);
+
   if (normalizedIdentifiant && !isDeca(effectif)) {
     const orphan = await missionLocaleEffectifsDb().findOne({
       "identifiant_normalise.nom": normalizedIdentifiant.nom,
       "identifiant_normalise.prenom": normalizedIdentifiant.prenom,
       "identifiant_normalise.date_de_naissance": normalizedIdentifiant.date_de_naissance,
-      "effectif_snapshot.organisme_id": effectif.organisme_id,
+      $or: [
+        { "effectif_snapshot.organisme_id": effectif.organisme_id },
+        { "effectif_snapshot.organisme_responsable_id": effectif.organisme_id },
+      ],
       mission_locale_id: mlData._id,
       soft_deleted: { $ne: true },
     });
@@ -3372,7 +3416,10 @@ export const createMissionLocaleSnapshot = async (
     if (orphan && !orphan.effectif_id.equals(effectif._id) && isDecaSnapshot(orphan.effectif_snapshot)) {
       // skipCurrentStatus: le findOneAndUpdate ci-dessous filtre par effectif_id (qui matche désormais
       // le record migré) et $set current_status — pas la peine de le faire deux fois.
-      await migrateMlRecordEffectifId(orphan._id, orphan.effectif_id, effectif, { skipCurrentStatus: true });
+      await migrateMlRecordEffectifId(orphan._id, orphan.effectif_id, effectif, {
+        skipCurrentStatus: true,
+        extraSet: { "computed.organisme": computedOrganisme },
+      });
     }
   }
 
@@ -3388,7 +3435,6 @@ export const createMissionLocaleSnapshot = async (
   const shouldUpsert = preFilter && duplicateFilter;
 
   const date = new Date();
-  const computedOrganisme = await computedOrganismeMl(effectif.organisme_id);
 
   let mongoInfo;
   try {

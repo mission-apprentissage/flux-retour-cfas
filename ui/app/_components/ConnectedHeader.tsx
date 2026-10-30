@@ -34,6 +34,7 @@ const ADMIN_MENU_LINKS = [
   { text: "Impostures", href: "/admin/impostures" },
   { text: "Gestion des utilisateurs", href: "/admin/users" },
   { text: "Gestion des réseaux", href: "/admin/reseaux" },
+  { text: "Demandes d'activation des CFA", href: "/admin/demandes-activation" },
   { text: "Toutes les transmissions", href: "/admin/transmissions" },
   { text: "Fusion des organismes", href: "/admin/fusion-organismes" },
   { text: "Organismes absents du référentiel", href: "/admin/organismes/gestion" },

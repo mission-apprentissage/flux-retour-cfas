@@ -89,7 +89,7 @@ function PageSizeSelector({
   onPageSizeChange: (pageSize: number) => void;
 }) {
   const selectId = useId();
-  const pageSizeOptions = [5, 10, 20, 50];
+  const pageSizeOptions = [5, 10, 20, 50, 100];
 
   return (
     <div className={fr.cx("fr-select-group")}>
@@ -121,6 +121,7 @@ export function FullTable<R>({
   onSortingChange,
   onColumnFiltersChange,
   sorting = [],
+  manualSorting = false,
   columnFilters = [],
   pageSize = 20,
   emptyMessage = "Aucun élément à afficher",
@@ -196,7 +197,7 @@ export function FullTable<R>({
       : {}),
     enableSorting: true,
     enableColumnFilters: true,
-    manualSorting: false,
+    manualSorting,
     manualFiltering: false,
     manualPagination: true,
     pageCount: pagination?.lastPage || 1,

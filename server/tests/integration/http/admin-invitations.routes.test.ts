@@ -13,8 +13,10 @@ import {
   organismesDb,
   usersMigrationDb,
 } from "@/common/model/collections";
+import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
 import { sendEmail } from "@/common/services/mailer/mailer";
 import { setTime } from "@/common/utils/timeUtils";
+import config from "@/config";
 import { useMongo } from "@tests/jest/setupMongo";
 import {
   RequestAsOrganisationFunc,
@@ -26,6 +28,10 @@ import {
 } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/mailer/mailer");
+vi.mock("@/common/services/brevo/brevo", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/common/services/brevo/brevo")>()),
+  sendTransactionalEmail: vi.fn(),
+}));
 
 const now = "2026-04-20T00:00:00.000Z";
 
@@ -88,6 +94,9 @@ describe("Admin invitations routes", () => {
     requestAsOrganisation = app.requestAsOrganisation;
     setTime(new Date(now));
     vi.mocked(sendEmail).mockClear();
+    vi.mocked(sendTransactionalEmail)
+      .mockReset()
+      .mockResolvedValue({ messageId: "message" } as never);
   });
 
   describe("GET /api/v1/admin/invitations", () => {
@@ -384,14 +393,48 @@ describe("Admin invitations routes", () => {
         `/api/v1/admin/invitations/${invitationId.toString()}/resend`
       );
       expect(response.status).toBe(200);
-      expect(vi.mocked(sendEmail)).toHaveBeenCalledWith(
+      expect(vi.mocked(sendTransactionalEmail)).toHaveBeenCalledWith(
         "member@x.fr",
-        "invitation_cfa_member",
+        config.brevo.templateInvitationCollaborateurCfaId,
         expect.objectContaining({
-          cfaName: "CAMPUS DU LAC",
-          admin: expect.objectContaining({ prenom: "Alice", nom: "Author", fonction: "Support" }),
-        })
+          NOM_CFA: "CAMPUS DU LAC",
+          PRENOM_ADMIN: "Alice",
+          NOM_ADMIN: "Author",
+          FONCTION_ADMIN: "Support",
+          LIEN_INSCRIPTION: expect.stringContaining("invitationToken=m-tok"),
+        }),
+        { redirectRecipientInNonProdTo: "boss@cfa.fr" }
       );
+      expect(vi.mocked(sendEmail)).not.toHaveBeenCalled();
+    });
+
+    it("garde l'expiration de l'invitation member quand l'envoi Brevo échoue", async () => {
+      const cfaOrgId = new ObjectId(id(1));
+      const organismeId = new ObjectId(id(2));
+      await seedCfaOrganisation(cfaOrgId, organismeId);
+      const authorId = await seedAuthor("boss@cfa.fr");
+      const invitationId = new ObjectId();
+      const expiresAt = new Date("2026-04-24T00:00:00.000Z");
+      await invitationsDb().insertOne({
+        _id: invitationId,
+        organisation_id: cfaOrgId,
+        email: "member@x.fr",
+        token: "m-tok",
+        author_id: authorId,
+        role: "member",
+        created_at: new Date(now),
+        expires_at: expiresAt,
+      });
+      vi.mocked(sendTransactionalEmail).mockResolvedValue(undefined as never);
+
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "post",
+        `/api/v1/admin/invitations/${invitationId.toString()}/resend`
+      );
+
+      expect(response.status).toBe(500);
+      expect((await invitationsDb().findOne({ _id: invitationId }))?.expires_at).toEqual(expiresAt);
     });
 
     it("404 si invitation introuvable", async () => {

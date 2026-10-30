@@ -1,17 +1,21 @@
 import { ObjectId } from "bson";
 import { MongoServerError } from "mongodb";
 import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
-import { IEffectif } from "shared/models";
+import { IEffectif, IOrganisation } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { it, expect, describe, beforeAll, beforeEach, vi } from "vitest";
 
-import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
+import {
+  createMissionLocaleSnapshot,
+  matchFromJointOrganisme,
+} from "@/common/actions/mission-locale/mission-locale.actions";
 import * as collectionsModule from "@/common/model/collections";
 import { missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
+import { testDoc } from "@tests/utils/testUtils";
 
 const mockScoreEffectifs = vi.fn().mockResolvedValue({ model: "2026-03-16", scores: [0.5] });
 const mockRechercheCommune = vi.fn();
@@ -488,6 +492,71 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       // sans ces dates, le keeper serait « à recontacter » sans date : sous-texte vide et tri faussé
       expect(keeper?.date_dernier_passage_a_recontacter).toEqual(dateRecontact);
       expect(keeper?.date_derniere_action_ml).toEqual(dateRecontact);
+    });
+
+    it("DECA fléché vers son formateur, puis ERP du responsable pour même personne → dossier migré vers l'ERP", async () => {
+      const responsableId = new ObjectId();
+      const decaEffectif = createBaseDecaEffectif({
+        apprenant: makeApprenant("FLECHE", "Lina", 20),
+        organisme_responsable_id: responsableId,
+      });
+      await createMissionLocaleSnapshot(decaEffectif);
+      await missionLocaleEffectifsDb().updateOne(
+        { effectif_id: decaEffectif._id },
+        { $set: { situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR } }
+      );
+
+      const erpEffectif = createBaseErpEffectif({
+        _id: new ObjectId(),
+        apprenant: makeApprenant("FLECHE", "Lina", 20),
+        organisme_id: responsableId,
+      });
+      await createMissionLocaleSnapshot(erpEffectif);
+
+      const actifs = await missionLocaleEffectifsDb()
+        .find({ soft_deleted: { $ne: true } })
+        .toArray();
+      expect(actifs).toHaveLength(1);
+      expect(actifs[0].effectif_id).toEqual(erpEffectif._id);
+      expect(actifs[0].situation).toBe(SITUATION_ENUM.CONTACTE_SANS_RETOUR);
+      expect(await missionLocaleEffectifsDb().countDocuments({ soft_deleted: true })).toBe(0);
+    });
+
+    it("DECA fléché vers un formateur activé ML, puis ERP du responsable → dossier visible comme chez le responsable", async () => {
+      const responsableId = new ObjectId();
+      const formateurId = new ObjectId();
+      await organisationsDb().insertOne(
+        testDoc<IOrganisation>({
+          _id: new ObjectId(),
+          type: "ORGANISME_FORMATION",
+          siret: "11111111100011",
+          uai: "0111111A",
+          organisme_id: formateurId.toString(),
+          ml_beta_activated_at: new Date("2025-11-01"),
+          created_at: new Date("2025-11-01"),
+        }),
+        { bypassDocumentValidation: true }
+      );
+      const decaEffectif = createBaseDecaEffectif({
+        apprenant: makeApprenant("FLECHE", "Nour", 20),
+        organisme_id: formateurId,
+        organisme_responsable_id: responsableId,
+      });
+      await createMissionLocaleSnapshot(decaEffectif);
+
+      await createMissionLocaleSnapshot(
+        createBaseErpEffectif({
+          _id: new ObjectId(),
+          apprenant: makeApprenant("FLECHE", "Nour", 20),
+          organisme_id: responsableId,
+        })
+      );
+
+      const visibles = await missionLocaleEffectifsDb()
+        .aggregate([{ $match: { soft_deleted: { $ne: true } } }, ...matchFromJointOrganisme("MISSION_LOCALE")])
+        .toArray();
+      expect(visibles).toHaveLength(1);
+      expect(visibles[0].computed.organisme.ml_beta_activated_at).toBeNull();
     });
 
     it("ERP existe, puis DECA arrive pour même personne → DECA rejeté, ERP intact", async () => {

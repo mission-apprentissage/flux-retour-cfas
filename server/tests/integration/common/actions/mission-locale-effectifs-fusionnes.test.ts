@@ -222,6 +222,76 @@ describe("getEffectifsFusionnesByMissionLocaleId", () => {
     });
   });
 
+  describe("date de réception", () => {
+    const collabV2 = (overrides: Record<string, unknown> = {}) => ({
+      organisme: { ml_beta_activated_at: daysAgo(200), is_allowed_collab: true, ...overrides },
+    });
+
+    const receptionDe = async (nom: string) => {
+      const result = await getEffectifsFusionnesByMissionLocaleId(
+        missionLocale,
+        API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER
+      );
+      return result.effectifs.find((e) => e.nom === nom)?.date_reception;
+    };
+
+    it("date un dossier envoyé automatiquement du jour de l'envoi, 45 jours après la rupture", async () => {
+      await insertMlRecord("ENVOIAUTO", { computed: collabV2(), date_rupture: daysAgo(50), created_at: daysAgo(40) });
+
+      expect(await receptionDe("ENVOIAUTO")).toEqual(daysAgo(5));
+    });
+
+    it("garde la date de création d'un dossier transmis après l'échéance de l'envoi automatique", async () => {
+      await insertMlRecord("TARDIF", { computed: collabV2(), date_rupture: daysAgo(60), created_at: daysAgo(2) });
+
+      expect(await receptionDe("TARDIF")).toEqual(daysAgo(2));
+    });
+
+    it("date du jour de la suspension un dossier rendu visible par la suspension de la collaboration", async () => {
+      await insertMlRecord("SUSPENDU", {
+        computed: collabV2({ collab_suspended_at: daysAgo(3) }),
+        date_rupture: daysAgo(10),
+        created_at: daysAgo(8),
+      });
+
+      expect(await receptionDe("SUSPENDU")).toEqual(daysAgo(3));
+    });
+
+    it("garde la date de création d'un dossier antérieur à l'activation du CFA", async () => {
+      await insertMlRecord("ANTERIEUR", {
+        computed: collabV2({ ml_beta_activated_at: daysAgo(20) }),
+        date_rupture: daysAgo(50),
+        created_at: daysAgo(40),
+      });
+
+      expect(await receptionDe("ANTERIEUR")).toEqual(daysAgo(40));
+    });
+
+    it("date du jour de la demande de RDV un dossier rendu visible par le jeune avant l'envoi automatique", async () => {
+      await insertMlRecord("RDV", {
+        computed: collabV2(),
+        date_rupture: daysAgo(10),
+        created_at: daysAgo(8),
+        souhaite_rdv: true,
+        souhaite_rdv_at: daysAgo(3),
+      });
+
+      expect(await receptionDe("RDV")).toEqual(daysAgo(3));
+    });
+
+    it("ne date pas dans le futur un dossier déjà suivi dont la rupture a été repoussée", async () => {
+      await insertMlRecord("REPOUSSE", {
+        computed: collabV2(),
+        date_rupture: daysAgo(5),
+        created_at: daysAgo(100),
+        situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR,
+        date_derniere_action_ml: daysAgo(2),
+      });
+
+      expect(await receptionDe("REPOUSSE")).toEqual(daysAgo(2));
+    });
+  });
+
   describe("liste des dossiers prioritaires", () => {
     const LISTE = API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER_PRIORITAIRE;
 

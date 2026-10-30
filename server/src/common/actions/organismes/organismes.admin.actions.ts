@@ -1,5 +1,6 @@
 import { ObjectId } from "bson";
 import escapeStringRegexp from "escape-string-regexp";
+import { addJob } from "job-processor";
 import { STATUT_PRESENCE_REFERENTIEL } from "shared/constants";
 import { OrganismeSupportInfo } from "shared/models";
 import { OffreFormation } from "shared/models/data/@types/OffreFormation";
@@ -14,6 +15,7 @@ import {
   updateMissionLocaleEffectifComputedCollab,
   updateMissionLocaleEffectifComputedOrganisme,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
+import { flecherContratsDeca, rendreContratsDeca } from "@/common/actions/deca/deca-flechage.actions";
 import { getCfdInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { getEtablissement } from "@/common/apis/ApiEntreprise";
 import { fetchOrganismeReferentielBySiret } from "@/common/apis/apiReferentielMna";
@@ -436,12 +438,7 @@ export async function getArchivableOrganismes(): Promise<IArchivableOrganismesRe
 
 export type DecaCfaPilotBatchItem = { siret: string; uai: string };
 
-export type DecaCfaPilotActivateStatus =
-  | "activated"
-  | "already_active"
-  | "not_eligible"
-  | "not_found"
-  | "partial_failure";
+export type DecaCfaPilotActivateStatus = "queued" | "already_active" | "not_eligible" | "not_found" | "partial_failure";
 
 export type DecaCfaPilotDeactivateStatus = "deactivated" | "not_active" | "not_found" | "partial_failure";
 
@@ -490,7 +487,7 @@ export async function activateDecaCfaPilotBatch(
     const { siret, uai } = input;
     const organisme = await organismesDb().findOne(
       { siret, uai },
-      { projection: { _id: 1, siret: 1, uai: 1, nature: 1, is_allowed_deca: 1 } }
+      { projection: { _id: 1, siret: 1, uai: 1, nature: 1, ferme: 1, is_allowed_deca: 1, deca_contrats_flechables: 1 } }
     );
 
     if (!organisme) {
@@ -524,9 +521,12 @@ export async function activateDecaCfaPilotBatch(
     }
 
     try {
-      await organismesDb().updateOne({ _id: organisme._id as ObjectId }, { $set: { is_allowed_deca: true } });
-      results.push({ input, status: "activated", organismeId, eligibility });
+      if (await poserGardeActivationDeca(organisme._id as ObjectId)) {
+        await addJob({ name: "deca:activer", payload: { organismeId }, queued: true });
+      }
+      results.push({ input, status: "queued", organismeId, eligibility });
     } catch (err) {
+      await retirerGardeActivationDeca(organisme._id as ObjectId);
       logger.error({ err, siret, uai, organismeId }, "deca-cfa-pilot activate failed");
       results.push({
         input,
@@ -542,6 +542,71 @@ export async function activateDecaCfaPilotBatch(
   logger.info({ adminUserId, total: items.length, counts }, "deca-cfa-pilot batch activate");
 
   return { total: items.length, counts, items: results };
+}
+
+const DUREE_GARDE_ACTIVATION_DECA_MS = 12 * 3600 * 1000;
+
+export const estActivationDecaEnCours = (queuedAt: Date | null | undefined) =>
+  !!queuedAt && Date.now() - queuedAt.getTime() < DUREE_GARDE_ACTIVATION_DECA_MS;
+
+export async function poserGardeActivationDeca(organismeId: ObjectId): Promise<boolean> {
+  const maintenant = new Date();
+  const { modifiedCount } = await organismesDb().updateOne(
+    {
+      _id: organismeId,
+      $or: [
+        { deca_activation_queued_at: null },
+        { deca_activation_queued_at: { $lt: new Date(maintenant.getTime() - DUREE_GARDE_ACTIVATION_DECA_MS) } },
+      ],
+    },
+    { $set: { deca_activation_queued_at: maintenant } }
+  );
+  return modifiedCount === 1;
+}
+
+export async function retirerGardeActivationDeca(organismeId: ObjectId) {
+  await organismesDb().updateOne({ _id: organismeId }, { $unset: { deca_activation_queued_at: "" } });
+}
+
+export type ActivationDecaResultat = "flag_pose" | "deja_actif" | "non_eligible" | "annule";
+
+export async function activerDecaOrganisme(organismeId: ObjectId): Promise<ActivationDecaResultat> {
+  const organisme = await organismesDb().findOne(
+    { _id: organismeId },
+    {
+      projection: {
+        _id: 1,
+        siret: 1,
+        uai: 1,
+        nature: 1,
+        ferme: 1,
+        is_allowed_deca: 1,
+        deca_activation_queued_at: 1,
+        deca_contrats_flechables: 1,
+      },
+    }
+  );
+  if (!organisme) return "non_eligible";
+  if (organisme.is_allowed_deca === true) return "deja_actif";
+  if (!organisme.deca_activation_queued_at) return "annule";
+  const { eligible } = await checkEligibilityForLoaded(organisme);
+  if (!eligible) return "non_eligible";
+
+  const rendreLesContrats = () => rendreContratsDeca({ mode: "refaire", cibles: [organismeId] });
+  try {
+    await flecherContratsDeca({ perimetre: [organismeId], flagsSimules: [organismeId] });
+  } catch (err) {
+    await rendreLesContrats();
+    throw err;
+  }
+
+  const { modifiedCount } = await organismesDb().updateOne(
+    { _id: organismeId, deca_activation_queued_at: { $ne: null } },
+    { $set: { is_allowed_deca: true } }
+  );
+  if (modifiedCount === 1) return "flag_pose";
+  await rendreLesContrats();
+  return "annule";
 }
 
 export async function deactivateDecaCfaPilotBatch(
@@ -564,12 +629,16 @@ export async function deactivateDecaCfaPilotBatch(
     const isActive = organisme.is_allowed_deca === true;
 
     if (!isActive) {
+      await retirerGardeActivationDeca(organisme._id as ObjectId);
       results.push({ input, status: "not_active", organismeId });
       continue;
     }
 
     try {
-      await organismesDb().updateOne({ _id: organisme._id as ObjectId }, { $unset: { is_allowed_deca: "" } });
+      await organismesDb().updateOne(
+        { _id: organisme._id as ObjectId },
+        { $unset: { is_allowed_deca: "", deca_activation_queued_at: "" } }
+      );
       results.push({ input, status: "deactivated", organismeId });
     } catch (err) {
       logger.error({ err, siret, uai, organismeId }, "deca-cfa-pilot deactivate failed");

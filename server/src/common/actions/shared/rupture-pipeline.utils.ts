@@ -14,6 +14,8 @@ export const DATE_START_RUPTURES = new Date("2025-01-01");
  */
 export const STATUTS_SORTIE_RUPTURE = [STATUT_APPRENANT.APPRENTI, STATUT_APPRENANT.FIN_DE_FORMATION];
 
+export const estSnapshotDecaExpr = { $ne: [{ $type: "$effectif_snapshot.is_deca_compatible" }, "missing"] };
+
 /**
  * Fenêtre de visibilité d'un dossier ML/CFA : millésime d'année scolaire, date de rupture, ou
  * date de rupture déclarée par le CFA (la déclaration précède parfois la transmission ERP).

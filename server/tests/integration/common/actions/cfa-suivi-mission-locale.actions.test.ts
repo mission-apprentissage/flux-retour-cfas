@@ -10,7 +10,7 @@ import { getAnneeScolaireListFromDateRange, getAnneesScolaireListFromDate } from
 import type { PartialDeep } from "type-fest";
 import { describe, it, beforeEach, expect } from "vitest";
 
-import { getCfaEffectifDetail } from "@/common/actions/cfa/cfa-effectifs.actions";
+import { declareCfaEffectifRupture, getCfaEffectifDetail } from "@/common/actions/cfa/cfa-effectifs.actions";
 import {
   getCfaSuiviMissionLocale,
   getCfaSuiviMissionLocaleExportRows,
@@ -131,6 +131,56 @@ describe("getCfaSuiviMissionLocale", () => {
     const horsCollab = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "hors_collab" });
     expect(horsCollab.pagination.total).toBe(1);
     expect(horsCollab.effectifs[0].collab_status).toBe("contacte_par_ml_hors_collab");
+  });
+
+  it("étiquette effectifsDECA un dossier DECA dont le snapshot est sorti de l'union ML batch", async () => {
+    const doc = await createMlEffectif({ situation: SITUATION_ENUM.RDV_PRIS });
+    await missionLocaleEffectifsDb().insertOne(
+      testDoc<IMissionLocaleEffectif>({
+        ...doc,
+        effectif_snapshot: {
+          ...doc.effectif_snapshot,
+          deca_raw_id: new ObjectId(),
+          source: SOURCE_APPRENANT.DECA,
+          is_deca_compatible: false,
+        },
+      })
+    );
+
+    const result = await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "tous" });
+
+    expect(result.effectifs).toHaveLength(1);
+    expect(result.effectifs[0].source).toBe("effectifsDECA");
+  });
+
+  it("déclare la rupture d'un dossier DECA sorti de l'union ML batch avec la source donnée par le suivi", async () => {
+    const doc = await createMlEffectif({ situation: SITUATION_ENUM.RDV_PRIS });
+    const contrat = testDoc<IEffectifDECA>({
+      ...doc.effectif_snapshot,
+      deca_raw_id: new ObjectId(),
+      source: SOURCE_APPRENANT.DECA,
+      is_deca_compatible: false,
+    });
+    await effectifsDECADb().insertOne(contrat);
+    await missionLocaleEffectifsDb().insertOne(
+      testDoc<IMissionLocaleEffectif>({ ...doc, effectif_id: contrat._id, effectif_snapshot: contrat })
+    );
+    const [ligne] = (await getCfaSuiviMissionLocale(organisation, true, { ...baseParams, category: "tous" })).effectifs;
+
+    const dateRupture = new Date("2026-01-15");
+    const resultat = await declareCfaEffectifRupture(
+      organismeId,
+      String(ligne.id),
+      ligne.source,
+      dateRupture,
+      new ObjectId()
+    );
+
+    expect(ligne.source).toBe("effectifsDECA");
+    expect(resultat).toEqual({ created: false, updated: true });
+    expect(
+      (await missionLocaleEffectifsDb().findOne({ effectif_id: contrat._id }))?.cfa_rupture_declaration?.date_rupture
+    ).toEqual(dateRupture);
   });
 
   it("inclut toute qualification ML hors collab et la préqualif WhatsApp", async () => {

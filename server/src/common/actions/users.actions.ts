@@ -77,18 +77,20 @@ export const getUserByEmail = async (email: string) => {
   return user;
 };
 
+const emailSansCasse = (email: string) => ({ $regex: `^${escapeRegex(email)}$`, $options: "i" });
+
 /**
  * Un compte existe-t-il déjà pour cet email ? Comparaison insensible à la casse, comme le contrôle
  * qui refuse l'inscription (`registerCfa`) : les deux doivent rester alignés, sans quoi on enverrait
  * des liens d'inscription que le parcours rejettera.
  */
 export const isEmailAlreadyUsed = async (email: string): Promise<boolean> => {
-  const user = await usersMigrationDb().findOne(
-    { email: { $regex: `^${escapeRegex(email)}$`, $options: "i" } },
-    { projection: { _id: 1 } }
-  );
+  const user = await usersMigrationDb().findOne({ email: emailSansCasse(email) }, { projection: { _id: 1 } });
   return Boolean(user);
 };
+
+export const getUserByEmailIgnoringCase = (email: string) =>
+  usersMigrationDb().findOne({ email: emailSansCasse(email) });
 
 export const getDetailedUserById = async (_id: string | ObjectId) => {
   const user = await usersMigrationDb()

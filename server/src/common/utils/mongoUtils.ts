@@ -1,73 +1,197 @@
 import { WithId } from "mongodb";
 
+import { DECALAGE_DATE_METIER_MS } from "./dateUtils";
+
+const DIACRITIQUES = [
+  ["é", "e"],
+  ["è", "e"],
+  ["ê", "e"],
+  ["ë", "e"],
+  ["à", "a"],
+  ["â", "a"],
+  ["ä", "a"],
+  ["ù", "u"],
+  ["û", "u"],
+  ["ü", "u"],
+  ["ô", "o"],
+  ["ö", "o"],
+  ["î", "i"],
+  ["ï", "i"],
+  ["ç", "c"],
+  ["ÿ", "y"],
+  ["á", "a"],
+  ["í", "i"],
+  ["ó", "o"],
+  ["ú", "u"],
+  ["ñ", "n"],
+  ["ã", "a"],
+  ["õ", "o"],
+  ["ý", "y"],
+  ["ì", "i"],
+  ["ò", "o"],
+  ["É", "e"],
+  ["È", "e"],
+  ["Ê", "e"],
+  ["Ë", "e"],
+  ["À", "a"],
+  ["Â", "a"],
+  ["Ä", "a"],
+  ["Ù", "u"],
+  ["Û", "u"],
+  ["Ü", "u"],
+  ["Ô", "o"],
+  ["Ö", "o"],
+  ["Î", "i"],
+  ["Ï", "i"],
+  ["Ç", "c"],
+  ["Ÿ", "y"],
+  ["Á", "a"],
+  ["Í", "i"],
+  ["Ó", "o"],
+  ["Ú", "u"],
+  ["Ñ", "n"],
+  ["Ã", "a"],
+  ["Õ", "o"],
+  ["Ý", "y"],
+  ["Ì", "i"],
+  ["Ò", "o"],
+  ["́", ""],
+  ["̀", ""],
+  ["̂", ""],
+  ["̈", ""],
+  ["̧", ""],
+  ["̃", ""],
+];
+
+const LETTRES_SPECIALES = [
+  ["æ", "ae"],
+  ["Æ", "ae"],
+  ["œ", "oe"],
+  ["Œ", "oe"],
+  ["ß", "ss"],
+  ["ø", "o"],
+  ["Ø", "o"],
+  ["å", "a"],
+  ["Å", "a"],
+  ["ł", "l"],
+  ["Ł", "l"],
+  ["ą", "a"],
+  ["Ą", "a"],
+  ["ę", "e"],
+  ["Ę", "e"],
+  ["ć", "c"],
+  ["Ć", "c"],
+  ["ń", "n"],
+  ["Ń", "n"],
+  ["ś", "s"],
+  ["Ś", "s"],
+  ["ź", "z"],
+  ["Ź", "z"],
+  ["ż", "z"],
+  ["Ż", "z"],
+  ["ş", "s"],
+  ["Ş", "s"],
+  ["ș", "s"],
+  ["Ș", "s"],
+  ["ţ", "t"],
+  ["Ţ", "t"],
+  ["ț", "t"],
+  ["Ț", "t"],
+  ["ğ", "g"],
+  ["Ğ", "g"],
+  ["ı", "i"],
+  ["İ", "i"],
+  ["ă", "a"],
+  ["Ă", "a"],
+  ["č", "c"],
+  ["Č", "c"],
+  ["š", "s"],
+  ["Š", "s"],
+  ["ž", "z"],
+  ["Ž", "z"],
+  ["ř", "r"],
+  ["Ř", "r"],
+  ["ě", "e"],
+  ["Ě", "e"],
+  ["ů", "u"],
+  ["Ů", "u"],
+  ["̆", ""],
+  ["̌", ""],
+  ["̨", ""],
+  ["̇", ""],
+  ["̊", ""],
+];
+
+const SEPARATEURS_NOM = ["-", " ", "'", "’", "‘", "—", "–", " "];
+
+const REMPLACEMENTS_DEDUP_NOM = [
+  ...DIACRITIQUES,
+  ...LETTRES_SPECIALES,
+  ...SEPARATEURS_NOM.map((separateur) => [separateur, ""]),
+];
+
+const SEPARATEURS_ASCII = SEPARATEURS_NOM.filter((separateur) => /^[ -~]$/.test(separateur));
+
 /**
  * Normalisation des accents en agrégation Mongo
  */
 export function stripDiacritics(expr: Record<string, unknown>) {
-  const replacements = [
-    ["é", "e"],
-    ["è", "e"],
-    ["ê", "e"],
-    ["ë", "e"],
-    ["à", "a"],
-    ["â", "a"],
-    ["ä", "a"],
-    ["ù", "u"],
-    ["û", "u"],
-    ["ü", "u"],
-    ["ô", "o"],
-    ["ö", "o"],
-    ["î", "i"],
-    ["ï", "i"],
-    ["ç", "c"],
-    ["ÿ", "y"],
-    ["á", "a"],
-    ["í", "i"],
-    ["ó", "o"],
-    ["ú", "u"],
-    ["ñ", "n"],
-    ["ã", "a"],
-    ["õ", "o"],
-    ["ý", "y"],
-    ["ì", "i"],
-    ["ò", "o"],
-    ["É", "e"],
-    ["È", "e"],
-    ["Ê", "e"],
-    ["Ë", "e"],
-    ["À", "a"],
-    ["Â", "a"],
-    ["Ä", "a"],
-    ["Ù", "u"],
-    ["Û", "u"],
-    ["Ü", "u"],
-    ["Ô", "o"],
-    ["Ö", "o"],
-    ["Î", "i"],
-    ["Ï", "i"],
-    ["Ç", "c"],
-    ["Ÿ", "y"],
-    ["Á", "a"],
-    ["Í", "i"],
-    ["Ó", "o"],
-    ["Ú", "u"],
-    ["Ñ", "n"],
-    ["Ã", "a"],
-    ["Õ", "o"],
-    ["Ý", "y"],
-    ["Ì", "i"],
-    ["Ò", "o"],
-    ["́", ""],
-    ["̀", ""],
-    ["̂", ""],
-    ["̈", ""],
-    ["̧", ""],
-    ["̃", ""],
-  ];
-
   let result: Record<string, unknown> = expr;
-  for (const [from, to] of replacements) {
+  for (const [from, to] of DIACRITIQUES) {
     result = { $replaceAll: { input: result, find: from, replacement: to } };
+  }
+  return result;
+}
+
+export function dedupNomExpr(champ: string | Record<string, unknown>) {
+  return {
+    $let: {
+      vars: { nom: { $toLower: { $trim: { input: { $ifNull: [champ, ""] } } } } },
+      in: {
+        $cond: {
+          if: { $regexMatch: { input: "$$nom", regex: /[^ -~]/ } },
+          then: {
+            $reduce: {
+              input: { $literal: REMPLACEMENTS_DEDUP_NOM },
+              initialValue: "$$nom",
+              in: {
+                $replaceAll: {
+                  input: "$$value",
+                  find: { $arrayElemAt: ["$$this", 0] },
+                  replacement: { $arrayElemAt: ["$$this", 1] },
+                },
+              },
+            },
+          },
+          else: SEPARATEURS_ASCII.reduce<unknown>(
+            (input, find) => ({ $replaceAll: { input, find, replacement: "" } }),
+            "$$nom"
+          ),
+        },
+      },
+    },
+  };
+}
+
+export function dateMetierExpr(champ: string | Record<string, unknown>) {
+  return {
+    $cond: {
+      if: { $eq: [{ $type: champ }, "date"] },
+      then: {
+        $dateTrunc: {
+          date: { $dateAdd: { startDate: champ, unit: "millisecond", amount: DECALAGE_DATE_METIER_MS } },
+          unit: "day",
+        },
+      },
+      else: null,
+    },
+  };
+}
+
+export function dedupNom(valeur: string | null | undefined): string {
+  let result = (valeur ?? "").trim().replace(/[A-Z]/g, (lettre) => lettre.toLowerCase());
+  for (const [from, to] of REMPLACEMENTS_DEDUP_NOM) {
+    result = result.replaceAll(from, to);
   }
   return result;
 }

@@ -79,6 +79,15 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ "_computed.formation.codes_rome": 1 }, {}],
   [{ "_computed.formation.opcos": 1 }, {}],
   [{ "apprenant.adresse.mission_locale_id": 1, annee_scolaire: 1 }, {}],
+  [{ etablissement_formation_siret: 1, annee_scolaire: 1 }, { name: "etablissement_formation_siret_annee_scolaire" }],
+  [
+    { organisme_responsable_id: 1, id_erp_apprenant: 1, annee_scolaire: 1 },
+    { name: "fleche_responsable_id_erp_annee", partialFilterExpression: { fleche: { $exists: true } } },
+  ],
+  [
+    { organisme_responsable_id: 1, deca_raw_id: 1 },
+    { name: "fleche_responsable_deca_raw_id", partialFilterExpression: { fleche: { $exists: true } } },
+  ],
 ];
 
 const zodOverride = {
@@ -120,6 +129,14 @@ export const zEffectifDECA = z.object({
     .string()
     .describe("SIRET du lieu principal de formation déclaré au contrat DECA, brut (non résolu, non routé)")
     .nullish(),
+  fleche: z
+    .object({
+      regle: z.enum(["lieu_declare", "erp_formateur"]),
+      le: z.date(),
+      annule_le: z.date().optional(),
+    })
+    .describe("Fléchage du contrat de l'organisme responsable vers son établissement de formation")
+    .optional(),
 
   id_erp_apprenant: z.string({
     description: "Identifiant de l'apprenant dans l'erp",

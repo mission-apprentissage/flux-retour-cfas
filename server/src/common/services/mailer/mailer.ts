@@ -122,10 +122,6 @@ const templatesTitleFuncs: TemplateTitleFuncs = {
   whatsapp_nohelp_notification: (payload) =>
     `❌ ${payload.effectif.prenom} ${payload.effectif.nom} ne souhaite pas être recontacté(e)`,
   invitation_cfa_admin: () => "Invitation | Tableau de bord de l'apprentissage : activez votre compte d'administrateur",
-  invitation_cfa_member: (payload) =>
-    payload.admin
-      ? `${payload.admin.prenom} ${payload.admin.nom} vous invite à rejoindre ${payload.cfaName}`
-      : `Invitation à rejoindre ${payload.cfaName} sur le Tableau de bord de l'apprentissage`,
   confirmation_cfa: () => "Confirmation email | Bienvenue, vous pouvez accéder au service",
   activation_cfa: () => "Confirmation email | Dernier clic pour accéder au service",
 };
@@ -339,16 +335,6 @@ export type TemplatePayloads = {
     cfaCity: string;
     cfaPostalCode: string;
     requestDate: string;
-    invitationToken: string;
-  };
-  invitation_cfa_member: {
-    /** Absent quand un administrateur invite : le mail part au nom de l'équipe du Tableau de bord. */
-    admin?: {
-      prenom: string;
-      nom: string;
-      fonction: string;
-    };
-    cfaName: string;
     invitationToken: string;
   };
   confirmation_cfa: {

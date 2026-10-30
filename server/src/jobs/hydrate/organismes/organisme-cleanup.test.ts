@@ -161,4 +161,22 @@ describe("cleanupOrganismes", () => {
     expect(organisations).toHaveLength(1);
     expect(organisations).toEqual([orgWithUser]);
   });
+
+  it("garde un responsable dont les contrats DECA sont fléchés chez leur établissement de formation", async () => {
+    await effectifsDECADb().insertOne({
+      _id: new ObjectId(),
+      organisme_id: organismes.withEffectifsDeca._id,
+      organisme_responsable_id: organismes.empty._id,
+      id_erp_apprenant: "654321",
+      source: SOURCE_APPRENANT.DECA,
+      annee_scolaire: "2024-2025",
+      deca_raw_id: new ObjectId(),
+      apprenant: { nom: "Doe", prenom: "Jane", historique_statut: [] },
+      fleche: { regle: "lieu_declare", le: new Date() },
+    });
+
+    await cleanupOrganismes();
+
+    expect(await organismesDb().findOne({ _id: organismes.empty._id })).not.toBeNull();
+  });
 });

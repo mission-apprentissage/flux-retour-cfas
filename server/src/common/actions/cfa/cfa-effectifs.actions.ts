@@ -19,6 +19,7 @@ import {
   buildCsvInConditions,
   buildDistinctFacet,
   buildNameSearchConditions,
+  estSnapshotDecaExpr,
 } from "@/common/actions/shared/rupture-pipeline.utils";
 import {
   effectifsDb,
@@ -27,7 +28,7 @@ import {
   organisationsDb,
   organismesDb,
 } from "@/common/model/collections";
-import { stripDiacritics } from "@/common/utils/mongoUtils";
+import { dateMetierExpr, dedupNom, dedupNomExpr } from "@/common/utils/mongoUtils";
 
 interface CfaEffectifsQueryParams {
   page: number;
@@ -101,19 +102,21 @@ export async function getCfaEffectifs(
     {
       $addFields: {
         source_priority: { $cond: [{ $eq: ["$source_collection", "effectifs"] }, 0, 1] },
-        _dedup_nom: stripDiacritics({ $toLower: { $trim: { input: { $ifNull: ["$apprenant.nom", ""] } } } }),
-        _dedup_prenom: stripDiacritics({ $toLower: { $trim: { input: { $ifNull: ["$apprenant.prenom", ""] } } } }),
+        _dedup_nom: dedupNomExpr("$apprenant.nom"),
+        _dedup_prenom: dedupNomExpr("$apprenant.prenom"),
+        _dedup_ddn: dateMetierExpr("$apprenant.date_de_naissance"),
       },
     },
-    { $sort: { source_priority: 1 as const } },
+    { $sort: { source_priority: 1 as const, updated_at: -1 as const, _id: 1 as const } },
     {
       $group: {
         _id: {
           nom: "$_dedup_nom",
           prenom: "$_dedup_prenom",
-          ddn: "$apprenant.date_de_naissance",
+          ddn: "$_dedup_ddn",
         },
         effectif_id: { $first: "$_id" },
+        effectif_ids: { $push: "$_id" },
         source_collection: { $first: "$source_collection" },
         doc: { $first: "$$ROOT" },
       },
@@ -121,7 +124,10 @@ export async function getCfaEffectifs(
     {
       $replaceRoot: {
         newRoot: {
-          $mergeObjects: ["$doc", { effectif_id: "$effectif_id", source_collection: "$source_collection" }],
+          $mergeObjects: [
+            "$doc",
+            { effectif_id: "$effectif_id", effectif_ids: "$effectif_ids", source_collection: "$source_collection" },
+          ],
         },
       },
     }
@@ -151,10 +157,15 @@ export async function getCfaEffectifs(
     {
       $lookup: {
         from: "missionLocaleEffectif",
-        localField: "effectif_id",
+        localField: "effectif_ids",
         foreignField: "effectif_id",
         as: "ml_data",
-        pipeline: [{ $match: { soft_deleted: { $ne: true } } }, { $limit: 1 }],
+        pipeline: [
+          { $match: { soft_deleted: { $ne: true } } },
+          { $addFields: { _est_deca: estSnapshotDecaExpr } },
+          { $sort: { _est_deca: 1, updated_at: -1 } },
+          { $limit: 1 },
+        ],
       },
     },
     // Fallback identifiant scopé famille (rattrape les double-ingestions formateur/responsable).
@@ -389,8 +400,11 @@ async function formatRawEffectif(
 
 export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: string, userId?: ObjectId) {
   const eid = new ObjectId(effectifId);
-  const buildMlAggregation = (initialMatch: Record<string, unknown>) => [
+  const buildMlAggregation = (initialMatch: Record<string, unknown>, erpDabord = false) => [
     { $match: initialMatch },
+    ...(erpDabord
+      ? [{ $addFields: { _est_deca: estSnapshotDecaExpr } }, { $sort: { _est_deca: 1, updated_at: -1 } }]
+      : []),
     {
       $lookup: {
         from: "organismes",
@@ -544,19 +558,23 @@ export async function getCfaEffectifDetail(organismeId: ObjectId, effectifId: st
     baseEffectif.apprenant?.date_de_naissance
   ) {
     const familyOrganismeIds = await getFamilyOrganismeIds(organismeId);
-    const ident = normalisePersonIdentifiant({
+    const identite = normalisePersonIdentifiant({
       nom: baseEffectif.apprenant.nom,
       prenom: baseEffectif.apprenant.prenom,
       date_de_naissance: baseEffectif.apprenant.date_de_naissance,
     });
     const fallbackMatch = {
-      "identifiant_normalise.nom": ident.nom,
-      "identifiant_normalise.prenom": ident.prenom,
-      "identifiant_normalise.date_de_naissance": ident.date_de_naissance,
       "effectif_snapshot.organisme_id": { $in: familyOrganismeIds },
       soft_deleted: { $ne: true },
+      $expr: {
+        $and: [
+          { $eq: [dedupNomExpr("$identifiant_normalise.nom"), { $literal: dedupNom(identite.nom) }] },
+          { $eq: [dedupNomExpr("$identifiant_normalise.prenom"), { $literal: dedupNom(identite.prenom) }] },
+          { $eq: [dateMetierExpr("$identifiant_normalise.date_de_naissance"), identite.date_de_naissance] },
+        ],
+      },
     };
-    mlEffectif = await missionLocaleEffectifsDb().aggregate(buildMlAggregation(fallbackMatch)).next();
+    mlEffectif = await missionLocaleEffectifsDb().aggregate(buildMlAggregation(fallbackMatch, true)).next();
     if (mlEffectif) {
       return { effectif: mlEffectif, currentIndex: 0, total: 1 };
     }

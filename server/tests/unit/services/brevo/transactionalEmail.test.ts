@@ -48,14 +48,40 @@ describe("sendTransactionalEmail — garde-fou hors production", () => {
       "directeur@vrai-cfa.fr",
       1,
       { NOM_CFA: "CAMPUS DU LAC" },
-      { cc: ["conseiller@ml.fr"], redirectRecipientInNonProdTo: "testeur@ml.fr" }
+      { cc: ["conseiller@ml.fr"], redirectRecipientInNonProdTo: "testeur@beta.gouv.fr" }
     );
 
     expect(sendTransacEmailMock).toHaveBeenCalledTimes(1);
     const envoye = sendTransacEmailMock.mock.calls[0][0];
-    expect(envoye.to).toEqual([{ email: "testeur@ml.fr" }]);
+    expect(envoye.to).toEqual([{ email: "testeur@beta.gouv.fr" }]);
     // Le vrai destinataire est exposé au testeur, mais jamais utilisé comme destinataire ni en copie.
     expect(envoye.params).toMatchObject({ NOM_CFA: "CAMPUS DU LAC", DESTINATAIRE_REEL: "directeur@vrai-cfa.fr" });
     expect(envoye.cc).toBeUndefined();
+  });
+
+  it("n'envoie rien quand l'adresse de redirection n'est pas en beta.gouv.fr", async () => {
+    for (const adresse of ["testeur@ml.fr", "testeur@faux-beta.gouv.fr", "testeur@beta.gouv.fr.exemple.com"]) {
+      const res = await sendTransactionalEmail(
+        "directeur@vrai-cfa.fr",
+        1,
+        {},
+        { redirectRecipientInNonProdTo: adresse }
+      );
+      expect(res).toBeUndefined();
+    }
+
+    expect(sendTransacEmailMock).not.toHaveBeenCalled();
+  });
+
+  it("accepte une adresse de redirection d'un sous-domaine de beta.gouv.fr, quelle que soit la casse", async () => {
+    await sendTransactionalEmail(
+      "directeur@vrai-cfa.fr",
+      1,
+      {},
+      { redirectRecipientInNonProdTo: "Admin@TBA.Beta.Gouv.FR" }
+    );
+
+    expect(sendTransacEmailMock).toHaveBeenCalledTimes(1);
+    expect(sendTransacEmailMock.mock.calls[0][0].to).toEqual([{ email: "Admin@TBA.Beta.Gouv.FR" }]);
   });
 });

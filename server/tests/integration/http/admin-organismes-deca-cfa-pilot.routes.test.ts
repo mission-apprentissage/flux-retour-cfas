@@ -1,16 +1,22 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "mongodb";
-import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
+import { NATURE_ORGANISME_DE_FORMATION, SOURCE_APPRENANT } from "shared/constants";
 import type { IEffectif } from "shared/models/data/effectifs.model";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IOrganisation } from "shared/models/data/organisations.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { effectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import { effectifsDb, effectifsDECADb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 import { useMongo } from "@tests/jest/setupMongo";
 import { RequestAsOrganisationFunc, expectUnauthorizedError, initTestApp, testDoc } from "@tests/utils/testUtils";
+
+vi.mock("job-processor", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("job-processor")>()),
+  addJob: vi.fn(),
+}));
 
 useMongo();
 
@@ -83,6 +89,32 @@ describe("admin deca-cfa-pilot routes", () => {
       expect(response.data.eligible).toBe(true);
       expect(response.data.alreadyActive).toBe(false);
       expect(response.data.checks.exists_with_siret_uai.passed).toBe(true);
+      expect(response.data).toMatchObject({ activationEnCours: false, contratsFleches: 0 });
+    });
+
+    it("compte les contrats DECA fléchés vers l'organisme, pour la confirmation de désactivation", async () => {
+      const id = await seedEligibleOrganisme("10000000000001", "0010001A");
+      await effectifsDECADb().insertOne(
+        testDoc<IEffectifDECA>({
+          _id: new ObjectId(),
+          deca_raw_id: new ObjectId(),
+          organisme_id: id,
+          organisme_responsable_id: new ObjectId(),
+          id_erp_apprenant: "id-erp",
+          source: SOURCE_APPRENANT.DECA,
+          annee_scolaire: currentAnnee,
+          fleche: { regle: "lieu_declare", le: new Date() },
+        }),
+        { bypassDocumentValidation: true }
+      );
+
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "get",
+        `/api/v1/admin/organismes/${id.toHexString()}/deca-cfa-pilot-eligibility`
+      );
+
+      expect(response.data.contratsFleches).toBe(1);
     });
 
     it("returns 400 for an invalid id", async () => {
@@ -113,8 +145,22 @@ describe("admin deca-cfa-pilot routes", () => {
       );
       expect(response.status).toBe(200);
       expect(response.data.total).toBe(1);
-      expect(response.data.items[0].status).toBe("activated");
+      expect(response.data.items[0].status).toBe("queued");
       expect(response.data.items[0].organismeId).toBe(id.toHexString());
+    });
+
+    it("refuse d'activer un organisme fermé", async () => {
+      const id = await seedEligibleOrganisme("10000000000001", "0010001A");
+      await organismesDb().updateOne({ _id: id }, { $set: { ferme: true } });
+
+      const response = await requestAsOrganisation(
+        { type: "ADMINISTRATEUR" },
+        "post",
+        "/api/v1/admin/organismes/deca-cfa-pilot/activate",
+        { items: [{ siret: "10000000000001", uai: "0010001A" }] }
+      );
+
+      expect(response.data.items[0].status).toBe("not_eligible");
     });
 
     it("returns 400 for empty items", async () => {
@@ -171,13 +217,8 @@ describe("admin deca-cfa-pilot routes", () => {
     });
 
     it("deactivates a previously activated organisme", async () => {
-      await seedEligibleOrganisme("10000000000001", "0010001A");
-      await requestAsOrganisation(
-        { type: "ADMINISTRATEUR" },
-        "post",
-        "/api/v1/admin/organismes/deca-cfa-pilot/activate",
-        { items: [{ siret: "10000000000001", uai: "0010001A" }] }
-      );
+      const id = await seedEligibleOrganisme("10000000000001", "0010001A");
+      await organismesDb().updateOne({ _id: id }, { $set: { is_allowed_deca: true } });
       const response = await requestAsOrganisation(
         { type: "ADMINISTRATEUR" },
         "post",

@@ -79,7 +79,18 @@ export async function getMissionLocaleEffectifsStats(missionLocaleId: number): P
           },
         },
         effectifs_souhaite_rdv: {
-          $sum: { $cond: [{ $eq: ["$souhaite_rdv", true] }, 1, 0] },
+          $sum: {
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$souhaite_rdv", true] },
+                  { $or: [{ $eq: ["$a_traiter", true] }, { $eq: ["$injoignable", true] }] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
         },
       },
     },

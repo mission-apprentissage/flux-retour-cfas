@@ -185,5 +185,25 @@ describe("getEffectifsParMoisByMissionLocaleId", () => {
       expect(dossier.date_reception).not.toEqual(dateRupture);
       expect(dossier.date_reception).toBeInstanceOf(Date);
     });
+
+    it("range un dossier envoyé automatiquement par le CFA dans le mois de l'envoi", async () => {
+      const jour = 24 * 60 * 60 * 1000;
+      const envoi = new Date(Date.now() - 5 * jour);
+      await insertMlRecord({
+        date_rupture: new Date(envoi.getTime() - 45 * jour),
+        created_at: new Date(envoi.getTime() - 35 * jour),
+        computed: { organisme: { ml_beta_activated_at: monthsAgo(12), is_allowed_collab: true } },
+      });
+
+      const result = await getEffectifsParMoisByMissionLocaleId(
+        missionLocale,
+        { type: API_EFFECTIF_LISTE.A_TRAITER_OU_RECONTACTER },
+        undefined,
+        true,
+        true
+      );
+
+      expect(result.map(({ month }) => month)).toEqual([monthKeyOf(envoi)]);
+    });
   });
 });

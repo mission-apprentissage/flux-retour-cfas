@@ -18,7 +18,7 @@ jobs:
     outputs:
       VERSION: ${{ steps.get-version.outputs.VERSION }}
       PREV_VERSION: ${{ steps.get-prev-version.outputs.VERSION }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout project
         uses: actions/checkout@v6
@@ -66,7 +66,7 @@ jobs:
   build-ui-recette:
     needs: ["release"]
     if: needs.release.outputs.VERSION != needs.release.outputs.PREV_VERSION
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout project
         uses: actions/checkout@v6
@@ -172,7 +172,7 @@ jobs:
   sentry-release:
     if: needs.release.outputs.VERSION != needs.release.outputs.PREV_VERSION
     needs: ["release"]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout project
         uses: actions/checkout@v6

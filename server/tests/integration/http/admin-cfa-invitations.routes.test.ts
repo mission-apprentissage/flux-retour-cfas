@@ -3,11 +3,18 @@ import type { IOrganisationCreate } from "shared/models/data/organisations.model
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { invitationsDb, organisationsDb, organismesDb } from "@/common/model/collections";
-import { sendEmail } from "@/common/services/mailer/mailer";
+import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
+import config from "@/config";
 import { useMongo } from "@tests/jest/setupMongo";
 import { initTestApp, RequestAsOrganisationFunc } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/mailer/mailer");
+vi.mock("@/common/services/brevo/brevo", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/common/services/brevo/brevo")>()),
+  sendTransactionalEmail: vi.fn(),
+}));
+
+const brevoMock = vi.mocked(sendTransactionalEmail);
 
 const ADMIN: IOrganisationCreate = { type: "ADMINISTRATEUR" };
 const DREETS_IDF: IOrganisationCreate = { type: "DREETS", code_region: "11" };
@@ -23,7 +30,7 @@ describe("POST /api/v1/admin/organismes/:id/membres/invitations", () => {
     requestAsOrganisation(org, "post", `/api/v1/admin/organismes/${id}/membres/invitations`, body);
 
   beforeEach(async () => {
-    vi.mocked(sendEmail).mockClear();
+    brevoMock.mockReset().mockResolvedValue({ messageId: "message" } as never);
     requestAsOrganisation = (await initTestApp()).requestAsOrganisation;
     await organismesDb().insertOne(
       {
@@ -54,13 +61,13 @@ describe("POST /api/v1/admin/organismes/:id/membres/invitations", () => {
       ["admin@example.com", "admin"],
       ["membre@example.com", "member"],
     ]);
-    expect(vi.mocked(sendEmail).mock.calls.map((call) => call[1])).toEqual([
-      "invitation_cfa_member",
-      "invitation_cfa_member",
+    expect(brevoMock.mock.calls.map((call) => [call[0], call[1]])).toEqual([
+      ["admin@example.com", config.brevo.templateInvitationCollaborateurCfaId],
+      ["membre@example.com", config.brevo.templateInvitationCollaborateurCfaId],
     ]);
-    expect(vi.mocked(sendEmail).mock.calls.map((call) => (call[2] as { admin?: unknown }).admin)).toEqual([
-      undefined,
-      undefined,
+    expect(brevoMock.mock.calls.map((call) => (call[2] as { NOM_CFA?: string }).NOM_CFA)).toEqual([
+      "CAMPUS DU LAC",
+      "CAMPUS DU LAC",
     ]);
   });
 

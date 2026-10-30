@@ -3,14 +3,13 @@ import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 
-import { effectifsDb, effectifsDECADb, formationsCatalogueDb, organismesDb } from "@/common/model/collections";
+import { effectifsDb, effectifsDECADb, organismesDb } from "@/common/model/collections";
 
 export type EligibilityCheck = {
   passed: boolean;
   details?: {
     effectifsErpCount?: number;
     effectifsDecaCount?: number;
-    formateursTiersCount?: number;
     natureActuelle?: string | null;
   };
 };
@@ -21,7 +20,7 @@ export type EligibilityResult = {
   checks: {
     exists_with_siret_uai: EligibilityCheck;
     nature: EligibilityCheck;
-    no_formateurs_tiers: EligibilityCheck;
+    not_closed: EligibilityCheck;
     has_effectifs: EligibilityCheck;
     not_already_active: EligibilityCheck;
   };
@@ -31,6 +30,7 @@ export type EligibilityResult = {
     uai: string | null | undefined;
     nature: IOrganisme["nature"];
     is_allowed_deca: boolean | null | undefined;
+    deca_activation_queued_at?: Date | null;
     nom?: string;
     raison_sociale?: string;
     enseigne?: string | null;
@@ -164,14 +164,26 @@ function notEvaluated(): EligibilityCheck {
 export async function checkEligibilityForLoaded(
   organisme: Pick<
     IOrganisme,
-    "_id" | "siret" | "uai" | "nature" | "is_allowed_deca" | "nom" | "raison_sociale" | "enseigne"
+    | "_id"
+    | "siret"
+    | "uai"
+    | "nature"
+    | "ferme"
+    | "is_allowed_deca"
+    | "deca_activation_queued_at"
+    | "deca_contrats_flechables"
+    | "nom"
+    | "raison_sociale"
+    | "enseigne"
   >
 ): Promise<EligibilityResult> {
-  const { _id, siret, uai, nature, is_allowed_deca, nom, raison_sociale, enseigne } = organisme;
+  const { _id, siret, uai, nature, ferme, is_allowed_deca, deca_activation_queued_at, nom, raison_sociale, enseigne } =
+    organisme;
 
   const exists_with_siret_uai: EligibilityCheck = {
     passed: Boolean(siret && uai),
   };
+  const not_closed: EligibilityCheck = { passed: ferme !== true };
 
   if (!exists_with_siret_uai.passed) {
     return {
@@ -180,7 +192,7 @@ export async function checkEligibilityForLoaded(
       checks: {
         exists_with_siret_uai,
         nature: notEvaluated(),
-        no_formateurs_tiers: notEvaluated(),
+        not_closed,
         has_effectifs: notEvaluated(),
         not_already_active: { passed: is_allowed_deca !== true },
       },
@@ -190,6 +202,7 @@ export async function checkEligibilityForLoaded(
         uai,
         nature,
         is_allowed_deca,
+        deca_activation_queued_at,
         nom,
         raison_sociale,
         enseigne,
@@ -204,7 +217,7 @@ export async function checkEligibilityForLoaded(
 
   const activeAnnees = getActiveAnneesScolaires(new Date());
 
-  const [effectifsErpCount, effectifsDecaCount, formateursTiersCount] = await Promise.all([
+  const [effectifsErpCount, effectifsDecaPropres] = await Promise.all([
     effectifsDb().countDocuments({
       organisme_id: _id as ObjectId,
       annee_scolaire: { $in: activeAnnees },
@@ -213,22 +226,14 @@ export async function checkEligibilityForLoaded(
       organisme_id: _id as ObjectId,
       annee_scolaire: { $in: activeAnnees },
     }),
-    formationsCatalogueDb().countDocuments({
-      published: true,
-      etablissement_gestionnaire_siret: siret,
-      etablissement_gestionnaire_uai: uai,
-      $or: [{ etablissement_formateur_siret: { $ne: siret } }, { etablissement_formateur_uai: { $ne: uai } }],
-    }),
   ]);
+
+  const effectifsDecaCount =
+    effectifsDecaPropres + (is_allowed_deca === true ? 0 : (organisme.deca_contrats_flechables ?? 0));
 
   const has_effectifs: EligibilityCheck = {
     passed: effectifsErpCount + effectifsDecaCount > 0,
     details: { effectifsErpCount, effectifsDecaCount },
-  };
-
-  const no_formateurs_tiers: EligibilityCheck = {
-    passed: formateursTiersCount === 0,
-    details: { formateursTiersCount },
   };
 
   const alreadyActive = is_allowed_deca === true;
@@ -237,7 +242,7 @@ export async function checkEligibilityForLoaded(
   const eligible =
     exists_with_siret_uai.passed &&
     natureCheck.passed &&
-    no_formateurs_tiers.passed &&
+    not_closed.passed &&
     has_effectifs.passed &&
     not_already_active.passed;
 
@@ -247,7 +252,7 @@ export async function checkEligibilityForLoaded(
     checks: {
       exists_with_siret_uai,
       nature: natureCheck,
-      no_formateurs_tiers,
+      not_closed,
       has_effectifs,
       not_already_active,
     },
@@ -257,6 +262,7 @@ export async function checkEligibilityForLoaded(
       uai,
       nature,
       is_allowed_deca,
+      deca_activation_queued_at,
     },
   };
 }
@@ -272,7 +278,7 @@ export async function checkActivationEligibility(organismeId: string): Promise<E
       checks: {
         exists_with_siret_uai: { passed: false },
         nature: notEvaluated(),
-        no_formateurs_tiers: notEvaluated(),
+        not_closed: notEvaluated(),
         has_effectifs: notEvaluated(),
         not_already_active: { passed: true },
       },
@@ -288,7 +294,10 @@ export async function checkActivationEligibility(organismeId: string): Promise<E
         siret: 1,
         uai: 1,
         nature: 1,
+        ferme: 1,
         is_allowed_deca: 1,
+        deca_activation_queued_at: 1,
+        deca_contrats_flechables: 1,
         nom: 1,
         raison_sociale: 1,
         enseigne: 1,
@@ -303,7 +312,7 @@ export async function checkActivationEligibility(organismeId: string): Promise<E
       checks: {
         exists_with_siret_uai: { passed: false },
         nature: notEvaluated(),
-        no_formateurs_tiers: notEvaluated(),
+        not_closed: notEvaluated(),
         has_effectifs: notEvaluated(),
         not_already_active: { passed: true },
       },
