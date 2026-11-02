@@ -1,0 +1,43 @@
+.bandeau {
+  background-color: var(--background-contrast-warning);
+  color: var(--text-default-warning);
+}
+
+.inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.icon {
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.texte {
+  margin: 0;
+  padding: 0.25rem 0;
+}
+
+.bouton.bouton {
+  flex-shrink: 0;
+  color: var(--text-inverted-blue-france);
+  background-color: var(--background-action-high-warning);
+  --hover: var(--background-action-high-warning-hover);
+  --active: var(--background-action-high-warning-active);
+}
+
+@media (max-width: 767px) {
+  .inner {
+    flex-direction: column;
+  }
+}

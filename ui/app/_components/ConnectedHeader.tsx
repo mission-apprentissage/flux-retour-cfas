@@ -15,9 +15,8 @@ import { getUserOrganismeId } from "@/common/internal/AuthContext";
 import { useAuth } from "../_context/UserContext";
 import { usePlausibleAppTracking } from "../_hooks/plausible";
 
+import { BandeauImposture } from "./BandeauImposture";
 import styles from "./ConnectedHeader.module.css";
-import { Impersonate } from "./Impersonate";
-import { LectureSeuleNotice } from "./LectureSeuleNotice";
 import { useCfaUnreadNotificationsCount } from "./ruptures/cfa/hooks";
 import { useMlCompteursOnglets } from "./ruptures/shared/hooks";
 import { UserConnectedHeader } from "./UserConnectedHeader";
@@ -300,6 +299,7 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
           <StatsFiltersQueryReader onChange={setStatsFiltersQuery} />
         </Suspense>
       )}
+      <BandeauImposture />
       <DsfrHeader
         brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
         homeLinkProps={{
@@ -308,11 +308,10 @@ export function ConnectedHeader({ withNav = true }: { withNav?: boolean }) {
         }}
         id="fr-header-simple-header-with-service-title-and-tagline"
         serviceTitle={PRODUCT_NAME_TITLE}
-        quickAccessItems={[<Impersonate key="impersonate" />, <UserConnectedHeader key="user-connected" />]}
+        quickAccessItems={[<UserConnectedHeader key="user-connected" />]}
         navigation={getNavigationItems()}
         disableDisplay
       />
-      <LectureSeuleNotice />
     </>
   );
 }
