@@ -42,8 +42,8 @@ export function NotePerimetre() {
       title="Information"
       description={
         <>
-          Les informations de collaboration affichées concernent uniquement les dossiers de jeunes transmis {emetteurs}{" "}
-          de votre territoire : <strong>{label}</strong>
+          Les informations détaillées des collaborations affichées dans cette section, concernent uniquement les
+          dossiers de jeunes transmis {emetteurs} de votre territoire : <strong>{label}</strong>
         </>
       }
     />
