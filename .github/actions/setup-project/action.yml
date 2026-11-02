@@ -12,7 +12,11 @@ runs:
   steps:
     - name: Initialize the GnuPG keyring
       if: inputs.openpgp-key != ''
-      run: printf '%s' "$OPENPGP_KEY" | gpg --import
+      run: |
+        install -d -m 700 "${RUNNER_TEMP}/gnupg"
+        echo "GNUPGHOME=${RUNNER_TEMP}/gnupg" >> "${GITHUB_ENV}"
+        export GNUPGHOME="${RUNNER_TEMP}/gnupg"
+        printf '%s' "$OPENPGP_KEY" | gpg --batch --import
       shell: bash
       env:
         OPENPGP_KEY: ${{ inputs.openpgp-key }}
