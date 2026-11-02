@@ -72,7 +72,7 @@ describe("POST /api/v1/admin/demandes-activation/import", () => {
     const response = await importer(EXPORT, "Webinaire PdL (réponses).csv", "Webinaire PdL");
 
     expect(response.status).toBe(200);
-    expect(response.data).toEqual({ creees: 5, misesAJour: 0, fusionnees: 1, inchangees: 0, erreurs: 0 });
+    expect(response.data).toEqual({ creees: 5, misesAJour: 0, fusionnees: 1, inchangees: 0, sansSiret: 0, erreurs: 0 });
     expect(await demande("directrice@cfa-exemple.fr")).toMatchObject({
       source: "Webinaire PdL",
       siret_saisi_brut: "130 023 740 00439",
@@ -183,6 +183,59 @@ describe("POST /api/v1/admin/demandes-activation/import", () => {
     });
   });
 
+  it("lit les anciens SIRET d'une question recréée, passés dans une colonne sans titre", async () => {
+    const recreee = Buffer.from(
+      `"Horodateur","Adresse email","SIRET de votre CFA","Fonction occupée au sein du CFA",""
+"2026/10/16 3:45:45 PM UTC+3","Directrice@CFA-exemple.fr","","Directrice","130 023 740 00439"
+"2026/11/02 9:21:55 AM UTC+1","nouvelle@cfa-exemple.fr","${CFA_GMAIL_SIRET}","Conseillère formation",""
+`
+    );
+
+    await importer(EXPORT);
+    const response = await importer(recreee);
+
+    expect(response.data).toMatchObject({ creees: 1, misesAJour: 1, sansSiret: 0 });
+    expect(await demandesActivationCfaDb().countDocuments()).toBe(6);
+    expect(await demande("directrice@cfa-exemple.fr")).toMatchObject({
+      siret_saisi_brut: "130 023 740 00439",
+      siret: CFA_SIRET,
+      branche: "activation",
+    });
+    expect(await demande("nouvelle@cfa-exemple.fr")).toMatchObject({ siret: CFA_GMAIL_SIRET });
+  });
+
+  it("lit chacune des colonnes de même intitulé", async () => {
+    const enDouble = Buffer.from(
+      `"Adresse email","SIRET de votre CFA","SIRET de votre CFA"
+"directrice@cfa-exemple.fr","${CFA_SIRET}",""
+"nouvelle@cfa-exemple.fr","","${CFA_GMAIL_SIRET}"
+`
+    );
+
+    const response = await importer(enDouble);
+
+    expect(response.data).toMatchObject({ creees: 2, sansSiret: 0 });
+    expect(await demande("directrice@cfa-exemple.fr")).toMatchObject({ siret: CFA_SIRET });
+    expect(await demande("nouvelle@cfa-exemple.fr")).toMatchObject({ siret: CFA_GMAIL_SIRET });
+  });
+
+  it("ignore et compte à part les lignes sans SIRET, mais garde un SIRET mal saisi", async () => {
+    const sansSiret = Buffer.from(
+      `"Adresse email","SIRET de votre CFA"
+"directrice@cfa-exemple.fr","${CFA_SIRET}"
+"nouvelle@cfa-exemple.fr","  "
+"rh@cfa-exemple.fr","en cours"
+"",""
+`
+    );
+
+    const response = await importer(sansSiret);
+
+    expect(response.data).toEqual({ creees: 2, misesAJour: 0, fusionnees: 0, inchangees: 0, sansSiret: 1, erreurs: 1 });
+    expect(await demande("nouvelle@cfa-exemple.fr")).toBeNull();
+    expect(await demande("rh@cfa-exemple.fr")).toMatchObject({ motifs: ["siret_mal_forme"] });
+  });
+
   it("refuse un fichier sans colonne SIRET en listant les colonnes attendues", async () => {
     const response = await importer(Buffer.from('"Horodateur","Adresse email"\n"x","a@b.fr"\n'), "export.csv");
 
@@ -213,7 +266,7 @@ describe("POST /api/v1/admin/demandes-activation/import", () => {
 
     const response = await importer(zipper(EXPORT), "Webinaire PdL (réponses) (1).csv.zip", "Relance PdL");
 
-    expect(response.data).toEqual({ creees: 0, misesAJour: 5, fusionnees: 1, inchangees: 0, erreurs: 0 });
+    expect(response.data).toEqual({ creees: 0, misesAJour: 5, fusionnees: 1, inchangees: 0, sansSiret: 0, erreurs: 0 });
     expect(await demandesActivationCfaDb().countDocuments()).toBe(5);
     expect(await demandesActivationCfaDb().findOne({ email_saisi: "contact.cfa@gmail.com" })).toMatchObject({
       email_corrige: "contact@cfa-exemple.fr",

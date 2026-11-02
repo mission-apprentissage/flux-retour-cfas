@@ -77,6 +77,7 @@ export interface IBilanImportDemandes {
   misesAJour: number;
   fusionnees: number;
   inchangees: number;
+  sansSiret: number;
   erreurs: number;
 }
 
