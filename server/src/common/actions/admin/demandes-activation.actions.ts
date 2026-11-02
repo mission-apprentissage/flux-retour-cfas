@@ -193,14 +193,13 @@ function extraireCsv({ buffer, originalname }: { buffer: Buffer; originalname: s
   return csvs[0].getData();
 }
 
-function lireLignes(csv: Buffer): Record<string, string>[] {
+function lireLignes(csv: Buffer): string[][] {
   const premiereLigne = csv.toString("utf8").split(/\r?\n/, 1)[0];
   const delimiter = (premiereLigne.match(/;/g)?.length ?? 0) > (premiereLigne.match(/,/g)?.length ?? 0) ? ";" : ",";
   try {
-    return parse<Record<string, string>>(csv, {
+    return parse(csv, {
       bom: true,
       delimiter,
-      columns: true,
       skip_empty_lines: true,
       relax_column_count: true,
     });
@@ -209,24 +208,24 @@ function lireLignes(csv: Buffer): Record<string, string>[] {
   }
 }
 
-function reconnaitreColonnes(entetes: string[]): Partial<Record<Colonne, string>> {
-  const colonnes: Partial<Record<Colonne, string>> = {};
+function reconnaitreColonnes(entetes: string[]): Record<Colonne, number[]> {
+  const indices = (retenue: (entete: string) => boolean) =>
+    entetes.flatMap((entete, index) => (retenue(entete) ? [index] : []));
+  const colonnes = {} as Record<Colonne, number[]>;
   for (const [colonne, motsCles] of Object.entries(COLONNES) as [Colonne, readonly string[]][]) {
-    colonnes[colonne] = entetes.find((entete) => motsCles.some((motCle) => normalize(entete).includes(motCle)));
+    colonnes[colonne] = indices((entete) => motsCles.some((motCle) => normalize(entete).includes(motCle)));
   }
-  if (!colonnes.email || !colonnes.siret) {
+  if (colonnes.email.length === 0 || colonnes.siret.length === 0) {
     throw Boom.badRequest(
       "Colonnes attendues : horodateur, adresse email, SIRET, fonction, remarques. Les colonnes email et SIRET sont obligatoires."
     );
   }
+  colonnes.siret.push(...indices((entete) => !entete.trim()));
   return colonnes;
 }
 
-function lireProvenance(ligne: Record<string, string>, colonnes: Partial<Record<Colonne, string>>): ProvenanceDemande {
-  const valeur = (colonne: Colonne) => {
-    const entete = colonnes[colonne];
-    return entete ? ligne[entete] : undefined;
-  };
+function lireProvenance(ligne: string[], colonnes: Record<Colonne, number[]>): ProvenanceDemande {
+  const valeur = (colonne: Colonne) => colonnes[colonne].map((index) => ligne[index]).find((texte) => texte?.trim());
   const horodatageBrut = texteOuNull(valeur("horodatage"));
   return {
     horodatage_brut: horodatageBrut,
@@ -392,15 +391,22 @@ export async function importerDemandesActivation(
   saisie: string
 ): Promise<IBilanImportDemandes> {
   const source = await sourceRetenue(saisie);
-  const lignes = lireLignes(extraireCsv(fichier));
-  const colonnes = reconnaitreColonnes(Object.keys(lignes[0] ?? {}));
-  const bilan: IBilanImportDemandes = { creees: 0, misesAJour: 0, fusionnees: 0, inchangees: 0, erreurs: 0 };
+  const [entetes = [], ...lignes] = lireLignes(extraireCsv(fichier));
+  const colonnes = reconnaitreColonnes(entetes);
+  const bilan: IBilanImportDemandes = {
+    creees: 0,
+    misesAJour: 0,
+    fusionnees: 0,
+    inchangees: 0,
+    sansSiret: 0,
+    erreurs: 0,
+  };
 
   const parCle = new Map<string, ProvenanceDemande>();
   for (const ligne of lignes) {
     const provenance = lireProvenance(ligne, colonnes);
-    if (!provenance.email_saisi && !provenance.siret_saisi) {
-      bilan.erreurs++;
+    if (!provenance.siret_saisi_brut) {
+      bilan[provenance.email_saisi ? "sansSiret" : "erreurs"]++;
       continue;
     }
     const cle = `${provenance.email_saisi}|${provenance.siret_saisi}`;

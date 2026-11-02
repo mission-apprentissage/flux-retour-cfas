@@ -120,8 +120,12 @@ const emailSecable = (email: string) => {
   );
 };
 
-const bilanImport = ({ creees, misesAJour, fusionnees, inchangees, erreurs }: IBilanImportDemandes) =>
-  `${creees} demande(s) créée(s), ${misesAJour} mise(s) à jour, ${fusionnees} doublon(s) fusionné(s), ${inchangees} déjà envoyée(s) laissée(s) telle(s) quelle(s), ${erreurs} ligne(s) vide(s) ignorée(s).${
+const bilanImport = ({ creees, misesAJour, fusionnees, inchangees, sansSiret, erreurs }: IBilanImportDemandes) =>
+  `${creees} demande(s) créée(s), ${misesAJour} mise(s) à jour, ${fusionnees} doublon(s) fusionné(s), ${inchangees} déjà envoyée(s) laissée(s) telle(s) quelle(s), ${sansSiret} ligne(s) sans SIRET ignorée(s), ${erreurs} ligne(s) vide(s) ignorée(s).${
+    sansSiret > 0
+      ? " Vérifiez la colonne SIRET de l'export, puis réimportez-le : les autres lignes ne seront pas dupliquées."
+      : ""
+  }${
     creees + misesAJour > 0
       ? " Les contrats DECA à rattacher à chaque établissement sont recalculés en arrière-plan : rechargez la page dans quelques minutes."
       : ""
@@ -236,7 +240,7 @@ export default function DemandesActivationClient() {
     formulaire.append("source", source);
     try {
       const bilan = await importMutation.mutateAsync(formulaire);
-      setRetourImport({ severity: "success", message: bilanImport(bilan) });
+      setRetourImport({ severity: bilan.sansSiret > 0 ? "warning" : "success", message: bilanImport(bilan) });
       await queryClient.invalidateQueries({ queryKey: CLE_REQUETE });
     } catch (err) {
       setRetourImport({ severity: "error", message: getServerErrorMessage(err, "L'import a échoué") });
