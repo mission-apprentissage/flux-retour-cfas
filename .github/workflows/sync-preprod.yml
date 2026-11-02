@@ -5,7 +5,7 @@ on:
 jobs:
   deploy:
     name: Synchronisation de la base de donnée Production -> Preprod
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Notify new deployment on Slack
         uses: ravsamhq/notify-slack-action@v2
@@ -24,7 +24,10 @@ jobs:
 
       - name: Initialize the GnuPG keyring
         run: |
-          printf '%s' "$OPENPGP_KEY" | gpg --import
+          install -d -m 700 "${RUNNER_TEMP}/gnupg"
+          echo "GNUPGHOME=${RUNNER_TEMP}/gnupg" >> "${GITHUB_ENV}"
+          export GNUPGHOME="${RUNNER_TEMP}/gnupg"
+          printf '%s' "$OPENPGP_KEY" | gpg --batch --import
         env:
           OPENPGP_KEY: ${{ secrets.OPENPGP_PRIVATE_SUBKEY }}
 
