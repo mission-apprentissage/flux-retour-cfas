@@ -39,7 +39,7 @@ export function FicheEntete({ parent, titre, statuts, imposture }: FicheEntetePr
       await _post(imposture.url ?? "/api/v1/admin/impersonate", imposture.corps);
       window.location.href = imposture.redirection;
     } catch (err) {
-      setErreur(getApiErrorMessage(err, "L'imposture a échoué. Merci de réessayer."));
+      setErreur(getApiErrorMessage(err, "L'ouverture de la vue a échoué. Merci de réessayer."));
       setEnCours(false);
     }
   };
@@ -64,7 +64,7 @@ export function FicheEntete({ parent, titre, statuts, imposture }: FicheEntetePr
               disabled={imposture.desactivee || enCours}
               className={styles.imposture}
             >
-              Imposture
+              Voir son activité
             </Button>
           )}
         </div>

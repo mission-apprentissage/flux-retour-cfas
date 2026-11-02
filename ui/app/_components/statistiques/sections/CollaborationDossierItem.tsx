@@ -126,7 +126,7 @@ function VoirDetailButton({ dossier }: { dossier: ICollaborationDossier }) {
         window.location.href = `/cfa/${dossier.effectif_id}`;
       }
     } catch (err) {
-      setErreur(getApiErrorMessage(err, "L'imposture a échoué. Merci de réessayer."));
+      setErreur(getApiErrorMessage(err, "L'ouverture de la vue a échoué. Merci de réessayer."));
       setEnCours(false);
     }
   };
