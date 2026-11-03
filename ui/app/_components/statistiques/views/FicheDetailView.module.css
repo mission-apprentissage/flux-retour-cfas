@@ -47,13 +47,28 @@
   color: var(--text-mention-grey);
 }
 
+/* La hauteur animée par DSFR décale le panneau (align-content: stretch) : le conteneur épouse son contenu. */
 .tabs:global(.fr-tabs) {
   overflow: visible;
+  box-shadow: none;
+  height: auto;
+  align-content: flex-start;
+  transition: none;
+}
+
+/* Le cadre DSFR est dessiné par ::before sous le panneau, que son fond recouvre : on le porte par le panneau. */
+.tabs:global(.fr-tabs)::before {
+  height: 0;
+  margin-top: 0;
+  box-shadow: none;
 }
 
 .tabs:global(.fr-tabs) :global(.fr-tabs__panel) {
+  margin-top: 0;
   padding: 32px;
+  border: 1px solid var(--border-default-grey);
   background-color: var(--background-default-grey);
+  transition: none;
 }
 
 .loadingContainer {
