@@ -76,18 +76,72 @@ const MODE_D_EMPLOI = [
 
 const VUES_COCHABLES_EN_BLOC: ReadonlyArray<VueDemandeActivation> = ["a_envoyer", "devenus_eligibles"];
 
-const COLONNES = [
-  { label: "CFA", dataKey: "cfa", width: "15%", sortable: false },
-  { label: "Demandeur", dataKey: "demandeur", width: "16%", sortable: false },
-  { label: "Inscrit le", dataKey: "inscription", width: "8%", sortable: true },
-  { label: "Source", dataKey: "source", width: "9%", sortable: true },
-  { label: "Compte", dataKey: "compte", width: "8%", sortable: false },
-  { label: "Branche", dataKey: "branche", width: "9%", sortable: false },
-  { label: "Motifs", dataKey: "motifs", width: "14%", sortable: false },
-  { label: "Statut", dataKey: "statut", width: "8%", sortable: false },
-  { label: "À envoyer", dataKey: "a_envoyer", width: "5%", sortable: false },
-  { label: "Actions", dataKey: "actions", width: "8%", sortable: false },
-];
+const COLONNES = {
+  cfa: { label: "CFA", sortable: false },
+  demandeur: { label: "Demandeur", sortable: false },
+  inscription: { label: "Inscrit le", sortable: true },
+  source: { label: "Source", sortable: true },
+  compte: { label: "Compte", sortable: false },
+  branche: { label: "Branche", sortable: false },
+  motifs: { label: "Motifs", sortable: false },
+  mail_refus: { label: "Mail de refus", sortable: false },
+  echec: { label: "Échec", sortable: false },
+  statut: { label: "Statut", sortable: false },
+  a_envoyer: { label: "À envoyer", sortable: false },
+  actions: { label: "Actions", sortable: false },
+} as const;
+
+const colonnes = (...largeurs: [keyof typeof COLONNES, number][]) =>
+  largeurs.map(([dataKey, largeur]) => ({ ...COLONNES[dataKey], dataKey, width: `${largeur}%` }));
+
+const COLONNES_A_ENVOYER = colonnes(
+  ["cfa", 18],
+  ["demandeur", 20],
+  ["inscription", 10],
+  ["source", 11],
+  ["compte", 12],
+  ["branche", 11],
+  ["a_envoyer", 8],
+  ["actions", 10]
+);
+
+const COLONNES_PAR_VUE: Record<VueDemandeActivation, ReturnType<typeof colonnes>> = {
+  a_envoyer: COLONNES_A_ENVOYER,
+  envoyees: colonnes(
+    ["cfa", 15],
+    ["demandeur", 16],
+    ["inscription", 8],
+    ["source", 9],
+    ["compte", 8],
+    ["branche", 9],
+    ["motifs", 14],
+    ["statut", 8],
+    ["a_envoyer", 5],
+    ["actions", 8]
+  ),
+  refus: colonnes(
+    ["cfa", 17],
+    ["demandeur", 18],
+    ["inscription", 9],
+    ["source", 10],
+    ["motifs", 20],
+    ["mail_refus", 11],
+    ["a_envoyer", 6],
+    ["actions", 9]
+  ),
+  devenus_eligibles: COLONNES_A_ENVOYER,
+  echecs: colonnes(
+    ["cfa", 18],
+    ["demandeur", 20],
+    ["source", 11],
+    ["compte", 12],
+    ["branche", 11],
+    ["echec", 18],
+    ["actions", 10]
+  ),
+};
+
+const jour = (date: string) => format(new Date(date), "dd/MM/yyyy");
 
 const CLES_DE_TRI: Record<string, (demande: IDemandeActivationLigne) => string | null> = {
   inscription: (demande) => demande.horodatage,
@@ -169,34 +223,73 @@ function BadgeCompte({ demande: { compte, branche } }: { demande: IDemandeActiva
   );
 }
 
+function TagsMotifs({ motifs }: Pick<IDemandeActivationLigne, "motifs">) {
+  if (motifs.length === 0) return null;
+  return (
+    <ul className="fr-tags-group">
+      {motifs.map((motif) => (
+        <li key={motif}>
+          <Tooltip
+            kind="hover"
+            title={`${MOTIFS_DEMANDE_ACTIVATION[motif].detail}. ${
+              MOTIFS_DEMANDE_ACTIVATION[motif].avecMail
+                ? "Refus avec mail : le message « pas encore » part à l'envoi."
+                : "Refus sans mail : rien ne part, l'équipe prend contact si besoin."
+            }`}
+          >
+            <Tag small>{MOTIFS_DEMANDE_ACTIVATION[motif].libelle}</Tag>
+          </Tooltip>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function Motifs({ demande }: { demande: IDemandeActivationLigne }) {
   return (
     <div id={`motifs-${demande._id}`}>
-      {demande.motifs.length > 0 && (
-        <ul className="fr-tags-group">
-          {demande.motifs.map((motif) => (
-            <li key={motif}>
-              <Tooltip
-                kind="hover"
-                title={`${MOTIFS_DEMANDE_ACTIVATION[motif].detail}. ${
-                  MOTIFS_DEMANDE_ACTIVATION[motif].avecMail
-                    ? "Refus avec mail : le message « pas encore » part à l'envoi."
-                    : "Refus sans mail : rien ne part, l'équipe prend contact si besoin."
-                }`}
-              >
-                <Tag small>{MOTIFS_DEMANDE_ACTIVATION[motif].libelle}</Tag>
-              </Tooltip>
-            </li>
-          ))}
-        </ul>
-      )}
-      {demande.domaine_inconnu && (
-        <Badge className={styles.insecable} severity="warning" small>
-          Domaine inconnu
-        </Badge>
-      )}
-      {demande.motif_echec && <p className="fr-text--xs fr-mb-0">{demande.motif_echec}</p>}
+      <TagsMotifs motifs={demande.motifs} />
     </div>
+  );
+}
+
+function BadgeStatut({ statut }: Pick<IDemandeActivationLigne, "statut">) {
+  return (
+    <Badge className={styles.insecable} small severity={STATUTS[statut].severity} noIcon={!STATUTS[statut].severity}>
+      {STATUTS[statut].libelle}
+    </Badge>
+  );
+}
+
+function Echec({ demande }: { demande: IDemandeActivationLigne }) {
+  return (
+    <>
+      <BadgeStatut statut={demande.statut} />
+      {demande.motif_echec && <p className="fr-text--xs fr-mb-0">{demande.motif_echec}</p>}
+      <TagsMotifs motifs={demande.motifs} />
+    </>
+  );
+}
+
+function MailDeRefus({ demande }: { demande: IDemandeActivationLigne }) {
+  if (demande.statut === "envoyee") {
+    return (
+      <>
+        <Badge className={styles.insecable} severity="success" small>
+          Envoyé
+        </Badge>
+        {demande.envoyee_at && <p className="fr-text--xs fr-mb-0">le {jour(demande.envoyee_at)}</p>}
+      </>
+    );
+  }
+  return refusAvecMail(demande.motifs) ? (
+    <Badge className={styles.insecable} noIcon small>
+      Pas encore envoyé
+    </Badge>
+  ) : (
+    <Badge className={styles.insecable} severity="warning" small>
+      Sans mail
+    </Badge>
   );
 }
 
@@ -403,6 +496,11 @@ export default function DemandesActivationClient() {
           {demande.email_corrige && (
             <p className="fr-text--xs fr-mb-0">Saisi : {emailSecable(demande.email_saisi || "—")}</p>
           )}
+          {demande.domaine_inconnu && (
+            <Badge className={styles.insecable} severity="warning" small>
+              Domaine inconnu
+            </Badge>
+          )}
           {demande.fonction && <p className="fr-text--xs fr-mb-0">{demande.fonction}</p>}
           {demande.compte && (demande.compte.prenom || demande.compte.nom) && (
             <p className="fr-text--xs fr-mb-0">
@@ -423,38 +521,43 @@ export default function DemandesActivationClient() {
         ? format(new Date(demande.horodatage), "dd/MM/yyyy HH:mm")
         : (demande.horodatage_brut ?? "—"),
       source: demande.source,
-      branche: <BadgeBranche demande={demande} />,
+      branche: (
+        <>
+          <BadgeBranche demande={demande} />
+          {demande.vue === "devenus_eligibles" && demande.statut === "envoyee" && demande.envoyee_at && (
+            <p className="fr-text--xs fr-mb-0">Refus envoyé le {jour(demande.envoyee_at)}</p>
+          )}
+        </>
+      ),
       motifs: <Motifs demande={demande} />,
-      statut: (
-        <Badge
-          className={styles.insecable}
-          small
-          severity={STATUTS[demande.statut].severity}
-          noIcon={!STATUTS[demande.statut].severity}
-        >
-          {STATUTS[demande.statut].libelle}
-        </Badge>
-      ),
-      a_envoyer: (
-        <Checkbox
-          small
-          options={[
-            {
-              label: (
-                <span className="fr-sr-only">
-                  À envoyer : {nomCfa(demande)}, {demande.email}
-                </span>
-              ),
-              nativeInputProps: {
-                checked: demande.a_envoyer,
-                disabled: !demande.cochable || idsEnCoche.has(demande._id),
-                onChange: (event) => cocherMutation.mutate({ ids: [demande._id], a_envoyer: event.target.checked }),
-                "aria-describedby": demande.cochable ? undefined : `motifs-${demande._id}`,
+      mail_refus: <MailDeRefus demande={demande} />,
+      echec: <Echec demande={demande} />,
+      statut: <BadgeStatut statut={demande.statut} />,
+      a_envoyer:
+        demande.statut === "envoi_en_cours" ? (
+          <Badge className={styles.insecable} severity="info" noIcon small>
+            En cours
+          </Badge>
+        ) : (
+          <Checkbox
+            small
+            options={[
+              {
+                label: (
+                  <span className="fr-sr-only">
+                    À envoyer : {nomCfa(demande)}, {demande.email}
+                  </span>
+                ),
+                nativeInputProps: {
+                  checked: demande.a_envoyer,
+                  disabled: !demande.cochable || idsEnCoche.has(demande._id),
+                  onChange: (event) => cocherMutation.mutate({ ids: [demande._id], a_envoyer: event.target.checked }),
+                  "aria-describedby": demande.cochable ? undefined : `motifs-${demande._id}`,
+                },
               },
-            },
-          ]}
-        />
-      ),
+            ]}
+          />
+        ),
       actions:
         demande.vue === "envoyees" || demande.statut === "envoi_en_cours" ? null : (
           <div className="fr-btns-group fr-btns-group--sm fr-btns-group--icon-left">
@@ -489,6 +592,7 @@ export default function DemandesActivationClient() {
       onChange: () => {
         setVue(cle);
         setPage(1);
+        setTri([]);
       },
     },
   });
@@ -670,7 +774,7 @@ export default function DemandesActivationClient() {
           )}
           <AdminTable
             data={tableData}
-            columns={COLONNES}
+            columns={COLONNES_PAR_VUE[vue]}
             tableLabel={`Demandes d'activation : ${LIBELLES_VUES[vue]}`}
             pagination={{ total: demandesDeLaVue.length, page: currentPage, limit: pageSize, lastPage }}
             onPageChange={setPage}
