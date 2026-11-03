@@ -1,6 +1,5 @@
 import { ObjectId } from "bson";
 import { addJob } from "job-processor";
-import { Collection } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
 import type { IOrganisation, IOrganisationOrganismeFormation, IMissionLocaleEffectif } from "shared/models";
 import type { IEffectif } from "shared/models/data/effectifs.model";
@@ -9,6 +8,7 @@ import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixtu
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { updateMissionLocaleEffectifComputedActivation } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { flecherContratsDeca } from "@/common/actions/deca/deca-flechage.actions";
 import {
   activateDecaCfaPilotBatch,
@@ -33,14 +33,25 @@ vi.mock("@/common/actions/deca/deca-flechage.actions", async (importOriginal) =>
   flecherContratsDeca: vi.fn(),
 }));
 
+vi.mock("@/common/actions/admin/mission-locale/mission-locale.admin.actions", async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import("@/common/actions/admin/mission-locale/mission-locale.admin.actions")>();
+  return {
+    ...original,
+    updateMissionLocaleEffectifComputedActivation: vi.fn(original.updateMissionLocaleEffectifComputedActivation),
+  };
+});
+
 const addJobMock = vi.mocked(addJob);
 const flecherMock = vi.mocked(flecherContratsDeca);
+const ecrireActivationMock = vi.mocked(updateMissionLocaleEffectifComputedActivation);
 
 useMongo();
 
 beforeEach(() => {
   addJobMock.mockReset();
   flecherMock.mockReset();
+  ecrireActivationMock.mockReset();
 });
 
 afterEach(() => {
@@ -266,14 +277,12 @@ describe("couplage avec la collaboration", () => {
       insertMlEffectif: true,
     });
     await insererCompteCfa(organisationId!);
-    const updateMany = vi.spyOn(Collection.prototype, "updateMany").mockRejectedValueOnce(new Error("panne"));
+    ecrireActivationMock.mockRejectedValueOnce(new Error("panne"));
 
-    try {
-      await activerParJob("10000000000022", "0010022C");
-    } finally {
-      updateMany.mockRestore();
-    }
+    await activerParJob("10000000000022", "0010022C");
 
+    expect(ecrireActivationMock).toHaveBeenCalledTimes(2);
+    expect(ecrireActivationMock).toHaveBeenLastCalledWith(id, { isAllowedCollab: false, mlBetaActivatedAt: null });
     const organisme = await organismesDb().findOne({ _id: id });
     expect(organisme?.is_allowed_deca).toBe(true);
     expect(organisme?.is_allowed_collab).toBeUndefined();
@@ -282,9 +291,7 @@ describe("couplage avec la collaboration", () => {
     })) as IOrganisationOrganismeFormation | null;
     expect(organisation?.ml_beta_activated_at).toBeUndefined();
   });
-});
 
-describe("couplage avec la collaboration, écriture partielle des dossiers", () => {
   it("remet les dossiers hors collaboration quand l'écriture échoue en cours de route", async () => {
     const { id, organisationId } = await seedOrganisme({
       siret: "10000000000023",
@@ -292,21 +299,15 @@ describe("couplage avec la collaboration, écriture partielle des dossiers", () 
       insertMlEffectif: true,
     });
     await insererCompteCfa(organisationId!);
-    const updateManyOriginal = Collection.prototype.updateMany;
-    const updateMany = vi.spyOn(Collection.prototype, "updateMany").mockImplementationOnce(async function (
-      this: Collection,
-      ...args: Parameters<Collection["updateMany"]>
-    ) {
-      await updateManyOriginal.apply(this, args);
+    const ecrire = ecrireActivationMock.getMockImplementation()!;
+    ecrireActivationMock.mockImplementationOnce(async (...args) => {
+      await ecrire(...args);
       throw new Error("panne");
     });
 
-    try {
-      await activerParJob("10000000000023", "0010023D");
-    } finally {
-      updateMany.mockRestore();
-    }
+    await activerParJob("10000000000023", "0010023D");
 
+    expect(ecrireActivationMock).toHaveBeenCalledTimes(2);
     expect((await organismesDb().findOne({ _id: id }))?.is_allowed_collab).toBeUndefined();
     const mlEffectif = await missionLocaleEffectifsDb().findOne({ "effectif_snapshot.organisme_id": id });
     expect(mlEffectif?.computed?.organisme).toMatchObject({ is_allowed_collab: false, ml_beta_activated_at: null });
