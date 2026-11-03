@@ -1046,6 +1046,19 @@ describe("collaboration à l'envoi des demandes d'activation", () => {
     expect(await etatOrganisme(organisme._id)).toEqual({ deca: true, collab: undefined });
   });
 
+  it("CFA qui avait déjà DECA, compte en attente validé à l'envoi : collaboration activée", async () => {
+    const organisme = await insererOrganisme({ is_allowed_deca: true });
+    await insererCompte("direction@cfa-tests.fr", await insererOrganisation(organisme._id), {
+      account_status: "PENDING_ADMIN_VALIDATION",
+      organisation_role: null,
+    });
+    await insererDemande("direction@cfa-tests.fr");
+
+    await envoyerEtTraiter();
+
+    expect(await etatOrganisme(organisme._id)).toEqual({ deca: true, collab: true });
+  });
+
   it("branche invitation : DECA activé, collaboration inactive", async () => {
     const organisme = await insererOrganisme();
     await insererDemande("direction@cfa-tests.fr");
