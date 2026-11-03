@@ -936,15 +936,18 @@ export async function renvoyerDemandeActivation(id: ObjectId, expediteur: Expedi
   return ligne;
 }
 
-async function activerPourEnvois(organismeId: ObjectId): Promise<string | null> {
+async function activerPourEnvois(organismeId: ObjectId): Promise<{ motifEchec: string | null; flagPose: boolean }> {
   if (!(await poserGardeActivationDeca(organismeId))) {
-    return "Activation DECA déjà en cours pour cet établissement : renvoyer plus tard";
+    return { motifEchec: "Activation DECA déjà en cours pour cet établissement : renvoyer plus tard", flagPose: false };
   }
   try {
     const resultat = await activerDecaOrganisme(organismeId);
-    return resultat === "flag_pose" || resultat === "deja_actif" ? null : MOTIFS_ECHEC_ACTIVATION[resultat];
+    return {
+      motifEchec: resultat === "flag_pose" || resultat === "deja_actif" ? null : MOTIFS_ECHEC_ACTIVATION[resultat],
+      flagPose: resultat === "flag_pose",
+    };
   } catch (err) {
-    return `Activation DECA en échec : ${(err as Error).message}`;
+    return { motifEchec: `Activation DECA en échec : ${(err as Error).message}`, flagPose: false };
   } finally {
     await retirerGardeActivationDeca(organismeId);
   }
@@ -1143,7 +1146,8 @@ export async function traiterEnvoisDemandesActivation(organismeId: ObjectId | nu
   }
 
   const activees = preparees.filter(({ demande }) => demande.branche !== "refus");
-  const echecActivation = organismeId && activees.length > 0 ? await activerPourEnvois(organismeId) : null;
+  const activation = organismeId && activees.length > 0 ? await activerPourEnvois(organismeId) : null;
+  const echecActivation = activation?.motifEchec ?? null;
 
   for (const { demande, compte } of preparees) {
     const etapes = { ...demande.etapes };
@@ -1175,7 +1179,7 @@ export async function traiterEnvoisDemandesActivation(organismeId: ObjectId | nu
     }
   }
 
-  if (organismeId && activees.length > 0 && !echecActivation) {
+  if (organismeId && activation?.flagPose) {
     await activerCollabSiEligible(organismeId);
   }
 }

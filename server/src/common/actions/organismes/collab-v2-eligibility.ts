@@ -1,16 +1,9 @@
 import { ObjectId } from "bson";
 import { IOrganisme } from "shared/models/data/organismes.model";
-import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 
-import {
-  effectifsDb,
-  effectifsDECADb,
-  organisationsDb,
-  organismesDb,
-  usersMigrationDb,
-} from "@/common/model/collections";
+import { organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 
-import { NATURES_ELIGIBLES } from "./deca-cfa-eligibility";
+import { countEffectifsAnneesActives, NATURES_ELIGIBLES } from "./deca-cfa-eligibility";
 
 export type CollabV2EligibilityCheck = {
   passed: boolean;
@@ -49,8 +42,40 @@ export type CollabV2EligibilityResult = {
   } | null;
 };
 
+export const collabV2EligibilityProjection = {
+  _id: 1,
+  siret: 1,
+  uai: 1,
+  nature: 1,
+  ferme: 1,
+  is_allowed_deca: 1,
+  is_allowed_collab: 1,
+  nom: 1,
+  raison_sociale: 1,
+  enseigne: 1,
+  collab_suspended_at: 1,
+  collab_inactivity_email_sent_at: 1,
+} as const;
+
 function notEvaluated(): CollabV2EligibilityCheck {
   return { passed: false };
+}
+
+function resultatSansOrganisme(): CollabV2EligibilityResult {
+  return {
+    eligible: false,
+    alreadyActive: false,
+    checks: {
+      exists_with_siret_uai: { passed: false },
+      nature: notEvaluated(),
+      not_closed: notEvaluated(),
+      has_effectifs: notEvaluated(),
+      deca_visible: notEvaluated(),
+      has_compte_confirme: notEvaluated(),
+      not_already_active: { passed: true },
+    },
+    organisme: null,
+  };
 }
 
 async function countComptesConfirmes(organismeId: ObjectId): Promise<number> {
@@ -151,17 +176,8 @@ export async function checkCollabV2EligibilityForLoaded(
     details: { natureActuelle: nature ?? null },
   };
 
-  const activeAnnees = getActiveAnneesScolaires(new Date());
-
-  const [effectifsErpCount, effectifsDecaCount, comptesConfirmes] = await Promise.all([
-    effectifsDb().countDocuments({
-      organisme_id: _id as ObjectId,
-      annee_scolaire: { $in: activeAnnees },
-    }),
-    effectifsDECADb().countDocuments({
-      organisme_id: _id as ObjectId,
-      annee_scolaire: { $in: activeAnnees },
-    }),
+  const [{ effectifsErpCount, effectifsDecaPropres: effectifsDecaCount }, comptesConfirmes] = await Promise.all([
+    countEffectifsAnneesActives(_id as ObjectId),
     countComptesConfirmes(_id as ObjectId),
   ]);
 
@@ -225,57 +241,12 @@ export async function checkCollabV2Eligibility(organismeId: string): Promise<Col
   try {
     _id = new ObjectId(organismeId);
   } catch {
-    return {
-      eligible: false,
-      alreadyActive: false,
-      checks: {
-        exists_with_siret_uai: { passed: false },
-        nature: notEvaluated(),
-        not_closed: notEvaluated(),
-        has_effectifs: notEvaluated(),
-        deca_visible: notEvaluated(),
-        has_compte_confirme: notEvaluated(),
-        not_already_active: { passed: true },
-      },
-      organisme: null,
-    };
+    return resultatSansOrganisme();
   }
 
-  const organisme = await organismesDb().findOne(
-    { _id },
-    {
-      projection: {
-        _id: 1,
-        siret: 1,
-        uai: 1,
-        nature: 1,
-        ferme: 1,
-        is_allowed_deca: 1,
-        is_allowed_collab: 1,
-        nom: 1,
-        raison_sociale: 1,
-        enseigne: 1,
-        collab_suspended_at: 1,
-        collab_inactivity_email_sent_at: 1,
-      },
-    }
-  );
-
+  const organisme = await organismesDb().findOne({ _id }, { projection: collabV2EligibilityProjection });
   if (!organisme) {
-    return {
-      eligible: false,
-      alreadyActive: false,
-      checks: {
-        exists_with_siret_uai: { passed: false },
-        nature: notEvaluated(),
-        not_closed: notEvaluated(),
-        has_effectifs: notEvaluated(),
-        deca_visible: notEvaluated(),
-        has_compte_confirme: notEvaluated(),
-        not_already_active: { passed: true },
-      },
-      organisme: null,
-    };
+    return resultatSansOrganisme();
   }
 
   return checkCollabV2EligibilityForLoaded(organisme);

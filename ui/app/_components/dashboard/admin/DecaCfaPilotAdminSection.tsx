@@ -13,6 +13,7 @@ import { getServerErrorMessage } from "@/common/rateLimit";
 
 import { CheckLine, EligibilityCheck, EtatBadge } from "./EligibilityBadges";
 import styles from "./encart-admin.module.scss";
+import { collabV2EligibilityQueryKey, useCollabV2Eligibility } from "./useCollabV2Eligibility";
 
 const decaCfaPilotConfirmModal = createModal({
   id: "deca-cfa-pilot-confirm",
@@ -57,11 +58,7 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
     enabled: !!organisme._id,
     refetchInterval: (query) => (query.state.data?.activationEnCours ? 30_000 : false),
   });
-  const { data: collab } = useQuery<{ alreadyActive: boolean }>({
-    queryKey: ["admin/organismes/collab-v2-eligibility", organisme._id],
-    queryFn: () => _get(`/api/v1/admin/organismes/${organisme._id}/collab-v2-eligibility`),
-    enabled: !!organisme._id,
-  });
+  const { data: collab } = useCollabV2Eligibility(organisme._id);
   const collabActive = collab?.alreadyActive === true;
 
   const activateMutation = useMutation({
@@ -90,7 +87,7 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
   const activationEtaitEnCours = useRef(activationEnCours);
   useEffect(() => {
     if (activationEtaitEnCours.current && !activationEnCours) {
-      queryClient.invalidateQueries({ queryKey: ["admin/organismes/collab-v2-eligibility", organisme._id] });
+      queryClient.invalidateQueries({ queryKey: collabV2EligibilityQueryKey(organisme._id) });
     }
     activationEtaitEnCours.current = activationEnCours;
   }, [activationEnCours, queryClient, organisme._id]);
@@ -128,7 +125,7 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
       decaCfaPilotConfirmModal.close();
       await Promise.all([
         refetch(),
-        queryClient.invalidateQueries({ queryKey: ["admin/organismes/collab-v2-eligibility", organisme._id] }),
+        queryClient.invalidateQueries({ queryKey: collabV2EligibilityQueryKey(organisme._id) }),
       ]);
     } catch (err) {
       setFeedback({

@@ -157,6 +157,15 @@ export async function findEligibleOrganismes(organismeIds?: ObjectId[]): Promise
     .toArray();
 }
 
+export async function countEffectifsAnneesActives(organismeId: ObjectId) {
+  const activeAnnees = getActiveAnneesScolaires(new Date());
+  const [effectifsErpCount, effectifsDecaPropres] = await Promise.all([
+    effectifsDb().countDocuments({ organisme_id: organismeId, annee_scolaire: { $in: activeAnnees } }),
+    effectifsDECADb().countDocuments({ organisme_id: organismeId, annee_scolaire: { $in: activeAnnees } }),
+  ]);
+  return { effectifsErpCount, effectifsDecaPropres };
+}
+
 function notEvaluated(): EligibilityCheck {
   return { passed: false };
 }
@@ -215,18 +224,7 @@ export async function checkEligibilityForLoaded(
     details: { natureActuelle: nature ?? null },
   };
 
-  const activeAnnees = getActiveAnneesScolaires(new Date());
-
-  const [effectifsErpCount, effectifsDecaPropres] = await Promise.all([
-    effectifsDb().countDocuments({
-      organisme_id: _id as ObjectId,
-      annee_scolaire: { $in: activeAnnees },
-    }),
-    effectifsDECADb().countDocuments({
-      organisme_id: _id as ObjectId,
-      annee_scolaire: { $in: activeAnnees },
-    }),
-  ]);
+  const { effectifsErpCount, effectifsDecaPropres } = await countEffectifsAnneesActives(_id as ObjectId);
 
   const effectifsDecaCount =
     effectifsDecaPropres + (is_allowed_deca === true ? 0 : (organisme.deca_contrats_flechables ?? 0));

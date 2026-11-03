@@ -59,7 +59,7 @@ async function creerDossier(
       effectif_snapshot_date: new Date(),
       date_rupture: null,
       created_at: new Date(),
-      current_status: { value: statut, date: new Date("2026-01-01") },
+      current_status: { value: STATUT_APPRENANT.RUPTURANT, date: new Date("2025-12-01") },
       ...(organismeData ? { organisme_data: organismeData } : {}),
       ...extra,
     })
@@ -102,21 +102,6 @@ describe("Refresh de snapshot déclenché par une activation", () => {
       const dossier = await missionLocaleEffectifsDb().findOne({ _id: collaboration });
       expect(dossier?.date_rupture).toBeNull();
     });
-
-    it.each([STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.APPRENTI])(
-      "conserve un dossier %s avec sa date de rupture",
-      async (statut) => {
-        const dateRupture = new Date("2025-12-01");
-        const dossierId = await creerDossier(null, { date_rupture: dateRupture }, statut);
-
-        await updateEffectifMissionLocaleSnapshotAtMLActivation(mlOrganisationId);
-
-        const dossier = await missionLocaleEffectifsDb().findOne({ _id: dossierId });
-        expect(dossier?.soft_deleted).not.toBe(true);
-        expect(dossier?.date_rupture).toEqual(dateRupture);
-        expect(dossier?.current_status?.value).toBe(statut);
-      }
-    );
   });
 
   describe("activation d'un organisme", () => {
@@ -131,14 +116,19 @@ describe("Refresh de snapshot déclenché par une activation", () => {
       expect(await estSoftDeleted(demandeRdv)).toBe(false);
       expect(await estSoftDeleted(sansSignal)).toBe(true);
     });
+  });
 
+  describe.each([
+    ["d'une Mission Locale", () => updateEffectifMissionLocaleSnapshotAtMLActivation(mlOrganisationId)],
+    ["d'un organisme", () => updateEffectifMissionLocaleSnapshotAtOrganismeActivation(organismeId)],
+  ])("activation %s", (_, activer) => {
     it.each([STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.APPRENTI])(
-      "conserve un dossier %s avec sa date de rupture",
+      "conserve un dossier passé en %s, avec son statut à jour et sa date de rupture",
       async (statut) => {
         const dateRupture = new Date("2025-12-01");
         const dossierId = await creerDossier(null, { date_rupture: dateRupture }, statut);
 
-        await updateEffectifMissionLocaleSnapshotAtOrganismeActivation(organismeId);
+        await activer();
 
         const dossier = await missionLocaleEffectifsDb().findOne({ _id: dossierId });
         expect(dossier?.soft_deleted).not.toBe(true);

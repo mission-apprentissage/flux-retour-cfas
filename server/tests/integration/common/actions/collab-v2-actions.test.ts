@@ -3,7 +3,6 @@ import { NATURE_ORGANISME_DE_FORMATION, SOURCE_APPRENANT, STATUT_APPRENANT } fro
 import type { IMissionLocaleEffectif } from "shared/models";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IOrganisation } from "shared/models/data/organisations.model";
-import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -20,10 +19,10 @@ import {
   missionLocaleEffectifsDb,
   organisationsDb,
   organismesDb,
-  usersMigrationDb,
 } from "@/common/model/collections";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
+import { insererCompteCfa } from "@tests/utils/comptesCfa";
 import { testDoc } from "@tests/utils/testUtils";
 
 useMongo();
@@ -258,10 +257,7 @@ describe("activation de la collaboration d'un CFA sans ERP", () => {
   });
 
   it("active un CFA DECA seul avec un compte confirmé et dénormalise la collab sur son dossier DECA", async () => {
-    await usersMigrationDb().insertOne(
-      testDoc<IUsersMigration>({ email: "cfa@deca.fr", organisation_id: organisationId, account_status: "CONFIRMED" }),
-      { bypassDocumentValidation: true }
-    );
+    await insererCompteCfa(organisationId);
 
     const result = await activateCollabV2(organismeId.toString(), adminUserId);
 
@@ -276,10 +272,7 @@ describe("activation de la collaboration d'un CFA sans ERP", () => {
   });
 
   it("ne pose qu'une date quand deux activations arrivent en même temps", async () => {
-    await usersMigrationDb().insertOne(
-      testDoc<IUsersMigration>({ email: "cfa@deca.fr", organisation_id: organisationId, account_status: "CONFIRMED" }),
-      { bypassDocumentValidation: true }
-    );
+    await insererCompteCfa(organisationId);
 
     const results = await Promise.all([
       activateCollabV2(organismeId.toString(), adminUserId),

@@ -2,24 +2,16 @@ import { ObjectId } from "bson";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import type { IOrganisation } from "shared/models/data/organisations.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
-import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { generateFormationCatalogueFixture } from "shared/models/fixtures/formationsCatalogue.fixture";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { describe, expect, it } from "vitest";
 
 import { checkCollabV2Eligibility } from "@/common/actions/organismes/collab-v2-eligibility";
-import {
-  effectifsDb,
-  effectifsDECADb,
-  formationsCatalogueDb,
-  organisationsDb,
-  organismesDb,
-  usersMigrationDb,
-} from "@/common/model/collections";
+import { effectifsDb, effectifsDECADb, formationsCatalogueDb, organismesDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
+import { insererCompteCfa, insererOrganisationCfa } from "@tests/utils/comptesCfa";
 import { testDoc } from "@tests/utils/testUtils";
 
 useMongo();
@@ -58,37 +50,6 @@ async function insertEffectifDECA(organisme_id: ObjectId, annee_scolaire: string
   await effectifsDECADb().insertOne(testDoc<IEffectifDECA>({ _id: new ObjectId(), organisme_id, annee_scolaire }), {
     bypassDocumentValidation: true,
   });
-}
-
-async function insertOrganisation(organisme_id: ObjectId) {
-  const organisationId = new ObjectId();
-  await organisationsDb().insertOne(
-    testDoc<IOrganisation>({
-      _id: organisationId,
-      type: "ORGANISME_FORMATION",
-      siret: SIRET_SELF,
-      uai: UAI_SELF,
-      organisme_id: organisme_id.toString(),
-      created_at: new Date(),
-    }),
-    { bypassDocumentValidation: true }
-  );
-  return organisationId;
-}
-
-async function insertCompte(organisationId: ObjectId, account_status: IUsersMigration["account_status"] = "CONFIRMED") {
-  await usersMigrationDb().insertOne(
-    testDoc<IUsersMigration>({
-      email: `${new ObjectId().toHexString()}@cfa.fr`,
-      organisation_id: organisationId,
-      account_status,
-    }),
-    { bypassDocumentValidation: true }
-  );
-}
-
-async function insertCompteConfirme(organisme_id: ObjectId) {
-  await insertCompte(await insertOrganisation(organisme_id));
 }
 
 async function insertFormationCatalogue(overrides: Partial<ReturnType<typeof generateFormationCatalogueFixture>>) {
@@ -178,7 +139,7 @@ describe("checkCollabV2Eligibility", () => {
       const organisme = await insertOrganisme({ is_allowed_deca: true });
       await insertEffectif(organisme._id as ObjectId, "2010-2011");
       await insertEffectifDECA(organisme._id as ObjectId, "2010-2011");
-      await insertCompteConfirme(organisme._id as ObjectId);
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
       const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
       expect(result.checks.has_effectifs.passed).toBe(false);
       expect(result.eligible).toBe(false);
@@ -199,7 +160,7 @@ describe("checkCollabV2Eligibility", () => {
         const organisme = await insertOrganisme({ is_allowed_deca: flag });
         if (erp) await insertEffectif(organisme._id as ObjectId, currentAnnee);
         if (deca) await insertEffectifDECA(organisme._id as ObjectId, currentAnnee);
-        await insertCompteConfirme(organisme._id as ObjectId);
+        await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
         const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
         expect(result.checks.deca_visible.passed).toBe(expected);
         expect(result.checks.deca_visible.details?.decaActif).toBe(flag);
@@ -212,7 +173,7 @@ describe("checkCollabV2Eligibility", () => {
     it("fails when the organisme is closed", async () => {
       const organisme = await insertOrganisme({ ferme: true });
       await insertEffectif(organisme._id as ObjectId, currentAnnee);
-      await insertCompteConfirme(organisme._id as ObjectId);
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
       const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
       expect(result.checks.not_closed.passed).toBe(false);
       expect(result.eligible).toBe(false);
@@ -223,7 +184,7 @@ describe("checkCollabV2Eligibility", () => {
     it("fails without any account", async () => {
       const organisme = await insertOrganisme();
       await insertEffectif(organisme._id as ObjectId, currentAnnee);
-      await insertOrganisation(organisme._id as ObjectId);
+      await insererOrganisationCfa(organisme._id as ObjectId);
       const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
       expect(result.checks.has_compte_confirme.passed).toBe(false);
       expect(result.checks.has_compte_confirme.details?.comptesConfirmes).toBe(0);
@@ -233,7 +194,7 @@ describe("checkCollabV2Eligibility", () => {
     it("fails with an account pending validation", async () => {
       const organisme = await insertOrganisme();
       await insertEffectif(organisme._id as ObjectId, currentAnnee);
-      await insertCompte(await insertOrganisation(organisme._id as ObjectId), "PENDING_ADMIN_VALIDATION");
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId), "PENDING_ADMIN_VALIDATION");
       const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
       expect(result.checks.has_compte_confirme.passed).toBe(false);
     });
@@ -241,7 +202,7 @@ describe("checkCollabV2Eligibility", () => {
     it("ignores a confirmed account of another organisme", async () => {
       const organisme = await insertOrganisme();
       await insertEffectif(organisme._id as ObjectId, currentAnnee);
-      await insertCompteConfirme(new ObjectId());
+      await insererCompteCfa(await insererOrganisationCfa(new ObjectId()));
       const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
       expect(result.checks.has_compte_confirme.passed).toBe(false);
     });
@@ -249,7 +210,7 @@ describe("checkCollabV2Eligibility", () => {
     it("passes with a confirmed account", async () => {
       const organisme = await insertOrganisme();
       await insertEffectif(organisme._id as ObjectId, currentAnnee);
-      await insertCompteConfirme(organisme._id as ObjectId);
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
       const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
       expect(result.checks.has_compte_confirme.passed).toBe(true);
       expect(result.checks.has_compte_confirme.details?.comptesConfirmes).toBe(1);
@@ -259,8 +220,8 @@ describe("checkCollabV2Eligibility", () => {
     it("passes with a confirmed account in the second organisation of the organisme", async () => {
       const organisme = await insertOrganisme();
       await insertEffectif(organisme._id as ObjectId, currentAnnee);
-      await insertOrganisation(organisme._id as ObjectId);
-      await insertCompteConfirme(organisme._id as ObjectId);
+      await insererOrganisationCfa(organisme._id as ObjectId);
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
       const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
       expect(result.checks.has_compte_confirme.passed).toBe(true);
     });
@@ -296,7 +257,7 @@ describe("checkCollabV2Eligibility", () => {
     it("returns eligible=true even with a published gestionnaire=self / formateur=tiers formation", async () => {
       const organisme = await insertOrganisme({ nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR });
       await insertEffectif(organisme._id as ObjectId, currentAnnee);
-      await insertCompteConfirme(organisme._id as ObjectId);
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
       await insertFormationCatalogue({
         etablissement_formateur_siret: SIRET_TIERS,
         etablissement_formateur_uai: UAI_TIERS,
@@ -311,7 +272,7 @@ describe("checkCollabV2Eligibility", () => {
     it("returns eligible=true for nature=formateur with ERP effectif on current annee", async () => {
       const organisme = await insertOrganisme({ nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR });
       await insertEffectif(organisme._id as ObjectId, currentAnnee);
-      await insertCompteConfirme(organisme._id as ObjectId);
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
       const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
       expect(result.eligible).toBe(true);
       expect(result.alreadyActive).toBe(false);

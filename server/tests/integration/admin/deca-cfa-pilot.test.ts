@@ -5,7 +5,6 @@ import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
 import type { IOrganisation, IOrganisationOrganismeFormation, IMissionLocaleEffectif } from "shared/models";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
-import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -16,17 +15,12 @@ import {
   activerDecaOrganisme,
   deactivateDecaCfaPilotBatch,
 } from "@/common/actions/organismes/organismes.admin.actions";
-import {
-  effectifsDb,
-  missionLocaleEffectifsDb,
-  organisationsDb,
-  organismesDb,
-  usersMigrationDb,
-} from "@/common/model/collections";
+import { effectifsDb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
 import { decaJobs } from "@/jobs/registry/deca";
 import { useMongo } from "@tests/jest/setupMongo";
+import { insererCompteCfa } from "@tests/utils/comptesCfa";
 import { DeepPartial, testDoc } from "@tests/utils/testUtils";
 
 vi.mock("job-processor", async (importOriginal) => ({
@@ -73,17 +67,6 @@ beforeAll(async () => {
 const ADMIN_USER_ID = "admin-user-id";
 
 const [currentAnnee] = getActiveAnneesScolaires(new Date());
-
-async function insertCompteConfirme(organisationId: ObjectId) {
-  await usersMigrationDb().insertOne(
-    testDoc<IUsersMigration>({
-      email: `${organisationId.toHexString()}@cfa.fr`,
-      organisation_id: organisationId,
-      account_status: "CONFIRMED",
-    }),
-    { bypassDocumentValidation: true }
-  );
-}
 
 type Seed = {
   siret: string;
@@ -217,7 +200,7 @@ describe("activateDecaCfaPilotBatch", () => {
       mlBetaActivatedAt: initialDate,
       insertMlEffectif: true,
     });
-    await insertCompteConfirme(organisationId!);
+    await insererCompteCfa(organisationId!);
     const result = await activerParJob("10000000000005", "0010005E");
     expect(result.items[0].status).toBe("queued");
     expect((await organismesDb().findOne({ _id: id }))?.is_allowed_collab).toBe(true);
@@ -238,7 +221,7 @@ describe("couplage avec la collaboration", () => {
       uai: "0010020A",
       insertMlEffectif: true,
     });
-    await insertCompteConfirme(organisationId!);
+    await insererCompteCfa(organisationId!);
 
     await activerParJob("10000000000020", "0010020A");
 
@@ -263,7 +246,7 @@ describe("couplage avec la collaboration", () => {
       uai: "0010021B",
       mlBetaActivatedAt: new Date("2026-01-15T10:00:00.000Z"),
     });
-    await insertCompteConfirme(organisationId!);
+    await insererCompteCfa(organisationId!);
     await organismesDb().updateOne(
       { _id: id },
       { $set: { is_allowed_collab: true, collab_suspended_at: suspendedAt } }
@@ -282,7 +265,7 @@ describe("couplage avec la collaboration", () => {
       uai: "0010022C",
       insertMlEffectif: true,
     });
-    await insertCompteConfirme(organisationId!);
+    await insererCompteCfa(organisationId!);
     const updateMany = vi.spyOn(Collection.prototype, "updateMany").mockRejectedValueOnce(new Error("panne"));
 
     try {
@@ -298,6 +281,35 @@ describe("couplage avec la collaboration", () => {
       _id: organisationId,
     })) as IOrganisationOrganismeFormation | null;
     expect(organisation?.ml_beta_activated_at).toBeUndefined();
+  });
+});
+
+describe("couplage avec la collaboration, écriture partielle des dossiers", () => {
+  it("remet les dossiers hors collaboration quand l'écriture échoue en cours de route", async () => {
+    const { id, organisationId } = await seedOrganisme({
+      siret: "10000000000023",
+      uai: "0010023D",
+      insertMlEffectif: true,
+    });
+    await insererCompteCfa(organisationId!);
+    const updateManyOriginal = Collection.prototype.updateMany;
+    const updateMany = vi.spyOn(Collection.prototype, "updateMany").mockImplementationOnce(async function (
+      this: Collection,
+      ...args: Parameters<Collection["updateMany"]>
+    ) {
+      await updateManyOriginal.apply(this, args);
+      throw new Error("panne");
+    });
+
+    try {
+      await activerParJob("10000000000023", "0010023D");
+    } finally {
+      updateMany.mockRestore();
+    }
+
+    expect((await organismesDb().findOne({ _id: id }))?.is_allowed_collab).toBeUndefined();
+    const mlEffectif = await missionLocaleEffectifsDb().findOne({ "effectif_snapshot.organisme_id": id });
+    expect(mlEffectif?.computed?.organisme).toMatchObject({ is_allowed_collab: false, ml_beta_activated_at: null });
   });
 });
 

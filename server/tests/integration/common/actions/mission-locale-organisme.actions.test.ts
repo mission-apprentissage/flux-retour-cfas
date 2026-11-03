@@ -598,7 +598,7 @@ describe("activation DECA à l'envoi d'une collaboration", () => {
   const envoyerCollaboration = () =>
     setEffectifMissionLocaleDataFromOrganisme(organismeId, effectifId, { rupture: true, acc_conjoint: true }, userId);
 
-  const decaEnFile = () =>
+  const verifierDecaEnFile = () =>
     expect(addJobMock).toHaveBeenCalledWith({
       name: "deca:activer",
       payload: { organismeId: organismeId.toHexString() },
@@ -610,7 +610,7 @@ describe("activation DECA à l'envoi d'une collaboration", () => {
 
     await envoyerCollaboration();
 
-    decaEnFile();
+    verifierDecaEnFile();
     const organisme = await organismesDb().findOne({ _id: organismeId });
     expect(organisme?.deca_activation_queued_at).toBeInstanceOf(Date);
     expect(organisme?.is_allowed_collab).toBe(true);
@@ -622,7 +622,7 @@ describe("activation DECA à l'envoi d'une collaboration", () => {
 
     await envoyerCollaboration();
 
-    decaEnFile();
+    verifierDecaEnFile();
   });
 
   it.each([
