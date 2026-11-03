@@ -5,7 +5,7 @@ const userSchema = () =>
     civility: z.enum(["Monsieur", "Madame"]),
     prenom: z.string(),
     nom: z.string(),
-    email: z.string().email(),
+    email: z.string().email().toLowerCase().trim(),
     fonction: z.string(),
     telephone: z.string().optional(),
   });
