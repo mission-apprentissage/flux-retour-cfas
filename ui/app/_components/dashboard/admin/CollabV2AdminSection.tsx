@@ -25,7 +25,10 @@ type EligibilityResult = {
   checks: {
     exists_with_siret_uai: EligibilityCheck;
     nature: EligibilityCheck;
-    has_effectifs_erp: EligibilityCheck;
+    not_closed: EligibilityCheck;
+    has_effectifs: EligibilityCheck;
+    deca_visible: EligibilityCheck;
+    has_compte_confirme: EligibilityCheck;
     not_already_active: EligibilityCheck;
   };
   organisme: {
@@ -134,8 +137,16 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
             Nature «&nbsp;formateur&nbsp;» / «&nbsp;responsable_formateur&nbsp;» (actuelle&nbsp;:{" "}
             <strong>{checks.nature.details?.natureActuelle ?? "—"}</strong>)
           </CheckLine>
-          <CheckLine passed={checks.has_effectifs_erp.passed}>
-            Effectifs ERP sur années scolaires actives ({checks.has_effectifs_erp.details?.effectifsErpCount ?? 0})
+          <CheckLine passed={checks.not_closed?.passed === true}>Établissement ouvert</CheckLine>
+          <CheckLine passed={checks.has_effectifs?.passed === true}>
+            Effectifs sur années scolaires actives (ERP&nbsp;: {checks.has_effectifs?.details?.effectifsErpCount ?? 0},
+            DECA&nbsp;: {checks.has_effectifs?.details?.effectifsDecaCount ?? 0})
+          </CheckLine>
+          <CheckLine passed={checks.deca_visible?.passed === true}>
+            Programme DECA-CFA actif, requis dès qu&apos;il y a des effectifs DECA
+          </CheckLine>
+          <CheckLine passed={checks.has_compte_confirme?.passed === true}>
+            Au moins un compte CFA confirmé ({checks.has_compte_confirme?.details?.comptesConfirmes ?? 0})
           </CheckLine>
         </div>
       ) : null}

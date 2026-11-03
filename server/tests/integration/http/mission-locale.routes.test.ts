@@ -1147,6 +1147,21 @@ describe("Mission Locale Routes", () => {
       expect(isVisible(res, snapshotId.toString())).toBe(false);
     });
 
+    it.each([
+      { ruptureDaysAgo: 10, visible: false },
+      { ruptureDaysAgo: 60, visible: true },
+    ])(
+      "CFA en V2 + rupture DECA il y a $ruptureDaysAgo j : visible=$visible, comme une rupture ERP",
+      async ({ ruptureDaysAgo, visible }) => {
+        const { snapshotId, doc } = makeDoc({ accConjoint: false, isAllowedCollab: true, ruptureDaysAgo });
+        Object.assign(doc.effectif_snapshot, { source: SOURCE_APPRENANT.DECA, is_deca_compatible: true });
+        await insertDoc(doc);
+
+        const res = await getPerMonth();
+        expect(isVisible(res, snapshotId.toString())).toBe(visible);
+      }
+    );
+
     // RG8 : collaboration suspendue pour inactivité → le délai de 45 j ne s'applique plus.
     it("CFA suspendu pour inactivité + rupture < 45j : visible MAIS non prioritaire", async () => {
       const { snapshotId, doc } = makeDoc({

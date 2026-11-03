@@ -690,6 +690,8 @@ export async function activateCollabV2(
         siret: 1,
         uai: 1,
         nature: 1,
+        ferme: 1,
+        is_allowed_deca: 1,
         is_allowed_collab: 1,
         nom: 1,
         raison_sociale: 1,
