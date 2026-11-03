@@ -147,15 +147,18 @@ const emailProuve = <T extends Pick<IUsersMigration, "account_status">>(compte: 
 const venuDUneInvitation = (compte: Pick<IUsersMigration, "account_status" | "organisation_role">) =>
   compte.account_status === "PENDING_EMAIL_VALIDATION" && !!compte.organisation_role;
 
+const appartientALOrganisme = (
+  organisation: { type: string; organisme_id?: string | null } | null | undefined,
+  organismeId: ObjectId | string
+) => organisation?.type === "ORGANISME_FORMATION" && organisation.organisme_id === organismeId.toString();
+
 export async function organisationDuCompteDans(
   compte: Pick<IUsersMigration, "organisation_id">,
   organismeId: ObjectId | string | null | undefined
 ) {
   if (!organismeId) return null;
   const organisation = await organisationsDb().findOne({ _id: compte.organisation_id });
-  return organisation?.type === "ORGANISME_FORMATION" && organisation.organisme_id === organismeId.toString()
-    ? organisation
-    : null;
+  return appartientALOrganisme(organisation, organismeId) ? organisation : null;
 }
 
 const normaliserEmail = (valeur: string | undefined) => (valeur ?? "").toLowerCase().replace(/\s+/g, "");
@@ -639,13 +642,13 @@ function derniereRelance(
 function compteRetenu(
   demande: IDemandeActivationCfa,
   comptes: CompteSuivi[],
-  organismeParOrganisation: Map<string, string>
+  organisationParId: Map<string, Pick<IOrganisationOrganismeFormation, "type" | "organisme_id">>
 ) {
   const candidats = comptes.filter((compte) => compte.email === demande.email || demande.user_id?.equals(compte._id));
   const dansLEtablissement = candidats.filter(
     (compte) =>
       !!demande.organisme_id &&
-      organismeParOrganisation.get(compte.organisation_id.toString()) === demande.organisme_id.toString()
+      appartientALOrganisme(organisationParId.get(compte.organisation_id.toString()), demande.organisme_id)
   );
   const compte =
     dansLEtablissement.find((candidat) => demande.user_id?.equals(candidat._id)) ?? dansLEtablissement[0] ?? null;
@@ -674,15 +677,9 @@ async function suivreEnvoyees(
       { projection: { type: 1, organisme_id: 1 } }
     )
     .toArray();
-  const organismeParOrganisation = new Map(
-    organisations.flatMap((organisation) =>
-      organisation.type === "ORGANISME_FORMATION" && organisation.organisme_id
-        ? [[organisation._id.toString(), organisation.organisme_id] as const]
-        : []
-    )
-  );
+  const organisationParId = new Map(organisations.map((organisation) => [organisation._id.toString(), organisation]));
 
-  const suivies = demandes.map((demande) => ({ demande, ...compteRetenu(demande, comptes, organismeParOrganisation) }));
+  const suivies = demandes.map((demande) => ({ demande, ...compteRetenu(demande, comptes, organisationParId) }));
   const auteurs = suivies.flatMap(({ compte }) => (compte ? [compte] : []));
   const [enAttente, archivees] = await Promise.all([
     invitationsDb()
@@ -715,13 +712,13 @@ async function suivreEnvoyees(
   return new Map(
     suivies.map(({ demande, compte, ailleurs }) => {
       const depuis = demande.envoyee_at ?? demande.created_at;
-      const duCompte = <T extends { author_id: ObjectId; created_at: Date }>(invitations: T[]) =>
+      const inviteesParLeCompte = <T extends { author_id: ObjectId; created_at: Date }>(invitations: T[]) =>
         compte
           ? invitations.filter(
               (invitation) => invitation.author_id.equals(compte._id) && invitation.created_at >= depuis
             )
           : [];
-      const invitations = [...duCompte(enAttente), ...duCompte(archivees)];
+      const invitations = [...inviteesParLeCompte(enAttente), ...inviteesParLeCompte(archivees)];
       const connexion = compte ? premiereConnexionDepuis(compte, depuis) : null;
       return [
         demande._id.toString(),
@@ -738,7 +735,7 @@ async function suivreEnvoyees(
             compte_ailleurs: ailleurs,
             connexion_apres_envoi_at: connexion?.toISOString() ?? null,
             collaborateurs_invites: invitations.length,
-            collaborateurs_inscrits: duCompte(archivees).filter((archivee) =>
+            collaborateurs_inscrits: inviteesParLeCompte(archivees).filter((archivee) =>
               inscrits.has(`${archivee.email} ${archivee.organisation_id}`)
             ).length,
             derniere_relance: derniereRelance(
@@ -764,7 +761,10 @@ const versCompte = (compte: CompteLigne): NonNullable<IDemandeActivationLigne["c
 
 async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeActivationLigne[]> {
   const organismeIds = demandes.flatMap((demande) => (demande.organisme_id ? [demande.organisme_id] : []));
-  const userIds = demandes.flatMap((demande) => (demande.user_id ? [demande.user_id] : []));
+  const envoyees = demandes.filter((demande) => vueDemande(demande) === "envoyees");
+  const userIds = demandes.flatMap((demande) =>
+    demande.user_id && !envoyees.includes(demande) ? [demande.user_id] : []
+  );
   const [organismes, comptes, suivis] = await Promise.all([
     organismesDb()
       .find({ _id: { $in: organismeIds } }, { projection: { nom: 1, raison_sociale: 1, enseigne: 1 } })
@@ -772,7 +772,7 @@ async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeAc
     usersMigrationDb()
       .find<CompteLigne>({ _id: { $in: userIds } }, { projection: PROJECTION_COMPTE })
       .toArray(),
-    suivreEnvoyees(demandes.filter((demande) => vueDemande(demande) === "envoyees")),
+    suivreEnvoyees(envoyees),
   ]);
   const organismeParId = new Map(organismes.map((organisme) => [organisme._id.toString(), organisme]));
   const compteParId = new Map(comptes.map((compte) => [compte._id.toString(), compte]));
@@ -780,7 +780,7 @@ async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeAc
   return demandes.map((demande) => {
     const organisme = demande.organisme_id ? organismeParId.get(demande.organisme_id.toString()) : undefined;
     const suivi = suivis.get(demande._id.toString());
-    const compte = suivi ? suivi.compte : demande.user_id ? compteParId.get(demande.user_id.toString()) : undefined;
+    const compte = suivi ? suivi.compte : demande.user_id && compteParId.get(demande.user_id.toString());
     return {
       _id: demande._id.toString(),
       source: demande.source,
@@ -1255,6 +1255,7 @@ async function traiterDemande(
     }
     if (compte && venuDUneInvitation(compte)) {
       await renvoyerLienDeValidation(compte);
+      await demandesActivationCfaDb().updateOne({ _id: demande._id }, { $set: { invitation_id: null } });
       etapes.compte_at = new Date();
       etapes.email_at = new Date();
       return { compteValide };

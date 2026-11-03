@@ -6,7 +6,6 @@ import { ObjectId } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
 import type { IDemandeActivationCfa } from "shared/models/data/demandesActivationCfa.model";
 import type { IEffectif } from "shared/models/data/effectifs.model";
-import type { IOrganisation } from "shared/models/data/organisations.model";
 import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import type { IDemandesActivationResponse } from "shared/models/routes/admin/demandes-activation.api";
@@ -18,11 +17,11 @@ import {
   effectifsDb,
   invitationsArchiveDb,
   invitationsDb,
-  organisationsDb,
   organismesDb,
   usersMigrationDb,
 } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
+import { insererOrganisationCfa } from "@tests/utils/comptesCfa";
 import { initTestApp, RequestAsOrganisationFunc, testDoc, testPasswordHash } from "@tests/utils/testUtils";
 
 vi.mock("job-processor", async (importOriginal) => ({
@@ -484,22 +483,6 @@ describe("suivi des demandes envoyées", () => {
   let organismeId: ObjectId;
   let organisationId: ObjectId;
 
-  async function insererOrganisation(organisme: ObjectId) {
-    const _id = new ObjectId();
-    await organisationsDb().insertOne(
-      testDoc<IOrganisation>({
-        _id,
-        type: "ORGANISME_FORMATION",
-        siret: CFA_SIRET,
-        uai: "0442095L",
-        organisme_id: organisme.toString(),
-        created_at: ENVOI,
-      }),
-      { bypassDocumentValidation: true }
-    );
-    return _id;
-  }
-
   async function insererCompte(overrides: Partial<IUsersMigration> = {}) {
     const _id = new ObjectId();
     await usersMigrationDb().insertOne({
@@ -578,7 +561,7 @@ describe("suivi des demandes envoyées", () => {
   beforeEach(async () => {
     ({ requestAsOrganisation } = await initTestApp());
     organismeId = await insererCfa(CFA_SIRET, "0442095L");
-    organisationId = await insererOrganisation(organismeId);
+    organisationId = await insererOrganisationCfa(organismeId);
   });
 
   it("retrouve par e-mail le compte recréé sur invitation, quand user_id vise l'ancien compte supprimé", async () => {
@@ -633,7 +616,7 @@ describe("suivi des demandes envoyées", () => {
   it("écarte un compte d'un autre établissement, mais garde celui d'une organisation jumelle", async () => {
     const id = await insererEnvoyee();
     const autreOrganisme = await insererCfa(CFA_GMAIL_SIRET, "0442097N");
-    const compteId = await insererCompte({ organisation_id: await insererOrganisation(autreOrganisme) });
+    const compteId = await insererCompte({ organisation_id: await insererOrganisationCfa(autreOrganisme) });
 
     expect(await ligneDe(id)).toMatchObject({
       compte: null,
@@ -642,7 +625,7 @@ describe("suivi des demandes envoyées", () => {
 
     await usersMigrationDb().updateOne(
       { _id: compteId },
-      { $set: { organisation_id: await insererOrganisation(organismeId) } }
+      { $set: { organisation_id: await insererOrganisationCfa(organismeId) } }
     );
 
     expect((await ligneDe(id)).suivi).toMatchObject({ etape: "pas_connecte", compte_ailleurs: false });
@@ -693,6 +676,20 @@ describe("suivi des demandes envoyées", () => {
     await insererCompte({ account_status: "PENDING_EMAIL_VALIDATION", created_at: plus(-5) });
 
     expect((await ligneDe(id)).suivi).toMatchObject({ etape: "compte_a_valider", mail_envoye: "lien_validation" });
+  });
+
+  it("ne renvoie pas de suivi dans les réponses de la coche et du renvoi", async () => {
+    const prete = await insererEnvoyee({ email: "autre@cfa-suivi.fr", statut: "pret", envoyee_at: null });
+    const enEchec = await insererEnvoyee({ email: "echec@cfa-suivi.fr", statut: "echec", envoyee_at: null });
+
+    const coche = await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "put", `${URL_LISTE}/a-envoyer`, {
+      ids: [prete],
+      a_envoyer: true,
+    });
+    const renvoi = await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "post", `${URL_LISTE}/${enEchec}/renvoyer`);
+
+    expect(coche.data).toMatchObject([{ _id: prete, a_envoyer: true, suivi: null }]);
+    expect(renvoi.data).toMatchObject({ _id: enEchec, statut: "envoi_en_cours", suivi: null });
   });
 
   it("ne calcule le suivi que dans la vue Envoyées", async () => {
