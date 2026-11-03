@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { STATUT_APPRENANT } from "shared/constants";
+import { STATUT_APPRENANT, type StatutApprenant } from "shared/constants";
 import type { IMissionLocaleEffectif } from "shared/models";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
@@ -21,10 +21,14 @@ const mlOrganisationId = new ObjectId(id(2));
 const sampleOrganisme = { _id: organismeId, ...createRandomOrganisme({ siret: "19040492100016" }) };
 
 /**
- * Crée un effectif INSCRIT (donc ni rupturant ni en abandon) et son dossier ML : sans les gardes
- * du lot B2b, `updateOrDeleteMissionLocaleSnapshot` soft-delete ce dossier au passage du job.
+ * Crée un effectif, INSCRIT par défaut (donc ni rupturant ni en abandon), et son dossier ML : sans
+ * les gardes du lot B2b, `updateOrDeleteMissionLocaleSnapshot` soft-delete ce dossier au passage du job.
  */
-async function creerDossier(organismeData: Record<string, unknown> | null, extra: Record<string, unknown> = {}) {
+async function creerDossier(
+  organismeData: Record<string, unknown> | null,
+  extra: Record<string, unknown> = {},
+  statut: StatutApprenant = STATUT_APPRENANT.INSCRIT
+) {
   const effectifId = new ObjectId();
   const snapshot = await createSampleEffectif({
     organisme: sampleOrganisme,
@@ -38,8 +42,8 @@ async function creerDossier(organismeData: Record<string, unknown> | null, extra
     _computed: {
       ...snapshot._computed,
       statut: {
-        en_cours: STATUT_APPRENANT.INSCRIT,
-        parcours: [{ valeur: STATUT_APPRENANT.INSCRIT, date: new Date("2026-01-01") }],
+        en_cours: statut,
+        parcours: [{ valeur: statut, date: new Date("2026-01-01") }],
       },
     },
   };
@@ -55,7 +59,7 @@ async function creerDossier(organismeData: Record<string, unknown> | null, extra
       effectif_snapshot_date: new Date(),
       date_rupture: null,
       created_at: new Date(),
-      current_status: { value: STATUT_APPRENANT.INSCRIT, date: new Date("2026-01-01") },
+      current_status: { value: statut, date: new Date("2026-01-01") },
       ...(organismeData ? { organisme_data: organismeData } : {}),
       ...extra,
     })
@@ -98,6 +102,21 @@ describe("Refresh de snapshot déclenché par une activation", () => {
       const dossier = await missionLocaleEffectifsDb().findOne({ _id: collaboration });
       expect(dossier?.date_rupture).toBeNull();
     });
+
+    it.each([STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.APPRENTI])(
+      "conserve un dossier %s avec sa date de rupture",
+      async (statut) => {
+        const dateRupture = new Date("2025-12-01");
+        const dossierId = await creerDossier(null, { date_rupture: dateRupture }, statut);
+
+        await updateEffectifMissionLocaleSnapshotAtMLActivation(mlOrganisationId);
+
+        const dossier = await missionLocaleEffectifsDb().findOne({ _id: dossierId });
+        expect(dossier?.soft_deleted).not.toBe(true);
+        expect(dossier?.date_rupture).toEqual(dateRupture);
+        expect(dossier?.current_status?.value).toBe(statut);
+      }
+    );
   });
 
   describe("activation d'un organisme", () => {
@@ -112,5 +131,20 @@ describe("Refresh de snapshot déclenché par une activation", () => {
       expect(await estSoftDeleted(demandeRdv)).toBe(false);
       expect(await estSoftDeleted(sansSignal)).toBe(true);
     });
+
+    it.each([STATUT_APPRENANT.ABANDON, STATUT_APPRENANT.APPRENTI])(
+      "conserve un dossier %s avec sa date de rupture",
+      async (statut) => {
+        const dateRupture = new Date("2025-12-01");
+        const dossierId = await creerDossier(null, { date_rupture: dateRupture }, statut);
+
+        await updateEffectifMissionLocaleSnapshotAtOrganismeActivation(organismeId);
+
+        const dossier = await missionLocaleEffectifsDb().findOne({ _id: dossierId });
+        expect(dossier?.soft_deleted).not.toBe(true);
+        expect(dossier?.date_rupture).toEqual(dateRupture);
+        expect(dossier?.current_status?.value).toBe(statut);
+      }
+    );
   });
 });

@@ -652,8 +652,9 @@ describe("Mission Locale Routes", () => {
         expect(after?.soft_deleted).toBeFalsy();
       });
 
-      // Contraste : le retour en contrat reste un soft-delete (comportement préexistant inchangé).
-      it("soft-delete toujours un retour en APPRENTI", async () => {
+      it("garde aussi un retour en APPRENTI et préserve date_rupture", async () => {
+        const before = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+
         await effectifsDb().updateOne(
           { _id: EFFECTIF_ID },
           {
@@ -667,7 +668,9 @@ describe("Mission Locale Routes", () => {
         await updateOrDeleteMissionLocaleSnapshot(updatedEffectif!);
 
         const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
-        expect(after?.soft_deleted).toBe(true);
+        expect(after?.soft_deleted).toBeFalsy();
+        expect(after?.date_rupture).toEqual(before?.date_rupture);
+        expect(after?.current_status?.value).toBe("APPRENTI");
       });
     });
 
