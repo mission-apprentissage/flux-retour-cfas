@@ -4,14 +4,25 @@ import { join } from "node:path";
 import AdmZip from "adm-zip";
 import { ObjectId } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
+import type { IDemandeActivationCfa } from "shared/models/data/demandesActivationCfa.model";
 import type { IEffectif } from "shared/models/data/effectifs.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
+import type { IDemandesActivationResponse } from "shared/models/routes/admin/demandes-activation.api";
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { demandesActivationCfaDb, effectifsDb, organismesDb } from "@/common/model/collections";
+import {
+  demandesActivationCfaDb,
+  effectifsDb,
+  invitationsArchiveDb,
+  invitationsDb,
+  organismesDb,
+  usersMigrationDb,
+} from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
-import { initTestApp, RequestAsOrganisationFunc, testDoc } from "@tests/utils/testUtils";
+import { insererOrganisationCfa } from "@tests/utils/comptesCfa";
+import { initTestApp, RequestAsOrganisationFunc, testDoc, testPasswordHash } from "@tests/utils/testUtils";
 
 vi.mock("job-processor", async (importOriginal) => ({
   ...(await importOriginal<typeof import("job-processor")>()),
@@ -460,5 +471,242 @@ describe("récapitulatif des demandes d'activation", () => {
     await demandesActivationCfaDb().updateOne({ _id: new ObjectId(_id) }, { $set: { statut: "envoi_en_cours" } });
 
     expect((await modifier(_id, { siret_corrige: CFA_SIRET })).status).toBe(409);
+  });
+});
+
+describe("suivi des demandes envoyées", () => {
+  const URL_LISTE = "/api/v1/admin/demandes-activation";
+  const JOUR = 24 * 3600 * 1000;
+  const ENVOI = new Date("2026-10-28T09:00:00.000Z");
+  const plus = (jours: number) => new Date(ENVOI.getTime() + jours * JOUR);
+  const EMAIL = "direction@cfa-suivi.fr";
+  let organismeId: ObjectId;
+  let organisationId: ObjectId;
+
+  async function insererCompte(overrides: Partial<IUsersMigration> = {}) {
+    const _id = new ObjectId();
+    await usersMigrationDb().insertOne({
+      _id,
+      email: EMAIL,
+      prenom: "Camille",
+      nom: "Martin",
+      password: testPasswordHash,
+      connection_history: [],
+      emails: [],
+      organisation_id: organisationId,
+      organisation_role: "admin",
+      account_status: "CONFIRMED",
+      created_at: plus(1),
+      ...overrides,
+    });
+    return _id;
+  }
+
+  async function insererEnvoyee(overrides: Partial<IDemandeActivationCfa> = {}) {
+    const _id = new ObjectId();
+    await demandesActivationCfaDb().insertOne({
+      _id,
+      source: "Webinaire PdL",
+      email_saisi: EMAIL,
+      email: EMAIL,
+      siret_saisi_brut: CFA_SIRET,
+      siret_saisi: CFA_SIRET,
+      siret: CFA_SIRET,
+      organisme_id: organismeId,
+      organisation_id: organisationId,
+      motifs: [],
+      domaine_inconnu: false,
+      branche: "activation",
+      branche_initiale: "activation",
+      branche_envoyee: "activation",
+      a_envoyer: false,
+      statut: "envoyee",
+      invitation_id: new ObjectId(),
+      envoyee_at: ENVOI,
+      created_at: ENVOI,
+      updated_at: ENVOI,
+      ...overrides,
+    });
+    return _id.toString();
+  }
+
+  const invitation = (overrides: {
+    author_id: ObjectId;
+    email?: string;
+    created_at?: Date;
+    relance_admin_at?: Date;
+  }) => ({
+    _id: new ObjectId(),
+    token: `jeton-${new ObjectId().toString()}`,
+    email: "collegue@cfa-suivi.fr",
+    organisation_id: organisationId,
+    role: "member" as const,
+    created_at: plus(2),
+    expires_at: plus(6),
+    ...overrides,
+  });
+
+  const COMPTE_EXISTANT = {
+    branche: "compte_existant",
+    branche_initiale: "compte_existant",
+    branche_envoyee: "compte_existant",
+    invitation_id: null,
+  } as const;
+
+  const ligneDe = async (id: string) =>
+    (
+      (await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "get", URL_LISTE)).data as IDemandesActivationResponse
+    ).demandes.find((demande) => demande._id === id)!;
+
+  beforeEach(async () => {
+    ({ requestAsOrganisation } = await initTestApp());
+    organismeId = await insererCfa(CFA_SIRET, "0442095L");
+    organisationId = await insererOrganisationCfa(organismeId);
+  });
+
+  it("retrouve par e-mail le compte recréé sur invitation, quand user_id vise l'ancien compte supprimé", async () => {
+    const id = await insererEnvoyee({ user_id: new ObjectId() });
+    await insererCompte({ account_status: "PENDING_EMAIL_VALIDATION" });
+
+    expect(await ligneDe(id)).toMatchObject({
+      vue: "envoyees",
+      compte: { prenom: "Camille", account_status: "PENDING_EMAIL_VALIDATION", created_at: plus(1).toISOString() },
+      suivi: {
+        etape: "compte_a_valider",
+        mail_envoye: "invitation",
+        compte_ailleurs: false,
+        connexion_apres_envoi_at: null,
+      },
+    });
+  });
+
+  it("ne compte que les connexions postérieures à l'envoi", async () => {
+    const id = await insererEnvoyee();
+    const compteId = await insererCompte({ connection_history: [plus(-3)], last_connection: plus(-3) });
+
+    expect((await ligneDe(id)).suivi).toMatchObject({ etape: "pas_connecte", connexion_apres_envoi_at: null });
+
+    await usersMigrationDb().updateOne(
+      { _id: compteId },
+      { $set: { connection_history: [plus(-3), plus(2), plus(5)], last_connection: plus(5) } }
+    );
+
+    expect(await ligneDe(id)).toMatchObject({
+      compte: { last_connection: plus(5).toISOString() },
+      suivi: { etape: "connecte", connexion_apres_envoi_at: plus(2).toISOString() },
+    });
+  });
+
+  it("retrouve par user_id un compte existant dont l'e-mail a changé depuis l'évaluation", async () => {
+    const compteId = await insererCompte({ email: "nouvelle.adresse@cfa-suivi.fr", created_at: plus(-100) });
+    const id = await insererEnvoyee({ ...COMPTE_EXISTANT, user_id: compteId });
+
+    expect((await ligneDe(id)).suivi).toMatchObject({ etape: "pas_connecte", mail_envoye: "compte_existant" });
+  });
+
+  it("repasse à compte à créer un compte existant supprimé depuis l'envoi", async () => {
+    const id = await insererEnvoyee({ ...COMPTE_EXISTANT, user_id: new ObjectId() });
+
+    expect(await ligneDe(id)).toMatchObject({
+      compte: null,
+      suivi: { etape: "compte_a_creer", mail_envoye: "compte_existant", compte_ailleurs: false },
+    });
+  });
+
+  it("écarte un compte d'un autre établissement, mais garde celui d'une organisation jumelle", async () => {
+    const id = await insererEnvoyee();
+    const autreOrganisme = await insererCfa(CFA_GMAIL_SIRET, "0442097N");
+    const compteId = await insererCompte({ organisation_id: await insererOrganisationCfa(autreOrganisme) });
+
+    expect(await ligneDe(id)).toMatchObject({
+      compte: null,
+      suivi: { etape: "compte_a_creer", compte_ailleurs: true },
+    });
+
+    await usersMigrationDb().updateOne(
+      { _id: compteId },
+      { $set: { organisation_id: await insererOrganisationCfa(organismeId) } }
+    );
+
+    expect((await ligneDe(id)).suivi).toMatchObject({ etape: "pas_connecte", compte_ailleurs: false });
+  });
+
+  it("compte les collaborateurs invités depuis l'envoi, et seulement les inscrits parmi les archivées", async () => {
+    const id = await insererEnvoyee();
+    const compteId = await insererCompte();
+    await insererCompte({ email: "inscrit@cfa-suivi.fr", organisation_role: "member" });
+    await invitationsDb().insertOne(invitation({ author_id: compteId, email: "en-attente@cfa-suivi.fr" }));
+    await invitationsArchiveDb().insertOne(invitation({ author_id: compteId, email: "inscrit@cfa-suivi.fr" }));
+    await invitationsArchiveDb().insertOne(invitation({ author_id: compteId, email: "annulee@cfa-suivi.fr" }));
+    await invitationsDb().insertOne(
+      invitation({ author_id: compteId, email: "avant-envoi@cfa-suivi.fr", created_at: plus(-1) })
+    );
+
+    expect((await ligneDe(id)).suivi).toMatchObject({ collaborateurs_invites: 3, collaborateurs_inscrits: 1 });
+  });
+
+  it("donne la dernière relance postérieure à l'envoi, relances d'invitations en attente comprises", async () => {
+    const compteId = await insererCompte();
+    const id = await insererEnvoyee({ invitez_sent_at: plus(-10) });
+
+    expect((await ligneDe(id)).suivi?.derniere_relance).toBeNull();
+
+    await demandesActivationCfaDb().updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { relance_validation_email_at: plus(2) } }
+    );
+
+    expect((await ligneDe(id)).suivi?.derniere_relance).toEqual({
+      type: "validation_email",
+      at: plus(2).toISOString(),
+    });
+
+    await invitationsDb().insertOne(
+      invitation({ author_id: compteId, created_at: plus(3), relance_admin_at: plus(5) })
+    );
+
+    expect((await ligneDe(id)).suivi?.derniere_relance).toEqual({
+      type: "invitation_en_attente",
+      at: plus(5).toISOString(),
+    });
+  });
+
+  it("indique un lien de validation renvoyé quand l'envoi n'a pas créé d'invitation", async () => {
+    const id = await insererEnvoyee({ invitation_id: null });
+    await insererCompte({ account_status: "PENDING_EMAIL_VALIDATION", created_at: plus(-5) });
+
+    expect((await ligneDe(id)).suivi).toMatchObject({ etape: "compte_a_valider", mail_envoye: "lien_validation" });
+  });
+
+  it("ne renvoie pas de suivi dans les réponses de la coche et du renvoi", async () => {
+    const prete = await insererEnvoyee({ email: "autre@cfa-suivi.fr", statut: "pret", envoyee_at: null });
+    const enEchec = await insererEnvoyee({ email: "echec@cfa-suivi.fr", statut: "echec", envoyee_at: null });
+
+    const coche = await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "put", `${URL_LISTE}/a-envoyer`, {
+      ids: [prete],
+      a_envoyer: true,
+    });
+    const renvoi = await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "post", `${URL_LISTE}/${enEchec}/renvoyer`);
+
+    expect(coche.data).toMatchObject([{ _id: prete, a_envoyer: true, suivi: null }]);
+    expect(renvoi.data).toMatchObject({ _id: enEchec, statut: "envoi_en_cours", suivi: null });
+  });
+
+  it("ne calcule le suivi que dans la vue Envoyées", async () => {
+    const envoyee = await insererEnvoyee();
+    const prete = await insererEnvoyee({ email: "autre@cfa-suivi.fr", statut: "pret", envoyee_at: null });
+    const refusEnvoye = await insererEnvoyee({
+      email: "refus@cfa-suivi.fr",
+      branche: "refus",
+      branche_initiale: "refus",
+      branche_envoyee: "refus",
+      motifs: ["aucun_effectif"],
+    });
+
+    expect((await ligneDe(envoyee)).suivi).not.toBeNull();
+    for (const id of [prete, refusEnvoye]) {
+      expect(await ligneDe(id)).toMatchObject({ suivi: null });
+      expect((await ligneDe(id)).vue).not.toBe("envoyees");
+    }
   });
 });

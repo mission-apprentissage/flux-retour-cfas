@@ -182,6 +182,22 @@ describe("Routes users", () => {
       expectForbiddenError(response);
     });
   });
+
+  describe("PUT /api/v1/admin/users/:id - modification d'un compte", () => {
+    it("Enregistre l'e-mail en minuscules", async () => {
+      await createUserWithStatus("CONFIRMED");
+      const response = await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "put", `/api/v1/admin/users/${id(1)}`, {
+        civility: "Madame",
+        prenom: "Jean",
+        nom: "Dupont",
+        email: "Direction@TDB.local",
+        fonction: "Responsable administratif",
+      });
+
+      expect.soft(response.status).toStrictEqual(200);
+      expect((await usersMigrationDb().findOne({ _id: new ObjectId(id(1)) }))?.email).toBe("direction@tdb.local");
+    });
+  });
 });
 
 async function createMissionLocale(hasActivatedAt = false) {

@@ -7,6 +7,7 @@ import { it, describe, beforeEach, vi } from "vitest";
 
 import { auditLogsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { setTime } from "@/common/utils/timeUtils";
+import { up as upEmailsEnMinuscules } from "@/db/migrations/20261103150000-emails-comptes-en-minuscules";
 import { useMongo } from "@tests/jest/setupMongo";
 import { id, initTestApp, testPasswordHash } from "@tests/utils/testUtils";
 
@@ -145,6 +146,19 @@ describe("Authentification", () => {
       });
 
       assert.strictEqual(response.status, 401);
+    });
+
+    it("Connecte un compte enregistré avec des majuscules, une fois son e-mail passé en minuscules", async () => {
+      await usersMigrationDb().insertOne({ ...testUser, _id: new ObjectId(id(2)), email: "Direction@TDB.local" });
+      await upEmailsEnMinuscules();
+
+      const response = await httpClient.post("/api/v1/auth/login", {
+        email: "Direction@TDB.local",
+        password: "MDP-azerty123",
+      });
+
+      assert.strictEqual(response.status, 200);
+      assert.ok(response.headers["set-cookie"]?.[0]);
     });
 
     it("Erreur si compte en attente de validation email", async () => {

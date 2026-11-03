@@ -33,6 +33,30 @@ export const zEnvoiDemandesActivation = z.object({ ids: z.array(zIdDemande).min(
 
 export type IEnvoiDemandesActivation = z.output<typeof zEnvoiDemandesActivation>;
 
+export const ETAPES_SUIVI = ["compte_a_creer", "compte_a_valider", "pas_connecte", "connecte"] as const;
+
+export type EtapeSuivi = (typeof ETAPES_SUIVI)[number];
+
+export type MailEnvoye = "invitation" | "lien_validation" | "compte_existant";
+
+export type TypeRelance =
+  | "sans_compte"
+  | "validation_email"
+  | "avec_compte"
+  | "invitez"
+  | "sans_invitation"
+  | "invitation_en_attente";
+
+export interface ISuiviDemandeActivation {
+  etape: EtapeSuivi;
+  mail_envoye: MailEnvoye;
+  compte_ailleurs: boolean;
+  connexion_apres_envoi_at: string | null;
+  collaborateurs_invites: number;
+  collaborateurs_inscrits: number;
+  derniere_relance: { type: TypeRelance; at: string } | null;
+}
+
 export interface IDemandeActivationLigne {
   _id: string;
   source: string;
@@ -55,6 +79,8 @@ export interface IDemandeActivationLigne {
     nom: string | null;
     account_status: IUsersMigration["account_status"];
     organisation_role: IUsersMigration["organisation_role"] | null;
+    created_at: string | null;
+    last_connection: string | null;
   } | null;
   effectifs_erp: number | null;
   effectifs_deca: number | null;
@@ -66,6 +92,7 @@ export interface IDemandeActivationLigne {
   a_envoyer: boolean;
   vue: VueDemandeActivation;
   cochable: boolean;
+  suivi: ISuiviDemandeActivation | null;
 }
 
 export interface IDemandesActivationResponse {
