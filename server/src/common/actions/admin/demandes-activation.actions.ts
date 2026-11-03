@@ -14,14 +14,18 @@ import {
   refusAvecMail,
 } from "shared/models/data/demandesActivationCfa.model";
 import { IInvitation } from "shared/models/data/invitations.model";
+import type { IOrganisationOrganismeFormation } from "shared/models/data/organisations.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 import {
+  EtapeSuivi,
   IBilanEnvoiDemandes,
   IBilanImportDemandes,
   IDemandeActivationLigne,
   IDemandesActivationResponse,
   IModificationDemandeActivation,
+  ISuiviDemandeActivation,
+  TypeRelance,
   VueDemandeActivation,
 } from "shared/models/routes/admin/demandes-activation.api";
 import { normalize } from "shared/utils";
@@ -55,6 +59,7 @@ import {
   demandesActivationCfaDb,
   effectifsDb,
   effectifsDECADb,
+  invitationsArchiveDb,
   invitationsDb,
   organisationsDb,
   organismesDb,
@@ -576,23 +581,206 @@ async function reevaluerEtEnregistrer(
   return lue;
 }
 
+const PROJECTION_COMPTE = {
+  prenom: 1,
+  nom: 1,
+  account_status: 1,
+  organisation_role: 1,
+  created_at: 1,
+  last_connection: 1,
+} as const;
+
+const PROJECTION_COMPTE_SUIVI = { ...PROJECTION_COMPTE, email: 1, organisation_id: 1, connection_history: 1 } as const;
+
+type CompteLigne = Pick<IUsersMigration, "_id" | keyof typeof PROJECTION_COMPTE>;
+
+type CompteSuivi = Pick<IUsersMigration, "_id" | keyof typeof PROJECTION_COMPTE_SUIVI>;
+
+const RELANCES_DEMANDE = [
+  ["sans_compte", "relance_sans_compte_at"],
+  ["validation_email", "relance_validation_email_at"],
+  ["avec_compte", "relance_avec_compte_at"],
+  ["invitez", "invitez_sent_at"],
+  ["sans_invitation", "relance_sans_invitation_at"],
+] as const satisfies ReadonlyArray<readonly [TypeRelance, keyof IDemandeActivationCfa]>;
+
+export const premiereConnexionDepuis = (
+  compte: Pick<IUsersMigration, "connection_history" | "last_connection">,
+  depuis: Date
+): Date | null =>
+  [
+    ...(compte.connection_history ?? []),
+    ...(compte.last_connection ? [compte.last_connection] : []),
+  ].reduce<Date | null>((premiere, date) => (date > depuis && (!premiere || date < premiere) ? date : premiere), null);
+
+function etapeSuivi(compte: CompteSuivi | null, connexion: Date | null): EtapeSuivi {
+  if (!compte) return "compte_a_creer";
+  if (compte.account_status !== "CONFIRMED") return "compte_a_valider";
+  return connexion ? "connecte" : "pas_connecte";
+}
+
+function derniereRelance(
+  demande: IDemandeActivationCfa,
+  depuis: Date,
+  relancesInvitations: Date[]
+): ISuiviDemandeActivation["derniere_relance"] {
+  const relances: { type: TypeRelance; at: Date | null | undefined }[] = [
+    ...RELANCES_DEMANDE.map(([type, champ]) => ({ type, at: demande[champ] })),
+    ...relancesInvitations.map((at) => ({ type: "invitation_en_attente" as const, at })),
+  ];
+  const derniere = relances.reduce<{ type: TypeRelance; at: Date } | null>(
+    (plusRecente, { type, at }) =>
+      at && at >= depuis && (!plusRecente || at > plusRecente.at) ? { type, at } : plusRecente,
+    null
+  );
+  return derniere && { type: derniere.type, at: derniere.at.toISOString() };
+}
+
+function compteRetenu(
+  demande: IDemandeActivationCfa,
+  comptes: CompteSuivi[],
+  organismeParOrganisation: Map<string, string>
+) {
+  const candidats = comptes.filter((compte) => compte.email === demande.email || demande.user_id?.equals(compte._id));
+  const dansLEtablissement = candidats.filter(
+    (compte) =>
+      !!demande.organisme_id &&
+      organismeParOrganisation.get(compte.organisation_id.toString()) === demande.organisme_id.toString()
+  );
+  const compte =
+    dansLEtablissement.find((candidat) => demande.user_id?.equals(candidat._id)) ?? dansLEtablissement[0] ?? null;
+  return { compte, ailleurs: !compte && candidats.length > 0 };
+}
+
+async function suivreEnvoyees(
+  demandes: IDemandeActivationCfa[]
+): Promise<Map<string, { compte: CompteSuivi | null; suivi: ISuiviDemandeActivation }>> {
+  if (demandes.length === 0) return new Map();
+
+  const comptes = await usersMigrationDb()
+    .find<CompteSuivi>(
+      {
+        $or: [
+          { _id: { $in: demandes.flatMap((demande) => (demande.user_id ? [demande.user_id] : [])) } },
+          { email: { $in: demandes.map((demande) => demande.email) } },
+        ],
+      },
+      { projection: PROJECTION_COMPTE_SUIVI }
+    )
+    .toArray();
+  const organisations = await organisationsDb()
+    .find<Pick<IOrganisationOrganismeFormation, "_id" | "type" | "organisme_id">>(
+      { _id: { $in: comptes.map((compte) => compte.organisation_id) } },
+      { projection: { type: 1, organisme_id: 1 } }
+    )
+    .toArray();
+  const organismeParOrganisation = new Map(
+    organisations.flatMap((organisation) =>
+      organisation.type === "ORGANISME_FORMATION" && organisation.organisme_id
+        ? [[organisation._id.toString(), organisation.organisme_id] as const]
+        : []
+    )
+  );
+
+  const suivies = demandes.map((demande) => ({ demande, ...compteRetenu(demande, comptes, organismeParOrganisation) }));
+  const auteurs = suivies.flatMap(({ compte }) => (compte ? [compte] : []));
+  const [enAttente, archivees] = await Promise.all([
+    invitationsDb()
+      .find(
+        {
+          organisation_id: { $in: auteurs.map((auteur) => auteur.organisation_id) },
+          author_id: { $in: auteurs.map((auteur) => auteur._id) },
+        },
+        { projection: { author_id: 1, created_at: 1, relance_admin_at: 1 } }
+      )
+      .toArray(),
+    invitationsArchiveDb()
+      .find(
+        { author_id: { $in: auteurs.map((auteur) => auteur._id) } },
+        { projection: { author_id: 1, email: 1, organisation_id: 1, created_at: 1, relance_admin_at: 1 } }
+      )
+      .toArray(),
+  ]);
+  const inscrits = new Set(
+    (
+      await usersMigrationDb()
+        .find(
+          { email: { $in: archivees.map((archivee) => archivee.email) } },
+          { projection: { email: 1, organisation_id: 1 } }
+        )
+        .toArray()
+    ).map((compte) => `${compte.email} ${compte.organisation_id}`)
+  );
+
+  return new Map(
+    suivies.map(({ demande, compte, ailleurs }) => {
+      const depuis = demande.envoyee_at ?? demande.created_at;
+      const duCompte = <T extends { author_id: ObjectId; created_at: Date }>(invitations: T[]) =>
+        compte
+          ? invitations.filter(
+              (invitation) => invitation.author_id.equals(compte._id) && invitation.created_at >= depuis
+            )
+          : [];
+      const invitations = [...duCompte(enAttente), ...duCompte(archivees)];
+      const connexion = compte ? premiereConnexionDepuis(compte, depuis) : null;
+      return [
+        demande._id.toString(),
+        {
+          compte,
+          suivi: {
+            etape: etapeSuivi(compte, connexion),
+            mail_envoye:
+              demande.branche_envoyee === "compte_existant"
+                ? "compte_existant"
+                : demande.invitation_id
+                  ? "invitation"
+                  : "lien_validation",
+            compte_ailleurs: ailleurs,
+            connexion_apres_envoi_at: connexion?.toISOString() ?? null,
+            collaborateurs_invites: invitations.length,
+            collaborateurs_inscrits: duCompte(archivees).filter((archivee) =>
+              inscrits.has(`${archivee.email} ${archivee.organisation_id}`)
+            ).length,
+            derniere_relance: derniereRelance(
+              demande,
+              depuis,
+              invitations.flatMap((invitation) => (invitation.relance_admin_at ? [invitation.relance_admin_at] : []))
+            ),
+          },
+        },
+      ] as const;
+    })
+  );
+}
+
+const versCompte = (compte: CompteLigne): NonNullable<IDemandeActivationLigne["compte"]> => ({
+  prenom: compte.prenom ?? null,
+  nom: compte.nom ?? null,
+  account_status: compte.account_status,
+  organisation_role: compte.organisation_role ?? null,
+  created_at: compte.created_at?.toISOString() ?? null,
+  last_connection: compte.last_connection?.toISOString() ?? null,
+});
+
 async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeActivationLigne[]> {
   const organismeIds = demandes.flatMap((demande) => (demande.organisme_id ? [demande.organisme_id] : []));
   const userIds = demandes.flatMap((demande) => (demande.user_id ? [demande.user_id] : []));
-  const [organismes, comptes] = await Promise.all([
+  const [organismes, comptes, suivis] = await Promise.all([
     organismesDb()
       .find({ _id: { $in: organismeIds } }, { projection: { nom: 1, raison_sociale: 1, enseigne: 1 } })
       .toArray(),
     usersMigrationDb()
-      .find({ _id: { $in: userIds } }, { projection: { prenom: 1, nom: 1, account_status: 1, organisation_role: 1 } })
+      .find<CompteLigne>({ _id: { $in: userIds } }, { projection: PROJECTION_COMPTE })
       .toArray(),
+    suivreEnvoyees(demandes.filter((demande) => vueDemande(demande) === "envoyees")),
   ]);
   const organismeParId = new Map(organismes.map((organisme) => [organisme._id.toString(), organisme]));
   const compteParId = new Map(comptes.map((compte) => [compte._id.toString(), compte]));
 
   return demandes.map((demande) => {
     const organisme = demande.organisme_id ? organismeParId.get(demande.organisme_id.toString()) : undefined;
-    const compte = demande.user_id ? compteParId.get(demande.user_id.toString()) : undefined;
+    const suivi = suivis.get(demande._id.toString());
+    const compte = suivi ? suivi.compte : demande.user_id ? compteParId.get(demande.user_id.toString()) : undefined;
     return {
       _id: demande._id.toString(),
       source: demande.source,
@@ -610,14 +798,7 @@ async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeAc
       uai: demande.uai ?? null,
       siret_propose: demande.siret_propose ?? null,
       organisme: organisme ? { nom: nomOrganisme(organisme) } : null,
-      compte: compte
-        ? {
-            prenom: compte.prenom ?? null,
-            nom: compte.nom ?? null,
-            account_status: compte.account_status,
-            organisation_role: compte.organisation_role ?? null,
-          }
-        : null,
+      compte: compte ? versCompte(compte) : null,
       effectifs_erp: demande.effectifs_erp ?? null,
       effectifs_deca: demande.effectifs_deca ?? null,
       motifs: demande.motifs,
@@ -628,6 +809,7 @@ async function versLignes(demandes: IDemandeActivationCfa[]): Promise<IDemandeAc
       a_envoyer: demande.a_envoyer,
       vue: vueDemande(demande),
       cochable: estCochable(demande),
+      suivi: suivi?.suivi ?? null,
     };
   });
 }
