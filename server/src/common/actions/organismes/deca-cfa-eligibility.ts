@@ -166,6 +166,20 @@ export async function countEffectifsAnneesActives(organismeId: ObjectId) {
   return { effectifsErpCount, effectifsDecaPropres };
 }
 
+export const decaEligibilityProjection = {
+  _id: 1,
+  siret: 1,
+  uai: 1,
+  nature: 1,
+  ferme: 1,
+  is_allowed_deca: 1,
+  deca_activation_queued_at: 1,
+  deca_contrats_flechables: 1,
+  nom: 1,
+  raison_sociale: 1,
+  enseigne: 1,
+} as const;
+
 function notEvaluated(): EligibilityCheck {
   return { passed: false };
 }
@@ -284,24 +298,7 @@ export async function checkActivationEligibility(organismeId: string): Promise<E
     };
   }
 
-  const organisme = await organismesDb().findOne(
-    { _id },
-    {
-      projection: {
-        _id: 1,
-        siret: 1,
-        uai: 1,
-        nature: 1,
-        ferme: 1,
-        is_allowed_deca: 1,
-        deca_activation_queued_at: 1,
-        deca_contrats_flechables: 1,
-        nom: 1,
-        raison_sociale: 1,
-        enseigne: 1,
-      },
-    }
-  );
+  const organisme = await organismesDb().findOne({ _id }, { projection: decaEligibilityProjection });
 
   if (!organisme) {
     return {

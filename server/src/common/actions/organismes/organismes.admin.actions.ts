@@ -40,7 +40,12 @@ import {
   collabV2EligibilityProjection,
   CollabV2EligibilityResult,
 } from "./collab-v2-eligibility";
-import { checkEligibilityForLoaded, countEffectifsAnneesActives, EligibilityResult } from "./deca-cfa-eligibility";
+import {
+  checkEligibilityForLoaded,
+  countEffectifsAnneesActives,
+  decaEligibilityProjection,
+  EligibilityResult,
+} from "./deca-cfa-eligibility";
 
 function getFormationEtablissment(formation: OffreFormation, siret: string) {
   if (formation.formateur.siret === siret) return formation.formateur;
@@ -587,21 +592,7 @@ async function mettreActivationDecaEnFile(organismeId: ObjectId) {
 export type ActivationDecaResultat = "flag_pose" | "deja_actif" | "non_eligible" | "annule";
 
 export async function activerDecaOrganisme(organismeId: ObjectId): Promise<ActivationDecaResultat> {
-  const organisme = await organismesDb().findOne(
-    { _id: organismeId },
-    {
-      projection: {
-        _id: 1,
-        siret: 1,
-        uai: 1,
-        nature: 1,
-        ferme: 1,
-        is_allowed_deca: 1,
-        deca_activation_queued_at: 1,
-        deca_contrats_flechables: 1,
-      },
-    }
-  );
+  const organisme = await organismesDb().findOne({ _id: organismeId }, { projection: decaEligibilityProjection });
   if (!organisme) return "non_eligible";
   if (organisme.is_allowed_deca === true) return "deja_actif";
   if (!organisme.deca_activation_queued_at) return "annule";
@@ -839,21 +830,7 @@ export async function activerCollabSiEligible(organismeId: ObjectId) {
 
 async function mettreDecaEnFileSiInvisible(organismeId: ObjectId) {
   try {
-    const organisme = await organismesDb().findOne(
-      { _id: organismeId },
-      {
-        projection: {
-          _id: 1,
-          siret: 1,
-          uai: 1,
-          nature: 1,
-          ferme: 1,
-          is_allowed_deca: 1,
-          deca_activation_queued_at: 1,
-          deca_contrats_flechables: 1,
-        },
-      }
-    );
+    const organisme = await organismesDb().findOne({ _id: organismeId }, { projection: decaEligibilityProjection });
     if (!organisme || organisme.is_allowed_deca === true) return;
     const { effectifsDecaPropres } = await countEffectifsAnneesActives(organismeId);
     if (effectifsDecaPropres === 0) return;
