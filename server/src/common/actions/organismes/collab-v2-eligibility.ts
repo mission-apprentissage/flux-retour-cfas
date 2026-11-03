@@ -1,15 +1,17 @@
 import { ObjectId } from "bson";
 import { IOrganisme } from "shared/models/data/organismes.model";
-import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 
-import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 
-import { NATURES_ELIGIBLES } from "./deca-cfa-eligibility";
+import { countEffectifsAnneesActives, NATURES_ELIGIBLES } from "./deca-cfa-eligibility";
 
 export type CollabV2EligibilityCheck = {
   passed: boolean;
   details?: {
     effectifsErpCount?: number;
+    effectifsDecaCount?: number;
+    decaActif?: boolean;
+    comptesConfirmes?: number;
     natureActuelle?: string | null;
   };
 };
@@ -20,7 +22,10 @@ export type CollabV2EligibilityResult = {
   checks: {
     exists_with_siret_uai: CollabV2EligibilityCheck;
     nature: CollabV2EligibilityCheck;
-    has_effectifs_erp: CollabV2EligibilityCheck;
+    not_closed: CollabV2EligibilityCheck;
+    has_effectifs: CollabV2EligibilityCheck;
+    deca_visible: CollabV2EligibilityCheck;
+    has_compte_confirme: CollabV2EligibilityCheck;
     not_already_active: CollabV2EligibilityCheck;
   };
   organisme: {
@@ -37,21 +42,69 @@ export type CollabV2EligibilityResult = {
   } | null;
 };
 
+export const collabV2EligibilityProjection = {
+  _id: 1,
+  siret: 1,
+  uai: 1,
+  nature: 1,
+  ferme: 1,
+  is_allowed_deca: 1,
+  is_allowed_collab: 1,
+  nom: 1,
+  raison_sociale: 1,
+  enseigne: 1,
+  collab_suspended_at: 1,
+  collab_inactivity_email_sent_at: 1,
+} as const;
+
 function notEvaluated(): CollabV2EligibilityCheck {
   return { passed: false };
 }
 
+function resultatSansOrganisme(): CollabV2EligibilityResult {
+  return {
+    eligible: false,
+    alreadyActive: false,
+    checks: {
+      exists_with_siret_uai: { passed: false },
+      nature: notEvaluated(),
+      not_closed: notEvaluated(),
+      has_effectifs: notEvaluated(),
+      deca_visible: notEvaluated(),
+      has_compte_confirme: notEvaluated(),
+      not_already_active: { passed: true },
+    },
+    organisme: null,
+  };
+}
+
+async function countComptesConfirmes(organismeId: ObjectId): Promise<number> {
+  const organisations = await organisationsDb()
+    .find({ type: "ORGANISME_FORMATION", organisme_id: organismeId.toString() }, { projection: { _id: 1 } })
+    .toArray();
+  if (organisations.length === 0) {
+    return 0;
+  }
+  return usersMigrationDb().countDocuments({
+    organisation_id: { $in: organisations.map((organisation) => organisation._id) },
+    account_status: "CONFIRMED",
+  });
+}
+
 /**
- * Éligibilité à l'activation « collaboration v2 » (interface v2/collaboration ERP-only).
+ * Éligibilité à l'activation « collaboration v2 ».
  *
  * Critères :
  *   - siret AND uai non vides
  *   - nature ∈ {FORMATEUR, RESPONSABLE_FORMATEUR}
- *   - au moins un effectif ERP (collection `effectifs`) sur les années scolaires actives
+ *   - établissement ouvert
+ *   - au moins un effectif ERP ou DECA sur les années scolaires actives
+ *   - programme DECA-CFA actif dès qu'il y a un effectif DECA
+ *   - au moins un compte CFA confirmé
  *   - pas déjà activé (is_allowed_collab !== true)
  *
  * ⚠️ Contrairement au pilote DECA-CFA : pas de check « aucun formateur tiers dans le
- * catalogue publié », et on ne compte QUE les effectifs ERP (pas DECA).
+ * catalogue publié ».
  */
 export async function checkCollabV2EligibilityForLoaded(
   organisme: Pick<
@@ -60,6 +113,8 @@ export async function checkCollabV2EligibilityForLoaded(
     | "siret"
     | "uai"
     | "nature"
+    | "ferme"
+    | "is_allowed_deca"
     | "is_allowed_collab"
     | "nom"
     | "raison_sociale"
@@ -73,6 +128,8 @@ export async function checkCollabV2EligibilityForLoaded(
     siret,
     uai,
     nature,
+    ferme,
+    is_allowed_deca,
     is_allowed_collab,
     nom,
     raison_sociale,
@@ -84,6 +141,7 @@ export async function checkCollabV2EligibilityForLoaded(
   const exists_with_siret_uai: CollabV2EligibilityCheck = {
     passed: Boolean(siret && uai),
   };
+  const not_closed: CollabV2EligibilityCheck = { passed: ferme !== true };
 
   if (!exists_with_siret_uai.passed) {
     return {
@@ -92,7 +150,10 @@ export async function checkCollabV2EligibilityForLoaded(
       checks: {
         exists_with_siret_uai,
         nature: notEvaluated(),
-        has_effectifs_erp: notEvaluated(),
+        not_closed,
+        has_effectifs: notEvaluated(),
+        deca_visible: notEvaluated(),
+        has_compte_confirme: notEvaluated(),
         not_already_active: { passed: is_allowed_collab !== true },
       },
       organisme: {
@@ -115,23 +176,38 @@ export async function checkCollabV2EligibilityForLoaded(
     details: { natureActuelle: nature ?? null },
   };
 
-  const activeAnnees = getActiveAnneesScolaires(new Date());
+  const [{ effectifsErpCount, effectifsDecaPropres: effectifsDecaCount }, comptesConfirmes] = await Promise.all([
+    countEffectifsAnneesActives(_id as ObjectId),
+    countComptesConfirmes(_id as ObjectId),
+  ]);
 
-  const effectifsErpCount = await effectifsDb().countDocuments({
-    organisme_id: _id as ObjectId,
-    annee_scolaire: { $in: activeAnnees },
-  });
+  const has_effectifs: CollabV2EligibilityCheck = {
+    passed: effectifsErpCount + effectifsDecaCount > 0,
+    details: { effectifsErpCount, effectifsDecaCount },
+  };
 
-  const has_effectifs_erp: CollabV2EligibilityCheck = {
-    passed: effectifsErpCount > 0,
-    details: { effectifsErpCount },
+  const decaActif = is_allowed_deca === true;
+  const deca_visible: CollabV2EligibilityCheck = {
+    passed: effectifsDecaCount === 0 || decaActif,
+    details: { decaActif },
+  };
+
+  const has_compte_confirme: CollabV2EligibilityCheck = {
+    passed: comptesConfirmes > 0,
+    details: { comptesConfirmes },
   };
 
   const alreadyActive = is_allowed_collab === true;
   const not_already_active: CollabV2EligibilityCheck = { passed: !alreadyActive };
 
   const eligible =
-    exists_with_siret_uai.passed && natureCheck.passed && has_effectifs_erp.passed && not_already_active.passed;
+    exists_with_siret_uai.passed &&
+    natureCheck.passed &&
+    not_closed.passed &&
+    has_effectifs.passed &&
+    deca_visible.passed &&
+    has_compte_confirme.passed &&
+    not_already_active.passed;
 
   return {
     eligible,
@@ -139,7 +215,10 @@ export async function checkCollabV2EligibilityForLoaded(
     checks: {
       exists_with_siret_uai,
       nature: natureCheck,
-      has_effectifs_erp,
+      not_closed,
+      has_effectifs,
+      deca_visible,
+      has_compte_confirme,
       not_already_active,
     },
     organisme: {
@@ -162,49 +241,12 @@ export async function checkCollabV2Eligibility(organismeId: string): Promise<Col
   try {
     _id = new ObjectId(organismeId);
   } catch {
-    return {
-      eligible: false,
-      alreadyActive: false,
-      checks: {
-        exists_with_siret_uai: { passed: false },
-        nature: notEvaluated(),
-        has_effectifs_erp: notEvaluated(),
-        not_already_active: { passed: true },
-      },
-      organisme: null,
-    };
+    return resultatSansOrganisme();
   }
 
-  const organisme = await organismesDb().findOne(
-    { _id },
-    {
-      projection: {
-        _id: 1,
-        siret: 1,
-        uai: 1,
-        nature: 1,
-        is_allowed_collab: 1,
-        nom: 1,
-        raison_sociale: 1,
-        enseigne: 1,
-        collab_suspended_at: 1,
-        collab_inactivity_email_sent_at: 1,
-      },
-    }
-  );
-
+  const organisme = await organismesDb().findOne({ _id }, { projection: collabV2EligibilityProjection });
   if (!organisme) {
-    return {
-      eligible: false,
-      alreadyActive: false,
-      checks: {
-        exists_with_siret_uai: { passed: false },
-        nature: notEvaluated(),
-        has_effectifs_erp: notEvaluated(),
-        not_already_active: { passed: true },
-      },
-      organisme: null,
-    };
+    return resultatSansOrganisme();
   }
 
   return checkCollabV2EligibilityForLoaded(organisme);

@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { ObjectId } from "bson";
 import escapeStringRegexp from "escape-string-regexp";
 import { addJob } from "job-processor";
@@ -11,11 +12,12 @@ import { zArchivableOrganismesResponse } from "shared/models/routes/admin/organi
 import type { IArchivableOrganismesResponse } from "shared/models/routes/admin/organismes.api";
 
 import {
-  activateOrganisme,
+  updateMissionLocaleEffectifComputedActivation,
   updateMissionLocaleEffectifComputedCollab,
   updateMissionLocaleEffectifComputedOrganisme,
 } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { flecherContratsDeca, rendreContratsDeca } from "@/common/actions/deca/deca-flechage.actions";
+import { getOrganisationOrganismeByOrganismeId } from "@/common/actions/organisations.actions";
 import { getCfdInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { getEtablissement } from "@/common/apis/ApiEntreprise";
 import { fetchOrganismeReferentielBySiret } from "@/common/apis/apiReferentielMna";
@@ -28,11 +30,22 @@ import {
   organisationsDb,
   organismesDb,
 } from "@/common/model/collections";
+import { updateEffectifMissionLocaleSnapshotAtOrganismeActivation } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 
 import { getTransmissionRelatedToOrganismeByDate } from "../indicateurs/transmissions/transmission.action";
 
-import { checkCollabV2EligibilityForLoaded, CollabV2EligibilityResult } from "./collab-v2-eligibility";
-import { checkEligibilityForLoaded, EligibilityResult } from "./deca-cfa-eligibility";
+import {
+  checkCollabV2Eligibility,
+  checkCollabV2EligibilityForLoaded,
+  collabV2EligibilityProjection,
+  CollabV2EligibilityResult,
+} from "./collab-v2-eligibility";
+import {
+  checkEligibilityForLoaded,
+  countEffectifsAnneesActives,
+  decaEligibilityProjection,
+  EligibilityResult,
+} from "./deca-cfa-eligibility";
 
 function getFormationEtablissment(formation: OffreFormation, siret: string) {
   if (formation.formateur.siret === siret) return formation.formateur;
@@ -521,9 +534,7 @@ export async function activateDecaCfaPilotBatch(
     }
 
     try {
-      if (await poserGardeActivationDeca(organisme._id as ObjectId)) {
-        await addJob({ name: "deca:activer", payload: { organismeId }, queued: true });
-      }
+      await mettreActivationDecaEnFile(organisme._id as ObjectId);
       results.push({ input, status: "queued", organismeId, eligibility });
     } catch (err) {
       await retirerGardeActivationDeca(organisme._id as ObjectId);
@@ -568,24 +579,20 @@ export async function retirerGardeActivationDeca(organismeId: ObjectId) {
   await organismesDb().updateOne({ _id: organismeId }, { $unset: { deca_activation_queued_at: "" } });
 }
 
+async function mettreActivationDecaEnFile(organismeId: ObjectId) {
+  if (!(await poserGardeActivationDeca(organismeId))) return;
+  try {
+    await addJob({ name: "deca:activer", payload: { organismeId: organismeId.toHexString() }, queued: true });
+  } catch (err) {
+    await retirerGardeActivationDeca(organismeId);
+    throw err;
+  }
+}
+
 export type ActivationDecaResultat = "flag_pose" | "deja_actif" | "non_eligible" | "annule";
 
 export async function activerDecaOrganisme(organismeId: ObjectId): Promise<ActivationDecaResultat> {
-  const organisme = await organismesDb().findOne(
-    { _id: organismeId },
-    {
-      projection: {
-        _id: 1,
-        siret: 1,
-        uai: 1,
-        nature: 1,
-        ferme: 1,
-        is_allowed_deca: 1,
-        deca_activation_queued_at: 1,
-        deca_contrats_flechables: 1,
-      },
-    }
-  );
+  const organisme = await organismesDb().findOne({ _id: organismeId }, { projection: decaEligibilityProjection });
   if (!organisme) return "non_eligible";
   if (organisme.is_allowed_deca === true) return "deja_actif";
   if (!organisme.deca_activation_queued_at) return "annule";
@@ -604,7 +611,10 @@ export async function activerDecaOrganisme(organismeId: ObjectId): Promise<Activ
     { _id: organismeId, deca_activation_queued_at: { $ne: null } },
     { $set: { is_allowed_deca: true } }
   );
-  if (modifiedCount === 1) return "flag_pose";
+  if (modifiedCount === 1) {
+    await activerCollabSiEligible(organismeId);
+    return "flag_pose";
+  }
   await rendreLesContrats();
   return "annule";
 }
@@ -682,23 +692,7 @@ export async function activateCollabV2(
     return { status: "not_found" };
   }
 
-  const organisme = await organismesDb().findOne(
-    { _id },
-    {
-      projection: {
-        _id: 1,
-        siret: 1,
-        uai: 1,
-        nature: 1,
-        is_allowed_collab: 1,
-        nom: 1,
-        raison_sociale: 1,
-        enseigne: 1,
-        collab_suspended_at: 1,
-        collab_inactivity_email_sent_at: 1,
-      },
-    }
-  );
+  const organisme = await organismesDb().findOne({ _id }, { projection: collabV2EligibilityProjection });
 
   if (!organisme) {
     return { status: "not_found" };
@@ -734,8 +728,11 @@ export async function activateCollabV2(
   }
 
   try {
-    await organismesDb().updateOne({ _id }, { $set: { is_allowed_collab: true } });
-    const { mlBetaActivatedAt, activated } = await applyCollabActivation(_id, now);
+    const activation = await applyCollabActivation(_id, now);
+    if (!activation) {
+      return { status: "already_active", organismeId, eligibility };
+    }
+    const { mlBetaActivatedAt, activated } = activation;
     const status: CollabV2ActivateStatus = activated ? "activated" : "already_active";
     logger.info({ adminUserId, organismeId, status }, "collab-v2 activate");
     return { status, organismeId, eligibility, mlBetaActivatedAt };
@@ -748,21 +745,103 @@ export async function activateCollabV2(
 async function applyCollabActivation(
   _id: ObjectId,
   now: Date
-): Promise<{ mlBetaActivatedAt: Date; activated: boolean }> {
-  await updateMissionLocaleEffectifComputedCollab(_id, true);
-
-  const existingOrg = (await organisationsDb().findOne(
-    { type: "ORGANISME_FORMATION", organisme_id: _id.toString() },
-    { projection: { ml_beta_activated_at: 1 } }
-  )) as Pick<IOrganisationOrganismeFormation, "ml_beta_activated_at"> | null;
-
-  if (!existingOrg?.ml_beta_activated_at) {
-    await activateOrganisme(now, _id);
-    return { mlBetaActivatedAt: now, activated: true };
+): Promise<{ mlBetaActivatedAt: Date; activated: boolean } | null> {
+  const { modifiedCount } = await organismesDb().updateOne(
+    { _id, is_allowed_collab: { $ne: true } },
+    { $set: { is_allowed_collab: true } }
+  );
+  if (modifiedCount === 0) {
+    return null;
   }
 
-  await updateMissionLocaleEffectifComputedOrganisme(existingOrg.ml_beta_activated_at, _id);
-  return { mlBetaActivatedAt: existingOrg.ml_beta_activated_at, activated: false };
+  let organisationId: ObjectId | null = null;
+  let dateExistante: Date | null = null;
+  let datePosee = false;
+  let dossiersTouches = false;
+  try {
+    const organisation = await getOrganisationOrganismeByOrganismeId(_id);
+    if (!organisation) {
+      throw new Error(`Organisation introuvable pour l'organisme ${_id.toString()}`);
+    }
+    organisationId = organisation._id;
+    dateExistante = organisation.ml_beta_activated_at ?? null;
+    if (!dateExistante) {
+      await organisationsDb().updateOne(
+        { _id: organisation._id, type: "ORGANISME_FORMATION" },
+        { $set: { ml_beta_activated_at: now } }
+      );
+      datePosee = true;
+    }
+    dossiersTouches = true;
+    await updateMissionLocaleEffectifComputedActivation(_id, {
+      isAllowedCollab: true,
+      mlBetaActivatedAt: dateExistante ?? now,
+    });
+  } catch (err) {
+    await organismesDb().updateOne({ _id }, { $unset: { is_allowed_collab: "" } });
+    if (organisationId && datePosee) {
+      await organisationsDb().updateOne({ _id: organisationId }, { $unset: { ml_beta_activated_at: "" } });
+    }
+    if (dossiersTouches) {
+      try {
+        await updateMissionLocaleEffectifComputedActivation(_id, {
+          isAllowedCollab: false,
+          mlBetaActivatedAt: dateExistante,
+        });
+      } catch (rollbackErr) {
+        logger.error(
+          { err: rollbackErr, organismeId: _id.toString() },
+          "collab-v2 activate: rollback of dossiers failed"
+        );
+        captureException(rollbackErr);
+      }
+    }
+    throw err;
+  }
+
+  if (datePosee) {
+    try {
+      await updateEffectifMissionLocaleSnapshotAtOrganismeActivation(_id);
+    } catch (err) {
+      logger.error({ err, organismeId: _id.toString() }, "collab-v2 activate: snapshot refresh failed");
+      captureException(err);
+    }
+  }
+  return { mlBetaActivatedAt: dateExistante ?? now, activated: datePosee };
+}
+
+export async function activerCollabSiEligible(organismeId: ObjectId) {
+  try {
+    const eligibility = await checkCollabV2Eligibility(organismeId.toString());
+    if (!eligibility.eligible) return;
+
+    const activation = await applyCollabActivation(organismeId, new Date());
+    if (activation) {
+      logger.info(
+        { organismeId: organismeId.toString(), mlBetaActivatedAt: activation.mlBetaActivatedAt },
+        "collab-v2 activate (deca coupling)"
+      );
+    }
+  } catch (err) {
+    logger.error({ err, organismeId: organismeId.toString() }, "collab-v2 activate (deca coupling) failed");
+    captureException(err);
+  }
+}
+
+async function mettreDecaEnFileSiInvisible(organismeId: ObjectId) {
+  try {
+    const organisme = await organismesDb().findOne({ _id: organismeId }, { projection: decaEligibilityProjection });
+    if (!organisme || organisme.is_allowed_deca === true) return;
+    const { effectifsDecaPropres } = await countEffectifsAnneesActives(organismeId);
+    if (effectifsDecaPropres === 0) return;
+    const { eligible } = await checkEligibilityForLoaded(organisme);
+    if (eligible) {
+      await mettreActivationDecaEnFile(organismeId);
+    }
+  } catch (err) {
+    logger.error({ err, organismeId: organismeId.toString() }, "deca activation after collaboration failed");
+    captureException(err);
+  }
 }
 
 export type CollabResumeReason = "reconnexion" | "collaboration_envoyee" | "admin";
@@ -861,21 +940,19 @@ export async function ensureCollabOnAfterCollaboration(
     await resumeCollab(organismeId, { reason: "collaboration_envoyee", userId: context.userId });
   }
 
-  const { modifiedCount } = await organismesDb().updateOne(
-    { _id: organismeId, is_allowed_collab: { $ne: true } },
-    { $set: { is_allowed_collab: true } }
-  );
-  if (modifiedCount === 0) {
+  await mettreDecaEnFileSiInvisible(organismeId);
+
+  const activation = await applyCollabActivation(organismeId, now);
+  if (!activation) {
     return "already_on";
   }
 
-  const { mlBetaActivatedAt } = await applyCollabActivation(organismeId, now);
   logger.info(
     {
       organismeId: organismeId.toString(),
       userId: context.userId?.toString(),
       effectifId: context.effectifId.toString(),
-      mlBetaActivatedAt,
+      mlBetaActivatedAt: activation.mlBetaActivatedAt,
     },
     "collab-on auto-activation"
   );

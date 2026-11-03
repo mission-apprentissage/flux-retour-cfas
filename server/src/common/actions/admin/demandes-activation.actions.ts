@@ -40,6 +40,7 @@ import {
 } from "@/common/actions/organisations.actions";
 import { checkEligibilityForLoaded } from "@/common/actions/organismes/deca-cfa-eligibility";
 import {
+  activerCollabSiEligible,
   activerDecaOrganisme,
   poserGardeActivationDeca,
   retirerGardeActivationDeca,
@@ -935,15 +936,18 @@ export async function renvoyerDemandeActivation(id: ObjectId, expediteur: Expedi
   return ligne;
 }
 
-async function activerPourEnvois(organismeId: ObjectId): Promise<string | null> {
+async function activerPourEnvois(organismeId: ObjectId): Promise<{ motifEchec: string | null; flagPose: boolean }> {
   if (!(await poserGardeActivationDeca(organismeId))) {
-    return "Activation DECA déjà en cours pour cet établissement : renvoyer plus tard";
+    return { motifEchec: "Activation DECA déjà en cours pour cet établissement : renvoyer plus tard", flagPose: false };
   }
   try {
     const resultat = await activerDecaOrganisme(organismeId);
-    return resultat === "flag_pose" || resultat === "deja_actif" ? null : MOTIFS_ECHEC_ACTIVATION[resultat];
+    return {
+      motifEchec: resultat === "flag_pose" || resultat === "deja_actif" ? null : MOTIFS_ECHEC_ACTIVATION[resultat],
+      flagPose: resultat === "flag_pose",
+    };
   } catch (err) {
-    return `Activation DECA en échec : ${(err as Error).message}`;
+    return { motifEchec: `Activation DECA en échec : ${(err as Error).message}`, flagPose: false };
   } finally {
     await retirerGardeActivationDeca(organismeId);
   }
@@ -1038,9 +1042,10 @@ async function traiterDemande(
   organisation: Organisation | null,
   compte: IUsersMigration | null,
   etapes: NonNullable<IDemandeActivationCfa["etapes"]>
-) {
+): Promise<{ compteValide: boolean }> {
   const nomCfa = nomCfaPourEmail(organisme);
   const branche = brancheEnvoyee(demande, compte);
+  let compteValide = false;
 
   if (branche === "refus") {
     if (!refusAvecMail(demande.motifs)) {
@@ -1050,6 +1055,7 @@ async function traiterDemande(
   } else if (branche === "compte_existant" && compte) {
     if (compte.account_status === "PENDING_ADMIN_VALIDATION") {
       await validerCompteEnAttente(compte);
+      compteValide = true;
     }
     if (compte.organisation_role !== "admin") {
       await adminUpdateUserRole(compte._id.toString(), "admin");
@@ -1069,7 +1075,7 @@ async function traiterDemande(
       await renvoyerLienDeValidation(compte);
       etapes.compte_at = new Date();
       etapes.email_at = new Date();
-      return;
+      return { compteValide };
     }
     if (compte) {
       await supprimerCompteNonConfirme(compte);
@@ -1086,6 +1092,7 @@ async function traiterDemande(
     await envoyerInvitationAdminDemande(invitation, invitation.expires_at ?? new Date(), demande.envoye_par_email);
   }
   etapes.email_at = new Date();
+  return { compteValide };
 }
 
 async function marquerEchec(
@@ -1142,7 +1149,9 @@ export async function traiterEnvoisDemandesActivation(organismeId: ObjectId | nu
   }
 
   const activees = preparees.filter(({ demande }) => demande.branche !== "refus");
-  const echecActivation = organismeId && activees.length > 0 ? await activerPourEnvois(organismeId) : null;
+  const activation = organismeId && activees.length > 0 ? await activerPourEnvois(organismeId) : null;
+  const echecActivation = activation?.motifEchec ?? null;
+  let compteValide = false;
 
   for (const { demande, compte } of preparees) {
     const etapes = { ...demande.etapes };
@@ -1151,7 +1160,9 @@ export async function traiterEnvoisDemandesActivation(organismeId: ObjectId | nu
         if (echecActivation) throw new EchecEnvoi(echecActivation);
         etapes.flag_at ??= new Date();
       }
-      await traiterDemande(demande, organisme, organisation, compte, etapes);
+      if ((await traiterDemande(demande, organisme, organisation, compte, etapes)).compteValide) {
+        compteValide = true;
+      }
       await demandesActivationCfaDb().updateOne(
         { _id: demande._id, statut: "envoi_en_cours" },
         {
@@ -1172,5 +1183,9 @@ export async function traiterEnvoisDemandesActivation(organismeId: ObjectId | nu
     } catch (err) {
       await marquerEchec(demande, err, etapes);
     }
+  }
+
+  if (organismeId && activation && !activation.motifEchec && (activation.flagPose || compteValide)) {
+    await activerCollabSiEligible(organismeId);
   }
 }

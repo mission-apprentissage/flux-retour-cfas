@@ -3,41 +3,22 @@
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 
 import { formatDate } from "@/app/_utils/date.utils";
-import { _get, _post } from "@/common/httpClient";
+import { _post } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
 import { getServerErrorMessage } from "@/common/rateLimit";
 
-import { CheckLine, EligibilityCheck, EtatBadge } from "./EligibilityBadges";
+import { CheckLine, EtatBadge } from "./EligibilityBadges";
 import styles from "./encart-admin.module.scss";
+import { useCollabV2Eligibility } from "./useCollabV2Eligibility";
 
 const collabV2ConfirmModal = createModal({
   id: "collab-v2-confirm",
   isOpenedByDefault: false,
 });
-
-type EligibilityResult = {
-  eligible: boolean;
-  alreadyActive: boolean;
-  checks: {
-    exists_with_siret_uai: EligibilityCheck;
-    nature: EligibilityCheck;
-    has_effectifs_erp: EligibilityCheck;
-    not_already_active: EligibilityCheck;
-  };
-  organisme: {
-    _id: string;
-    siret: string;
-    uai: string | null;
-    nature?: string;
-    is_allowed_collab?: boolean | null;
-    collab_suspended_at?: string | null;
-    collab_inactivity_email_sent_at?: string | null;
-  } | null;
-};
 
 type ActionResult = {
   status: string;
@@ -49,11 +30,7 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
   const [action, setAction] = useState<"activate" | "suspend" | "resume" | null>(null);
   const [feedback, setFeedback] = useState<{ severity: "success" | "error"; message: string } | null>(null);
 
-  const { data, isLoading, isFetching, refetch } = useQuery<EligibilityResult>({
-    queryKey: ["admin/organismes/collab-v2-eligibility", organisme._id],
-    queryFn: () => _get(`/api/v1/admin/organismes/${organisme._id}/collab-v2-eligibility`),
-    enabled: !!organisme._id,
-  });
+  const { data, isLoading, isFetching, refetch } = useCollabV2Eligibility(organisme._id);
 
   const activateMutation = useMutation({
     mutationFn: () =>
@@ -134,11 +111,24 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
             Nature «&nbsp;formateur&nbsp;» / «&nbsp;responsable_formateur&nbsp;» (actuelle&nbsp;:{" "}
             <strong>{checks.nature.details?.natureActuelle ?? "—"}</strong>)
           </CheckLine>
-          <CheckLine passed={checks.has_effectifs_erp.passed}>
-            Effectifs ERP sur années scolaires actives ({checks.has_effectifs_erp.details?.effectifsErpCount ?? 0})
+          <CheckLine passed={checks.not_closed.passed}>Établissement ouvert</CheckLine>
+          <CheckLine passed={checks.has_effectifs.passed}>
+            Effectifs sur années scolaires actives (ERP&nbsp;: {checks.has_effectifs.details?.effectifsErpCount ?? 0},
+            DECA&nbsp;: {checks.has_effectifs.details?.effectifsDecaCount ?? 0})
+          </CheckLine>
+          <CheckLine passed={checks.deca_visible.passed}>
+            Programme DECA-CFA actif, requis dès qu&apos;il y a des effectifs DECA
+          </CheckLine>
+          <CheckLine passed={checks.has_compte_confirme.passed}>
+            Au moins un compte CFA confirmé ({checks.has_compte_confirme.details?.comptesConfirmes ?? 0})
           </CheckLine>
         </div>
       ) : null}
+      {!alreadyActive && checks?.deca_visible.details?.decaActif === false && !checks.deca_visible.passed && (
+        <span className={styles.muted}>
+          Activez d&apos;abord le programme DECA-CFA&nbsp;: la collaboration suivra si le CFA y est éligible.
+        </span>
+      )}
 
       {feedback && (
         <Alert

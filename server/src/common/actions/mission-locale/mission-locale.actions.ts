@@ -2125,12 +2125,16 @@ export const updateOrDeleteMissionLocaleSnapshot = async (effectif: IEffectif | 
   if (eff) {
     const cleanCfaDeclaration = shouldCleanCfaRuptureDeclaration(eff.cfa_rupture_declaration, currentStatus);
     const hasValidCfaDeclaration = !!eff.cfa_rupture_declaration && !cleanCfaDeclaration;
-    // Sortant requalifié : masqué des listes par `current_status`, jamais soft-deleted — le
-    // masquage doit rester réversible si une rupture est transmise plus tard.
-    const sortantRequalifie = currentStatus?.valeur === STATUT_APPRENANT.FIN_DE_FORMATION;
+    // Sortant, abandon ou retour en contrat : jamais soft-deleted, le masquage doit rester
+    // réversible si une rupture est transmise plus tard.
+    const sortieOuAbandon = [
+      STATUT_APPRENANT.FIN_DE_FORMATION,
+      STATUT_APPRENANT.ABANDON,
+      STATUT_APPRENANT.APPRENTI,
+    ].some((statut) => statut === currentStatus?.valeur);
     const hasAccConjoint = eff.organisme_data?.acc_conjoint === true;
     const souhaiteRdv = eff.souhaite_rdv === true;
-    const shouldKeep = rupturantFilter || hasValidCfaDeclaration || sortantRequalifie || hasAccConjoint || souhaiteRdv;
+    const shouldKeep = rupturantFilter || hasValidCfaDeclaration || sortieOuAbandon || hasAccConjoint || souhaiteRdv;
 
     // Tout dossier conservé sans statut rupturant ni déclaration CFA garde sa date de rupture
     // enregistrée : la remettre à null le ferait sortir de la fenêtre de visibilité ML.
