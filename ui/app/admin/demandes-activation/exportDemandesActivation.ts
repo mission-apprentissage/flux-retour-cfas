@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { MOTIFS_DEMANDE_ACTIVATION, refusAvecMail } from "shared/models/data/demandesActivationCfa.model";
+import { MOTIFS_DEMANDE_ACTIVATION } from "shared/models/data/demandesActivationCfa.model";
 import {
   IDemandeActivationLigne,
   VUES_DEMANDES_ACTIVATION,
@@ -15,8 +15,10 @@ import {
   LIBELLES_MAILS_ENVOYES,
   LIBELLES_RELANCES,
   LIBELLES_VUES,
+  mailDeRefus,
   nomCfa,
   precisionEtape,
+  refusEnvoyeLe,
   STATUTS,
 } from "./libelles";
 
@@ -61,11 +63,26 @@ const COLONNES_EXPORT = {
 
 type CleExport = keyof typeof COLONNES_EXPORT;
 
-const CFA: CleExport[] = ["cfa", "siret", "siret_saisi", "uai", "siret_propose", "effectifs_erp", "effectifs_deca"];
-const DEMANDEUR: CleExport[] = ["email", "email_saisi", "fonction", "compte_nom", "domaine_inconnu", "commentaire"];
-const INSCRIPTION: CleExport[] = ["inscription", "horodateur_brut"];
-const COMPTE: CleExport[] = ["compte_etat", "compte_role"];
-const SUIVI: CleExport[] = [
+const COLONNES_CFA: CleExport[] = [
+  "cfa",
+  "siret",
+  "siret_saisi",
+  "uai",
+  "siret_propose",
+  "effectifs_erp",
+  "effectifs_deca",
+];
+const COLONNES_DEMANDEUR: CleExport[] = [
+  "email",
+  "email_saisi",
+  "fonction",
+  "compte_nom",
+  "domaine_inconnu",
+  "commentaire",
+];
+const COLONNES_INSCRIPTION: CleExport[] = ["inscription", "horodateur_brut"];
+const COLONNES_COMPTE: CleExport[] = ["compte_etat", "compte_role"];
+const COLONNES_SUIVI: CleExport[] = [
   "etape",
   "etape_detail",
   "compte_cree_le",
@@ -78,26 +95,49 @@ const SUIVI: CleExport[] = [
 ];
 
 const COLONNES_EXPORT_PAR_VUE: Record<VueDemandeActivation, CleExport[]> = {
-  a_envoyer: [...CFA, ...DEMANDEUR, ...INSCRIPTION, "source", ...COMPTE, "branche", "cochee"],
-  envoyees: [...CFA, ...DEMANDEUR, "envoyee_le", "mail_envoye", "source", ...SUIVI],
-  refus: [...CFA, ...DEMANDEUR, ...INSCRIPTION, "source", "motifs", "mail_refus", "cochee"],
-  devenus_eligibles: [
-    ...CFA,
-    ...DEMANDEUR,
-    ...INSCRIPTION,
+  a_envoyer: [
+    ...COLONNES_CFA,
+    ...COLONNES_DEMANDEUR,
+    ...COLONNES_INSCRIPTION,
     "source",
-    ...COMPTE,
+    ...COLONNES_COMPTE,
+    "branche",
+    "cochee",
+  ],
+  envoyees: [...COLONNES_CFA, ...COLONNES_DEMANDEUR, "envoyee_le", "mail_envoye", "source", ...COLONNES_SUIVI],
+  refus: [
+    ...COLONNES_CFA,
+    ...COLONNES_DEMANDEUR,
+    ...COLONNES_INSCRIPTION,
+    "source",
+    "motifs",
+    "mail_refus",
+    "refus_envoye_le",
+    "cochee",
+  ],
+  devenus_eligibles: [
+    ...COLONNES_CFA,
+    ...COLONNES_DEMANDEUR,
+    ...COLONNES_INSCRIPTION,
+    "source",
+    ...COLONNES_COMPTE,
     "branche",
     "refus_envoye_le",
     "cochee",
   ],
-  echecs: [...CFA, ...DEMANDEUR, "source", ...COMPTE, "branche", "statut", "motif_echec", "motifs"],
+  echecs: [
+    ...COLONNES_CFA,
+    ...COLONNES_DEMANDEUR,
+    "source",
+    ...COLONNES_COMPTE,
+    "branche",
+    "statut",
+    "motif_echec",
+    "motifs",
+  ],
 };
 
 const ROLES = { admin: "admin", member: "membre" } as const;
-
-const mailDeRefus = (demande: IDemandeActivationLigne) =>
-  demande.statut === "envoyee" ? "Envoyé" : refusAvecMail(demande.motifs) ? "Pas encore envoyé" : "Sans mail";
 
 const versLigneExport = (demande: IDemandeActivationLigne): Record<CleExport, unknown> => ({
   cfa: nomCfa(demande),
@@ -121,9 +161,9 @@ const versLigneExport = (demande: IDemandeActivationLigne): Record<CleExport, un
   compte_etat: demande.compte ? etatCompte(demande.compte, demande.branche).libelle : "Sans compte",
   compte_role: demande.compte?.organisation_role ? ROLES[demande.compte.organisation_role] : null,
   branche: libelleBranche(demande),
-  refus_envoye_le: demande.statut === "envoyee" ? demande.envoyee_at : null,
+  refus_envoye_le: refusEnvoyeLe(demande),
   motifs: demande.motifs.map((motif) => MOTIFS_DEMANDE_ACTIVATION[motif].libelle).join(" ; "),
-  mail_refus: mailDeRefus(demande),
+  mail_refus: mailDeRefus(demande).libelle,
   statut: STATUTS[demande.statut].libelle,
   motif_echec: demande.motif_echec,
   cochee: demande.statut === "envoi_en_cours" ? "envoi en cours" : demande.a_envoyer ? "oui" : "non",

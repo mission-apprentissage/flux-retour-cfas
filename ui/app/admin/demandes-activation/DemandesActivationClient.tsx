@@ -37,6 +37,7 @@ import {
 } from "shared/models/routes/admin/demandes-activation.api";
 
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
+import { formatDate } from "@/app/_utils/date.utils";
 import { PAGES } from "@/app/_utils/routes.utils";
 import { AdminPageHeader } from "@/app/admin/_components/AdminPageHeader";
 import { AdminTable } from "@/app/admin/_components/AdminTable";
@@ -55,8 +56,10 @@ import {
   LIBELLES_RELANCES,
   LIBELLES_ROLES,
   LIBELLES_VUES,
+  mailDeRefus,
   nomCfa,
   precisionEtape,
+  refusEnvoyeLe,
   STATUTS,
 } from "./libelles";
 
@@ -99,10 +102,10 @@ const COLONNES = {
   actions: { label: "Actions", sortable: false },
 } as const;
 
-const colonnes = (...largeurs: [keyof typeof COLONNES, number][]) =>
-  largeurs.map(([dataKey, largeur]) => ({ ...COLONNES[dataKey], dataKey, width: `${largeur}%` }));
+const colonnesAvecLargeurs = (...colonnesEtLargeurs: [keyof typeof COLONNES, number][]) =>
+  colonnesEtLargeurs.map(([dataKey, largeur]) => ({ ...COLONNES[dataKey], dataKey, width: `${largeur}%` }));
 
-const COLONNES_A_ENVOYER = colonnes(
+const COLONNES_A_ENVOYER = colonnesAvecLargeurs(
   ["cfa", 18],
   ["demandeur", 20],
   ["inscription", 10],
@@ -113,10 +116,10 @@ const COLONNES_A_ENVOYER = colonnes(
   ["actions", 10]
 );
 
-const COLONNES_PAR_VUE: Record<VueDemandeActivation, ReturnType<typeof colonnes>> = {
+const COLONNES_PAR_VUE: Record<VueDemandeActivation, ReturnType<typeof colonnesAvecLargeurs>> = {
   a_envoyer: COLONNES_A_ENVOYER,
-  envoyees: colonnes(["cfa", 20], ["demandeur", 24], ["envoyee", 12], ["source", 11], ["suivi", 33]),
-  refus: colonnes(
+  envoyees: colonnesAvecLargeurs(["cfa", 20], ["demandeur", 24], ["envoyee", 12], ["source", 11], ["suivi", 33]),
+  refus: colonnesAvecLargeurs(
     ["cfa", 17],
     ["demandeur", 18],
     ["inscription", 9],
@@ -127,7 +130,7 @@ const COLONNES_PAR_VUE: Record<VueDemandeActivation, ReturnType<typeof colonnes>
     ["actions", 9]
   ),
   devenus_eligibles: COLONNES_A_ENVOYER,
-  echecs: colonnes(
+  echecs: colonnesAvecLargeurs(
     ["cfa", 18],
     ["demandeur", 20],
     ["source", 11],
@@ -137,8 +140,6 @@ const COLONNES_PAR_VUE: Record<VueDemandeActivation, ReturnType<typeof colonnes>
     ["actions", 10]
   ),
 };
-
-const jour = (date: string) => format(new Date(date), "dd/MM/yyyy");
 
 const CLES_DE_TRI: Record<string, (demande: IDemandeActivationLigne) => string | null> = {
   inscription: (demande) => demande.horodatage,
@@ -281,29 +282,32 @@ function Suivi({ demande: { compte, suivi } }: { demande: IDemandeActivationLign
       </Badge>
       {precision && <p className="fr-text--xs fr-mb-0">{precision}</p>}
       {suivi.etape !== "compte_a_creer" && suivi.mail_envoye !== "compte_existant" && compte?.created_at && (
-        <p className="fr-text--xs fr-mb-0">Compte créé le {jour(compte.created_at)}</p>
+        <p className="fr-text--xs fr-mb-0">Compte créé le {formatDate(compte.created_at)}</p>
       )}
       {suivi.etape === "pas_connecte" && (
         <p className="fr-text--xs fr-mb-0">
-          {compte?.last_connection ? `Dernière connexion le ${jour(compte.last_connection)}` : "Jamais connecté"}
+          {compte?.last_connection ? `Dernière connexion le ${formatDate(compte.last_connection)}` : "Jamais connecté"}
         </p>
       )}
       {connexion && (
         <p className="fr-text--xs fr-mb-0">
-          Le {jour(connexion)}
-          {compte?.last_connection && jour(compte.last_connection) !== jour(connexion)
-            ? `, dernière fois le ${jour(compte.last_connection)}`
+          Le {formatDate(connexion)}
+          {compte?.last_connection && formatDate(compte.last_connection) !== formatDate(connexion)
+            ? `, dernière fois le ${formatDate(compte.last_connection)}`
             : ""}
         </p>
       )}
       {suivi.collaborateurs_invites > 0 && (
         <p className="fr-text--xs fr-mb-0">
-          {suivi.collaborateurs_invites} collaborateur(s) invité(s), dont {suivi.collaborateurs_inscrits} inscrit(s)
+          {suivi.collaborateurs_invites}{" "}
+          {suivi.collaborateurs_invites > 1 ? "collaborateurs invités" : "collaborateur invité"}, dont{" "}
+          {suivi.collaborateurs_inscrits} {suivi.collaborateurs_inscrits > 1 ? "inscrits" : "inscrit"}
         </p>
       )}
       {suivi.derniere_relance && (
         <p className="fr-text--xs fr-mb-0">
-          Dernier mail auto le {jour(suivi.derniere_relance.at)} : {LIBELLES_RELANCES[suivi.derniere_relance.type]}
+          Dernier mail auto le {formatDate(suivi.derniere_relance.at)} :{" "}
+          {LIBELLES_RELANCES[suivi.derniere_relance.type]}
         </p>
       )}
     </>
@@ -311,25 +315,21 @@ function Suivi({ demande: { compte, suivi } }: { demande: IDemandeActivationLign
 }
 
 function MailDeRefus({ demande }: { demande: IDemandeActivationLigne }) {
-  if (demande.statut === "envoyee") {
-    return (
-      <>
-        <Badge className={styles.insecable} severity="success" small>
-          Envoyé
-        </Badge>
-        {demande.envoyee_at && <p className="fr-text--xs fr-mb-0">le {jour(demande.envoyee_at)}</p>}
-      </>
-    );
-  }
-  return refusAvecMail(demande.motifs) ? (
-    <Badge className={styles.insecable} noIcon small>
-      Pas encore envoyé
-    </Badge>
-  ) : (
-    <Badge className={styles.insecable} severity="warning" small>
-      Sans mail
-    </Badge>
+  const { libelle, severity } = mailDeRefus(demande);
+  const envoyeLe = refusEnvoyeLe(demande);
+  return (
+    <>
+      <Badge className={styles.insecable} severity={severity} noIcon={!severity} small>
+        {libelle}
+      </Badge>
+      {envoyeLe && <p className="fr-text--xs fr-mb-0">le {formatDate(envoyeLe)}</p>}
+    </>
   );
+}
+
+function RefusEnvoyeLe({ demande }: { demande: IDemandeActivationLigne }) {
+  const envoyeLe = refusEnvoyeLe(demande);
+  return envoyeLe && <p className="fr-text--xs fr-mb-0">Refus envoyé le {formatDate(envoyeLe)}</p>;
 }
 
 export default function DemandesActivationClient() {
@@ -563,7 +563,7 @@ export default function DemandesActivationClient() {
         : (demande.horodatage_brut ?? "—"),
       envoyee: demande.envoyee_at && (
         <>
-          {jour(demande.envoyee_at)}
+          {formatDate(demande.envoyee_at)}
           {demande.suivi && <p className="fr-text--xs fr-mb-0">{LIBELLES_MAILS_ENVOYES[demande.suivi.mail_envoye]}</p>}
         </>
       ),
@@ -572,9 +572,7 @@ export default function DemandesActivationClient() {
       branche: (
         <>
           <BadgeBranche demande={demande} />
-          {demande.vue === "devenus_eligibles" && demande.statut === "envoyee" && demande.envoyee_at && (
-            <p className="fr-text--xs fr-mb-0">Refus envoyé le {jour(demande.envoyee_at)}</p>
-          )}
+          {demande.vue === "devenus_eligibles" && <RefusEnvoyeLe demande={demande} />}
         </>
       ),
       motifs: <Motifs demande={demande} />,

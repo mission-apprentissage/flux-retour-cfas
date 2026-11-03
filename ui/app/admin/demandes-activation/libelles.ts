@@ -100,3 +100,20 @@ export function precisionEtape({ compte, suivi }: Pick<IDemandeActivationLigne, 
   }
   return null;
 }
+
+const MAILS_DE_REFUS: Record<
+  "envoye" | "pas_encore_envoye" | "sans_mail",
+  { libelle: string; severity?: "success" | "warning" }
+> = {
+  envoye: { libelle: "Envoyé", severity: "success" },
+  pas_encore_envoye: { libelle: "Pas encore envoyé" },
+  sans_mail: { libelle: "Sans mail", severity: "warning" },
+};
+
+export const mailDeRefus = (demande: Pick<IDemandeActivationLigne, "statut" | "motifs">) =>
+  MAILS_DE_REFUS[
+    demande.statut === "envoyee" ? "envoye" : refusAvecMail(demande.motifs) ? "pas_encore_envoye" : "sans_mail"
+  ];
+
+export const refusEnvoyeLe = (demande: Pick<IDemandeActivationLigne, "statut" | "envoyee_at">) =>
+  demande.statut === "envoyee" ? demande.envoyee_at : null;
