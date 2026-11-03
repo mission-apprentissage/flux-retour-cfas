@@ -68,7 +68,7 @@ const MODE_D_EMPLOI = [
   "Indiquez la source à l'import : elle reste attachée aux demandes créées par cet import et sert à filtrer la liste.",
   "Ré-importer un export plus récent ajoute les nouvelles réponses ; les lignes déjà envoyées ne bougent pas.",
   "Corrigez une ligne avec « Corriger » (SIRET, e-mail), jamais dans le fichier : les corrections sont gardées aux imports suivants.",
-  "Cochez les lignes prêtes, puis « Envoyer les e-mails » : DECA est activé et chaque demandeur reçoit son e-mail.",
+  "Cochez les lignes prêtes, puis « Envoyer les e-mails » : DECA est activé, puis la collaboration si le CFA y est éligible, et chaque demandeur reçoit son e-mail.",
   "Les refus « sans mail » ne reçoivent rien : à traiter à la main si besoin.",
   "En cas d'échec, corrigez puis « Renvoyer ». Les relances partent automatiquement.",
   "L'export Excel contient des données personnelles : ne le partagez pas hors de l'équipe.",

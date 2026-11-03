@@ -1,8 +1,10 @@
 import { ObjectId } from "mongodb";
-import { STATUT_APPRENANT } from "shared";
+import { NATURE_ORGANISME_DE_FORMATION, SOURCE_APPRENANT, STATUT_APPRENANT } from "shared";
 import type { IMissionLocaleEffectif } from "shared/models";
+import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IOrganisation } from "shared/models/data/organisations.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
+import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
@@ -11,9 +13,16 @@ import {
   resumeCollab,
   suspendCollab,
 } from "@/common/actions/organismes/organismes.admin.actions";
-import { auditLogsDb, missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import {
+  auditLogsDb,
+  effectifsDECADb,
+  missionLocaleEffectifsDb,
+  organisationsDb,
+  organismesDb,
+} from "@/common/model/collections";
 import { createRandomOrganisme, createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
+import { insererCompteCfa } from "@tests/utils/comptesCfa";
 import { testDoc } from "@tests/utils/testUtils";
 
 useMongo();
@@ -187,5 +196,101 @@ describe("suspension et reprise de collaboration", () => {
       const audit = await auditLogsDb().findOne({ action: "collab_resumed" });
       expect(audit?.data).toMatchObject({ reason: "collaboration_envoyee" });
     });
+  });
+});
+
+describe("activation de la collaboration d'un CFA sans ERP", () => {
+  const dateRupture = new Date("2026-08-20");
+  const decaId = new ObjectId();
+  const organisationId = new ObjectId();
+
+  beforeEach(async () => {
+    await organismesDb().insertOne({
+      ...organisme,
+      nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+      is_allowed_deca: true,
+    });
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        _id: organisationId,
+        type: "ORGANISME_FORMATION",
+        siret: organisme.siret,
+        uai: organisme.uai,
+        organisme_id: organismeId.toString(),
+        created_at: new Date(),
+      })
+    );
+    const effectif = await createSampleEffectif({
+      organisme,
+      annee_scolaire: getActiveAnneesScolaires(new Date())[0],
+      source: SOURCE_APPRENANT.DECA,
+      apprenant: { date_de_naissance: new Date(new Date().getFullYear() - 20, 0, 1) },
+    });
+    const contrat = testDoc<IEffectifDECA>({
+      ...effectif,
+      _id: decaId,
+      deca_raw_id: new ObjectId(),
+      organisme_id: organismeId,
+      is_deca_compatible: true,
+      _computed: {
+        ...effectif._computed,
+        statut: {
+          en_cours: STATUT_APPRENANT.RUPTURANT,
+          parcours: [{ valeur: STATUT_APPRENANT.RUPTURANT, date: dateRupture }],
+        },
+      },
+    });
+    await effectifsDECADb().insertOne(contrat);
+    await missionLocaleEffectifsDb().insertOne(
+      testDoc<IMissionLocaleEffectif>({
+        mission_locale_id: new ObjectId(),
+        effectif_id: decaId,
+        effectif_snapshot: contrat,
+        effectif_snapshot_date: new Date(),
+        date_rupture: dateRupture,
+        current_status: { value: STATUT_APPRENANT.RUPTURANT, date: dateRupture },
+        created_at: new Date("2026-08-21"),
+        computed: { organisme: { ml_beta_activated_at: null, is_allowed_collab: false } },
+      }),
+      { bypassDocumentValidation: true }
+    );
+  });
+
+  it("active un CFA DECA seul avec un compte confirmé et dénormalise la collab sur son dossier DECA", async () => {
+    await insererCompteCfa(organisationId);
+
+    const result = await activateCollabV2(organismeId.toString(), adminUserId);
+
+    expect(result.status).toBe("activated");
+    expect((await reloadOrganisme())?.is_allowed_collab).toBe(true);
+    const organisation = await organisationsDb().findOne({ _id: organisationId });
+    expect(organisation).toMatchObject({ ml_beta_activated_at: expect.any(Date) });
+    const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: decaId });
+    expect(dossier?.soft_deleted).not.toBe(true);
+    expect(dossier?.computed?.organisme?.is_allowed_collab).toBe(true);
+    expect(dossier?.computed?.organisme?.ml_beta_activated_at).toEqual(result.mlBetaActivatedAt);
+  });
+
+  it("ne pose qu'une date quand deux activations arrivent en même temps", async () => {
+    await insererCompteCfa(organisationId);
+
+    const results = await Promise.all([
+      activateCollabV2(organismeId.toString(), adminUserId),
+      activateCollabV2(organismeId.toString(), adminUserId),
+    ]);
+
+    expect(results.map((result) => result.status).sort()).toEqual(["activated", "already_active"]);
+    const organisation = await organisationsDb().findOne({ _id: organisationId });
+    const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: decaId });
+    expect(dossier?.computed?.organisme?.ml_beta_activated_at).toEqual(
+      (organisation as { ml_beta_activated_at?: Date } | null)?.ml_beta_activated_at
+    );
+  });
+
+  it("refuse un CFA sans compte confirmé", async () => {
+    const result = await activateCollabV2(organismeId.toString(), adminUserId);
+
+    expect(result.status).toBe("not_eligible");
+    expect((await reloadOrganisme())?.is_allowed_collab).toBeUndefined();
   });
 });

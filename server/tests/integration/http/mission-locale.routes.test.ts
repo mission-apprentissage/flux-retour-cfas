@@ -675,8 +675,9 @@ describe("Mission Locale Routes", () => {
         expect(after?.soft_deleted).toBeFalsy();
       });
 
-      // Contraste : le retour en contrat reste un soft-delete (comportement préexistant inchangé).
-      it("soft-delete toujours un retour en APPRENTI", async () => {
+      it("garde aussi un retour en APPRENTI et préserve date_rupture", async () => {
+        const before = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
+
         await effectifsDb().updateOne(
           { _id: EFFECTIF_ID },
           {
@@ -690,7 +691,9 @@ describe("Mission Locale Routes", () => {
         await updateOrDeleteMissionLocaleSnapshot(updatedEffectif!);
 
         const after = await missionLocaleEffectifsDb().findOne({ effectif_id: EFFECTIF_ID });
-        expect(after?.soft_deleted).toBe(true);
+        expect(after?.soft_deleted).toBeFalsy();
+        expect(after?.date_rupture).toEqual(before?.date_rupture);
+        expect(after?.current_status?.value).toBe("APPRENTI");
       });
     });
 
@@ -1166,6 +1169,21 @@ describe("Mission Locale Routes", () => {
       const res = await getPerMonth();
       expect(isVisible(res, snapshotId.toString())).toBe(false);
     });
+
+    it.each([
+      { ruptureDaysAgo: 10, visible: false },
+      { ruptureDaysAgo: 60, visible: true },
+    ])(
+      "CFA en V2 + rupture DECA il y a $ruptureDaysAgo j : visible=$visible, comme une rupture ERP",
+      async ({ ruptureDaysAgo, visible }) => {
+        const { snapshotId, doc } = makeDoc({ accConjoint: false, isAllowedCollab: true, ruptureDaysAgo });
+        Object.assign(doc.effectif_snapshot, { source: SOURCE_APPRENANT.DECA, is_deca_compatible: true });
+        await insertDoc(doc);
+
+        const res = await getPerMonth();
+        expect(isVisible(res, snapshotId.toString())).toBe(visible);
+      }
+    );
 
     // RG8 : collaboration suspendue pour inactivité → le délai de 45 j ne s'applique plus.
     it("CFA suspendu pour inactivité + rupture < 45j : visible MAIS non prioritaire", async () => {

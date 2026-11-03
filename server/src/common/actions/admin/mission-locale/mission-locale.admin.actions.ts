@@ -349,6 +349,21 @@ export const updateMissionLocaleEffectifComputedCollab = (organismeId: ObjectId,
   );
 };
 
+export const updateMissionLocaleEffectifComputedActivation = (
+  organismeId: ObjectId,
+  { isAllowedCollab, mlBetaActivatedAt }: { isAllowedCollab: boolean; mlBetaActivatedAt: Date | null }
+) => {
+  return missionLocaleEffectifsDb().updateMany(
+    { "effectif_snapshot.organisme_id": organismeId },
+    {
+      $set: {
+        "computed.organisme.is_allowed_collab": isAllowedCollab,
+        "computed.organisme.ml_beta_activated_at": mlBetaActivatedAt,
+      },
+    }
+  );
+};
+
 export const updateMissionLocaleEffectifComputedML = (date: Date, missionLocaleId: ObjectId) => {
   return missionLocaleEffectifsDb().updateMany(
     { mission_locale_id: missionLocaleId },

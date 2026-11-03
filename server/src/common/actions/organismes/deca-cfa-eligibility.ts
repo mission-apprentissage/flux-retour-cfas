@@ -157,6 +157,29 @@ export async function findEligibleOrganismes(organismeIds?: ObjectId[]): Promise
     .toArray();
 }
 
+export async function countEffectifsAnneesActives(organismeId: ObjectId) {
+  const activeAnnees = getActiveAnneesScolaires(new Date());
+  const [effectifsErpCount, effectifsDecaPropres] = await Promise.all([
+    effectifsDb().countDocuments({ organisme_id: organismeId, annee_scolaire: { $in: activeAnnees } }),
+    effectifsDECADb().countDocuments({ organisme_id: organismeId, annee_scolaire: { $in: activeAnnees } }),
+  ]);
+  return { effectifsErpCount, effectifsDecaPropres };
+}
+
+export const decaEligibilityProjection = {
+  _id: 1,
+  siret: 1,
+  uai: 1,
+  nature: 1,
+  ferme: 1,
+  is_allowed_deca: 1,
+  deca_activation_queued_at: 1,
+  deca_contrats_flechables: 1,
+  nom: 1,
+  raison_sociale: 1,
+  enseigne: 1,
+} as const;
+
 function notEvaluated(): EligibilityCheck {
   return { passed: false };
 }
@@ -215,18 +238,7 @@ export async function checkEligibilityForLoaded(
     details: { natureActuelle: nature ?? null },
   };
 
-  const activeAnnees = getActiveAnneesScolaires(new Date());
-
-  const [effectifsErpCount, effectifsDecaPropres] = await Promise.all([
-    effectifsDb().countDocuments({
-      organisme_id: _id as ObjectId,
-      annee_scolaire: { $in: activeAnnees },
-    }),
-    effectifsDECADb().countDocuments({
-      organisme_id: _id as ObjectId,
-      annee_scolaire: { $in: activeAnnees },
-    }),
-  ]);
+  const { effectifsErpCount, effectifsDecaPropres } = await countEffectifsAnneesActives(_id as ObjectId);
 
   const effectifsDecaCount =
     effectifsDecaPropres + (is_allowed_deca === true ? 0 : (organisme.deca_contrats_flechables ?? 0));
@@ -286,24 +298,7 @@ export async function checkActivationEligibility(organismeId: string): Promise<E
     };
   }
 
-  const organisme = await organismesDb().findOne(
-    { _id },
-    {
-      projection: {
-        _id: 1,
-        siret: 1,
-        uai: 1,
-        nature: 1,
-        ferme: 1,
-        is_allowed_deca: 1,
-        deca_activation_queued_at: 1,
-        deca_contrats_flechables: 1,
-        nom: 1,
-        raison_sociale: 1,
-        enseigne: 1,
-      },
-    }
-  );
+  const organisme = await organismesDb().findOne({ _id }, { projection: decaEligibilityProjection });
 
   if (!organisme) {
     return {

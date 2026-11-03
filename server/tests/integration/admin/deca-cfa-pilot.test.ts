@@ -8,6 +8,7 @@ import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixtu
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { updateMissionLocaleEffectifComputedActivation } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { flecherContratsDeca } from "@/common/actions/deca/deca-flechage.actions";
 import {
   activateDecaCfaPilotBatch,
@@ -19,6 +20,7 @@ import { getDatabase } from "@/common/mongodb";
 import config from "@/config";
 import { decaJobs } from "@/jobs/registry/deca";
 import { useMongo } from "@tests/jest/setupMongo";
+import { insererCompteCfa } from "@tests/utils/comptesCfa";
 import { DeepPartial, testDoc } from "@tests/utils/testUtils";
 
 vi.mock("job-processor", async (importOriginal) => ({
@@ -31,14 +33,25 @@ vi.mock("@/common/actions/deca/deca-flechage.actions", async (importOriginal) =>
   flecherContratsDeca: vi.fn(),
 }));
 
+vi.mock("@/common/actions/admin/mission-locale/mission-locale.admin.actions", async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import("@/common/actions/admin/mission-locale/mission-locale.admin.actions")>();
+  return {
+    ...original,
+    updateMissionLocaleEffectifComputedActivation: vi.fn(original.updateMissionLocaleEffectifComputedActivation),
+  };
+});
+
 const addJobMock = vi.mocked(addJob);
 const flecherMock = vi.mocked(flecherContratsDeca);
+const ecrireActivationMock = vi.mocked(updateMissionLocaleEffectifComputedActivation);
 
 useMongo();
 
 beforeEach(() => {
   addJobMock.mockReset();
   flecherMock.mockReset();
+  ecrireActivationMock.mockReset();
 });
 
 afterEach(() => {
@@ -167,7 +180,7 @@ describe("activateDecaCfaPilotBatch", () => {
     expect((await organismesDb().findOne({ _id: eligible.id }))?.is_allowed_deca).toBeUndefined();
   });
 
-  it("poses only is_allowed_deca : collaboration flag, ml_beta_activated_at and computed untouched", async () => {
+  it("without a confirmed account, poses only is_allowed_deca : collaboration flag, ml_beta_activated_at and computed untouched", async () => {
     const { id } = await seedOrganisme({
       siret: "10000000000004",
       uai: "0010004D",
@@ -192,19 +205,112 @@ describe("activateDecaCfaPilotBatch", () => {
 
   it("preserves an existing ml_beta_activated_at on activation", async () => {
     const initialDate = new Date("2026-01-15T10:00:00.000Z");
-    const { id } = await seedOrganisme({
+    const { id, organisationId } = await seedOrganisme({
       siret: "10000000000005",
       uai: "0010005E",
       mlBetaActivatedAt: initialDate,
       insertMlEffectif: true,
     });
+    await insererCompteCfa(organisationId!);
     const result = await activerParJob("10000000000005", "0010005E");
     expect(result.items[0].status).toBe("queued");
+    expect((await organismesDb().findOne({ _id: id }))?.is_allowed_collab).toBe(true);
+    const mlEffectif = await missionLocaleEffectifsDb().findOne({ "effectif_snapshot.organisme_id": id });
+    expect(mlEffectif?.computed?.organisme?.ml_beta_activated_at).toEqual(initialDate);
 
     const organisation = (await organisationsDb().findOne({
       organisme_id: id.toHexString(),
     })) as IOrganisationOrganismeFormation | null;
     expect(organisation?.ml_beta_activated_at).toEqual(initialDate);
+  });
+});
+
+describe("couplage avec la collaboration", () => {
+  it("avec un compte confirmé, active aussi la collaboration et la dénormalise", async () => {
+    const { id, organisationId } = await seedOrganisme({
+      siret: "10000000000020",
+      uai: "0010020A",
+      insertMlEffectif: true,
+    });
+    await insererCompteCfa(organisationId!);
+
+    await activerParJob("10000000000020", "0010020A");
+
+    const organisme = await organismesDb().findOne({ _id: id });
+    expect(organisme?.is_allowed_deca).toBe(true);
+    expect(organisme?.is_allowed_collab).toBe(true);
+    const organisation = (await organisationsDb().findOne({
+      _id: organisationId,
+    })) as IOrganisationOrganismeFormation | null;
+    expect(organisation?.ml_beta_activated_at).toBeInstanceOf(Date);
+    const mlEffectif = await missionLocaleEffectifsDb().findOne({ "effectif_snapshot.organisme_id": id });
+    expect(mlEffectif?.computed?.organisme).toMatchObject({
+      is_allowed_collab: true,
+      ml_beta_activated_at: organisation?.ml_beta_activated_at,
+    });
+  });
+
+  it("ne lève pas la suspension d'un CFA déjà en collaboration", async () => {
+    const suspendedAt = new Date("2026-09-01T07:00:00.000Z");
+    const { id, organisationId } = await seedOrganisme({
+      siret: "10000000000021",
+      uai: "0010021B",
+      mlBetaActivatedAt: new Date("2026-01-15T10:00:00.000Z"),
+    });
+    await insererCompteCfa(organisationId!);
+    await organismesDb().updateOne(
+      { _id: id },
+      { $set: { is_allowed_collab: true, collab_suspended_at: suspendedAt } }
+    );
+
+    await activerParJob("10000000000021", "0010021B");
+
+    const organisme = await organismesDb().findOne({ _id: id });
+    expect(organisme?.is_allowed_deca).toBe(true);
+    expect(organisme?.collab_suspended_at).toEqual(suspendedAt);
+  });
+
+  it("un échec de l'activation de la collaboration garde le flag DECA et retire la collaboration", async () => {
+    const { id, organisationId } = await seedOrganisme({
+      siret: "10000000000022",
+      uai: "0010022C",
+      insertMlEffectif: true,
+    });
+    await insererCompteCfa(organisationId!);
+    ecrireActivationMock.mockRejectedValueOnce(new Error("panne"));
+
+    await activerParJob("10000000000022", "0010022C");
+
+    expect(ecrireActivationMock).toHaveBeenCalledTimes(2);
+    expect(ecrireActivationMock).toHaveBeenLastCalledWith(id, { isAllowedCollab: false, mlBetaActivatedAt: null });
+    const organisme = await organismesDb().findOne({ _id: id });
+    expect(organisme?.is_allowed_deca).toBe(true);
+    expect(organisme?.is_allowed_collab).toBeUndefined();
+    const organisation = (await organisationsDb().findOne({
+      _id: organisationId,
+    })) as IOrganisationOrganismeFormation | null;
+    expect(organisation?.ml_beta_activated_at).toBeUndefined();
+  });
+
+  it("remet les dossiers hors collaboration quand l'écriture échoue en cours de route", async () => {
+    const { id, organisationId } = await seedOrganisme({
+      siret: "10000000000023",
+      uai: "0010023D",
+      insertMlEffectif: true,
+    });
+    await insererCompteCfa(organisationId!);
+    const ecrire = ecrireActivationMock.getMockImplementation()!;
+    ecrireActivationMock.mockImplementationOnce(async (...args) => {
+      await ecrire(...args);
+      throw new Error("panne");
+    });
+
+    await activerParJob("10000000000023", "0010023D");
+
+    expect(ecrireActivationMock).toHaveBeenCalledTimes(2);
+    expect((await organismesDb().findOne({ _id: id }))?.is_allowed_collab).toBeUndefined();
+    const mlEffectif = await missionLocaleEffectifsDb().findOne({ "effectif_snapshot.organisme_id": id });
+    expect(mlEffectif?.computed?.organisme).toMatchObject({ is_allowed_collab: false, ml_beta_activated_at: null });
   });
 });
 

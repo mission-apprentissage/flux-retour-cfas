@@ -11,6 +11,7 @@ import { describe, expect, it } from "vitest";
 import { checkCollabV2Eligibility } from "@/common/actions/organismes/collab-v2-eligibility";
 import { effectifsDb, effectifsDECADb, formationsCatalogueDb, organismesDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
+import { insererCompteCfa, insererOrganisationCfa } from "@tests/utils/comptesCfa";
 import { testDoc } from "@tests/utils/testUtils";
 
 useMongo();
@@ -108,36 +109,121 @@ describe("checkCollabV2Eligibility", () => {
     });
   });
 
-  describe("has_effectifs_erp (ERP uniquement)", () => {
+  describe("has_effectifs (ERP ou DECA)", () => {
     it("fails when no effectifs at all", async () => {
       const organisme = await insertOrganisme();
       const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
-      expect(result.checks.has_effectifs_erp.passed).toBe(false);
-      expect(result.checks.has_effectifs_erp.details?.effectifsErpCount).toBe(0);
+      expect(result.checks.has_effectifs.passed).toBe(false);
+      expect(result.checks.has_effectifs.details?.effectifsErpCount).toBe(0);
+      expect(result.checks.has_effectifs.details?.effectifsDecaCount).toBe(0);
     });
 
     it("passes with ERP effectifs on current annee", async () => {
       const organisme = await insertOrganisme();
       await insertEffectif(organisme._id as ObjectId, currentAnnee);
       const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
-      expect(result.checks.has_effectifs_erp.passed).toBe(true);
-      expect(result.checks.has_effectifs_erp.details?.effectifsErpCount).toBe(1);
+      expect(result.checks.has_effectifs.passed).toBe(true);
+      expect(result.checks.has_effectifs.details?.effectifsErpCount).toBe(1);
     });
 
-    it("fails with DECA effectifs only (DECA not counted)", async () => {
+    it("passes with DECA effectifs only", async () => {
       const organisme = await insertOrganisme();
       await insertEffectifDECA(organisme._id as ObjectId, currentAnnee);
       await insertEffectifDECA(organisme._id as ObjectId, previousAnnee);
       const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
-      expect(result.checks.has_effectifs_erp.passed).toBe(false);
+      expect(result.checks.has_effectifs.passed).toBe(true);
+      expect(result.checks.has_effectifs.details?.effectifsDecaCount).toBe(2);
+    });
+
+    it("fails when effectifs are only on inactive annees", async () => {
+      const organisme = await insertOrganisme({ is_allowed_deca: true });
+      await insertEffectif(organisme._id as ObjectId, "2010-2011");
+      await insertEffectifDECA(organisme._id as ObjectId, "2010-2011");
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
+      const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
+      expect(result.checks.has_effectifs.passed).toBe(false);
+      expect(result.eligible).toBe(false);
+    });
+  });
+
+  describe("deca_visible", () => {
+    const cases: Array<{ erp: boolean; deca: boolean; flag: boolean; expected: boolean }> = [
+      { erp: false, deca: true, flag: true, expected: true },
+      { erp: false, deca: true, flag: false, expected: false },
+      { erp: true, deca: true, flag: true, expected: true },
+      { erp: true, deca: true, flag: false, expected: false },
+      { erp: true, deca: false, flag: false, expected: true },
+    ];
+
+    cases.forEach(({ erp, deca, flag, expected }) => {
+      it(`returns eligible=${expected} with ERP=${erp}, DECA=${deca}, flag DECA=${flag}`, async () => {
+        const organisme = await insertOrganisme({ is_allowed_deca: flag });
+        if (erp) await insertEffectif(organisme._id as ObjectId, currentAnnee);
+        if (deca) await insertEffectifDECA(organisme._id as ObjectId, currentAnnee);
+        await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
+        const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
+        expect(result.checks.deca_visible.passed).toBe(expected);
+        expect(result.checks.deca_visible.details?.decaActif).toBe(flag);
+        expect(result.eligible).toBe(expected);
+      });
+    });
+  });
+
+  describe("not_closed", () => {
+    it("fails when the organisme is closed", async () => {
+      const organisme = await insertOrganisme({ ferme: true });
+      await insertEffectif(organisme._id as ObjectId, currentAnnee);
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
+      const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
+      expect(result.checks.not_closed.passed).toBe(false);
+      expect(result.eligible).toBe(false);
+    });
+  });
+
+  describe("has_compte_confirme", () => {
+    it("fails without any account", async () => {
+      const organisme = await insertOrganisme();
+      await insertEffectif(organisme._id as ObjectId, currentAnnee);
+      await insererOrganisationCfa(organisme._id as ObjectId);
+      const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
+      expect(result.checks.has_compte_confirme.passed).toBe(false);
+      expect(result.checks.has_compte_confirme.details?.comptesConfirmes).toBe(0);
       expect(result.eligible).toBe(false);
     });
 
-    it("fails when ERP effectifs are only on inactive annees", async () => {
+    it("fails with an account pending validation", async () => {
       const organisme = await insertOrganisme();
-      await insertEffectif(organisme._id as ObjectId, "2010-2011");
+      await insertEffectif(organisme._id as ObjectId, currentAnnee);
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId), "PENDING_ADMIN_VALIDATION");
       const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
-      expect(result.checks.has_effectifs_erp.passed).toBe(false);
+      expect(result.checks.has_compte_confirme.passed).toBe(false);
+    });
+
+    it("ignores a confirmed account of another organisme", async () => {
+      const organisme = await insertOrganisme();
+      await insertEffectif(organisme._id as ObjectId, currentAnnee);
+      await insererCompteCfa(await insererOrganisationCfa(new ObjectId()));
+      const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
+      expect(result.checks.has_compte_confirme.passed).toBe(false);
+    });
+
+    it("passes with a confirmed account", async () => {
+      const organisme = await insertOrganisme();
+      await insertEffectif(organisme._id as ObjectId, currentAnnee);
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
+      const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
+      expect(result.checks.has_compte_confirme.passed).toBe(true);
+      expect(result.checks.has_compte_confirme.details?.comptesConfirmes).toBe(1);
+      expect(result.eligible).toBe(true);
+    });
+
+    it("passes with a confirmed account in the second organisation of the organisme", async () => {
+      const organisme = await insertOrganisme();
+      await insertEffectif(organisme._id as ObjectId, currentAnnee);
+      await insererOrganisationCfa(organisme._id as ObjectId);
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
+      const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
+      expect(result.checks.has_compte_confirme.passed).toBe(true);
     });
   });
 
@@ -171,6 +257,7 @@ describe("checkCollabV2Eligibility", () => {
     it("returns eligible=true even with a published gestionnaire=self / formateur=tiers formation", async () => {
       const organisme = await insertOrganisme({ nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR });
       await insertEffectif(organisme._id as ObjectId, currentAnnee);
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
       await insertFormationCatalogue({
         etablissement_formateur_siret: SIRET_TIERS,
         etablissement_formateur_uai: UAI_TIERS,
@@ -185,6 +272,7 @@ describe("checkCollabV2Eligibility", () => {
     it("returns eligible=true for nature=formateur with ERP effectif on current annee", async () => {
       const organisme = await insertOrganisme({ nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR });
       await insertEffectif(organisme._id as ObjectId, currentAnnee);
+      await insererCompteCfa(await insererOrganisationCfa(organisme._id as ObjectId));
       const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
       expect(result.eligible).toBe(true);
       expect(result.alreadyActive).toBe(false);

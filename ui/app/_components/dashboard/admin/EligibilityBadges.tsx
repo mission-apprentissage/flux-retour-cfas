@@ -12,6 +12,8 @@ export type EligibilityCheck = {
   details?: {
     effectifsErpCount?: number;
     effectifsDecaCount?: number;
+    decaActif?: boolean;
+    comptesConfirmes?: number;
     natureActuelle?: string | null;
   };
 };
