@@ -150,6 +150,11 @@ export function CollabV2AdminSection({ organisme }: { organisme: Organisme }) {
           </CheckLine>
         </div>
       ) : null}
+      {!alreadyActive && checks?.deca_visible?.details?.decaActif === false && !checks.deca_visible.passed && (
+        <span className={styles.muted}>
+          Activez d&apos;abord le programme DECA-CFA&nbsp;: la collaboration suivra si le CFA y est éligible.
+        </span>
+      )}
 
       {feedback && (
         <Alert

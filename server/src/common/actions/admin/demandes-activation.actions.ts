@@ -40,6 +40,7 @@ import {
 } from "@/common/actions/organisations.actions";
 import { checkEligibilityForLoaded } from "@/common/actions/organismes/deca-cfa-eligibility";
 import {
+  activerCollabSiEligible,
   activerDecaOrganisme,
   poserGardeActivationDeca,
   retirerGardeActivationDeca,
@@ -1172,5 +1173,9 @@ export async function traiterEnvoisDemandesActivation(organismeId: ObjectId | nu
     } catch (err) {
       await marquerEchec(demande, err, etapes);
     }
+  }
+
+  if (organismeId && activees.length > 0 && !echecActivation) {
+    await activerCollabSiEligible(organismeId);
   }
 }

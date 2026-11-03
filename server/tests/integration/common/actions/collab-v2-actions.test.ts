@@ -275,6 +275,25 @@ describe("activation de la collaboration d'un CFA sans ERP", () => {
     expect(dossier?.computed?.organisme?.ml_beta_activated_at).toEqual(result.mlBetaActivatedAt);
   });
 
+  it("ne pose qu'une date quand deux activations arrivent en même temps", async () => {
+    await usersMigrationDb().insertOne(
+      testDoc<IUsersMigration>({ email: "cfa@deca.fr", organisation_id: organisationId, account_status: "CONFIRMED" }),
+      { bypassDocumentValidation: true }
+    );
+
+    const results = await Promise.all([
+      activateCollabV2(organismeId.toString(), adminUserId),
+      activateCollabV2(organismeId.toString(), adminUserId),
+    ]);
+
+    expect(results.map((result) => result.status).sort()).toEqual(["activated", "already_active"]);
+    const organisation = await organisationsDb().findOne({ _id: organisationId });
+    const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: decaId });
+    expect(dossier?.computed?.organisme?.ml_beta_activated_at).toEqual(
+      (organisation as { ml_beta_activated_at?: Date } | null)?.ml_beta_activated_at
+    );
+  });
+
   it("refuse un CFA sans compte confirmé", async () => {
     const result = await activateCollabV2(organismeId.toString(), adminUserId);
 

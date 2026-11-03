@@ -4,8 +4,8 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { _get, _post } from "@/common/httpClient";
 import { Organisme } from "@/common/internal/Organisme";
@@ -50,12 +50,19 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
   const [action, setAction] = useState<"activate" | "deactivate" | null>(null);
   const [feedback, setFeedback] = useState<{ severity: "success" | "info" | "error"; message: string } | null>(null);
 
+  const queryClient = useQueryClient();
   const { data, isLoading, isFetching, refetch } = useQuery<EligibilityResult>({
     queryKey: ["admin/organismes/deca-cfa-pilot-eligibility", organisme._id],
     queryFn: () => _get(`/api/v1/admin/organismes/${organisme._id}/deca-cfa-pilot-eligibility`),
     enabled: !!organisme._id,
     refetchInterval: (query) => (query.state.data?.activationEnCours ? 30_000 : false),
   });
+  const { data: collab } = useQuery<{ alreadyActive: boolean }>({
+    queryKey: ["admin/organismes/collab-v2-eligibility", organisme._id],
+    queryFn: () => _get(`/api/v1/admin/organismes/${organisme._id}/collab-v2-eligibility`),
+    enabled: !!organisme._id,
+  });
+  const collabActive = collab?.alreadyActive === true;
 
   const activateMutation = useMutation({
     mutationFn: (items: Array<{ siret: string; uai: string }>) =>
@@ -80,6 +87,14 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
   const siret = organisme.siret;
   const uai = organisme.uai;
 
+  const activationEtaitEnCours = useRef(activationEnCours);
+  useEffect(() => {
+    if (activationEtaitEnCours.current && !activationEnCours) {
+      queryClient.invalidateQueries({ queryKey: ["admin/organismes/collab-v2-eligibility", organisme._id] });
+    }
+    activationEtaitEnCours.current = activationEnCours;
+  }, [activationEnCours, queryClient, organisme._id]);
+
   const openConfirm = useCallback((next: "activate" | "deactivate") => {
     setAction(next);
     setFeedback(null);
@@ -102,7 +117,8 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
         item?.status === "queued"
           ? {
               severity: "info",
-              message: "Activation DECA mise en file : le flag sera posé à la fin du job.",
+              message:
+                "Activation DECA mise en file : à la fin du job, le flag sera posé et la collaboration activée si le CFA y est éligible.",
             }
           : {
               severity: isOk ? "success" : "error",
@@ -110,7 +126,10 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
             }
       );
       decaCfaPilotConfirmModal.close();
-      await refetch();
+      await Promise.all([
+        refetch(),
+        queryClient.invalidateQueries({ queryKey: ["admin/organismes/collab-v2-eligibility", organisme._id] }),
+      ]);
     } catch (err) {
       setFeedback({
         severity: "error",
@@ -118,7 +137,7 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
       });
       decaCfaPilotConfirmModal.close();
     }
-  }, [action, siret, uai, activateMutation, deactivateMutation, refetch]);
+  }, [action, siret, uai, activateMutation, deactivateMutation, refetch, queryClient, organisme._id]);
 
   const nomAffiche = organisme.nom || organisme.raison_sociale || siret;
 
@@ -209,10 +228,14 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
         ]}
       >
         {action === "activate"
-          ? `Activer le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Un job lui rattachera d'abord ses contrats DECA (lieu de formation déclaré ou jeune présent dans son ERP), puis posera le flag is_allowed_deca : les effectifs DECA deviennent visibles côté CFA. La collaboration n'est pas modifiée.`
+          ? `Activer le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Un job lui rattachera d'abord ses contrats DECA (lieu de formation déclaré ou jeune présent dans son ERP), puis posera le flag is_allowed_deca : les effectifs DECA deviennent visibles côté CFA. À la fin du job, la collaboration sera aussi activée si le CFA y est éligible.`
           : `Désactiver le programme DECA-CFA pilot pour ${nomAffiche} (SIRET ${siret}, UAI ${uai ?? "—"}) ? Le flag is_allowed_deca sera retiré. La collaboration, la date d'activation ML et les snapshots déjà transmis restent inchangés.${
               contratsFleches > 0
                 ? ` ${contratsFleches} contrat(s) DECA fléché(s) vers cet établissement ne seront plus affichés par aucun CFA tant que « deca:flechage --refaire --cible ${siret} » n'a pas tourné.`
+                : ""
+            }${
+              collabActive
+                ? " Ce CFA est en collaboration. Hors suspension, ses ruptures DECA seront retenues 45 jours sans qu'il puisse les voir. Le programme sera réactivé à sa prochaine collaboration."
                 : ""
             }`}
       </decaCfaPilotConfirmModal.Component>

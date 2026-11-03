@@ -1,15 +1,17 @@
 import { randomUUID } from "node:crypto";
 
+import { addJob } from "job-processor";
 import { ObjectId } from "mongodb";
 import { ACC_CONJOINT_MOTIF_ENUM, STATUT_APPRENANT } from "shared";
-import { SOURCE_APPRENANT } from "shared/constants";
+import { NATURE_ORGANISME_DE_FORMATION, SOURCE_APPRENANT } from "shared/constants";
 import type { IMissionLocaleEffectif } from "shared/models";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
 import type { IOrganisation } from "shared/models/data/organisations.model";
 import { getAnneesScolaireListFromDate } from "shared/utils";
-import { describe, it, beforeEach, expect } from "vitest";
+import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
+import { describe, it, beforeEach, expect, vi } from "vitest";
 
 import {
   setEffectifMissionLocaleDataFromOrganisme,
@@ -26,6 +28,13 @@ import {
 import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { id, testDoc } from "@tests/utils/testUtils";
+
+vi.mock("job-processor", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("job-processor")>()),
+  addJob: vi.fn(),
+}));
+
+const addJobMock = vi.mocked(addJob);
 
 const ANNEE_SCOLAIRE = getAnneesScolaireListFromDate(new Date())[0];
 const organismeId = new ObjectId(id(1));
@@ -554,5 +563,90 @@ describe("auto-activation Collab ON à la première collab", () => {
     const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
     expect(dossier?.organisme_data?.acc_conjoint).toBe(true);
     expect(await findCfaOrganisation()).toBeNull();
+  });
+});
+
+describe("activation DECA à l'envoi d'une collaboration", () => {
+  useMongo();
+
+  beforeEach(async () => {
+    addJobMock.mockReset();
+    await organismesDb().insertOne({
+      ...sampleOrganisme,
+      uai: "0802004U",
+      nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
+      ferme: false,
+    });
+    await organisationsDb().insertOne(
+      testDoc<IOrganisation>({
+        _id: mlOrganisationId,
+        type: "MISSION_LOCALE",
+        ml_id: 42,
+        nom: "ML Test",
+        created_at: new Date(),
+      })
+    );
+    await missionLocaleEffectifsDb().insertOne(testDoc<IMissionLocaleEffectif>(await createMlEffectifDoc()));
+  });
+
+  const insertContratDecaActif = () =>
+    effectifsDECADb().insertOne(
+      testDoc<IEffectifDECA>({ organisme_id: organismeId, annee_scolaire: getActiveAnneesScolaires(new Date())[0] }),
+      { bypassDocumentValidation: true }
+    );
+
+  const envoyerCollaboration = () =>
+    setEffectifMissionLocaleDataFromOrganisme(organismeId, effectifId, { rupture: true, acc_conjoint: true }, userId);
+
+  const decaEnFile = () =>
+    expect(addJobMock).toHaveBeenCalledWith({
+      name: "deca:activer",
+      payload: { organismeId: organismeId.toHexString() },
+      queued: true,
+    });
+
+  it("première collaboration d'un CFA avec du DECA sans flag : met DECA en file et pose la garde", async () => {
+    await insertContratDecaActif();
+
+    await envoyerCollaboration();
+
+    decaEnFile();
+    const organisme = await organismesDb().findOne({ _id: organismeId });
+    expect(organisme?.deca_activation_queued_at).toBeInstanceOf(Date);
+    expect(organisme?.is_allowed_collab).toBe(true);
+  });
+
+  it("collaboration d'un CFA déjà en collab, sans flag DECA : met aussi DECA en file", async () => {
+    await insertContratDecaActif();
+    await organismesDb().updateOne({ _id: organismeId }, { $set: { is_allowed_collab: true } });
+
+    await envoyerCollaboration();
+
+    decaEnFile();
+  });
+
+  it.each([
+    { cas: "avec le flag DECA", flag: true, deca: true, nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR },
+    { cas: "sans effectif DECA", flag: false, deca: false, nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR },
+    { cas: "de nature responsable", flag: false, deca: true, nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE },
+  ])("CFA $cas : aucune activation DECA", async ({ flag, deca, nature }) => {
+    if (deca) await insertContratDecaActif();
+    await organismesDb().updateOne({ _id: organismeId }, { $set: { is_allowed_deca: flag, nature } });
+
+    await envoyerCollaboration();
+
+    expect(addJobMock).not.toHaveBeenCalled();
+  });
+
+  it("échec de la mise en file : garde retirée, collaboration enregistrée", async () => {
+    await insertContratDecaActif();
+    addJobMock.mockRejectedValueOnce(new Error("file indisponible"));
+
+    await envoyerCollaboration();
+
+    const organisme = await organismesDb().findOne({ _id: organismeId });
+    expect(organisme?.deca_activation_queued_at).toBeUndefined();
+    const dossier = await missionLocaleEffectifsDb().findOne({ effectif_id: effectifId });
+    expect(dossier?.organisme_data?.acc_conjoint).toBe(true);
   });
 });

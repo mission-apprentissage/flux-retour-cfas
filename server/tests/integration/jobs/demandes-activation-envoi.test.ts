@@ -998,3 +998,50 @@ describe("envoi des demandes d'activation", () => {
     });
   });
 });
+
+describe("collaboration à l'envoi des demandes d'activation", () => {
+  beforeEach(() => {
+    brevoMock.mockReset().mockResolvedValue({ messageId: "message" } as never);
+    sendEmailMock.mockReset();
+    addJobMock.mockReset();
+    flecherMock.mockReset();
+    pendantEvaluation.mockReset();
+  });
+
+  const etatOrganisme = async (organismeId: ObjectId) => {
+    const organisme = await organismesDb().findOne({ _id: organismeId });
+    return { deca: organisme?.is_allowed_deca, collab: organisme?.is_allowed_collab };
+  };
+
+  it("demandeur avec un compte confirmé : DECA et collaboration activés", async () => {
+    const organisme = await insererOrganisme();
+    await insererCompte("direction@cfa-tests.fr", await insererOrganisation(organisme._id));
+    await insererDemande("direction@cfa-tests.fr");
+
+    await envoyerEtTraiter();
+
+    expect(await etatOrganisme(organisme._id)).toEqual({ deca: true, collab: true });
+  });
+
+  it("demandeur avec un compte en attente : collaboration activée après la validation du compte", async () => {
+    const organisme = await insererOrganisme();
+    await insererCompte("direction@cfa-tests.fr", await insererOrganisation(organisme._id), {
+      account_status: "PENDING_ADMIN_VALIDATION",
+      organisation_role: null,
+    });
+    await insererDemande("direction@cfa-tests.fr");
+
+    await envoyerEtTraiter();
+
+    expect(await etatOrganisme(organisme._id)).toEqual({ deca: true, collab: true });
+  });
+
+  it("branche invitation : DECA activé, collaboration inactive", async () => {
+    const organisme = await insererOrganisme();
+    await insererDemande("direction@cfa-tests.fr");
+
+    await envoyerEtTraiter();
+
+    expect(await etatOrganisme(organisme._id)).toEqual({ deca: true, collab: undefined });
+  });
+});
