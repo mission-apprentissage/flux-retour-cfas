@@ -4,6 +4,7 @@ import type { Period } from "../ui/PeriodSelector";
 
 export interface BaseSectionProps {
   region?: string;
+  departement?: string;
   national?: boolean;
 }
 

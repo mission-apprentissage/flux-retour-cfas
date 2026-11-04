@@ -9,6 +9,7 @@ import { z } from "zod";
 import { getApiErrorMessage } from "@/common/rateLimit";
 
 import { useUpdateMlParametresAdmin } from "../hooks/useStatsQueries";
+import { safeHttpUrl } from "../utils";
 
 import styles from "./MlAdminRdvUrlEditor.module.css";
 
@@ -81,12 +82,12 @@ export function MlAdminRdvUrlEditor({ mlId, rdvUrl }: Props) {
   if (!editing) {
     return (
       <>
-        {rdvUrl ? (
-          <a href={rdvUrl} target="_blank" rel="noopener noreferrer" className="fr-link">
+        {safeHttpUrl(rdvUrl) ? (
+          <a href={safeHttpUrl(rdvUrl) ?? undefined} target="_blank" rel="noopener noreferrer" className="fr-link">
             {rdvUrl}
           </a>
         ) : (
-          "—"
+          rdvUrl || "—"
         )}{" "}
         <Button
           priority="tertiary no outline"

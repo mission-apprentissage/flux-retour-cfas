@@ -45,7 +45,7 @@ export function IdentificationSuiviSection({
         <div className={styles.cardsContainer}>
           <TraitementCards
             latestStats={data?.latest}
-            firstStats={data?.first}
+            variations={data?.variations}
             loading={isLoading}
             loadingPercentage={loadingPercentage}
           />

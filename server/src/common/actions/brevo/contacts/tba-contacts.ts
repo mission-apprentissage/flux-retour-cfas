@@ -1,5 +1,6 @@
 import { ObjectId } from "bson";
 import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, STATUT_APPRENANT } from "shared/constants";
+import { dateActivationAffichee } from "shared/constants/missionLocale";
 import type { IDepartmentCode } from "shared/constants/territoires";
 import { getOrganisationLabel, type IOrganisationCreate } from "shared/models/data/organisations.model";
 import { getAnneesScolaireListFromDate, getAnneeScolaireListFromDateRange } from "shared/utils";
@@ -116,6 +117,8 @@ export type TbaContactAttributeName =
   | "CFA_NB_MISSIONS_LOCALES_PARTENAIRES"
   | "CFA_LISTE_MISSIONS_LOCALES"
   | "CFA_LIEN_CONNEXION_PERSONNALISE"
+  | "CFA_ROLE_COMPTE"
+  | "CFA_A_INVITE_UN_MEMBRE"
   | "ML_ADRESSE_GENERIQUE";
 
 // `undefined` autorisé : un attribut absent du payload est préservé par Brevo,
@@ -175,6 +178,8 @@ export const tbaContactsAttributesSchema: Record<TbaContactAttributeName, BrevoA
   CFA_NB_MISSIONS_LOCALES_PARTENAIRES: "float",
   CFA_LISTE_MISSIONS_LOCALES: "text",
   CFA_LIEN_CONNEXION_PERSONNALISE: "text",
+  CFA_ROLE_COMPTE: "text",
+  CFA_A_INVITE_UN_MEMBRE: "text",
   ML_ADRESSE_GENERIQUE: "boolean",
 };
 
@@ -188,6 +193,7 @@ type TbaUserContext = {
   created_at?: Date;
   last_connection?: Date | null;
   account_status?: string;
+  organisation_role?: "admin" | "member";
   organisation: {
     _id: ObjectId;
     type: OrganisationType;
@@ -286,6 +292,7 @@ const selectTbaContacts = async (filter?: FetchContactsFilter): Promise<TbaUserC
         created_at: 1,
         last_connection: 1,
         account_status: 1,
+        organisation_role: 1,
         organisation: {
           _id: "$organisation._id",
           type: "$organisation.type",
@@ -423,6 +430,26 @@ const fetchCfaErpRupturantsByOrgId = async (orgIds: ObjectId[]): Promise<Map<str
     ])
     .toArray();
   return new Map(rows.filter((r) => r._id).map((r) => [String(r._id), r.count]));
+};
+
+// Organisations (`organisation_id`) ayant au moins un compte confirmé de rôle
+// `member`. Calculé sur toute la base, sans le filtre de synchro : une synchro
+// unitaire d'un admin doit voir les membres invités qui ne font pas partie du lot.
+const fetchOrganisationIdsWithInvitedMember = async (organisationIds: ObjectId[]): Promise<Set<string>> => {
+  if (organisationIds.length === 0) return new Set();
+  const rows = await usersMigrationDb()
+    .aggregate<{ _id: ObjectId }>([
+      {
+        $match: {
+          organisation_id: { $in: organisationIds },
+          account_status: "CONFIRMED",
+          organisation_role: "member",
+        },
+      },
+      { $group: { _id: "$organisation_id" } },
+    ])
+    .toArray();
+  return new Set(rows.map((r) => String(r._id)));
 };
 
 type TransmissionReport = { error_count: number; current_day: string };
@@ -664,12 +691,23 @@ type CfaOrgStats = {
   rupturantsStats?: CfaRupturantsStats;
   activationDate?: Date;
   collaborations?: ICollaborationsByOrg;
+  hasInvitedMember?: boolean;
 };
+
+const CFA_ROLE_COMPTE_LABELS = { admin: "admin", member: "membre" } as const;
 
 const buildAttributes = (
   user: TbaUserContext,
   lienConnexionPersonnalise: string,
-  { decaCounts, erpRupturants, transmissionErrors, rupturantsStats, activationDate, collaborations }: CfaOrgStats,
+  {
+    decaCounts,
+    erpRupturants,
+    transmissionErrors,
+    rupturantsStats,
+    activationDate,
+    collaborations,
+    hasInvitedMember,
+  }: CfaOrgStats,
   mlStats: MlStats | undefined,
   eligibleOrgIds: Set<string>
 ): TbaContactAttributes => {
@@ -772,7 +810,7 @@ const buildAttributes = (
     // ML côté CFA, ce qui prêtait à confusion.
     // `activated_at` et non `ml_beta_activated_at` : ce dernier n'existe que sur
     // les organisations ORGANISME_FORMATION, l'attribut était donc toujours vide.
-    ML_DATE_ACTIVATION_ML: isMl ? (user.organisation.activated_at ?? null) : null,
+    ML_DATE_ACTIVATION_ML: isMl ? dateActivationAffichee(user.organisation.activated_at) : null,
     ML_NB_RUPTURANTS_TOTAL: isMl ? (mlStats?.total ?? 0) : null,
     ML_NB_RUPTURANTS_A_TRAITER: isMl ? (mlStats?.a_traiter ?? 0) : null,
     ML_NB_RUPTURANTS_TRAITES: isMl ? (mlStats?.traite ?? 0) : null,
@@ -787,6 +825,9 @@ const buildAttributes = (
       : null,
 
     CFA_LIEN_CONNEXION_PERSONNALISE: isCfa ? lienConnexionPersonnalise : null,
+    // Vide pour un compte historique : aucun rôle n'a jamais été enregistré.
+    CFA_ROLE_COMPTE: isCfa && user.organisation_role ? CFA_ROLE_COMPTE_LABELS[user.organisation_role] : null,
+    CFA_A_INVITE_UN_MEMBRE: isCfa ? (hasInvitedMember ? "oui" : "non") : null,
 
     // `false` explicite (et non omis) : si une adresse générique de ML devient
     // le compte d'un agent, le contact doit perdre le marqueur.
@@ -940,7 +981,7 @@ const buildMlGenericAttributes = (ctx: MlGenericContext, mlStats: MlStats | unde
     ADRESSE: adresseString,
     SIRET: cleanSiret(ctx.organisation.siret),
 
-    ML_DATE_ACTIVATION_ML: ctx.organisation.activated_at ?? ctx.firstConfirmedAt ?? null,
+    ML_DATE_ACTIVATION_ML: dateActivationAffichee(ctx.organisation.activated_at, ctx.firstConfirmedAt),
     ML_NB_RUPTURANTS_TOTAL: mlStats?.total ?? 0,
     ML_NB_RUPTURANTS_A_TRAITER: mlStats?.a_traiter ?? 0,
     ML_NB_RUPTURANTS_TRAITES: mlStats?.traite ?? 0,
@@ -977,6 +1018,8 @@ const buildMlGenericAttributes = (ctx: MlGenericContext, mlStats: MlStats | unde
     CFA_NB_MISSIONS_LOCALES_PARTENAIRES: null,
     CFA_LISTE_MISSIONS_LOCALES: null,
     CFA_LIEN_CONNEXION_PERSONNALISE: null,
+    CFA_ROLE_COMPTE: null,
+    CFA_A_INVITE_UN_MEMBRE: null,
   };
 };
 
@@ -988,6 +1031,10 @@ const fetchContacts = async (filter?: FetchContactsFilter): Promise<BrevoContact
     .filter((u) => u.organisation.type === "ORGANISME_FORMATION")
     .map((u) => u.organisme?._id)
     .filter((id): id is ObjectId => Boolean(id));
+
+  const cfaOrganisationIds = users
+    .filter((u) => u.organisation.type === "ORGANISME_FORMATION")
+    .map((u) => u.organisation._id);
 
   const mlIds = [
     ...users.filter((u) => u.organisation.type === "MISSION_LOCALE").map((u) => u.organisation._id),
@@ -1006,6 +1053,7 @@ const fetchContacts = async (filter?: FetchContactsFilter): Promise<BrevoContact
     eligibleOrgsRows,
     activationDateByOrgId,
     collaborationsByOrgId,
+    organisationIdsWithInvitedMember,
   ] = await Promise.all([
     fetchCfaDecaCountsByOrgId(cfaOrgIds),
     fetchCfaErpRupturantsByOrgId(cfaOrgIds),
@@ -1016,22 +1064,26 @@ const fetchContacts = async (filter?: FetchContactsFilter): Promise<BrevoContact
     findEligibleOrganismes(cfaOrgIds),
     fetchActivationDatesByOrgId(cfaOrgIds, endExclusive),
     fetchCollaborationsByOrgId(cfaOrgIds, endExclusive),
+    fetchOrganisationIdsWithInvitedMember(cfaOrganisationIds),
   ]);
 
   const eligibleOrgIds = new Set(eligibleOrgsRows.map((o) => String(o._id)));
 
   const userContacts = users.map((user): BrevoContact => {
     const organismeId = user.organisme?._id ? String(user.organisme._id) : null;
-    const orgStats: CfaOrgStats = organismeId
-      ? {
-          decaCounts: decaCountsByOrgId.get(organismeId),
-          erpRupturants: erpRupturantsByOrgId.get(organismeId),
-          transmissionErrors: transmissionErrorsByOrgId.get(organismeId),
-          rupturantsStats: rupturantsStatsByOrgId.get(organismeId),
-          activationDate: activationDateByOrgId.get(organismeId),
-          collaborations: collaborationsByOrgId.get(organismeId),
-        }
-      : {};
+    const orgStats: CfaOrgStats = {
+      ...(organismeId
+        ? {
+            decaCounts: decaCountsByOrgId.get(organismeId),
+            erpRupturants: erpRupturantsByOrgId.get(organismeId),
+            transmissionErrors: transmissionErrorsByOrgId.get(organismeId),
+            rupturantsStats: rupturantsStatsByOrgId.get(organismeId),
+            activationDate: activationDateByOrgId.get(organismeId),
+            collaborations: collaborationsByOrgId.get(organismeId),
+          }
+        : {}),
+      hasInvitedMember: organisationIdsWithInvitedMember.has(String(user.organisation._id)),
+    };
     const mlStats =
       user.organisation.type === "MISSION_LOCALE" ? mlStatsByMlId.get(String(user.organisation._id)) : undefined;
     const lien = lienByEmail.get(formatEmail(user.email)) ?? "";

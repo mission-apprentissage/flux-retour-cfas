@@ -6,7 +6,7 @@ import { getOrganisationLabel, IOrganisationCreate } from "shared";
 import { DropdownMenu, DropdownMenuButton } from "@/app/_components/common/DropdownMenu";
 import { _post } from "@/common/httpClient";
 
-import { Impersonate } from "../_components/Impersonate";
+import { BandeauImposture } from "../_components/BandeauImposture";
 import { useAuth } from "../_context/UserContext";
 
 function LogoutMenu() {
@@ -37,16 +37,19 @@ function LogoutMenu() {
 
 export function DecommissionnementHeader() {
   return (
-    <DsfrHeader
-      brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
-      homeLinkProps={{
-        href: "/decommissionnement",
-        title: "Tableau de bord de l'apprentissage",
-      }}
-      id="fr-header-decommissionnement"
-      serviceTitle={<>Tableau de bord de l&apos;apprentissage</>}
-      quickAccessItems={[<Impersonate key="impersonate" />, <LogoutMenu key="logout-menu" />]}
-      disableDisplay
-    />
+    <>
+      <BandeauImposture />
+      <DsfrHeader
+        brandTop={<>RÉPUBLIQUE FRANÇAISE</>}
+        homeLinkProps={{
+          href: "/decommissionnement",
+          title: "Tableau de bord de l'apprentissage",
+        }}
+        id="fr-header-decommissionnement"
+        serviceTitle={<>Tableau de bord de l&apos;apprentissage</>}
+        quickAccessItems={[<LogoutMenu key="logout-menu" />]}
+        disableDisplay
+      />
+    </>
   );
 }

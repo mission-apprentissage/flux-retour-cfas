@@ -1,0 +1,7 @@
+.tabs :global(.fr-tabs__panel) {
+  padding: 0;
+}
+
+.tabs :global(.fr-tabs__panel) > :last-child {
+  margin-bottom: 0;
+}

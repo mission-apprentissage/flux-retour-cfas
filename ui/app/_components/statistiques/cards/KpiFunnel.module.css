@@ -1,0 +1,40 @@
+.funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 32px 24px;
+  border: 1px solid var(--border-default-grey);
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  line-height: 28px;
+  color: var(--text-title-grey);
+}
+
+.kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 0;
+}
+
+.kpi.kpi {
+  flex: 1 1 0;
+  min-width: 180px;
+  height: 150px;
+  padding: 0 16px;
+  background: none;
+}
+
+.kpi.kpi:first-child {
+  padding-left: 0;
+}
+
+.kpi.kpi + .kpi {
+  border-left: 1px solid var(--border-default-grey);
+}
+
+.kpi > div {
+  padding: 8px 0;
+}

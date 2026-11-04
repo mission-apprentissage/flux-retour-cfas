@@ -512,4 +512,48 @@ describe("getCollaborationsCfaSynthese", () => {
       dossiers_envoyes_cfa: 0,
     });
   });
+
+  it("compte aussi les collaborations de 2025, contrairement aux stats admin", async () => {
+    const compatibleOrg = await insertCompatible({ adresse: { region: HDF } as never });
+    const envoi2025 = new Date("2025-11-15");
+    await missionLocaleEffectifsDb().insertOne(
+      buildMlEffectif({
+        organisme_id: compatibleOrg._id,
+        created_at: envoi2025,
+        reponse_at: envoi2025,
+        acc_conjoint: true,
+      }),
+      { bypassDocumentValidation: true }
+    );
+    const reference = new Date("2026-05-25");
+
+    const synthese = await getCollaborationsCfaSynthese(reference);
+    const admin = await computeStatsForDate(addDaysUTC(reference, 1));
+
+    expect(synthese.national).toMatchObject({ cfa_with_collab: 1, dossiers_envoyes_cfa: 1 });
+    expect(admin.national.usage.dossiers_envoyes_cfa).toBe(0);
+  });
+
+  it("regroupe les CFA sans région dans une ligne « Région inconnue », pour que les régions totalisent le national", async () => {
+    const sansRegion = await insertCompatible({ adresse: {} as never });
+    await insertCompatible({ adresse: { region: HDF } as never });
+    const envoi = new Date("2026-02-01");
+    await missionLocaleEffectifsDb().insertOne(
+      buildMlEffectif({ organisme_id: sansRegion._id, created_at: envoi, reponse_at: envoi, acc_conjoint: true }),
+      { bypassDocumentValidation: true }
+    );
+
+    const synthese = await getCollaborationsCfaSynthese(new Date("2026-05-25"));
+
+    expect(synthese.regions.at(-1)).toMatchObject({
+      region_code: "inconnu",
+      region_nom: "Région inconnue",
+      cfa_compatibles: 1,
+      dossiers_envoyes_cfa: 1,
+    });
+    const somme = (cle: "cfa_compatibles" | "dossiers_envoyes_cfa") =>
+      synthese.regions.reduce((total, row) => total + row[cle], 0);
+    expect(somme("cfa_compatibles")).toBe(synthese.national.cfa_compatibles);
+    expect(somme("dossiers_envoyes_cfa")).toBe(synthese.national.dossiers_envoyes_cfa);
+  });
 });

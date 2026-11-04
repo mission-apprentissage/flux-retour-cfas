@@ -6,6 +6,7 @@ import qs from "qs";
 import { useState } from "react";
 import { IMissionLocaleEffectifList } from "shared";
 
+import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _getBlob } from "@/common/httpClient";
 import { reportError } from "@/common/reportError";
@@ -20,6 +21,7 @@ export function MlListeDownloadButton({
 }) {
   const [isFetching, setIsFetching] = useState(false);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
+  const { user } = useAuth();
 
   const onDownload = async () => {
     setIsFetching(true);
@@ -39,6 +41,8 @@ export function MlListeDownloadButton({
       setIsFetching(false);
     }
   };
+
+  if (user?.readOnly) return null;
 
   return (
     <Button

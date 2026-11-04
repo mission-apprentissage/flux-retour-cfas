@@ -7,6 +7,7 @@ import {
   cfaInvitationsExportColumns,
 } from "@/common/exports";
 import { _get } from "@/common/httpClient";
+import { getApiErrorMessage } from "@/common/rateLimit";
 import { exportMultiSheetXlsx } from "@/common/utils/exportUtils";
 
 interface UseCfaInvitationsExportOptions {
@@ -45,7 +46,7 @@ export function useCfaInvitationsExport({ onSuccess, onError }: UseCfaInvitation
 
       onSuccess?.();
     } catch (error) {
-      onError?.(error instanceof Error ? error : new Error("Le téléchargement a échoué"));
+      onError?.(new Error(getApiErrorMessage(error, "Le téléchargement a échoué")));
     } finally {
       setIsExporting(false);
     }

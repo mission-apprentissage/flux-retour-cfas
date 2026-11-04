@@ -8,6 +8,7 @@ import {
   collaborationDetailsExportColumns,
 } from "@/common/exports";
 import { _get } from "@/common/httpClient";
+import { getApiErrorMessage } from "@/common/rateLimit";
 import { exportMultiSheetXlsx } from "@/common/utils/exportUtils";
 
 interface UseCollaborationExportOptions {
@@ -56,7 +57,7 @@ export function useCollaborationExport({ onSuccess, onError }: UseCollaborationE
 
       onSuccess?.();
     } catch (error) {
-      onError?.(error instanceof Error ? error : new Error("Le téléchargement a échoué"));
+      onError?.(new Error(getApiErrorMessage(error, "Le téléchargement a échoué")));
     } finally {
       setIsExporting(false);
     }

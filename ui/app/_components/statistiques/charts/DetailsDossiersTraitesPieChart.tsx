@@ -6,13 +6,14 @@ import { Skeleton } from "@/app/_components/common/Skeleton";
 
 import { DOSSIERS_TRAITES_V2_COLORS, DOSSIERS_TRAITES_V2_LABELS, getVariationColorFromString } from "../constants";
 
-import { DejaConnuMiniChart } from "./DejaConnuMiniChart";
+import { DejaConnuMiniChart, type DejaConnuFormat } from "./DejaConnuMiniChart";
 import styles from "./DetailsDossiersTraitesPieChart.module.css";
 import { DonutChart } from "./DonutChart";
 
 interface DetailsDossiersTraitesPieChartProps {
   data?: IDetailsDossiersTraitesV2;
   dejaConnu?: { value: number; total: number };
+  dejaConnuFormat?: DejaConnuFormat;
   loading?: boolean;
   loadingVariation?: boolean;
 }
@@ -20,6 +21,7 @@ interface DetailsDossiersTraitesPieChartProps {
 export function DetailsDossiersTraitesPieChart({
   data,
   dejaConnu,
+  dejaConnuFormat,
   loading,
   loadingVariation,
 }: DetailsDossiersTraitesPieChartProps) {
@@ -98,7 +100,9 @@ export function DetailsDossiersTraitesPieChart({
         </div>
       </div>
 
-      {dejaConnu !== undefined && <DejaConnuMiniChart dejaConnu={dejaConnu.value} total={dejaConnu.total} />}
+      {dejaConnu !== undefined && (
+        <DejaConnuMiniChart dejaConnu={dejaConnu.value} total={dejaConnu.total} format={dejaConnuFormat} />
+      )}
     </div>
   );
 }

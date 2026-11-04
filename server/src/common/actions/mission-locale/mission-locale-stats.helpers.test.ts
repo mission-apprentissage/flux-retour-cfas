@@ -1,7 +1,13 @@
+import { zStatsPeriod } from "shared/models/data/nationalStats.model";
+import { calculatePercentage as calculatePercentageOf } from "shared/utils/stats";
 import { describe, expect, it } from "vitest";
 
 import {
   buildEmptySegments,
+  calculatePreviousStartDate,
+  calculateStartDate,
+  createCumulStatWithVariation,
+  createEtatStatWithVariation,
   buildSituationBuckets,
   ISituationCounters,
   listUtcDays,
@@ -149,5 +155,76 @@ describe("listUtcDays", () => {
 
   it("renvoie une liste vide quand le début est après la fin", () => {
     expect(listUtcDays(new Date("2026-09-22T00:00:00.000Z"), new Date("2026-09-21T00:00:00.000Z"))).toEqual([]);
+  });
+});
+
+describe("calculateStartDate", () => {
+  const utc = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
+  const reference = new Date("2026-10-15T14:30:00.000Z");
+
+  it("recule de 30 jours, 3 mois ou 6 mois à minuit UTC", () => {
+    expect(calculateStartDate("30days", reference)).toEqual(utc("2026-09-15"));
+    expect(calculateStartDate("3months", reference)).toEqual(utc("2026-07-15"));
+    expect(calculateStartDate("6months", reference)).toEqual(utc("2026-04-15"));
+  });
+
+  it("ramène au dernier jour du mois quand le jour n'existe pas", () => {
+    expect(calculateStartDate("6months", utc("2026-08-31"))).toEqual(utc("2026-02-28"));
+    expect(calculateStartDate("3months", utc("2026-05-31"))).toEqual(utc("2026-02-28"));
+    expect(calculateStartDate("6months", utc("2028-08-31"))).toEqual(utc("2028-02-29"));
+    expect(calculateStartDate("3months", utc("2027-01-31"))).toEqual(utc("2026-10-31"));
+  });
+
+  it("part du 1er janvier de l'année pour « Depuis janvier »", () => {
+    expect(calculateStartDate("since-2026", reference)).toEqual(utc("2026-01-01"));
+  });
+
+  it("part de la date la plus ancienne connue depuis le lancement", () => {
+    expect(calculateStartDate("all", reference, new Date("2025-03-21T08:00:00.000Z"))).toEqual(utc("2025-03-21"));
+  });
+});
+
+describe("zStatsPeriod", () => {
+  it("n'accepte « Depuis janvier » que pour les années de 2026 à l'année en cours", () => {
+    expect(zStatsPeriod.safeParse("since-2026").success).toBe(true);
+    expect(zStatsPeriod.safeParse("since-2025").success).toBe(false);
+    expect(zStatsPeriod.safeParse(`since-${new Date().getUTCFullYear() + 1}`).success).toBe(false);
+    expect(zStatsPeriod.safeParse("since-abcd").success).toBe(false);
+    expect(zStatsPeriod.safeParse("6months").success).toBe(true);
+  });
+});
+
+describe("variations par période", () => {
+  const utc = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
+
+  it("donne le début de la période précédente de même durée, rien pour « depuis janvier » et « lancement »", () => {
+    expect(calculatePreviousStartDate("30days", utc("2026-09-19"))).toEqual(utc("2026-08-20"));
+    expect(calculatePreviousStartDate("3months", utc("2026-07-19"))).toEqual(utc("2026-04-19"));
+    expect(calculatePreviousStartDate("6months", utc("2026-04-19"))).toEqual(utc("2025-10-19"));
+    expect(calculatePreviousStartDate("since-2026", utc("2026-01-01"))).toBeNull();
+    expect(calculatePreviousStartDate("all", utc("2025-03-21"))).toBeNull();
+  });
+
+  it("compare les ajouts de la période à ceux de la période précédente pour un cumul", () => {
+    expect(createCumulStatWithVariation(150, 100, 80)).toEqual({
+      current: 150,
+      variation: calculatePercentageOf(50, 20),
+    });
+    expect(createCumulStatWithVariation(150, 100, null)).toEqual({ current: 150, variation: "" });
+  });
+
+  it("compare la valeur actuelle au début de période pour un état, sauf sans période comparable", () => {
+    expect(createEtatStatWithVariation(40, 50, true).variation).toBe(calculatePercentageOf(40, 50));
+    expect(createEtatStatWithVariation(40, 50, false).variation).toBe("");
+  });
+});
+
+describe("calculatePercentage", () => {
+  it("rapporte l'écart à la valeur précédente", () => {
+    expect(calculatePercentageOf(120, 100)).toBe("+20%");
+    expect(calculatePercentageOf(1, 6)).toBe("-83%");
+    expect(calculatePercentageOf(0, 6)).toBe("-100%");
+    expect(calculatePercentageOf(5, 0)).toBe("");
+    expect(calculatePercentageOf(0, 0)).toBe("0%");
   });
 });

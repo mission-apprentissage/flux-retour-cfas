@@ -1,0 +1,36 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.row :global(.fr-pagination__list) {
+  margin: 0;
+}
+
+.row :global(.fr-pagination__link) {
+  margin-bottom: 0;
+}
+
+.row :global(.fr-pagination__link--prev) {
+  padding-left: 0;
+}
+
+.pageSize {
+  padding: 4px 32px 4px 12px;
+  border: 1px solid var(--border-default-grey);
+  border-radius: 0;
+  background-color: var(--background-default-grey);
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000091'%3E%3Cpath d='m12 13.1 5-4.9 1.4 1.4-6.4 6.3-6.4-6.4L7 8.1l5 5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  appearance: none;
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--text-action-high-blue-france);
+  cursor: pointer;
+}

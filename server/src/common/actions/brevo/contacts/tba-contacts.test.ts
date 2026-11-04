@@ -1050,5 +1050,135 @@ describe("tbaContactsContactList", () => {
       expect(contacts).toHaveLength(2);
       expect(contacts.map((c) => c.attributes.ML_ADRESSE_GENERIQUE).sort()).toEqual([false, true]);
     });
+
+    it("met les attributs de rôle CFA à null", async () => {
+      await enableMlGenericContacts();
+      const orgaMl = buildOrgaMl("ML BREST", { email: "contact@ml-brest.fr", activated_at: NOW });
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
+
+      const [contact] = genericContacts(await tbaContactsContactList.fetchContacts());
+
+      expect(contact.attributes.CFA_ROLE_COMPTE).toBeNull();
+      expect(contact.attributes.CFA_A_INVITE_UN_MEMBRE).toBeNull();
+    });
+  });
+
+  describe("fetchContacts - CFA_ROLE_COMPTE et CFA_A_INVITE_UN_MEMBRE", () => {
+    const insertCfaOrganisation = async () => {
+      const orgaOf = buildOrgaOf();
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaOf));
+      await organismesDb().insertOne(testDoc<IOrganisme>(buildOrganisme(orgaOf)));
+      return orgaOf;
+    };
+
+    const contactOf = (contacts: { email: string; attributes: Record<string, unknown> }[], email: string) =>
+      contacts.find((c) => c.email === email)?.attributes;
+
+    it("admin seul : rôle 'admin' et aucun membre invité", async () => {
+      const orgaOf = await insertCfaOrganisation();
+      await usersMigrationDb().insertOne(
+        testDoc<IUsersMigration>(buildUser(orgaOf, { email: "admin@cfa.fr", organisation_role: "admin" }))
+      );
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contactOf(contacts, "admin@cfa.fr")).toMatchObject({
+        CFA_ROLE_COMPTE: "admin",
+        CFA_A_INVITE_UN_MEMBRE: "non",
+      });
+    });
+
+    it("membre invité confirmé : l'admin et le membre voient 'oui', le rôle du membre est 'membre'", async () => {
+      const orgaOf = await insertCfaOrganisation();
+      await usersMigrationDb().insertMany([
+        testDoc<IUsersMigration>(buildUser(orgaOf, { email: "admin@cfa.fr", organisation_role: "admin" })),
+        testDoc<IUsersMigration>(buildUser(orgaOf, { email: "membre@cfa.fr", organisation_role: "member" })),
+      ]);
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contactOf(contacts, "admin@cfa.fr")).toMatchObject({
+        CFA_ROLE_COMPTE: "admin",
+        CFA_A_INVITE_UN_MEMBRE: "oui",
+      });
+      expect(contactOf(contacts, "membre@cfa.fr")).toMatchObject({
+        CFA_ROLE_COMPTE: "membre",
+        CFA_A_INVITE_UN_MEMBRE: "oui",
+      });
+    });
+
+    it("compte historique sans rôle : rôle vide", async () => {
+      const orgaOf = await insertCfaOrganisation();
+      const ancien = buildUser(orgaOf, { email: "ancien@cfa.fr" });
+      await usersMigrationDb().insertOne(testDoc<IUsersMigration>(ancien));
+      await usersMigrationDb().updateOne({ _id: ancien._id }, { $unset: { organisation_role: "" } });
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contactOf(contacts, "ancien@cfa.fr")).toMatchObject({
+        CFA_ROLE_COMPTE: null,
+        CFA_A_INVITE_UN_MEMBRE: "non",
+      });
+    });
+
+    it("un membre dont le compte n'est pas confirmé ne compte pas comme invité", async () => {
+      const orgaOf = await insertCfaOrganisation();
+      await usersMigrationDb().insertMany([
+        testDoc<IUsersMigration>(buildUser(orgaOf, { email: "admin@cfa.fr", organisation_role: "admin" })),
+        testDoc<IUsersMigration>(
+          buildUser(orgaOf, {
+            email: "attente@cfa.fr",
+            organisation_role: "member",
+            account_status: "PENDING_EMAIL_VALIDATION",
+          })
+        ),
+      ]);
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contactOf(contacts, "admin@cfa.fr")?.CFA_A_INVITE_UN_MEMBRE).toBe("non");
+    });
+
+    it("un membre d'une autre organisation ne compte pas", async () => {
+      const orgaA = await insertCfaOrganisation();
+      const orgaB = await insertCfaOrganisation();
+      await usersMigrationDb().insertMany([
+        testDoc<IUsersMigration>(buildUser(orgaA, { email: "admin-a@cfa.fr", organisation_role: "admin" })),
+        testDoc<IUsersMigration>(buildUser(orgaB, { email: "membre-b@cfa.fr", organisation_role: "member" })),
+      ]);
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contactOf(contacts, "admin-a@cfa.fr")?.CFA_A_INVITE_UN_MEMBRE).toBe("non");
+    });
+
+    it("synchro unitaire : l'admin voit les membres invités hors du lot synchronisé", async () => {
+      const orgaOf = await insertCfaOrganisation();
+      const admin = buildUser(orgaOf, { email: "admin@cfa.fr", organisation_role: "admin" });
+      await usersMigrationDb().insertMany([
+        testDoc<IUsersMigration>(admin),
+        testDoc<IUsersMigration>(buildUser(orgaOf, { email: "membre@cfa.fr", organisation_role: "member" })),
+      ]);
+
+      const contacts = await tbaContactsContactList.fetchContacts({ userIds: [admin._id] });
+
+      expect(contacts).toHaveLength(1);
+      expect(contacts[0].attributes.CFA_A_INVITE_UN_MEMBRE).toBe("oui");
+    });
+
+    it("un utilisateur non CFA a les deux attributs à null", async () => {
+      const orgaMl = buildOrgaMl("ML LILLE");
+      await organisationsDb().insertOne(testDoc<IOrganisation>(orgaMl));
+      await usersMigrationDb().insertOne(
+        testDoc<IUsersMigration>(buildUser(orgaMl, { email: "agent@ml.fr", organisation_role: "admin" }))
+      );
+
+      const contacts = await tbaContactsContactList.fetchContacts();
+
+      expect(contactOf(contacts, "agent@ml.fr")).toMatchObject({
+        CFA_ROLE_COMPTE: null,
+        CFA_A_INVITE_UN_MEMBRE: null,
+      });
+    });
   });
 });

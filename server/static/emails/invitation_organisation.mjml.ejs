@@ -9,6 +9,7 @@
           <mj-text> Bonjour, </mj-text>
           <mj-text>
             <div>
+              <% if (data.author) { %>
               Vous avez reçu une invitation pour accéder au <strong>tableau de bord de l'apprentissage</strong>. Cette
               invitation provient de :
               <ul>
@@ -16,6 +17,10 @@
                 <li><%= data.author.email %></li>
                 <li><%= data.organisationLabel %></li>
               </ul>
+              <% } else { %>
+              L'équipe du <strong>Tableau de bord de l'apprentissage</strong> vous invite à rejoindre l'espace de :
+              <strong><%= data.organisationLabel %></strong>.
+              <% } %>
             </div>
           </mj-text>
           <mj-button

@@ -1,0 +1,7 @@
+.root .title {
+  display: block;
+}
+
+.root .description {
+  color: var(--text-title-grey);
+}

@@ -3,6 +3,16 @@ import { z } from "zod";
 /** Seuil partagé : remontée en tête des listes ML côté serveur, sous-texte en orange côté UI. */
 export const ML_DELAI_RELANCE_JOURS = 7;
 
+/**
+ * Date posée par la migration de rattrapage sur les ML déjà actives sans date d'activation. Antérieure au service,
+ * elle ne masque aucun dossier à la ML, mais ce n'est pas une vraie date d'activation.
+ */
+export const ACTIVATION_RATTRAPAGE_DATE = new Date("2022-01-01T00:00:00.000Z");
+
+/** Date d'activation à montrer : la date de rattrapage cède la place à `repli`. */
+export const dateActivationAffichee = (activatedAt: Date | null | undefined, repli: Date | null = null) =>
+  activatedAt && activatedAt.getTime() !== ACTIVATION_RATTRAPAGE_DATE.getTime() ? activatedAt : repli;
+
 /** Situation du dossier affichée côté ML, distincte de SITUATION_ENUM (retour du conseiller). */
 export enum ML_SITUATION_DOSSIER {
   RUPTURE = "RUPTURE",

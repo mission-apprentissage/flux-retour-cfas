@@ -12,6 +12,7 @@ import { normalize, UAI_INCONNUE_TAG_FORMAT } from "shared";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
 import { DataTable } from "@/app/_components/table/DataTable";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { conserverParamsHote } from "@/app/_utils/params-conserves.utils";
 import { NatureOrganismeTag } from "@/app/admin/_components/NatureOrganismeTag";
 import { convertOrganismeToExport, organismesExportColumns } from "@/common/exports";
 import {
@@ -104,6 +105,7 @@ export function OrganismesTableClient(props: OrganismesTableClientProps) {
       ...(props.serverSide && page > 1 ? { page: String(page) } : {}),
       ...(props.serverSide && limit !== 20 ? { limit: String(limit) } : {}),
     } as Record<string, string>);
+    conserverParamsHote(searchParams, query);
     router.replace(`?${query.toString()}`, { scroll: false });
   };
 
@@ -125,7 +127,7 @@ export function OrganismesTableClient(props: OrganismesTableClientProps) {
   const onReset = () => {
     setSearchValue("");
     setSort(DEFAULT_SORT);
-    router.replace("?", { scroll: false });
+    router.replace(`?${conserverParamsHote(searchParams, new URLSearchParams()).toString()}`, { scroll: false });
   };
 
   const serverSearch = searchParams?.get("search") ?? "";

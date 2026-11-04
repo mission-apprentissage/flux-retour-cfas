@@ -34,6 +34,7 @@ import {
   getDuplicatesEffectifsForOrganismeIdWithPagination,
 } from "@/common/actions/effectifs.duplicates.actions";
 import { effectifsFiltersTerritoireSchema } from "@/common/actions/helpers/filters";
+import { journaliserImposture } from "@/common/actions/impersonation.actions";
 import { getOrganismeIndicateursEffectifs } from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
 import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import {
@@ -149,6 +150,7 @@ import {
   resendEmailLimiter,
   webhookLimiter,
 } from "./middlewares/rateLimit";
+import { restrictReadOnlyImpersonation } from "./middlewares/readOnlyImpersonation";
 import requireApiKeyAuthenticationMiddleware from "./middlewares/requireApiKeyAuthentication";
 import requireBearerAuthentication from "./middlewares/requireBearerAuthentication";
 import requireSipaAuthentication from "./middlewares/requireSipaAuthentication";
@@ -588,6 +590,7 @@ function setupRoutes(app: Application) {
   const authRouter = express.Router();
   authRouter
     .use(authMiddleware())
+    .use(restrictReadOnlyImpersonation)
     // Rate limit global des routes authed (userId, 1000/min). `heavyLimiter` se superpose sur les routes coûteuses.
     .use(apiLimiter)
     .get(
@@ -1050,15 +1053,26 @@ function setupRoutes(app: Application) {
             await createOrganisation(organisationBody);
             organisation = await organisationsDb().findOne(organisationBody);
           }
+          if (!organisation) {
+            throw Boom.notFound("Organisation introuvable");
+          }
+          const journaliser = () =>
+            journaliserImposture({
+              user: req.user,
+              origine: req.user.organisation,
+              cible: organisation,
+              readOnly: false,
+            });
 
           let sessionToken;
-          if (organisation?.type === "ORGANISME_FORMATION") {
+          if (organisation.type === "ORGANISME_FORMATION") {
             const userOrganisme = await organismesDb().findOne({
               siret: organisation.siret,
               uai: organisation.uai as string,
             });
 
             if (userOrganisme) {
+              await journaliser();
               sessionToken = await createSession(req.user.email, {
                 impersonatedOrganisation: { ...organisation, organisme_id: userOrganisme._id },
               });
@@ -1066,6 +1080,7 @@ function setupRoutes(app: Application) {
               throw new Error("Organisme non trouvé.");
             }
           } else {
+            await journaliser();
             sessionToken = await createSession(req.user.email, {
               impersonatedOrganisation: organisation,
             });

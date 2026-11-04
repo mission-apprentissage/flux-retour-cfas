@@ -1,0 +1,49 @@
+.bandeau {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px 32px 16px;
+  margin-bottom: 32px;
+  background-color: var(--orange-terre-battue-975-75);
+}
+
+.titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: var(--text-default-warning);
+}
+
+.liste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.alerte {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background-color: var(--background-default-grey);
+  border: 1px solid var(--border-default-grey);
+}
+
+.alerte > span {
+  color: var(--artwork-major-blue-france);
+}
+
+.texte {
+  margin: 0;
+  font-weight: 500;
+}
+
+.texte strong {
+  color: var(--text-default-warning);
+}

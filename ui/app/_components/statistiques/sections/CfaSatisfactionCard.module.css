@@ -1,0 +1,48 @@
+.gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 504px;
+}
+
+.subtitle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  font-size: 20px;
+  line-height: 28px;
+}
+
+.track {
+  position: relative;
+  margin-top: 40px;
+  height: 11px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #ef4444 0%, #f59e0b 35%, #facc15 50%, #84cc16 75%, #10b981 100%);
+}
+
+.value {
+  position: absolute;
+  bottom: 18px;
+  transform: translateX(-50%);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 28px;
+  color: var(--text-title-grey);
+}
+
+.scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 17px;
+  font-weight: 500;
+  color: #8a8aa8;
+}
+
+.meta {
+  margin: 0;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--text-mention-grey);
+}
