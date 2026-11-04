@@ -23,6 +23,8 @@ import {
   zBrancheDemandeActivation,
 } from "shared/models/data/demandesActivationCfa.model";
 import {
+  ETAPES_SUIVI,
+  EtapeSuivi,
   IBilanEnvoiDemandes,
   IBilanImportDemandes,
   ICocheDemandesActivation,
@@ -35,6 +37,7 @@ import {
 } from "shared/models/routes/admin/demandes-activation.api";
 
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
+import { formatDate } from "@/app/_utils/date.utils";
 import { PAGES } from "@/app/_utils/routes.utils";
 import { AdminPageHeader } from "@/app/admin/_components/AdminPageHeader";
 import { AdminTable } from "@/app/admin/_components/AdminTable";
@@ -45,12 +48,18 @@ import { CorrectionDemandeModal, correctionModal } from "./CorrectionDemandeModa
 import styles from "./demandes-activation.module.scss";
 import { exporterDemandesActivation } from "./exportDemandesActivation";
 import {
+  ETAPES,
   etatCompte,
   libelleBranche,
   LIBELLES_BRANCHES,
+  LIBELLES_MAILS_ENVOYES,
+  LIBELLES_RELANCES,
   LIBELLES_ROLES,
   LIBELLES_VUES,
+  mailDeRefus,
   nomCfa,
+  precisionEtape,
+  refusEnvoyeLe,
   STATUTS,
 } from "./libelles";
 
@@ -71,27 +80,72 @@ const MODE_D_EMPLOI = [
   "Cochez les lignes prêtes, puis « Envoyer les e-mails » : DECA est activé, puis la collaboration si le CFA y est éligible, et chaque demandeur reçoit son e-mail.",
   "Les refus « sans mail » ne reçoivent rien : à traiter à la main si besoin.",
   "En cas d'échec, corrigez puis « Renvoyer ». Les relances partent automatiquement.",
+  "Dans « Envoyées », le suivi compte une connexion quand la personne saisit son mot de passe : une session déjà ouverte n'apparaît pas.",
   "L'export Excel contient des données personnelles : ne le partagez pas hors de l'équipe.",
 ];
 
 const VUES_COCHABLES_EN_BLOC: ReadonlyArray<VueDemandeActivation> = ["a_envoyer", "devenus_eligibles"];
 
-const COLONNES = [
-  { label: "CFA", dataKey: "cfa", width: "15%", sortable: false },
-  { label: "Demandeur", dataKey: "demandeur", width: "16%", sortable: false },
-  { label: "Inscrit le", dataKey: "inscription", width: "8%", sortable: true },
-  { label: "Source", dataKey: "source", width: "9%", sortable: true },
-  { label: "Compte", dataKey: "compte", width: "8%", sortable: false },
-  { label: "Branche", dataKey: "branche", width: "9%", sortable: false },
-  { label: "Motifs", dataKey: "motifs", width: "14%", sortable: false },
-  { label: "Statut", dataKey: "statut", width: "8%", sortable: false },
-  { label: "À envoyer", dataKey: "a_envoyer", width: "5%", sortable: false },
-  { label: "Actions", dataKey: "actions", width: "8%", sortable: false },
-];
+const COLONNES = {
+  cfa: { label: "CFA", sortable: false },
+  demandeur: { label: "Demandeur", sortable: false },
+  inscription: { label: "Inscrit le", sortable: true },
+  envoyee: { label: "Envoyée le", sortable: true },
+  source: { label: "Source", sortable: true },
+  suivi: { label: "Suivi", sortable: true },
+  compte: { label: "Compte", sortable: false },
+  branche: { label: "Branche", sortable: false },
+  motifs: { label: "Motifs", sortable: false },
+  mail_refus: { label: "Mail de refus", sortable: false },
+  echec: { label: "Échec", sortable: false },
+  a_envoyer: { label: "À envoyer", sortable: false },
+  actions: { label: "Actions", sortable: false },
+} as const;
+
+const colonnesAvecLargeurs = (...colonnesEtLargeurs: [keyof typeof COLONNES, number][]) =>
+  colonnesEtLargeurs.map(([dataKey, largeur]) => ({ ...COLONNES[dataKey], dataKey, width: `${largeur}%` }));
+
+const COLONNES_A_ENVOYER = colonnesAvecLargeurs(
+  ["cfa", 18],
+  ["demandeur", 20],
+  ["inscription", 10],
+  ["source", 11],
+  ["compte", 12],
+  ["branche", 11],
+  ["a_envoyer", 8],
+  ["actions", 10]
+);
+
+const COLONNES_PAR_VUE: Record<VueDemandeActivation, ReturnType<typeof colonnesAvecLargeurs>> = {
+  a_envoyer: COLONNES_A_ENVOYER,
+  envoyees: colonnesAvecLargeurs(["cfa", 20], ["demandeur", 24], ["envoyee", 12], ["source", 11], ["suivi", 33]),
+  refus: colonnesAvecLargeurs(
+    ["cfa", 17],
+    ["demandeur", 18],
+    ["inscription", 9],
+    ["source", 10],
+    ["motifs", 20],
+    ["mail_refus", 11],
+    ["a_envoyer", 6],
+    ["actions", 9]
+  ),
+  devenus_eligibles: COLONNES_A_ENVOYER,
+  echecs: colonnesAvecLargeurs(
+    ["cfa", 18],
+    ["demandeur", 20],
+    ["source", 11],
+    ["compte", 12],
+    ["branche", 11],
+    ["echec", 18],
+    ["actions", 10]
+  ),
+};
 
 const CLES_DE_TRI: Record<string, (demande: IDemandeActivationLigne) => string | null> = {
   inscription: (demande) => demande.horodatage,
+  envoyee: (demande) => demande.envoyee_at,
   source: (demande) => demande.source,
+  suivi: (demande) => demande.suivi && `${ETAPES_SUIVI.indexOf(demande.suivi.etape)} ${demande.envoyee_at ?? ""}`,
 };
 
 function trier(demandes: IDemandeActivationLigne[], tri: SortingState) {
@@ -169,35 +223,113 @@ function BadgeCompte({ demande: { compte, branche } }: { demande: IDemandeActiva
   );
 }
 
+function TagsMotifs({ motifs }: Pick<IDemandeActivationLigne, "motifs">) {
+  if (motifs.length === 0) return null;
+  return (
+    <ul className="fr-tags-group">
+      {motifs.map((motif) => (
+        <li key={motif}>
+          <Tooltip
+            kind="hover"
+            title={`${MOTIFS_DEMANDE_ACTIVATION[motif].detail}. ${
+              MOTIFS_DEMANDE_ACTIVATION[motif].avecMail
+                ? "Refus avec mail : le message « pas encore » part à l'envoi."
+                : "Refus sans mail : rien ne part, l'équipe prend contact si besoin."
+            }`}
+          >
+            <Tag small>{MOTIFS_DEMANDE_ACTIVATION[motif].libelle}</Tag>
+          </Tooltip>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function Motifs({ demande }: { demande: IDemandeActivationLigne }) {
   return (
     <div id={`motifs-${demande._id}`}>
-      {demande.motifs.length > 0 && (
-        <ul className="fr-tags-group">
-          {demande.motifs.map((motif) => (
-            <li key={motif}>
-              <Tooltip
-                kind="hover"
-                title={`${MOTIFS_DEMANDE_ACTIVATION[motif].detail}. ${
-                  MOTIFS_DEMANDE_ACTIVATION[motif].avecMail
-                    ? "Refus avec mail : le message « pas encore » part à l'envoi."
-                    : "Refus sans mail : rien ne part, l'équipe prend contact si besoin."
-                }`}
-              >
-                <Tag small>{MOTIFS_DEMANDE_ACTIVATION[motif].libelle}</Tag>
-              </Tooltip>
-            </li>
-          ))}
-        </ul>
-      )}
-      {demande.domaine_inconnu && (
-        <Badge className={styles.insecable} severity="warning" small>
-          Domaine inconnu
-        </Badge>
-      )}
-      {demande.motif_echec && <p className="fr-text--xs fr-mb-0">{demande.motif_echec}</p>}
+      <TagsMotifs motifs={demande.motifs} />
     </div>
   );
+}
+
+function BadgeStatut({ statut }: Pick<IDemandeActivationLigne, "statut">) {
+  return (
+    <Badge className={styles.insecable} small severity={STATUTS[statut].severity} noIcon={!STATUTS[statut].severity}>
+      {STATUTS[statut].libelle}
+    </Badge>
+  );
+}
+
+function Echec({ demande }: { demande: IDemandeActivationLigne }) {
+  return (
+    <>
+      <BadgeStatut statut={demande.statut} />
+      {demande.motif_echec && <p className="fr-text--xs fr-mb-0">{demande.motif_echec}</p>}
+      <TagsMotifs motifs={demande.motifs} />
+    </>
+  );
+}
+
+function Suivi({ demande: { compte, suivi } }: { demande: IDemandeActivationLigne }) {
+  if (!suivi) return null;
+  const precision = precisionEtape({ compte, suivi });
+  const connexion = suivi.connexion_apres_envoi_at;
+  return (
+    <>
+      <Badge className={styles.insecable} severity={ETAPES[suivi.etape].severity} small>
+        {ETAPES[suivi.etape].libelle}
+      </Badge>
+      {precision && <p className="fr-text--xs fr-mb-0">{precision}</p>}
+      {suivi.etape !== "compte_a_creer" && suivi.mail_envoye !== "compte_existant" && compte?.created_at && (
+        <p className="fr-text--xs fr-mb-0">Compte créé le {formatDate(compte.created_at)}</p>
+      )}
+      {suivi.etape === "pas_connecte" && (
+        <p className="fr-text--xs fr-mb-0">
+          {compte?.last_connection ? `Dernière connexion le ${formatDate(compte.last_connection)}` : "Jamais connecté"}
+        </p>
+      )}
+      {connexion && (
+        <p className="fr-text--xs fr-mb-0">
+          Le {formatDate(connexion)}
+          {compte?.last_connection && formatDate(compte.last_connection) !== formatDate(connexion)
+            ? `, dernière fois le ${formatDate(compte.last_connection)}`
+            : ""}
+        </p>
+      )}
+      {suivi.collaborateurs_invites > 0 && (
+        <p className="fr-text--xs fr-mb-0">
+          {suivi.collaborateurs_invites}{" "}
+          {suivi.collaborateurs_invites > 1 ? "collaborateurs invités" : "collaborateur invité"}, dont{" "}
+          {suivi.collaborateurs_inscrits} {suivi.collaborateurs_inscrits > 1 ? "inscrits" : "inscrit"}
+        </p>
+      )}
+      {suivi.derniere_relance && (
+        <p className="fr-text--xs fr-mb-0">
+          Dernier mail auto le {formatDate(suivi.derniere_relance.at)} :{" "}
+          {LIBELLES_RELANCES[suivi.derniere_relance.type]}
+        </p>
+      )}
+    </>
+  );
+}
+
+function MailDeRefus({ demande }: { demande: IDemandeActivationLigne }) {
+  const { libelle, severity } = mailDeRefus(demande);
+  const envoyeLe = refusEnvoyeLe(demande);
+  return (
+    <>
+      <Badge className={styles.insecable} severity={severity} noIcon={!severity} small>
+        {libelle}
+      </Badge>
+      {envoyeLe && <p className="fr-text--xs fr-mb-0">le {formatDate(envoyeLe)}</p>}
+    </>
+  );
+}
+
+function RefusEnvoyeLe({ demande }: { demande: IDemandeActivationLigne }) {
+  const envoyeLe = refusEnvoyeLe(demande);
+  return envoyeLe && <p className="fr-text--xs fr-mb-0">Refus envoyé le {formatDate(envoyeLe)}</p>;
 }
 
 export default function DemandesActivationClient() {
@@ -207,6 +339,7 @@ export default function DemandesActivationClient() {
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const [tri, setTri] = useState<SortingState>([]);
   const [filtreSource, setFiltreSource] = useState("");
+  const [filtreEtape, setFiltreEtape] = useState<EtapeSuivi | "">("");
   const [fichier, setFichier] = useState<File | null>(null);
   const [source, setSource] = useState("");
   const [retourImport, setRetourImport] = useState<Retour | null>(null);
@@ -346,8 +479,9 @@ export default function DemandesActivationClient() {
   const toutes = data?.demandes ?? [];
   const sources = [...new Set(toutes.map((demande) => demande.source))].sort((a, b) => a.localeCompare(b, "fr"));
   const demandesFiltrees = filtreSource ? toutes.filter((demande) => demande.source === filtreSource) : toutes;
+  const envoyeesFiltrees = demandesFiltrees.filter((demande) => demande.vue === "envoyees");
   const demandesDeLaVue = trier(
-    demandesFiltrees.filter((demande) => demande.vue === vue),
+    demandesFiltrees.filter((demande) => demande.vue === vue && (!filtreEtape || demande.suivi?.etape === filtreEtape)),
     tri
   );
   const cochees = toutes.filter((demande) => demande.a_envoyer && demande.cochable);
@@ -403,6 +537,11 @@ export default function DemandesActivationClient() {
           {demande.email_corrige && (
             <p className="fr-text--xs fr-mb-0">Saisi : {emailSecable(demande.email_saisi || "—")}</p>
           )}
+          {demande.domaine_inconnu && (
+            <Badge className={styles.insecable} severity="warning" small>
+              Domaine inconnu
+            </Badge>
+          )}
           {demande.fonction && <p className="fr-text--xs fr-mb-0">{demande.fonction}</p>}
           {demande.compte && (demande.compte.prenom || demande.compte.nom) && (
             <p className="fr-text--xs fr-mb-0">
@@ -422,39 +561,48 @@ export default function DemandesActivationClient() {
       inscription: demande.horodatage
         ? format(new Date(demande.horodatage), "dd/MM/yyyy HH:mm")
         : (demande.horodatage_brut ?? "—"),
+      envoyee: demande.envoyee_at && (
+        <>
+          {formatDate(demande.envoyee_at)}
+          {demande.suivi && <p className="fr-text--xs fr-mb-0">{LIBELLES_MAILS_ENVOYES[demande.suivi.mail_envoye]}</p>}
+        </>
+      ),
       source: demande.source,
-      branche: <BadgeBranche demande={demande} />,
+      suivi: <Suivi demande={demande} />,
+      branche: (
+        <>
+          <BadgeBranche demande={demande} />
+          {demande.vue === "devenus_eligibles" && <RefusEnvoyeLe demande={demande} />}
+        </>
+      ),
       motifs: <Motifs demande={demande} />,
-      statut: (
-        <Badge
-          className={styles.insecable}
-          small
-          severity={STATUTS[demande.statut].severity}
-          noIcon={!STATUTS[demande.statut].severity}
-        >
-          {STATUTS[demande.statut].libelle}
-        </Badge>
-      ),
-      a_envoyer: (
-        <Checkbox
-          small
-          options={[
-            {
-              label: (
-                <span className="fr-sr-only">
-                  À envoyer : {nomCfa(demande)}, {demande.email}
-                </span>
-              ),
-              nativeInputProps: {
-                checked: demande.a_envoyer,
-                disabled: !demande.cochable || idsEnCoche.has(demande._id),
-                onChange: (event) => cocherMutation.mutate({ ids: [demande._id], a_envoyer: event.target.checked }),
-                "aria-describedby": demande.cochable ? undefined : `motifs-${demande._id}`,
+      mail_refus: <MailDeRefus demande={demande} />,
+      echec: <Echec demande={demande} />,
+      a_envoyer:
+        demande.statut === "envoi_en_cours" ? (
+          <Badge className={styles.insecable} severity="info" noIcon small>
+            En cours
+          </Badge>
+        ) : (
+          <Checkbox
+            small
+            options={[
+              {
+                label: (
+                  <span className="fr-sr-only">
+                    À envoyer : {nomCfa(demande)}, {demande.email}
+                  </span>
+                ),
+                nativeInputProps: {
+                  checked: demande.a_envoyer,
+                  disabled: !demande.cochable || idsEnCoche.has(demande._id),
+                  onChange: (event) => cocherMutation.mutate({ ids: [demande._id], a_envoyer: event.target.checked }),
+                  "aria-describedby": demande.cochable ? undefined : `motifs-${demande._id}`,
+                },
               },
-            },
-          ]}
-        />
-      ),
+            ]}
+          />
+        ),
       actions:
         demande.vue === "envoyees" || demande.statut === "envoi_en_cours" ? null : (
           <div className="fr-btns-group fr-btns-group--sm fr-btns-group--icon-left">
@@ -489,6 +637,8 @@ export default function DemandesActivationClient() {
       onChange: () => {
         setVue(cle);
         setPage(1);
+        setTri([]);
+        setFiltreEtape("");
       },
     },
   });
@@ -589,7 +739,7 @@ export default function DemandesActivationClient() {
         <TableSkeleton />
       ) : (
         <>
-          <div className="fr-grid-row">
+          <div className="fr-grid-row fr-grid-row--gutters">
             <div className="fr-col-12 fr-col-md-4">
               <SelectNext
                 label="Filtrer par source"
@@ -609,6 +759,27 @@ export default function DemandesActivationClient() {
                 }}
               />
             </div>
+            {vue === "envoyees" && (
+              <div className="fr-col-12 fr-col-md-4">
+                <SelectNext
+                  label="Filtrer par étape"
+                  options={[
+                    { value: "", label: `Toutes les étapes (${envoyeesFiltrees.length})` },
+                    ...ETAPES_SUIVI.map((etape) => ({
+                      value: etape,
+                      label: `${ETAPES[etape].libelle} (${envoyeesFiltrees.filter((demande) => demande.suivi?.etape === etape).length})`,
+                    })),
+                  ]}
+                  nativeSelectProps={{
+                    value: filtreEtape,
+                    onChange: (event) => {
+                      setFiltreEtape(event.target.value as EtapeSuivi | "");
+                      setPage(1);
+                    },
+                  }}
+                />
+              </div>
+            )}
           </div>
           <div className={`${styles.barreVues} fr-mb-3w`}>
             <SegmentedControl legend="Vue" hideLegend small segments={segments} />
@@ -670,7 +841,7 @@ export default function DemandesActivationClient() {
           )}
           <AdminTable
             data={tableData}
-            columns={COLONNES}
+            columns={COLONNES_PAR_VUE[vue]}
             tableLabel={`Demandes d'activation : ${LIBELLES_VUES[vue]}`}
             pagination={{ total: demandesDeLaVue.length, page: currentPage, limit: pageSize, lastPage }}
             onPageChange={setPage}

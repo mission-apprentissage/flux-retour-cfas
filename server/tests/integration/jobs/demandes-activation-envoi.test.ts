@@ -403,7 +403,7 @@ describe("envoi des demandes d'activation", () => {
         account_status: "PENDING_EMAIL_VALIDATION",
         organisation_role: "member",
       });
-      const demande = await insererDemande("direction@cfa-tests.fr");
+      const demande = await insererDemande("direction@cfa-tests.fr", SIRET, { invitation_id: new ObjectId() });
       expect(demande.branche).toBe("activation");
 
       await envoyerEtTraiter();
@@ -419,7 +419,11 @@ describe("envoi des demandes d'activation", () => {
       );
       expect(brevoMock).not.toHaveBeenCalled();
       expect(await invitationsDb().countDocuments()).toBe(0);
-      expect(await relire(demande)).toMatchObject({ statut: "envoyee", branche_envoyee: "activation" });
+      expect(await relire(demande)).toMatchObject({
+        statut: "envoyee",
+        branche_envoyee: "activation",
+        invitation_id: null,
+      });
     });
 
     it("ne laisse pas un tiers inscrit avec l'email du demandeur devenir admin", async () => {

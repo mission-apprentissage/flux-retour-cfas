@@ -9,6 +9,7 @@ import {
   organisationDuCompteDans,
   paramsActivationAvecCompte,
   paramsActivationSansCompte,
+  premiereConnexionDepuis,
 } from "@/common/actions/admin/demandes-activation.actions";
 import { nomCfaPourEmail } from "@/common/actions/organisations.actions";
 import { getUserByEmailIgnoringCase, resendConfirmationEmail } from "@/common/actions/users.actions";
@@ -251,11 +252,6 @@ async function renvoyerValidationEmail(maintenant: Date) {
   }
 }
 
-const connecteDepuis = (compte: Pick<IUsersMigration, "connection_history" | "last_connection">, depuis: Date) =>
-  [...(compte.connection_history ?? []), ...(compte.last_connection ? [compte.last_connection] : [])].some(
-    (date) => date > depuis
-  );
-
 async function relancerAdminsAvecCompte(maintenant: Date) {
   const templateId = config.brevo.templatesDemandesActivation.relanceAvecCompte;
   const demandes = await demandesActivationCfaDb()
@@ -268,7 +264,7 @@ async function relancerAdminsAvecCompte(maintenant: Date) {
     .toArray();
   for (const demande of demandes) {
     const compte = await getUserByEmailIgnoringCase(demande.email);
-    if (!compte || !demande.envoyee_at || connecteDepuis(compte, demande.envoyee_at)) continue;
+    if (!compte || !demande.envoyee_at || premiereConnexionDepuis(compte, demande.envoyee_at)) continue;
     await relancer(
       templateId,
       verrouDemande(demande, "relance_avec_compte_at"),
