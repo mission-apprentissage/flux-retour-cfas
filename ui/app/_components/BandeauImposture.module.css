@@ -28,6 +28,11 @@
   padding: 0.25rem 0;
 }
 
+.erreur {
+  display: block;
+  font-weight: 700;
+}
+
 .bouton.bouton {
   flex-shrink: 0;
   color: var(--text-inverted-blue-france);

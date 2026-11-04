@@ -1,10 +1,9 @@
 import { ObjectId } from "bson";
+import { dateActivationAffichee } from "shared/constants/missionLocale";
 import { ML_ALERTE_SEUILS, type IMlAlerte, type IMlFicheIndicateurs } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay, subtractDaysUTC } from "shared/utils/date";
 
 import { missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
-
-import { ACTIVATION_RATTRAPAGE_DATE } from "../admin/mission-locale/mission-locale.admin.actions";
 
 import { getSegmentStatsForPeriod } from "./mission-locale-stats.actions";
 import { ENGAGEMENT_THRESHOLD } from "./mission-locale-stats.helpers";
@@ -83,8 +82,7 @@ export async function getMissionLocaleFicheIndicateurs(
 
   return {
     // La date du rattrapage n'est pas une vraie date d'activation : on montre alors le premier compte confirmé.
-    premier_compte_at:
-      activatedAt?.getTime() === ACTIVATION_RATTRAPAGE_DATE.getTime() ? comptes.premier_compte_at : activatedAt,
+    premier_compte_at: activatedAt ? dateActivationAffichee(activatedAt, comptes.premier_compte_at) : null,
     derniere_activite_at: derniereActiviteAt,
     taux_traitement: tauxTraitement === null ? null : Math.round(tauxTraitement * 100),
     is_engaged: isEngaged,

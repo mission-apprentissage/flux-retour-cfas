@@ -1,6 +1,5 @@
-import { addJob } from "job-processor";
+import { ACTIVATION_RATTRAPAGE_DATE } from "shared/constants/missionLocale";
 
-import { ACTIVATION_RATTRAPAGE_DATE } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import logger from "@/common/logger";
 import { missionLocaleEffectifsDb, organisationsDb, usersMigrationDb } from "@/common/model/collections";
 
@@ -8,7 +7,7 @@ const SANS_DATE = { $or: [{ activated_at: { $exists: false } }, { activated_at: 
 
 /**
  * ML actives (compte confirmé) sans date d'activation : inscrites sur invitation avant que l'inscription ne l'active.
- * On ne rafraîchit pas leurs dossiers : la date, antérieure au service, ne change rien à ce que la ML voit.
+ * Les stats ne sont pas recalculées : la date, antérieure au service, ne change rien à ce que la ML voit.
  */
 export const up = async () => {
   const sansDate = await organisationsDb()
@@ -20,21 +19,18 @@ export const up = async () => {
   });
 
   for (const missionLocaleId of actives) {
-    await organisationsDb().updateOne(
-      { _id: missionLocaleId, type: "MISSION_LOCALE", ...SANS_DATE },
-      { $set: { activated_at: ACTIVATION_RATTRAPAGE_DATE } }
-    );
+    // Les dossiers d'abord : la ML reste sélectionnée au rejeu tant que sa date n'est pas posée.
     // Des dossiers anciens peuvent ne plus respecter le schéma : la migration ne doit pas échouer pour eux.
     await missionLocaleEffectifsDb().updateMany(
       { mission_locale_id: missionLocaleId },
       { $set: { "computed.mission_locale.activated_at": ACTIVATION_RATTRAPAGE_DATE } },
       { bypassDocumentValidation: true }
     );
+    await organisationsDb().updateOne(
+      { _id: missionLocaleId, type: "MISSION_LOCALE", ...SANS_DATE },
+      { $set: { activated_at: ACTIVATION_RATTRAPAGE_DATE } }
+    );
   }
 
   logger.info({ count: actives.length }, "[Migration] ML actives sans date d'activation datées au 01/01/2022");
-
-  if (actives.length > 0) {
-    await addJob({ name: "hydrate:daily-mission-locale-stats", queued: true });
-  }
 };

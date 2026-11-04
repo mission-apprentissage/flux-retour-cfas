@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { _delete } from "@/common/httpClient";
 import { AuthContext } from "@/common/internal/AuthContext";
+import { getServerErrorMessage } from "@/common/rateLimit";
 import { getAccountLabel } from "@/common/utils/accountUtils";
 
 import { useAuth } from "../_context/UserContext";
@@ -19,21 +20,24 @@ function getCibleLabel(user: AuthContext): string {
   if (organisation.type === "MISSION_LOCALE") {
     return organisation.nom ? `de la Mission Locale ${organisation.nom}` : "d'une Mission Locale";
   }
-  return `: ${getAccountLabel(user)}`;
+  return `: ${getAccountLabel(user)}`.trim();
 }
 
 export function BandeauImposture() {
   const { user } = useAuth();
   const [enCours, setEnCours] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
 
   if (!user?.impersonating) return null;
 
   const quitter = async () => {
     setEnCours(true);
+    setErreur(null);
     try {
       await _delete("/api/v1/admin/impersonate");
       window.location.href = "/";
-    } catch {
+    } catch (err) {
+      setErreur(getServerErrorMessage(err, "La sortie de cette vue a échoué. Merci de réessayer."));
       setEnCours(false);
     }
   };
@@ -44,9 +48,14 @@ export function BandeauImposture() {
         <div className={styles.content}>
           <span className={`fr-icon-eye-fill ${styles.icon}`} aria-hidden="true" />
           <p className={styles.texte}>
-            <strong>Vous voyez l&apos;interface {getCibleLabel(user)}</strong>{" "}
+            <strong>Vous voyez l&apos;interface {getCibleLabel(user)}.</strong>{" "}
             {user.readOnly && "Cette interface est en lecture seule. "}
-            Quittez cette vue pour revenir à votre outil
+            Quittez cette vue pour revenir à votre outil.
+            {erreur && (
+              <span role="alert" className={styles.erreur}>
+                {erreur}
+              </span>
+            )}
           </p>
         </div>
         <Button

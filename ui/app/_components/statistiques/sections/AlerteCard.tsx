@@ -85,7 +85,7 @@ export function AlerteCard({
             iconPosition="right"
             priority="secondary"
             onClick={() => setExpanded((value) => !value)}
-            disabled={!data?.total}
+            disabled={!expanded && !data?.total}
             nativeButtonProps={{ "aria-expanded": expanded }}
           >
             {expanded ? "Masquer" : "Voir"}
@@ -102,9 +102,9 @@ export function AlerteCard({
           small
         />
       )}
-      {expanded && (
-        <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
-          {loadingRows ? (
+      <StatsErrorHandler data={data} error={error} isLoading={isLoading}>
+        {expanded &&
+          (loadingRows ? (
             <TableSkeleton rows={Math.min(limit, rows.length || limit)} />
           ) : (
             <div className={tableStyles.tableContainer}>
@@ -122,9 +122,8 @@ export function AlerteCard({
                 />
               )}
             </div>
-          )}
-        </StatsErrorHandler>
-      )}
+          ))}
+      </StatsErrorHandler>
     </div>
   );
 }

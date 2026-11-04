@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { getApiErrorMessage } from "@/common/rateLimit";
 import { type ExportColumn, exportDataAsXlsx } from "@/common/utils/exportUtils";
 
 /** Export xlsx d'une liste de stats : `Prefixe-JJ-MM-AA.xlsx`, avec état de chargement et message d'erreur. */
@@ -22,7 +23,7 @@ export function useStatsXlsxExport(
         .join("-");
       exportDataAsXlsx(`${filenamePrefix}-${date}.xlsx`, rows, columns);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Le téléchargement a échoué");
+      setError(getApiErrorMessage(e, "Le téléchargement a échoué"));
     } finally {
       setIsExporting(false);
     }

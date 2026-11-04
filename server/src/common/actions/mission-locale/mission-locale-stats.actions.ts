@@ -1,4 +1,5 @@
 import { ObjectId } from "bson";
+import { ACTIVATION_RATTRAPAGE_DATE } from "shared/constants/missionLocale";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import { IOrganisationMissionLocale } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
@@ -1226,6 +1227,11 @@ const buildDetailFieldsProjection = () => ({
   ne_veut_pas_accompagnement: 1,
 });
 
+/** La date de rattrapage n'est pas une vraie date d'activation : elle n'est pas exportée. */
+const DATE_ACTIVATION_EXPR = {
+  $cond: [{ $eq: ["$ml.activated_at", ACTIVATION_RATTRAPAGE_DATE] }, null, { $ifNull: ["$ml.activated_at", null] }],
+};
+
 const buildSegmentRowsPipeline = (basePipeline: Record<string, unknown>[], segment: "rupture" | "collab") => [
   ...basePipeline,
   { $lookup: { from: "regions", localField: "ml.adresse.region", foreignField: "code", as: "region_info" } },
@@ -1236,7 +1242,7 @@ const buildSegmentRowsPipeline = (basePipeline: Record<string, unknown>[], segme
       departement_code: { $ifNull: ["$ml.adresse.departement", null] },
       nom: { $trim: { input: "$ml.nom" } },
       siret: { $ifNull: ["$ml.siret", null] },
-      date_activation: { $ifNull: ["$ml.activated_at", null] },
+      date_activation: DATE_ACTIVATION_EXPR,
       derniere_activite: { $ifNull: ["$ml.derniere_activite", null] },
       total_jeunes: { $add: ["$view.a_traiter", "$view.traite"] },
       a_traiter: "$view.a_traiter",
@@ -1311,7 +1317,7 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
         a_traiter: 1,
         traites: 1,
         ...buildPercentageProjections(),
-        date_activation: { $ifNull: ["$ml.activated_at", null] },
+        date_activation: DATE_ACTIVATION_EXPR,
         derniere_activite: 1,
         ...buildDetailFieldsProjection(),
       },
