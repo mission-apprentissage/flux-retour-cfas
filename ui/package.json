@@ -38,7 +38,7 @@
     "lodash.get": "4.4.2",
     "luxon": "^3.5.0",
     "mime": "^4.0.6",
-    "next": "15.5.27",
+    "next": "15.5.28",
     "next-plausible": "^3.12.2",
     "notion-client": "^8.0.2",
     "notion-types": "^8.0.2",
