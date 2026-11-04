@@ -27,6 +27,7 @@ import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organisme
 import parentLogger from "@/common/logger";
 import { effectifsDECADb, organismesDb } from "@/common/model/collections";
 import { getBALMongodbUri } from "@/common/mongodb";
+import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import { cachedInRun, getRunCacheStats, withRunCache } from "@/common/utils/runCache";
 import config from "@/config";
 import {
@@ -190,6 +191,7 @@ async function importerContratsDeca({ dryRun = false, limit }: { dryRun?: boolea
   const totalStats = createEmptyStats();
   const dryRunStats = createEmptyDryRunStats();
   const debutMs = Date.now();
+  const echecs = createErrorAggregator("hydrate:contrats-deca-raw");
   let totalCount = 0;
 
   const processBuffer = async (buffer: Promise<IProcessingStats>[]) => {
@@ -197,6 +199,9 @@ async function importerContratsDeca({ dryRun = false, limit }: { dryRun?: boolea
     for (const result of results) {
       if (result.status === "fulfilled") {
         mergeStats(totalStats, result.value);
+        echecs.ok();
+      } else {
+        echecs.record(result.reason);
       }
     }
     totalCount += buffer.length;
@@ -252,10 +257,15 @@ async function importerContratsDeca({ dryRun = false, limit }: { dryRun?: boolea
     captureException(err);
   } finally {
     await client.close();
+    const nbEchecs = echecs.failed;
+    if (!dryRun) {
+      echecs.flush();
+    }
     const bilan = construireBilanImport({
       debutMs,
       finMs: Date.now(),
       contrats: totalCount,
+      echecs: nbEchecs,
       cache: getRunCacheStats(),
     });
     logger.info(
@@ -268,8 +278,9 @@ async function importerContratsDeca({ dryRun = false, limit }: { dryRun?: boolea
   }
 }
 
-function publierMesures({ contrats, contratsParSeconde, tauxDefautCache }: BilanImportDeca) {
+function publierMesures({ contrats, contratsParSeconde, echecs, tauxDefautCache }: BilanImportDeca) {
   Sentry.setMeasurement("deca.contrats", contrats, "none");
+  Sentry.setMeasurement("deca.echecs", echecs, "none");
   Sentry.setMeasurement("deca.contrats_par_seconde", contratsParSeconde, "none");
   if (tauxDefautCache !== null) {
     Sentry.setMeasurement("deca.cache_taux_defaut", tauxDefautCache, "ratio");
