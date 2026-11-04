@@ -146,12 +146,20 @@ const updateEffectifById: RouteHandler<
   z.infer<typeof updateEffectifParams>,
   DefaultQuery,
   z.infer<typeof updateEffectifBody>
-> = async (req) => {
+> = async (req, { locals }) => {
+  const ftOrga = locals.franceTravail;
   const effectifId = req.params.id;
   const user = req.user;
   const body = req.body;
 
-  await updateFranceTravailData(effectifId, body.commentaire, body.situation, body.code_secteur, user._id);
+  await updateFranceTravailData(
+    ftOrga.code_region,
+    effectifId,
+    body.commentaire,
+    body.situation,
+    body.code_secteur,
+    user._id
+  );
 };
 
 const exportEffectifByCodeSecteur: RouteHandler<
