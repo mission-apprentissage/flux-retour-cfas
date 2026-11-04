@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { cachedInRun, withRunCache } from "./runCache";
+import { cachedInRun, getRunCacheStats, withRunCache } from "./runCache";
 
 describe("cachedInRun", () => {
   afterEach(() => {
@@ -84,5 +84,37 @@ describe("cachedInRun", () => {
     await withRunCache(() => cachedInRun("cle", load));
 
     expect(load).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("getRunCacheStats", () => {
+  it("renvoie null hors d'un run", () => {
+    expect(getRunCacheStats()).toBeNull();
+  });
+
+  it("compte accès et défauts par préfixe de clé", async () => {
+    const stats = await withRunCache(async () => {
+      await cachedInRun("organisme:a", async () => "A");
+      await cachedInRun("organisme:a", async () => "A");
+      await cachedInRun("organisme:a", async () => "A");
+      await cachedInRun("organisme:b", async () => "B");
+      await cachedInRun("opcos-rncp:x", async () => []);
+      return getRunCacheStats();
+    });
+
+    expect(stats).toEqual({
+      organisme: { acces: 4, defauts: 2, tauxDefaut: 0.5 },
+      "opcos-rncp": { acces: 1, defauts: 1, tauxDefaut: 1 },
+    });
+  });
+
+  it("compte comme défaut un résultat null, qui n'est jamais mémorisé", async () => {
+    const stats = await withRunCache(async () => {
+      await cachedInRun("organisme:inconnu", async () => null);
+      await cachedInRun("organisme:inconnu", async () => null);
+      return getRunCacheStats();
+    });
+
+    expect(stats).toEqual({ organisme: { acces: 2, defauts: 2, tauxDefaut: 1 } });
   });
 });
