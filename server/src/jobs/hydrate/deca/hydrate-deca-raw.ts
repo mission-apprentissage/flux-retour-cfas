@@ -490,9 +490,6 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
     return null;
   }
 
-  const currentTimestamp = new Date();
-  await effectifsDECADb().updateOne({ _id: organisme._id }, { $set: { last_effectifs_deca_update: currentTimestamp } });
-
   const dateDebutContrat = date_debut_contrat ? new Date(date_debut_contrat) : null;
   const dateFinContrat = date_fin_contrat ? new Date(date_fin_contrat) : null;
   const dateEffetRupture = date_effet_rupture ? new Date(date_effet_rupture) : null;
