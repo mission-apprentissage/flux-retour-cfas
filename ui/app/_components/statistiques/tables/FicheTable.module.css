@@ -1,0 +1,40 @@
+/* Tableau des fiches : sans cadre ni zébrage, en-tête gris souligné, lignes séparées par un trait. */
+.table:global(.fr-table) {
+  width: 100%;
+  margin-bottom: 0;
+  overflow: visible;
+}
+
+@media (max-width: 992px) {
+  .table:global(.fr-table) {
+    overflow-x: auto;
+  }
+}
+
+.table:global(.fr-table) table {
+  display: table;
+  width: 100%;
+}
+
+.table:global(.fr-table) > table > * > tr > :is(th, td) {
+  border: 0;
+  vertical-align: middle;
+}
+
+.table:global(.fr-table) > table > thead::after,
+.table:global(.fr-table) > table > tbody::after {
+  content: none;
+}
+
+.table:global(.fr-table) > table > thead > tr > th {
+  background-color: var(--background-alt-grey);
+  border-bottom: 1px solid var(--border-plain-grey);
+}
+
+.table:global(.fr-table) table tbody tr {
+  background-color: var(--background-default-grey);
+}
+
+.table:global(.fr-table) > table > tbody > tr > td {
+  border-bottom: 1px solid var(--border-contrast-grey);
+}

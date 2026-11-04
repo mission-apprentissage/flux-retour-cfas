@@ -14,7 +14,9 @@
 
 .dropdownFit {
   right: auto;
-  min-width: 16.25rem;
+  width: max-content;
+  min-width: 20rem;
+  max-width: min(28rem, calc(100vw - 2rem));
 }
 
 .selectWrapper {
@@ -63,21 +65,34 @@
   transform: translateY(-50%) rotate(180deg);
 }
 
+/* Panneau inspiré de la « liste déroulante riche » du DSFR (bêta, pas encore disponible en code). */
 .dropdown {
   position: absolute;
   top: calc(100% + 0.25rem);
   left: 0;
   right: 0;
-  background: var(--background-default-grey);
-  border: 1px solid var(--border-default-grey);
+  background: var(--background-overlap-grey);
   box-shadow: var(--overlap-shadow);
   z-index: 1000;
   display: flex;
   flex-direction: column;
 }
 
+.panelHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 1rem 0;
+}
+
+.selectAllButton {
+  justify-content: center;
+  width: 100%;
+  max-width: none;
+}
+
 .dropdownContent {
-  padding: 0rem;
+  padding: 0.5rem 1rem;
   max-height: 16rem;
   overflow-y: auto;
   overflow-x: hidden;
@@ -93,16 +108,7 @@
 }
 
 .option {
-  padding: 0rem 1.5rem;
-}
-
-.selectAllOption {
-  border-bottom: 1px solid var(--border-default-grey);
-}
-
-.option:hover,
-.optionFocused {
-  background-color: var(--background-default-grey-hover);
+  padding: 0;
 }
 
 /* Réglages UI des options pour la taille et le centrage des éléments */
@@ -120,6 +126,7 @@
 
 .option :global(.fr-fieldset .fr-fieldset__content .fr-checkbox-group input[type="checkbox"] + label::before) {
   top: 50%;
+  margin-top: 0;
   transform: translateY(-50%);
 }
 
@@ -134,22 +141,9 @@
   padding: 0;
 }
 
-.searchRow {
-  padding: 0.75rem;
-  border-bottom: 1px solid var(--border-default-grey);
-  background: var(--background-default-grey);
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-.searchInput {
-  width: 100%;
-}
-
 .aucunResultat {
   margin: 0;
-  padding: 0.75rem;
+  padding: 0.5rem 0;
   color: var(--text-mention-grey);
   font-size: 0.875rem;
 }

@@ -53,7 +53,11 @@ export function DeploymentRow({
             (loadingPercentage ? (
               <Skeleton width="40px" height="20px" />
             ) : (
-              <p className={styles.cardPercentage} style={{ color: percentageColor }}>
+              <p
+                className={styles.cardPercentage}
+                style={{ color: percentageColor }}
+                title="Évolution par rapport à la période précédente de même durée"
+              >
                 {percentage}
               </p>
             ))}

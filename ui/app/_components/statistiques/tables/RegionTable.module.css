@@ -40,10 +40,6 @@
   composes: centeredCell from "./common.module.css";
 }
 
-.buttonContainer {
-  composes: buttonContainer from "./common.module.css";
-}
-
 .emptyMessage {
   composes: emptyMessage from "./common.module.css";
 }

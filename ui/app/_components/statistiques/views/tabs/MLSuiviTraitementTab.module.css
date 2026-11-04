@@ -1,5 +1,8 @@
-.container {
-  padding: 12px 0 24px 0;
+.titre {
+  margin: 0 0 16px;
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  color: var(--text-title-blue-france);
 }
 
 .periodRow {
@@ -8,11 +11,18 @@
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 24px;
+  margin-bottom: 48px;
 }
 
 .chartsContainer {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 32px;
+}
+
+.carte {
+  margin-bottom: 0;
+  padding: 24px;
+  background-color: var(--background-default-grey);
+  border: 1px solid var(--border-default-grey);
 }

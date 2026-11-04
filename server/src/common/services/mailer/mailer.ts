@@ -91,7 +91,9 @@ export function getEmailInfos<T extends TemplateName>(template: T, payload: Temp
 const templatesTitleFuncs: TemplateTitleFuncs = {
   activation_user: () => "Activation de votre compte",
   invitation_organisation: (payload) =>
-    `${payload.author.civility} ${payload.author.nom} vous invite à rejoindre le tableau de bord de l'apprentissage`,
+    payload.author
+      ? `${payload.author.civility} ${payload.author.nom} vous invite à rejoindre le tableau de bord de l'apprentissage`
+      : "Invitation à rejoindre le Tableau de bord de l'apprentissage",
   notify_access_granted: () => "Votre demande d'accès a été acceptée",
   notify_access_granted_ofa: () => "Votre demande d’accès a été acceptée",
   notify_access_rejected: () => "Votre demande d'accès a été refusée",
@@ -137,7 +139,8 @@ export type TemplatePayloads = {
     activationToken: string;
   };
   invitation_organisation: {
-    author: {
+    /** Absent quand un administrateur invite : le mail part au nom de l'équipe du Tableau de bord. */
+    author?: {
       civility?: string;
       nom: string;
       prenom: string;

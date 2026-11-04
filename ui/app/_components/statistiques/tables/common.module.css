@@ -16,9 +16,22 @@
   gap: 0.5rem;
 }
 
+.sortButton {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--border-default-grey);
+}
+
+.sortButtonActive {
+  border-color: var(--border-action-high-blue-france);
+}
+
 .sortIcon {
-  font-size: 1rem;
-  color: #000091;
+  color: var(--text-action-high-blue-france);
 }
 
 .centeredCell {
@@ -82,24 +95,4 @@
 .variationNegative {
   composes: variation;
   color: var(--text-default-error);
-}
-
-.evolutionBadge {
-  font-size: 12px;
-  margin-left: 4px;
-}
-
-.evolutionPositive {
-  composes: evolutionBadge;
-  color: var(--text-default-success);
-}
-
-.evolutionNegative {
-  composes: evolutionBadge;
-  color: var(--text-default-error);
-}
-
-.evolutionZero {
-  composes: evolutionBadge;
-  color: var(--text-title-grey);
 }

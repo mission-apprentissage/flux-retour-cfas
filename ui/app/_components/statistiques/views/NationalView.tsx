@@ -44,7 +44,6 @@ export function NationalView({ isAdmin = false }: NationalViewProps) {
             iconId: "fr-icon-line-chart-line",
             content: (
               <CouvertureRegionsSection
-                isAdmin={isAdmin}
                 national
                 title="Déploiement et activité ML"
                 note="Les dossiers à traiter et traités couvrent les ruptures et les collaborations."

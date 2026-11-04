@@ -31,8 +31,10 @@ export interface AuthContext<I = IOrganisation> {
   // nom de l'organisme, enrichi au runtime depuis la collection organismes (CFA uniquement)
   organisation_nom?: string;
 
-  // only admins can impersonate organisations
+  // admins can impersonate any organisation, DREETS, DDETS and ARML only in read-only mode within their territory
   impersonating?: boolean;
+  // imposture limitée aux routes de lecture listées dans readOnlyImpersonation.ts
+  readOnly?: boolean;
 
   acl: Acl;
 }

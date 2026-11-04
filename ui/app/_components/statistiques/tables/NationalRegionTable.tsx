@@ -3,29 +3,52 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import type { IRegionStats } from "shared/models/data/nationalStats.model";
+import { useMemo, useState, type ReactNode } from "react";
+import type { IDepartementStats } from "shared/models/data/nationalStats.model";
 
 import { Skeleton } from "@/app/_components/common/Skeleton";
 
+import { ML_ENGAGEES_DEFINITION } from "../constants";
 import { useSortableTable } from "../hooks/useSortableTable";
 import { formatDelta, formatVariationBadge } from "../utils";
 
 import styles from "./NationalRegionTable.module.css";
 import { SortableTableHeader } from "./SortableTableHeader";
 
+type TerritoryStats = IDepartementStats;
+
 interface NationalRegionTableProps {
-  regions: IRegionStats[];
+  regions: TerritoryStats[];
   loadingDeltas?: boolean;
   detailRegions?: ReadonlyArray<string>;
+  territoryLabel?: string;
+  showAllLabel?: string;
+  showLessLabel?: string;
+  formatName?: (territory: TerritoryStats) => string;
+  renderDetail?: (territory: TerritoryStats) => ReactNode;
 }
 
-type SortColumn = keyof IRegionStats;
+type SortColumn = keyof TerritoryStats;
 
-export function NationalRegionTable({ regions, loadingDeltas = false, detailRegions = [] }: NationalRegionTableProps) {
-  const showDetailColumn = detailRegions.length > 0;
+const NAME_SORT_OPTIONS = { columnDefaultDirections: { nom: "asc" } } as const;
+
+export function NationalRegionTable({
+  regions,
+  loadingDeltas = false,
+  detailRegions = [],
+  territoryLabel = "Région",
+  showAllLabel = "Afficher toutes les régions",
+  showLessLabel = "Afficher moins de régions",
+  formatName = (territory) => territory.nom,
+  renderDetail,
+}: NationalRegionTableProps) {
+  const showDetailColumn = !!renderDetail || detailRegions.length > 0;
   const [showAll, setShowAll] = useState(false);
-  const { sortColumn, sortDirection, handleSort } = useSortableTable<SortColumn>("ml_activees");
+  const { sortColumn, sortDirection, handleSort } = useSortableTable<SortColumn>(
+    "ml_activees",
+    "desc",
+    NAME_SORT_OPTIONS
+  );
 
   const sortedRegions = useMemo(() => {
     const columnsWithEmptyHandling: SortColumn[] = ["ml_engagees", "a_traiter", "traites"];
@@ -46,7 +69,14 @@ export function NationalRegionTable({ regions, loadingDeltas = false, detailRegi
       const aVal = a[sortColumn] ?? 0;
       const bVal = b[sortColumn] ?? 0;
 
-      const comparison = aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+      const comparison =
+        typeof aVal === "string" && typeof bVal === "string"
+          ? aVal.localeCompare(bVal, "fr")
+          : aVal > bVal
+            ? 1
+            : aVal < bVal
+              ? -1
+              : 0;
       const primarySort = sortDirection === "desc" ? -comparison : comparison;
 
       if (primarySort !== 0) return primarySort;
@@ -63,12 +93,19 @@ export function NationalRegionTable({ regions, loadingDeltas = false, detailRegi
   return (
     <div>
       {displayedRegions.length === 0 ? (
-        <p className={styles.emptyMessage}>Aucune région à afficher.</p>
+        <p className={styles.emptyMessage}>Aucun territoire à afficher.</p>
       ) : (
         <div className={styles.regionStatsTable}>
           <Table
             headers={[
-              "Région",
+              <SortableTableHeader
+                key="nom"
+                column="nom"
+                label={territoryLabel}
+                currentSortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />,
               <SortableTableHeader
                 key="ml_activees"
                 column="ml_activees"
@@ -77,7 +114,6 @@ export function NationalRegionTable({ regions, loadingDeltas = false, detailRegi
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 centered
-                tooltip="Missions Locales dont l'accès au suivi des jeunes a été activé, rapportées au nombre de Missions Locales de la région."
               />,
               <SortableTableHeader
                 key="ml_engagees"
@@ -87,7 +123,7 @@ export function NationalRegionTable({ regions, loadingDeltas = false, detailRegi
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 centered
-                tooltip="Les Missions Locales sont considérées comme engagées sur l'utilisation du service du Tableau de bord de l'apprentissage à partir d'un taux de dossiers traités supérieur à 70%."
+                tooltip={`${ML_ENGAGEES_DEFINITION}.`}
               />,
               <SortableTableHeader
                 key="a_traiter"
@@ -113,7 +149,7 @@ export function NationalRegionTable({ regions, loadingDeltas = false, detailRegi
               const hasActiveML = region.ml_activees > 0;
 
               return [
-                region.nom,
+                formatName(region),
                 <div className={styles.centeredCell} key={`active-${region.code}`}>
                   <span>
                     <strong>{region.ml_activees}</strong>/{region.ml_total}
@@ -151,7 +187,9 @@ export function NationalRegionTable({ regions, loadingDeltas = false, detailRegi
                 </div>,
                 ...(showDetailColumn
                   ? [
-                      detailRegions.includes(region.code) ? (
+                      renderDetail ? (
+                        renderDetail(region)
+                      ) : detailRegions.includes(region.code) ? (
                         <Link
                           key={`detail-${region.code}`}
                           href={`/suivi-des-indicateurs/region/${region.code}`}
@@ -173,7 +211,7 @@ export function NationalRegionTable({ regions, loadingDeltas = false, detailRegi
       {hasMoreThan6Regions && (
         <div className={styles.buttonContainer}>
           <Button priority="secondary" size="small" onClick={() => setShowAll(!showAll)}>
-            {showAll ? "Afficher moins de régions" : "Afficher toutes les régions"}
+            {showAll ? showLessLabel : showAllLabel}
           </Button>
         </div>
       )}

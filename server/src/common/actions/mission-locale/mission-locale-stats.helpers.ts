@@ -11,7 +11,7 @@ import type {
   IMissionLocaleStatsSegments,
   ISegmentStats,
 } from "shared/models/data/missionLocaleStats.model";
-import type { StatsPeriod, StatsSegment } from "shared/models/data/nationalStats.model";
+import { anneeDePeriodeDepuis, type StatsPeriod, type StatsSegment } from "shared/models/data/nationalStats.model";
 import { normalizeToUTCDay } from "shared/utils/date";
 import { calculatePercentage } from "shared/utils/stats";
 
@@ -87,12 +87,27 @@ export const buildPercentageExpression = (numerator: MongoExpression, denominato
   ],
 });
 
-/**
- * Récupère les IDs des Missions Locales d'une région donnée
- */
-export const getMissionLocaleIdsByRegions = async (regions: string[]): Promise<ObjectId[]> => {
+/** Territoire des indicateurs : des régions et, en vue département, des départements. */
+export interface Territoire {
+  regions?: string[];
+  departements?: string[];
+}
+
+export const isTerritoireRestreint = ({ regions, departements }: Territoire = {}) =>
+  !!regions?.length || !!departements?.length;
+
+/** Filtre sur l'adresse d'une ML ou d'un organisme ; `prefix` vise un document joint (ex. `ml.`). */
+export const buildTerritoireMatch = ({ regions, departements }: Territoire = {}, prefix = "") => ({
+  ...(regions?.length ? { [`${prefix}adresse.region`]: { $in: regions } } : {}),
+  ...(departements?.length ? { [`${prefix}adresse.departement`]: { $in: departements } } : {}),
+});
+
+export const getMissionLocaleIdsByRegions = async (regions: string[]): Promise<ObjectId[]> =>
+  getMissionLocaleIdsByTerritoire({ regions });
+
+export const getMissionLocaleIdsByTerritoire = async (territoire: Territoire): Promise<ObjectId[]> => {
   const mls = await organisationsDb()
-    .find({ type: "MISSION_LOCALE", "adresse.region": { $in: regions } }, { projection: { _id: 1 } })
+    .find({ type: "MISSION_LOCALE", ...buildTerritoireMatch(territoire) }, { projection: { _id: 1 } })
     .toArray();
 
   return mls.map((ml) => ml._id);
@@ -128,21 +143,33 @@ const getEarliestDate = async () => {
  * Calcule la date de début en fonction de la période
  */
 export function calculateStartDate(period: StatsPeriod, referenceDate: Date, earliestDate?: Date): Date {
-  const startDate = new Date(referenceDate);
-
   switch (period) {
-    case "30days":
+    case "30days": {
+      const startDate = new Date(referenceDate);
       startDate.setUTCDate(referenceDate.getUTCDate() - 30);
-      break;
+      return normalizeToUTCDay(startDate);
+    }
     case "3months":
-      startDate.setUTCMonth(referenceDate.getUTCMonth() - 3);
-      break;
+      return subtractMonthsUTC(referenceDate, 3);
+    case "6months":
+      return subtractMonthsUTC(referenceDate, 6);
     case "all":
       return normalizeToUTCDay(earliestDate || new Date(0));
+    default: {
+      const annee = anneeDePeriodeDepuis(period);
+      if (annee === null) throw new Error(`Période inconnue : ${period}`);
+      return new Date(Date.UTC(annee, 0, 1));
+    }
   }
-
-  return normalizeToUTCDay(startDate);
 }
+
+/** Même jour N mois plus tôt, ramené au dernier jour du mois s'il n'existe pas (31 août − 6 mois = 28 février). */
+const subtractMonthsUTC = (referenceDate: Date, months: number) => {
+  const year = referenceDate.getUTCFullYear();
+  const month = referenceDate.getUTCMonth() - months;
+  const dernierJour = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(year, month, Math.min(referenceDate.getUTCDate(), dernierJour)));
+};
 
 /**
  * Calcule la date de début de manière asynchrone (récupère earliestDate si nécessaire)
@@ -278,13 +305,33 @@ export const buildTotalTraitesV2Expression = (statsPath = "$latest_stats") => ({
 });
 
 /**
- * Crée un objet IStatWithVariation à partir de valeurs courante et précédente
+ * Début de la période précédente de même durée. « Depuis janvier » et « Depuis le lancement » n'en ont pas :
+ * aucune variation n'est alors affichée.
  */
-export function createStatWithVariation(current: number, previous: number) {
+export function calculatePreviousStartDate(period: StatsPeriod, startDate: Date): Date | null {
+  switch (period) {
+    case "30days":
+      return calculateStartDate("30days", startDate);
+    case "3months":
+      return calculateStartDate("3months", startDate);
+    case "6months":
+      return calculateStartDate("6months", startDate);
+    default:
+      return null;
+  }
+}
+
+/** Cumul (dossiers traités, jeunes envoyés…) : ce qui s'est ajouté pendant la période, comparé à la période précédente. */
+export function createCumulStatWithVariation(fin: number, debut: number, debutPrecedent: number | null) {
   return {
-    current,
-    variation: calculatePercentage(current, previous),
+    current: fin,
+    variation: debutPrecedent === null ? "" : calculatePercentage(fin - debut, debut - debutPrecedent),
   };
+}
+
+/** État (dossiers à traiter, ML engagées…) : valeur actuelle comparée à celle du début de période. */
+export function createEtatStatWithVariation(fin: number, debut: number, comparable: boolean) {
+  return { current: fin, variation: comparable ? calculatePercentage(fin, debut) : "" };
 }
 
 /**

@@ -1,5 +1,6 @@
 import { ObjectId } from "bson";
 import { ACADEMIES_BY_CODE, DEPARTEMENTS_BY_CODE, REGIONS_BY_CODE, STATUT_APPRENANT } from "shared/constants";
+import { dateActivationAffichee } from "shared/constants/missionLocale";
 import type { IDepartmentCode } from "shared/constants/territoires";
 import { getOrganisationLabel, type IOrganisationCreate } from "shared/models/data/organisations.model";
 import { getAnneesScolaireListFromDate, getAnneeScolaireListFromDateRange } from "shared/utils";
@@ -809,7 +810,7 @@ const buildAttributes = (
     // ML côté CFA, ce qui prêtait à confusion.
     // `activated_at` et non `ml_beta_activated_at` : ce dernier n'existe que sur
     // les organisations ORGANISME_FORMATION, l'attribut était donc toujours vide.
-    ML_DATE_ACTIVATION_ML: isMl ? (user.organisation.activated_at ?? null) : null,
+    ML_DATE_ACTIVATION_ML: isMl ? dateActivationAffichee(user.organisation.activated_at) : null,
     ML_NB_RUPTURANTS_TOTAL: isMl ? (mlStats?.total ?? 0) : null,
     ML_NB_RUPTURANTS_A_TRAITER: isMl ? (mlStats?.a_traiter ?? 0) : null,
     ML_NB_RUPTURANTS_TRAITES: isMl ? (mlStats?.traite ?? 0) : null,
@@ -980,7 +981,7 @@ const buildMlGenericAttributes = (ctx: MlGenericContext, mlStats: MlStats | unde
     ADRESSE: adresseString,
     SIRET: cleanSiret(ctx.organisation.siret),
 
-    ML_DATE_ACTIVATION_ML: ctx.organisation.activated_at ?? ctx.firstConfirmedAt ?? null,
+    ML_DATE_ACTIVATION_ML: dateActivationAffichee(ctx.organisation.activated_at, ctx.firstConfirmedAt),
     ML_NB_RUPTURANTS_TOTAL: mlStats?.total ?? 0,
     ML_NB_RUPTURANTS_A_TRAITER: mlStats?.a_traiter ?? 0,
     ML_NB_RUPTURANTS_TRAITES: mlStats?.traite ?? 0,

@@ -11,7 +11,7 @@ export function ViewHeader({ title, icon, action }: ViewHeaderProps) {
     <div className={styles.headerContainer}>
       <div className={styles.logoContainer}>{icon}</div>
       <div className={styles.headerRow}>
-        <h2 className={styles.headerTitle}>{title}</h2>
+        <h1 className={styles.headerTitle}>{title}</h1>
         {action && <div className={styles.headerAction}>{action}</div>}
       </div>
     </div>

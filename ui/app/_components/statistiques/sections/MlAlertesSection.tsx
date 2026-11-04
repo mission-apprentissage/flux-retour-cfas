@@ -1,0 +1,234 @@
+"use client";
+
+import { Badge } from "@codegouvfr/react-dsfr/Badge";
+import Link from "next/link";
+import { useState, type ReactNode } from "react";
+import type { IMlAlerteListeRow, MlAlerteListeSortBy, MlAlerteListeType } from "shared/models/data/nationalStats.model";
+
+import { useMlAlertesExport } from "../hooks/useMlAlertesExport";
+import { usePageForParams } from "../hooks/usePageForParams";
+import { useSortableTable } from "../hooks/useSortableTable";
+import { useStatsFilters } from "../hooks/useStatsFilters";
+import { useMlAlertes } from "../hooks/useStatsQueries";
+import tableStyles from "../tables/CfaEtablissementsTable.module.css";
+import { SortableTableHeader } from "../tables/SortableTableHeader";
+import { formatActivityDuration, formatPercentageBadgeSimple } from "../utils";
+
+import { AlerteCard, AlertesSection } from "./AlerteCard";
+import styles from "./CfaAlertesSection.module.css";
+import mlStyles from "./MlAlertesSection.module.css";
+
+interface Colonne {
+  column: MlAlerteListeSortBy;
+  label: string;
+  centered?: boolean;
+  tooltip?: string;
+  cellule: (row: IMlAlerteListeRow) => ReactNode;
+}
+
+function NomMl({ row }: { row: IMlAlerteListeRow }) {
+  return (
+    <div className={`${tableStyles.nameCell} ${mlStyles.nom}`}>
+      <span className={tableStyles.name}>{row.nom}</span>
+      {!row.is_activated && (
+        <Badge as="span" severity="error" small>
+          N&apos;utilise pas le service
+        </Badge>
+      )}
+      <Link
+        href={`/suivi-des-indicateurs/mission-locale/${row.id}`}
+        className="fr-link fr-link--sm fr-link--icon-right fr-icon-arrow-right-line"
+        aria-label={`Voir la fiche de ${row.nom}`}
+      >
+        Voir la fiche
+      </Link>
+    </div>
+  );
+}
+
+const centre = (contenu: ReactNode) => <div className={tableStyles.centeredCell}>{contenu}</div>;
+
+const COLONNES = {
+  nom: { column: "nom", label: "Mission Locale", cellule: (row) => <NomMl row={row} /> },
+  raisonSociale: { column: "nom", label: "Raison sociale", cellule: (row) => <NomMl row={row} /> },
+  localisation: {
+    column: "localisation",
+    label: "Localisation",
+    cellule: (row) => [row.code_postal, row.commune].filter(Boolean).join(" ") || "-",
+  },
+  totalDossiers: {
+    column: "total_jeunes",
+    label: "Total dossiers",
+    tooltip:
+      "Ruptures et collaborations : l'engagement d'une Mission Locale (70 % de dossiers traités) se mesure sur tous ses dossiers.",
+    centered: true,
+    cellule: (row) => centre(row.total_jeunes.toLocaleString("fr-FR")),
+  },
+  aTraiter: {
+    column: "a_traiter",
+    label: "À traiter",
+    centered: true,
+    cellule: (row) => (
+      <div className={mlStyles.empile}>
+        {row.a_traiter.toLocaleString("fr-FR")}
+        {row.a_recontacter > 0 && (
+          <span className={mlStyles.mention}>+ {row.a_recontacter.toLocaleString("fr-FR")} à recontacter</span>
+        )}
+      </div>
+    ),
+  },
+  aRecontacter: {
+    column: "a_recontacter",
+    label: "À recontacter",
+    centered: true,
+    cellule: (row) => centre(row.a_recontacter.toLocaleString("fr-FR")),
+  },
+  delai: {
+    column: "delai_moyen_jours",
+    label: "Délai moyen",
+    centered: true,
+    cellule: (row) => (
+      <div className={`${tableStyles.centeredCell} ${styles.highlight}`}>
+        {row.delai_moyen_jours === null ? "-" : `${row.delai_moyen_jours.toLocaleString("fr-FR")} jours`}
+      </div>
+    ),
+  },
+  collabsRecues: {
+    column: "total_jeunes",
+    label: "Collab reçues",
+    centered: true,
+    cellule: (row) => centre(row.total_jeunes.toLocaleString("fr-FR")),
+  },
+  pourcentageTraites: {
+    column: "pourcentage_traites",
+    label: "% Traités",
+    centered: true,
+    cellule: (row) => centre(formatPercentageBadgeSimple(row.pourcentage_traites)),
+  },
+  activite: {
+    column: "activite",
+    label: "Activité",
+    centered: true,
+    cellule: (row) => {
+      const { text, className } = formatActivityDuration(row.jours_depuis_activite);
+      return <div className={`${tableStyles.centeredCell} ${className}`}>{text}</div>;
+    },
+  },
+} satisfies Record<string, Colonne>;
+
+function MlAlerte({
+  type,
+  titre,
+  colonnes,
+  triParDefaut,
+}: {
+  type: MlAlerteListeType;
+  titre: ReactNode;
+  colonnes: Colonne[];
+  triParDefaut: MlAlerteListeSortBy;
+}) {
+  const { region, departement } = useStatsFilters();
+  const [limit, setLimit] = useState(10);
+  const sort = useSortableTable<MlAlerteListeSortBy>(triParDefaut, "desc", {
+    columnDefaultDirections: { nom: "asc", localisation: "asc", activite: "asc" },
+  });
+  const params = { region, departement, sort_by: sort.sortColumn, sort_order: sort.sortDirection };
+  const [page, setPage] = usePageForParams(params);
+  const query = useMlAlertes(type, { ...params, page, limit });
+  const exporter = useMlAlertesExport(type, params);
+
+  return (
+    <AlerteCard
+      title={titre}
+      query={query}
+      loadingRows={query.isLoading || (query.isFetching && query.isPlaceholderData)}
+      exporter={exporter}
+      headers={colonnes.map(({ column, label, centered, tooltip }) => (
+        <SortableTableHeader
+          key={column}
+          column={column}
+          label={label}
+          currentSortColumn={sort.sortColumn}
+          sortDirection={sort.sortDirection}
+          onSort={sort.handleSort}
+          centered={centered}
+          tooltip={tooltip}
+        />
+      ))}
+      rows={(query.data?.data ?? []).map((row) =>
+        colonnes.map(({ column, cellule }) => <div key={column}>{cellule(row)}</div>)
+      )}
+      page={page}
+      onPageChange={setPage}
+      limit={limit}
+      onLimitChange={setLimit}
+      unite="ML"
+      libellePagination="ML en alerte"
+      tableClassName={mlStyles.tableMl}
+    />
+  );
+}
+
+/** Onglet Ruptures : les ML activées qui ne sont pas engagées. */
+export function MlRupturesAlertesSection() {
+  return (
+    <AlertesSection>
+      <MlAlerte
+        type="non_engagee"
+        titre={
+          <>
+            Les Missions Locales <span className={styles.highlight}>qui ne sont pas « Missions Locales engagées »</span>
+          </>
+        }
+        colonnes={[
+          COLONNES.nom,
+          COLONNES.totalDossiers,
+          COLONNES.aTraiter,
+          COLONNES.pourcentageTraites,
+          COLONNES.activite,
+        ]}
+        triParDefaut="total_jeunes"
+      />
+    </AlertesSection>
+  );
+}
+
+/** Onglet Collaborations > Activité des ML : mêmes alertes que la fiche ML, sur les collaborations. */
+export function MlCollabAlertesSection() {
+  return (
+    <AlertesSection>
+      <MlAlerte
+        type="delai_collab"
+        titre={
+          <>
+            Les ML qui ont un <span className={styles.highlight}>délai de traitement</span> des collabs supérieur à 10
+            jours
+          </>
+        }
+        colonnes={[COLONNES.raisonSociale, COLONNES.localisation, COLONNES.aTraiter, COLONNES.delai]}
+        triParDefaut="delai_moyen_jours"
+      />
+      <MlAlerte
+        type="a_recontacter"
+        titre={
+          <>
+            Les ML qui ont <span className={styles.highlight}>le plus de jeunes à recontacter</span>
+          </>
+        }
+        colonnes={[COLONNES.raisonSociale, COLONNES.localisation, COLONNES.aTraiter, COLONNES.aRecontacter]}
+        triParDefaut="a_recontacter"
+      />
+      <MlAlerte
+        type="collab_sans_compte"
+        titre={
+          <>
+            Les ML qui ont <span className={styles.highlight}>reçu des demandes de collaboration</span> mais qui
+            n&apos;utilisent pas encore le service TBA
+          </>
+        }
+        colonnes={[COLONNES.raisonSociale, COLONNES.localisation, COLONNES.collabsRecues]}
+        triParDefaut="total_jeunes"
+      />
+    </AlertesSection>
+  );
+}

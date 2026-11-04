@@ -12,9 +12,11 @@ interface TraitementStats {
 
 interface TraitementCardsProps {
   latestStats?: TraitementStats;
-  firstStats?: TraitementStats;
+  /** Variations calculées par le serveur : ajouts de la période comparés à la période précédente. */
+  variations?: Partial<Record<keyof TraitementStats, string>>;
   loading?: boolean;
   loadingPercentage?: boolean;
+  cardClassName?: string;
 }
 
 const TooltipWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -45,25 +47,28 @@ const BulletItem = ({ color, children }: { color: string; children: React.ReactN
 
 export function TraitementCards({
   latestStats,
-  firstStats,
+  variations,
   loading = false,
   loadingPercentage = false,
+  cardClassName,
 }: TraitementCardsProps) {
   return (
     <>
       <StatCard
         label="Total jeunes identifiés en rupture"
         value={latestStats?.total}
-        previousValue={firstStats?.total}
+        variation={variations?.total}
         loading={loading}
         loadingPercentage={loadingPercentage}
+        className={cardClassName}
       />
       <StatCard
         label="Total jeunes contactés par les Missions Locales"
         value={latestStats?.total_contacte}
-        previousValue={firstStats?.total_contacte}
+        variation={variations?.total_contacte}
         loading={loading}
         loadingPercentage={loadingPercentage}
+        className={cardClassName}
         tooltip={
           <TooltipWrapper>
             <TooltipHeader>Total jeunes contactés par les Missions locales</TooltipHeader>
@@ -90,9 +95,10 @@ export function TraitementCards({
       <StatCard
         label="Total jeunes ayant répondu"
         value={latestStats?.total_repondu}
-        previousValue={firstStats?.total_repondu}
+        variation={variations?.total_repondu}
         loading={loading}
         loadingPercentage={loadingPercentage}
+        className={cardClassName}
         tooltip={
           <TooltipWrapper>
             <TooltipHeader>Total jeunes ayant répondu</TooltipHeader>
@@ -122,9 +128,10 @@ export function TraitementCards({
       <StatCard
         label="Total jeunes accompagnés découverts par le service"
         value={latestStats?.total_accompagne}
-        previousValue={firstStats?.total_accompagne}
+        variation={variations?.total_accompagne}
         loading={loading}
         loadingPercentage={loadingPercentage}
+        className={cardClassName}
         tooltip={
           <TooltipWrapper>
             <TooltipHeader>Total jeunes accompagnés découverts par le service</TooltipHeader>

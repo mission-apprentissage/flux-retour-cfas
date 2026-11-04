@@ -685,7 +685,7 @@ const ACCENT_EQUIVALENTS: Record<string, string> = {
   y: "yÿ",
 };
 
-function buildAccentInsensitiveRegex(token: string): string {
+export function buildAccentInsensitiveRegex(token: string): string {
   return token
     .split("")
     .map((char) => {
@@ -697,6 +697,37 @@ function buildAccentInsensitiveRegex(token: string): string {
       return char.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     })
     .join("");
+}
+
+export const buildOrganismeNatureFilter = (natures: string[]): Document =>
+  natures.includes("inconnue")
+    ? { $or: [{ nature: { $in: natures } }, { nature: { $exists: false } }, { nature: null }] }
+    : { nature: { $in: natures } };
+
+/** Recherche par mots (enseigne, raison sociale, commune), insensible aux accents, ou par préfixe d'UAI / SIRET. */
+export function buildOrganismeSearchFilter(search: string): Document {
+  const searchValue = search.trim();
+  const tokenClauses = searchValue
+    .split(/\s+/)
+    .filter((token) => token.length > 0)
+    .map((token) => {
+      const regex = buildAccentInsensitiveRegex(token);
+      return {
+        $or: [
+          { enseigne: { $regex: regex, $options: "i" } },
+          { raison_sociale: { $regex: regex, $options: "i" } },
+          { "adresse.commune": { $regex: regex, $options: "i" } },
+        ],
+      };
+    });
+  const escapedFull = searchValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return {
+    $or: [
+      ...(tokenClauses.length > 0 ? [{ $and: tokenClauses }] : []),
+      { uai: { $regex: `^${escapedFull}`, $options: "i" } },
+      { siret: { $regex: `^${escapedFull.replace(/\s+/g, "")}` } },
+    ],
+  };
 }
 
 export interface ListOrganismesPaginatedParams {
@@ -723,13 +754,7 @@ export async function listOrganisationOrganismesPaginated(acl: Acl, params: List
 
   if (params.departements?.length) matchFilters.push({ "adresse.departement": { $in: params.departements } });
   if (params.regions?.length) matchFilters.push({ "adresse.region": { $in: params.regions } });
-  if (params.nature?.length) {
-    matchFilters.push(
-      params.nature.includes("inconnue")
-        ? { $or: [{ nature: { $in: params.nature } }, { nature: { $exists: false } }, { nature: null }] }
-        : { nature: { $in: params.nature } }
-    );
-  }
+  if (params.nature?.length) matchFilters.push(buildOrganismeNatureFilter(params.nature));
   if (params.qualiopi?.length) matchFilters.push({ qualiopi: { $in: params.qualiopi } });
   if (params.ferme?.length) matchFilters.push({ ferme: { $in: params.ferme } });
   if (params.etatUAI?.length && !(params.etatUAI.includes(true) && params.etatUAI.includes(false))) {
@@ -755,30 +780,7 @@ export async function listOrganisationOrganismesPaginated(acl: Acl, params: List
     }
     if (transmissionConditions.length > 0) matchFilters.push({ $or: transmissionConditions });
   }
-  if (params.search && params.search.trim().length >= 2) {
-    const searchValue = params.search.trim();
-    const tokenClauses = searchValue
-      .split(/\s+/)
-      .filter((token) => token.length > 0)
-      .map((token) => {
-        const regex = buildAccentInsensitiveRegex(token);
-        return {
-          $or: [
-            { enseigne: { $regex: regex, $options: "i" } },
-            { raison_sociale: { $regex: regex, $options: "i" } },
-            { "adresse.commune": { $regex: regex, $options: "i" } },
-          ],
-        };
-      });
-    const escapedFull = searchValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    matchFilters.push({
-      $or: [
-        ...(tokenClauses.length > 0 ? [{ $and: tokenClauses }] : []),
-        { uai: { $regex: `^${escapedFull}`, $options: "i" } },
-        { siret: { $regex: `^${escapedFull.replace(/\s+/g, "")}` } },
-      ],
-    });
-  }
+  if (params.search && params.search.trim().length >= 2) matchFilters.push(buildOrganismeSearchFilter(params.search));
 
   const direction = params.order === "desc" ? -1 : 1;
   const sortStages: Document[] = [];

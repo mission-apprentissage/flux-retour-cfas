@@ -1,0 +1,20 @@
+.charts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.charts > section {
+  margin-bottom: 0;
+  background-color: var(--background-default-grey);
+  border: 1px solid var(--border-default-grey);
+}
+
+.charts > section:first-child {
+  flex: 1 1 320px;
+}
+
+.charts > section:last-child {
+  flex: 2 1 480px;
+}
