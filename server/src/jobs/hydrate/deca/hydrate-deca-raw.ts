@@ -27,6 +27,7 @@ import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organisme
 import parentLogger from "@/common/logger";
 import { effectifsDECADb, organismesDb } from "@/common/model/collections";
 import { getBALMongodbUri } from "@/common/mongodb";
+import { cachedInRun, withRunCache } from "@/common/utils/runCache";
 import config from "@/config";
 import {
   fiabilisationEffectifFormation,
@@ -179,7 +180,11 @@ async function inspectEffectifDeca(document: IRawBalDeca, stats: IDryRunStats): 
   return createEmptyStats();
 }
 
-export async function hydrateDecaRaw({ dryRun = false, limit }: { dryRun?: boolean; limit?: number } = {}) {
+export function hydrateDecaRaw(options: { dryRun?: boolean; limit?: number } = {}) {
+  return withRunCache(() => importerContratsDeca(options));
+}
+
+async function importerContratsDeca({ dryRun = false, limit }: { dryRun?: boolean; limit?: number }) {
   const totalStats = createEmptyStats();
   const dryRunStats = createEmptyDryRunStats();
   let totalCount = 0;
@@ -484,7 +489,9 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
   const { siret, denomination, naf, adresse, nombre_de_salaries } = employeur;
   const { uai_cfa, siret: orgSiret } = organisme_formation;
 
-  const organisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
+  const organisme = await cachedInRun(`organisme:${uai_cfa}|${orgSiret}`, () =>
+    getOrganismeByUAIAndSIRET(uai_cfa, orgSiret)
+  );
 
   if (!organisme) {
     return null;
