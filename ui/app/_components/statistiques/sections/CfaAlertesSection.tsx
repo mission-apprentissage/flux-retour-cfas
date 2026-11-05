@@ -77,12 +77,7 @@ function CfaInvitesAlerte() {
 
   return (
     <AlerteCard
-      title={
-        <>
-          Les CFA ont reçu des invitations des Missions Locales mais n&apos;ont{" "}
-          <span className={styles.highlight}>pas encore fait de collaborations</span>
-        </>
-      }
+      title="Les CFA ont reçu des invitations des Missions Locales"
       query={query}
       loadingRows={query.isLoading || (query.isFetching && query.isPlaceholderData)}
       exporter={exporter}
@@ -90,6 +85,7 @@ function CfaInvitesAlerte() {
         [
           { column: "nom", label: "Raison sociale" },
           { column: "compte", label: "Compte TBA", centered: true },
+          { column: "collaborations", label: "Nb collab", centered: true },
           { column: "localisation", label: "Localisation" },
           { column: "invitations", label: "Invitations reçues", centered: true },
         ],
@@ -107,6 +103,9 @@ function CfaInvitesAlerte() {
           <Badge as="span" noIcon small severity={row.has_account ? "success" : "error"}>
             {row.has_account ? "Oui" : "Non"}
           </Badge>
+        </div>,
+        <div key="collab" className={tableStyles.centeredCell}>
+          {row.nb_collaborations}
         </div>,
         <Localisation key="loc" adresse={row.adresse} />,
         <div key="inv" className={tableStyles.centeredCell}>
