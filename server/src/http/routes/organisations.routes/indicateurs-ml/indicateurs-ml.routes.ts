@@ -752,6 +752,7 @@ const getCfaEtablissementsExportRoute: IndicateursHandler<z.infer<typeof cfaEtab
 
 const cfaInvitesOptions = (query: TerritoireQuery, userRegions: string[]) => ({
   territoire: resolveTerritoire(query, userRegions),
+  inclureAvecCollab: true,
 });
 
 const getCfaInvitesRoute: IndicateursHandler<z.infer<typeof cfaInvitesQuery>> = async (req, { locals }) =>
