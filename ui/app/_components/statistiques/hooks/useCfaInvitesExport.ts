@@ -8,7 +8,7 @@ import { avecVueFrance, type CfaInvitesParams } from "./useStatsQueries";
 import { useStatsXlsxExport } from "./useStatsXlsxExport";
 
 export function useCfaInvitesExport(params: CfaInvitesParams) {
-  return useStatsXlsxExport("CFA-invites-sans-collaboration", cfaInvitesSansCollabExportColumns, async () => {
+  return useStatsXlsxExport("CFA-invites", cfaInvitesSansCollabExportColumns, async () => {
     const { data } = await _get<{ data: ICfaInviteSansCollabRow[] }>(
       `${INDICATEURS_ML_BASE}/stats/cfa/invites-sans-collab/export`,
       { params: avecVueFrance(params) }
@@ -18,6 +18,9 @@ export function useCfaInvitesExport(params: CfaInvitesParams) {
       uai: row.uai ?? "",
       siret: row.siret,
       compte_tba: row.has_account ? "Oui" : "Non",
+      nb_collaborations: row.nb_collaborations,
+      date_activation: row.date_activation,
+      date_premiere_collaboration: row.date_premiere_collaboration,
       code_postal: row.adresse?.code_postal ?? "",
       commune: row.adresse?.commune ?? "",
       adresse: row.adresse?.complete ?? "",
