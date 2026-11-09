@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { CHAMPS_TELEVERSEMENT_PAR_CLE, ERREURS_TELEVERSEMENT } from "shared";
+import { CHAMPS_TELEVERSEMENT_PAR_CLE, ERREURS_TELEVERSEMENT, TELEVERSEMENT_MAX_LIGNES } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _post } from "@/common/httpClient";
@@ -8,8 +8,6 @@ import { getErrorStatusCode, getServerErrorMessage } from "@/common/rateLimit";
 import { reportError } from "@/common/reportError";
 import { lireFichierEffectifs, type ResultatLecture } from "@/common/utils/lectureFichierEffectifs";
 import { evenementVerification, messageFichierRefuse, toEffectifsQueue } from "@/common/utils/televersement";
-
-const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
 
 const FORMATS_ACCEPTES = {
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
@@ -30,13 +28,20 @@ interface ValidationIssue {
   code?: string;
 }
 
+export interface AvertissementsVerification {
+  contratCount?: number;
+  nouveaux?: number;
+  misAJour?: number;
+  contratsEffaces?: { nom: string; prenom: string; ligne: number }[];
+}
+
 interface StateType {
   processedData: ProcessedDataType[];
   valeursAEnvoyer: Record<string, unknown>[];
   headers: string[];
   error: string | null;
   errorsCount: number;
-  warnings: { contratCount?: number };
+  warnings: AvertissementsVerification;
   missingHeaders: string[];
   columnsWithErrors: string[];
   showOnlyColumnsAndLinesWithErrors: boolean;
@@ -95,17 +100,15 @@ const useExcelFileProcessor = (organismeId: string) => {
     trackPlausibleEvent("televersement_fichier_depose");
 
     try {
-      const lecture = await lireDansUnWorker(
-        await file.arrayBuffer(),
-        file.name,
-        POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH
-      );
+      const lecture = await lireDansUnWorker(await file.arrayBuffer(), file.name, TELEVERSEMENT_MAX_LIGNES);
       if (!lecture.succes) {
         setState({ ...initialState, error: lecture.message });
         return;
       }
 
-      const valeursAEnvoyer = toEffectifsQueue(lecture.lignes.map(({ valeurs }) => valeurs));
+      const valeursAEnvoyer = toEffectifsQueue(
+        lecture.lignes.map(({ valeurs, numero }) => ({ ...valeurs, ligne_fichier: numero }))
+      );
       const res = await _post<unknown, { error?: { issues?: ValidationIssue[] }; warnings?: StateType["warnings"] }>(
         `/api/v1/organismes/${organismeId}/upload/validate`,
         valeursAEnvoyer
@@ -114,13 +117,7 @@ const useExcelFileProcessor = (organismeId: string) => {
       const erreursServeurParLigne = (res.error?.issues ?? []).reduce<Record<number, ProcessedDataType["errors"]>>(
         (acc, issue) => {
           const index = Number(issue.path[0]);
-          acc[index] = [
-            ...(acc[index] ?? []),
-            {
-              key: String(issue.path[1]),
-              message: issue.code === "invalid_type" ? "Format invalide" : issue.message,
-            },
-          ];
+          acc[index] = [...(acc[index] ?? []), { key: String(issue.path[1]), message: issue.message }];
           return acc;
         },
         {}
@@ -131,7 +128,7 @@ const useExcelFileProcessor = (organismeId: string) => {
         numero: ligne.numero,
         errors: [
           ...ligne.erreurs.map(({ cle, message }) => ({ key: cle, message })),
-          ...(erreursServeurParLigne[index] ?? []),
+          ...(erreursServeurParLigne[index] ?? []).filter(({ key }) => !ligne.erreurs.some(({ cle }) => cle === key)),
         ],
       }));
       const erreursDeLignes = processedData.flatMap(({ errors }) => errors);

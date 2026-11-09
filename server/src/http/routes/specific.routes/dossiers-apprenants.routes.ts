@@ -13,7 +13,7 @@ import stripNullProperties from "@/common/utils/stripNullProperties";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
 
-export default () => {
+export default ({ maximumLignes = POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH }: { maximumLignes?: number } = {}) => {
   const router = express.Router();
 
   /**
@@ -22,7 +22,7 @@ export default () => {
    * Une validation plus complete est effectuée lors du traitement des données par process-effectifs-queue
    */
   router.post("/", async ({ user, body }, res, next) => {
-    const bodyItems = validateArrayInput(body, POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH).map((e) =>
+    const bodyItems = validateArrayInput(body, maximumLignes).map((e) =>
       stripNullProperties(e as Record<string, unknown>)
     );
     const validationSchema = dossierApprenantSchemaV3Input;

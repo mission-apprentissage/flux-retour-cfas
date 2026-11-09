@@ -10,11 +10,13 @@ import express, { Application, Response } from "express";
 import { ObjectId } from "mongodb";
 import passport from "passport";
 import { RateLimiterMemory } from "rate-limiter-flexible";
-import { CODE_POSTAL_REGEX, SOURCE_APPRENANT, zEffectifArchive } from "shared";
 import {
-  computeWarningsForDossierApprenantSchemaV3,
-  dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret,
-} from "shared/models/parts/dossierApprenantSchemaV3";
+  CODE_POSTAL_REGEX,
+  ERREURS_TELEVERSEMENT,
+  SOURCE_APPRENANT,
+  TELEVERSEMENT_MAX_LIGNES,
+  zEffectifArchive,
+} from "shared";
 import { extensions, primitivesV1 } from "shared/models/parts/zodPrimitives";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
@@ -57,8 +59,6 @@ import {
   findOrganismesBySIRET,
   findOrganismesByUAI,
   generateApiKeyForOrg,
-  getInvalidSiretsFromDossierApprenant,
-  getInvalidUaisFromDossierApprenant,
   getOrganisationIndicateursOrganismes,
   getOrganismeByAPIKey,
   getOrganismeById,
@@ -86,10 +86,7 @@ import {
   zSipaLoginBody,
 } from "@/common/actions/sipa.actions";
 import { genererModeleExcelTeleversement } from "@/common/actions/televersement/modele-excel.actions";
-import {
-  MESSAGE_API_ALTERNANCE_INDISPONIBLE,
-  verifierPerimetreTeleversement,
-} from "@/common/actions/televersement/perimetre.actions";
+import { verifierTeleversement } from "@/common/actions/televersement/verification.actions";
 import {
   changePassword,
   getUserByEmail,
@@ -105,8 +102,8 @@ import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
+import { validateArrayInput } from "@/common/utils/inputValidationError";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
-import stripNullProperties from "@/common/utils/stripNullProperties";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
@@ -724,45 +721,34 @@ function setupRoutes(app: Application) {
           .post(
             "/validate",
             returnResult<OrganismeLocals>(async (req, res) => {
-              const lignes = Array.isArray(req.body) ? req.body : [];
-              const perimetre = await verifierPerimetreTeleversement(res.locals.organismeId, lignes);
-              if (perimetre.indisponible) {
-                throw Boom.serverUnavailable(MESSAGE_API_ALTERNANCE_INDISPONIBLE);
+              const lignes = validateArrayInput(req.body, TELEVERSEMENT_MAX_LIGNES) as Record<string, unknown>[];
+              const verification = await verifierTeleversement(res.locals.organismeId, lignes);
+              if (verification.indisponible) {
+                throw Boom.serverUnavailable(ERREURS_TELEVERSEMENT.api_indisponible());
               }
-              const data = await z
-                .array(
-                  dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret(
-                    await getInvalidUaisFromDossierApprenant(Array.isArray(req.body) ? req.body : []),
-                    await getInvalidSiretsFromDossierApprenant(Array.isArray(req.body) ? req.body : [])
-                  )
-                )
-                .safeParseAsync(
-                  Array.isArray(req.body) ? req.body.map((dossier) => stripNullProperties(dossier)) : req.body
-                );
-              const warnings = computeWarningsForDossierApprenantSchemaV3(lignes);
-              const issues = [...(data.success ? [] : data.error.issues), ...perimetre.issues];
-              return issues.length > 0 ? { success: false, error: { issues }, warnings } : { ...data, warnings };
+              const { issues, warnings } = verification;
+              return issues.length > 0 ? { success: false, error: { issues }, warnings } : { success: true, warnings };
             })
           )
           .use(
             // v3 is required in URL to consider the request as a v3 import
             "/import/v3",
             async (req, res: Response<unknown, OrganismeLocals>, next) => {
-              const perimetre = await verifierPerimetreTeleversement(
-                res.locals.organismeId,
-                Array.isArray(req.body) ? req.body : []
-              );
-              if (perimetre.indisponible) {
-                throw Boom.serverUnavailable(MESSAGE_API_ALTERNANCE_INDISPONIBLE);
+              const lignes = validateArrayInput(req.body, TELEVERSEMENT_MAX_LIGNES) as Record<string, unknown>[];
+              const verification = await verifierTeleversement(res.locals.organismeId, lignes);
+              if (verification.indisponible) {
+                throw Boom.serverUnavailable(ERREURS_TELEVERSEMENT.api_indisponible());
               }
-              if (perimetre.issues.length > 0) {
-                throw Boom.badRequest(perimetre.issues[0].message);
+              if (verification.issues.length > 0) {
+                throw Boom.badRequest(
+                  `${ERREURS_TELEVERSEMENT.erreurs_avant_import()} ${verification.issues[0].message}`
+                );
               }
               req.user.source = SOURCE_APPRENANT.FICHIER;
               req.user.source_organisme_id = String(res.locals.organismeId);
               next();
             },
-            dossierApprenantRouter()
+            dossierApprenantRouter({ maximumLignes: TELEVERSEMENT_MAX_LIGNES })
           )
       )
       .use(

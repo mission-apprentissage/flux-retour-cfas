@@ -16,3 +16,12 @@ export function normalizeToUTCDay(date: Date): Date {
   normalized.setUTCHours(0, 0, 0, 0);
   return normalized;
 }
+
+export function estFinAvantEntree(entree?: Date | null, fin?: Date | null): boolean {
+  return !!entree && !!fin && fin.getTime() < entree.getTime();
+}
+
+export function formaterDateJourUTC(date: Date): string {
+  const deuxChiffres = (n: number) => String(n).padStart(2, "0");
+  return `${deuxChiffres(date.getUTCDate())}/${deuxChiffres(date.getUTCMonth() + 1)}/${date.getUTCFullYear()}`;
+}

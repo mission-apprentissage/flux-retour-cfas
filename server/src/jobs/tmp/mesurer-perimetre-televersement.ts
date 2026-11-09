@@ -2,7 +2,7 @@ import { subMonths } from "date-fns";
 import { ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 
-import { verifierPerimetreTeleversement } from "@/common/actions/televersement/perimetre.actions";
+import { verifierEtablissementsTeleversement } from "@/common/actions/televersement/perimetre.actions";
 import parentLogger from "@/common/logger";
 import { effectifsQueueDb, organismesDb } from "@/common/model/collections";
 
@@ -73,7 +73,7 @@ export async function mesurerPerimetreTeleversement({ mois = 16 }: { mois?: numb
       continue;
     }
     const sourceId = new ObjectId(importFichier._id.source_organisme_id);
-    const { indisponible, issues } = await verifierPerimetreTeleversement(
+    const { indisponible, issues } = await verifierEtablissementsTeleversement(
       sourceId,
       importFichier.etablissements.map(({ uai, siret }) => ({
         etablissement_formateur_uai: uai,
@@ -84,10 +84,12 @@ export async function mesurerPerimetreTeleversement({ mois = 16 }: { mois?: numb
       importsNonJuges.push(importFichier._id);
       continue;
     }
-    if (issues.length === 0) {
+    const horsPerimetre = issues
+      .filter(({ motif }) => motif === "hors_perimetre")
+      .map(({ path: [index] }) => importFichier.etablissements[index]);
+    if (horsPerimetre.length === 0) {
       continue;
     }
-    const horsPerimetre = issues.map(({ path: [index] }) => importFichier.etablissements[index]);
     const source = await organismesDb().findOne({ _id: sourceId }, { projection: { uai: 1 } });
     importsRefuses.push({
       source_organisme_id: importFichier._id.source_organisme_id,

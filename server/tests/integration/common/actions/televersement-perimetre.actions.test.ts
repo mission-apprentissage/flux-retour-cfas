@@ -4,7 +4,7 @@ import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IOrganisme } from "shared/models/data/organismes.model";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { verifierPerimetreTeleversement } from "@/common/actions/televersement/perimetre.actions";
+import { verifierEtablissementsTeleversement } from "@/common/actions/televersement/perimetre.actions";
 import { effectifsDECADb, organismesDb } from "@/common/model/collections";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -60,7 +60,7 @@ const ligne = ({ uai, siret }: Identifiant) => ({
   etablissement_formateur_siret: siret,
 });
 
-describe("verifierPerimetreTeleversement", () => {
+describe("verifierEtablissementsTeleversement", () => {
   useNock();
   useMongo();
 
@@ -92,15 +92,16 @@ describe("verifierPerimetreTeleversement", () => {
     const couples = [IMPORTATEUR, FORMATEUR_DECLARE, MEME_SIRET_QUE_FORMATEUR, MEME_SIREN, RELIE_PAR_DECA];
     couples.forEach(mockRechercheExacte);
 
-    const resultat = await verifierPerimetreTeleversement(importateur._id, couples.map(ligne));
+    const resultat = await verifierEtablissementsTeleversement(importateur._id, couples.map(ligne));
 
-    expect(resultat).toEqual({ indisponible: false, issues: [] });
+    expect(resultat.issues).toEqual([]);
+    expect(resultat.indisponible).toBe(false);
   });
 
   it("refuse un établissement sans aucun lien, avec le nom de l'organisme qui importe", async () => {
     [IMPORTATEUR, TIERS].forEach(mockRechercheExacte);
 
-    const resultat = await verifierPerimetreTeleversement(importateur._id, [ligne(IMPORTATEUR), ligne(TIERS)]);
+    const resultat = await verifierEtablissementsTeleversement(importateur._id, [ligne(IMPORTATEUR), ligne(TIERS)]);
 
     expect(resultat).toEqual({
       indisponible: false,
@@ -110,8 +111,10 @@ describe("verifierPerimetreTeleversement", () => {
           message:
             "L'établissement 0600077H n'est pas rattaché à CFA Importateur. Ses apprenants ne peuvent pas être importés ici.",
           code: "custom",
+          motif: "hors_perimetre",
         },
       ],
+      organismeIdParLigne: [importateur._id.toString(), expect.any(String)],
     });
   });
 
@@ -133,7 +136,7 @@ describe("verifierPerimetreTeleversement", () => {
       })
       .persist();
 
-    await verifierPerimetreTeleversement(importateur._id, [
+    await verifierEtablissementsTeleversement(importateur._id, [
       ligne(TIERS_SANS_RESULTAT),
       ligne(TIERS_SANS_RESULTAT),
       ligne(TIERS_SANS_RESULTAT),
@@ -142,19 +145,49 @@ describe("verifierPerimetreTeleversement", () => {
     expect(appels.n).toBe(1);
   });
 
-  it("laisse à la vérification des établissements un SIRET dont la clé est fausse, sans appeler l'API", async () => {
-    const resultat = await verifierPerimetreTeleversement(importateur._id, [
+  it("signale un établissement inconnu quand la clé du SIRET est fausse, sans appeler l'API", async () => {
+    const resultat = await verifierEtablissementsTeleversement(importateur._id, [
       ligne({ uai: TIERS.uai, siret: "44444444200017" }),
     ]);
 
-    expect(resultat).toEqual({ indisponible: false, issues: [] });
+    expect(resultat.issues).toEqual([
+      {
+        path: [0, "etablissement_formateur_uai"],
+        message:
+          "Aucun établissement ne correspond à l'UAI 0600077H et au SIRET 44444444200017. Vérifiez les deux numéros.",
+        code: "custom",
+        motif: "etablissement_inconnu",
+      },
+    ]);
+  });
+
+  it("signale un responsable inconnu, distinct du formateur", async () => {
+    mockRechercheExacte(IMPORTATEUR);
+    nock(API)
+      .get("/organisme/v1/recherche")
+      .query({ uai: TIERS_SANS_RESULTAT.uai, siret: TIERS_SANS_RESULTAT.siret })
+      .reply(200, { metadata: { uai: { status: "ok" }, siret: { status: "ok" } }, resultat: null, candidats: [] })
+      .persist();
+
+    const resultat = await verifierEtablissementsTeleversement(importateur._id, [
+      {
+        ...ligne(IMPORTATEUR),
+        etablissement_responsable_uai: TIERS_SANS_RESULTAT.uai,
+        etablissement_responsable_siret: TIERS_SANS_RESULTAT.siret,
+      },
+    ]);
+
+    expect(resultat.issues).toMatchObject([
+      { path: [0, "etablissement_responsable_uai"], motif: "etablissement_inconnu" },
+    ]);
+    expect(resultat.organismeIdParLigne).toEqual([importateur._id.toString()]);
   });
 
   it("signale l'indisponibilité de l'API au lieu de juger le périmètre", async () => {
     nock(API).get("/organisme/v1/recherche").query(true).replyWithError("API indisponible").persist();
 
-    const resultat = await verifierPerimetreTeleversement(importateur._id, [ligne(TIERS_API_EN_PANNE)]);
+    const resultat = await verifierEtablissementsTeleversement(importateur._id, [ligne(TIERS_API_EN_PANNE)]);
 
-    expect(resultat).toEqual({ indisponible: true, issues: [] });
+    expect(resultat).toMatchObject({ indisponible: true, issues: [] });
   });
 });

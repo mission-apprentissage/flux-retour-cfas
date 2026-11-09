@@ -150,7 +150,7 @@ export function TeleversementTable({
       cells[header] = (
         <span>
           <span>{typeof value === "string" || typeof value === "number" ? value : null}</span>
-          {error && <span className={styles.cellError}> {error.message.replace("String", "Texte")}</span>}
+          {error && <span className={styles.cellError}> {error.message}</span>}
         </span>
       );
     }

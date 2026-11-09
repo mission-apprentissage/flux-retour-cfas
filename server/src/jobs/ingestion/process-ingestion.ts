@@ -12,6 +12,7 @@ import {
 import { IAttributionOrganisme, IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import dossierApprenantSchemaV3, { type IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
+import { estFinAvantEntree } from "shared/utils";
 import { NEVER, SafeParseReturnType } from "zod";
 
 import { updateVoeuxAffelnetEffectif } from "@/common/actions/affelnet.actions";
@@ -381,7 +382,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
       // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1695295051135549
       // We compute the real duration of the formation in months, only if we have both date_entree and date_fin
       if (effectif.formation?.date_fin && effectif.formation?.date_entree) {
-        if (effectif.formation.date_fin < effectif.formation.date_entree) {
+        if (estFinAvantEntree(effectif.formation.date_entree, effectif.formation.date_fin)) {
           ctx.addIssue(
             createCustomEffectifIssue(
               "La date de fin de formation doit être supérieure à la date d'entrée en formation",

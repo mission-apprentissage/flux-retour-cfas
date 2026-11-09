@@ -7,7 +7,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ERREURS_TELEVERSEMENT, TD_MANUEL_ELEMENT_LINK } from "shared";
+import { ERREURS_TELEVERSEMENT, TD_MANUEL_ELEMENT_LINK, TEXTES_TELEVERSEMENT } from "shared";
 
 import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
@@ -121,15 +121,41 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
       {status === "validation_success" && (
         <Alert
           severity="success"
-          title="Le format de votre fichier a été correctement rempli."
+          title={TEXTES_TELEVERSEMENT.titre_succes()}
           description={
             <>
-              Vous pouvez relire le détail ligne à ligne ci-dessous (et défiler sur la droite). Si vous êtes satisfait,
-              vous pouvez valider l’import en cliquant sur le bouton dédié en bas de cette page.{" "}
-              <b>Votre fichier n’a pas encore été importé.</b>
+              {warnings.nouveaux !== undefined && warnings.misAJour !== undefined && (
+                <p className="fr-mb-1w">
+                  {TEXTES_TELEVERSEMENT.nouveaux_et_mis_a_jour({
+                    nouveaux: warnings.nouveaux,
+                    misAJour: warnings.misAJour,
+                  })}
+                </p>
+              )}
+              <p className="fr-mb-0">
+                Vous pouvez relire le détail ligne à ligne ci-dessous (et défiler sur la droite). Si vous êtes
+                satisfait, vous pouvez valider l’import en cliquant sur le bouton dédié en bas de cette page.{" "}
+                <b>Votre fichier n’a pas encore été importé.</b>
+              </p>
             </>
           }
           className="fr-my-3w"
+        />
+      )}
+      {status === "validation_success" && !!warnings.contratsEffaces?.length && (
+        <Alert
+          severity="warning"
+          title={TEXTES_TELEVERSEMENT.contrats_effaces({ nombre: warnings.contratsEffaces.length })}
+          description={
+            <ul className="fr-mb-0">
+              {warnings.contratsEffaces.map(({ nom, prenom, ligne }) => (
+                <li key={ligne}>
+                  {nom} {prenom}, ligne {ligne}
+                </li>
+              ))}
+            </ul>
+          }
+          className="fr-mb-3w"
         />
       )}
       {status === "validation_failure" && (
@@ -168,12 +194,8 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
       )}
       {!!warnings.contratCount && (
         <Alert
-          severity="warning"
-          title={`${warnings.contratCount}${
-            warnings.contratCount === 1
-              ? " apprenant n'a aucune date de début et de fin de contrat renseignée."
-              : " apprenants n'ont aucune date de début et de fin de contrat renseignée."
-          }`}
+          severity="info"
+          title={TEXTES_TELEVERSEMENT.inscrits_sans_contrat({ nombre: warnings.contratCount })}
           description="Nous nous basons sur les dates de contrat, de rupture, de formation et d'exclusion pour déterminer le statut d'un effectif. N'oubliez pas de remplir les dates de contrat quand il y en a un, sans quoi les apprentis passent automatiquement en statut « abandon » 3 mois après leur date d'inscription ou 6 mois après leur date de rupture."
           className="fr-mb-3w"
         />

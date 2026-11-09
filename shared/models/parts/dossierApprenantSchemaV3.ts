@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-import { ERREURS_TELEVERSEMENT } from "../../constants/televersement";
+import { CHAMPS_TELEVERSEMENT_PAR_CLE, ERREURS_TELEVERSEMENT } from "../../constants/televersement";
+import { CODE_POSTAL_REGEX, SIRET_REGEX } from "../../constants/validations";
+import { estFinAvantEntree, formaterDateJourUTC } from "../../utils/date";
 
 import { extensions, primitivesV1, primitivesV3 } from "./zodPrimitives";
 
@@ -170,42 +172,91 @@ const REGLES_UN_DES_DEUX_FICHIER = [
   },
 ] as const;
 
+export const PARAMS_TELEVERSEMENT = { televersement: true } as const;
+
+export const SUFFIXES_CONTRATS = ["", "_2", "_3", "_4"] as const;
+
+const estRenseigne = (valeur: unknown) => valeur !== undefined && valeur !== null && valeur !== "";
+
 const verifierReglesFichier = (dossier: Record<string, unknown>, ctx: z.RefinementCtx) => {
   for (const { champs, message } of REGLES_UN_DES_DEUX_FICHIER) {
-    if (champs.every((champ) => dossier[champ] === undefined || dossier[champ] === null || dossier[champ] === "")) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: [champs[0]], message });
+    if (!champs.some((champ) => estRenseigne(dossier[champ]))) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: [champs[0]], message, params: PARAMS_TELEVERSEMENT });
     }
+  }
+  for (const suffixe of SUFFIXES_CONTRATS) {
+    const elementsDuContrat = ["contrat_date_fin", "contrat_date_rupture", "cause_rupture_contrat"].map(
+      (champ) => dossier[`${champ}${suffixe}`]
+    );
+    if (elementsDuContrat.some(estRenseigne) && !estRenseigne(dossier[`contrat_date_debut${suffixe}`])) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [`contrat_date_debut${suffixe}`],
+        message: ERREURS_TELEVERSEMENT.contrat_incomplet(),
+        params: PARAMS_TELEVERSEMENT,
+      });
+    }
+  }
+  const entree = dossier.date_entree_formation;
+  const fin = dossier.date_fin_formation;
+  if (entree instanceof Date && fin instanceof Date && estFinAvantEntree(entree, fin)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["date_fin_formation"],
+      message: ERREURS_TELEVERSEMENT.fin_avant_entree({
+        fin: formaterDateJourUTC(fin),
+        entree: formaterDateJourUTC(entree),
+      }),
+      params: PARAMS_TELEVERSEMENT,
+    });
   }
 };
 
-export function dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret(
-  invalidsUais: string[],
-  invalidsSirets: string[]
-) {
-  const validateUAI = (uai: string) => !invalidsUais.includes(uai);
-  const validateSiret = (siret: string) => !invalidsSirets.includes(siret);
-  const messageUai = "UAI non valide";
-  const messageSiret = "Siret non valide";
-
-  return dossierApprenantSchemaV3Base
-    .merge(
-      z.object({
-        etablissement_responsable_uai: primitivesV1.etablissement_responsable.uai.refine(validateUAI, {
-          message: messageUai,
-        }),
-        etablissement_responsable_siret: primitivesV1.etablissement_responsable.siret.refine(validateSiret, {
-          message: messageSiret,
-        }),
-        etablissement_formateur_uai: primitivesV1.etablissement_formateur.uai.refine(validateUAI, {
-          message: messageUai,
-        }),
-        etablissement_formateur_siret: primitivesV1.etablissement_formateur.siret.refine(validateSiret, {
-          message: messageSiret,
-        }),
+const valeurMalFormee = (cle: string, attendu: string, estValide: (valeur: string) => boolean) =>
+  z.preprocess(
+    (valeur) => (estRenseigne(valeur) ? String(valeur).trim() : undefined),
+    z
+      .string()
+      .superRefine((valeur, ctx) => {
+        if (!estValide(valeur)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: ERREURS_TELEVERSEMENT.valeur_mal_formee({
+              libelle: CHAMPS_TELEVERSEMENT_PAR_CLE[cle].libelle,
+              valeur,
+              attendu,
+            }),
+            params: PARAMS_TELEVERSEMENT,
+          });
+        }
       })
-    )
-    .superRefine(verifierReglesFichier);
-}
+      .optional()
+  );
+
+const siretStrict = (cle: string) =>
+  valeurMalFormee(cle, "Il compte 14 chiffres.", (valeur) => SIRET_REGEX.test(valeur.replace(/[\s.-]+/g, "")));
+
+export const dossierApprenantSchemaFichier = dossierApprenantSchemaV3Base
+  .merge(
+    z.object({
+      siret_employeur: siretStrict("siret_employeur"),
+      siret_employeur_2: siretStrict("siret_employeur_2"),
+      siret_employeur_3: siretStrict("siret_employeur_3"),
+      siret_employeur_4: siretStrict("siret_employeur_4"),
+      etablissement_lieu_de_formation_siret: siretStrict("etablissement_lieu_de_formation_siret"),
+      code_postal_de_naissance_apprenant: valeurMalFormee(
+        "code_postal_de_naissance_apprenant",
+        "Il compte 5 chiffres.",
+        (valeur) => CODE_POSTAL_REGEX.test(valeur.padStart(5, "0"))
+      ),
+      duree_theorique_formation_mois: valeurMalFormee(
+        "duree_theorique_formation_mois",
+        "Indiquez un nombre entier de mois, de 1 à 48.",
+        (valeur) => /^\d+$/.test(valeur) && Number(valeur) >= 1 && Number(valeur) <= 48
+      ),
+    })
+  )
+  .superRefine(verifierReglesFichier);
 
 export function computeWarningsForDossierApprenantSchemaV3(data: Array<IDossierApprenantSchemaV3>) {
   return {

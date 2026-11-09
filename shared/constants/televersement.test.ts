@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret } from "../models/parts/dossierApprenantSchemaV3";
+import { dossierApprenantSchemaFichier } from "../models/parts/dossierApprenantSchemaV3";
 
 import { CATALOGUE_CHAMPS_TELEVERSEMENT, CHAMPS_TELEVERSEMENT_PAR_CLE, ERREURS_TELEVERSEMENT } from "./televersement";
 
@@ -42,7 +42,7 @@ const ligneMinimale: Record<string, unknown> = {
   email_contact: "gaston.dupuis@domaine.fr",
 };
 
-const schemaFichier = dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret([], []);
+const schemaFichier = dossierApprenantSchemaFichier;
 
 const sans = (...cles: string[]) =>
   Object.fromEntries(Object.entries(ligneMinimale).filter(([cle]) => !cles.includes(cle)));
@@ -102,6 +102,9 @@ describe("messages de l'import par fichier", () => {
     expect(ERREURS_TELEVERSEMENT.doublon_fichier({ apprenant: "Camille Martin", lignes: [12, 48] })).toBe(
       "Camille Martin apparaît deux fois (lignes 12 et 48) pour la même année. Gardez une seule ligne."
     );
+    expect(ERREURS_TELEVERSEMENT.doublon_fichier({ apprenant: "Camille Martin", lignes: [3, 7, 9] })).toBe(
+      "Camille Martin apparaît 3 fois (lignes 3, 7 et 9) pour la même année. Gardez une seule ligne."
+    );
   });
 
   it("donnent le nombre de lignes et le maximum", () => {
@@ -109,6 +112,42 @@ describe("messages de l'import par fichier", () => {
     expect(message).toMatch(
       /^Votre fichier contient 5\s214 apprenants\. Le maximum est 5\s000 : coupez-le en deux fichiers\.$/
     );
+  });
+});
+
+const messagesEnErreur = (ligne: Record<string, unknown>) => {
+  const resultat = schemaFichier.safeParse(ligne);
+  return resultat.success ? [] : resultat.error.issues.map(({ path, message }) => [path.join("."), message]);
+};
+
+describe("contrôles du schéma fichier", () => {
+  it("refuse une fin de formation avant l'entrée", () => {
+    expect(messagesEnErreur({ ...ligneMinimale, date_fin_formation: "2026-01-01" })).toEqual([
+      ["date_fin_formation", "La fin de formation (01/01/2026) est avant l'entrée en formation (01/09/2026)."],
+    ]);
+  });
+
+  it("refuse un contrat sans date de début, pour chacun des quatre contrats", () => {
+    expect(
+      messagesEnErreur({ ...ligneMinimale, contrat_date_rupture: "2026-12-01", cause_rupture_contrat_3: "Démission" })
+    ).toEqual([
+      ["contrat_date_debut", ERREURS_TELEVERSEMENT.contrat_incomplet()],
+      ["contrat_date_debut_3", ERREURS_TELEVERSEMENT.contrat_incomplet()],
+    ]);
+  });
+
+  it.each([
+    ["siret_employeur", "1234"],
+    ["duree_theorique_formation_mois", "60"],
+    ["code_postal_de_naissance_apprenant", "Paris"],
+  ])("signale %s mal formé au lieu de le vider", (cle, valeur) => {
+    const [[chemin, message]] = messagesEnErreur({ ...ligneMinimale, [cle]: valeur });
+    expect(chemin).toBe(cle);
+    expect(message).toContain(`valeur mal formée (${valeur})`);
+  });
+
+  it("accepte un SIRET employeur écrit avec des espaces", () => {
+    expect(messagesEnErreur({ ...ligneMinimale, siret_employeur: "780 507 190 00012" })).toEqual([]);
   });
 });
 

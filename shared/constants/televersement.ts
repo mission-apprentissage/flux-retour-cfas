@@ -615,7 +615,7 @@ export const ERREURS_TELEVERSEMENT = {
     `Votre fichier contient ${lignes.toLocaleString("fr-FR")} apprenants. Le maximum est ${maximum.toLocaleString("fr-FR")} : coupez-le en deux fichiers.`,
   fichier_protege: () =>
     "Ce fichier est protégé par un mot de passe. Enregistrez-le sans mot de passe, puis déposez-le.",
-  cellule_obligatoire_vide: ({ libelle }: { libelle: string }) => `${libelle} manquante.`,
+  cellule_obligatoire_vide: ({ libelle }: { libelle: string }) => `${libelle} : à renseigner.`,
   date_illisible: ({ libelle, valeur }: { libelle: string; valeur: string }) =>
     `${libelle} illisible : ${valeur}. Écrivez-la sous la forme 01/09/2026.`,
   date_impossible: ({ valeur }: { valeur: string }) => `Le ${valeur} n'existe pas.`,
@@ -632,10 +632,10 @@ export const ERREURS_TELEVERSEMENT = {
   contrat_incomplet: () =>
     "La date de début du contrat manque, alors que sa fin, sa rupture ou sa cause de rupture est renseignée.",
   doublon_fichier: ({ apprenant, lignes }: { apprenant: string; lignes: number[] }) =>
-    `${apprenant} apparaît ${lignes.length === 2 ? "deux" : lignes.length} fois (lignes ${lignes.join(" et ")}) pour la même année. Gardez une seule ligne.`,
+    `${apprenant} apparaît ${lignes.length === 2 ? "deux" : lignes.length} fois (lignes ${lignes.slice(0, -1).join(", ")} et ${lignes.at(-1)}) pour la même année. Gardez une seule ligne.`,
   sexe: () => "Sexe : indiquez F ou M.",
   valeur_mal_formee: ({ libelle, valeur, attendu }: { libelle: string; valeur: string; attendu: string }) =>
-    `${libelle} mal formé : ${valeur}. ${attendu}`,
+    `${libelle} : valeur mal formée (${valeur}). ${attendu}`,
   erreurs_avant_import: () => "Corrigez les erreurs avant d'importer.",
   erreur_reseau: () =>
     "Votre fichier n'a pas pu être envoyé. Vérifiez votre connexion et réessayez. Rien n'a été importé.",
@@ -646,3 +646,23 @@ export const ERREURS_TELEVERSEMENT = {
 } as const;
 
 export type CodeErreurTeleversement = keyof typeof ERREURS_TELEVERSEMENT;
+
+export const TELEVERSEMENT_MAX_LIGNES = 5000;
+
+const nombre = (valeur: number) => valeur.toLocaleString("fr-FR");
+
+export const TEXTES_TELEVERSEMENT = {
+  limite_zone_depot: () =>
+    `Sélectionner un fichier contenant vos effectifs à importer (${nombre(TELEVERSEMENT_MAX_LIGNES)} au plus).`,
+  titre_succes: () => "Votre fichier est prêt.",
+  nouveaux_et_mis_a_jour: ({ nouveaux, misAJour }: { nouveaux: number; misAJour: number }) =>
+    `${nombre(nouveaux + misAJour)} apprenant${nouveaux + misAJour > 1 ? "s" : ""} : ${nombre(nouveaux)} nouveau${nouveaux > 1 ? "x" : ""} et ${nombre(misAJour)} mis à jour.`,
+  contrats_effaces: ({ nombre: total }: { nombre: number }) =>
+    total > 1
+      ? `${nombre(total)} apprentis ont un contrat connu qui n'est pas dans ce fichier. Il sera retiré à l'import.`
+      : "1 apprenti a un contrat connu qui n'est pas dans ce fichier. Il sera retiré à l'import.",
+  inscrits_sans_contrat: ({ nombre: total }: { nombre: number }) =>
+    total > 1
+      ? `${nombre(total)} jeunes sont inscrits sans contrat. S'ils ont un contrat, ajoutez sa date de début.`
+      : "1 jeune est inscrit sans contrat. S'il a un contrat, ajoutez sa date de début.",
+} as const;
