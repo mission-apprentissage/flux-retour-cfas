@@ -488,12 +488,12 @@ const createOrUpdateEffectif = async (
       // L'effectif est fusionné avec les nouvelles données.
       // Si une donnée a été modifiée manuellement dans la plateforme, elle sera écrasée par l'import.
       // Ce (potentiel, tout dépend de ce qu'on veut) problème doit être traité d'un point de vue métier.
-      await effectifsDb().findOneAndUpdate(
-        { _id: effectifDb._id },
-        {
-          $set: mergedEffectif,
-        }
-      );
+      effectifDb =
+        (await effectifsDb().findOneAndUpdate(
+          { _id: effectifDb._id },
+          { $set: mergedEffectif },
+          { returnDocument: "after" }
+        )) ?? effectifDb;
     } else {
       effectifDb = { ...effectif, transmitted_at: new Date(), _id: new ObjectId() };
       const { insertedId } = await effectifsDb().insertOne(effectifDb);
