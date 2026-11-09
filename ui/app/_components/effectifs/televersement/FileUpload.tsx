@@ -30,7 +30,7 @@ export function FileUpload({
           </div>
         ) : (
           <>
-            <input {...getInputProps()} />
+            <input {...getInputProps({ "aria-label": "Fichier des effectifs à importer" })} />
             {isDragActive ? (
               <p>Glissez et déposez ici ...</p>
             ) : (

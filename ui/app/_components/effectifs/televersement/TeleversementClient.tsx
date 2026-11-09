@@ -10,8 +10,9 @@ import { useState } from "react";
 import { TD_MANUEL_ELEMENT_LINK } from "shared";
 
 import { PageHeader } from "@/app/_components/page-header/PageHeader";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _post } from "@/common/httpClient";
-import { toEffectifsQueue } from "@/common/utils/televersement";
+import { envoyerImport, toEffectifsQueue } from "@/common/utils/televersement";
 import useExcelFileProcessor from "@/hooks/useExcelFileProcessor";
 
 import { DocumentsActionButtons } from "./DocumentsActionButtons";
@@ -30,6 +31,7 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const {
     getRootProps,
@@ -50,18 +52,22 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
 
   const handleSubmit = async () => {
     if (errorsCount > 0 || error) {
-      setSubmitError("Please fix the errors before submitting.");
+      setSubmitError("Corrigez les erreurs avant d'importer.");
       setIsSubmitting(false);
       return;
     }
     setSubmitError(null);
     setIsSubmitting(true);
-    const res = await _post<unknown, { error?: unknown }>(
-      `/api/v1/organismes/${organismeId}/upload/import/v3`,
-      toEffectifsQueue(processedData)
+    const resultat = await envoyerImport(
+      () => _post(`/api/v1/organismes/${organismeId}/upload/import/v3`, toEffectifsQueue(processedData)),
+      (goal) => trackPlausibleEvent(goal)
     );
-    setStatus(res.error ? "import_failure" : "import_success");
     setIsSubmitting(false);
+    if (resultat.succes) {
+      setStatus("import_success");
+    } else {
+      setSubmitError(resultat.message);
+    }
   };
 
   if (status === "import_success") return <TeleversementValide isMine={isMine} organismeId={organismeId} />;
@@ -74,6 +80,7 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
   return (
     <div>
       <PageHeader
+        titleAs={isMine ? "h1" : "h2"}
         title={
           <>
             Import des effectifs{" "}

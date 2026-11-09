@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import XLSX from "xlsx";
 
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { FieldConfig, televersementHeaders } from "@/common/constants/televersementHeaders";
 import { _post } from "@/common/httpClient";
 import { reportError } from "@/common/reportError";
 import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
-import { toEffectifsQueue } from "@/common/utils/televersement";
+import { evenementVerification, messageFichierRefuse, toEffectifsQueue } from "@/common/utils/televersement";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
 
@@ -48,6 +49,7 @@ const initialState: StateType = {
 
 const useExcelFileProcessor = (organismeId: string) => {
   const [state, setState] = useState<StateType>(initialState);
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const resetState = () => {
     setState(initialState);
@@ -57,8 +59,11 @@ const useExcelFileProcessor = (organismeId: string) => {
     resetState();
     setState((prevState) => ({ ...prevState, status: "processing" }));
     const file = acceptedFiles[0];
+    if (file) {
+      trackPlausibleEvent("televersement_fichier_depose");
+    }
     if (!file) {
-      const errorMsg = "No file provided";
+      const errorMsg = "Aucun fichier n'a été reçu. Déposez-le à nouveau.";
       setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
       return;
     }
@@ -199,6 +204,7 @@ const useExcelFileProcessor = (organismeId: string) => {
           columnsWithErrors: uniqueColumnsWithErrors as string[],
           status: errors.length ? "validation_failure" : "validation_success",
         }));
+        trackPlausibleEvent(evenementVerification(errors.length));
       } catch (error) {
         reportError(error, { action: "traitement-fichier-excel" });
         const errorMsg = "Erreur de traitement du fichier";
@@ -223,7 +229,7 @@ const useExcelFileProcessor = (organismeId: string) => {
     onDropRejected: (rejections) => {
       setState((prevState) => ({
         ...prevState,
-        error: `Ce fichier ne peut pas être déposé : ${rejections?.[0]?.errors?.[0]?.message}`,
+        error: messageFichierRefuse(rejections),
         status: "idle",
       }));
     },
