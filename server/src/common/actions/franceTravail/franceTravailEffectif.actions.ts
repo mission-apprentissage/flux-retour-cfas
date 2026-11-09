@@ -917,15 +917,16 @@ export const dedupeFranceTravailEffectifSnapshots = async (effectifId: ObjectId,
   );
 };
 
-export const updateFranceTravailData = (
+export const updateFranceTravailData = async (
+  codeRegion: string,
   effectif_id: string,
   commentaire: string | null,
   situation: FRANCE_TRAVAIL_SITUATION_ENUM,
   code_secteur: number,
   user_id: ObjectId
 ) => {
-  return franceTravailEffectifsDb().updateOne(
-    { effectif_id: new ObjectId(effectif_id) },
+  const { matchedCount } = await franceTravailEffectifsDb().updateOne(
+    { effectif_id: new ObjectId(effectif_id), code_region: codeRegion },
     {
       $set: {
         [`ft_data.${code_secteur}`]: {
@@ -937,6 +938,10 @@ export const updateFranceTravailData = (
       },
     }
   );
+
+  if (matchedCount === 0) {
+    throw Boom.notFound("Effectif non trouvé");
+  }
 };
 
 export const getFranceTravailEffectifsTraitesMois = async (codeRegion: string) => {
