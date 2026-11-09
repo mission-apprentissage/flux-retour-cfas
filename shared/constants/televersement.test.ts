@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret } from "../models/parts/dossierApprenantSchemaV3";
 
-import { CATALOGUE_CHAMPS_TELEVERSEMENT, ERREURS_TELEVERSEMENT } from "./televersement";
+import { CATALOGUE_CHAMPS_TELEVERSEMENT, CHAMPS_TELEVERSEMENT_PAR_CLE, ERREURS_TELEVERSEMENT } from "./televersement";
 
 const OBLIGATOIRES_ANNEXE_F = [
   "nom_apprenant",
@@ -109,5 +109,79 @@ describe("messages de l'import par fichier", () => {
     expect(message).toMatch(
       /^Votre fichier contient 5\s214 apprenants\. Le maximum est 5\s000 : coupez-le en deux fichiers\.$/
     );
+  });
+});
+
+const EN_TETES_ANCIEN_MODELE = [
+  "nom_apprenant *",
+  "prenom_apprenant *",
+  "date_de_naissance_apprenant *",
+  "sexe_apprenant *",
+  "code_postal_de_naissance_apprenant",
+  "email_contact *",
+  "adresse_apprenant *",
+  "code_postal_apprenant *",
+  "ine_apprenant",
+  "tel_apprenant",
+  "rqth_apprenant",
+  "date_rqth_apprenant",
+  "responsable_apprenant_mail1",
+  "responsable_apprenant_mail2",
+  "dernier_organisme_uai",
+  "derniere_situation",
+  "type_cfa",
+  "etablissement_responsable_uai *",
+  "etablissement_responsable_siret *",
+  "etablissement_formateur_uai *",
+  "etablissement_formateur_siret *",
+  "etablissement_lieu_de_formation_uai",
+  "etablissement_lieu_de_formation_siret",
+  "etablissement_lieu_de_formation_adresse",
+  "etablissement_lieu_de_formation_code_postal",
+  "annee_scolaire *",
+  "annee_formation *",
+  "formation_rncp *",
+  "formation_cfd",
+  "date_inscription_formation *",
+  "date_entree_formation *",
+  "date_fin_formation *",
+  "duree_theorique_formation_mois *",
+  "libelle_court_formation",
+  "obtention_diplome_formation",
+  "date_obtention_diplome_formation",
+  "date_exclusion_formation **",
+  "cause_exclusion_formation",
+  "formation_presentielle",
+  "nom_referent_handicap_formation",
+  "prenom_referent_handicap_formation",
+  "email_referent_handicap_formation",
+  "contrat_date_debut **",
+  "contrat_date_fin **",
+  "siret_employeur **",
+  "contrat_date_rupture **",
+  "cause_rupture_contrat",
+  "contrat_date_debut_2 **",
+  "contrat_date_fin_2**",
+  "siret_employeur_2 **",
+  "contrat_date_rupture_2 **",
+  "cause_rupture_contrat_2",
+  "contrat_date_debut_3 **",
+  "contrat_date_fin_3 **",
+  "siret_employeur_3 **",
+  "contrat_date_rupture_3 **",
+  "cause_rupture_contrat_3",
+  "contrat_date_debut_4 **",
+  "contrat_date_fin_4 **",
+  "siret_employeur_4 **",
+  "contrat_date_rupture_4 **",
+  "cause_rupture_contrat_4",
+];
+
+describe("ancien modèle Excel (modele-import-29012025.xlsx)", () => {
+  it("n'a que des colonnes connues du catalogue", () => {
+    const cles = EN_TETES_ANCIEN_MODELE.map((enTete) => enTete.replace(/\*/g, "").trim());
+
+    expect(cles).toHaveLength(62);
+    expect(cles.filter((cle) => !CHAMPS_TELEVERSEMENT_PAR_CLE[cle])).toEqual([]);
   });
 });

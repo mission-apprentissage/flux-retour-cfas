@@ -85,6 +85,7 @@ import {
   parseSuiviQuery,
   zSipaLoginBody,
 } from "@/common/actions/sipa.actions";
+import { genererModeleExcelTeleversement } from "@/common/actions/televersement/modele-excel.actions";
 import {
   MESSAGE_API_ALTERNANCE_INDISPONIBLE,
   verifierPerimetreTeleversement,
@@ -325,6 +326,12 @@ function setupRoutes(app: Application) {
     // injoignable, et n'est lue que par la supervision. Docker ne doit pas s'y fier :
     // redémarrer l'API ne répare pas Mongo, et une base brièvement absente pendant un
     // déploiement tuerait les deux réplicas au pire moment.
+    .get("/api/v1/televersement/modele-excel", async (_req, res) => {
+      const modele = await genererModeleExcelTeleversement();
+      res.attachment("modele-import-effectifs.xlsx");
+      res.contentType("xlsx");
+      res.send(modele);
+    })
     .get("/api/healthcheck/readiness", async (_req, res) => {
       const mongodbHealthy = await isMongodbHealthy();
       res
