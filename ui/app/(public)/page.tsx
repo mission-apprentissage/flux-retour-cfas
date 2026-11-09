@@ -18,7 +18,7 @@ export default function HomePage() {
       <HeroSection />
       <SponsorsSection />
       <BaseRupturesContratSection
-        title="180 000 jeunes en rupture de contrat d’apprentissage chaque année*"
+        title="180 000 ruptures de contrat d’apprentissage chaque année*"
         description={
           "Le Tableau de bord connecte les acteurs du service public à l’emploi et de l’apprentissage pour qu’aucune rupture ne se solde en échec et que chacun ait une chance d’avoir un accompagnement global."
         }

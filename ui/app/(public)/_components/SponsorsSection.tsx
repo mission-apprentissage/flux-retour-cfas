@@ -3,7 +3,7 @@ import { BaseSponsorsSection, type Sponsor } from "./shared/BaseSponsorsSection"
 const SPONSORS: Array<Sponsor> = [
   {
     image: { src: "/images/home/ml-actives.png", width: 360, height: 246 },
-    title: "+ 200 Missions Locales actives",
+    title: "+ 320 Missions Locales actives",
     description: "Un réseau de Missions Locales déjà actives sur le service",
   },
   {
@@ -14,7 +14,7 @@ const SPONSORS: Array<Sponsor> = [
   {
     image: { src: "/images/home/cfas.png", width: 360, height: 246 },
     title: "+ 1000 établissements de formation",
-    description: "Les CFA choisissent le Tableau de bord pour collaborer avec les Missions Locales.",
+    description: "Sont connectés sur le service du Tableau de bord",
   },
 ];
 
