@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { ChampTeleversement, CHAMPS_TELEVERSEMENT_PAR_CLE } from "shared";
 import XLSX from "xlsx";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
-import { FieldConfig, televersementHeaders } from "@/common/constants/televersementHeaders";
 import { _post } from "@/common/httpClient";
 import { getErrorStatusCode, getServerErrorMessage } from "@/common/rateLimit";
 import { reportError } from "@/common/reportError";
@@ -107,7 +107,7 @@ const useExcelFileProcessor = (organismeId: string) => {
           typeof header === "string" ? header.toLowerCase().replace(/\*/g, "").trim() : ""
         );
 
-        const validHeaders = Object.keys(televersementHeaders);
+        const validHeaders = Object.keys(CHAMPS_TELEVERSEMENT_PAR_CLE);
         setState((prevState) => ({ ...prevState, headers: validHeaders }));
 
         const headerMap: Record<string, number> = {};
@@ -130,7 +130,7 @@ const useExcelFileProcessor = (organismeId: string) => {
           validHeaders.forEach((header) => {
             const index = headerMap[header];
             if (index !== undefined) {
-              const config = televersementHeaders[header];
+              const config = CHAMPS_TELEVERSEMENT_PAR_CLE[header];
               const cellValue = (row as unknown[])[index];
 
               if (config) {
@@ -142,7 +142,7 @@ const useExcelFileProcessor = (organismeId: string) => {
                   rowObject[header] = cellValue || null;
                 }
 
-                if (config.mandatory && !rowObject[header]) {
+                if (config.obligation === "obligatoire" && !rowObject[header]) {
                   rowObject.errors.push({ key: header, message: `${header} est requis` });
                 }
               }
@@ -167,7 +167,7 @@ const useExcelFileProcessor = (organismeId: string) => {
           missingHeaders: validHeaders.filter((header) => !cleanHeaders.includes(header)),
         }));
 
-        const mandatoryHeaders = getMandatoryHeaders(televersementHeaders);
+        const mandatoryHeaders = getMandatoryHeaders(CHAMPS_TELEVERSEMENT_PAR_CLE);
         const missingMandatoryHeaders = filterMissingHeaders(state.missingHeaders, mandatoryHeaders);
 
         setState((prevState) => ({
@@ -260,8 +260,8 @@ const useExcelFileProcessor = (organismeId: string) => {
   };
 };
 
-function getMandatoryHeaders(headers: Record<string, FieldConfig>) {
-  return Object.keys(headers).filter((header) => headers[header].mandatory);
+function getMandatoryHeaders(headers: Record<string, ChampTeleversement>) {
+  return Object.keys(headers).filter((header) => headers[header].obligation === "obligatoire");
 }
 
 function filterMissingHeaders(missingHeaders: string[], mandatoryHeaders: string[]) {

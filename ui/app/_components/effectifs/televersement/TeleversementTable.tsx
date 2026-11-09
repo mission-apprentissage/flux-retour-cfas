@@ -3,14 +3,12 @@
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 import { SortingState } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
-import { normalize } from "shared";
+import { CHAMPS_TELEVERSEMENT_PAR_CLE, normalize } from "shared";
 
 import { DataTable } from "@/app/_components/table/DataTable";
-import { televersementHeaders } from "@/common/constants/televersementHeaders";
 import { formatDateNumericDayMonthYear } from "@/common/utils/dateUtils";
 import { ProcessedDataType } from "@/hooks/useExcelFileProcessor";
 
-import headerTooltips from "./headerTooltips";
 import styles from "./televersement.module.scss";
 
 interface TeleversementTableProps {
@@ -28,12 +26,12 @@ function fromIsoLikeDateStringToFrenchDate(date: unknown) {
 }
 
 function HeaderLabel({ header }: { header: string }) {
-  const tooltip = headerTooltips[header as keyof typeof headerTooltips];
-  if (tooltip) {
+  const champ = CHAMPS_TELEVERSEMENT_PAR_CLE[header];
+  if (champ) {
     return (
       <span className={styles.headerWithTooltip}>
-        {header}
-        <Tooltip kind="click" title={tooltip} />
+        {champ.libelle}
+        <Tooltip kind="click" title={champ.aide} />
       </span>
     );
   }
@@ -112,7 +110,7 @@ export function TeleversementTable({
     return headers;
   }, [headers, columnsWithErrors, showOnlyColumnsAndLinesWithErrors]);
 
-  const isDateField = (header: string) => televersementHeaders[header]?.type === "date";
+  const isDateField = (header: string) => CHAMPS_TELEVERSEMENT_PAR_CLE[header]?.type === "date";
 
   const columns = [
     { label: "Ligne", dataKey: "lineNumber", sortable: false },
@@ -142,7 +140,7 @@ export function TeleversementTable({
     const values = row as Record<string, unknown>;
     for (const header of filteredHeaders) {
       let value = values[header];
-      if (televersementHeaders[header]?.type === "boolean") {
+      if (CHAMPS_TELEVERSEMENT_PAR_CLE[header]?.type === "boolean") {
         value = value === true ? "Oui" : value === false ? "Non" : "";
       } else if (isDateField(header)) {
         value = fromIsoLikeDateStringToFrenchDate(value);

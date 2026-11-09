@@ -153,18 +153,28 @@ export const dossierApprenantSchemaV3Input = dossierApprenantSchemaV3Base
     has_nir: true,
   });
 
-// Utilisé par le téléversement manuel. Le but côté métier est d'obliger les utilisateurs à remplir des champs dont
-// ils pourraient avoir besoin dans SIFA alors que ce n'est pas toujours présent côté ERPs.
-// Source de la décision: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1693232432865229
-const dossierApprenantSchemaV3WithMoreRequiredFields = dossierApprenantSchemaV3Base.merge(
-  z.object({
-    email_contact: primitivesV1.apprenant.email,
-    adresse_apprenant: primitivesV3.apprenant.adresse,
-    code_postal_apprenant: primitivesV3.apprenant.code_postal,
-    sexe_apprenant: primitivesV3.apprenant.sexe,
-    annee_formation: primitivesV1.formation.annee,
-  })
-);
+const REGLES_UN_DES_DEUX_FICHIER = [
+  {
+    champs: ["formation_rncp", "formation_cfd"],
+    message: "Indiquez le code RNCP ou le code diplôme de la formation.",
+  },
+  {
+    champs: ["code_postal_apprenant", "code_commune_insee_apprenant"],
+    message: "Indiquez le code postal ou le code commune de résidence : il sert à trouver la Mission Locale du jeune.",
+  },
+  {
+    champs: ["email_contact", "tel_apprenant"],
+    message: "Indiquez un téléphone ou un email : la Mission Locale en a besoin pour joindre le jeune.",
+  },
+] as const;
+
+const verifierReglesFichier = (dossier: Record<string, unknown>, ctx: z.RefinementCtx) => {
+  for (const { champs, message } of REGLES_UN_DES_DEUX_FICHIER) {
+    if (champs.every((champ) => dossier[champ] === undefined || dossier[champ] === null || dossier[champ] === "")) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: [champs[0]], message });
+    }
+  }
+};
 
 export function dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret(
   invalidsUais: string[],
@@ -175,22 +185,24 @@ export function dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret
   const messageUai = "UAI non valide";
   const messageSiret = "Siret non valide";
 
-  return dossierApprenantSchemaV3WithMoreRequiredFields.merge(
-    z.object({
-      etablissement_responsable_uai: primitivesV1.etablissement_responsable.uai.refine(validateUAI, {
-        message: messageUai,
-      }),
-      etablissement_responsable_siret: primitivesV1.etablissement_responsable.siret.refine(validateSiret, {
-        message: messageSiret,
-      }),
-      etablissement_formateur_uai: primitivesV1.etablissement_formateur.uai.refine(validateUAI, {
-        message: messageUai,
-      }),
-      etablissement_formateur_siret: primitivesV1.etablissement_formateur.siret.refine(validateSiret, {
-        message: messageSiret,
-      }),
-    })
-  );
+  return dossierApprenantSchemaV3Base
+    .merge(
+      z.object({
+        etablissement_responsable_uai: primitivesV1.etablissement_responsable.uai.refine(validateUAI, {
+          message: messageUai,
+        }),
+        etablissement_responsable_siret: primitivesV1.etablissement_responsable.siret.refine(validateSiret, {
+          message: messageSiret,
+        }),
+        etablissement_formateur_uai: primitivesV1.etablissement_formateur.uai.refine(validateUAI, {
+          message: messageUai,
+        }),
+        etablissement_formateur_siret: primitivesV1.etablissement_formateur.siret.refine(validateSiret, {
+          message: messageSiret,
+        }),
+      })
+    )
+    .superRefine(verifierReglesFichier);
 }
 
 export function computeWarningsForDossierApprenantSchemaV3(data: Array<IDossierApprenantSchemaV3>) {
