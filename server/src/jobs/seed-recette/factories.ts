@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { addDays, subDays, subYears } from "date-fns";
+import { addDays } from "date-fns";
 import type { ObjectId, WithoutId } from "mongodb";
 import { CGU_VERSION } from "shared/constants";
 import type {
@@ -13,7 +13,7 @@ import type {
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
-import { getAnneeScolaireFromDate } from "shared/utils";
+import { addDaysUTC, getAnneeScolaireFromDate, subtractDaysUTC, subtractYearsUTC } from "shared/utils";
 
 import { withComputedFields } from "@/common/actions/effectifs.actions";
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
@@ -136,7 +136,7 @@ export async function loadSeedContext(hosts: SeedRecetteHosts, now: Date, plan?:
   };
 }
 
-export const jour = (ctx: SeedContext, offset: number) => addDays(ctx.today, offset);
+export const jour = (ctx: SeedContext, offset: number) => addDaysUTC(ctx.today, offset);
 
 export const telephoneFictif = (n: number) => `060000${String(n).padStart(4, "0")}`;
 
@@ -148,7 +148,7 @@ const MAX_DECALAGE_JOURS = 20;
 
 export function dateDeNaissanceLibre(ctx: SeedContext, nom: string, prenom: string, souhaitee: Date): Date {
   for (let decalage = 0; decalage <= MAX_DECALAGE_JOURS; decalage++) {
-    const candidate = subDays(souhaitee, decalage);
+    const candidate = subtractDaysUTC(souhaitee, decalage);
     const cle = cleIdentite(normalisePersonIdentifiant({ nom, prenom, date_de_naissance: candidate }));
     if (!ctx.identitesPrises.has(cle)) {
       ctx.identitesPrises.add(cle);
@@ -184,7 +184,7 @@ export function buildPersonne(
     ctx,
     nom,
     prenom,
-    dateDeNaissance ?? subDays(subYears(ctx.today, age), 30 + (n % 300))
+    dateDeNaissance ?? subtractDaysUTC(subtractYearsUTC(ctx.today, age), 30 + (n % 300))
   );
   return {
     nom,
