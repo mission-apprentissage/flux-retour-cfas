@@ -5,6 +5,7 @@ import XLSX from "xlsx";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { FieldConfig, televersementHeaders } from "@/common/constants/televersementHeaders";
 import { _post } from "@/common/httpClient";
+import { getErrorStatusCode, getServerErrorMessage } from "@/common/rateLimit";
 import { reportError } from "@/common/reportError";
 import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
 import parseExcelDate from "@/common/utils/parseExcelDate";
@@ -206,6 +207,11 @@ const useExcelFileProcessor = (organismeId: string) => {
         }));
         trackPlausibleEvent(evenementVerification(errors.length));
       } catch (error) {
+        if (getErrorStatusCode(error) === 503) {
+          const errorMsg = getServerErrorMessage(error, "Erreur de traitement du fichier");
+          setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
+          return;
+        }
         reportError(error, { action: "traitement-fichier-excel" });
         const errorMsg = "Erreur de traitement du fichier";
         setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));

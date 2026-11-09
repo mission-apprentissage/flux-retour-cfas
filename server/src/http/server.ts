@@ -6,7 +6,7 @@ import * as Sentry from "@sentry/node";
 import { zUai } from "api-alternance-sdk/internal";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import express, { Application } from "express";
+import express, { Application, Response } from "express";
 import { ObjectId } from "mongodb";
 import passport from "passport";
 import { RateLimiterMemory } from "rate-limiter-flexible";
@@ -85,6 +85,10 @@ import {
   parseSuiviQuery,
   zSipaLoginBody,
 } from "@/common/actions/sipa.actions";
+import {
+  MESSAGE_API_ALTERNANCE_INDISPONIBLE,
+  verifierPerimetreTeleversement,
+} from "@/common/actions/televersement/perimetre.actions";
 import {
   changePassword,
   getUserByEmail,
@@ -712,7 +716,12 @@ function setupRoutes(app: Application) {
           .Router()
           .post(
             "/validate",
-            returnResult(async (req) => {
+            returnResult<OrganismeLocals>(async (req, res) => {
+              const lignes = Array.isArray(req.body) ? req.body : [];
+              const perimetre = await verifierPerimetreTeleversement(res.locals.organismeId, lignes);
+              if (perimetre.indisponible) {
+                throw Boom.serverUnavailable(MESSAGE_API_ALTERNANCE_INDISPONIBLE);
+              }
               const data = await z
                 .array(
                   dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret(
@@ -723,14 +732,25 @@ function setupRoutes(app: Application) {
                 .safeParseAsync(
                   Array.isArray(req.body) ? req.body.map((dossier) => stripNullProperties(dossier)) : req.body
                 );
-              const warnings = computeWarningsForDossierApprenantSchemaV3(Array.isArray(req.body) ? req.body : []);
-              return { ...data, warnings };
+              const warnings = computeWarningsForDossierApprenantSchemaV3(lignes);
+              const issues = [...(data.success ? [] : data.error.issues), ...perimetre.issues];
+              return issues.length > 0 ? { success: false, error: { issues }, warnings } : { ...data, warnings };
             })
           )
           .use(
             // v3 is required in URL to consider the request as a v3 import
             "/import/v3",
-            async (req, res, next) => {
+            async (req, res: Response<unknown, OrganismeLocals>, next) => {
+              const perimetre = await verifierPerimetreTeleversement(
+                res.locals.organismeId,
+                Array.isArray(req.body) ? req.body : []
+              );
+              if (perimetre.indisponible) {
+                throw Boom.serverUnavailable(MESSAGE_API_ALTERNANCE_INDISPONIBLE);
+              }
+              if (perimetre.issues.length > 0) {
+                throw Boom.badRequest(perimetre.issues[0].message);
+              }
               req.user.source = SOURCE_APPRENANT.FICHIER;
               req.user.source_organisme_id = String(res.locals.organismeId);
               next();
