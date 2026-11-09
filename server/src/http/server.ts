@@ -43,7 +43,6 @@ import {
   getInvitationByToken,
   getOrganisationOrganisme,
   batchInviteUsersToOrganisation,
-  inviteUserToOrganisation,
   listOrganisationMembers,
   listOrganisationPendingInvitations,
   rejectInvitation,
@@ -926,13 +925,6 @@ function setupRoutes(app: Application) {
         })
       )
       .post(
-        "/membres",
-        returnResult(async (req) => {
-          const { email } = z.object({ email: z.string() }).parse(req.body);
-          await inviteUserToOrganisation(req.user, email.toLowerCase(), (req.user as AuthContext).organisation_id);
-        })
-      )
-      .post(
         "/membres/batch",
         requireCfaAdminIfCfa,
         heavyLimiter,
@@ -956,20 +948,23 @@ function setupRoutes(app: Application) {
       )
       .delete(
         "/membres/:userId",
+        requireCfaAdminIfCfa,
         returnResult(async (req) => {
-          await removeUserFromOrganisation(req.user, req.params.userId);
+          await removeUserFromOrganisation(req.user, req.params.userId as string);
         })
       )
       .post(
         "/membres/:userId/validate",
+        requireCfaAdminIfCfa,
         returnResult(async (req) => {
-          await validateMembre(req.user, req.params.userId);
+          await validateMembre(req.user, req.params.userId as string);
         })
       )
       .post(
         "/membres/:userId/reject",
+        requireCfaAdminIfCfa,
         returnResult(async (req) => {
-          await rejectMembre(req.user, req.params.userId);
+          await rejectMembre(req.user, req.params.userId as string);
         })
       )
       .put(
@@ -988,14 +983,16 @@ function setupRoutes(app: Application) {
       )
       .delete(
         "/invitations/:invitationId",
+        requireCfaAdminIfCfa,
         returnResult(async (req) => {
-          await cancelInvitation(req.user, req.params.invitationId);
+          await cancelInvitation(req.user, req.params.invitationId as string);
         })
       )
       .post(
         "/invitations/:invitationId/resend",
+        requireCfaAdminIfCfa,
         returnResult(async (req) => {
-          await resendInvitationEmail(req.user, req.params.invitationId);
+          await resendInvitationEmail(req.user, req.params.invitationId as string);
         })
       )
       .use("/mission-locale", requireMissionLocale, missionLocaleAuthentRoutes())
