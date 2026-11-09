@@ -1,5 +1,5 @@
 import * as Boom from "@hapi/boom";
-import express from "express";
+import express, { type Response } from "express";
 import { ObjectId } from "mongodb";
 import { dossierApprenantSchemaV3Input, stripModelAdditionalKeys } from "shared/models/parts/dossierApprenantSchemaV3";
 
@@ -21,7 +21,7 @@ export default ({ maximumLignes = POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH }: {
    * Une prévalidation des données est effectuée, afin de faire un retour immédiat à l'utilisateur
    * Une validation plus complete est effectuée lors du traitement des données par process-effectifs-queue
    */
-  router.post("/", async ({ user, body }, res, next) => {
+  router.post("/", async ({ user, body }, res: Response<unknown, { uploadId?: string }>, next) => {
     const bodyItems = validateArrayInput(body, maximumLignes).map((e) =>
       stripNullProperties(e as Record<string, unknown>)
     );
@@ -55,6 +55,7 @@ export default ({ maximumLignes = POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH }: {
         validation_errors: prettyValidationError || [],
         source,
         ...(user.source_organisme_id ? { source_organisme_id: user.source_organisme_id } : {}),
+        ...(res.locals.uploadId ? { upload_id: res.locals.uploadId } : {}),
         api_version: "v3",
         has_error: !!prettyValidationError,
         computed_day: formatDateYYYYMMDD(processedAt),
@@ -77,6 +78,10 @@ export default ({ maximumLignes = POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH }: {
         await effectifsQueueDb().insertOne(effectifsToQueue[0]);
       } else if (effectifsToQueue.length) {
         await effectifsQueueDb().insertMany(effectifsToQueue);
+      }
+      if (res.locals.uploadId) {
+        res.json({ upload_id: res.locals.uploadId, lignes: effectifsToQueue.length });
+        return;
       }
       res.json({
         status: "OK",

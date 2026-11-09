@@ -265,19 +265,21 @@ describe("Vérification de l'import par fichier", () => {
     expect(await effectifsQueueDb().countDocuments({})).toBe(0);
   });
 
-  it("l'import met en file les lignes vérifiées, sans le numéro de ligne", async () => {
+  it("l'import met en file les lignes vérifiées sous un même identifiant, sans le numéro de ligne", async () => {
     mockRechercheExacte(IMPORTATEUR);
 
     const response = await requestAsOrganisation(
       organisation,
       "post",
       `/api/v1/organismes/${importateur._id}/upload/import/v3`,
-      [ligneFichier(IMPORTATEUR)]
+      [ligneFichier(IMPORTATEUR), ligneFichier(IMPORTATEUR)]
     );
 
     expect(response.status).toBe(200);
+    expect(response.data).toEqual({ upload_id: expect.stringMatching(/^[0-9a-f]{24}$/), lignes: 2 });
     const enFile = await effectifsQueueDb().find({ source_organisme_id: importateur._id.toString() }).toArray();
-    expect(enFile).toHaveLength(1);
+    expect(enFile).toHaveLength(2);
+    expect(enFile.map(({ upload_id }) => upload_id)).toEqual([response.data.upload_id, response.data.upload_id]);
     expect(enFile[0]).not.toHaveProperty("ligne_fichier");
     expect(enFile[0].validation_errors).toEqual([]);
   });

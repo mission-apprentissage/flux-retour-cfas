@@ -746,6 +746,7 @@ function setupRoutes(app: Application) {
               }
               req.user.source = SOURCE_APPRENANT.FICHIER;
               req.user.source_organisme_id = String(res.locals.organismeId);
+              res.locals.uploadId = new ObjectId().toString();
               next();
             },
             dossierApprenantRouter({ maximumLignes: TELEVERSEMENT_MAX_LIGNES })

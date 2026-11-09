@@ -45,6 +45,23 @@ describe("Dossier Apprenants Route V3", () => {
       expect(response.status).toBe(200);
     });
 
+    it("répond toujours avec les lignes mises en file, sans identifiant d'import", async () => {
+      const dossier = createRandomDossierApprenantApiInputV3({
+        etablissement_formateur_uai: uai,
+        etablissement_formateur_siret: siret,
+      });
+
+      const response = await httpClient.post(`${API_ENDPOINT_URL}`, [dossier], {
+        headers: { Authorization: `Bearer ${api_key}` },
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.data).toMatchObject({ status: "OK", message: "Queued" });
+      expect(response.data.data).toHaveLength(1);
+      expect(response.data).not.toHaveProperty("upload_id");
+      expect(response.data.data[0]).not.toHaveProperty("upload_id");
+    });
+
     it("répond 500 sans divulguer le message interne quand l'écriture Mongo échoue", async () => {
       vi.spyOn(collections, "effectifsQueueDb").mockReturnValue({
         insertOne: () => Promise.reject(new Error("mongo indisponible")),

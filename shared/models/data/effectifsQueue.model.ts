@@ -26,6 +26,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
   [{ processed_at: 1, created_at: 1 }, {}],
   [{ computed_day: 1 }, {}],
+  [{ upload_id: 1 }, { name: "upload_id", partialFilterExpression: { upload_id: { $exists: true } } }],
 ];
 
 const effectifsProps = effectifsModel.zod.shape;
@@ -82,6 +83,7 @@ const internalFields = {
     )
     .nullish(),
   computed_day: z.string().optional(),
+  upload_id: z.string({ description: "Identifiant de l'import par fichier qui a mis la ligne en file" }).optional(),
   has_error: z.boolean().optional(),
   organisme_attribution: z
     .object({
