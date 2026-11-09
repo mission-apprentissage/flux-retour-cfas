@@ -7,6 +7,7 @@ import logger from "@/common/logger";
 import config from "@/config";
 
 import { hydrateDecaRaw, hydrateDecaFromExistingEffectifs } from "../hydrate/deca/hydrate-deca-raw";
+import { retablirDecaFichier } from "../tmp/retablir-deca-fichier";
 
 import { payloadBoolean, payloadNumber, payloadString, payloadStringArray, requirePayloadString } from "./payload";
 
@@ -20,6 +21,11 @@ export const decaJobs = {
         return 0;
       }
       return hydrateDecaRaw({ dryRun, limit });
+    },
+  },
+  "tmp:retablir-deca-fichier": {
+    handler: async (job) => {
+      return retablirDecaFichier({ appliquer: payloadBoolean(job.payload, "appliquer") ?? false });
     },
   },
   "hydrate:mission-locale-from-deca": {
