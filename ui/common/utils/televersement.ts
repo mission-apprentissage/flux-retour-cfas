@@ -1,10 +1,9 @@
 import { ErrorCode, FileRejection } from "react-dropzone";
-import { cyrb53Hash, normalize, PlausibleGoalType } from "shared";
+import { cyrb53Hash, ERREURS_TELEVERSEMENT, normalize, PlausibleGoalType } from "shared";
 
 import { getApiErrorMessage, getErrorStatusCode } from "@/common/rateLimit";
 
-export const MESSAGE_ERREUR_ENVOI =
-  "Votre fichier n'a pas pu être envoyé. Vérifiez votre connexion et réessayez. Rien n'a été importé.";
+export const MESSAGE_ERREUR_ENVOI = ERREURS_TELEVERSEMENT.erreur_reseau();
 
 export function toEffectifsQueue(data: Record<string, unknown>[]) {
   return data.map((e) => ({
@@ -22,12 +21,12 @@ export function toEffectifsQueue(data: Record<string, unknown>[]) {
 export function messageFichierRefuse(rejections: FileRejection[]): string {
   const code = rejections[0]?.errors[0]?.code;
   if (code === ErrorCode.TooManyFiles) {
-    return "Déposez un seul fichier à la fois.";
+    return ERREURS_TELEVERSEMENT.plusieurs_fichiers();
   }
   if (code === ErrorCode.FileInvalidType) {
-    return "Ce fichier n'est pas un tableur. Déposez un fichier Excel (.xlsx, .xls), OpenDocument (.ods) ou CSV.";
+    return ERREURS_TELEVERSEMENT.format_refuse();
   }
-  return "Ce fichier ne peut pas être déposé.";
+  return ERREURS_TELEVERSEMENT.depot_impossible();
 }
 
 export function evenementVerification(nombreErreurs: number): PlausibleGoalType {

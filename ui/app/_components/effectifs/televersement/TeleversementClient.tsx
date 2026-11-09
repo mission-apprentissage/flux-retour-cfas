@@ -7,7 +7,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { TD_MANUEL_ELEMENT_LINK } from "shared";
+import { ERREURS_TELEVERSEMENT, TD_MANUEL_ELEMENT_LINK } from "shared";
 
 import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
@@ -52,7 +52,7 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
 
   const handleSubmit = async () => {
     if (errorsCount > 0 || error) {
-      setSubmitError("Corrigez les erreurs avant d'importer.");
+      setSubmitError(ERREURS_TELEVERSEMENT.erreurs_avant_import());
       setIsSubmitting(false);
       return;
     }

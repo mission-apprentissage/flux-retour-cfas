@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { ERREURS_TELEVERSEMENT } from "../../constants/televersement";
+
 import { extensions, primitivesV1, primitivesV3 } from "./zodPrimitives";
 
 export const stripModelAdditionalKeys = <T extends object>(
@@ -156,15 +158,15 @@ export const dossierApprenantSchemaV3Input = dossierApprenantSchemaV3Base
 const REGLES_UN_DES_DEUX_FICHIER = [
   {
     champs: ["formation_rncp", "formation_cfd"],
-    message: "Indiquez le code RNCP ou le code diplôme de la formation.",
+    message: ERREURS_TELEVERSEMENT.code_formation_absent(),
   },
   {
     champs: ["code_postal_apprenant", "code_commune_insee_apprenant"],
-    message: "Indiquez le code postal ou le code commune de résidence : il sert à trouver la Mission Locale du jeune.",
+    message: ERREURS_TELEVERSEMENT.lieu_residence_absent(),
   },
   {
     champs: ["email_contact", "tel_apprenant"],
-    message: "Indiquez un téléphone ou un email : la Mission Locale en a besoin pour joindre le jeune.",
+    message: ERREURS_TELEVERSEMENT.contact_absent(),
   },
 ] as const;
 

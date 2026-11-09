@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { ChampTeleversement, CHAMPS_TELEVERSEMENT_PAR_CLE } from "shared";
+import { ChampTeleversement, CHAMPS_TELEVERSEMENT_PAR_CLE, ERREURS_TELEVERSEMENT } from "shared";
 import XLSX from "xlsx";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
@@ -64,7 +64,7 @@ const useExcelFileProcessor = (organismeId: string) => {
       trackPlausibleEvent("televersement_fichier_depose");
     }
     if (!file) {
-      const errorMsg = "Aucun fichier n'a été reçu. Déposez-le à nouveau.";
+      const errorMsg = ERREURS_TELEVERSEMENT.aucun_fichier();
       setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
       return;
     }

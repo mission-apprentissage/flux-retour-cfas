@@ -602,3 +602,47 @@ export const CLES_DATE_DEBUT_CONTRAT = [
 export const CHAMPS_TELEVERSEMENT_PAR_CLE: Record<string, ChampTeleversement> = Object.fromEntries(
   CATALOGUE_CHAMPS_TELEVERSEMENT.map((champ) => [champ.cle, champ])
 );
+
+export const ERREURS_TELEVERSEMENT = {
+  format_refuse: () =>
+    "Ce fichier n'est pas un tableur. Déposez un fichier Excel (.xlsx, .xls), OpenDocument (.ods) ou CSV.",
+  plusieurs_fichiers: () => "Déposez un seul fichier à la fois.",
+  aucun_fichier: () => "Aucun fichier n'a été reçu. Déposez-le à nouveau.",
+  depot_impossible: () => "Ce fichier ne peut pas être déposé.",
+  fichier_vide: () =>
+    "Votre fichier ne contient aucun apprenant. Vérifiez que vos effectifs sont dans la première feuille.",
+  trop_de_lignes: ({ lignes, maximum }: { lignes: number; maximum: number }) =>
+    `Votre fichier contient ${lignes.toLocaleString("fr-FR")} apprenants. Le maximum est ${maximum.toLocaleString("fr-FR")} : coupez-le en deux fichiers.`,
+  fichier_protege: () =>
+    "Ce fichier est protégé par un mot de passe. Enregistrez-le sans mot de passe, puis déposez-le.",
+  cellule_obligatoire_vide: ({ libelle }: { libelle: string }) => `${libelle} manquante.`,
+  date_illisible: ({ libelle, valeur }: { libelle: string; valeur: string }) =>
+    `${libelle} illisible : ${valeur}. Écrivez-la sous la forme 01/09/2026.`,
+  date_impossible: ({ valeur }: { valeur: string }) => `Le ${valeur} n'existe pas.`,
+  fin_avant_entree: ({ fin, entree }: { fin: string; entree: string }) =>
+    `La fin de formation (${fin}) est avant l'entrée en formation (${entree}).`,
+  etablissement_inconnu: ({ uai, siret }: { uai: string; siret: string }) =>
+    `Aucun établissement ne correspond à l'UAI ${uai} et au SIRET ${siret}. Vérifiez les deux numéros.`,
+  hors_perimetre: ({ uai, organisme }: { uai: string; organisme: string }) =>
+    `L'établissement ${uai} n'est pas rattaché à ${organisme}. Ses apprenants ne peuvent pas être importés ici.`,
+  code_formation_absent: () => "Indiquez le code RNCP ou le code diplôme de la formation.",
+  lieu_residence_absent: () =>
+    "Indiquez le code postal ou le code commune de résidence : il sert à trouver la Mission Locale du jeune.",
+  contact_absent: () => "Indiquez un téléphone ou un email : la Mission Locale en a besoin pour joindre le jeune.",
+  contrat_incomplet: () =>
+    "La date de début du contrat manque, alors que sa fin, sa rupture ou sa cause de rupture est renseignée.",
+  doublon_fichier: ({ apprenant, lignes }: { apprenant: string; lignes: number[] }) =>
+    `${apprenant} apparaît ${lignes.length === 2 ? "deux" : lignes.length} fois (lignes ${lignes.join(" et ")}) pour la même année. Gardez une seule ligne.`,
+  sexe: () => "Sexe : indiquez F ou M.",
+  valeur_mal_formee: ({ libelle, valeur, attendu }: { libelle: string; valeur: string; attendu: string }) =>
+    `${libelle} mal formé : ${valeur}. ${attendu}`,
+  erreurs_avant_import: () => "Corrigez les erreurs avant d'importer.",
+  erreur_reseau: () =>
+    "Votre fichier n'a pas pu être envoyé. Vérifiez votre connexion et réessayez. Rien n'a été importé.",
+  api_indisponible: () =>
+    "La vérification des établissements est momentanément impossible. Réessayez dans quelques minutes. Rien n'a été importé.",
+  organisme_introuvable: () =>
+    "Impossible de charger cet organisme. Rechargez la page ou revenez à la liste des organismes.",
+} as const;
+
+export type CodeErreurTeleversement = keyof typeof ERREURS_TELEVERSEMENT;

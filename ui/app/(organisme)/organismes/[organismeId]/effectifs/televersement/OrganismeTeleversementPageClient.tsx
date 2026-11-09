@@ -1,6 +1,7 @@
 "use client";
 
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import { ERREURS_TELEVERSEMENT } from "shared";
 
 import TeleversementClient from "@/app/_components/effectifs/televersement/TeleversementClient";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
@@ -10,14 +11,7 @@ export default function OrganismeTeleversementPageClient({ organismeId }: { orga
   const { organisme, error } = useOrganisme(organismeId);
 
   if (error) {
-    return (
-      <Alert
-        severity="error"
-        title="Impossible de charger cet organisme. Rechargez la page ou revenez à la liste des organismes."
-        description=""
-        small
-      />
-    );
+    return <Alert severity="error" title={ERREURS_TELEVERSEMENT.organisme_introuvable()} description="" small />;
   }
 
   if (!organisme) {

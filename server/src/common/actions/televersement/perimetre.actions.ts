@@ -1,5 +1,6 @@
 import { zSiret, zUai } from "api-alternance-sdk/internal";
 import { ObjectId } from "mongodb";
+import { ERREURS_TELEVERSEMENT } from "shared/constants";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { extensions } from "shared/models/parts/zodPrimitives";
 
@@ -7,8 +8,7 @@ import { findOrganismeFormateursIds } from "@/common/actions/helpers/permissions
 import { effectifsDECADb, organismesDb } from "@/common/model/collections";
 import { findOrganismeWithStats } from "@/jobs/ingestion/resolution-organisme";
 
-export const MESSAGE_API_ALTERNANCE_INDISPONIBLE =
-  "La vérification des établissements est momentanément impossible. Réessayez dans quelques minutes. Rien n'a été importé.";
+export const MESSAGE_API_ALTERNANCE_INDISPONIBLE = ERREURS_TELEVERSEMENT.api_indisponible();
 
 type LigneTeleversement = {
   etablissement_formateur_uai?: unknown;
@@ -132,7 +132,7 @@ export async function verifierPerimetreTeleversement(
     } else if (resultat.jugement === "hors_perimetre") {
       issues.push({
         path: [resultat.index, "etablissement_formateur_uai"],
-        message: `L'établissement ${resultat.uai} n'est pas rattaché à ${nomSource}. Ses apprenants ne peuvent pas être importés ici.`,
+        message: ERREURS_TELEVERSEMENT.hors_perimetre({ uai: resultat.uai, organisme: nomSource }),
         code: "custom",
       });
     }

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret } from "../models/parts/dossierApprenantSchemaV3";
 
-import { CATALOGUE_CHAMPS_TELEVERSEMENT } from "./televersement";
+import { CATALOGUE_CHAMPS_TELEVERSEMENT, ERREURS_TELEVERSEMENT } from "./televersement";
 
 const OBLIGATOIRES_ANNEXE_F = [
   "nom_apprenant",
@@ -88,5 +88,26 @@ describe("catalogue des champs de l'import par fichier", () => {
   it.each(PAIRES_ANNEXE_F)("exige %s ou %s, et se contente de l'un des deux", (premier, second, valeur) => {
     expect(cheminsEnErreur(sans(premier, second))).toEqual([premier]);
     expect(cheminsEnErreur({ ...sans(premier), [second]: valeur })).toEqual([]);
+  });
+});
+
+describe("messages de l'import par fichier", () => {
+  it("nomment l'organisme et l'établissement hors périmètre", () => {
+    expect(ERREURS_TELEVERSEMENT.hors_perimetre({ uai: "0922455U", organisme: "CFA de test" })).toBe(
+      "L'établissement 0922455U n'est pas rattaché à CFA de test. Ses apprenants ne peuvent pas être importés ici."
+    );
+  });
+
+  it("disent combien de fois un apprenant revient dans le fichier", () => {
+    expect(ERREURS_TELEVERSEMENT.doublon_fichier({ apprenant: "Camille Martin", lignes: [12, 48] })).toBe(
+      "Camille Martin apparaît deux fois (lignes 12 et 48) pour la même année. Gardez une seule ligne."
+    );
+  });
+
+  it("donnent le nombre de lignes et le maximum", () => {
+    const message = ERREURS_TELEVERSEMENT.trop_de_lignes({ lignes: 5214, maximum: 5000 });
+    expect(message).toMatch(
+      /^Votre fichier contient 5\s214 apprenants\. Le maximum est 5\s000 : coupez-le en deux fichiers\.$/
+    );
   });
 });
