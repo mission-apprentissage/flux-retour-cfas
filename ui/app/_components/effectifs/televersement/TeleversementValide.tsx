@@ -9,9 +9,13 @@ import { PAGES } from "@/app/_utils/routes.utils";
 import styles from "./televersement.module.scss";
 
 export function TeleversementValide({ organismeId, isMine }: { organismeId: string; isMine: boolean }) {
+  const transmissionsPath = isMine
+    ? PAGES.static.transmissions.getPath()
+    : PAGES.dynamic.organismeTransmissions({ organismeId }).getPath();
+
   return (
     <div>
-      <PageHeader title="Import des effectifs" />
+      <PageHeader title="Import des effectifs" titleAs={isMine ? "h1" : "h2"} />
       <div className={styles.successPanel}>
         <div className={styles.successTitleRow}>
           <i className="fr-icon-checkbox-circle-fill" aria-hidden="true" />
@@ -28,7 +32,7 @@ export function TeleversementValide({ organismeId, isMine }: { organismeId: stri
             </p>
             <p>
               Veuillez consulter le{" "}
-              <DsfrLink href={PAGES.static.transmissions.getPath()} arrow="none">
+              <DsfrLink href={transmissionsPath} arrow="none">
                 rapport de transmission
               </DsfrLink>{" "}
               pour identifier et réparer les erreurs potentielles.
@@ -46,7 +50,7 @@ export function TeleversementValide({ organismeId, isMine }: { organismeId: stri
         </p>
       </div>
       <div className={styles.successActions}>
-        <Button priority="secondary" linkProps={{ href: PAGES.static.transmissions.getPath() }}>
+        <Button priority="secondary" linkProps={{ href: transmissionsPath }}>
           Voir le rapport de transmission
         </Button>
         <Button
