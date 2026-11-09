@@ -16,11 +16,11 @@ export function HeroSection() {
       <div className={styles.titleBlock}>
         <h1 className={styles.title}>
           L’outil de <span className={styles.titleHighlight}>repérage</span> des jeunes en{" "}
-          <span className={styles.titleHighlight}>rupture de contrat d’apprentissage</span> et de{" "}
+          <span className={styles.titleHighlight}>difficulté en apprentissage</span> et de{" "}
           <span className={styles.titleHighlight}>collaboration avec les CFA.</span> Soutenons l’insertion des
           apprentis.
         </h1>
-        <p className={styles.subtitle}>Pour les Missions locales</p>
+        <p className={styles.subtitle}>Pour les Missions Locales</p>
       </div>
       <div className={styles.heroBlock}>
         <div className={styles.figuresBand} aria-hidden="true">
