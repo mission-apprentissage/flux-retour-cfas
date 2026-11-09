@@ -246,7 +246,9 @@ async function processEffectifQueueItem(
 
       itemLogger.error({ duration: Date.now() - start, err: result.error }, "item validation error");
     }
-    await handleDECAMechanism(organismeTarget);
+    if (effectifQueue.source !== SOURCE_APPRENANT.FICHIER) {
+      await handleDECAMechanism(organismeTarget);
+    }
 
     return result.success;
   } catch (err) {

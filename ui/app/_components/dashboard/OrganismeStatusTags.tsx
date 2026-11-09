@@ -10,6 +10,9 @@ const FIABILISATION_TOOLTIP =
 const DECA_TOOLTIP =
   "Effectifs affichés provenant de la source DECA (DEpôts des Contrats d’Alternance). La date correspond à la dernière récupération brute de cette base. Pour une donnée plus fraîche, l’organisme doit transmettre lui-même ses effectifs.";
 
+const DECA_FICHIER_TOOLTIP =
+  "Effectifs du fichier importé par l’organisme, complétés par les contrats DECA (DEpôts des Contrats d’Alternance) des apprentis absents du fichier. La date correspond à la dernière récupération brute de la base DECA.";
+
 const DUPLICATS_TOOLTIP =
   "Duplicats d’effectifs détectés : des effectifs sont en doublons et doivent être supprimés dans l’onglet « Mes effectifs ». Sans cette action, les doublons sont comptabilisés dans les effectifs globaux de l’établissement.";
 
@@ -28,18 +31,21 @@ export function InfoFiabilisationTag({ fiabilisationStatut }: { fiabilisationSta
 export function InfoTransmissionDecaTag({
   date,
   indicateursEffectifs,
+  avecFichier = false,
 }: {
   date?: Date;
   indicateursEffectifs?: IndicateursEffectifs;
+  avecFichier?: boolean;
 }) {
   if (!indicateursEffectifs?.apprenants) return null;
 
   return (
     <span>
       <Badge severity="info" small>
-        Données DECA{date ? ` — dernière MAJ : ${date.toLocaleDateString("fr")}` : ""}
+        {avecFichier ? "Données fichier et DECA" : "Données DECA"}
+        {date ? ` — dernière MAJ : ${date.toLocaleDateString("fr")}` : ""}
       </Badge>{" "}
-      <Tooltip kind="hover" title={DECA_TOOLTIP} />
+      <Tooltip kind="hover" title={avecFichier ? DECA_FICHIER_TOOLTIP : DECA_TOOLTIP} />
     </span>
   );
 }

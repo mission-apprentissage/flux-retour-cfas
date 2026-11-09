@@ -100,7 +100,8 @@ export async function getOrganismeIndicateursEffectifsGenerique(
   organismeId: ObjectId,
   filters: EffectifsFiltersTerritoire,
   db: Collection<IEffectif> | Collection<IEffectifDECA>,
-  decaMode: boolean = false
+  decaMode: boolean = false,
+  etapesExclusion: Record<string, unknown>[] = []
 ): Promise<IndicateursEffectifs> {
   const indicateurs = (await db
     .aggregate([
@@ -111,6 +112,7 @@ export async function getOrganismeIndicateursEffectifsGenerique(
           ...buildEffectifMongoFilters(filters, ctx.acl.indicateursEffectifs)
         ),
       },
+      ...etapesExclusion,
       ...buildIndicateursEffectifsPipeline(null, filters.date),
       {
         $project: {
@@ -135,7 +137,7 @@ export async function getOrganismeIndicateursEffectifsGenerique(
   );
 }
 
-async function getOrganismeRestriction(organismeId?: ObjectId) {
+export async function getOrganismeRestriction(organismeId?: ObjectId) {
   return organismeId
     ? { organisme_id: { $in: [organismeId, ...(await findOrganismesFormateursIdsOfOrganisme(organismeId, true))] } }
     : {};
