@@ -2,7 +2,7 @@
 
 import { CATALOGUE_CHAMPS_TELEVERSEMENT, CHAMPS_TELEVERSEMENT_PAR_CLE, GroupeChampTeleversement } from "shared";
 
-import { MODEL_EXPORT_LAST_UPDATE } from "@/common/utils/exportUtils";
+import { publicConfig } from "@/config.public";
 
 import styles from "./televersement.module.scss";
 
@@ -25,7 +25,7 @@ export function InfoTeleversement() {
   return (
     <>
       <a
-        href={`/modele-import-${MODEL_EXPORT_LAST_UPDATE}.xlsx`}
+        href={`${publicConfig.baseUrl}/api/v1/televersement/modele-excel`}
         target="_blank"
         rel="noopener noreferrer"
         className="fr-link"
