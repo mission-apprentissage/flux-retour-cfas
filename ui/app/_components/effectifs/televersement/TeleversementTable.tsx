@@ -46,8 +46,8 @@ export function TeleversementTable({
 }: TeleversementTableProps) {
   const dataWithAdditionalInfo = useMemo(
     () =>
-      data.map((row, index) => ({
-        lineNumber: index + 2,
+      data.map((row) => ({
+        lineNumber: row.numero,
         ...row,
         status: row.errors.length === 0 ? "Valide" : `${row.errors.length} erreur${row.errors.length > 1 ? "s" : ""}`,
       })),

@@ -1,20 +1,26 @@
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { ChampTeleversement, CHAMPS_TELEVERSEMENT_PAR_CLE, ERREURS_TELEVERSEMENT } from "shared";
-import XLSX from "xlsx";
+import { CHAMPS_TELEVERSEMENT_PAR_CLE, ERREURS_TELEVERSEMENT } from "shared";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _post } from "@/common/httpClient";
 import { getErrorStatusCode, getServerErrorMessage } from "@/common/rateLimit";
 import { reportError } from "@/common/reportError";
-import parseExcelBoolean from "@/common/utils/parseExcelBoolean";
-import parseExcelDate from "@/common/utils/parseExcelDate";
+import { lireFichierEffectifs, type ResultatLecture } from "@/common/utils/lectureFichierEffectifs";
 import { evenementVerification, messageFichierRefuse, toEffectifsQueue } from "@/common/utils/televersement";
 
 const POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH = 2000;
 
+const FORMATS_ACCEPTES = {
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+  "application/vnd.ms-excel": [".xls", ".csv"],
+  "application/vnd.oasis.opendocument.spreadsheet": [".ods"],
+  "text/csv": [".csv"],
+};
+
 export interface ProcessedDataType {
   [key: string]: unknown;
+  numero: number;
   errors: { key: string; message: string }[];
 }
 
@@ -26,6 +32,7 @@ interface ValidationIssue {
 
 interface StateType {
   processedData: ProcessedDataType[];
+  valeursAEnvoyer: Record<string, unknown>[];
   headers: string[];
   error: string | null;
   errorsCount: number;
@@ -33,11 +40,12 @@ interface StateType {
   missingHeaders: string[];
   columnsWithErrors: string[];
   showOnlyColumnsAndLinesWithErrors: boolean;
-  status: "idle" | "processing" | "validation_success" | "validation_failure" | "import_success" | "import_failure";
+  status: "idle" | "processing" | "validation_success" | "validation_failure" | "import_success";
 }
 
 const initialState: StateType = {
   processedData: [],
+  valeursAEnvoyer: [],
   headers: [],
   error: null,
   errorsCount: 0,
@@ -48,196 +56,121 @@ const initialState: StateType = {
   status: "idle",
 };
 
+function lireDansUnWorker(contenu: ArrayBuffer, nomFichier: string, maximumLignes: number): Promise<ResultatLecture> {
+  const lireIci = () => lireFichierEffectifs(contenu, nomFichier, { maximumLignes });
+  if (typeof Worker === "undefined") {
+    return Promise.resolve(lireIci());
+  }
+  return new Promise((resolve) => {
+    let worker: Worker;
+    try {
+      worker = new Worker(new URL("../common/utils/lectureFichierEffectifs.worker.ts", import.meta.url));
+    } catch {
+      resolve(lireIci());
+      return;
+    }
+    worker.onmessage = (event: MessageEvent<ResultatLecture>) => {
+      worker.terminate();
+      resolve(event.data);
+    };
+    worker.onerror = () => {
+      worker.terminate();
+      resolve(lireIci());
+    };
+    worker.postMessage({ contenu, nomFichier, maximumLignes });
+  });
+}
+
 const useExcelFileProcessor = (organismeId: string) => {
   const [state, setState] = useState<StateType>(initialState);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
 
-  const resetState = () => {
-    setState(initialState);
-  };
-
   const onDrop = async (acceptedFiles: File[]) => {
-    resetState();
-    setState((prevState) => ({ ...prevState, status: "processing" }));
+    setState({ ...initialState, status: "processing" });
     const file = acceptedFiles[0];
-    if (file) {
-      trackPlausibleEvent("televersement_fichier_depose");
-    }
     if (!file) {
-      const errorMsg = ERREURS_TELEVERSEMENT.aucun_fichier();
-      setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
+      setState({ ...initialState, error: ERREURS_TELEVERSEMENT.aucun_fichier() });
       return;
     }
+    trackPlausibleEvent("televersement_fichier_depose");
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      if (!e.target?.result) {
-        const errorMsg = "Erreur lors de la lecture du fichier, veuillez réessayer.";
-        setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
+    try {
+      const lecture = await lireDansUnWorker(
+        await file.arrayBuffer(),
+        file.name,
+        POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH
+      );
+      if (!lecture.succes) {
+        setState({ ...initialState, error: lecture.message });
         return;
       }
 
-      try {
-        const data = new Uint8Array(e.target.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: "array" });
-        const worksheetName = workbook.SheetNames[0];
-        if (!worksheetName) {
-          setState((prevState) => ({
-            ...prevState,
-            error: "Impossible de charger la première feuille du fichier Excel",
-            status: "idle",
-          }));
-          return;
-        }
-        const worksheet = workbook.Sheets[worksheetName];
-        const rawJsonData = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1 }) as unknown[][];
+      const valeursAEnvoyer = toEffectifsQueue(lecture.lignes.map(({ valeurs }) => valeurs));
+      const res = await _post<unknown, { error?: { issues?: ValidationIssue[] }; warnings?: StateType["warnings"] }>(
+        `/api/v1/organismes/${organismeId}/upload/validate`,
+        valeursAEnvoyer
+      );
 
-        const filteredJsonData = rawJsonData.filter((row: unknown[]) =>
-          row.some((cell) => typeof cell === "string" && cell.trim() !== "")
-        );
-
-        if (filteredJsonData.length - 1 > POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH) {
-          const errorMsg = `Pour des raisons techniques et de sécurité, votre fichier ne doit pas dépasser ${POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} lignes. Veuillez téléverser un premier fichier de ${POST_DOSSIERS_APPRENANTS_MAX_INPUT_LENGTH} lignes/effectifs et renouveler l'opération avec un deuxième fichier comprenant le nombre de lignes restantes.`;
-          setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
-          return;
-        }
-
-        const rawHeaders = filteredJsonData[0] as string[];
-        const cleanHeaders = rawHeaders.map((header) =>
-          typeof header === "string" ? header.toLowerCase().replace(/\*/g, "").trim() : ""
-        );
-
-        const validHeaders = Object.keys(CHAMPS_TELEVERSEMENT_PAR_CLE);
-        setState((prevState) => ({ ...prevState, headers: validHeaders }));
-
-        const headerMap: Record<string, number> = {};
-        cleanHeaders.forEach((header, index) => {
-          if (validHeaders.includes(header)) {
-            headerMap[header] = index;
-          }
-        });
-
-        if (Object.keys(headerMap).length === 0) {
-          const errorMsg =
-            "Le format de votre fichier n'est pas conforme. Veuillez respecter celui du fichier-modèle Excel téléchargeable.";
-          setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
-          return;
-        }
-
-        const jsonData: ProcessedDataType[] = filteredJsonData.slice(1).map((row) => {
-          const rowObject: ProcessedDataType = { errors: [] };
-
-          validHeaders.forEach((header) => {
-            const index = headerMap[header];
-            if (index !== undefined) {
-              const config = CHAMPS_TELEVERSEMENT_PAR_CLE[header];
-              const cellValue = (row as unknown[])[index];
-
-              if (config) {
-                if (config.type === "date") {
-                  rowObject[header] = parseExcelDate(cellValue as string | number | null | undefined);
-                } else if (config.type === "boolean") {
-                  rowObject[header] = parseExcelBoolean(cellValue);
-                } else {
-                  rowObject[header] = cellValue || null;
-                }
-
-                if (config.obligation === "obligatoire" && !rowObject[header]) {
-                  rowObject.errors.push({ key: header, message: `${header} est requis` });
-                }
-              }
-            } else {
-              rowObject[header] = null;
-            }
-          });
-
-          return rowObject;
-        });
-
-        const res = await _post<
-          unknown,
-          { error?: { issues?: ValidationIssue[] }; warnings?: Record<string, unknown> }
-        >(`/api/v1/organismes/${organismeId}/upload/validate`, toEffectifsQueue(jsonData));
-
-        const errors = res.error?.issues || [];
-        setState((prevState) => ({
-          ...prevState,
-          errorsCount: errors.length,
-          warnings: res.warnings || {},
-          missingHeaders: validHeaders.filter((header) => !cleanHeaders.includes(header)),
-        }));
-
-        const mandatoryHeaders = getMandatoryHeaders(CHAMPS_TELEVERSEMENT_PAR_CLE);
-        const missingMandatoryHeaders = filterMissingHeaders(state.missingHeaders, mandatoryHeaders);
-
-        setState((prevState) => ({
-          ...prevState,
-          missingHeaders: missingMandatoryHeaders,
-        }));
-
-        const errorsByRow = errors.reduce((acc: Record<number, { message: string; key: string }[]>, error) => {
-          const row = Number(error.path[0]);
-          let message = error.message;
-
-          if (error.code === "invalid_type") {
-            message = "Format invalide";
-          }
-
-          if (!acc[row]) acc[row] = [];
-          acc[row].push({
-            message,
-            key: String(error.path[1]),
-          });
+      const erreursServeurParLigne = (res.error?.issues ?? []).reduce<Record<number, ProcessedDataType["errors"]>>(
+        (acc, issue) => {
+          const index = Number(issue.path[0]);
+          acc[index] = [
+            ...(acc[index] ?? []),
+            {
+              key: String(issue.path[1]),
+              message: issue.code === "invalid_type" ? "Format invalide" : issue.message,
+            },
+          ];
           return acc;
-        }, {});
+        },
+        {}
+      );
 
-        const columnsWithErrorsArray = errors.map((e) => String(e.path[1]));
-        const uniqueColumnsWithErrors = Array.from(new Set(columnsWithErrorsArray));
-
-        const rows = jsonData.map((row, index) => {
-          const rowErrors = errorsByRow[index] || [];
-          return { ...row, errors: rowErrors };
-        });
-
-        setState((prevState) => ({
-          ...prevState,
-          processedData: rows,
-          columnsWithErrors: uniqueColumnsWithErrors as string[],
-          status: errors.length ? "validation_failure" : "validation_success",
-        }));
-        trackPlausibleEvent(evenementVerification(errors.length));
-      } catch (error) {
-        if (getErrorStatusCode(error) === 503) {
-          const errorMsg = getServerErrorMessage(error, "Erreur de traitement du fichier");
-          setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
-          return;
-        }
-        reportError(error, { action: "traitement-fichier-excel" });
-        const errorMsg = "Erreur de traitement du fichier";
-        setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
+      const processedData: ProcessedDataType[] = lecture.lignes.map((ligne, index) => ({
+        ...ligne.valeurs,
+        numero: ligne.numero,
+        errors: [
+          ...ligne.erreurs.map(({ cle, message }) => ({ key: cle, message })),
+          ...(erreursServeurParLigne[index] ?? []),
+        ],
+      }));
+      const erreursDeLignes = processedData.flatMap(({ errors }) => errors);
+      const errorsCount = erreursDeLignes.length + lecture.colonnesObligatoiresAbsentes.length;
+      const codesErreurs = new Set<string>(lecture.lignes.flatMap(({ erreurs }) => erreurs.map(({ code }) => code)));
+      if (lecture.colonnesObligatoiresAbsentes.length > 0) {
+        codesErreurs.add("colonne_absente");
       }
-    };
 
-    reader.onerror = () => {
-      const errorMsg = "Erreur de lecture du fichier";
-      setState((prevState) => ({ ...prevState, error: errorMsg, status: "idle" }));
-    };
-
-    reader.readAsArrayBuffer(file);
+      setState({
+        ...initialState,
+        processedData,
+        valeursAEnvoyer,
+        headers: Object.keys(CHAMPS_TELEVERSEMENT_PAR_CLE),
+        errorsCount,
+        warnings: res.warnings ?? {},
+        missingHeaders: lecture.colonnesObligatoiresAbsentes,
+        columnsWithErrors: Array.from(new Set(erreursDeLignes.map(({ key }) => key))),
+        status: errorsCount > 0 ? "validation_failure" : "validation_success",
+      });
+      trackPlausibleEvent(evenementVerification(errorsCount), undefined, {
+        codes: [...codesErreurs].sort().join(","),
+      });
+    } catch (error) {
+      if (getErrorStatusCode(error) === 503) {
+        setState({ ...initialState, error: getServerErrorMessage(error, "Erreur de traitement du fichier") });
+        return;
+      }
+      reportError(error, { action: "traitement-fichier-excel" });
+      setState({ ...initialState, error: "Erreur de traitement du fichier" });
+    }
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxFiles: 1,
-    accept: {
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
-    },
+    accept: FORMATS_ACCEPTES,
     onDrop,
     onDropRejected: (rejections) => {
-      setState((prevState) => ({
-        ...prevState,
-        error: messageFichierRefuse(rejections),
-        status: "idle",
-      }));
+      setState({ ...initialState, error: messageFichierRefuse(rejections) });
     },
   });
 
@@ -246,6 +179,7 @@ const useExcelFileProcessor = (organismeId: string) => {
     getInputProps,
     isDragActive,
     processedData: state.processedData,
+    valeursAEnvoyer: state.valeursAEnvoyer,
     headers: state.headers,
     error: state.error,
     errorsCount: state.errorsCount,
@@ -259,13 +193,5 @@ const useExcelFileProcessor = (organismeId: string) => {
     setStatus: (status: StateType["status"]) => setState((prevState) => ({ ...prevState, status })),
   };
 };
-
-function getMandatoryHeaders(headers: Record<string, ChampTeleversement>) {
-  return Object.keys(headers).filter((header) => headers[header].obligation === "obligatoire");
-}
-
-function filterMissingHeaders(missingHeaders: string[], mandatoryHeaders: string[]) {
-  return missingHeaders.filter((header) => mandatoryHeaders.includes(header));
-}
 
 export default useExcelFileProcessor;

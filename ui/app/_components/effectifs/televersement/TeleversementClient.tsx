@@ -12,7 +12,7 @@ import { ERREURS_TELEVERSEMENT, TD_MANUEL_ELEMENT_LINK } from "shared";
 import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _post } from "@/common/httpClient";
-import { envoyerImport, toEffectifsQueue } from "@/common/utils/televersement";
+import { envoyerImport } from "@/common/utils/televersement";
 import useExcelFileProcessor from "@/hooks/useExcelFileProcessor";
 
 import { DocumentsActionButtons } from "./DocumentsActionButtons";
@@ -38,6 +38,7 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
     getInputProps,
     isDragActive,
     processedData,
+    valeursAEnvoyer,
     headers,
     error,
     errorsCount,
@@ -59,7 +60,7 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
     setSubmitError(null);
     setIsSubmitting(true);
     const resultat = await envoyerImport(
-      () => _post(`/api/v1/organismes/${organismeId}/upload/import/v3`, toEffectifsQueue(processedData)),
+      () => _post(`/api/v1/organismes/${organismeId}/upload/import/v3`, valeursAEnvoyer),
       (goal) => trackPlausibleEvent(goal)
     );
     setIsSubmitting(false);

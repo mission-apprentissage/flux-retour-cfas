@@ -37,7 +37,7 @@ export function FileUpload({
               <>
                 <i className="fr-icon-upload-2-line fr-icon--lg" aria-hidden="true" />
                 <p className="fr-mb-0">Glissez le fichier dans cette zone ou cliquez sur le bouton</p>
-                <p>pour ajouter un document Excel (xlsx) depuis votre disque dur</p>
+                <p>pour ajouter un fichier Excel, OpenDocument ou CSV depuis votre ordinateur</p>
                 <Button priority="secondary" className="fr-mt-2w">
                   Ajouter un document
                 </Button>
