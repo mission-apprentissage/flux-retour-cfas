@@ -22,6 +22,7 @@ export type TransmissionStat = {
   total: number;
   error: number;
   success: number;
+  pending: number;
 };
 
 export interface OrganismeSupportInfo {

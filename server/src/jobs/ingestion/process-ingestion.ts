@@ -26,6 +26,7 @@ import {
 import { createFranceTravailEffectifSnapshot } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
+  signalerErreurTransmission,
   updateOrganismeTransmission,
   updateOrganismesHasTransmittedWithHierarchy,
 } from "@/common/actions/organismes/organismes.actions";
@@ -245,6 +246,9 @@ async function processEffectifQueueItem(
         }
       );
 
+      if (effectifQueue.source === SOURCE_APPRENANT.FICHIER) {
+        await signalerErreurTransmission(effectifQueue.source_organisme_id, currentDate);
+      }
       itemLogger.error({ duration: Date.now() - start, err: result.error }, "item validation error");
     }
     if (effectifQueue.source !== SOURCE_APPRENANT.FICHIER) {
@@ -274,6 +278,9 @@ async function processEffectifQueueItem(
         },
       }
     );
+    if (effectifQueue.source === SOURCE_APPRENANT.FICHIER) {
+      await signalerErreurTransmission(effectifQueue.source_organisme_id, currentDate);
+    }
     return false;
   }
 }

@@ -20,6 +20,7 @@ interface TransmissionDay {
   day: string;
   success: number;
   error: number;
+  pending?: number;
   total: number;
 }
 
@@ -89,6 +90,11 @@ export default function TransmissionsClient({ modePublique = false, organismeId 
             <i className={fr.cx("fr-icon-close-circle-fill", "fr-icon--sm")} aria-hidden="true" />
             Incomplète
           </span>
+        ) : Number(transmission.pending) > 0 ? (
+          <span className={`${styles.status} ${styles.statusPending}`}>
+            <i className={fr.cx("fr-icon-time-fill", "fr-icon--sm")} aria-hidden="true" />
+            En cours de traitement
+          </span>
         ) : (
           <span className={`${styles.status} ${styles.statusComplete}`}>
             <i className={fr.cx("fr-icon-checkbox-circle-fill", "fr-icon--sm")} aria-hidden="true" />
@@ -129,7 +135,9 @@ export default function TransmissionsClient({ modePublique = false, organismeId 
       <PageHeader
         title={`${modePublique ? "Ses" : "Mes"} transmissions`}
         titleAs={modePublique ? "h2" : "h1"}
-        intro="Visualisez l’état de la donnée des apprenants et leurs contrats transmis ou non, via l’API. L’ensemble des éléments manquants et/ou invalides sont listés dans un rapport complet."
+        intro={`Visualisez l’état de la donnée des apprenants et leurs contrats transmis ou non, ${
+          organisme?.mode_de_transmission === "MANUEL" ? "par import de fichier" : "via l’API"
+        }. L’ensemble des éléments manquants et/ou invalides sont listés dans un rapport complet.`}
       />
 
       {error ? (

@@ -62,6 +62,23 @@ export const findOrganismeById = async (id: string | ObjectId, projection = {}) 
 /**
  * Méthode de mise à jour d'un organisme depuis son id
  */
+export async function signalerErreurTransmission(sourceOrganismeId: string | null | undefined, date: Date) {
+  if (!sourceOrganismeId || !ObjectId.isValid(sourceOrganismeId)) {
+    return;
+  }
+  await organismesDb().updateOne(
+    { _id: new ObjectId(sourceOrganismeId) },
+    { $set: { has_transmission_errors: true, transmission_errors_date: date, updated_at: date } }
+  );
+}
+
+export async function effacerAlerteTransmission(organismeId: ObjectId) {
+  await organismesDb().updateOne(
+    { _id: organismeId },
+    { $set: { has_transmission_errors: false, updated_at: new Date() }, $unset: { transmission_errors_date: 1 } }
+  );
+}
+
 export const updateOrganisme = async (_id: ObjectId, data: Partial<IOrganisme>) => {
   const organisme = await organismesDb().findOne({ _id });
   if (!organisme) {
