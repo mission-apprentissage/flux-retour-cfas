@@ -24,7 +24,10 @@ export default function HomePage() {
         }
       />
       <ConnexionSection />
-      <VideoSection />
+      <VideoSection
+        title="Les CFA et les Missions Locales parlent de leur collaboration sur le Tableau de bord"
+        badge="Île-de-France"
+      />
       <TemoignagesSection />
       <FAQSection />
       <FooterCTASection />

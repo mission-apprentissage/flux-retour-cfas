@@ -14,8 +14,21 @@
   }
 }
 
-.title {
+.heading {
+  display: flex;
   flex-shrink: 0;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+  text-align: left;
+
+  @include respond-from(md) {
+    width: 20rem;
+    margin-top: 12rem;
+  }
+}
+
+.title {
   width: auto;
   margin: 0;
   font-size: 1.5rem;
@@ -24,11 +37,16 @@
   color: var(--light-decisions-text-text-default-grey, #3a3a3a);
 
   @include respond-from(md) {
-    width: 20rem;
-    margin-top: 12rem;
     font-size: 2rem;
     line-height: 40px;
   }
+}
+
+.badge {
+  gap: 0.5rem;
+  align-items: center;
+  color: #000091;
+  background-color: #ececfe;
 }
 
 .media {

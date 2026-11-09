@@ -25,7 +25,10 @@ export default function AccueilTerritoirePage() {
         title="180 000 jeunes en rupture de contrat d’apprentissage chaque année*"
         description="Une grande partie d’entre eux ne bénéficie d’aucun accompagnement. Les relations entre les CFA, les Missions Locales et l’ensemble des acteurs territoriaux existent déjà, le Tableau de bord leur donne un espace de centralisation pour faciliter l’accès à l’information et la collaboration."
       />
-      <VideoSection />
+      <VideoSection
+        title="Les CFA et les Missions Locales parlent de leur collaboration sur le Tableau de bord"
+        badge="Île-de-France"
+      />
       <TemoignagesSection linkInscription="operateur_public" />
       <FAQSection />
       <FooterCTASection linkInscription="operateur_public" />

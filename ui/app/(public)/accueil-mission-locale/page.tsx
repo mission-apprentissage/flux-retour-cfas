@@ -22,7 +22,7 @@ export default function AccueilMissionLocalePage() {
       <EtablissementsConnectesSection />
       <FeaturesSection />
       <ProcessusSection />
-      <VideoSection />
+      <VideoSection title="Les mots des Missions Locales" />
       <TemoignagesSection linkInscription="missions_locales" />
       <FAQSection />
       <FooterCTASection linkInscription="missions_locales" />
