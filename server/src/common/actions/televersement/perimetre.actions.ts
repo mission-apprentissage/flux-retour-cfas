@@ -1,3 +1,4 @@
+import { zSiret, zUai } from "api-alternance-sdk/internal";
 import { ObjectId } from "mongodb";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { extensions } from "shared/models/parts/zodPrimitives";
@@ -109,6 +110,9 @@ export async function verifierPerimetreTeleversement(
       }
       const siretLu = extensions.siret().safeParse(ligne.etablissement_formateur_siret);
       const siret = siretLu.success ? siretLu.data : undefined;
+      if (!zUai.safeParse(uai.data).success || (siret && !zSiret.safeParse(siret).success)) {
+        return null;
+      }
       const cle = `${uai.data}|${siret ?? ""}`;
       if (!jugements.has(cle)) {
         jugements.set(cle, jugerEtablissement(uai.data, siret, source, perimetre));

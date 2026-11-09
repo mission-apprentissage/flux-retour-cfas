@@ -7,6 +7,7 @@ import { updateEffectifQueueDateAndError } from "../ingestion/migration/effectif
 import { removeDuplicatesEffectifsQueue } from "../ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "../ingestion/process-ingestion";
 import { migrateEffectifs } from "../ingestion/process-ingestion.v2";
+import { mesurerPerimetreTeleversement } from "../tmp/mesurer-perimetre-televersement";
 
 import { payloadBoolean, payloadDate, payloadNumber, requirePayloadString } from "./payload";
 
@@ -40,6 +41,9 @@ export const ingestionJobs = {
   },
   "tmp:migrate:effectifs-queue": {
     handler: updateEffectifQueueDateAndError,
+  },
+  "tmp:mesurer-perimetre-televersement": {
+    handler: async (job) => mesurerPerimetreTeleversement({ mois: payloadNumber(job.payload, "mois") }),
   },
   "heartbeat:ingestion": {
     handler: heartbeatIngestion,

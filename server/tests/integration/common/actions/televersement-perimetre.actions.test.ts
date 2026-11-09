@@ -142,6 +142,14 @@ describe("verifierPerimetreTeleversement", () => {
     expect(appels.n).toBe(1);
   });
 
+  it("laisse à la vérification des établissements un SIRET dont la clé est fausse, sans appeler l'API", async () => {
+    const resultat = await verifierPerimetreTeleversement(importateur._id, [
+      ligne({ uai: TIERS.uai, siret: "44444444200017" }),
+    ]);
+
+    expect(resultat).toEqual({ indisponible: false, issues: [] });
+  });
+
   it("signale l'indisponibilité de l'API au lieu de juger le périmètre", async () => {
     nock(API).get("/organisme/v1/recherche").query(true).replyWithError("API indisponible").persist();
 
