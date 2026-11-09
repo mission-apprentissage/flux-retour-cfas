@@ -17,8 +17,8 @@ export function HeroSection() {
         <h1 className={styles.title}>
           L’outil de <span className={styles.titleHighlight}>collaboration avec les Missions Locales</span> pour{" "}
           <span className={styles.titleHighlight}>l’accompagnement</span> des{" "}
-          <span className={styles.titleHighlight}>jeunes en rupture</span> de{" "}
-          <span className={styles.titleHighlight}>contrat d’apprentissage</span>.
+          <span className={styles.titleHighlight}>jeunes en difficulté</span> pendant un{" "}
+          <span className={styles.titleHighlight}>apprentissage</span>.
         </h1>
         <p className={styles.subtitle}>Pour les CFA</p>
       </div>

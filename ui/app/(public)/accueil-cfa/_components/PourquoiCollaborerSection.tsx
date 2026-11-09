@@ -77,9 +77,9 @@ export function PourquoiCollaborerSection() {
       <div className={styles.titleBlock}>
         <p className={styles.eyebrow}>Pourquoi collaborer avec les Missions Locales ?</p>
         <h2 className={styles.title}>
-          Quand la rupture s’installe et dure, la Mission Locale apporte ses solutions{" "}
+          Pour prévenir la rupture ou éviter le décrochage après une rupture complexe, appuyez-vous sur les solutions{" "}
           <span className={styles.titleAccent}>pédagogiques</span>, <span className={styles.titleAccent}>humaines</span>{" "}
-          et <span className={styles.titleAccent}>matérielles</span>.
+          et <span className={styles.titleAccent}>matérielles</span> des Missions Locales.
         </h2>
       </div>
       <p className={styles.subtitle}>Les freins périphériques pour lesquels la Mission Locale agit</p>
