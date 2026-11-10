@@ -50,11 +50,13 @@ describe("sendCfaDailyRecap", () => {
     accConjointBy = repondant._id,
     situation = SITUATION_ENUM.RDV_PRIS,
     logIlYaHeures = 1,
+    auteur = new ObjectId(),
   }: {
     accConjoint?: boolean;
     accConjointBy?: ObjectId;
     situation?: SITUATION_ENUM;
     logIlYaHeures?: number;
+    auteur?: ObjectId | null;
   } = {}) {
     const dossier = testDoc<IMissionLocaleEffectif>({
       mission_locale_id: missionLocale._id,
@@ -69,6 +71,7 @@ describe("sendCfaDailyRecap", () => {
         mission_locale_effectif_id: dossier._id,
         situation,
         created_at: subHours(new Date(), logIlYaHeures),
+        created_by: auteur,
         read_by: [],
       })
     );
@@ -153,6 +156,15 @@ describe("sendCfaDailyRecap", () => {
   it("ignore les actions de plus de 24 h et les situations non actives", async () => {
     await insererDossier({ logIlYaHeures: 48 });
     await insererDossier({ situation: SITUATION_ENUM.COORDONNEES_INCORRECT });
+
+    const compteurs = await sendCfaDailyRecap();
+
+    expect(sendEmail).not.toHaveBeenCalled();
+    expect(compteurs).toMatchObject({ cfas: 0, emailsSent: 0 });
+  });
+
+  it("ignore les situations posées par un job, sans auteur", async () => {
+    await insererDossier({ auteur: null });
 
     const compteurs = await sendCfaDailyRecap();
 

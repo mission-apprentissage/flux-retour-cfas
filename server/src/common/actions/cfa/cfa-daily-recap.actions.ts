@@ -69,6 +69,7 @@ export async function getCfaEffectifsWithMlActionsLast24h(): Promise<ICfaDailySt
     .find({
       created_at: { $gte: yesterday },
       situation: { $in: SITUATIONS_ACTIVES },
+      created_by: { $ne: null },
     })
     .toArray();
   if (logsRecents.length === 0) {
@@ -216,6 +217,7 @@ export async function getJeunesForCfaMl(
     .find({
       created_at: { $gte: since },
       situation: { $in: SITUATIONS_ACTIVES },
+      created_by: { $ne: null },
     })
     .toArray();
 
