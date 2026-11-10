@@ -1,15 +1,19 @@
+import * as Boom from "@hapi/boom";
 import { ObjectId } from "mongodb";
-import { CHAMPS_TELEVERSEMENT_PAR_CLE, ERREURS_TELEVERSEMENT } from "shared/constants";
+import { CHAMPS_TELEVERSEMENT_PAR_CLE, ERREURS_TELEVERSEMENT, TELEVERSEMENT_MAX_LIGNES } from "shared/constants";
 import {
   computeWarningsForDossierApprenantSchemaV3,
   dossierApprenantSchemaFichier,
   IDossierApprenantSchemaV3,
+  lireCleEffectifFichier,
   PARAMS_TELEVERSEMENT,
   SUFFIXES_CONTRATS,
+  verifierReglesFichierSurLigneBrute,
 } from "shared/models/parts/dossierApprenantSchemaV3";
 import { z } from "zod";
 
 import { effectifsDb } from "@/common/model/collections";
+import { validateArrayInput } from "@/common/utils/inputValidationError";
 import stripNullProperties from "@/common/utils/stripNullProperties";
 
 import { verifierEtablissementsTeleversement } from "./perimetre.actions";
@@ -21,13 +25,11 @@ export type IssueTeleversement = {
   motif?: string;
 };
 
-export type ContratEfface = { nom: string; prenom: string; ligne: number };
-
 export type AvertissementsTeleversement = {
   contratCount: number;
   nouveaux: number;
   misAJour: number;
-  contratsEffaces: ContratEfface[];
+  contratsEffaces: number[];
 };
 
 export type ResultatVerificationTeleversement =
@@ -35,6 +37,16 @@ export type ResultatVerificationTeleversement =
   | { indisponible: false; issues: IssueTeleversement[]; warnings: AvertissementsTeleversement };
 
 type Ligne = Record<string, unknown>;
+
+type CleEffectif = { annee_scolaire: string | undefined; id_erp_apprenant: string | undefined };
+
+export function lireLignesTeleversement(body: unknown): Ligne[] {
+  const lignes = validateArrayInput(body, TELEVERSEMENT_MAX_LIGNES);
+  if (!lignes.every((ligne) => typeof ligne === "object" && ligne !== null && !Array.isArray(ligne))) {
+    throw Boom.badRequest(ERREURS_TELEVERSEMENT.erreurs_avant_import());
+  }
+  return lignes as Ligne[];
+}
 
 const estVide = (valeur: unknown) =>
   valeur === undefined || valeur === null || (typeof valeur === "string" && valeur.trim() === "");
@@ -74,11 +86,12 @@ function traduireIssue(issue: z.ZodIssue, lignes: Ligne[]): IssueTeleversement {
 function verifierSchema(lignes: Ligne[]): IssueTeleversement[] {
   const vues = new Set<string>();
   return lignes.flatMap((ligne, index) => {
-    const resultat = dossierApprenantSchemaFichier.safeParse(stripNullProperties(ligne));
+    const dossier = stripNullProperties(ligne);
+    const resultat = dossierApprenantSchemaFichier.safeParse(dossier);
     if (resultat.success) {
       return [];
     }
-    return resultat.error.issues
+    return [...resultat.error.issues, ...verifierReglesFichierSurLigneBrute(dossier)]
       .map((issue) => traduireIssue({ ...issue, path: [index, ...issue.path] }, lignes))
       .filter(({ path, message }) => {
         const cle = `${path.join(".")}|${message}`;
@@ -91,17 +104,22 @@ function verifierSchema(lignes: Ligne[]): IssueTeleversement[] {
   });
 }
 
-const cleEffectif = (organismeId: string, anneeScolaire: unknown, idErp: unknown) =>
-  `${organismeId}|${texte(anneeScolaire)}|${texte(idErp)}`;
+const cleEffectif = (organismeId: string, anneeScolaire: string, idErp: string) =>
+  `${organismeId}|${anneeScolaire}|${idErp}`;
 
-function verifierDoublons(lignes: Ligne[], organismeIdParLigne: (string | null)[]): IssueTeleversement[] {
+function verifierDoublons(
+  lignes: Ligne[],
+  cles: CleEffectif[],
+  organismeIdParLigne: (string | null)[]
+): IssueTeleversement[] {
   const groupes = new Map<string, number[]>();
-  lignes.forEach((ligne, index) => {
+  lignes.forEach((_ligne, index) => {
     const organismeId = organismeIdParLigne[index];
-    if (!organismeId || estVide(ligne.id_erp_apprenant) || estVide(ligne.annee_scolaire)) {
+    const { annee_scolaire, id_erp_apprenant } = cles[index];
+    if (!organismeId || !annee_scolaire || !id_erp_apprenant) {
       return;
     }
-    const cle = cleEffectif(organismeId, ligne.annee_scolaire, ligne.id_erp_apprenant);
+    const cle = cleEffectif(organismeId, annee_scolaire, id_erp_apprenant);
     groupes.set(cle, [...(groupes.get(cle) ?? []), index]);
   });
 
@@ -128,12 +146,14 @@ const nombreDeContrats = (ligne: Ligne) =>
 
 async function comparerAuxEffectifsConnus(
   lignes: Ligne[],
+  cles: CleEffectif[],
   organismeIdParLigne: (string | null)[]
 ): Promise<Omit<AvertissementsTeleversement, "contratCount">> {
   const resolues = lignes.flatMap((ligne, index) => {
     const organismeId = organismeIdParLigne[index];
-    return organismeId && !estVide(ligne.id_erp_apprenant) && !estVide(ligne.annee_scolaire)
-      ? [{ ligne, index, organismeId }]
+    const { annee_scolaire, id_erp_apprenant } = cles[index];
+    return organismeId && annee_scolaire && id_erp_apprenant
+      ? [{ ligne, index, organismeId, annee_scolaire, id_erp_apprenant }]
       : [];
   });
   if (resolues.length === 0) {
@@ -146,8 +166,8 @@ async function comparerAuxEffectifsConnus(
         organisme_id: {
           $in: [...new Set(resolues.map(({ organismeId }) => organismeId))].map((id) => new ObjectId(id)),
         },
-        annee_scolaire: { $in: [...new Set(resolues.map(({ ligne }) => texte(ligne.annee_scolaire)))] },
-        id_erp_apprenant: { $in: [...new Set(resolues.map(({ ligne }) => texte(ligne.id_erp_apprenant)))] },
+        annee_scolaire: { $in: [...new Set(resolues.map(({ annee_scolaire }) => annee_scolaire))] },
+        id_erp_apprenant: { $in: [...new Set(resolues.map(({ id_erp_apprenant }) => id_erp_apprenant))] },
       },
       { projection: { organisme_id: 1, annee_scolaire: 1, id_erp_apprenant: 1, contrats: 1 } }
     )
@@ -160,19 +180,15 @@ async function comparerAuxEffectifsConnus(
   );
 
   let misAJour = 0;
-  const contratsEffaces: ContratEfface[] = [];
-  for (const { ligne, index, organismeId } of resolues) {
-    const connu = contratsConnus.get(cleEffectif(organismeId, ligne.annee_scolaire, ligne.id_erp_apprenant));
+  const contratsEffaces: number[] = [];
+  for (const { ligne, index, organismeId, annee_scolaire, id_erp_apprenant } of resolues) {
+    const connu = contratsConnus.get(cleEffectif(organismeId, annee_scolaire, id_erp_apprenant));
     if (connu === undefined) {
       continue;
     }
     misAJour++;
     if (nombreDeContrats(ligne) < connu) {
-      contratsEffaces.push({
-        nom: texte(ligne.nom_apprenant),
-        prenom: texte(ligne.prenom_apprenant),
-        ligne: numeroDeLigne(ligne, index),
-      });
+      contratsEffaces.push(index);
     }
   }
   return { nouveaux: resolues.length - misAJour, misAJour, contratsEffaces };
@@ -187,10 +203,11 @@ export async function verifierTeleversement(
     return { indisponible: true };
   }
 
+  const cles = lignes.map((ligne) => lireCleEffectifFichier(ligne));
   const issues = [
     ...verifierSchema(lignes),
     ...etablissements.issues,
-    ...verifierDoublons(lignes, etablissements.organismeIdParLigne),
+    ...verifierDoublons(lignes, cles, etablissements.organismeIdParLigne),
   ].sort((a, b) => a.path[0] - b.path[0]);
 
   return {
@@ -198,7 +215,9 @@ export async function verifierTeleversement(
     issues,
     warnings: {
       ...computeWarningsForDossierApprenantSchemaV3(lignes as IDossierApprenantSchemaV3[]),
-      ...(await comparerAuxEffectifsConnus(lignes, etablissements.organismeIdParLigne)),
+      ...(issues.length > 0
+        ? { nouveaux: 0, misAJour: 0, contratsEffaces: [] }
+        : await comparerAuxEffectifsConnus(lignes, cles, etablissements.organismeIdParLigne)),
     },
   };
 }

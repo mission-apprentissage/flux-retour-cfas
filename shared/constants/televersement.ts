@@ -132,7 +132,7 @@ export const CATALOGUE_CHAMPS_TELEVERSEMENT: ChampTeleversement[] = [
     alias: ["Genre"],
     obligation: "facultatif",
     type: "string",
-    format: "F ou M (1, 2, H, Homme, Femme acceptés)",
+    format: "F ou M (1, 2, H, Homme, Femme, Masculin, Féminin acceptés)",
     exemple: "F",
     aide: "Sexe de l'apprenant.",
     groupe: "Apprenant",
@@ -174,7 +174,15 @@ export const CATALOGUE_CHAMPS_TELEVERSEMENT: ChampTeleversement[] = [
   {
     cle: "tel_apprenant",
     libelle: "Téléphone",
-    alias: ["Tél", "Tel", "Portable", "Mobile", "Téléphone portable", "Numéro de téléphone"],
+    alias: [
+      "Tél",
+      "Tel",
+      "Portable",
+      "Mobile",
+      "Téléphone portable",
+      "Numéro de téléphone",
+      "Téléphone de l'apprenant",
+    ],
     obligation: "un_des_deux",
     avec: "email_contact",
     type: "string",
@@ -603,6 +611,20 @@ export const CHAMPS_TELEVERSEMENT_PAR_CLE: Record<string, ChampTeleversement> = 
   CATALOGUE_CHAMPS_TELEVERSEMENT.map((champ) => [champ.cle, champ])
 );
 
+const MOTS_IGNORES_EN_TETE = new Set(["de", "du", "des"]);
+
+export const normaliserEnTeteTeleversement = (enTete: string) => {
+  const mots = enTete
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/(^|[^a-z0-9])l['’]/g, "$1")
+    .split(/[^a-z0-9]+/);
+  return mots
+    .filter((mot, index) => !MOTS_IGNORES_EN_TETE.has(mot) && !(mot === "la" && mots[index - 1] === "de"))
+    .join("");
+};
+
 export const ERREURS_TELEVERSEMENT = {
   format_refuse: () =>
     "Ce fichier n'est pas un tableur. Déposez un fichier Excel (.xlsx, .xls), OpenDocument (.ods) ou CSV.",
@@ -643,11 +665,19 @@ export const ERREURS_TELEVERSEMENT = {
     "La vérification des établissements est momentanément impossible. Réessayez dans quelques minutes. Rien n'a été importé.",
   organisme_introuvable: () =>
     "Impossible de charger cet organisme. Rechargez la page ou revenez à la liste des organismes.",
+  trop_d_etablissements: ({ etablissements, maximum }: { etablissements: number; maximum: number }) =>
+    `Votre fichier cite ${etablissements.toLocaleString("fr-FR")} établissements différents. Le maximum est ${maximum.toLocaleString("fr-FR")} : vérifiez les colonnes UAI et SIRET.`,
+  fichier_trop_lourd: () =>
+    "Votre fichier est trop volumineux pour être vérifié en une fois. Coupez-le en deux fichiers, puis déposez-les un par un.",
+  colonne_en_double: ({ libelle }: { libelle: string }) =>
+    `La colonne ${libelle} apparaît plusieurs fois. Gardez-en une seule.`,
 } as const;
 
 export type CodeErreurTeleversement = keyof typeof ERREURS_TELEVERSEMENT;
 
 export const TELEVERSEMENT_MAX_LIGNES = 5000;
+
+export const TELEVERSEMENT_MAX_ETABLISSEMENTS = 200;
 
 const nombre = (valeur: number) => valeur.toLocaleString("fr-FR");
 

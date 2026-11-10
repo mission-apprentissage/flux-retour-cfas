@@ -12,7 +12,6 @@ import {
   IOrganisationIndicateursOrganismes,
   IUsersMigration,
 } from "shared";
-import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme, hasRecentTransmissions, withOrganismeListSummary } from "shared/models/data/organismes.model";
 
 import {
@@ -1029,39 +1028,6 @@ function getOrganismeListProjection(
       },
     },
   });
-}
-
-export async function getInvalidUaisFromDossierApprenant(data: Partial<IEffectifQueue>[]): Promise<string[]> {
-  const uais = new Set<string>();
-  for (const dossier of data) {
-    if (typeof dossier.etablissement_formateur_uai === "string") uais.add(dossier.etablissement_formateur_uai);
-    if (typeof dossier.etablissement_responsable_uai === "string") uais.add(dossier.etablissement_responsable_uai);
-  }
-  const invalidsUais: string[] = [];
-  for (const uai of uais) {
-    const organisme = await organismesDb().findOne({ uai: { $eq: uai } });
-    if (!organisme) {
-      invalidsUais.push(uai);
-    }
-  }
-  return invalidsUais;
-}
-
-export async function getInvalidSiretsFromDossierApprenant(data: Partial<IEffectifQueue>[]): Promise<string[]> {
-  const sirets = new Set<string>();
-  for (const dossier of data) {
-    if (typeof dossier.etablissement_formateur_siret === "string") sirets.add(dossier.etablissement_formateur_siret);
-    if (typeof dossier.etablissement_responsable_siret === "string")
-      sirets.add(dossier.etablissement_responsable_siret);
-  }
-  const invalidsSirets: string[] = [];
-  for (const siret of sirets) {
-    const organisme = await organismesDb().findOne({ siret: { $eq: siret } });
-    if (!organisme) {
-      invalidsSirets.push(siret);
-    }
-  }
-  return invalidsSirets;
 }
 
 async function getMemberIdsOfOrganisme(organismeId: ObjectId): Promise<ObjectId[]> {

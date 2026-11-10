@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { dossierApprenantSchemaFichier } from "../models/parts/dossierApprenantSchemaV3";
 
-import { CATALOGUE_CHAMPS_TELEVERSEMENT, CHAMPS_TELEVERSEMENT_PAR_CLE, ERREURS_TELEVERSEMENT } from "./televersement";
+import {
+  CATALOGUE_CHAMPS_TELEVERSEMENT,
+  CHAMPS_TELEVERSEMENT_PAR_CLE,
+  ERREURS_TELEVERSEMENT,
+  normaliserEnTeteTeleversement,
+} from "./televersement";
 
 const OBLIGATOIRES_ANNEXE_F = [
   "nom_apprenant",
@@ -61,6 +66,26 @@ describe("catalogue des champs de l'import par fichier", () => {
 
     expect(new Set(cles).size).toBe(cles.length);
     expect(new Set(enTetes).size).toBe(enTetes.length);
+  });
+
+  it("ne rattache aucun en-tête normalisé à deux champs", () => {
+    const champsParEnTete = new Map<string, Set<string>>();
+    CATALOGUE_CHAMPS_TELEVERSEMENT.forEach(({ cle, libelle, alias }) =>
+      [cle, libelle, ...alias].forEach((enTete) => {
+        const normalise = normaliserEnTeteTeleversement(enTete);
+        champsParEnTete.set(normalise, new Set([...(champsParEnTete.get(normalise) ?? []), cle]));
+      })
+    );
+
+    expect([...champsParEnTete].filter(([, cles]) => cles.size > 1)).toEqual([]);
+  });
+
+  it("normalise sans casse, accents, espaces, soulignés, astérisques ni petits mots", () => {
+    expect(normaliserEnTeteTeleversement("Date de début de contrat *")).toBe("datedebutcontrat");
+    expect(normaliserEnTeteTeleversement("date_debut_contrat")).toBe("datedebutcontrat");
+    expect(normaliserEnTeteTeleversement("Date de fin de la formation")).toBe("datefinformation");
+    expect(normaliserEnTeteTeleversement("Email de l’apprenant")).toBe("emailapprenant");
+    expect(normaliserEnTeteTeleversement("Date d'entrée")).toBe("datedentree");
   });
 
   it("suit l'annexe F pour les obligations", () => {

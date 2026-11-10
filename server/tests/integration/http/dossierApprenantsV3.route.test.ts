@@ -62,6 +62,17 @@ describe("Dossier Apprenants Route V3", () => {
       expect(response.data.data[0]).not.toHaveProperty("upload_id");
     });
 
+    it("garde la limite de 2 000 lignes de l'API ERP", async () => {
+      const response = await httpClient.post(
+        `${API_ENDPOINT_URL}`,
+        Array.from({ length: 2001 }, () => ({})),
+        { headers: { Authorization: `Bearer ${api_key}` } }
+      );
+
+      expect(response.status).toBe(400);
+      expect(JSON.stringify(response.data)).toContain("less than or equal to 2000 items");
+    });
+
     it("répond 500 sans divulguer le message interne quand l'écriture Mongo échoue", async () => {
       vi.spyOn(collections, "effectifsQueueDb").mockReturnValue({
         insertOne: () => Promise.reject(new Error("mongo indisponible")),

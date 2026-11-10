@@ -258,6 +258,32 @@ export const dossierApprenantSchemaFichier = dossierApprenantSchemaV3Base
   )
   .superRefine(verifierReglesFichier);
 
+const lireValeur = <T>(schema: z.ZodType<T, z.ZodTypeDef, unknown>, valeur: unknown): T | undefined => {
+  const resultat = schema.safeParse(valeur);
+  return resultat.success ? resultat.data : undefined;
+};
+
+const schemaReglesFichier = z.record(z.string(), z.unknown()).superRefine(verifierReglesFichier);
+
+export function verifierReglesFichierSurLigneBrute(ligne: Record<string, unknown>): z.ZodIssue[] {
+  const resultat = schemaReglesFichier.safeParse({
+    ...ligne,
+    date_entree_formation: lireValeur(primitivesV3.formation.date_entree, ligne.date_entree_formation),
+    date_fin_formation: lireValeur(primitivesV3.formation.date_fin, ligne.date_fin_formation),
+  });
+  return resultat.success ? [] : resultat.error.issues;
+}
+
+export function lireCleEffectifFichier(ligne: Record<string, unknown>): {
+  annee_scolaire: string | undefined;
+  id_erp_apprenant: string | undefined;
+} {
+  return {
+    annee_scolaire: lireValeur(primitivesV1.formation.annee_scolaire, ligne.annee_scolaire),
+    id_erp_apprenant: lireValeur(primitivesV1.apprenant.id_erp, ligne.id_erp_apprenant),
+  };
+}
+
 export function computeWarningsForDossierApprenantSchemaV3(data: Array<IDossierApprenantSchemaV3>) {
   return {
     contratCount: countContratWarning(data),

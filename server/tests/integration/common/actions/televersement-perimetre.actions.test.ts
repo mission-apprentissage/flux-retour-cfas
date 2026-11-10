@@ -24,6 +24,8 @@ const RELIE_PAR_DECA = { uai: "0600076G", siret: "33333333400014" };
 const TIERS = { uai: "0600077H", siret: "44444444200016" };
 const TIERS_SANS_RESULTAT = { uai: "0600078J", siret: "55555555600011" };
 const TIERS_API_EN_PANNE = { uai: "0600079K", siret: "66666666400014" };
+const TIERS_COMPTE = { uai: "0600080L", siret: "70707070000018" };
+const RELIE_PAR_FLECHAGE = { uai: "0600081M", siret: "80808080000010" };
 
 function mockRechercheExacte({ uai, siret }: Identifiant) {
   nock(API)
@@ -76,20 +78,37 @@ describe("verifierEtablissementsTeleversement", () => {
     await insererOrganisme(MEME_SIREN);
     const cfaMemeSiren = await insererOrganisme(CFA_MEME_SIREN);
     await insererOrganisme(RELIE_PAR_DECA);
+    const relieParFlechage = await insererOrganisme(RELIE_PAR_FLECHAGE);
     await insererOrganisme(TIERS);
-    await effectifsDECADb().insertOne(
-      testDoc<IEffectifDECA>({
-        _id: new ObjectId(),
-        organisme_id: cfaMemeSiren._id,
-        annee_scolaire: "2025-2026",
-        etablissement_formation_siret: RELIE_PAR_DECA.siret,
-      }),
+    await effectifsDECADb().insertMany(
+      [
+        testDoc<IEffectifDECA>({
+          _id: new ObjectId(),
+          organisme_id: cfaMemeSiren._id,
+          annee_scolaire: "2025-2026",
+          etablissement_formation_siret: RELIE_PAR_DECA.siret,
+        }),
+        testDoc<IEffectifDECA>({
+          _id: new ObjectId(),
+          organisme_id: relieParFlechage._id,
+          organisme_responsable_id: cfaMemeSiren._id,
+          annee_scolaire: "2025-2026",
+          etablissement_formation_siret: RELIE_PAR_FLECHAGE.siret,
+        }),
+      ],
       { bypassDocumentValidation: true }
     );
   });
 
   it("accepte l'organisme, ses formateurs, leur SIRET, son SIREN et les établissements reliés par DECA", async () => {
-    const couples = [IMPORTATEUR, FORMATEUR_DECLARE, MEME_SIRET_QUE_FORMATEUR, MEME_SIREN, RELIE_PAR_DECA];
+    const couples = [
+      IMPORTATEUR,
+      FORMATEUR_DECLARE,
+      MEME_SIRET_QUE_FORMATEUR,
+      MEME_SIREN,
+      RELIE_PAR_DECA,
+      RELIE_PAR_FLECHAGE,
+    ];
     couples.forEach(mockRechercheExacte);
 
     const resultat = await verifierEtablissementsTeleversement(importateur._id, couples.map(ligne));
@@ -114,7 +133,7 @@ describe("verifierEtablissementsTeleversement", () => {
           motif: "hors_perimetre",
         },
       ],
-      organismeIdParLigne: [importateur._id.toString(), expect.any(String)],
+      organismeIdParLigne: [importateur._id.toString(), null],
     });
   });
 
@@ -137,9 +156,9 @@ describe("verifierEtablissementsTeleversement", () => {
       .persist();
 
     await verifierEtablissementsTeleversement(importateur._id, [
-      ligne(TIERS_SANS_RESULTAT),
-      ligne(TIERS_SANS_RESULTAT),
-      ligne(TIERS_SANS_RESULTAT),
+      ligne(TIERS_COMPTE),
+      ligne(TIERS_COMPTE),
+      ligne(TIERS_COMPTE),
     ]);
 
     expect(appels.n).toBe(1);
@@ -181,6 +200,19 @@ describe("verifierEtablissementsTeleversement", () => {
       { path: [0, "etablissement_responsable_uai"], motif: "etablissement_inconnu" },
     ]);
     expect(resultat.organismeIdParLigne).toEqual([importateur._id.toString()]);
+  });
+
+  it("refuse un fichier qui cite trop d'établissements, sans appeler l'API", async () => {
+    const lignes = Array.from({ length: 201 }, (_, index) => ({
+      etablissement_formateur_uai: `${String(1000000 + index)}A`,
+      etablissement_formateur_siret: IMPORTATEUR.siret,
+    }));
+
+    await expect(verifierEtablissementsTeleversement(importateur._id, lignes)).rejects.toMatchObject({
+      output: { statusCode: 400 },
+      message:
+        "Votre fichier cite 201 établissements différents. Le maximum est 200 : vérifiez les colonnes UAI et SIRET.",
+    });
   });
 
   it("signale l'indisponibilité de l'API au lieu de juger le périmètre", async () => {

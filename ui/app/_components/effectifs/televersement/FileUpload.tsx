@@ -24,7 +24,13 @@ export function FileUpload({
         <p className="fr-mb-0">{TEXTES_TELEVERSEMENT.limite_zone_depot()}</p>
         <p>Si vous utilisez plusieurs fichiers, merci d’importer vos documents un par un.</p>
       </div>
-      <div {...getRootProps({ className: `${styles.uploadZone} ${isDragActive ? styles.uploadZoneActive : ""}` })}>
+      <div
+        {...getRootProps({
+          className: `${styles.uploadZone} ${isDragActive ? styles.uploadZoneActive : ""}`,
+          role: "button",
+          "aria-label": "Fichier des effectifs à importer",
+        })}
+      >
         {isSubmitting ? (
           <div className={styles.uploadSpinner}>
             <p>Veuillez patienter quelques secondes</p>

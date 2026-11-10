@@ -3,6 +3,7 @@ import {
   CHAMPS_TELEVERSEMENT_PAR_CLE,
   CLES_DATE_DEBUT_CONTRAT,
   ERREURS_TELEVERSEMENT,
+  normaliserEnTeteTeleversement,
   type ChampTeleversement,
   type CodeErreurTeleversement,
 } from "shared";
@@ -20,36 +21,63 @@ export interface LigneLue {
   erreurs: ErreurLecture[];
 }
 
-export type ResultatLecture =
-  | { succes: false; code: CodeErreurTeleversement; message: string }
-  | {
-      succes: true;
-      lignes: LigneLue[];
-      colonnesReconnues: string[];
-      colonnesObligatoiresAbsentes: string[];
-    };
+export interface LectureReussie {
+  succes: true;
+  lignes: LigneLue[];
+  colonnesReconnues: string[];
+  colonnesObligatoiresAbsentes: string[];
+  colonnesEnDouble: string[];
+}
+
+export type ResultatLecture = { succes: false; code: CodeErreurTeleversement; message: string } | LectureReussie;
 
 const ANNEE_MIN = 1950;
 const ANNEE_MAX = 2100;
 const FEUILLE_AIDE = "aide";
+const LIGNES_OU_CHERCHER_LES_EN_TETES = 10;
 const EXCEL_EPOCH_UTC = Date.UTC(1899, 11, 30);
 const JOUR_MS = 24 * 60 * 60 * 1000;
+const DECALAGE_1904_JOURS = 1462;
 
-export const normaliserEnTete = (enTete: string) =>
-  enTete
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
+const PRIORITE_NOM_TECHNIQUE = 0;
+const PRIORITE_LIBELLE = 1;
+const PRIORITE_ALIAS = 2;
 
-const CLES_PAR_EN_TETE = new Map<string, string>(
-  CATALOGUE_CHAMPS_TELEVERSEMENT.flatMap((champ) =>
-    [champ.cle, champ.libelle, ...champ.alias].map((enTete) => [normaliserEnTete(enTete), champ.cle] as const)
-  )
-);
+interface EnTeteReconnu {
+  cle: string;
+  priorite: number;
+}
 
-export const reconnaitreColonne = (enTete: unknown): string | null =>
-  typeof enTete === "string" ? (CLES_PAR_EN_TETE.get(normaliserEnTete(enTete)) ?? null) : null;
+const CLES_TECHNIQUES = new Set(CATALOGUE_CHAMPS_TELEVERSEMENT.map(({ cle }) => cle));
+
+const EN_TETES_RECONNUS = new Map<string, EnTeteReconnu>();
+CATALOGUE_CHAMPS_TELEVERSEMENT.forEach((champ) => {
+  const enTetes: [string, number][] = [
+    [champ.libelle, PRIORITE_LIBELLE],
+    [champ.cle, PRIORITE_ALIAS],
+    ...champ.alias.map((alias): [string, number] => [alias, PRIORITE_ALIAS]),
+  ];
+  enTetes.forEach(([enTete, priorite]) => {
+    const normalise = normaliserEnTeteTeleversement(enTete);
+    const connu = EN_TETES_RECONNUS.get(normalise);
+    if (!connu || (connu.cle === champ.cle && priorite < connu.priorite)) {
+      EN_TETES_RECONNUS.set(normalise, { cle: champ.cle, priorite });
+    }
+  });
+});
+
+function reconnaitreEnTete(enTete: unknown): EnTeteReconnu | null {
+  if (typeof enTete !== "string") {
+    return null;
+  }
+  const technique = enTete.replace(/\*/g, "").trim().toLowerCase();
+  if (CLES_TECHNIQUES.has(technique)) {
+    return { cle: technique, priorite: PRIORITE_NOM_TECHNIQUE };
+  }
+  return EN_TETES_RECONNUS.get(normaliserEnTeteTeleversement(enTete)) ?? null;
+}
+
+export const reconnaitreColonne = (enTete: unknown): string | null => reconnaitreEnTete(enTete)?.cle ?? null;
 
 const deuxChiffres = (n: number) => String(n).padStart(2, "0");
 
@@ -59,12 +87,11 @@ const formaterDate = (annee: number, mois: number, jour: number) =>
 type DateLue = { date: string } | { code: "date_illisible" | "date_impossible" };
 
 const verifierDate = (annee: number, mois: number, jour: number): DateLue => {
-  const date = new Date(Date.UTC(annee, mois - 1, jour));
-  if (date.getUTCFullYear() !== annee || date.getUTCMonth() !== mois - 1 || date.getUTCDate() !== jour) {
-    return { code: "date_impossible" };
-  }
-  if (annee < ANNEE_MIN || annee > ANNEE_MAX) {
+  if (mois < 1 || mois > 12 || jour < 1 || jour > 31 || annee < ANNEE_MIN || annee > ANNEE_MAX) {
     return { code: "date_illisible" };
+  }
+  if (new Date(Date.UTC(annee, mois - 1, jour)).getUTCDate() !== jour) {
+    return { code: "date_impossible" };
   }
   return { date: formaterDate(annee, mois, jour) };
 };
@@ -74,15 +101,18 @@ const dateDepuisUTC = (date: Date): DateLue =>
     ? { code: "date_illisible" }
     : verifierDate(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
 
-export function lireDate(valeur: unknown): DateLue {
+const HEURE_EN_FIN = /(?:\s+|T)\d{1,2}:\d{2}(?::\d{2}(?:[.,]\d+)?)?\s*(?:Z|[+-]\d{2}(?::?\d{2})?)?$/i;
+
+export function lireDate(valeur: unknown, { date1904 = false }: { date1904?: boolean } = {}): DateLue {
   if (valeur instanceof Date) {
     return dateDepuisUTC(valeur);
   }
   if (typeof valeur === "number") {
-    return dateDepuisUTC(new Date(EXCEL_EPOCH_UTC + Math.round(valeur * JOUR_MS)));
+    const jours = valeur + (date1904 ? DECALAGE_1904_JOURS : 0);
+    return dateDepuisUTC(new Date(EXCEL_EPOCH_UTC + Math.round(jours * JOUR_MS)));
   }
-  const texte = String(valeur).replace(/\s+/g, "");
-  const iso = texte.match(/^(\d{4})-(\d{2})-(\d{2})(T.*)?$/);
+  const texte = String(valeur).trim().replace(HEURE_EN_FIN, "").replace(/\s+/g, "");
+  const iso = texte.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (iso) {
     return verifierDate(Number(iso[1]), Number(iso[2]), Number(iso[3]));
   }
@@ -95,31 +125,46 @@ export function lireDate(valeur: unknown): DateLue {
   return { code: "date_illisible" };
 }
 
-const BOOLEENS: Record<string, boolean> = {
-  oui: true,
-  vrai: true,
-  true: true,
-  "1": true,
-  non: false,
-  faux: false,
-  false: false,
-  "0": false,
-};
+const BOOLEENS = new Map<string, boolean>([
+  ["oui", true],
+  ["vrai", true],
+  ["true", true],
+  ["1", true],
+  ["non", false],
+  ["faux", false],
+  ["false", false],
+  ["0", false],
+]);
 
-const SEXES: Record<string, string> = { homme: "M", femme: "F" };
+const SEXES = new Map<string, "F" | "M">([
+  ["F", "F"],
+  ["FEMME", "F"],
+  ["FEMININ", "F"],
+  ["2", "F"],
+  ["M", "M"],
+  ["H", "M"],
+  ["HOMME", "M"],
+  ["MASCULIN", "M"],
+  ["1", "M"],
+]);
 
 const estVide = (valeur: unknown) =>
   valeur === null || valeur === undefined || (typeof valeur === "string" && valeur.trim() === "");
 
 const texteDeLaCellule = (valeur: unknown) =>
-  valeur instanceof Date ? valeur.toISOString().slice(0, 10) : String(valeur).trim();
+  valeur instanceof Date
+    ? `${deuxChiffres(valeur.getUTCDate())}/${deuxChiffres(valeur.getUTCMonth() + 1)}/${valeur.getUTCFullYear()}`
+    : String(valeur).trim();
+
+const sansAccents = (texte: string) => texte.normalize("NFD").replace(/[̀-ͯ]/g, "");
 
 function lireCellule(
   champ: ChampTeleversement,
-  valeur: unknown
+  valeur: unknown,
+  { date1904 }: { date1904: boolean }
 ): { valeur: unknown } | { erreur: Omit<ErreurLecture, "cle"> } {
   if (champ.type === "date") {
-    const date = lireDate(valeur);
+    const date = lireDate(valeur, { date1904 });
     if ("date" in date) {
       return { valeur: date.date };
     }
@@ -138,7 +183,7 @@ function lireCellule(
     if (typeof valeur === "boolean") {
       return { valeur };
     }
-    const booleen = BOOLEENS[texteDeLaCellule(valeur).toLowerCase()];
+    const booleen = BOOLEENS.get(texteDeLaCellule(valeur).toLowerCase());
     return booleen === undefined
       ? {
           erreur: {
@@ -152,8 +197,8 @@ function lireCellule(
         }
       : { valeur: booleen };
   }
-  if (champ.cle === "sexe_apprenant" && typeof valeur === "string") {
-    return { valeur: SEXES[valeur.trim().toLowerCase()] ?? valeur };
+  if (champ.cle === "sexe_apprenant" && (typeof valeur === "string" || typeof valeur === "number")) {
+    return { valeur: SEXES.get(sansAccents(String(valeur).trim()).toUpperCase()) ?? valeur };
   }
   return { valeur };
 }
@@ -177,31 +222,102 @@ function colonnesObligatoiresAbsentes(colonnesReconnues: Set<string>): string[] 
   return avecContrat ? absentes : [...absentes, CHAMPS_TELEVERSEMENT_PAR_CLE.contrat_date_debut.libelle];
 }
 
-const SIGNATURES_CLASSEUR = [
+const SIGNATURES_BINAIRES = [
   [0x50, 0x4b, 0x03, 0x04],
   [0xd0, 0xcf, 0x11, 0xe0],
+  [0x09, 0x08],
+  [0x09, 0x04],
+  [0x09, 0x02],
+  [0x09, 0x00],
 ];
 
-const aUneSignatureDeClasseur = (contenu: ArrayBuffer) => {
+const aUneSignatureBinaire = (contenu: ArrayBuffer) => {
   const debut = new Uint8Array(contenu.slice(0, 4));
-  return SIGNATURES_CLASSEUR.some((signature) => signature.every((octet, index) => debut[index] === octet));
+  return SIGNATURES_BINAIRES.some((signature) => signature.every((octet, index) => debut[index] === octet));
 };
 
+const OPTIONS_LECTURE: XLSX.ParsingOptions = { cellDates: true, UTC: true, nodim: true };
+
 function ouvrirClasseur(contenu: ArrayBuffer, nomFichier: string): XLSX.WorkBook {
+  if (aUneSignatureBinaire(contenu)) {
+    return XLSX.read(contenu, { ...OPTIONS_LECTURE, type: "array" });
+  }
   const extension = nomFichier.toLowerCase().split(".").pop();
-  if ((extension === "xlsx" || extension === "ods") && !aUneSignatureDeClasseur(contenu)) {
+  if (extension === "xlsx" || extension === "ods") {
     throw new Error("Pas un classeur");
   }
-  if (extension === "csv") {
-    let texte: string;
-    try {
-      texte = new TextDecoder("utf-8", { fatal: true }).decode(contenu);
-    } catch {
-      texte = new TextDecoder("windows-1252").decode(contenu);
-    }
-    return XLSX.read(texte.replace(/^\uFEFF/, ""), { type: "string", raw: true });
+  let texte: string;
+  try {
+    texte = new TextDecoder("utf-8", { fatal: true }).decode(contenu);
+  } catch {
+    texte = new TextDecoder("windows-1252").decode(contenu);
   }
-  return XLSX.read(contenu, { type: "array", cellDates: true, UTC: true });
+  if (texte.includes("\u0000")) {
+    throw new Error("Pas un tableur");
+  }
+  return XLSX.read(texte.replace(/^\uFEFF/, ""), { ...OPTIONS_LECTURE, type: "string", raw: true });
+}
+
+const OPTIONS_CONVERSION: XLSX.Sheet2JSONOpts = { header: 1, raw: true, defval: null, blankrows: true, UTC: true };
+
+interface FeuilleRetenue {
+  feuille: XLSX.WorkSheet;
+  plage: XLSX.Range;
+  ligneDesEnTetes: number;
+  enTetes: unknown[];
+}
+
+function trouverLesEnTetes(classeur: XLSX.WorkBook): FeuilleRetenue | null {
+  for (const nom of classeur.SheetNames) {
+    const feuille = classeur.Sheets[nom];
+    if (normaliserEnTeteTeleversement(nom) === FEUILLE_AIDE || !feuille?.["!ref"]) {
+      continue;
+    }
+    const plage = XLSX.utils.decode_range(feuille["!ref"]);
+    const premieresLignes = XLSX.utils.sheet_to_json<unknown[]>(feuille, {
+      ...OPTIONS_CONVERSION,
+      range: {
+        s: plage.s,
+        e: { r: Math.min(plage.e.r, plage.s.r + LIGNES_OU_CHERCHER_LES_EN_TETES - 1), c: plage.e.c },
+      },
+    });
+    let meilleure = -1;
+    let reconnuesDansLaMeilleure = 0;
+    for (const [index, cellules] of premieresLignes.entries()) {
+      const reconnues = new Set((cellules ?? []).map(reconnaitreColonne).filter(Boolean)).size;
+      if (reconnues > reconnuesDansLaMeilleure) {
+        meilleure = index;
+        reconnuesDansLaMeilleure = reconnues;
+      }
+    }
+    if (meilleure >= 0) {
+      return { feuille, plage, ligneDesEnTetes: plage.s.r + meilleure, enTetes: premieresLignes[meilleure] ?? [] };
+    }
+  }
+  return null;
+}
+
+function associerLesColonnes(enTetes: unknown[]) {
+  const parCle = new Map<string, { priorite: number; colonnes: number[] }>();
+  enTetes.forEach((enTete, colonne) => {
+    const reconnu = reconnaitreEnTete(enTete);
+    if (!reconnu) {
+      return;
+    }
+    const connu = parCle.get(reconnu.cle);
+    if (!connu || reconnu.priorite < connu.priorite) {
+      parCle.set(reconnu.cle, { priorite: reconnu.priorite, colonnes: [colonne] });
+    } else if (reconnu.priorite === connu.priorite) {
+      connu.colonnes.push(colonne);
+    }
+  });
+  const retenues = [...parCle.entries()].sort(([, a], [, b]) => a.colonnes[0] - b.colonnes[0]);
+  return {
+    colonnes: new Map(retenues.map(([cle, { colonnes }]) => [colonnes[0], CHAMPS_TELEVERSEMENT_PAR_CLE[cle]])),
+    colonnesEnDouble: retenues
+      .filter(([, { colonnes }]) => colonnes.length > 1)
+      .map(([cle]) => CHAMPS_TELEVERSEMENT_PAR_CLE[cle].libelle),
+  };
 }
 
 export function lireFichierEffectifs(
@@ -218,48 +334,39 @@ export function lireFichierEffectifs(
     return { succes: false, code, message: ERREURS_TELEVERSEMENT[code]() };
   }
 
-  const feuilles = classeur.SheetNames.filter((nom) => normaliserEnTete(nom) !== FEUILLE_AIDE).map((nom) =>
-    XLSX.utils.sheet_to_json<unknown[]>(classeur.Sheets[nom], {
-      header: 1,
-      raw: true,
-      defval: null,
-      blankrows: true,
-      UTC: true,
-    })
-  );
-  const lignesDeLaFeuille = feuilles.find((lignes) => (lignes[0] ?? []).some((enTete) => reconnaitreColonne(enTete)));
-  if (!lignesDeLaFeuille) {
+  const retenue = trouverLesEnTetes(classeur);
+  if (!retenue) {
     return { succes: false, code: "fichier_vide", message: ERREURS_TELEVERSEMENT.fichier_vide() };
   }
-
-  const colonnes = new Map<number, ChampTeleversement>();
-  (lignesDeLaFeuille[0] ?? []).forEach((enTete, index) => {
-    const cle = reconnaitreColonne(enTete);
-    if (cle && ![...colonnes.values()].some((champ) => champ.cle === cle)) {
-      colonnes.set(index, CHAMPS_TELEVERSEMENT_PAR_CLE[cle]);
-    }
-  });
+  const { feuille, plage, ligneDesEnTetes, enTetes } = retenue;
+  const { colonnes, colonnesEnDouble } = associerLesColonnes(enTetes);
+  const date1904 = Boolean(classeur.Workbook?.WBProps?.date1904);
 
   const lignes: LigneLue[] = [];
-  lignesDeLaFeuille.slice(1).forEach((cellules, index) => {
-    if ((cellules ?? []).every(estVide)) {
-      return;
-    }
-    const ligne: LigneLue = { numero: index + 2, valeurs: {}, erreurs: [] };
-    colonnes.forEach((champ, colonne) => {
-      const valeur = cellules[colonne];
-      if (estVide(valeur)) {
+  XLSX.utils
+    .sheet_to_json<unknown[]>(feuille, {
+      ...OPTIONS_CONVERSION,
+      range: { s: { r: ligneDesEnTetes + 1, c: plage.s.c }, e: plage.e },
+    })
+    .forEach((cellules, index) => {
+      if ((cellules ?? []).every(estVide)) {
         return;
       }
-      const lu = lireCellule(champ, typeof valeur === "string" ? valeur.trim() : valeur);
-      if ("erreur" in lu) {
-        ligne.erreurs.push({ ...lu.erreur, cle: champ.cle });
-      } else {
-        ligne.valeurs[champ.cle] = lu.valeur;
-      }
+      const ligne: LigneLue = { numero: ligneDesEnTetes + index + 2, valeurs: {}, erreurs: [] };
+      colonnes.forEach((champ, colonne) => {
+        const valeur = cellules[colonne];
+        if (estVide(valeur)) {
+          return;
+        }
+        const lu = lireCellule(champ, typeof valeur === "string" ? valeur.trim() : valeur, { date1904 });
+        if ("erreur" in lu) {
+          ligne.erreurs.push({ ...lu.erreur, cle: champ.cle });
+        } else {
+          ligne.valeurs[champ.cle] = lu.valeur;
+        }
+      });
+      lignes.push(ligne);
     });
-    lignes.push(ligne);
-  });
 
   if (lignes.length === 0) {
     return { succes: false, code: "fichier_vide", message: ERREURS_TELEVERSEMENT.fichier_vide() };
@@ -278,5 +385,6 @@ export function lireFichierEffectifs(
     lignes,
     colonnesReconnues: [...colonnesReconnues],
     colonnesObligatoiresAbsentes: colonnesObligatoiresAbsentes(colonnesReconnues),
+    colonnesEnDouble,
   };
 }

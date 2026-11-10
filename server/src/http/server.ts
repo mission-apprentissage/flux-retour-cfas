@@ -87,7 +87,7 @@ import {
   zSipaLoginBody,
 } from "@/common/actions/sipa.actions";
 import { genererModeleExcelTeleversement } from "@/common/actions/televersement/modele-excel.actions";
-import { verifierTeleversement } from "@/common/actions/televersement/verification.actions";
+import { lireLignesTeleversement, verifierTeleversement } from "@/common/actions/televersement/verification.actions";
 import {
   changePassword,
   getUserByEmail,
@@ -103,7 +103,6 @@ import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
-import { validateArrayInput } from "@/common/utils/inputValidationError";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
@@ -120,7 +119,7 @@ import userProfileSchema from "@/common/validation/userProfileSchema";
 import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
-import errorMiddleware from "./middlewares/errorMiddleware";
+import errorMiddleware, { dependanceIndisponible } from "./middlewares/errorMiddleware";
 import {
   requireAdministrator,
   requireCfaAdminIfCfa,
@@ -320,16 +319,17 @@ function setupRoutes(app: Application) {
         };
       })
     )
+    .get("/api/v1/televersement/modele-excel", publicLimiter, async (_req, res) => {
+      const modele = await genererModeleExcelTeleversement();
+      res.attachment("modele-import-effectifs.xlsx");
+      res.contentType("xlsx");
+      res.set("Cache-Control", "public, max-age=3600");
+      res.send(modele);
+    })
     // Readiness : « les dépendances répondent-elles ? ». Renvoie 503 si Mongo est
     // injoignable, et n'est lue que par la supervision. Docker ne doit pas s'y fier :
     // redémarrer l'API ne répare pas Mongo, et une base brièvement absente pendant un
     // déploiement tuerait les deux réplicas au pire moment.
-    .get("/api/v1/televersement/modele-excel", async (_req, res) => {
-      const modele = await genererModeleExcelTeleversement();
-      res.attachment("modele-import-effectifs.xlsx");
-      res.contentType("xlsx");
-      res.send(modele);
-    })
     .get("/api/healthcheck/readiness", async (_req, res) => {
       const mongodbHealthy = await isMongodbHealthy();
       res
@@ -722,10 +722,10 @@ function setupRoutes(app: Application) {
           .post(
             "/validate",
             returnResult<OrganismeLocals>(async (req, res) => {
-              const lignes = validateArrayInput(req.body, TELEVERSEMENT_MAX_LIGNES) as Record<string, unknown>[];
+              const lignes = lireLignesTeleversement(req.body);
               const verification = await verifierTeleversement(res.locals.organismeId, lignes);
               if (verification.indisponible) {
-                throw Boom.serverUnavailable(ERREURS_TELEVERSEMENT.api_indisponible());
+                throw dependanceIndisponible(ERREURS_TELEVERSEMENT.api_indisponible());
               }
               const { issues, warnings } = verification;
               return issues.length > 0 ? { success: false, error: { issues }, warnings } : { success: true, warnings };
@@ -735,15 +735,13 @@ function setupRoutes(app: Application) {
             // v3 is required in URL to consider the request as a v3 import
             "/import/v3",
             async (req, res: Response<unknown, OrganismeLocals>, next) => {
-              const lignes = validateArrayInput(req.body, TELEVERSEMENT_MAX_LIGNES) as Record<string, unknown>[];
+              const lignes = lireLignesTeleversement(req.body);
               const verification = await verifierTeleversement(res.locals.organismeId, lignes);
               if (verification.indisponible) {
-                throw Boom.serverUnavailable(ERREURS_TELEVERSEMENT.api_indisponible());
+                throw dependanceIndisponible(ERREURS_TELEVERSEMENT.api_indisponible());
               }
               if (verification.issues.length > 0) {
-                throw Boom.badRequest(
-                  `${ERREURS_TELEVERSEMENT.erreurs_avant_import()} ${verification.issues[0].message}`
-                );
+                throw Boom.badRequest(ERREURS_TELEVERSEMENT.erreurs_avant_import());
               }
               req.user.source = SOURCE_APPRENANT.FICHIER;
               req.user.source_organisme_id = String(res.locals.organismeId);

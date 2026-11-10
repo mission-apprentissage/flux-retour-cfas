@@ -12,6 +12,35 @@ const VALEURS_PERMISES: Record<string, string[]> = {
   annee_formation: ["1", "2", "3", "4", "5"],
 };
 
+const COLONNES_TEXTE = new Set([
+  "code_postal_apprenant",
+  "code_postal_de_naissance_apprenant",
+  "code_commune_insee_apprenant",
+  "code_commune_insee_de_naissance_apprenant",
+  "tel_apprenant",
+  "ine_apprenant",
+  "etablissement_responsable_uai",
+  "etablissement_responsable_siret",
+  "etablissement_formateur_uai",
+  "etablissement_formateur_siret",
+  "etablissement_lieu_de_formation_uai",
+  "etablissement_lieu_de_formation_siret",
+  "etablissement_lieu_de_formation_code_postal",
+  "formation_rncp",
+  "formation_cfd",
+  "siret_employeur",
+  "siret_employeur_2",
+  "siret_employeur_3",
+  "siret_employeur_4",
+]);
+
+const formatDeColonne = (champ: ChampTeleversement) => {
+  if (champ.type === "date") {
+    return { numFmt: "dd/mm/yyyy" };
+  }
+  return COLONNES_TEXTE.has(champ.cle) ? { numFmt: "@" } : {};
+};
+
 const valeursPermises = (champ: ChampTeleversement) =>
   VALEURS_PERMISES[champ.cle] ?? (champ.type === "boolean" ? ["Oui", "Non"] : null);
 
@@ -28,7 +57,7 @@ const libelleObligation = (champ: ChampTeleversement) => {
   }
 };
 
-export async function genererModeleExcelTeleversement(): Promise<Buffer> {
+async function construireModeleExcel(): Promise<Buffer> {
   const champs = CATALOGUE_CHAMPS_TELEVERSEMENT.filter((champ) => !champ.sifa);
   const workbook = new ExcelJs.Workbook();
 
@@ -42,7 +71,7 @@ export async function genererModeleExcelTeleversement(): Promise<Buffer> {
     width: Math.max(14, champ.libelle.length + 4),
     outlineLevel: champ.obligation === "facultatif" ? 1 : 0,
     hidden: champ.obligation === "facultatif",
-    style: champ.type === "date" ? { numFmt: "dd/mm/yyyy" } : {},
+    style: formatDeColonne(champ),
   }));
 
   const enTetes = saisie.getRow(1);
@@ -85,4 +114,16 @@ export async function genererModeleExcelTeleversement(): Promise<Buffer> {
   );
 
   return Buffer.from(await workbook.xlsx.writeBuffer());
+}
+
+let modeleEnCache: Promise<Buffer> | null = null;
+
+export function genererModeleExcelTeleversement(): Promise<Buffer> {
+  if (!modeleEnCache) {
+    modeleEnCache = construireModeleExcel().catch((err) => {
+      modeleEnCache = null;
+      throw err;
+    });
+  }
+  return modeleEnCache;
 }

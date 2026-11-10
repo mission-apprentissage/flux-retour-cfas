@@ -1,6 +1,7 @@
+import * as Boom from "@hapi/boom";
 import { zSiret, zUai } from "api-alternance-sdk/internal";
 import { ObjectId } from "mongodb";
-import { ERREURS_TELEVERSEMENT } from "shared/constants";
+import { ERREURS_TELEVERSEMENT, TELEVERSEMENT_MAX_ETABLISSEMENTS } from "shared/constants";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { extensions } from "shared/models/parts/zodPrimitives";
 
@@ -71,7 +72,13 @@ async function estDansPerimetre(organisme: IOrganisme, perimetre: Perimetre): Pr
     return false;
   }
   const contratDeca = await effectifsDECADb().findOne(
-    { etablissement_formation_siret: organisme.siret, organisme_id: { $in: perimetre.idsMemeSiren } },
+    {
+      etablissement_formation_siret: organisme.siret,
+      $or: [
+        { organisme_id: { $in: perimetre.idsMemeSiren } },
+        { organisme_responsable_id: { $in: perimetre.idsMemeSiren } },
+      ],
+    },
     { projection: { _id: 1 } }
   );
   return !!contratDeca;
@@ -98,6 +105,27 @@ const lireCouple = (uaiBrut: unknown, siretBrut: unknown) => {
   return { uai: uai.data, siret: siret.success ? siret.data : undefined };
 };
 
+const cleCouple = ({ uai, siret }: { uai: string; siret?: string }) => `${uai}|${siret ?? ""}`;
+
+const RESOLUTIONS_SIMULTANEES = 10;
+
+function limiterConcurrence(maximum: number) {
+  let actives = 0;
+  const enAttente: (() => void)[] = [];
+  return async <T>(tache: () => Promise<T>): Promise<T> => {
+    if (actives >= maximum) {
+      await new Promise<void>((reprendre) => enAttente.push(reprendre));
+    }
+    actives++;
+    try {
+      return await tache();
+    } finally {
+      actives--;
+      enAttente.shift()?.();
+    }
+  };
+}
+
 export async function verifierEtablissementsTeleversement(
   sourceOrganismeId: ObjectId,
   lignes: LigneTeleversement[]
@@ -107,14 +135,35 @@ export async function verifierEtablissementsTeleversement(
     return { indisponible: false, issues: [], organismeIdParLigne: lignes.map(() => null) };
   }
 
+  const couplesDistincts = new Set(
+    lignes.flatMap((ligne) =>
+      [
+        lireCouple(ligne.etablissement_responsable_uai, ligne.etablissement_responsable_siret),
+        lireCouple(ligne.etablissement_formateur_uai, ligne.etablissement_formateur_siret),
+      ].flatMap((couple) => (couple ? [cleCouple(couple)] : []))
+    )
+  );
+  if (couplesDistincts.size > TELEVERSEMENT_MAX_ETABLISSEMENTS) {
+    throw Boom.badRequest(
+      ERREURS_TELEVERSEMENT.trop_d_etablissements({
+        etablissements: couplesDistincts.size,
+        maximum: TELEVERSEMENT_MAX_ETABLISSEMENTS,
+      })
+    );
+  }
+
   const perimetre = await construirePerimetre(source);
   const resolutions = new Map<string, Promise<Resolution>>();
+  const limiter = limiterConcurrence(RESOLUTIONS_SIMULTANEES);
   const perimetres = new Map<string, Promise<boolean>>();
   const nomSource = source.enseigne || source.raison_sociale || source.nom || "cet organisme";
   const resoudre = (uai: string, siret: string | undefined) => {
-    const cle = `${uai}|${siret ?? ""}`;
+    const cle = cleCouple({ uai, siret });
     if (!resolutions.has(cle)) {
-      resolutions.set(cle, resoudreEtablissement(uai, siret, source));
+      resolutions.set(
+        cle,
+        limiter(() => resoudreEtablissement(uai, siret, source))
+      );
     }
     return resolutions.get(cle)!;
   };
@@ -168,6 +217,7 @@ export async function verifierEtablissementsTeleversement(
           code: "custom",
           motif: "hors_perimetre",
         });
+        return null;
       }
       return resolution.organisme._id.toString();
     })

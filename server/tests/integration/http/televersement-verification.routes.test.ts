@@ -242,12 +242,94 @@ describe("Vérification de l'import par fichier", () => {
         contratCount: 1,
         nouveaux: 1,
         misAJour: 3,
-        contratsEffaces: [
-          { nom: "Martin", prenom: "Camille", ligne: avecMoinsDeContrats.ligne_fichier },
-          { nom: "Durand", prenom: "Lou", ligne: sansContrat.ligne_fichier },
-        ],
+        contratsEffaces: [0, 1],
       },
     });
+  });
+
+  it("reconnaît un effectif connu quand l'année scolaire est écrite avec une barre", async () => {
+    mockRechercheExacte(IMPORTATEUR);
+    const ligne = ligneFichier(IMPORTATEUR, { annee_scolaire: "2026 / 2027", contrat_date_debut: undefined });
+    const doublon = ligneFichier(IMPORTATEUR, { id_erp_apprenant: ligne.id_erp_apprenant });
+    await effectifsDb().insertOne(
+      testDoc<IEffectif>({
+        organisme_id: importateur._id,
+        annee_scolaire: "2026-2027",
+        id_erp_apprenant: ligne.id_erp_apprenant as string,
+        contrats: [{ date_debut: new Date("2026-09-01") }],
+      }),
+      { bypassDocumentValidation: true }
+    );
+
+    expect((await verifier([ligne])).warnings).toMatchObject({ nouveaux: 0, misAJour: 1, contratsEffaces: [0] });
+    expect((await verifier([ligne, doublon])).error?.issues).toMatchObject([
+      { path: [0, "nom_apprenant"], motif: "doublon" },
+      { path: [1, "nom_apprenant"], motif: "doublon" },
+    ]);
+  });
+
+  it("ne dit rien des effectifs d'un organisme hors périmètre", async () => {
+    [IMPORTATEUR, TIERS].forEach(mockRechercheExacte);
+    const tiers = await organismesDb().findOne({ uai: TIERS.uai });
+    const sonde = ligneFichier(TIERS, { contrat_date_debut: undefined });
+    await effectifsDb().insertOne(
+      testDoc<IEffectif>({
+        organisme_id: tiers!._id,
+        annee_scolaire: sonde.annee_scolaire as string,
+        id_erp_apprenant: sonde.id_erp_apprenant as string,
+        contrats: [{ date_debut: new Date("2026-09-01") }],
+      }),
+      { bypassDocumentValidation: true }
+    );
+
+    const resultat = await verifier([sonde]);
+
+    expect(resultat.success).toBe(false);
+    expect(resultat.warnings).toMatchObject({ nouveaux: 0, misAJour: 0, contratsEffaces: [] });
+  });
+
+  it("signale les règles du fichier même quand un autre champ est mal formé", async () => {
+    mockRechercheExacte(IMPORTATEUR);
+
+    const resultat = await verifier([
+      ligneFichier(IMPORTATEUR, { sexe_apprenant: "X", email_contact: undefined, formation_rncp: undefined }),
+    ]);
+
+    expect(resultat.error?.issues.map(({ path }) => path[1]).sort()).toEqual([
+      "email_contact",
+      "formation_rncp",
+      "sexe_apprenant",
+    ]);
+  });
+
+  it("refuse en 400 un élément qui n'est pas une ligne", async () => {
+    const response = await requestAsOrganisation(
+      organisation,
+      "post",
+      `/api/v1/organismes/${importateur._id}/upload/validate`,
+      [null]
+    );
+
+    expect(response.status).toBe(400);
+  });
+
+  it("refuse un fichier qui cite trop d'établissements", async () => {
+    const lignes = Array.from({ length: 201 }, (_, index) => ({
+      etablissement_formateur_uai: `${String(1000000 + index)}A`,
+      etablissement_formateur_siret: IMPORTATEUR.siret,
+    }));
+
+    const response = await requestAsOrganisation(
+      organisation,
+      "post",
+      `/api/v1/organismes/${importateur._id}/upload/validate`,
+      lignes
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.data.message).toBe(
+      "Votre fichier cite 201 établissements différents. Le maximum est 200 : vérifiez les colonnes UAI et SIRET."
+    );
   });
 
   it("l'import refuse toute la requête quand une ligne est en erreur", async () => {
@@ -261,7 +343,7 @@ describe("Vérification de l'import par fichier", () => {
     );
 
     expect(response.status).toBe(400);
-    expect(response.data.message).toMatch(/^Corrigez les erreurs avant d'importer\. L'établissement 0610077C/);
+    expect(response.data.message).toBe("Corrigez les erreurs avant d'importer.");
     expect(await effectifsQueueDb().countDocuments({})).toBe(0);
   });
 
@@ -285,15 +367,27 @@ describe("Vérification de l'import par fichier", () => {
   });
 
   it("les deux routes acceptent 5 000 lignes et refusent au-delà", async () => {
-    const response = await requestAsOrganisation(
-      organisation,
-      "post",
-      `/api/v1/organismes/${importateur._id}/upload/validate`,
-      Array.from({ length: 5001 }, () => ({}))
-    );
+    const envoyer = (route: string, nombre: number) =>
+      requestAsOrganisation(
+        organisation,
+        "post",
+        `/api/v1/organismes/${importateur._id}/upload/${route}`,
+        Array.from({ length: nombre }, () => ({}))
+      );
 
-    expect(response.status).toBe(400);
-    expect(JSON.stringify(response.data)).toContain("less than or equal to 5000 items");
+    for (const route of ["validate", "import/v3"]) {
+      const refus = await envoyer(route, 5001);
+      expect(refus.status).toBe(400);
+      expect(JSON.stringify(refus.data)).toContain("less than or equal to 5000 items");
+    }
+
+    const verification = await envoyer("validate", 5000);
+    expect(verification.status).toBe(200);
+    expect(verification.data.success).toBe(false);
+
+    const importation = await envoyer("import/v3", 5000);
+    expect(importation.status).toBe(400);
+    expect(importation.data.message).toBe("Corrigez les erreurs avant d'importer.");
   });
 
   it("les deux routes répondent 503 quand l'API Alternance est indisponible", async () => {

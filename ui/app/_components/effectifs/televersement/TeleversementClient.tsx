@@ -44,6 +44,7 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
     errorsCount,
     warnings,
     missingHeaders,
+    colonnesEnDouble,
     columnsWithErrors,
     showOnlyColumnsAndLinesWithErrors,
     setShowOnlyColumnsAndLinesWithErrors,
@@ -73,6 +74,8 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
 
   if (status === "import_success") return <TeleversementValide isMine={isMine} organismeId={organismeId} />;
 
+  const enAttente = status === "idle" || status === "processing";
+
   const filteredHeaders =
     showOnlyColumnsAndLinesWithErrors && columnsWithErrors.length
       ? headers?.filter((header) => columnsWithErrors.includes(header))
@@ -97,7 +100,7 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
         }
       />
 
-      {status === "idle" && (
+      {enAttente && (
         <div className={styles.introPanel}>
           <ul>
             <li>
@@ -187,6 +190,15 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
                   </ul>
                 </>
               )}
+              {colonnesEnDouble.length > 0 && (
+                <ul>
+                  {colonnesEnDouble.map((message) => (
+                    <li key={message} className={styles.cellError}>
+                      {message}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </>
           }
           className="fr-my-3w"
@@ -240,10 +252,10 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
         )}
       </div>
 
-      {status === "idle" && (
+      {enAttente && (
         <>
           <FileUpload
-            isSubmitting={isSubmitting}
+            isSubmitting={isSubmitting || status === "processing"}
             getRootProps={getRootProps}
             getInputProps={getInputProps}
             isDragActive={isDragActive}

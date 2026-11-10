@@ -44,11 +44,23 @@ const ligneComplete = (surcharge: Record<string, unknown> = {}) => {
   return { ...base, ...surcharge };
 };
 
-const classeur = (lignes: unknown[][], bookType: XLSX.BookType = "xlsx", nomFeuille = "Effectifs") => {
+const classeur = (
+  lignes: unknown[][],
+  bookType: XLSX.BookType = "xlsx",
+  nomFeuille = "Effectifs",
+  { date1904 = false, origine = "A1" }: { date1904?: boolean; origine?: string } = {}
+) => {
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(lignes, { cellDates: true, UTC: true }), nomFeuille);
+  const feuille = XLSX.utils.aoa_to_sheet([]);
+  XLSX.utils.sheet_add_aoa(feuille, lignes, { cellDates: true, UTC: true, origin: origine });
+  XLSX.utils.book_append_sheet(wb, feuille, nomFeuille);
+  if (date1904) {
+    wb.Workbook = { WBProps: { date1904: true } };
+  }
   return XLSX.write(wb, { type: "array", bookType }) as ArrayBuffer;
 };
+
+const texteEnOctets = (texte: string) => new TextEncoder().encode(texte).buffer as ArrayBuffer;
 
 const versLignes = (objets: Record<string, unknown>[], enTetes = Object.keys(objets[0])) => [
   enTetes,
@@ -134,6 +146,73 @@ describe("lecture du fichier d'effectifs", () => {
 
       expect(hash(nouvelle.valeurs)).toBe(hash(ancienne));
     });
+
+    it.each([
+      [
+        "un tableau HTML",
+        `<table><tr>${[...enTetes, "code_postal_apprenant"].map((enTete) => `<td>${enTete}</td>`).join("")}</tr><tr><td>TESTUX</td><td>Élodie</td><td>01/02/2006</td><td>01000</td></tr></table>`,
+      ],
+      ["un CSV", `${[...enTetes, "code_postal_apprenant"].join(";")}\nTESTUX;Élodie;01/02/2006;01000\n`],
+      ["un TSV", `${[...enTetes, "code_postal_apprenant"].join("\t")}\nTESTUX\tÉlodie\t01/02/2006\t01000\n`],
+    ])("lit un .xls qui contient %s sans inverser jour et mois", (_cas, texte) => {
+      process.env.TZ = fuseau;
+
+      const [nouvelle] = lignesLues(texteEnOctets(texte), "export.xls");
+      const [ancienne] = ancienLecteur(classeur([enTetes, ["TESTUX", "Élodie", "01/02/2006"]]));
+
+      expect(nouvelle.valeurs).toEqual({
+        nom_apprenant: "TESTUX",
+        prenom_apprenant: "Élodie",
+        date_de_naissance_apprenant: "2006-02-01",
+        code_postal_apprenant: "01000",
+      });
+      expect(hash(nouvelle.valeurs)).toBe(hash(ancienne));
+    });
+
+    it("lit un nombre Excel d'un classeur 1904 comme le même jour d'un classeur 1900", () => {
+      process.env.TZ = fuseau;
+
+      const [nouvelle] = lignesLues(
+        classeur([enTetes, ["TESTUX", "Élodie", 37329]], "xlsx", "Effectifs", { date1904: true })
+      );
+      const [ancienne] = ancienLecteur(classeur([enTetes, ["TESTUX", "Élodie", 38791]]));
+
+      expect(nouvelle.valeurs.date_de_naissance_apprenant).toBe("2006-03-15");
+      expect(hash(nouvelle.valeurs)).toBe(hash(ancienne));
+    });
+
+    it("garde la cellule date d'un classeur 1904", () => {
+      process.env.TZ = fuseau;
+      const contenu = classeur([enTetes, ["TESTUX", "Élodie", new Date(Date.UTC(2006, 2, 15))]], "xlsx", "Effectifs", {
+        date1904: true,
+      });
+
+      expect(lignesLues(contenu)[0].valeurs.date_de_naissance_apprenant).toBe("2006-03-15");
+    });
+
+    it("lit des en-têtes placés sous un titre, avec les vrais numéros de ligne", () => {
+      process.env.TZ = fuseau;
+      const contenu = classeur([["Liste des apprenants"], [], enTetes, ["TESTUX", "Élodie", "15/03/2006"]]);
+
+      const [nouvelle] = lignesLues(contenu);
+      const [ancienne] = ancienLecteur(classeur([enTetes, ["TESTUX", "Élodie", "15/03/2006"]]));
+
+      expect(nouvelle.numero).toBe(4);
+      expect(hash(nouvelle.valeurs)).toBe(hash(ancienne));
+    });
+
+    it.each(["15/03/2006 00:00:00", "15/03/2006 08:30", "2006-03-15 18:00:00", "2006-03-15T23:30:00.000Z"])(
+      "lit la date avec heure %s au jour écrit",
+      (naissance) => {
+        process.env.TZ = fuseau;
+
+        const [nouvelle] = lignesLues(classeur([enTetes, ["TESTUX", "Élodie", naissance]]));
+        const [ancienne] = ancienLecteur(classeur([enTetes, ["TESTUX", "Élodie", "15/03/2006"]]));
+
+        expect(nouvelle.valeurs.date_de_naissance_apprenant).toBe("2006-03-15");
+        expect(hash(nouvelle.valeurs)).toBe(hash(ancienne));
+      }
+    );
   });
 
   it("lit les dates qui étaient perdues", () => {
@@ -148,9 +227,32 @@ describe("lecture du fichier d'effectifs", () => {
 
   it("signale une date impossible, illisible ou hors des bornes", () => {
     expect(lireDate("31/02/2006")).toEqual({ code: "date_impossible" });
-    expect(lireDate("01/13/2026")).toEqual({ code: "date_impossible" });
+    expect(lireDate("31/04/2026")).toEqual({ code: "date_impossible" });
+    expect(lireDate("01/13/2026")).toEqual({ code: "date_illisible" });
+    expect(lireDate("32/01/2026")).toEqual({ code: "date_illisible" });
+    expect(lireDate("00/00/0000")).toEqual({ code: "date_illisible" });
     expect(lireDate("le 1er septembre")).toEqual({ code: "date_illisible" });
     expect(lireDate("01/09/1900")).toEqual({ code: "date_illisible" });
+    expect(lireDate("15/03/2006 8h00")).toEqual({ code: "date_illisible" });
+  });
+
+  it("montre la date telle que saisie dans le message d'erreur", () => {
+    const enTetes = ["nom_apprenant", "date_de_naissance_apprenant", "date_entree_formation", "date_fin_formation"];
+    const contenu = classeur([enTetes, ["TESTUX", new Date(Date.UTC(1949, 5, 1)), "01/13/2026", "31/02/2026"]]);
+
+    expect(lignesLues(contenu)[0].erreurs).toEqual([
+      {
+        code: "date_illisible",
+        cle: "date_de_naissance_apprenant",
+        message: "Date de naissance illisible : 01/06/1949. Écrivez-la sous la forme 01/09/2026.",
+      },
+      {
+        code: "date_illisible",
+        cle: "date_entree_formation",
+        message: "Date d'entrée en formation illisible : 01/13/2026. Écrivez-la sous la forme 01/09/2026.",
+      },
+      { code: "date_impossible", cle: "date_fin_formation", message: "Le 31/02/2026 n'existe pas." },
+    ]);
   });
 
   it("reconnaît les noms techniques, les libellés et les alias, pas les en-têtes ambigus", () => {
@@ -168,6 +270,66 @@ describe("lecture du fichier d'effectifs", () => {
     );
 
     expect(mal).toEqual([]);
+  });
+
+  it.each([
+    ["Date de début de contrat", "contrat_date_debut"],
+    ["Date début de contrat", "contrat_date_debut"],
+    ["Date de fin de contrat", "contrat_date_fin"],
+    ["Date de rupture de contrat", "contrat_date_rupture"],
+    ["Date de naissance de l'apprenant", "date_de_naissance_apprenant"],
+    ["Date de naissance de l’apprenant", "date_de_naissance_apprenant"],
+    ["Email apprenant", "email_contact"],
+    ["Téléphone apprenant", "tel_apprenant"],
+    ["Date début de formation", "date_entree_formation"],
+    ["Date de fin de la formation", "date_fin_formation"],
+  ])("reconnaît l'en-tête courant %s", (enTete, cle) => {
+    expect(reconnaitreColonne(enTete)).toBe(cle);
+  });
+
+  it("ne reconnaît ni un en-tête ambigu ni une clé du prototype", () => {
+    expect(["UAI", "SIRET", "Année", "De", "constructor", "__proto__"].map(reconnaitreColonne)).toEqual([
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ]);
+  });
+
+  it("préfère le nom technique au libellé et le libellé à l'alias, sans erreur", () => {
+    const contenu = classeur([
+      ["Nom de famille", "Nom", "nom_apprenant *", "Prénom de l'apprenant", "Prénom", "Date de naissance"],
+      ["ALIAS", "LIBELLE", "TESTUX", "Alias", "Élodie", "15/03/2006"],
+    ]);
+
+    const resultat = lire(contenu);
+
+    expect(resultat.succes && resultat.colonnesEnDouble).toEqual([]);
+    expect(resultat.succes && resultat.lignes[0].valeurs).toEqual({
+      nom_apprenant: "TESTUX",
+      prenom_apprenant: "Élodie",
+      date_de_naissance_apprenant: "2006-03-15",
+    });
+  });
+
+  it("signale deux colonnes de même rang pour un même champ", () => {
+    const contenu = classeur([
+      [
+        "Nom de famille",
+        "Nom d'usage",
+        "Prénom",
+        "Prénom",
+        "date_de_naissance_apprenant",
+        "date_de_naissance_apprenant",
+      ],
+      ["MARTIN", "DUPONT", "Élodie", "Élodie", "15/03/2006", "15/03/2006"],
+    ]);
+
+    const resultat = lire(contenu);
+
+    expect(resultat.succes && resultat.colonnesEnDouble).toEqual(["Nom", "Prénom", "Date de naissance"]);
   });
 
   it("reconnaît les en-têtes d'un export de logiciel, sauf les ambigus", () => {
@@ -228,6 +390,21 @@ describe("lecture du fichier d'effectifs", () => {
     expect(resultat.lignes[1].valeurs).not.toHaveProperty("contrat_date_debut");
   });
 
+  it("numérote les lignes d'une plage qui ne commence pas en ligne 1", () => {
+    const contenu = classeur(
+      [
+        ["nom_apprenant", "prenom_apprenant", "date_de_naissance_apprenant"],
+        ["TESTUX", "Élodie", "15/03/2006"],
+        ["TESTUX", "Jules", "31/02/2006"],
+      ],
+      "xlsx",
+      "Effectifs",
+      { origine: "A3" }
+    );
+
+    expect(lignesLues(contenu).map(({ numero }) => numero)).toEqual([4, 5]);
+  });
+
   it("garde les numéros de ligne du fichier, ignore les lignes vides et lit les lignes sans texte", () => {
     const enTetes = Object.keys(ligneComplete());
     const contenu = classeur([
@@ -246,6 +423,39 @@ describe("lecture du fichier d'effectifs", () => {
       { code: "date_impossible", cle: "date_de_naissance_apprenant", message: "Le 31/02/2006 n'existe pas." },
     ]);
     expect(lignes[3].valeurs).toEqual({ date_entree_formation: "2026-09-01" });
+  });
+
+  it.each([
+    ["f", "F"],
+    ["Femme", "F"],
+    ["FÉMININ", "F"],
+    ["2", "F"],
+    [2, "F"],
+    ["m", "M"],
+    ["H", "M"],
+    ["homme", "M"],
+    ["Masculin", "M"],
+    ["1", "M"],
+    [1, "M"],
+    ["X", "X"],
+    ["constructor", "constructor"],
+  ])("lit le sexe %s en %s", (sexe, attendu) => {
+    const [ligne] = lignesLues(
+      classeur([
+        ["nom_apprenant", "sexe_apprenant"],
+        ["TESTUX", sexe],
+      ])
+    );
+
+    expect(ligne.valeurs.sexe_apprenant).toBe(attendu);
+  });
+
+  it.each(["constructor", "__proto__", "toString"])("refuse %s dans une colonne Oui ou Non", (valeur) => {
+    const [ligne] = lignesLues(texteEnOctets(`nom_apprenant;rqth_apprenant\nTESTUX;${valeur}\n`), "effectifs.csv");
+
+    expect(ligne.valeurs).toEqual({ nom_apprenant: "TESTUX" });
+    expect(ligne.erreurs.map(({ code }) => code)).toEqual(["valeur_mal_formee"]);
+    expect(() => structuredClone(ligne)).not.toThrow();
   });
 
   it("accepte Homme, Femme, Oui, Non, Vrai, Faux et garde le zéro", () => {
@@ -358,6 +568,10 @@ describe("lecture du fichier d'effectifs", () => {
       code: "trop_de_lignes",
     });
     expect(lire(new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d]).buffer, "effectifs.xlsx")).toMatchObject({
+      succes: false,
+      code: "format_refuse",
+    });
+    expect(lire(new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x00, 0x01]).buffer, "effectifs.xls")).toMatchObject({
       succes: false,
       code: "format_refuse",
     });
