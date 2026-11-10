@@ -2,6 +2,7 @@ export interface DuplicateEffectifDetail {
   id: string;
   created_at: string;
   updated_at: string;
+  transmitted_at?: string | null;
   source: string;
   id_erp_apprenant: string;
   annee_scolaire: string;
@@ -47,8 +48,10 @@ export interface DuplicateEffectifDetail {
 
 export interface DuplicateEffectifGroup {
   _id: {
-    id_erp_apprenant: string;
     annee_scolaire: string;
+    nom: string;
+    prenom: string;
+    date_de_naissance: string | Date;
   };
   count: number;
   duplicates: DuplicateEffectifDetail[];

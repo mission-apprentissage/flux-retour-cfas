@@ -24,7 +24,9 @@ export default async function RootLayout({ children }: { children: JSX.Element }
       <UserContextProvider user={user}>
         <TravauxBanner />
         <ConnectedHeader />
-        <div className={styles.grow}>{children}</div>
+        <main id="contenu" tabIndex={-1} className={styles.grow}>
+          {children}
+        </main>
         <Footer />
         <CrispChatNoSSR />
       </UserContextProvider>

@@ -86,7 +86,10 @@ export interface EffectifQueueItem {
   validation_errors?: Array<{ message: string; path: string[] }>;
   error?: string | null;
   source?: string;
+  processed_at?: string | null;
 }
+
+const CHAMPS_AFFICHES = new Set(attributes.map(({ value }) => value));
 
 const renderQueueValue = (value: unknown) => (typeof value === "string" || typeof value === "number" ? value : null);
 
@@ -120,6 +123,9 @@ const RequiredMark = ({ value }: { value: string }) =>
 export function EffectifQueueItemDetail({ effectifQueueItem }: { effectifQueueItem: EffectifQueueItem }) {
   const validationErrorFormated = buildValidationError(effectifQueueItem.validation_errors);
   const hasValidationErrors = Boolean(effectifQueueItem.validation_errors?.length);
+  const autresErreurs = (effectifQueueItem.validation_errors ?? []).filter(
+    ({ path }) => !path.some((champ) => CHAMPS_AFFICHES.has(String(champ)))
+  );
 
   return (
     <div>
@@ -143,10 +149,24 @@ export function EffectifQueueItemDetail({ effectifQueueItem }: { effectifQueueIt
       {effectifQueueItem.error ? (
         <p className={styles.detailError}>
           <i className={fr.cx("fr-icon-warning-fill", "fr-icon--sm")} aria-hidden="true" /> Une erreur s&apos;est
-          produite lors de la transmission des effectifs. Aucune action de votre part n&apos;est nécessaire. Si le
-          problème persiste dans vos prochains rapports, veuillez nous contacter.
+          produite lors de la transmission des effectifs. Si le problème persiste dans vos prochains rapports, veuillez
+          nous contacter.
         </p>
       ) : null}
+
+      {autresErreurs.length > 0 && (
+        <div className={`${styles.detailError} ${styles.detailOtherErrors}`}>
+          <i className={fr.cx("fr-icon-warning-fill", "fr-icon--sm")} aria-hidden="true" />
+          <ul className={styles.detailErrorList}>
+            {autresErreurs.map(({ message, path }, index) => (
+              <li key={index}>
+                {path.length > 0 ? `${path.join(", ")} : ` : ""}
+                {ErrorMessages[`${message}:${path[0]}` as keyof typeof ErrorMessages] || message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <table className={styles.detailTable}>
         <tbody>

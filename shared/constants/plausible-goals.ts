@@ -63,6 +63,11 @@ const plausibleGoals = [
   "televersement_clic_tutoriel_video",
   "televersement_clic_excel_conseils",
   "televersement_clic_rapport_transmission",
+  "televersement_fichier_depose",
+  "televersement_verification_reussie",
+  "televersement_verification_erreur",
+  "televersement_import_en_file",
+  "televersement_echec_envoi",
 
   // Kit déploiement
 

@@ -7,11 +7,12 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { TD_MANUEL_ELEMENT_LINK } from "shared";
+import { ERREURS_TELEVERSEMENT, TD_MANUEL_ELEMENT_LINK, TEXTES_TELEVERSEMENT } from "shared";
 
 import { PageHeader } from "@/app/_components/page-header/PageHeader";
+import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { _post } from "@/common/httpClient";
-import { toEffectifsQueue } from "@/common/utils/televersement";
+import { envoyerImport } from "@/common/utils/televersement";
 import useExcelFileProcessor from "@/hooks/useExcelFileProcessor";
 
 import { DocumentsActionButtons } from "./DocumentsActionButtons";
@@ -30,17 +31,20 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
+  const { trackPlausibleEvent } = usePlausibleAppTracking();
 
   const {
     getRootProps,
     getInputProps,
     isDragActive,
     processedData,
+    valeursAEnvoyer,
     headers,
     error,
     errorsCount,
     warnings,
     missingHeaders,
+    colonnesEnDouble,
     columnsWithErrors,
     showOnlyColumnsAndLinesWithErrors,
     setShowOnlyColumnsAndLinesWithErrors,
@@ -50,21 +54,27 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
 
   const handleSubmit = async () => {
     if (errorsCount > 0 || error) {
-      setSubmitError("Please fix the errors before submitting.");
+      setSubmitError(ERREURS_TELEVERSEMENT.erreurs_avant_import());
       setIsSubmitting(false);
       return;
     }
     setSubmitError(null);
     setIsSubmitting(true);
-    const res = await _post<unknown, { error?: unknown }>(
-      `/api/v1/organismes/${organismeId}/upload/import/v3`,
-      toEffectifsQueue(processedData)
+    const resultat = await envoyerImport(
+      () => _post(`/api/v1/organismes/${organismeId}/upload/import/v3`, valeursAEnvoyer),
+      (goal) => trackPlausibleEvent(goal)
     );
-    setStatus(res.error ? "import_failure" : "import_success");
     setIsSubmitting(false);
+    if (resultat.succes) {
+      setStatus("import_success");
+    } else {
+      setSubmitError(resultat.message);
+    }
   };
 
   if (status === "import_success") return <TeleversementValide isMine={isMine} organismeId={organismeId} />;
+
+  const enAttente = status === "idle" || status === "processing";
 
   const filteredHeaders =
     showOnlyColumnsAndLinesWithErrors && columnsWithErrors.length
@@ -74,6 +84,7 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
   return (
     <div>
       <PageHeader
+        titleAs={isMine ? "h1" : "h2"}
         title={
           <>
             Import des effectifs{" "}
@@ -89,7 +100,7 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
         }
       />
 
-      {status === "idle" && (
+      {enAttente && (
         <div className={styles.introPanel}>
           <ul>
             <li>
@@ -113,15 +124,41 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
       {status === "validation_success" && (
         <Alert
           severity="success"
-          title="Le format de votre fichier a été correctement rempli."
+          title={TEXTES_TELEVERSEMENT.titre_succes()}
           description={
             <>
-              Vous pouvez relire le détail ligne à ligne ci-dessous (et défiler sur la droite). Si vous êtes satisfait,
-              vous pouvez valider l’import en cliquant sur le bouton dédié en bas de cette page.{" "}
-              <b>Votre fichier n’a pas encore été importé.</b>
+              {warnings.nouveaux !== undefined && warnings.misAJour !== undefined && (
+                <p className="fr-mb-1w">
+                  {TEXTES_TELEVERSEMENT.nouveaux_et_mis_a_jour({
+                    nouveaux: warnings.nouveaux,
+                    misAJour: warnings.misAJour,
+                  })}
+                </p>
+              )}
+              <p className="fr-mb-0">
+                Vous pouvez relire le détail ligne à ligne ci-dessous (et défiler sur la droite). Si vous êtes
+                satisfait, vous pouvez valider l’import en cliquant sur le bouton dédié en bas de cette page.{" "}
+                <b>Votre fichier n’a pas encore été importé.</b>
+              </p>
             </>
           }
           className="fr-my-3w"
+        />
+      )}
+      {status === "validation_success" && !!warnings.contratsEffaces?.length && (
+        <Alert
+          severity="warning"
+          title={TEXTES_TELEVERSEMENT.contrats_effaces({ nombre: warnings.contratsEffaces.length })}
+          description={
+            <ul className="fr-mb-0">
+              {warnings.contratsEffaces.map(({ nom, prenom, ligne }) => (
+                <li key={ligne}>
+                  {nom} {prenom}, ligne {ligne}
+                </li>
+              ))}
+            </ul>
+          }
+          className="fr-mb-3w"
         />
       )}
       {status === "validation_failure" && (
@@ -153,6 +190,15 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
                   </ul>
                 </>
               )}
+              {colonnesEnDouble.length > 0 && (
+                <ul>
+                  {colonnesEnDouble.map((message) => (
+                    <li key={message} className={styles.cellError}>
+                      {message}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </>
           }
           className="fr-my-3w"
@@ -160,12 +206,8 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
       )}
       {!!warnings.contratCount && (
         <Alert
-          severity="warning"
-          title={`${warnings.contratCount}${
-            warnings.contratCount === 1
-              ? " apprenant n'a aucune date de début et de fin de contrat renseignée."
-              : " apprenants n'ont aucune date de début et de fin de contrat renseignée."
-          }`}
+          severity="info"
+          title={TEXTES_TELEVERSEMENT.inscrits_sans_contrat({ nombre: warnings.contratCount })}
           description="Nous nous basons sur les dates de contrat, de rupture, de formation et d'exclusion pour déterminer le statut d'un effectif. N'oubliez pas de remplir les dates de contrat quand il y en a un, sans quoi les apprentis passent automatiquement en statut « abandon » 3 mois après leur date d'inscription ou 6 mois après leur date de rupture."
           className="fr-mb-3w"
         />
@@ -210,10 +252,10 @@ export default function TeleversementClient({ organismeId, isMine }: { organisme
         )}
       </div>
 
-      {status === "idle" && (
+      {enAttente && (
         <>
           <FileUpload
-            isSubmitting={isSubmitting}
+            isSubmitting={isSubmitting || status === "processing"}
             getRootProps={getRootProps}
             getInputProps={getInputProps}
             isDragActive={isDragActive}

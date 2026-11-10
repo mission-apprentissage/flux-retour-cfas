@@ -4,6 +4,8 @@ import { TransmissionStat } from "shared/models";
 
 import { effectifsQueueDb, transmissionDailyReportDb } from "@/common/model/collections";
 
+const estEnAttente = { $eq: [{ $ifNull: ["$processed_at", null] }, null] };
+
 const groupPipeline = {
   total: {
     $sum: 1,
@@ -12,7 +14,17 @@ const groupPipeline = {
     $sum: { $cond: [{ $eq: ["$has_error", true] }, 1, 0] },
   },
   success: {
-    $sum: { $cond: [{ $eq: ["$has_error", false] }, 1, 0] },
+    $sum: { $cond: [{ $and: [{ $eq: ["$has_error", false] }, { $not: [estEnAttente] }] }, 1, 0] },
+  },
+  pending: {
+    $sum: { $cond: [estEnAttente, 1, 0] },
+  },
+};
+
+const jourDeTransmission = {
+  $dateToString: {
+    format: "%Y-%m-%d",
+    date: { $ifNull: ["$processed_at", "$created_at"] },
   },
 };
 
@@ -27,12 +39,7 @@ export const getTransmissionRelatedToOrganismeByDate = async (organismeId: Objec
       {
         $group: {
           _id: {
-            date: {
-              $dateToString: {
-                format: "%Y-%m-%d",
-                date: "$processed_at",
-              },
-            },
+            date: jourDeTransmission,
             source_organisme_id: "$source_organisme_id",
             organisme_id: "$organisme_id",
           },
@@ -75,6 +82,7 @@ export const getTransmissionRelatedToOrganismeByDate = async (organismeId: Objec
           total: 1,
           error: 1,
           success: 1,
+          pending: 1,
         },
       },
       {
@@ -93,6 +101,7 @@ export const getTransmissionRelatedToOrganismeByDate = async (organismeId: Objec
           total: 1,
           error: 1,
           success: 1,
+          pending: 1,
         },
       },
       {
@@ -118,12 +127,7 @@ export const getTransmissionStatusByOrganismeGroupedByDate = async (
       },
       {
         $group: {
-          _id: {
-            $dateToString: {
-              format: "%Y-%m-%d",
-              date: "$processed_at",
-            },
-          },
+          _id: jourDeTransmission,
           ...groupPipeline,
         },
       },
@@ -138,6 +142,7 @@ export const getTransmissionStatusByOrganismeGroupedByDate = async (
           day: "$_id",
           success: "$success",
           error: "$error",
+          pending: "$pending",
           total: "$total",
         },
       },

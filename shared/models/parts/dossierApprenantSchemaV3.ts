@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+import { CHAMPS_TELEVERSEMENT_PAR_CLE, ERREURS_TELEVERSEMENT } from "../../constants/televersement";
+import { CODE_POSTAL_REGEX, SIRET_REGEX } from "../../constants/validations";
+import { estFinAvantEntree, formaterDateJourUTC } from "../../utils/date";
+
 import { extensions, primitivesV1, primitivesV3 } from "./zodPrimitives";
 
 export const stripModelAdditionalKeys = <T extends object>(
@@ -153,44 +157,131 @@ export const dossierApprenantSchemaV3Input = dossierApprenantSchemaV3Base
     has_nir: true,
   });
 
-// Utilisé par le téléversement manuel. Le but côté métier est d'obliger les utilisateurs à remplir des champs dont
-// ils pourraient avoir besoin dans SIFA alors que ce n'est pas toujours présent côté ERPs.
-// Source de la décision: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1693232432865229
-const dossierApprenantSchemaV3WithMoreRequiredFields = dossierApprenantSchemaV3Base.merge(
-  z.object({
-    email_contact: primitivesV1.apprenant.email,
-    adresse_apprenant: primitivesV3.apprenant.adresse,
-    code_postal_apprenant: primitivesV3.apprenant.code_postal,
-    sexe_apprenant: primitivesV3.apprenant.sexe,
-    annee_formation: primitivesV1.formation.annee,
-  })
-);
+const REGLES_UN_DES_DEUX_FICHIER = [
+  {
+    champs: ["formation_rncp", "formation_cfd"],
+    message: ERREURS_TELEVERSEMENT.code_formation_absent(),
+  },
+  {
+    champs: ["code_postal_apprenant", "code_commune_insee_apprenant"],
+    message: ERREURS_TELEVERSEMENT.lieu_residence_absent(),
+  },
+  {
+    champs: ["email_contact", "tel_apprenant"],
+    message: ERREURS_TELEVERSEMENT.contact_absent(),
+  },
+] as const;
 
-export function dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret(
-  invalidsUais: string[],
-  invalidsSirets: string[]
-) {
-  const validateUAI = (uai: string) => !invalidsUais.includes(uai);
-  const validateSiret = (siret: string) => !invalidsSirets.includes(siret);
-  const messageUai = "UAI non valide";
-  const messageSiret = "Siret non valide";
+export const PARAMS_TELEVERSEMENT = { televersement: true } as const;
 
-  return dossierApprenantSchemaV3WithMoreRequiredFields.merge(
-    z.object({
-      etablissement_responsable_uai: primitivesV1.etablissement_responsable.uai.refine(validateUAI, {
-        message: messageUai,
+export const SUFFIXES_CONTRATS = ["", "_2", "_3", "_4"] as const;
+
+const estRenseigne = (valeur: unknown) => valeur !== undefined && valeur !== null && valeur !== "";
+
+const verifierReglesFichier = (dossier: Record<string, unknown>, ctx: z.RefinementCtx) => {
+  for (const { champs, message } of REGLES_UN_DES_DEUX_FICHIER) {
+    if (!champs.some((champ) => estRenseigne(dossier[champ]))) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: [champs[0]], message, params: PARAMS_TELEVERSEMENT });
+    }
+  }
+  for (const suffixe of SUFFIXES_CONTRATS) {
+    const elementsDuContrat = ["contrat_date_fin", "contrat_date_rupture", "cause_rupture_contrat"].map(
+      (champ) => dossier[`${champ}${suffixe}`]
+    );
+    if (elementsDuContrat.some(estRenseigne) && !estRenseigne(dossier[`contrat_date_debut${suffixe}`])) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [`contrat_date_debut${suffixe}`],
+        message: ERREURS_TELEVERSEMENT.contrat_incomplet(),
+        params: PARAMS_TELEVERSEMENT,
+      });
+    }
+  }
+  const entree = dossier.date_entree_formation;
+  const fin = dossier.date_fin_formation;
+  if (entree instanceof Date && fin instanceof Date && estFinAvantEntree(entree, fin)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["date_fin_formation"],
+      message: ERREURS_TELEVERSEMENT.fin_avant_entree({
+        fin: formaterDateJourUTC(fin),
+        entree: formaterDateJourUTC(entree),
       }),
-      etablissement_responsable_siret: primitivesV1.etablissement_responsable.siret.refine(validateSiret, {
-        message: messageSiret,
-      }),
-      etablissement_formateur_uai: primitivesV1.etablissement_formateur.uai.refine(validateUAI, {
-        message: messageUai,
-      }),
-      etablissement_formateur_siret: primitivesV1.etablissement_formateur.siret.refine(validateSiret, {
-        message: messageSiret,
-      }),
-    })
+      params: PARAMS_TELEVERSEMENT,
+    });
+  }
+};
+
+const valeurMalFormee = (cle: string, attendu: string, estValide: (valeur: string) => boolean) =>
+  z.preprocess(
+    (valeur) => (estRenseigne(valeur) ? String(valeur).trim() : undefined),
+    z
+      .string()
+      .superRefine((valeur, ctx) => {
+        if (!estValide(valeur)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: ERREURS_TELEVERSEMENT.valeur_mal_formee({
+              libelle: CHAMPS_TELEVERSEMENT_PAR_CLE[cle].libelle,
+              valeur,
+              attendu,
+            }),
+            params: PARAMS_TELEVERSEMENT,
+          });
+        }
+      })
+      .optional()
   );
+
+const siretStrict = (cle: string) =>
+  valeurMalFormee(cle, "Il compte 14 chiffres.", (valeur) => SIRET_REGEX.test(valeur.replace(/[\s.-]+/g, "")));
+
+export const dossierApprenantSchemaFichier = dossierApprenantSchemaV3Base
+  .merge(
+    z.object({
+      siret_employeur: siretStrict("siret_employeur"),
+      siret_employeur_2: siretStrict("siret_employeur_2"),
+      siret_employeur_3: siretStrict("siret_employeur_3"),
+      siret_employeur_4: siretStrict("siret_employeur_4"),
+      etablissement_lieu_de_formation_siret: siretStrict("etablissement_lieu_de_formation_siret"),
+      code_postal_de_naissance_apprenant: valeurMalFormee(
+        "code_postal_de_naissance_apprenant",
+        "Il compte 5 chiffres.",
+        (valeur) => CODE_POSTAL_REGEX.test(valeur.padStart(5, "0"))
+      ),
+      duree_theorique_formation_mois: valeurMalFormee(
+        "duree_theorique_formation_mois",
+        "Indiquez un nombre entier de mois, de 1 à 48.",
+        (valeur) => /^\d+$/.test(valeur) && Number(valeur) >= 1 && Number(valeur) <= 48
+      ),
+    })
+  )
+  .superRefine(verifierReglesFichier);
+
+const lireValeur = <T>(schema: z.ZodType<T, z.ZodTypeDef, unknown>, valeur: unknown): T | undefined => {
+  const resultat = schema.safeParse(valeur);
+  return resultat.success ? resultat.data : undefined;
+};
+
+const schemaReglesFichier = z.record(z.string(), z.unknown()).superRefine(verifierReglesFichier);
+
+export function verifierReglesFichierSurLigneBrute(ligne: Record<string, unknown>): z.ZodIssue[] {
+  const resultat = schemaReglesFichier.safeParse({
+    ...ligne,
+    date_entree_formation: lireValeur(primitivesV3.formation.date_entree, ligne.date_entree_formation),
+    date_fin_formation: lireValeur(primitivesV3.formation.date_fin, ligne.date_fin_formation),
+  });
+  return resultat.success ? [] : resultat.error.issues;
+}
+
+export function lireCleEffectifFichier(ligne: Record<string, unknown>): {
+  annee_scolaire: string | undefined;
+  id_erp_apprenant: string | undefined;
+} {
+  return {
+    annee_scolaire: lireValeur(primitivesV1.formation.annee_scolaire, ligne.annee_scolaire),
+    id_erp_apprenant: lireValeur(primitivesV1.apprenant.id_erp, ligne.id_erp_apprenant),
+  };
 }
 
 export function computeWarningsForDossierApprenantSchemaV3(data: Array<IDossierApprenantSchemaV3>) {

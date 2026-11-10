@@ -9316,6 +9316,10 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
       ],
       "description": "Date de mise à jour en base de données",
     },
+    "upload_id": {
+      "bsonType": "string",
+      "description": "Identifiant de l'import par fichier qui a mis la ligne en file",
+    },
     "user_erp_id": {
       "bsonType": [
         "string",
