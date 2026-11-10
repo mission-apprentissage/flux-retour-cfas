@@ -4,7 +4,6 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { DuplicateEffectifDetail, DuplicateEffectifGroup, getStatut, StatutApprenant } from "shared";
 
-import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { formatPhoneNumber } from "@/app/_utils/phone.utils";
 import { formatDateDayMonthYear } from "@/common/utils/dateUtils";
 import { getNestedValue } from "@/common/utils/misc";
@@ -92,7 +91,6 @@ export function DoublonsDetailTable({
   group: DuplicateEffectifGroup;
   onRequestDelete: (duplicate: DuplicateEffectifDetail) => void;
 }) {
-  const { trackPlausibleEvent } = usePlausibleAppTracking();
   const duplicates: DuplicateEffectifDetail[] = group.duplicates;
 
   const processedDuplicates = duplicates.map((duplicate) => ({
@@ -154,10 +152,7 @@ export function DoublonsDetailTable({
                     priority="secondary"
                     size="small"
                     iconId="fr-icon-delete-line"
-                    onClick={() => {
-                      trackPlausibleEvent("suppression_doublons_effectifs");
-                      onRequestDelete(duplicate);
-                    }}
+                    onClick={() => onRequestDelete(duplicate)}
                   >
                     Supprimer
                   </Button>

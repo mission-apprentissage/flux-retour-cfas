@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import {
   DuplicateEffectifGroup,
   DuplicateEffectifGroupPagination,
+  getActiveAnneesScolaires,
   getAnneesScolaireListFromDate,
   MOTIF_SUPPRESSION,
   SOURCE_APPRENANT,
@@ -10,62 +11,29 @@ import {
 import type { IEffectif } from "shared/models/data/effectifs.model";
 
 import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
+import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import logger from "@/common/logger";
 import { effectifsDb } from "@/common/model/collections";
+import { dateMetierExpr, dedupNomExpr } from "@/common/utils/mongoUtils";
 import { repointerLiensVersJumeau, resultatRepointageVide } from "@/jobs/effectifs/repointer-liens";
 
-const LETTRES_ACCENTUEES: [string, string][] = Object.entries({
-  a: "àâäáãåÀÂÄÁÃÅ",
-  c: "çÇ",
-  e: "èéêëÈÉÊË",
-  i: "ìíîïÌÍÎÏ",
-  n: "ñÑ",
-  o: "òóôöõøÒÓÔÖÕØ",
-  u: "ùúûüÙÚÛÜ",
-  y: "ýÿÝŸ",
-  ae: "æÆ",
-  oe: "œŒ",
-}).flatMap(([base, variantes]) => [...variantes].map((variante): [string, string] => [variante, base]));
-
-const lettresNormalisees = (champ: string) => ({
-  $reduce: {
-    input: {
-      $regexFindAll: {
-        input: {
-          $toLower: {
-            $reduce: {
-              input: LETTRES_ACCENTUEES,
-              initialValue: { $ifNull: [champ, ""] },
-              in: {
-                $replaceAll: {
-                  input: "$$value",
-                  find: { $arrayElemAt: ["$$this", 0] },
-                  replacement: { $arrayElemAt: ["$$this", 1] },
-                },
-              },
-            },
-          },
-        },
-        regex: /[a-z]/,
-      },
-    },
-    initialValue: "",
-    in: { $concat: ["$$value", "$$this.match"] },
-  },
-});
+const anneesDeDetection = (date: Date) => [
+  ...new Set([...getAnneesScolaireListFromDate(date), ...getActiveAnneesScolaires(date)]),
+];
 
 const getBasePipeline = (organisme_id: ObjectId) => [
   {
     $match: {
       organisme_id,
-      annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
+      annee_scolaire: { $in: anneesDeDetection(new Date()) },
       "apprenant.date_de_naissance": { $type: "date" },
     },
   },
   {
     $addFields: {
-      nomNormalise: lettresNormalisees("$apprenant.nom"),
-      prenomNormalise: lettresNormalisees("$apprenant.prenom"),
+      nomNormalise: dedupNomExpr("$apprenant.nom"),
+      prenomNormalise: dedupNomExpr("$apprenant.prenom"),
+      dateDeNaissanceNormalisee: dateMetierExpr("$apprenant.date_de_naissance"),
     },
   },
   { $match: { nomNormalise: { $ne: "" }, prenomNormalise: { $ne: "" } } },
@@ -75,7 +43,7 @@ const getBasePipeline = (organisme_id: ObjectId) => [
         annee_scolaire: "$annee_scolaire",
         nom: "$nomNormalise",
         prenom: "$prenomNormalise",
-        date_de_naissance: "$apprenant.date_de_naissance",
+        date_de_naissance: "$dateDeNaissanceNormalisee",
       },
       count: { $sum: 1 },
       duplicates: {
@@ -83,6 +51,7 @@ const getBasePipeline = (organisme_id: ObjectId) => [
           id: "$_id",
           created_at: "$created_at",
           updated_at: "$updated_at",
+          transmitted_at: "$transmitted_at",
           source: "$source",
           apprenant: "$apprenant",
           formation: "$formation",
@@ -100,12 +69,12 @@ const getBasePipeline = (organisme_id: ObjectId) => [
   {
     $addFields: {
       duplicates: {
-        $sortArray: { input: "$duplicates", sortBy: { updated_at: -1 } },
+        $sortArray: { input: "$duplicates", sortBy: { transmitted_at: -1, updated_at: -1 } },
       },
     },
   },
   { $match: { count: { $gt: 1 } } },
-  { $sort: { firstNomApprenant: 1, firstPrenomApprenant: 1 } },
+  { $sort: { firstNomApprenant: 1, firstPrenomApprenant: 1, _id: 1 } },
 ];
 
 /**
@@ -157,8 +126,15 @@ export const getDuplicatesEffectifsForOrganismeIdWithPagination = async (
 
 const dateDe = (valeur: Date | string | null | undefined) => (valeur ? new Date(valeur).getTime() : 0);
 
+type DateTriable = Date | string | null | undefined;
+
 function choisirEffectifAGarder<
-  T extends { source?: string | null; updated_at?: Date | string | null; created_at?: Date | string | null },
+  T extends {
+    source?: string | null;
+    transmitted_at?: DateTriable;
+    updated_at?: DateTriable;
+    created_at?: DateTriable;
+  },
 >(effectifs: T[]): T {
   return [...effectifs].sort((a, b) => {
     const erpA = a.source === SOURCE_APPRENANT.FICHIER ? 1 : 0;
@@ -166,18 +142,34 @@ function choisirEffectifAGarder<
     if (erpA !== erpB) {
       return erpA - erpB;
     }
+    const transmission = dateDe(b.transmitted_at) - dateDe(a.transmitted_at);
+    if (transmission !== 0) {
+      return transmission;
+    }
     return dateDe(b.updated_at ?? b.created_at) - dateDe(a.updated_at ?? a.created_at);
   })[0];
 }
 
+const existeEncore = async (effectifId: ObjectId) =>
+  !!(await effectifsDb().findOne({ _id: effectifId }, { projection: { _id: 1 } }));
+
 async function archiverAuProfitDe(
   effectifId: ObjectId,
   jumeau: IEffectif,
-  userId: ObjectId | null
+  userId: ObjectId | null,
+  missionsLocales: Map<string, ObjectId>
 ): Promise<"supprime" | "refuse"> {
+  if (!(await existeEncore(jumeau._id)) || !(await existeEncore(effectifId))) {
+    return "refuse";
+  }
   const repointage = await repointerLiensVersJumeau(effectifId, jumeau, resultatRepointageVide());
+  repointage.missions_locales.forEach((id) => missionsLocales.set(id.toString(), id));
   if (repointage.ml.refuses > 0) {
     logger.warn({ effectifId, jumeauId: jumeau._id }, "doublon conservé : dossier Mission Locale non reportable");
+    return "refuse";
+  }
+  if (!(await existeEncore(jumeau._id))) {
+    logger.warn({ effectifId, jumeauId: jumeau._id }, "doublon conservé : son jumeau a été supprimé entre-temps");
     return "refuse";
   }
   await softDeleteEffectif(effectifId, userId, {
@@ -185,6 +177,16 @@ async function archiverAuProfitDe(
     description: `Doublon de l'effectif ${jumeau._id.toString()}`,
   });
   return "supprime";
+}
+
+async function rafraichirStatsMissionsLocales(missionsLocales: Map<string, ObjectId>) {
+  for (const missionLocaleId of missionsLocales.values()) {
+    try {
+      await createOrUpdateMissionLocaleStats(missionLocaleId);
+    } catch (err) {
+      logger.warn({ err, mission_locale_id: missionLocaleId }, "Stats de la Mission Locale non rafraîchies");
+    }
+  }
 }
 
 export type ResultatSuppressionDoublons = { supprimes: number; refuses: number };
@@ -195,6 +197,7 @@ export async function supprimerDoublonsEnLot(
 ): Promise<ResultatSuppressionDoublons> {
   const groupes = await getDuplicatesEffectifsForOrganismeId(organisme_id);
   const resultat: ResultatSuppressionDoublons = { supprimes: 0, refuses: 0 };
+  const missionsLocales = new Map<string, ObjectId>();
   for (const groupe of groupes) {
     const garde = choisirEffectifAGarder(groupe.duplicates);
     const jumeau = await effectifsDb().findOne({ _id: new ObjectId(garde.id) });
@@ -202,11 +205,16 @@ export async function supprimerDoublonsEnLot(
       continue;
     }
     for (const doublon of groupe.duplicates.filter(({ id }) => String(id) !== String(garde.id))) {
-      resultat[
-        (await archiverAuProfitDe(new ObjectId(doublon.id), jumeau, userId)) === "supprime" ? "supprimes" : "refuses"
-      ]++;
+      try {
+        const issue = await archiverAuProfitDe(new ObjectId(doublon.id), jumeau, userId, missionsLocales);
+        resultat[issue === "supprime" ? "supprimes" : "refuses"]++;
+      } catch (err) {
+        logger.error({ err, effectifId: doublon.id, jumeauId: jumeau._id }, "doublon conservé : suppression en erreur");
+        resultat.refuses++;
+      }
     }
   }
+  await rafraichirStatsMissionsLocales(missionsLocales);
   return resultat;
 }
 
@@ -226,7 +234,10 @@ export async function supprimerDoublon(effectifId: ObjectId, userId: ObjectId | 
   if (!jumeau) {
     throw Boom.conflict("Cet effectif n'a pas de doublon : il n'a pas été supprimé.");
   }
-  if ((await archiverAuProfitDe(effectifId, jumeau, userId)) === "refuse") {
+  const missionsLocales = new Map<string, ObjectId>();
+  const issue = await archiverAuProfitDe(effectifId, jumeau, userId, missionsLocales);
+  await rafraichirStatsMissionsLocales(missionsLocales);
+  if (issue === "refuse") {
     throw Boom.conflict(
       "Son dossier Mission Locale ne peut pas être reporté sur son doublon : l'effectif n'a pas été supprimé."
     );

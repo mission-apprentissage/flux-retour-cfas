@@ -86,4 +86,61 @@ describe("Routes diverses", () => {
       });
     });
   });
+  describe("DELETE /api/v1/organismes/:id/duplicates - suppression des doublons en lot", () => {
+    beforeEach(async () => {
+      const effectif = await createSampleEffectif({
+        ...commonEffectifsAttributes(),
+        annee_scolaire: getAnneesScolaireListFromDate(new Date())[0],
+        id_erp_apprenant: "ERP-1",
+        apprenant: {
+          nom: "DURAND",
+          prenom: "Léa",
+          date_de_naissance: new Date("2007-03-04T00:00:00Z"),
+          historique_statut: historySequenceInscritToApprenti,
+        },
+        organisme_id: organismes[0]._id,
+      });
+      await effectifsDb().insertMany([
+        { ...effectif, _id: new ObjectId(), source: "ERP" },
+        { ...effectif, _id: new ObjectId(), id_erp_apprenant: "hash-fichier", source: "FICHIER" },
+      ]);
+    });
+
+    const accesOrganisme: PermissionsTestConfig<boolean> = {
+      "OF cible": true,
+      "OF responsable": true,
+      Administrateur: true,
+      "OF non lié": false,
+      "OF formateur": false,
+      "Tête de réseau même réseau": false,
+      "Tête de réseau Responsable": true,
+      "Tête de réseau autre réseau": false,
+      "DREETS même région": false,
+      "DREETS autre région": false,
+      "Conseil Régional même région": false,
+      "Conseil Régional autre région": false,
+      "DDETS même département": false,
+      "DDETS autre département": false,
+      "Académie même académie": false,
+      "Académie autre académie": false,
+      "Opérateur public national": false,
+    };
+    testPermissions(accesOrganisme, async (organisation, allowed) => {
+      const response = await requestAsOrganisation(
+        organisation,
+        "delete",
+        `/api/v1/organismes/${organismes[0]._id}/duplicates`
+      );
+      expect(response.status).toStrictEqual(allowed ? 200 : 403);
+      if (allowed) {
+        expect(response.data).toStrictEqual({ supprimes: 1, refuses: 0 });
+      }
+      await expect(effectifsDb().countDocuments({ organisme_id: organismes[0]._id })).resolves.toStrictEqual(
+        allowed ? 1 : 2
+      );
+      await expect(effectifsArchiveDb().countDocuments({ id_erp_apprenant: "hash-fichier" })).resolves.toStrictEqual(
+        allowed ? 1 : 0
+      );
+    });
+  });
 });

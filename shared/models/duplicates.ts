@@ -2,6 +2,7 @@ export interface DuplicateEffectifDetail {
   id: string;
   created_at: string;
   updated_at: string;
+  transmitted_at?: string | null;
   source: string;
   id_erp_apprenant: string;
   annee_scolaire: string;

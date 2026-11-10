@@ -4,7 +4,7 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CRISP_FAQ,
   DuplicateEffectifDetail,
@@ -18,7 +18,7 @@ import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { PAGES } from "@/app/_utils/routes.utils";
 import { _delete, _get } from "@/common/httpClient";
-import { getServerErrorMessage } from "@/common/rateLimit";
+import { getApiErrorMessage } from "@/common/rateLimit";
 
 import styles from "./doublons.module.scss";
 import { DoublonsList } from "./DoublonsList";
@@ -42,6 +42,13 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
   const [duplicateToDelete, setDuplicateToDelete] = useState<DuplicateEffectifDetail | null>(null);
   const [suppressionEnCours, setSuppressionEnCours] = useState(false);
   const [message, setMessage] = useState<{ severite: "error" | "warning"; texte: string } | null>(null);
+  const zoneMessage = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (message) {
+      zoneMessage.current?.focus();
+    }
+  }, [message]);
 
   const { data: duplicates, isLoading } = useQuery<DuplicateEffectifGroup[]>({
     queryKey: [`duplicates-effectifs`, organismeId, page, pageSize],
@@ -70,7 +77,7 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
       await _delete(`/api/v1/effectif/${duplicateToDelete.id}`);
       trackPlausibleEvent("suppression_doublons_effectifs");
     } catch (error) {
-      setMessage({ severite: "error", texte: getServerErrorMessage(error, "Le doublon n'a pas pu être supprimé.") });
+      setMessage({ severite: "error", texte: getApiErrorMessage(error, "Le doublon n'a pas pu être supprimé.") });
     } finally {
       setSuppressionEnCours(false);
       queryClient.invalidateQueries({ queryKey: ["duplicates-effectifs"] });
@@ -99,7 +106,7 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
     } catch (error) {
       setMessage({
         severite: "error",
-        texte: getServerErrorMessage(error, "Les doublons n'ont pas pu être supprimés."),
+        texte: getApiErrorMessage(error, "Les doublons n'ont pas pu être supprimés."),
       });
     } finally {
       setSuppressionEnCours(false);
@@ -138,11 +145,9 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
             le même apprenant a été transmis deux fois, par exemple par votre ERP et par un fichier.
           </p>
           <p>
-            Ces dernières sont signalées en <span className={styles.rougeSignal}>rouge</span>.
-          </p>
-          <p>
-            Par exemple, un code RNCP a été rajouté ou un numéro de téléphone a été modifié. Vérifiez les informations
-            en dépliant chaque ligne et supprimez le(s) doublon(s) incorrect(s).
+            Les informations qui diffèrent d&apos;un effectif à l&apos;autre, par exemple un code RNCP ou un numéro de
+            téléphone, sont signalées en <span className={styles.rougeSignal}>rouge</span>. Vérifiez-les en dépliant
+            chaque ligne et supprimez le ou les doublons incorrects.
           </p>
           <p>
             En cas de difficulté, lisez la{" "}
@@ -158,9 +163,11 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
         </div>
       )}
 
-      {message && (
-        <Alert severity={message.severite} title={message.texte} description="" small closable className="fr-mb-3w" />
-      )}
+      <div ref={zoneMessage} tabIndex={-1} aria-live="polite">
+        {message && (
+          <Alert severity={message.severite} title={message.texte} description="" small closable className="fr-mb-3w" />
+        )}
+      </div>
 
       <DoublonsList
         data={duplicates || []}
@@ -184,7 +191,10 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
           },
         ]}
       >
-        <p className="fr-text--bold fr-mb-0">Cette opération est irréversible.</p>
+        <p className="fr-text--bold fr-mb-0">
+          L&apos;effectif supprimé est archivé, et ses dossiers Mission Locale sont reportés sur l&apos;effectif
+          conservé.
+        </p>
         <p>Êtes-vous sûr.e de vouloir supprimer ce duplicat d&apos;apprenant ?</p>
         <Alert
           severity="warning"
@@ -208,9 +218,12 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
         ]}
       >
         <p className="fr-text--bold fr-mb-0">
-          Pour chaque apprenant, l&apos;effectif transmis par votre ERP est conservé, sinon le plus récent.
+          Pour chaque apprenant, l&apos;effectif transmis par un ERP est conservé, sinon le dernier transmis.
         </p>
-        <p>Cette opération est irréversible.</p>
+        <p>
+          Les autres effectifs sont archivés, et leurs dossiers Mission Locale sont reportés sur l&apos;effectif
+          conservé.
+        </p>
         <Alert
           severity="warning"
           title="Attention, veuillez vérifier que ce doublon n‘existe pas déjà dans votre système ERP pour éviter des erreurs de synchronisation des données."
