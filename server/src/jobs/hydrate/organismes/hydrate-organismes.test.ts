@@ -6,12 +6,18 @@ import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixtu
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
+import {
+  getEtablissementRechercheEntreprises,
+  type IEtablissementRechercheEntreprises,
+} from "@/common/apis/apiRechercheEntreprises";
 import { organismesDb } from "@/common/model/collections";
+import { ApiError } from "@/common/utils/apiUtils";
 import { useMongo } from "@tests/jest/setupMongo";
 
 import { hydrateOrganismesFromApiAlternance } from "./hydrate-organismes";
 
 vi.mock("@/common/apis/apiAlternance/client");
+vi.mock("@/common/apis/apiRechercheEntreprises");
 
 useMongo();
 
@@ -293,6 +299,8 @@ describe("hydrateOrganismesFromReferentiel", () => {
         yield page;
       }
     });
+    vi.mocked(getEtablissementRechercheEntreprises).mockReset();
+    vi.mocked(getEtablissementRechercheEntreprises).mockResolvedValue(null);
   });
 
   it("doit ajouter les organismes présent dans le référentiel", async () => {
@@ -306,7 +314,14 @@ describe("hydrateOrganismesFromReferentiel", () => {
       expectedOrganismes.map((o) => ({ ...o, _id: expect.any(ObjectId), created_at: now, updated_at: now }))
     );
 
-    expect(result).toEqual({ nbOrganismesCrees: 2, nbOrganismesMaj: 0, nbOrganismesSuppr: 0 });
+    expect(result).toEqual({
+      nbOrganismesCrees: 2,
+      nbOrganismesMaj: 0,
+      nbOrganismesSuppr: 0,
+      nbAdressesConservees: 0,
+      nbAdressesCompletees: 0,
+      nbOrganismesSansAdresse: 1,
+    });
   });
 
   it("doit mettre à jour les organismes présents dans le référentiel", async () => {
@@ -351,7 +366,14 @@ describe("hydrateOrganismesFromReferentiel", () => {
       },
     ]);
 
-    expect(result).toEqual({ nbOrganismesCrees: 0, nbOrganismesMaj: 2, nbOrganismesSuppr: 0 });
+    expect(result).toEqual({
+      nbOrganismesCrees: 0,
+      nbOrganismesMaj: 2,
+      nbOrganismesSuppr: 0,
+      nbAdressesConservees: 0,
+      nbAdressesCompletees: 0,
+      nbOrganismesSansAdresse: 1,
+    });
   });
 
   it("doit préserver les organismes supprimé du référentiel mais en réinitialisant le statut", async () => {
@@ -423,7 +445,6 @@ describe("hydrateOrganismesFromReferentiel", () => {
         ...oldOrganismePresent,
         _id: expect.any(ObjectId),
         updated_at: now,
-        adresse: null,
         ferme: true,
         enseigne: "ASAF",
         nom: "ASAF",
@@ -441,7 +462,15 @@ describe("hydrateOrganismesFromReferentiel", () => {
       },
     ]);
 
-    expect(result).toEqual({ nbOrganismesCrees: 2, nbOrganismesMaj: 1, nbOrganismesSuppr: 1 });
+    expect(result).toEqual({
+      nbOrganismesCrees: 2,
+      nbOrganismesMaj: 1,
+      nbOrganismesSuppr: 1,
+      nbAdressesConservees: 1,
+      nbAdressesCompletees: 0,
+      nbOrganismesSansAdresse: 0,
+    });
+    expect(getEtablissementRechercheEntreprises).not.toHaveBeenCalled();
   });
 
   it("doit préserver les organismes si une erreur api alternance", async () => {
@@ -521,5 +550,116 @@ describe("hydrateOrganismesFromReferentiel", () => {
         _id: expect.any(ObjectId),
       },
     ]);
+  });
+
+  describe("adresse absente de l'API Alternance", () => {
+    const organismeParisApi = (uai: string, siret: string) =>
+      generateOrganismeApiFixture({
+        identifiant: { uai, siret },
+        contacts: [],
+        etablissement: {
+          siret,
+          ouvert: true,
+          enseigne: "MJM GRAPHIC DESIGN",
+          adresse: null,
+          geopoint: { type: "Point", coordinates: [2.366, 48.873] },
+          creation: new Date("1970-01-09T00:08:34.800Z"),
+          fermeture: null,
+        },
+        renseignements_specifiques: { qualiopi: true, numero_activite: null },
+        statut: { referentiel: "présent" },
+        unite_legale: {
+          siren: siret.slice(0, 9),
+          actif: true,
+          raison_sociale: "MJM GRAPHIC DESIGN",
+          creation: new Date("1970-01-09T00:08:34.800Z"),
+          cessation: null,
+        },
+      });
+
+    const etablissementParis = (siret: string): IEtablissementRechercheEntreprises => ({
+      siret,
+      adresse: "38 QUAI DE JEMMAPES 75010 PARIS",
+      code_postal: "75010",
+      commune: "75110",
+      libelle_commune: "PARIS",
+      statut_diffusion_etablissement: "O",
+    });
+
+    const adresseParis = {
+      code_postal: "75010",
+      code_insee: "75110",
+      commune: "PARIS",
+      departement: "75",
+      region: "11",
+      academie: "01",
+      complete: "38 QUAI DE JEMMAPES 75010 PARIS",
+    };
+
+    const mockExport = (page: IOrganismeApi[]) => {
+      vi.mocked(apiAlternanceClient.organisme.export).mockReset();
+      vi.mocked(apiAlternanceClient.organisme.export).mockImplementation(async function* () {
+        yield page;
+      });
+    };
+
+    it("complète l'adresse depuis API Recherche d'entreprises quand l'organisme n'en a pas", async () => {
+      mockExport([organismeParisApi("0754571L", "31709861400033")]);
+      vi.mocked(getEtablissementRechercheEntreprises).mockResolvedValue(etablissementParis("31709861400033"));
+
+      const result = await hydrateOrganismesFromApiAlternance(now);
+
+      const organisme = await organismesDb().findOne({ uai: "0754571L", siret: "31709861400033" });
+      expect(organisme?.adresse).toEqual(adresseParis);
+      expect(getEtablissementRechercheEntreprises).toHaveBeenCalledWith("31709861400033");
+      expect(result).toMatchObject({ nbAdressesCompletees: 1, nbOrganismesSansAdresse: 0 });
+    });
+
+    it("conserve l'adresse déjà connue sans appeler API Recherche d'entreprises", async () => {
+      await organismesDb().insertOne(
+        generateOrganismeFixture({ uai: "0754571L", siret: "31709861400033", adresse: adresseParis })
+      );
+      mockExport([organismeParisApi("0754571L", "31709861400033")]);
+
+      const result = await hydrateOrganismesFromApiAlternance(now);
+
+      const organisme = await organismesDb().findOne({ uai: "0754571L", siret: "31709861400033" });
+      expect(organisme?.adresse).toEqual(adresseParis);
+      expect(getEtablissementRechercheEntreprises).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ nbAdressesConservees: 1 });
+    });
+
+    it("passe au suivant quand le SIRET est introuvable ou non diffusible", async () => {
+      mockExport([
+        organismeParisApi("0754571L", "31709861400033"),
+        organismeParisApi("0750043P", "20000069300024"),
+        organismeParisApi("0756243D", "32922456200549"),
+      ]);
+      vi.mocked(getEtablissementRechercheEntreprises)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ ...etablissementParis("20000069300024"), statut_diffusion_etablissement: "P" })
+        .mockResolvedValueOnce(etablissementParis("32922456200549"));
+
+      const result = await hydrateOrganismesFromApiAlternance(now);
+
+      expect(getEtablissementRechercheEntreprises).toHaveBeenCalledTimes(3);
+      expect((await organismesDb().findOne({ uai: "0754571L" }))?.adresse).toBeNull();
+      expect((await organismesDb().findOne({ uai: "0750043P" }))?.adresse).toBeNull();
+      expect((await organismesDb().findOne({ uai: "0756243D" }))?.adresse).toEqual(adresseParis);
+      expect(result).toMatchObject({ nbAdressesCompletees: 1, nbOrganismesSansAdresse: 2 });
+    });
+
+    it("n'appelle plus API Recherche d'entreprises après une erreur", async () => {
+      mockExport([organismeParisApi("0754571L", "31709861400033"), organismeParisApi("0756243D", "32922456200549")]);
+      vi.mocked(getEtablissementRechercheEntreprises).mockRejectedValue(
+        new ApiError("API Recherche d'entreprises", "Too Many Requests", 429)
+      );
+
+      const result = await hydrateOrganismesFromApiAlternance(now);
+
+      expect(getEtablissementRechercheEntreprises).toHaveBeenCalledTimes(1);
+      expect(await organismesDb().countDocuments({ adresse: null })).toBe(2);
+      expect(result).toMatchObject({ nbAdressesCompletees: 0, nbOrganismesSansAdresse: 2 });
+    });
   });
 });
