@@ -3,7 +3,7 @@ import { BaseSponsorsSection, type Sponsor } from "./shared/BaseSponsorsSection"
 const SPONSORS: Array<Sponsor> = [
   {
     image: { src: "/images/home/ml-actives.png", width: 360, height: 246 },
-    title: "+ 320 Missions Locales actives",
+    title: "+ 340 Missions Locales actives",
     description: "Un réseau de Missions Locales déjà actives sur le service",
   },
   {

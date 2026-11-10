@@ -1,6 +1,4 @@
 import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
-import { Badge } from "@codegouvfr/react-dsfr/Badge";
-import Image from "next/image";
 
 import styles from "./video-section.module.scss";
 
@@ -8,22 +6,15 @@ const YOUTUBE_VIDEO_ID = "Al8aSdWTw94";
 
 interface VideoSectionProps {
   title: string;
-  badge?: string;
 }
 
-export function VideoSection({ title, badge }: VideoSectionProps) {
+export function VideoSection({ title }: VideoSectionProps) {
   const fullVideoUrl = `https://www.youtube.com/watch?v=${YOUTUBE_VIDEO_ID}`;
 
   return (
     <section className={styles.section}>
       <div className={styles.heading}>
         <h2 className={styles.title}>{title}</h2>
-        {badge && (
-          <Badge severity="info" noIcon small className={styles.badge}>
-            <Image src="/images/france-icon.svg" alt="" width={16} height={16} aria-hidden="true" />
-            {badge}
-          </Badge>
-        )}
       </div>
       <div className={styles.media}>
         <figure className={`fr-content-media ${styles.figure}`} role="group">

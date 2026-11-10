@@ -3,7 +3,7 @@ import { BaseSponsorsSection, type Sponsor } from "../../_components/shared/Base
 const SPONSORS: Array<Sponsor> = [
   {
     image: { src: "/images/home/ml-actives.png", width: 360, height: 246 },
-    title: "+ 320 Missions Locales l’ont adopté",
+    title: "+ 340 Missions Locales l’ont adopté",
     description:
       "De nombreuses Missions Locales l’ont ajouté à leur quotidien pour lutter contre le décrochage et les fractures de parcours.",
   },
