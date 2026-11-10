@@ -6,6 +6,7 @@ import { hydrateOrganismesFromApiAlternance } from "../hydrate/organismes/hydrat
 import { hydrateOrganismesFormationsCount } from "../hydrate/organismes/hydrate-organismes-formations";
 import { hydrateOrganismesRelations } from "../hydrate/organismes/hydrate-organismes-relations";
 import { cleanupOrganismes } from "../hydrate/organismes/organisme-cleanup";
+import { rattraperAdressesOrganismes } from "../hydrate/organismes/rattrapage-adresses-organismes";
 import { createAllMissingOrganismeOrganisation, hydrateOrganismesHasAccount } from "../organisations/organisation.job";
 import { collabInactiviteCfaJob } from "../organismes/collab-inactivite-cfa";
 import { revokeStaleApiKeysJob } from "../organismes/revoke-stale-api-keys";
@@ -14,6 +15,11 @@ export const organismesJobs = {
   "hydrate:organismes": {
     handler: async (job) => {
       return hydrateOrganismesFromApiAlternance(job.started_at ?? new Date());
+    },
+  },
+  "tmp:rattrapage-adresses-organismes": {
+    handler: async () => {
+      return rattraperAdressesOrganismes();
     },
   },
   "hydrate:organismes-organisations": {

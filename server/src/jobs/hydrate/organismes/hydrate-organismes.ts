@@ -4,21 +4,43 @@ import {
   NATURE_ORGANISME_DE_FORMATION,
   STATUT_FIABILISATION_ORGANISME,
   STATUT_PRESENCE_REFERENTIEL,
+  type IDepartmentCode,
   type IOrganisme,
 } from "shared";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
+import { getEtablissementRechercheEntreprises } from "@/common/apis/apiRechercheEntreprises";
 import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
+import { findDataByDepartementNum, getDepartementCodeFromCodeInsee } from "@/common/utils/adresseUtils";
+
+type IAdresseOrganisme = NonNullable<IOrganisme["adresse"]>;
+
+export type IRepliAdresse = {
+  sourceDisponible: boolean;
+  nbConservees: number;
+  nbCompletees: number;
+  nbSansAdresse: number;
+};
+
+export const nouveauRepliAdresse = (): IRepliAdresse => ({
+  sourceDisponible: true,
+  nbConservees: 0,
+  nbCompletees: 0,
+  nbSansAdresse: 0,
+});
 
 export const hydrateOrganismesFromApiAlternance = async (startTime: Date) => {
   let nbOrganismeCreated = 0;
   let nbOrganismeUpdated = 0;
 
+  const repli = nouveauRepliAdresse();
+
   const cursor = apiAlternanceClient.organisme.export({ page_size: 100 });
   for await (const page of cursor) {
+    const adressesDeRepli = await getAdressesDeRepli(page, repli);
     const operations = page
-      .map((o) => generateBulkOperation(o, startTime))
+      .map((o) => generateBulkOperation(o, startTime, adressesDeRepli))
       .filter((op): op is AnyBulkWriteOperation<IOrganisme> => op !== null);
 
     if (operations.length > 0) {
@@ -36,19 +58,101 @@ export const hydrateOrganismesFromApiAlternance = async (startTime: Date) => {
   logger.info(`--> ${nbOrganismeCreated} organismes créés depuis le référentiel`);
   logger.info(`---> ${nbOrganismeUpdated} organismes mis à jour`);
   logger.info(`----> ${nbOrganismesSuppr} organismes supprimés de l'API`);
+  logger.info(
+    `-----> adresses absentes de l'API : ${repli.nbConservees} conservées, ${repli.nbCompletees} complétées via API Recherche d'entreprises, ${repli.nbSansAdresse} sans adresse`
+  );
 
   return {
     nbOrganismesCrees: nbOrganismeCreated,
     nbOrganismesMaj: nbOrganismeUpdated,
     nbOrganismesSuppr,
+    nbAdressesConservees: repli.nbConservees,
+    nbAdressesCompletees: repli.nbCompletees,
+    nbOrganismesSansAdresse: repli.nbSansAdresse,
   };
+};
+
+const cleOrganisme = (uai: string, siret: string) => `${uai}|${siret}`;
+
+const getAdressesDeRepli = async (
+  page: IApiOrganisme[],
+  repli: IRepliAdresse
+): Promise<Map<string, IAdresseOrganisme>> => {
+  const adresses = new Map<string, IAdresseOrganisme>();
+  const identifiants = page
+    .filter((o) => o.etablissement.adresse === null)
+    .flatMap(({ identifiant: { uai, siret } }) => (uai ? [{ uai, siret }] : []));
+  if (identifiants.length === 0) {
+    return adresses;
+  }
+
+  const existants = await organismesDb()
+    .find({ $or: identifiants }, { projection: { uai: 1, siret: 1, adresse: 1 } })
+    .toArray();
+  for (const { uai, siret, adresse } of existants) {
+    if (uai && adresse?.departement) {
+      adresses.set(cleOrganisme(uai, siret), adresse);
+    }
+  }
+
+  for (const { uai, siret } of identifiants) {
+    const cle = cleOrganisme(uai, siret);
+    if (adresses.has(cle)) {
+      repli.nbConservees++;
+      continue;
+    }
+    const adresse = await getAdresseRechercheEntreprises(siret, repli);
+    if (adresse) {
+      adresses.set(cle, adresse);
+      repli.nbCompletees++;
+    } else {
+      repli.nbSansAdresse++;
+    }
+  }
+
+  return adresses;
+};
+
+export const getAdresseRechercheEntreprises = async (
+  siret: string,
+  repli: IRepliAdresse
+): Promise<IAdresseOrganisme | null> => {
+  if (!repli.sourceDisponible) {
+    return null;
+  }
+
+  try {
+    const etablissement = await getEtablissementRechercheEntreprises(siret);
+    if (!etablissement?.commune || etablissement.statut_diffusion_etablissement !== "O") {
+      return null;
+    }
+    const departement = getDepartementCodeFromCodeInsee(etablissement.commune);
+    const { code_region, num_academie } = findDataByDepartementNum(departement as IDepartmentCode);
+    if (!code_region || !num_academie) {
+      return null;
+    }
+    return {
+      ...(etablissement.code_postal && { code_postal: etablissement.code_postal }),
+      code_insee: etablissement.commune,
+      ...(etablissement.libelle_commune && { commune: etablissement.libelle_commune }),
+      departement,
+      region: code_region,
+      academie: num_academie,
+      complete: etablissement.adresse,
+    };
+  } catch (e) {
+    repli.sourceDisponible = false;
+    logger.warn({ err: e }, "API Recherche d'entreprises indisponible, adresses manquantes non complétées");
+    return null;
+  }
 };
 
 type DefaultField = "created_at" | "_id" | "nature" | "formations_count";
 
 const generateBulkOperation = (
   organismeApi: IApiOrganisme,
-  startTime: Date
+  startTime: Date,
+  adressesDeRepli: Map<string, IAdresseOrganisme>
 ): AnyBulkWriteOperation<IOrganisme> | null => {
   const { uai, siret } = organismeApi.identifiant;
 
@@ -60,7 +164,7 @@ const generateBulkOperation = (
   const { adresse } = organismeApi.etablissement;
   const adresseFormatted =
     adresse === null
-      ? null
+      ? (adressesDeRepli.get(cleOrganisme(uai, siret)) ?? null)
       : {
           code_postal: adresse.code_postal,
           code_insee: adresse.commune.code_insee,
