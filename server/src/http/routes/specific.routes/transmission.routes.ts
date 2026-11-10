@@ -48,6 +48,9 @@ export default () => {
     "/reset-notification",
     requireOrganismePermission("configurerModeTransmission"),
     returnResult<OrganismeLocals>(async (req, res) => {
+      if (req.user.impersonating) {
+        return;
+      }
       await effacerAlerteTransmission(res.locals.organismeId);
     })
   );

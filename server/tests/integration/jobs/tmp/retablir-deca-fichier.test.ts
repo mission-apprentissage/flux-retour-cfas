@@ -4,11 +4,12 @@ import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IOrganisme } from "shared/models/data/organismes.model";
 import { getAnneeScolaireFromDate } from "shared/utils";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as collections from "@/common/model/collections";
 import { effectifsDb, effectifsDECADb, missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
-import { retablirDecaFichier } from "@/jobs/tmp/retablir-deca-fichier";
+import { restaurerDecaFichier, retablirDecaFichier } from "@/jobs/tmp/retablir-deca-fichier";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 import { testDoc } from "@tests/utils/testUtils";
@@ -121,5 +122,80 @@ describe("tmp:retablir-deca-fichier", () => {
       ])
     );
     expect(sauvegarde).toHaveLength(3);
+  });
+
+  it("ne crée aucune collection de sauvegarde en simulation", async () => {
+    const sauvegardes = () =>
+      getDatabase()
+        .listCollections({ name: /^sauvegarde_retablir_deca_fichier_/ })
+        .toArray();
+    for (const { name } of await sauvegardes()) {
+      await getDatabase().collection(name).drop();
+    }
+
+    await retablirDecaFichier();
+
+    expect(await sauvegardes()).toEqual([]);
+  });
+
+  it("traite les organismes marqués de l'ancien nom de la source fichier", async () => {
+    const ancienNom = organisme({ is_transmission_target: true, erps: ["televersement", "FICHIER"] });
+    const ancienNomSeul = organisme({ is_transmission_target: true, erps: ["televersement"] });
+    await organismesDb().insertMany([ancienNom, ancienNomSeul]);
+
+    const bilan = await retablirDecaFichier({ appliquer: true });
+
+    expect(bilan.organismesCibles).toBe(5);
+    expect((await organismesDb().findOne({ _id: ancienNom._id }))?.is_transmission_target).toBe(false);
+    expect((await organismesDb().findOne({ _id: ancienNomSeul._id }))?.is_transmission_target).toBe(false);
+  });
+
+  it("rétablit aussi un membre de la hiérarchie qui n'est pas cible lui-même", async () => {
+    const formateurSansErps = organisme({ is_transmission_target: true, erps: [] });
+    const responsable = organisme({
+      is_transmission_target: true,
+      erps: ["FICHIER"],
+      organismesFormateurs: [
+        { _id: formateurSansErps._id, uai: formateurSansErps.uai, siret: formateurSansErps.siret },
+      ],
+    });
+    await organismesDb().insertMany([formateurSansErps, responsable]);
+
+    await retablirDecaFichier({ appliquer: true });
+
+    expect((await organismesDb().findOne({ _id: formateurSansErps._id }))?.is_transmission_target).toBe(false);
+  });
+
+  it("reste rejouable quand l'écriture des contrats échoue", async () => {
+    const original = collections.effectifsDECADb;
+    const espion = vi.spyOn(collections, "effectifsDECADb").mockImplementation(() =>
+      Object.assign(Object.create(original()), {
+        updateMany: () => Promise.reject(new Error("écriture impossible")),
+      })
+    );
+    await expect(retablirDecaFichier({ appliquer: true })).rejects.toThrow("écriture impossible");
+    espion.mockRestore();
+
+    await retablirDecaFichier({ appliquer: true });
+
+    expect((await organismesDb().findOne({ _id: fichierSeul._id }))?.is_transmission_target).toBe(false);
+    expect((await effectifsDECADb().findOne({ _id: contratFichierSeul }))?.is_deca_compatible).toBe(true);
+  });
+
+  it("annule un rétablissement à partir de sa sauvegarde", async () => {
+    const { sauvegarde } = await retablirDecaFichier({ appliquer: true });
+
+    const bilan = await restaurerDecaFichier(sauvegarde as string);
+
+    expect(bilan).toMatchObject({ organismes: 1, contratsDeca: 1, dossiersMl: 1 });
+    expect((await organismesDb().findOne({ _id: fichierSeul._id }))?.is_transmission_target).toBe(true);
+    expect((await effectifsDECADb().findOne({ _id: contratFichierSeul }))?.is_deca_compatible).toBe(false);
+    expect(
+      (await missionLocaleEffectifsDb().findOne({ effectif_id: contratFichierSeul }))?.effectif_snapshot
+    ).toMatchObject({ is_deca_compatible: false });
+  });
+
+  it("refuse de restaurer depuis une collection qui n'est pas une sauvegarde", async () => {
+    await expect(restaurerDecaFichier("organismes")).rejects.toThrow("Sauvegarde inconnue");
   });
 });

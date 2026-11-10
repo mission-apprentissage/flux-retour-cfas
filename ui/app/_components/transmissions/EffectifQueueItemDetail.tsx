@@ -149,9 +149,8 @@ export function EffectifQueueItemDetail({ effectifQueueItem }: { effectifQueueIt
       {effectifQueueItem.error ? (
         <p className={styles.detailError}>
           <i className={fr.cx("fr-icon-warning-fill", "fr-icon--sm")} aria-hidden="true" /> Une erreur s&apos;est
-          produite lors de la transmission des effectifs.
-          {effectifQueueItem.processed_at ? "" : " Aucune action de votre part n’est nécessaire."} Si le problème
-          persiste dans vos prochains rapports, veuillez nous contacter.
+          produite lors de la transmission des effectifs. Si le problème persiste dans vos prochains rapports, veuillez
+          nous contacter.
         </p>
       ) : null}
 

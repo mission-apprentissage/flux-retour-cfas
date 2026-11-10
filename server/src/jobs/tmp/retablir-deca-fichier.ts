@@ -16,6 +16,8 @@ import { getDatabase } from "@/common/mongodb";
 
 const logger = parentLogger.child({ module: "job:tmp:retablir-deca-fichier" });
 
+const SOURCES_FICHIER: string[] = [SOURCE_APPRENANT.FICHIER, "televersement"];
+
 type OrganismeHierarchie = Pick<
   IOrganisme,
   "_id" | "erps" | "is_transmission_target" | "organismesFormateurs" | "organismesResponsables"
@@ -88,7 +90,14 @@ async function organismesFichierSansErps(): Promise<ObjectId[]> {
 
 export async function retablirDecaFichier({ appliquer = false }: { appliquer?: boolean } = {}) {
   const cibles = await organismesDb()
-    .find({ is_transmission_target: true, erps: [SOURCE_APPRENANT.FICHIER] }, { projection: projectionHierarchie })
+    .find(
+      {
+        is_transmission_target: true,
+        "erps.0": { $exists: true },
+        erps: { $not: { $elemMatch: { $nin: SOURCES_FICHIER } } },
+      },
+      { projection: projectionHierarchie }
+    )
     .toArray();
 
   const idsHierarchie = [...new Map(cibles.flatMap(hierarchie).map((id) => [id.toString(), id])).values()];
@@ -104,7 +113,7 @@ export async function retablirDecaFichier({ appliquer = false }: { appliquer?: b
   const transmetHorsFichier = (id: ObjectId) => {
     const organisme = organismes.get(id.toString());
     return (
-      !!organisme?.erps?.some((erp) => erp !== SOURCE_APPRENANT.FICHIER) || avecEffectifsHorsFichier.has(id.toString())
+      !!organisme?.erps?.some((erp) => !SOURCES_FICHIER.includes(erp)) || avecEffectifsHorsFichier.has(id.toString())
     );
   };
 
@@ -180,11 +189,6 @@ export async function retablirDecaFichier({ appliquer = false }: { appliquer?: b
     await sauvegarde.insertMany(aSauvegarder);
   }
 
-  await organismesDb().updateMany(
-    { _id: { $in: aRetablir } },
-    { $set: { is_transmission_target: false } },
-    { bypassDocumentValidation: true }
-  );
   await effectifsDECADb().updateMany(
     { _id: { $in: idsContrats } },
     { $set: { is_deca_compatible: true } },
@@ -195,8 +199,70 @@ export async function retablirDecaFichier({ appliquer = false }: { appliquer?: b
     { $set: { "effectif_snapshot.is_deca_compatible": true } },
     { bypassDocumentValidation: true }
   );
+  await organismesDb().updateMany(
+    { _id: { $in: aRetablir } },
+    { $set: { is_transmission_target: false } },
+    { bypassDocumentValidation: true }
+  );
 
   const bilanApplique = { ...bilan, sauvegarde: nomSauvegarde };
   logger.info(bilanApplique, "rétablissement DECA des organismes en mode fichier appliqué");
   return bilanApplique;
+}
+
+type LigneSauvegarde =
+  | { collection: "organismes"; document_id: ObjectId; is_transmission_target: boolean | null }
+  | { collection: "effectifsDECA"; document_id: ObjectId; is_deca_compatible: boolean }
+  | { collection: "missionLocaleEffectif"; document_id: ObjectId; is_deca_compatible: boolean | null };
+
+const idsDe = (lignes: LigneSauvegarde[], collection: LigneSauvegarde["collection"], valeur?: boolean | null) =>
+  lignes
+    .filter(
+      (ligne) =>
+        ligne.collection === collection &&
+        (valeur === undefined ||
+          ("is_transmission_target" in ligne ? ligne.is_transmission_target : ligne.is_deca_compatible) === valeur)
+    )
+    .map(({ document_id }) => document_id);
+
+export async function restaurerDecaFichier(nomSauvegarde: string) {
+  if (!/^sauvegarde_retablir_deca_fichier_\d{8}$/.test(nomSauvegarde)) {
+    throw new Error(`Sauvegarde inconnue : ${nomSauvegarde}`);
+  }
+  const lignes = await getDatabase().collection<LigneSauvegarde>(nomSauvegarde).find({}).toArray();
+  if (lignes.length === 0) {
+    throw new Error(`Sauvegarde vide ou absente : ${nomSauvegarde}`);
+  }
+
+  await organismesDb().updateMany(
+    { _id: { $in: idsDe(lignes, "organismes", true) } },
+    { $set: { is_transmission_target: true } },
+    { bypassDocumentValidation: true }
+  );
+  await effectifsDECADb().updateMany(
+    { _id: { $in: idsDe(lignes, "effectifsDECA") } },
+    { $set: { is_deca_compatible: false } },
+    { bypassDocumentValidation: true }
+  );
+  for (const valeur of [true, false]) {
+    await missionLocaleEffectifsDb().updateMany(
+      { _id: { $in: idsDe(lignes, "missionLocaleEffectif", valeur) } },
+      { $set: { "effectif_snapshot.is_deca_compatible": valeur } },
+      { bypassDocumentValidation: true }
+    );
+  }
+  await missionLocaleEffectifsDb().updateMany(
+    { _id: { $in: idsDe(lignes, "missionLocaleEffectif", null) } },
+    { $unset: { "effectif_snapshot.is_deca_compatible": 1 } },
+    { bypassDocumentValidation: true }
+  );
+
+  const bilan = {
+    sauvegarde: nomSauvegarde,
+    organismes: idsDe(lignes, "organismes").length,
+    contratsDeca: idsDe(lignes, "effectifsDECA").length,
+    dossiersMl: idsDe(lignes, "missionLocaleEffectif").length,
+  };
+  logger.info(bilan, "rétablissement DECA des organismes en mode fichier annulé");
+  return bilan;
 }

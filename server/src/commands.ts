@@ -331,6 +331,21 @@ program
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("effectifs:doublons-obsoletes"));
 
+program
+  .command("tmp:retablir-deca-fichier")
+  .description("Rétablit dans DECA les organismes sortis de DECA par des imports par fichier seulement")
+  .option("--appliquer", "Écrit les changements après une sauvegarde datée, au lieu de simuler", false)
+  .option("--restaurer <collection>", "Annule un rétablissement à partir de sa collection de sauvegarde")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:retablir-deca-fichier"));
+
+program
+  .command("tmp:mesurer-perimetre-televersement")
+  .description("Compte les imports par fichier passés que le contrôle de périmètre refuserait")
+  .option("--mois <number>", "Nombre de mois d'imports à rejouer", (n) => parseInt(n, 10))
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("tmp:mesurer-perimetre-televersement"));
+
 /**
  * Job de lancement des scripts de fiabilisation des couples UAI SIRET
  */

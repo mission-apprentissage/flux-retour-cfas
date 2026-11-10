@@ -18,10 +18,12 @@ describe("Rapport de transmission", () => {
 
   let organisme: IOrganisme;
   let requestAsOrganisation: RequestAsOrganisationFunc;
+  let httpClient: Awaited<ReturnType<typeof initTestApp>>["httpClient"];
 
   beforeEach(async () => {
     const app = await initTestApp();
     requestAsOrganisation = app.requestAsOrganisation;
+    httpClient = app.httpClient;
     organisme = {
       _id: new ObjectId(),
       ...createRandomOrganisme({ reseaux: [] }),
@@ -83,5 +85,25 @@ describe("Rapport de transmission", () => {
     const apres = await organismesDb().findOne({ _id: organisme._id });
     expect(apres?.has_transmission_errors).toBe(false);
     expect(apres).not.toHaveProperty("transmission_errors_date");
+  });
+
+  it("garde l'alerte du CFA quand un administrateur consulte son rapport en imposture", async () => {
+    const imposture = await requestAsOrganisation({ type: "ADMINISTRATEUR" }, "post", "/api/v1/admin/impersonate", {
+      type: "ORGANISME_FORMATION",
+      ...CFA,
+    });
+    expect(imposture.status).toBe(200);
+    const cookie = imposture.headers["set-cookie"]?.[0];
+
+    const response = await httpClient.put(
+      `/api/v1/organismes/${organisme._id}/transmission/reset-notification`,
+      {},
+      { headers: { cookie } }
+    );
+
+    expect(response.status).toBe(200);
+    const apres = await organismesDb().findOne({ _id: organisme._id });
+    expect(apres?.has_transmission_errors).toBe(true);
+    expect(apres?.transmission_errors_date).toEqual(new Date("2026-11-04T10:00:00Z"));
   });
 });

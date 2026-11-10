@@ -26,7 +26,6 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
   [{ processed_at: 1, created_at: 1 }, {}],
   [{ computed_day: 1 }, {}],
-  [{ upload_id: 1 }, { name: "upload_id", partialFilterExpression: { upload_id: { $exists: true } } }],
 ];
 
 const effectifsProps = effectifsModel.zod.shape;

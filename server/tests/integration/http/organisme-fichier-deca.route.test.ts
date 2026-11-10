@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import nock from "nock";
 import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
 import { IOrganisation, IOrganisme } from "shared/models";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -8,7 +9,9 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { effectifsDECADb, effectifsDb, effectifsQueueDb, organismesDb } from "@/common/model/collections";
 import { getOrganismeEffectifs, updateOrganismeEffectifs } from "@/http/routes/specific.routes/organisme.routes";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
+import { mockApiApprentissageCertificationApi } from "@tests/data/api.apprentissage.beta.gouv.fr/certification/apiApprentissage.certification.mock";
 import { useMongo } from "@tests/jest/setupMongo";
+import { useNock } from "@tests/jest/setupNock";
 import { initTestApp, RequestAsOrganisationFunc, testDoc } from "@tests/utils/testUtils";
 
 const organisme: IOrganisme = generateOrganismeFixture({
@@ -65,7 +68,30 @@ const ligneFichier = (nom: string, prenom: string) => ({
   created_at: new Date(),
 });
 
-const contratDeca = (nom: string, prenom: string): IEffectifDECA =>
+function mockRechercheExacte({ uai, siret }: { uai: string; siret: string }) {
+  nock("https://api.apprentissage.beta.gouv.fr/api")
+    .get("/organisme/v1/recherche")
+    .query({ uai, siret })
+    .reply(200, {
+      metadata: { uai: { status: "ok" }, siret: { status: "ok" } },
+      resultat: {
+        status: { ouvert: true, declaration_catalogue: true, validation_uai: true },
+        correspondances: {
+          uai: { lui_meme: true, son_lieu: false },
+          siret: { lui_meme: true, son_formateur: false, son_responsable: false },
+        },
+        organisme: { identifiant: { uai, siret } },
+      },
+      candidats: [],
+    })
+    .persist();
+}
+
+const contratDeca = (
+  nom: string,
+  prenom: string,
+  { annee_scolaire = "2023-2024", date_entree = new Date("2023-09-01T00:00:00.000Z") } = {}
+): IEffectifDECA =>
   testDoc<IEffectifDECA>({
     _id: new ObjectId(),
     deca_raw_id: new ObjectId(),
@@ -81,7 +107,7 @@ const contratDeca = (nom: string, prenom: string): IEffectifDECA =>
       periode: [],
       date_inscription: new Date("2023-09-01T00:00:00.000Z"),
       date_fin: new Date("2024-06-30T00:00:00.000Z"),
-      date_entree: new Date("2023-09-01T00:00:00.000Z"),
+      date_entree,
     },
     validation_errors: [],
     _computed: {
@@ -104,7 +130,7 @@ const contratDeca = (nom: string, prenom: string): IEffectifDECA =>
     },
     updated_at: new Date("2024-04-24T09:23:11.040Z"),
     created_at: new Date("2024-04-24T09:23:11.021Z"),
-    annee_scolaire: "2023-2024",
+    annee_scolaire,
     source: SOURCE_APPRENANT.DECA,
     id_erp_apprenant: new ObjectId().toString(),
     organisme_id: organisme._id,
@@ -114,6 +140,7 @@ const contratDeca = (nom: string, prenom: string): IEffectifDECA =>
   });
 
 describe("Organisme hors cible qui importe par fichier", () => {
+  useNock();
   useMongo();
 
   let requestAsOrganisation: RequestAsOrganisationFunc;
@@ -121,6 +148,8 @@ describe("Organisme hors cible qui importe par fichier", () => {
   beforeEach(async () => {
     const app = await initTestApp();
     requestAsOrganisation = app.requestAsOrganisation;
+    mockApiApprentissageCertificationApi();
+    mockRechercheExacte({ uai: organisme.uai as string, siret: organisme.siret });
     await organismesDb().insertOne(organisme);
     await effectifsQueueDb().insertOne(ligneFichier("Dupont", "Jeanne"));
     await processEffectifsQueue();
@@ -153,6 +182,27 @@ describe("Organisme hors cible qui importe par fichier", () => {
     );
 
     expect(response.status).toBe(200);
+    expect(response.data.abandons).toBe(2);
+  });
+
+  it("ne compte qu'une fois l'apprenti dont le contrat DECA est daté sur l'année civile", async () => {
+    await effectifsDECADb().deleteMany({ "apprenant.nom": "DUPONT" });
+    await effectifsDECADb().insertOne(
+      contratDeca("DUPONT", "Jeanne", {
+        annee_scolaire: "2024-2024",
+        date_entree: new Date("2024-01-15T00:00:00.000Z"),
+      }),
+      { bypassDocumentValidation: true }
+    );
+
+    const { total } = await getOrganismeEffectifs(organisme._id, { page: 0, limit: 10 });
+    const response = await requestAsOrganisation(
+      organisation as IOrganisation,
+      "get",
+      `/api/v1/organismes/${organisme._id.toString()}/indicateurs/effectifs?date=2024-04-24T15:04:33.359Z`
+    );
+
+    expect(total).toBe(2);
     expect(response.data.abandons).toBe(2);
   });
 

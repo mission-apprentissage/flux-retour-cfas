@@ -188,6 +188,34 @@ export function dateMetierExpr(champ: string | Record<string, unknown>) {
   };
 }
 
+const anneeScolaireDepuisDateExpr = (date: Record<string, unknown>) => ({
+  $let: {
+    vars: { annee: { $year: date }, mois: { $month: date } },
+    in: {
+      $cond: [
+        { $gte: ["$$mois", 8] },
+        { $concat: [{ $toString: "$$annee" }, "-", { $toString: { $add: ["$$annee", 1] } }] },
+        { $concat: [{ $toString: { $subtract: ["$$annee", 1] } }, "-", { $toString: "$$annee" }] },
+      ],
+    },
+  },
+});
+
+const anneeLue = { $ifNull: ["$annee_scolaire", ""] };
+
+export const anneeScolaireDedupExpr = {
+  $cond: [
+    {
+      $and: [
+        { $eq: [{ $type: "$formation.date_entree" }, "date"] },
+        { $eq: [{ $substrCP: [anneeLue, 0, 4] }, { $substrCP: [anneeLue, 5, 4] }] },
+      ],
+    },
+    anneeScolaireDepuisDateExpr(dateMetierExpr("$formation.date_entree")),
+    anneeLue,
+  ],
+};
+
 export function dedupNom(valeur: string | null | undefined): string {
   let result = (valeur ?? "").trim().replace(/[A-Z]/g, (lettre) => lettre.toLowerCase());
   for (const [from, to] of REMPLACEMENTS_DEDUP_NOM) {

@@ -4,7 +4,7 @@ import { zGetEffectifsForOrganismeApi } from "shared/models/routes/organismes/ef
 import { WithPagination } from "shared/models/routes/pagination";
 
 import { effectifsDb, organismesDb } from "@/common/model/collections";
-import { dateMetierExpr, dedupNomExpr } from "@/common/utils/mongoUtils";
+import { anneeScolaireDedupExpr, dateMetierExpr, dedupNomExpr } from "@/common/utils/mongoUtils";
 
 const FIELD_MAP: Record<string, string> = {
   nom: "apprenant.nom",
@@ -69,6 +69,7 @@ function effectifsEtContratsDecaSansDoublon(organismeId: ObjectId) {
         _nom: dedupNomExpr("$apprenant.nom"),
         _prenom: dedupNomExpr("$apprenant.prenom"),
         _ddn: dateMetierExpr("$apprenant.date_de_naissance"),
+        _annee: anneeScolaireDedupExpr,
       },
     },
     { $sort: { _priorite: 1, updated_at: -1, _id: 1 } },
@@ -77,7 +78,7 @@ function effectifsEtContratsDecaSansDoublon(organismeId: ObjectId) {
         _id: {
           $cond: [
             { $and: [{ $ne: ["$_nom", ""] }, { $ne: ["$_ddn", null] }] },
-            { nom: "$_nom", prenom: "$_prenom", ddn: "$_ddn", annee_scolaire: "$annee_scolaire" },
+            { nom: "$_nom", prenom: "$_prenom", ddn: "$_ddn", annee_scolaire: "$_annee" },
             "$_id",
           ],
         },
@@ -85,7 +86,7 @@ function effectifsEtContratsDecaSansDoublon(organismeId: ObjectId) {
       },
     },
     { $replaceRoot: { newRoot: "$doc" } },
-    { $project: { _priorite: 0, _nom: 0, _prenom: 0, _ddn: 0 } },
+    { $project: { _priorite: 0, _nom: 0, _prenom: 0, _ddn: 0, _annee: 0 } },
   ];
 }
 
