@@ -1,8 +1,8 @@
-import { captureException } from "@sentry/node";
 import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 
 import logger from "@/common/logger";
 import { getDbCollection } from "@/common/mongodb";
+import { captureTiered } from "@/common/services/sentry/alertContract";
 
 interface CollectionDescriptor {
   collectionName: string;
@@ -23,9 +23,11 @@ export const createCollectionIndexes = async (collectionDescriptor?: CollectionD
           { err, collectionName: collectionDescriptor.collectionName },
           "Erreur lors de la création des index"
         );
-        captureException(
-          new Error(`Error creating indexes for ${collectionDescriptor.collectionName}`, { cause: err })
-        );
+        captureTiered(new Error(`Error creating indexes for ${collectionDescriptor.collectionName}`, { cause: err }), {
+          tier: "veille",
+          errorKind: "db",
+          fingerprintKey: `indexes:${collectionDescriptor.collectionName}`,
+        });
       }
     })
   );
