@@ -16,7 +16,9 @@ import {
 import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
+import { PAGES } from "@/app/_utils/routes.utils";
 import { _delete, _get } from "@/common/httpClient";
+import { getServerErrorMessage } from "@/common/rateLimit";
 
 import styles from "./doublons.module.scss";
 import { DoublonsList } from "./DoublonsList";
@@ -38,6 +40,8 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
   const [pageSize, setPageSize] = useState(20);
   const [totalCount, setTotalCount] = useState(0);
   const [duplicateToDelete, setDuplicateToDelete] = useState<DuplicateEffectifDetail | null>(null);
+  const [suppressionEnCours, setSuppressionEnCours] = useState(false);
+  const [message, setMessage] = useState<{ severite: "error" | "warning"; texte: string } | null>(null);
 
   const { data: duplicates, isLoading } = useQuery<DuplicateEffectifGroup[]>({
     queryKey: [`duplicates-effectifs`, organismeId, page, pageSize],
@@ -59,21 +63,49 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
   };
 
   const confirmDeleteDuplicate = async () => {
-    if (!duplicateToDelete) return;
-    trackPlausibleEvent("suppression_doublons_effectifs");
-    await _delete(`/api/v1/effectif/${duplicateToDelete.id}`);
-    queryClient.invalidateQueries({ queryKey: ["duplicates-effectifs"] });
-    deleteDoublonModal.close();
-    setDuplicateToDelete(null);
+    if (!duplicateToDelete || suppressionEnCours) return;
+    setSuppressionEnCours(true);
+    setMessage(null);
+    try {
+      await _delete(`/api/v1/effectif/${duplicateToDelete.id}`);
+      trackPlausibleEvent("suppression_doublons_effectifs");
+    } catch (error) {
+      setMessage({ severite: "error", texte: getServerErrorMessage(error, "Le doublon n'a pas pu être supprimé.") });
+    } finally {
+      setSuppressionEnCours(false);
+      queryClient.invalidateQueries({ queryKey: ["duplicates-effectifs"] });
+      deleteDoublonModal.close();
+      setDuplicateToDelete(null);
+    }
   };
 
   const confirmDeleteAll = async () => {
-    trackPlausibleEvent("suppression_doublons_effectifs_en_lot", undefined, {
-      nb_doublons_supprimes_lot: totalCount,
-    });
-    await _delete(`/api/v1/organismes/${organismeId}/duplicates`);
-    queryClient.invalidateQueries({ queryKey: ["duplicates-effectifs"] });
-    deleteAllDoublonsModal.close();
+    if (suppressionEnCours) return;
+    setSuppressionEnCours(true);
+    setMessage(null);
+    try {
+      const { supprimes, refuses } = await _delete<{ supprimes: number; refuses: number }>(
+        `/api/v1/organismes/${organismeId}/duplicates`
+      );
+      trackPlausibleEvent("suppression_doublons_effectifs_en_lot", undefined, {
+        nb_doublons_supprimes_lot: supprimes,
+      });
+      if (refuses > 0) {
+        setMessage({
+          severite: "warning",
+          texte: `${refuses} ${refuses > 1 ? "doublons n'ont pas été supprimés : leur dossier" : "doublon n'a pas été supprimé : son dossier"} Mission Locale ne peut pas être reporté sur l'effectif conservé.`,
+        });
+      }
+    } catch (error) {
+      setMessage({
+        severite: "error",
+        texte: getServerErrorMessage(error, "Les doublons n'ont pas pu être supprimés."),
+      });
+    } finally {
+      setSuppressionEnCours(false);
+      queryClient.invalidateQueries({ queryKey: ["duplicates-effectifs"] });
+      deleteAllDoublonsModal.close();
+    }
   };
 
   if (isLoading) {
@@ -84,7 +116,10 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
     <div>
       <PageHeader
         title={isMine ? "Mes duplicats d'effectifs" : "Ses duplicats d'effectifs"}
-        backLink={{ href: `/organismes/${organismeId}/effectifs`, label: "Retour au tableau des effectifs" }}
+        backLink={{
+          href: isMine ? PAGES.static.effectifs.getPath() : `/organismes/${organismeId}/effectifs`,
+          label: "Retour au tableau des effectifs",
+        }}
         action={
           <Button priority="secondary" iconId="fr-icon-delete-line" onClick={() => deleteAllDoublonsModal.open()}>
             Supprimer en lot
@@ -99,8 +134,8 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
             &nbsp;d&apos;effectifs. Pour chacun, supprimez celui avec les informations incorrectes.
           </p>
           <p>
-            Les effectifs ci-dessous apparaissent en doublons car une ou plusieurs données ont été modifiées sur chacun
-            d’entre eux.
+            Les effectifs ci-dessous ont les mêmes nom, prénom et date de naissance, mais des identifiants différents :
+            le même apprenant a été transmis deux fois, par exemple par votre ERP et par un fichier.
           </p>
           <p>
             Ces dernières sont signalées en <span className={styles.rougeSignal}>rouge</span>.
@@ -121,6 +156,10 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
             .
           </p>
         </div>
+      )}
+
+      {message && (
+        <Alert severity={message.severite} title={message.texte} description="" small closable className="fr-mb-3w" />
       )}
 
       <DoublonsList
@@ -168,7 +207,9 @@ export default function DoublonsClient({ organismeId, isMine }: { organismeId: s
           },
         ]}
       >
-        <p className="fr-text--bold fr-mb-0">Seuls les duplicats les plus anciens seront supprimés.</p>
+        <p className="fr-text--bold fr-mb-0">
+          Pour chaque apprenant, l&apos;effectif transmis par votre ERP est conservé, sinon le plus récent.
+        </p>
         <p>Cette opération est irréversible.</p>
         <Alert
           severity="warning"

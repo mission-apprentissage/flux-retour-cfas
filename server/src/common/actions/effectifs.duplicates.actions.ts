@@ -1,47 +1,81 @@
+import * as Boom from "@hapi/boom";
 import { ObjectId } from "mongodb";
-import { DuplicateEffectifGroup, DuplicateEffectifGroupPagination, getAnneesScolaireListFromDate } from "shared";
+import {
+  DuplicateEffectifGroup,
+  DuplicateEffectifGroupPagination,
+  getAnneesScolaireListFromDate,
+  MOTIF_SUPPRESSION,
+  SOURCE_APPRENANT,
+} from "shared";
+import type { IEffectif } from "shared/models/data/effectifs.model";
 
+import { softDeleteEffectif } from "@/common/actions/effectifs.actions";
 import logger from "@/common/logger";
 import { effectifsDb } from "@/common/model/collections";
+import { repointerLiensVersJumeau, resultatRepointageVide } from "@/jobs/effectifs/repointer-liens";
 
-/**
- * Construction du pipeline d'aggregation pour l'identification des doublons
- * @returns
- */
-const getSanitizedNomPrenomPipeline = (
-  nomApprenantField = "$apprenant.nom",
-  prenomApprenantField = "$apprenant.prenom"
-) => [
-  {
-    $addFields: {
-      sanitizedNom: {
-        $regexFindAll: { input: { $toLower: nomApprenantField }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ },
-      },
-      sanitizedPrenom: {
-        $regexFindAll: { input: { $toLower: prenomApprenantField }, regex: /[A-Za-zÀ-ÖØ-öø-ÿ]/ },
+const LETTRES_ACCENTUEES: [string, string][] = Object.entries({
+  a: "àâäáãåÀÂÄÁÃÅ",
+  c: "çÇ",
+  e: "èéêëÈÉÊË",
+  i: "ìíîïÌÍÎÏ",
+  n: "ñÑ",
+  o: "òóôöõøÒÓÔÖÕØ",
+  u: "ùúûüÙÚÛÜ",
+  y: "ýÿÝŸ",
+  ae: "æÆ",
+  oe: "œŒ",
+}).flatMap(([base, variantes]) => [...variantes].map((variante): [string, string] => [variante, base]));
+
+const lettresNormalisees = (champ: string) => ({
+  $reduce: {
+    input: {
+      $regexFindAll: {
+        input: {
+          $toLower: {
+            $reduce: {
+              input: LETTRES_ACCENTUEES,
+              initialValue: { $ifNull: [champ, ""] },
+              in: {
+                $replaceAll: {
+                  input: "$$value",
+                  find: { $arrayElemAt: ["$$this", 0] },
+                  replacement: { $arrayElemAt: ["$$this", 1] },
+                },
+              },
+            },
+          },
+        },
+        regex: /[a-z]/,
       },
     },
+    initialValue: "",
+    in: { $concat: ["$$value", "$$this.match"] },
   },
-  {
-    $addFields: {
-      sanitizedNom: {
-        $reduce: { input: "$sanitizedNom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
-      },
-      sanitizedPrenom: {
-        $reduce: { input: "$sanitizedPrenom.match", initialValue: "", in: { $concat: ["$$value", "$$this"] } },
-      },
-    },
-  },
-];
+});
 
 const getBasePipeline = (organisme_id: ObjectId) => [
-  { $match: { organisme_id, annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) } } },
-  ...getSanitizedNomPrenomPipeline(),
+  {
+    $match: {
+      organisme_id,
+      annee_scolaire: { $in: getAnneesScolaireListFromDate(new Date()) },
+      "apprenant.date_de_naissance": { $type: "date" },
+    },
+  },
+  {
+    $addFields: {
+      nomNormalise: lettresNormalisees("$apprenant.nom"),
+      prenomNormalise: lettresNormalisees("$apprenant.prenom"),
+    },
+  },
+  { $match: { nomNormalise: { $ne: "" }, prenomNormalise: { $ne: "" } } },
   {
     $group: {
       _id: {
-        id_erp_apprenant: "$id_erp_apprenant",
         annee_scolaire: "$annee_scolaire",
+        nom: "$nomNormalise",
+        prenom: "$prenomNormalise",
+        date_de_naissance: "$apprenant.date_de_naissance",
       },
       count: { $sum: 1 },
       duplicates: {
@@ -121,29 +155,80 @@ export const getDuplicatesEffectifsForOrganismeIdWithPagination = async (
   };
 };
 
-export const deleteOldestDuplicates = async (organisme_id: ObjectId): Promise<void> => {
-  try {
-    const result = await getDuplicatesEffectifsForOrganismeId(organisme_id);
-    let idsToDelete: ObjectId[] = [];
+const dateDe = (valeur: Date | string | null | undefined) => (valeur ? new Date(valeur).getTime() : 0);
 
-    if (!Array.isArray(result)) {
-      throw new Error("Doublons attendus sans pagination");
+function choisirEffectifAGarder<
+  T extends { source?: string | null; updated_at?: Date | string | null; created_at?: Date | string | null },
+>(effectifs: T[]): T {
+  return [...effectifs].sort((a, b) => {
+    const erpA = a.source === SOURCE_APPRENANT.FICHIER ? 1 : 0;
+    const erpB = b.source === SOURCE_APPRENANT.FICHIER ? 1 : 0;
+    if (erpA !== erpB) {
+      return erpA - erpB;
     }
+    return dateDe(b.updated_at ?? b.created_at) - dateDe(a.updated_at ?? a.created_at);
+  })[0];
+}
 
-    const duplicates = result;
-
-    duplicates.forEach((duplicateGroup: DuplicateEffectifGroup) => {
-      if (duplicateGroup.duplicates.length > 1) {
-        const sortedDuplicates = duplicateGroup.duplicates.sort(
-          (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        );
-        const olderDuplicates = sortedDuplicates.slice(0, -1);
-        idsToDelete.push(...olderDuplicates.map((duplicate) => new ObjectId(duplicate.id)));
-      }
-    });
-
-    await effectifsDb().deleteMany({ _id: { $in: idsToDelete } });
-  } catch (error) {
-    logger.error({ err: error }, "Une erreur s'est produite lors du processus de suppression des doublons");
+async function archiverAuProfitDe(
+  effectifId: ObjectId,
+  jumeau: IEffectif,
+  userId: ObjectId | null
+): Promise<"supprime" | "refuse"> {
+  const repointage = await repointerLiensVersJumeau(effectifId, jumeau, resultatRepointageVide());
+  if (repointage.ml.refuses > 0) {
+    logger.warn({ effectifId, jumeauId: jumeau._id }, "doublon conservé : dossier Mission Locale non reportable");
+    return "refuse";
   }
-};
+  await softDeleteEffectif(effectifId, userId, {
+    motif: MOTIF_SUPPRESSION.Doublon,
+    description: `Doublon de l'effectif ${jumeau._id.toString()}`,
+  });
+  return "supprime";
+}
+
+export type ResultatSuppressionDoublons = { supprimes: number; refuses: number };
+
+export async function supprimerDoublonsEnLot(
+  organisme_id: ObjectId,
+  userId: ObjectId | null
+): Promise<ResultatSuppressionDoublons> {
+  const groupes = await getDuplicatesEffectifsForOrganismeId(organisme_id);
+  const resultat: ResultatSuppressionDoublons = { supprimes: 0, refuses: 0 };
+  for (const groupe of groupes) {
+    const garde = choisirEffectifAGarder(groupe.duplicates);
+    const jumeau = await effectifsDb().findOne({ _id: new ObjectId(garde.id) });
+    if (!jumeau) {
+      continue;
+    }
+    for (const doublon of groupe.duplicates.filter(({ id }) => String(id) !== String(garde.id))) {
+      resultat[
+        (await archiverAuProfitDe(new ObjectId(doublon.id), jumeau, userId)) === "supprime" ? "supprimes" : "refuses"
+      ]++;
+    }
+  }
+  return resultat;
+}
+
+export async function supprimerDoublon(effectifId: ObjectId, userId: ObjectId | null): Promise<void> {
+  const effectif = await effectifsDb().findOne({ _id: effectifId });
+  if (!effectif) {
+    throw Boom.notFound("Effectif introuvable");
+  }
+  const groupe = (await getDuplicatesEffectifsForOrganismeId(effectif.organisme_id)).find(({ duplicates }) =>
+    duplicates.some(({ id }) => String(id) === effectifId.toString())
+  );
+  const autres = groupe?.duplicates.filter(({ id }) => String(id) !== effectifId.toString()) ?? [];
+  if (autres.length === 0) {
+    throw Boom.conflict("Cet effectif n'a pas de doublon : il n'a pas été supprimé.");
+  }
+  const jumeau = await effectifsDb().findOne({ _id: new ObjectId(choisirEffectifAGarder(autres).id) });
+  if (!jumeau) {
+    throw Boom.conflict("Cet effectif n'a pas de doublon : il n'a pas été supprimé.");
+  }
+  if ((await archiverAuProfitDe(effectifId, jumeau, userId)) === "refuse") {
+    throw Boom.conflict(
+      "Son dossier Mission Locale ne peut pas être reporté sur son doublon : l'effectif n'a pas été supprimé."
+    );
+  }
+}

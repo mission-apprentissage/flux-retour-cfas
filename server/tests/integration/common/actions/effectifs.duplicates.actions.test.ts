@@ -1,133 +1,156 @@
-import { strict as assert } from "assert";
-
+import * as Boom from "@hapi/boom";
 import { ObjectId } from "mongodb";
-import { IOrganisme } from "shared/models/data/organismes.model";
-import { getAnneesScolaireListFromDate } from "shared/utils";
-import { it, describe, beforeEach } from "vitest";
+import { MOTIF_SUPPRESSION, SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
+import type { IEffectif } from "shared/models/data/effectifs.model";
+import type { IOrganisme } from "shared/models/data/organismes.model";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import {
-  deleteOldestDuplicates,
   getDuplicatesEffectifsForOrganismeIdWithPagination,
+  supprimerDoublon,
+  supprimerDoublonsEnLot,
 } from "@/common/actions/effectifs.duplicates.actions";
-import { effectifsDb, organismesDb } from "@/common/model/collections";
-import { createSampleEffectif, createRandomOrganisme } from "@tests/data/randomizedSample";
+import { effectifsArchiveDb, effectifsDb, missionLocaleEffectifsDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
-import { id } from "@tests/utils/testUtils";
+import {
+  avecStatut,
+  creerMissionLocale,
+  creerOrganisme,
+  identite,
+  insererDossierMl,
+  insererEffectif,
+} from "@tests/utils/effectifsJumeaux";
 
-const TEST_SIREN = "190404921";
-const ANNEE_SCOLAIRE = getAnneesScolaireListFromDate(new Date())[0];
+const UTILISATEUR = new ObjectId();
 
-const sampleOrganismeId = new ObjectId(id(1));
-const sampleOrganisme: IOrganisme = {
-  _id: sampleOrganismeId,
-  ...createRandomOrganisme({ siret: `${TEST_SIREN}00016` }),
-};
+describe("Doublons certains d'effectifs", () => {
+  useMongo();
 
-/**
- * Fonction utilitaire pour ajouter des doublons d'effectif basés sur id_erp_apprenant
- */
-const insertDuplicateEffectifs = async (totalEffectifs = 5, duplicatesCount = 2) => {
-  const insertedIdList: ObjectId[] = [];
+  let organisme: IOrganisme;
 
-  for (let i = 0; i < totalEffectifs; i++) {
-    const idErpApprenant = `ID_ERP_${i}`;
+  const inserer = async (
+    idErp: string,
+    {
+      apprenant = {},
+      source = SOURCE_APPRENANT.ERP,
+      misAJourLe = new Date("2026-10-01T00:00:00Z"),
+      statut,
+    }: {
+      apprenant?: Partial<IEffectif["apprenant"]>;
+      source?: string;
+      misAJourLe?: Date;
+      statut?: (typeof STATUT_APPRENANT)[keyof typeof STATUT_APPRENANT];
+    } = {}
+  ) => {
+    const effectif = await insererEffectif({
+      organisme,
+      idErp,
+      apprenant: { ...identite, adresse: { mission_locale_id: 42 }, ...apprenant },
+      statut,
+    });
+    await effectifsDb().updateOne({ _id: effectif._id }, { $set: { source, updated_at: misAJourLe } });
+    return { ...effectif, source, updated_at: misAJourLe } as IEffectif;
+  };
 
-    for (let j = 0; j < duplicatesCount; j++) {
-      const effectif = {
-        _id: new ObjectId(),
-        ...(await createSampleEffectif({
-          organisme: sampleOrganisme,
-          annee_scolaire: ANNEE_SCOLAIRE,
-          id_erp_apprenant: idErpApprenant,
-        })),
-      };
+  beforeEach(async () => {
+    organisme = await creerOrganisme("CFA de test");
+    await creerMissionLocale();
+  });
 
-      const { insertedId } = await effectifsDb().insertOne(effectif);
-      insertedIdList.push(insertedId);
+  it("regroupe le même apprenant saisi sous deux identifiants, malgré la casse, les accents et la ponctuation", async () => {
+    await inserer("ERP-1", { apprenant: { nom: "Dupont-Martin", prenom: "LÉA" } });
+    await inserer("hash-fichier", { apprenant: { nom: "DUPONT MARTIN", prenom: "LEA" }, source: "FICHIER" });
+
+    const { totalItems, data } = await getDuplicatesEffectifsForOrganismeIdWithPagination(organisme._id, 1, 10);
+
+    expect(totalItems).toBe(1);
+    expect(data[0].duplicates.map(({ id_erp_apprenant }) => id_erp_apprenant).sort()).toEqual([
+      "ERP-1",
+      "hash-fichier",
+    ]);
+  });
+
+  it("ne prend jamais deux jumeaux pour un doublon", async () => {
+    await inserer("A", { apprenant: { prenom: "Léa" } });
+    await inserer("B", { apprenant: { prenom: "Lou" } });
+
+    expect((await getDuplicatesEffectifsForOrganismeIdWithPagination(organisme._id, 1, 10)).totalItems).toBe(0);
+  });
+
+  it("pagine les groupes de doublons", async () => {
+    for (const prenom of ["Ana", "Bea", "Cyd", "Dan", "Eva"]) {
+      await inserer(`${prenom}-1`, { apprenant: { prenom } });
+      await inserer(`${prenom}-2`, { apprenant: { prenom } });
     }
-  }
 
-  return insertedIdList;
-};
+    const page3 = await getDuplicatesEffectifsForOrganismeIdWithPagination(organisme._id, 3, 2);
 
-describe("Tests de pagination et détection des doublons basés sur id_erp_apprenant", () => {
-  useMongo();
-
-  beforeEach(async () => {
-    await effectifsDb().deleteMany({});
-    await organismesDb().deleteMany({});
-    await organismesDb().insertOne(sampleOrganisme);
+    expect(page3.totalItems).toBe(5);
+    expect(page3.data).toHaveLength(1);
+    expect(page3.data[0].duplicates).toHaveLength(2);
   });
 
-  it("doit récupérer correctement les doublons avec pagination", async () => {
-    await insertDuplicateEffectifs(5, 2);
+  it("en lot, garde l'effectif ERP, archive le fichier et reporte son dossier Mission Locale", async () => {
+    const erp = await inserer("ERP-1", { misAJourLe: new Date("2026-09-01T00:00:00Z") });
+    const fichier = await inserer("hash-fichier", {
+      source: SOURCE_APPRENANT.FICHIER,
+      misAJourLe: new Date("2026-10-15T00:00:00Z"),
+    });
+    const dossier = await insererDossierMl(fichier);
 
-    const duplicatesPage1 = await getDuplicatesEffectifsForOrganismeIdWithPagination(sampleOrganismeId, 1, 2);
-    assert.equal(duplicatesPage1.data.length, 2, "La première page doit contenir 2 effectifs en doublons");
-    assert.equal(duplicatesPage1.totalItems, 5, "Doit indiquer un total de 5 effectifs en doublons");
-    assert.equal(
-      duplicatesPage1.data[0].duplicates.length,
-      2,
-      "Le groupe de doublons sur la première page doit contenir 2 éléments"
-    );
+    const resultat = await supprimerDoublonsEnLot(organisme._id, UTILISATEUR);
 
-    const duplicatesPage2 = await getDuplicatesEffectifsForOrganismeIdWithPagination(sampleOrganismeId, 2, 2);
-    assert.equal(duplicatesPage2.data.length, 2, "La deuxième page doit encore contenir 2 effectifs en doublons");
-    assert.equal(
-      duplicatesPage2.data[0].duplicates.length,
-      2,
-      "Le groupe de doublons sur la deuxième page doit contenir 2 éléments"
-    );
-
-    const duplicatesPage3 = await getDuplicatesEffectifsForOrganismeIdWithPagination(sampleOrganismeId, 3, 2);
-    assert.equal(duplicatesPage3.data.length, 1, "La troisième page doit encore contenir 1 effectifs en doublons");
-    assert.equal(
-      duplicatesPage3.data[0].duplicates.length,
-      2,
-      "Le groupe de doublons sur la troisième page doit contenir 2 éléments"
-    );
+    expect(resultat).toEqual({ supprimes: 1, refuses: 0 });
+    expect(await effectifsDb().distinct("_id", { organisme_id: organisme._id })).toEqual([erp._id]);
+    expect(await effectifsArchiveDb().findOne({ id_erp_apprenant: "hash-fichier" })).toMatchObject({
+      suppression: { motif: MOTIF_SUPPRESSION.Doublon, user_id: UTILISATEUR },
+    });
+    expect((await missionLocaleEffectifsDb().findOne({ _id: dossier._id }))?.effectif_id).toEqual(erp._id);
   });
 
-  it("ne doit pas récupérer de doublons si un seul effectif est présent pour un id_erp_apprenant", async () => {
-    await insertDuplicateEffectifs(3, 1);
+  it("entre deux effectifs de même source, garde le plus récent", async () => {
+    await inserer("ancien", { source: SOURCE_APPRENANT.FICHIER, misAJourLe: new Date("2026-09-01T00:00:00Z") });
+    const recent = await inserer("recent", {
+      source: SOURCE_APPRENANT.FICHIER,
+      misAJourLe: new Date("2026-10-01T00:00:00Z"),
+    });
 
-    const duplicates = await getDuplicatesEffectifsForOrganismeIdWithPagination(sampleOrganismeId, 1, 10);
-    assert.equal(duplicates.data.length, 0, "Ne doit pas trouver de doublons pour un id_erp_apprenant unique");
-  });
-});
+    await supprimerDoublonsEnLot(organisme._id, UTILISATEUR);
 
-describe("Suppression des doublons les plus anciens", () => {
-  useMongo();
-
-  beforeEach(async () => {
-    await effectifsDb().deleteMany({});
-    await organismesDb().deleteMany({});
-    await organismesDb().insertOne(sampleOrganisme);
+    expect(await effectifsDb().distinct("_id", { organisme_id: organisme._id })).toEqual([recent._id]);
   });
 
-  it("devrait supprimer les doublons les plus anciens, ne laissant que l'enregistrement le plus récent pour chaque id_erp_apprenant", async () => {
-    await insertDuplicateEffectifs(5, 3);
-    await deleteOldestDuplicates(sampleOrganismeId);
+  it("laisse l'effectif en place quand son dossier Mission Locale ne peut pas être reporté", async () => {
+    await inserer("ERP-1", { statut: STATUT_APPRENANT.APPRENTI });
+    const fichier = await inserer("hash-fichier", {
+      source: SOURCE_APPRENANT.FICHIER,
+      statut: STATUT_APPRENANT.RUPTURANT,
+    });
+    await insererDossierMl(avecStatut(fichier, STATUT_APPRENANT.RUPTURANT));
 
-    const effectifsRestants = await effectifsDb().find({ organisme_id: sampleOrganismeId }).toArray();
+    const resultat = await supprimerDoublonsEnLot(organisme._id, UTILISATEUR);
 
-    assert.strictEqual(
-      effectifsRestants.length,
-      5,
-      "Il ne devrait rester que 5 effectifs, un pour chaque id_erp_apprenant"
+    expect(resultat).toEqual({ supprimes: 0, refuses: 1 });
+    expect(await effectifsDb().countDocuments({ _id: fichier._id })).toBe(1);
+    expect(await effectifsArchiveDb().countDocuments({})).toBe(0);
+  });
+
+  it("supprime un doublon choisi à l'écran en l'archivant", async () => {
+    const erp = await inserer("ERP-1");
+    const fichier = await inserer("hash-fichier", { source: SOURCE_APPRENANT.FICHIER });
+
+    await supprimerDoublon(erp._id, UTILISATEUR);
+
+    expect(await effectifsDb().distinct("_id", { organisme_id: organisme._id })).toEqual([fichier._id]);
+    expect(await effectifsArchiveDb().countDocuments({ id_erp_apprenant: "ERP-1" })).toBe(1);
+  });
+
+  it("refuse de supprimer à l'écran un effectif qui n'a pas de doublon", async () => {
+    const seul = await inserer("ERP-1");
+
+    await expect(supprimerDoublon(seul._id, UTILISATEUR)).rejects.toSatisfy(
+      (err: unknown) => Boom.isBoom(err) && err.output.statusCode === 409
     );
-
-    const counts = effectifsRestants.reduce<Record<string, number>>((acc, effectif) => {
-      acc[effectif.id_erp_apprenant] = (acc[effectif.id_erp_apprenant] || 0) + 1;
-      return acc;
-    }, {});
-
-    const allHaveOneDuplicate = Object.values(counts).every((count) => count === 1);
-
-    assert.strictEqual(
-      allHaveOneDuplicate,
-      true,
-      "Chaque effectif devrait avoir exactement 1 occurrence après la suppression des doublons"
-    );
+    expect(await effectifsDb().countDocuments({ _id: seul._id })).toBe(1);
   });
 });

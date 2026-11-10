@@ -32,8 +32,9 @@ import {
 } from "@/common/actions/account.actions";
 import { getEffectifForm, softDeleteEffectif, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
 import {
-  deleteOldestDuplicates,
   getDuplicatesEffectifsForOrganismeIdWithPagination,
+  supprimerDoublon,
+  supprimerDoublonsEnLot,
 } from "@/common/actions/effectifs.duplicates.actions";
 import { effectifsFiltersTerritoireSchema } from "@/common/actions/helpers/filters";
 import { journaliserImposture } from "@/common/actions/impersonation.actions";
@@ -96,7 +97,7 @@ import {
 import { getCfdInfo, getCommune, getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
-import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
+import { organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
@@ -685,7 +686,7 @@ function setupRoutes(app: Application) {
         "/duplicates",
         requireOrganismePermission("manageEffectifs"),
         returnResult<OrganismeLocals>(async (req, res) => {
-          await deleteOldestDuplicates(res.locals.organismeId);
+          return await supprimerDoublonsEnLot(res.locals.organismeId, req.user._id);
         })
       )
       .put(
@@ -868,7 +869,7 @@ function setupRoutes(app: Application) {
       "/api/v1/effectif/:id",
       requireEffectifOrganismePermission("manageEffectifs"),
       returnResult(async (req) => {
-        await effectifsDb().deleteOne({ _id: new ObjectId(req.params.id) });
+        await supprimerDoublon(new ObjectId(req.params.id), req.user._id);
       })
     );
 

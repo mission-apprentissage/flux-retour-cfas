@@ -1,8 +1,9 @@
 import { AxiosInstance } from "axiosist";
 import { ObjectId } from "bson";
+import { getAnneesScolaireListFromDate } from "shared/utils";
 import { it, expect, describe, beforeEach } from "vitest";
 
-import { effectifsDb, organismesDb, reseauxDb } from "@/common/model/collections";
+import { effectifsArchiveDb, effectifsDb, organismesDb, reseauxDb } from "@/common/model/collections";
 import { historySequenceInscritToApprenti } from "@tests/data/historySequenceSamples";
 import { createSampleEffectif } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -30,22 +31,25 @@ describe("Routes diverses", () => {
     await reseauxDb().insertMany(reseaux);
   });
 
-  describe("DELETE /api/v1/effectif - suppression d'effectif", () => {
-    const anneeScolaire = "2022-2023";
+  describe("DELETE /api/v1/effectif - suppression d'un doublon d'effectif", () => {
+    const anneeScolaire = getAnneesScolaireListFromDate(new Date())[0];
     let effectifId: ObjectId;
 
     beforeEach(async () => {
-      const { insertedId } = await effectifsDb().insertOne({
-        _id: new ObjectId(),
-        ...(await createSampleEffectif({
-          ...commonEffectifsAttributes(),
-          annee_scolaire: anneeScolaire,
-          apprenant: {
-            historique_statut: historySequenceInscritToApprenti,
-          },
-          organisme_id: organismes[0]._id,
-        })),
+      const effectif = await createSampleEffectif({
+        ...commonEffectifsAttributes(),
+        annee_scolaire: anneeScolaire,
+        id_erp_apprenant: "ERP-1",
+        apprenant: {
+          nom: "DURAND",
+          prenom: "Léa",
+          date_de_naissance: new Date("2007-03-04T00:00:00Z"),
+          historique_statut: historySequenceInscritToApprenti,
+        },
+        organisme_id: organismes[0]._id,
       });
+      const { insertedId } = await effectifsDb().insertOne({ _id: new ObjectId(), ...effectif });
+      await effectifsDb().insertOne({ ...effectif, _id: new ObjectId(), id_erp_apprenant: "hash-fichier" });
       effectifId = insertedId;
     });
 
@@ -77,7 +81,8 @@ describe("Routes diverses", () => {
       testPermissions(accesOrganisme, async (organisation, allowed) => {
         const response = await requestAsOrganisation(organisation, "delete", `/api/v1/effectif/${effectifId}`);
         expect(response.status).toStrictEqual(allowed ? 200 : 403);
-        await expect(effectifsDb().countDocuments()).resolves.toStrictEqual(allowed ? 0 : 1);
+        await expect(effectifsDb().countDocuments({ _id: effectifId })).resolves.toStrictEqual(allowed ? 0 : 1);
+        await expect(effectifsArchiveDb().countDocuments()).resolves.toStrictEqual(allowed ? 1 : 0);
       });
     });
   });
