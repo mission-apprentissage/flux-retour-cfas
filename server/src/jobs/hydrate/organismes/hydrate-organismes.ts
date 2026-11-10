@@ -16,18 +16,25 @@ import { findDataByDepartementNum, getDepartementCodeFromCodeInsee } from "@/com
 
 type IAdresseOrganisme = NonNullable<IOrganisme["adresse"]>;
 
-type IRepliAdresse = {
+export type IRepliAdresse = {
   sourceDisponible: boolean;
   nbConservees: number;
   nbCompletees: number;
   nbSansAdresse: number;
 };
 
+export const nouveauRepliAdresse = (): IRepliAdresse => ({
+  sourceDisponible: true,
+  nbConservees: 0,
+  nbCompletees: 0,
+  nbSansAdresse: 0,
+});
+
 export const hydrateOrganismesFromApiAlternance = async (startTime: Date) => {
   let nbOrganismeCreated = 0;
   let nbOrganismeUpdated = 0;
 
-  const repli: IRepliAdresse = { sourceDisponible: true, nbConservees: 0, nbCompletees: 0, nbSansAdresse: 0 };
+  const repli = nouveauRepliAdresse();
 
   const cursor = apiAlternanceClient.organisme.export({ page_size: 100 });
   for await (const page of cursor) {
@@ -106,7 +113,7 @@ const getAdressesDeRepli = async (
   return adresses;
 };
 
-const getAdresseRechercheEntreprises = async (
+export const getAdresseRechercheEntreprises = async (
   siret: string,
   repli: IRepliAdresse
 ): Promise<IAdresseOrganisme | null> => {

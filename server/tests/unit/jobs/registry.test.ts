@@ -162,6 +162,7 @@ describe("registre des jobs", () => {
       "tmp:migration:organisation-organisme",
       "tmp:mission-locale-adresse-update",
       "tmp:mission-locale-snapshot-update",
+      "tmp:rattrapage-adresses-organismes",
       "tmp:retablir-deca-fichier",
       "tmp:seed-ml-rdv-url",
       "tmp:seed-sipa-test-nancy",
