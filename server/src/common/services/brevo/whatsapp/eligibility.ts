@@ -1,16 +1,14 @@
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
-import { CONVERSATION_STATE } from "shared/models/data/whatsappContact.model";
 import { isAgeEligibleMissionLocale } from "shared/utils";
 
 import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "@/common/actions/mission-locale/mission-locale.constants";
 import logger from "@/common/logger";
 import config from "@/config";
 
-import { upsertBrevoContact, sendWhatsAppTemplate } from "./brevoApi";
-import { updateWhatsAppContact, getMissionLocaleInfo } from "./database";
-import { applyTestPhoneOverride, maskPhone, normalizePhoneNumber } from "./phone";
+import { normalizePhoneNumber } from "./phone";
+import { enqueueWhatsAppInitial } from "./queue";
 
 export const PREQUALIF_RUPTURE_MAX_DAYS = 180;
 
@@ -89,8 +87,10 @@ export function isEligibleForWhatsApp(effectif: IMissionLocaleEffectif): boolean
 }
 
 /**
- * Déclenche l'envoi WhatsApp si l'effectif est éligible
- * Appelé après qu'une ML marque un effectif comme CONTACTE_SANS_RETOUR
+ * Déclenche l'envoi WhatsApp si l'effectif est éligible.
+ * Appelé après qu'une ML marque un effectif comme CONTACTE_SANS_RETOUR : l'envoi lui-même part par job
+ * (`whatsapp:send-initial`), l'agent n'attend pas Brevo. Les gardes de config et d'éligibilité sont
+ * évaluées ici pour ne pas enfiler un job inutile, puis revérifiées par le job.
  */
 export async function triggerWhatsAppIfEligible(
   effectif: IMissionLocaleEffectif | null,
@@ -114,7 +114,6 @@ export async function triggerWhatsAppIfEligible(
     return;
   }
 
-  // Vérifier l'éligibilité
   if (!isEligibleForWhatsApp(effectif)) {
     logger.debug(
       {
@@ -128,85 +127,5 @@ export async function triggerWhatsAppIfEligible(
     return;
   }
 
-  const missionLocaleInfo = await getMissionLocaleInfo(missionLocaleId);
-  if (!missionLocaleInfo) {
-    logger.error({ missionLocaleId }, "Mission Locale not found for WhatsApp");
-    return;
-  }
-
-  const prenom = effectif.effectif_snapshot?.apprenant?.prenom || "";
-  const targetPhone = normalizePhoneNumber(effectif.effectif_snapshot?.apprenant?.telephone);
-  if (!targetPhone) {
-    logger.warn({ effectifId: effectif._id }, "Invalid phone number for WhatsApp");
-    return;
-  }
-
-  // Override de test : en non-prod, redirige vers le numéro de test si défini.
-  const effectivePhone = applyTestPhoneOverride(targetPhone);
-
-  const templateId = config.brevo.whatsapp?.templateInjoignablesId;
-  if (!templateId) {
-    logger.error("WhatsApp template ID not configured (MNA_TDB_WHATSAPP_TEMPLATE_INJOIGNABLES_ID)");
-    return;
-  }
-
-  // Créer/mettre à jour le contact Brevo avec les attributs du template
-  await upsertBrevoContact(effectivePhone, {
-    TBA_EFFECTIF_PRENOM_WHATSAPP: prenom,
-    TBA_EFFECTIF_MISSION_LOCALE_NOM_WHATSAPP: missionLocaleInfo.nom,
-  });
-
-  const result = await sendWhatsAppTemplate(effectivePhone, {
-    templateId,
-  });
-
-  // Mettre à jour l'effectif (on stocke le numéro effectif envoyé pour que le webhook
-  // inbound retrouve l'effectif quand l'utilisateur de test répond).
-  const now = new Date();
-  await updateWhatsAppContact(
-    effectif._id,
-    {
-      phone_normalized: effectivePhone,
-      last_message_sent_at: now,
-      message_id: result.messageId,
-      message_status: result.success ? "sent" : "failed",
-      status_updated_at: now,
-      conversation_state: result.success ? CONVERSATION_STATE.INITIAL_SENT : CONVERSATION_STATE.CLOSED,
-    },
-    {
-      direction: "outbound",
-      content: `[Template injoignables_recemment] prenom=${prenom}, mission_locale=${missionLocaleInfo.nom}`,
-      sent_at: now,
-      brevo_message_id: result.messageId,
-    }
-  );
-
-  const templateVars = {
-    phoneNumber: maskPhone(effectivePhone),
-    prenom: prenom.length > 2 ? prenom.slice(0, 2) + "***" : "***",
-    missionLocale: missionLocaleInfo.nom,
-    templateId,
-  };
-
-  if (result.success) {
-    logger.info(
-      {
-        effectifId: effectif._id,
-        missionLocaleId,
-        messageId: result.messageId,
-        templateVars,
-      },
-      "WhatsApp initial message sent"
-    );
-  } else {
-    logger.error(
-      {
-        effectifId: effectif._id,
-        missionLocaleId,
-        error: result.error,
-        templateVars,
-      },
-      "Failed to send WhatsApp initial message"
-    );
-  }
+  await enqueueWhatsAppInitial(effectif._id, missionLocaleId);
 }

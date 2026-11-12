@@ -132,12 +132,16 @@ export async function reserveAndSendPrequalif({
 
     const result = await sendWhatsAppTemplate(effectivePhone, { templateId });
 
+    // `failed_send` fait reprendre l'effectif par le cron suivant (après 1 h) : réservé aux échecs où Brevo
+    // n'a sûrement rien traité (429, 502-504, connexion refusée). Après un timeout ou un 500, il a pu envoyer
+    // le message : rejouer le doublerait chez le jeune. Un refus 4xx est définitif.
+    const failureStatus = result.safeToRetry ? "failed_send" : "failed";
     await missionLocaleEffectifsDb().updateOne(
       { _id: effectifId },
       {
         $set: {
           "whatsapp_contact.message_id": result.messageId,
-          "whatsapp_contact.message_status": result.success ? "sent" : "failed",
+          "whatsapp_contact.message_status": result.success ? "sent" : failureStatus,
           "whatsapp_contact.status_updated_at": new Date(),
         },
       }
@@ -150,7 +154,10 @@ export async function reserveAndSendPrequalif({
       );
       return "sent";
     }
-    logger.error({ effectifId, error: result.error }, "Brevo returned failure for prequalif send");
+    logger.error(
+      { effectifId, error: result.error, status: result.status, safeToRetry: result.safeToRetry },
+      "Brevo returned failure for prequalif send"
+    );
     return "failed";
   } catch (err) {
     await missionLocaleEffectifsDb().updateOne(

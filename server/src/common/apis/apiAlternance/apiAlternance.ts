@@ -1,5 +1,5 @@
 import { captureException } from "@sentry/node";
-import type { ICommune, IMissionLocale } from "api-alternance-sdk";
+import { ApiError, type ICommune, type IMissionLocale } from "api-alternance-sdk";
 import { zCfd } from "api-alternance-sdk/internal";
 import type { CfdInfo, RncpInfo } from "shared/models/apis/@types/ApiAlternance";
 
@@ -9,6 +9,7 @@ import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 import { getErrorMessage } from "@/common/utils/errorUtils";
 
 import { apiAlternanceClient } from "./client";
+import { estRequeteRefusee, reportRequeteRefuseeOnce } from "./requeteRefusee";
 
 /**
  * `null` ne signifie plus que « cette certification ou cette commune n'existe
@@ -18,14 +19,20 @@ import { apiAlternanceClient } from "./client";
  *
  * Le signalement passe par la santé de la dépendance, qui ne capture qu'à la
  * transition : sur le chemin d'ingestion, une capture par appel produirait un
- * événement par effectif.
+ * événement par effectif. Un 400 n'est pas une panne : il est capturé une fois,
+ * avec le corps de la réponse.
  */
 const failed = (operation: string, error: unknown): Error => {
-  reportDependencyHealth(`api-alternance:${operation}`, false, error, {
-    tier: "jour",
-    errorKind: "upstream",
-    upstream: "api-alternance",
-  });
+  const cle = `api-alternance:${operation}`;
+  if (estRequeteRefusee(error)) {
+    reportRequeteRefuseeOnce(cle, error);
+  } else {
+    reportDependencyHealth(cle, false, error, {
+      tier: "jour",
+      errorKind: "upstream",
+      upstream: "api-alternance",
+    });
+  }
   return new Error(`api-alternance: échec de ${operation}`, { cause: error });
 };
 
@@ -34,8 +41,10 @@ const succeeded = (operation: string): void => {
 };
 
 const describeApiError = (error: unknown) => {
-  const { response } = error as { response?: { data?: unknown } };
-  return response?.data || getErrorMessage(error);
+  if (error instanceof ApiError) {
+    return error.context.errorData ?? getErrorMessage(error);
+  }
+  return getErrorMessage(error);
 };
 
 export const getCfdInfo = async (cfd: string): Promise<CfdInfo | null> => {

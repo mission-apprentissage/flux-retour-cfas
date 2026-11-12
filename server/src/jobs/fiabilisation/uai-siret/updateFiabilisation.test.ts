@@ -4,6 +4,7 @@ import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixtu
 import { describe, it, vi, beforeEach, expect } from "vitest";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
+import { viderRequetesRefuseesSignalees } from "@/common/apis/apiAlternance/requeteRefusee";
 import { organismesDb } from "@/common/model/collections";
 import { captureTiered } from "@/common/services/sentry/alertContract";
 import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
@@ -30,6 +31,12 @@ vi.mock("@/common/services/sentry/alertContract", () => ({ captureTiered: vi.fn(
 describe("fiabilisationUaiSiret", () => {
   const uai = "0596776V";
   const siret = "77562556900014";
+
+  beforeEach(() => {
+    vi.mocked(captureTiered).mockClear();
+    vi.mocked(reportDependencyHealth).mockClear();
+    viderRequetesRefuseesSignalees();
+  });
 
   describe("when couple is valid", () => {
     it("should return fiable result", async () => {
@@ -141,12 +148,10 @@ describe("fiabilisationUaiSiret", () => {
           name: "",
           responseHeaders: {},
           errorData: {
-            validationError: {
-              _errors: [],
-              siret: {
-                _errors: ["SIRET does not match the format /^\\d{14}$/", "SIRET does not pass the Luhn algorithm"],
-              },
-            },
+            validationError: [
+              { instancePath: "/siret", message: "SIRET does not match the format /^\\d{14}$/" },
+              { instancePath: "/siret", message: "SIRET does not pass the Luhn algorithm" },
+            ],
           },
         })
       );
@@ -165,6 +170,37 @@ describe("fiabilisationUaiSiret", () => {
         expect.anything(),
         expect.anything()
       );
+      expect(captureTiered).not.toHaveBeenCalled();
+    });
+
+    it("should still read the former validation error format", async () => {
+      vi.mocked(apiAlternanceClient.organisme.recherche).mockRejectedValueOnce(
+        new ApiError({
+          path: "",
+          params: {},
+          querystring: {},
+          requestHeaders: {},
+          statusCode: 400,
+          message: "",
+          name: "",
+          responseHeaders: {},
+          errorData: {
+            validationError: {
+              _errors: [],
+              siret: { _errors: ["SIRET does not pass the Luhn algorithm"] },
+            },
+          },
+        })
+      );
+
+      await expect(fiabilisationUaiSiret({ uai, siret })).resolves.toEqual({
+        uai,
+        siret,
+        statut: "NON_FIABLE",
+        api_response: null,
+        mode: "aucun",
+      });
+      expect(captureTiered).not.toHaveBeenCalled();
     });
   });
 
@@ -181,12 +217,7 @@ describe("fiabilisationUaiSiret", () => {
           name: "",
           responseHeaders: {},
           errorData: {
-            validationError: {
-              _errors: [],
-              uai: {
-                _errors: ["UAI checksum is invalid"],
-              },
-            },
+            validationError: [{ instancePath: "/uai", message: "UAI checksum is invalid" }],
           },
         })
       );
@@ -205,6 +236,7 @@ describe("fiabilisationUaiSiret", () => {
         expect.anything(),
         expect.anything()
       );
+      expect(captureTiered).not.toHaveBeenCalled();
     });
   });
 
@@ -220,7 +252,7 @@ describe("fiabilisationUaiSiret", () => {
           message: "Request validation failed",
           name: "Bad Request",
           responseHeaders: {},
-          errorData: { validationError: { _errors: ["Expected object, received null"] } },
+          errorData: { validationError: [{ instancePath: "", message: "Expected object, received null" }] },
         });
       vi.mocked(apiAlternanceClient.organisme.recherche)
         .mockRejectedValueOnce(rejected())
@@ -246,7 +278,10 @@ describe("fiabilisationUaiSiret", () => {
         expect.any(ApiError),
         expect.objectContaining({
           tier: "jour",
-          extra: { errorData: { validationError: { _errors: ["Expected object, received null"] } } },
+          fingerprintKey: "api-alternance:rechercheOrganisme:requete-refusee",
+          extra: {
+            errorData: { validationError: [{ instancePath: "", message: "Expected object, received null" }] },
+          },
         })
       );
     });

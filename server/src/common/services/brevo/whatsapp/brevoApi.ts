@@ -1,23 +1,25 @@
-import { captureException } from "@sentry/node";
 import axios from "axios";
 import axiosRetry from "axios-retry";
 
 import logger from "@/common/logger";
-import { getErrorMessage } from "@/common/utils/errorUtils";
 import config from "@/config";
 
+import { brevoErrorLogFields, describeBrevoError, reportBrevoError } from "./brevoError";
 import { maskPhone } from "./phone";
 import { WhatsAppSendResult, WhatsAppTemplateParams } from "./types";
-
-const getBrevoErrorMessage = (error: unknown): string =>
-  (axios.isAxiosError(error) && error.response?.data?.message) || getErrorMessage(error) || "Unknown error";
 
 const BREVO_CONVERSATIONS_API = "https://api.brevo.com/v3/conversations";
 const BREVO_CONTACTS_API = "https://api.brevo.com/v3/contacts";
 const BREVO_WHATSAPP_API = "https://api.brevo.com/v3/whatsapp";
 
 const brevoClient = axios.create({ timeout: 10000 });
-axiosRetry(brevoClient, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
+// Par défaut axios-retry rejoue un POST sur ECONNRESET/ETIMEDOUT : Brevo a pu envoyer le message avant la coupure.
+// On ne rejoue que si la requête n'a sûrement pas été traitée.
+axiosRetry(brevoClient, {
+  retries: 3,
+  retryDelay: axiosRetry.exponentialDelay,
+  retryCondition: (error) => describeBrevoError(error).safeToRetry,
+});
 
 /**
  * Envoie un message WhatsApp via l'API Brevo Conversations
@@ -60,13 +62,16 @@ export async function sendWhatsAppMessage(visitorId: string, message: string): P
       messageId,
     };
   } catch (error) {
-    const errorMessage = getBrevoErrorMessage(error);
-    logger.error({ visitorId, error: errorMessage }, "Failed to send WhatsApp message");
-    captureException(error);
+    const details = describeBrevoError(error);
+    logger.error({ visitorId, ...brevoErrorLogFields(details) }, "Failed to send WhatsApp message");
+    reportBrevoError("send_message", details);
 
     return {
       success: false,
-      error: errorMessage,
+      error: details.message,
+      status: details.status,
+      retryable: details.retryable,
+      safeToRetry: details.safeToRetry,
     };
   }
 }
@@ -98,20 +103,19 @@ export async function upsertBrevoContact(phoneNumber: string, attributes: Record
           "api-key": apiKey,
           "Content-Type": "application/json",
         },
+        // L'upsert est idempotent (`updateEnabled`) : on peut rejouer une coupure réseau, contrairement à un envoi.
+        "axios-retry": { retryCondition: axiosRetry.isNetworkError },
       }
     );
     logger.debug({ phoneNumber: maskPhone(formattedPhone) }, "Brevo contact upserted");
   } catch (error) {
     // Ne pas bloquer l'envoi du template WhatsApp si l'upsert contact échoue
+    const details = describeBrevoError(error, Object.values(attributes));
     logger.error(
-      {
-        phoneNumber: maskPhone(formattedPhone),
-        status: axios.isAxiosError(error) ? error.response?.status : undefined,
-        error: getBrevoErrorMessage(error),
-      },
+      { phoneNumber: maskPhone(formattedPhone), ...brevoErrorLogFields(details) },
       "Failed to upsert Brevo contact — template will be sent without custom attributes"
     );
-    captureException(error);
+    reportBrevoError("upsert_contact", details);
   }
 }
 
@@ -176,20 +180,19 @@ export async function sendWhatsAppTemplate(
       messageId,
     };
   } catch (error) {
-    const errorMessage = getBrevoErrorMessage(error);
+    const details = describeBrevoError(error, Object.values(template.params ?? {}));
     logger.error(
-      {
-        phoneNumber: maskPhone(phoneNumber),
-        templateId: template.templateId,
-        error: errorMessage,
-      },
+      { phoneNumber: maskPhone(phoneNumber), templateId: template.templateId, ...brevoErrorLogFields(details) },
       "Failed to send WhatsApp template"
     );
-    captureException(error);
+    reportBrevoError("send_template", details);
 
     return {
       success: false,
-      error: errorMessage,
+      error: details.message,
+      status: details.status,
+      retryable: details.retryable,
+      safeToRetry: details.safeToRetry,
     };
   }
 }

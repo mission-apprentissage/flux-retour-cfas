@@ -41,6 +41,7 @@ import {
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { triggerWhatsAppIfEligible } from "@/common/services/brevo/whatsapp";
 import { extractScoreInput, reportClassifierFailure, scoreEffectifs } from "@/common/services/classifier";
+import { cachedInRun } from "@/common/utils/runCache";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
@@ -3182,22 +3183,24 @@ export async function computedOrganismeMl(
   organismeId: ObjectId,
   { lectureSeule = false }: { lectureSeule?: boolean } = {}
 ): Promise<IComputedOrganismeMl> {
-  const organisation = lectureSeule
-    ? ((await organisationsDb().findOne({
-        type: "ORGANISME_FORMATION",
-        organisme_id: organismeId.toString(),
-      })) as IOrganisationOrganismeFormation | null)
-    : await getOrganisationOrganismeByOrganismeId(organismeId);
-  const organisme = await organismesDb().findOne(
-    { _id: organismeId },
-    { projection: { is_allowed_collab: 1, collab_suspended_at: 1, collab_resumed_at: 1 } }
-  );
-  return {
-    ml_beta_activated_at: organisation?.ml_beta_activated_at ?? null,
-    is_allowed_collab: organisme?.is_allowed_collab ?? false,
-    ...(organisme?.collab_suspended_at ? { collab_suspended_at: organisme.collab_suspended_at } : {}),
-    ...(organisme?.collab_resumed_at ? { collab_resumed_at: organisme.collab_resumed_at } : {}),
-  };
+  return cachedInRun(`computed-organisme-ml:${organismeId}:${lectureSeule}`, async () => {
+    const organisation = lectureSeule
+      ? ((await organisationsDb().findOne({
+          type: "ORGANISME_FORMATION",
+          organisme_id: organismeId.toString(),
+        })) as IOrganisationOrganismeFormation | null)
+      : await getOrganisationOrganismeByOrganismeId(organismeId);
+    const organisme = await organismesDb().findOne(
+      { _id: organismeId },
+      { projection: { is_allowed_collab: 1, collab_suspended_at: 1, collab_resumed_at: 1 } }
+    );
+    return {
+      ml_beta_activated_at: organisation?.ml_beta_activated_at ?? null,
+      is_allowed_collab: organisme?.is_allowed_collab ?? false,
+      ...(organisme?.collab_suspended_at ? { collab_suspended_at: organisme.collab_suspended_at } : {}),
+      ...(organisme?.collab_resumed_at ? { collab_resumed_at: organisme.collab_resumed_at } : {}),
+    };
+  });
 }
 
 /**
@@ -3393,10 +3396,10 @@ export const createMissionLocaleSnapshot = async (
 
   const preFilter = !!(rupturantFilter && ageFilter && decaFilter);
 
-  const mlData = (await organisationsDb().findOne({
-    type: "MISSION_LOCALE",
-    ml_id: effectif.apprenant.adresse?.mission_locale_id,
-  })) as IOrganisationMissionLocale;
+  const mlId = effectif.apprenant.adresse?.mission_locale_id;
+  const mlData = (await cachedInRun(`mission-locale:${mlId}`, () =>
+    organisationsDb().findOne({ type: "MISSION_LOCALE", ml_id: mlId })
+  )) as IOrganisationMissionLocale;
 
   if (!mlData) {
     return null;

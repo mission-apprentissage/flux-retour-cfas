@@ -29,74 +29,47 @@ function getOpcoParRncpCodeMap(): Map<string, string[]> {
   return map;
 }
 
+function aggregateSiretRncp(role: "responsable" | "formateur") {
+  return formationV2Db().aggregate<{ _id: { siret: string; rncp: string } }>(
+    [
+      { $match: { [`identifiant.${role}_siret`]: { $ne: null }, "identifiant.rncp": { $ne: null } } },
+      { $group: { _id: { siret: `$identifiant.${role}_siret`, rncp: "$identifiant.rncp" } } },
+    ],
+    { allowDiskUse: true }
+  );
+}
+
 /**
  * Remplit le champ organismes.opcos.
- * Pour l'instant, uniquement 2i, ep, akto et atlas.
+ * Les agrégations sont globales : formationV2 n'est pas indexée par siret, une agrégation par organisme
+ * reviendrait à un scan complet de la collection pour chacun d'eux.
+ * Les organismes sans formation v2 ne sont pas modifiés.
  */
 export const hydrateOrganismesOPCOs = async () => {
   const opcoParRncpCodeMap = getOpcoParRncpCodeMap();
 
-  const cursor = organismesDb().find();
+  const opcosParSiret = new Map<string, Set<string>>();
+
+  for (const role of ["responsable", "formateur"] as const) {
+    for await (const {
+      _id: { siret, rncp },
+    } of aggregateSiretRncp(role)) {
+      if (!opcosParSiret.has(siret)) {
+        opcosParSiret.set(siret, new Set());
+      }
+      for (const opco of opcoParRncpCodeMap.get(rncp) ?? []) {
+        opcosParSiret.get(siret)?.add(opco);
+      }
+    }
+  }
 
   let ops: AnyBulkWriteOperation<IOrganisme>[] = [];
 
-  for await (const organisme of cursor) {
-    const [rncpAsResponsable, rncpAsFormateur] = await Promise.all([
-      formationV2Db()
-        .aggregate<{
-          _id: { siret: string; rncp: string };
-        }>([
-          {
-            $match: {
-              "identifiant.responsable_siret": organisme.siret,
-              "identifiant.rncp": { $ne: null },
-            },
-          },
-          {
-            $group: {
-              siret: "$identifiant.responsable_siret",
-              rncp: "$identifiant.rncp",
-            },
-          },
-        ])
-        .toArray(),
-      formationV2Db()
-        .aggregate<{
-          _id: { siret: string; rncp: string };
-        }>([
-          {
-            $match: {
-              "identifiant.formateur_siret": organisme.siret,
-              "identifiant.rncp": { $ne: null },
-            },
-          },
-          {
-            $group: {
-              siret: "$identifiant.formateur_siret",
-              rncp: "$identifiant.rncp",
-            },
-          },
-        ])
-        .toArray(),
-    ]);
-
-    const organismeRncps: Set<string> = new Set([
-      ...rncpAsResponsable.map(({ _id: { rncp } }) => rncp),
-      ...rncpAsFormateur.map(({ _id: { rncp } }) => rncp),
-    ]);
-    const organismeOpcos: Set<string> = new Set();
-
-    for (const rncp of organismeRncps) {
-      const opcos = opcoParRncpCodeMap.get(rncp) ?? [];
-      for (const opco of opcos) {
-        organismeOpcos.add(opco);
-      }
-    }
-
+  for (const [siret, opcos] of opcosParSiret) {
     ops.push({
-      updateOne: {
-        filter: { _id: organisme._id },
-        update: { $set: { opcos: Array.from(organismeOpcos) } },
+      updateMany: {
+        filter: { siret },
+        update: { $set: { opcos: Array.from(opcos) } },
       },
     });
 

@@ -72,6 +72,9 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   // ─── Jobs enfilés par les autres crons ────────────────────────────────────
   "brevo-contacts:sync": { tier: "jour" },
   "whatsapp:send-prequalif-daily": { tier: "jour" },
+  // Enfilés par le webhook et par l'agent ML, pas par un cron : un échec laisse un jeune sans réponse.
+  "whatsapp:send-reply": { tier: "jour" },
+  "whatsapp:send-initial": { tier: "jour" },
   "send-mission-locale-weekly-recap": { tier: "jour" },
   "send-mission-locale-daily-recap": { tier: "jour" },
   "send-cfa-daily-recap": { tier: "jour" },
@@ -114,7 +117,8 @@ export function applyAlertContract<T extends SentryEventLike>(event: T): T {
 }
 
 export type CaptureTieredOptions = {
-  tier: AlertTier;
+  /** Omis, le palier est laissé au contrat : `JOB_META` pour un job, sinon `veille`. */
+  tier?: AlertTier;
   errorKind?: ErrorKind;
   /** Nom du service amont, pour les règles qui surveillent les dépendances. */
   upstream?: string;
@@ -127,7 +131,7 @@ export type CaptureTieredOptions = {
 /** Point d'entrée unique des captures explicites, pour que le niveau soit lisible sur place. */
 export function captureTiered(error: unknown, options: CaptureTieredOptions): void {
   withScope((scope) => {
-    scope.setTag("alert_tier", options.tier);
+    if (options.tier) scope.setTag("alert_tier", options.tier);
     if (options.errorKind) scope.setTag("error_kind", options.errorKind);
     if (options.upstream) scope.setTag("upstream", options.upstream);
     if (options.fingerprintKey) scope.setFingerprint([options.fingerprintKey]);

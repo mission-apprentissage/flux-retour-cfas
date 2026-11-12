@@ -21,6 +21,11 @@ describe("JOB_META", () => {
     expect(missing).toEqual([]);
   });
 
+  it("classe en « jour » les envois WhatsApp enfilés hors cron, dont l'échec laisse un jeune sans message", () => {
+    expect(JOB_META["whatsapp:send-reply"]?.tier).toBe("jour");
+    expect(JOB_META["whatsapp:send-initial"]?.tier).toBe("jour");
+  });
+
   it("ne référence que des noms qui existent encore", () => {
     const known = new Set([...Object.keys(crons), ...Object.keys(jobs)]);
     const orphans = Object.keys(JOB_META).filter((name) => !known.has(name));
@@ -72,6 +77,13 @@ describe("captureTiered", () => {
     expect(scope.setTag).toHaveBeenCalledWith("error_kind", "db");
     expect(scope.setFingerprint).toHaveBeenCalledWith(["dependency-health:mongodb"]);
     expect(captureException).toHaveBeenCalledWith(error);
+  });
+
+  it("sans niveau, ne pose pas alert_tier et laisse le contrat décider", () => {
+    captureTiered(new Error("boom"), { errorKind: "upstream" });
+
+    expect(scope.setTag).toHaveBeenCalledWith("error_kind", "upstream");
+    expect(scope.setTag).not.toHaveBeenCalledWith("alert_tier", expect.anything());
   });
 
   it("range les identifiants métier en contexte, jamais en tag", () => {

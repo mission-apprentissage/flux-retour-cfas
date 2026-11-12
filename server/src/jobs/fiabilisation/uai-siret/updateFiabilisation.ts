@@ -1,33 +1,18 @@
-import { ApiError, type IRechercheOrganismeResponse } from "api-alternance-sdk";
+import type { IRechercheOrganismeResponse } from "api-alternance-sdk";
 import { STATUT_FIABILISATION_ORGANISME } from "shared/constants";
 import type { IAttributionOrganisme } from "shared/models/data/effectifsQueue.model";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
+import {
+  champsEnErreurDeValidation,
+  estRequeteRefusee,
+  reportRequeteRefuseeOnce,
+} from "@/common/apis/apiAlternance/requeteRefusee";
 import { organismesDb } from "@/common/model/collections";
-import { captureTiered } from "@/common/services/sentry/alertContract";
 import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 
 /** Appelé une fois par organisme du curseur : seule la transition est signalée. */
 const HEALTH_KEY = "api-alternance:rechercheOrganisme";
-
-let rejectedRequestReported = false;
-
-/**
- * Un 400 n'est pas une panne : l'API refuse notre requête, donc la faute est de
- * notre côté. Une capture par processus suffit à savoir pourquoi.
- */
-function reportRejectedRequestOnce(error: ApiError): void {
-  if (rejectedRequestReported) return;
-  rejectedRequestReported = true;
-
-  captureTiered(error, {
-    tier: "jour",
-    errorKind: "upstream",
-    upstream: "api-alternance",
-    fingerprintKey: `${HEALTH_KEY}:requete-refusee`,
-    extra: { errorData: error.context.errorData },
-  });
-}
 
 export type FiabilisationUaiSiret = {
   uai: string | null | undefined;
@@ -81,27 +66,21 @@ export async function fiabilisationUaiSiret({
       };
     })
     .catch((error) => {
-      if (error instanceof ApiError) {
-        if (error.context.statusCode === 400) {
-          const errorData = error.context.errorData as
-            | { validationError?: { siret?: { _errors?: string[] }; uai?: { _errors?: string[] } } }
-            | undefined;
-          const siretError = errorData?.validationError?.siret?._errors?.[0] ?? null;
-          const uaiError = errorData?.validationError?.uai?._errors?.[0] ?? null;
+      if (estRequeteRefusee(error)) {
+        const champs = champsEnErreurDeValidation(error.context.errorData);
 
-          if (siretError || uaiError) {
-            return {
-              uai,
-              siret,
-              statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
-              api_response: null,
-              mode: "aucun",
-            };
-          }
-
-          reportRejectedRequestOnce(error);
-          return { uai, siret, statut: "INCONNU", api_response: null, mode: "indisponible" };
+        if (champs.has("siret") || champs.has("uai")) {
+          return {
+            uai,
+            siret,
+            statut: STATUT_FIABILISATION_ORGANISME.NON_FIABLE,
+            api_response: null,
+            mode: "aucun",
+          };
         }
+
+        reportRequeteRefuseeOnce(HEALTH_KEY, error);
+        return { uai, siret, statut: "INCONNU", api_response: null, mode: "indisponible" };
       }
       reportDependencyHealth(HEALTH_KEY, false, error, {
         tier: "jour",
