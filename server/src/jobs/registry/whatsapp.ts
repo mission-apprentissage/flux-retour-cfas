@@ -1,9 +1,10 @@
 import { addJob, type CronDef, type JobDef } from "job-processor";
 
 import logger from "@/common/logger";
-import { isWhatsAppReplyKind, WHATSAPP_REPLY_JOB } from "@/common/services/brevo/whatsapp/queue";
+import { isWhatsAppReplyKind, WHATSAPP_INITIAL_JOB, WHATSAPP_REPLY_JOB } from "@/common/services/brevo/whatsapp/queue";
 import config from "@/config";
 
+import { sendWhatsAppInitial } from "../whatsapp/send-whatsapp-initial";
 import { sendWhatsAppInjoignables } from "../whatsapp/send-whatsapp-injoignables";
 import { sendWhatsAppPrequalif } from "../whatsapp/send-whatsapp-prequalif";
 import { sendWhatsAppReply } from "../whatsapp/send-whatsapp-reply";
@@ -46,6 +47,15 @@ export const whatsappJobs = {
       }
       return sendWhatsAppReply({ effectifId, kind, attempt: payloadNumber(job.payload, "attempt") ?? 1 });
     },
+  },
+  // Premier message « injoignables » après action d'un agent ML ; se replanifie elle-même (cf. queue.ts)
+  [WHATSAPP_INITIAL_JOB]: {
+    handler: async (job) =>
+      sendWhatsAppInitial({
+        effectifId: requirePayloadString(job.payload, "effectifId"),
+        missionLocaleId: requirePayloadString(job.payload, "missionLocaleId"),
+        attempt: payloadNumber(job.payload, "attempt") ?? 1,
+      }),
   },
 } satisfies Record<string, JobDef>;
 

@@ -50,3 +50,37 @@ export async function enqueueWhatsAppReply(effectifId: ObjectId | string, kind: 
     return false;
   }
 }
+
+export const WHATSAPP_INITIAL_JOB = "whatsapp:send-initial";
+
+/** Identifiants seulement, comme pour les réponses. `attempt` vaut 1 au premier passage. */
+export async function scheduleWhatsAppInitial(
+  effectifId: ObjectId | string,
+  missionLocaleId: ObjectId | string,
+  { attempt = 1, delayMs = 0 }: { attempt?: number; delayMs?: number } = {}
+): Promise<void> {
+  await addJob({
+    name: WHATSAPP_INITIAL_JOB,
+    payload: { effectifId: String(effectifId), missionLocaleId: String(missionLocaleId), attempt },
+    scheduled_for: new Date(Date.now() + delayMs),
+    queued: true,
+  });
+}
+
+/**
+ * Enfile le premier message WhatsApp « injoignables » hors du chemin HTTP de l'agent ML.
+ * Ne lève jamais : l'enregistrement de la situation par l'agent est déjà fait.
+ */
+export async function enqueueWhatsAppInitial(
+  effectifId: ObjectId | string,
+  missionLocaleId: ObjectId | string
+): Promise<boolean> {
+  try {
+    await scheduleWhatsAppInitial(effectifId, missionLocaleId);
+    return true;
+  } catch (err) {
+    logger.error({ err, effectifId: String(effectifId) }, "Échec de l'enqueue du message WhatsApp initial");
+    captureTiered(err, { errorKind: "db", fingerprintKey: "whatsapp:enqueue-initial" });
+    return false;
+  }
+}
