@@ -6,6 +6,7 @@ import type {
   ICfaInvitesSortBy,
 } from "shared/models/routes/admin/cfa-invites-sans-collab.api";
 
+import { buildDossierEnvoyeMatch } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
 import { buildCfaTerritoireMatch, type CfaTerritoire } from "@/common/actions/cfa/cfa-stats.actions";
 import { missionLocaleCfaInvitationsDb } from "@/common/model/collections";
 
@@ -14,15 +15,22 @@ const SORT_STAGES: Record<ICfaInvitesSortBy, (direction: 1 | -1) => Record<strin
   localisation: (direction) => ({ "adresse.code_postal": direction, "adresse.commune": direction, siret: 1, _id: 1 }),
   nom: (direction) => ({ raison_sociale: direction, siret: 1, _id: 1 }),
   compte: (direction) => ({ has_account: direction, invitations_recues: -1, siret: 1, _id: 1 }),
+  collaborations: (direction) => ({ nb_collaborations: direction, invitations_recues: -1, siret: 1, _id: 1 }),
 };
 
 export interface CfaInvitesSansCollabOptions {
   /** Restreint aux établissements du territoire, sur la même base que la liste des CFA (référentiel, non fermés). */
   territoire?: CfaTerritoire;
   collaborationsDepuis?: Date;
+  /** Garde aussi les CFA qui ont collaboré, comptés comme la liste des CFA du territoire (toutes collaborations). */
+  inclureAvecCollab?: boolean;
 }
 
-const buildPipeline = ({ territoire, collaborationsDepuis }: CfaInvitesSansCollabOptions): Document[] => [
+const buildPipeline = ({
+  territoire,
+  collaborationsDepuis,
+  inclureAvecCollab = false,
+}: CfaInvitesSansCollabOptions): Document[] => [
   {
     $group: {
       _id: "$organisme_id",
@@ -72,18 +80,39 @@ const buildPipeline = ({ territoire, collaborationsDepuis }: CfaInvitesSansColla
         {
           $match: {
             $expr: { $eq: ["$effectif_snapshot.organisme_id", "$$organismeId"] },
-            "organisme_data.acc_conjoint": true,
-            soft_deleted: { $ne: true },
-            ...(collaborationsDepuis ? { "organisme_data.reponse_at": { $gte: collaborationsDepuis } } : {}),
+            ...(inclureAvecCollab
+              ? buildDossierEnvoyeMatch(new Date(), undefined, null)
+              : {
+                  "organisme_data.acc_conjoint": true,
+                  soft_deleted: { $ne: true },
+                  ...(collaborationsDepuis ? { "organisme_data.reponse_at": { $gte: collaborationsDepuis } } : {}),
+                }),
           },
         },
-        { $limit: 1 },
-        { $project: { _id: 1 } },
+        { $group: { _id: null, nb: { $sum: 1 }, premiere: { $min: "$organisme_data.acc_conjoint_at" } } },
       ],
       as: "collaborations",
     },
   },
-  { $match: { collaborations: { $size: 0 } } },
+  // Activation V2 du CFA (`CFA_DATE_ACTIVATION_V2` de Brevo) : plus ancienne `ml_beta_activated_at` de ses organisations.
+  {
+    $lookup: {
+      from: "organisations",
+      let: { organismeId: { $toString: "$_id" } },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $eq: ["$organisme_id", "$$organismeId"] },
+            type: "ORGANISME_FORMATION",
+            ml_beta_activated_at: { $type: "date" },
+          },
+        },
+        { $group: { _id: null, date: { $min: "$ml_beta_activated_at" } } },
+      ],
+      as: "activation",
+    },
+  },
+  ...(inclureAvecCollab ? [] : [{ $match: { collaborations: { $size: 0 } } }]),
   {
     $project: {
       _id: 0,
@@ -105,6 +134,9 @@ const buildPipeline = ({ territoire, collaborationsDepuis }: CfaInvitesSansColla
         ],
       },
       has_account: { $eq: ["$organisme.has_account", true] },
+      nb_collaborations: { $ifNull: [{ $first: "$collaborations.nb" }, 0] },
+      date_premiere_collaboration: { $ifNull: [{ $first: "$collaborations.premiere" }, null] },
+      date_activation: { $ifNull: [{ $first: "$activation.date" }, null] },
       invitations_recues: 1,
       ml_invitantes: { $size: "$mission_locale_ids" },
       derniere_invitation_at: 1,
