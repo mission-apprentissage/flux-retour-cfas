@@ -1,12 +1,14 @@
 import { addJob, type CronDef, type JobDef } from "job-processor";
 
 import logger from "@/common/logger";
+import { isWhatsAppReplyKind, WHATSAPP_REPLY_JOB } from "@/common/services/brevo/whatsapp/queue";
 import config from "@/config";
 
 import { sendWhatsAppInjoignables } from "../whatsapp/send-whatsapp-injoignables";
 import { sendWhatsAppPrequalif } from "../whatsapp/send-whatsapp-prequalif";
+import { sendWhatsAppReply } from "../whatsapp/send-whatsapp-reply";
 
-import { payloadBoolean, payloadNumber } from "./payload";
+import { payloadBoolean, payloadNumber, payloadString, requirePayloadString } from "./payload";
 
 export const whatsappJobs = {
   "tmp:whatsapp:send-injoignables": {
@@ -32,6 +34,17 @@ export const whatsappJobs = {
     handler: async (job) => {
       const payload = job.payload as { limit?: number } | undefined;
       return sendWhatsAppPrequalif({ dryRun: false, limit: payload?.limit, sentVia: "daily" });
+    },
+  },
+  // Réponses du webhook WhatsApp, enfilées hors du chemin HTTP ; se replanifie elle-même (cf. queue.ts)
+  [WHATSAPP_REPLY_JOB]: {
+    handler: async (job) => {
+      const effectifId = requirePayloadString(job.payload, "effectifId");
+      const kind = payloadString(job.payload, "kind");
+      if (!isWhatsAppReplyKind(kind)) {
+        throw new Error(`Type de réponse WhatsApp inconnu : ${kind}`);
+      }
+      return sendWhatsAppReply({ effectifId, kind, attempt: payloadNumber(job.payload, "attempt") ?? 1 });
     },
   },
 } satisfies Record<string, JobDef>;

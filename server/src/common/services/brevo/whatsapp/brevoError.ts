@@ -19,7 +19,7 @@ export interface BrevoErrorDetails {
   safeToRetry: boolean;
 }
 
-export class BrevoApiError extends Error {
+class BrevoApiError extends Error {
   constructor(
     readonly operation: BrevoOperation,
     readonly details: BrevoErrorDetails
