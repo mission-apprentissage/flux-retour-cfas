@@ -168,7 +168,9 @@ describe("registre des jobs", () => {
       "tmp:seed-sipa-test-nancy",
       "tmp:whatsapp:send-injoignables",
       "tmp:whatsapp:send-prequalif",
+      "whatsapp:send-initial",
       "whatsapp:send-prequalif-daily",
+      "whatsapp:send-reply",
     ]);
   });
 });
