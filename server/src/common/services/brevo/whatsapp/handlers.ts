@@ -14,47 +14,24 @@ import {
 
 import logger from "@/common/logger";
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
-import config from "@/config";
 
-import { sendWhatsAppMessage } from "./brevoApi";
 import { updateWhatsAppContact, getMissionLocaleInfo, getMissionLocaleInfoFull } from "./database";
 import { isExcludedByCfaCollab } from "./eligibility";
-import {
-  buildAutoReplyMessage,
-  buildCallbackMessage,
-  buildNoHelpMessage,
-  buildPrequalifNoMessage,
-  buildPrequalifYesWithUrlInlineMessage,
-  buildPrequalifYesWithoutUrlMessage,
-  buildStopConfirmationMessage,
-  isStopMessage,
-  parseUserResponse,
-} from "./messages";
+import { isStopMessage, parseUserResponse } from "./messages";
 import { notifyMLUserOnCallback, notifyMLUserOnNoHelp, notifyMLUsersOnPrequalifYes } from "./notifications";
 import { maskPhone, normalizePhoneNumber } from "./phone";
+import { enqueueWhatsAppReply, type WhatsAppReplyKind } from "./queue";
 
 /**
- * Gère un message STOP : opt-out RGPD
+ * Gère un message STOP : opt-out RGPD. L'opt-out est enregistré avant tout envoi ; la confirmation
+ * part par job.
  */
 async function handleStopMessage(
   effectif: IMissionLocaleEffectif,
   text: string,
-  resolvedVisitorId: string,
   inboundHistory: IWhatsAppMessageHistory
 ): Promise<void> {
   const now = new Date();
-  const stopMessage = buildStopConfirmationMessage();
-  const result = await sendWhatsAppMessage(resolvedVisitorId, stopMessage);
-
-  const historyEntries: IWhatsAppMessageHistory[] = [inboundHistory];
-  if (result.success) {
-    historyEntries.push({
-      direction: "outbound",
-      content: stopMessage,
-      sent_at: new Date(),
-      brevo_message_id: result.messageId,
-    });
-  }
 
   await updateWhatsAppContact(
     effectif._id,
@@ -66,7 +43,7 @@ async function handleStopMessage(
       message_status: "read",
       status_updated_at: now,
     },
-    historyEntries
+    [inboundHistory]
   );
 
   await missionLocaleEffectifsDb().updateOne(
@@ -82,6 +59,8 @@ async function handleStopMessage(
       },
     }
   );
+
+  await enqueueWhatsAppReply(effectif._id, "stop");
 
   logger.info({ effectifId: effectif._id }, "User opted out via STOP");
 }
@@ -297,30 +276,19 @@ async function handlePrequalifNoSideEffects(effectif: IMissionLocaleEffectif): P
 }
 
 /**
- * Envoie une réponse WhatsApp et met à jour le contact avec l'historique
+ * Enregistre la réponse du jeune (état de la conversation, entrée entrante de l'historique) puis enfile
+ * l'envoi de la réponse. L'enregistrement passe avant l'enqueue : le job ajoute l'entrée sortante après
+ * l'entrante, et un rejeu du webhook est dédoublonné par `brevo_message_id`.
  */
-async function sendResponseAndUpdateContact(
+async function recordResponseAndEnqueueReply(
   effectif: IMissionLocaleEffectif,
-  resolvedVisitorId: string,
-  responseMessage: string,
+  replyKind: WhatsAppReplyKind,
   responseType: IUserResponseType,
   newState: IConversationState,
   text: string,
   inboundHistory: IWhatsAppMessageHistory
 ): Promise<void> {
   const now = new Date();
-  const result = await sendWhatsAppMessage(resolvedVisitorId, responseMessage);
-
-  const historyEntries: IWhatsAppMessageHistory[] = [inboundHistory];
-  if (result.success) {
-    historyEntries.push({
-      direction: "outbound",
-      content: responseMessage,
-      sent_at: new Date(),
-      brevo_message_id: result.messageId,
-    });
-  }
-
   await updateWhatsAppContact(
     effectif._id,
     {
@@ -331,8 +299,9 @@ async function sendResponseAndUpdateContact(
       message_status: "read",
       status_updated_at: now,
     },
-    historyEntries
+    [inboundHistory]
   );
+  await enqueueWhatsAppReply(effectif._id, replyKind);
 }
 
 /**
@@ -385,7 +354,6 @@ export async function handleInboundWhatsAppMessage(
     return;
   }
 
-  const prenom = effectif.effectif_snapshot?.apprenant?.prenom || "Bonjour";
   const now = new Date();
 
   const inboundHistory: IWhatsAppMessageHistory = {
@@ -396,7 +364,7 @@ export async function handleInboundWhatsAppMessage(
   };
 
   if (isStopMessage(text)) {
-    await handleStopMessage(effectif, text, resolvedVisitorId, inboundHistory);
+    await handleStopMessage(effectif, text, inboundHistory);
     return;
   }
 
@@ -405,41 +373,14 @@ export async function handleInboundWhatsAppMessage(
   if (!responseType) {
     logger.info({ effectifId: effectif._id }, "Unrecognized user response");
 
-    const historyEntries: IWhatsAppMessageHistory[] = [inboundHistory];
-
+    let autoReplyLocked = false;
     if (!effectif.whatsapp_contact?.auto_reply_sent) {
       const locked = await missionLocaleEffectifsDb().findOneAndUpdate(
         { _id: effectif._id, "whatsapp_contact.auto_reply_sent": { $ne: true } },
         { $set: { "whatsapp_contact.auto_reply_sent": true, "whatsapp_contact.auto_reply_sent_at": now } },
         { returnDocument: "after", includeResultMetadata: false }
       );
-
-      if (locked) {
-        const autoReplyMessage = buildAutoReplyMessage(missionLocaleInfo);
-        const result = await sendWhatsAppMessage(resolvedVisitorId, autoReplyMessage);
-        if (result.success) {
-          historyEntries.push({
-            direction: "outbound",
-            content: autoReplyMessage,
-            sent_at: new Date(),
-            brevo_message_id: result.messageId,
-          });
-        } else {
-          try {
-            await missionLocaleEffectifsDb().updateOne(
-              { _id: effectif._id },
-              {
-                $set: {
-                  "whatsapp_contact.auto_reply_sent": false,
-                  "whatsapp_contact.auto_reply_sent_at": null,
-                },
-              }
-            );
-          } catch (rollbackError) {
-            logger.error({ effectifId: effectif._id, rollbackError }, "Failed to rollback auto_reply_sent flag");
-          }
-        }
-      }
+      autoReplyLocked = !!locked;
     }
 
     await updateWhatsAppContact(
@@ -450,47 +391,51 @@ export async function handleInboundWhatsAppMessage(
         status_updated_at: now,
         conversation_state: CONVERSATION_STATE.USER_RESPONDED,
       },
-      historyEntries
+      [inboundHistory]
     );
+
+    if (autoReplyLocked && !(await enqueueWhatsAppReply(effectif._id, "auto_reply"))) {
+      // Rien ne partira : on libère le verrou pour que le prochain message non reconnu relance une réponse.
+      try {
+        await missionLocaleEffectifsDb().updateOne(
+          { _id: effectif._id },
+          { $set: { "whatsapp_contact.auto_reply_sent": false, "whatsapp_contact.auto_reply_sent_at": null } }
+        );
+      } catch (rollbackError) {
+        logger.error({ effectifId: effectif._id, rollbackError }, "Failed to rollback auto_reply_sent flag");
+      }
+    }
     return;
   }
 
   if (responseType === USER_RESPONSE_TYPE.PREQUALIF_YES) {
-    await handlePrequalifYes(effectif, resolvedVisitorId, text, inboundHistory, prenom);
+    await handlePrequalifYes(effectif, text, inboundHistory);
     logger.info({ effectifId: effectif._id, responseType }, "Processed inbound WhatsApp prequalif YES");
     return;
   }
   if (responseType === USER_RESPONSE_TYPE.PREQUALIF_NO) {
-    await handlePrequalifNo(effectif, resolvedVisitorId, text, inboundHistory, prenom);
+    await handlePrequalifNo(effectif, text, inboundHistory);
     logger.info({ effectifId: effectif._id, responseType }, "Processed inbound WhatsApp prequalif NO");
     return;
   }
 
-  let responseMessage: string;
+  let replyKind: WhatsAppReplyKind;
   let newState: IConversationState;
 
   switch (responseType) {
     case USER_RESPONSE_TYPE.CALLBACK:
-      responseMessage = buildCallbackMessage(prenom, missionLocaleInfo);
+      replyKind = "callback";
       newState = CONVERSATION_STATE.CALLBACK_REQUESTED;
       break;
     case USER_RESPONSE_TYPE.NO_HELP:
-      responseMessage = buildNoHelpMessage(prenom, missionLocaleInfo);
+      replyKind = "no_help";
       newState = CONVERSATION_STATE.CLOSED;
       break;
     default:
       return;
   }
 
-  await sendResponseAndUpdateContact(
-    effectif,
-    resolvedVisitorId,
-    responseMessage,
-    responseType,
-    newState,
-    text,
-    inboundHistory
-  );
+  await recordResponseAndEnqueueReply(effectif, replyKind, responseType, newState, text, inboundHistory);
 
   if (responseType === USER_RESPONSE_TYPE.CALLBACK) {
     await handleCallbackSideEffects(effectif);
@@ -503,10 +448,8 @@ export async function handleInboundWhatsAppMessage(
 
 async function handlePrequalifYes(
   effectif: IMissionLocaleEffectif,
-  resolvedVisitorId: string,
   text: string,
-  inboundHistory: IWhatsAppMessageHistory,
-  prenom: string
+  inboundHistory: IWhatsAppMessageHistory
 ): Promise<void> {
   // Exclusion PRD (race send/réponse) : le dossier est passé côté collab CFA depuis l'envoi.
   // Aucun souhaite_rdv, aucune notif ML — donc surtout pas de message promettant un rappel.
@@ -549,30 +492,23 @@ async function handlePrequalifYes(
     return;
   }
 
-  let message: string;
+  // Le jeton est posé avant l'enqueue : le job construit le lien de rendez-vous à partir de lui.
   if (ml.rdv_url) {
-    const token = randomUUID();
-    const now = new Date();
     await missionLocaleEffectifsDb().updateOne(
       { _id: effectif._id },
       {
         $set: {
-          "whatsapp_contact.rdv_redirect_token": token,
-          "whatsapp_contact.rdv_redirect_token_created_at": now,
+          "whatsapp_contact.rdv_redirect_token": randomUUID(),
+          "whatsapp_contact.rdv_redirect_token_created_at": new Date(),
         },
       }
     );
-    const redirectUrl = `${config.publicUrl}/api/r/${token}`;
-    message = buildPrequalifYesWithUrlInlineMessage(prenom, ml, redirectUrl);
-  } else {
-    message = buildPrequalifYesWithoutUrlMessage(prenom, ml);
   }
 
   try {
-    await sendResponseAndUpdateContact(
+    await recordResponseAndEnqueueReply(
       effectif,
-      resolvedVisitorId,
-      message,
+      "prequalif_yes",
       USER_RESPONSE_TYPE.PREQUALIF_YES,
       CONVERSATION_STATE.CLOSED,
       text,
@@ -581,7 +517,7 @@ async function handlePrequalifYes(
   } catch (err) {
     logger.error(
       { err, effectifId: effectif._id, mlId: effectif.mission_locale_id, hasRdvUrl: !!ml.rdv_url },
-      "Échec envoi confirmation YES texte libre — YES enregistré côté DB"
+      "Échec enregistrement de la réponse YES texte libre — YES enregistré côté DB"
     );
     captureException(err, {
       tags: { feature: "whatsapp_prequalif", step: "follow_up_yes" },
@@ -592,27 +528,14 @@ async function handlePrequalifYes(
 
 async function handlePrequalifNo(
   effectif: IMissionLocaleEffectif,
-  resolvedVisitorId: string,
   text: string,
-  inboundHistory: IWhatsAppMessageHistory,
-  prenom: string
+  inboundHistory: IWhatsAppMessageHistory
 ): Promise<void> {
   await handlePrequalifNoSideEffects(effectif);
 
-  const ml = await getMissionLocaleInfoFull(effectif.mission_locale_id);
-  if (!ml) {
-    logger.error(
-      { missionLocaleId: effectif.mission_locale_id },
-      "Mission Locale not found for prequalif NO follow-up"
-    );
-    return;
-  }
-
-  const message = buildPrequalifNoMessage(prenom, ml);
-  await sendResponseAndUpdateContact(
+  await recordResponseAndEnqueueReply(
     effectif,
-    resolvedVisitorId,
-    message,
+    "prequalif_no",
     USER_RESPONSE_TYPE.PREQUALIF_NO,
     CONVERSATION_STATE.CLOSED,
     text,

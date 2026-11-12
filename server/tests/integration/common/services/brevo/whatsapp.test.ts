@@ -1,5 +1,6 @@
 import { strict as assert } from "assert";
 
+import { addJob } from "job-processor";
 import { ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import type { IEffectif } from "shared/models";
@@ -44,10 +45,20 @@ import { isPhoneAlreadyContacted, reserveAndSendPrequalif } from "@/common/servi
 import { sendEmail } from "@/common/services/mailer/mailer";
 import config from "@/config";
 import { sendWhatsAppPrequalif } from "@/jobs/whatsapp/send-whatsapp-prequalif";
+import { sendWhatsAppReply } from "@/jobs/whatsapp/send-whatsapp-reply";
 import { useMongo } from "@tests/jest/setupMongo";
 import { DeepPartial, testDoc, testDocs } from "@tests/utils/testUtils";
 
 vi.mock("@/common/services/mailer/mailer");
+
+// Les réponses sont enfilées hors du chemin HTTP : on vérifie l'enqueue, pas l'envoi (cf. whatsapp-reply.test.ts)
+vi.mock("job-processor", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("job-processor")>()),
+  addJob: vi.fn().mockResolvedValue(0),
+}));
+
+const enqueuedKinds = (): string[] =>
+  vi.mocked(addJob).mock.calls.map(([job]) => (job.payload as { kind: string }).kind);
 
 // Mock brevoApi pour les appels HTTP Brevo (sendWhatsAppMessage, sendWhatsAppTemplate, upsertBrevoContact)
 vi.mock("@/common/services/brevo/whatsapp/brevoApi", async (importOriginal) => {
@@ -472,6 +483,7 @@ describe("WhatsApp Service", () => {
 
     beforeEach(async () => {
       vi.mocked(sendEmail).mockClear();
+      vi.mocked(addJob).mockClear();
       // Désactiver la validation de schéma pour les tests avec des fixtures minimales
       const db = getDatabase();
       await db.command({ collMod: "missionLocaleEffectif", validationLevel: "off" }).catch(() => {});
@@ -587,40 +599,27 @@ describe("WhatsApp Service", () => {
       expect(effectif?.whatsapp_contact?.conversation_state).toBe(CONVERSATION_STATE.USER_RESPONDED);
     });
 
-    it("envoie l'auto-reply avec coordonnées ML pour un message non reconnu", async () => {
+    it("enfile l'auto-reply (sans l'envoyer dans la requête) pour un message non reconnu", async () => {
       await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-auto-1", "visitor-123");
 
       const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       expect(effectif?.whatsapp_contact?.auto_reply_sent).toBe(true);
       expect(effectif?.whatsapp_contact?.auto_reply_sent_at).toBeInstanceOf(Date);
-
-      const autoReplyMsg = effectif?.whatsapp_contact?.messages_history?.find(
-        (m) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
-      );
-      expect(autoReplyMsg).toBeDefined();
-      expect(autoReplyMsg?.content).toContain("ML Test");
-      expect(autoReplyMsg?.content).toContain("01 23 45 67 89");
-      expect(autoReplyMsg?.content).toContain("https://www.ml-test.fr");
+      expect(enqueuedKinds()).toEqual(["auto_reply"]);
+      expect(sendWhatsAppMessage).not.toHaveBeenCalled();
+      expect(effectif?.whatsapp_contact?.messages_history?.map((m) => m.direction)).toEqual(["outbound", "inbound"]);
     });
 
-    it("n'envoie PAS l'auto-reply au deuxième message non reconnu", async () => {
-      // Premier message : auto-reply envoyé
+    it("n'enfile PAS l'auto-reply au deuxième message non reconnu", async () => {
       await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-first", "visitor-123");
+      expect(enqueuedKinds()).toEqual(["auto_reply"]);
 
-      const afterFirst = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
-      const autoReplyCountFirst = afterFirst?.whatsapp_contact?.messages_history?.filter(
-        (m) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
-      ).length;
-      expect(autoReplyCountFirst).toBe(1);
-
-      // Deuxième message : pas d'auto-reply
       await handleInboundWhatsAppMessage("+33612345678", "allo", "msg-second", "visitor-123");
 
-      const afterSecond = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
-      const autoReplyCountSecond = afterSecond?.whatsapp_contact?.messages_history?.filter(
-        (m) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
-      ).length;
-      expect(autoReplyCountSecond).toBe(1);
+      expect(enqueuedKinds()).toEqual(["auto_reply"]);
+      const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      const inbound = effectif?.whatsapp_contact?.messages_history?.filter((m) => m.direction === "inbound");
+      expect(inbound?.map((m) => m.brevo_message_id)).toEqual(["msg-first", "msg-second"]);
     });
 
     it("n'envoie PAS l'auto-reply pour une réponse callback (1)", async () => {
@@ -639,28 +638,78 @@ describe("WhatsApp Service", () => {
       expect(effectif?.whatsapp_contact?.opted_out).toBe(true);
     });
 
-    it("rollback auto_reply_sent si l'envoi échoue, et retry au message suivant", async () => {
-      // Premier message : envoi échoue → rollback
-      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({ success: false, error: "API error" });
+    it("libère auto_reply_sent si l'enqueue échoue, et retente au message suivant", async () => {
+      vi.mocked(addJob).mockRejectedValueOnce(new Error("mongo down"));
       await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-fail", "visitor-123");
 
       const afterFail = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       expect(afterFail?.whatsapp_contact?.auto_reply_sent).toBe(false);
-      const autoReplyAfterFail = afterFail?.whatsapp_contact?.messages_history?.filter(
-        (m) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
-      );
-      expect(autoReplyAfterFail?.length ?? 0).toBe(0);
+      expect(afterFail?.whatsapp_contact?.messages_history?.some((m) => m.brevo_message_id === "msg-fail")).toBe(true);
 
-      // Deuxième message : envoi réussit → auto-reply envoyé
-      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({ success: true, messageId: "mock-retry-id" });
       await handleInboundWhatsAppMessage("+33612345678", "allo", "msg-retry", "visitor-123");
 
       const afterRetry = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       expect(afterRetry?.whatsapp_contact?.auto_reply_sent).toBe(true);
-      const autoReplyAfterRetry = afterRetry?.whatsapp_contact?.messages_history?.filter(
-        (m) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
+      expect(enqueuedKinds()).toEqual(["auto_reply", "auto_reply"]);
+    });
+
+    it("callback (1) : état enregistré puis réponse enfilée, rien n'est envoyé dans la requête", async () => {
+      await handleInboundWhatsAppMessage("+33612345678", "1", "msg-cb", "visitor-123");
+
+      const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(effectif?.whatsapp_contact?.user_response).toBe("callback");
+      expect(effectif?.whatsapp_contact?.conversation_state).toBe(CONVERSATION_STATE.CALLBACK_REQUESTED);
+      expect(enqueuedKinds()).toEqual(["callback"]);
+      expect(sendWhatsAppMessage).not.toHaveBeenCalled();
+    });
+
+    it("de bout en bout : le job enfilé par le webhook envoie la réponse et la trace après l'entrée entrante", async () => {
+      await handleInboundWhatsAppMessage("+33612345678", "1", "msg-e2e", "visitor-123");
+      const payload = vi.mocked(addJob).mock.calls[0][0].payload as {
+        effectifId: string;
+        kind: "callback";
+        attempt: number;
+      };
+
+      expect(await sendWhatsAppReply(payload)).toEqual({ outcome: "sent" });
+
+      expect(sendWhatsAppMessage).toHaveBeenCalledWith(
+        "visitor-123",
+        expect.stringContaining("Mission locale ML Test")
       );
-      expect(autoReplyAfterRetry?.length).toBe(1);
+      const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(effectif?.whatsapp_contact?.messages_history?.map((m) => m.direction)).toEqual([
+        "outbound",
+        "inbound",
+        "outbound",
+      ]);
+    });
+
+    it("no_help (2) : réponse enfilée", async () => {
+      await handleInboundWhatsAppMessage("+33612345678", "2", "msg-nh", "visitor-123");
+
+      const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(effectif?.whatsapp_contact?.conversation_state).toBe(CONVERSATION_STATE.CLOSED);
+      expect(enqueuedKinds()).toEqual(["no_help"]);
+    });
+
+    it("STOP : l'opt-out est posé avant l'enqueue de la confirmation", async () => {
+      vi.mocked(addJob).mockImplementationOnce(async () => {
+        const before = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+        expect(before?.whatsapp_contact?.opted_out).toBe(true);
+        return 0;
+      });
+
+      await handleInboundWhatsAppMessage("+33612345678", "STOP", "msg-stop-q", "visitor-123");
+
+      expect(enqueuedKinds()).toEqual(["stop"]);
+    });
+
+    it("le rejeu du même message par Brevo n'enfile pas de seconde réponse", async () => {
+      await handleInboundWhatsAppMessage("+33612345678", "1", "msg-replay", "visitor-123");
+      await handleInboundWhatsAppMessage("+33612345678", "1", "msg-replay", "visitor-123");
+
+      expect(enqueuedKinds()).toEqual(["callback"]);
     });
 
     it("déduplique les messages avec le même brevoMessageId", async () => {
@@ -1571,6 +1620,50 @@ describe("WhatsApp Service", () => {
         event: "WHATSAPP_PREQUALIF_NO",
       });
       assert.ok(log, "Log timeline event NO doit être inséré");
+    });
+
+    it("YES : réponse enfilée, entrée entrante enregistrée, pas de jeton sans rdv_url", async () => {
+      const { effectifId } = await setupPrequalifEffectif();
+
+      await handleInboundWhatsAppMessage("+33688888888", "✅", "msg-yes-q", "visitor-x");
+
+      expect(enqueuedKinds()).toEqual(["prequalif_yes"]);
+      expect(sendWhatsAppMessage).not.toHaveBeenCalled();
+      const updated = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(updated?.whatsapp_contact?.conversation_state).toBe(CONVERSATION_STATE.CLOSED);
+      expect(updated?.whatsapp_contact?.messages_history?.map((m) => m.brevo_message_id)).toEqual(["msg-yes-q"]);
+      expect(updated?.whatsapp_contact?.rdv_redirect_token).toBeUndefined();
+    });
+
+    it("YES avec rdv_url : le jeton existe avant l'enqueue (le job en construit le lien)", async () => {
+      const { effectifId, mlId } = await setupPrequalifEffectif();
+      await organisationsDb().updateOne({ _id: mlId }, { $set: { rdv_url: "https://rdv.exemple.fr" } });
+      vi.mocked(addJob).mockImplementationOnce(async () => {
+        const before = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+        expect(before?.whatsapp_contact?.rdv_redirect_token).toEqual(expect.any(String));
+        return 0;
+      });
+
+      await handleInboundWhatsAppMessage("+33688888888", "✅", "msg-yes-url", "visitor-x");
+
+      expect(enqueuedKinds()).toEqual(["prequalif_yes"]);
+    });
+
+    it("NO : réponse enfilée", async () => {
+      await setupPrequalifEffectif();
+
+      await handleInboundWhatsAppMessage("+33688888888", "❌ Je ne veux pas d'aide", "msg-no-q", "visitor-x");
+
+      expect(enqueuedKinds()).toEqual(["prequalif_no"]);
+      expect(sendWhatsAppMessage).not.toHaveBeenCalled();
+    });
+
+    it("YES exclu (CFA V2) : rien n'est enfilé", async () => {
+      await setupPrequalifEffectif({ computed: { organisme: { is_allowed_collab: true } } });
+
+      await handleInboundWhatsAppMessage("+33688888888", "✅", "msg-yes-excl", "visitor-x");
+
+      expect(addJob).not.toHaveBeenCalled();
     });
 
     it("YES après NO (race) : re-aligne a_traiter=true et lève situation NE_SOUHAITE_PAS_ETRE_RECONTACTE", async () => {
