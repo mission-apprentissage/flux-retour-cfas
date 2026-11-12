@@ -62,7 +62,6 @@ export default function ParametresClient({
     "none"
   );
   const [selectedERPId, setSelectedERPId] = useState("");
-  const [selectedERP, setSelectedERP] = useState({} as Erp);
   const [unsupportedERPName, setUnsupportedERPName] = useState("");
   const [regeneratedApiKey, setRegeneratedApiKey] = useState<string | null>(null);
   const [regeneratedKeyCopied, setRegeneratedKeyCopied] = useState(false);
@@ -73,10 +72,6 @@ export default function ParametresClient({
 
   const erpV3 =
     typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("erpV3")?.toLowerCase() : null;
-
-  useEffect(() => {
-    setSelectedERP(erpsById[selectedERPId]);
-  }, [selectedERPId]);
 
   // redirige vers la finalisation API v3 si le paramètre est présent (= on vient de connexion-api)
   useEffect(() => {
@@ -342,7 +337,7 @@ export default function ParametresClient({
               <Button
                 disabled={!selectedERPId}
                 onClick={() => {
-                  setStepConfigurationERP(selectedERP.apiV3 ? "v3" : "unsupported_erp");
+                  setStepConfigurationERP(erpsById[selectedERPId]?.apiV3 ? "v3" : "unsupported_erp");
                 }}
               >
                 Confirmer
