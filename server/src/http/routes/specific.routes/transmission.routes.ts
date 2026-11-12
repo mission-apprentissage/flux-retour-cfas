@@ -7,7 +7,7 @@ import {
   getErrorsTransmissionStatusDetailsForAGivenDay,
   getSuccessfulTransmissionStatusDetailsForAGivenDay,
 } from "@/common/actions/indicateurs/transmissions/transmission.action";
-import { updateOrganisme } from "@/common/actions/organismes/organismes.actions";
+import { effacerAlerteTransmission } from "@/common/actions/organismes/organismes.actions";
 import paginationSchema from "@/common/validation/paginationSchema";
 import {
   DefaultParams,
@@ -48,9 +48,10 @@ export default () => {
     "/reset-notification",
     requireOrganismePermission("configurerModeTransmission"),
     returnResult<OrganismeLocals>(async (req, res) => {
-      await updateOrganisme(res.locals.organismeId, {
-        has_transmission_errors: false,
-      });
+      if (req.user.impersonating) {
+        return;
+      }
+      await effacerAlerteTransmission(res.locals.organismeId);
     })
   );
 

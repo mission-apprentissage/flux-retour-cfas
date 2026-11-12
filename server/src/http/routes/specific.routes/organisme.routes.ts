@@ -3,7 +3,8 @@ import { getAnneeScolaireFromDate, IEffectif } from "shared";
 import { zGetEffectifsForOrganismeApi } from "shared/models/routes/organismes/effectifs/effectifs.api";
 import { WithPagination } from "shared/models/routes/pagination";
 
-import { effectifsDECADb, effectifsDb, organismesDb } from "@/common/model/collections";
+import { effectifsDb, organismesDb } from "@/common/model/collections";
+import { anneeScolaireDedupExpr, dateMetierExpr, dedupNomExpr } from "@/common/utils/mongoUtils";
 
 const FIELD_MAP: Record<string, string> = {
   nom: "apprenant.nom",
@@ -53,6 +54,42 @@ const computeSearch = (search?: string | null) => {
     : {};
 };
 
+function effectifsEtContratsDecaSansDoublon(organismeId: ObjectId) {
+  return [
+    { $match: { organisme_id: organismeId } },
+    { $addFields: { _priorite: 0 } },
+    {
+      $unionWith: {
+        coll: "effectifsDECA",
+        pipeline: [{ $match: { organisme_id: organismeId } }, { $addFields: { _priorite: 1 } }],
+      },
+    },
+    {
+      $addFields: {
+        _nom: dedupNomExpr("$apprenant.nom"),
+        _prenom: dedupNomExpr("$apprenant.prenom"),
+        _ddn: dateMetierExpr("$apprenant.date_de_naissance"),
+        _annee: anneeScolaireDedupExpr,
+      },
+    },
+    { $sort: { _priorite: 1, updated_at: -1, _id: 1 } },
+    {
+      $group: {
+        _id: {
+          $cond: [
+            { $and: [{ $ne: ["$_nom", ""] }, { $ne: ["$_ddn", null] }] },
+            { nom: "$_nom", prenom: "$_prenom", ddn: "$_ddn", annee_scolaire: "$_annee" },
+            "$_id",
+          ],
+        },
+        doc: { $first: "$$ROOT" },
+      },
+    },
+    { $replaceRoot: { newRoot: "$doc" } },
+    { $project: { _priorite: 0, _nom: 0, _prenom: 0, _ddn: 0, _annee: 0 } },
+  ];
+}
+
 export async function getOrganismeEffectifs(
   organismeId: ObjectId,
   options: WithPagination<typeof zGetEffectifsForOrganismeApi>
@@ -75,7 +112,6 @@ export async function getOrganismeEffectifs(
   } = options;
 
   const isDeca = !organisme?.is_transmission_target;
-  const db = isDeca ? effectifsDECADb() : effectifsDb();
 
   const formationConditions = computeFormation(formation_libelle_long);
   const statutConditions = computeStatut(statut_courant);
@@ -94,11 +130,7 @@ export async function getOrganismeEffectifs(
   const sortConditions = computeSort(sort, order);
 
   const pipeline = [
-    {
-      $match: {
-        organisme_id: organismeId,
-      },
-    },
+    ...(isDeca ? effectifsEtContratsDecaSansDoublon(organismeId) : [{ $match: { organisme_id: organismeId } }]),
     {
       $facet: {
         allFilters: [
@@ -143,7 +175,7 @@ export async function getOrganismeEffectifs(
       },
     },
   ];
-  const [data] = await db.aggregate(pipeline).toArray();
+  const [data] = await effectifsDb().aggregate(pipeline).toArray();
 
   const effectifs = data?.results.map((effectif: IEffectif) => ({
     id: effectif._id.toString(),
@@ -174,32 +206,6 @@ export async function getOrganismeEffectifs(
   };
 }
 
-async function getAllOrganismeEffectifsIds(organismeId: ObjectId) {
-  const organisme = await organismesDb().findOne({ _id: organismeId });
-  const isDeca = !organisme?.is_transmission_target;
-  const db = isDeca ? effectifsDECADb() : effectifsDb();
-
-  const pipeline = [
-    {
-      $match: {
-        organisme_id: organismeId,
-      },
-    },
-    {
-      $project: {
-        id: { $toString: "$_id" },
-      },
-    },
-  ];
-
-  const effectifs = await db.aggregate(pipeline).toArray();
-
-  return {
-    fromDECA: isDeca,
-    organismesEffectifs: effectifs,
-  };
-}
-
 export async function updateOrganismeEffectifs(
   organismeId: ObjectId,
   update: {
@@ -207,17 +213,8 @@ export async function updateOrganismeEffectifs(
   }
 ) {
   if (!update["apprenant.type_cfa"]) return;
-  const { fromDECA, organismesEffectifs } = await getAllOrganismeEffectifsIds(organismeId);
-
-  !fromDECA &&
-    (await effectifsDb().updateMany(
-      {
-        _id: {
-          $in: organismesEffectifs.map((effectif) => new ObjectId(effectif.id)),
-        },
-      },
-      {
-        ...(update["apprenant.type_cfa"] ? { $set: { "apprenant.type_cfa": update["apprenant.type_cfa"] } } : {}),
-      }
-    ));
+  await effectifsDb().updateMany(
+    { organisme_id: organismeId },
+    { $set: { "apprenant.type_cfa": update["apprenant.type_cfa"] } }
+  );
 }

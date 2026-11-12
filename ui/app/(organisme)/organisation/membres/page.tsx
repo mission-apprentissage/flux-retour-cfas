@@ -13,6 +13,10 @@ export default async function OrganisationMembresPage() {
     redirect("/auth/connexion");
   }
 
+  if (user?.organisation?.type === "ORGANISME_FORMATION") {
+    redirect("/cfa/roles-habilitations");
+  }
+
   return (
     <div className="fr-container fr-pt-3w fr-pb-6w">
       <RolesHabilitationsClient description="Retrouvez ici l'ensemble des utilisateurs habilités à consulter les données de votre organisation sur le tableau de bord." />

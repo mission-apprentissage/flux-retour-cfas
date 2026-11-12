@@ -13,6 +13,7 @@ export * from "./pays";
 export * from "./permissions";
 export * from "./plausible-goals";
 export * from "./support";
+export * from "./televersement";
 export * from "./territoires";
 export * from "./validations";
 export * from "./link";

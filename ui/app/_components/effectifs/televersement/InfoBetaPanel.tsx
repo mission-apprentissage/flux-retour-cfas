@@ -55,19 +55,6 @@ export function InfoBetaPanel() {
                 jour, il n’est pas nécessaire d’ajouter un fichier.
               </li>
               <li>
-                Si vous n&apos;avez pas accès à Excel ou si vous ne l&apos;utilisez pas, vous pouvez utiliser un{" "}
-                <a
-                  href="https://www.zamzar.com/fr/convert/numbers-to-xls/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="fr-link"
-                >
-                  convertisseur en ligne
-                </a>{" "}
-                . Pour les utilisateurs de Numbers (ou autre logiciel), vous avez la possibilité d’exporter le fichier
-                au format .xls (Fichier &gt; Exporter vers &gt; Excel)
-              </li>
-              <li>
                 Le téléversement régulier de vos effectifs au tableau de bord ne vous dispense pas de répondre à
                 l&apos;enquête annuelle SIFA sur la{" "}
                 <a href="https://sifa.depp.education.fr" target="_blank" rel="noopener noreferrer" className="fr-link">

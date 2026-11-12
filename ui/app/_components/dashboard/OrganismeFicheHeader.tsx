@@ -82,6 +82,7 @@ export function OrganismeFicheHeader({ organismeId }: { organismeId: string }) {
               <InfoTransmissionDecaTag
                 date={organisme.last_effectifs_deca_update ? new Date(organisme.last_effectifs_deca_update) : undefined}
                 indicateursEffectifs={indicateursEffectifs}
+                avecFichier={organisme.erps?.includes("FICHIER")}
               />
             )}
             {organisme.fiabilisation_statut && (

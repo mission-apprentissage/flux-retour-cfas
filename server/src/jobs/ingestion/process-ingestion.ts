@@ -12,6 +12,7 @@ import {
 import { IAttributionOrganisme, IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import dossierApprenantSchemaV3, { type IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
+import { estFinAvantEntree } from "shared/utils";
 import { NEVER, SafeParseReturnType } from "zod";
 
 import { updateVoeuxAffelnetEffectif } from "@/common/actions/affelnet.actions";
@@ -23,10 +24,9 @@ import {
   checkIfEffectifExists,
 } from "@/common/actions/engine/engine.actions";
 import { createFranceTravailEffectifSnapshot } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
-import { findOrganismeFormateursIds, findOrganismeResponsablesIds } from "@/common/actions/helpers/permissions";
 import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
-  findOrganismeByUaiAndSiret,
+  signalerErreurTransmission,
   updateOrganismeTransmission,
   updateOrganismesHasTransmittedWithHierarchy,
 } from "@/common/actions/organismes/organismes.actions";
@@ -44,9 +44,9 @@ import {
   fiabilisationEffectifFormation,
   getEffectifCertification,
 } from "../fiabilisation/certification/fiabilisation-certification";
-import { fiabilisationUaiSiret } from "../fiabilisation/uai-siret/updateFiabilisation";
 
 import { handleEffectifTransmission } from "./process-ingestion.v2";
+import { findOrganismeWithStats, type OrganismeSearchStatsInfos } from "./resolution-organisme";
 
 const logger = parentLogger.child({
   module: "processor",
@@ -246,9 +246,14 @@ async function processEffectifQueueItem(
         }
       );
 
+      if (effectifQueue.source === SOURCE_APPRENANT.FICHIER) {
+        await signalerErreurTransmission(effectifQueue.source_organisme_id, currentDate);
+      }
       itemLogger.error({ duration: Date.now() - start, err: result.error }, "item validation error");
     }
-    await handleDECAMechanism(organismeTarget);
+    if (effectifQueue.source !== SOURCE_APPRENANT.FICHIER) {
+      await handleDECAMechanism(organismeTarget);
+    }
 
     return result.success;
   } catch (err) {
@@ -273,21 +278,11 @@ async function processEffectifQueueItem(
         },
       }
     );
+    if (effectifQueue.source === SOURCE_APPRENANT.FICHIER) {
+      await signalerErreurTransmission(effectifQueue.source_organisme_id, currentDate);
+    }
     return false;
   }
-}
-
-interface OrganismeSearchStatsInfos {
-  id?: string;
-  uai?: string;
-  uai_corrige?: string;
-  siret?: string;
-  siret_corrige?: string;
-  fiabilisation?: "FIABLE" | "NON_FIABLE" | "INCONNU";
-  found?: boolean;
-  attribution?: IAttributionOrganisme["mode"];
-  uai_retenue?: string | null;
-  siret_retenu?: string | null;
 }
 
 function attributionDepuisStats(
@@ -394,7 +389,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
       // Source: https://mission-apprentissage.slack.com/archives/C02FR2L1VB8/p1695295051135549
       // We compute the real duration of the formation in months, only if we have both date_entree and date_fin
       if (effectif.formation?.date_fin && effectif.formation?.date_entree) {
-        if (effectif.formation.date_fin < effectif.formation.date_entree) {
+        if (estFinAvantEntree(effectif.formation.date_entree, effectif.formation.date_fin)) {
           ctx.addIssue(
             createCustomEffectifIssue(
               "La date de fin de formation doit être supérieure à la date d'entrée en formation",
@@ -501,12 +496,12 @@ const createOrUpdateEffectif = async (
       // L'effectif est fusionné avec les nouvelles données.
       // Si une donnée a été modifiée manuellement dans la plateforme, elle sera écrasée par l'import.
       // Ce (potentiel, tout dépend de ce qu'on veut) problème doit être traité d'un point de vue métier.
-      await effectifsDb().findOneAndUpdate(
-        { _id: effectifDb._id },
-        {
-          $set: mergedEffectif,
-        }
-      );
+      effectifDb =
+        (await effectifsDb().findOneAndUpdate(
+          { _id: effectifDb._id },
+          { $set: mergedEffectif },
+          { returnDocument: "after" }
+        )) ?? effectifDb;
     } else {
       effectifDb = { ...effectif, transmitted_at: new Date(), _id: new ObjectId() };
       const { insertedId } = await effectifsDb().insertOne(effectifDb);
@@ -535,98 +530,6 @@ const createOrUpdateEffectif = async (
     throw err;
   }
 };
-
-const relationsIds = (organisme: IOrganisme) => [
-  ...findOrganismeFormateursIds(organisme, true),
-  ...findOrganismeResponsablesIds(organisme),
-];
-
-async function surclasserParTransmetteur(
-  siret: string,
-  sourceOrganismeId: string | null | undefined,
-  projection: Record<string, unknown>
-): Promise<{ organisme: IOrganisme; mode: "transmetteur" | "famille" } | null> {
-  if (!sourceOrganismeId || !ObjectId.isValid(sourceOrganismeId)) {
-    return null;
-  }
-  const transmetteur = await organismesDb().findOne(
-    { _id: new ObjectId(sourceOrganismeId) },
-    { projection: { organismesFormateurs: 1, organismesResponsables: 1 } }
-  );
-  if (!transmetteur) {
-    return null;
-  }
-
-  const projectionCandidats =
-    Object.keys(projection).length === 0
-      ? {}
-      : { ...projection, uai: 1, siret: 1, organismesFormateurs: 1, organismesResponsables: 1 };
-  const candidats = await organismesDb()
-    .find({ siret, ferme: { $ne: true } }, { projection: projectionCandidats, sort: { _id: 1 } })
-    .toArray();
-
-  const transmetteurLui = candidats.find((candidat) => candidat._id.equals(transmetteur._id));
-  if (transmetteurLui) {
-    return { organisme: transmetteurLui, mode: "transmetteur" };
-  }
-  const relationsTransmetteur = relationsIds(transmetteur);
-  const famille = candidats.find(
-    (candidat) =>
-      relationsTransmetteur.some((id) => id.equals(candidat._id)) ||
-      relationsIds(candidat).some((id) => id.equals(transmetteur._id))
-  );
-  return famille ? { organisme: famille, mode: "famille" } : null;
-}
-
-async function findOrganismeWithStats(
-  uai_etablissement: string,
-  siret_etablissement?: string,
-  projection: Record<string, unknown> = {},
-  sourceOrganismeId?: string | null
-): Promise<{ organisme: IOrganisme | null; stats: OrganismeSearchStatsInfos }> {
-  const stats: OrganismeSearchStatsInfos = {};
-
-  // 1. On essaie de corriger l'UAI et le SIRET avec la collection fiabilisationUaiSiret
-  const fiabilisationResult = await fiabilisationUaiSiret({
-    uai: uai_etablissement,
-    siret: siret_etablissement,
-  });
-
-  // 2. On cherche l'organisme avec le couple uai/siret
-  let organisme = await findOrganismeByUaiAndSiret(fiabilisationResult.uai, fiabilisationResult.siret, projection);
-  let retenu = { uai: fiabilisationResult.uai, siret: fiabilisationResult.siret };
-  let attribution = fiabilisationResult.mode;
-  const siretDuResponsable =
-    fiabilisationResult.api_response?.resultat?.correspondances.siret?.son_responsable === true;
-
-  if (attribution === "lieu" && siret_etablissement && !siretDuResponsable) {
-    const surclassement = await surclasserParTransmetteur(siret_etablissement, sourceOrganismeId, projection);
-    if (surclassement) {
-      organisme = surclassement.organisme;
-      retenu = { uai: surclassement.organisme.uai, siret: surclassement.organisme.siret };
-      attribution = surclassement.mode;
-    }
-  }
-
-  // 3. Des indicateurs pour apporter des informations sur le traitement
-  stats.uai = uai_etablissement;
-  if (retenu.uai !== uai_etablissement) {
-    stats.uai_corrige = retenu.uai ?? undefined;
-  }
-  stats.siret = siret_etablissement;
-  if (retenu.siret !== siret_etablissement) {
-    stats.siret_corrige = retenu.siret ?? undefined;
-  }
-  stats.fiabilisation = fiabilisationResult.statut;
-  stats.attribution = attribution;
-  stats.uai_retenue = retenu.uai ?? null;
-  stats.siret_retenu = retenu.siret ?? null;
-  stats.found = !!organisme;
-  if (organisme) {
-    stats.id = organisme._id.toString();
-  }
-  return { organisme, stats };
-}
 
 const handleDECAMechanism = async (organismeTarget: IOrganisme | null | undefined) => {
   if (!organismeTarget) {

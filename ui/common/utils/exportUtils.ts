@@ -91,5 +91,3 @@ export function exportMultiSheetXlsx(filename: string, sheets: SheetData[]) {
 
   writeFileXLSX(workbook, filename, { compression: true });
 }
-
-export const MODEL_EXPORT_LAST_UPDATE = "29012025";

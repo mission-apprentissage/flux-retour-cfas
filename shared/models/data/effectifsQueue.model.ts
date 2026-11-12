@@ -82,6 +82,7 @@ const internalFields = {
     )
     .nullish(),
   computed_day: z.string().optional(),
+  upload_id: z.string({ description: "Identifiant de l'import par fichier qui a mis la ligne en file" }).optional(),
   has_error: z.boolean().optional(),
   organisme_attribution: z
     .object({

@@ -1,0 +1,698 @@
+export type ObligationChampTeleversement = "obligatoire" | "un_des_deux" | "selon_contrat" | "facultatif";
+
+export type GroupeChampTeleversement =
+  | "Apprenant"
+  | "Formation"
+  | "Établissements"
+  | "Contrat 1"
+  | "Contrat 2"
+  | "Contrat 3"
+  | "Contrat 4";
+
+export interface ChampTeleversement {
+  cle: string;
+  libelle: string;
+  alias: string[];
+  obligation: ObligationChampTeleversement;
+  avec?: string;
+  type: "string" | "date" | "boolean";
+  format: string;
+  exemple: string;
+  aide: string;
+  groupe: GroupeChampTeleversement;
+  sifa?: true;
+}
+
+const FORMAT_DATE = "JJ/MM/AAAA ou AAAA-MM-JJ, ou une cellule au format date";
+const FORMAT_UAI = "7 chiffres suivis d'une lettre";
+const FORMAT_SIRET = "14 chiffres";
+const FORMAT_BOOLEEN = "Oui ou Non (Vrai ou Faux accepté)";
+
+const champsContrat = (numero: 1 | 2 | 3 | 4): ChampTeleversement[] => {
+  const suffixe = numero === 1 ? "" : `_${numero}`;
+  const libelle = numero === 1 ? "du contrat" : `du contrat ${numero}`;
+  const groupe = `Contrat ${numero}` as GroupeChampTeleversement;
+  const alias = (base: string[]) => (numero === 1 ? base : []);
+  return [
+    {
+      cle: `contrat_date_debut${suffixe}`,
+      libelle: `Début ${libelle}`,
+      alias: alias(["Début contrat", "Date début contrat", "Date de début du contrat", "date_debut_contrat"]),
+      obligation: "selon_contrat",
+      type: "date",
+      format: FORMAT_DATE,
+      exemple: "01/09/2026",
+      aide: "Date de début du contrat d'apprentissage, celle du CERFA ou de la convention. Obligatoire dès que la fin, la rupture ou la cause de rupture de ce contrat est renseignée.",
+      groupe,
+    },
+    {
+      cle: `contrat_date_fin${suffixe}`,
+      libelle: `Fin ${libelle}`,
+      alias: alias(["Fin contrat", "Date fin contrat", "Date de fin du contrat", "date_fin_contrat"]),
+      obligation: "facultatif",
+      type: "date",
+      format: FORMAT_DATE,
+      exemple: "31/08/2028",
+      aide: "Date de fin prévue du contrat d'apprentissage, celle du CERFA ou de la convention.",
+      groupe,
+    },
+    {
+      cle: `siret_employeur${suffixe}`,
+      libelle: `SIRET de l'employeur ${libelle}`,
+      alias: alias(["SIRET employeur", "SIRET de l'employeur"]),
+      obligation: "facultatif",
+      type: "string",
+      format: FORMAT_SIRET,
+      exemple: "12345678901234",
+      aide: "SIRET de l'employeur chez qui se déroule le contrat.",
+      groupe,
+    },
+    {
+      cle: `contrat_date_rupture${suffixe}`,
+      libelle: `Rupture ${libelle}`,
+      alias: alias(["Date rupture", "Date de rupture", "Date de rupture du contrat", "date_rupture_contrat"]),
+      obligation: "facultatif",
+      type: "date",
+      format: FORMAT_DATE,
+      exemple: "15/01/2027",
+      aide: "Date de rupture du contrat, s'il a été rompu.",
+      groupe,
+    },
+    {
+      cle: `cause_rupture_contrat${suffixe}`,
+      libelle: `Cause de rupture ${libelle}`,
+      alias: alias(["Motif rupture", "Motif de rupture", "Cause de rupture"]),
+      obligation: "facultatif",
+      type: "string",
+      format: "Texte libre",
+      exemple: "Démission",
+      aide: "Cause de la rupture du contrat, en texte libre.",
+      groupe,
+    },
+  ];
+};
+
+export const CATALOGUE_CHAMPS_TELEVERSEMENT: ChampTeleversement[] = [
+  {
+    cle: "nom_apprenant",
+    libelle: "Nom",
+    alias: ["Nom de famille", "Nom de l'apprenant", "Nom d'usage"],
+    obligation: "obligatoire",
+    type: "string",
+    format: "Texte",
+    exemple: "Dupuis",
+    aide: "Nom de famille de l'apprenant, son nom d'usage.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "prenom_apprenant",
+    libelle: "Prénom",
+    alias: ["Prénom de l'apprenant"],
+    obligation: "obligatoire",
+    type: "string",
+    format: "Texte",
+    exemple: "Gaston",
+    aide: "Premier prénom de l'apprenant.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "date_de_naissance_apprenant",
+    libelle: "Date de naissance",
+    alias: ["Date naissance", "Né le", "Née le"],
+    obligation: "obligatoire",
+    type: "date",
+    format: FORMAT_DATE,
+    exemple: "15/03/2006",
+    aide: "Date de naissance de l'apprenant.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "sexe_apprenant",
+    libelle: "Sexe",
+    alias: ["Genre"],
+    obligation: "facultatif",
+    type: "string",
+    format: "F ou M (1, 2, H, Homme, Femme, Masculin, Féminin acceptés)",
+    exemple: "F",
+    aide: "Sexe de l'apprenant.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "code_postal_de_naissance_apprenant",
+    libelle: "Code postal de naissance",
+    alias: [],
+    obligation: "facultatif",
+    type: "string",
+    format: "5 chiffres",
+    exemple: "44400",
+    aide: "Code postal de la commune de naissance.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "code_commune_insee_de_naissance_apprenant",
+    libelle: "Code commune INSEE de naissance",
+    alias: [],
+    obligation: "facultatif",
+    type: "string",
+    format: "5 caractères",
+    exemple: "44109",
+    aide: "Code INSEE de la commune de naissance.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "email_contact",
+    libelle: "Email",
+    alias: ["Courriel", "Mail", "Adresse mail", "Adresse email", "Email de l'apprenant"],
+    obligation: "un_des_deux",
+    avec: "tel_apprenant",
+    type: "string",
+    format: "texte@domaine.fr",
+    exemple: "gaston.dupuis@domaine.fr",
+    aide: "Email de l'apprenant. Un email ou un téléphone est obligatoire : la Mission Locale en a besoin pour joindre le jeune.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "tel_apprenant",
+    libelle: "Téléphone",
+    alias: [
+      "Tél",
+      "Tel",
+      "Portable",
+      "Mobile",
+      "Téléphone portable",
+      "Numéro de téléphone",
+      "Téléphone de l'apprenant",
+    ],
+    obligation: "un_des_deux",
+    avec: "email_contact",
+    type: "string",
+    format: "10 chiffres, ou au format international",
+    exemple: "0612345678",
+    aide: "Téléphone de l'apprenant. Un téléphone ou un email est obligatoire : la Mission Locale en a besoin pour joindre le jeune.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "adresse_apprenant",
+    libelle: "Adresse",
+    alias: ["Adresse de l'apprenant", "Adresse postale"],
+    obligation: "facultatif",
+    type: "string",
+    format: "Texte",
+    exemple: "64 bis, route de Paris",
+    aide: "Adresse de résidence de l'apprenant : numéro, voie et complément.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "code_postal_apprenant",
+    libelle: "Code postal de résidence",
+    alias: ["Code postal", "CP"],
+    obligation: "un_des_deux",
+    avec: "code_commune_insee_apprenant",
+    type: "string",
+    format: "5 chiffres",
+    exemple: "44000",
+    aide: "Code postal du lieu de résidence. Le code postal ou le code commune INSEE est obligatoire : il sert à trouver la Mission Locale du jeune.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "code_commune_insee_apprenant",
+    libelle: "Code commune INSEE de résidence",
+    alias: ["Code INSEE", "Code commune"],
+    obligation: "un_des_deux",
+    avec: "code_postal_apprenant",
+    type: "string",
+    format: "5 caractères",
+    exemple: "44109",
+    aide: "Code INSEE de la commune de résidence. Le code commune INSEE ou le code postal est obligatoire : il sert à trouver la Mission Locale du jeune.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "ine_apprenant",
+    libelle: "INE",
+    alias: ["N° INE", "Numéro INE"],
+    obligation: "facultatif",
+    type: "string",
+    format: "11 caractères",
+    exemple: "1234567890A",
+    aide: "Identifiant national élève, attribué à tout élève, étudiant ou apprenti.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "rqth_apprenant",
+    libelle: "RQTH",
+    alias: [],
+    obligation: "facultatif",
+    type: "boolean",
+    format: FORMAT_BOOLEEN,
+    exemple: "Non",
+    aide: "Reconnaissance de la qualité de travailleur handicapé.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "date_rqth_apprenant",
+    libelle: "Date de RQTH",
+    alias: [],
+    obligation: "facultatif",
+    type: "date",
+    format: FORMAT_DATE,
+    exemple: "01/06/2025",
+    aide: "Date de reconnaissance de la qualité de travailleur handicapé.",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "responsable_apprenant_mail1",
+    libelle: "Email du responsable légal 1",
+    alias: [],
+    obligation: "facultatif",
+    type: "string",
+    format: "texte@domaine.fr",
+    exemple: "marc.dupuis@domaine.fr",
+    aide: "Email du premier responsable légal (parent ou tuteur).",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "responsable_apprenant_mail2",
+    libelle: "Email du responsable légal 2",
+    alias: [],
+    obligation: "facultatif",
+    type: "string",
+    format: "texte@domaine.fr",
+    exemple: "jeanne.dupuis@domaine.fr",
+    aide: "Email du second responsable légal (parent ou tuteur).",
+    groupe: "Apprenant",
+  },
+  {
+    cle: "dernier_organisme_uai",
+    libelle: "Dernier organisme fréquenté",
+    alias: [],
+    obligation: "facultatif",
+    type: "string",
+    format: `${FORMAT_UAI}, ou un numéro de département sur 3 chiffres`,
+    exemple: "0123456A",
+    aide: "Établissement fréquenté l'année précédente. Champ de l'enquête SIFA, accepté mais plus demandé.",
+    groupe: "Apprenant",
+    sifa: true,
+  },
+  {
+    cle: "derniere_situation",
+    libelle: "Dernière situation",
+    alias: [],
+    obligation: "facultatif",
+    type: "string",
+    format: "4 chiffres de la nomenclature SIFA",
+    exemple: "4101",
+    aide: "Situation de l'année précédente. Champ de l'enquête SIFA, accepté mais plus demandé.",
+    groupe: "Apprenant",
+    sifa: true,
+  },
+  {
+    cle: "type_cfa",
+    libelle: "Type de CFA",
+    alias: [],
+    obligation: "facultatif",
+    type: "string",
+    format: "01 à 10",
+    exemple: "10",
+    aide: "Type de CFA au sens de l'enquête SIFA. Accepté mais plus demandé.",
+    groupe: "Apprenant",
+    sifa: true,
+  },
+  {
+    cle: "etablissement_responsable_uai",
+    libelle: "UAI du responsable",
+    alias: ["UAI responsable", "UAI de l'établissement responsable"],
+    obligation: "obligatoire",
+    type: "string",
+    format: FORMAT_UAI,
+    exemple: "0123456A",
+    aide: "UAI de l'établissement responsable, signataire du contrat et gestionnaire de la formation.",
+    groupe: "Établissements",
+  },
+  {
+    cle: "etablissement_responsable_siret",
+    libelle: "SIRET du responsable",
+    alias: ["SIRET responsable", "SIRET de l'établissement responsable"],
+    obligation: "obligatoire",
+    type: "string",
+    format: FORMAT_SIRET,
+    exemple: "12345678901234",
+    aide: "SIRET de l'établissement responsable.",
+    groupe: "Établissements",
+  },
+  {
+    cle: "etablissement_formateur_uai",
+    libelle: "UAI du formateur",
+    alias: ["UAI formateur", "UAI de l'établissement formateur"],
+    obligation: "obligatoire",
+    type: "string",
+    format: FORMAT_UAI,
+    exemple: "0123456A",
+    aide: "UAI de l'établissement qui accueille et forme l'apprenant. Il peut être différent du responsable.",
+    groupe: "Établissements",
+  },
+  {
+    cle: "etablissement_formateur_siret",
+    libelle: "SIRET du formateur",
+    alias: ["SIRET formateur", "SIRET de l'établissement formateur"],
+    obligation: "obligatoire",
+    type: "string",
+    format: FORMAT_SIRET,
+    exemple: "12345678901234",
+    aide: "SIRET de l'établissement formateur.",
+    groupe: "Établissements",
+  },
+  {
+    cle: "etablissement_lieu_de_formation_uai",
+    libelle: "UAI du lieu de formation",
+    alias: ["UAI lieu de formation"],
+    obligation: "facultatif",
+    type: "string",
+    format: FORMAT_UAI,
+    exemple: "0123456A",
+    aide: "UAI du lieu où se déroule la formation, s'il est différent du formateur.",
+    groupe: "Établissements",
+  },
+  {
+    cle: "etablissement_lieu_de_formation_siret",
+    libelle: "SIRET du lieu de formation",
+    alias: ["SIRET lieu de formation"],
+    obligation: "facultatif",
+    type: "string",
+    format: FORMAT_SIRET,
+    exemple: "12345678901234",
+    aide: "SIRET du lieu de formation.",
+    groupe: "Établissements",
+  },
+  {
+    cle: "etablissement_lieu_de_formation_adresse",
+    libelle: "Adresse du lieu de formation",
+    alias: [],
+    obligation: "facultatif",
+    type: "string",
+    format: "Texte",
+    exemple: "64 bis, route de Paris",
+    aide: "Adresse du lieu de formation.",
+    groupe: "Établissements",
+  },
+  {
+    cle: "etablissement_lieu_de_formation_code_postal",
+    libelle: "Code postal du lieu de formation",
+    alias: [],
+    obligation: "facultatif",
+    type: "string",
+    format: "5 chiffres",
+    exemple: "44000",
+    aide: "Code postal du lieu de formation.",
+    groupe: "Établissements",
+  },
+  {
+    cle: "annee_scolaire",
+    libelle: "Année scolaire",
+    alias: [],
+    obligation: "obligatoire",
+    type: "string",
+    format: "AAAA-AAAA",
+    exemple: "2026-2027",
+    aide: "Année scolaire de la formation suivie.",
+    groupe: "Formation",
+  },
+  {
+    cle: "annee_formation",
+    libelle: "Année de formation",
+    alias: [],
+    obligation: "facultatif",
+    type: "string",
+    format: "1 à 5",
+    exemple: "1",
+    aide: "Année de la formation suivie, par exemple 1 pour la première année.",
+    groupe: "Formation",
+  },
+  {
+    cle: "formation_rncp",
+    libelle: "Code RNCP",
+    alias: ["RNCP", "Code RNCP de la formation"],
+    obligation: "un_des_deux",
+    avec: "formation_cfd",
+    type: "string",
+    format: "RNCP suivi de 4 ou 5 chiffres",
+    exemple: "RNCP12345",
+    aide: "Code RNCP de la formation. Le code RNCP ou le code diplôme est obligatoire : il identifie la formation.",
+    groupe: "Formation",
+  },
+  {
+    cle: "formation_cfd",
+    libelle: "Code diplôme",
+    alias: ["CFD", "Code formation diplôme", "Code diplôme (CFD)"],
+    obligation: "un_des_deux",
+    avec: "formation_rncp",
+    type: "string",
+    format: "8 caractères",
+    exemple: "50022145",
+    aide: "Code diplôme (CFD) de la formation. Le code diplôme ou le code RNCP est obligatoire : il identifie la formation.",
+    groupe: "Formation",
+  },
+  {
+    cle: "date_inscription_formation",
+    libelle: "Date d'inscription",
+    alias: ["Date d'inscription en formation", "Inscription"],
+    obligation: "obligatoire",
+    type: "date",
+    format: FORMAT_DATE,
+    exemple: "01/09/2026",
+    aide: "Date à laquelle le jeune s'est inscrit en formation, avec ou sans contrat.",
+    groupe: "Formation",
+  },
+  {
+    cle: "date_entree_formation",
+    libelle: "Date d'entrée en formation",
+    alias: ["Date d'entrée", "Date début formation", "Date de début de formation", "Entrée en formation"],
+    obligation: "obligatoire",
+    type: "date",
+    format: FORMAT_DATE,
+    exemple: "01/09/2026",
+    aide: "Date à laquelle le jeune a commencé sa formation, avec ou sans contrat.",
+    groupe: "Formation",
+  },
+  {
+    cle: "date_fin_formation",
+    libelle: "Date de fin de formation",
+    alias: ["Date fin formation", "Fin de formation"],
+    obligation: "obligatoire",
+    type: "date",
+    format: FORMAT_DATE,
+    exemple: "30/06/2028",
+    aide: "Date de fin prévue de la formation. Elle doit être après la date d'entrée.",
+    groupe: "Formation",
+  },
+  {
+    cle: "duree_theorique_formation_mois",
+    libelle: "Durée théorique en mois",
+    alias: ["Durée théorique", "Durée de la formation"],
+    obligation: "facultatif",
+    type: "string",
+    format: "Nombre entier de 1 à 48",
+    exemple: "24",
+    aide: "Durée théorique de la formation en mois, de l'inscription au diplôme.",
+    groupe: "Formation",
+  },
+  {
+    cle: "libelle_court_formation",
+    libelle: "Libellé de la formation",
+    alias: ["Intitulé de la formation"],
+    obligation: "facultatif",
+    type: "string",
+    format: "Texte",
+    exemple: "CAP PATISSIER",
+    aide: "Libellé court de la formation.",
+    groupe: "Formation",
+  },
+  {
+    cle: "obtention_diplome_formation",
+    libelle: "Diplôme obtenu",
+    alias: [],
+    obligation: "facultatif",
+    type: "boolean",
+    format: FORMAT_BOOLEEN,
+    exemple: "Oui",
+    aide: "Oui si le diplôme a été obtenu à l'issue de la formation, Non sinon.",
+    groupe: "Formation",
+  },
+  {
+    cle: "date_obtention_diplome_formation",
+    libelle: "Date d'obtention du diplôme",
+    alias: [],
+    obligation: "facultatif",
+    type: "date",
+    format: FORMAT_DATE,
+    exemple: "30/06/2028",
+    aide: "Date d'obtention du diplôme, s'il a été obtenu.",
+    groupe: "Formation",
+  },
+  {
+    cle: "date_exclusion_formation",
+    libelle: "Date d'exclusion ou d'abandon",
+    alias: ["Date d'exclusion", "Date d'abandon", "Date de sortie"],
+    obligation: "facultatif",
+    type: "date",
+    format: FORMAT_DATE,
+    exemple: "15/01/2027",
+    aide: "Date à laquelle le jeune a quitté la formation : exclusion, abandon ou changement de CFA.",
+    groupe: "Formation",
+  },
+  {
+    cle: "cause_exclusion_formation",
+    libelle: "Cause d'exclusion ou d'abandon",
+    alias: ["Cause d'exclusion", "Motif de sortie"],
+    obligation: "facultatif",
+    type: "string",
+    format: "Texte libre",
+    exemple: "Absences répétées",
+    aide: "Cause de la sortie de formation, en texte libre.",
+    groupe: "Formation",
+  },
+  {
+    cle: "formation_presentielle",
+    libelle: "Formation en présentiel",
+    alias: [],
+    obligation: "facultatif",
+    type: "boolean",
+    format: FORMAT_BOOLEEN,
+    exemple: "Oui",
+    aide: "Non si la formation se déroule entièrement à distance.",
+    groupe: "Formation",
+  },
+  {
+    cle: "nom_referent_handicap_formation",
+    libelle: "Nom du référent handicap",
+    alias: [],
+    obligation: "facultatif",
+    type: "string",
+    format: "Texte",
+    exemple: "Dumas",
+    aide: "Nom du référent handicap de la formation, s'il y en a un.",
+    groupe: "Formation",
+  },
+  {
+    cle: "prenom_referent_handicap_formation",
+    libelle: "Prénom du référent handicap",
+    alias: [],
+    obligation: "facultatif",
+    type: "string",
+    format: "Texte",
+    exemple: "Sylvie",
+    aide: "Prénom du référent handicap de la formation, s'il y en a un.",
+    groupe: "Formation",
+  },
+  {
+    cle: "email_referent_handicap_formation",
+    libelle: "Email du référent handicap",
+    alias: [],
+    obligation: "facultatif",
+    type: "string",
+    format: "texte@domaine.fr",
+    exemple: "sylvie.dumas@domaine.fr",
+    aide: "Email du référent handicap de la formation, s'il y en a un.",
+    groupe: "Formation",
+  },
+  ...champsContrat(1),
+  ...champsContrat(2),
+  ...champsContrat(3),
+  ...champsContrat(4),
+];
+
+export const CLES_DATE_DEBUT_CONTRAT = [
+  "contrat_date_debut",
+  "contrat_date_debut_2",
+  "contrat_date_debut_3",
+  "contrat_date_debut_4",
+];
+
+export const CHAMPS_TELEVERSEMENT_PAR_CLE: Record<string, ChampTeleversement> = Object.fromEntries(
+  CATALOGUE_CHAMPS_TELEVERSEMENT.map((champ) => [champ.cle, champ])
+);
+
+const MOTS_IGNORES_EN_TETE = new Set(["de", "du", "des"]);
+
+export const normaliserEnTeteTeleversement = (enTete: string) => {
+  const mots = enTete
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/(^|[^a-z0-9])l['’]/g, "$1")
+    .split(/[^a-z0-9]+/);
+  return mots
+    .filter((mot, index) => !MOTS_IGNORES_EN_TETE.has(mot) && !(mot === "la" && mots[index - 1] === "de"))
+    .join("");
+};
+
+export const ERREURS_TELEVERSEMENT = {
+  format_refuse: () =>
+    "Ce fichier n'est pas un tableur. Déposez un fichier Excel (.xlsx, .xls), OpenDocument (.ods) ou CSV.",
+  plusieurs_fichiers: () => "Déposez un seul fichier à la fois.",
+  aucun_fichier: () => "Aucun fichier n'a été reçu. Déposez-le à nouveau.",
+  depot_impossible: () => "Ce fichier ne peut pas être déposé.",
+  fichier_vide: () =>
+    "Votre fichier ne contient aucun apprenant. Vérifiez que vos effectifs sont dans la première feuille.",
+  trop_de_lignes: ({ lignes, maximum }: { lignes: number; maximum: number }) =>
+    `Votre fichier contient ${lignes.toLocaleString("fr-FR")} apprenants. Le maximum est ${maximum.toLocaleString("fr-FR")} : coupez-le en deux fichiers.`,
+  fichier_protege: () =>
+    "Ce fichier est protégé par un mot de passe. Enregistrez-le sans mot de passe, puis déposez-le.",
+  cellule_obligatoire_vide: ({ libelle }: { libelle: string }) => `${libelle} : à renseigner.`,
+  date_illisible: ({ libelle, valeur }: { libelle: string; valeur: string }) =>
+    `${libelle} illisible : ${valeur}. Écrivez-la sous la forme 01/09/2026.`,
+  date_impossible: ({ valeur }: { valeur: string }) => `Le ${valeur} n'existe pas.`,
+  fin_avant_entree: ({ fin, entree }: { fin: string; entree: string }) =>
+    `La fin de formation (${fin}) est avant l'entrée en formation (${entree}).`,
+  etablissement_inconnu: ({ uai, siret }: { uai: string; siret: string }) =>
+    `Aucun établissement ne correspond à l'UAI ${uai} et au SIRET ${siret}. Vérifiez les deux numéros.`,
+  hors_perimetre: ({ uai, organisme }: { uai: string; organisme: string }) =>
+    `L'établissement ${uai} n'est pas rattaché à ${organisme}. Ses apprenants ne peuvent pas être importés ici.`,
+  code_formation_absent: () => "Indiquez le code RNCP ou le code diplôme de la formation.",
+  lieu_residence_absent: () =>
+    "Indiquez le code postal ou le code commune de résidence : il sert à trouver la Mission Locale du jeune.",
+  contact_absent: () => "Indiquez un téléphone ou un email : la Mission Locale en a besoin pour joindre le jeune.",
+  contrat_incomplet: () =>
+    "La date de début du contrat manque, alors que sa fin, sa rupture ou sa cause de rupture est renseignée.",
+  doublon_fichier: ({ apprenant, lignes }: { apprenant: string; lignes: number[] }) =>
+    `${apprenant} apparaît ${lignes.length === 2 ? "deux" : lignes.length} fois (lignes ${lignes.slice(0, -1).join(", ")} et ${lignes.at(-1)}) pour la même année. Gardez une seule ligne.`,
+  sexe: () => "Sexe : indiquez F ou M.",
+  valeur_mal_formee: ({ libelle, valeur, attendu }: { libelle: string; valeur: string; attendu: string }) =>
+    `${libelle} : valeur mal formée (${valeur}). ${attendu}`,
+  erreurs_avant_import: () => "Corrigez les erreurs avant d'importer.",
+  erreur_reseau: () =>
+    "Votre fichier n'a pas pu être envoyé. Vérifiez votre connexion et réessayez. Rien n'a été importé.",
+  api_indisponible: () =>
+    "La vérification des établissements est momentanément impossible. Réessayez dans quelques minutes. Rien n'a été importé.",
+  organisme_introuvable: () =>
+    "Impossible de charger cet organisme. Rechargez la page ou revenez à la liste des organismes.",
+  trop_d_etablissements: ({ etablissements, maximum }: { etablissements: number; maximum: number }) =>
+    `Votre fichier cite ${etablissements.toLocaleString("fr-FR")} établissements différents. Le maximum est ${maximum.toLocaleString("fr-FR")} : vérifiez les colonnes UAI et SIRET.`,
+  fichier_trop_lourd: () =>
+    "Votre fichier est trop volumineux pour être vérifié en une fois. Coupez-le en deux fichiers, puis déposez-les un par un.",
+  colonne_en_double: ({ libelle }: { libelle: string }) =>
+    `La colonne ${libelle} apparaît plusieurs fois. Gardez-en une seule.`,
+} as const;
+
+export type CodeErreurTeleversement = keyof typeof ERREURS_TELEVERSEMENT;
+
+export const TELEVERSEMENT_MAX_LIGNES = 5000;
+
+export const TELEVERSEMENT_MAX_ETABLISSEMENTS = 200;
+
+const nombre = (valeur: number) => valeur.toLocaleString("fr-FR");
+
+export const TEXTES_TELEVERSEMENT = {
+  limite_zone_depot: () =>
+    `Sélectionner un fichier contenant vos effectifs à importer (${nombre(TELEVERSEMENT_MAX_LIGNES)} au plus).`,
+  titre_succes: () => "Votre fichier est prêt.",
+  nouveaux_et_mis_a_jour: ({ nouveaux, misAJour }: { nouveaux: number; misAJour: number }) =>
+    `${nombre(nouveaux + misAJour)} apprenant${nouveaux + misAJour > 1 ? "s" : ""} : ${nombre(nouveaux)} nouveau${nouveaux > 1 ? "x" : ""} et ${nombre(misAJour)} mis à jour.`,
+  contrats_effaces: ({ nombre: total }: { nombre: number }) =>
+    total > 1
+      ? `${nombre(total)} apprentis ont un contrat connu qui n'est pas dans ce fichier. Il sera retiré à l'import.`
+      : "1 apprenti a un contrat connu qui n'est pas dans ce fichier. Il sera retiré à l'import.",
+  inscrits_sans_contrat: ({ nombre: total }: { nombre: number }) =>
+    total > 1
+      ? `${nombre(total)} jeunes sont inscrits sans contrat. S'ils ont un contrat, ajoutez sa date de début.`
+      : "1 jeune est inscrit sans contrat. S'il a un contrat, ajoutez sa date de début.",
+} as const;

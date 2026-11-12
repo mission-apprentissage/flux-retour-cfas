@@ -6,15 +6,17 @@ import * as Sentry from "@sentry/node";
 import { zUai } from "api-alternance-sdk/internal";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import express, { Application } from "express";
+import express, { Application, Response } from "express";
 import { ObjectId } from "mongodb";
 import passport from "passport";
 import { RateLimiterMemory } from "rate-limiter-flexible";
-import { CODE_POSTAL_REGEX, SOURCE_APPRENANT, zEffectifArchive } from "shared";
 import {
-  computeWarningsForDossierApprenantSchemaV3,
-  dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret,
-} from "shared/models/parts/dossierApprenantSchemaV3";
+  CODE_POSTAL_REGEX,
+  ERREURS_TELEVERSEMENT,
+  SOURCE_APPRENANT,
+  TELEVERSEMENT_MAX_LIGNES,
+  zEffectifArchive,
+} from "shared";
 import { extensions, primitivesV1 } from "shared/models/parts/zodPrimitives";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
@@ -30,8 +32,9 @@ import {
 } from "@/common/actions/account.actions";
 import { getEffectifForm, softDeleteEffectif, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
 import {
-  deleteOldestDuplicates,
   getDuplicatesEffectifsForOrganismeIdWithPagination,
+  supprimerDoublon,
+  supprimerDoublonsEnLot,
 } from "@/common/actions/effectifs.duplicates.actions";
 import { effectifsFiltersTerritoireSchema } from "@/common/actions/helpers/filters";
 import { journaliserImposture } from "@/common/actions/impersonation.actions";
@@ -43,7 +46,6 @@ import {
   getInvitationByToken,
   getOrganisationOrganisme,
   batchInviteUsersToOrganisation,
-  inviteUserToOrganisation,
   listOrganisationMembers,
   listOrganisationPendingInvitations,
   rejectInvitation,
@@ -58,8 +60,6 @@ import {
   findOrganismesBySIRET,
   findOrganismesByUAI,
   generateApiKeyForOrg,
-  getInvalidSiretsFromDossierApprenant,
-  getInvalidUaisFromDossierApprenant,
   getOrganisationIndicateursOrganismes,
   getOrganismeByAPIKey,
   getOrganismeById,
@@ -86,6 +86,8 @@ import {
   parseSuiviQuery,
   zSipaLoginBody,
 } from "@/common/actions/sipa.actions";
+import { genererModeleExcelTeleversement } from "@/common/actions/televersement/modele-excel.actions";
+import { lireLignesTeleversement, verifierTeleversement } from "@/common/actions/televersement/verification.actions";
 import {
   changePassword,
   getUserByEmail,
@@ -95,14 +97,13 @@ import {
 import { getCfdInfo, getCommune, getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
-import { effectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
+import { organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
 import { stripEmptyFields } from "@/common/utils/miscUtils";
-import stripNullProperties from "@/common/utils/stripNullProperties";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
@@ -118,7 +119,7 @@ import userProfileSchema from "@/common/validation/userProfileSchema";
 import config from "@/config";
 
 import { authMiddleware, checkActivationToken, checkPasswordToken } from "./helpers/passport-handlers";
-import errorMiddleware from "./middlewares/errorMiddleware";
+import errorMiddleware, { dependanceIndisponible } from "./middlewares/errorMiddleware";
 import {
   requireAdministrator,
   requireCfaAdminIfCfa,
@@ -318,6 +319,13 @@ function setupRoutes(app: Application) {
         };
       })
     )
+    .get("/api/v1/televersement/modele-excel", publicLimiter, async (_req, res) => {
+      const modele = await genererModeleExcelTeleversement();
+      res.attachment("modele-import-effectifs.xlsx");
+      res.contentType("xlsx");
+      res.set("Cache-Control", "public, max-age=3600");
+      res.send(modele);
+    })
     // Readiness : « les dépendances répondent-elles ? ». Renvoie 503 si Mongo est
     // injoignable, et n'est lue que par la supervision. Docker ne doit pas s'y fier :
     // redémarrer l'API ne répare pas Mongo, et une base brièvement absente pendant un
@@ -678,7 +686,7 @@ function setupRoutes(app: Application) {
         "/duplicates",
         requireOrganismePermission("manageEffectifs"),
         returnResult<OrganismeLocals>(async (req, res) => {
-          await deleteOldestDuplicates(res.locals.organismeId);
+          return await supprimerDoublonsEnLot(res.locals.organismeId, req.user._id);
         })
       )
       .put(
@@ -713,30 +721,34 @@ function setupRoutes(app: Application) {
           .Router()
           .post(
             "/validate",
-            returnResult(async (req) => {
-              const data = await z
-                .array(
-                  dossierApprenantSchemaV3WithMoreRequiredFieldsValidatingUAISiret(
-                    await getInvalidUaisFromDossierApprenant(Array.isArray(req.body) ? req.body : []),
-                    await getInvalidSiretsFromDossierApprenant(Array.isArray(req.body) ? req.body : [])
-                  )
-                )
-                .safeParseAsync(
-                  Array.isArray(req.body) ? req.body.map((dossier) => stripNullProperties(dossier)) : req.body
-                );
-              const warnings = computeWarningsForDossierApprenantSchemaV3(Array.isArray(req.body) ? req.body : []);
-              return { ...data, warnings };
+            returnResult<OrganismeLocals>(async (req, res) => {
+              const lignes = lireLignesTeleversement(req.body);
+              const verification = await verifierTeleversement(res.locals.organismeId, lignes);
+              if (verification.indisponible) {
+                throw dependanceIndisponible(ERREURS_TELEVERSEMENT.api_indisponible());
+              }
+              const { issues, warnings } = verification;
+              return issues.length > 0 ? { success: false, error: { issues }, warnings } : { success: true, warnings };
             })
           )
           .use(
             // v3 is required in URL to consider the request as a v3 import
             "/import/v3",
-            async (req, res, next) => {
+            async (req, res: Response<unknown, OrganismeLocals>, next) => {
+              const lignes = lireLignesTeleversement(req.body);
+              const verification = await verifierTeleversement(res.locals.organismeId, lignes);
+              if (verification.indisponible) {
+                throw dependanceIndisponible(ERREURS_TELEVERSEMENT.api_indisponible());
+              }
+              if (verification.issues.length > 0) {
+                throw Boom.badRequest(ERREURS_TELEVERSEMENT.erreurs_avant_import());
+              }
               req.user.source = SOURCE_APPRENANT.FICHIER;
               req.user.source_organisme_id = String(res.locals.organismeId);
+              res.locals.uploadId = new ObjectId().toString();
               next();
             },
-            dossierApprenantRouter()
+            dossierApprenantRouter({ maximumLignes: TELEVERSEMENT_MAX_LIGNES })
           )
       )
       .use(
@@ -855,7 +867,7 @@ function setupRoutes(app: Application) {
       "/api/v1/effectif/:id",
       requireEffectifOrganismePermission("manageEffectifs"),
       returnResult(async (req) => {
-        await effectifsDb().deleteOne({ _id: new ObjectId(req.params.id) });
+        await supprimerDoublon(new ObjectId(req.params.id), req.user._id);
       })
     );
 
@@ -926,13 +938,6 @@ function setupRoutes(app: Application) {
         })
       )
       .post(
-        "/membres",
-        returnResult(async (req) => {
-          const { email } = z.object({ email: z.string() }).parse(req.body);
-          await inviteUserToOrganisation(req.user, email.toLowerCase(), (req.user as AuthContext).organisation_id);
-        })
-      )
-      .post(
         "/membres/batch",
         requireCfaAdminIfCfa,
         heavyLimiter,
@@ -956,20 +961,23 @@ function setupRoutes(app: Application) {
       )
       .delete(
         "/membres/:userId",
+        requireCfaAdminIfCfa,
         returnResult(async (req) => {
-          await removeUserFromOrganisation(req.user, req.params.userId);
+          await removeUserFromOrganisation(req.user, req.params.userId as string);
         })
       )
       .post(
         "/membres/:userId/validate",
+        requireCfaAdminIfCfa,
         returnResult(async (req) => {
-          await validateMembre(req.user, req.params.userId);
+          await validateMembre(req.user, req.params.userId as string);
         })
       )
       .post(
         "/membres/:userId/reject",
+        requireCfaAdminIfCfa,
         returnResult(async (req) => {
-          await rejectMembre(req.user, req.params.userId);
+          await rejectMembre(req.user, req.params.userId as string);
         })
       )
       .put(
@@ -988,14 +996,16 @@ function setupRoutes(app: Application) {
       )
       .delete(
         "/invitations/:invitationId",
+        requireCfaAdminIfCfa,
         returnResult(async (req) => {
-          await cancelInvitation(req.user, req.params.invitationId);
+          await cancelInvitation(req.user, req.params.invitationId as string);
         })
       )
       .post(
         "/invitations/:invitationId/resend",
+        requireCfaAdminIfCfa,
         returnResult(async (req) => {
-          await resendInvitationEmail(req.user, req.params.invitationId);
+          await resendInvitationEmail(req.user, req.params.invitationId as string);
         })
       )
       .use("/mission-locale", requireMissionLocale, missionLocaleAuthentRoutes())

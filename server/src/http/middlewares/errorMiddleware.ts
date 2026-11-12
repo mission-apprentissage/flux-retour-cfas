@@ -92,9 +92,14 @@ export function normalizeToBoom(rawError: unknown): Boom.Boom {
   return boomError;
 }
 
+export function dependanceIndisponible(message: string): Boom.Boom {
+  return Boom.serverUnavailable(message, { dependanceDejaSignalee: true });
+}
+
 /** Seule règle de capture du serveur HTTP. */
 export function shouldReportError(boomError: Boom.Boom): boolean {
-  return boomError.isServer;
+  const data = boomError.data as { dependanceDejaSignalee?: boolean } | null;
+  return boomError.isServer && data?.dependanceDejaSignalee !== true;
 }
 
 export default (): ErrorRequestHandler => {

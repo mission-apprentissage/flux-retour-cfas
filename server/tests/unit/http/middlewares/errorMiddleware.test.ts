@@ -9,6 +9,7 @@ import errorMiddleware, {
   errorKindOf,
   normalizeToBoom,
   routeGroupOf,
+  dependanceIndisponible,
   shouldReportError,
 } from "@/http/middlewares/errorMiddleware";
 
@@ -97,6 +98,7 @@ describe("shouldReportError", () => {
     ["forbidden", Boom.forbidden()],
     ["badRequest", Boom.badRequest()],
     ["notFound", Boom.notFound()],
+    ["503 d'une dépendance déjà signalée", dependanceIndisponible("API indisponible")],
   ])("ne rapporte pas un %s", (_label, boom) => {
     expect(shouldReportError(boom)).toBe(false);
   });

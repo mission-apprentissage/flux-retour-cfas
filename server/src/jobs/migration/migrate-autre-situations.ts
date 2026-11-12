@@ -11,6 +11,7 @@ import {
 import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
 
+import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import parentLogger from "@/common/logger";
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
 
@@ -25,9 +26,9 @@ interface MigrateOptions {
 
 interface CsvRow {
   _id: string;
-  situation_autre: string;
-  commentaires: string;
-  probleme_type: string;
+  situation_autre?: string;
+  commentaires?: string;
+  probleme_type?: string;
   nouveau_motif: string;
 }
 
@@ -62,6 +63,10 @@ interface Report {
   notFound: string[];
   noSituation: string[];
   alreadyMigrated: string[];
+  softDeletedSansKeeper: string[];
+  redirigesVersKeeper: string[];
+  dejaCibles: string[];
+  nonModifies: string[];
   unknownMotif: Record<string, number>;
   noOpAutre: number;
   pendingUpdates: number;
@@ -77,6 +82,10 @@ const emptyReport = (): Report => ({
   notFound: [],
   noSituation: [],
   alreadyMigrated: [],
+  softDeletedSansKeeper: [],
+  redirigesVersKeeper: [],
+  dejaCibles: [],
+  nonModifies: [],
   unknownMotif: {},
   noOpAutre: 0,
   pendingUpdates: 0,
@@ -92,6 +101,84 @@ const parseProblemeType = (raw: string | undefined): PROBLEME_TYPE_ENUM | undefi
   const trimmed = raw?.trim();
   if (!trimmed) return undefined;
   return PROBLEME_TYPE_VALUES.has(trimmed) ? (trimmed as PROBLEME_TYPE_ENUM) : undefined;
+};
+
+const PROJECTION = {
+  _id: 1,
+  situation: 1,
+  soft_deleted: 1,
+  connaissance_ml: 1,
+  situation_autre: 1,
+  commentaires: 1,
+  probleme_type: 1,
+  probleme_detail: 1,
+  "effectif_snapshot.apprenant.nom": 1,
+  "effectif_snapshot.apprenant.prenom": 1,
+  "effectif_snapshot.apprenant.date_de_naissance": 1,
+} as const;
+
+type EffectifCharge = Pick<
+  IMissionLocaleEffectif,
+  | "_id"
+  | "situation"
+  | "soft_deleted"
+  | "connaissance_ml"
+  | "situation_autre"
+  | "commentaires"
+  | "probleme_type"
+  | "probleme_detail"
+  | "effectif_snapshot"
+>;
+
+type Identifiant = { nom: string; prenom: string; date_de_naissance: Date };
+
+const identifiantDe = (effectif: EffectifCharge): Identifiant | null => {
+  const apprenant = effectif.effectif_snapshot?.apprenant;
+  if (!apprenant?.nom || !apprenant?.prenom || !apprenant?.date_de_naissance) return null;
+  return normalisePersonIdentifiant({
+    nom: apprenant.nom,
+    prenom: apprenant.prenom,
+    date_de_naissance: apprenant.date_de_naissance,
+  });
+};
+
+const cleIdentifiant = (i: Identifiant) => `${i.nom}|${i.prenom}|${i.date_de_naissance.getTime()}`;
+
+const chargerKeepers = async (supprimes: EffectifCharge[]) => {
+  const identifiants = new Map<string, Identifiant>();
+  const cleParSupprime = new Map<string, string>();
+  for (const supprime of supprimes) {
+    const identifiant = identifiantDe(supprime);
+    if (!identifiant) continue;
+    const cle = cleIdentifiant(identifiant);
+    identifiants.set(cle, identifiant);
+    cleParSupprime.set(supprime._id.toString(), cle);
+  }
+  if (identifiants.size === 0) return new Map<string, EffectifCharge>();
+
+  const keepers = (await missionLocaleEffectifsDb()
+    .find(
+      {
+        soft_deleted: { $ne: true },
+        $or: [...identifiants.values()].map((i) => ({
+          "identifiant_normalise.nom": i.nom,
+          "identifiant_normalise.prenom": i.prenom,
+          "identifiant_normalise.date_de_naissance": i.date_de_naissance,
+        })),
+      },
+      { projection: { ...PROJECTION, identifiant_normalise: 1 } }
+    )
+    .toArray()) as Array<EffectifCharge & { identifiant_normalise?: Identifiant | null }>;
+  const keeperParCle = new Map(
+    keepers.flatMap((k) => (k.identifiant_normalise ? [[cleIdentifiant(k.identifiant_normalise), k] as const] : []))
+  );
+
+  const keeperParSupprime = new Map<string, EffectifCharge>();
+  for (const [supprimeId, cle] of cleParSupprime) {
+    const keeper = keeperParCle.get(cle);
+    if (keeper) keeperParSupprime.set(supprimeId, keeper);
+  }
+  return keeperParSupprime;
 };
 
 export async function migrateAutreSituations({ csvPath, dryRun }: MigrateOptions) {
@@ -141,63 +228,89 @@ export async function migrateAutreSituations({ csvPath, dryRun }: MigrateOptions
   const existing =
     idsToLoad.length === 0
       ? []
-      : await missionLocaleEffectifsDb()
-          .find({ _id: { $in: idsToLoad } }, { projection: { _id: 1, situation: 1 } })
-          .toArray();
-  const situationById = new Map<string, IMissionLocaleEffectif["situation"]>();
-  for (const e of existing) {
-    situationById.set(e._id.toString(), e.situation);
-  }
+      : ((await missionLocaleEffectifsDb()
+          .find({ _id: { $in: idsToLoad } }, { projection: PROJECTION })
+          .toArray()) as EffectifCharge[]);
+  const effectifById = new Map(existing.map((e) => [e._id.toString(), e]));
+  const keeperParSupprime = await chargerKeepers(existing.filter((e) => e.soft_deleted === true));
+  const now = new Date();
 
   // 3. Construit les opérations + logs ; rien n'est $unset pour préserver la donnée existante.
-  let pendingEffectifOps: AnyBulkWriteOperation<IMissionLocaleEffectif>[] = [];
-  let pendingLogDocs: IMissionLocaleEffectifLog[] = [];
+  let pending: {
+    _id: ObjectId;
+    op: AnyBulkWriteOperation<IMissionLocaleEffectif>;
+    log: IMissionLocaleEffectifLog;
+  }[] = [];
+  const cibles = new Set<string>();
 
   const flush = async () => {
-    const opsCount = pendingEffectifOps.length;
-    const logsCount = pendingLogDocs.length;
+    if (pending.length === 0) return;
 
     if (dryRun) {
-      report.pendingUpdates += opsCount;
-      pendingEffectifOps = [];
-      pendingLogDocs = [];
+      report.pendingUpdates += pending.length;
+      pending = [];
       return;
     }
 
-    if (opsCount > 0) {
-      const result = await missionLocaleEffectifsDb().bulkWrite(pendingEffectifOps, { ordered: false });
-      report.matched += result.matchedCount ?? 0;
-      report.updated += result.modifiedCount ?? 0;
-      if ((result.modifiedCount ?? 0) !== opsCount) {
-        logger.warn(
-          {
-            attempted: opsCount,
-            matched: result.matchedCount,
-            modified: result.modifiedCount,
-          },
-          "bulkWrite a modifié moins de documents que prévu (situation déjà migrée entre-temps?)"
-        );
+    const result = await missionLocaleEffectifsDb().bulkWrite(
+      pending.map((p) => p.op),
+      { ordered: false }
+    );
+    report.matched += result.matchedCount ?? 0;
+    report.updated += result.modifiedCount ?? 0;
+
+    const situationsApres = new Map(
+      (
+        await missionLocaleEffectifsDb()
+          .find({ _id: { $in: pending.map((p) => p._id) } }, { projection: { _id: 1, situation: 1 } })
+          .toArray()
+      ).map((e) => [e._id.toString(), e.situation])
+    );
+    const logs: IMissionLocaleEffectifLog[] = [];
+    for (const p of pending) {
+      if (situationsApres.get(p._id.toString()) === p.log.situation) {
+        logs.push(p.log);
+      } else {
+        report.nonModifies.push(p._id.toString());
       }
     }
 
-    if (logsCount > 0) {
-      const insertResult = await missionLocaleEffectifsLogDb().insertMany(pendingLogDocs, { ordered: false });
-      report.logsInserted += insertResult.insertedCount ?? logsCount;
+    if (logs.length > 0) {
+      const insertResult = await missionLocaleEffectifsLogDb().insertMany(logs, { ordered: false });
+      report.logsInserted += insertResult.insertedCount ?? logs.length;
     }
 
-    pendingEffectifOps = [];
-    pendingLogDocs = [];
+    pending = [];
   };
 
   for (const { row, _id, mapping, motif } of validRows) {
     const idKey = _id.toString();
 
-    if (!situationById.has(idKey)) {
+    const charge = effectifById.get(idKey);
+
+    if (!charge) {
       report.notFound.push(row._id);
       continue;
     }
 
-    const currentSituation = situationById.get(idKey);
+    let effectif = charge;
+    if (charge.soft_deleted === true) {
+      const keeper = keeperParSupprime.get(idKey);
+      if (!keeper) {
+        report.softDeletedSansKeeper.push(row._id);
+        continue;
+      }
+      effectif = keeper;
+      report.redirigesVersKeeper.push(`${row._id} (keeper ${keeper._id.toString()})`);
+    }
+
+    const cibleKey = effectif._id.toString();
+    if (cibles.has(cibleKey)) {
+      report.dejaCibles.push(row._id);
+      continue;
+    }
+
+    const currentSituation = effectif.situation;
 
     if (currentSituation == null) {
       // Effectif sans situation: la donnée est intacte, on ne migre pas.
@@ -210,48 +323,62 @@ export async function migrateAutreSituations({ csvPath, dryRun }: MigrateOptions
       continue;
     }
 
+    cibles.add(cibleKey);
+
+    const connaissanceMl =
+      mapping.connaissance_ml === CONNAISSANCE_ML_ENUM.CONNU_NON_ACCOMPAGNE &&
+      effectif.connaissance_ml === CONNAISSANCE_ML_ENUM.DEJA_ACCOMPAGNE_ACTIVEMENT
+        ? effectif.connaissance_ml
+        : mapping.connaissance_ml;
+
     const setObject: Record<string, unknown> = {
       situation: mapping.situation,
-      updated_at: new Date(),
     };
-    if (mapping.connaissance_ml !== undefined) {
-      setObject.connaissance_ml = mapping.connaissance_ml;
+    if (connaissanceMl !== undefined) {
+      setObject.connaissance_ml = connaissanceMl;
     }
     if (mapping.deja_connu !== undefined) {
       setObject.deja_connu = mapping.deja_connu;
     }
+    if (mapping.situation === SITUATION_ENUM.CONTACTE_SANS_RETOUR) {
+      setObject.date_traitement = null;
+      setObject.date_dernier_passage_a_recontacter = now;
+    }
 
-    pendingEffectifOps.push({
-      updateOne: {
-        filter: { _id, situation: SITUATION_ENUM.AUTRE },
-        update: { $set: setObject },
+    // Le log capture le snapshot pré-migration (situation_autre, commentaires, probleme_*)
+    // pour ne rien perdre — l'effectif lui-même conserve aussi ces champs (pas de $unset).
+    const situationAutre = effectif.situation_autre || row.situation_autre?.trim();
+    const commentaires = effectif.commentaires || row.commentaires?.trim();
+    const problemeType = effectif.probleme_type ?? parseProblemeType(row.probleme_type);
+    const problemeDetail = effectif.probleme_detail;
+
+    pending.push({
+      _id: effectif._id,
+      op: {
+        updateOne: {
+          filter: { _id: effectif._id, situation: SITUATION_ENUM.AUTRE },
+          update: { $set: setObject },
+        },
+      },
+      log: {
+        _id: new ObjectId(),
+        mission_locale_effectif_id: effectif._id,
+        situation: mapping.situation,
+        ...(connaissanceMl !== undefined ? { connaissance_ml: connaissanceMl } : {}),
+        ...(mapping.deja_connu !== undefined ? { deja_connu: mapping.deja_connu } : {}),
+        ...(situationAutre ? { situation_autre: situationAutre } : {}),
+        ...(commentaires ? { commentaires } : {}),
+        ...(problemeType ? { probleme_type: problemeType } : {}),
+        ...(problemeDetail ? { probleme_detail: problemeDetail } : {}),
+        created_at: now,
+        created_by: null,
+        read_by: [],
       },
     });
 
-    // Le log capture le snapshot pré-migration (situation_autre, commentaires, probleme_type)
-    // pour ne rien perdre — l'effectif lui-même conserve aussi ces champs (pas de $unset).
-    const csvSituationAutre = row.situation_autre?.trim();
-    const csvCommentaires = row.commentaires?.trim();
-    const csvProblemeType = parseProblemeType(row.probleme_type);
-
-    const logDoc: IMissionLocaleEffectifLog = {
-      _id: new ObjectId(),
-      mission_locale_effectif_id: _id,
-      situation: mapping.situation,
-      ...(mapping.connaissance_ml !== undefined ? { connaissance_ml: mapping.connaissance_ml } : {}),
-      ...(mapping.deja_connu !== undefined ? { deja_connu: mapping.deja_connu } : {}),
-      ...(csvSituationAutre ? { situation_autre: csvSituationAutre } : {}),
-      ...(csvCommentaires ? { commentaires: csvCommentaires } : {}),
-      ...(csvProblemeType ? { probleme_type: csvProblemeType } : {}),
-      created_at: new Date(),
-      created_by: null,
-      read_by: [],
-    };
-    pendingLogDocs.push(logDoc);
-
     report.byMotif[motif] = (report.byMotif[motif] ?? 0) + 1;
 
-    if (pendingEffectifOps.length >= BATCH_SIZE) {
+    if (pending.length >= BATCH_SIZE) {
       await flush();
     }
   }
@@ -270,6 +397,10 @@ export async function migrateAutreSituations({ csvPath, dryRun }: MigrateOptions
       notFound: report.notFound.length,
       noSituation: report.noSituation.length,
       alreadyMigrated: report.alreadyMigrated.length,
+      softDeletedSansKeeper: report.softDeletedSansKeeper.length,
+      redirigesVersKeeper: report.redirigesVersKeeper.length,
+      dejaCibles: report.dejaCibles.length,
+      nonModifies: report.nonModifies.length,
       invalidIds: report.invalidIds,
       unknownMotif: report.unknownMotif,
       byMotif: report.byMotif,
@@ -292,6 +423,30 @@ export async function migrateAutreSituations({ csvPath, dryRun }: MigrateOptions
       "IDs déjà migrés (situation != AUTRE) — ignorés"
     );
   }
+  if (report.softDeletedSansKeeper.length > 0) {
+    logger.warn(
+      { ids: report.softDeletedSansKeeper, total: report.softDeletedSansKeeper.length },
+      "IDs soft-deleted sans dossier conservé retrouvé — ignorés"
+    );
+  }
+  if (report.redirigesVersKeeper.length > 0) {
+    logger.info(
+      { ids: report.redirigesVersKeeper, total: report.redirigesVersKeeper.length },
+      "IDs soft-deleted requalifiés sur leur dossier conservé"
+    );
+  }
+  if (report.dejaCibles.length > 0) {
+    logger.warn(
+      { ids: report.dejaCibles, total: report.dejaCibles.length },
+      "IDs dont le dossier est déjà requalifié par une autre ligne — ignorés"
+    );
+  }
+  if (report.nonModifies.length > 0) {
+    logger.warn(
+      { ids: report.nonModifies, total: report.nonModifies.length },
+      "Dossiers modifiés pendant le passage — ni requalifiés ni journalisés"
+    );
+  }
 
-  return 0;
+  return report;
 }

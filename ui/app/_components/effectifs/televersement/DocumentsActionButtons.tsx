@@ -3,7 +3,7 @@
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
-import { MODEL_EXPORT_LAST_UPDATE } from "@/common/utils/exportUtils";
+import { publicConfig } from "@/config.public";
 
 import { InfoTeleversement } from "./InfoTeleversement";
 import styles from "./televersement.module.scss";
@@ -20,7 +20,7 @@ export function DocumentsActionButtons() {
     <>
       <div className={styles.docsRow}>
         <a
-          href={`/modele-import-${MODEL_EXPORT_LAST_UPDATE}.xlsx`}
+          href={`${publicConfig.baseUrl}/api/v1/televersement/modele-excel`}
           target="_blank"
           rel="noopener noreferrer"
           className="fr-link"

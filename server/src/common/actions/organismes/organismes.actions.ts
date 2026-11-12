@@ -12,7 +12,6 @@ import {
   IOrganisationIndicateursOrganismes,
   IUsersMigration,
 } from "shared";
-import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import { IOrganisme, hasRecentTransmissions, withOrganismeListSummary } from "shared/models/data/organismes.model";
 
 import {
@@ -62,6 +61,23 @@ export const findOrganismeById = async (id: string | ObjectId, projection = {}) 
 /**
  * Méthode de mise à jour d'un organisme depuis son id
  */
+export async function signalerErreurTransmission(sourceOrganismeId: string | null | undefined, date: Date) {
+  if (!sourceOrganismeId || !ObjectId.isValid(sourceOrganismeId)) {
+    return;
+  }
+  await organismesDb().updateOne(
+    { _id: new ObjectId(sourceOrganismeId) },
+    { $set: { has_transmission_errors: true, transmission_errors_date: date, updated_at: date } }
+  );
+}
+
+export async function effacerAlerteTransmission(organismeId: ObjectId) {
+  await organismesDb().updateOne(
+    { _id: organismeId },
+    { $set: { has_transmission_errors: false, updated_at: new Date() }, $unset: { transmission_errors_date: 1 } }
+  );
+}
+
 export const updateOrganisme = async (_id: ObjectId, data: Partial<IOrganisme>) => {
   const organisme = await organismesDb().findOne({ _id });
   if (!organisme) {
@@ -1012,39 +1028,6 @@ function getOrganismeListProjection(
       },
     },
   });
-}
-
-export async function getInvalidUaisFromDossierApprenant(data: Partial<IEffectifQueue>[]): Promise<string[]> {
-  const uais = new Set<string>();
-  for (const dossier of data) {
-    if (typeof dossier.etablissement_formateur_uai === "string") uais.add(dossier.etablissement_formateur_uai);
-    if (typeof dossier.etablissement_responsable_uai === "string") uais.add(dossier.etablissement_responsable_uai);
-  }
-  const invalidsUais: string[] = [];
-  for (const uai of uais) {
-    const organisme = await organismesDb().findOne({ uai: { $eq: uai } });
-    if (!organisme) {
-      invalidsUais.push(uai);
-    }
-  }
-  return invalidsUais;
-}
-
-export async function getInvalidSiretsFromDossierApprenant(data: Partial<IEffectifQueue>[]): Promise<string[]> {
-  const sirets = new Set<string>();
-  for (const dossier of data) {
-    if (typeof dossier.etablissement_formateur_siret === "string") sirets.add(dossier.etablissement_formateur_siret);
-    if (typeof dossier.etablissement_responsable_siret === "string")
-      sirets.add(dossier.etablissement_responsable_siret);
-  }
-  const invalidsSirets: string[] = [];
-  for (const siret of sirets) {
-    const organisme = await organismesDb().findOne({ siret: { $eq: siret } });
-    if (!organisme) {
-      invalidsSirets.push(siret);
-    }
-  }
-  return invalidsSirets;
 }
 
 async function getMemberIdsOfOrganisme(organismeId: ObjectId): Promise<ObjectId[]> {
