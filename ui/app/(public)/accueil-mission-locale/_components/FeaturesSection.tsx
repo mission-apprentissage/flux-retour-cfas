@@ -84,7 +84,7 @@ const FEATURES: readonly [FeatureAccordionFeature, ...FeatureAccordionFeature[]]
   {
     id: "compte-rendu",
     label:
-      "Reportez sur le service le compte rendu de vos prises de contact avec les jeunes et participez la mission de lutte contre le décrochage de l’apprentissage",
+      "Reportez sur le service le compte rendu de vos prises de contact avec les jeunes et participez à la mission de lutte contre le décrochage de l’apprentissage et la prévention de rupture",
     description: (
       <ul>
         <li>
@@ -102,7 +102,7 @@ const FEATURES: readonly [FeatureAccordionFeature, ...FeatureAccordionFeature[]]
 export function FeaturesSection() {
   return (
     <BaseFeaturesAccordionSection
-      title="Identifiez, contactez et accompagnez les jeunes en rupture en collaboration direct avec les CFA"
+      title="Identifiez, contactez et accompagnez les jeunes en difficulté en collaboration directe avec les CFA"
       features={FEATURES}
       imgAlt="Aperçu du Tableau de bord pour les Missions Locales"
       imgPath={"/images/home/mission-locale/carousel-feature-"}

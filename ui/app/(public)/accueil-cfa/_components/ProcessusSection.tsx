@@ -5,10 +5,6 @@ const TITLE =
 
 const CARDS: Array<ProcessusCard> = [
   {
-    image: "/images/home/cfa/avantage-cfa-rupture.png",
-    title: "Détection automatique des rupturants",
-  },
-  {
     image: "/images/home/cfa/avantage-cfa-collab.png",
     title: "Collaboration avec la Mission Locale à votre initiative sur chaque dossier",
   },
@@ -27,5 +23,5 @@ const CARDS: Array<ProcessusCard> = [
 ];
 
 export function ProcessusSection() {
-  return <BaseProcessusSection title={TITLE} cards={CARDS} linkInscription="organisme_formation" />;
+  return <BaseProcessusSection title={TITLE} cards={CARDS} linkInscription="organisme_formation" layout="grid" />;
 }

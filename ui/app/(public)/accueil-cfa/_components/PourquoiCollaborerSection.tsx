@@ -11,7 +11,7 @@ type Aide = { iconClass: string; label: React.ReactNode };
 
 const AIDES: Array<Aide> = [
   {
-    iconClass: fr.cx("fr-icon-community-line"),
+    iconClass: fr.cx("fr-icon-community-fill"),
     label: (
       <>
         Aides
@@ -21,7 +21,7 @@ const AIDES: Array<Aide> = [
     ),
   },
   {
-    iconClass: fr.cx("fr-icon-stethoscope-line"),
+    iconClass: fr.cx("fr-icon-stethoscope-fill"),
     label: (
       <>
         Aides
@@ -30,7 +30,7 @@ const AIDES: Array<Aide> = [
     ),
   },
   {
-    iconClass: fr.cx("fr-icon-file-text-line"),
+    iconClass: fr.cx("fr-icon-file-text-fill"),
     label: (
       <>
         Aides
@@ -40,7 +40,7 @@ const AIDES: Array<Aide> = [
     ),
   },
   {
-    iconClass: fr.cx("fr-icon-bike-line"),
+    iconClass: fr.cx("fr-icon-bike-fill"),
     label: (
       <>
         Aides
@@ -48,9 +48,9 @@ const AIDES: Array<Aide> = [
       </>
     ),
   },
-  { iconClass: fr.cx("fr-icon-computer-line"), label: "Accompagnement au numérique" },
-  { iconClass: fr.cx("fr-icon-money-euro-circle-line"), label: "Aides financières" },
-  { iconClass: fr.cx("fr-icon-team-line"), label: "Soutien dans la médiation sociale" },
+  { iconClass: fr.cx("fr-icon-computer-fill"), label: "Accompagnement au numérique" },
+  { iconClass: fr.cx("fr-icon-money-euro-circle-fill"), label: "Aides financières" },
+  { iconClass: fr.cx("fr-icon-team-fill"), label: "Soutien dans la médiation sociale" },
 ];
 
 export function PourquoiCollaborerSection() {
@@ -77,9 +77,9 @@ export function PourquoiCollaborerSection() {
       <div className={styles.titleBlock}>
         <p className={styles.eyebrow}>Pourquoi collaborer avec les Missions Locales ?</p>
         <h2 className={styles.title}>
-          Quand la rupture s’installe et dure, la Mission Locale apporte ses solutions{" "}
+          Pour prévenir la rupture ou éviter le décrochage après une rupture complexe, appuyez-vous sur les solutions{" "}
           <span className={styles.titleAccent}>pédagogiques</span>, <span className={styles.titleAccent}>humaines</span>{" "}
-          et <span className={styles.titleAccent}>matérielles</span>.
+          et <span className={styles.titleAccent}>matérielles</span> des Missions Locales.
         </h2>
       </div>
       <p className={styles.subtitle}>Les freins périphériques pour lesquels la Mission Locale agit</p>

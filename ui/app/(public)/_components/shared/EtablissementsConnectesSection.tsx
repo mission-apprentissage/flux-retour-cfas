@@ -17,7 +17,7 @@ const LOGOS = [
     src: "/images/home/etablissements/cma-nouvelle-aquitaine.png",
     alt: "CMA — Chambre des métiers et de l’artisanat - Nouvelle-Aquitaine",
   },
-  { src: "/images/home/etablissements/cci-auvergne-rhone-alpes.png", alt: "CCI Auvergne-Rhône-Alpes" },
+  { src: "/images/home/etablissements/cci-france.png", alt: "CCI France" },
   { src: "/images/home/etablissements/btp-cfa-picardie.png", alt: "BTP-CFA Picardie" },
   { src: "/images/home/etablissements/ccca-btp.png", alt: "CCCA BTP" },
   { src: "/images/home/etablissements/groupe-institut-de-genech.png", alt: "Groupe Institut de Genech" },

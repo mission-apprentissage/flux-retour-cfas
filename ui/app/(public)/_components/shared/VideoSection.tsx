@@ -4,12 +4,18 @@ import styles from "./video-section.module.scss";
 
 const YOUTUBE_VIDEO_ID = "Al8aSdWTw94";
 
-export function VideoSection() {
+interface VideoSectionProps {
+  title: string;
+}
+
+export function VideoSection({ title }: VideoSectionProps) {
   const fullVideoUrl = `https://www.youtube.com/watch?v=${YOUTUBE_VIDEO_ID}`;
 
   return (
     <section className={styles.section}>
-      <h2 className={styles.title}>Les Missions Locales en parlent...</h2>
+      <div className={styles.heading}>
+        <h2 className={styles.title}>{title}</h2>
+      </div>
       <div className={styles.media}>
         <figure className={`fr-content-media ${styles.figure}`} role="group">
           <div className={`fr-responsive-vid ${styles.videoWrapper}`}>

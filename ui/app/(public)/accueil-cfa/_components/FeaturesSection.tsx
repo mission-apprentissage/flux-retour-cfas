@@ -8,20 +8,20 @@ import {
 const FEATURES: readonly [FeatureAccordionFeature, ...FeatureAccordionFeature[]] = [
   {
     id: "liste-effectifs",
-    label: "Accédez à la liste de vos effectifs en rupture de contrat",
+    label: "Accédez à la liste de vos effectifs",
     description: (
       <ul>
         <li>
+          Grâce à la base de données DECA, accédez à la liste de vos effectifs avant même de connecter votre ERP et
+          visualisez la liste de vos effectifs.
+        </li>
+        <li>
           Grâce à <strong>la connexion de votre ERP</strong> (logiciel de gestion de vos effectifs) directement au
-          Tableau de bord de l’apprentissage, consultez directement{" "}
-          <strong>la liste filtrée de vos effectifs en rupture</strong> de contrat d’apprentissage{" "}
-          <strong>classés par durée de rupture</strong> de contrat.
+          Tableau de bord de l’apprentissage, consultez directement <strong>la liste de vos effectifs.</strong>
         </li>
         <li>
           Cette liste est <strong>actualisée tous les jours</strong> et{" "}
-          <strong>prend en compte les informations que vous enregistrez sur votre ERP</strong>. Vous indiquez qu’un
-          jeune a retrouvé un contrat dans votre ERP, le lendemain il disparaît de la liste des effectifs en rupture sur
-          le Tableau de bord.
+          <strong>prend en compte les informations que vous enregistrez sur votre ERP</strong>.
         </li>
       </ul>
     ),
@@ -54,7 +54,7 @@ const FEATURES: readonly [FeatureAccordionFeature, ...FeatureAccordionFeature[]]
 export function FeaturesSection() {
   return (
     <BaseFeaturesAccordionSection
-      title="Profitez d’une opportunité de collaborer avec une Mission Locale pour chaque jeune en rupture"
+      title="Profitez d’une opportunité de collaborer avec une Mission Locale pour chaque jeune en difficulté"
       features={FEATURES}
       imgAlt="Aperçu du Tableau de bord pour les CFA"
       imgPath="/images/home/cfa/carousel-feature-"

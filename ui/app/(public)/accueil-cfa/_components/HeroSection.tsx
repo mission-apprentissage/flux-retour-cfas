@@ -17,8 +17,8 @@ export function HeroSection() {
         <h1 className={styles.title}>
           L’outil de <span className={styles.titleHighlight}>collaboration avec les Missions Locales</span> pour{" "}
           <span className={styles.titleHighlight}>l’accompagnement</span> des{" "}
-          <span className={styles.titleHighlight}>jeunes en rupture</span> de{" "}
-          <span className={styles.titleHighlight}>contrat d’apprentissage</span>.
+          <span className={styles.titleHighlight}>jeunes en difficulté</span> pendant un{" "}
+          <span className={styles.titleHighlight}>apprentissage</span>.
         </h1>
         <p className={styles.subtitle}>Pour les CFA</p>
       </div>
@@ -68,21 +68,22 @@ export function HeroSection() {
               className={styles.dashboardPreview}
               width={996}
               height={560}
-              poster="/videos/hero-poster.webp"
+              poster="/videos/hero-v2-poster.webp"
               autoPlay
               muted
               loop
               playsInline
               preload="metadata"
-              aria-label="Aperçu animé du Tableau de bord pour les CFA"
+              aria-label="Aperçu animé du Tableau de bord pour les CFA et les Missions Locales"
               aria-describedby="hero-cfa-video-description"
             >
-              <source src="/videos/hero.webm" type="video/webm" />
-              <source src="/videos/hero.mp4" type="video/mp4" />
+              <source src="/videos/hero-v2.webm" type="video/webm" />
+              <source src="/videos/hero-v2.mp4" type="video/mp4" />
             </video>
             <p id="hero-cfa-video-description" className={styles.srOnly}>
-              Démonstration sans son : interface du Tableau de bord pour les CFA présentant la liste des apprenants en
-              rupture de contrat, l’ouverture d’une fiche navette et un échange de messages avec une Mission Locale.
+              Démonstration sans son : interface du Tableau de bord, d’abord côté CFA avec la liste des effectifs et le
+              démarrage d’une collaboration, puis côté Mission Locale avec la liste des dossiers prioritaires et la
+              fiche navette partagée.
             </p>
             <PauseButton isPaused={isPaused} togglePause={togglePause} className={styles.pauseButtonFlottant} />
           </div>

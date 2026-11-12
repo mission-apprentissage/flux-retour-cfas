@@ -10,9 +10,9 @@ export function MapStatsSection() {
       <div className={styles.mapBackground} aria-hidden="true">
         <div className={styles.mapImageContainer}>
           <Image
-            src="/images/home/territoire/carte.png"
-            width={429}
-            height={347}
+            src="/images/home/territoire/carte.svg"
+            width={447}
+            height={356}
             unoptimized
             alt="Carte de France des missions locales partenaires"
             sizes="(max-width: 768px) calc(100vw - 48px), 429px"
@@ -22,7 +22,7 @@ export function MapStatsSection() {
       </div>
       <div className={styles.titleBlock}>
         <h2 className={styles.title}>
-          +200 Missions Locales <br />
+          +340 Missions Locales <br />
           +1000 Établissements de formation
         </h2>
         <p className={styles.subtitle}>
@@ -50,14 +50,14 @@ export function MapStatsSection() {
         <div className={styles.cardColumn}>
           <div className={styles.cardHeader}>
             <Image
-              src="/images/home/territoire/paul-boris-bouzin.png"
+              src="/images/home/territoire/cassandra-malve.png"
               alt=""
               width={64}
               height={64}
               sizes="64px"
               className={styles.cardAvatar}
             />
-            <h3 className={styles.cardTitle}>Prenez rendez-vous avec Paul-Boris Bouzin</h3>
+            <h3 className={styles.cardTitle}>Prenez rendez-vous avec Cassandra Malvé</h3>
             <p className={styles.cardDescription}>
               Responsable du déploiement du service Tableau de bord de l’apprentissage
             </p>
@@ -65,11 +65,7 @@ export function MapStatsSection() {
           <Button
             iconId="fr-icon-external-link-line"
             iconPosition="right"
-            linkProps={{
-              href: "https://calendar.app.google/paul-boris-bouzin",
-              target: "_blank",
-              rel: "noopener noreferrer",
-            }}
+            linkProps={{ href: "mailto:cassandra.malve.ext@beta.gouv.fr" }}
           >
             Prendre rendez-vous
           </Button>
