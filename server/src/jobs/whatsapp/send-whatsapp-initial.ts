@@ -1,8 +1,9 @@
 import { ObjectId } from "mongodb";
 
 import parentLogger from "@/common/logger";
-import { reserveAndSendInjoignables } from "@/common/services/brevo/whatsapp/injoignables";
+import { abandonInjoignables, reserveAndSendInjoignables } from "@/common/services/brevo/whatsapp/injoignables";
 import { nextRetryDelayMs, scheduleWhatsAppInitial } from "@/common/services/brevo/whatsapp/queue";
+import { captureTiered } from "@/common/services/sentry/alertContract";
 
 const logger = parentLogger.child({ module: "job:whatsapp:send-initial" });
 
@@ -36,7 +37,15 @@ export async function sendWhatsAppInitial({
   });
 
   if (result.outcome === "retry" && delayMs !== null) {
-    await scheduleWhatsAppInitial(effectifId, missionLocaleId, { attempt: attempt + 1, delayMs });
+    try {
+      await scheduleWhatsAppInitial(effectifId, missionLocaleId, { attempt: attempt + 1, delayMs });
+    } catch (err) {
+      // Sans reprise planifiée, laisser `failed_send` figerait l'effectif : aucun job ne le reprendrait.
+      logger.error({ err, effectifId: String(effectifId), attempt }, "Échec de la replanification, envoi abandonné");
+      captureTiered(err, { errorKind: "db", fingerprintKey: "whatsapp:enqueue-initial-retry" });
+      await abandonInjoignables(new ObjectId(String(effectifId)));
+      return { outcome: "failed", reason: "replanification_impossible" };
+    }
     logger.warn({ effectifId: String(effectifId), attempt, delayMs }, "Message WhatsApp initial replanifié");
     return { outcome: "retry_scheduled", attempt: attempt + 1, delayMs };
   }

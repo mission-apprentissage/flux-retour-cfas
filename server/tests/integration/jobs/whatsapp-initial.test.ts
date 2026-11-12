@@ -317,6 +317,24 @@ describe("premier message WhatsApp « injoignables » en job", () => {
       );
     });
 
+    it("si la replanification échoue, clôt l'effectif au lieu de le laisser en failed_send", async () => {
+      vi.mocked(sendWhatsAppTemplate).mockResolvedValue({
+        success: false,
+        status: 503,
+        retryable: true,
+        safeToRetry: true,
+      });
+      vi.mocked(addJob).mockRejectedValueOnce(new Error("mongo down"));
+      const id = await insertEffectif();
+
+      const result = await sendWhatsAppInitial({ effectifId: id, missionLocaleId: mlId, attempt: 1 });
+
+      expect(result).toEqual({ outcome: "failed", reason: "replanification_impossible" });
+      const doc = await missionLocaleEffectifsDb().findOne({ _id: id });
+      expect(doc?.whatsapp_contact?.message_status).toBe("failed");
+      expect(doc?.whatsapp_contact?.conversation_state).toBe("closed");
+    });
+
     it("à la dernière tentative, clôt l'effectif au lieu de replanifier", async () => {
       vi.mocked(sendWhatsAppTemplate).mockResolvedValue({
         success: false,
