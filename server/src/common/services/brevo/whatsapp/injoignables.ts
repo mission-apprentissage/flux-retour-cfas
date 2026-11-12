@@ -25,6 +25,22 @@ interface ReserveAndSendInjoignablesOptions {
   canRetry?: boolean;
 }
 
+/** Clôt la conversation d'un envoi « injoignables » qui ne sera pas rejoué. */
+export async function abandonInjoignables(effectifId: ObjectId): Promise<void> {
+  const failedAt = new Date();
+  await missionLocaleEffectifsDb().updateOne(
+    { _id: effectifId },
+    {
+      $set: {
+        "whatsapp_contact.message_status": "failed",
+        "whatsapp_contact.status_updated_at": failedAt,
+        "whatsapp_contact.conversation_state": CONVERSATION_STATE.CLOSED,
+        updated_at: failedAt,
+      },
+    }
+  );
+}
+
 /**
  * Premier message WhatsApp « injoignables » : réserve l'effectif de façon atomique, puis envoie le template.
  * Appelé par le job `whatsapp:send-initial` et par le batch `tmp:whatsapp:send-injoignables`.
@@ -168,18 +184,7 @@ export async function reserveAndSendInjoignables({
     return { outcome: "retry" };
   }
 
-  const failedAt = new Date();
-  await missionLocaleEffectifsDb().updateOne(
-    { _id: effectifId },
-    {
-      $set: {
-        "whatsapp_contact.message_status": "failed",
-        "whatsapp_contact.status_updated_at": failedAt,
-        "whatsapp_contact.conversation_state": CONVERSATION_STATE.CLOSED,
-        updated_at: failedAt,
-      },
-    }
-  );
+  await abandonInjoignables(effectifId);
   logger.error(
     { ...logContext, status: result.status, error: result.error },
     "Failed to send WhatsApp initial message"

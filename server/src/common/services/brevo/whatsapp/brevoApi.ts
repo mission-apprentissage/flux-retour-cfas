@@ -103,6 +103,8 @@ export async function upsertBrevoContact(phoneNumber: string, attributes: Record
           "api-key": apiKey,
           "Content-Type": "application/json",
         },
+        // L'upsert est idempotent (`updateEnabled`) : on peut rejouer une coupure réseau, contrairement à un envoi.
+        "axios-retry": { retryCondition: axiosRetry.isNetworkError },
       }
     );
     logger.debug({ phoneNumber: maskPhone(formattedPhone) }, "Brevo contact upserted");
