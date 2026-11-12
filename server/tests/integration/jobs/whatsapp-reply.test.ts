@@ -304,7 +304,7 @@ describe("file d'envoi des réponses WhatsApp", () => {
   describe("enqueueWhatsAppReply", () => {
     it("n'enfile que des identifiants, sans prénom ni téléphone", async () => {
       const id = new ObjectId();
-      await enqueueWhatsAppReply(id, "prequalif_yes");
+      expect(await enqueueWhatsAppReply(id, "prequalif_yes")).toBe(true);
 
       expect(addJob).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -318,7 +318,7 @@ describe("file d'envoi des réponses WhatsApp", () => {
     it("ne lève jamais quand l'enqueue échoue", async () => {
       vi.mocked(addJob).mockRejectedValueOnce(new Error("mongo down"));
 
-      await expect(enqueueWhatsAppReply(new ObjectId(), "stop")).resolves.toBeUndefined();
+      await expect(enqueueWhatsAppReply(new ObjectId(), "stop")).resolves.toBe(false);
     });
   });
 });

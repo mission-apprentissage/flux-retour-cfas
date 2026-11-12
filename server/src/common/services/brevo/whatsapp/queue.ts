@@ -38,13 +38,15 @@ export async function scheduleWhatsAppReply(
 /**
  * Enfile l'envoi d'une réponse WhatsApp hors du chemin HTTP du webhook.
  * Ne lève jamais : l'état de la conversation est déjà enregistré, un échec d'enqueue ne doit pas
- * faire rejouer le webhook par Brevo.
+ * faire rejouer le webhook par Brevo. Renvoie `false` si la réponse n'a pas pu être enfilée.
  */
-export async function enqueueWhatsAppReply(effectifId: ObjectId | string, kind: WhatsAppReplyKind): Promise<void> {
+export async function enqueueWhatsAppReply(effectifId: ObjectId | string, kind: WhatsAppReplyKind): Promise<boolean> {
   try {
     await scheduleWhatsAppReply(effectifId, kind);
+    return true;
   } catch (err) {
     logger.error({ err, effectifId: String(effectifId), kind }, "Échec de l'enqueue de la réponse WhatsApp");
     captureTiered(err, { errorKind: "db", fingerprintKey: "whatsapp:enqueue-reply", extra: { kind } });
+    return false;
   }
 }
