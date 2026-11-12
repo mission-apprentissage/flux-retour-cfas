@@ -23,5 +23,5 @@ const CARDS: Array<ProcessusCard> = [
 ];
 
 export function ProcessusSection() {
-  return <BaseProcessusSection title={TITLE} cards={CARDS} linkInscription="organisme_formation" />;
+  return <BaseProcessusSection title={TITLE} cards={CARDS} linkInscription="organisme_formation" layout="grid" />;
 }

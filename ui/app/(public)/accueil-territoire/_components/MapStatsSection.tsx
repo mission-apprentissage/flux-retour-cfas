@@ -62,11 +62,13 @@ export function MapStatsSection() {
               Responsable du déploiement du service Tableau de bord de l’apprentissage
             </p>
           </div>
-          <Tooltip kind="hover" title="Bientôt disponible">
-            <Button iconId="fr-icon-external-link-line" iconPosition="right">
-              Prendre rendez-vous
-            </Button>
-          </Tooltip>
+          <Button
+            iconId="fr-icon-external-link-line"
+            iconPosition="right"
+            linkProps={{ href: "mailto:cassandra.malve.ext@beta.gouv.fr" }}
+          >
+            Prendre rendez-vous
+          </Button>
         </div>
       </div>
     </section>

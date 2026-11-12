@@ -93,6 +93,25 @@
   }
 }
 
+.grid {
+  --card-width: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+
+  @include respond-from(md) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  @include respond-from(lg) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 .track {
   display: flex;
   gap: var(--card-gap);

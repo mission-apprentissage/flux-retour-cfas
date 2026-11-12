@@ -19,19 +19,69 @@ export type ProcessusCard = {
 
 const TRANSITION_DURATION = 500;
 
-export function BaseProcessusSection({
-  title,
-  subtitle = "Moins de courriels qui se perdent, moins de temps à chercher les contacts dans un annuaire de Missions Locales. Concentrez-vous sur l’accompagnement.",
-  cards,
-  linkInscription,
-  ariaLabel = "Avantages de la collaboration sur le Tableau de bord",
-}: {
+const DEFAULT_SUBTITLE =
+  "Moins de courriels qui se perdent, moins de temps à chercher les contacts dans un annuaire de Missions Locales. Concentrez-vous sur l’accompagnement.";
+const DEFAULT_ARIA_LABEL = "Avantages de la collaboration sur le Tableau de bord";
+
+type BaseProcessusSectionProps = {
   title: string;
   subtitle?: string;
   cards: Array<ProcessusCard>;
   linkInscription: TypeOrganisationInscription;
   ariaLabel?: string;
-}) {
+  // "grid" : cartes affichées en ligne, sans animation ni contrôles (adapté à 4 cartes ou moins)
+  layout?: "carousel" | "grid";
+};
+
+export function BaseProcessusSection({ layout = "carousel", ...props }: BaseProcessusSectionProps) {
+  return layout === "grid" ? <ProcessusGrid {...props} /> : <ProcessusCarousel {...props} />;
+}
+
+function ProcessusGrid({
+  title,
+  subtitle = DEFAULT_SUBTITLE,
+  cards,
+  linkInscription,
+  ariaLabel = DEFAULT_ARIA_LABEL,
+}: Omit<BaseProcessusSectionProps, "layout">) {
+  const inscriptionHref = PAGES.dynamic.authInscription({ typeOrganisation: linkInscription }).getPath();
+
+  return (
+    <section className={styles.section} aria-label={ariaLabel}>
+      <div className={styles.contentWrapper}>
+        <div className={styles.intro}>
+          <h2 className={styles.title}>{title}</h2>
+          <p className={styles.subtitle}>{subtitle}</p>
+        </div>
+
+        <ul className={styles.grid}>
+          {cards.map((card) => (
+            <li key={card.title} className={styles.card}>
+              <div className={styles.cardImageWrapper}>
+                <Image src={card.image} alt="" width={120} height={80} className={styles.cardImage} />
+              </div>
+              <p className={styles.cardTitle}>{card.title}</p>
+            </li>
+          ))}
+        </ul>
+
+        <div className={styles.cta}>
+          <Button iconId="fr-icon-arrow-right-line" iconPosition="right" linkProps={{ href: inscriptionHref }}>
+            Commencer à collaborer
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ProcessusCarousel({
+  title,
+  subtitle = DEFAULT_SUBTITLE,
+  cards,
+  linkInscription,
+  ariaLabel = DEFAULT_ARIA_LABEL,
+}: Omit<BaseProcessusSectionProps, "layout">) {
   const inscriptionHref = PAGES.dynamic.authInscription({ typeOrganisation: linkInscription }).getPath();
   const count = cards.length;
   const trackCards = [...cards, ...cards, ...cards];
