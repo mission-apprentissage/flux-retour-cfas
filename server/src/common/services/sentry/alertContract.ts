@@ -72,6 +72,9 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   // ─── Jobs enfilés par les autres crons ────────────────────────────────────
   "brevo-contacts:sync": { tier: "jour" },
   "whatsapp:send-prequalif-daily": { tier: "jour" },
+  // Enfilés par le webhook et par l'agent ML, pas par un cron : un échec laisse un jeune sans réponse.
+  "whatsapp:send-reply": { tier: "jour" },
+  "whatsapp:send-initial": { tier: "jour" },
   "send-mission-locale-weekly-recap": { tier: "jour" },
   "send-mission-locale-daily-recap": { tier: "jour" },
   "send-cfa-daily-recap": { tier: "jour" },

@@ -21,6 +21,11 @@ describe("JOB_META", () => {
     expect(missing).toEqual([]);
   });
 
+  it("classe en « jour » les envois WhatsApp enfilés hors cron, dont l'échec laisse un jeune sans message", () => {
+    expect(JOB_META["whatsapp:send-reply"]?.tier).toBe("jour");
+    expect(JOB_META["whatsapp:send-initial"]?.tier).toBe("jour");
+  });
+
   it("ne référence que des noms qui existent encore", () => {
     const known = new Set([...Object.keys(crons), ...Object.keys(jobs)]);
     const orphans = Object.keys(JOB_META).filter((name) => !known.has(name));
