@@ -114,7 +114,8 @@ export function applyAlertContract<T extends SentryEventLike>(event: T): T {
 }
 
 export type CaptureTieredOptions = {
-  tier: AlertTier;
+  /** Omis, le palier est laissé au contrat : `JOB_META` pour un job, sinon `veille`. */
+  tier?: AlertTier;
   errorKind?: ErrorKind;
   /** Nom du service amont, pour les règles qui surveillent les dépendances. */
   upstream?: string;
@@ -127,7 +128,7 @@ export type CaptureTieredOptions = {
 /** Point d'entrée unique des captures explicites, pour que le niveau soit lisible sur place. */
 export function captureTiered(error: unknown, options: CaptureTieredOptions): void {
   withScope((scope) => {
-    scope.setTag("alert_tier", options.tier);
+    if (options.tier) scope.setTag("alert_tier", options.tier);
     if (options.errorKind) scope.setTag("error_kind", options.errorKind);
     if (options.upstream) scope.setTag("upstream", options.upstream);
     if (options.fingerprintKey) scope.setFingerprint([options.fingerprintKey]);

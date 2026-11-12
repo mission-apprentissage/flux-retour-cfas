@@ -2052,6 +2052,37 @@ describe("WhatsApp Service", () => {
       );
     });
 
+    describe.each([
+      { cas: "timeout (Brevo a pu envoyer)", echec: { retryable: true, safeToRetry: false }, attendu: "failed" },
+      {
+        cas: "500 (Brevo a pu envoyer)",
+        echec: { status: 500, retryable: true, safeToRetry: false },
+        attendu: "failed",
+      },
+      { cas: "503 (rien traité)", echec: { status: 503, retryable: true, safeToRetry: true }, attendu: "failed_send" },
+      { cas: "429 (rien traité)", echec: { status: 429, retryable: true, safeToRetry: true }, attendu: "failed_send" },
+      { cas: "400 (refus définitif)", echec: { status: 400, retryable: false, safeToRetry: false }, attendu: "failed" },
+    ])("échec Brevo : $cas", ({ echec, attendu }) => {
+      it(`pose message_status=${attendu} et retourne 'failed'`, async () => {
+        mutableConfig.env = "local";
+        mutableConfig.brevo.whatsapp.testPhoneOverride = "+33612345678";
+        vi.mocked(sendWhatsAppTemplate).mockResolvedValueOnce({ success: false, error: "boom", ...echec });
+
+        const id = await insertCandidate();
+        const result = await reserveAndSendPrequalif({
+          effectifId: id,
+          targetPhone: "+33688888888",
+          prenom: "Test",
+          mlNom: "ML",
+          sentVia: "daily",
+        });
+
+        assert.strictEqual(result, "failed");
+        const after = await missionLocaleEffectifsDb().findOne({ _id: id });
+        assert.strictEqual(after?.whatsapp_contact?.message_status, attendu);
+      });
+    });
+
     it("isPhoneAlreadyContacted bypass : non-prod+override → false même si phone partagé (envois successifs OK)", async () => {
       mutableConfig.env = "local";
       mutableConfig.brevo.whatsapp.testPhoneOverride = "+33612345678";

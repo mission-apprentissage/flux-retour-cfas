@@ -74,6 +74,13 @@ describe("captureTiered", () => {
     expect(captureException).toHaveBeenCalledWith(error);
   });
 
+  it("sans niveau, ne pose pas alert_tier et laisse le contrat décider", () => {
+    captureTiered(new Error("boom"), { errorKind: "upstream" });
+
+    expect(scope.setTag).toHaveBeenCalledWith("error_kind", "upstream");
+    expect(scope.setTag).not.toHaveBeenCalledWith("alert_tier", expect.anything());
+  });
+
   it("range les identifiants métier en contexte, jamais en tag", () => {
     captureTiered(new Error("boom"), { tier: "jour", extra: { siret: "12345678900011" } });
 
