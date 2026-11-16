@@ -1,11 +1,13 @@
 import type { Document } from "mongodb";
 import type {
   ICfaInviteSansCollabRow,
+  ICfaInvitesExportRow,
   ICfaInvitesSansCollabQuery,
   ICfaInvitesSansCollabResponse,
   ICfaInvitesSortBy,
 } from "shared/models/routes/admin/cfa-invites-sans-collab.api";
 
+import { listCfaInvitationsExportRows } from "@/common/actions/admin/collaborations/cfa-invitations-export.actions";
 import { buildDossierEnvoyeMatch } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
 import { buildCfaTerritoireMatch, type CfaTerritoire } from "@/common/actions/cfa/cfa-stats.actions";
 import { missionLocaleCfaInvitationsDb } from "@/common/model/collections";
@@ -182,4 +184,24 @@ export async function listCfaInvitesSansCollab(
       { $sort: SORT_STAGES[sort_by](sort_order === "asc" ? 1 : -1) },
     ])
     .toArray();
+}
+
+/** Export du tableau : une ligne par invitation reçue, avec les colonnes du CFA tel qu'il figure dans la liste. */
+export async function listCfaInvitesExport(
+  query: Pick<ICfaInvitesSansCollabQuery, "sort_by" | "sort_order">,
+  options: CfaInvitesSansCollabOptions = {}
+): Promise<ICfaInvitesExportRow[]> {
+  const [cfas, invitations] = await Promise.all([
+    listCfaInvitesSansCollab(query, options),
+    listCfaInvitationsExportRows({ territoire: options.territoire }),
+  ]);
+  const invitationsByOrganisme = new Map<string, ICfaInvitesExportRow["invitation"][]>();
+  for (const { organisme_id, row } of invitations) {
+    const deja = invitationsByOrganisme.get(organisme_id);
+    if (deja) deja.push(row);
+    else invitationsByOrganisme.set(organisme_id, [row]);
+  }
+  return cfas.flatMap((cfa) =>
+    (invitationsByOrganisme.get(cfa.organisme_id) ?? []).map((invitation) => ({ cfa, invitation }))
+  );
 }

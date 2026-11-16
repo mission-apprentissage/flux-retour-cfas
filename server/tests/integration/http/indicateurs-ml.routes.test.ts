@@ -1546,6 +1546,17 @@ describe("Indicateurs ML routes (territoriales)", () => {
       const exportAdmin = await requestAsOrganisation(ADMIN, "get", `${BASE}/export`);
       expect(exportAdmin.data.data).toHaveLength(2);
 
+      const exportRegion = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}/export?national=true`);
+      expect(exportRegion.status).toBe(200);
+      expect(exportRegion.data.data.map((row: { cfa: { raison_sociale: string } }) => row.cfa.raison_sociale)).toEqual([
+        "CFA IDF",
+      ]);
+      expect((await requestAsOrganisation(DREETS_IDF, "get", `${BASE}/export?region=84`)).status).toBe(403);
+      expect((await requestAsOrganisation(ARML_IDF, "get", `${BASE}/export`)).status).toBe(403);
+      const exportDdets = await requestAsOrganisation(DDETS_PARIS, "get", `${BASE}/export`);
+      expect(exportDdets.status).toBe(200);
+      expect(exportDdets.data.data).toEqual([]);
+
       expect((await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`)).status).toBe(200);
     });
 
@@ -1607,7 +1618,9 @@ describe("Indicateurs ML routes (territoriales)", () => {
         "get",
         `${BASE}/export?sort_by=collaborations&sort_order=asc`
       );
-      expect(exportAdmin.data.data.map((row: { nb_collaborations: number }) => row.nb_collaborations)).toEqual([0, 2]);
+      expect(
+        exportAdmin.data.data.map((row: { cfa: { nb_collaborations: number } }) => row.cfa.nb_collaborations)
+      ).toEqual([0, 2]);
     });
   });
 

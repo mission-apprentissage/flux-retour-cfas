@@ -254,22 +254,6 @@ export const cfaEtablissementsExportColumns = [
   { label: "Dernière activité", key: "derniere_activite", xlsxType: "date", width: 18 },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 
-export const cfaInvitesSansCollabExportColumns = [
-  { label: "Raison sociale", key: "raison_sociale", width: 45 },
-  { label: "UAI", key: "uai", xlsxType: "string", width: 12 },
-  { label: "SIRET", key: "siret", xlsxType: "string", width: 16 },
-  { label: "Compte TBA", key: "compte_tba", width: 12 },
-  { label: "Collaborations", key: "nb_collaborations", width: 14 },
-  { label: "Date d'activation du CFA", key: "date_activation", xlsxType: "date", width: 22 },
-  { label: "Date de première collaboration", key: "date_premiere_collaboration", xlsxType: "date", width: 28 },
-  { label: "Code postal", key: "code_postal", xlsxType: "string", width: 12 },
-  { label: "Commune", key: "commune", width: 25 },
-  { label: "Adresse", key: "adresse", width: 50 },
-  { label: "Invitations reçues", key: "invitations_recues", width: 18 },
-  { label: "ML invitantes", key: "ml_invitantes", width: 14 },
-  { label: "Dernière invitation", key: "derniere_invitation_at", xlsxType: "date", width: 18 },
-] as const satisfies ReadonlyArray<ExportColumn>;
-
 export const mlAlertesExportColumns = [
   { label: "Mission Locale", key: "nom", width: 45 },
   { label: "Code postal", key: "code_postal", xlsxType: "string", width: 12 },
@@ -441,6 +425,47 @@ export const cfaInvitationsExportColumns = [
     key: "date_premiere_connexion_apres_invitation_cfa",
     xlsxType: "date",
     width: 44,
+  },
+] as const satisfies ReadonlyArray<ExportColumn>;
+
+export const cfaInvitesSansCollabExportColumns = [
+  { label: "Raison sociale", key: "raison_sociale", width: 45 },
+  { label: "UAI", key: "uai", xlsxType: "string", width: 12 },
+  { label: "SIRET", key: "siret", xlsxType: "string", width: 16 },
+  { label: "Compte TBA", key: "compte_tba", width: 12 },
+  { label: "Collaborations (total)", key: "nb_collaborations", width: 22 },
+  { label: "Date d'activation du CFA", key: "date_activation", xlsxType: "date", width: 22 },
+  { label: "Date de première collaboration (total)", key: "date_premiere_collaboration", xlsxType: "date", width: 36 },
+  { label: "Code postal", key: "code_postal", xlsxType: "string", width: 12 },
+  { label: "Commune", key: "commune", width: 25 },
+  { label: "Adresse", key: "adresse", width: 50 },
+  { label: "Invitations reçues", key: "invitations_recues", width: 18 },
+  { label: "ML invitantes", key: "ml_invitantes", width: 14 },
+  { label: "Dernière invitation", key: "derniere_invitation_at", xlsxType: "date", width: 18 },
+  { label: "Date d'invitation", key: "date_invitation", xlsxType: "date", width: 16 },
+  { label: "Mission Locale invitante", key: "ml_nom", width: 40 },
+  { label: "Région de la Mission Locale", key: "region_ml", width: 26 },
+  { label: "Région du CFA", key: "region_cfa", width: 26 },
+  { label: "Département du CFA", key: "departement_cfa", width: 26 },
+  { label: "Code département du CFA", key: "departement_code_cfa", xlsxType: "string", width: 24 },
+  { label: "Nouveaux comptes du CFA après l'invitation", key: "nb_nouveaux_comptes_apres_cfa", width: 38 },
+  { label: "Date de dernière connexion du CFA", key: "date_derniere_connexion_cfa", xlsxType: "date", width: 32 },
+  { label: "Collaboration après l'invitation", key: "collab_apres_invitation_cfa", width: 28 },
+  { label: "Contacts du CFA ayant collaboré", key: "contacts_cfa_qui_ont_collabore", width: 45 },
+  { label: "Nb collaborations après l'invitation", key: "nb_collab_apres_invitation_cfa", width: 32 },
+  {
+    label: "Date de première collaboration après l'invitation",
+    key: "date_premiere_collab_apres_cfa",
+    xlsxType: "date",
+    width: 44,
+  },
+  { label: "Date de dernière collaboration", key: "date_derniere_collab_cfa", xlsxType: "date", width: 28 },
+  { label: "Connexion après l'invitation", key: "connexion_apres_invitation_cfa", width: 28 },
+  {
+    label: "Date de première connexion après l'invitation",
+    key: "date_premiere_connexion_apres_invitation_cfa",
+    xlsxType: "date",
+    width: 40,
   },
 ] as const satisfies ReadonlyArray<ExportColumn>;
 

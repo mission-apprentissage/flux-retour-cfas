@@ -5,6 +5,7 @@ import type {
   ICfaInvitationsExportResponse,
 } from "shared/models/routes/admin/cfa-invitations-export.api";
 
+import { buildCfaTerritoireMatch, type CfaTerritoire } from "@/common/actions/cfa/cfa-stats.actions";
 import {
   missionLocaleCfaInvitationsDb,
   missionLocaleEffectifsDb,
@@ -216,8 +217,26 @@ function buildRow(invitation: Invitation, ctx: Contexte): ICfaInvitationExportRo
   };
 }
 
-export async function getCfaInvitationsExportData(): Promise<ICfaInvitationsExportResponse> {
-  const invitations = await missionLocaleCfaInvitationsDb()
+/** Organismes du territoire, sur la même base que la liste des CFA (référentiel, non fermés). */
+async function filterByTerritoire(invitations: Invitation[], territoire: CfaTerritoire): Promise<Invitation[]> {
+  const organismes = await organismesDb()
+    .find(
+      {
+        _id: { $in: uniqueIds(invitations.map((invitation) => invitation.organisme_id)) },
+        ...buildCfaTerritoireMatch(territoire),
+      },
+      { projection: { _id: 1 } }
+    )
+    .toArray();
+  const idsDuTerritoire = new Set(organismes.map((organisme) => organisme._id.toString()));
+  return invitations.filter((invitation) => idsDuTerritoire.has(invitation.organisme_id.toString()));
+}
+
+/** Lignes d'export des invitations, avec l'identifiant du CFA invité pour pouvoir les rattacher à une autre liste. */
+export async function listCfaInvitationsExportRows(
+  options: { territoire?: CfaTerritoire } = {}
+): Promise<Array<{ organisme_id: string; row: ICfaInvitationExportRow }>> {
+  const toutes = await missionLocaleCfaInvitationsDb()
     .find<Invitation>(
       {},
       {
@@ -226,7 +245,8 @@ export async function getCfaInvitationsExportData(): Promise<ICfaInvitationsExpo
       }
     )
     .toArray();
-  if (invitations.length === 0) return { invitations: [] };
+  const invitations = options.territoire ? await filterByTerritoire(toutes, options.territoire) : toutes;
+  if (invitations.length === 0) return [];
 
   const organismeIds = uniqueIds(invitations.map((invitation) => invitation.organisme_id));
   const depuis = invitations[invitations.length - 1].created_at;
@@ -239,5 +259,12 @@ export async function getCfaInvitationsExportData(): Promise<ICfaInvitationsExpo
   ]);
 
   const ctx: Contexte = { missionsLocales, organismes, comptesByOrganisme, collaborationsByOrganisme };
-  return { invitations: invitations.map((invitation) => buildRow(invitation, ctx)) };
+  return invitations.map((invitation) => ({
+    organisme_id: invitation.organisme_id.toString(),
+    row: buildRow(invitation, ctx),
+  }));
+}
+
+export async function getCfaInvitationsExportData(): Promise<ICfaInvitationsExportResponse> {
+  return { invitations: (await listCfaInvitationsExportRows()).map(({ row }) => row) };
 }

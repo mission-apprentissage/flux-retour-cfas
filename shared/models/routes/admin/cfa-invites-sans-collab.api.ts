@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { ICfaInvitationExportRow } from "./cfa-invitations-export.api";
+
 export const CFA_INVITES_SORT_FIELDS = ["localisation", "invitations", "nom", "compte", "collaborations"] as const;
 export const zCfaInvitesSortBy = z.enum(CFA_INVITES_SORT_FIELDS);
 export type ICfaInvitesSortBy = z.output<typeof zCfaInvitesSortBy>;
@@ -35,6 +37,9 @@ const zCfaInviteSansCollabRow = z.object({
 });
 
 export type ICfaInviteSansCollabRow = z.output<typeof zCfaInviteSansCollabRow>;
+
+/** Une ligne d'export : une invitation reçue par le CFA, avec le CFA tel qu'il figure dans le tableau. */
+export type ICfaInvitesExportRow = { cfa: ICfaInviteSansCollabRow; invitation: ICfaInvitationExportRow };
 
 export const zCfaInvitesSansCollabResponse = z.object({
   total: z.number(),

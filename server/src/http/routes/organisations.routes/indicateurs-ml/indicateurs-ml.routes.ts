@@ -25,7 +25,7 @@ import { z } from "zod";
 
 import {
   getCfaInvitesSansCollab,
-  listCfaInvitesSansCollab,
+  listCfaInvitesExport,
 } from "@/common/actions/admin/collaborations/cfa-invites-sans-collab.actions";
 import {
   getMissionLocaleDetail,
@@ -758,10 +758,44 @@ const cfaInvitesOptions = (query: TerritoireQuery, userRegions: string[]) => ({
 const getCfaInvitesRoute: IndicateursHandler<z.infer<typeof cfaInvitesQuery>> = async (req, { locals }) =>
   getCfaInvitesSansCollab(req.query, cfaInvitesOptions(req.query, locals.regions));
 
+/**
+ * L'export contient les contacts des CFA (emails) : même périmètre que la liste nominative des collaborations.
+ * La DREETS reste dans sa région, la DDETS dans son département, la vue France est réservée à l'admin et l'ARML
+ * n'y a pas accès.
+ */
+const resolveCfaInvitesExportTerritoire = (
+  query: TerritoireQuery,
+  { organisation, regions: userRegions }: IndicateursMlLocals
+): Territoire => {
+  if (organisation.type === ORGANISATION_TYPE.ADMINISTRATEUR) {
+    return resolveTerritoire(query, userRegions);
+  }
+  if (organisation.type === ORGANISATION_TYPE.DDETS) {
+    const departement = (organisation as { code_departement?: string }).code_departement;
+    if (!departement || (query.departement && query.departement !== departement)) {
+      throw Boom.forbidden("Accès non autorisé à ce département");
+    }
+    return { regions: userRegions, departements: [departement] };
+  }
+  if (organisation.type === ORGANISATION_TYPE.DREETS) {
+    assertRegionAllowed(query.region, userRegions);
+    assertDepartementsAllowed(query.departement ? [query.departement] : undefined, userRegions);
+    return query.departement
+      ? resolveTerritoire(query, userRegions)
+      : { regions: scopedRegions(query.region, userRegions) };
+  }
+  throw Boom.forbidden("Accès non autorisé à l'export des invitations");
+};
+
 const getCfaInvitesExportRoute: IndicateursHandler<z.infer<typeof cfaInvitesExportQuery>> = async (
   req,
   { locals }
-) => ({ data: await listCfaInvitesSansCollab(req.query, cfaInvitesOptions(req.query, locals.regions)) });
+) => ({
+  data: await listCfaInvitesExport(req.query, {
+    territoire: resolveCfaInvitesExportTerritoire(req.query, locals),
+    inclureAvecCollab: true,
+  }),
+});
 
 const getCfaNpsRoute: IndicateursHandler<z.infer<typeof syntheseQuery>> = async (req, { locals }) => {
   const scope = await resolveStatsScope(req.query, locals.regions);

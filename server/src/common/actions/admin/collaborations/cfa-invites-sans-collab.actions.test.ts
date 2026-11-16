@@ -12,7 +12,11 @@ import {
 } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 
-import { getCfaInvitesSansCollab, listCfaInvitesSansCollab } from "./cfa-invites-sans-collab.actions";
+import {
+  getCfaInvitesSansCollab,
+  listCfaInvitesExport,
+  listCfaInvitesSansCollab,
+} from "./cfa-invites-sans-collab.actions";
 
 useMongo();
 
@@ -226,5 +230,28 @@ describe("getCfaInvitesSansCollab", () => {
 
     const all = await listCfaInvitesSansCollab({ sort_by: "compte", sort_order: "desc" }, options);
     expect(all.map((row) => row.raison_sociale)).toEqual(["Sans collab", "Collab 2025"]);
+  });
+
+  it("exporte une ligne par invitation, avec les colonnes du CFA et celles de l'invitation", async () => {
+    const referentiel = { est_dans_le_referentiel: "present" } as const;
+    const deuxInvitations = await insertOrganisme({ nom: "Deux invitations", ...referentiel });
+    const uneInvitation = await insertOrganisme({ nom: "Une invitation", ...referentiel });
+    await insertInvitation(deuxInvitations, ML_A, new Date("2026-09-01"));
+    await insertInvitation(deuxInvitations, ML_A, new Date("2026-09-05"));
+    await insertInvitation(uneInvitation, ML_A, new Date("2026-09-03"));
+    await insertCollab(deuxInvitations, false, undefined, new Date("2026-09-10"));
+
+    const rows = await listCfaInvitesExport(
+      { sort_by: "invitations", sort_order: "desc" },
+      { inclureAvecCollab: true }
+    );
+
+    expect(rows.map(({ cfa, invitation }) => [cfa.raison_sociale, invitation.raison_sociale_cfa])).toEqual([
+      ["Deux invitations", "Deux invitations"],
+      ["Deux invitations", "Deux invitations"],
+      ["Une invitation", "Une invitation"],
+    ]);
+    expect(rows[0].cfa.nb_collaborations).toBe(1);
+    expect(rows.map(({ invitation }) => invitation.nb_collab_apres_invitation_cfa)).toEqual([1, 1, 0]);
   });
 });
