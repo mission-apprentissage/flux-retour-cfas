@@ -131,6 +131,7 @@ import {
   requireIndicateursMlAccess,
   OrganismeLocals,
 } from "./middlewares/helpers";
+import limitBodyArrays from "./middlewares/limitBodyArrays";
 import { logMiddleware } from "./middlewares/logMiddleware";
 import { proxyIpVerification } from "./middlewares/proxyIpVerification";
 import {
@@ -271,6 +272,7 @@ export default async function createServer(): Promise<Application> {
       },
     })
   );
+  app.use(limitBodyArrays());
   app.use(logMiddleware);
   app.use(cookieParser());
   app.use(passport.initialize());
