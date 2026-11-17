@@ -7,7 +7,12 @@ import { configureDbSchemaValidation } from "@/common/mongodb";
 import { findInvalidDocuments } from "../db/findInvalidDocuments";
 import { recreateIndexes } from "../db/recreateIndexes";
 import { validateModels } from "../db/schemaValidation";
-import { create as createMigration, status as statusMigration, up as upMigration } from "../migrations/migrations";
+import {
+  assertNoMigrationLock,
+  create as createMigration,
+  status as statusMigration,
+  up as upMigration,
+} from "../migrations/migrations";
 
 import { payloadNumber } from "./payload";
 
@@ -51,6 +56,7 @@ export const dbMaintenanceJobs = {
   },
   "migrations:up": {
     handler: async () => {
+      await assertNoMigrationLock();
       await configureDbSchemaValidation(modelDescriptors, { level: "moderate" });
       await upMigration();
       await configureDbSchemaValidation(modelDescriptors, { level: "strict" });
