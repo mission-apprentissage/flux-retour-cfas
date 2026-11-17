@@ -10,7 +10,8 @@ import { getErrorMessage } from "@/common/utils/errorUtils";
 
 import { createSipaUser, deleteSipaUser } from "./common/actions/sipa.actions";
 import logger from "./common/logger";
-import { closeMongodbConnection } from "./common/mongodb";
+import { modelDescriptors } from "./common/model/collections";
+import { closeMongodbConnection, configureDbSchemaValidation } from "./common/mongodb";
 import { closeSentry } from "./common/services/sentry/sentry";
 import { sleep } from "./common/utils/asyncUtils";
 import config from "./config";
@@ -18,6 +19,10 @@ import createServer from "./http/server";
 import { createHttpTerminator } from "./http/terminator";
 import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
 import { crons, registry } from "./jobs/registry";
+
+async function applyDbSchemaValidation() {
+  await configureDbSchemaValidation(modelDescriptors, { level: "strict", onIndexBuild: "warn" });
+}
 
 async function startJobProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
@@ -83,6 +88,7 @@ program
     try {
       const signal = createProcessExitSignal();
 
+      await applyDbSchemaValidation();
       const server = await createServer();
       const httpServer = server.listen(config.port, () =>
         logger.info(`Server ready and listening on port ${config.port}`)
@@ -125,6 +131,7 @@ program
   .description("Démarre le démon qui traite les effectifs en attente")
   .action(async () => {
     const signal = createProcessExitSignal();
+    await applyDbSchemaValidation();
 
     if (config.disable_processors) {
       // The processor will exit, and be restarted by docker every day
@@ -145,6 +152,7 @@ program
   .description("Run job processor")
   .action(async () => {
     const signal = createProcessExitSignal();
+    await applyDbSchemaValidation();
     if (config.disable_processors) {
       // The processor will exit, and be restarted by docker every day
       await sleep(24 * 3_600_000, signal);

@@ -2,6 +2,7 @@ import { addJob, type JobDef } from "job-processor";
 
 import { modelDescriptors } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
+import { configureDbSchemaValidation } from "@/common/mongodb";
 
 import { findInvalidDocuments } from "../db/findInvalidDocuments";
 import { recreateIndexes } from "../db/recreateIndexes";
@@ -48,7 +49,9 @@ export const dbMaintenanceJobs = {
   },
   "migrations:up": {
     handler: async () => {
+      await configureDbSchemaValidation(modelDescriptors, { level: "moderate" });
       await upMigration();
+      await configureDbSchemaValidation(modelDescriptors, { level: "strict" });
       // Validate all documents after the migration
       await addJob({ name: "db:validate", queued: true });
       return;

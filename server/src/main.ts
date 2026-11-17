@@ -1,10 +1,9 @@
 import { captureException } from "@sentry/node";
 
 import logger from "@/common/logger";
-import { modelDescriptors } from "@/common/model/collections";
 
 import { startCLI } from "./commands";
-import { connectToMongodb, configureDbSchemaValidation, getMongodbUri } from "./common/mongodb";
+import { connectToMongodb, getMongodbUri } from "./common/mongodb";
 import { closeSentry, initSentryProcessor } from "./common/services/sentry/sentry";
 import { setupJobProcessor } from "./jobs/jobs";
 import createGlobalServices from "./services";
@@ -25,8 +24,6 @@ process.on("uncaughtException", (err) => {
 try {
   logger.warn("starting application");
   await connectToMongodb(getMongodbUri());
-  await configureDbSchemaValidation(modelDescriptors); // à supprimer d'ici et mettre dans une commande distincte
-
   await setupJobProcessor();
   createGlobalServices();
   await startCLI();
