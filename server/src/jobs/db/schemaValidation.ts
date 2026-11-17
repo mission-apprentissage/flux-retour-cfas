@@ -1,25 +1,23 @@
 import { modelDescriptors } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 
-async function countInvalidDocuments(collectionName: string): Promise<number> {
-  const collection = getDatabase().collection(collectionName);
-  const options = await collection.options();
-
-  return collection.countDocuments({ $nor: [options.validator] });
-}
-
 export async function validateModels(): Promise<void> {
-  const counts = await Promise.all(
-    modelDescriptors.map(async (d) => ({
-      collectionName: d.collectionName,
-      invalidCount: await countInvalidDocuments(d.collectionName),
-    }))
-  );
+  const db = getDatabase();
+  const collections = await db.listCollections({}, { nameOnly: false }).toArray();
+  const validators = new Map(collections.map((collection) => [collection.name, collection.options?.validator]));
 
-  const invalid = counts.filter(({ invalidCount }) => invalidCount > 0);
+  const invalid: string[] = [];
+  for (const { collectionName } of modelDescriptors) {
+    const validator = validators.get(collectionName);
+    if (!validator) continue;
+
+    const invalidCount = await db.collection(collectionName).countDocuments({ $nor: [validator] });
+    if (invalidCount > 0) {
+      invalid.push(`${collectionName} (${invalidCount})`);
+    }
+  }
+
   if (invalid.length > 0) {
-    const detail = invalid.map(({ collectionName, invalidCount }) => `${collectionName} (${invalidCount})`).join(", ");
-    // Le job relance : job-processor capture, inutile de le faire ici.
-    throw new Error(`Documents invalides : ${detail}`);
+    throw new Error(`Documents invalides : ${invalid.join(", ")}`);
   }
 }

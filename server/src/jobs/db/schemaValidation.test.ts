@@ -12,6 +12,12 @@ describe("validateModels", () => {
     await expect(validateModels()).resolves.toBeUndefined();
   });
 
+  it("ignore une collection absente de la base", async () => {
+    await getDatabase().collection("jwtSessions").drop();
+
+    await expect(validateModels()).resolves.toBeUndefined();
+  });
+
   it("signale toutes les collections invalides, pas seulement la première", async () => {
     for (const collectionName of ["effectifsArchive", "usersMigration"]) {
       await getDatabase()

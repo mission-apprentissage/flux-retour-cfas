@@ -255,7 +255,8 @@ program
 program
   .command("db:find-invalid-documents")
   .description("Recherche des documents invalides")
-  .requiredOption("-c, --collection", "the collection to search for invalid documents")
+  .requiredOption("-c, --collection <name>", "the collection to search for invalid documents")
+  .option("--limit <n>", "Nombre maximal de documents invalides à détailler", (value) => parseInt(value))
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("db:find-invalid-documents"));
 

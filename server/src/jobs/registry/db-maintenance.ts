@@ -9,6 +9,8 @@ import { recreateIndexes } from "../db/recreateIndexes";
 import { validateModels } from "../db/schemaValidation";
 import { create as createMigration, status as statusMigration, up as upMigration } from "../migrations/migrations";
 
+import { payloadNumber } from "./payload";
+
 const requireStringPayload = (payload: Record<string, unknown> | null | undefined, key: string): string => {
   const value = payload?.[key];
   if (typeof value !== "string" || !value) {
@@ -23,7 +25,7 @@ const isDropRequested = (payload: Record<string, unknown> | null | undefined) =>
 export const dbMaintenanceJobs = {
   "db:find-invalid-documents": {
     handler: async (job) => {
-      return findInvalidDocuments(requireStringPayload(job.payload, "collection"));
+      return findInvalidDocuments(requireStringPayload(job.payload, "collection"), payloadNumber(job.payload, "limit"));
     },
   },
   "indexes:create": {
