@@ -6,6 +6,7 @@ import multer from "multer";
 import { getAcademieById } from "shared/constants";
 import { IVoeuAffelnet, IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelnet.model";
 
+import { findDeletedVoeux } from "@/common/actions/affelnet.actions";
 import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
@@ -91,18 +92,6 @@ export default () => {
   router.post("/create", upload.single("csvfile"), returnResult(createVoeux));
 
   return router;
-};
-
-const findDeletedVoeux = async (date: Date) => {
-  const currentDate = new Date();
-
-  const cursor = voeuxAffelnetDb().find({ updated_at: { $lt: date } });
-  while (await cursor.hasNext()) {
-    const voeu = await cursor.next();
-    if (voeu) {
-      await voeuxAffelnetDb().updateOne({ _id: voeu._id }, { $set: { deleted_at: currentDate } });
-    }
-  }
 };
 
 const parseCsvFile = async (buffer: Buffer) => {

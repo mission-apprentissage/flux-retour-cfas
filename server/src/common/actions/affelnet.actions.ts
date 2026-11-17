@@ -5,6 +5,14 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { voeuxAffelnetDb } from "../model/collections";
 
+export const findDeletedVoeux = async (importDate: Date) => {
+  const { modifiedCount } = await voeuxAffelnetDb().updateMany(
+    { updated_at: { $lt: importDate }, deleted_at: { $exists: false } },
+    { $set: { deleted_at: new Date() } }
+  );
+  return modifiedCount;
+};
+
 const computeFilter = (academie_list: Array<string> | null) => {
   return {
     ...(academie_list ? { academie_code: { $in: academie_list } } : {}),
