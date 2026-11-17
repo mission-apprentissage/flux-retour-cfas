@@ -24,6 +24,7 @@ const extendedTypesEffectifNominatif = [
   ...typesARML,
   ...typesFranceTravail,
   ...typesIndicateursCollaborations,
+  "sifa", // historique : fonctionnalité retirée, logs conservés
 ] as const;
 
 const zTelechargementListeNomLogs = z.object({
