@@ -19,7 +19,7 @@ const PROCESSED = { $exists: true, $ne: null } as const;
 
 type IndexHint = Record<string, 1 | -1>;
 type BatchOptions = { batchSize?: number; sleepMs?: number };
-type OrphanOptions = BatchOptions & { nbDaysToKeep?: number; onMissingIndex?: "throw" | "skip" };
+type OrphanOptions = BatchOptions & { nbDaysToKeep?: number; mode?: "one-shot" | "nightly" };
 type OrphanResult = { dated: number; undated: number; skipped: boolean };
 
 const assertInteger = (name: string, value: number | undefined, min: number) => {
@@ -92,10 +92,10 @@ export const deleteInBatches = async (
 
 export const purgeOrphanQueues = async (options: OrphanOptions = {}): Promise<OrphanResult> => {
   assertOptions(options);
-  const { nbDaysToKeep = DEFAULT_NB_DAYS_TO_KEEP, batchSize, sleepMs, onMissingIndex = "throw" } = options;
+  const { nbDaysToKeep = DEFAULT_NB_DAYS_TO_KEEP, batchSize, sleepMs, mode = "one-shot" } = options;
 
   if (!(await hasPurgeIndex())) {
-    if (onMissingIndex === "skip") {
+    if (mode === "nightly") {
       logger.warn("Purge des orphelins d'effectifsQueue sautée : index composé absent");
       return { dated: 0, undated: 0, skipped: true };
     }
@@ -175,8 +175,15 @@ export const purgeOrphanQueues = async (options: OrphanOptions = {}): Promise<Or
     errors.record(error);
   }
 
-  errors.ok(orphanSources.length + 1 - errors.failed);
+  const failed = errors.failed;
+  errors.ok(orphanSources.length + 1 - failed);
   errors.flush();
+
+  if (mode === "one-shot" && failed > 0) {
+    throw new Error(
+      `Purge des orphelins d'effectifsQueue incomplète : ${failed} échec(s), ${dated} datés et ${undated} non datés supprimés`
+    );
+  }
 
   return { dated, undated, skipped: false };
 };
@@ -227,7 +234,7 @@ export const purgeQueues = async (nbDaysToKeep = DEFAULT_NB_DAYS_TO_KEEP, batchO
   assertOptions({ nbDaysToKeep, ...batchOptions });
 
   await purgeOrganismeQueues(nbDaysToKeep, batchOptions);
-  await purgeOrphanQueues({ nbDaysToKeep, ...batchOptions, onMissingIndex: "skip" });
+  await purgeOrphanQueues({ nbDaysToKeep, ...batchOptions, mode: "nightly" });
 
   logger.info("End Purging effectifsQueue");
 };

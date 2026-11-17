@@ -189,6 +189,23 @@ describe("purge d'effectifsQueue", () => {
     expect(await countFor({ source_organisme_id: "srcU" })).toBe(1);
   });
 
+  it("échoue en one-shot quand une source échoue, après avoir purgé les autres", async () => {
+    const realAggregate = Collection.prototype.aggregate;
+    vi.spyOn(Collection.prototype, "aggregate").mockImplementation(function (this: Collection, ...args) {
+      const pipeline = args[0] as Array<{ $match?: { source_organisme_id?: string } }>;
+      if (pipeline[0]?.$match?.source_organisme_id === "srcA") {
+        throw new Error("boom");
+      }
+      return realAggregate.apply(this, args);
+    });
+
+    await expect(purgeOrphanQueues(FAST)).rejects.toThrow("incomplète : 1 échec(s), 0 datés et 1 non datés supprimés");
+    vi.restoreAllMocks();
+
+    expect(await countFor({ source_organisme_id: "srcA" })).toBe(40);
+    expect(await countFor({ source_organisme_id: "srcU" })).toBe(1);
+  });
+
   it("échoue quand l'acquittement majority est dépassé", async () => {
     vi.spyOn(Collection.prototype, "deleteMany").mockRejectedValue(writeConcernError());
 
