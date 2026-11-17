@@ -97,12 +97,6 @@ const zVoeuAffelnet = z.object({
     .regex(YEAR_REGEX)
     .nullish(),
   raw: zVoeuAffelnetRaw,
-  history: z.array(
-    z.object({
-      created_at: z.date(),
-      raw: zVoeuAffelnetRaw,
-    })
-  ),
   _computed: z.object({
     formation: z.object({
       libelle: z.string().nullish(),

@@ -12,7 +12,7 @@ import { formationsCatalogueDb, organismesDb, voeuxAffelnetDb } from "@/common/m
 import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import { returnResult, RouteHandler } from "@/http/middlewares/helpers";
 
-const AFFELNET_HEADER = [
+export const AFFELNET_HEADER = [
   "academie",
   "ine",
   "nom",
@@ -135,7 +135,6 @@ const createVoeux: RouteHandler = async (req, res) => {
         created_at: currentDate,
         updated_at: currentDate,
         is_contacted: false,
-        history: [],
         annee_scolaire_rentree: voeuRaw.annee_scolaire_rentree,
         raw: voeuRaw,
         _computed: {
@@ -222,14 +221,10 @@ const createVoeux: RouteHandler = async (req, res) => {
                 formation_catalogue_id: voeu.formation_catalogue_id,
                 is_contacted: false,
                 _computed: voeu._computed,
+                raw: voeu.raw,
                 updated_at: currentDate,
               },
-              $push: {
-                history: {
-                  created_at: currentDate,
-                  raw: voeu.raw,
-                },
-              },
+              $unset: { deleted_at: "" },
             }
           );
         }
