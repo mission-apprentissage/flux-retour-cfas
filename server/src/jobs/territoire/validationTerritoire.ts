@@ -11,6 +11,12 @@ import logger from "@/common/logger";
 
 type Divergence = { motif: string; detail: Record<string, unknown> };
 
+// Anomalie de l'API : pour les TAAF, l'académie « Étranger » a le code 984 alors que son id (A00) correspond au code 00
+function academieApi(apiDepartement: IApiDepartement): { code: string; nom: string } {
+  const { id, code, nom } = apiDepartement.academie;
+  return id === "A00" && code === "984" ? { code: "00", nom } : { code, nom };
+}
+
 function validationRegions(apiDepartements: IApiDepartement[]): Divergence[] {
   const divergences: Divergence[] = [];
   const seen = new Set<string>();
@@ -73,10 +79,7 @@ function validationDepartements(apiDepartements: IApiDepartement[]): Divergence[
         code: apiDepartement.region.codeInsee,
         nom: apiDepartement.region.nom,
       },
-      academie: {
-        code: apiDepartement.academie.code,
-        nom: apiDepartement.academie.nom,
-      },
+      academie: academieApi(apiDepartement),
     };
 
     if (!isEqual(tdbDepartement, expectedTdbDepartement)) {
@@ -100,26 +103,25 @@ function validationAcademies(apiDepartements: IApiDepartement[]): Divergence[] {
   const todo = new Set(Object.keys(ACADEMIES_BY_CODE));
 
   for (const apiDepartement of apiDepartements) {
-    if (seen.has(apiDepartement.academie.code)) {
+    const expectedTdbAcademie = academieApi(apiDepartement);
+
+    if (seen.has(expectedTdbAcademie.code)) {
       continue;
     }
 
-    seen.add(apiDepartement.academie.code);
+    seen.add(expectedTdbAcademie.code);
 
-    if (!todo.has(apiDepartement.academie.code)) {
+    if (!todo.has(expectedTdbAcademie.code)) {
       divergences.push({ motif: "L'académie n'est pas dans la liste des académies", detail: { apiDepartement } });
       continue;
     }
 
-    todo.delete(apiDepartement.academie.code);
+    todo.delete(expectedTdbAcademie.code);
 
-    const tdbAcademie = ACADEMIES_BY_CODE[apiDepartement.academie.code];
-    const expectedTdbAcademie = {
-      code: apiDepartement.academie.code,
-      nom: apiDepartement.academie.nom,
-    };
+    const tdbAcademie = ACADEMIES_BY_CODE[expectedTdbAcademie.code];
 
-    if (!isEqual(tdbAcademie, expectedTdbAcademie)) {
+    // L'id n'existe pas côté API (il sert aux jointures Affelnet) : seuls le code et le nom sont comparés
+    if (!isEqual({ code: tdbAcademie.code, nom: tdbAcademie.nom }, expectedTdbAcademie)) {
       divergences.push({
         motif: "Les informations de l'académie ont changé",
         detail: { tdbAcademie, apiDepartement, expectedTdbAcademie },
