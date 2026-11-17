@@ -144,7 +144,6 @@ describe("registre des jobs", () => {
       "tmp:migrate:autre-situations",
       "tmp:migrate:commune-apprenant",
       "tmp:migrate:communes-voies-puis-commune-apprenant",
-      "tmp:migrate:effectifs",
       "tmp:migrate:mission-locale-current-status",
       "tmp:migrate:mission-locale-effectif-snapshot",
       "tmp:migrate:ml-cloture-a-recontacter",

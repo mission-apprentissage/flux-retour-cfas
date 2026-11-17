@@ -9017,18 +9017,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "duree_theorique_formation_mois": {
       "description": "Durée théorique de la formation en mois",
     },
-    "effectifV2_id": {
-      "anyOf": [
-        {
-          "bsonType": "objectId",
-          "description": "Id de l'effectif v2 associé",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Id de l'effectif v2 associé",
-    },
     "effectif_id": {
       "anyOf": [
         {

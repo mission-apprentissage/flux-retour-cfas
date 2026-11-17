@@ -175,8 +175,7 @@ async function processEffectifQueueItem(
   const computed_day = formatDateYYYYMMDD(currentDate);
 
   try {
-    //Process du nouveau schéma de données
-    const effectifv2 = await handleEffectifTransmission(effectifQueue, currentDate, errors);
+    await handleEffectifTransmission(effectifQueue, errors);
     // Phase de transformation d'une donnée de queue
     const { result, itemProcessingInfos, organismeTarget } = await transformEffectifQueueV3ToEffectif(effectifQueue);
     // ajout des informations sur le traitement au logger
@@ -209,7 +208,6 @@ async function processEffectifQueueItem(
         {
           $set: {
             effectif_id: upsertedEffectif._id,
-            effectifv2_id: effectifv2?._id,
             organisme_id: organisme._id,
             updated_at: currentDate,
             processed_at: currentDate,
@@ -233,7 +231,6 @@ async function processEffectifQueueItem(
         {
           $set: {
             validation_errors: result.error?.issues.map(({ path, message }) => ({ message, path })) || [],
-            effectifv2_id: effectifv2?._id,
             updated_at: currentDate,
             processed_at: currentDate,
             has_error: true,
