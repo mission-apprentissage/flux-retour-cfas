@@ -109,6 +109,14 @@
         chdir: /opt/app
         cmd: "sudo /opt/app/tools/maintenance/maintenance-off.sh"
 
+    - name: "Validation des documents après les migrations"
+      shell:
+        chdir: /opt/app
+        cmd: "sudo /opt/app/scripts/cli.sh db:validate --queued"
+      when:
+        - stack_status.stdout != ""
+        - '"migrations-status=synced" not in migration_status_output.stdout_lines'
+
     - name: "Verification des certificats SSL"
       shell:
         chdir: /opt/app

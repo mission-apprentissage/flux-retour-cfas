@@ -1,4 +1,4 @@
-import { addJob, type JobDef } from "job-processor";
+import type { JobDef } from "job-processor";
 
 import { modelDescriptors } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
@@ -52,9 +52,6 @@ export const dbMaintenanceJobs = {
       await configureDbSchemaValidation(modelDescriptors, { level: "moderate" });
       await upMigration();
       await configureDbSchemaValidation(modelDescriptors, { level: "strict" });
-      // Validate all documents after the migration
-      await addJob({ name: "db:validate", queued: true });
-      return;
     },
   },
   "migrations:status": {

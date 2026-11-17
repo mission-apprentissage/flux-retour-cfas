@@ -1,3 +1,4 @@
+import { addJob } from "job-processor";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { configureDbSchemaValidation } from "@/common/mongodb";
@@ -27,6 +28,12 @@ describe("migrations:up", () => {
     await runMigrationsUp();
 
     expect(steps).toEqual(["validators:moderate", "migrations", "validators:strict"]);
+  });
+
+  it("ne met pas db:validate en file, le déploiement s'en charge après la maintenance", async () => {
+    await runMigrationsUp();
+
+    expect(addJob).not.toHaveBeenCalled();
   });
 
   it("laisse les validateurs en moderate quand une migration échoue", async () => {

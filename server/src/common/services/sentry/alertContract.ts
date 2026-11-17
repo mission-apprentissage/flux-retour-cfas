@@ -79,6 +79,7 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   "deca:flechage": { tier: "jour" },
   "demandes-activation:flechables": { tier: "jour" },
   "organismes:revoke-stale-api-keys": { tier: "veille" },
+  "db:validate": { tier: "jour" },
 };
 
 type JobContext = { type?: string };
