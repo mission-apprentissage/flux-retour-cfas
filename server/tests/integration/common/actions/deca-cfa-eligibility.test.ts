@@ -261,8 +261,8 @@ describe("findEligibleOrganismes", () => {
     expect(rows).toEqual([]);
   });
 
-  it("excludes organismes where catalogue publishes a gestionnaire=self / formateur=tiers formation", async () => {
-    const withTiers = await insertOrg();
+  it("includes organismes chapeautant un formateur tiers au catalogue publié", async () => {
+    const withTiers = await insertOrg({ nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR });
     await insertEffectif(withTiers._id as ObjectId, currentAnnee);
     await insertFormationCatalogue({
       etablissement_gestionnaire_siret: withTiers.siret,
@@ -271,17 +271,29 @@ describe("findEligibleOrganismes", () => {
       etablissement_formateur_uai: UAI_TIERS,
     });
 
-    const cleanOrg = await insertOrg();
-    await insertEffectifDECA(cleanOrg._id as ObjectId, currentAnnee);
+    const decaOnly = await insertOrg();
+    await insertEffectifDECA(decaOnly._id as ObjectId, currentAnnee);
 
     const rows = await findEligibleOrganismes();
 
     const ids = rows.map((r) => r._id.toString());
-    expect(ids).toContain((cleanOrg._id as ObjectId).toString());
-    expect(ids).not.toContain((withTiers._id as ObjectId).toString());
+    expect(ids).toContain((withTiers._id as ObjectId).toString());
+    expect(ids).toContain((decaOnly._id as ObjectId).toString());
 
-    const cleanRow = rows.find((r) => r._id.toString() === (cleanOrg._id as ObjectId).toString())!;
-    expect(cleanRow.has_effectifs_erp).toBe(false);
-    expect(cleanRow.has_effectifs_deca).toBe(true);
+    const decaOnlyRow = rows.find((r) => r._id.toString() === (decaOnly._id as ObjectId).toString())!;
+    expect(decaOnlyRow.has_effectifs_erp).toBe(false);
+    expect(decaOnlyRow.has_effectifs_deca).toBe(true);
+  });
+
+  it("compte les contrats DECA que l'activation rattacherait, tant que l'organisme n'est pas activé", async () => {
+    const aRattacher = await insertOrg({ deca_contrats_flechables: 2 });
+    const dejaActive = await insertOrg({ is_allowed_deca: true, deca_contrats_flechables: 2 });
+
+    const rows = await findEligibleOrganismes();
+
+    const ids = rows.map((r) => r._id.toString());
+    expect(ids).toEqual([(aRattacher._id as ObjectId).toString()]);
+    expect(ids).not.toContain((dejaActive._id as ObjectId).toString());
+    expect(rows[0].has_effectifs_deca).toBe(true);
   });
 });
