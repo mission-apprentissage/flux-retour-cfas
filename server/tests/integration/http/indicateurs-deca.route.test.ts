@@ -120,19 +120,6 @@ const createEffDECA = (org: typeof organismeResponsable) => ({
     date_fin: new Date("2024-06-30T00:00:00.000Z"),
     date_entree: new Date("2023-09-01T00:00:00.000Z"),
   },
-  is_lock: {
-    apprenant: {
-      nom: true,
-      prenom: true,
-      date_de_naissance: true,
-      historique_statut: true,
-    },
-    formation: {
-      cfd: true,
-      periode: true,
-    },
-    contrats: true,
-  },
   validation_errors: [],
   _computed: {
     organisme: {

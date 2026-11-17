@@ -16,7 +16,7 @@ import { estFinAvantEntree } from "shared/utils";
 import { NEVER, SafeParseReturnType } from "zod";
 
 import { updateVoeuxAffelnetEffectif } from "@/common/actions/affelnet.actions";
-import { lockEffectif, mergeEffectifWithDefaults, withComputedFields } from "@/common/actions/effectifs.actions";
+import { mergeEffectifWithDefaults, withComputedFields } from "@/common/actions/effectifs.actions";
 import {
   buildNewHistoriqueStatutApprenant,
   mapEffectifQueueToEffectif,
@@ -415,9 +415,6 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
           adresse: effectifQueued.etablissement_lieu_de_formation_adresse,
           code_postal: effectifQueued.etablissement_lieu_de_formation_code_postal,
         },
-        _raw: {
-          formation: effectif.formation,
-        },
       };
       return {
         effectif: await withComputedFields(effectifData, { organisme: organismeFormateur, certification }),
@@ -436,12 +433,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
 async function transformEffectifQueueToEffectif(
   effectifQueue: IDossierApprenantSchemaV3
 ): Promise<Omit<IEffectif, "_id" | "_computed" | "organisme_id">> {
-  return await completeEffectifAddress(
-    mergeEffectifWithDefaults(
-      mapEffectifQueueToEffectif(effectifQueue),
-      effectifQueue.source !== SOURCE_APPRENANT.FICHIER
-    )
-  );
+  return await completeEffectifAddress(mergeEffectifWithDefaults(mapEffectifQueueToEffectif(effectifQueue)));
 }
 
 /**
@@ -507,12 +499,6 @@ const createOrUpdateEffectif = async (
     }
 
     itemProcessingInfos.effectif_id = effectifDb._id.toString();
-
-    // Lock de tous les champs (non vide) mis à jour par l'API pour ne pas permettre la modification côté UI
-    // Uniquement dans le cas où c'est bien par API et non par import manuel (a.k.a téléversement)
-    if (effectif.source !== SOURCE_APPRENANT.FICHIER) {
-      effectifDb = await lockEffectif(effectifDb);
-    }
 
     await createMissionLocaleSnapshot(effectifDb);
     await createFranceTravailEffectifSnapshot(effectifDb);

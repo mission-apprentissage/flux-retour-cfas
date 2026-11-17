@@ -1,13 +1,12 @@
 import * as Boom from "@hapi/boom";
 import type { ICertification } from "api-alternance-sdk";
-import { cloneDeep, isObject, merge, mergeWith, reduce, set } from "lodash-es";
+import { cloneDeep, mergeWith } from "lodash-es";
 import { Collection, ObjectId, type WithoutId } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";
 import { IOpcos, IRncp } from "shared/models";
 import { IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { IOrganisme } from "shared/models/data/organismes.model";
-import type { Paths } from "type-fest";
 
 import { effectifsArchiveDb, effectifsDECADb, effectifsDb, opcosRncpDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
@@ -17,18 +16,10 @@ import { legacySchema } from "./effectif.legacy_schema";
 import { createComputedStatutObject } from "./effectifs.statut.actions";
 import { generateOrganismeComputed } from "./organismes/organismes.actions";
 
-/**
- * Méthode de build d'un effectif
- *
- * Dans le cas d'un effectif téléversé, on ne veut pas verrouiller les champs, même ceux dits "par défaut" (nom, prénom, etc.)
- * Voir aussi la méthode lockEffectif
- */
 export const mergeEffectifWithDefaults = (
-  effectifData: Omit<IEffectif, "_id" | "_computed" | "organisme_id">,
-  lockData: boolean = true
+  effectifData: Omit<IEffectif, "_id" | "_computed" | "organisme_id">
 ): Omit<IEffectif, "_id" | "_computed" | "organisme_id"> => {
   const defaultValues = defaultValuesEffectif();
-  // note: I've tried to use ts-deepmerge, but typing doesn't work well
   return {
     ...defaultValues,
     ...effectifData,
@@ -36,71 +27,11 @@ export const mergeEffectifWithDefaults = (
       ...defaultValues.apprenant,
       ...effectifData.apprenant,
     },
-    is_lock: {
-      ...(lockData ? defaultValues.is_lock : { apprenant: {}, formation: {} }),
-      ...effectifData.is_lock,
-    },
     formation: {
       ...defaultValues.formation,
       ...effectifData.formation,
     },
   };
-};
-
-export function flatPathsWithoutEmpty<T>(object: T): Paths<T>[] {
-  const flattenKeys = (obj: unknown, path: string[] = []): Record<string, unknown> => {
-    if (isObject(obj)) {
-      return reduce(obj, (cum, next, key) => merge(cum, flattenKeys(next, [...path, key])), {});
-    }
-
-    return obj !== "" && obj !== null && obj !== undefined ? { [path.join(".")]: obj } : {};
-  };
-
-  return Object.keys(flattenKeys(object)) as Paths<T>[];
-}
-
-/**
- * Méthode de mise à jour d'un effectif avec lock
- */
-export const lockEffectif = async (effectif: IEffectif) => {
-  const { apprenant, formation } = effectif;
-
-  // Lock field
-  let newLocker = { ...effectif.is_lock };
-  const updatePaths = flatPathsWithoutEmpty({ apprenant, formation });
-
-  // Handle manually array fields
-  const updatePathsFiltered = updatePaths
-    .filter((item) => !item.includes("apprenant.historique_statut"))
-    .filter((item) => !item.includes("contrats"))
-    .filter((item) => !item.includes("formation.periode"));
-
-  for (const path of updatePathsFiltered) {
-    set(newLocker, path, true);
-  }
-
-  // Handle manually locked fields
-  set(newLocker, "apprenant.date_de_naissance", true);
-  set(newLocker, "apprenant.historique_statut", true);
-  set(newLocker, "contrats", true);
-  set(newLocker, "formation.periode", true);
-
-  const updated = await effectifsDb().findOneAndUpdate(
-    { _id: effectif._id },
-    {
-      $set: {
-        is_lock: newLocker,
-        updated_at: new Date(),
-      },
-    },
-    { returnDocument: "after" }
-  );
-
-  if (!updated) {
-    throw new Error(`Unable to find effectif ${effectif._id.toString()}`);
-  }
-
-  return updated;
 };
 
 export const addComputedFields = async <T extends WithoutId<IEffectif | IEffectifDECA>>({
@@ -219,14 +150,6 @@ export async function softDeleteEffectif(
 function buildEffectifResult(effectif: (IEffectif | IEffectifDECA) & { lieu_de_formation?: unknown }) {
   const { properties: effectifSchema } = legacySchema;
 
-  if (!effectif.is_lock) {
-    effectif.is_lock = {
-      apprenant: {},
-      formation: {},
-      lieu_de_formation: {},
-    };
-  }
-
   function customizer(objValue: Record<string, unknown> | undefined, srcValue: unknown) {
     if (objValue !== undefined) {
       return {
@@ -237,122 +160,47 @@ function buildEffectifResult(effectif: (IEffectif | IEffectifDECA) & { lieu_de_f
     }
   }
 
-  function customizerLock(objValue: Record<string, unknown> | undefined, srcValue: unknown) {
-    if (objValue !== undefined) {
-      return { ...objValue, locked: srcValue };
-    }
-  }
-  function customizerPath(objValue: Record<string, unknown> | undefined, srcValue: unknown) {
-    if (objValue !== undefined) {
-      return { ...objValue, path: srcValue };
-    }
-  }
-
-  const flatPaths = Object.keys(flattenKeys(effectif.is_lock));
-  let paths = cloneDeep(effectif.is_lock);
-  for (const path of flatPaths) {
-    set(paths, path, path);
-  }
-
   return {
     apprenant: {
-      ...mergeWith(
-        mergeWith(
-          mergeWith(cloneDeep(effectifSchema.apprenant.properties), effectif.apprenant, customizer),
-          effectif.is_lock.apprenant,
-          customizerLock
-        ),
-        paths.apprenant,
-        customizerPath
-      ),
+      ...mergeWith(cloneDeep(effectifSchema.apprenant.properties), effectif.apprenant, customizer),
       adresse: {
         ...mergeWith(
-          mergeWith(
-            mergeWith(
-              cloneDeep(effectifSchema.apprenant.properties.adresse.properties),
-              effectif.apprenant.adresse,
-              customizer
-            ),
-            effectif.is_lock.apprenant.adresse,
-            customizerLock
-          ),
-          paths.apprenant.adresse,
-          customizerPath
+          cloneDeep(effectifSchema.apprenant.properties.adresse.properties),
+          effectif.apprenant.adresse,
+          customizer
         ),
       },
       adresse_naissance: {
         ...mergeWith(
-          mergeWith(
-            mergeWith(
-              cloneDeep(effectifSchema.apprenant.properties.adresse_naissance.properties),
-              effectif.apprenant.adresse_naissance,
-              customizer
-            ),
-            effectif.is_lock.apprenant.adresse_naissance,
-            customizerLock
-          ),
-          paths.apprenant.adresse_naissance,
-          customizerPath
+          cloneDeep(effectifSchema.apprenant.properties.adresse_naissance.properties),
+          effectif.apprenant.adresse_naissance,
+          customizer
         ),
       },
       representant_legal: {
         ...mergeWith(
-          mergeWith(
-            mergeWith(
-              cloneDeep(effectifSchema.apprenant.properties.representant_legal.properties),
-              effectif.apprenant.representant_legal,
-              customizer
-            ),
-            effectif.is_lock.apprenant.representant_legal,
-            customizerLock
-          ),
-          paths.apprenant.representant_legal,
-          customizerPath
+          cloneDeep(effectifSchema.apprenant.properties.representant_legal.properties),
+          effectif.apprenant.representant_legal,
+          customizer
         ),
         adresse: {
           ...mergeWith(
-            mergeWith(
-              mergeWith(
-                cloneDeep(effectifSchema.apprenant.properties.representant_legal.properties.adresse.properties),
-                effectif.apprenant.representant_legal ? effectif.apprenant.representant_legal.adresse : {},
-                customizer
-              ),
-              effectif.is_lock.apprenant.representant_legal?.adresse,
-              customizerLock
-            ),
-            paths.apprenant.representant_legal?.adresse,
-            customizerPath
+            cloneDeep(effectifSchema.apprenant.properties.representant_legal.properties.adresse.properties),
+            effectif.apprenant.representant_legal ? effectif.apprenant.representant_legal.adresse : {},
+            customizer
           ),
         },
       },
     },
     formation: {
-      ...mergeWith(
-        mergeWith(
-          mergeWith(cloneDeep(effectifSchema.formation.properties), effectif.formation, customizer),
-          effectif.is_lock.formation,
-          customizerLock
-        ),
-        paths.formation.adresse,
-        customizerPath
-      ),
+      ...mergeWith(cloneDeep(effectifSchema.formation.properties), effectif.formation, customizer),
     },
     lieu_de_formation: {
-      ...mergeWith(
-        mergeWith(
-          mergeWith(cloneDeep(effectifSchema.lieu_de_formation.properties), effectif.lieu_de_formation, customizer),
-          effectif.is_lock.lieu_de_formation,
-          customizerLock
-        ),
-        paths.lieu_de_formation,
-        customizerPath
-      ),
+      ...mergeWith(cloneDeep(effectifSchema.lieu_de_formation.properties), effectif.lieu_de_formation, customizer),
     },
     contrats: {
       ...effectifSchema.contrats,
       value: effectif.contrats,
-      locked: effectif.is_lock.contrats || false,
-      path: paths.contrats,
     },
     annee_scolaire: effectif.annee_scolaire,
     id: effectif._id,
@@ -363,15 +211,6 @@ function buildEffectifResult(effectif: (IEffectif | IEffectifDECA) & { lieu_de_f
     updated_at: effectif.updated_at,
   };
 }
-
-const flattenKeys = (obj: unknown, path: string[] = []): Record<string, unknown> =>
-  !isObject(obj)
-    ? { [path.join(".")]: obj }
-    : reduce(
-        obj as Record<string, unknown>,
-        (cum: Record<string, unknown>, next, key) => merge(cum, flattenKeys(next, [...path, key])),
-        {}
-      );
 
 export const updateEffectifComputedFromRNCP = async (rncp: IRncp, opco: IOpcos) => {
   return (

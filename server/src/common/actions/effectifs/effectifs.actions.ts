@@ -13,7 +13,6 @@ export const getAllEffectifs = async (
     .aggregate([
       { $match: query },
       { $sort: sort },
-      { $project: { is_lock: 0 } },
       {
         $facet: {
           pagination: [{ $count: "total" }, { $addFields: { page, limit } }],
@@ -67,7 +66,7 @@ export const getDetailedEffectifById = async (_id: ObjectId) => {
         { $lookup: organismeLookup },
         { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
 
-        { $project: { is_lock: 0, organisme_id: 0 } },
+        { $project: { organisme_id: 0 } },
         { $unwind: { path: "$formation_detail", preserveNullAndEmptyArrays: true } },
         // lookup effectifsQueue
         {
@@ -122,7 +121,7 @@ export const getDetailedEffectifById = async (_id: ObjectId) => {
                 },
               },
               { $unwind: { path: "$organisme", preserveNullAndEmptyArrays: true } },
-              { $project: { is_lock: 0, organisme_id: 0 } },
+              { $project: { organisme_id: 0 } },
             ],
           },
         },
