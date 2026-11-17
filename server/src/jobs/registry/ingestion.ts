@@ -3,7 +3,6 @@ import { ObjectId } from "mongodb";
 
 import { purgeOrphanQueues, purgeQueues } from "../clear/purge-queues";
 import { heartbeatIngestion } from "../ingestion/heartbeat-ingestion";
-import { updateEffectifQueueDateAndError } from "../ingestion/migration/effectif-queue";
 import { removeDuplicatesEffectifsQueue } from "../ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "../ingestion/process-ingestion";
 import { migrateEffectifs } from "../ingestion/process-ingestion.v2";
@@ -47,9 +46,6 @@ export const ingestionJobs = {
   },
   "tmp:migrate:effectifs": {
     handler: migrateEffectifs,
-  },
-  "tmp:migrate:effectifs-queue": {
-    handler: updateEffectifQueueDateAndError,
   },
   "tmp:mesurer-perimetre-televersement": {
     handler: async (job) => mesurerPerimetreTeleversement({ mois: payloadNumber(job.payload, "mois") }),
