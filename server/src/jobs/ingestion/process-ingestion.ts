@@ -221,8 +221,6 @@ async function processEffectifQueueItem(
           },
         }
       );
-      await createMissionLocaleSnapshot(upsertedEffectif);
-
       itemLogger.info({ duration: Date.now() - start }, "processed item");
     } else {
       // MAJ de la queue pour indiquer que les données ont été traitées
@@ -493,12 +491,15 @@ const createOrUpdateEffectif = async (
       // L'effectif est fusionné avec les nouvelles données.
       // Si une donnée a été modifiée manuellement dans la plateforme, elle sera écrasée par l'import.
       // Ce (potentiel, tout dépend de ce qu'on veut) problème doit être traité d'un point de vue métier.
-      effectifDb =
-        (await effectifsDb().findOneAndUpdate(
-          { _id: effectifDb._id },
-          { $set: mergedEffectif },
-          { returnDocument: "after" }
-        )) ?? effectifDb;
+      const updatedEffectif = await effectifsDb().findOneAndUpdate(
+        { _id: effectifDb._id },
+        { $set: mergedEffectif },
+        { returnDocument: "after" }
+      );
+      if (!updatedEffectif) {
+        throw new Error(`Effectif ${effectifDb._id.toString()} supprimé pendant son ingestion`);
+      }
+      effectifDb = updatedEffectif;
     } else {
       effectifDb = { ...effectif, transmitted_at: new Date(), _id: new ObjectId() };
       const { insertedId } = await effectifsDb().insertOne(effectifDb);
