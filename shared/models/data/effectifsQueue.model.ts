@@ -16,10 +16,8 @@ const collectionName = "effectifsQueue";
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ effectif_id: 1 }, { name: "effectif_id" }],
   [{ organisme_id: 1 }, { name: "organisme_id" }],
-  [{ processed_at: 1 }, { name: "processed_at" }],
   [{ created_at: 1 }, { name: "created_at" }],
   [{ source: 1 }, { name: "source" }],
-  [{ source_organisme_id: 1 }, { name: "source_organisme_id" }],
   [{ processed_at: 1, created_at: 1 }, {}],
   [{ computed_day: 1 }, {}],
   [{ source_organisme_id: 1, organisme_id: 1, computed_day: 1 }, {}],
