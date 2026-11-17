@@ -46,7 +46,6 @@ import transmissionDailyReportDescriptor, {
   ITransmissionDailyReport,
 } from "shared/models/data/transmissionDailyReport.model";
 import usersMigrationModelDescriptor, { IUsersMigration } from "shared/models/data/usersMigration.model";
-import effectifsV2ModelDescriptor, { IEffectifV2 } from "shared/models/data/v2/effectif.v2.model";
 import formationV2ModelDescriptor, { IFormationV2 } from "shared/models/data/v2/formation.v2.model";
 import personV2ModelDescriptor, { IPersonV2 } from "shared/models/data/v2/person.v2.model";
 import voeuxAffelnetDescriptor, { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
@@ -72,7 +71,6 @@ export const modelDescriptors = [
   telechargementListesNominativesLogsDescriptor,
   opcosDescriptor,
   opcosRncpDescriptor,
-  effectifsV2ModelDescriptor,
   formationV2ModelDescriptor,
   personV2ModelDescriptor,
   ReseauxModelDescriptor,
@@ -146,4 +144,3 @@ export const romeSecteurActivitesDb = () =>
 
 export const personV2Db = () => getDbCollection<IPersonV2>(personV2ModelDescriptor.collectionName);
 export const formationV2Db = () => getDbCollection<IFormationV2>(formationV2ModelDescriptor.collectionName);
-export const effectifV2Db = () => getDbCollection<IEffectifV2>(effectifsV2ModelDescriptor.collectionName);
