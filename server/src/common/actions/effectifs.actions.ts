@@ -1,6 +1,6 @@
 import * as Boom from "@hapi/boom";
 import type { ICertification } from "api-alternance-sdk";
-import { cloneDeep, isObject, merge, mergeWith, reduce, set, uniqBy } from "lodash-es";
+import { cloneDeep, isObject, merge, mergeWith, reduce, set } from "lodash-es";
 import { Collection, ObjectId, type WithoutId } from "mongodb";
 import { MOTIF_SUPPRESSION } from "shared/constants";
 import { IOpcos, IRncp } from "shared/models";
@@ -12,8 +12,6 @@ import type { Paths } from "type-fest";
 import { effectifsArchiveDb, effectifsDECADb, effectifsDb, opcosRncpDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
 import { cachedInRun } from "@/common/utils/runCache";
-
-import { stripEmptyFields } from "../utils/miscUtils";
 
 import { legacySchema } from "./effectif.legacy_schema";
 import { createComputedStatutObject } from "./effectifs.statut.actions";
@@ -47,37 +45,6 @@ export const mergeEffectifWithDefaults = (
       ...effectifData.formation,
     },
   };
-};
-
-/**
- * Méthode de mise à jour d'un effectif depuis son id
- */
-const updateEffectif = async (_id: ObjectId, data: Partial<IEffectif>, opt = { keepPreviousErrors: false }) => {
-  const effectif = await effectifsDb().findOne({ _id });
-  if (!effectif) {
-    throw new Error(`Unable to find effectif ${_id.toString()}`);
-  }
-
-  const updated = await effectifsDb().findOneAndUpdate(
-    { _id: effectif._id },
-    {
-      $set: {
-        ...data,
-        ...(opt.keepPreviousErrors
-          ? {
-              validation_errors: uniqBy(
-                [...(effectif.validation_errors || []), ...(data.validation_errors || [])],
-                "fieldName"
-              ),
-            }
-          : {}),
-        updated_at: new Date(),
-      },
-    },
-    { returnDocument: "after" }
-  );
-
-  return updated;
 };
 
 export function flatPathsWithoutEmpty<T>(object: T): Paths<T>[] {
@@ -219,120 +186,6 @@ export async function getEffectifForm(effectifId: ObjectId) {
   }
 
   return buildEffectifResult(effectif);
-}
-
-export interface EffectifFormBody {
-  inputNames: string[];
-  is_lock?: unknown;
-  nouveau_statut?: {
-    valeur_statut: IEffectif["apprenant"]["historique_statut"][number]["valeur_statut"];
-    date_statut: string | Date;
-  };
-  nouveau_contrat?: NonNullable<IEffectif["contrats"]>[number];
-  [key: string]: unknown;
-}
-
-export async function updateEffectifFromForm(effectifId: ObjectId, body: EffectifFormBody) {
-  const { inputNames, ...data } = body; // TODO JOI (inputNames used to track user actions)
-
-  const effectifDb = await effectifsDb().findOne({ _id: effectifId });
-  if (!effectifDb) {
-    throw Boom.notFound(`Unable to find effectif ${effectifId.toString()}`);
-  }
-
-  const { is_lock, nouveau_statut, nouveau_contrat, ...restData } = data;
-
-  const { _id, id_erp_apprenant, organisme_id, annee_scolaire, source, updated_at, created_at, ...dataToUpdate } =
-    merge(effectifDb, stripEmptyFields(restData));
-
-  // TODO WEIRD MONGO VALIDATION ISSUE ONLY ON THOSE
-  const formation = dataToUpdate.formation;
-  if (formation?.date_entree) {
-    formation.date_entree = new Date(formation.date_entree);
-  }
-  if (formation?.date_fin) {
-    formation.date_fin = new Date(formation.date_fin);
-  }
-  if (formation?.date_inscription) {
-    formation.date_inscription = new Date(formation.date_inscription);
-  }
-  if (formation?.date_obtention_diplome) {
-    formation.date_obtention_diplome = new Date(formation.date_obtention_diplome);
-  }
-  if (dataToUpdate.apprenant.date_rqth) {
-    dataToUpdate.apprenant.date_rqth = new Date(dataToUpdate.apprenant.date_rqth);
-  }
-  if (dataToUpdate.apprenant.date_de_naissance) {
-    dataToUpdate.apprenant.date_de_naissance = new Date(dataToUpdate.apprenant.date_de_naissance);
-  }
-
-  // Le numero d'adresse est parfois envoyé en string, bloquant toute la mise à jour de l'effectif
-  // Si le numéro est présent, forcer le numéro a un nombre
-  const adresse = dataToUpdate.apprenant.adresse;
-  if (adresse?.numero) {
-    const numero = Number(adresse.numero);
-    adresse.numero = !isNaN(numero) ? numero : undefined;
-  }
-
-  dataToUpdate.apprenant.historique_statut = dataToUpdate.apprenant.historique_statut
-    .filter((e) => e) // Remove empty values
-    .map((s) => {
-      const statut = stripEmptyFields(s);
-      if (statut.date_statut) {
-        statut.date_statut = new Date(statut.date_statut);
-      }
-      if (statut.date_reception) {
-        statut.date_reception = new Date(statut.date_reception);
-      }
-      return statut;
-    });
-  if (nouveau_statut) {
-    dataToUpdate.apprenant.historique_statut.push({
-      valeur_statut: nouveau_statut.valeur_statut,
-      date_statut: new Date(nouveau_statut.date_statut),
-      date_reception: new Date(),
-    });
-  }
-
-  dataToUpdate.contrats = (dataToUpdate.contrats ?? [])
-    .filter((e) => e) // Remove empty values
-    .map((c) => {
-      const contrat = stripEmptyFields(c);
-      if (contrat.date_debut) {
-        contrat.date_debut = new Date(contrat.date_debut);
-      }
-      if (contrat.date_fin) {
-        contrat.date_fin = new Date(contrat.date_fin);
-      }
-      if (contrat.date_rupture) {
-        contrat.date_rupture = new Date(contrat.date_rupture);
-      }
-      return contrat;
-    });
-  if (nouveau_contrat) {
-    dataToUpdate.contrats.push(nouveau_contrat);
-  }
-
-  const validation_errors: IEffectif["validation_errors"] = [];
-  for (const validation_error of dataToUpdate.validation_errors ?? []) {
-    if (!validation_error.fieldName || !inputNames.includes(validation_error.fieldName)) {
-      validation_errors.push(validation_error);
-    }
-  }
-
-  const effectifUpdated = await updateEffectif(effectifDb._id, {
-    ...dataToUpdate,
-    id_erp_apprenant,
-    organisme_id: new ObjectId(organisme_id),
-    annee_scolaire,
-    source,
-    validation_errors,
-  });
-  if (!effectifUpdated) {
-    throw Boom.notFound(`Unable to find effectif ${effectifId.toString()}`);
-  }
-
-  return buildEffectifResult(effectifUpdated);
 }
 
 export async function softDeleteEffectif(
