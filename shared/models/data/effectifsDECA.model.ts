@@ -40,6 +40,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
     },
   ],
   [{ organisme_id: 1, created_at: 1 }, {}],
+  [{ annee_scolaire: 1, "formation.cfd": 1, id_erp_apprenant: 1, organisme_id: 1 }, {}],
   [{ id_erp_apprenant: 1 }, { name: "id_erp_apprenant" }],
   [{ "formation.cfd": 1 }, { name: "formation.cfd" }],
   [

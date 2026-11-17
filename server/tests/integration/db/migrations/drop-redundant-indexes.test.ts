@@ -1,5 +1,7 @@
+import effectifsDECADescriptor from "shared/models/data/effectifsDECA.model";
 import { afterEach, describe, expect, it } from "vitest";
 
+import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { getDatabase } from "@/common/mongodb";
 import { REDUNDANT_INDEXES, up } from "@/db/migrations/20261117120300-drop-redundant-indexes";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -53,6 +55,18 @@ describe("migration drop-redundant-indexes", () => {
     const stats = await indexNames("missionLocaleStats");
     expect(stats).not.toContain("computed_day_asc");
     expect(stats).toContain("computed_day_ml_id_desc");
+  });
+
+  it("laisse à effectifsDECA un index mené par annee_scolaire quand seul le modèle le crée", async () => {
+    const db = getDatabase();
+    await db.collection("effectifsDECA").createIndex({ annee_scolaire: 1 }, { name: "annee_scolaire" });
+
+    await up(db);
+    await createCollectionIndexes(effectifsDECADescriptor);
+
+    const deca = await indexNames("effectifsDECA");
+    expect(deca).not.toContain("annee_scolaire");
+    expect(deca).toContain("annee_scolaire_1_formation.cfd_1_id_erp_apprenant_1_organisme_id_1");
   });
 
   it("passe sans erreur quand les index sont déjà absents", async () => {
