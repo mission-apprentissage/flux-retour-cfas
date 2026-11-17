@@ -4,11 +4,11 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { SortingState } from "@tanstack/react-table";
 import NavLink from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { SearchField } from "@/app/_components/common/SearchField";
 import { FullTable } from "@/app/_components/table/FullTable";
 import { ColumnData } from "@/app/_components/table/types";
 import { AdminInvitation, useAdminInvitations } from "@/app/_hooks/useAdminInvitations";
@@ -254,19 +254,12 @@ export default function InvitationsTable({ status, organisation_id }: Invitation
           onClose={() => setActionSuccess(null)}
         />
       )}
-      <SearchBar
+      <SearchField
         label="Rechercher une invitation"
-        onButtonClick={(value) => setSearchTerm(value)}
-        renderInput={({ className, id, type }) => (
-          <input
-            className={className}
-            id={id}
-            placeholder="Email, nom, organisme, SIRET…"
-            type={type}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        )}
+        placeholder="Email, nom, organisme, SIRET…"
+        value={searchTerm}
+        onChange={setSearchTerm}
+        onSearch={setSearchTerm}
       />
       <p className={styles.caption}>
         {isLoading

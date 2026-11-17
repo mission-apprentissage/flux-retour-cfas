@@ -1,7 +1,7 @@
 "use client";
 
 import { fr } from "@codegouvfr/react-dsfr";
-import { useCallback, useId, useRef, useState, type MutableRefObject, type RefCallback } from "react";
+import { useCallback, useId, useRef, useState, type RefCallback, type RefObject } from "react";
 
 interface SearchFieldProps {
   label: string;
@@ -14,7 +14,7 @@ interface SearchFieldProps {
   inputClassName?: string;
   maxLength?: number;
   autoComplete?: string;
-  inputRef?: RefCallback<HTMLInputElement> | MutableRefObject<HTMLInputElement | null>;
+  inputRef?: RefCallback<HTMLInputElement> | RefObject<HTMLInputElement | null>;
 }
 
 export function SearchField({
@@ -40,7 +40,7 @@ export function SearchField({
       if (typeof inputRef === "function") {
         inputRef(element);
       } else if (inputRef) {
-        inputRef.current = element;
+        (inputRef as { current: HTMLInputElement | null }).current = element;
       }
     },
     [inputRef]
