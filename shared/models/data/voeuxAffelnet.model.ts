@@ -8,9 +8,8 @@ import { zAdresse } from "../parts/adresseSchema";
 const collectionName = "voeuxAffelnet";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
-  [{ voeu_id: 1 }, {}],
-  [{ revision: -1 }, {}],
   [{ "raw.ine": 1 }, {}],
+  [{ annee_scolaire_rentree: 1, "raw.nom": 1, "raw.prenom_1": 1 }, {}],
   [{ deleted_at: 1 }, {}],
   [{ effectif_id: 1 }, {}],
 ];

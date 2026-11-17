@@ -40,9 +40,7 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
     },
   ],
   [{ organisme_id: 1, created_at: 1 }, {}],
-  [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
   [{ id_erp_apprenant: 1 }, { name: "id_erp_apprenant" }],
-  [{ date_de_naissance: 1 }, { name: "date_de_naissance" }],
   [{ "formation.cfd": 1 }, { name: "formation.cfd" }],
   [
     { "apprenant.nom": 1 },
@@ -65,7 +63,6 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
     },
   ],
   [{ source: 1 }, { name: "source" }],
-  [{ source_organisme_id: 1 }, { name: "source_organisme_id" }],
   [{ created_at: 1 }, { name: "created_at" }],
   [{ transmitted_at: 1 }, {}],
   [{ "_computed.organisme.region": 1 }, {}],
