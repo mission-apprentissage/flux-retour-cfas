@@ -57,8 +57,7 @@ export type IEligibleOrganismeRow = {
 /**
  *   - siret AND uai non vides
  *   - nature ∈ {FORMATEUR, RESPONSABLE_FORMATEUR}
- *   - aucune formation catalogue publiée où l'organisme est gestionnaire mais formateur tiers
- *   - au moins un effectif (ERP + DECA) sur les années scolaires actives
+ *   - au moins un effectif (ERP + DECA, contrats DECA à rattacher compris) sur les années scolaires actives
  *   - ferme !== true
  *
  * `organismeIds` (optionnel) : restreint le scan à un sous-ensemble d'organismes
@@ -103,43 +102,22 @@ export async function findEligibleOrganismes(organismeIds?: ObjectId[]): Promise
         },
       },
       {
-        $lookup: {
-          from: "formationsCatalogue",
-          let: { sir: "$siret", u: "$uai" },
-          pipeline: [
-            {
-              $match: {
-                published: true,
-                $expr: {
-                  $and: [
-                    { $eq: ["$etablissement_gestionnaire_siret", "$$sir"] },
-                    { $eq: ["$etablissement_gestionnaire_uai", "$$u"] },
-                    {
-                      $or: [
-                        { $ne: ["$etablissement_formateur_siret", "$$sir"] },
-                        { $ne: ["$etablissement_formateur_uai", "$$u"] },
-                      ],
-                    },
-                  ],
-                },
+        $set: {
+          _has_effectifs_erp: { $gt: [{ $size: "$_effectifs_erp" }, 0] },
+          _has_effectifs_deca: {
+            $or: [
+              { $gt: [{ $size: "$_effectifs_deca" }, 0] },
+              {
+                $and: [
+                  { $ne: ["$is_allowed_deca", true] },
+                  { $gt: [{ $ifNull: ["$deca_contrats_flechables", 0] }, 0] },
+                ],
               },
-            },
-            { $limit: 1 },
-            { $project: { _id: 1 } },
-          ],
-          as: "_formateurs_tiers",
-        },
-      },
-      {
-        $match: {
-          $expr: {
-            $and: [
-              { $or: [{ $gt: [{ $size: "$_effectifs_erp" }, 0] }, { $gt: [{ $size: "$_effectifs_deca" }, 0] }] },
-              { $eq: [{ $size: "$_formateurs_tiers" }, 0] },
             ],
           },
         },
       },
+      { $match: { $or: [{ _has_effectifs_erp: true }, { _has_effectifs_deca: true }] } },
       {
         $project: {
           _id: 1,
@@ -149,8 +127,8 @@ export async function findEligibleOrganismes(organismeIds?: ObjectId[]): Promise
           region: "$adresse.region",
           departement: "$adresse.departement",
           is_allowed_deca: { $eq: ["$is_allowed_deca", true] },
-          has_effectifs_erp: { $gt: [{ $size: "$_effectifs_erp" }, 0] },
-          has_effectifs_deca: { $gt: [{ $size: "$_effectifs_deca" }, 0] },
+          has_effectifs_erp: "$_has_effectifs_erp",
+          has_effectifs_deca: "$_has_effectifs_deca",
         },
       },
     ])

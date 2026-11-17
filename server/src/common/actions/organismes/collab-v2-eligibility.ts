@@ -102,9 +102,6 @@ async function countComptesConfirmes(organismeId: ObjectId): Promise<number> {
  *   - programme DECA-CFA actif dès qu'il y a un effectif DECA
  *   - au moins un compte CFA confirmé
  *   - pas déjà activé (is_allowed_collab !== true)
- *
- * ⚠️ Contrairement au pilote DECA-CFA : pas de check « aucun formateur tiers dans le
- * catalogue publié ».
  */
 export async function checkCollabV2EligibilityForLoaded(
   organisme: Pick<
