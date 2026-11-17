@@ -105,6 +105,17 @@ const createCollectionIfDoesNotExist = async (collectionName: string) => {
   }
 };
 
+export const buildCollectionValidator = (collectionName: string, zod?: ZodTypeAny | null) => {
+  if (!zod) {
+    return null;
+  }
+  const convertedSchema = zodToMongoSchema(zod);
+  if (!convertedSchema) {
+    return null;
+  }
+  return { $jsonSchema: { title: collectionName, ...omitDeepKeys(convertedSchema, ["example"]) } };
+};
+
 export const configureDbSchemaValidation = async (
   modelDescriptors: ReadonlyArray<{ collectionName: string; zod?: ZodTypeAny | null }>,
   { level = "strict", onIndexBuild = "throw" }: ValidationOptions = {}
@@ -119,17 +130,10 @@ export const configureDbSchemaValidation = async (
         await createCollectionIfDoesNotExist(collectionName);
       }
 
-      if (!zod) {
+      const validator = buildCollectionValidator(collectionName, zod);
+      if (!validator) {
         return;
       }
-      const convertedSchema = zodToMongoSchema(zod);
-      if (!convertedSchema) {
-        return;
-      }
-
-      const validator = {
-        $jsonSchema: { title: collectionName, ...omitDeepKeys(convertedSchema, ["example"]) },
-      };
 
       const current = optionsByName.get(collectionName);
       if (
