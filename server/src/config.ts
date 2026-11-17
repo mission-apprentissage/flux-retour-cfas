@@ -44,8 +44,6 @@ const config = {
     uri: env.get("MNA_TDB_MONGODB_URI").required().asString(),
     dbName: env.get("MNA_TDB_MONGODB_DB_NAME").required().asString(),
     options: env.get("MNA_TDB_MONGODB_OPTIONS").required().asString(),
-    decaDbName: env.get("MNA_TDB_DECA_DB_NAME").required().asString(),
-    decaDbCollection: env.get("MNA_TDB_DECA_COLLECTION_NAME").required().asString(),
     uriBal: env.get("MNA_BAL_MONGODB_URI").required().asString(),
     dbNameBal: env.get("MNA_BAL_MONGODB_DB_NAME").required().asString(),
     optionsBal: env.get("MNA_BAL_MONGODB_OPTIONS").asString(),
@@ -115,11 +113,6 @@ const config = {
   },
   apiAlternance: {
     key: env.get("API_ALTERNANCE_KEY").required().asString(),
-  },
-  decaApi: {
-    endpoint: env.get("MNA_TDB_API_DECA_URL").asString(),
-    login: env.get("MNA_TDB_API_DECA_LOGIN").asString(),
-    password: env.get("MNA_TDB_API_DECA_PASSWORD").asString(),
   },
   disable_processors: env.get("FLUX_RETOUR_CFAS_DISABLE_PROCESSORS").default("false").asBool(),
   bal: {
