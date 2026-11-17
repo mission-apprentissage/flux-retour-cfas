@@ -38,6 +38,34 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
         run: yarn gitleaks:check ci
 
+  migration-guard:
+    name: "Migration avec les validateurs"
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Exige une migration quand un validateur change
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          snapshot="server/src/common/mongodb/__snapshots__/validationSchema.test.ts.snap"
+          if git diff --quiet "$BASE_SHA...$HEAD_SHA" -- "$snapshot"; then
+            exit 0
+          fi
+          added=$(git diff --name-only --diff-filter=A "$BASE_SHA...$HEAD_SHA" -- server/src/db/migrations)
+          if [ -z "$added" ]; then
+            echo "::error::Un validateur MongoDB change ($snapshot) sans nouvelle migration dans server/src/db/migrations. Ajouter une migration, même vide, pour que le déploiement passe par la maintenance."
+            exit 1
+          fi
+
   npm-packages-check:
     runs-on: ubuntu-26.04
     steps:
