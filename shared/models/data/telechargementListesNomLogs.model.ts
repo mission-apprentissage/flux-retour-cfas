@@ -12,9 +12,13 @@ import {
   typesIndicateursCollaborations,
 } from "../../constants";
 
+import { SIX_MOIS_EN_SECONDES } from "./common";
+
 const collectionName = "telechargementListeNomLogs";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ telechargement_date: 1 }, { name: "ttl_telechargement_date", expireAfterSeconds: SIX_MOIS_EN_SECONDES }],
+];
 
 const extendedTypesEffectifNominatif = [
   ...typesEffectifNominatif,

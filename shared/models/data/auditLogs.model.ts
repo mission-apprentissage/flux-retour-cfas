@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-import { IModelDescriptor } from "./common";
+import { IModelDescriptor, SIX_MOIS_EN_SECONDES } from "./common";
 
 const auditLogSchema = z
   .object({
@@ -15,6 +15,6 @@ export type IAuditLog = z.output<typeof auditLogSchema>;
 
 export default {
   collectionName: "auditLogs",
-  indexes: [],
+  indexes: [[{ date: 1 }, { name: "ttl_date", expireAfterSeconds: SIX_MOIS_EN_SECONDES }]],
   zod: auditLogSchema.extend({ _id: zObjectId }).strict(),
 } as IModelDescriptor;
