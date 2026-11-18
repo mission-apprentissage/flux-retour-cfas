@@ -9,6 +9,7 @@ import { Skeleton } from "@/app/_components/common/Skeleton";
 import styles from "@/app/_components/ruptures/cfa/collaboration/CollaborationForm.module.css";
 import { useCfaEffectifDetail } from "@/app/_components/ruptures/cfa/collaboration/hooks";
 import { CollaborationTunnel } from "@/app/_components/ruptures/cfa/collaboration/tunnel/CollaborationTunnel";
+import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { dePrenom } from "@/app/_utils/ruptures.utils";
 
@@ -20,6 +21,7 @@ export default function CollaborationFormPage({ id }: { id: string }) {
   const [showModal, setShowModal] = useState(false);
   const snapshotRef = useRef<IEffectifMissionLocale["effectif"] | null>(null);
   const { trackPlausibleEvent } = usePlausibleAppTracking();
+  const { user } = useAuth();
 
   const handleSuccess = useCallback(() => {
     if (data?.effectif) {
@@ -31,7 +33,7 @@ export default function CollaborationFormPage({ id }: { id: string }) {
 
   const effectif = data?.effectif;
   const alreadySent = effectif?.organisme_data?.acc_conjoint === true;
-  const shouldRedirect = !isLoading && !showModal && effectif && alreadySent;
+  const shouldRedirect = user?.readOnly === true || (!isLoading && !showModal && effectif && alreadySent);
 
   useEffect(() => {
     if (shouldRedirect) {
