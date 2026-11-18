@@ -4,10 +4,19 @@ import type { IMissionLocaleCfaInvitation } from "shared/models/data/missionLoca
 import type { IOrganisme } from "shared/models/data/organismes.model";
 import { describe, expect, it } from "vitest";
 
-import { missionLocaleCfaInvitationsDb, missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
+import {
+  missionLocaleCfaInvitationsDb,
+  missionLocaleEffectifsDb,
+  organisationsDb,
+  organismesDb,
+} from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 
-import { getCfaInvitesSansCollab, listCfaInvitesSansCollab } from "./cfa-invites-sans-collab.actions";
+import {
+  getCfaInvitesSansCollab,
+  listCfaInvitesExport,
+  listCfaInvitesSansCollab,
+} from "./cfa-invites-sans-collab.actions";
 
 useMongo();
 
@@ -46,7 +55,12 @@ const insertInvitation = async (organismeId: ObjectId, missionLocaleId: ObjectId
   } as IMissionLocaleCfaInvitation);
 };
 
-const insertCollab = async (organismeId: ObjectId, softDeleted = false, reponseAt?: Date) => {
+const insertCollab = async (
+  organismeId: ObjectId,
+  softDeleted = false,
+  reponseAt?: Date,
+  accConjointAt: Date = new Date("2026-02-01")
+) => {
   await missionLocaleEffectifsDb().insertOne(
     {
       _id: new ObjectId(),
@@ -56,6 +70,7 @@ const insertCollab = async (organismeId: ObjectId, softDeleted = false, reponseA
       effectif_snapshot: { organisme_id: organismeId },
       organisme_data: {
         acc_conjoint: true,
+        acc_conjoint_at: accConjointAt,
         has_unread_notification: false,
         ...(reponseAt ? { reponse_at: reponseAt } : {}),
       },
@@ -100,6 +115,55 @@ describe("getCfaInvitesSansCollab", () => {
     const result = await getCfaInvitesSansCollab(defaultQuery);
 
     expect(result.data.map((row) => row.raison_sociale)).toEqual(["CFA Collab Supprimée"]);
+  });
+
+  it("avec inclureAvecCollab, garde tous les invités et compte leurs collaborations non supprimées", async () => {
+    const treize = await insertOrganisme({ nom: "Treize" });
+    const deux = await insertOrganisme({ nom: "Deux" });
+    const aucune = await insertOrganisme({ nom: "Aucune" });
+    const supprimee = await insertOrganisme({ nom: "Supprimée" });
+    for (const id of [treize, deux, aucune, supprimee]) await insertInvitation(id, ML_A, new Date("2026-09-01"));
+    for (let i = 0; i < 13; i++) await insertCollab(treize);
+    await insertCollab(deux, false, undefined, new Date("2026-03-05"));
+    await insertCollab(deux, false, undefined, new Date("2026-02-10"));
+    await insertCollab(supprimee, true);
+    await organisationsDb().insertMany(
+      [
+        { type: "ORGANISME_FORMATION", organisme_id: deux.toString(), ml_beta_activated_at: new Date("2026-03-01") },
+        { type: "ORGANISME_FORMATION", organisme_id: deux.toString(), ml_beta_activated_at: new Date("2026-02-01") },
+        { type: "ORGANISME_FORMATION", organisme_id: aucune.toString() },
+      ].map((organisation) => ({ _id: new ObjectId(), ...organisation })) as never[],
+      { bypassDocumentValidation: true }
+    );
+    await insertCollab(aucune, false, undefined, new Date("2999-01-01"));
+
+    const options = { inclureAvecCollab: true };
+    const desc = await getCfaInvitesSansCollab({ ...defaultQuery, sort_by: "collaborations" }, options);
+    expect(desc.total).toBe(4);
+    expect(desc.data.map((row) => [row.raison_sociale, row.nb_collaborations])).toEqual([
+      ["Treize", 13],
+      ["Deux", 2],
+      ["Aucune", 0],
+      ["Supprimée", 0],
+    ]);
+
+    const dates = Object.fromEntries(
+      desc.data.map((row) => [row.raison_sociale, [row.date_activation, row.date_premiere_collaboration]])
+    );
+    expect(dates["Deux"]).toEqual([new Date("2026-02-01"), new Date("2026-02-10")]);
+    expect(dates["Treize"]).toEqual([null, new Date("2026-02-01")]);
+    expect(dates["Aucune"]).toEqual([null, null]);
+
+    const asc = await listCfaInvitesSansCollab({ sort_by: "collaborations", sort_order: "asc" }, options);
+    expect(asc.map((row) => row.nb_collaborations)).toEqual([0, 0, 2, 13]);
+  });
+
+  it("sans option, renvoie nb_collaborations à 0 pour les CFA sans collaboration", async () => {
+    const cfa = await insertOrganisme({ nom: "CFA Sans Collab" });
+    await insertInvitation(cfa, ML_A, new Date("2026-09-01"));
+
+    const result = await getCfaInvitesSansCollab(defaultQuery);
+    expect(result.data[0]).toMatchObject({ raison_sociale: "CFA Sans Collab", nb_collaborations: 0 });
   });
 
   it("trie et pagine", async () => {
@@ -166,5 +230,28 @@ describe("getCfaInvitesSansCollab", () => {
 
     const all = await listCfaInvitesSansCollab({ sort_by: "compte", sort_order: "desc" }, options);
     expect(all.map((row) => row.raison_sociale)).toEqual(["Sans collab", "Collab 2025"]);
+  });
+
+  it("exporte une ligne par invitation, avec les colonnes du CFA et celles de l'invitation", async () => {
+    const referentiel = { est_dans_le_referentiel: "present" } as const;
+    const deuxInvitations = await insertOrganisme({ nom: "Deux invitations", ...referentiel });
+    const uneInvitation = await insertOrganisme({ nom: "Une invitation", ...referentiel });
+    await insertInvitation(deuxInvitations, ML_A, new Date("2026-09-01"));
+    await insertInvitation(deuxInvitations, ML_A, new Date("2026-09-05"));
+    await insertInvitation(uneInvitation, ML_A, new Date("2026-09-03"));
+    await insertCollab(deuxInvitations, false, undefined, new Date("2026-09-10"));
+
+    const rows = await listCfaInvitesExport(
+      { sort_by: "invitations", sort_order: "desc" },
+      { inclureAvecCollab: true }
+    );
+
+    expect(rows.map(({ cfa, invitation }) => [cfa.raison_sociale, invitation.raison_sociale_cfa])).toEqual([
+      ["Deux invitations", "Deux invitations"],
+      ["Deux invitations", "Deux invitations"],
+      ["Une invitation", "Une invitation"],
+    ]);
+    expect(rows[0].cfa.nb_collaborations).toBe(1);
+    expect(rows.map(({ invitation }) => invitation.nb_collab_apres_invitation_cfa)).toEqual([1, 1, 0]);
   });
 });

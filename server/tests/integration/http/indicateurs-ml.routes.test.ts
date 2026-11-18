@@ -1546,7 +1546,81 @@ describe("Indicateurs ML routes (territoriales)", () => {
       const exportAdmin = await requestAsOrganisation(ADMIN, "get", `${BASE}/export`);
       expect(exportAdmin.data.data).toHaveLength(2);
 
+      const exportRegion = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}/export?national=true`);
+      expect(exportRegion.status).toBe(200);
+      expect(exportRegion.data.data.map((row: { cfa: { raison_sociale: string } }) => row.cfa.raison_sociale)).toEqual([
+        "CFA IDF",
+      ]);
+      expect((await requestAsOrganisation(DREETS_IDF, "get", `${BASE}/export?region=84`)).status).toBe(403);
+      expect((await requestAsOrganisation(ARML_IDF, "get", `${BASE}/export`)).status).toBe(403);
+      const exportDdets = await requestAsOrganisation(DDETS_PARIS, "get", `${BASE}/export`);
+      expect(exportDdets.status).toBe(200);
+      expect(exportDdets.data.data).toEqual([]);
+
       expect((await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?region=84`)).status).toBe(200);
+    });
+
+    it("Garde les CFA qui ont collaboré et renvoie leur nombre de collaborations, triable", async () => {
+      const BASE = "/api/v1/organisation/indicateurs-ml/stats/cfa/invites-sans-collab";
+      await organismesDb().insertMany(
+        [
+          {
+            _id: CFA_A,
+            siret: "11111111100011",
+            nom: "CFA Actif",
+            adresse: { region: "11" },
+            est_dans_le_referentiel: "present",
+          },
+          {
+            _id: CFA_B,
+            siret: "22222222200022",
+            nom: "CFA Sans Collab",
+            adresse: { region: "11" },
+            est_dans_le_referentiel: "present",
+          },
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+      await missionLocaleCfaInvitationsDb().insertMany(
+        [CFA_A, CFA_B].map((organismeId) => ({
+          _id: new ObjectId(),
+          mission_locale_id: ML_IDF,
+          author_id: new ObjectId(),
+          organisme_id: organismeId,
+          organisation_id: new ObjectId(),
+          siret: "00000000000000",
+          destinataires: [],
+          created_at: new Date(),
+        })) as never[],
+        { bypassDocumentValidation: true }
+      );
+      await missionLocaleEffectifsDb().deleteMany({});
+      await missionLocaleEffectifsDb().insertMany(
+        [buildCollabDossier(ML_IDF, CFA_A, []), buildCollabDossier(ML_IDF, CFA_A, [])],
+        { bypassDocumentValidation: true }
+      );
+
+      const desc = await requestAsOrganisation(DREETS_IDF, "get", `${BASE}?sort_by=collaborations&sort_order=desc`);
+      expect(desc.status).toBe(200);
+      expect(desc.data.total).toBe(2);
+      expect(
+        desc.data.data.map((row: { raison_sociale: string; nb_collaborations: number }) => [
+          row.raison_sociale,
+          row.nb_collaborations,
+        ])
+      ).toEqual([
+        ["CFA Actif", 2],
+        ["CFA Sans Collab", 0],
+      ]);
+
+      const exportAdmin = await requestAsOrganisation(
+        ADMIN,
+        "get",
+        `${BASE}/export?sort_by=collaborations&sort_order=asc`
+      );
+      expect(
+        exportAdmin.data.data.map((row: { cfa: { nb_collaborations: number } }) => row.cfa.nb_collaborations)
+      ).toEqual([0, 2]);
     });
   });
 
