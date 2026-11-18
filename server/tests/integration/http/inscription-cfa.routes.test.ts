@@ -73,7 +73,7 @@ async function seedInvitation({
   organisationId: ObjectId;
   email?: string;
   role?: "admin" | "member";
-  expiresAt?: Date | null;
+  expiresAt?: Date;
 }) {
   await invitationsDb().insertOne({
     _id: new ObjectId(),
@@ -83,7 +83,7 @@ async function seedInvitation({
     author_id: new ObjectId(id(42)),
     created_at: new Date(now),
     ...(role ? { role } : {}),
-    ...(expiresAt !== null ? { expires_at: expiresAt ?? new Date("2026-04-21T00:00:00.000Z") } : {}),
+    expires_at: expiresAt ?? new Date("2026-04-21T00:00:00.000Z"),
   });
 }
 
