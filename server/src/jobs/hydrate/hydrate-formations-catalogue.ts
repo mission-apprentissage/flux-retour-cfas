@@ -24,7 +24,7 @@ const INSERT_BATCH_SIZE = 1_000;
 const MARGE_LIMITE = 1_000;
 const ECART_TOLERE = 0.005;
 const PAUSES_ENTRE_TENTATIVES_MS = [30_000, 120_000];
-const DELAI_INACTIVITE_MS = 10_000;
+const DELAI_INACTIVITE_MS = 60_000;
 
 const champsDuSchema = (schema: z.AnyZodObject, prefixe = ""): string[] =>
   Object.entries(schema.shape).flatMap(([champ, type]) => {
@@ -102,12 +102,12 @@ const importerFormations = async (limit: number, delaiInactiviteMs: number): Pro
     objectMode: true,
     write({ value }: { value: unknown }, _encoding, callback) {
       resultat.recues++;
-      const cle = (value as { cle_ministere_educatif?: unknown } | null)?.cle_ministere_educatif;
-      if (typeof cle === "string") {
-        resultat.cles.add(cle);
+      const formation = zFormationCatalogue.safeParse(value);
+      const brute = value as { cle_ministere_educatif?: unknown; published?: unknown } | null;
+      if (typeof brute?.cle_ministere_educatif === "string" && (formation.success || brute.published !== false)) {
+        resultat.cles.add(brute.cle_ministere_educatif);
       }
 
-      const formation = zFormationCatalogue.safeParse(value);
       if (!formation.success) {
         resultat.rejetees++;
         errors.record(formation.error);
@@ -178,30 +178,31 @@ export const hydrateFormationsCatalogue = async ({
   delaiInactiviteMs = DELAI_INACTIVITE_MS,
 }: IOptionsImportCatalogue = {}) => {
   logger.info("récupération des formations depuis le catalogue");
-  const total = await compterFormationsCatalogue(delaiInactiviteMs);
-  const limit = total + MARGE_LIMITE;
 
-  let resultat: IResultatImport | null = null;
+  let importReussi: { total: number; limit: number; resultat: IResultatImport } | null = null;
   let derniereErreur: unknown = null;
-  for (let tentative = 0; tentative <= pausesEntreTentativesMs.length && !resultat; tentative++) {
+  for (let tentative = 0; tentative <= pausesEntreTentativesMs.length && !importReussi; tentative++) {
     if (tentative > 0) {
       logger.warn(
         { err: derniereErreur, tentative: tentative + 1 },
-        "flux du catalogue interrompu, nouvelle tentative"
+        "import du catalogue interrompu, nouvelle tentative"
       );
       await sleep(pausesEntreTentativesMs[tentative - 1]);
     }
     try {
-      resultat = await importerFormations(limit, delaiInactiviteMs);
+      const total = await compterFormationsCatalogue(delaiInactiviteMs);
+      const limit = total + MARGE_LIMITE;
+      importReussi = { total, limit, resultat: await importerFormations(limit, delaiInactiviteMs) };
     } catch (err) {
       derniereErreur = err;
     }
   }
-  if (!resultat) {
+  if (!importReussi) {
     throw new Error(`Import du catalogue interrompu après ${pausesEntreTentativesMs.length + 1} tentatives`, {
       cause: derniereErreur,
     });
   }
+  const { total, limit, resultat } = importReussi;
 
   verifierTotal(total, limit, resultat.recues);
   const depubliees = await depublierFormationsAbsentes(resultat.cles);

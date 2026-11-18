@@ -581,6 +581,27 @@ describe("Job hydrateFormationsCatalogue", () => {
     expect(await publicationDe("BBB")).toBe(true);
   });
 
+  it("Dépublie une formation invalide que le catalogue donne dépubliée", async () => {
+    await insererFormation("BBB");
+    nockCatalogue([formation("AAA"), formation("BBB", { cfd: null, published: false })]);
+
+    expect(await hydrateFormationsCatalogue()).toMatchObject({ rejetees: 1, depubliees: 1 });
+    expect(await publicationDe("BBB")).toBe(false);
+  });
+
+  it("Reprend après un échec du comptage", async () => {
+    nock(config.mnaCatalogApi.endpoint)
+      .get(/v1\/entity\/formations\/count/)
+      .query(true)
+      .reply(503);
+    nockCatalogue([formation("AAA"), formation("BBB")]);
+
+    expect(await hydrateFormationsCatalogue({ pausesEntreTentativesMs: [0, 0] })).toMatchObject({
+      total: 2,
+      recues: 2,
+    });
+  });
+
   it("Dépublie les formations publiées absentes de l'export", async () => {
     await insererFormation("ZZZ");
     await insererFormation("YYY", { published: false });
