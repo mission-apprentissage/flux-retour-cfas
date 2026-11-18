@@ -3,7 +3,7 @@ import nock from "nock";
 import { CODES_STATUT_APPRENANT, SOURCE_APPRENANT } from "shared";
 import type { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import type { IOrganisme } from "shared/models/data/organismes.model";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { effectifsDb, effectifsQueueDb, organismesDb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
@@ -129,11 +129,17 @@ describe("Attribution de l'organisme à l'ingestion", () => {
   let cfppa: IOrganisme;
 
   beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2023-01-15T00:00:00Z"));
     lemonnier = organisme(LEMONNIER);
     genech = organisme(GENECH);
     cfppa = organisme(CFPPA_65);
     await organismesDb().insertMany([lemonnier, genech, cfppa]);
     mockApiApprentissageCertificationApi();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("retient le transmetteur quand l'API ne rattache que par lieu et que le SIRET envoyé est le sien", async () => {

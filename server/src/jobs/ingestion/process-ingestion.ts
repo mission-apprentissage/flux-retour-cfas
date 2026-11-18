@@ -4,6 +4,7 @@ import { PromisePool } from "@supercharge/promise-pool";
 import { Filter, ObjectId, WithId, type WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import {
+  EFFECTIF_HORS_CONSERVATION,
   IEffectif,
   ORGANISME_FORMATEUR_NOT_FOUND,
   ORGANISME_RESPONSABLE_NOT_FOUND,
@@ -33,6 +34,7 @@ import {
 import parentLogger from "@/common/logger";
 import { effectifsDb, effectifsQueueDb, organismesDb } from "@/common/model/collections";
 import { sleep } from "@/common/utils/asyncUtils";
+import { estHorsConservation, getDatesDeFinEffectif } from "@/common/utils/conservationUtils";
 import { formatDateYYYYMMDD } from "@/common/utils/dateUtils";
 import { createErrorAggregator, type ErrorAggregator } from "@/common/utils/errorAggregator";
 import { formatError } from "@/common/utils/errorUtils";
@@ -370,7 +372,19 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
       validateContrat(effectifQueued, "_3", ctx);
       validateContrat(effectifQueued, "_4", ctx);
 
-      if (!organismeFormateur || !organismeResponsable) {
+      const horsConservation = estHorsConservation({
+        annee_scolaire: effectif.annee_scolaire,
+        datesDeFin: getDatesDeFinEffectif(effectif),
+      });
+      if (horsConservation) {
+        ctx.addIssue(
+          createCustomEffectifIssue(EFFECTIF_HORS_CONSERVATION, ["date_fin_formation"], {
+            annee_scolaire: effectif.annee_scolaire,
+          })
+        );
+      }
+
+      if (!organismeFormateur || !organismeResponsable || horsConservation) {
         return NEVER;
       }
 

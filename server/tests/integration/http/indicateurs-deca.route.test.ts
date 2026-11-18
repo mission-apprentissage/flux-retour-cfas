@@ -3,7 +3,7 @@ import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
 import { IOrganisation, IOrganisme } from "shared/models";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
-import { it, expect, describe, beforeEach } from "vitest";
+import { it, expect, describe, beforeEach, afterEach, vi } from "vitest";
 
 import { organismesDb, effectifsQueueDb, effectifsDECADb } from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
@@ -209,12 +209,18 @@ const testDeca = async (
 describe("Test des indicateurs avec des données DECA", () => {
   useMongo();
   beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2024-04-24T15:04:33.359Z"));
     app = await initTestApp();
     requestAsOrganisation = app.requestAsOrganisation;
   });
 
   beforeEach(async () => {
     await organismesDb().insertMany([organismeResponsable, organismeFormateur]);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("Indicateur avec DECA - 1", async () => {
