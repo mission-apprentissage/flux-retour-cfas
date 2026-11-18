@@ -9,7 +9,10 @@ import {
 } from "shared";
 
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
-import { getEtablissementRechercheEntreprises } from "@/common/apis/apiRechercheEntreprises";
+import {
+  getEtablissementRechercheEntreprises,
+  type IEtablissementRechercheEntreprises,
+} from "@/common/apis/apiRechercheEntreprises";
 import logger from "@/common/logger";
 import { organismesDb } from "@/common/model/collections";
 import { findDataByDepartementNum, getDepartementCodeFromCodeInsee } from "@/common/utils/adresseUtils";
@@ -35,12 +38,14 @@ export const hydrateOrganismesFromApiAlternance = async (startTime: Date) => {
   let nbOrganismeUpdated = 0;
 
   const repli = nouveauRepliAdresse();
+  const controle = nouveauControleFermes();
 
   const cursor = apiAlternanceClient.organisme.export({ page_size: 100 });
   for await (const page of cursor) {
     const adressesDeRepli = await getAdressesDeRepli(page, repli);
+    const fermesControles = await controlerFermes(page, repli, controle);
     const operations = page
-      .map((o) => generateBulkOperation(o, startTime, adressesDeRepli))
+      .map((o) => generateBulkOperation(o, startTime, adressesDeRepli, fermesControles))
       .filter((op): op is AnyBulkWriteOperation<IOrganisme> => op !== null);
 
     if (operations.length > 0) {
@@ -54,8 +59,6 @@ export const hydrateOrganismesFromApiAlternance = async (startTime: Date) => {
   // On reset tous les organismes comme non présents dans le référentiel
   let nbOrganismesSuppr = await resetOrganismesReferentielPresence(startTime);
 
-  const { nbFermesControles, nbFermesRouverts } = await controlerFermes(repli);
-
   // Log & stats
   logger.info(`--> ${nbOrganismeCreated} organismes créés depuis le référentiel`);
   logger.info(`---> ${nbOrganismeUpdated} organismes mis à jour`);
@@ -64,7 +67,7 @@ export const hydrateOrganismesFromApiAlternance = async (startTime: Date) => {
     `-----> adresses absentes de l'API : ${repli.nbConservees} conservées, ${repli.nbCompletees} complétées via API Recherche d'entreprises, ${repli.nbSansAdresse} sans adresse`
   );
   logger.info(
-    `------> ${nbFermesRouverts} organismes fermés rouverts sur ${nbFermesControles} contrôlés auprès de l'INSEE`
+    `------> organismes fermés de l'API : ${controle.nbRouverts} ouverts à l'INSEE sur ${controle.nbControles} contrôlés, ${controle.nbConserves} laissés ouverts faute de contrôle`
   );
 
   return {
@@ -74,45 +77,85 @@ export const hydrateOrganismesFromApiAlternance = async (startTime: Date) => {
     nbAdressesConservees: repli.nbConservees,
     nbAdressesCompletees: repli.nbCompletees,
     nbOrganismesSansAdresse: repli.nbSansAdresse,
-    nbFermesControles,
-    nbFermesRouverts,
+    nbFermesControles: controle.nbControles,
+    nbFermesRouverts: controle.nbRouverts,
+    nbFermesConserves: controle.nbConserves,
   };
 };
 
-const controlerFermes = async (repli: IRepliAdresse) => {
-  const fermes = await organismesDb()
-    .find({ ferme: true }, { projection: { _id: 1, siret: 1 } })
-    .toArray();
-  const rouverts: ObjectId[] = [];
-  let nbFermesControles = 0;
+const cleOrganisme = (uai: string, siret: string) => `${uai}|${siret}`;
 
-  for (const { _id, siret } of fermes) {
-    if (!repli.sourceDisponible) {
-      break;
-    }
-    try {
-      const etablissement = await getEtablissementRechercheEntreprises(siret);
-      nbFermesControles++;
-      if (etablissement?.etat_administratif === "A") {
-        rouverts.push(_id);
-      }
-    } catch (e) {
-      repli.sourceDisponible = false;
-      logger.warn({ err: e }, "API Recherche d'entreprises indisponible, contrôle des organismes fermés interrompu");
-    }
-  }
-
-  if (rouverts.length > 0) {
-    await organismesDb().updateMany(
-      { _id: { $in: rouverts } },
-      { $set: { ferme: false } },
-      { bypassDocumentValidation: true }
-    );
-  }
-  return { nbFermesControles, nbFermesRouverts: rouverts.length };
+type IControleFermes = {
+  nbControles: number;
+  nbRouverts: number;
+  nbConserves: number;
 };
 
-const cleOrganisme = (uai: string, siret: string) => `${uai}|${siret}`;
+const nouveauControleFermes = (): IControleFermes => ({ nbControles: 0, nbRouverts: 0, nbConserves: 0 });
+
+const getEtatAdministratif = async (
+  siret: string,
+  repli: IRepliAdresse
+): Promise<IEtablissementRechercheEntreprises["etat_administratif"] | undefined> => {
+  if (!repli.sourceDisponible) {
+    return undefined;
+  }
+  try {
+    return (await getEtablissementRechercheEntreprises(siret))?.etat_administratif ?? null;
+  } catch (e) {
+    repli.sourceDisponible = false;
+    logger.warn({ err: e }, "API Recherche d'entreprises indisponible, organismes fermés non contrôlés");
+    return undefined;
+  }
+};
+
+const controlerFermes = async (
+  page: IApiOrganisme[],
+  repli: IRepliAdresse,
+  controle: IControleFermes
+): Promise<Map<string, boolean>> => {
+  const fermes = new Map<string, boolean>();
+  const identifiants = page
+    .filter((o) => !o.etablissement.ouvert)
+    .flatMap(({ identifiant: { uai, siret }, statut }) =>
+      uai ? [{ uai, siret, present: statut.referentiel === "présent" }] : []
+    );
+  if (identifiants.length === 0) {
+    return fermes;
+  }
+
+  const existants = await organismesDb()
+    .find(
+      { $or: identifiants.map(({ uai, siret }) => ({ uai, siret })) },
+      { projection: { uai: 1, siret: 1, ferme: 1 } }
+    )
+    .toArray();
+  const fermeEnBase = new Map(
+    existants.flatMap(({ uai, siret, ferme }) => (uai ? [[cleOrganisme(uai, siret), ferme] as const] : []))
+  );
+
+  for (const { uai, siret, present } of identifiants) {
+    const cle = cleOrganisme(uai, siret);
+    if (!present && !fermeEnBase.has(cle)) {
+      continue;
+    }
+    const etat = await getEtatAdministratif(siret, repli);
+    if (etat === undefined) {
+      if (fermeEnBase.get(cle) === false) {
+        fermes.set(cle, false);
+        controle.nbConserves++;
+      }
+      continue;
+    }
+    controle.nbControles++;
+    if (etat === "A") {
+      fermes.set(cle, false);
+      controle.nbRouverts++;
+    }
+  }
+
+  return fermes;
+};
 
 const getAdressesDeRepli = async (
   page: IApiOrganisme[],
@@ -192,7 +235,8 @@ type DefaultField = "created_at" | "_id" | "nature" | "formations_count";
 const generateBulkOperation = (
   organismeApi: IApiOrganisme,
   startTime: Date,
-  adressesDeRepli: Map<string, IAdresseOrganisme>
+  adressesDeRepli: Map<string, IAdresseOrganisme>,
+  fermesControles: Map<string, boolean>
 ): AnyBulkWriteOperation<IOrganisme> | null => {
   const { uai, siret } = organismeApi.identifiant;
 
@@ -230,7 +274,7 @@ const generateBulkOperation = (
     enseigne: organismeApi.etablissement.enseigne,
     adresse: adresseFormatted,
     geopoint: organismeApi.etablissement.geopoint,
-    ferme: !organismeApi.etablissement.ouvert,
+    ferme: fermesControles.get(cleOrganisme(uai, siret)) ?? !organismeApi.etablissement.ouvert,
     qualiopi: organismeApi.renseignements_specifiques.qualiopi,
     fiabilisation_statut:
       organismeApi.statut.referentiel === "présent"

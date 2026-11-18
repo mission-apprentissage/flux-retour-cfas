@@ -323,6 +323,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
       nbOrganismesSansAdresse: 1,
       nbFermesControles: 0,
       nbFermesRouverts: 0,
+      nbFermesConserves: 0,
     });
   });
 
@@ -377,6 +378,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
       nbOrganismesSansAdresse: 1,
       nbFermesControles: 0,
       nbFermesRouverts: 0,
+      nbFermesConserves: 0,
     });
   });
 
@@ -475,6 +477,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
       nbOrganismesSansAdresse: 0,
       nbFermesControles: 1,
       nbFermesRouverts: 0,
+      nbFermesConserves: 0,
     });
     expect(getEtablissementRechercheEntreprises).toHaveBeenCalledTimes(1);
     expect(getEtablissementRechercheEntreprises).toHaveBeenCalledWith(oldOrganismePresent.siret);
@@ -717,7 +720,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
       expect(result).toMatchObject({ nbFermesControles: 2, nbFermesRouverts: 0 });
     });
 
-    it("rouvre aussi un organisme fermé absent de l'export", async () => {
+    it("ne contrôle pas un organisme fermé absent de l'export", async () => {
       mockExport([]);
       await organismesDb().insertOne(
         generateOrganismeFixture({
@@ -732,16 +735,21 @@ describe("hydrateOrganismesFromReferentiel", () => {
 
       const result = await hydrateOrganismesFromApiAlternance(now);
 
-      expect(await organismesDb().findOne({ siret: "31709861400033" })).toMatchObject({
-        ferme: false,
-        est_dans_le_referentiel: "absent",
-        updated_at: now,
-      });
-      expect(result).toMatchObject({ nbFermesControles: 1, nbFermesRouverts: 1 });
+      expect(await organismesDb().findOne({ siret: "31709861400033" })).toMatchObject({ ferme: true });
+      expect(getEtablissementRechercheEntreprises).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ nbFermesControles: 0, nbFermesRouverts: 0 });
     });
 
-    it("n'appelle plus l'API après une erreur et laisse les organismes fermés", async () => {
-      mockExport([organismeFermeApi("0754571L", "31709861400033"), organismeFermeApi("0756243D", "32922456200549")]);
+    it("garde l'état en base de chaque organisme quand l'API est indisponible", async () => {
+      mockExport([
+        organismeFermeApi("0754571L", "31709861400033"),
+        organismeFermeApi("0756243D", "32922456200549"),
+        organismeFermeApi("0753844T", "19750705900015"),
+      ]);
+      await organismesDb().insertMany([
+        generateOrganismeFixture({ uai: "0754571L", siret: "31709861400033", ferme: false, updated_at: yesterday }),
+        generateOrganismeFixture({ uai: "0756243D", siret: "32922456200549", ferme: true, updated_at: yesterday }),
+      ]);
       vi.mocked(getEtablissementRechercheEntreprises).mockRejectedValue(
         new ApiError("API Recherche d'entreprises", "Too Many Requests", 429)
       );
@@ -749,8 +757,38 @@ describe("hydrateOrganismesFromReferentiel", () => {
       const result = await hydrateOrganismesFromApiAlternance(now);
 
       expect(getEtablissementRechercheEntreprises).toHaveBeenCalledTimes(1);
-      expect(await organismesDb().countDocuments({ ferme: true })).toBe(2);
-      expect(result).toMatchObject({ nbFermesControles: 0, nbFermesRouverts: 0 });
+      const fermes = await organismesDb()
+        .find({}, { projection: { _id: 0, siret: 1, ferme: 1 }, sort: { siret: 1 } })
+        .toArray();
+      expect(fermes).toEqual([
+        { siret: "19750705900015", ferme: true },
+        { siret: "31709861400033", ferme: false },
+        { siret: "32922456200549", ferme: true },
+      ]);
+      expect(result).toMatchObject({ nbFermesControles: 0, nbFermesRouverts: 0, nbFermesConserves: 1 });
+    });
+
+    it("garde ouvert un organisme rouvert la veille quand le repli d'adresse a coupé l'API", async () => {
+      mockExport([
+        {
+          ...organismesApi[0][0],
+          identifiant: { uai: "0756243D", siret: "32922456200549" },
+          etablissement: { ...organismesApi[0][0].etablissement, siret: "32922456200549", adresse: null },
+        },
+        organismeFermeApi("0754571L", "31709861400033"),
+      ]);
+      await organismesDb().insertOne(
+        generateOrganismeFixture({ uai: "0754571L", siret: "31709861400033", ferme: false, updated_at: yesterday })
+      );
+      vi.mocked(getEtablissementRechercheEntreprises).mockRejectedValue(
+        new ApiError("API Recherche d'entreprises", "Too Many Requests", 429)
+      );
+
+      const result = await hydrateOrganismesFromApiAlternance(now);
+
+      expect(getEtablissementRechercheEntreprises).toHaveBeenCalledTimes(1);
+      expect(await organismesDb().findOne({ siret: "31709861400033" })).toMatchObject({ ferme: false });
+      expect(result).toMatchObject({ nbFermesControles: 0, nbFermesConserves: 1 });
     });
   });
 });
