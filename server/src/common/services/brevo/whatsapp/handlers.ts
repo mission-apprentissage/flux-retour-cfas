@@ -33,6 +33,12 @@ import {
 import { notifyMLUserOnCallback, notifyMLUserOnNoHelp, notifyMLUsersOnPrequalifYes } from "./notifications";
 import { maskPhone, normalizePhoneNumber } from "./phone";
 
+/** Le prénom du jeune, à masquer si Brevo le cite dans son message d'erreur. */
+const sensitiveValuesOf = (effectif: IMissionLocaleEffectif): string[] => {
+  const prenom = effectif.effectif_snapshot?.apprenant?.prenom;
+  return prenom ? [prenom] : [];
+};
+
 /**
  * Gère un message STOP : opt-out RGPD
  */
@@ -44,7 +50,7 @@ async function handleStopMessage(
 ): Promise<void> {
   const now = new Date();
   const stopMessage = buildStopConfirmationMessage();
-  const result = await sendWhatsAppMessage(resolvedVisitorId, stopMessage);
+  const result = await sendWhatsAppMessage(resolvedVisitorId, stopMessage, sensitiveValuesOf(effectif));
 
   const historyEntries: IWhatsAppMessageHistory[] = [inboundHistory];
   if (result.success) {
@@ -309,7 +315,7 @@ async function sendResponseAndUpdateContact(
   inboundHistory: IWhatsAppMessageHistory
 ): Promise<void> {
   const now = new Date();
-  const result = await sendWhatsAppMessage(resolvedVisitorId, responseMessage);
+  const result = await sendWhatsAppMessage(resolvedVisitorId, responseMessage, sensitiveValuesOf(effectif));
 
   const historyEntries: IWhatsAppMessageHistory[] = [inboundHistory];
   if (result.success) {
@@ -416,7 +422,7 @@ export async function handleInboundWhatsAppMessage(
 
       if (locked) {
         const autoReplyMessage = buildAutoReplyMessage(missionLocaleInfo);
-        const result = await sendWhatsAppMessage(resolvedVisitorId, autoReplyMessage);
+        const result = await sendWhatsAppMessage(resolvedVisitorId, autoReplyMessage, sensitiveValuesOf(effectif));
         if (result.success) {
           historyEntries.push({
             direction: "outbound",

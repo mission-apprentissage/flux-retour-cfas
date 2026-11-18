@@ -603,6 +603,23 @@ describe("WhatsApp Service", () => {
       expect(autoReplyMsg?.content).toContain("https://www.ml-test.fr");
     });
 
+    // Brevo peut citer le prénom sans guillemets dans son erreur : l'envoi doit le connaître pour le masquer.
+    it.each([
+      { cas: "auto-reply", texte: "bonjour", message: expect.stringContaining("Mission apprentissage") },
+      { cas: "réponse callback (1)", texte: "1", message: expect.any(String) },
+      { cas: "STOP", texte: "STOP", message: expect.any(String) },
+    ])(
+      "transmet le prénom du jeune à l'envoi pour le masquer dans les erreurs Brevo : $cas",
+      async ({ texte, message }) => {
+        vi.mocked(sendWhatsAppMessage).mockClear();
+
+        await handleInboundWhatsAppMessage("+33612345678", texte, "msg-prenom", "visitor-123");
+
+        expect(sendWhatsAppMessage).toHaveBeenCalledTimes(1);
+        expect(sendWhatsAppMessage).toHaveBeenCalledWith("visitor-123", message, ["Jean"]);
+      }
+    );
+
     it("n'envoie PAS l'auto-reply au deuxième message non reconnu", async () => {
       // Premier message : auto-reply envoyé
       await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-first", "visitor-123");
