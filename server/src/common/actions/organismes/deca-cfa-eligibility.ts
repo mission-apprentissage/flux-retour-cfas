@@ -37,10 +37,8 @@ export type EligibilityResult = {
   } | null;
 };
 
-export const NATURES_ELIGIBLES: ReadonlyArray<string> = [
-  NATURE_ORGANISME_DE_FORMATION.FORMATEUR,
-  NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR,
-];
+export const isNatureEligible = (nature: IOrganisme["nature"] | null) =>
+  nature !== NATURE_ORGANISME_DE_FORMATION.RESPONSABLE;
 
 export type IEligibleOrganismeRow = {
   _id: ObjectId;
@@ -56,7 +54,7 @@ export type IEligibleOrganismeRow = {
 
 /**
  *   - siret AND uai non vides
- *   - nature ∈ {FORMATEUR, RESPONSABLE_FORMATEUR}
+ *   - nature autre que RESPONSABLE
  *   - au moins un effectif (ERP + DECA, contrats DECA à rattacher compris) sur les années scolaires actives
  *   - ferme !== true
  *
@@ -74,7 +72,7 @@ export async function findEligibleOrganismes(organismeIds?: ObjectId[]): Promise
           ferme: { $ne: true },
           siret: { $exists: true, $nin: [null, ""] },
           uai: { $exists: true, $nin: [null, ""] },
-          nature: { $in: NATURES_ELIGIBLES as string[] },
+          nature: { $ne: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE },
         },
       },
       {
@@ -212,7 +210,7 @@ export async function checkEligibilityForLoaded(
   }
 
   const natureCheck: EligibilityCheck = {
-    passed: nature !== undefined && NATURES_ELIGIBLES.includes(nature),
+    passed: isNatureEligible(nature),
     details: { natureActuelle: nature ?? null },
   };
 

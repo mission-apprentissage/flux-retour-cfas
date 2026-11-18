@@ -5,7 +5,6 @@ import { format } from "date-fns";
 import escapeStringRegexp from "escape-string-regexp";
 import { addJob } from "job-processor";
 import { ObjectId } from "mongodb";
-import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
 import {
   BrancheDemandeActivation,
   estRenvoyable,
@@ -337,11 +336,7 @@ export async function evaluerDemande(
     if (!checks.exists_with_siret_uai.passed) {
       motifs.add("sans_uai");
     } else {
-      if (!checks.nature.passed) {
-        motifs.add(
-          organisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE ? "responsable_pur" : "nature_inconnue"
-        );
-      }
+      if (!checks.nature.passed) motifs.add("responsable_pur");
       if (!checks.has_effectifs.passed) motifs.add("aucun_effectif");
       effectifs = checks.has_effectifs.details;
     }

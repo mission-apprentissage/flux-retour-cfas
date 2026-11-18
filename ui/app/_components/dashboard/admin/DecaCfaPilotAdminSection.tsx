@@ -156,7 +156,7 @@ export function DecaCfaPilotAdminSection({ organisme }: { organisme: Organisme }
         <div className={styles.checks}>
           <CheckLine passed={checks.exists_with_siret_uai.passed}>Présent en base avec SIRET et UAI</CheckLine>
           <CheckLine passed={checks.nature.passed}>
-            Nature «&nbsp;formateur&nbsp;» / «&nbsp;responsable_formateur&nbsp;» (actuelle&nbsp;:{" "}
+            Nature autre que «&nbsp;responsable&nbsp;» (actuelle&nbsp;:{" "}
             <strong>{checks.nature.details?.natureActuelle ?? "—"}</strong>)
           </CheckLine>
           <CheckLine passed={checks.not_closed.passed}>Établissement ouvert</CheckLine>

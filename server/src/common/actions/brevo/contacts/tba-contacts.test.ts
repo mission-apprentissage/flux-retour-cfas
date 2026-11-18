@@ -224,8 +224,7 @@ describe("tbaContactsContactList", () => {
           CFA_NB_APPRENANTS_DECA: null,
           CFA_NB_RUPTURANTS_ERP: 1,
           CFA_NB_RUPTURANTS_DECA: null,
-          // organisme sans `nature` → ne passe pas les checks d'éligibilité V2
-          CFA_STATUT_V2: "exclu",
+          CFA_STATUT_V2: "activable",
           ML_NB_RUPTURANTS_TOTAL: null,
           ML_NB_RUPTURANTS_A_TRAITER: null,
           ML_NB_RUPTURANTS_TRAITES: null,

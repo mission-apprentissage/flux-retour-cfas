@@ -93,8 +93,9 @@ describe("checkCollabV2Eligibility", () => {
   describe("nature", () => {
     const cases = [
       { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE, expected: false },
-      { nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE, expected: false },
-      { nature: undefined, expected: false },
+      { nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE, expected: true },
+      { nature: undefined, expected: true },
+      { nature: NATURE_ORGANISME_DE_FORMATION.LIEU, expected: true },
       { nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR, expected: true },
       { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR, expected: true },
     ] as const;

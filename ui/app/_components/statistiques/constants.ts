@@ -224,6 +224,6 @@ export const CFA_ESTIMATION_DEFINITION =
   "Établissements ouverts qui ont une offre publiée au catalogue de l'apprentissage, des effectifs sur l'année scolaire en cours ou la précédente, ou un compte sur le Tableau de bord.";
 
 export const CFA_COMPATIBLES_DEFINITION =
-  "Un CFA de nature formateur ou responsable formateur pour lequel des effectifs sont lisibles et disponibles soit via DECA, soit via son ERP. Certains CFA ne remplissent pas ces conditions techniques, qui sont celles actuelles du TBA.";
+  "Un CFA de nature autre que responsable pour lequel des effectifs sont lisibles et disponibles soit via DECA, soit via son ERP. Certains CFA ne remplissent pas ces conditions techniques, qui sont celles actuelles du TBA.";
 
 export const CFA_AVEC_COMPTE_DEFINITION = "CFA qui ont au moins un compte utilisateur confirmé dans l'établissement.";

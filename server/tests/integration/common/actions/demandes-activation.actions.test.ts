@@ -192,12 +192,12 @@ describe("evaluerDemande", () => {
       expect((await evaluer("direction@cfa.fr")).branche).toBe("activation");
     });
 
-    it("distingue un responsable pur d'une nature inconnue", async () => {
+    it("refuse un responsable pur, pas un organisme de nature inconnue", async () => {
       await insererOrganisme({ nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE });
       expect((await evaluer("direction@cfa.fr")).motifs).toEqual(["responsable_pur"]);
 
       await organismesDb().updateOne({ siret: SIRET }, { $set: { nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE } });
-      expect((await evaluer("direction@cfa.fr")).motifs).toEqual(["nature_inconnue"]);
+      expect((await evaluer("direction@cfa.fr")).motifs).toEqual([]);
     });
 
     it("signale un CFA sans effectif et compte ses effectifs", async () => {

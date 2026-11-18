@@ -95,8 +95,9 @@ describe("checkActivationEligibility", () => {
   describe("nature", () => {
     const cases = [
       { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE, expected: false },
-      { nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE, expected: false },
-      { nature: undefined, expected: false },
+      { nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE, expected: true },
+      { nature: undefined, expected: true },
+      { nature: NATURE_ORGANISME_DE_FORMATION.LIEU, expected: true },
       { nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR, expected: true },
       { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR, expected: true },
     ] as const;
@@ -283,6 +284,27 @@ describe("findEligibleOrganismes", () => {
     const decaOnlyRow = rows.find((r) => r._id.toString() === (decaOnly._id as ObjectId).toString())!;
     expect(decaOnlyRow.has_effectifs_erp).toBe(false);
     expect(decaOnlyRow.has_effectifs_deca).toBe(true);
+  });
+
+  it("inclut toute nature autre que responsable, nature absente comprise", async () => {
+    const inconnue = await insertOrg({ nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE });
+    const lieu = await insertOrg({ nature: NATURE_ORGANISME_DE_FORMATION.LIEU });
+    const sansNature = await insertOrg();
+    await organismesDb().updateOne(
+      { _id: sansNature._id },
+      { $unset: { nature: "" } },
+      { bypassDocumentValidation: true }
+    );
+    const responsable = await insertOrg({ nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE });
+    for (const organisme of [inconnue, lieu, sansNature, responsable]) {
+      await insertEffectif(organisme._id as ObjectId, currentAnnee);
+    }
+
+    const ids = (await findEligibleOrganismes()).map((row) => row._id.toString());
+
+    expect(ids.toSorted()).toEqual(
+      [inconnue, lieu, sansNature].map((organisme) => (organisme._id as ObjectId).toString()).toSorted()
+    );
   });
 
   it("compte les contrats DECA que l'activation rattacherait, tant que l'organisme n'est pas activé", async () => {
