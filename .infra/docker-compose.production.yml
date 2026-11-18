@@ -131,6 +131,7 @@ services:
         limits:
           memory: 2g
     environment:
+      JAVA_TOOL_OPTIONS: "-XX:-UseBASE64Intrinsics"
       JAVA_TIMEZONE: Europe/Paris
       MB_SITE_LOCALE: fr
       MB_SITE_URL: "{{ dns_name }}/metabase"
