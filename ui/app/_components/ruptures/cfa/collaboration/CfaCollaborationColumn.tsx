@@ -5,6 +5,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useRouter } from "next/navigation";
 import { IEffectifMissionLocale } from "shared";
 
+import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import { CFA_COLLAB_STATUS } from "@/common/types/cfaRuptures";
 
@@ -50,6 +51,8 @@ function MlCard({ ml, showInactiveMessage }: { ml: MlOrg; showInactiveMessage?: 
 export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps) {
   const router = useRouter();
   const { trackPlausibleEvent } = usePlausibleAppTracking();
+  const { user } = useAuth();
+  const lectureSeule = user?.readOnly === true;
   const ml = effectif.mission_locale_organisation;
   const dossierTraité = !!effectif.collab_status && effectif.collab_status !== CFA_COLLAB_STATUS.DEMARRER_COLLAB;
   const contacteHorsCollab = effectif.collab_status === CFA_COLLAB_STATUS.CONTACTE_PAR_ML_HORS_COLLAB;
@@ -69,22 +72,26 @@ export function CfaCollaborationColumn({ effectif }: CfaCollaborationColumnProps
           {ml ? (
             <>
               <div className={styles.collabBlock}>
-                <p className={styles.collabQuestion}>
-                  Souhaitez-vous démarrer une collaboration avec la Mission Locale ?
-                </p>
+                {!lectureSeule && (
+                  <p className={styles.collabQuestion}>
+                    Souhaitez-vous démarrer une collaboration avec la Mission Locale ?
+                  </p>
+                )}
                 <MlCard ml={ml} showInactiveMessage />
               </div>
-              <div className={styles.collabCta}>
-                <Button
-                  priority="primary"
-                  onClick={() => {
-                    trackPlausibleEvent("cfa_fiche_demarrer_collab");
-                    router.push(`/cfa/${String(effectif.id)}/collaboration`);
-                  }}
-                >
-                  Démarrer une collaboration
-                </Button>
-              </div>
+              {!lectureSeule && (
+                <div className={styles.collabCta}>
+                  <Button
+                    priority="primary"
+                    onClick={() => {
+                      trackPlausibleEvent("cfa_fiche_demarrer_collab");
+                      router.push(`/cfa/${String(effectif.id)}/collaboration`);
+                    }}
+                  >
+                    Démarrer une collaboration
+                  </Button>
+                </div>
+              )}
             </>
           ) : (
             <p className={styles.collabDisabledMessage}>Aucune Mission Locale compétente identifiée pour ce jeune.</p>

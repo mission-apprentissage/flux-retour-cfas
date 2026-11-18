@@ -3,6 +3,7 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 
+import { useAuth } from "@/app/_context/UserContext";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
 import type { CfaCollaborationStatus } from "@/common/types/cfaRuptures";
 
@@ -46,9 +47,11 @@ export function CfaCollaborationBadge({
   sansTagHorsCollab = false,
 }: CfaCollaborationBadgeProps) {
   const { trackPlausibleEvent } = usePlausibleAppTracking();
+  const { user } = useAuth();
 
   switch (status) {
     case "demarrer_collab":
+      if (user?.readOnly) return null;
       if (unavailableReason) {
         return (
           <span className={styles.unavailableCta}>
