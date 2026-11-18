@@ -1247,7 +1247,7 @@ describe("Indicateurs ML routes (territoriales)", () => {
       await organismesDb().insertMany(
         [
           buildOrganisme(CFA_A, "11", { has_account: true }),
-          buildOrganisme(new ObjectId(), "11"),
+          buildOrganisme(new ObjectId(), "11", { formations_count: 2 }),
           buildOrganisme(new ObjectId(), "11", { ferme: true, has_account: true }),
           buildOrganisme(new ObjectId(), "11", { est_dans_le_referentiel: "absent" }),
           buildOrganisme(CFA_B, "84", { has_account: true }),
@@ -1270,6 +1270,25 @@ describe("Indicateurs ML routes (territoriales)", () => {
         avec_compte: { current: 1 },
         avec_collaboration: { current: 1 },
       });
+    });
+
+    it("Ne compte que les CFA avec une offre publiée, des effectifs récents ou un compte", async () => {
+      await organismesDb().insertMany(
+        [
+          buildOrganisme(new ObjectId(), "11", { effectifs_annees_actives_count: 4 }),
+          buildOrganisme(new ObjectId(), "11", { formations_count: 0, effectifs_annees_actives_count: 0 }),
+          buildOrganisme(new ObjectId(), "11", { nature: "lieu_formation", has_account: false }),
+        ] as never[],
+        { bypassDocumentValidation: true }
+      );
+
+      const response = await requestAsOrganisation(
+        DREETS_IDF,
+        "get",
+        "/api/v1/organisation/indicateurs-ml/stats/cfa/adoption"
+      );
+
+      expect(response.data).toMatchObject({ estimation: 3, avec_compte: { current: 1 } });
     });
 
     it("Date la création du compte d'un CFA par la confirmation de son premier utilisateur", async () => {
@@ -1371,16 +1390,23 @@ describe("Indicateurs ML routes (territoriales)", () => {
           buildOrganisme(
             CFA_ALPHA,
             { region: "11", departement: "77", commune: "Melun", code_postal: "77000" },
-            { raison_sociale: " Alpha", uai: "0771234A", qualiopi: false }
+            { raison_sociale: " Alpha", uai: "0771234A", qualiopi: false, effectifs_annees_actives_count: 3 }
           ),
           buildOrganisme(CFA_GAMMA, idf, {
             enseigne: "Gamma",
             nature: "formateur",
+            formations_count: 2,
             is_allowed_collab: true,
             collab_suspended_at: new Date(),
           }),
-          buildOrganisme(new ObjectId(), idf, { enseigne: "Fermé", ferme: true }),
-          buildOrganisme(CFA_B, { region: "84", departement: "69", commune: "Lyon" }, { enseigne: "Delta" }),
+          buildOrganisme(new ObjectId(), idf, { enseigne: "Fermé", ferme: true, formations_count: 1 }),
+          buildOrganisme(new ObjectId(), idf, { enseigne: "Lieu", nature: "lieu_formation" }),
+          buildOrganisme(new ObjectId(), idf, { enseigne: "Sans activité", effectifs_annees_actives_count: 0 }),
+          buildOrganisme(
+            CFA_B,
+            { region: "84", departement: "69", commune: "Lyon" },
+            { enseigne: "Delta", formations_count: 1 }
+          ),
         ] as never[],
         { bypassDocumentValidation: true }
       );
