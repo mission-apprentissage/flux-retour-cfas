@@ -1,10 +1,12 @@
 import { strict as assert } from "assert";
+import { createServer, type ServerResponse } from "node:http";
+import type { AddressInfo } from "node:net";
 import { Readable } from "node:stream";
 
 import { ObjectId, EnhancedOmit } from "mongodb";
 import nock from "nock";
-import { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
-import { it, describe } from "vitest";
+import { IFormationCatalogue, zFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
+import { it, describe, afterEach, expect } from "vitest";
 
 import { formationsCatalogueDb } from "@/common/model/collections";
 import config from "@/config";
@@ -86,8 +88,83 @@ const fakeData: Omit<
   etablissement_formateur_date_creation: "a",
 } as const;
 
+const nockCatalogue = (formations: unknown[], total = formations.length) => {
+  const requetes: Record<string, string>[] = [];
+  nock(config.mnaCatalogApi.endpoint)
+    .persist()
+    .get(/v1\/entity\/formations\/count/)
+    .query(true)
+    .reply(200, () => JSON.stringify(total), { "content-type": "application/json" });
+  nock(config.mnaCatalogApi.endpoint)
+    .persist()
+    .get(/v1\/entity\/formations\.json/)
+    .query((query) => {
+      requetes.push(query as Record<string, string>);
+      return true;
+    })
+    .reply(200, () => Readable.from([JSON.stringify(formations)]), { "content-type": "application/json" });
+  return requetes;
+};
+
+const formation = (cle: string, extra: Record<string, unknown> = {}) => ({
+  _id: new ObjectId().toString(),
+  cle_ministere_educatif: cle,
+  intitule_long: "CHIMIE (MASTER)",
+  cfd: "aa",
+  rncp_code: "aa",
+  duree: "2",
+  annee: "1",
+  etablissement_gestionnaire_siret: "1",
+  etablissement_gestionnaire_uai: "1",
+  etablissement_formateur_siret: "1",
+  etablissement_formateur_uai: "1",
+  ...fakeData,
+  published: true,
+  ...extra,
+});
+
+const insererFormation = (cle: string, extra: Record<string, unknown> = {}) =>
+  formationsCatalogueDb().insertOne({ ...formation(cle, extra), _id: new ObjectId() } as IFormationCatalogue);
+
+const publicationDe = async (cle: string) =>
+  (await formationsCatalogueDb().findOne({ cle_ministere_educatif: cle }))?.published;
+
+const demarrerCatalogueLocal = async (repondre: (tentative: number, res: ServerResponse) => void) => {
+  let tentatives = 0;
+  const serveur = createServer((req, res) => {
+    if (req.url?.includes("/formations/count")) {
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end("2");
+      return;
+    }
+    tentatives++;
+    repondre(tentatives, res);
+  });
+  await new Promise<void>((resolve) => serveur.listen(0, "127.0.0.1", resolve));
+  const endpointInitial = config.mnaCatalogApi.endpoint;
+  config.mnaCatalogApi.endpoint = `http://127.0.0.1:${(serveur.address() as AddressInfo).port}/api`;
+
+  return {
+    tentatives: () => tentatives,
+    arreter: async () => {
+      config.mnaCatalogApi.endpoint = endpointInitial;
+      serveur.closeAllConnections();
+      await new Promise((resolve) => serveur.close(resolve));
+    },
+  };
+};
+
+const ecrireDebutDeFlux = (res: ServerResponse) => {
+  res.writeHead(200, { "content-type": "application/json" });
+  res.write(`[${JSON.stringify(formation("AAA"))},`);
+};
+
 describe("Job hydrateFormationsCatalogue", () => {
   useMongo();
+  afterEach(() => {
+    nock.cleanAll();
+  });
+
   const formationsCatalogue: WithStringId<IFormationCatalogue>[] = [
     {
       _id: id(1),
@@ -120,12 +197,7 @@ describe("Job hydrateFormationsCatalogue", () => {
   ];
 
   it("Met à jour les formations de la collection formationsCatalogue", async () => {
-    nock(config.mnaCatalogApi.endpoint)
-      .persist()
-      .get(new RegExp("v1/entity/formations.json.*"))
-      .reply(200, () => Readable.from([JSON.stringify(formationsCatalogue)]), {
-        "content-type": "application/json",
-      });
+    nockCatalogue(formationsCatalogue);
 
     await formationsCatalogueDb().insertOne({
       _id: new ObjectId(id(1)),
@@ -446,13 +518,135 @@ describe("Job hydrateFormationsCatalogue", () => {
     },
   ];
   it("Enregistre les données complètes", async () => {
-    nock(config.mnaCatalogApi.endpoint)
-      .persist()
-      .get(new RegExp("v1/entity/formations.json.*"))
-      .reply(200, () => Readable.from([JSON.stringify(formationsCatalogueCompletes)]), {
-        "content-type": "application/json",
-      });
+    nockCatalogue(formationsCatalogueCompletes);
 
     await hydrateFormationsCatalogue();
+  });
+
+  it("Demande le total du catalogue plus 1 000 et les seuls champs du schéma", async () => {
+    const requetes = nockCatalogue([formation("AAA")], 62_341);
+
+    await expect(hydrateFormationsCatalogue()).rejects.toThrow("incomplet");
+
+    expect(requetes).toHaveLength(1);
+    expect(requetes[0].limit).toBe("63341");
+    const select = Object.keys(JSON.parse(requetes[0].select));
+    expect(select).toEqual(
+      Object.keys(zFormationCatalogue.shape).flatMap((champ) =>
+        champ === "rncp_details"
+          ? ["rncp_details.date_fin_validite_enregistrement", "rncp_details.active_inactive"]
+          : [champ]
+      )
+    );
+  });
+
+  it("Échoue si l'export atteint la limite demandée", async () => {
+    nockCatalogue(
+      Array.from({ length: 1_001 }, (_, i) => formation(`F${i}`)),
+      1
+    );
+
+    await expect(hydrateFormationsCatalogue()).rejects.toThrow("tronqué");
+  });
+
+  it("Échoue sans rien dépublier si l'export reste sous le total au-delà de la tolérance", async () => {
+    await insererFormation("ZZZ");
+    nockCatalogue([formation("AAA"), formation("BBB")], 1_000);
+
+    await expect(hydrateFormationsCatalogue()).rejects.toThrow("2 formations reçues sur 1000");
+
+    expect(await publicationDe("ZZZ")).toBe(true);
+  });
+
+  it("Accepte un écart sous la tolérance", async () => {
+    nockCatalogue(
+      Array.from({ length: 200 }, (_, i) => formation(`F${i}`)),
+      201
+    );
+
+    expect(await hydrateFormationsCatalogue()).toMatchObject({ total: 201, recues: 200, importees: 200 });
+  });
+
+  it("Ignore une formation invalide et importe les autres", async () => {
+    await insererFormation("BBB");
+    nockCatalogue([formation("AAA"), formation("BBB", { cfd: null })]);
+
+    expect(await hydrateFormationsCatalogue()).toMatchObject({
+      recues: 2,
+      importees: 1,
+      rejetees: 1,
+      depubliees: 0,
+    });
+    expect(await publicationDe("AAA")).toBe(true);
+    expect(await publicationDe("BBB")).toBe(true);
+  });
+
+  it("Dépublie les formations publiées absentes de l'export", async () => {
+    await insererFormation("ZZZ");
+    await insererFormation("YYY", { published: false });
+    nockCatalogue([formation("AAA"), formation("BBB", { published: false })]);
+
+    expect(await hydrateFormationsCatalogue()).toMatchObject({ depubliees: 1 });
+
+    expect(await publicationDe("ZZZ")).toBe(false);
+    expect(await publicationDe("YYY")).toBe(false);
+    expect(await publicationDe("AAA")).toBe(true);
+    expect(await publicationDe("BBB")).toBe(false);
+  });
+
+  describe("coupures du flux", () => {
+    let catalogue: Awaited<ReturnType<typeof demarrerCatalogueLocal>> | null = null;
+    afterEach(async () => {
+      await catalogue?.arreter();
+      catalogue = null;
+    });
+
+    it("Reprend depuis le début après une coupure", async () => {
+      catalogue = await demarrerCatalogueLocal((tentative, res) => {
+        if (tentative === 1) {
+          ecrireDebutDeFlux(res);
+          res.destroy();
+          return;
+        }
+        res.writeHead(200, { "content-type": "application/json" });
+        res.end(JSON.stringify([formation("AAA"), formation("BBB")]));
+      });
+
+      expect(await hydrateFormationsCatalogue({ pausesEntreTentativesMs: [0, 0] })).toMatchObject({
+        recues: 2,
+        importees: 2,
+      });
+      expect(catalogue.tentatives()).toBe(2);
+    });
+
+    it("Reprend après un flux bloqué", async () => {
+      catalogue = await demarrerCatalogueLocal((tentative, res) => {
+        if (tentative === 1) {
+          ecrireDebutDeFlux(res);
+          return;
+        }
+        res.writeHead(200, { "content-type": "application/json" });
+        res.end(JSON.stringify([formation("AAA"), formation("BBB")]));
+      });
+
+      expect(
+        await hydrateFormationsCatalogue({ pausesEntreTentativesMs: [0, 0], delaiInactiviteMs: 300 })
+      ).toMatchObject({ recues: 2 });
+      expect(catalogue.tentatives()).toBe(2);
+    });
+
+    it("Échoue après trois tentatives sans rien dépublier", async () => {
+      await insererFormation("ZZZ");
+      catalogue = await demarrerCatalogueLocal((_tentative, res) => {
+        ecrireDebutDeFlux(res);
+        res.destroy();
+      });
+
+      await expect(hydrateFormationsCatalogue({ pausesEntreTentativesMs: [0, 0] })).rejects.toThrow(
+        "après 3 tentatives"
+      );
+      expect(catalogue.tentatives()).toBe(3);
+      expect(await publicationDe("ZZZ")).toBe(true);
+    });
   });
 });
