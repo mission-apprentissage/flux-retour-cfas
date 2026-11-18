@@ -127,7 +127,9 @@ export function brevoErrorLogFields({ message, ...details }: BrevoErrorDetails):
  * 500 appels, et un 400 systématique produirait autant d'événements identiques. Les occurrences
  * écartées sont comptées (`suppressedSinceLastReport`) ; chaque échec reste dans les logs.
  * Le corps assaini de la réponse part en `extra`, `scrubPii` ayant déjà retiré celui de l'AxiosError.
- * Aucun palier n'est posé : le contrat d'alerte décide (`jour` dans le job quotidien, `veille` ailleurs).
+ * Le palier est « jour » pour un message envoyé en réponse à un jeune : le webhook n'est pas un job, le contrat
+ * le laisserait en `veille`, et un échec laisse un jeune sans réponse. Pour les autres opérations aucun palier
+ * n'est posé : le contrat décide (`jour` dans le job quotidien, `veille` ailleurs).
  * Sans statut ni code, l'erreur ne vient pas de Brevo mais du code appelant : c'est un bug, pas une panne amont.
  */
 export function reportBrevoError(operation: BrevoOperation, details: BrevoErrorDetails): void {
@@ -142,6 +144,7 @@ export function reportBrevoError(operation: BrevoOperation, details: BrevoErrorD
   lastReport.set(key, { at: now, suppressed: 0 });
 
   captureTiered(new BrevoApiError(operation, details), {
+    tier: operation === "send_message" ? "jour" : undefined,
     errorKind: fromBrevo ? "upstream" : "bug",
     upstream: fromBrevo ? "brevo" : undefined,
     fingerprintKey: key,

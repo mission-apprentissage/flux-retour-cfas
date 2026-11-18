@@ -154,9 +154,19 @@ describe("reportBrevoError", () => {
     );
   });
 
-  it("ne pose aucun palier : le contrat d'alerte décide", () => {
+  it("ne pose aucun palier pour un contact ou un template : le contrat d'alerte décide", () => {
     reportBrevoError("send_template", { status: 400, message: "Invalid", retryable: false, safeToRetry: false });
-    expect(vi.mocked(captureTiered).mock.calls[0][1]).not.toHaveProperty("tier");
+    reportBrevoError("upsert_contact", { status: 400, message: "Invalid", retryable: false, safeToRetry: false });
+
+    for (const [, options] of vi.mocked(captureTiered).mock.calls) {
+      expect(options.tier).toBeUndefined();
+    }
+  });
+
+  it("classe en « jour » l'échec d'un message envoyé en réponse à un jeune, sans dépendre d'un job", () => {
+    reportBrevoError("send_message", { status: 503, message: "Unavailable", retryable: true, safeToRetry: true });
+
+    expect(vi.mocked(captureTiered).mock.calls[0][1]).toMatchObject({ tier: "jour", errorKind: "upstream" });
   });
 
   it("classe en bug une erreur sans statut ni code, avec sa propre empreinte", () => {
