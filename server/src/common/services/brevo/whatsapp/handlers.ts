@@ -17,7 +17,7 @@ import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/
 import config from "@/config";
 
 import { sendWhatsAppMessage } from "./brevoApi";
-import { isRefusDefinitif } from "./brevoError";
+import { messageAPuPartir } from "./brevoError";
 import { updateWhatsAppContact, getMissionLocaleInfo, getMissionLocaleInfoFull } from "./database";
 import { isExcludedByCfaCollab } from "./eligibility";
 import {
@@ -431,7 +431,7 @@ export async function handleInboundWhatsAppMessage(
             sent_at: new Date(),
             brevo_message_id: result.messageId,
           });
-        } else if (result.safeToRetry || isRefusDefinitif(result.status)) {
+        } else if (!messageAPuPartir(result)) {
           try {
             await missionLocaleEffectifsDb().updateOne(
               { _id: effectif._id },

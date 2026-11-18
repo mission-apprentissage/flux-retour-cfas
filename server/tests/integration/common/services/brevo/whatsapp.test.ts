@@ -718,6 +718,15 @@ describe("WhatsApp Service", () => {
       expect(afterRefus?.whatsapp_contact?.auto_reply_sent).toBe(false);
     });
 
+    // Aucun appel n'a été fait (WhatsApp désactivé, clé API absente) : rien n'est parti, le verrou ne doit pas rester pris.
+    it("libère auto_reply_sent quand l'envoi n'a pas été tenté (échec avant l'appel à Brevo)", async () => {
+      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({ success: false, error: "WhatsApp is disabled" });
+      await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-non-tente", "visitor-123");
+
+      const afterFailure = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(afterFailure?.whatsapp_contact?.auto_reply_sent).toBe(false);
+    });
+
     it("déduplique les messages avec le même brevoMessageId", async () => {
       await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-dedup");
       // Deuxième appel avec le même ID

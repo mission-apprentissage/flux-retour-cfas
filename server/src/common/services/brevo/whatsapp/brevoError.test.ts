@@ -5,7 +5,7 @@ import { captureTiered } from "@/common/services/sentry/alertContract";
 
 import {
   describeBrevoError,
-  isRefusDefinitif,
+  messageAPuPartir,
   reportBrevoError,
   resetBrevoErrorReports,
   sanitizeBrevoText,
@@ -127,13 +127,31 @@ describe("safeToRetry : rejouer ne peut pas doubler le message", () => {
   });
 });
 
-describe("isRefusDefinitif", () => {
-  it.each([400, 401, 404, 429])("%s : Brevo a répondu sans rien traiter", (status) => {
-    expect(isRefusDefinitif(status)).toBe(true);
+describe("messageAPuPartir", () => {
+  it.each([
+    ["timeout", () => axiosError(undefined, undefined, "ECONNABORTED")],
+    ["coupure en cours de route", () => axiosError(undefined, undefined, "ECONNRESET")],
+    ["408", () => axiosError(408, { message: "x" })],
+    ["500", () => axiosError(500, { message: "x" })],
+    ["502", () => axiosError(502, { message: "x" })],
+    ["504", () => axiosError(504, { message: "x" })],
+  ])("%s : Brevo a pu envoyer sans que nous le sachions", (_cas, build) => {
+    expect(messageAPuPartir(describeBrevoError(build()))).toBe(true);
   });
 
-  it.each([408, 500, 502, 503, undefined])("%s : le message a pu partir, ou aucune réponse", (status) => {
-    expect(isRefusDefinitif(status)).toBe(false);
+  it.each([
+    ["400", () => axiosError(400, { message: "x" })],
+    ["404", () => axiosError(404, { message: "x" })],
+    ["429", () => axiosError(429, { message: "x" })],
+    ["503", () => axiosError(503, { message: "x" })],
+    ["connexion refusée", () => axiosError(undefined, undefined, "ECONNREFUSED")],
+    ["erreur applicative avant l'appel", () => new Error("x is not a function")],
+  ])("%s : rien n'a été envoyé", (_cas, build) => {
+    expect(messageAPuPartir(describeBrevoError(build()))).toBe(false);
+  });
+
+  it("WhatsApp désactivé ou clé API absente : l'envoi n'a pas été tenté", () => {
+    expect(messageAPuPartir({})).toBe(false);
   });
 });
 

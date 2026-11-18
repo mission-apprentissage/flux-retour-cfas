@@ -87,9 +87,13 @@ export function sanitizeBrevoText(text: string, sensitiveValues: readonly string
 
 const isRetryableStatus = (status: number): boolean => status >= 500 || status === 429 || status === 408;
 
-/** Refus 4xx : Brevo a répondu sans rien traiter. Le 408 est exclu, la requête a pu aboutir malgré tout. */
-export const isRefusDefinitif = (status?: number): boolean =>
-  status !== undefined && status >= 400 && status < 500 && status !== 408;
+/**
+ * Brevo a pu envoyer le message sans que nous recevions la réponse : échec transitoire (timeout, coupure, 5xx, 408)
+ * qui n'est pas un échec « sûr ». Tout le reste n'a rien envoyé : refus 4xx, échec sûr, et aussi les échecs avant
+ * l'appel (WhatsApp désactivé, clé API absente, erreur applicative), qui n'ont ni `retryable` ni `safeToRetry`.
+ */
+export const messageAPuPartir = ({ retryable, safeToRetry }: { retryable?: boolean; safeToRetry?: boolean }): boolean =>
+  retryable === true && safeToRetry !== true;
 
 const asString = (value: unknown): string | undefined => (typeof value === "string" && value ? value : undefined);
 
