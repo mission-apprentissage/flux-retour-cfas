@@ -40,6 +40,10 @@ interface SendReplyOptions {
   attempt: number;
 }
 
+/** Refus 4xx : Brevo a répondu sans rien traiter. Le 408 est exclu, la requête a pu aboutir malgré tout. */
+const isRefusDefinitif = (status?: number): boolean =>
+  status !== undefined && status >= 400 && status < 500 && status !== 408;
+
 /** Reconstruit le texte depuis la base : le job ne reçoit que des identifiants. */
 async function buildReplyMessage(effectif: IMissionLocaleEffectif, kind: WhatsAppReplyKind): Promise<string | null> {
   if (kind === "stop") {
@@ -140,9 +144,9 @@ export async function sendWhatsAppReply({ effectifId, kind, attempt }: SendReply
     "Réponse WhatsApp abandonnée"
   );
 
-  // La réponse automatique n'a pas été envoyée : on libère le verrou pour que le prochain message
-  // non reconnu du jeune en déclenche une autre.
-  if (kind === "auto_reply") {
+  // Le verrou n'est libéré que si le message n'est sûrement pas parti : après un timeout ou un 5xx il a pu partir,
+  // et le prochain message non reconnu du jeune déclencherait une seconde réponse automatique.
+  if (kind === "auto_reply" && (result.safeToRetry || isRefusDefinitif(result.status))) {
     await missionLocaleEffectifsDb().updateOne(
       { _id },
       { $set: { "whatsapp_contact.auto_reply_sent": false, "whatsapp_contact.auto_reply_sent_at": null } }

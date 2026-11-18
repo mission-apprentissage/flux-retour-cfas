@@ -269,6 +269,43 @@ describe("file d'envoi des réponses WhatsApp", () => {
       expect(after?.whatsapp_contact?.auto_reply_sent_at).toBeNull();
     });
 
+    it.each([
+      ["un 500", { status: 500, retryable: true, safeToRetry: false }],
+      ["un timeout", { retryable: true, safeToRetry: false }],
+    ])("réponse automatique après %s : le verrou est conservé, le message a pu partir", async (_cas, echec) => {
+      vi.mocked(sendWhatsAppMessage).mockResolvedValue({ success: false, ...echec });
+      const id = await insertEffectif({
+        whatsapp_contact: { brevo_visitor_id: "visitor-1", auto_reply_sent: true, auto_reply_sent_at: new Date() },
+      });
+
+      await sendWhatsAppReply({ effectifId: id, kind: "auto_reply", attempt: 1 });
+
+      const after = await missionLocaleEffectifsDb().findOne({ _id: id });
+      expect(after?.whatsapp_contact?.auto_reply_sent).toBe(true);
+      expect(after?.whatsapp_contact?.auto_reply_sent_at).toBeInstanceOf(Date);
+    });
+
+    it("réponse automatique sans reprise possible après des 503 : le verrou est libéré, Brevo n'a rien traité", async () => {
+      vi.mocked(sendWhatsAppMessage).mockResolvedValue({
+        success: false,
+        status: 503,
+        retryable: true,
+        safeToRetry: true,
+      });
+      const id = await insertEffectif({
+        whatsapp_contact: { brevo_visitor_id: "visitor-1", auto_reply_sent: true, auto_reply_sent_at: new Date() },
+      });
+
+      await sendWhatsAppReply({
+        effectifId: id,
+        kind: "auto_reply",
+        attempt: WHATSAPP_RETRY_DELAYS_MS.length + 1,
+      });
+
+      const after = await missionLocaleEffectifsDb().findOne({ _id: id });
+      expect(after?.whatsapp_contact?.auto_reply_sent).toBe(false);
+    });
+
     it("un échec non terminal d'une autre réponse ne touche pas auto_reply_sent", async () => {
       vi.mocked(sendWhatsAppMessage).mockResolvedValue({
         success: false,
