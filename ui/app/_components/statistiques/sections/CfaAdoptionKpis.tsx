@@ -2,7 +2,7 @@
 
 import { KpiFunnel, kpiFunnelCardClassName } from "../cards/KpiFunnel";
 import { StatCard } from "../cards/StatCard";
-import { CFA_AVEC_COMPTE_DEFINITION, CFA_COMPATIBLES_DEFINITION } from "../constants";
+import { CFA_AVEC_COMPTE_DEFINITION, CFA_COMPATIBLES_DEFINITION, CFA_ESTIMATION_DEFINITION } from "../constants";
 import { isLoadingVariation } from "../hooks/useLoadingVariation";
 import { useStatsFilters } from "../hooks/useStatsFilters";
 import { useCfaAdoptionStats } from "../hooks/useStatsQueries";
@@ -20,6 +20,7 @@ export function CfaAdoptionKpis() {
           value={data?.estimation}
           loading={isLoading}
           className={kpiFunnelCardClassName}
+          tooltip={CFA_ESTIMATION_DEFINITION}
         />
         <StatCard
           label="Total CFA compatibles avec la collaboration ML"
