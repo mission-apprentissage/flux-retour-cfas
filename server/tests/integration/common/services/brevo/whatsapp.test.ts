@@ -675,7 +675,8 @@ describe("WhatsApp Service", () => {
 
       expect(sendWhatsAppMessage).toHaveBeenCalledWith(
         "visitor-123",
-        expect.stringContaining("Mission locale ML Test")
+        expect.stringContaining("Mission locale ML Test"),
+        ["Jean"]
       );
       const effectif = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
       expect(effectif?.whatsapp_contact?.messages_history?.map((m) => m.direction)).toEqual([

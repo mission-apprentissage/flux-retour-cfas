@@ -23,8 +23,13 @@ axiosRetry(brevoClient, {
 
 /**
  * Envoie un message WhatsApp via l'API Brevo Conversations
+ * `sensitiveValues` : les données personnelles du texte (prénom), à masquer si Brevo les cite dans son erreur.
  */
-export async function sendWhatsAppMessage(visitorId: string, message: string): Promise<WhatsAppSendResult> {
+export async function sendWhatsAppMessage(
+  visitorId: string,
+  message: string,
+  sensitiveValues: readonly string[] = []
+): Promise<WhatsAppSendResult> {
   if (!config.brevo.whatsapp?.enabled) {
     logger.info({ visitorId }, "WhatsApp is disabled, skipping message");
     return { success: false, error: "WhatsApp is disabled" };
@@ -62,7 +67,7 @@ export async function sendWhatsAppMessage(visitorId: string, message: string): P
       messageId,
     };
   } catch (error) {
-    const details = describeBrevoError(error);
+    const details = describeBrevoError(error, [message, ...sensitiveValues]);
     logger.error({ visitorId, ...brevoErrorLogFields(details) }, "Failed to send WhatsApp message");
     reportBrevoError("send_message", details);
 

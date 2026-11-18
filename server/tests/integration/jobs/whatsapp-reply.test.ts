@@ -96,8 +96,10 @@ describe("file d'envoi des réponses WhatsApp", () => {
       const result = await sendWhatsAppReply({ effectifId: id, kind: "callback", attempt: 1 });
 
       expect(result).toEqual({ outcome: "sent" });
-      expect(sendWhatsAppMessage).toHaveBeenCalledWith("visitor-1", expect.stringContaining("Mission locale ML Test"));
-      expect(sendWhatsAppMessage).toHaveBeenCalledWith("visitor-1", expect.stringContaining("Jeanne"));
+      expect(sendWhatsAppMessage).toHaveBeenCalledWith("visitor-1", expect.stringContaining("Mission locale ML Test"), [
+        "Jeanne",
+      ]);
+      expect(sendWhatsAppMessage).toHaveBeenCalledWith("visitor-1", expect.stringContaining("Jeanne"), ["Jeanne"]);
       const after = await missionLocaleEffectifsDb().findOne({ _id: id });
       expect(after?.whatsapp_contact?.messages_history).toEqual([
         expect.objectContaining({ direction: "outbound", brevo_message_id: "out-1" }),
@@ -111,7 +113,9 @@ describe("file d'envoi des réponses WhatsApp", () => {
 
       await sendWhatsAppReply({ effectifId: id, kind: "prequalif_yes", attempt: 1 });
 
-      expect(sendWhatsAppMessage).toHaveBeenCalledWith("visitor-1", expect.stringContaining("/api/r/tok-123"));
+      expect(sendWhatsAppMessage).toHaveBeenCalledWith("visitor-1", expect.stringContaining("/api/r/tok-123"), [
+        "Jeanne",
+      ]);
     });
 
     it("prequalif_yes : sans jeton, message sans lien", async () => {

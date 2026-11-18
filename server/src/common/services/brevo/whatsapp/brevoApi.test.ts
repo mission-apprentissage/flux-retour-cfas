@@ -1,6 +1,7 @@
 import nock from "nock";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { captureTiered } from "@/common/services/sentry/alertContract";
 import config from "@/config";
 
 import { sendWhatsAppMessage, upsertBrevoContact } from "./brevoApi";
@@ -32,7 +33,10 @@ describe("reprises des appels Brevo", () => {
     nock.enableNetConnect();
   });
 
-  beforeEach(() => resetBrevoErrorReports());
+  beforeEach(() => {
+    resetBrevoErrorReports();
+    vi.mocked(captureTiered).mockClear();
+  });
   afterEach(() => nock.cleanAll());
 
   it("upsert du contact : une coupure réseau est rejouée, l'opération étant idempotente", async () => {
@@ -55,6 +59,30 @@ describe("reprises des appels Brevo", () => {
     expect(result.success).toBe(false);
     expect(result.safeToRetry).toBe(false);
     expect(scope.isDone()).toBe(false);
+  });
+
+  it("envoi de message : le prénom cité par Brevo est masqué dans l'erreur renvoyée et dans la capture", async () => {
+    brevo()
+      .post("/v3/conversations/messages")
+      .reply(400, { code: "invalid_parameter", message: "Invalid text for Jeanne" });
+
+    const result = await sendWhatsAppMessage("visitor-1", "Bonjour Jeanne, ta Mission locale te contactera.", [
+      "Jeanne",
+    ]);
+
+    expect(result.error).toBe("Invalid text for <valeur>");
+    expect(JSON.stringify(vi.mocked(captureTiered).mock.calls)).not.toContain("Jeanne");
+  });
+
+  it("envoi de message : le texte complet cité par Brevo est masqué, même sans valeur sensible déclarée", async () => {
+    const texte = "Bonjour Jeanne, ta Mission locale te contactera.";
+    brevo()
+      .post("/v3/conversations/messages")
+      .reply(400, { message: `Rejected: ${texte}` });
+
+    const result = await sendWhatsAppMessage("visitor-1", texte);
+
+    expect(result.error).toBe("Rejected: <valeur>");
   });
 
   it("envoi de message : un 503 est rejoué, Brevo n'a rien traité", async () => {

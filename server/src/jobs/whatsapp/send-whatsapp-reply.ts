@@ -113,7 +113,8 @@ export async function sendWhatsAppReply({ effectifId, kind, attempt }: SendReply
     return { outcome: "failed", reason: "mission_locale_introuvable" };
   }
 
-  const result = await sendWhatsAppMessage(visitorId, message);
+  const prenom = effectif.effectif_snapshot?.apprenant?.prenom;
+  const result = await sendWhatsAppMessage(visitorId, message, prenom ? [prenom] : []);
 
   if (result.success) {
     await updateWhatsAppContact(_id, {}, [
