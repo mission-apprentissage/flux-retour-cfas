@@ -133,6 +133,7 @@ describe("registre des jobs", () => {
       "process:effectifs-queue:remove-duplicates",
       "process:effectifs-queue:single",
       "purge:queues",
+      "purge:traces",
       "seed:recette",
       "send-cfa-daily-recap",
       "send-mission-locale-daily-recap",

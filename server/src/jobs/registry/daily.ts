@@ -36,6 +36,8 @@ const runDailyJobs = async (queued: boolean) => {
   // # Purge des collections events et queues
   await addJob({ name: "purge:queues", queued });
 
+  await addJob({ name: "purge:traces", queued });
+
   // # Mise à jour du nb d'effectifs
   await addJob({ name: "hydrate:organismes-effectifs-count", queued });
 
@@ -69,7 +71,7 @@ export const dailyJobs = {
 
 export const dailyCrons = {
   // 02h30 Paris — enchaîne tous les jobs quotidiens (hydrate, fiabilisation, purge) en file
-  // Enfile 20 jobs puis rend la main : sa durée propre est de 0,3 s, mais sa file
+  // Enfile 21 jobs puis rend la main : sa durée propre est de 0,3 s, mais sa file
   // occupe le worker jusqu'à 04h27 au pire. Tout l'ordonnancement nocturne en découle.
   "Run daily jobs each day at 02h30": {
     cron_string: "30 2 * * *",

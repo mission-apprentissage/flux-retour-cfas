@@ -2,6 +2,7 @@ import type { CronDef, JobDef } from "job-processor";
 import { ObjectId } from "mongodb";
 
 import { purgeOrphanQueues, purgeQueues } from "../clear/purge-queues";
+import { purgeTraces } from "../clear/purge-traces";
 import { heartbeatIngestion } from "../ingestion/heartbeat-ingestion";
 import { removeDuplicatesEffectifsQueue } from "../ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "../ingestion/process-ingestion";
@@ -33,6 +34,9 @@ export const ingestionJobs = {
     handler: async (job) => {
       return purgeQueues(payloadNumber(job.payload, "nbDaysToKeep"));
     },
+  },
+  "purge:traces": {
+    handler: async () => purgeTraces(),
   },
   "clear:queue-orphans": {
     handler: async (job) => {
