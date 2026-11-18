@@ -44,6 +44,13 @@ describe("sanitizeBrevoText", () => {
     expect(text).toContain("Dupont");
   });
 
+  it("ne masque une valeur transmise que comme mot entier, sans hacher les autres mots", () => {
+    expect(sanitizeBrevoText("validation failed for Ali, Ali's phone", ["Ali"])).toBe(
+      "validation failed for <valeur>, <valeur>'s phone"
+    );
+    expect(sanitizeBrevoText("Léana et Léa", ["Léa"])).toBe("Léana et <valeur>");
+  });
+
   it("ignore les valeurs trop courtes pour ne pas hacher le message", () => {
     expect(sanitizeBrevoText("an error occurred", ["an", ""])).toBe("an error occurred");
   });

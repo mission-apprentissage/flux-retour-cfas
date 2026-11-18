@@ -63,7 +63,11 @@ export function sanitizeBrevoText(text: string, sensitiveValues: readonly string
   for (const value of sensitiveValues) {
     const trimmed = value.trim();
     if (trimmed.length >= MIN_SENSITIVE_VALUE_LENGTH) {
-      sanitized = sanitized.replace(new RegExp(escapeRegExp(trimmed), "gi"), "<valeur>");
+      // Mot entier seulement : « Ali » ne doit pas hacher « validation »
+      sanitized = sanitized.replace(
+        new RegExp(`(?<![\\p{L}\\d])${escapeRegExp(trimmed)}(?![\\p{L}\\d])`, "giu"),
+        "<valeur>"
+      );
     }
   }
   return sanitized
