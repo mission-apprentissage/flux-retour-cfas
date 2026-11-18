@@ -13,7 +13,7 @@ import {
 } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 
-import { getCfaInvitationsExportData } from "./cfa-invitations-export.actions";
+import { getCfaInvitationsExportData, listCfaInvitationsExportRows } from "./cfa-invitations-export.actions";
 
 useMongo();
 
@@ -291,5 +291,40 @@ describe("getCfaInvitationsExportData", () => {
       nb_nouveaux_comptes_apres_cfa: 0,
       date_derniere_connexion_cfa: null,
     });
+  });
+
+  it("restreint aux CFA du territoire, présents au référentiel et non fermés", async () => {
+    const ml = await insertMissionLocale("Mission Locale Nord", "32");
+    const referentiel = { est_dans_le_referentiel: "present" } as const;
+    const bretagne = await insertOrganisme({
+      nom: "Bretagne",
+      adresse: { region: "53", departement: "35" } as never,
+      ...referentiel,
+    });
+    const centre = await insertOrganisme({
+      nom: "Centre",
+      adresse: { region: "24", departement: "45" } as never,
+      ...referentiel,
+    });
+    const ferme = await insertOrganisme({
+      nom: "Fermé",
+      adresse: { region: "53", departement: "35" } as never,
+      ferme: true,
+      ...referentiel,
+    });
+    const horsReferentiel = await insertOrganisme({
+      nom: "Hors référentiel",
+      adresse: { region: "53", departement: "35" } as never,
+    });
+    for (const id of [bretagne, centre, ferme, horsReferentiel]) await insertInvitation(id, ml, INVITATION);
+
+    const region = await listCfaInvitationsExportRows({ territoire: { regions: ["53"] } });
+    expect(region.map(({ row }) => row.raison_sociale_cfa)).toEqual(["Bretagne"]);
+
+    const departement = await listCfaInvitationsExportRows({ territoire: { regions: ["24"], departements: ["35"] } });
+    expect(departement).toEqual([]);
+
+    const france = await listCfaInvitationsExportRows({ territoire: {} });
+    expect(france.map(({ row }) => row.raison_sociale_cfa).sort()).toEqual(["Bretagne", "Centre"]);
   });
 });
