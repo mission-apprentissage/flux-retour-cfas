@@ -27,6 +27,7 @@ import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organisme
 import parentLogger from "@/common/logger";
 import { effectifsDECADb, organismesDb } from "@/common/model/collections";
 import { getBALMongodbUri } from "@/common/mongodb";
+import { estHorsConservation } from "@/common/utils/conservationUtils";
 import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import { cachedInRun, getRunCacheStats, withRunCache } from "@/common/utils/runCache";
 import config from "@/config";
@@ -456,7 +457,12 @@ async function updateOrganismesLastEffectifUpdate(organismeIds: Set<string>) {
   }
 }
 
-async function transformDocument(document: IRawBalDeca): Promise<WithoutId<IEffectifDECA>[]> {
+export function getAnneesScolairesAImporter(
+  document: Pick<IRawBalDeca, "_id" | "date_fin_contrat"> & {
+    formation: Pick<IRawBalDeca["formation"], "date_debut_formation" | "date_fin_formation">;
+  },
+  maintenant: Date = new Date()
+): string[] {
   const { formation } = document;
 
   const dateDebutFormation = formation?.date_debut_formation ? new Date(formation.date_debut_formation) : null;
@@ -472,21 +478,23 @@ async function transformDocument(document: IRawBalDeca): Promise<WithoutId<IEffe
     );
   }
 
-  const effectifs: WithoutId<IEffectifDECA>[] = [];
+  const anneesScolaires =
+    startYear === endYear
+      ? [`${startYear}-${startYear}`]
+      : Array.from({ length: endYear - startYear }, (_, index) => `${startYear + index}-${startYear + index + 1}`);
+  const dateFinContrat = document.date_fin_contrat ? new Date(document.date_fin_contrat) : null;
 
-  if (startYear === endYear) {
-    const anneeScolaire = `${startYear}-${startYear}`;
+  return anneesScolaires.filter(
+    (anneeScolaire) => !estHorsConservation({ annee_scolaire: anneeScolaire, datesDeFin: [dateFinContrat] }, maintenant)
+  );
+}
+
+async function transformDocument(document: IRawBalDeca): Promise<WithoutId<IEffectifDECA>[]> {
+  const effectifs: WithoutId<IEffectifDECA>[] = [];
+  for (const anneeScolaire of getAnneesScolairesAImporter(document)) {
     const effectif = await createEffectif(document, anneeScolaire);
     if (effectif) {
       effectifs.push(effectif);
-    }
-  } else {
-    for (let year = startYear; year < endYear; year++) {
-      const anneeScolaire = `${year}-${year + 1}`;
-      const effectif = await createEffectif(document, anneeScolaire);
-      if (effectif) {
-        effectifs.push(effectif);
-      }
     }
   }
 

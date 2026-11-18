@@ -233,6 +233,7 @@ export type IStatutApprenantEnum = z.infer<typeof zStatutApprenantEnum>;
 export const ORGANISME_LIEU_NOT_FOUND = "organisme lieu de formation non trouvé";
 export const ORGANISME_FORMATEUR_NOT_FOUND = "organisme formateur non trouvé";
 export const ORGANISME_RESPONSABLE_NOT_FOUND = "organisme responsable non trouvé";
+export const EFFECTIF_HORS_CONSERVATION = "dossier terminé depuis plus de deux ans, non conservé";
 
 export const createCustomEffectifIssue = (message: string, paths: string[], params: { [key: string]: string }) => ({
   code: ZodIssueCode.custom,
