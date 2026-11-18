@@ -54,11 +54,13 @@ const insertUser = async (
     email?: string;
     created_at?: Date;
     connections?: Date[];
+    last_connection?: Date;
     account_status?: IUsersMigration["account_status"];
   } = {}
 ) => {
   const _id = new ObjectId();
   const connections = fields.connections ?? [];
+  const lastConnection = fields.last_connection ?? connections[connections.length - 1];
   await usersMigrationDb().insertOne(
     {
       _id,
@@ -67,7 +69,7 @@ const insertUser = async (
       account_status: fields.account_status ?? "CONFIRMED",
       created_at: fields.created_at ?? new Date("2025-01-01"),
       connection_history: connections,
-      ...(connections.length ? { last_connection: connections[connections.length - 1] } : {}),
+      ...(lastConnection ? { last_connection: lastConnection } : {}),
     } as IUsersMigration,
     { bypassDocumentValidation: true }
   );
@@ -198,6 +200,23 @@ describe("getCfaInvitationsExportData", () => {
       date_derniere_collab_cfa: AVANT,
       connexion_apres_invitation_cfa: "Non",
       date_premiere_connexion_apres_invitation_cfa: null,
+    });
+  });
+
+  it("date la connexion après l'invitation par la dernière connexion quand l'historique a été purgé", async () => {
+    const ml = await insertMissionLocale("Mission Locale Ouest", "52");
+    const cfa = await insertOrganisme();
+    const organisation = await insertOrganisationCfa(cfa);
+    const APRES = new Date("2026-09-20T10:00:00Z");
+    await insertUser(organisation, { connections: [], last_connection: APRES });
+    await insertInvitation(cfa, ml, INVITATION);
+
+    const [row] = (await getCfaInvitationsExportData()).invitations;
+
+    expect(row).toMatchObject({
+      connexion_apres_invitation_cfa: "Oui",
+      date_premiere_connexion_apres_invitation_cfa: APRES,
+      date_derniere_connexion_cfa: APRES,
     });
   });
 

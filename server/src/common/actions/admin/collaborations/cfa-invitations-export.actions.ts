@@ -191,7 +191,11 @@ function buildRow(invitation: Invitation, ctx: Contexte): ICfaInvitationExportRo
   const collaborations = ctx.collaborationsByOrganisme.get(organismeId) ?? [];
 
   const premiereConnexionApres = minDate(
-    comptes.flatMap((compte) => compte.connection_history.filter((date) => date > depuis))
+    comptes.flatMap((compte) =>
+      [...compte.connection_history, ...(compte.last_connection ? [compte.last_connection] : [])].filter(
+        (date) => date > depuis
+      )
+    )
   );
   const collaborationsApres = collaborations.filter((collaboration) => collaboration.date > depuis);
   const contacts = [...new Set(collaborationsApres.flatMap((collaboration) => collaboration.email ?? []))].sort();
