@@ -52,7 +52,7 @@ export const MOTIFS_DEMANDE_ACTIVATION = {
   },
   nature_inconnue: {
     libelle: "Nature de l'organisme inconnue",
-    detail: "La nature de l'organisme est inconnue du référentiel",
+    detail: "Nature inconnue et organisme absent du Référentiel de l'apprentissage",
     avecMail: false,
   },
   compte_autre_organisation: {

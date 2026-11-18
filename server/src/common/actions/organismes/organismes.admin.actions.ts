@@ -498,10 +498,7 @@ export async function activateDecaCfaPilotBatch(
 
   for (const input of deduped) {
     const { siret, uai } = input;
-    const organisme = await organismesDb().findOne(
-      { siret, uai },
-      { projection: { _id: 1, siret: 1, uai: 1, nature: 1, ferme: 1, is_allowed_deca: 1, deca_contrats_flechables: 1 } }
-    );
+    const organisme = await organismesDb().findOne({ siret, uai }, { projection: decaEligibilityProjection });
 
     if (!organisme) {
       results.push({ input, status: "not_found" });

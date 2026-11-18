@@ -1,5 +1,5 @@
 import { ObjectId } from "bson";
-import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
+import { NATURE_ORGANISME_DE_FORMATION, STATUT_PRESENCE_REFERENTIEL } from "shared/constants";
 import { IOrganisme } from "shared/models/data/organismes.model";
 import { getActiveAnneesScolaires } from "shared/utils/anneeScolaire";
 
@@ -37,8 +37,13 @@ export type EligibilityResult = {
   } | null;
 };
 
-export const isNatureEligible = (nature: IOrganisme["nature"] | null) =>
-  nature !== NATURE_ORGANISME_DE_FORMATION.RESPONSABLE;
+export const isNatureEligible = (
+  nature: IOrganisme["nature"] | null,
+  estDansLeReferentiel: IOrganisme["est_dans_le_referentiel"] | null
+) =>
+  nature !== NATURE_ORGANISME_DE_FORMATION.RESPONSABLE &&
+  ((!!nature && nature !== NATURE_ORGANISME_DE_FORMATION.INCONNUE) ||
+    estDansLeReferentiel === STATUT_PRESENCE_REFERENTIEL.PRESENT);
 
 export type IEligibleOrganismeRow = {
   _id: ObjectId;
@@ -54,7 +59,7 @@ export type IEligibleOrganismeRow = {
 
 /**
  *   - siret AND uai non vides
- *   - nature autre que RESPONSABLE
+ *   - nature autre que RESPONSABLE, et connue si l'organisme est absent du référentiel
  *   - au moins un effectif (ERP + DECA, contrats DECA à rattacher compris) sur les années scolaires actives
  *   - ferme !== true
  *
@@ -72,7 +77,17 @@ export async function findEligibleOrganismes(organismeIds?: ObjectId[]): Promise
           ferme: { $ne: true },
           siret: { $exists: true, $nin: [null, ""] },
           uai: { $exists: true, $nin: [null, ""] },
-          nature: { $ne: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE },
+          $or: [
+            {
+              nature: {
+                $nin: [NATURE_ORGANISME_DE_FORMATION.RESPONSABLE, NATURE_ORGANISME_DE_FORMATION.INCONNUE, null],
+              },
+            },
+            {
+              nature: { $ne: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE },
+              est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.PRESENT,
+            },
+          ],
         },
       },
       {
@@ -147,6 +162,7 @@ export const decaEligibilityProjection = {
   siret: 1,
   uai: 1,
   nature: 1,
+  est_dans_le_referentiel: 1,
   ferme: 1,
   is_allowed_deca: 1,
   deca_activation_queued_at: 1,
@@ -167,6 +183,7 @@ export async function checkEligibilityForLoaded(
     | "siret"
     | "uai"
     | "nature"
+    | "est_dans_le_referentiel"
     | "ferme"
     | "is_allowed_deca"
     | "deca_activation_queued_at"
@@ -176,8 +193,19 @@ export async function checkEligibilityForLoaded(
     | "enseigne"
   >
 ): Promise<EligibilityResult> {
-  const { _id, siret, uai, nature, ferme, is_allowed_deca, deca_activation_queued_at, nom, raison_sociale, enseigne } =
-    organisme;
+  const {
+    _id,
+    siret,
+    uai,
+    nature,
+    est_dans_le_referentiel,
+    ferme,
+    is_allowed_deca,
+    deca_activation_queued_at,
+    nom,
+    raison_sociale,
+    enseigne,
+  } = organisme;
 
   const exists_with_siret_uai: EligibilityCheck = {
     passed: Boolean(siret && uai),
@@ -210,7 +238,7 @@ export async function checkEligibilityForLoaded(
   }
 
   const natureCheck: EligibilityCheck = {
-    passed: isNatureEligible(nature),
+    passed: isNatureEligible(nature, est_dans_le_referentiel),
     details: { natureActuelle: nature ?? null },
   };
 

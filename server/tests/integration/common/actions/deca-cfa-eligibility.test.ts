@@ -94,17 +94,19 @@ describe("checkActivationEligibility", () => {
 
   describe("nature", () => {
     const cases = [
-      { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE, expected: false },
-      { nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE, expected: true },
-      { nature: undefined, expected: true },
-      { nature: NATURE_ORGANISME_DE_FORMATION.LIEU, expected: true },
-      { nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR, expected: true },
-      { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR, expected: true },
+      { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE, referentiel: "present", expected: false },
+      { nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE, referentiel: "present", expected: true },
+      { nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE, referentiel: "absent", expected: false },
+      { nature: undefined, referentiel: "present", expected: true },
+      { nature: undefined, referentiel: undefined, expected: false },
+      { nature: NATURE_ORGANISME_DE_FORMATION.LIEU, referentiel: "absent", expected: true },
+      { nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR, referentiel: "absent", expected: true },
+      { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR, referentiel: undefined, expected: true },
     ] as const;
 
-    cases.forEach(({ nature, expected }) => {
-      it(`returns nature.passed=${expected} for nature=${nature ?? "undefined"}`, async () => {
-        const organisme = await insertOrganisme({ nature });
+    cases.forEach(({ nature, referentiel, expected }) => {
+      it(`returns nature.passed=${expected} for nature=${nature ?? "undefined"}, référentiel=${referentiel ?? "undefined"}`, async () => {
+        const organisme = await insertOrganisme({ nature, est_dans_le_referentiel: referentiel });
         const result = await checkActivationEligibility((organisme._id as ObjectId).toHexString());
         expect(result.checks.nature.passed).toBe(expected);
         expect(result.checks.nature.details?.natureActuelle).toBe(nature ?? null);
@@ -286,17 +288,35 @@ describe("findEligibleOrganismes", () => {
     expect(decaOnlyRow.has_effectifs_deca).toBe(true);
   });
 
-  it("inclut toute nature autre que responsable, nature absente comprise", async () => {
-    const inconnue = await insertOrg({ nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE });
-    const lieu = await insertOrg({ nature: NATURE_ORGANISME_DE_FORMATION.LIEU });
-    const sansNature = await insertOrg();
-    await organismesDb().updateOne(
-      { _id: sansNature._id },
+  it("inclut toute nature autre que responsable, inconnue ou absente seulement au référentiel", async () => {
+    const inconnue = await insertOrg({
+      nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE,
+      est_dans_le_referentiel: "present",
+    });
+    const inconnueHorsReferentiel = await insertOrg({
+      nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE,
+      est_dans_le_referentiel: "absent",
+    });
+    const lieu = await insertOrg({ nature: NATURE_ORGANISME_DE_FORMATION.LIEU, est_dans_le_referentiel: "absent" });
+    const sansNature = await insertOrg({ est_dans_le_referentiel: "present" });
+    const sansNatureHorsReferentiel = await insertOrg();
+    await organismesDb().updateMany(
+      { _id: { $in: [sansNature._id, sansNatureHorsReferentiel._id] } },
       { $unset: { nature: "" } },
       { bypassDocumentValidation: true }
     );
-    const responsable = await insertOrg({ nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE });
-    for (const organisme of [inconnue, lieu, sansNature, responsable]) {
+    const responsable = await insertOrg({
+      nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE,
+      est_dans_le_referentiel: "present",
+    });
+    for (const organisme of [
+      inconnue,
+      inconnueHorsReferentiel,
+      lieu,
+      sansNature,
+      sansNatureHorsReferentiel,
+      responsable,
+    ]) {
       await insertEffectif(organisme._id as ObjectId, currentAnnee);
     }
 

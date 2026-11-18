@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import escapeStringRegexp from "escape-string-regexp";
 import { addJob } from "job-processor";
 import { ObjectId } from "mongodb";
+import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
 import {
   BrancheDemandeActivation,
   estRenvoyable,
@@ -120,6 +121,7 @@ const PROJECTION_ORGANISME = {
   siret: 1,
   uai: 1,
   nature: 1,
+  est_dans_le_referentiel: 1,
   ferme: 1,
   is_allowed_deca: 1,
   deca_activation_queued_at: 1,
@@ -336,7 +338,11 @@ export async function evaluerDemande(
     if (!checks.exists_with_siret_uai.passed) {
       motifs.add("sans_uai");
     } else {
-      if (!checks.nature.passed) motifs.add("responsable_pur");
+      if (!checks.nature.passed) {
+        motifs.add(
+          organisme.nature === NATURE_ORGANISME_DE_FORMATION.RESPONSABLE ? "responsable_pur" : "nature_inconnue"
+        );
+      }
       if (!checks.has_effectifs.passed) motifs.add("aucun_effectif");
       effectifs = checks.has_effectifs.details;
     }
