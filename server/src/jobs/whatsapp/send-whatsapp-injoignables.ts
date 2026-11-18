@@ -3,8 +3,7 @@ import { getBornesNaissanceMissionLocale } from "shared/utils";
 
 import parentLogger from "@/common/logger";
 import { missionLocaleEffectifsDb } from "@/common/model/collections";
-import { isEligibleForWhatsApp } from "@/common/services/brevo/whatsapp";
-import { reserveAndSendInjoignables } from "@/common/services/brevo/whatsapp/injoignables";
+import { isEligibleForWhatsApp, triggerWhatsAppIfEligible } from "@/common/services/brevo/whatsapp";
 import config from "@/config";
 
 const logger = parentLogger.child({
@@ -139,16 +138,9 @@ export async function sendWhatsAppInjoignables({ dryRun, limit }: SendWhatsAppIn
         continue;
       }
 
-      // Envoi direct, sans passer par la file : le batch garde son propre rythme séquentiel.
-      const result = await reserveAndSendInjoignables({ effectifId, missionLocaleId });
-      if (result.outcome === "sent") {
-        processed++;
-      } else if (result.outcome === "skipped") {
-        skipped++;
-      } else {
-        failed++;
-      }
-      logger.info({ effectifId, outcome: result.outcome }, "Message WhatsApp injoignables traité");
+      await triggerWhatsAppIfEligible(freshEffectif, missionLocaleId);
+      processed++;
+      logger.info({ effectifId }, "triggerWhatsAppIfEligible exécuté (voir logs Brevo pour le statut réel)");
     } catch (error) {
       failed++;
       logger.error({ effectifId, error }, "Exception lors du traitement");
