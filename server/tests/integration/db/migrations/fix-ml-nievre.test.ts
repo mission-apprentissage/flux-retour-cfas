@@ -226,6 +226,7 @@ describe("migration fix-ml-nievre", () => {
       organisation_id: MORVAN_ID,
       author_id: new ObjectId(),
       created_at: new Date(),
+      expires_at: new Date(Date.now() + 96 * 3600 * 1000),
     });
 
     await up();

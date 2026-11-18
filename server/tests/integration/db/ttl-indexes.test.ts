@@ -1,4 +1,5 @@
 import auditLogsDescriptor from "shared/models/data/auditLogs.model";
+import invitationsDescriptor from "shared/models/data/invitations.model";
 import telechargementListesNomLogsDescriptor from "shared/models/data/telechargementListesNomLogs.model";
 import { describe, expect, it } from "vitest";
 
@@ -9,6 +10,7 @@ import { useMongo } from "@tests/jest/setupMongo";
 useMongo();
 
 const SIX_MOIS = 183 * 24 * 3600;
+const DOUZE_MOIS = 365 * 24 * 3600;
 
 const ttlIndex = async (collectionName: string, name: string) => {
   const indexes = await getDbCollection(collectionName).listIndexes().toArray();
@@ -24,6 +26,12 @@ describe("index TTL de rétention", () => {
       name: "ttl_telechargement_date",
       key: { telechargement_date: 1 },
       expireAfterSeconds: SIX_MOIS,
+    },
+    {
+      descriptor: invitationsDescriptor,
+      name: "ttl_expires_at",
+      key: { expires_at: 1 },
+      expireAfterSeconds: DOUZE_MOIS,
     },
   ])("$name", async ({ descriptor, name, key, expireAfterSeconds }) => {
     await createCollectionIndexes(descriptor);

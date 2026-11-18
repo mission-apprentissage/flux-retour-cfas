@@ -73,6 +73,7 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
           organisation_id: organisationId,
           author_id: new ObjectId(),
           created_at: new Date(),
+          expires_at: new Date(Date.now() + 96 * 3600 * 1000),
         })
       );
 
@@ -101,6 +102,7 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
             organisation_id: organisationId,
             author_id: new ObjectId(),
             created_at: new Date(),
+            expires_at: new Date(Date.now() + 96 * 3600 * 1000),
           })
         );
         return organisationId;
@@ -214,6 +216,7 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
           author_id: new ObjectId(),
           role: "member",
           created_at: new Date(),
+          expires_at: new Date(Date.now() + 96 * 3600 * 1000),
         })
       );
 
