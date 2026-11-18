@@ -57,7 +57,7 @@
     "migrate-mongo": "14.0.7",
     "mjml": "^5.4.1",
     "mongodb": "^6.21.0",
-    "multer": "^2.4.0",
+    "multer": "^2.5.0",
     "netmask": "^2.1.1",
     "nodemailer": "~10.1.4",
     "nodemailer-html-to-text": "3.2.0",
@@ -100,7 +100,7 @@
     "tsup": "^8.5.1",
     "tsx": "^4.0.0",
     "typescript": "^5.6.3",
-    "vitest": "^4.1.11",
+    "vitest": "^4.1.12",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }
