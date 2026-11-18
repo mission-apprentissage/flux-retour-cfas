@@ -60,6 +60,8 @@ export const zFormationCatalogue = z.object({
   published: z.boolean().nullish(),
   lieu_formation_adresse: z.string(),
   lieu_formation_siret: z.string().nullish(),
+  etablissement_lieu_formation_siret: z.string().nullish(),
+  etablissement_lieu_formation_uai: z.string().nullish(),
   id_formation: z.string(),
   libelle_court: z.string().nullish(),
   niveau_formation_diplome: z.string().nullish(),

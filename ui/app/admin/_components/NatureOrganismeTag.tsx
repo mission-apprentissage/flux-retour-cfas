@@ -7,7 +7,7 @@ import { NATURE_ORGANISME } from "@/common/constants/organismes";
 import styles from "./nature-organisme-tag.module.scss";
 
 export function NatureOrganismeTag({ nature }: { nature: keyof typeof NATURE_ORGANISME }) {
-  const isInconnue = !nature || nature === "inconnue" || nature === "lieu_formation";
+  const isInconnue = !nature || nature === "inconnue";
   const label = NATURE_ORGANISME[nature] ?? NATURE_ORGANISME.inconnue;
 
   return (

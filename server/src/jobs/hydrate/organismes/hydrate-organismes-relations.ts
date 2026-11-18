@@ -57,12 +57,15 @@ type IPaireFormation = {
     gestionnaire_uai?: IFormationCatalogue["etablissement_gestionnaire_uai"];
     formateur_siret: IFormationCatalogue["etablissement_formateur_siret"];
     formateur_uai?: IFormationCatalogue["etablissement_formateur_uai"];
+    lieu_siret?: IFormationCatalogue["etablissement_lieu_formation_siret"];
+    lieu_uai?: IFormationCatalogue["etablissement_lieu_formation_uai"];
   };
 };
 
 type IRolesActifs = {
   gestionnaires: Set<string>;
   formateurs: Set<string>;
+  lieux: Set<string>;
 };
 
 type INature = NonNullable<IOrganisme["nature"]>;
@@ -85,6 +88,8 @@ const fetchRolesActifs = async (dateCalcul: Date): Promise<IRolesActifs> => {
             gestionnaire_uai: "$etablissement_gestionnaire_uai",
             formateur_siret: "$etablissement_formateur_siret",
             formateur_uai: "$etablissement_formateur_uai",
+            lieu_siret: "$etablissement_lieu_formation_siret",
+            lieu_uai: "$etablissement_lieu_formation_uai",
           },
         },
       },
@@ -97,6 +102,11 @@ const fetchRolesActifs = async (dateCalcul: Date): Promise<IRolesActifs> => {
     ),
     formateurs: new Set(
       paires.map(({ _id }) => getOrganismeKey({ siret: _id.formateur_siret, uai: _id.formateur_uai }))
+    ),
+    lieux: new Set(
+      paires.flatMap(({ _id }) =>
+        _id.lieu_siret ? [getOrganismeKey({ siret: _id.lieu_siret, uai: _id.lieu_uai })] : []
+      )
     ),
   };
 };
@@ -303,7 +313,7 @@ function getOrganismeRelationBulkWriteOperation(
 
 function getNature(
   organisme: Pick<IOrganisme, "_id" | "siret" | "uai">,
-  { gestionnaires, formateurs }: IRolesActifs
+  { gestionnaires, formateurs, lieux }: IRolesActifs
 ): INature {
   const organismeKey = getOrganismeKey(organisme);
   const estGestionnaire = gestionnaires.has(organismeKey);
@@ -319,6 +329,10 @@ function getNature(
 
   if (estGestionnaire) {
     return NATURE_ORGANISME_DE_FORMATION.RESPONSABLE;
+  }
+
+  if (lieux.has(organismeKey)) {
+    return NATURE_ORGANISME_DE_FORMATION.LIEU;
   }
 
   return NATURE_ORGANISME_DE_FORMATION.INCONNUE;

@@ -9696,6 +9696,18 @@ exports[`validation-schema > should create validation schema for formationsCatal
         "null",
       ],
     },
+    "etablissement_lieu_formation_siret": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+    },
+    "etablissement_lieu_formation_uai": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+    },
     "id_formation": {
       "bsonType": "string",
     },

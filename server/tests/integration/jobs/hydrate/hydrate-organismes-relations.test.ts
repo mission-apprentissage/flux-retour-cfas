@@ -592,6 +592,58 @@ describe("Job hydrate:organismes-relations", () => {
       expect(formateur).toMatchObject({ nature: natures[1], organismesFormateurs: [], organismesResponsables: [] });
     });
 
+    it("Donne la nature lieu de formation au seul lieu exact d'une formation active, sans relation", async () => {
+      const resp = organisme("00000000000042", "0000001A");
+      const form = organisme("00000000000059", "0000002B");
+      const lieu = organisme("00000000000067", "0000003C");
+      const memeSiretAutreUai = organisme("00000000000067", "0000004D");
+      const lieuAncien = organisme("00000000000075", "0000005E");
+      await organismesDb().insertMany([resp, form, lieu, memeSiretAutreUai, lieuAncien]);
+      await insererFormation(resp, form, {
+        etablissement_lieu_formation_siret: lieu.siret,
+        etablissement_lieu_formation_uai: lieu.uai,
+      });
+      await insererFormation(resp, form, {
+        cle_ministere_educatif: "formation-finie-il-y-a-7-mois",
+        published: false,
+        date_fin: ["2024-06-27T00:00:00.000Z"],
+        etablissement_lieu_formation_siret: lieuAncien.siret,
+        etablissement_lieu_formation_uai: lieuAncien.uai,
+      });
+
+      await hydrateOrganismesRelations();
+
+      const organismes = await organismesDb().find({}).toArray();
+      expect(Object.fromEntries(organismes.map((o) => [`${o.siret}-${o.uai}`, o.nature]))).toEqual({
+        "00000000000042-0000001A": "responsable",
+        "00000000000059-0000002B": "formateur",
+        "00000000000067-0000003C": "lieu_formation",
+        "00000000000067-0000004D": "inconnue",
+        "00000000000075-0000005E": "inconnue",
+      });
+      expect(organismes.find((o) => o._id.equals(lieu._id))).toMatchObject({
+        organismesFormateurs: [],
+        organismesResponsables: [],
+      });
+      expect(organismes.find((o) => o._id.equals(resp._id))?.organismesFormateurs?.map((o) => o._id)).toEqual([
+        form._id,
+      ]);
+    });
+
+    it("Garde la nature formateur à un organisme qui est aussi le lieu de sa formation", async () => {
+      const resp = organisme("00000000000042", "0000001A");
+      const form = organisme("00000000000059", "0000002B");
+      await organismesDb().insertMany([resp, form]);
+      await insererFormation(resp, form, {
+        etablissement_lieu_formation_siret: form.siret,
+        etablissement_lieu_formation_uai: form.uai,
+      });
+
+      await hydrateOrganismesRelations();
+
+      expect((await organismesDb().findOne({ _id: form._id }))?.nature).toBe("formateur");
+    });
+
     it("Renvoie la répartition par nature et les transitions depuis le calcul précédent", async () => {
       const resp = organisme("00000000000042", "0000001A", "inconnue");
       const form = organisme("00000000000059", "0000002B", "formateur");

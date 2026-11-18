@@ -12,6 +12,7 @@ const NATURE_LABELS: Record<string, string> = {
   responsable: "Responsable",
   formateur: "Formateur",
   responsable_formateur: "Responsable formateur",
+  lieu_formation: "Lieu de formation",
   inconnue: "Nature inconnue",
 };
 
@@ -137,6 +138,7 @@ export function OrganismesFilterPanel(props: OrganismesFilterPanelProps) {
               { value: "responsable", label: "Responsable" },
               { value: "formateur", label: "Formateur" },
               { value: "responsable_formateur", label: "Responsable formateur" },
+              { value: "lieu_formation", label: "Lieu de formation" },
               { value: "inconnue", label: "Inconnue" },
             ]}
             value={props.filters.nature}

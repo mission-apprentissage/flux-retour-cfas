@@ -173,7 +173,7 @@ async function buildOffreDeFormation(formationCatalogue: IFormationCatalogue): P
         nom_academie: formationCatalogue.nom_academie,
         num_academie: formationCatalogue.num_academie,
       },
-      siret: formationCatalogue.lieu_formation_siret ?? null,
+      siret: formationCatalogue.etablissement_lieu_formation_siret ?? null,
     },
 
     entierement_a_distance: formationCatalogue.entierement_a_distance,
@@ -227,7 +227,7 @@ async function getOffreFormations(siret: string): Promise<OffreFormation[]> {
       $or: [
         { etablissement_formateur_siret: siret },
         { etablissement_gestionnaire_siret: siret },
-        { lieu_formation_siret: siret },
+        { etablissement_lieu_formation_siret: siret },
       ],
     })
     .toArray();
