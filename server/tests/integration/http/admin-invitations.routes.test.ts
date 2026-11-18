@@ -262,7 +262,6 @@ describe("Admin invitations routes", () => {
           _id: new ObjectId(),
           organisation_id: cfaOrgId,
           email: "consumed@x.fr",
-          token: "told",
           author_id: new ObjectId(),
           created_at: new Date(now),
         })

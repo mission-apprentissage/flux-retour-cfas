@@ -224,7 +224,9 @@ describe("Inscription CFA (onboarding)", () => {
       expect(user?.prenom).toBe("TestPrenom");
 
       expect(await invitationsDb().findOne({ token: "register-token-12345" })).toBeNull();
-      expect(await invitationsArchiveDb().findOne({ token: "register-token-12345" })).toBeTruthy();
+      const archive = await invitationsArchiveDb().findOne({ email: "test-cfa-user@tdb.local" });
+      expect(archive).toBeTruthy();
+      expect(archive).not.toHaveProperty("token");
 
       expect(sendEmail).toHaveBeenCalledWith(
         "test-cfa-user@tdb.local",

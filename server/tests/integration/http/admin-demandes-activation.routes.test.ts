@@ -546,6 +546,11 @@ describe("suivi des demandes envoyées", () => {
     ...overrides,
   });
 
+  const archive = (overrides: Parameters<typeof invitation>[0]) => {
+    const { token: _token, ...doc } = invitation(overrides);
+    return doc;
+  };
+
   const COMPTE_EXISTANT = {
     branche: "compte_existant",
     branche_initiale: "compte_existant",
@@ -636,8 +641,8 @@ describe("suivi des demandes envoyées", () => {
     const compteId = await insererCompte();
     await insererCompte({ email: "inscrit@cfa-suivi.fr", organisation_role: "member" });
     await invitationsDb().insertOne(invitation({ author_id: compteId, email: "en-attente@cfa-suivi.fr" }));
-    await invitationsArchiveDb().insertOne(invitation({ author_id: compteId, email: "inscrit@cfa-suivi.fr" }));
-    await invitationsArchiveDb().insertOne(invitation({ author_id: compteId, email: "annulee@cfa-suivi.fr" }));
+    await invitationsArchiveDb().insertOne(archive({ author_id: compteId, email: "inscrit@cfa-suivi.fr" }));
+    await invitationsArchiveDb().insertOne(archive({ author_id: compteId, email: "annulee@cfa-suivi.fr" }));
     await invitationsDb().insertOne(
       invitation({ author_id: compteId, email: "avant-envoi@cfa-suivi.fr", created_at: plus(-1) })
     );
