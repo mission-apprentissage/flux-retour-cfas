@@ -11805,14 +11805,9 @@ exports[`validation-schema > should create validation schema for invitationsArch
         "member",
       ],
     },
-    "token": {
-      "bsonType": "string",
-      "description": "Jeton d'invitation",
-    },
   },
   "required": [
     "_id",
-    "token",
     "email",
     "organisation_id",
     "author_id",

@@ -8,7 +8,6 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ author_id: 1 }
 
 const zInvitationArchive = z.object({
   _id: zObjectId,
-  token: z.string({ description: "Jeton d'invitation" }),
   email: z.string({ description: "Email destinataire" }),
   organisation_id: zObjectId.describe("Organisation cible de l'invitation"),
   author_id: zObjectId.describe("Auteur de l'invitation"),

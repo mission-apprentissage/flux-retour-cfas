@@ -28,7 +28,12 @@ import {
 } from "./admin/mission-locale/mission-locale.admin.actions";
 import { enqueueBrevoContactSync, enqueueBrevoOrganisationContactSync } from "./brevo/contacts/enqueue-sync";
 import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
-import { buildOrganisationLabel, createOrganisation, getOrganisationById } from "./organisations.actions";
+import {
+  archiverInvitation,
+  buildOrganisationLabel,
+  createOrganisation,
+  getOrganisationById,
+} from "./organisations.actions";
 import { getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
 import { resumeCollab } from "./organismes/organismes.admin.actions";
 import { createSession } from "./sessions.actions";
@@ -116,7 +121,7 @@ export async function register(registration: RegistrationSchema): Promise<{
         },
       }
     );
-    await invitationsArchiveDb().insertOne(invitation);
+    await archiverInvitation(invitation);
     await invitationsDb().deleteOne({ _id: invitation._id });
     await enqueueBrevoContactSync(userId);
     // Transition -> CONFIRMED (invitation) : émet l'événement Brevo pour le scénario d'automation.
@@ -372,7 +377,7 @@ export async function registerCfa(data: RegistrationCfaSchema): Promise<{
 
   const isAdmin = invitation.role === "admin";
 
-  await invitationsArchiveDb().insertOne(invitation);
+  await archiverInvitation(invitation);
 
   let userId: ObjectId | null = null;
   try {
