@@ -1,4 +1,5 @@
 import auditLogsDescriptor from "shared/models/data/auditLogs.model";
+import connexionInvitationsDescriptor from "shared/models/data/connexionInvitations.model";
 import invitationsDescriptor from "shared/models/data/invitations.model";
 import telechargementListesNomLogsDescriptor from "shared/models/data/telechargementListesNomLogs.model";
 import { describe, expect, it } from "vitest";
@@ -31,6 +32,12 @@ describe("index TTL de rétention", () => {
       descriptor: invitationsDescriptor,
       name: "ttl_expires_at",
       key: { expires_at: 1 },
+      expireAfterSeconds: DOUZE_MOIS,
+    },
+    {
+      descriptor: connexionInvitationsDescriptor,
+      name: "ttl_updated_at",
+      key: { updated_at: 1 },
       expireAfterSeconds: DOUZE_MOIS,
     },
   ])("$name", async ({ descriptor, name, key, expireAfterSeconds }) => {
