@@ -123,6 +123,12 @@ export const zOrganisme = z
       })
       .int()
       .optional(),
+    effectifs_annees_actives_count: z
+      .number({
+        description: "Compteur des effectifs ERP et DECA de l'organisme sur l'année scolaire en cours et la précédente",
+      })
+      .int()
+      .optional(),
     nature: zodEnumFromObjValues(NATURE_ORGANISME_DE_FORMATION)
       .describe("Nature de l'organisme de formation")
       .optional(),

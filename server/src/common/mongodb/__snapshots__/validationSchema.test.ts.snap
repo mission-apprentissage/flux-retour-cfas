@@ -21320,6 +21320,10 @@ exports[`validation-schema > should create validation schema for organismes > or
       ],
       "description": "Date du calcul des contrats DECA à rattacher",
     },
+    "effectifs_annees_actives_count": {
+      "bsonType": "int",
+      "description": "Compteur des effectifs ERP et DECA de l'organisme sur l'année scolaire en cours et la précédente",
+    },
     "effectifs_count": {
       "bsonType": "int",
       "description": "Compteur sur le nombre d'effectifs de l'organisme",
