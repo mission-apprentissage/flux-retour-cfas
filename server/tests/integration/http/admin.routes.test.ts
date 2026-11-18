@@ -604,6 +604,17 @@ describe("Routes administrateur", () => {
 
       expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-init" })).toBe(1);
       expect(await auditLogsDb().countDocuments({ action: "mergeOrganismeSansUaiDansOrganismeFiable-end" })).toBe(1);
+
+      const endLog = await auditLogsDb().findOne({ action: "mergeOrganismeSansUaiDansOrganismeFiable-end" });
+      expect(endLog?.data).toStrictEqual({
+        updatedEffectifsLinkedToOrganismeSansUai: 0,
+        deletedDuplicates: 3,
+        updatedDuplicates: 3,
+        organisationsUpdatedCount: 1,
+        effectifsDeletedCount: 4,
+        organismeDeletedCount: 1,
+        duplicatesCount: 3,
+      });
     });
   });
 
