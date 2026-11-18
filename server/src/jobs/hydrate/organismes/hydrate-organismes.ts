@@ -54,12 +54,17 @@ export const hydrateOrganismesFromApiAlternance = async (startTime: Date) => {
   // On reset tous les organismes comme non présents dans le référentiel
   let nbOrganismesSuppr = await resetOrganismesReferentielPresence(startTime);
 
+  const { nbFermesControles, nbFermesRouverts } = await controlerFermes(repli);
+
   // Log & stats
   logger.info(`--> ${nbOrganismeCreated} organismes créés depuis le référentiel`);
   logger.info(`---> ${nbOrganismeUpdated} organismes mis à jour`);
   logger.info(`----> ${nbOrganismesSuppr} organismes supprimés de l'API`);
   logger.info(
     `-----> adresses absentes de l'API : ${repli.nbConservees} conservées, ${repli.nbCompletees} complétées via API Recherche d'entreprises, ${repli.nbSansAdresse} sans adresse`
+  );
+  logger.info(
+    `------> ${nbFermesRouverts} organismes fermés rouverts sur ${nbFermesControles} contrôlés auprès de l'INSEE`
   );
 
   return {
@@ -69,7 +74,42 @@ export const hydrateOrganismesFromApiAlternance = async (startTime: Date) => {
     nbAdressesConservees: repli.nbConservees,
     nbAdressesCompletees: repli.nbCompletees,
     nbOrganismesSansAdresse: repli.nbSansAdresse,
+    nbFermesControles,
+    nbFermesRouverts,
   };
+};
+
+const controlerFermes = async (repli: IRepliAdresse) => {
+  const fermes = await organismesDb()
+    .find({ ferme: true }, { projection: { _id: 1, siret: 1 } })
+    .toArray();
+  const rouverts: ObjectId[] = [];
+  let nbFermesControles = 0;
+
+  for (const { _id, siret } of fermes) {
+    if (!repli.sourceDisponible) {
+      break;
+    }
+    try {
+      const etablissement = await getEtablissementRechercheEntreprises(siret);
+      nbFermesControles++;
+      if (etablissement?.etat_administratif === "A") {
+        rouverts.push(_id);
+      }
+    } catch (e) {
+      repli.sourceDisponible = false;
+      logger.warn({ err: e }, "API Recherche d'entreprises indisponible, contrôle des organismes fermés interrompu");
+    }
+  }
+
+  if (rouverts.length > 0) {
+    await organismesDb().updateMany(
+      { _id: { $in: rouverts } },
+      { $set: { ferme: false } },
+      { bypassDocumentValidation: true }
+    );
+  }
+  return { nbFermesControles, nbFermesRouverts: rouverts.length };
 };
 
 const cleOrganisme = (uai: string, siret: string) => `${uai}|${siret}`;

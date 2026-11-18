@@ -20,6 +20,7 @@ export type IEtablissementRechercheEntreprises = {
   commune: string | null;
   libelle_commune: string | null;
   statut_diffusion_etablissement: string | null;
+  etat_administratif: "A" | "F" | null;
 };
 
 type IRechercheEntreprisesResponse = {

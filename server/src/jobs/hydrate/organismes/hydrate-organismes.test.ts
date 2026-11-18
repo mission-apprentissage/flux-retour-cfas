@@ -321,6 +321,8 @@ describe("hydrateOrganismesFromReferentiel", () => {
       nbAdressesConservees: 0,
       nbAdressesCompletees: 0,
       nbOrganismesSansAdresse: 1,
+      nbFermesControles: 0,
+      nbFermesRouverts: 0,
     });
   });
 
@@ -373,6 +375,8 @@ describe("hydrateOrganismesFromReferentiel", () => {
       nbAdressesConservees: 0,
       nbAdressesCompletees: 0,
       nbOrganismesSansAdresse: 1,
+      nbFermesControles: 0,
+      nbFermesRouverts: 0,
     });
   });
 
@@ -469,8 +473,11 @@ describe("hydrateOrganismesFromReferentiel", () => {
       nbAdressesConservees: 1,
       nbAdressesCompletees: 0,
       nbOrganismesSansAdresse: 0,
+      nbFermesControles: 1,
+      nbFermesRouverts: 0,
     });
-    expect(getEtablissementRechercheEntreprises).not.toHaveBeenCalled();
+    expect(getEtablissementRechercheEntreprises).toHaveBeenCalledTimes(1);
+    expect(getEtablissementRechercheEntreprises).toHaveBeenCalledWith(oldOrganismePresent.siret);
   });
 
   it("doit préserver les organismes si une erreur api alternance", async () => {
@@ -552,6 +559,13 @@ describe("hydrateOrganismesFromReferentiel", () => {
     ]);
   });
 
+  const mockExport = (page: IOrganismeApi[]) => {
+    vi.mocked(apiAlternanceClient.organisme.export).mockReset();
+    vi.mocked(apiAlternanceClient.organisme.export).mockImplementation(async function* () {
+      yield page;
+    });
+  };
+
   describe("adresse absente de l'API Alternance", () => {
     const organismeParisApi = (uai: string, siret: string) =>
       generateOrganismeApiFixture({
@@ -584,6 +598,7 @@ describe("hydrateOrganismesFromReferentiel", () => {
       commune: "75110",
       libelle_commune: "PARIS",
       statut_diffusion_etablissement: "O",
+      etat_administratif: "A",
     });
 
     const adresseParis = {
@@ -594,13 +609,6 @@ describe("hydrateOrganismesFromReferentiel", () => {
       region: "11",
       academie: "01",
       complete: "38 QUAI DE JEMMAPES 75010 PARIS",
-    };
-
-    const mockExport = (page: IOrganismeApi[]) => {
-      vi.mocked(apiAlternanceClient.organisme.export).mockReset();
-      vi.mocked(apiAlternanceClient.organisme.export).mockImplementation(async function* () {
-        yield page;
-      });
     };
 
     it("complète l'adresse depuis API Recherche d'entreprises quand l'organisme n'en a pas", async () => {
@@ -660,6 +668,89 @@ describe("hydrateOrganismesFromReferentiel", () => {
       expect(getEtablissementRechercheEntreprises).toHaveBeenCalledTimes(1);
       expect(await organismesDb().countDocuments({ adresse: null })).toBe(2);
       expect(result).toMatchObject({ nbAdressesCompletees: 0, nbOrganismesSansAdresse: 2 });
+    });
+  });
+
+  describe("contrôle des organismes fermés auprès de l'INSEE", () => {
+    const organismeFermeApi = (uai: string, siret: string): IOrganismeApi => ({
+      ...organismesApi[0][0],
+      identifiant: { uai, siret },
+      etablissement: { ...organismesApi[0][0].etablissement, siret, ouvert: false },
+    });
+
+    const etatsInsee = (etats: Record<string, "A" | "F">) =>
+      vi.mocked(getEtablissementRechercheEntreprises).mockImplementation(async (siret) =>
+        etats[siret]
+          ? {
+              siret,
+              adresse: null,
+              code_postal: null,
+              commune: null,
+              libelle_commune: null,
+              statut_diffusion_etablissement: "O",
+              etat_administratif: etats[siret],
+            }
+          : null
+      );
+
+    it("rouvre un organisme que l'export donne fermé quand l'INSEE le donne actif, sans le sortir du référentiel", async () => {
+      mockExport([organismeFermeApi("0754571L", "31709861400033")]);
+      etatsInsee({ "31709861400033": "A" });
+
+      const result = await hydrateOrganismesFromApiAlternance(now);
+
+      expect(await organismesDb().findOne({ siret: "31709861400033" })).toMatchObject({
+        ferme: false,
+        est_dans_le_referentiel: "present",
+        updated_at: now,
+      });
+      expect(result).toMatchObject({ nbFermesControles: 1, nbFermesRouverts: 1 });
+    });
+
+    it("laisse fermé un organisme que l'INSEE donne fermé ou ne trouve pas", async () => {
+      mockExport([organismeFermeApi("0754571L", "31709861400033"), organismeFermeApi("0756243D", "32922456200549")]);
+      etatsInsee({ "31709861400033": "F" });
+
+      const result = await hydrateOrganismesFromApiAlternance(now);
+
+      expect(await organismesDb().countDocuments({ ferme: true })).toBe(2);
+      expect(result).toMatchObject({ nbFermesControles: 2, nbFermesRouverts: 0 });
+    });
+
+    it("rouvre aussi un organisme fermé absent de l'export", async () => {
+      mockExport([]);
+      await organismesDb().insertOne(
+        generateOrganismeFixture({
+          uai: "0754571L",
+          siret: "31709861400033",
+          ferme: true,
+          est_dans_le_referentiel: "present",
+          updated_at: yesterday,
+        })
+      );
+      etatsInsee({ "31709861400033": "A" });
+
+      const result = await hydrateOrganismesFromApiAlternance(now);
+
+      expect(await organismesDb().findOne({ siret: "31709861400033" })).toMatchObject({
+        ferme: false,
+        est_dans_le_referentiel: "absent",
+        updated_at: now,
+      });
+      expect(result).toMatchObject({ nbFermesControles: 1, nbFermesRouverts: 1 });
+    });
+
+    it("n'appelle plus l'API après une erreur et laisse les organismes fermés", async () => {
+      mockExport([organismeFermeApi("0754571L", "31709861400033"), organismeFermeApi("0756243D", "32922456200549")]);
+      vi.mocked(getEtablissementRechercheEntreprises).mockRejectedValue(
+        new ApiError("API Recherche d'entreprises", "Too Many Requests", 429)
+      );
+
+      const result = await hydrateOrganismesFromApiAlternance(now);
+
+      expect(getEtablissementRechercheEntreprises).toHaveBeenCalledTimes(1);
+      expect(await organismesDb().countDocuments({ ferme: true })).toBe(2);
+      expect(result).toMatchObject({ nbFermesControles: 0, nbFermesRouverts: 0 });
     });
   });
 });
