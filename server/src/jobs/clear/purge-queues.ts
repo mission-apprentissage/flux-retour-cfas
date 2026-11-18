@@ -7,6 +7,7 @@ import { sleep } from "@/common/utils/asyncUtils";
 import { createErrorAggregator } from "@/common/utils/errorAggregator";
 
 const DEFAULT_NB_DAYS_TO_KEEP = 15;
+const MAX_DAYS_TO_KEEP = 183;
 const DEFAULT_BATCH_SIZE = 5000;
 const DEFAULT_SLEEP_MS = 200;
 const MAX_EMPTY_BATCHES = 2;
@@ -15,6 +16,7 @@ const PURGE_JOB = "purge:queues";
 export const PURGE_INDEX = { source_organisme_id: 1, organisme_id: 1, computed_day: 1 } as const;
 const ORGANISME_INDEX = { organisme_id: 1 } as const;
 const COMPUTED_DAY_INDEX = { computed_day: 1 } as const;
+const CREATED_AT_INDEX = { created_at: 1 } as const;
 const WRITE_CONCERN = { w: "majority", wtimeoutMS: 30_000 } as const;
 const PROCESSED = { $exists: true, $ne: null } as const;
 
@@ -232,11 +234,23 @@ const purgeOrganismeQueues = async (nbDaysToKeep: number, batchOptions: BatchOpt
   errors.flush();
 };
 
+const purgeExpiredQueues = async (batchOptions: BatchOptions) => {
+  const cutoff = new Date();
+  cutoff.setUTCDate(cutoff.getUTCDate() - MAX_DAYS_TO_KEEP);
+  const deleted = await deleteInBatches(
+    { created_at: { $lt: cutoff }, processed_at: PROCESSED } as Filter<IEffectifQueue>,
+    CREATED_AT_INDEX,
+    batchOptions
+  );
+  logger.info(`Purged ${deleted} processed entries < ${cutoff.toISOString()}`);
+};
+
 export const purgeQueues = async (nbDaysToKeep = DEFAULT_NB_DAYS_TO_KEEP, batchOptions: BatchOptions = {}) => {
   assertOptions({ nbDaysToKeep, ...batchOptions });
 
   await purgeOrganismeQueues(nbDaysToKeep, batchOptions);
   await purgeOrphanQueues({ nbDaysToKeep, ...batchOptions, mode: "nightly" });
+  await purgeExpiredQueues(batchOptions);
 
   logger.info("End Purging effectifsQueue");
 };

@@ -172,6 +172,54 @@ describe("purge d'effectifsQueue", () => {
     expect(await countFor({ source_organisme_id: "srcP" })).toBe(1);
   });
 
+  it("supprime tout item traité de plus de six mois, même dans les 15 derniers jours actifs", async () => {
+    await insertQueueDocs([
+      {
+        organisme_id: realOrganismeId,
+        source_organisme_id: "srcReal",
+        computed_day: day(20),
+        processed_at: daysAgo(213),
+        created_at: daysAgo(213),
+      },
+      {
+        organisme_id: null,
+        source_organisme_id: "srcB",
+        computed_day: oldDay(10),
+        processed_at: daysAgo(213),
+        created_at: daysAgo(213),
+      },
+    ]);
+
+    await purgeQueues(NB_DAYS_TO_KEEP, FAST);
+
+    expect(await countFor({ created_at: { $lt: daysAgo(183) } })).toBe(0);
+    expect(await countFor({ organisme_id: realOrganismeId })).toBe(15);
+    expect(await countFor({ source_organisme_id: "srcB" })).toBe(10);
+  });
+
+  it("garde un item non traité de plus de six mois et un item traité de cinq mois", async () => {
+    await insertQueueDocs([
+      {
+        organisme_id: realOrganismeId,
+        source_organisme_id: "srcReal",
+        computed_day: day(20),
+        created_at: daysAgo(213),
+      },
+      {
+        organisme_id: realOrganismeId,
+        source_organisme_id: "srcReal",
+        computed_day: day(20),
+        processed_at: daysAgo(152),
+        created_at: daysAgo(152),
+      },
+    ]);
+
+    await purgeQueues(NB_DAYS_TO_KEEP, FAST);
+
+    expect(await countFor({ organisme_id: realOrganismeId, created_at: { $lt: daysAgo(183) } })).toBe(1);
+    expect(await countFor({ organisme_id: realOrganismeId, created_at: { $lt: daysAgo(150) } })).toBe(2);
+  });
+
   it("purge les orphelins en plusieurs lots", async () => {
     const result = await purgeOrphanQueues({ batchSize: 1, sleepMs: 0 });
 
