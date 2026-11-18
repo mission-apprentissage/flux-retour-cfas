@@ -3,7 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { captureTiered } from "@/common/services/sentry/alertContract";
 
-import { describeBrevoError, reportBrevoError, resetBrevoErrorReports, sanitizeBrevoText } from "./brevoError";
+import {
+  describeBrevoError,
+  isRefusDefinitif,
+  reportBrevoError,
+  resetBrevoErrorReports,
+  sanitizeBrevoText,
+} from "./brevoError";
 
 vi.mock("@/common/services/sentry/alertContract", () => ({ captureTiered: vi.fn() }));
 
@@ -118,6 +124,16 @@ describe("safeToRetry : rejouer ne peut pas doubler le message", () => {
     const details = describeBrevoError(axiosError(undefined, undefined, code));
     expect(details.retryable).toBe(true);
     expect(details.safeToRetry).toBe(false);
+  });
+});
+
+describe("isRefusDefinitif", () => {
+  it.each([400, 401, 404, 429])("%s : Brevo a répondu sans rien traiter", (status) => {
+    expect(isRefusDefinitif(status)).toBe(true);
+  });
+
+  it.each([408, 500, 502, 503, undefined])("%s : le message a pu partir, ou aucune réponse", (status) => {
+    expect(isRefusDefinitif(status)).toBe(false);
   });
 });
 

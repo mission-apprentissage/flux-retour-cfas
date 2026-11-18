@@ -656,9 +656,15 @@ describe("WhatsApp Service", () => {
       expect(effectif?.whatsapp_contact?.opted_out).toBe(true);
     });
 
-    it("rollback auto_reply_sent si l'envoi échoue, et retry au message suivant", async () => {
-      // Premier message : envoi échoue → rollback
-      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({ success: false, error: "API error" });
+    it("rollback auto_reply_sent si l'envoi échoue sûrement sans rien envoyer, et retry au message suivant", async () => {
+      // Premier message : Brevo indisponible (503, rien traité) → rollback
+      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({
+        success: false,
+        error: "API error",
+        status: 503,
+        retryable: true,
+        safeToRetry: true,
+      });
       await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-fail", "visitor-123");
 
       const afterFail = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
@@ -678,6 +684,38 @@ describe("WhatsApp Service", () => {
         (m) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
       );
       expect(autoReplyAfterRetry?.length).toBe(1);
+    });
+
+    it("conserve auto_reply_sent après un timeout : le message a pu partir, pas de second envoi", async () => {
+      vi.mocked(sendWhatsAppMessage).mockClear();
+      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({
+        success: false,
+        error: "timeout of 10000ms exceeded",
+        retryable: true,
+        safeToRetry: false,
+      });
+      await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-timeout", "visitor-123");
+
+      const afterTimeout = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(afterTimeout?.whatsapp_contact?.auto_reply_sent).toBe(true);
+
+      await handleInboundWhatsAppMessage("+33612345678", "allo", "msg-after-timeout", "visitor-123");
+
+      expect(sendWhatsAppMessage).toHaveBeenCalledTimes(1);
+    });
+
+    it("libère auto_reply_sent après un refus définitif de Brevo (400)", async () => {
+      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({
+        success: false,
+        error: "Invalid",
+        status: 400,
+        retryable: false,
+        safeToRetry: false,
+      });
+      await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-refus", "visitor-123");
+
+      const afterRefus = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(afterRefus?.whatsapp_contact?.auto_reply_sent).toBe(false);
     });
 
     it("déduplique les messages avec le même brevoMessageId", async () => {

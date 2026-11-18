@@ -87,6 +87,10 @@ export function sanitizeBrevoText(text: string, sensitiveValues: readonly string
 
 const isRetryableStatus = (status: number): boolean => status >= 500 || status === 429 || status === 408;
 
+/** Refus 4xx : Brevo a répondu sans rien traiter. Le 408 est exclu, la requête a pu aboutir malgré tout. */
+export const isRefusDefinitif = (status?: number): boolean =>
+  status !== undefined && status >= 400 && status < 500 && status !== 408;
+
 const asString = (value: unknown): string | undefined => (typeof value === "string" && value ? value : undefined);
 
 /**
