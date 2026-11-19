@@ -1,7 +1,7 @@
 import { COLONNES_AFFELNET_CONSERVEES } from "shared/models/data/voeuxAffelnet.model";
 import { generateFormationCatalogueFixture } from "shared/models/fixtures/formationsCatalogue.fixture";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { formationsCatalogueDb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
 import { AFFELNET_HEADER } from "@/http/routes/admin.routes/affelnet.routes";
@@ -39,7 +39,13 @@ const importer = (lignes: Ligne[]) => {
 const voeuDe = (ine: string) => voeuxAffelnetDb().findOne({ "raw.ine": ine });
 
 describe("POST /api/v1/admin/affelnet/create", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-19T10:00:00Z"));
     ({ requestAsOrganisation } = await initTestApp());
     await organismesDb().insertOne(generateOrganismeFixture({ uai: UAI, siret: SIRET }));
     await formationsCatalogueDb().insertOne(
@@ -74,11 +80,27 @@ describe("POST /api/v1/admin/affelnet/create", () => {
     expect(voeu?.raw).toMatchObject({ ine: "INE1", ville: "AMIENS" });
   });
 
+  it("ignore les lignes d'une campagne qui n'est plus conservée", async () => {
+    expect((await importer([ligne("INE1", { annee_scolaire_rentree: "2024" }), ligne("INE2")])).status).toBe(200);
+
+    expect(await voeuDe("INE1")).toBeNull();
+    expect(await voeuDe("INE2")).not.toBeNull();
+  });
+
+  it("refuse un fichier qui ne porte que des campagnes non conservées", async () => {
+    const response = await importer([ligne("INE1", { annee_scolaire_rentree: "2024" })]);
+
+    expect(response.status).toBe(400);
+    expect(await voeuxAffelnetDb().countDocuments({})).toBe(0);
+  });
+
   it("retire deleted_at d'un vœu supprimé puis réimporté", async () => {
     await importer([ligne("INE1"), ligne("INE2")]);
+    vi.setSystemTime(new Date("2026-11-19T11:00:00Z"));
     await importer([ligne("INE2")]);
     expect((await voeuDe("INE1"))?.deleted_at).toBeInstanceOf(Date);
 
+    vi.setSystemTime(new Date("2026-11-19T12:00:00Z"));
     await importer([ligne("INE1")]);
 
     expect(await voeuDe("INE1")).not.toHaveProperty("deleted_at");

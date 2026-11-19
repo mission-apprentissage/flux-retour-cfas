@@ -4,6 +4,7 @@ import express from "express";
 import { Parser } from "json2csv";
 import { ObjectId } from "mongodb";
 import { IOrganisationOperateurPublicAcademie, IOrganisationOperateurPublicRegion } from "shared/models";
+import { getCampagnesAffelnetConservees } from "shared/utils/campagnesAffelnet";
 import { z } from "zod";
 
 import {
@@ -60,6 +61,16 @@ const affelnetQuery = z.object({
 });
 type AffelnetQuery = z.infer<typeof affelnetQuery>;
 type AffelnetHandler = RouteHandler<RegionalLocals, DefaultParams, AffelnetQuery>;
+
+const exigerCampagneConservee = (year: string | undefined): string => {
+  if (!year) {
+    throw Boom.badRequest("Year is required");
+  }
+  if (!getCampagnesAffelnetConservees(new Date()).map(String).includes(year)) {
+    throw Boom.badRequest(`La campagne ${year} n'est plus conservée`);
+  }
+  return year;
+};
 
 type ContratDates = { date_debut_contrat: Date | string; date_fin_contrat: Date | string };
 type ContratConcretise = { date_debut: Date | string; date_fin: Date | string };
@@ -139,24 +150,18 @@ const getNationalCount: AffelnetHandler = async (req, { locals }) => {
   const { year } = req.query;
   const academie_list = locals.academie_list;
 
-  if (!year) {
-    throw Boom.badRequest("Year is required");
-  }
-
-  return await getAffelnetCountVoeuxNational(academie_list, year);
+  return await getAffelnetCountVoeuxNational(academie_list, exigerCampagneConservee(year));
 };
 
 const exportNonConcretisee: AffelnetHandler = async (req, { locals }) => {
   const user = req.user;
   const { year } = req.query;
   const academie_list = locals.academie_list;
-  if (!year) {
-    throw Boom.badRequest("Year is required");
-  }
+  const campagne = exigerCampagneConservee(year);
 
   try {
     const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
-    const listVoeux = await getAffelnetVoeuxNonConcretise(academie_list, year);
+    const listVoeux = await getAffelnetVoeuxNonConcretise(academie_list, campagne);
 
     const transformedVoeux = listVoeux.map(({ contrats = [], contrats_deca = [], formations_demandees, ...voeu }) => ({
       ...voeu,
@@ -204,14 +209,11 @@ const exportConcretisee: AffelnetHandler = async (req, { locals }) => {
   const user = req.user;
   const { year } = req.query;
   const academie_list = locals.academie_list;
-
-  if (!year) {
-    throw Boom.badRequest("Year is required");
-  }
+  const campagne = exigerCampagneConservee(year);
 
   try {
     const orga = user.organisation as IOrganisationOperateurPublicRegion | IOrganisationOperateurPublicAcademie;
-    const listVoeux = await getAffelnetVoeuxConcretise(academie_list, year);
+    const listVoeux = await getAffelnetVoeuxConcretise(academie_list, campagne);
 
     const transformedVoeux = listVoeux.map(({ contrats = [], contrats_deca = [], formations_demandees, ...voeu }) => ({
       ...voeu,
