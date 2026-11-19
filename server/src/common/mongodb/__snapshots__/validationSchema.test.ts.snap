@@ -21241,67 +21241,7 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
             "null",
           ],
         },
-        "bareme": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "candidature_internat": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
         "cle_ministere_educatif": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_enseignement": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_lv1": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_lv2": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_mef": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_mef_origine": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_offre_formation": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_origine_1": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_origine_2": {
           "bsonType": [
             "string",
             "null",
@@ -21313,67 +21253,7 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
             "null",
           ],
         },
-        "code_specialite_offre_formation": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_uai_cio_origine": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_uai_etab_accueil": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_uai_etab_origine": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "demande_code_lv1": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "demande_code_lv2": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "demande_libelle_lv1": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "demande_libelle_lv2": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
         "ine": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_cio_origine": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_enseignement": {
           "bsonType": [
             "string",
             "null",
@@ -21391,48 +21271,6 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
             "null",
           ],
         },
-        "libelle_formation": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_formation_origine": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_lv1": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_lv2": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_option_1": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_option_2": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_public_etablissement": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
         "mail_responsable_1": {
           "bsonType": [
             "string",
@@ -21440,18 +21278,6 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
           ],
         },
         "mail_responsable_2": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "mnemonique_mef_offre_formation": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "mnemonique_mef_origine": {
           "bsonType": [
             "string",
             "null",
@@ -21482,36 +21308,6 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
           ],
         },
         "prenom_3": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "rang": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "siret_uai_gestionnaire": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "telephone": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "telephone_portable": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "telephone_pro": {
           "bsonType": [
             "string",
             "null",
@@ -21560,12 +21356,6 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
           ],
         },
         "ville": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "ville_etab_accueil": {
           "bsonType": [
             "string",
             "null",

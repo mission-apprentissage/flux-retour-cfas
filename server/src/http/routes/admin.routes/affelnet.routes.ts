@@ -4,7 +4,7 @@ import express from "express";
 import { ObjectId } from "mongodb";
 import multer from "multer";
 import { getAcademieById } from "shared/constants";
-import { IVoeuAffelnet, IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelnet.model";
+import { COLONNES_AFFELNET_CONSERVEES, IVoeuAffelnet, IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelnet.model";
 
 import { findDeletedVoeux } from "@/common/actions/affelnet.actions";
 import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
@@ -94,13 +94,16 @@ export default () => {
   return router;
 };
 
+const garderColonnesLues = (ligne: Record<string, string>): IVoeuAffelnetRaw =>
+  Object.fromEntries(COLONNES_AFFELNET_CONSERVEES.map((colonne) => [colonne, ligne[colonne]]));
+
 const parseCsvFile = async (buffer: Buffer) => {
-  const records = parse<IVoeuAffelnetRaw>(buffer, {
+  const records = parse<Record<string, string>>(buffer, {
     columns: AFFELNET_HEADER,
     skip_empty_lines: true,
     delimiter: ";",
   });
-  return records;
+  return records.map(garderColonnesLues);
 };
 
 const createVoeux: RouteHandler = async (req, res) => {
