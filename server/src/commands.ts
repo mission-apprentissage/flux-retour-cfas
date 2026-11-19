@@ -356,6 +356,13 @@ program
   .action(createJobAction("purge:dossiers-suivi"));
 
 program
+  .command("purge:voeux-affelnet")
+  .description("Supprime les vœux Affelnet des campagnes plus anciennes que les deux dernières rentrées")
+  .option("--dry-run", "Compte les vœux à supprimer par campagne sans rien écrire", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("purge:voeux-affelnet"));
+
+program
   .command("classifier:score-effectifs")
   .description("Score les effectifs ML existants sans score via le classifier")
   .option("--dryRun", "Mode simulation sans écriture", false)
