@@ -50,7 +50,6 @@ import transmissionDailyReportDescriptor, {
 } from "shared/models/data/transmissionDailyReport.model";
 import usersMigrationModelDescriptor, { IUsersMigration } from "shared/models/data/usersMigration.model";
 import formationV2ModelDescriptor, { IFormationV2 } from "shared/models/data/v2/formation.v2.model";
-import personV2ModelDescriptor, { IPersonV2 } from "shared/models/data/v2/person.v2.model";
 import voeuxAffelnetDescriptor, { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
 
 import { getDbCollection } from "@/common/mongodb";
@@ -76,7 +75,6 @@ export const modelDescriptors = [
   opcosDescriptor,
   opcosRncpDescriptor,
   formationV2ModelDescriptor,
-  personV2ModelDescriptor,
   ReseauxModelDescriptor,
   missionLocaleEffectifDescriptor,
   missionLocaleCfaInvitationsDescriptor,
@@ -148,5 +146,4 @@ export const romeSecteurActivitesDb = () =>
 
 // v2
 
-export const personV2Db = () => getDbCollection<IPersonV2>(personV2ModelDescriptor.collectionName);
 export const formationV2Db = () => getDbCollection<IFormationV2>(formationV2ModelDescriptor.collectionName);

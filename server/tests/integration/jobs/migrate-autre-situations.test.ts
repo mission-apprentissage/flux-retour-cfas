@@ -12,9 +12,9 @@ import {
 } from "shared/models/data/missionLocaleEffectif.model";
 import { it, expect, describe, beforeEach, afterEach, vi } from "vitest";
 
-import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
+import { normalisePersonIdentifiant } from "@/common/utils/identifiantUtils";
 import { migrateAutreSituations } from "@/jobs/migration/migrate-autre-situations";
 import { useMongo } from "@tests/jest/setupMongo";
 import { testDocs } from "@tests/utils/testUtils";

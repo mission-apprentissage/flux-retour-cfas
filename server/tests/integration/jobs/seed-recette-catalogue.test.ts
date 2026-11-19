@@ -13,7 +13,6 @@ import {
   getAllEffectifsParMois,
   getEffectifsFusionnesByMissionLocaleId,
 } from "@/common/actions/mission-locale/mission-locale.actions";
-import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import {
   effectifsDb,
   effectifsDECADb,
@@ -22,6 +21,7 @@ import {
   organismesDb,
 } from "@/common/model/collections";
 import { clearAllCollections, configureDbSchemaValidation } from "@/common/mongodb";
+import { normalisePersonIdentifiant } from "@/common/utils/identifiantUtils";
 import { CATALOGUE } from "@/jobs/seed-recette/catalogue";
 import type { SeedCase } from "@/jobs/seed-recette/catalogue/types";
 import { CFA_HOST_CODES, type SeedRecetteHosts } from "@/jobs/seed-recette/hosts";

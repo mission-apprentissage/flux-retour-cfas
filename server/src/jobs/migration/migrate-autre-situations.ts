@@ -11,9 +11,9 @@ import {
 import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
 
-import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import parentLogger from "@/common/logger";
 import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
+import { normalisePersonIdentifiant } from "@/common/utils/identifiantUtils";
 
 const logger = parentLogger.child({ module: "job:migrate:autre-situations" });
 

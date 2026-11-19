@@ -14,8 +14,8 @@ import {
   organismesDb,
 } from "@/common/model/collections";
 import { extractScoreInput, reportClassifierFailure, scoreEffectifs } from "@/common/services/classifier";
+import { normalisePersonIdentifiant } from "@/common/utils/identifiantUtils";
 
-import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
 import { getCurrentStatutFromParcours } from "../shared/rupture-pipeline.utils";
 
 import { computedOrganismeMl, isDecaSnapshot, migrateMlRecordEffectifId } from "./mission-locale.actions";
