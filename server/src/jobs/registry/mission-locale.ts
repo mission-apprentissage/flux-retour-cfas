@@ -3,6 +3,7 @@ import type { CronDef, JobDef } from "job-processor";
 import { effectifsDb } from "@/common/model/collections";
 
 import { verifyMissionLocaleEffectifMail } from "../bal/bal.job";
+import { purgerDossiersMlMasques } from "../clear/purge-ml-dossiers-masques";
 import { hydrateCommunesVoies } from "../hydrate/communes-voies/hydrate-communes-voies";
 import {
   hydrateEffectifsComputedTypes,
@@ -31,9 +32,12 @@ import { migrateAutreSituations } from "../migration/migrate-autre-situations";
 import { migrateCommuneApprenant } from "../migration/migrate-commune-apprenant";
 import { seedMlRdvUrl } from "../tmp/seed-ml-rdv-url";
 
-import { payloadDate } from "./payload";
+import { payloadBoolean, payloadDate } from "./payload";
 
 export const missionLocaleJobs = {
+  "purge:ml-dossiers-masques": {
+    handler: async (job) => purgerDossiersMlMasques({ dryRun: payloadBoolean(job.payload, "dryRun") ?? false }),
+  },
   "hydrate:mission-locale-effectif-snapshot": {
     handler: async (job) => {
       const missionLocaleStructureId = (job.payload?.ml_id as string) ? parseInt(job.payload?.ml_id as string) : null;
