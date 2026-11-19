@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 import multer from "multer";
 import { getAcademieById } from "shared/constants";
 import { COLONNES_AFFELNET_CONSERVEES, IVoeuAffelnet, IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelnet.model";
+import { getPremiereCampagneAffelnetConservee } from "shared/utils/campagnesAffelnet";
 
 import { findDeletedVoeux } from "@/common/actions/affelnet.actions";
 import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
@@ -114,10 +115,21 @@ const createVoeux: RouteHandler = async (req, res) => {
 
   const parsedCSV: Array<IVoeuAffelnetRaw> = await parseCsvFile(file.buffer);
   const currentDate = new Date();
+  const premiereCampagne = getPremiereCampagneAffelnetConservee(currentDate);
+  const lignes = parsedCSV.filter((voeu) => Number(voeu.annee_scolaire_rentree) >= premiereCampagne);
+  if (lignes.length < parsedCSV.length) {
+    logger.warn(
+      { ignorees: parsedCSV.length - lignes.length, premiereCampagne },
+      "Import Affelnet : lignes de campagnes non conservées ignorées"
+    );
+  }
+  if (lignes.length === 0) {
+    return res.status(400).send(`Aucune ligne d'une campagne conservée, à partir de ${premiereCampagne}.`);
+  }
   const errors = createErrorAggregator("admin-import-voeux-affelnet");
 
   await PromisePool.withConcurrency(100)
-    .for(parsedCSV)
+    .for(lignes)
     .process(async (voeuRaw: IVoeuAffelnetRaw) => {
       const voeu: IVoeuAffelnet = {
         _id: new ObjectId(),
@@ -226,7 +238,7 @@ const createVoeux: RouteHandler = async (req, res) => {
       }
     });
 
-  errors.ok(parsedCSV.length - errors.failed);
+  errors.ok(lignes.length - errors.failed);
   errors.flush();
 
   logger.info("Voeux mis à jour");
