@@ -1,10 +1,10 @@
-import { subDays, subYears } from "date-fns";
 import {
   CONNAISSANCE_ML_ENUM,
   PROBLEME_TYPE_ENUM,
   SITUATION_ENUM,
 } from "shared/models/data/missionLocaleEffectif.model";
 import { CFA_COLLAB_STATUS } from "shared/models/routes/organismes/cfa/cfa.api";
+import { subtractDaysUTC, subtractYearsUTC } from "shared/utils";
 
 import { jour, type SeedContext } from "../factories";
 
@@ -266,7 +266,7 @@ export const ML_CASES: SeedCase[] = [
         await rupture(ctx, {
           n: 63,
           cfa: "CFA_SANS",
-          dateDeNaissance: subDays(subYears(ctx.today, 26), 10),
+          dateDeNaissance: subtractDaysUTC(subtractYearsUTC(ctx.today, 26), 10),
         })
       ).docs,
   },

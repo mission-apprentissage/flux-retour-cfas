@@ -603,6 +603,23 @@ describe("WhatsApp Service", () => {
       expect(autoReplyMsg?.content).toContain("https://www.ml-test.fr");
     });
 
+    // Brevo peut citer le prénom sans guillemets dans son erreur : l'envoi doit le connaître pour le masquer.
+    it.each([
+      { cas: "auto-reply", texte: "bonjour", message: expect.stringContaining("Mission apprentissage") },
+      { cas: "réponse callback (1)", texte: "1", message: expect.any(String) },
+      { cas: "STOP", texte: "STOP", message: expect.any(String) },
+    ])(
+      "transmet le prénom du jeune à l'envoi pour le masquer dans les erreurs Brevo : $cas",
+      async ({ texte, message }) => {
+        vi.mocked(sendWhatsAppMessage).mockClear();
+
+        await handleInboundWhatsAppMessage("+33612345678", texte, "msg-prenom", "visitor-123");
+
+        expect(sendWhatsAppMessage).toHaveBeenCalledTimes(1);
+        expect(sendWhatsAppMessage).toHaveBeenCalledWith("visitor-123", message, ["Jean"]);
+      }
+    );
+
     it("n'envoie PAS l'auto-reply au deuxième message non reconnu", async () => {
       // Premier message : auto-reply envoyé
       await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-first", "visitor-123");
@@ -639,9 +656,15 @@ describe("WhatsApp Service", () => {
       expect(effectif?.whatsapp_contact?.opted_out).toBe(true);
     });
 
-    it("rollback auto_reply_sent si l'envoi échoue, et retry au message suivant", async () => {
-      // Premier message : envoi échoue → rollback
-      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({ success: false, error: "API error" });
+    it("rollback auto_reply_sent si l'envoi échoue sûrement sans rien envoyer, et retry au message suivant", async () => {
+      // Premier message : Brevo indisponible (503, rien traité) → rollback
+      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({
+        success: false,
+        error: "API error",
+        status: 503,
+        retryable: true,
+        safeToRetry: true,
+      });
       await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-fail", "visitor-123");
 
       const afterFail = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
@@ -661,6 +684,47 @@ describe("WhatsApp Service", () => {
         (m) => m.direction === "outbound" && m.content.includes("Mission apprentissage")
       );
       expect(autoReplyAfterRetry?.length).toBe(1);
+    });
+
+    it("conserve auto_reply_sent après un timeout : le message a pu partir, pas de second envoi", async () => {
+      vi.mocked(sendWhatsAppMessage).mockClear();
+      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({
+        success: false,
+        error: "timeout of 10000ms exceeded",
+        retryable: true,
+        safeToRetry: false,
+      });
+      await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-timeout", "visitor-123");
+
+      const afterTimeout = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(afterTimeout?.whatsapp_contact?.auto_reply_sent).toBe(true);
+
+      await handleInboundWhatsAppMessage("+33612345678", "allo", "msg-after-timeout", "visitor-123");
+
+      expect(sendWhatsAppMessage).toHaveBeenCalledTimes(1);
+    });
+
+    it("libère auto_reply_sent après un refus définitif de Brevo (400)", async () => {
+      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({
+        success: false,
+        error: "Invalid",
+        status: 400,
+        retryable: false,
+        safeToRetry: false,
+      });
+      await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-refus", "visitor-123");
+
+      const afterRefus = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(afterRefus?.whatsapp_contact?.auto_reply_sent).toBe(false);
+    });
+
+    // Aucun appel n'a été fait (WhatsApp désactivé, clé API absente) : rien n'est parti, le verrou ne doit pas rester pris.
+    it("libère auto_reply_sent quand l'envoi n'a pas été tenté (échec avant l'appel à Brevo)", async () => {
+      vi.mocked(sendWhatsAppMessage).mockResolvedValueOnce({ success: false, error: "WhatsApp is disabled" });
+      await handleInboundWhatsAppMessage("+33612345678", "bonjour", "msg-non-tente", "visitor-123");
+
+      const afterFailure = await missionLocaleEffectifsDb().findOne({ _id: effectifId });
+      expect(afterFailure?.whatsapp_contact?.auto_reply_sent).toBe(false);
     });
 
     it("déduplique les messages avec le même brevoMessageId", async () => {
@@ -2050,6 +2114,37 @@ describe("WhatsApp Service", () => {
         "+33612345678",
         "DB doit stocker le numéro override pour que l'inbound retrouve l'effectif"
       );
+    });
+
+    describe.each([
+      { cas: "timeout (Brevo a pu envoyer)", echec: { retryable: true, safeToRetry: false }, attendu: "failed" },
+      {
+        cas: "500 (Brevo a pu envoyer)",
+        echec: { status: 500, retryable: true, safeToRetry: false },
+        attendu: "failed",
+      },
+      { cas: "503 (rien traité)", echec: { status: 503, retryable: true, safeToRetry: true }, attendu: "failed_send" },
+      { cas: "429 (rien traité)", echec: { status: 429, retryable: true, safeToRetry: true }, attendu: "failed_send" },
+      { cas: "400 (refus définitif)", echec: { status: 400, retryable: false, safeToRetry: false }, attendu: "failed" },
+    ])("échec Brevo : $cas", ({ echec, attendu }) => {
+      it(`pose message_status=${attendu} et retourne 'failed'`, async () => {
+        mutableConfig.env = "local";
+        mutableConfig.brevo.whatsapp.testPhoneOverride = "+33612345678";
+        vi.mocked(sendWhatsAppTemplate).mockResolvedValueOnce({ success: false, error: "boom", ...echec });
+
+        const id = await insertCandidate();
+        const result = await reserveAndSendPrequalif({
+          effectifId: id,
+          targetPhone: "+33688888888",
+          prenom: "Test",
+          mlNom: "ML",
+          sentVia: "daily",
+        });
+
+        assert.strictEqual(result, "failed");
+        const after = await missionLocaleEffectifsDb().findOne({ _id: id });
+        assert.strictEqual(after?.whatsapp_contact?.message_status, attendu);
+      });
     });
 
     it("isPhoneAlreadyContacted bypass : non-prod+override → false même si phone partagé (envois successifs OK)", async () => {

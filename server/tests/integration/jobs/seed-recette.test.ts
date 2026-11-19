@@ -1,5 +1,5 @@
 import { ObjectId } from "bson";
-import { subDays, subYears } from "date-fns";
+import { subDays } from "date-fns";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IMissionLocaleCfaInvitation } from "shared/models/data/missionLocaleCfaInvitations.model";
 import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
@@ -8,6 +8,7 @@ import type { IOrganisation } from "shared/models/data/organisations.model";
 import type { IOrganisme } from "shared/models/data/organismes.model";
 import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { extensions } from "shared/models/parts/zodPrimitives";
+import { subtractDaysUTC, subtractYearsUTC } from "shared/utils";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
@@ -331,7 +332,7 @@ describe("seedRecette", () => {
   it("décale la date de naissance d'un jeune fictif quand un vrai dossier porte déjà son identité", async () => {
     const now = new Date();
     const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    const dateVoulue = subDays(subYears(today, 20), 31);
+    const dateVoulue = subtractDaysUTC(subtractYearsUTC(today, 20), 31);
     const reel = { nom: "BERNARD", prenom: "Lucas", date_de_naissance: dateVoulue };
     await missionLocaleEffectifsDb().insertOne(
       testDocs<IMissionLocaleEffectif>([
@@ -348,7 +349,7 @@ describe("seedRecette", () => {
 
     const fictif = await missionLocaleEffectifsDb().findOne({ _id: seedId("dossierMl", 1) });
     expect(fictif?.identifiant_normalise).toMatchObject({ nom: "BERNARD", prenom: "Lucas" });
-    expect(fictif?.identifiant_normalise?.date_de_naissance).toEqual(subDays(dateVoulue, 1));
+    expect(fictif?.identifiant_normalise?.date_de_naissance).toEqual(subtractDaysUTC(dateVoulue, 1));
   });
 
   it("pose les flags de chaque hôte", async () => {

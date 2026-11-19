@@ -4,7 +4,6 @@ import path from "node:path";
 import { captureException } from "@sentry/node";
 import { program } from "commander";
 import { addJob, startJobProcessor as startJobProcessorFn } from "job-processor";
-import HttpTerminator from "lil-http-terminator";
 import { ObjectId } from "mongodb";
 
 import { getErrorMessage } from "@/common/utils/errorUtils";
@@ -16,6 +15,7 @@ import { closeSentry } from "./common/services/sentry/sentry";
 import { sleep } from "./common/utils/asyncUtils";
 import config from "./config";
 import createServer from "./http/server";
+import { createHttpTerminator } from "./http/terminator";
 import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
 import { crons, registry } from "./jobs/registry";
 
@@ -88,11 +88,7 @@ program
         logger.info(`Server ready and listening on port ${config.port}`)
       );
 
-      const terminator = HttpTerminator({
-        server: httpServer,
-        maxWaitTimeout: 50_000,
-        logger: logger,
-      });
+      const terminator = createHttpTerminator(httpServer);
 
       if (signal.aborted) {
         await terminator.terminate();

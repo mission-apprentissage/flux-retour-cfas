@@ -17,6 +17,7 @@ import { missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/
 import config from "@/config";
 
 import { sendWhatsAppMessage } from "./brevoApi";
+import { messageAPuPartir } from "./brevoError";
 import { updateWhatsAppContact, getMissionLocaleInfo, getMissionLocaleInfoFull } from "./database";
 import { isExcludedByCfaCollab } from "./eligibility";
 import {
@@ -33,6 +34,12 @@ import {
 import { notifyMLUserOnCallback, notifyMLUserOnNoHelp, notifyMLUsersOnPrequalifYes } from "./notifications";
 import { maskPhone, normalizePhoneNumber } from "./phone";
 
+/** Le prénom du jeune, à masquer si Brevo le cite dans son message d'erreur. */
+const sensitiveValuesOf = (effectif: IMissionLocaleEffectif): string[] => {
+  const prenom = effectif.effectif_snapshot?.apprenant?.prenom;
+  return prenom ? [prenom] : [];
+};
+
 /**
  * Gère un message STOP : opt-out RGPD
  */
@@ -44,7 +51,7 @@ async function handleStopMessage(
 ): Promise<void> {
   const now = new Date();
   const stopMessage = buildStopConfirmationMessage();
-  const result = await sendWhatsAppMessage(resolvedVisitorId, stopMessage);
+  const result = await sendWhatsAppMessage(resolvedVisitorId, stopMessage, sensitiveValuesOf(effectif));
 
   const historyEntries: IWhatsAppMessageHistory[] = [inboundHistory];
   if (result.success) {
@@ -309,7 +316,7 @@ async function sendResponseAndUpdateContact(
   inboundHistory: IWhatsAppMessageHistory
 ): Promise<void> {
   const now = new Date();
-  const result = await sendWhatsAppMessage(resolvedVisitorId, responseMessage);
+  const result = await sendWhatsAppMessage(resolvedVisitorId, responseMessage, sensitiveValuesOf(effectif));
 
   const historyEntries: IWhatsAppMessageHistory[] = [inboundHistory];
   if (result.success) {
@@ -416,7 +423,7 @@ export async function handleInboundWhatsAppMessage(
 
       if (locked) {
         const autoReplyMessage = buildAutoReplyMessage(missionLocaleInfo);
-        const result = await sendWhatsAppMessage(resolvedVisitorId, autoReplyMessage);
+        const result = await sendWhatsAppMessage(resolvedVisitorId, autoReplyMessage, sensitiveValuesOf(effectif));
         if (result.success) {
           historyEntries.push({
             direction: "outbound",
@@ -424,7 +431,7 @@ export async function handleInboundWhatsAppMessage(
             sent_at: new Date(),
             brevo_message_id: result.messageId,
           });
-        } else {
+        } else if (!messageAPuPartir(result)) {
           try {
             await missionLocaleEffectifsDb().updateOne(
               { _id: effectif._id },
@@ -438,6 +445,12 @@ export async function handleInboundWhatsAppMessage(
           } catch (rollbackError) {
             logger.error({ effectifId: effectif._id, rollbackError }, "Failed to rollback auto_reply_sent flag");
           }
+        } else {
+          // Timeout ou 5xx : Brevo a pu envoyer. Libérer le verrou ferait doubler l'auto-réponse au message suivant.
+          logger.warn(
+            { effectifId: effectif._id, status: result.status },
+            "Auto-reply : échec ambigu, verrou conservé"
+          );
         }
       }
     }

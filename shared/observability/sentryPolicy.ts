@@ -89,6 +89,7 @@ const MAX_SCRUB_DEPTH = 16;
  */
 const EMAIL_PATTERN = /(?<!\*)[\w.+-]+@[\w-]+\.[\w.-]+/g;
 const SENSITIVE_HEADERS = ["authorization", "cookie", "set-cookie", "x-api-key", "proxy-authorization"];
+const REDACTED = "[Filtered]";
 const ABSOLUTE_URL_PATTERN = /^([a-z][a-z\d+\-.]*:)?\/\//i;
 const OUTGOING_QUERY_KEYS = ["http.query", "http.fragment"];
 
@@ -207,7 +208,10 @@ function scrubValue(value: unknown, depth: number, seen: WeakSet<object>): unkno
 
   const entries = Object.entries(value as Record<string, unknown>);
   for (const [key, nested] of entries) {
-    (value as Record<string, unknown>)[key] = scrubValue(nested, depth + 1, seen);
+    // Une erreur porte parfois les en-têtes de sa requête (ApiError d'api-alternance-sdk : clé API en Bearer).
+    (value as Record<string, unknown>)[key] = SENSITIVE_HEADERS.includes(key.toLowerCase())
+      ? REDACTED
+      : scrubValue(nested, depth + 1, seen);
   }
   return value;
 }

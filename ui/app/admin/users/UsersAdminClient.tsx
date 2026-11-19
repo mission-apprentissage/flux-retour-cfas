@@ -3,7 +3,6 @@
 import { Breadcrumb } from "@codegouvfr/react-dsfr/Breadcrumb";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Notice } from "@codegouvfr/react-dsfr/Notice";
-import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { Tabs } from "@codegouvfr/react-dsfr/Tabs";
 import { SortingState } from "@tanstack/react-table";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -19,6 +18,7 @@ import {
   StatusCell,
   UserNameCell,
 } from "@/app/_components/admin/UserTableCells";
+import { SearchField } from "@/app/_components/common/SearchField";
 import { TableSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
 import { FullTable } from "@/app/_components/table/FullTable";
 import { useAllUsers } from "@/app/_hooks/useAllUsers";
@@ -371,20 +371,13 @@ export default function UsersAdminClient() {
           <div className={styles.stack}>
             <UsersFiltersPanel />
             <div className={styles.stack}>
-              <SearchBar
+              <SearchField
                 label="Rechercher un utilisateur"
-                onButtonClick={(value) => setSearchTerm(value)}
-                renderInput={({ className, id, type }) => (
-                  <input
-                    className={className}
-                    id={id}
-                    placeholder="Nom, prénom, email, organisation…"
-                    type={type}
-                    autoComplete="off"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                )}
+                placeholder="Nom, prénom, email, organisation…"
+                autoComplete="off"
+                value={searchTerm}
+                onChange={setSearchTerm}
+                onSearch={setSearchTerm}
               />
               {showSkeleton ? (
                 <TableSkeleton />

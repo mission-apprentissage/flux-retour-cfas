@@ -4,7 +4,6 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { useQuery } from "@tanstack/react-query";
 // eslint-disable-next-line import/no-duplicates
 import { format, formatDistanceToNow } from "date-fns";
@@ -13,6 +12,7 @@ import { fr as frLocale } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
 
+import { SearchField } from "@/app/_components/common/SearchField";
 import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { DataTable } from "@/app/_components/table/DataTable";
 import { ColumnData } from "@/app/_components/table/types";
@@ -509,18 +509,11 @@ export default function RolesHabilitationsClient({
 
         <div className={styles.topBar}>
           <div className={styles.searchWrapper}>
-            <SearchBar
+            <SearchField
               label="Cherchez un utilisateur"
-              renderInput={({ id, className, placeholder }) => (
-                <input
-                  id={id}
-                  className={`${className} ${styles.searchInput}`}
-                  placeholder={placeholder}
-                  type="search"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              )}
+              inputClassName={styles.searchInput}
+              value={searchTerm}
+              onChange={setSearchTerm}
             />
           </div>
           <Button iconId="fr-icon-add-line" iconPosition="right" onClick={() => setIsInvitationPanelOpen(true)}>

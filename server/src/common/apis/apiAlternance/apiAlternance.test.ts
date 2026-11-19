@@ -1,16 +1,34 @@
-import type { ICommune } from "api-alternance-sdk";
+import { ApiError, type ICommune } from "api-alternance-sdk";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { communesVoiesDb } from "@/common/model/collections";
 import { viderCacheCommunesVoies } from "@/common/services/commune/resoudreCodeInsee";
+import { captureTiered } from "@/common/services/sentry/alertContract";
+import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 import { useMongo } from "@tests/jest/setupMongo";
 
 import { estCommuneParDefaut, getCommune } from "./apiAlternance";
 import { apiAlternanceClient } from "./client";
+import { viderRequetesRefuseesSignalees } from "./requeteRefusee";
 
 vi.mock("@/common/apis/apiAlternance/client", () => ({
   apiAlternanceClient: { geographie: { rechercheCommune: vi.fn() } },
 }));
+vi.mock("@/common/services/sentry/alertContract", () => ({ captureTiered: vi.fn() }));
+vi.mock("@/common/services/sentry/reportOnce", () => ({ reportDependencyHealth: vi.fn() }));
+
+const apiError = (statusCode: number, errorData: unknown) =>
+  new ApiError({
+    path: "/v1/geographie/commune/search",
+    params: {},
+    querystring: {},
+    requestHeaders: {},
+    statusCode,
+    message: "",
+    name: "",
+    responseHeaders: {},
+    errorData,
+  });
 
 function commune(insee: string, nom: string, postaux: string[], missionLocaleId: number): ICommune {
   return {
@@ -72,6 +90,54 @@ describe("getCommune", () => {
 
   it("renvoie l'unique commune d'un code postal non partagé", async () => {
     expect(await getCommune({ codePostal: "02000" })).toBe(laon);
+  });
+});
+
+describe("getCommune, quand api-alternance échoue", () => {
+  beforeEach(() => {
+    vi.mocked(captureTiered).mockClear();
+    vi.mocked(reportDependencyHealth).mockClear();
+    viderRequetesRefuseesSignalees();
+  });
+
+  it("ne signale pas une panne sur un 400, mais le capture une fois avec le corps de la réponse", async () => {
+    const errorData = { validationError: [{ instancePath: "/code", message: "Invalid input" }] };
+    vi.mocked(apiAlternanceClient.geographie.rechercheCommune)
+      .mockRejectedValueOnce(apiError(400, errorData))
+      .mockRejectedValueOnce(apiError(400, errorData));
+
+    await expect(getCommune({ codePostal: "0210" })).rejects.toThrow("api-alternance: échec de rechercheCommune");
+    await expect(getCommune({ codePostal: "0210" })).rejects.toThrow("api-alternance: échec de rechercheCommune");
+
+    expect(reportDependencyHealth).not.toHaveBeenCalledWith(
+      expect.anything(),
+      false,
+      expect.anything(),
+      expect.anything()
+    );
+    expect(captureTiered).toHaveBeenCalledOnce();
+    expect(captureTiered).toHaveBeenCalledWith(
+      expect.any(ApiError),
+      expect.objectContaining({
+        tier: "jour",
+        fingerprintKey: "api-alternance:rechercheCommune:requete-refusee",
+        extra: { errorData },
+      })
+    );
+  });
+
+  it("signale une panne sur une autre erreur", async () => {
+    vi.mocked(apiAlternanceClient.geographie.rechercheCommune).mockRejectedValueOnce(apiError(503, null));
+
+    await expect(getCommune({ codePostal: "02100" })).rejects.toThrow("api-alternance: échec de rechercheCommune");
+
+    expect(reportDependencyHealth).toHaveBeenCalledWith(
+      "api-alternance:rechercheCommune",
+      false,
+      expect.anything(),
+      expect.objectContaining({ upstream: "api-alternance" })
+    );
+    expect(captureTiered).not.toHaveBeenCalled();
   });
 });
 
