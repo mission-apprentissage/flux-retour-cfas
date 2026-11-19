@@ -40,7 +40,6 @@ const COLONNES_RETIREES = [
   "code_uai_etab_accueil",
   "ville_etab_accueil",
   "siret_uai_gestionnaire",
-  "libelle_public_etablissement",
 ];
 
 const UNSET = Object.fromEntries(COLONNES_RETIREES.map((colonne) => [`raw.${colonne}`, ""]));

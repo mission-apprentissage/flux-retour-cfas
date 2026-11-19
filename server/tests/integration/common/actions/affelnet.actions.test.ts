@@ -126,7 +126,19 @@ describe("getAffelnetVoeuxNonConcretise", () => {
       uai_etablissement_responsable: "v-uai_etablissement_responsable",
       uai_cio_etablissement_accueil: "v-uai_cio_etab_accueil",
       type_etablissement_accueil: "v-type_etab_accueil",
-      libelle_pulic_etablissement_accueil: "v-libelle_etab_accueil",
+      libelle_pulic_etablissement_accueil: "v-libelle_public_etablissement",
     });
+  });
+
+  it("se replie sur le libellé court quand le libellé public est vide", async () => {
+    const raw = {
+      ...Object.fromEntries(COLONNES_AFFELNET_CONSERVEES.map((colonne) => [colonne, `v-${colonne}`])),
+      libelle_public_etablissement: "",
+    };
+    await voeuxAffelnetDb().insertOne({ ...nouveauVoeu(new ObjectId(), IMPORT), raw });
+
+    const [ligne] = await getAffelnetVoeuxNonConcretise(null, "2026");
+
+    expect(ligne).toMatchObject({ libelle_pulic_etablissement_accueil: "v-libelle_etab_accueil" });
   });
 });

@@ -21192,6 +21192,12 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
             "null",
           ],
         },
+        "libelle_public_etablissement": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+        },
         "mail_responsable_1": {
           "bsonType": [
             "string",

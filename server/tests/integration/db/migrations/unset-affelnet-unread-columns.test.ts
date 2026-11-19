@@ -41,9 +41,9 @@ describe("migration unset-affelnet-unread-columns", () => {
     expect(await getDatabase().collection("voeuxAffelnet").findOne({ _id: reduit._id })).toStrictEqual(reduit);
   });
 
-  it("retire 35 colonnes sur les 62 du fichier", () => {
+  it("retire 34 colonnes sur les 62 du fichier", () => {
     expect(AFFELNET_HEADER).toHaveLength(62);
-    expect(COLONNES_AFFELNET_CONSERVEES).toHaveLength(27);
+    expect(COLONNES_AFFELNET_CONSERVEES).toHaveLength(28);
     expect(COLONNES_AFFELNET_CONSERVEES.every((colonne) => AFFELNET_HEADER.includes(colonne))).toBe(true);
   });
 });
