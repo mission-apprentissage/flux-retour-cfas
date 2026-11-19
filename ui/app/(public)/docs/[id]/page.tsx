@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { ExtendedRecordMap } from "notion-types";
 
-import { getNotionPage, getNotionPageTitle } from "@/app/_utils/notion.utils";
+import { getNotionPage, getNotionPageTitle, isNotionPageId } from "@/app/_utils/notion.utils";
 import { PAGES } from "@/app/_utils/routes.utils";
 import { reportError } from "@/common/reportError";
 
@@ -11,6 +11,10 @@ import { NotionBody } from "../../_components/NotionBody";
 type DocsPageProps = { params: Promise<{ id: string }> };
 
 async function fetchDocPage(id: string): Promise<ExtendedRecordMap | null> {
+  if (!isNotionPageId(id)) {
+    return null;
+  }
+
   try {
     return await getNotionPage(id);
   } catch (error) {
