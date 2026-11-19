@@ -1,9 +1,11 @@
 import { ObjectId } from "mongodb";
+import { STATUT_PRESENCE_REFERENTIEL } from "shared/constants";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import effectifsPurgesStatsDescriptor from "shared/models/data/effectifsPurgesStats.model";
 import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import type { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
+import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -11,6 +13,7 @@ import {
   effectifsDECADb,
   effectifsPurgesStatsDb,
   missionLocaleEffectifsDb,
+  organismesDb,
   voeuxAffelnetDb,
 } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
@@ -243,6 +246,27 @@ describe("purgerEffectifsAnciens()", () => {
     });
     expect(await compteurs()).toStrictEqual([]);
     expect(await voeuxAffelnetDb().findOne({ _id: voeuLie._id })).toStrictEqual(voeuLie);
+  });
+
+  it("compte les organismes que la purge vide, en simulation comme en réel", async () => {
+    const organisme = (siret: string, est_dans_le_referentiel: "absent" | "present") =>
+      generateOrganismeFixture({ siret, uai: null, effectifs_count: 0, est_dans_le_referentiel });
+    const vide = organisme("13002975400020", STATUT_PRESENCE_REFERENTIEL.ABSENT);
+    const encoreActif = organisme("19240007500011", STATUT_PRESENCE_REFERENTIEL.ABSENT);
+    const auReferentiel = organisme("19590065900028", STATUT_PRESENCE_REFERENTIEL.PRESENT);
+    await organismesDb().insertMany([vide, encoreActif, auReferentiel]);
+    const ancien = (organisme_id: ObjectId) => effectif("2022-2023", { formation: "2023-06-30" }, { organisme_id });
+    await insererEffectifs([
+      ancien(vide._id),
+      ancien(vide._id),
+      ancien(encoreActif._id),
+      effectif("2025-2026", { formation: "2026-06-30" }, { organisme_id: encoreActif._id }),
+      ancien(auReferentiel._id),
+    ]);
+
+    expect((await purgerEffectifsAnciens({ maintenant, dryRun: true })).organismesVides).toBe(1);
+    expect((await purgerEffectifsAnciens({ maintenant })).organismesVides).toBe(1);
+    expect(await organismesDb().countDocuments()).toBe(3);
   });
 
   it("refuse une date limite dans le futur", async () => {
