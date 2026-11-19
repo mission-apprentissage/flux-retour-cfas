@@ -40,6 +40,8 @@ export const DROP_PATTERNS: ReadonlyArray<{ reason: DropReason; patterns: Readon
       "Load failed",
       "The operation was aborted",
       /^Network request failed$/,
+      // Axios, quand le navigateur n'a reçu aucune réponse.
+      /^Network Error$/,
       // Message brut de Safari sur un fetch interrompu. Ancré, sinon il attraperait
       // toute phrase contenant « cancelled ».
       /^(TypeError: )?cancelled$/,
