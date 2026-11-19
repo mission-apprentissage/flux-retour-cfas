@@ -3,6 +3,7 @@ import { ZodType } from "zod";
 
 export const SIX_MOIS_EN_SECONDES = 183 * 24 * 3600;
 export const DOUZE_MOIS_EN_SECONDES = 365 * 24 * 3600;
+export const VINGT_QUATRE_MOIS_EN_SECONDES = 2 * DOUZE_MOIS_EN_SECONDES;
 
 export type CollectionName = "users" | "jobs" | "rome" | "auditLogs";
 
