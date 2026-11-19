@@ -127,8 +127,11 @@ export const effectifsCrons = {
     checkinMargin: 30,
     maxRuntimeInMinutes: 5,
     handler: async () => {
-      if (config.env !== "production") {
-        logger.warn("Les purges de conservation ne tournent qu'en production");
+      if (config.env !== "production" || !config.purgesConservationActives) {
+        logger.warn(
+          { env: config.env, purgesConservationActives: config.purgesConservationActives },
+          "Purges de conservation hebdomadaires désactivées"
+        );
         return;
       }
       await addJob({ name: "purge:effectifs-anciens", queued: true });
