@@ -1,4 +1,5 @@
 import { Collection, Filter, ObjectId } from "mongodb";
+import { STATUT_APPRENANT } from "shared/constants";
 import { estAnneeScolaireActive } from "shared/utils/anneeScolaire";
 
 import logger from "@/common/logger";
@@ -37,10 +38,14 @@ export type ResultatPurgeDossiersSuivi = {
 
 const filtreDossierMlAncien = (limite: Date) =>
   ({
+    date_rupture: { $not: { $gte: limite } },
+    "cfa_rupture_declaration.date_rupture": { $not: { $gte: limite } },
+    $nor: [{ "current_status.value": STATUT_APPRENANT.RUPTURANT, "current_status.date": { $gte: limite } }],
     $or: [
       { date_rupture: { $lt: limite } },
-      { date_rupture: null, "cfa_rupture_declaration.date_rupture": { $lt: limite } },
-      { date_rupture: null, "cfa_rupture_declaration.date_rupture": null, created_at: { $lt: limite } },
+      { "cfa_rupture_declaration.date_rupture": { $lt: limite } },
+      { "current_status.value": STATUT_APPRENANT.RUPTURANT, "current_status.date": { $lt: limite } },
+      { created_at: { $lt: limite } },
     ],
   }) as unknown as Filter<DossierSuivi>;
 
