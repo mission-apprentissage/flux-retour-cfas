@@ -685,6 +685,28 @@ describe("Processus d'ingestion", () => {
         await expect(franceTravailEffectifsDb().countDocuments({})).resolves.toBe(0);
       });
 
+      it("n'allume pas l'alerte d'erreur de l'importateur pour un dossier seulement hors conservation", async () => {
+        vi.setSystemTime(new Date("2026-11-18T00:00:00Z"));
+        const importateur = {
+          _id: new ObjectId(),
+          ...createRandomOrganisme({ reseaux: [] }),
+          has_transmission_errors: false,
+        };
+        await organismesDb().insertOne(importateur);
+        await effectifsQueueDb().insertOne({
+          ...commonSampleData,
+          _id: new ObjectId(),
+          source_organisme_id: importateur._id.toString(),
+        });
+
+        await processEffectifsQueue();
+
+        expect(await effectifsQueueDb().findOne({})).toMatchObject({ has_error: true });
+        expect(await organismesDb().findOne({ _id: importateur._id })).toMatchObject({
+          has_transmission_errors: false,
+        });
+      });
+
       it("accepte le même dossier un an et onze mois après sa dernière date de fin", async () => {
         vi.setSystemTime(new Date("2024-05-30T00:00:00Z"));
         await effectifsQueueDb().insertOne({ ...commonSampleData, _id: new ObjectId() });
