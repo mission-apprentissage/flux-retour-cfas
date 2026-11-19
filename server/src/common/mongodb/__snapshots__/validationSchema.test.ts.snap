@@ -22113,6 +22113,7 @@ exports[`validation-schema > should create validation schema for telechargementL
         "ft_a_traiter",
         "ft_traite",
         "indicateurs_collaborations",
+        "sifa",
       ],
     },
     "user_id": {

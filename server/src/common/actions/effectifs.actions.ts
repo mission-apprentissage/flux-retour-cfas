@@ -11,6 +11,7 @@ import type { Paths } from "type-fest";
 
 import { effectifsArchiveDb, effectifsDECADb, effectifsDb, opcosRncpDb } from "@/common/model/collections";
 import { defaultValuesEffectif } from "@/common/model/effectifs.model/effectifs.model";
+import { cachedInRun } from "@/common/utils/runCache";
 
 import { stripEmptyFields } from "../utils/miscUtils";
 
@@ -156,7 +157,10 @@ export const addComputedFields = async <T extends WithoutId<IEffectif | IEffecti
   }
 
   if (effectif?.formation?.rncp) {
-    const rncpList = await opcosRncpDb().find({ "_computed.rncp.code": effectif.formation.rncp }).toArray();
+    const rncp = effectif.formation.rncp;
+    const rncpList = await cachedInRun(`opcos-rncp:${rncp}`, () =>
+      opcosRncpDb().find({ "_computed.rncp.code": rncp }).toArray()
+    );
 
     if (rncpList) {
       computedFields.formation = {

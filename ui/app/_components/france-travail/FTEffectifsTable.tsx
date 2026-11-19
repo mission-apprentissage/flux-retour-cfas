@@ -2,11 +2,11 @@
 
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { useMemo, useRef, useState } from "react";
 import { TOUS_LES_SECTEURS_CODE } from "shared/constants/franceTravail";
 
+import { SearchField } from "@/app/_components/common/SearchField";
 import { FullTable } from "@/app/_components/table/FullTable";
 import { ColumnData } from "@/app/_components/table/types";
 import { usePlausibleAppTracking } from "@/app/_hooks/plausible";
@@ -309,21 +309,11 @@ export function FTEffectifsTable({
       )}
 
       <div className={styles.searchContainer}>
-        <SearchBar
+        <SearchField
           label="Rechercher par nom ou prénom"
-          renderInput={({ id, className, placeholder }) => (
-            <input
-              ref={searchInputRef}
-              id={id}
-              className={className}
-              placeholder={placeholder}
-              type="search"
-              value={searchTerm}
-              onChange={(e) => {
-                onSearchChange(e.target.value);
-              }}
-            />
-          )}
+          inputRef={searchInputRef}
+          value={searchTerm}
+          onChange={onSearchChange}
         />
       </div>
 

@@ -1,10 +1,10 @@
 "use client";
 
-import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RECHERCHE_LONGUEUR_MIN } from "shared/models/data/nationalStats.model";
 
+import { SearchField } from "@/app/_components/common/SearchField";
 import { TableSkeleton } from "@/app/_components/common/Skeleton";
 
 import { usePageForParams } from "../hooks/usePageForParams";
@@ -69,21 +69,14 @@ export function RechercheEtablissements() {
         <h2 className={styles.accroche}>
           Accédez à toutes les informations de suivi sur la Mission Locale ou le CFA de votre choix
         </h2>
-        <SearchBar
+        <SearchField
           className={styles.searchBar}
           label="Rechercher un nom d'établissement ou une commune"
-          onButtonClick={lancer}
-          renderInput={({ className, id, type }) => (
-            <input
-              className={className}
-              id={id}
-              type={type}
-              value={saisie}
-              placeholder="Rechercher nom d'établissement, commune…"
-              maxLength={100}
-              onChange={(event) => setSaisie(event.target.value)}
-            />
-          )}
+          placeholder="Rechercher nom d'établissement, commune…"
+          maxLength={100}
+          value={saisie}
+          onChange={setSaisie}
+          onSearch={lancer}
         />
         {tropCourt && (
           <p className={styles.perimetre}>

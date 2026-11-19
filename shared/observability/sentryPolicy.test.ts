@@ -152,6 +152,32 @@ describe("scrubPii", () => {
     expect(event.request).toEqual({ url: "https://tba.example/api/v1/effectifs" });
   });
 
+  // Forme réelle d'une ApiError d'api-alternance-sdk : ExtraErrorData la range dans contexts[<nom de l'erreur>],
+  // avec les en-têtes de la requête, donc la clé API.
+  it("masque les en-têtes secrets portés par une erreur, où qu'ils soient dans les contextes et les extra", () => {
+    const requestHeaders = () => ({ authorization: "Bearer FAUSSE-CLE-API", "content-type": "application/json" });
+    const event = scrubPii({
+      contexts: {
+        "Bad Request": {
+          context: { path: "/organisme/v1/recherche", statusCode: 400, requestHeaders: requestHeaders() },
+          requestHeaders: requestHeaders(),
+        },
+      },
+      extra: { reponse: { "Set-Cookie": "sid=abc123", "X-Api-Key": "cle-secrete", etag: "W/1" } },
+    });
+
+    expect(event.contexts?.["Bad Request"]).toEqual({
+      context: {
+        path: "/organisme/v1/recherche",
+        statusCode: 400,
+        requestHeaders: { authorization: "[Filtered]", "content-type": "application/json" },
+      },
+      requestHeaders: { authorization: "[Filtered]", "content-type": "application/json" },
+    });
+    expect(event.extra?.reponse).toEqual({ "Set-Cookie": "[Filtered]", "X-Api-Key": "[Filtered]", etag: "W/1" });
+    expect(JSON.stringify(event)).not.toMatch(/FAUSSE-CLE-API|abc123|cle-secrete/);
+  });
+
   // Les sites d'appel masquent déjà à la source : un second passage ne doit rien changer.
   it("est idempotent", () => {
     const once = scrubPii({ message: "envoi à jean.dupont@example.com" }).message;

@@ -2,10 +2,10 @@
 
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { Button } from "@codegouvfr/react-dsfr/Button";
-import { SearchBar } from "@codegouvfr/react-dsfr/SearchBar";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 
+import { SearchField } from "@/app/_components/common/SearchField";
 import { FTHeader } from "@/app/_components/france-travail/FTHeader";
 import { useMoisTraites, useArborescence } from "@/app/_components/france-travail/hooks/useFranceTravailQueries";
 import { DsfrLink } from "@/app/_components/link/DsfrLink";
@@ -186,19 +186,7 @@ export default function DejaTraitesClient() {
           </div>
 
           <div className={styles.searchSection}>
-            <SearchBar
-              label="Rechercher par nom ou prénom"
-              renderInput={({ id, className, placeholder }) => (
-                <input
-                  id={id}
-                  className={className}
-                  placeholder={placeholder}
-                  type="search"
-                  value={searchInput}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                />
-              )}
-            />
+            <SearchField label="Rechercher par nom ou prénom" value={searchInput} onChange={handleSearchChange} />
           </div>
         </div>
 

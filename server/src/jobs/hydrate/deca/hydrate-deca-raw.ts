@@ -27,11 +27,15 @@ import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organisme
 import parentLogger from "@/common/logger";
 import { effectifsDECADb, organismesDb } from "@/common/model/collections";
 import { getBALMongodbUri } from "@/common/mongodb";
+import { createErrorAggregator } from "@/common/utils/errorAggregator";
+import { cachedInRun, getRunCacheStats, withRunCache } from "@/common/utils/runCache";
 import config from "@/config";
 import {
   fiabilisationEffectifFormation,
   getEffectifCertification,
 } from "@/jobs/fiabilisation/certification/fiabilisation-certification";
+
+import { construireBilanImport, type BilanImportDeca } from "./deca-bilan";
 
 const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
 
@@ -179,9 +183,15 @@ async function inspectEffectifDeca(document: IRawBalDeca, stats: IDryRunStats): 
   return createEmptyStats();
 }
 
-export async function hydrateDecaRaw({ dryRun = false, limit }: { dryRun?: boolean; limit?: number } = {}) {
+export function hydrateDecaRaw(options: { dryRun?: boolean; limit?: number } = {}) {
+  return withRunCache(() => importerContratsDeca(options));
+}
+
+async function importerContratsDeca({ dryRun = false, limit }: { dryRun?: boolean; limit?: number }) {
   const totalStats = createEmptyStats();
   const dryRunStats = createEmptyDryRunStats();
+  const debutMs = Date.now();
+  const echecs = createErrorAggregator("hydrate:contrats-deca-raw");
   let totalCount = 0;
 
   const processBuffer = async (buffer: Promise<IProcessingStats>[]) => {
@@ -189,6 +199,9 @@ export async function hydrateDecaRaw({ dryRun = false, limit }: { dryRun?: boole
     for (const result of results) {
       if (result.status === "fulfilled") {
         mergeStats(totalStats, result.value);
+        echecs.ok();
+      } else {
+        echecs.record(result.reason);
       }
     }
     totalCount += buffer.length;
@@ -244,7 +257,33 @@ export async function hydrateDecaRaw({ dryRun = false, limit }: { dryRun?: boole
     captureException(err);
   } finally {
     await client.close();
-    logger.info(`DECA terminé: ${totalCount} traités, ${totalStats.created} créés, ${totalStats.updated} mis à jour`);
+    const nbEchecs = echecs.failed;
+    if (!dryRun) {
+      echecs.flush();
+    }
+    const bilan = construireBilanImport({
+      debutMs,
+      finMs: Date.now(),
+      contrats: totalCount,
+      echecs: nbEchecs,
+      cache: getRunCacheStats(),
+    });
+    logger.info(
+      bilan,
+      `DECA terminé: ${totalCount} traités, ${totalStats.created} créés, ${totalStats.updated} mis à jour`
+    );
+    if (!dryRun && !limit) {
+      publierMesures(bilan);
+    }
+  }
+}
+
+function publierMesures({ contrats, contratsParSeconde, echecs, tauxDefautCache }: BilanImportDeca) {
+  Sentry.setMeasurement("deca.contrats", contrats, "none");
+  Sentry.setMeasurement("deca.echecs", echecs, "none");
+  Sentry.setMeasurement("deca.contrats_par_seconde", contratsParSeconde, "none");
+  if (tauxDefautCache !== null) {
+    Sentry.setMeasurement("deca.cache_taux_defaut", tauxDefautCache, "ratio");
   }
 }
 
@@ -484,14 +523,13 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
   const { siret, denomination, naf, adresse, nombre_de_salaries } = employeur;
   const { uai_cfa, siret: orgSiret } = organisme_formation;
 
-  const organisme = await getOrganismeByUAIAndSIRET(uai_cfa, orgSiret);
+  const organisme = await cachedInRun(`organisme:${uai_cfa}|${orgSiret}`, () =>
+    getOrganismeByUAIAndSIRET(uai_cfa, orgSiret)
+  );
 
   if (!organisme) {
     return null;
   }
-
-  const currentTimestamp = new Date();
-  await effectifsDECADb().updateOne({ _id: organisme._id }, { $set: { last_effectifs_deca_update: currentTimestamp } });
 
   const dateDebutContrat = date_debut_contrat ? new Date(date_debut_contrat) : null;
   const dateFinContrat = date_fin_contrat ? new Date(date_fin_contrat) : null;

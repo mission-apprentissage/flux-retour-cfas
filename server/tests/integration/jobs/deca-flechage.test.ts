@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { ObjectId } from "bson";
 import { addJob } from "job-processor";
 import { Collection, MongoClient, type WithoutId } from "mongodb";
@@ -46,6 +47,11 @@ const apresFlechage = vi.fn();
 vi.mock("job-processor", async (importOriginal) => ({
   ...(await importOriginal<typeof import("job-processor")>()),
   addJob: vi.fn(),
+}));
+
+vi.mock("@sentry/node", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@sentry/node")>()),
+  captureException: vi.fn(),
 }));
 
 vi.mock("@/common/actions/affelnet.actions", async (importOriginal) => ({
@@ -1038,6 +1044,26 @@ describe("fléchage des contrats DECA", () => {
           await hydrateDecaRaw({ limit: 1 });
 
           expect(addJob).not.toHaveBeenCalled();
+        });
+
+        it("remonte les contrats en échec dans un seul événement agrégé, au lieu de les perdre", async () => {
+          vi.mocked(captureException).mockClear();
+
+          await hydrateDecaRaw();
+
+          const agreges = vi
+            .mocked(captureException)
+            .mock.calls.filter(([erreur]) => erreur instanceof Error && erreur.message.includes("échecs agrégés"));
+          expect(agreges).toHaveLength(1);
+          expect((agreges[0][0] as Error).message).toBe("[hydrate:contrats-deca-raw] échecs agrégés");
+        });
+
+        it("n'émet pas d'événement d'échecs pour un dry-run", async () => {
+          vi.mocked(captureException).mockClear();
+
+          await hydrateDecaRaw({ dryRun: true });
+
+          expect(captureException).not.toHaveBeenCalled();
         });
       });
     });

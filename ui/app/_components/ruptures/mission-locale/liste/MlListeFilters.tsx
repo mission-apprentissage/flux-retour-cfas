@@ -1,9 +1,9 @@
 "use client";
 
-import SearchBar from "@codegouvfr/react-dsfr/SearchBar";
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { useMemo } from "react";
 
+import { SearchField } from "@/app/_components/common/SearchField";
 import { PostalCodeOption } from "@/app/_utils/ruptures.utils";
 
 import { VillesFilter } from "../../shared/ui/VillesFilter";
@@ -51,19 +51,11 @@ export function MlListeFilters({
 
   return (
     <div className={styles.filters}>
-      <SearchBar
+      <SearchField
         className={styles.searchBar}
         label="Rechercher par nom ou prénom"
-        renderInput={({ className, id, type }) => (
-          <input
-            className={className}
-            id={id}
-            type={type}
-            value={recherche}
-            placeholder="Rechercher par nom ou prénom"
-            onChange={(event) => onRechercheChange(event.target.value)}
-          />
-        )}
+        value={recherche}
+        onChange={onRechercheChange}
       />
       <div className={styles.filtersRow}>
         <span className={styles.filterLabel}>Filtrer</span>
