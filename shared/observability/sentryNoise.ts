@@ -57,7 +57,12 @@ export const DROP_PATTERNS: ReadonlyArray<{ reason: DropReason; patterns: Readon
   },
   {
     reason: "browser-noise",
-    patterns: ["ResizeObserver loop completed with undelivered notifications", "ResizeObserver loop limit exceeded"],
+    patterns: [
+      "ResizeObserver loop completed with undelivered notifications",
+      "ResizeObserver loop limit exceeded",
+      // Moteur trop ancien pour `?.` et `??` (robots). `'<'` reste visible : c'est un chunk remplacé par du HTML.
+      /^Unexpected token '?[?.]'?$/,
+    ],
   },
 ];
 
