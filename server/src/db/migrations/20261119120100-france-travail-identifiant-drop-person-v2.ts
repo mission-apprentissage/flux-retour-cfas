@@ -48,7 +48,7 @@ export const poserIdentifiantFranceTravail = async (db: Db, batchSize = DEFAULT_
     const identifiantsParPersonne = new Map<string, Identifiant>();
     if (personnesPresentes && personIds.length > 0) {
       for (const personne of await personnes.find({ _id: { $in: personIds } }).toArray()) {
-        identifiantsParPersonne.set(personne._id.toString(), personne.identifiant);
+        identifiantsParPersonne.set(personne._id.toString(), normalisePersonIdentifiant(personne.identifiant));
       }
     }
 
