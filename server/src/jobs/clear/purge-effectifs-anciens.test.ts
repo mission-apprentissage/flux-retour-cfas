@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { STATUT_PRESENCE_REFERENTIEL } from "shared/constants";
 import type { IEffectif } from "shared/models/data/effectifs.model";
+import type { IEffectifArchive } from "shared/models/data/effectifsArchive.model";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import effectifsPurgesStatsDescriptor from "shared/models/data/effectifsPurgesStats.model";
 import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
@@ -9,6 +10,7 @@ import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixtu
 import { describe, expect, it } from "vitest";
 
 import {
+  effectifsArchiveDb,
   effectifsDb,
   effectifsDECADb,
   effectifsPurgesStatsDb,
@@ -268,6 +270,27 @@ describe("purgerEffectifsAnciens()", () => {
     expect((await purgerEffectifsAnciens({ maintenant, dryRun: true })).organismesVides).toBe(1);
     expect((await purgerEffectifsAnciens({ maintenant })).organismesVides).toBe(1);
     expect(await organismesDb().countDocuments()).toBe(3);
+  });
+
+  it("supprime aussi les archives d'effectifs hors conservation, sans les compter", async () => {
+    const archive = (dates: Dates, annee: string) => ({
+      ...effectif(annee, dates),
+      suppression: { motif: "Doublon", date: new Date("2026-10-01T00:00:00Z") },
+    });
+    const ancienne = archive({ formation: "2019-06-30" }, "2018-2019");
+    const recente = archive({ formation: "2025-06-30" }, "2024-2025");
+    await effectifsArchiveDb().insertMany([ancienne, recente] as unknown as IEffectifArchive[], {
+      bypassDocumentValidation: true,
+    });
+
+    const resultat = await purgerEffectifsAnciens({ maintenant });
+
+    expect(resultat.effectifsArchive).toStrictEqual({ total: 1, parAnnee: { "2018-2019": { ERP: 1 } } });
+    expect((await effectifsArchiveDb().find({}).toArray()).map(({ _id }) => _id.toString())).toStrictEqual([
+      recente._id.toString(),
+    ]);
+    expect(await compteurs()).toStrictEqual([]);
+    expect(resultat.organismesVides).toBe(0);
   });
 
   it("refuse une date limite dans le futur", async () => {
