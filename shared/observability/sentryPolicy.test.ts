@@ -68,6 +68,25 @@ describe("classifyDrop", () => {
     expect(classifyDrop(event, [])).toBeNull();
   });
 
+  it("rejette le « Network Error » d'Axios côté navigateur seulement", () => {
+    const event = withException("AxiosError", "Network Error");
+
+    expect(classifyDrop(event, UI_DROP_REASONS)).toBe("network");
+    expect(classifyDrop(event, [])).toBeNull();
+  });
+
+  it("rejette les erreurs de syntaxe d'un moteur trop ancien pour `?.` et `??`", () => {
+    for (const value of ["Unexpected token ?", "Unexpected token .", "Unexpected token '?'", "Unexpected token '.'"]) {
+      expect(classifyDrop(withException("SyntaxError", value), UI_DROP_REASONS)).toBe("browser-noise");
+    }
+  });
+
+  it("conserve un chunk remplacé par du HTML et les autres erreurs de syntaxe", () => {
+    for (const value of ["Unexpected token '<'", "Unexpected token '}'", "Unexpected token ? in JSON at position 0"]) {
+      expect(classifyDrop(withException("SyntaxError", value), UI_DROP_REASONS)).toBeNull();
+    }
+  });
+
   it("rejette une pile entièrement issue d'une extension", () => {
     const event: SentryEventLike = {
       exception: {

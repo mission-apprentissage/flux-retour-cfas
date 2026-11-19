@@ -40,6 +40,8 @@ export const DROP_PATTERNS: ReadonlyArray<{ reason: DropReason; patterns: Readon
       "Load failed",
       "The operation was aborted",
       /^Network request failed$/,
+      // Axios, quand le navigateur n'a reçu aucune réponse.
+      /^Network Error$/,
       // Message brut de Safari sur un fetch interrompu. Ancré, sinon il attraperait
       // toute phrase contenant « cancelled ».
       /^(TypeError: )?cancelled$/,
@@ -57,7 +59,12 @@ export const DROP_PATTERNS: ReadonlyArray<{ reason: DropReason; patterns: Readon
   },
   {
     reason: "browser-noise",
-    patterns: ["ResizeObserver loop completed with undelivered notifications", "ResizeObserver loop limit exceeded"],
+    patterns: [
+      "ResizeObserver loop completed with undelivered notifications",
+      "ResizeObserver loop limit exceeded",
+      // Moteur trop ancien pour `?.` et `??` (robots). `'<'` reste visible : c'est un chunk remplacé par du HTML.
+      /^Unexpected token '?[?.]'?$/,
+    ],
   },
 ];
 

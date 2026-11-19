@@ -27,6 +27,12 @@ export function getNotionPageTitle(recordMap: ExtendedRecordMap | null): string 
   return text.length > 0 ? text : null;
 }
 
+// Mêmes motifs que notion-client : un identifiant refusé ici l'est aussi par son API.
+const NOTION_PAGE_ID_PATTERNS = [/\b[\da-f]{32}\b/, /\b[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}\b/];
+
+export const isNotionPageId = (id: string): boolean =>
+  NOTION_PAGE_ID_PATTERNS.some((pattern) => pattern.test(id.split("?")[0]));
+
 export const getNotionPage = unstable_cache(
   async (pageId: string): Promise<ExtendedRecordMap> => new NotionAPI().getPage(pageId),
   ["notion-page"],

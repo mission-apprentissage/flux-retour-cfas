@@ -3,7 +3,7 @@
 import { captureException } from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 
-import { _get } from "@/common/httpClient";
+import { _get, isClientHttpError } from "@/common/httpClient";
 import { getApiErrorMessage } from "@/common/rateLimit";
 
 export type OnboardingResourceState<T> =
@@ -35,7 +35,7 @@ export function useOnboardingInfo<T>(url: string | null): OnboardingResourceStat
         const data = (await _get(url)) as T;
         if (!cancelled) setState({ status: "success", data });
       } catch (e) {
-        captureException(e);
+        if (!isClientHttpError(e)) captureException(e);
         if (!cancelled) {
           const message = getApiErrorMessage(e, DEFAULT_ERROR);
           setState({ status: "error", message });

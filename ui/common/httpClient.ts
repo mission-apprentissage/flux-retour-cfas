@@ -41,6 +41,9 @@ export class HTTPError extends Error {
   }
 }
 
+/** Refus volontaire de l'API (jeton invalide, limite de débit…) : l'usager est informé, rien à corriger. */
+export const isClientHttpError = (error: unknown): boolean => error instanceof HTTPError && error.statusCode < 500;
+
 const handleResponse = <T = unknown>(path: string, response: AxiosResponse): T => {
   const statusCode = response.status;
   if (statusCode >= 400 && statusCode < 600) {
