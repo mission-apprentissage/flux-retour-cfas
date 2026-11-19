@@ -217,6 +217,26 @@ describe("purgerDossiersMlMasques()", () => {
       });
     });
 
+    it("ne recrée pas de dossier pour une rupture hors délai de conservation", async () => {
+      const parcoursRuptureAncienne: Parcours = [
+        { date: new Date("2023-09-01"), valeur: STATUT_APPRENANT.APPRENTI },
+        { date: new Date("2024-03-01"), valeur: STATUT_APPRENANT.RUPTURANT },
+      ];
+      const nouveau = effectifErp(parcoursRuptureAncienne);
+      const suivi = effectifErp(parcoursRupturant);
+      expect((await createMissionLocaleSnapshot(suivi))?.upserted).toBe(true);
+
+      const creation = await createMissionLocaleSnapshot(nouveau);
+      await createMissionLocaleSnapshot(effectifErp(parcoursRuptureAncienne, suivi._id));
+
+      expect(creation?.upserted).toBe(false);
+      expect(await missionLocaleEffectifsDb().countDocuments({ effectif_id: nouveau._id })).toBe(0);
+      expect((await missionLocaleEffectifsDb().findOne({ effectif_id: suivi._id }))?.current_status).toStrictEqual({
+        value: STATUT_APPRENANT.RUPTURANT,
+        date: new Date("2024-03-01"),
+      });
+    });
+
     it("donne un dossier visible à un apprenti qui redevient rupturant", async () => {
       const effectif = effectifErp(parcoursApprenti);
       await effectifsDb().insertOne(effectif, { bypassDocumentValidation: true });

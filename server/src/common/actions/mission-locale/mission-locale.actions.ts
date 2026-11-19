@@ -41,6 +41,7 @@ import {
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { triggerWhatsAppIfEligible } from "@/common/services/brevo/whatsapp";
 import { extractScoreInput, reportClassifierFailure, scoreEffectifs } from "@/common/services/classifier";
+import { getDateLimiteConservation } from "@/common/utils/conservationUtils";
 import { normalisePersonIdentifiant } from "@/common/utils/identifiantUtils";
 import { cachedInRun } from "@/common/utils/runCache";
 
@@ -3357,7 +3358,9 @@ export const createMissionLocaleSnapshot = async (
   const ageFilter = effectif?.apprenant?.date_de_naissance
     ? effectif.apprenant.date_de_naissance >= getBornesNaissanceMissionLocale().nesApres
     : false;
-  const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
+  const rupturantFilter =
+    currentStatus?.valeur === "RUPTURANT" &&
+    new Date(currentStatus.date).getTime() >= getDateLimiteConservation(new Date()).getTime();
   const mlFilter = !!effectif.apprenant.adresse?.mission_locale_id;
 
   if (!mlFilter) {
