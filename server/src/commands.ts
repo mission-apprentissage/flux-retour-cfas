@@ -340,6 +340,13 @@ program
   .action(createJobAction("purge:effectifs-anciens"));
 
 program
+  .command("purge:ml-dossiers-masques")
+  .description("Supprime les dossiers ML masqués sans trace humaine dont le jeune n'est pas rupturant, avec leurs logs")
+  .option("--dry-run", "Compte les dossiers et les logs à supprimer sans rien écrire", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("purge:ml-dossiers-masques"));
+
+program
   .command("classifier:score-effectifs")
   .description("Score les effectifs ML existants sans score via le classifier")
   .option("--dryRun", "Mode simulation sans écriture", false)

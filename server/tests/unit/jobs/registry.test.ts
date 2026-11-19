@@ -134,6 +134,7 @@ describe("registre des jobs", () => {
       "process:effectifs-queue:remove-duplicates",
       "process:effectifs-queue:single",
       "purge:effectifs-anciens",
+      "purge:ml-dossiers-masques",
       "purge:queues",
       "purge:traces",
       "seed:recette",
