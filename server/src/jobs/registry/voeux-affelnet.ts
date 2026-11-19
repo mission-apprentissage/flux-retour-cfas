@@ -1,6 +1,7 @@
 import type { JobDef } from "job-processor";
 
 import { purgerVoeuxAffelnet } from "../clear/purge-voeux-affelnet";
+import { refuserPurgesConcurrentes } from "../clear/verrou-purges";
 import {
   hydrateVoeuxEffectifsDECARelations,
   hydrateVoeuxEffectifsRelations,
@@ -12,7 +13,10 @@ import { payloadBoolean, payloadString } from "./payload";
 
 export const voeuxAffelnetJobs = {
   "purge:voeux-affelnet": {
-    handler: async (job) => purgerVoeuxAffelnet({ dryRun: payloadBoolean(job.payload, "dryRun") ?? false }),
+    handler: async (job) => {
+      await refuserPurgesConcurrentes(job.name);
+      return purgerVoeuxAffelnet({ dryRun: payloadBoolean(job.payload, "dryRun") ?? false });
+    },
   },
   "hydrate:voeux-effectifs-relations": {
     handler: async (job) => {

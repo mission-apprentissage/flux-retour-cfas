@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import effectifsPurgesStatsDescriptor from "shared/models/data/effectifsPurgesStats.model";
 import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import type { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
 import { describe, expect, it } from "vitest";
@@ -12,6 +13,7 @@ import {
   missionLocaleEffectifsDb,
   voeuxAffelnetDb,
 } from "@/common/model/collections";
+import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { useMongo } from "@tests/jest/setupMongo";
 
 import { purgerEffectifsAnciens } from "./purge-effectifs-anciens";
@@ -186,6 +188,24 @@ describe("purgerEffectifsAnciens()", () => {
     expect(await voeuxAffelnetDb().findOne({ _id: voeuDecaDelie._id })).toStrictEqual(voeuDecaDelie);
     expect(await voeuxAffelnetDb().findOne({ _id: voeuRecent._id })).toStrictEqual(voeuRecent);
     expect(await missionLocaleEffectifsDb().findOne({ _id: dossierMl._id })).toStrictEqual(dossierMl);
+  });
+
+  it("traite plusieurs lots et respecte l'index unique des compteurs", async () => {
+    await createCollectionIndexes(effectifsPurgesStatsDescriptor);
+    const sansStatut = { _computed: { organisme: { uai: "0751234A", siret: "12345678900011" } } };
+    await insererEffectifs([
+      ...Array.from({ length: 1500 }, () => effectif("2022-2023", { formation: "2023-06-30" })),
+      ...Array.from({ length: 3 }, () => effectif("2022-2023", { formation: "2023-06-30" }, sansStatut)),
+    ]);
+
+    const resultat = await purgerEffectifsAnciens({ maintenant });
+
+    expect(resultat.effectifs.total).toBe(1503);
+    expect(await effectifsDb().countDocuments()).toBe(0);
+    expect(await compteurs()).toStrictEqual([
+      compteur("2022-2023", "ERP", 3, null),
+      compteur("2022-2023", "ERP", 1500),
+    ]);
   });
 
   it("garde des compteurs justes sur plusieurs exécutions", async () => {
