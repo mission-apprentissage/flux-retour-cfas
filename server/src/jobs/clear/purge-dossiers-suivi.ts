@@ -11,22 +11,31 @@ import {
 import { sleep } from "@/common/utils/asyncUtils";
 import { getDateLimiteConservation } from "@/common/utils/conservationUtils";
 
-import { purgerDossiersMlMasques, type ResultatPurgeDossiersMasques } from "./purge-ml-dossiers-masques";
+import { executerPurgeDossiersMlMasques, type ResultatPurgeDossiersMasques } from "./purge-ml-dossiers-masques";
+import { ventiler, type Ventilation } from "./ventilation";
 
 const TAILLE_LOT = 1000;
 const PAUSE_MS = 200;
 const WRITE_CONCERN = { w: "majority", wtimeoutMS: 30_000 } as const;
 
-type DossierSuivi = { _id: ObjectId; effectif_snapshot?: { annee_scolaire?: string | null } | null };
+type DossierSuivi = {
+  _id: ObjectId;
+  effectif_snapshot?: { annee_scolaire?: string | null; source?: string | null } | null;
+};
 
-type Contexte = { dryRun: boolean; maintenant: Date };
+type Contexte = { dryRun: boolean; maintenant: Date; dejaComptes?: Set<string> };
 
 type Lies = {
   compter: (ids: ObjectId[]) => Promise<number>;
   supprimer: (ids: ObjectId[]) => Promise<number>;
 };
 
-export type ResultatPurgeSuivi = { supprimes: number; gardesAnneeActive: number; liesSupprimes: number };
+export type ResultatPurgeSuivi = {
+  supprimes: number;
+  gardesAnneeActive: number;
+  liesSupprimes: number;
+  parAnnee: Ventilation;
+};
 
 export type ResultatPurgeDossiersSuivi = {
   dryRun: boolean;
@@ -63,26 +72,35 @@ const LOGS_ML: Lies = {
 const purgerParLots = async (
   collection: Collection<DossierSuivi>,
   filtre: Filter<DossierSuivi>,
-  { dryRun, maintenant }: Contexte,
+  { dryRun, maintenant, dejaComptes }: Contexte,
   lies?: Lies
 ): Promise<ResultatPurgeSuivi> => {
-  const resultat: ResultatPurgeSuivi = { supprimes: 0, gardesAnneeActive: 0, liesSupprimes: 0 };
+  const resultat: ResultatPurgeSuivi = { supprimes: 0, gardesAnneeActive: 0, liesSupprimes: 0, parAnnee: {} };
   let lot: DossierSuivi[] = [];
 
+  const compterSupprimes = (dossiers: DossierSuivi[]) => {
+    resultat.supprimes += dossiers.length;
+    for (const dossier of dossiers) {
+      ventiler(resultat.parAnnee, dossier.effectif_snapshot?.annee_scolaire, dossier.effectif_snapshot?.source);
+    }
+  };
+
   const traiterLot = async () => {
-    const ids: ObjectId[] = [];
+    const aSupprimer: DossierSuivi[] = [];
     for (const dossier of lot) {
+      if (dejaComptes?.has(dossier._id.toString())) continue;
       if (estAnneeScolaireActive(dossier.effectif_snapshot?.annee_scolaire ?? "", maintenant)) {
         resultat.gardesAnneeActive++;
       } else {
-        ids.push(dossier._id);
+        aSupprimer.push(dossier);
       }
     }
     lot = [];
-    if (ids.length === 0) return;
+    if (aSupprimer.length === 0) return;
+    const ids = aSupprimer.map(({ _id }) => _id);
 
     if (dryRun) {
-      resultat.supprimes += ids.length;
+      compterSupprimes(aSupprimer);
       resultat.liesSupprimes += lies ? await lies.compter(ids) : 0;
       return;
     }
@@ -90,16 +108,16 @@ const purgerParLots = async (
     await collection.deleteMany({ ...filtre, _id: { $in: ids } }, { writeConcern: WRITE_CONCERN });
     const restants = await collection.find({ _id: { $in: ids } }, { projection: { _id: 1 } }).toArray();
     const idsRestants = new Set(restants.map(({ _id }) => _id.toString()));
-    const supprimes = ids.filter((id) => !idsRestants.has(id.toString()));
-    resultat.supprimes += supprimes.length;
+    const supprimes = aSupprimer.filter(({ _id }) => !idsRestants.has(_id.toString()));
+    compterSupprimes(supprimes);
     if (supprimes.length > 0) {
-      resultat.liesSupprimes += lies ? await lies.supprimer(supprimes) : 0;
+      resultat.liesSupprimes += lies ? await lies.supprimer(supprimes.map(({ _id }) => _id)) : 0;
       await sleep(PAUSE_MS);
     }
   };
 
   const curseur = collection.find(filtre, {
-    projection: { _id: 1, "effectif_snapshot.annee_scolaire": 1 },
+    projection: { _id: 1, "effectif_snapshot.annee_scolaire": 1, "effectif_snapshot.source": 1 },
     batchSize: TAILLE_LOT,
   });
   for await (const dossier of curseur) {
@@ -121,11 +139,11 @@ export const purgerDossiersSuivi = async ({
   }
   const contexte: Contexte = { dryRun, maintenant };
 
-  const dossiersMasques = await purgerDossiersMlMasques({ dryRun });
+  const { resultat: dossiersMasques, idsSupprimes } = await executerPurgeDossiersMlMasques({ dryRun, maintenant });
   const missionLocale = await purgerParLots(
     missionLocaleEffectifsDb() as unknown as Collection<DossierSuivi>,
     filtreDossierMlAncien(limite),
-    contexte,
+    { ...contexte, dejaComptes: dryRun ? idsSupprimes : undefined },
     LOGS_ML
   );
   const franceTravail = await purgerParLots(

@@ -78,6 +78,8 @@ type Contexte = {
   limite: Date;
   lancement: Date;
   retiresParOrganisme: Map<string, number>;
+  voeuxParEffectif: Map<string, number>;
+  voeuxLiesSimules: number;
 };
 
 type ParSource = Record<string, number>;
@@ -158,6 +160,11 @@ const supprimerLot = async (
       contexte.maintenant
     )
   );
+  if (contexte.dryRun) {
+    for (const dossier of candidats) {
+      contexte.voeuxLiesSimules += contexte.voeuxParEffectif.get(dossier._id.toString()) ?? 0;
+    }
+  }
   if (contexte.dryRun || candidats.length === 0) return candidats;
 
   const ids = candidats.map((dossier) => dossier._id);
@@ -219,7 +226,19 @@ const purgerAnnee = async (passe: Passe, anneeScolaire: string, contexte: Contex
   return parSource;
 };
 
+const compterVoeuxParEffectif = async (lien: Passe["lienVoeu"]): Promise<Map<string, number>> => {
+  const liens = await voeuxAffelnetDb()
+    .aggregate<{ _id: ObjectId; nombre: number }>([
+      { $match: { [lien]: { $type: "objectId" } } },
+      { $group: { _id: `$${lien}`, nombre: { $sum: 1 } } },
+    ])
+    .toArray();
+  return new Map(liens.map(({ _id, nombre }) => [_id.toString(), nombre]));
+};
+
 const purgerCollection = async (passe: Passe, contexte: Contexte): Promise<ResultatPurgeCollection> => {
+  contexte.voeuxLiesSimules = 0;
+  contexte.voeuxParEffectif = contexte.dryRun ? await compterVoeuxParEffectif(passe.lienVoeu) : new Map();
   const annees = (await passe.collection().distinct("annee_scolaire")) as string[];
   const resultat: ResultatPurgeCollection = { total: 0, parAnnee: {} };
 
@@ -284,12 +303,20 @@ export const purgerEffectifsAnciens = async ({
   if (limite.getTime() >= lancement.getTime()) {
     throw new Error(`Purge des effectifs anciens annulée : date limite ${limite.toISOString()} dans le futur`);
   }
-  const contexte: Contexte = { dryRun, maintenant, limite, lancement, retiresParOrganisme: new Map() };
+  const contexte: Contexte = {
+    dryRun,
+    maintenant,
+    limite,
+    lancement,
+    retiresParOrganisme: new Map(),
+    voeuxParEffectif: new Map(),
+    voeuxLiesSimules: 0,
+  };
 
   const effectifs = await purgerCollection(PASSE_EFFECTIFS, contexte);
-  const voeuxEffectifs = await delierVoeuxOrphelins(PASSE_EFFECTIFS, dryRun);
+  const voeuxEffectifs = (await delierVoeuxOrphelins(PASSE_EFFECTIFS, dryRun)) + contexte.voeuxLiesSimules;
   const effectifsDECA = await purgerCollection(PASSE_DECA, contexte);
-  const voeuxDeca = await delierVoeuxOrphelins(PASSE_DECA, dryRun);
+  const voeuxDeca = (await delierVoeuxOrphelins(PASSE_DECA, dryRun)) + contexte.voeuxLiesSimules;
 
   const resultat: ResultatPurgeEffectifsAnciens = {
     dryRun,
