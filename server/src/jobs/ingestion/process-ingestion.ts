@@ -243,7 +243,9 @@ async function processEffectifQueueItem(
         }
       );
 
-      if (effectifQueue.source === SOURCE_APPRENANT.FICHIER) {
+      const seulementHorsConservation =
+        result.error?.issues.every(({ message }) => message === EFFECTIF_HORS_CONSERVATION) ?? false;
+      if (effectifQueue.source === SOURCE_APPRENANT.FICHIER && !seulementHorsConservation) {
         await signalerErreurTransmission(effectifQueue.source_organisme_id, currentDate);
       }
       itemLogger.error({ duration: Date.now() - start, err: result.error }, "item validation error");
