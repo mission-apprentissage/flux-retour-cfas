@@ -23,7 +23,7 @@ const dossierMl = (extra: Record<string, unknown> = {}) => ({
   effectif_id: new ObjectId(),
   created_at: date("2024-01-10"),
   situation: "RDV_PRIS",
-  current_status: { value: "RUPTURANT", date: date("2024-01-05") },
+  current_status: { value: "ABANDON", date: date("2024-07-05") },
   effectif_snapshot: { annee_scolaire: "2023-2024", apprenant: { nom: "DUPONT" } },
   ...extra,
 });
@@ -96,6 +96,28 @@ describe("purgerDossiersSuivi()", () => {
 
     expect(resultat.missionLocale.supprimes).toBe(2);
     expect(await idsMl()).toStrictEqual(ids([declarationRecente, creationRecente, ruptureRecente]));
+  });
+
+  it("part de la rupture la plus récente, déclarée par le CFA ou en cours", async () => {
+    const ruptureEnCours = dossierMl({
+      date_rupture: date("2024-10-14"),
+      current_status: { value: "RUPTURANT", date: date("2025-07-01") },
+    });
+    const declarationPlusRecente = dossierMl({
+      date_rupture: date("2024-09-21"),
+      cfa_rupture_declaration: { date_rupture: date("2026-03-31") },
+    });
+    const statutRecentSansRupture = dossierMl({
+      date_rupture: date("2024-09-21"),
+      current_status: { value: "APPRENTI", date: date("2025-09-01") },
+    });
+    const ruptureEnCoursAncienne = dossierMl({ current_status: { value: "RUPTURANT", date: date("2024-03-01") } });
+    await insererMl([ruptureEnCours, declarationPlusRecente, statutRecentSansRupture, ruptureEnCoursAncienne]);
+
+    const resultat = await purgerDossiersSuivi({ maintenant });
+
+    expect(resultat.missionLocale.supprimes).toBe(2);
+    expect(await idsMl()).toStrictEqual(ids([ruptureEnCours, declarationPlusRecente]));
   });
 
   it("supprime aussi les dossiers masqués rompus depuis plus de deux ans", async () => {
