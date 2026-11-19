@@ -2,7 +2,11 @@ import type { CronDef, JobDef } from "job-processor";
 import { ObjectId } from "mongodb";
 import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
+import logger from "@/common/logger";
+import config from "@/config";
+
 import { scoreExistingEffectifs } from "../classifier/score-effectifs";
+import { purgerEffectifsAnciens } from "../clear/purge-effectifs-anciens";
 import { updateComputedFields } from "../computed/update-computed";
 import { SEUIL_JOURS_DEFAUT, traiterDoublonsObsoletes } from "../effectifs/doublons-obsoletes";
 import {
@@ -90,6 +94,9 @@ export const effectifsJobs = {
       return traiterDoublonsObsoletes({ seuilJours, appliquer });
     },
   },
+  "purge:effectifs-anciens": {
+    handler: async (job) => purgerEffectifsAnciens({ dryRun: payloadBoolean(job.payload, "dryRun") ?? false }),
+  },
 } satisfies Record<string, JobDef>;
 
 export const effectifsCrons = {
@@ -114,5 +121,17 @@ export const effectifsCrons = {
     checkinMargin: 15,
     maxRuntimeInMinutes: 60,
     handler: async () => traiterDoublonsObsoletes({ appliquer: true }),
+  },
+  "Purger les effectifs finis depuis plus de deux ans le samedi à 14h": {
+    cron_string: "0 14 * * 6",
+    checkinMargin: 30,
+    maxRuntimeInMinutes: 120,
+    handler: async () => {
+      if (config.env !== "production") {
+        logger.warn("La purge des effectifs anciens ne tourne qu'en production");
+        return;
+      }
+      await purgerEffectifsAnciens();
+    },
   },
 } satisfies Record<string, CronDef>;

@@ -7946,6 +7946,78 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
 }
 `;
 
+exports[`validation-schema > should create validation schema for effectifsPurgesStats > effectifsPurgesStats 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "annee_scolaire": {
+      "bsonType": "string",
+      "description": "Année scolaire du dossier supprimé",
+    },
+    "niveau": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Niveau de formation du dossier",
+    },
+    "nombre": {
+      "bsonType": "int",
+      "description": "Nombre de dossiers supprimés pour ces dimensions",
+    },
+    "organisme_id": {
+      "bsonType": "objectId",
+      "description": "Organisme du dossier supprimé",
+    },
+    "siret": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "SIRET de l'organisme au moment de la suppression",
+    },
+    "source": {
+      "bsonType": "string",
+      "description": "ERP, FICHIER ou DECA",
+    },
+    "statut": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Statut en cours du dossier au moment de la suppression",
+    },
+    "uai": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "UAI de l'organisme au moment de la suppression",
+    },
+    "updated_at": {
+      "bsonType": "date",
+      "description": "Date du dernier ajout",
+    },
+  },
+  "required": [
+    "_id",
+    "organisme_id",
+    "uai",
+    "siret",
+    "annee_scolaire",
+    "source",
+    "statut",
+    "niveau",
+    "nombre",
+    "updated_at",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for effectifsQueue > effectifsQueue 1`] = `
 {
   "additionalProperties": true,
