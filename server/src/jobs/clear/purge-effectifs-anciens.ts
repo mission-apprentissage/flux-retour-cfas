@@ -1,4 +1,4 @@
-import { Collection, Filter, MongoWriteConcernError, ObjectId } from "mongodb";
+import { Collection, Filter, ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
 import { estAnneeScolaireActive, getFinAnneeScolaire } from "shared/utils/anneeScolaire";
@@ -153,36 +153,31 @@ const supprimerLot = async (
   if (contexte.dryRun || candidats.length === 0) return candidats;
 
   const ids = candidats.map((dossier) => dossier._id);
+  let supprimes: DossierPurge[] = [];
   try {
-    await passe
+    const { deletedCount } = await passe
       .collection()
       .deleteMany(
         { ...filtre, _id: { $in: ids }, transmitted_at: { $not: { $gt: contexte.lancement } } },
         { writeConcern: WRITE_CONCERN }
       );
-  } catch (error) {
-    if (error instanceof MongoWriteConcernError) {
-      logger.error(
-        { err: error, collection: passe.nom, deleted: error.result?.n },
-        "Purge des effectifs anciens : acquittement majority dépassé, compteurs du lot non incrémentés"
+    const restants = await passe
+      .collection()
+      .find({ _id: { $in: ids } }, { projection: { _id: 1 } })
+      .toArray();
+    const idsRestants = new Set(restants.map((dossier) => dossier._id.toString()));
+    supprimes = candidats.filter((dossier) => !idsRestants.has(dossier._id.toString()));
+    if (deletedCount !== supprimes.length) {
+      logger.warn(
+        { collection: passe.nom, deletedCount, absents: supprimes.length },
+        "Purge des effectifs anciens : des dossiers du lot ont disparu sans cette purge"
       );
     }
-    throw error;
-  }
-
-  const restants = await passe
-    .collection()
-    .find({ _id: { $in: ids } }, { projection: { _id: 1 } })
-    .toArray();
-  const idsRestants = new Set(restants.map((dossier) => dossier._id.toString()));
-  const supprimes = candidats.filter((dossier) => !idsRestants.has(dossier._id.toString()));
-
-  try {
     await incrementerCompteurs(passe, supprimes);
   } catch (error) {
     logger.error(
-      { err: error, collection: passe.nom, supprimes: supprimes.length },
-      "Purge des effectifs anciens : lot supprimé sans incrément des compteurs"
+      { err: error, collection: passe.nom, candidats: ids.length, supprimes: supprimes.length },
+      "Purge des effectifs anciens : lot interrompu, ses compteurs peuvent manquer"
     );
     throw error;
   }

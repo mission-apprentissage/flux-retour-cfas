@@ -7,6 +7,7 @@ import config from "@/config";
 
 import { scoreExistingEffectifs } from "../classifier/score-effectifs";
 import { purgerEffectifsAnciens } from "../clear/purge-effectifs-anciens";
+import { refuserPurgesConcurrentes } from "../clear/verrou-purges";
 import { updateComputedFields } from "../computed/update-computed";
 import { SEUIL_JOURS_DEFAUT, traiterDoublonsObsoletes } from "../effectifs/doublons-obsoletes";
 import {
@@ -95,7 +96,10 @@ export const effectifsJobs = {
     },
   },
   "purge:effectifs-anciens": {
-    handler: async (job) => purgerEffectifsAnciens({ dryRun: payloadBoolean(job.payload, "dryRun") ?? false }),
+    handler: async (job) => {
+      await refuserPurgesConcurrentes(job.name);
+      return purgerEffectifsAnciens({ dryRun: payloadBoolean(job.payload, "dryRun") ?? false });
+    },
   },
 } satisfies Record<string, JobDef>;
 
