@@ -16,10 +16,10 @@ import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocale
 import { addDaysUTC, getAnneeScolaireFromDate, subtractDaysUTC, subtractYearsUTC } from "shared/utils";
 
 import { withComputedFields } from "@/common/actions/effectifs.actions";
-import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import { getCurrentStatutFromParcours } from "@/common/actions/shared/rupture-pipeline.utils";
 import parentLogger from "@/common/logger";
 import { missionLocaleEffectifsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
+import { normalisePersonIdentifiant } from "@/common/utils/identifiantUtils";
 import { hash } from "@/common/utils/passwordUtils";
 import config from "@/config";
 

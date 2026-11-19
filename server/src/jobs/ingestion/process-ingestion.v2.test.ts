@@ -4,7 +4,7 @@ import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierAppre
 import { describe, expect, it, vi } from "vitest";
 
 import { getCommune } from "@/common/apis/apiAlternance/apiAlternance";
-import { formationV2Db, personV2Db } from "@/common/model/collections";
+import { formationV2Db } from "@/common/model/collections";
 import { getDatabase } from "@/common/mongodb";
 import { useMongo } from "@tests/jest/setupMongo";
 
@@ -19,7 +19,7 @@ vi.mock("@/common/apis/apiAlternance/apiAlternance");
 useMongo();
 
 describe("process-ingestion.v2", () => {
-  it("crée la personne et la formation de la transmission, sans effectif v2", async () => {
+  it("crée la formation de la transmission, sans personne ni effectif v2", async () => {
     const dossier = {
       nom_apprenant: "DOE",
       prenom_apprenant: "John",
@@ -49,17 +49,7 @@ describe("process-ingestion.v2", () => {
       ...dossier,
     });
 
-    const persons = await personV2Db().find({}).toArray();
-    expect(persons).toEqual([
-      {
-        _id: expect.any(ObjectId),
-        identifiant: {
-          nom: dossier.nom_apprenant,
-          prenom: dossier.prenom_apprenant,
-          date_de_naissance: dossier.date_de_naissance_apprenant,
-        },
-      },
-    ]);
+    expect(await getDatabase().collection("personV2").countDocuments()).toBe(0);
 
     const formations = await formationV2Db().find({}).toArray();
     expect(formations).toEqual([

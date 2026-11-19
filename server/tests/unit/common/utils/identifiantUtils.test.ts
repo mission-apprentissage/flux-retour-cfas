@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
+import { normalisePersonIdentifiant } from "@/common/utils/identifiantUtils";
 
 describe("normalisePersonIdentifiant", () => {
   describe("normalisation du nom et prénom", () => {

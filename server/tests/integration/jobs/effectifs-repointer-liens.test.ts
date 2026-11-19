@@ -56,7 +56,6 @@ async function insererDossierFt(effectif: IEffectif, ftData: IFranceTravailEffec
     romes: { code: ["A1101"] },
     current_status: { value: STATUT_APPRENANT.INSCRIT, date: DATE_STATUT },
     ft_data: ftData,
-    person_id: null,
   });
   await franceTravailEffectifsDb().insertOne(dossier);
   return dossier;

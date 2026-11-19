@@ -11692,16 +11692,32 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
       },
       "bsonType": "object",
     },
-    "person_id": {
+    "identifiant_normalise": {
       "anyOf": [
         {
-          "bsonType": "objectId",
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "date_de_naissance": {
+              "bsonType": "date",
+            },
+            "nom": {
+              "bsonType": "string",
+            },
+            "prenom": {
+              "bsonType": "string",
+            },
+          },
+          "required": [
+            "nom",
+            "prenom",
+            "date_de_naissance",
+          ],
         },
         {
           "bsonType": "null",
         },
       ],
-      "description": "Identifiant unique",
     },
     "romes": {
       "additionalProperties": false,
@@ -20319,101 +20335,6 @@ exports[`validation-schema > should create validation schema for organismes > or
     "contacts_from_referentiel",
     "updated_at",
     "created_at",
-  ],
-}
-`;
-
-exports[`validation-schema > should create validation schema for personV2 > personV2 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "identifiant": {
-      "additionalProperties": false,
-      "bsonType": "object",
-      "properties": {
-        "date_de_naissance": {
-          "bsonType": "date",
-        },
-        "nom": {
-          "bsonType": "string",
-        },
-        "prenom": {
-          "bsonType": "string",
-        },
-      },
-      "required": [
-        "nom",
-        "prenom",
-        "date_de_naissance",
-      ],
-    },
-    "parcours": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "chronologie": {
-              "bsonType": "array",
-              "items": {
-                "additionalProperties": false,
-                "bsonType": "object",
-                "properties": {
-                  "date": {
-                    "bsonType": "date",
-                  },
-                  "id": {
-                    "bsonType": "objectId",
-                  },
-                },
-                "required": [
-                  "id",
-                  "date",
-                ],
-              },
-            },
-            "en_cours": {
-              "anyOf": [
-                {
-                  "additionalProperties": false,
-                  "bsonType": "object",
-                  "properties": {
-                    "date": {
-                      "bsonType": "date",
-                    },
-                    "id": {
-                      "bsonType": "objectId",
-                    },
-                  },
-                  "required": [
-                    "id",
-                    "date",
-                  ],
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-            },
-          },
-          "required": [
-            "en_cours",
-            "chronologie",
-          ],
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
-  },
-  "required": [
-    "_id",
-    "identifiant",
   ],
 }
 `;
