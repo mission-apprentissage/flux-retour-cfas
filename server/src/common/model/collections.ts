@@ -11,6 +11,9 @@ import demandesActivationCfaModelDescriptor, {
 import effectifsModelDescriptor, { IEffectif } from "shared/models/data/effectifs.model";
 import effectifsArchiveModelDescriptor, { IEffectifArchive } from "shared/models/data/effectifsArchive.model";
 import effectifsDECAModelDescriptor, { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
+import effectifsPurgesStatsModelDescriptor, {
+  IEffectifsPurgesStats,
+} from "shared/models/data/effectifsPurgesStats.model";
 import effectifsQueueModelDescriptor, { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
 import erpModelDescriptor, { IErp } from "shared/models/data/erp.model";
 import formationsCatalogueModelDescriptor, { IFormationCatalogue } from "shared/models/data/formationsCatalogue.model";
@@ -67,6 +70,7 @@ export const modelDescriptors = [
   rncpModelDescriptor,
   effectifsDECAModelDescriptor,
   effectifsArchiveModelDescriptor,
+  effectifsPurgesStatsModelDescriptor,
   voeuxAffelnetDescriptor,
   telechargementListesNominativesLogsDescriptor,
   opcosDescriptor,
@@ -106,6 +110,8 @@ export const effectifsArchiveDb = () =>
   getDbCollection<IEffectifArchive>(effectifsArchiveModelDescriptor.collectionName);
 export const effectifsDECADb = () => getDbCollection<IEffectifDECA>(effectifsDECAModelDescriptor.collectionName);
 export const effectifsQueueDb = () => getDbCollection<IEffectifQueue>(effectifsQueueModelDescriptor.collectionName);
+export const effectifsPurgesStatsDb = () =>
+  getDbCollection<IEffectifsPurgesStats>(effectifsPurgesStatsModelDescriptor.collectionName);
 export const communesVoiesDb = () => getDbCollection<ICommunesVoies>(communesVoiesModelDescriptor.collectionName);
 export const rncpDb = () => getDbCollection<IRncp>(rncpModelDescriptor.collectionName);
 export const auditLogsDb = () => getDbCollection<IAuditLog>(auditLogsModelDescriptor.collectionName);

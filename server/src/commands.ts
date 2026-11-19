@@ -333,6 +333,13 @@ program
   .action(createJobAction("purge:queues"));
 
 program
+  .command("purge:effectifs-anciens")
+  .description("Supprime les effectifs ERP et DECA finis depuis plus de deux ans, en gardant des compteurs agrégés")
+  .option("--dry-run", "Compte par année scolaire et par source sans supprimer", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("purge:effectifs-anciens"));
+
+program
   .command("classifier:score-effectifs")
   .description("Score les effectifs ML existants sans score via le classifier")
   .option("--dryRun", "Mode simulation sans écriture", false)
