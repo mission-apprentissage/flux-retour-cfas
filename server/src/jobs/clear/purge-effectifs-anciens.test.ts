@@ -240,6 +240,7 @@ describe("purgerEffectifsAnciens()", () => {
       parAnnee: { "2021-2022": { FICHIER: 1 }, "2022-2023": { ERP: 1 } },
     });
     expect(resultat.effectifsDECA.total).toBe(1);
+    expect(resultat.voeuxDelies).toStrictEqual({ effectif_id: 1, effectif_deca_id: 0 });
     expect(await idsRestants()).toStrictEqual({
       effectifs: ids.map((id) => id.toString()),
       deca: [idDeca.toString()],

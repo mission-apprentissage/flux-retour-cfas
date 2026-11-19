@@ -77,7 +77,12 @@ describe("purgerDossiersSuivi()", () => {
 
     const resultat = await purgerDossiersSuivi({ maintenant });
 
-    expect(resultat.missionLocale).toStrictEqual({ supprimes: 1, gardesAnneeActive: 0, liesSupprimes: 1 });
+    expect(resultat.missionLocale).toStrictEqual({
+      supprimes: 1,
+      gardesAnneeActive: 0,
+      liesSupprimes: 1,
+      parAnnee: { "2023-2024": { inconnue: 1 } },
+    });
     expect(await idsMl()).toStrictEqual([recent._id.toString()]);
     expect(
       (await missionLocaleEffectifsLogDb().find({}).toArray()).map((doc) => doc.mission_locale_effectif_id)
@@ -137,7 +142,12 @@ describe("purgerDossiersSuivi()", () => {
 
     const resultat = await purgerDossiersSuivi({ maintenant });
 
-    expect(resultat.missionLocale).toStrictEqual({ supprimes: 0, gardesAnneeActive: 1, liesSupprimes: 0 });
+    expect(resultat.missionLocale).toStrictEqual({
+      supprimes: 0,
+      gardesAnneeActive: 1,
+      liesSupprimes: 0,
+      parAnnee: {},
+    });
     expect(await idsMl()).toStrictEqual([actif._id.toString()]);
   });
 
@@ -148,7 +158,12 @@ describe("purgerDossiersSuivi()", () => {
 
     const resultat = await purgerDossiersSuivi({ maintenant });
 
-    expect(resultat.franceTravail).toStrictEqual({ supprimes: 1, gardesAnneeActive: 0, liesSupprimes: 0 });
+    expect(resultat.franceTravail).toStrictEqual({
+      supprimes: 1,
+      gardesAnneeActive: 0,
+      liesSupprimes: 0,
+      parAnnee: { "2023-2024": { inconnue: 1 } },
+    });
     expect(ids(await franceTravailEffectifsDb().find({}).toArray())).toStrictEqual([recent._id.toString()]);
   });
 
@@ -162,17 +177,24 @@ describe("purgerDossiersSuivi()", () => {
     expect(await idsMl()).toStrictEqual([]);
   });
 
-  it("n'écrit rien en simulation", async () => {
+  it("n'écrit rien en simulation et ne compte pas deux fois un dossier masqué", async () => {
     const ancien = dossierMl({ date_rupture: date("2024-01-05") });
-    await insererMl([ancien]);
+    const masqueAncien = dossierMl({ soft_deleted: true, situation: null, date_rupture: date("2024-01-05") });
+    await insererMl([ancien, masqueAncien]);
     await missionLocaleEffectifsLogDb().insertOne(log(ancien._id));
     await insererFt([dossierFt("2024-01-10")]);
 
     const resultat = await purgerDossiersSuivi({ maintenant, dryRun: true });
 
-    expect(resultat.missionLocale).toStrictEqual({ supprimes: 1, gardesAnneeActive: 0, liesSupprimes: 1 });
+    expect(resultat.dossiersMasques.supprimes).toBe(1);
+    expect(resultat.missionLocale).toStrictEqual({
+      supprimes: 1,
+      gardesAnneeActive: 0,
+      liesSupprimes: 1,
+      parAnnee: { "2023-2024": { inconnue: 1 } },
+    });
     expect(resultat.franceTravail.supprimes).toBe(1);
-    expect(await idsMl()).toStrictEqual([ancien._id.toString()]);
+    expect(await idsMl()).toStrictEqual(ids([ancien, masqueAncien]));
     expect(await missionLocaleEffectifsLogDb().countDocuments()).toBe(1);
     expect(await franceTravailEffectifsDb().countDocuments()).toBe(1);
   });

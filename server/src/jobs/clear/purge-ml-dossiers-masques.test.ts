@@ -115,7 +115,10 @@ describe("purgerDossiersMlMasques()", () => {
   it("supprime un dossier masqué sans trace avec ses logs", async () => {
     const effectif = effectifErp(parcoursApprenti);
     await effectifsDb().insertOne(effectif, { bypassDocumentValidation: true });
-    const masque = dossierMasque(effectif._id);
+    const masque = dossierMasque(effectif._id, {
+      identifiant_normalise: { nom: "DUPONT", prenom: "Jean", date_de_naissance: new Date("2006-01-01") },
+      effectif_snapshot: { annee_scolaire: "2024-2025", source: "ERP", apprenant: { nom: "DUPONT" } },
+    });
     const autre = dossierMasque(new ObjectId(), { soft_deleted: false });
     await insererDossiers([masque, autre]);
     const logAutre = log(autre._id);
@@ -128,7 +131,9 @@ describe("purgerDossiersMlMasques()", () => {
       candidats: 1,
       gardes: { rupturant: 0, log: 0 },
       supprimes: 1,
+      avecIdentite: 1,
       logsSupprimes: 1,
+      parAnnee: { "2024-2025": { ERP: 1 } },
     });
     expect(await idsDossiers()).toStrictEqual([autre._id.toString()]);
     expect(await missionLocaleEffectifsLogDb().find({}).toArray()).toStrictEqual([logAutre]);
@@ -197,7 +202,9 @@ describe("purgerDossiersMlMasques()", () => {
       candidats: 1,
       gardes: { rupturant: 0, log: 0 },
       supprimes: 1,
+      avecIdentite: 0,
       logsSupprimes: 1,
+      parAnnee: { inconnue: { inconnue: 1 } },
     });
     expect(await idsDossiers()).toStrictEqual([masque._id.toString()]);
     expect(await missionLocaleEffectifsLogDb().countDocuments()).toBe(1);

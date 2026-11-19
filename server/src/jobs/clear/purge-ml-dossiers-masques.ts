@@ -9,6 +9,8 @@ import logger from "@/common/logger";
 import { effectifsDb, missionLocaleEffectifsDb, missionLocaleEffectifsLogDb } from "@/common/model/collections";
 import { sleep } from "@/common/utils/asyncUtils";
 
+import { ventiler, type Ventilation } from "./ventilation";
+
 const TAILLE_LOT = 1000;
 const PAUSE_MS = 200;
 const WRITE_CONCERN = { w: "majority", wtimeoutMS: 30_000 } as const;
@@ -56,14 +58,19 @@ const FILTRE_LOG_NON_VIDE = {
   $or: CHAMPS_LOG.map((champ) => ({ [champ]: { $ne: null } })),
 } as Filter<IMissionLocaleEffectifLog>;
 
-type DossierMasque = Pick<IMissionLocaleEffectif, "_id" | "effectif_id">;
+type DossierMasque = Pick<IMissionLocaleEffectif, "_id" | "effectif_id"> & {
+  identifiant_normalise?: { nom?: string } | null;
+  effectif_snapshot?: { annee_scolaire?: string | null; source?: string | null } | null;
+};
 
 export type ResultatPurgeDossiersMasques = {
   dryRun: boolean;
   candidats: number;
   gardes: { rupturant: number; log: number };
   supprimes: number;
+  avecIdentite: number;
   logsSupprimes: number;
+  parAnnee: Ventilation;
 };
 
 const idsRupturants = async (dossiers: DossierMasque[], maintenant: Date): Promise<Set<string>> => {
@@ -100,21 +107,37 @@ const idsAvecLogNonVide = async (dossiers: DossierMasque[]): Promise<Set<string>
   return new Set(ids.map((id) => id.toString()));
 };
 
-export const purgerDossiersMlMasques = async ({
+export const executerPurgeDossiersMlMasques = async ({
   dryRun = false,
-}: { dryRun?: boolean } = {}): Promise<ResultatPurgeDossiersMasques> => {
+  maintenant = new Date(),
+}: { dryRun?: boolean; maintenant?: Date } = {}): Promise<{
+  resultat: ResultatPurgeDossiersMasques;
+  idsSupprimes: Set<string>;
+}> => {
   const resultat: ResultatPurgeDossiersMasques = {
     dryRun,
     candidats: 0,
     gardes: { rupturant: 0, log: 0 },
     supprimes: 0,
+    avecIdentite: 0,
     logsSupprimes: 0,
+    parAnnee: {},
   };
+  const idsSupprimes = new Set<string>();
   let lot: DossierMasque[] = [];
+
+  const compterSupprimes = (dossiers: DossierMasque[]) => {
+    for (const dossier of dossiers) {
+      idsSupprimes.add(dossier._id.toString());
+      resultat.supprimes++;
+      if (dossier.identifiant_normalise?.nom) resultat.avecIdentite++;
+      ventiler(resultat.parAnnee, dossier.effectif_snapshot?.annee_scolaire, dossier.effectif_snapshot?.source);
+    }
+  };
 
   const traiterLot = async () => {
     resultat.candidats += lot.length;
-    const rupturants = await idsRupturants(lot, new Date());
+    const rupturants = await idsRupturants(lot, maintenant);
     const avecLog = await idsAvecLogNonVide(lot);
     const aSupprimer: DossierMasque[] = [];
     for (const dossier of lot) {
@@ -131,7 +154,7 @@ export const purgerDossiersMlMasques = async ({
 
     const ids = aSupprimer.map(({ _id }) => _id);
     if (dryRun) {
-      resultat.supprimes += ids.length;
+      compterSupprimes(aSupprimer);
       resultat.logsSupprimes += await missionLocaleEffectifsLogDb().countDocuments({
         mission_locale_effectif_id: { $in: ids },
       });
@@ -146,12 +169,12 @@ export const purgerDossiersMlMasques = async ({
       .find({ _id: { $in: ids } }, { projection: { _id: 1 } })
       .toArray();
     const idsRestants = new Set(restants.map(({ _id }) => _id.toString()));
-    const supprimes = ids.filter((id) => !idsRestants.has(id.toString()));
-    resultat.supprimes += supprimes.length;
+    const supprimes = aSupprimer.filter(({ _id }) => !idsRestants.has(_id.toString()));
+    compterSupprimes(supprimes);
 
     if (supprimes.length > 0) {
       const { deletedCount } = await missionLocaleEffectifsLogDb().deleteMany(
-        { mission_locale_effectif_id: { $in: supprimes } },
+        { mission_locale_effectif_id: { $in: supprimes.map(({ _id }) => _id) } },
         { writeConcern: WRITE_CONCERN }
       );
       resultat.logsSupprimes += deletedCount;
@@ -160,7 +183,13 @@ export const purgerDossiersMlMasques = async ({
   };
 
   const curseur = missionLocaleEffectifsDb().find(FILTRE_DOSSIER_MASQUE_SANS_TRACE, {
-    projection: { _id: 1, effectif_id: 1 },
+    projection: {
+      _id: 1,
+      effectif_id: 1,
+      "identifiant_normalise.nom": 1,
+      "effectif_snapshot.annee_scolaire": 1,
+      "effectif_snapshot.source": 1,
+    },
     batchSize: TAILLE_LOT,
   });
   for await (const dossier of curseur) {
@@ -173,5 +202,8 @@ export const purgerDossiersMlMasques = async ({
     resultat,
     dryRun ? "Purge des dossiers ML masqués sans trace simulée" : "Purge des dossiers ML masqués sans trace terminée"
   );
-  return resultat;
+  return { resultat, idsSupprimes };
 };
+
+export const purgerDossiersMlMasques = async (options: { dryRun?: boolean; maintenant?: Date } = {}) =>
+  (await executerPurgeDossiersMlMasques(options)).resultat;
