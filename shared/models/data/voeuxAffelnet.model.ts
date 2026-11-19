@@ -41,6 +41,7 @@ const zVoeuAffelnetRaw = z.object({
   uai_cio_etab_accueil: z.string().nullish(),
   uai_etatblissement_formateur: z.string().nullish(),
   uai_etablissement_responsable: z.string().nullish(),
+  libelle_public_etablissement: z.string().nullish(),
   annee_scolaire_rentree: z.string().nullish(),
 });
 const zVoeuAffelnet = z.object({

@@ -214,7 +214,13 @@ const AFFELNET_VOEUX_AGGREGATION = [
       uai_etablissement_responsable: "$apprenant.raw.uai_etablissement_responsable",
       uai_cio_etablissement_accueil: "$apprenant.raw.uai_cio_etab_accueil",
       type_etablissement_accueil: "$apprenant.raw.type_etab_accueil",
-      libelle_pulic_etablissement_accueil: "$apprenant.raw.libelle_etab_accueil",
+      libelle_pulic_etablissement_accueil: {
+        $cond: [
+          { $gt: [{ $strLenCP: { $ifNull: ["$apprenant.raw.libelle_public_etablissement", ""] } }, 0] },
+          "$apprenant.raw.libelle_public_etablissement",
+          "$apprenant.raw.libelle_etab_accueil",
+        ],
+      },
       contrats: "$effectif.contrats",
       contrats_deca: "$effectifDeca.contrats",
     },
