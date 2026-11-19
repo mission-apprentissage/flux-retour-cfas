@@ -347,6 +347,15 @@ program
   .action(createJobAction("purge:ml-dossiers-masques"));
 
 program
+  .command("purge:dossiers-suivi")
+  .description(
+    "Supprime les dossiers ML masqués sans trace, puis les dossiers ML et France Travail rompus ou créés depuis plus de deux ans"
+  )
+  .option("--dry-run", "Compte les dossiers et les logs à supprimer sans rien écrire", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("purge:dossiers-suivi"));
+
+program
   .command("classifier:score-effectifs")
   .description("Score les effectifs ML existants sans score via le classifier")
   .option("--dryRun", "Mode simulation sans écriture", false)

@@ -3,6 +3,7 @@ import type { CronDef, JobDef } from "job-processor";
 import { effectifsDb } from "@/common/model/collections";
 
 import { verifyMissionLocaleEffectifMail } from "../bal/bal.job";
+import { purgerDossiersSuivi } from "../clear/purge-dossiers-suivi";
 import { purgerDossiersMlMasques } from "../clear/purge-ml-dossiers-masques";
 import { hydrateCommunesVoies } from "../hydrate/communes-voies/hydrate-communes-voies";
 import {
@@ -37,6 +38,9 @@ import { payloadBoolean, payloadDate } from "./payload";
 export const missionLocaleJobs = {
   "purge:ml-dossiers-masques": {
     handler: async (job) => purgerDossiersMlMasques({ dryRun: payloadBoolean(job.payload, "dryRun") ?? false }),
+  },
+  "purge:dossiers-suivi": {
+    handler: async (job) => purgerDossiersSuivi({ dryRun: payloadBoolean(job.payload, "dryRun") ?? false }),
   },
   "hydrate:mission-locale-effectif-snapshot": {
     handler: async (job) => {

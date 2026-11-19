@@ -1,4 +1,4 @@
-import type { CronDef, JobDef } from "job-processor";
+import { addJob, type CronDef, type JobDef } from "job-processor";
 import { ObjectId } from "mongodb";
 import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
@@ -122,16 +122,17 @@ export const effectifsCrons = {
     maxRuntimeInMinutes: 60,
     handler: async () => traiterDoublonsObsoletes({ appliquer: true }),
   },
-  "Purger les effectifs finis depuis plus de deux ans le samedi à 14h": {
+  "Purger les données conservées plus de deux ans le samedi à 14h": {
     cron_string: "0 14 * * 6",
     checkinMargin: 30,
-    maxRuntimeInMinutes: 120,
+    maxRuntimeInMinutes: 5,
     handler: async () => {
       if (config.env !== "production") {
-        logger.warn("La purge des effectifs anciens ne tourne qu'en production");
+        logger.warn("Les purges de conservation ne tournent qu'en production");
         return;
       }
-      await purgerEffectifsAnciens();
+      await addJob({ name: "purge:effectifs-anciens", queued: true });
+      await addJob({ name: "purge:dossiers-suivi", queued: true });
     },
   },
 } satisfies Record<string, CronDef>;
