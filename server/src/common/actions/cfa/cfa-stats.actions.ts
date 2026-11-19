@@ -27,13 +27,16 @@ export type CfaTerritoire = Territoire;
 
 /**
  * Établissements de formation retenus sur un territoire : présents dans le référentiel et non fermés.
- * Source provisoire de l'estimation du nombre de CFA, en attendant l'arbitrage métier (Carif-Oref, catalogue…).
  */
 export const buildCfaTerritoireMatch = ({ regions, departements }: CfaTerritoire = {}) => ({
   est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.PRESENT,
   ferme: { $ne: true },
   ...(regions?.length ? { "adresse.region": { $in: regions } } : {}),
   ...(departements?.length ? { "adresse.departement": { $in: departements } } : {}),
+});
+
+export const buildCfaActifMatch = () => ({
+  $or: [{ formations_count: { $gt: 0 } }, { effectifs_annees_actives_count: { $gt: 0 } }, { has_account: true }],
 });
 
 const countOrganismesWithCollaboration = async (organismeIds: ObjectId[], endExclusive: Date) =>
@@ -86,7 +89,10 @@ export async function getCfaAdoptionStats(
   const startDate = await calculateStartDateAsync(period, evaluationDate);
 
   const organismes = await organismesDb()
-    .find(buildCfaTerritoireMatch(territoire), { projection: { _id: 1, has_account: 1 } })
+    .find(
+      { $and: [buildCfaTerritoireMatch(territoire), buildCfaActifMatch()] },
+      { projection: { _id: 1, has_account: 1 } }
+    )
     .toArray();
   const organismeIds = organismes.map((organisme) => organisme._id);
 
@@ -197,7 +203,7 @@ export async function listCfaEtablissements({
   sortBy,
   sortOrder,
 }: CfaEtablissementsFilters): Promise<ICfaEtablissement[]> {
-  const filters: Document[] = [buildCfaTerritoireMatch({ regions, departements })];
+  const filters: Document[] = [buildCfaTerritoireMatch({ regions, departements }), buildCfaActifMatch()];
   if (natures?.length) filters.push(buildOrganismeNatureFilter(natures));
   if (utilisateur !== undefined) filters.push({ has_account: utilisateur ? true : { $ne: true } });
   if (qualiopi !== undefined) filters.push({ qualiopi: qualiopi ? true : { $ne: true } });

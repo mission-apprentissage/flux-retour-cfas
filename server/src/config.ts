@@ -101,7 +101,7 @@ const config = {
 
   // API métiers externes
   mnaCatalogApi: {
-    endpoint: "https://catalogue.apprentissage.beta.gouv.fr/api",
+    endpoint: "https://catalogue-apprentissage.intercariforef.org/api",
   },
   mnaReferentielApi: {
     endpoint: "https://referentiel.apprentissage.onisep.fr/api/v1",

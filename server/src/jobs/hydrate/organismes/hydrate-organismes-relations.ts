@@ -1,4 +1,5 @@
 import * as Boom from "@hapi/boom";
+import { subMonths } from "date-fns";
 import { ObjectId, type AnyBulkWriteOperation } from "mongodb";
 import { NATURE_ORGANISME_DE_FORMATION } from "shared/constants";
 import { IOrganisme, type IFormationCatalogue, type IRelatedOrganisme } from "shared/models";
@@ -10,6 +11,8 @@ import { stripEmptyFields } from "@/common/utils/miscUtils";
 const logger = parentLogger.child({
   module: "job:hydrate:organismes-relations",
 });
+
+const MARGE_FIN_DE_SESSION_MOIS = 6;
 
 interface OrganismeInfos {
   _id?: ObjectId;
@@ -48,9 +51,86 @@ type IReponsableToFormateurs = {
   }>;
 };
 
+type IPaireFormation = {
+  _id: {
+    gestionnaire_siret: IFormationCatalogue["etablissement_gestionnaire_siret"];
+    gestionnaire_uai?: IFormationCatalogue["etablissement_gestionnaire_uai"];
+    formateur_siret: IFormationCatalogue["etablissement_formateur_siret"];
+    formateur_uai?: IFormationCatalogue["etablissement_formateur_uai"];
+    lieu_siret?: IFormationCatalogue["etablissement_lieu_formation_siret"];
+    lieu_uai?: IFormationCatalogue["etablissement_lieu_formation_uai"];
+  };
+};
+
+type IRolesActifs = {
+  gestionnaires: Set<string>;
+  formateurs: Set<string>;
+  lieux: Set<string>;
+};
+
+type INature = NonNullable<IOrganisme["nature"]>;
+
+type ITransitionNature = {
+  avant: INature | null;
+  apres: INature;
+  nombre: number;
+};
+
+const fetchRolesActifs = async (dateCalcul: Date): Promise<IRolesActifs> => {
+  const finDeSessionMin = subMonths(dateCalcul, MARGE_FIN_DE_SESSION_MOIS).toISOString();
+  const paires = await formationsCatalogueDb()
+    .aggregate<IPaireFormation>([
+      { $match: { $or: [{ published: true }, { date_fin: { $gte: finDeSessionMin } }] } },
+      {
+        $group: {
+          _id: {
+            gestionnaire_siret: "$etablissement_gestionnaire_siret",
+            gestionnaire_uai: "$etablissement_gestionnaire_uai",
+            formateur_siret: "$etablissement_formateur_siret",
+            formateur_uai: "$etablissement_formateur_uai",
+            lieu_siret: "$etablissement_lieu_formation_siret",
+            lieu_uai: "$etablissement_lieu_formation_uai",
+          },
+        },
+      },
+    ])
+    .toArray();
+
+  return {
+    gestionnaires: new Set(
+      paires.map(({ _id }) => getOrganismeKey({ siret: _id.gestionnaire_siret, uai: _id.gestionnaire_uai }))
+    ),
+    formateurs: new Set(
+      paires.map(({ _id }) => getOrganismeKey({ siret: _id.formateur_siret, uai: _id.formateur_uai }))
+    ),
+    lieux: new Set(
+      paires.flatMap(({ _id }) =>
+        _id.lieu_siret ? [getOrganismeKey({ siret: _id.lieu_siret, uai: _id.lieu_uai })] : []
+      )
+    ),
+  };
+};
+
+const bilanDesNatures = (changements: Array<Omit<ITransitionNature, "nombre">>) => {
+  const repartition: Partial<Record<INature, number>> = {};
+  const transitions = new Map<string, ITransitionNature>();
+  for (const { avant, apres } of changements) {
+    repartition[apres] = (repartition[apres] ?? 0) + 1;
+    if (avant === apres) continue;
+    const cle = `${avant}|${apres}`;
+    const transition = transitions.get(cle) ?? { avant, apres, nombre: 0 };
+    transition.nombre += 1;
+    transitions.set(cle, transition);
+  }
+  return {
+    repartition,
+    transitions: [...transitions.values()].toSorted((a, b) => b.nombre - a.nombre),
+  };
+};
+
 export const hydrateOrganismesRelations = async () => {
   logger.info("Hydratation des relations entre organismes");
-  const [formateurToResponsables, responsableToFormateurs] = await Promise.all([
+  const [formateurToResponsables, responsableToFormateurs, rolesActifs] = await Promise.all([
     formationsCatalogueDb()
       .aggregate<IFormateurToResponsables>([
         {
@@ -93,6 +173,7 @@ export const hydrateOrganismesRelations = async () => {
         },
       ])
       .toArray(),
+    fetchRolesActifs(new Date()),
   ]);
 
   const formateurToResponsablesMap: Map<string, IFormateurToResponsables> = new Map(
@@ -147,7 +228,7 @@ export const hydrateOrganismesRelations = async () => {
       academie: organisme.adresse?.academie,
       reseaux: organisme.reseaux,
       fiable: organisme.fiabilisation_statut === "FIABLE",
-      nature: getNature(organisme, formateurToResponsablesMap, responsableToFormateursMap),
+      nature: getNature(organisme, rolesActifs),
       last_transmission_date: organisme.last_transmission_date,
       ferme: organisme.ferme,
     });
@@ -174,6 +255,15 @@ export const hydrateOrganismesRelations = async () => {
   if (bulk.length > 0) {
     await organismesDb().bulkWrite(bulk);
   }
+
+  const bilan = bilanDesNatures(
+    organismes.map((organisme) => ({
+      avant: organisme.nature ?? null,
+      apres: getNature(organisme, rolesActifs),
+    }))
+  );
+  logger.info(bilan, "Nature des organismes calculée");
+  return bilan;
 };
 
 function getOrganismeKey(organisme: { siret?: string; uai?: string | null }): string {
@@ -192,8 +282,6 @@ function getOrganismeRelationBulkWriteOperation(
   if (!organismeInfos) {
     throw Boom.internal(`Organisme ${organismeKey} not found in organismeInfosBySIRETAndUAI`);
   }
-
-  const nature = getNature(organisme, formateurToResponsablesMap, responsableToFormateursMap);
 
   const organismesFormateurs = buildOrganismeFormateurs(
     organisme,
@@ -215,7 +303,7 @@ function getOrganismeRelationBulkWriteOperation(
         $set: {
           organismesFormateurs,
           organismesResponsables,
-          nature,
+          nature: organismeInfos.nature,
           updated_at: new Date(),
         },
       },
@@ -225,23 +313,26 @@ function getOrganismeRelationBulkWriteOperation(
 
 function getNature(
   organisme: Pick<IOrganisme, "_id" | "siret" | "uai">,
-  formateurToResponsablesMap: Map<string, IFormateurToResponsables>,
-  responsableToFormateursMap: Map<string, IReponsableToFormateurs>
-): IOrganisme["nature"] {
+  { gestionnaires, formateurs, lieux }: IRolesActifs
+): INature {
   const organismeKey = getOrganismeKey(organisme);
-  const sesFormateurs = responsableToFormateursMap.get(organismeKey)?.formateurs ?? [];
-  const sesResponsables = formateurToResponsablesMap.get(organismeKey)?.responsables ?? [];
+  const estGestionnaire = gestionnaires.has(organismeKey);
+  const estFormateur = formateurs.has(organismeKey);
 
-  if (sesFormateurs.length > 0 && sesResponsables.length > 0) {
+  if (estGestionnaire && estFormateur) {
     return NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR;
   }
 
-  if (sesResponsables.length > 0) {
+  if (estFormateur) {
     return NATURE_ORGANISME_DE_FORMATION.FORMATEUR;
   }
 
-  if (sesFormateurs.length > 0) {
+  if (estGestionnaire) {
     return NATURE_ORGANISME_DE_FORMATION.RESPONSABLE;
+  }
+
+  if (lieux.has(organismeKey)) {
+    return NATURE_ORGANISME_DE_FORMATION.LIEU;
   }
 
   return NATURE_ORGANISME_DE_FORMATION.INCONNUE;

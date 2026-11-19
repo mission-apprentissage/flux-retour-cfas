@@ -173,7 +173,7 @@ async function buildOffreDeFormation(formationCatalogue: IFormationCatalogue): P
         nom_academie: formationCatalogue.nom_academie,
         num_academie: formationCatalogue.num_academie,
       },
-      siret: formationCatalogue.lieu_formation_siret ?? null,
+      siret: formationCatalogue.etablissement_lieu_formation_siret ?? null,
     },
 
     entierement_a_distance: formationCatalogue.entierement_a_distance,
@@ -227,7 +227,7 @@ async function getOffreFormations(siret: string): Promise<OffreFormation[]> {
       $or: [
         { etablissement_formateur_siret: siret },
         { etablissement_gestionnaire_siret: siret },
-        { lieu_formation_siret: siret },
+        { etablissement_lieu_formation_siret: siret },
       ],
     })
     .toArray();
@@ -498,10 +498,7 @@ export async function activateDecaCfaPilotBatch(
 
   for (const input of deduped) {
     const { siret, uai } = input;
-    const organisme = await organismesDb().findOne(
-      { siret, uai },
-      { projection: { _id: 1, siret: 1, uai: 1, nature: 1, ferme: 1, is_allowed_deca: 1, deca_contrats_flechables: 1 } }
-    );
+    const organisme = await organismesDb().findOne({ siret, uai }, { projection: decaEligibilityProjection });
 
     if (!organisme) {
       results.push({ input, status: "not_found" });

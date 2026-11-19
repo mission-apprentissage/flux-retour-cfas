@@ -23,6 +23,7 @@ const NATURE_OPTIONS = [
   { value: "responsable", label: "Responsable" },
   { value: "formateur", label: "Formateur" },
   { value: "responsable_formateur", label: "Responsable formateur" },
+  { value: "lieu_formation", label: "Lieu de formation" },
   { value: "inconnue", label: "Inconnue" },
 ];
 

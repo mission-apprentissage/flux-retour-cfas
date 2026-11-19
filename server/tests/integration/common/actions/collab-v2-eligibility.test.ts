@@ -92,16 +92,19 @@ describe("checkCollabV2Eligibility", () => {
 
   describe("nature", () => {
     const cases = [
-      { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE, expected: false },
-      { nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE, expected: false },
-      { nature: undefined, expected: false },
-      { nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR, expected: true },
-      { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR, expected: true },
+      { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE, referentiel: "present", expected: false },
+      { nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE, referentiel: "present", expected: true },
+      { nature: NATURE_ORGANISME_DE_FORMATION.INCONNUE, referentiel: "absent", expected: false },
+      { nature: undefined, referentiel: "present", expected: true },
+      { nature: undefined, referentiel: undefined, expected: false },
+      { nature: NATURE_ORGANISME_DE_FORMATION.LIEU, referentiel: "absent", expected: true },
+      { nature: NATURE_ORGANISME_DE_FORMATION.FORMATEUR, referentiel: "absent", expected: true },
+      { nature: NATURE_ORGANISME_DE_FORMATION.RESPONSABLE_FORMATEUR, referentiel: undefined, expected: true },
     ] as const;
 
-    cases.forEach(({ nature, expected }) => {
-      it(`returns nature.passed=${expected} for nature=${nature ?? "undefined"}`, async () => {
-        const organisme = await insertOrganisme({ nature });
+    cases.forEach(({ nature, referentiel, expected }) => {
+      it(`returns nature.passed=${expected} for nature=${nature ?? "undefined"}, référentiel=${referentiel ?? "undefined"}`, async () => {
+        const organisme = await insertOrganisme({ nature, est_dans_le_referentiel: referentiel });
         const result = await checkCollabV2Eligibility((organisme._id as ObjectId).toHexString());
         expect(result.checks.nature.passed).toBe(expected);
         expect(result.checks.nature.details?.natureActuelle).toBe(nature ?? null);

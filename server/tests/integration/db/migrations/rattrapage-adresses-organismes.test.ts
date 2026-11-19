@@ -29,6 +29,7 @@ const etablissementParis: IEtablissementRechercheEntreprises = {
   commune: "75110",
   libelle_commune: "PARIS",
   statut_diffusion_etablissement: "O",
+  etat_administratif: "A",
 };
 
 const adresseParis = {

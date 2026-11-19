@@ -3,7 +3,7 @@ import { IOrganisme } from "shared/models/data/organismes.model";
 
 import { organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 
-import { countEffectifsAnneesActives, NATURES_ELIGIBLES } from "./deca-cfa-eligibility";
+import { countEffectifsAnneesActives, isNatureEligible } from "./deca-cfa-eligibility";
 
 export type CollabV2EligibilityCheck = {
   passed: boolean;
@@ -47,6 +47,7 @@ export const collabV2EligibilityProjection = {
   siret: 1,
   uai: 1,
   nature: 1,
+  est_dans_le_referentiel: 1,
   ferme: 1,
   is_allowed_deca: 1,
   is_allowed_collab: 1,
@@ -96,7 +97,7 @@ async function countComptesConfirmes(organismeId: ObjectId): Promise<number> {
  *
  * Critères :
  *   - siret AND uai non vides
- *   - nature ∈ {FORMATEUR, RESPONSABLE_FORMATEUR}
+ *   - nature autre que RESPONSABLE, et connue si l'organisme est absent du référentiel
  *   - établissement ouvert
  *   - au moins un effectif ERP ou DECA sur les années scolaires actives
  *   - programme DECA-CFA actif dès qu'il y a un effectif DECA
@@ -110,6 +111,7 @@ export async function checkCollabV2EligibilityForLoaded(
     | "siret"
     | "uai"
     | "nature"
+    | "est_dans_le_referentiel"
     | "ferme"
     | "is_allowed_deca"
     | "is_allowed_collab"
@@ -125,6 +127,7 @@ export async function checkCollabV2EligibilityForLoaded(
     siret,
     uai,
     nature,
+    est_dans_le_referentiel,
     ferme,
     is_allowed_deca,
     is_allowed_collab,
@@ -169,7 +172,7 @@ export async function checkCollabV2EligibilityForLoaded(
   }
 
   const natureCheck: CollabV2EligibilityCheck = {
-    passed: nature !== undefined && NATURES_ELIGIBLES.includes(nature),
+    passed: isNatureEligible(nature, est_dans_le_referentiel),
     details: { natureActuelle: nature ?? null },
   };
 

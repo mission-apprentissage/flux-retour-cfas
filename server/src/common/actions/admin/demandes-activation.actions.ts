@@ -121,6 +121,7 @@ const PROJECTION_ORGANISME = {
   siret: 1,
   uai: 1,
   nature: 1,
+  est_dans_le_referentiel: 1,
   ferme: 1,
   is_allowed_deca: 1,
   deca_activation_queued_at: 1,
