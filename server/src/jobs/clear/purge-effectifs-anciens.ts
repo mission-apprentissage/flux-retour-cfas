@@ -12,6 +12,7 @@ import {
   getDatesDeFinEffectif,
   getDatesDeFinEffectifDeca,
 } from "@/common/utils/conservationUtils";
+import { compterOrganismesSupprimables } from "@/jobs/hydrate/organismes/organisme-cleanup";
 
 const TAILLE_LOT = 1000;
 const PAUSE_MS = 200;
@@ -71,7 +72,13 @@ const PROJECTION = {
   "_computed.statut.en_cours": 1,
 };
 
-type Contexte = { dryRun: boolean; maintenant: Date; limite: Date; lancement: Date };
+type Contexte = {
+  dryRun: boolean;
+  maintenant: Date;
+  limite: Date;
+  lancement: Date;
+  retiresParOrganisme: Map<string, number>;
+};
 
 type ParSource = Record<string, number>;
 
@@ -83,6 +90,7 @@ export type ResultatPurgeEffectifsAnciens = {
   effectifs: ResultatPurgeCollection;
   effectifsDECA: ResultatPurgeCollection;
   voeuxDelies: { effectif_id: number; effectif_deca_id: number };
+  organismesVides: number;
 };
 
 export const filtreHorsConservation = (
@@ -194,6 +202,8 @@ const purgerAnnee = async (passe: Passe, anneeScolaire: string, contexte: Contex
     for (const dossier of supprimes) {
       const source = passe.source(dossier);
       parSource[source] = (parSource[source] ?? 0) + 1;
+      const organisme = dossier.organisme_id.toString();
+      contexte.retiresParOrganisme.set(organisme, (contexte.retiresParOrganisme.get(organisme) ?? 0) + 1);
     }
     lot = [];
     if (!contexte.dryRun && supprimes.length > 0) await sleep(PAUSE_MS);
@@ -274,7 +284,7 @@ export const purgerEffectifsAnciens = async ({
   if (limite.getTime() >= lancement.getTime()) {
     throw new Error(`Purge des effectifs anciens annulée : date limite ${limite.toISOString()} dans le futur`);
   }
-  const contexte: Contexte = { dryRun, maintenant, limite, lancement };
+  const contexte: Contexte = { dryRun, maintenant, limite, lancement, retiresParOrganisme: new Map() };
 
   const effectifs = await purgerCollection(PASSE_EFFECTIFS, contexte);
   const voeuxEffectifs = await delierVoeuxOrphelins(PASSE_EFFECTIFS, dryRun);
@@ -287,6 +297,11 @@ export const purgerEffectifsAnciens = async ({
     effectifs,
     effectifsDECA,
     voeuxDelies: { effectif_id: voeuxEffectifs, effectif_deca_id: voeuxDeca },
+    organismesVides: await compterOrganismesSupprimables(
+      dryRun
+        ? contexte.retiresParOrganisme
+        : new Map([...contexte.retiresParOrganisme.keys()].map((organisme) => [organisme, 0]))
+    ),
   };
   logger.info(resultat, dryRun ? "Purge des effectifs anciens simulée" : "Purge des effectifs anciens terminée");
   return resultat;
