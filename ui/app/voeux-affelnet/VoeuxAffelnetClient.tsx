@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AUTRE_AFFELNET_LINK } from "shared";
+import { getCampagnesAffelnetConservees } from "shared/utils/campagnesAffelnet";
 
 import { StatCard } from "@/app/_components/statistiques/cards/StatCard";
 import { StatisticsSection } from "@/app/_components/statistiques/sections/StatisticsSection";
@@ -18,8 +19,6 @@ import { downloadObject } from "@/common/utils/browser";
 
 import { AffelnetChart } from "./AffelnetChart";
 import styles from "./voeux-affelnet.module.scss";
-
-const FIRST_AFFELNET_YEAR = 2024;
 
 type AffelnetCount = {
   voeuxFormules: number;
@@ -47,12 +46,8 @@ export default function VoeuxAffelnetClient() {
     [searchParams]
   );
 
-  const currentYear = new Date().getFullYear();
-  const years = useMemo(
-    () => Array.from({ length: currentYear - FIRST_AFFELNET_YEAR + 1 }, (_, index) => currentYear - index),
-    [currentYear]
-  );
-  const [year, setYear] = useState(currentYear);
+  const years = useMemo(() => getCampagnesAffelnetConservees(new Date()), []);
+  const [year, setYear] = useState(years[0]);
 
   const [exportError, setExportError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);

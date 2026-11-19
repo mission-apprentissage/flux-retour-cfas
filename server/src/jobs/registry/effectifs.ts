@@ -133,6 +133,7 @@ export const effectifsCrons = {
       }
       await addJob({ name: "purge:effectifs-anciens", queued: true });
       await addJob({ name: "purge:dossiers-suivi", queued: true });
+      await addJob({ name: "purge:voeux-affelnet", queued: true });
     },
   },
 } satisfies Record<string, CronDef>;

@@ -138,6 +138,7 @@ describe("registre des jobs", () => {
       "purge:ml-dossiers-masques",
       "purge:queues",
       "purge:traces",
+      "purge:voeux-affelnet",
       "seed:recette",
       "send-cfa-daily-recap",
       "send-mission-locale-daily-recap",

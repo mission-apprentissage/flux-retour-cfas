@@ -83,6 +83,7 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   "organismes:revoke-stale-api-keys": { tier: "veille" },
   "purge:effectifs-anciens": { tier: "jour" },
   "purge:dossiers-suivi": { tier: "jour" },
+  "purge:voeux-affelnet": { tier: "jour" },
   "db:validate": { tier: "jour" },
 };
 

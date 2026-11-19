@@ -1,4 +1,5 @@
 export * from "./anneeScolaire";
+export * from "./campagnesAffelnet";
 export * from "./date";
 export * from "./missionLocaleAge";
 export * from "./organisationRegions";
