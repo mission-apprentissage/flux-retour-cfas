@@ -4,7 +4,13 @@ import { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
 import { estAnneeScolaireActive, getFinAnneeScolaire } from "shared/utils/anneeScolaire";
 
 import logger from "@/common/logger";
-import { effectifsDb, effectifsDECADb, effectifsPurgesStatsDb, voeuxAffelnetDb } from "@/common/model/collections";
+import {
+  effectifsArchiveDb,
+  effectifsDb,
+  effectifsDECADb,
+  effectifsPurgesStatsDb,
+  voeuxAffelnetDb,
+} from "@/common/model/collections";
 import { sleep } from "@/common/utils/asyncUtils";
 import {
   estHorsConservation,
@@ -31,13 +37,16 @@ type DossierPurge = {
   } | null;
 };
 
+type LienVoeu = "effectif_id" | "effectif_deca_id";
+
 type Passe = {
-  nom: "effectifs" | "effectifsDECA";
+  nom: "effectifs" | "effectifsDECA" | "effectifsArchive";
   collection: () => Collection<DossierPurge>;
   champsDeFin: string[];
   datesDeFin: (dossier: DossierPurge) => Array<Date | null | undefined>;
   source: (dossier: DossierPurge) => string;
-  lienVoeu: "effectif_id" | "effectif_deca_id";
+  lienVoeu: LienVoeu | null;
+  compteurs: boolean;
 };
 
 const PASSE_EFFECTIFS: Passe = {
@@ -47,6 +56,7 @@ const PASSE_EFFECTIFS: Passe = {
   datesDeFin: getDatesDeFinEffectif,
   source: (dossier) => dossier.source ?? SOURCE_APPRENANT.ERP,
   lienVoeu: "effectif_id",
+  compteurs: true,
 };
 
 const PASSE_DECA: Passe = {
@@ -56,6 +66,15 @@ const PASSE_DECA: Passe = {
   datesDeFin: getDatesDeFinEffectifDeca,
   source: () => SOURCE_APPRENANT.DECA,
   lienVoeu: "effectif_deca_id",
+  compteurs: true,
+};
+
+const PASSE_ARCHIVE: Passe = {
+  ...PASSE_EFFECTIFS,
+  nom: "effectifsArchive",
+  collection: () => effectifsArchiveDb() as unknown as Collection<DossierPurge>,
+  lienVoeu: null,
+  compteurs: false,
 };
 
 const PROJECTION = {
@@ -91,6 +110,7 @@ export type ResultatPurgeEffectifsAnciens = {
   limite: Date;
   effectifs: ResultatPurgeCollection;
   effectifsDECA: ResultatPurgeCollection;
+  effectifsArchive: ResultatPurgeCollection;
   voeuxDelies: { effectif_id: number; effectif_deca_id: number };
   organismesVides: number;
 };
@@ -188,7 +208,7 @@ const supprimerLot = async (
         "Purge des effectifs anciens : des dossiers du lot ont disparu sans cette purge"
       );
     }
-    await incrementerCompteurs(passe, supprimes);
+    if (passe.compteurs) await incrementerCompteurs(passe, supprimes);
   } catch (error) {
     logger.error(
       { err: error, collection: passe.nom, candidats: ids.length, supprimes: supprimes.length },
@@ -209,8 +229,10 @@ const purgerAnnee = async (passe: Passe, anneeScolaire: string, contexte: Contex
     for (const dossier of supprimes) {
       const source = passe.source(dossier);
       parSource[source] = (parSource[source] ?? 0) + 1;
-      const organisme = dossier.organisme_id.toString();
-      contexte.retiresParOrganisme.set(organisme, (contexte.retiresParOrganisme.get(organisme) ?? 0) + 1);
+      if (passe.compteurs) {
+        const organisme = dossier.organisme_id.toString();
+        contexte.retiresParOrganisme.set(organisme, (contexte.retiresParOrganisme.get(organisme) ?? 0) + 1);
+      }
     }
     lot = [];
     if (!contexte.dryRun && supprimes.length > 0) await sleep(PAUSE_MS);
@@ -226,7 +248,7 @@ const purgerAnnee = async (passe: Passe, anneeScolaire: string, contexte: Contex
   return parSource;
 };
 
-const compterVoeuxParEffectif = async (lien: Passe["lienVoeu"]): Promise<Map<string, number>> => {
+const compterVoeuxParEffectif = async (lien: LienVoeu): Promise<Map<string, number>> => {
   const liens = await voeuxAffelnetDb()
     .aggregate<{ _id: ObjectId; nombre: number }>([
       { $match: { [lien]: { $type: "objectId" } } },
@@ -238,7 +260,8 @@ const compterVoeuxParEffectif = async (lien: Passe["lienVoeu"]): Promise<Map<str
 
 const purgerCollection = async (passe: Passe, contexte: Contexte): Promise<ResultatPurgeCollection> => {
   contexte.voeuxLiesSimules = 0;
-  contexte.voeuxParEffectif = contexte.dryRun ? await compterVoeuxParEffectif(passe.lienVoeu) : new Map();
+  contexte.voeuxParEffectif =
+    contexte.dryRun && passe.lienVoeu ? await compterVoeuxParEffectif(passe.lienVoeu) : new Map();
   const annees = (await passe.collection().distinct("annee_scolaire")) as string[];
   const resultat: ResultatPurgeCollection = { total: 0, parAnnee: {} };
 
@@ -259,10 +282,12 @@ const purgerCollection = async (passe: Passe, contexte: Contexte): Promise<Resul
 };
 
 const delierVoeuxOrphelins = async (passe: Passe, dryRun: boolean): Promise<number> => {
+  const lien = passe.lienVoeu;
+  if (!lien) return 0;
   const orphelins = await voeuxAffelnetDb()
     .aggregate<{ _id: ObjectId; cible: ObjectId }>([
-      { $match: { [passe.lienVoeu]: { $type: "objectId" } } },
-      { $project: { cible: `$${passe.lienVoeu}` } },
+      { $match: { [lien]: { $type: "objectId" } } },
+      { $project: { cible: `$${lien}` } },
       {
         $lookup: {
           from: passe.nom,
@@ -283,8 +308,8 @@ const delierVoeuxOrphelins = async (passe: Passe, dryRun: boolean): Promise<numb
     const resultat = await voeuxAffelnetDb().bulkWrite(
       orphelins.slice(debut, debut + TAILLE_LOT).map(({ _id, cible }) => ({
         updateOne: {
-          filter: { _id, [passe.lienVoeu]: cible } as Filter<IVoeuAffelnet>,
-          update: { $unset: { [passe.lienVoeu]: "" } },
+          filter: { _id, [lien]: cible } as Filter<IVoeuAffelnet>,
+          update: { $unset: { [lien]: "" } },
         },
       })),
       { ordered: false, writeConcern: WRITE_CONCERN }
@@ -317,12 +342,14 @@ export const purgerEffectifsAnciens = async ({
   const voeuxEffectifs = (await delierVoeuxOrphelins(PASSE_EFFECTIFS, dryRun)) + contexte.voeuxLiesSimules;
   const effectifsDECA = await purgerCollection(PASSE_DECA, contexte);
   const voeuxDeca = (await delierVoeuxOrphelins(PASSE_DECA, dryRun)) + contexte.voeuxLiesSimules;
+  const effectifsArchive = await purgerCollection(PASSE_ARCHIVE, contexte);
 
   const resultat: ResultatPurgeEffectifsAnciens = {
     dryRun,
     limite,
     effectifs,
     effectifsDECA,
+    effectifsArchive,
     voeuxDelies: { effectif_id: voeuxEffectifs, effectif_deca_id: voeuxDeca },
     organismesVides: await compterOrganismesSupprimables(
       dryRun
