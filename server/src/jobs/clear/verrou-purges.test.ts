@@ -46,13 +46,12 @@ describe("refuserPurgesConcurrentes()", () => {
   it("est appelé par les jobs de purge", async () => {
     await inserer([job("purge:effectifs-anciens", "running"), job("purge:voeux-affelnet", "running")]);
     const simulation = (name: string) => ({ name, payload: { dryRun: true } }) as unknown as IJobsSimple;
-    const signal = new AbortController().signal;
 
     await expect(
-      effectifsJobs["purge:effectifs-anciens"].handler(simulation("purge:effectifs-anciens"), signal)
+      effectifsJobs["purge:effectifs-anciens"].handler(simulation("purge:effectifs-anciens"))
     ).rejects.toThrow("une autre purge");
-    await expect(
-      voeuxAffelnetJobs["purge:voeux-affelnet"].handler(simulation("purge:voeux-affelnet"), signal)
-    ).rejects.toThrow("une autre purge");
+    await expect(voeuxAffelnetJobs["purge:voeux-affelnet"].handler(simulation("purge:voeux-affelnet"))).rejects.toThrow(
+      "une autre purge"
+    );
   });
 });

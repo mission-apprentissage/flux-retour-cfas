@@ -10,7 +10,7 @@ vi.mock("job-processor", async (importOriginal) => ({
 }));
 
 const cron = effectifsCrons["Purger les données conservées plus de deux ans le samedi à 14h"];
-const lancer = () => cron.handler(new AbortController().signal);
+const lancer = () => cron.handler();
 
 describe("cron des purges de conservation", () => {
   const initial = { env: config.env, actives: config.purgesConservationActives };
