@@ -3,6 +3,7 @@ import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
 import { zAdresse } from "../parts/adresseSchema";
+import { zIdentifiantNormalise } from "../parts/identifiantNormalise";
 
 import { zEffectif, zStatutApprenantEnum } from "./effectifs.model";
 
@@ -13,6 +14,14 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ code_region: 1, effectif_id: 1 }, { name: "code_region_effectif_id" }],
   [{ effectif_id: 1 }, { name: "effectif_id" }],
   [{ "current_status.value": 1, "current_status.date": 1 }, { name: "current_status" }],
+  [
+    {
+      "identifiant_normalise.nom": 1,
+      "identifiant_normalise.prenom": 1,
+      "identifiant_normalise.date_de_naissance": 1,
+    },
+    { name: "identifiant_normalise" },
+  ],
 ];
 
 export enum FRANCE_TRAVAIL_SITUATION_ENUM {
@@ -40,7 +49,7 @@ const zFranceTravailEffectif = z.object({
   created_at: z.date(),
   updated_at: z.date().optional(),
   effectif_id: zObjectId,
-  person_id: zObjectId.nullish(),
+  identifiant_normalise: zIdentifiantNormalise.nullish(),
   effectif_snapshot: zEffectif,
   effectif_snapshot_date: z.date().optional(),
   code_region: zAdresse.shape.region.optional(),

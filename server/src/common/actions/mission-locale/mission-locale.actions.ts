@@ -10,7 +10,6 @@ import {
   IEffectif,
   IOrganisationMissionLocale,
   IOrganisationOrganismeFormation,
-  IPersonV2,
   IUpdateMissionLocaleEffectif,
 } from "shared/models";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -24,6 +23,7 @@ import {
   SITUATION_ENUM,
 } from "shared/models/data/missionLocaleEffectif.model";
 import { IMissionLocaleStats, IMissionLocaleStatsSegments } from "shared/models/data/missionLocaleStats.model";
+import type { IIdentifiantNormalise } from "shared/models/parts/identifiantNormalise";
 import { IEffectifsParMoisFiltersMissionLocaleSchema } from "shared/models/routes/mission-locale/missionLocale.api";
 import { getAnneeScolaireListFromDateRange, getBornesNaissanceMissionLocale } from "shared/utils";
 
@@ -41,11 +41,12 @@ import {
 import { AuthContext } from "@/common/model/internal/AuthContext";
 import { triggerWhatsAppIfEligible } from "@/common/services/brevo/whatsapp";
 import { extractScoreInput, reportClassifierFailure, scoreEffectifs } from "@/common/services/classifier";
+import { getDateLimiteConservation } from "@/common/utils/conservationUtils";
+import { normalisePersonIdentifiant } from "@/common/utils/identifiantUtils";
 import { cachedInRun } from "@/common/utils/runCache";
 
 import { createDernierStatutFieldPipeline } from "../indicateurs/indicateurs.actions";
 import { getOrganisationOrganismeByOrganismeId } from "../organisations.actions";
-import { normalisePersonIdentifiant } from "../personV2/personV2.actions";
 import {
   DATE_START_RUPTURES,
   STATUTS_SORTIE_RUPTURE,
@@ -3090,7 +3091,7 @@ interface DuplicateCheckResult {
 }
 
 async function checkAndHandleDuplicate(
-  normalizedIdentifiant: IPersonV2["identifiant"],
+  normalizedIdentifiant: IIdentifiantNormalise,
   isNewDeca: boolean,
   newMissionLocaleId: ObjectId,
   effectif: IEffectif | IEffectifDECA
@@ -3357,7 +3358,9 @@ export const createMissionLocaleSnapshot = async (
   const ageFilter = effectif?.apprenant?.date_de_naissance
     ? effectif.apprenant.date_de_naissance >= getBornesNaissanceMissionLocale().nesApres
     : false;
-  const rupturantFilter = currentStatus?.valeur === "RUPTURANT";
+  const rupturantFilter =
+    currentStatus?.valeur === "RUPTURANT" &&
+    new Date(currentStatus.date).getTime() >= getDateLimiteConservation(new Date()).getTime();
   const mlFilter = !!effectif.apprenant.adresse?.mission_locale_id;
 
   if (!mlFilter) {

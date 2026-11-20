@@ -1,9 +1,13 @@
 import { ObjectId } from "mongodb";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
-import type { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
+import { COLONNES_AFFELNET_CONSERVEES, type IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { findDeletedVoeux, updateVoeuxAffelnetEffectifDeca } from "@/common/actions/affelnet.actions";
+import {
+  findDeletedVoeux,
+  getAffelnetVoeuxNonConcretise,
+  updateVoeuxAffelnetEffectifDeca,
+} from "@/common/actions/affelnet.actions";
 import { voeuxAffelnetDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
 
@@ -88,5 +92,53 @@ describe("updateVoeuxAffelnetEffectifDeca", () => {
     await updateVoeuxAffelnetEffectifDeca(effectifDecaId, contrat, null);
 
     expect(await voeu(_id)).not.toHaveProperty("effectif_deca_id");
+  });
+});
+
+describe("getAffelnetVoeuxNonConcretise", () => {
+  it("exporte toutes ses colonnes depuis les colonnes conservées", async () => {
+    const raw = Object.fromEntries(COLONNES_AFFELNET_CONSERVEES.map((colonne) => [colonne, `v-${colonne}`]));
+    await voeuxAffelnetDb().insertOne({ ...nouveauVoeu(new ObjectId(), IMPORT), raw });
+
+    const [ligne] = await getAffelnetVoeuxNonConcretise(null, "2026");
+
+    expect(ligne).toMatchObject({
+      ine: "v-ine",
+      nom: "v-nom",
+      prenom_1: "v-prenom_1",
+      prenom_2: "v-prenom_2",
+      prenom_3: "v-prenom_3",
+      adresse_1: "v-adresse_1",
+      adresse_2: "v-adresse_2",
+      adresse_3: "v-adresse_3",
+      adresse_4: "v-adresse_4",
+      code_postal: "v-code_postal",
+      ville: "v-ville",
+      pays: "v-pays",
+      mail_responsable_1: "v-mail_responsable_1",
+      mail_responsable_2: "v-mail_responsable_2",
+      telephone_responsable_1: "v-telephone_responsable_1",
+      telephone_responsable_2: "v-telephone_responsable_2",
+      ville_etab_origine: "v-ville_etab_origine",
+      type_etab_origine: "v-type_etab_origine",
+      libelle_etab_origine: "v-libelle_etab_origine",
+      uai_etablissement_formateur: "v-uai_etatblissement_formateur",
+      uai_etablissement_responsable: "v-uai_etablissement_responsable",
+      uai_cio_etablissement_accueil: "v-uai_cio_etab_accueil",
+      type_etablissement_accueil: "v-type_etab_accueil",
+      libelle_pulic_etablissement_accueil: "v-libelle_public_etablissement",
+    });
+  });
+
+  it("se replie sur le libellé court quand le libellé public est vide", async () => {
+    const raw = {
+      ...Object.fromEntries(COLONNES_AFFELNET_CONSERVEES.map((colonne) => [colonne, `v-${colonne}`])),
+      libelle_public_etablissement: "",
+    };
+    await voeuxAffelnetDb().insertOne({ ...nouveauVoeu(new ObjectId(), IMPORT), raw });
+
+    const [ligne] = await getAffelnetVoeuxNonConcretise(null, "2026");
+
+    expect(ligne).toMatchObject({ libelle_pulic_etablissement_accueil: "v-libelle_etab_accueil" });
   });
 });

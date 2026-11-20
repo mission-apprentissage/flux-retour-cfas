@@ -1,6 +1,7 @@
 import auditLogsDescriptor from "shared/models/data/auditLogs.model";
 import connexionInvitationsDescriptor from "shared/models/data/connexionInvitations.model";
 import invitationsDescriptor from "shared/models/data/invitations.model";
+import invitationsArchiveDescriptor from "shared/models/data/invitationsArchive.model";
 import telechargementListesNomLogsDescriptor from "shared/models/data/telechargementListesNomLogs.model";
 import { describe, expect, it } from "vitest";
 
@@ -12,6 +13,7 @@ useMongo();
 
 const SIX_MOIS = 183 * 24 * 3600;
 const DOUZE_MOIS = 365 * 24 * 3600;
+const VINGT_QUATRE_MOIS = 730 * 24 * 3600;
 
 const ttlIndex = async (collectionName: string, name: string) => {
   const indexes = await getDbCollection(collectionName).listIndexes().toArray();
@@ -39,6 +41,12 @@ describe("index TTL de rétention", () => {
       name: "ttl_updated_at",
       key: { updated_at: 1 },
       expireAfterSeconds: DOUZE_MOIS,
+    },
+    {
+      descriptor: invitationsArchiveDescriptor,
+      name: "ttl_created_at",
+      key: { created_at: 1 },
+      expireAfterSeconds: VINGT_QUATRE_MOIS,
     },
   ])("$name", async ({ descriptor, name, key, expireAfterSeconds }) => {
     await createCollectionIndexes(descriptor);

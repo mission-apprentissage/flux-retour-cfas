@@ -1,8 +1,13 @@
-import type { CronDef, JobDef } from "job-processor";
+import { addJob, type CronDef, type JobDef } from "job-processor";
 import { ObjectId } from "mongodb";
 import { getAnneesScolaireListFromDate, subtractDaysUTC } from "shared/utils";
 
+import logger from "@/common/logger";
+import config from "@/config";
+
 import { scoreExistingEffectifs } from "../classifier/score-effectifs";
+import { purgerEffectifsAnciens } from "../clear/purge-effectifs-anciens";
+import { refuserPurgesConcurrentes } from "../clear/verrou-purges";
 import { updateComputedFields } from "../computed/update-computed";
 import { SEUIL_JOURS_DEFAUT, traiterDoublonsObsoletes } from "../effectifs/doublons-obsoletes";
 import {
@@ -90,6 +95,12 @@ export const effectifsJobs = {
       return traiterDoublonsObsoletes({ seuilJours, appliquer });
     },
   },
+  "purge:effectifs-anciens": {
+    handler: async (job) => {
+      await refuserPurgesConcurrentes(job.name);
+      return purgerEffectifsAnciens({ dryRun: payloadBoolean(job.payload, "dryRun") ?? false });
+    },
+  },
 } satisfies Record<string, JobDef>;
 
 export const effectifsCrons = {
@@ -114,5 +125,22 @@ export const effectifsCrons = {
     checkinMargin: 15,
     maxRuntimeInMinutes: 60,
     handler: async () => traiterDoublonsObsoletes({ appliquer: true }),
+  },
+  "Purger les données conservées plus de deux ans le samedi à 14h": {
+    cron_string: "0 14 * * 6",
+    checkinMargin: 30,
+    maxRuntimeInMinutes: 5,
+    handler: async () => {
+      if (config.env !== "production" || !config.purgesConservationActives) {
+        logger.warn(
+          { env: config.env, purgesConservationActives: config.purgesConservationActives },
+          "Purges de conservation hebdomadaires désactivées"
+        );
+        return;
+      }
+      await addJob({ name: "purge:effectifs-anciens", queued: true });
+      await addJob({ name: "purge:dossiers-suivi", queued: true });
+      await addJob({ name: "purge:voeux-affelnet", queued: true });
+    },
   },
 } satisfies Record<string, CronDef>;

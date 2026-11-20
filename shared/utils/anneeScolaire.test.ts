@@ -1,8 +1,10 @@
 import { it, expect, describe } from "vitest";
 
 import {
+  estAnneeScolaireActive,
   getActiveAnneesScolaires,
   getAnneeScolaireFromDate,
+  getFinAnneeScolaire,
   getAnneeScolaireListFromDateRange,
   getAnneesScolaireListFromDate,
 } from "./anneeScolaire";
@@ -140,6 +142,39 @@ describe("getActiveAnneesScolaires()", () => {
   ].forEach(({ date, expected }) => {
     it(`returns [${expected.join(", ")}] for ${date}`, () => {
       expect(getActiveAnneesScolaires(new Date(`${date}T00:00:00Z`))).toStrictEqual(expected);
+    });
+  });
+});
+
+describe("getFinAnneeScolaire()", () => {
+  [
+    { annee: "2023-2024", expected: "2024-08-01" },
+    { annee: "2023-2023", expected: "2024-01-01" },
+    { annee: "2021-2023", expected: "2023-08-01" },
+  ].forEach(({ annee, expected }) => {
+    it(`returns ${expected} for ${annee}`, () => {
+      expect(getFinAnneeScolaire(annee)).toStrictEqual(new Date(`${expected}T00:00:00Z`));
+    });
+  });
+
+  it("returns null for an unreadable year", () => {
+    expect(getFinAnneeScolaire("2023")).toBeNull();
+  });
+});
+
+describe("estAnneeScolaireActive()", () => {
+  const date = new Date("2026-11-18T00:00:00Z");
+  [
+    { annee: "2026-2027", expected: true },
+    { annee: "2025-2026", expected: true },
+    { annee: "2025-2025", expected: true },
+    { annee: "2027-2028", expected: true },
+    { annee: "2024-2025", expected: false },
+    { annee: "2024-2024", expected: false },
+    { annee: "inconnue", expected: true },
+  ].forEach(({ annee, expected }) => {
+    it(`returns ${expected} for ${annee} on 2026-11-18`, () => {
+      expect(estAnneeScolaireActive(annee, date)).toBe(expected);
     });
   });
 });

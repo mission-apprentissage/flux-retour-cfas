@@ -20,12 +20,12 @@ import {
   updateOrDeleteMissionLocaleSnapshot,
 } from "@/common/actions/mission-locale/mission-locale.actions";
 import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.actions";
-import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import { getCurrentStatutFromParcours } from "@/common/actions/shared/rupture-pipeline.utils";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 import { effectifsDb, effectifsQueueDb, missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { createErrorAggregator } from "@/common/utils/errorAggregator";
+import { normalisePersonIdentifiant } from "@/common/utils/identifiantUtils";
 
 export const hydrateMissionLocaleSnapshot = async (missionLocaleStructureId: number | null) => {
   const cursor = organisationsDb().find({
@@ -127,7 +127,10 @@ export const updateMissionLocaleSnapshotFromLastStatus = async () => {
               }
             );
             const effToCompute = await effectifsDb().findOne({ _id: eff.effectif_id });
-            await updateEffectifStatut(effToCompute as IEffectif, new Date(), effectifsDb());
+            if (!effToCompute) {
+              continue;
+            }
+            await updateEffectifStatut(effToCompute, new Date(), effectifsDb());
             const effToSnap = await effectifsDb().findOne({ _id: eff.effectif_id });
             if (effToSnap) {
               updateOrDeleteMissionLocaleSnapshot(effToSnap);

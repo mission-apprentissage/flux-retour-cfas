@@ -3,14 +3,15 @@ import { ObjectId } from "bson";
 import { differenceInYears } from "date-fns";
 import type { Document } from "mongodb";
 import { TOUS_LES_SECTEURS_CODE } from "shared/constants/franceTravail";
-import { API_EFFECTIF_LISTE, IEffectif, IPersonV2 } from "shared/models";
+import { API_EFFECTIF_LISTE, IEffectif } from "shared/models";
 import { FRANCE_TRAVAIL_SITUATION_ENUM } from "shared/models/data/franceTravailEffectif.model";
+import type { IIdentifiantNormalise } from "shared/models/parts/identifiantNormalise";
 
 import logger from "@/common/logger";
 import { franceTravailEffectifsDb, organisationsDb } from "@/common/model/collections";
+import { normalisePersonIdentifiant } from "@/common/utils/identifiantUtils";
 
 import { getCurrentAndNextStatus } from "../effectifs.statut.actions";
-import { getPersonV2FromIdentifiant } from "../personV2/personV2.actions";
 import { getRomeByRncp, getSecteurActivitesByCodeRome } from "../rome/rome.actions";
 
 const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -822,8 +823,6 @@ export const getAllFranceTravailEffectifsTraites = async (codeRegion: string, mo
 };
 
 export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif, withDedupe: boolean = true) => {
-  let person: IPersonV2 | null = null;
-
   const { current: currentStatus, next: nextStatus } = getCurrentAndNextStatus(
     effectif._computed?.statut?.parcours,
     new Date()
@@ -844,17 +843,11 @@ export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif, w
     ? differenceInYears(new Date(), new Date(effectif.apprenant?.date_de_naissance)) >= 18
     : false;
 
-  const identifiant = {
-    nom: effectif.apprenant.nom,
-    prenom: effectif.apprenant.prenom,
-    date_de_naissance: effectif.apprenant.date_de_naissance,
-  };
+  const { nom, prenom, date_de_naissance } = effectif.apprenant;
+  const identifiant =
+    nom && prenom && date_de_naissance ? normalisePersonIdentifiant({ nom, prenom, date_de_naissance }) : null;
 
   const upsertCondition = !!inscritFilter && adultFilter;
-
-  if (upsertCondition) {
-    person = await getPersonV2FromIdentifiant(identifiant);
-  }
 
   try {
     await franceTravailEffectifsDb().findOneAndUpdate(
@@ -880,24 +873,33 @@ export const createFranceTravailEffectifSnapshot = async (effectif: IEffectif, w
             code: romes,
             secteur_activites: secteurActivites,
           },
-          person_id: person?._id || null,
+          ...(identifiant ? { identifiant_normalise: identifiant } : {}),
         },
       },
       { upsert: upsertCondition }
     );
-    withDedupe && (await dedupeFranceTravailEffectifSnapshots(effectif._id, person?._id || null));
+    withDedupe && upsertCondition && (await dedupeFranceTravailEffectifSnapshots(effectif._id, identifiant));
   } catch (e) {
     logger.error({ err: e, effectifId: effectif._id }, "Error while creating France Travail effectif snapshot");
   }
 };
 
-export const dedupeFranceTravailEffectifSnapshots = async (effectifId: ObjectId, personId: ObjectId | null) => {
-  if (!personId) {
+export const filtreIdentifiantNormalise = (identifiant: IIdentifiantNormalise) => ({
+  "identifiant_normalise.nom": identifiant.nom,
+  "identifiant_normalise.prenom": identifiant.prenom,
+  "identifiant_normalise.date_de_naissance": identifiant.date_de_naissance,
+});
+
+export const dedupeFranceTravailEffectifSnapshots = async (
+  effectifId: ObjectId,
+  identifiant: IIdentifiantNormalise | null
+) => {
+  if (!identifiant) {
     return;
   }
 
   const foundPersons = await franceTravailEffectifsDb()
-    .find({ person_id: personId, soft_deleted: { $ne: true } })
+    .find({ ...filtreIdentifiantNormalise(identifiant), soft_deleted: { $ne: true } })
     .toArray();
 
   if (!foundPersons || foundPersons.length <= 1) {
@@ -906,7 +908,7 @@ export const dedupeFranceTravailEffectifSnapshots = async (effectifId: ObjectId,
 
   await franceTravailEffectifsDb().updateMany(
     {
-      person_id: personId,
+      ...filtreIdentifiantNormalise(identifiant),
       _id: { $ne: effectifId },
     },
     {

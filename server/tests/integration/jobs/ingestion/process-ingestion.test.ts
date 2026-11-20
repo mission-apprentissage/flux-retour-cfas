@@ -1,11 +1,17 @@
 import { ObjectId, WithId, WithoutId } from "mongodb";
 import { CODES_STATUT_APPRENANT, SOURCE_APPRENANT } from "shared";
-import { IEffectif } from "shared/models/data/effectifs.model";
+import { EFFECTIF_HORS_CONSERVATION, IEffectif } from "shared/models/data/effectifs.model";
 import { IEffectifQueue } from "shared/models/data/effectifsQueue.model";
-import { it, expect, describe, beforeEach } from "vitest";
+import { it, expect, describe, beforeEach, afterEach, vi } from "vitest";
 
 import { findOrganismeByUaiAndSiret } from "@/common/actions/organismes/organismes.actions";
-import { effectifsDb, effectifsQueueDb, organismesDb } from "@/common/model/collections";
+import {
+  effectifsDb,
+  effectifsQueueDb,
+  franceTravailEffectifsDb,
+  missionLocaleEffectifsDb,
+  organismesDb,
+} from "@/common/model/collections";
 import { processEffectifsQueue } from "@/jobs/ingestion/process-ingestion";
 import { mockApiApprentissageCertificationApi } from "@tests/data/api.apprentissage.beta.gouv.fr/certification/apiApprentissage.certification.mock";
 import { createRandomOrganisme, getRandomSourceOrganismeId } from "@tests/data/randomizedSample";
@@ -90,6 +96,8 @@ describe("Processus d'ingestion", () => {
   } as const satisfies WithoutId<IEffectifQueue>;
 
   beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2023-01-15T00:00:00Z"));
     await organismesDb().insertMany([
       { _id: new ObjectId(), ...createRandomOrganisme({ uai: UAI, siret: SIRET, reseaux: [] }) },
       {
@@ -99,6 +107,10 @@ describe("Processus d'ingestion", () => {
     ]);
 
     mockApiApprentissageCertificationApi();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   describe("Ingestion de données valides", () => {
@@ -651,6 +663,61 @@ describe("Processus d'ingestion", () => {
   });
 
   describe("Ingestion de données invalides", () => {
+    describe("Ingestion d'un dossier terminé depuis plus de deux ans", () => {
+      it("refuse le dossier sans créer d'effectif ni de dossier de suivi", async () => {
+        vi.setSystemTime(new Date("2026-11-18T00:00:00Z"));
+        const { insertedId } = await effectifsQueueDb().insertOne({
+          ...commonSampleData,
+          _id: new ObjectId(),
+          statut_apprenant: CODES_STATUT_APPRENANT.abandon,
+        });
+
+        const result = await processEffectifsQueue();
+
+        expect(result).toStrictEqual({ totalProcessed: 1, totalValidItems: 0, totalInvalidItems: 1 });
+        const item = await effectifsQueueDb().findOne({ _id: insertedId });
+        expect(item?.validation_errors).toStrictEqual([
+          { message: EFFECTIF_HORS_CONSERVATION, path: ["date_fin_formation"] },
+        ]);
+        expect(item?.effectif_id).toBeUndefined();
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(0);
+        await expect(missionLocaleEffectifsDb().countDocuments({})).resolves.toBe(0);
+        await expect(franceTravailEffectifsDb().countDocuments({})).resolves.toBe(0);
+      });
+
+      it("n'allume pas l'alerte d'erreur de l'importateur pour un dossier seulement hors conservation", async () => {
+        vi.setSystemTime(new Date("2026-11-18T00:00:00Z"));
+        const importateur = {
+          _id: new ObjectId(),
+          ...createRandomOrganisme({ reseaux: [] }),
+          has_transmission_errors: false,
+        };
+        await organismesDb().insertOne(importateur);
+        await effectifsQueueDb().insertOne({
+          ...commonSampleData,
+          _id: new ObjectId(),
+          source_organisme_id: importateur._id.toString(),
+        });
+
+        await processEffectifsQueue();
+
+        expect(await effectifsQueueDb().findOne({})).toMatchObject({ has_error: true });
+        expect(await organismesDb().findOne({ _id: importateur._id })).toMatchObject({
+          has_transmission_errors: false,
+        });
+      });
+
+      it("accepte le même dossier un an et onze mois après sa dernière date de fin", async () => {
+        vi.setSystemTime(new Date("2024-05-30T00:00:00Z"));
+        await effectifsQueueDb().insertOne({ ...commonSampleData, _id: new ObjectId() });
+
+        const result = await processEffectifsQueue();
+
+        expect(result).toStrictEqual({ totalProcessed: 1, totalValidItems: 1, totalInvalidItems: 0 });
+        await expect(effectifsDb().countDocuments({})).resolves.toBe(1);
+      });
+    });
+
     describe("Ingestion de mises à jour de données invalides", () => {
       it("Vérifie la mise à l'écart d'une mise à jour de dossier avec un statut invalide", async () => {
         // Création et ingestion d'un dossier valide pour un jeune inscrit à une date donnée

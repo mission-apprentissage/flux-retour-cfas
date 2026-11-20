@@ -4,7 +4,7 @@ import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
 import { IOrganisation, IOrganisme } from "shared/models";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { effectifsDECADb, effectifsDb, effectifsQueueDb, organismesDb } from "@/common/model/collections";
 import { getOrganismeEffectifs, updateOrganismeEffectifs } from "@/http/routes/specific.routes/organisme.routes";
@@ -146,6 +146,8 @@ describe("Organisme hors cible qui importe par fichier", () => {
   let requestAsOrganisation: RequestAsOrganisationFunc;
 
   beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2024-04-24T00:00:00Z"));
     const app = await initTestApp();
     requestAsOrganisation = app.requestAsOrganisation;
     mockApiApprentissageCertificationApi();
@@ -156,6 +158,10 @@ describe("Organisme hors cible qui importe par fichier", () => {
     await effectifsDECADb().insertMany([contratDeca("DUPONT", "Jeanne"), contratDeca("Martin", "Paul")], {
       bypassDocumentValidation: true,
     });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("reste hors cible après l'import", async () => {

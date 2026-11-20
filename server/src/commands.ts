@@ -333,6 +333,36 @@ program
   .action(createJobAction("purge:queues"));
 
 program
+  .command("purge:effectifs-anciens")
+  .description("Supprime les effectifs ERP et DECA finis depuis plus de deux ans, en gardant des compteurs agrégés")
+  .option("--dry-run", "Compte par année scolaire et par source sans supprimer", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("purge:effectifs-anciens"));
+
+program
+  .command("purge:ml-dossiers-masques")
+  .description("Supprime les dossiers ML masqués sans trace humaine dont le jeune n'est pas rupturant, avec leurs logs")
+  .option("--dry-run", "Compte les dossiers et les logs à supprimer sans rien écrire", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("purge:ml-dossiers-masques"));
+
+program
+  .command("purge:dossiers-suivi")
+  .description(
+    "Supprime les dossiers ML masqués sans trace, puis les dossiers ML et France Travail rompus ou créés depuis plus de deux ans"
+  )
+  .option("--dry-run", "Compte les dossiers et les logs à supprimer sans rien écrire", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("purge:dossiers-suivi"));
+
+program
+  .command("purge:voeux-affelnet")
+  .description("Supprime les vœux Affelnet des campagnes plus anciennes que les deux dernières rentrées")
+  .option("--dry-run", "Compte les vœux à supprimer par campagne sans rien écrire", false)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("purge:voeux-affelnet"));
+
+program
   .command("classifier:score-effectifs")
   .description("Score les effectifs ML existants sans score via le classifier")
   .option("--dryRun", "Mode simulation sans écriture", false)

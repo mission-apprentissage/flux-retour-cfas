@@ -2,6 +2,8 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
+import { zIdentifiantNormalise } from "../parts/identifiantNormalise";
+
 import { zEffectif, zStatutApprenantEnum } from "./effectifs.model";
 import { zEffectifDECA } from "./effectifsDECA.model";
 import { zWhatsAppContact } from "./whatsappContact.model";
@@ -172,13 +174,7 @@ const zMissionLocaleEffectif = z.object({
   mission_locale_id: zObjectId,
   effectif_id: zObjectId,
   date_rupture: z.date().nullish(),
-  identifiant_normalise: z
-    .object({
-      nom: z.string(),
-      prenom: z.string(),
-      date_de_naissance: z.date(),
-    })
-    .nullish(),
+  identifiant_normalise: zIdentifiantNormalise.nullish(),
   situation: zSituationEnum.nullish(),
   situation_autre: z.string().nullish(),
   created_at: z.date(),
