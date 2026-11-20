@@ -1,10 +1,14 @@
+import type { IJobsSimple } from "job-processor";
 import { ObjectId } from "mongodb";
 import type { IUsersMigration } from "shared/models";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { usersMigrationDb } from "@/common/model/collections";
+import config from "@/config";
 import { useMongo } from "@tests/jest/setupMongo";
 import { testPasswordHash } from "@tests/utils/testUtils";
+
+import { ingestionJobs } from "../registry/ingestion";
 
 import { purgeTraces } from "./purge-traces";
 
@@ -99,5 +103,49 @@ describe("purgeTraces", () => {
 
     expect(await purgeTraces(MAINTENANT)).toEqual({ connection_history: 1, emails: 1, payload: 1 });
     expect(await purgeTraces(MAINTENANT)).toEqual({ connection_history: 0, emails: 0, payload: 0 });
+  });
+
+  it("en simulation, compte les comptes concernés sans rien modifier", async () => {
+    const _id = await insererCompte({
+      connection_history: [joursAvant(400), joursAvant(10)],
+      emails: [courriel("ancien", [joursAvant(400)]), courriel("charge", [joursAvant(60)], { prenom: "Jean" })],
+    });
+    const avant = await lireCompte(_id);
+
+    expect(await purgeTraces(MAINTENANT, { simulation: true })).toEqual({
+      connection_history: 1,
+      emails: 1,
+      payload: 1,
+    });
+    expect(await lireCompte(_id)).toEqual(avant);
+  });
+});
+
+describe("job purge:traces", () => {
+  const interrupteurInitial = config.purgeTracesActive;
+  const handler = ingestionJobs["purge:traces"].handler as (job: IJobsSimple, signal: AbortSignal) => Promise<unknown>;
+  const job = { name: "purge:traces", payload: {} } as unknown as IJobsSimple;
+  const ilYA = (jours: number) => new Date(Date.now() - jours * 24 * 60 * 60 * 1000);
+
+  afterEach(() => {
+    config.purgeTracesActive = interrupteurInitial;
+  });
+
+  it("ne purge rien tant que l'interrupteur est coupé", async () => {
+    const _id = await insererCompte({ connection_history: [ilYA(400), ilYA(10)] });
+    config.purgeTracesActive = false;
+
+    await handler(job, new AbortController().signal);
+
+    expect((await lireCompte(_id))?.connection_history).toHaveLength(2);
+  });
+
+  it("purge une fois l'interrupteur posé", async () => {
+    const _id = await insererCompte({ connection_history: [ilYA(400), ilYA(10)] });
+    config.purgeTracesActive = true;
+
+    await handler(job, new AbortController().signal);
+
+    expect((await lireCompte(_id))?.connection_history).toHaveLength(1);
   });
 });

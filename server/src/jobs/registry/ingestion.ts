@@ -1,6 +1,8 @@
 import type { CronDef, JobDef } from "job-processor";
 import { ObjectId } from "mongodb";
 
+import config from "@/config";
+
 import { purgeOrphanQueues, purgeQueues } from "../clear/purge-queues";
 import { purgeTraces } from "../clear/purge-traces";
 import { heartbeatIngestion } from "../ingestion/heartbeat-ingestion";
@@ -36,7 +38,7 @@ export const ingestionJobs = {
     },
   },
   "purge:traces": {
-    handler: async () => purgeTraces(),
+    handler: async () => purgeTraces(new Date(), { simulation: !config.purgeTracesActive }),
   },
   "clear:queue-orphans": {
     handler: async (job) => {
