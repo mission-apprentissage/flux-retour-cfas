@@ -362,7 +362,7 @@ async function upsertEffectifDecaChezCible(
     }
     throw err;
   }
-  await updateVoeuxAffelnetEffectifDeca(nouveau._id, nouveau, cible._id.toString());
+  await updateVoeuxAffelnetEffectifDeca(nouveau._id, nouveau, cible._id);
   await createMissionLocaleSnapshot(nouveau);
   return { created: true };
 }
@@ -385,7 +385,7 @@ export async function upsertEffectifDeca(
     try {
       const id = new ObjectId();
       await effectifsDECADb().insertOne({ ...effectif, _id: id });
-      await updateVoeuxAffelnetEffectifDeca(id, effectif, effectif.organisme_formateur_id?.toString());
+      await updateVoeuxAffelnetEffectifDeca(id, effectif, effectif.organisme_formateur_id);
       await createMissionLocaleSnapshot({ ...effectif, _id: id });
       return { created: true };
     } catch (err) {

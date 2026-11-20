@@ -287,12 +287,15 @@ export const updateVoeuxAffelnetEffectif = async (
 export const updateVoeuxAffelnetEffectifDeca = async (
   effectif_id: ObjectId,
   effectif: WithoutId<IEffectifDECA>,
-  uai: string | undefined | null
+  organismeFormateurId: ObjectId | undefined | null
 ) => {
+  if (!organismeFormateurId) {
+    return;
+  }
   const { apprenant, annee_scolaire } = effectif;
   const { nom, prenom } = apprenant;
   const filter = {
-    "raw.uai_etatblissement_formateur": uai,
+    organisme_formateur_id: organismeFormateurId,
     "raw.prenom_1": { $regex: `^${prenom.toLowerCase()}$`, $options: "i" },
     "raw.nom": { $regex: `^${nom.toLowerCase()}$`, $options: "i" },
     annee_scolaire_rentree: annee_scolaire.substring(0, 4),
