@@ -605,10 +605,6 @@ export const getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay = asyn
   return transmissionsDetails;
 };
 
-export const getAllTransmissionsDate = () => {
-  return effectifsQueueDb().distinct("computed_day");
-};
-
 export const getPaginatedErrorsTransmissionStatusGroupedByOrganismeForAGivenDay = async (
   selectedDay: string,
   page: number = 1,

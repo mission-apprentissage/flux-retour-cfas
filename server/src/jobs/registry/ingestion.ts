@@ -1,12 +1,13 @@
 import type { CronDef, JobDef } from "job-processor";
 import { ObjectId } from "mongodb";
 
-import { purgeQueues } from "../clear/purge-queues";
+import config from "@/config";
+
+import { purgeOrphanQueues, purgeQueues } from "../clear/purge-queues";
+import { purgeTraces } from "../clear/purge-traces";
 import { heartbeatIngestion } from "../ingestion/heartbeat-ingestion";
-import { updateEffectifQueueDateAndError } from "../ingestion/migration/effectif-queue";
 import { removeDuplicatesEffectifsQueue } from "../ingestion/process-effectifs-queue-remove-duplicates";
 import { processEffectifQueueById, processEffectifsQueue } from "../ingestion/process-ingestion";
-import { migrateEffectifs } from "../ingestion/process-ingestion.v2";
 import { mesurerPerimetreTeleversement } from "../tmp/mesurer-perimetre-televersement";
 
 import { payloadBoolean, payloadDate, payloadNumber, requirePayloadString } from "./payload";
@@ -36,11 +37,17 @@ export const ingestionJobs = {
       return purgeQueues(payloadNumber(job.payload, "nbDaysToKeep"));
     },
   },
-  "tmp:migrate:effectifs": {
-    handler: migrateEffectifs,
+  "purge:traces": {
+    handler: async () => purgeTraces(new Date(), { simulation: !config.purgeTracesActive }),
   },
-  "tmp:migrate:effectifs-queue": {
-    handler: updateEffectifQueueDateAndError,
+  "clear:queue-orphans": {
+    handler: async (job) => {
+      return purgeOrphanQueues({
+        nbDaysToKeep: payloadNumber(job.payload, "nbDaysToKeep"),
+        batchSize: payloadNumber(job.payload, "batchSize"),
+        sleepMs: payloadNumber(job.payload, "sleepMs"),
+      });
+    },
   },
   "tmp:mesurer-perimetre-televersement": {
     handler: async (job) => mesurerPerimetreTeleversement({ mois: payloadNumber(job.payload, "mois") }),

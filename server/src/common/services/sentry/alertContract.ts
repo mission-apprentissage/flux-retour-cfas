@@ -61,6 +61,7 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   "fiabilisation:uai-siret:run": { tier: "jour" },
   "hydrate:effectifs-formation-niveaux": { tier: "jour" },
   "purge:queues": { tier: "jour" },
+  "purge:traces": { tier: "jour" },
   "hydrate:organismes-effectifs-count": { tier: "jour" },
   "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis": { tier: "jour" },
   "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis": { tier: "jour" },
@@ -79,6 +80,7 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   "deca:flechage": { tier: "jour" },
   "demandes-activation:flechables": { tier: "jour" },
   "organismes:revoke-stale-api-keys": { tier: "veille" },
+  "db:validate": { tier: "jour" },
 };
 
 type JobContext = { type?: string };

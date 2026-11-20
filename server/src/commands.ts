@@ -10,7 +10,8 @@ import { getErrorMessage } from "@/common/utils/errorUtils";
 
 import { createSipaUser, deleteSipaUser } from "./common/actions/sipa.actions";
 import logger from "./common/logger";
-import { closeMongodbConnection } from "./common/mongodb";
+import { modelDescriptors } from "./common/model/collections";
+import { closeMongodbConnection, configureDbSchemaValidation } from "./common/mongodb";
 import { closeSentry } from "./common/services/sentry/sentry";
 import { sleep } from "./common/utils/asyncUtils";
 import config from "./config";
@@ -18,6 +19,10 @@ import createServer from "./http/server";
 import { createHttpTerminator } from "./http/terminator";
 import { startEffectifQueueProcessor } from "./jobs/ingestion/process-ingestion";
 import { crons, registry } from "./jobs/registry";
+
+async function applyDbSchemaValidation() {
+  await configureDbSchemaValidation(modelDescriptors, { level: "strict", onIndexBuild: "warn" });
+}
 
 async function startJobProcessor(signal: AbortSignal) {
   logger.info(`Process jobs queue - start`);
@@ -83,6 +88,7 @@ program
     try {
       const signal = createProcessExitSignal();
 
+      await applyDbSchemaValidation();
       const server = await createServer();
       const httpServer = server.listen(config.port, () =>
         logger.info(`Server ready and listening on port ${config.port}`)
@@ -125,6 +131,7 @@ program
   .description("Démarre le démon qui traite les effectifs en attente")
   .action(async () => {
     const signal = createProcessExitSignal();
+    await applyDbSchemaValidation();
 
     if (config.disable_processors) {
       // The processor will exit, and be restarted by docker every day
@@ -145,6 +152,7 @@ program
   .description("Run job processor")
   .action(async () => {
     const signal = createProcessExitSignal();
+    await applyDbSchemaValidation();
     if (config.disable_processors) {
       // The processor will exit, and be restarted by docker every day
       await sleep(24 * 3_600_000, signal);
@@ -247,7 +255,8 @@ program
 program
   .command("db:find-invalid-documents")
   .description("Recherche des documents invalides")
-  .requiredOption("-c, --collection", "the collection to search for invalid documents")
+  .requiredOption("-c, --collection <name>", "the collection to search for invalid documents")
+  .option("--limit <n>", "Nombre maximal de documents invalides à détailler", Number)
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("db:find-invalid-documents"));
 
@@ -282,6 +291,24 @@ program
   .action(createJobAction("process:effectifs-queue:remove-duplicates"));
 
 program
+  .command("clear:queue-orphans")
+  .description(
+    "Purge one-shot des orphelins d'effectifsQueue (sans organisme_id) : 15 derniers computed_day par source et filet calendaire, par lots"
+  )
+  .option("--batch-size <number>", "Taille des lots de suppression", Number)
+  .option("--sleep-ms <number>", "Pause entre chaque lot (ms)", Number)
+  .option("--nb-days-to-keep <number>", "Nombre de jours conservés par source", Number)
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("clear:queue-orphans"));
+
+program
+  .command("hydrate:transmission-daily")
+  .description("Calcule le rapport quotidien des transmissions de la veille, ou d'un jour des 14 derniers")
+  .option("--day <AAAA-MM-JJ>", "Jour à recalculer")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:transmission-daily"));
+
+program
   .command("dev:generate-open-api")
   .description("Création/maj du fichier open-api.json")
   .option("-q, --queued", "Run job asynchronously", false)
@@ -301,7 +328,7 @@ program.command("init:dev").description("Initialisation du projet en local").act
 program
   .command("purge:queues")
   .description("Purge des queues")
-  .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", (n) => parseInt(n, 10), 15)
+  .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", Number, 15)
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("purge:queues"));
 

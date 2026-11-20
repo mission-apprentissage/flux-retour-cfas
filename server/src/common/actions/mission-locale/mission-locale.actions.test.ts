@@ -117,7 +117,6 @@ const insertDossier = async ({
       },
       formation: {},
       _computed: { statut: { en_cours: STATUT_APPRENANT.RUPTURANT } },
-      is_lock: false,
       created_at: new Date(),
       updated_at: new Date(),
     },

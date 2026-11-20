@@ -25,7 +25,6 @@ describe("ingestionPersonV2", () => {
         prenom: dossier.prenom_apprenant,
         date_de_naissance: dossier.date_de_naissance_apprenant,
       },
-      parcours: { en_cours: null, chronologie: [] },
     });
 
     expect(await personV2Db().find({}).toArray()).toEqual([result]);
@@ -101,7 +100,6 @@ describe("ingestionPersonV2", () => {
         prenom: dossier.prenom_apprenant,
         date_de_naissance: dossier.date_de_naissance_apprenant,
       },
-      parcours: { en_cours: null, chronologie: [] },
     }).toEqual(result);
 
     expect(await personV2Db().countDocuments()).toBe(existingPersons.length + 1);

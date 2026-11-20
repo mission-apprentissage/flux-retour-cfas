@@ -252,7 +252,6 @@ describe("Processus d'ingestion", () => {
             niveau: "3",
             niveau_libelle: "3 (CAP...)",
           },
-          is_lock: expect.any(Object),
           lieu_de_formation: {
             adresse: "1 rue de la paix",
             code_postal: "75000",
@@ -260,30 +259,6 @@ describe("Processus d'ingestion", () => {
             uai: "0802004U",
           },
           validation_errors: [],
-          _raw: {
-            formation: {
-              annee: 1,
-              cause_exclusion: "absences répétées et injustifiées",
-              cfd: "1234ABCD",
-              date_entree: new Date("2021-09-01T00:00:00.000Z"),
-              date_exclusion: new Date("2022-06-30T00:00:00.000Z"),
-              date_fin: new Date("2022-06-30T00:00:00.000Z"),
-              date_inscription: new Date("2021-09-01T00:00:00.000Z"),
-              date_obtention_diplome: new Date("2022-06-30T00:00:00.000Z"),
-              duree_formation_relle: 10,
-              duree_theorique_mois: 24,
-              formation_presentielle: true,
-              obtention_diplome: true,
-              periode: [],
-              referent_handicap: {
-                email: "a3@example-example.org",
-                nom: "Doe",
-                prenom: "John",
-              },
-              rncp: "RNCP5364",
-              libelle_long: null,
-            },
-          },
           _computed: {
             organisme: {
               academie: "10",
@@ -412,7 +387,6 @@ describe("Processus d'ingestion", () => {
             obtention_diplome: null,
             referent_handicap: null,
           },
-          is_lock: expect.any(Object),
           lieu_de_formation: {
             adresse: "1 rue de la paix",
             code_postal: "75000",
@@ -420,26 +394,6 @@ describe("Processus d'ingestion", () => {
             uai: "0802004U",
           },
           validation_errors: [],
-          _raw: {
-            formation: {
-              annee: 1,
-              date_entree: new Date("2021-09-01T00:00:00.000Z"),
-              date_fin: new Date("2022-06-30T00:00:00.000Z"),
-              date_inscription: new Date("2021-09-01T00:00:00.000Z"),
-              duree_formation_relle: 10,
-              duree_theorique_mois: 24,
-              periode: [],
-              rncp: "RNCP5364",
-              cfd: null,
-              cause_exclusion: null,
-              date_exclusion: null,
-              date_obtention_diplome: null,
-              formation_presentielle: null,
-              libelle_long: null,
-              obtention_diplome: null,
-              referent_handicap: null,
-            },
-          },
           _computed: {
             organisme: {
               academie: "10",
@@ -646,7 +600,6 @@ describe("Processus d'ingestion", () => {
             obtention_diplome: null,
             referent_handicap: null,
           },
-          is_lock: expect.any(Object),
           lieu_de_formation: {
             adresse: "1 rue de la paix",
             code_postal: "75000",
@@ -654,26 +607,6 @@ describe("Processus d'ingestion", () => {
             uai: "0802004U",
           },
           validation_errors: [],
-          _raw: {
-            formation: {
-              annee: 1,
-              date_entree: new Date("2021-09-01T00:00:00.000Z"),
-              date_fin: new Date("2022-06-30T00:00:00.000Z"),
-              date_inscription: new Date("2021-09-01T00:00:00.000Z"),
-              duree_formation_relle: 10,
-              duree_theorique_mois: 24,
-              periode: [],
-              rncp: "RNCP34670",
-              cause_exclusion: null,
-              cfd: null,
-              date_exclusion: null,
-              date_obtention_diplome: null,
-              formation_presentielle: null,
-              libelle_long: null,
-              obtention_diplome: null,
-              referent_handicap: null,
-            },
-          },
           _computed: {
             organisme: {
               academie: "10",

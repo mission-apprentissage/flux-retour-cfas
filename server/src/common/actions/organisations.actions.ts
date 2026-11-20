@@ -320,6 +320,10 @@ export async function resendInvitationEmail(ctx: AuthContext, invitationId: stri
   }
 }
 
+export async function archiverInvitation({ token: _token, ...invitation }: IInvitation): Promise<void> {
+  await invitationsArchiveDb().insertOne(invitation);
+}
+
 export async function cancelInvitation(ctx: AuthContext, invitationId: string): Promise<void> {
   const invitation = await getInvitationById(ctx, new ObjectId(invitationId));
   const res = await invitationsDb().deleteOne({
@@ -329,7 +333,7 @@ export async function cancelInvitation(ctx: AuthContext, invitationId: string): 
   if (res.deletedCount === 0) {
     throw Boom.forbidden("Permissions invalides");
   }
-  await invitationsArchiveDb().insertOne(invitation);
+  await archiverInvitation(invitation);
 }
 
 export async function validateMembre(ctx: AuthContext, userId: string): Promise<void> {
@@ -613,7 +617,7 @@ export async function rejectInvitation(token: string): Promise<void> {
   await invitationsDb().deleteOne({
     token,
   });
-  await invitationsArchiveDb().insertOne(invitation);
+  await archiverInvitation(invitation);
   if (invitation.demande_id) {
     await demandesActivationCfaDb().updateOne(
       { _id: invitation.demande_id, statut: "envoyee" },

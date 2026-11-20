@@ -1,12 +1,20 @@
-import { addJob, type JobDef } from "job-processor";
+import type { JobDef } from "job-processor";
 
 import { modelDescriptors } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
+import { configureDbSchemaValidation } from "@/common/mongodb";
 
 import { findInvalidDocuments } from "../db/findInvalidDocuments";
 import { recreateIndexes } from "../db/recreateIndexes";
 import { validateModels } from "../db/schemaValidation";
-import { create as createMigration, status as statusMigration, up as upMigration } from "../migrations/migrations";
+import {
+  assertNoMigrationLock,
+  create as createMigration,
+  status as statusMigration,
+  up as upMigration,
+} from "../migrations/migrations";
+
+import { payloadNumber } from "./payload";
 
 const requireStringPayload = (payload: Record<string, unknown> | null | undefined, key: string): string => {
   const value = payload?.[key];
@@ -22,7 +30,7 @@ const isDropRequested = (payload: Record<string, unknown> | null | undefined) =>
 export const dbMaintenanceJobs = {
   "db:find-invalid-documents": {
     handler: async (job) => {
-      return findInvalidDocuments(requireStringPayload(job.payload, "collection"));
+      return findInvalidDocuments(requireStringPayload(job.payload, "collection"), payloadNumber(job.payload, "limit"));
     },
   },
   "indexes:create": {
@@ -48,10 +56,10 @@ export const dbMaintenanceJobs = {
   },
   "migrations:up": {
     handler: async () => {
+      await assertNoMigrationLock();
+      await configureDbSchemaValidation(modelDescriptors, { level: "moderate" });
       await upMigration();
-      // Validate all documents after the migration
-      await addJob({ name: "db:validate", queued: true });
-      return;
+      await configureDbSchemaValidation(modelDescriptors, { level: "strict" });
     },
   },
   "migrations:status": {

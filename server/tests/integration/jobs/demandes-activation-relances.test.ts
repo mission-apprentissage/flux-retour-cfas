@@ -454,7 +454,6 @@ describe("relances du workflow d'activation", () => {
       await insererDemande({ email: "adjoint@cfa-tests.fr", user_id: actif, invitez_sent_at: plus(1) });
       await invitationsArchiveDb().insertOne({
         _id: new ObjectId(),
-        token: "jeton-archive",
         email: "collegue@cfa-tests.fr",
         organisation_id: organisationId,
         author_id: actif,
@@ -488,7 +487,6 @@ describe("relances du workflow d'activation", () => {
       });
       await invitationsArchiveDb().insertOne({
         _id: new ObjectId(),
-        token: "jeton-consomme",
         email: "inscrit@cfa-tests.fr",
         organisation_id: organisationId,
         author_id: admin,
@@ -545,7 +543,6 @@ describe("relances du workflow d'activation", () => {
       await insererDemande({ user_id: admin, invitez_sent_at: plus(1) });
       await invitationsArchiveDb().insertOne({
         _id: new ObjectId(),
-        token: "jeton-ancien",
         email: "ancien@cfa-tests.fr",
         organisation_id: organisationId,
         author_id: admin,
@@ -566,7 +563,6 @@ describe("relances du workflow d'activation", () => {
       await insererDemande({ user_id: admin, invitez_sent_at: plus(1) });
       await invitationsArchiveDb().insertOne({
         _id: new ObjectId(),
-        token: "jeton-consomme",
         email: "collegue@cfa-tests.fr",
         organisation_id: organisationId,
         author_id: admin,
@@ -594,7 +590,6 @@ describe("relances du workflow d'activation", () => {
       });
       await invitationsArchiveDb().insertOne({
         _id: new ObjectId(),
-        token: "jeton-consomme",
         email: "collegue@cfa-tests.fr",
         organisation_id: organisationId,
         author_id: admin,
@@ -624,7 +619,6 @@ describe("relances du workflow d'activation", () => {
       await insererDemande({ user_id: admin, invitez_sent_at: plus(1) });
       await invitationsArchiveDb().insertOne({
         _id: new ObjectId(),
-        token: "jeton-consomme",
         email: "collegue@cfa-tests.fr",
         organisation_id: organisationId,
         author_id: admin,

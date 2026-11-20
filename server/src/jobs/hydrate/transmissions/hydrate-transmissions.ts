@@ -1,15 +1,10 @@
 import { ObjectId } from "bson";
 
-import {
-  getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay,
-  getAllTransmissionsDate,
-} from "@/common/actions/indicateurs/transmissions/transmission.action";
-import logger from "@/common/logger";
+import { getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay } from "@/common/actions/indicateurs/transmissions/transmission.action";
 import { transmissionDailyReportDb } from "@/common/model/collections";
 import { formatDateYYYYMMDD } from "@/common/utils/dateUtils";
-import { createErrorAggregator } from "@/common/utils/errorAggregator";
 
-const insertTransmissions = async (date: Date) => {
+const upsertTransmissions = async (date: Date) => {
   const formattedDay = formatDateYYYYMMDD(date);
 
   if (!formattedDay) {
@@ -17,84 +12,51 @@ const insertTransmissions = async (date: Date) => {
   }
 
   const data = await getAllErrorsTransmissionStatusGroupedByOrganismeForAGivenDay(date);
-  await transmissionDailyReportDb().insertMany(
+  if (data.length === 0) {
+    return;
+  }
+
+  await transmissionDailyReportDb().bulkWrite(
     data.map((item) => ({
-      _id: new ObjectId(),
-      organisme_id: item.organisme_id,
-      current_day: formattedDay,
-      success_count: item.success,
-      error_count: item.error,
+      updateOne: {
+        filter: { organisme_id: item.organisme_id, current_day: formattedDay },
+        update: {
+          $set: { success_count: item.success, error_count: item.error },
+          $setOnInsert: { _id: new ObjectId() },
+        },
+        upsert: true,
+      },
     }))
   );
 };
 
-const deleteTransmissions = async (date: Date) => {
-  const formattedDay = formatDateYYYYMMDD(date);
-  if (!formattedDay) {
-    throw new Error("Invalid date format");
+const MAX_REPLAY_DAYS = 14;
+
+const parseReplayDay = (day: string): Date => {
+  const date = new Date(`${day}T12:00:00`);
+  if (Number.isNaN(date.getTime()) || formatDateYYYYMMDD(date) !== day) {
+    throw new Error(`Option day invalide : date AAAA-MM-JJ attendue, reçu ${day}`);
   }
-  const result = await transmissionDailyReportDb().deleteMany({ current_day: formattedDay });
-  if (result.deletedCount === 0) {
-    logger.info(`No transmissions found for date: ${formattedDay}`);
+
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  const ageInDays = Math.round((today.getTime() - date.getTime()) / 86_400_000);
+  if (ageInDays < 1 || ageInDays > MAX_REPLAY_DAYS) {
+    throw new Error(
+      `Option day refusée : ${day} doit être entre la veille et il y a ${MAX_REPLAY_DAYS} jours, au-delà la purge a pu retirer une partie des transmissions`
+    );
   }
-  return result;
+  return date;
 };
 
-export const computeDailyTransmissions = async () => {
-  const previousDay = new Date();
-  previousDay.setDate(previousDay.getDate() - 1);
-
-  await insertTransmissions(previousDay);
-};
-
-export const hydrateAllTransmissions = async () => {
-  const allDates = await getAllTransmissionsDate();
-
-  if (!allDates || allDates.length === 0) {
-    logger.warn("Aucune date de transmission trouvée");
+export const computeDailyTransmissions = async ({ day }: { day?: string } = {}) => {
+  if (day) {
+    await upsertTransmissions(parseReplayDay(day));
     return;
   }
 
-  const errors = createErrorAggregator("hydrate-transmissions");
-  for (const date of allDates) {
-    if (!date) {
-      logger.warn({ date }, "Date invalide dans les dates de transmission");
-      continue;
-    }
-    try {
-      await insertTransmissions(new Date(date));
-      errors.ok();
-    } catch (error) {
-      logger.error({ err: error, date }, "Erreur lors du traitement de la date de transmission");
-      errors.record(error);
-    }
-  }
-  errors.finish();
-};
+  const previousDay = new Date();
+  previousDay.setDate(previousDay.getDate() - 1);
 
-export const forceHydrateAllTransmissions = async () => {
-  const allDates = await getAllTransmissionsDate();
-
-  const errors = createErrorAggregator("force-hydrate-transmissions");
-  for (const date of allDates) {
-    if (!date) {
-      logger.warn({ date }, "Date invalide dans les dates de transmission");
-      continue;
-    }
-    const today = new Date();
-    if (date === formatDateYYYYMMDD(today)) {
-      logger.warn({ date }, "Date du jour ignorée");
-      continue;
-    }
-
-    try {
-      await deleteTransmissions(new Date(date));
-      await insertTransmissions(new Date(date));
-      errors.ok();
-    } catch (error) {
-      logger.error({ err: error, date }, "Erreur lors du traitement de la date de transmission");
-      errors.record(error);
-    }
-  }
-  errors.finish();
+  await upsertTransmissions(previousDay);
 };

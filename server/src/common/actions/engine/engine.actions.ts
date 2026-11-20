@@ -82,7 +82,7 @@ export const getAndFormatCommuneFromCode = async (
         }
       : {};
   } catch {
-    // Dégradation assumée, comme dans adresse.builder : l'effectif s'ingère sans
+    // Dégradation assumée : l'effectif s'ingère sans
     // commune. Le wrapper a déjà signalé la panne d'api-alternance.
     return {};
   }

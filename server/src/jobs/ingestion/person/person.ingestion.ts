@@ -1,9 +1,8 @@
 import { ObjectId } from "bson";
-import type { IEffectifV2, IPersonV2 } from "shared/models";
+import type { IPersonV2 } from "shared/models";
 import type { IDossierApprenantSchemaV3 } from "shared/models/parts/dossierApprenantSchemaV3";
 
 import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
-import logger from "@/common/logger";
 import { personV2Db } from "@/common/model/collections";
 
 export type IIngestPersonUsedFields = "nom_apprenant" | "prenom_apprenant" | "date_de_naissance_apprenant";
@@ -18,7 +17,6 @@ export async function ingestPersonV2(dossier: IIngestPersonV2Params): Promise<IP
       prenom: dossier.prenom_apprenant,
       date_de_naissance: dossier.date_de_naissance_apprenant,
     }),
-    parcours: { en_cours: null, chronologie: [] },
   };
 
   const result = await personV2Db().findOneAndUpdate(
@@ -36,59 +34,4 @@ export async function ingestPersonV2(dossier: IIngestPersonV2Params): Promise<IP
   );
 
   return result!;
-}
-
-export async function updateParcoursPersonV2(person_id: ObjectId, effectifV2: IEffectifV2): Promise<void> {
-  const date_inscription = effectifV2.date_inscription;
-  const effv2_id = effectifV2._id;
-
-  try {
-    await personV2Db().updateOne(
-      { _id: person_id, "parcours.chronologie.id": { $ne: effv2_id } }, // insert only if id not already in array
-      {
-        $push: {
-          "parcours.chronologie": {
-            $each: [{ id: effv2_id, date: date_inscription }],
-            $sort: { date: 1 },
-          },
-        },
-      },
-      {
-        bypassDocumentValidation: true,
-      }
-    );
-
-    await personV2Db().updateOne(
-      { _id: person_id },
-      {
-        $push: {
-          "parcours.chronologie": {
-            $each: [],
-            $sort: { date: 1 },
-          },
-        },
-      },
-      {
-        bypassDocumentValidation: true,
-      }
-    );
-
-    await personV2Db().updateOne(
-      { _id: person_id },
-      [
-        {
-          $set: {
-            "parcours.en_cours": {
-              $arrayElemAt: ["$parcours.chronologie", -1],
-            },
-          },
-        },
-      ],
-      {
-        bypassDocumentValidation: true,
-      }
-    );
-  } catch (e) {
-    logger.error({ err: e, personId: person_id }, "Erreur lors de la mise à jour du parcours de la personne");
-  }
 }

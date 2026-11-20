@@ -584,7 +584,8 @@ export const cfaInvitationsChampsRows = [
   },
   {
     champ: "date_premiere_connexion_apres_invitation_CFA",
-    description: "Date de la première connexion d'un utilisateur du CFA après la date d'invitation",
+    description:
+      "Date de la première connexion d'un utilisateur du CFA après la date d'invitation. Les connexions sont gardées 12 mois : pour une invitation plus ancienne, c'est la plus ancienne connexion encore conservée.",
     format: `${FORMAT_DATE}, vide si aucune connexion`,
     pourquoi: "Mesurer le délai entre l'invitation et la première connexion du CFA",
   },

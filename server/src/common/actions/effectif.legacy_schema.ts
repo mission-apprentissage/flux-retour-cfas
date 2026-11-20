@@ -2457,11 +2457,6 @@ export const legacySchema = {
       bsonType: "string",
       description: "Identifiant de l'apprenant dans l'erp",
     },
-    is_lock: {
-      additionalProperties: true,
-      bsonType: ["number", "string", "bool", "object", "array", "null"],
-      description: "Indique les champs verrouillés",
-    },
     organisme_formateur_id: {
       bsonType: "objectId",
       description: "Organisme formateur id",

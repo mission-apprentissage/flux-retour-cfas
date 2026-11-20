@@ -5,7 +5,6 @@ export const contratsSchema = {
     autosave: false,
   },
   "contrats[].siret": {
-    locked: true,
     showInfo: true,
     label: "N° SIRET de l'employeur :",
     requiredMessage: "Le siret est obligatoire",
@@ -22,7 +21,6 @@ export const contratsSchema = {
   "contrats[].denomination": {
     label: "Dénomination :",
     showInfo: true,
-    locked: true,
     requiredMessage: "La dénomination de l'employeur est obligatoire",
     mask: "C",
     maskBlocks: [
@@ -35,7 +33,6 @@ export const contratsSchema = {
   },
   "contrats[].naf": {
     showInfo: true,
-    locked: true,
     label: "Code NAF de l'employeur :",
     requiredMessage: "le code NAF est obligatoire",
     validateMessage: "le code NAF n'est pas au bon format",
@@ -51,7 +48,6 @@ export const contratsSchema = {
   "contrats[].nombre_de_salaries": {
     fieldType: "number",
     showInfo: true,
-    locked: true,
     label: "Effectif salarié de l'entreprise :",
     mask: "C",
     maskBlocks: [
@@ -68,7 +64,6 @@ export const contratsSchema = {
   "contrats[].type_employeur": {
     label: "Type d'employeur :",
     showInfo: true,
-    locked: true,
     options: [
       {
         name: "Privé",
@@ -152,20 +147,16 @@ export const contratsSchema = {
   "contrats[].date_debut": {
     label: "Date de début du contrat :",
     fieldType: "date",
-    locked: true,
   },
   "contrats[].date_fin": {
     label: "Date de fin du contrat :",
     fieldType: "date",
-    locked: true,
   },
   "contrats[].date_rupture": {
     label: "Date de rupture du contrat :",
     fieldType: "date",
-    locked: true,
   },
   "contrats[].adresse.numero": {
-    locked: true,
     precision: 0,
     fieldType: "number",
     label: "N° :",
@@ -180,14 +171,12 @@ export const contratsSchema = {
     ],
   },
   "contrats[].adresse.repetition_voie": {
-    locked: true,
     fieldType: "select",
     label: "Indice de répétition :",
     validateMessage: `n'est pas un indice de répétition valide`,
     options: INDICE_DE_REPETITION_OPTIONS,
   },
   "contrats[].adresse.voie": {
-    locked: true,
     label: "Voie :",
     mask: "C",
     maskBlocks: [
@@ -200,10 +189,8 @@ export const contratsSchema = {
   },
   "contrats[].adresse.complement": {
     label: "Complément d'adresse (optionnel):",
-    locked: true,
   },
   "contrats[].adresse.code_postal": {
-    locked: true,
     label: "Code postal :",
     requiredMessage: "Le code postal est obligatoire",
     validateMessage: "n'est pas un code postal valide",
@@ -217,7 +204,6 @@ export const contratsSchema = {
     ],
   },
   "contrats[].adresse.commune": {
-    locked: true,
     label: "Commune: ",
     requiredMessage: "la commune est obligatoire",
     mask: "C",
@@ -230,13 +216,11 @@ export const contratsSchema = {
     ],
   },
   "contrats[].adresse.departement": {
-    locked: true,
     label: "Département de l'employeur :",
     requiredMessage: "le département de l'employeur est obligatoire",
     validateMessage: "Le département doit contenir 2 à 3 chiffres",
   },
   "contrats[].adresse.region": {
-    locked: true,
     fieldType: "select",
     label: "Région de l'employeur :",
     requiredMessage: "la région de l'employeur est obligatoire",

@@ -1,21 +1,11 @@
 import type { JobDef } from "job-processor";
 
-import {
-  computeDailyTransmissions,
-  forceHydrateAllTransmissions,
-  hydrateAllTransmissions,
-} from "../hydrate/transmissions/hydrate-transmissions";
+import { computeDailyTransmissions } from "../hydrate/transmissions/hydrate-transmissions";
+
+import { payloadString } from "./payload";
 
 export const transmissionsJobs = {
   "hydrate:transmission-daily": {
-    handler: computeDailyTransmissions,
-  },
-  "hydrate:transmissions-all": {
-    handler: hydrateAllTransmissions,
-  },
-  "tmp:force-hydrate-transmissions": {
-    handler: async () => {
-      return forceHydrateAllTransmissions();
-    },
+    handler: async (job) => computeDailyTransmissions({ day: payloadString(job.payload, "day") }),
   },
 } satisfies Record<string, JobDef>;

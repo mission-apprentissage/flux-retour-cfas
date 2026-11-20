@@ -274,7 +274,6 @@ function buildEffectifBase(ctx: SeedContext, { n, cfa, ml, personne, parcours, .
       ...(c.causeRupture ? { cause_rupture: c.causeRupture } : {}),
       ...c.employeur,
     })),
-    is_lock: false,
     validation_errors: [],
     created_at: ctx.now,
     updated_at: ctx.now,

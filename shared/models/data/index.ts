@@ -3,7 +3,6 @@ export * from "./demandesActivationCfa.model";
 export * from "./effectifs.model";
 export * from "./effectifsArchive.model";
 export * from "./effectifsQueue.model";
-export * from "./formations.model";
 export * from "./formationsCatalogue.model";
 export * from "./invitations.model";
 export * from "./jwtSessions.model";

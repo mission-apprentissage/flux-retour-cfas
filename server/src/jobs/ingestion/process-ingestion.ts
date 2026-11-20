@@ -16,7 +16,7 @@ import { estFinAvantEntree } from "shared/utils";
 import { NEVER, SafeParseReturnType } from "zod";
 
 import { updateVoeuxAffelnetEffectif } from "@/common/actions/affelnet.actions";
-import { lockEffectif, mergeEffectifWithDefaults, withComputedFields } from "@/common/actions/effectifs.actions";
+import { mergeEffectifWithDefaults, withComputedFields } from "@/common/actions/effectifs.actions";
 import {
   buildNewHistoriqueStatutApprenant,
   mapEffectifQueueToEffectif,
@@ -175,8 +175,7 @@ async function processEffectifQueueItem(
   const computed_day = formatDateYYYYMMDD(currentDate);
 
   try {
-    //Process du nouveau schéma de données
-    const effectifv2 = await handleEffectifTransmission(effectifQueue, currentDate, errors);
+    await handleEffectifTransmission(effectifQueue, errors);
     // Phase de transformation d'une donnée de queue
     const { result, itemProcessingInfos, organismeTarget } = await transformEffectifQueueV3ToEffectif(effectifQueue);
     // ajout des informations sur le traitement au logger
@@ -209,7 +208,6 @@ async function processEffectifQueueItem(
         {
           $set: {
             effectif_id: upsertedEffectif._id,
-            effectifv2_id: effectifv2?._id,
             organisme_id: organisme._id,
             updated_at: currentDate,
             processed_at: currentDate,
@@ -223,8 +221,6 @@ async function processEffectifQueueItem(
           },
         }
       );
-      await createMissionLocaleSnapshot(upsertedEffectif);
-
       itemLogger.info({ duration: Date.now() - start }, "processed item");
     } else {
       // MAJ de la queue pour indiquer que les données ont été traitées
@@ -233,7 +229,6 @@ async function processEffectifQueueItem(
         {
           $set: {
             validation_errors: result.error?.issues.map(({ path, message }) => ({ message, path })) || [],
-            effectifv2_id: effectifv2?._id,
             updated_at: currentDate,
             processed_at: currentDate,
             has_error: true,
@@ -420,9 +415,6 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
           adresse: effectifQueued.etablissement_lieu_de_formation_adresse,
           code_postal: effectifQueued.etablissement_lieu_de_formation_code_postal,
         },
-        _raw: {
-          formation: effectif.formation,
-        },
       };
       return {
         effectif: await withComputedFields(effectifData, { organisme: organismeFormateur, certification }),
@@ -441,12 +433,7 @@ async function transformEffectifQueueV3ToEffectif(rawEffectifQueued: IEffectifQu
 async function transformEffectifQueueToEffectif(
   effectifQueue: IDossierApprenantSchemaV3
 ): Promise<Omit<IEffectif, "_id" | "_computed" | "organisme_id">> {
-  return await completeEffectifAddress(
-    mergeEffectifWithDefaults(
-      mapEffectifQueueToEffectif(effectifQueue),
-      effectifQueue.source !== SOURCE_APPRENANT.FICHIER
-    )
-  );
+  return await completeEffectifAddress(mergeEffectifWithDefaults(mapEffectifQueueToEffectif(effectifQueue)));
 }
 
 /**
@@ -496,12 +483,15 @@ const createOrUpdateEffectif = async (
       // L'effectif est fusionné avec les nouvelles données.
       // Si une donnée a été modifiée manuellement dans la plateforme, elle sera écrasée par l'import.
       // Ce (potentiel, tout dépend de ce qu'on veut) problème doit être traité d'un point de vue métier.
-      effectifDb =
-        (await effectifsDb().findOneAndUpdate(
-          { _id: effectifDb._id },
-          { $set: mergedEffectif },
-          { returnDocument: "after" }
-        )) ?? effectifDb;
+      const updatedEffectif = await effectifsDb().findOneAndUpdate(
+        { _id: effectifDb._id },
+        { $set: mergedEffectif },
+        { returnDocument: "after" }
+      );
+      if (!updatedEffectif) {
+        throw new Error(`Effectif ${effectifDb._id.toString()} supprimé pendant son ingestion`);
+      }
+      effectifDb = updatedEffectif;
     } else {
       effectifDb = { ...effectif, transmitted_at: new Date(), _id: new ObjectId() };
       const { insertedId } = await effectifsDb().insertOne(effectifDb);
@@ -509,12 +499,6 @@ const createOrUpdateEffectif = async (
     }
 
     itemProcessingInfos.effectif_id = effectifDb._id.toString();
-
-    // Lock de tous les champs (non vide) mis à jour par l'API pour ne pas permettre la modification côté UI
-    // Uniquement dans le cas où c'est bien par API et non par import manuel (a.k.a téléversement)
-    if (effectif.source !== SOURCE_APPRENANT.FICHIER) {
-      effectifDb = await lockEffectif(effectifDb);
-    }
 
     await createMissionLocaleSnapshot(effectifDb);
     await createFranceTravailEffectifSnapshot(effectifDb);

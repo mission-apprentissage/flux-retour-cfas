@@ -16,16 +16,11 @@ const collectionName = "effectifsQueue";
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ effectif_id: 1 }, { name: "effectif_id" }],
   [{ organisme_id: 1 }, { name: "organisme_id" }],
-  [{ processed_at: 1 }, { name: "processed_at" }],
   [{ created_at: 1 }, { name: "created_at" }],
-  [{ id_erp_apprenant: 1 }, { name: "id_erp_apprenant" }],
   [{ source: 1 }, { name: "source" }],
-  [{ source_organisme_id: 1 }, { name: "source_organisme_id" }],
-  [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
-  [{ uai_etablissement: 1 }, { name: "uai_etablissement" }],
-  [{ siret_etablissement: 1 }, { name: "siret_etablissement" }],
   [{ processed_at: 1, created_at: 1 }, {}],
   [{ computed_day: 1 }, {}],
+  [{ source_organisme_id: 1, organisme_id: 1, computed_day: 1 }, {}],
 ];
 
 const effectifsProps = effectifsModel.zod.shape;
@@ -61,7 +56,6 @@ const internalFields = {
   source_organisme_id: z.string({ description: effectifsProps.source_organisme_id.description }).nullish(),
   user_erp_id: z.string({ description: "Id de l'utilisateur ERP" }).nullish(),
   effectif_id: zObjectId.describe("Id de l'effectif associé").nullish(),
-  effectifV2_id: zObjectId.describe("Id de l'effectif v2 associé").nullish(),
   organisme_id: zObjectId.describe("Id de l'organisme associé").nullish(),
   updated_at: z.date({ description: "Date de mise à jour en base de données" }).nullish(),
   created_at: z.date({ description: "Date d'ajout en base de données" }),

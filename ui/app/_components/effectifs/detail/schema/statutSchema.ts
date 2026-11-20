@@ -5,12 +5,10 @@ export const statutsSchema = {
   "apprenant.historique_statut[].date_statut": {
     label: "Date de changement de statut :",
     fieldType: "date",
-    locked: true,
   },
   "apprenant.historique_statut[].valeur_statut": {
     fieldType: "select",
     label: "Statut :",
-    locked: true,
     options: [
       {
         label: "Inscrit en formation",
@@ -29,6 +27,5 @@ export const statutsSchema = {
   "apprenant.historique_statut[].date_reception": {
     label: "Date de réception du statut :",
     fieldType: "date",
-    locked: true,
   },
 };

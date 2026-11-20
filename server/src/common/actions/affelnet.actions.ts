@@ -5,6 +5,14 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 
 import { voeuxAffelnetDb } from "../model/collections";
 
+export const findDeletedVoeux = async (importDate: Date) => {
+  const { modifiedCount } = await voeuxAffelnetDb().updateMany(
+    { updated_at: { $lt: importDate }, deleted_at: { $exists: false } },
+    { $set: { deleted_at: new Date() } }
+  );
+  return modifiedCount;
+};
+
 const computeFilter = (academie_list: Array<string> | null) => {
   return {
     ...(academie_list ? { academie_code: { $in: academie_list } } : {}),
@@ -279,12 +287,15 @@ export const updateVoeuxAffelnetEffectif = async (
 export const updateVoeuxAffelnetEffectifDeca = async (
   effectif_id: ObjectId,
   effectif: WithoutId<IEffectifDECA>,
-  uai: string | undefined | null
+  organismeFormateurId: ObjectId | undefined | null
 ) => {
+  if (!organismeFormateurId) {
+    return;
+  }
   const { apprenant, annee_scolaire } = effectif;
   const { nom, prenom } = apprenant;
   const filter = {
-    "raw.uai_etatblissement_formateur": uai,
+    organisme_formateur_id: organismeFormateurId,
     "raw.prenom_1": { $regex: `^${prenom.toLowerCase()}$`, $options: "i" },
     "raw.nom": { $regex: `^${nom.toLowerCase()}$`, $options: "i" },
     annee_scolaire_rentree: annee_scolaire.substring(0, 4),
