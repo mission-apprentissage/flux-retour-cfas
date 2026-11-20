@@ -1,16 +1,8 @@
 import { zCertification } from "api-alternance-sdk";
-import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
 import { zEffectifAnneeScolaire, zEffectifComputedStatut } from "../effectifs.model";
-
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [
-  [{ "identifiant.formation_id": 1, "identifiant.person_id": 1 }, { unique: true }],
-  [{ annee_scolaires: 1, "adresse.mission_locale_id": 1 }, {}],
-];
-
-const collectionName = "effectifV2";
 
 const zContrat = z.object({
   date_debut: z.date(),
@@ -121,4 +113,3 @@ export const zEffectifV2 = z.object({
 });
 
 export type IEffectifV2 = z.output<typeof zEffectifV2>;
-export default { zod: zEffectifV2, collectionName, indexes };
