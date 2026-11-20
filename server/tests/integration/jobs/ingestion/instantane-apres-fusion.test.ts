@@ -154,6 +154,8 @@ describe("Instantané Mission Locale après une mise à jour par fichier", () =>
       expect(ligne).toMatchObject({ has_error: true, processed_at: expect.any(Date) });
       expect(ligne?.error).toContain("supprimé pendant son ingestion");
       expect(await missionLocaleEffectifsDb().countDocuments({})).toBe(0);
+      const organisme = await organismesDb().findOne({ _id: organismeId });
+      expect(organisme?.has_transmission_errors === true).toBe(source === SOURCE_APPRENANT.FICHIER);
     }
   );
 });
