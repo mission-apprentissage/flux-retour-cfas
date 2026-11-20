@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import { getCampagnesAffelnetConservees, getPremiereCampagneAffelnetConservee } from "./campagnesAffelnet";
 
 describe("getPremiereCampagneAffelnetConservee()", () => {
-  it("garde la campagne N-2 jusqu'au 31 août", () => {
+  it("garde la campagne N-2 jusqu'au 31 août à minuit UTC", () => {
     expect(getPremiereCampagneAffelnetConservee(new Date("2026-08-31T23:59:59Z"))).toBe(2024);
   });
 
-  it("retire la campagne N-2 au 1er septembre", () => {
+  it("retire la campagne N-2 au 1er septembre à minuit UTC", () => {
     expect(getPremiereCampagneAffelnetConservee(new Date("2026-09-01T00:00:00Z"))).toBe(2025);
   });
 

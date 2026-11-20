@@ -29,8 +29,14 @@ describe("getDateDeFinConservation()", () => {
 
 describe("estHorsConservation()", () => {
   it("vrai deux ans et un jour après la fin", () => {
-    expect(estHorsConservation({ annee_scolaire: "2023-2024", datesDeFin: [date("2024-11-16")] }, maintenant)).toBe(
+    expect(estHorsConservation({ annee_scolaire: "2023-2024", datesDeFin: [date("2024-11-17")] }, maintenant)).toBe(
       true
+    );
+  });
+
+  it("faux deux ans jour pour jour après la fin", () => {
+    expect(estHorsConservation({ annee_scolaire: "2023-2024", datesDeFin: [date("2024-11-18")] }, maintenant)).toBe(
+      false
     );
   });
 
