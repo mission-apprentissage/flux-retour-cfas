@@ -256,7 +256,7 @@ program
   .command("db:find-invalid-documents")
   .description("Recherche des documents invalides")
   .requiredOption("-c, --collection <name>", "the collection to search for invalid documents")
-  .option("--limit <n>", "Nombre maximal de documents invalides à détailler", (value) => parseInt(value))
+  .option("--limit <n>", "Nombre maximal de documents invalides à détailler", Number)
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("db:find-invalid-documents"));
 
@@ -295,9 +295,9 @@ program
   .description(
     "Purge one-shot des orphelins d'effectifsQueue (sans organisme_id) : 15 derniers computed_day par source et filet calendaire, par lots"
   )
-  .option("--batch-size <number>", "Taille des lots de suppression", (value) => parseInt(value))
-  .option("--sleep-ms <number>", "Pause entre chaque lot (ms)", (value) => parseInt(value))
-  .option("--nb-days-to-keep <number>", "Nombre de jours conservés par source", (value) => parseInt(value))
+  .option("--batch-size <number>", "Taille des lots de suppression", Number)
+  .option("--sleep-ms <number>", "Pause entre chaque lot (ms)", Number)
+  .option("--nb-days-to-keep <number>", "Nombre de jours conservés par source", Number)
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("clear:queue-orphans"));
 
@@ -321,7 +321,7 @@ program.command("init:dev").description("Initialisation du projet en local").act
 program
   .command("purge:queues")
   .description("Purge des queues")
-  .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", (n) => parseInt(n, 10), 15)
+  .option("--nbDaysToKeep <number>", "Nombre de jours à conserver", Number, 15)
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("purge:queues"));
 
