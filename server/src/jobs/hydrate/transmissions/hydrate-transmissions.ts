@@ -30,7 +30,31 @@ const upsertTransmissions = async (date: Date) => {
   );
 };
 
-export const computeDailyTransmissions = async () => {
+const MAX_REPLAY_DAYS = 14;
+
+const parseReplayDay = (day: string): Date => {
+  const date = new Date(`${day}T12:00:00`);
+  if (Number.isNaN(date.getTime()) || formatDateYYYYMMDD(date) !== day) {
+    throw new Error(`Option day invalide : date AAAA-MM-JJ attendue, reçu ${day}`);
+  }
+
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  const ageInDays = Math.round((today.getTime() - date.getTime()) / 86_400_000);
+  if (ageInDays < 1 || ageInDays > MAX_REPLAY_DAYS) {
+    throw new Error(
+      `Option day refusée : ${day} doit être entre la veille et il y a ${MAX_REPLAY_DAYS} jours, au-delà la purge a pu retirer une partie des transmissions`
+    );
+  }
+  return date;
+};
+
+export const computeDailyTransmissions = async ({ day }: { day?: string } = {}) => {
+  if (day) {
+    await upsertTransmissions(parseReplayDay(day));
+    return;
+  }
+
   const previousDay = new Date();
   previousDay.setDate(previousDay.getDate() - 1);
 

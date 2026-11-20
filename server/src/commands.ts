@@ -302,6 +302,13 @@ program
   .action(createJobAction("clear:queue-orphans"));
 
 program
+  .command("hydrate:transmission-daily")
+  .description("Calcule le rapport quotidien des transmissions de la veille, ou d'un jour des 14 derniers")
+  .option("--day <AAAA-MM-JJ>", "Jour à recalculer")
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:transmission-daily"));
+
+program
   .command("dev:generate-open-api")
   .description("Création/maj du fichier open-api.json")
   .option("-q, --queued", "Run job asynchronously", false)
