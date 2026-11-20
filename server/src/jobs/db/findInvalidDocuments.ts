@@ -6,6 +6,9 @@ import { modelDescriptors } from "@/common/model/collections";
 import { buildCollectionValidator, getDatabase } from "@/common/mongodb";
 
 const DEFAULT_LIMIT = 100;
+const VALUE_KEYS = ["consideredValue", "consideredValues"];
+
+const withoutValues = (key: string, value: unknown) => (VALUE_KEYS.includes(key) ? undefined : value);
 
 export const findInvalidDocuments = async (name: string, limit = DEFAULT_LIMIT) => {
   if (!Number.isInteger(limit) || limit < 1) {
@@ -45,7 +48,7 @@ export const findInvalidDocuments = async (name: string, limit = DEFAULT_LIMIT) 
       await collection.updateOne({ _id: document._id }, { $set: { invalidDoc: true } });
     } catch (error) {
       const details = error instanceof MongoServerError ? error.errInfo?.details?.schemaRulesNotSatisfied : error;
-      logger.info(` #${i + 1} ${name} ${document._id}: ${JSON.stringify(details)}`);
+      logger.info(` #${i + 1} ${name} ${document._id}: ${JSON.stringify(details, withoutValues)}`);
     }
   }
 };

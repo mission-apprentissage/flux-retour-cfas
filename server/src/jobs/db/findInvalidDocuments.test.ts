@@ -38,6 +38,17 @@ describe("findInvalidDocuments", () => {
     expect(await markedDocuments()).toBe(0);
   });
 
+  it("ne journalise pas les valeurs des champs invalides", async () => {
+    await getDatabase().collection(COLLECTION).insertOne({ nom: 612345678 }, { bypassDocumentValidation: true });
+    const info = vi.spyOn(logger, "info");
+
+    await findInvalidDocuments(COLLECTION);
+
+    const [detail] = info.mock.calls.map(([message]) => String(message)).filter((message) => message.startsWith(" #"));
+    expect(detail).toContain("consideredType");
+    expect(detail).not.toContain("612345678");
+  });
+
   it("respecte la limite", async () => {
     await insertInvalidDocuments(3);
     const info = vi.spyOn(logger, "info");
