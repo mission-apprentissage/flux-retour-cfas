@@ -55,6 +55,28 @@ describe("findInvalidDocuments", () => {
     expect(await markedDocuments()).toBe(0);
   });
 
+  it("refuse de tourner quand le validateur en base diffère du modèle", async () => {
+    await insertInvalidDocuments(1);
+    await getDatabase().command({
+      collMod: COLLECTION,
+      validator: { $jsonSchema: { bsonType: "object" } },
+      validationLevel: "strict",
+      validationAction: "error",
+    });
+
+    await expect(findInvalidDocuments(COLLECTION)).rejects.toThrow("absent ou différent du modèle");
+  });
+
+  it("refuse de tourner quand le validateur en base est absent", async () => {
+    await getDatabase().command({ collMod: COLLECTION, validator: {} });
+
+    await expect(findInvalidDocuments(COLLECTION)).rejects.toThrow("absent ou différent du modèle");
+  });
+
+  it("refuse une collection sans validateur au modèle", async () => {
+    await expect(findInvalidDocuments("collectionInconnue")).rejects.toThrow("aucun validateur au modèle");
+  });
+
   it("refuse une limite invalide", async () => {
     await expect(findInvalidDocuments(COLLECTION, Number.NaN)).rejects.toThrow("invalide");
   });

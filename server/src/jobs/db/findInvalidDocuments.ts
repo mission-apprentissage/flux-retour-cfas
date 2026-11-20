@@ -1,7 +1,9 @@
+import { isEqual } from "lodash-es";
 import { MongoServerError } from "mongodb";
 
 import logger from "@/common/logger";
-import { getDatabase } from "@/common/mongodb";
+import { modelDescriptors } from "@/common/model/collections";
+import { buildCollectionValidator, getDatabase } from "@/common/mongodb";
 
 const DEFAULT_LIMIT = 100;
 
@@ -10,14 +12,21 @@ export const findInvalidDocuments = async (name: string, limit = DEFAULT_LIMIT) 
     throw new Error("Option limit invalide : entier supérieur ou égal à 1 attendu");
   }
 
+  const descriptor = modelDescriptors.find(({ collectionName }) => collectionName === name);
+  const validator = descriptor ? buildCollectionValidator(name, descriptor.zod) : null;
+  if (!validator) {
+    throw new Error(`Recherche impossible sur ${name} : aucun validateur au modèle`);
+  }
+
   const db = getDatabase();
   const [collectionInfo] = await db.listCollections({ name }, { nameOnly: false }).toArray();
   const options = collectionInfo?.options;
-  if (!options?.validator) {
-    logger.info(`Schema not found for ${name}`);
-    return;
+  if (!isEqual(options?.validator, validator)) {
+    throw new Error(
+      `Recherche refusée sur ${name} : le validateur en base est absent ou différent du modèle, le reposer d'abord (migrations:up ou redémarrage d'un service)`
+    );
   }
-  if (options.validationLevel !== "strict" || options.validationAction !== "error") {
+  if (options?.validationLevel !== "strict" || options?.validationAction !== "error") {
     throw new Error(
       `Recherche refusée sur ${name} : le validateur n'est pas en strict et error, le diagnostic écrirait dans les documents`
     );
@@ -25,7 +34,7 @@ export const findInvalidDocuments = async (name: string, limit = DEFAULT_LIMIT) 
 
   const collection = db.collection(name);
   const documents = await collection
-    .find({ $nor: [options.validator] })
+    .find({ $nor: [validator] })
     .limit(limit)
     .toArray();
 
