@@ -10,7 +10,7 @@ import { useMongo } from "@tests/jest/setupMongo";
 
 import { ingestionJobs } from "../registry/ingestion";
 
-import { PURGE_INDEX, purgeOrphanQueues, purgeQueues } from "./purge-queues";
+import { deleteInBatches, PURGE_INDEX, purgeOrphanQueues, purgeQueues } from "./purge-queues";
 
 vi.mock("@/common/utils/errorAggregator", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/common/utils/errorAggregator")>();
@@ -239,6 +239,19 @@ describe("purge d'effectifsQueue", () => {
 
     expect(result).toEqual({ dated: 0, undated: 0, skipped: false });
     expect(deleteMany).toHaveBeenCalledTimes(4);
+  });
+
+  it("s'arrête sans nouvelle recherche après un lot incomplet entièrement supprimé", async () => {
+    const find = vi.spyOn(Collection.prototype, "find");
+
+    const deleted = await deleteInBatches(
+      { source_organisme_id: "srcA" } as Parameters<typeof deleteInBatches>[0],
+      PURGE_INDEX,
+      { batchSize: 100, sleepMs: 0 }
+    );
+
+    expect(deleted).toBe(40);
+    expect(find).toHaveBeenCalledTimes(1);
   });
 
   it("continue après un seul lot sans suppression", async () => {

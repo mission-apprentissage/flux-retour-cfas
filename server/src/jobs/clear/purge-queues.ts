@@ -84,6 +84,7 @@ export const deleteInBatches = async (
       logger.warn({ filter }, "Purge effectifsQueue : deux lots consécutifs sans suppression, arrêt de la boucle");
       break;
     }
+    if (docs.length < batchSize && deleted === docs.length) break;
 
     await sleep(sleepMs);
   }
