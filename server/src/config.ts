@@ -115,6 +115,7 @@ const config = {
     key: env.get("API_ALTERNANCE_KEY").required().asString(),
   },
   disable_processors: env.get("FLUX_RETOUR_CFAS_DISABLE_PROCESSORS").default("false").asBool(),
+  purgeTracesActive: env.get("MNA_TDB_PURGE_TRACES_ACTIVE").default("false").asBool(),
   bal: {
     endpoint: env.get("MNA_TDB_BAL_API_URL").asString(),
     api_key: env.get("MNA_TDB_BAL_API_KEY").required().asString(),
