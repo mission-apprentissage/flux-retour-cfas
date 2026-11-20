@@ -10,6 +10,7 @@ const DEFAULT_NB_DAYS_TO_KEEP = 15;
 const DEFAULT_BATCH_SIZE = 5000;
 const DEFAULT_SLEEP_MS = 200;
 const MAX_EMPTY_BATCHES = 2;
+const PURGE_JOB = "purge:queues";
 
 export const PURGE_INDEX = { source_organisme_id: 1, organisme_id: 1, computed_day: 1 } as const;
 const ORGANISME_INDEX = { organisme_id: 1 } as const;
@@ -108,7 +109,7 @@ export const purgeOrphanQueues = async (options: OrphanOptions = {}): Promise<Or
     }>([{ $match: { organisme_id: null } }, { $group: { _id: "$source_organisme_id" } }], { hint: PURGE_INDEX })
     .toArray();
 
-  const errors = createErrorAggregator("purge-queues-orphans");
+  const errors = createErrorAggregator(PURGE_JOB);
   let dated = 0;
   for (const { _id: source } of orphanSources) {
     if (!source) continue;
@@ -191,7 +192,7 @@ export const purgeOrphanQueues = async (options: OrphanOptions = {}): Promise<Or
 const purgeOrganismeQueues = async (nbDaysToKeep: number, batchOptions: BatchOptions) => {
   const organismes = await effectifsQueueDb().distinct("organisme_id");
 
-  const errors = createErrorAggregator("purge-queues");
+  const errors = createErrorAggregator(PURGE_JOB);
   for (const organismeId of organismes) {
     if (!organismeId) continue;
     try {

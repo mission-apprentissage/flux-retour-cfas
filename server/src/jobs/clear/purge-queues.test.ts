@@ -4,11 +4,18 @@ import effectifsQueueDescriptor from "shared/models/data/effectifsQueue.model";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { effectifsQueueDb } from "@/common/model/collections";
+import { applyAlertContract } from "@/common/services/sentry/alertContract";
+import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import { useMongo } from "@tests/jest/setupMongo";
 
 import { ingestionJobs } from "../registry/ingestion";
 
 import { PURGE_INDEX, purgeOrphanQueues, purgeQueues } from "./purge-queues";
+
+vi.mock("@/common/utils/errorAggregator", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/common/utils/errorAggregator")>();
+  return { ...original, createErrorAggregator: vi.fn(original.createErrorAggregator) };
+});
 
 useMongo();
 
@@ -187,6 +194,16 @@ describe("purge d'effectifsQueue", () => {
 
     expect(await countFor({ source_organisme_id: "srcA" })).toBe(40);
     expect(await countFor({ source_organisme_id: "srcU" })).toBe(1);
+  });
+
+  it("classe les échecs agrégés de la passe nocturne au niveau du job purge:queues", async () => {
+    await purgeQueues(NB_DAYS_TO_KEEP, FAST);
+
+    const names = vi.mocked(createErrorAggregator).mock.calls.map(([name]) => name);
+    expect(names).toEqual(["purge:queues", "purge:queues"]);
+    expect(applyAlertContract<{ tags?: Record<string, unknown> }>({ tags: { job: names[0] } }).tags?.alert_tier).toBe(
+      "jour"
+    );
   });
 
   it("échoue en one-shot quand une source échoue, après avoir purgé les autres", async () => {
