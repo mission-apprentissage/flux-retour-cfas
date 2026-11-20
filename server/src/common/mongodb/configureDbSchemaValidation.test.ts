@@ -1,14 +1,14 @@
-import { captureException } from "@sentry/node";
 import { Db, MongoServerError } from "mongodb";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { modelDescriptors } from "@/common/model/collections";
 import { configureDbSchemaValidation, getDatabase } from "@/common/mongodb";
+import { captureTiered } from "@/common/services/sentry/alertContract";
 import { useMongo } from "@tests/jest/setupMongo";
 
-vi.mock("@sentry/node", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@sentry/node")>()),
-  captureException: vi.fn(),
+vi.mock("@/common/services/sentry/alertContract", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/common/services/sentry/alertContract")>()),
+  captureTiered: vi.fn(),
 }));
 
 useMongo();
@@ -80,7 +80,10 @@ describe("configureDbSchemaValidation", () => {
     await expect(
       configureDbSchemaValidation(modelDescriptors, { level: "moderate", onIndexBuild: "warn" })
     ).resolves.toBeUndefined();
-    expect(captureException).toHaveBeenCalled();
+    expect(captureTiered).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ tier: "jour", errorKind: "db" })
+    );
   });
 
   it("ne tolère aucune autre erreur de collMod", async () => {

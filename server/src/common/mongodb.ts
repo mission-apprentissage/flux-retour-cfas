@@ -1,10 +1,10 @@
-import { captureException } from "@sentry/node";
 import { isEqual } from "lodash-es";
 import { CollectionInfo, Document, MongoClient, MongoServerError } from "mongodb";
 import { zodToMongoSchema } from "shared/models";
 import type { ZodTypeAny } from "zod";
 
 import logger from "@/common/logger";
+import { captureTiered } from "@/common/services/sentry/alertContract";
 import config from "@/config";
 
 let mongodbClient: MongoClient | null = null;
@@ -154,7 +154,11 @@ export const configureDbSchemaValidation = async (
       } catch (err) {
         if (onIndexBuild === "warn" && err instanceof MongoServerError && err.code === INDEX_BUILD_IN_PROGRESS) {
           logger.warn({ err, collectionName }, "Validateur non appliqué : construction d'index en cours");
-          captureException(new Error(`Validateur non appliqué sur ${collectionName}`, { cause: err }));
+          captureTiered(new Error(`Validateur non appliqué sur ${collectionName}`, { cause: err }), {
+            tier: "jour",
+            errorKind: "db",
+            fingerprintKey: `validators:${collectionName}`,
+          });
           return;
         }
         throw err;
