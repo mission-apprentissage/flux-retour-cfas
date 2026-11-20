@@ -223,11 +223,34 @@ describe("purge d'effectifsQueue", () => {
     expect(await countFor({ source_organisme_id: "srcU" })).toBe(1);
   });
 
-  it("échoue quand l'acquittement majority est dépassé", async () => {
-    vi.spyOn(Collection.prototype, "deleteMany").mockRejectedValue(writeConcernError());
+  const failDeleteWhen = (predicate: (filter: Record<string, unknown>) => boolean) => {
+    const realDeleteMany = Collection.prototype.deleteMany;
+    vi.spyOn(Collection.prototype, "deleteMany").mockImplementation(function (this: Collection, ...args) {
+      if (predicate(args[0] as Record<string, unknown>)) {
+        return Promise.reject(writeConcernError());
+      }
+      return realDeleteMany.apply(this, args);
+    });
+  };
+
+  it("s'arrête quand l'acquittement majority est dépassé sur un organisme", async () => {
+    failDeleteWhen((filter) => filter.organisme_id instanceof ObjectId);
 
     await expect(purgeQueues(NB_DAYS_TO_KEEP, FAST)).rejects.toBeInstanceOf(MongoWriteConcernError);
-    await expect(purgeOrphanQueues(FAST)).rejects.toBeInstanceOf(MongoWriteConcernError);
+    expect(await countFor({ source_organisme_id: "srcA" })).toBe(40);
+  });
+
+  it("s'arrête quand l'acquittement majority est dépassé sur une source datée", async () => {
+    failDeleteWhen((filter) => filter.source_organisme_id === "srcA");
+
+    await expect(purgeOrphanQueues({ ...FAST, mode: "nightly" })).rejects.toBeInstanceOf(MongoWriteConcernError);
+    expect(await countFor({ source_organisme_id: "srcU" })).toBe(2);
+  });
+
+  it("s'arrête quand l'acquittement majority est dépassé sur les orphelins non datés", async () => {
+    failDeleteWhen((filter) => filter.computed_day === null);
+
+    await expect(purgeOrphanQueues({ ...FAST, mode: "nightly" })).rejects.toBeInstanceOf(MongoWriteConcernError);
   });
 
   it("s'arrête après deux lots consécutifs sans suppression", async () => {
