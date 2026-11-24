@@ -18934,6 +18934,11 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
       "bsonType": "objectId",
       "description": "Mission locale des dossiers supprimés",
     },
+    "mois": {
+      "bsonType": "string",
+      "description": "Mois, en UTC comme les photos, de la création des dossiers supprimés",
+      "pattern": "^\\d{4}-\\d{2}$",
+    },
     "segments": {
       "additionalProperties": false,
       "bsonType": "object",
@@ -19256,6 +19261,7 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
   "required": [
     "_id",
     "mission_locale_id",
+    "mois",
     "stats",
     "segments",
     "updated_at",

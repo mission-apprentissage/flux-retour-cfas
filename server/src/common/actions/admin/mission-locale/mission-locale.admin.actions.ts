@@ -6,7 +6,6 @@ import { CONNAISSANCE_ML_ENUM } from "shared/models/data/missionLocaleEffectif.m
 import {
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogDb,
-  missionLocaleStatsPurgesDb,
   organisationsDb,
   usersMigrationDb,
 } from "@/common/model/collections";
@@ -17,6 +16,7 @@ import {
 } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 
 import { createEffectifMissionLocaleLog } from "../../mission-locale/mission-locale-logs.actions";
+import { sommerPhotosPurges } from "../../mission-locale/mission-locale-purges-stats.actions";
 import { createOrUpdateMissionLocaleStats } from "../../mission-locale/mission-locale-stats.actions";
 import { computeSuiviDatesSet } from "../../mission-locale/mission-locale-suivi-dates";
 import { getMissionLocaleStat } from "../../mission-locale/mission-locale.actions";
@@ -448,7 +448,7 @@ export const getMissionLocaleDetail = async (missionLocaleId: ObjectId): Promise
     "organisme_data.acc_conjoint": true,
   });
 
-  const purged = await missionLocaleStatsPurgesDb().findOne({ mission_locale_id: missionLocaleId });
+  const purged = await sommerPhotosPurges(missionLocaleId);
 
   const traitesCount = mlEffectifs.filter((e) => e.situation != null).length + (purged?.stats.traite ?? 0);
 

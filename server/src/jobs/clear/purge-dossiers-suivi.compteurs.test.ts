@@ -11,10 +11,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getMissionLocaleDetail } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getMissionLocaleFicheIndicateurs } from "@/common/actions/mission-locale/mission-locale-fiche.actions";
 import {
+  createMissionLocaleStatsIfMissing,
   createOrUpdateMissionLocaleStats,
   getSuiviTraitementByRegion,
   getTraitementExportData,
   getTraitementStatsByMissionLocale,
+  setMissionLocaleStatsFields,
 } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { getMissionLocaleStat } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
@@ -269,6 +271,30 @@ describe("compteurs des photos ML à la purge des dossiers de suivi", () => {
 
     expect(await missionLocaleEffectifsDb().countDocuments({ _id: traite._id })).toBe(0);
     expect(await missionLocaleEffectifsLogDb().countDocuments({ mission_locale_effectif_id: traite._id })).toBe(0);
+  });
+
+  it("n'ajoute à une photo passée que les dossiers purgés créés jusqu'à son mois", async () => {
+    await inserer([
+      dossier({ rupture: "2025-03-10", situation: SITUATION_ENUM.RDV_PRIS }),
+      dossier({ rupture: "2025-05-10", situation: SITUATION_ENUM.RDV_PRIS }),
+    ]);
+    await purgerDossiersSuivi({ maintenant });
+    const fevrier = date("2025-02-01");
+    const avril = date("2025-04-01");
+
+    await createMissionLocaleStatsIfMissing(ML_ID, fevrier);
+    await setMissionLocaleStatsFields(ML_ID, fevrier, ["stats.traite"]);
+    await createMissionLocaleStatsIfMissing(ML_ID, avril);
+
+    const photos = await missionLocaleStatsDb()
+      .find({}, { sort: { computed_day: 1 } })
+      .toArray();
+    expect(photos.map(({ computed_day, stats }) => [computed_day, stats.total, stats.traite])).toStrictEqual([
+      [fevrier, 0, 0],
+      [avril, 1, 1],
+    ]);
+    expect((await photoDuJour()).stats).toMatchObject({ total: 2, traite: 2 });
+    expect(await getMissionLocaleStat(ML_ORGANISATION)).toMatchObject({ total: 2, traite: 2 });
   });
 
   it("garde les traités purgés dans l'admin ML, hors stock à traiter", async () => {

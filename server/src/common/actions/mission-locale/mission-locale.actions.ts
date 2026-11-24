@@ -34,7 +34,6 @@ import {
   effectifsDb,
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogDb,
-  missionLocaleStatsPurgesDb,
   organisationsDb,
   organismesDb,
   usersMigrationDb,
@@ -60,6 +59,7 @@ import {
 
 import { estDossierMlTraite } from "./dossier-traite.actions";
 import { createEffectifMissionLocaleLog } from "./mission-locale-logs.actions";
+import { sommerPhotosPurges } from "./mission-locale-purges-stats.actions";
 import { createOrUpdateMissionLocaleStats } from "./mission-locale-stats.actions";
 import {
   buildEmptySegments,
@@ -3651,7 +3651,7 @@ export const getMissionLocaleStat = async (
   if (organisation.type !== "MISSION_LOCALE" || (mineur && rqth)) {
     return live;
   }
-  const purged = await missionLocaleStatsPurgesDb().findOne({ mission_locale_id: organisation._id });
+  const purged = await sommerPhotosPurges(organisation._id);
   if (!purged) {
     return live;
   }

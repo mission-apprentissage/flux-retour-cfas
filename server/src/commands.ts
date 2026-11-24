@@ -195,7 +195,7 @@ program
   )
   .option(
     "--champs <champs...>",
-    "Pose aussi ces champs sur les photos existantes, par exemple stats.traite ou segments.collab.total"
+    "Pose aussi sur les photos existantes ces champs ajoutés aux photos, sous la forme stats.<champ> ou segments.<segment>.<champ>"
   )
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:daily-mission-locale-stats"));
