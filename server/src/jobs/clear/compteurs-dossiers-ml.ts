@@ -51,7 +51,7 @@ type Ligne = {
 };
 
 export type ContributionsLot = {
-  photos: Map<string, { missionLocaleId: ObjectId; mois: string; increments: Increments }>;
+  photos: Map<string, { missionLocaleId: ObjectId; mois: string; dossiers: number; increments: Increments }>;
   lignes: Map<string, Ligne[]>;
 };
 
@@ -355,7 +355,7 @@ const calculerPhotos = async (dossiers: DossierMlACompter[]): Promise<Contributi
       continue;
     }
     const photo = await computeMissionLocaleStats(organisation, new Date(), ids);
-    photos.set(cle, { missionLocaleId, mois, increments: aplatir(photo) });
+    photos.set(cle, { missionLocaleId, mois, dossiers: ids.length, increments: aplatir(photo) });
   }
   return photos;
 };
@@ -379,8 +379,12 @@ export const retirerRestants = async (
   for (const [cle, restant] of await calculerPhotos(restants)) {
     const photo = contributions.photos.get(cle);
     if (!photo) continue;
+    if (restant.dossiers >= photo.dossiers) {
+      contributions.photos.delete(cle);
+      continue;
+    }
     for (const [champ, valeur] of Object.entries(restant.increments)) {
-      photo.increments[champ] = (photo.increments[champ] ?? 0) - valeur;
+      photo.increments[champ] = Math.max(0, (photo.increments[champ] ?? 0) - valeur);
     }
   }
   return contributions;
