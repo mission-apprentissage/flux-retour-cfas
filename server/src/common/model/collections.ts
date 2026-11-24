@@ -32,6 +32,9 @@ import missionLocaleEffectifDescriptor, {
 import missionLocaleEffectifLogDescriptor, {
   IMissionLocaleEffectifLog,
 } from "shared/models/data/missionLocaleEffectifLog.model";
+import missionLocaleEffectifsPurgesStatsDescriptor, {
+  IMissionLocaleEffectifsPurgesStats,
+} from "shared/models/data/missionLocaleEffectifsPurgesStats.model";
 import missionLocaleStatsDescriptor, { IMissionLocaleStats } from "shared/models/data/missionLocaleStats.model";
 import missionLocaleStatsPurgesDescriptor, {
   IMissionLocaleStatsPurges,
@@ -89,6 +92,7 @@ export const modelDescriptors = [
   transmissionDailyReportDescriptor,
   missionLocaleStatsDescriptor,
   missionLocaleStatsPurgesDescriptor,
+  missionLocaleEffectifsPurgesStatsDescriptor,
   franceTravailEffectifDescriptor,
   romeSecteurActivitesDescriptor,
   sipaUsersModelDescriptor,
@@ -134,6 +138,9 @@ export const missionLocaleStatsDb = () =>
 
 export const missionLocaleStatsPurgesDb = () =>
   getDbCollection<IMissionLocaleStatsPurges>(missionLocaleStatsPurgesDescriptor.collectionName);
+
+export const missionLocaleEffectifsPurgesStatsDb = () =>
+  getDbCollection<IMissionLocaleEffectifsPurgesStats>(missionLocaleEffectifsPurgesStatsDescriptor.collectionName);
 export const missionLocaleEffectifsLogDb = () =>
   getDbCollection<IMissionLocaleEffectifLog>(missionLocaleEffectifLogDescriptor.collectionName);
 export const regionsDb = () => getDbCollection<IRegion>(regionsModelDescriptor.collectionName);
