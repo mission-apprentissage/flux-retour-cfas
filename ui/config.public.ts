@@ -33,7 +33,7 @@ function getRecettePublicConfig(): PublicConfig {
 }
 
 function getPreprodPublicConfig(): PublicConfig {
-  const host = "tableau-de-bord-preprod.apprentissage.beta.gouv.fr";
+  const host = "cfas-preprod.apprentissage.beta.gouv.fr";
 
   return {
     sentry_dsn: SENTRY_DSN,
