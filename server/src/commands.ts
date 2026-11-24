@@ -191,12 +191,14 @@ program
 program
   .command("hydrate:daily-mission-locale-stats")
   .description(
-    "Crée les photos ML quotidiennes absentes depuis le premier dossier, sans réécrire les photos existantes"
+    "Crée les photos ML quotidiennes absentes depuis le premier dossier ou la première photo, sans réécrire les photos existantes"
   )
   .option(
     "--champs <champs...>",
     "Pose aussi sur les photos existantes ces champs ajoutés aux photos, sous la forme stats.<champ> ou segments.<segment>.<champ>"
   )
+  .option("--depuis <date>", "Premier jour traité, AAAA-MM-JJ, nécessaire pour poser stats ou segments entiers")
+  .option("--jusqua <date>", "Dernier jour traité, AAAA-MM-JJ")
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:daily-mission-locale-stats"));
 

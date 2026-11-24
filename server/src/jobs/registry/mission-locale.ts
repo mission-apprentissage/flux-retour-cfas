@@ -159,7 +159,11 @@ export const missionLocaleJobs = {
   },
   "hydrate:daily-mission-locale-stats": {
     handler: async (job) => {
-      return hydrateDailyMissionLocaleStats({ champs: payloadStringArray(job.payload, "champs") });
+      return hydrateDailyMissionLocaleStats({
+        champs: payloadStringArray(job.payload, "champs"),
+        depuis: payloadDate(job.payload, "depuis"),
+        jusqua: payloadDate(job.payload, "jusqua"),
+      });
     },
   },
   "tmp:migrate:autre-situations": {

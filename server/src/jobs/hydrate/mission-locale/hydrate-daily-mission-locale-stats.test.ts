@@ -7,6 +7,7 @@ import type { IOrganisation } from "shared/models/data/organisations.model";
 import { normalizeToUTCDay } from "shared/utils/date";
 import { beforeEach, describe, expect, it } from "vitest";
 
+import { setMissionLocaleStatsFields } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { buildEmptySegments } from "@/common/actions/mission-locale/mission-locale-stats.helpers";
 import { missionLocaleEffectifsDb, missionLocaleStatsDb, organisationsDb } from "@/common/model/collections";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -90,6 +91,49 @@ describe("hydrateDailyMissionLocaleStats()", () => {
 
     const photo = await missionLocaleStatsDb().findOne({ computed_day: jourUtc(1) });
     expect(photo?.stats).toMatchObject({ total: 99, traite: 1 });
+  });
+
+  it("ne réécrit pas une photo dont les champs nommés sont déjà à jour", async () => {
+    await missionLocaleStatsDb().insertOne(photoExistante(jourUtc(1)));
+
+    expect(await setMissionLocaleStatsFields(ML_ID, jourUtc(1), ["stats.traite"])).toBe(true);
+    expect(await setMissionLocaleStatsFields(ML_ID, jourUtc(1), ["stats.traite"])).toBe(false);
+  });
+
+  it("pose les champs nommés depuis la première photo, même avant le premier dossier", async () => {
+    await missionLocaleStatsDb().insertOne(photoExistante(jourUtc(5)));
+
+    await hydrateDailyMissionLocaleStats({ champs: ["stats.traite"] });
+
+    const photo = await missionLocaleStatsDb().findOne({ computed_day: jourUtc(5) });
+    expect(photo?.stats).toMatchObject({ total: 99, traite: 0 });
+  });
+
+  it("recalcule des photos entières entre deux dates seulement", async () => {
+    await missionLocaleStatsDb().insertMany([photoExistante(jourUtc(2)), photoExistante(jourUtc(1))]);
+
+    await hydrateDailyMissionLocaleStats({ champs: ["stats", "segments"], depuis: jourUtc(1), jusqua: jourUtc(1) });
+
+    const photos = await missionLocaleStatsDb()
+      .find({}, { sort: { computed_day: 1 } })
+      .toArray();
+    expect(photos.map(({ computed_day, stats }) => [computed_day, stats.total])).toStrictEqual([
+      [jourUtc(2), 99],
+      [jourUtc(1), 1],
+    ]);
+  });
+
+  it("refuse des champs qui se recouvrent ou une photo entière sans date de début", async () => {
+    await expect(
+      hydrateDailyMissionLocaleStats({ champs: ["stats", "stats.traite"], depuis: jourUtc(1) })
+    ).rejects.toThrow("Champs de photo ML qui se recouvrent : stats.traite");
+    await expect(hydrateDailyMissionLocaleStats({ champs: ["segments.collab"] })).rejects.toThrow(
+      "Champs de photo ML à borner par une date de début : segments.collab"
+    );
+    await expect(hydrateDailyMissionLocaleStats({ depuis: new Date("pas une date") })).rejects.toThrow(
+      "Dates de début ou de fin invalides"
+    );
+    expect(await missionLocaleStatsDb().countDocuments()).toBe(0);
   });
 
   it("refuse un champ inconnu avant tout calcul", async () => {
