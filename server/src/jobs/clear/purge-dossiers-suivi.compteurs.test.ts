@@ -63,6 +63,8 @@ type Options = {
   anneeScolaire?: string;
   situation?: SITUATION_ENUM | null;
   softDeleted?: boolean;
+  age?: number;
+  dejaConnu?: boolean;
 };
 
 const dossier = ({
@@ -70,6 +72,8 @@ const dossier = ({
   anneeScolaire = "2024-2025",
   situation = null,
   softDeleted = false,
+  age = 20,
+  dejaConnu = false,
 }: Options = {}) => ({
   _id: new ObjectId(),
   mission_locale_id: ML_ID,
@@ -79,6 +83,7 @@ const dossier = ({
   current_status: { value: STATUT_APPRENANT.RUPTURANT, date: date(rupture) },
   situation,
   ...(softDeleted ? { soft_deleted: true } : {}),
+  ...(dejaConnu ? { deja_connu: true } : {}),
   effectif_snapshot: {
     _id: new ObjectId(),
     organisme_id: new ObjectId(),
@@ -87,7 +92,7 @@ const dossier = ({
     apprenant: {
       nom: "DOE",
       prenom: "John",
-      date_de_naissance: new Date(new Date().setFullYear(new Date().getFullYear() - 20)),
+      date_de_naissance: new Date(new Date().setFullYear(new Date().getFullYear() - age)),
     },
     formation: {},
     _computed: { statut: { en_cours: STATUT_APPRENANT.RUPTURANT } },
@@ -295,6 +300,33 @@ describe("compteurs des photos ML à la purge des dossiers de suivi", () => {
     ]);
     expect((await photoDuJour()).stats).toMatchObject({ total: 2, traite: 2 });
     expect(await getMissionLocaleStat(ML_ORGANISATION)).toMatchObject({ total: 2, traite: 2 });
+  });
+
+  it("n'écrit aucune contribution de photo pour un groupe dont aucun dossier n'est supprimé", async () => {
+    const invisible = dossier({ age: 40, situation: SITUATION_ENUM.RDV_PRIS });
+    await inserer([invisible]);
+    const original = await vi.importActual<typeof import("./compteurs-dossiers-ml")>("./compteurs-dossiers-ml");
+    vi.mocked(compteurs.calculerContributions).mockImplementationOnce(async (dossiers) => {
+      const contributions = await original.calculerContributions(dossiers);
+      await missionLocaleEffectifsDb().updateOne(
+        { _id: invisible._id },
+        {
+          $set: {
+            date_rupture: date("2026-06-01"),
+            "effectif_snapshot.apprenant.date_de_naissance": new Date(
+              new Date().setFullYear(new Date().getFullYear() - 20)
+            ),
+          },
+        },
+        { bypassDocumentValidation: true }
+      );
+      return contributions;
+    });
+
+    const resultat = await purgerDossiersSuivi({ maintenant });
+
+    expect(resultat.missionLocale.supprimes).toBe(0);
+    expect(await missionLocaleStatsPurgesDb().countDocuments()).toBe(0);
   });
 
   it("garde les traités purgés dans l'admin ML, hors stock à traiter", async () => {
