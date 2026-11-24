@@ -384,7 +384,6 @@ export interface IMissionLocaleDetail {
   ml: IOrganisationMissionLocale;
   activated_at: Date | null;
   is_active: boolean;
-  last_activity_at: Date | null;
   has_cfa_collaboration: boolean;
   traites_count: number;
 }
@@ -443,14 +442,6 @@ export const getMissionLocaleDetail = async (missionLocaleId: ObjectId): Promise
     )
     .toArray();
 
-  const mlEffectifIds = mlEffectifs.map((e) => e._id);
-
-  const lastLog = await missionLocaleEffectifsLogDb()
-    .find({ mission_locale_effectif_id: { $in: mlEffectifIds } })
-    .sort({ created_at: -1 })
-    .limit(1)
-    .toArray();
-
   const hasCfaCollaboration = await missionLocaleEffectifsDb().countDocuments({
     mission_locale_id: missionLocaleId,
     "organisme_data.acc_conjoint": true,
@@ -462,7 +453,6 @@ export const getMissionLocaleDetail = async (missionLocaleId: ObjectId): Promise
     ml,
     activated_at: ml.activated_at || null,
     is_active: !!ml.activated_at,
-    last_activity_at: lastLog.length > 0 ? lastLog[0].created_at : null,
     has_cfa_collaboration: hasCfaCollaboration > 0,
     traites_count: traitesCount,
   };

@@ -581,7 +581,6 @@ export interface IMissionLocaleDetailResponse {
   };
   activated_at: string | null;
   is_active: boolean;
-  last_activity_at: string | null;
   has_cfa_collaboration: boolean;
   traites_count: number;
   peut_voir_nominatif: boolean;

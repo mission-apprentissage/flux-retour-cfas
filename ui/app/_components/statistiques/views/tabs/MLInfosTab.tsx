@@ -45,7 +45,7 @@ export function MLInfosTab({
   data: IMissionLocaleDetailResponse;
   isAdmin: boolean;
 }) {
-  const { ml, indicateurs, last_activity_at } = data;
+  const { ml, indicateurs } = data;
   const siteWeb = safeHttpUrl(ml.site_web);
   const rdvUrl = safeHttpUrl(ml.rdv_url);
 
@@ -55,7 +55,7 @@ export function MLInfosTab({
       <dl className={styles.grille}>
         <div className={styles.ligne}>
           <Info label="Premier compte créé">{formatDateCourte(indicateurs.premier_compte_at) ?? NON_RENSEIGNE}</Info>
-          <Info label="Dernière activité">{formatDateCourte(last_activity_at) ?? NON_RENSEIGNE}</Info>
+          <Info label="Dernière activité">{formatDateCourte(indicateurs.derniere_activite_at) ?? NON_RENSEIGNE}</Info>
         </div>
         <Info label="SIRET">{avecCopie(ml.siret, "Copier le SIRET")}</Info>
         <Info label="Adresse">{formatAdresse(ml.adresse) ?? NON_RENSEIGNE}</Info>
