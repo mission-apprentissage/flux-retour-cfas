@@ -1,6 +1,7 @@
 import { ObjectId } from "bson";
 import type { Document } from "mongodb";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import type { CompteursPurgeMl } from "shared/models/data/missionLocaleEffectifsPurgesStats.model";
 import type {
   CfaCollabMlSortBy,
   ICfaCollabMlResponse,
@@ -14,6 +15,13 @@ import { normalizeToUTCDay } from "shared/utils/date";
 
 import { getNpsStatsForOrganismes } from "@/common/actions/cfa/cfa-collaboration-stats.actions";
 import { RESULTAT_SITUATIONS } from "@/common/actions/mission-locale/collaboration-dossiers.actions";
+import {
+  listerCfaPurges,
+  moisParis,
+  type PerimetrePurges,
+  sommerPurges,
+  sommerPurgesPar,
+} from "@/common/actions/mission-locale/mission-locale-purges-stats.actions";
 import {
   buildCollabPerimetreMatch,
   DEFAULT_MOTIFS,
@@ -78,8 +86,68 @@ type CollabFacets = {
   motifs: Array<Record<string, number>>;
 };
 
+const EMPTY_KPIS: Kpis = {
+  envoyes: 0,
+  traites: 0,
+  deja_connus: 0,
+  delai_total: 0,
+  delai_count: 0,
+  ...(Object.fromEntries(Object.keys(RESULTAT_SITUATIONS).map((cle) => [cle, 0])) as Record<
+    keyof typeof RESULTAT_SITUATIONS,
+    number
+  >),
+};
+
+const SITUATION_KEYS = Object.keys(EMPTY_SITUATIONS).filter(
+  (cle): cle is Exclude<keyof ICollabSituations, "total"> => cle !== "total"
+);
+
+const addPurgedSituations = (situations: ICollabSituations, purged: CompteursPurgeMl<"collab">) => {
+  const total = { ...situations };
+  for (const cle of SITUATION_KEYS) {
+    total[cle] += purged[`situation_${cle}`];
+    total.total += purged[`situation_${cle}`];
+  }
+  return total;
+};
+
+const addPurgedKpis = (kpis: Kpis | undefined, purged: CompteursPurgeMl<"collab">): Kpis | undefined => {
+  if (purged.envoyes === 0) return kpis;
+  const base = kpis ?? EMPTY_KPIS;
+  const resultats = Object.fromEntries(
+    Object.keys(RESULTAT_SITUATIONS).map((cle) => [
+      cle,
+      base[cle as keyof typeof RESULTAT_SITUATIONS] +
+        (cle === "a_recontacter" ? 0 : purged[`resultat_${cle}` as keyof CompteursPurgeMl<"collab">]),
+    ])
+  );
+  return {
+    ...base,
+    ...resultats,
+    envoyes: base.envoyes + purged.envoyes,
+    traites: base.traites + purged.contactes,
+    deja_connus: base.deja_connus + purged.deja_connus,
+    delai_total: base.delai_total + purged.delai_total,
+    delai_count: base.delai_count + purged.delai_count,
+  };
+};
+
+const addPurgedMotifs = (motifs: typeof DEFAULT_MOTIFS, purged: CompteursPurgeMl<"collab">) =>
+  Object.fromEntries(
+    Object.entries(motifs).map(([cle, valeur]) => [
+      cle,
+      (valeur || 0) + purged[`objectif_${cle}` as keyof CompteursPurgeMl<"collab">],
+    ])
+  ) as typeof DEFAULT_MOTIFS;
+
+const countCfaWithPurged = async (live: Promise<unknown[]>, perimetre: PerimetrePurges, date: Date) => {
+  const [vivants, purges] = await Promise.all([live, listerCfaPurges(perimetre, { jusqua: moisParis(date) })]);
+  return new Set([...vivants, ...purges].map(String)).size;
+};
+
 /** Chiffres des dossiers de collaboration d'un périmètre, à leur situation actuelle (règles des snapshots ML). */
-async function aggregateCollabDossiers(match: Document, now: Date) {
+async function aggregateCollabDossiers(match: Document, now: Date, purgesPerimetre: PerimetrePurges) {
+  const purgedPromise = sommerPurges("collab", purgesPerimetre, { jusqua: moisParis(now) });
   const mlUserIds = await fetchMlUserIds(match);
   const resultatsAccumulators = Object.fromEntries(
     Object.entries(RESULTAT_SITUATIONS).map(([cle, situations]) => [cle, countIf(situationIn(situations))])
@@ -126,10 +194,11 @@ async function aggregateCollabDossiers(match: Document, now: Date) {
     ])
     .next();
 
+  const purged = await purgedPromise;
   return {
-    kpis: facets?.kpis[0],
-    situations: toSituations(facets?.situations ?? []),
-    motifs: { ...DEFAULT_MOTIFS, ...facets?.motifs[0] },
+    kpis: addPurgedKpis(facets?.kpis[0], purged),
+    situations: addPurgedSituations(toSituations(facets?.situations ?? []), purged),
+    motifs: addPurgedMotifs({ ...DEFAULT_MOTIFS, ...facets?.motifs[0] }, purged),
   };
 }
 
@@ -179,7 +248,7 @@ export async function getCfaCollaborationStats(
   now: Date = new Date()
 ): Promise<ICfaCollaborationStats> {
   const [{ kpis, situations, motifs }, nps, mensuel] = await Promise.all([
-    aggregateCollabDossiers(buildCfaCollabMatch(organismeId, now), now),
+    aggregateCollabDossiers(buildCfaCollabMatch(organismeId, now), now, { organismeIds: [organismeId] }),
     getNpsStatsForOrganismes([organismeId]),
     getCollaborationMensuelStats("all", undefined, undefined, organismeId),
   ]);
@@ -211,23 +280,32 @@ export async function getTerritoireCollaborationStats(
   const evaluationDate = normalizeToUTCDay(now);
   const startDate = await calculateStartDateAsync(period, evaluationDate);
   const perimetre = await buildCollabPerimetreMatch(territoire);
+  const purgesPerimetre: PerimetrePurges = { regions: territoire.regions, departements: territoire.departements };
   const matchAu = (date: Date) => buildCollabDossiersMatch(perimetre, date);
-  const compterCfa = async (date: Date) =>
-    (await missionLocaleEffectifsDb().distinct("effectif_snapshot.organisme_id", matchAu(date))).length;
+  const compterCfa = (date: Date) =>
+    countCfaWithPurged(
+      missionLocaleEffectifsDb().distinct("effectif_snapshot.organisme_id", matchAu(date)),
+      purgesPerimetre,
+      date
+    );
 
-  const situationsAu = (date: Date) =>
-    missionLocaleEffectifsDb()
-      .aggregate<CollabFacets["situations"][number]>([
-        { $match: matchAu(date) },
-        addCollabSituationField(),
-        { $group: { _id: "$collab_situation", n: { $sum: 1 } } },
-      ])
-      .toArray()
-      .then(toSituations);
+  const situationsAu = async (date: Date) => {
+    const [vivantes, purged] = await Promise.all([
+      missionLocaleEffectifsDb()
+        .aggregate<CollabFacets["situations"][number]>([
+          { $match: matchAu(date) },
+          addCollabSituationField(),
+          { $group: { _id: "$collab_situation", n: { $sum: 1 } } },
+        ])
+        .toArray(),
+      sommerPurges("collab", purgesPerimetre, { jusqua: moisParis(date) }),
+    ]);
+    return addPurgedSituations(toSituations(vivantes), purged);
+  };
   const previousStartDate = calculatePreviousStartDate(period, startDate);
 
   const [actuel, cfaActuels, cfaDebut, cfaPrecedent, situationsDebut, situationsPrecedent] = await Promise.all([
-    aggregateCollabDossiers(matchAu(now), now),
+    aggregateCollabDossiers(matchAu(now), now, purgesPerimetre),
     compterCfa(now),
     compterCfa(startDate),
     previousStartDate ? compterCfa(previousStartDate) : Promise.resolve(null),
@@ -275,22 +353,39 @@ export async function listCfaCollaborationsParMl(
   options: { page: number; limit: number; sort_by: CfaCollabMlSortBy; sort_order: "asc" | "desc" },
   now: Date = new Date()
 ): Promise<ICfaCollabMlResponse> {
-  const groupes = await missionLocaleEffectifsDb()
-    .aggregate<{ _id: ObjectId; envoyees: number; a_traiter: number; a_recontacter: number; traitees: number }>([
-      { $match: buildCfaCollabMatch(organismeId, now) },
-      {
-        $group: {
-          _id: "$mission_locale_id",
-          envoyees: { $sum: 1 },
-          a_traiter: countIf({ $eq: [{ $ifNull: ["$situation", null] }, null] }),
-          a_recontacter: countIf({ $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] }),
-          traitees: countIf({
-            $not: [{ $in: [{ $ifNull: ["$situation", null] }, [null, SITUATION_ENUM.CONTACTE_SANS_RETOUR]] }],
-          }),
+  const [vivants, purges] = await Promise.all([
+    missionLocaleEffectifsDb()
+      .aggregate<{ _id: ObjectId; envoyees: number; a_traiter: number; a_recontacter: number; traitees: number }>([
+        { $match: buildCfaCollabMatch(organismeId, now) },
+        {
+          $group: {
+            _id: "$mission_locale_id",
+            envoyees: { $sum: 1 },
+            a_traiter: countIf({ $eq: [{ $ifNull: ["$situation", null] }, null] }),
+            a_recontacter: countIf({ $eq: ["$situation", SITUATION_ENUM.CONTACTE_SANS_RETOUR] }),
+            traitees: countIf({
+              $not: [{ $in: [{ $ifNull: ["$situation", null] }, [null, SITUATION_ENUM.CONTACTE_SANS_RETOUR]] }],
+            }),
+          },
         },
-      },
-    ])
-    .toArray();
+      ])
+      .toArray(),
+    sommerPurgesPar("collab", "mission_locale_id", { organismeIds: [organismeId] }, { jusqua: moisParis(now) }),
+  ]);
+  const groupesById = new Map(vivants.map((groupe) => [groupe._id.toString(), { ...groupe }]));
+  for (const [id, { compteurs }] of purges) {
+    const groupe = groupesById.get(id) ?? {
+      _id: new ObjectId(id),
+      envoyees: 0,
+      a_traiter: 0,
+      a_recontacter: 0,
+      traitees: 0,
+    };
+    groupe.envoyees += compteurs.envoyes;
+    groupe.traitees += compteurs.traitees;
+    groupesById.set(id, groupe);
+  }
+  const groupes = [...groupesById.values()];
 
   const missionsLocales = await organisationsDb()
     .find(

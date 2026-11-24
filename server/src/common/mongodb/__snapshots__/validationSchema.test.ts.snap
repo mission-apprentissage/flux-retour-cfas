@@ -18121,6 +18121,452 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
 }
 `;
 
+exports[`validation-schema > should create validation schema for missionLocaleEffectifsPurgesStats > missionLocaleEffectifsPurgesStats 1`] = `
+{
+  "anyOf": [
+    {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "bsonType": "objectId",
+        },
+        "compteurs": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "dossiers": {
+              "bsonType": "int",
+            },
+            "v2_dossiers": {
+              "bsonType": "int",
+            },
+          },
+          "required": [
+            "dossiers",
+            "v2_dossiers",
+          ],
+        },
+        "departement": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+          "description": "Département du CFA au moment de la suppression",
+        },
+        "mission_locale_id": {
+          "bsonType": "objectId",
+          "description": "Mission locale du dossier supprimé",
+        },
+        "mois": {
+          "bsonType": "string",
+          "description": "Mois, heure de Paris, de la création du dossier, de l'envoi par le CFA ou du dernier message WhatsApp",
+          "pattern": "^\\d{4}-\\d{2}$",
+        },
+        "organisme_id": {
+          "anyOf": [
+            {
+              "bsonType": "objectId",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "CFA du dossier supprimé",
+        },
+        "region": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+          "description": "Région du CFA au moment de la suppression",
+        },
+        "type": {
+          "bsonType": "string",
+        },
+        "updated_at": {
+          "bsonType": "date",
+          "description": "Date du dernier ajout",
+        },
+      },
+      "required": [
+        "_id",
+        "mission_locale_id",
+        "organisme_id",
+        "region",
+        "departement",
+        "mois",
+        "updated_at",
+        "type",
+        "compteurs",
+      ],
+    },
+    {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "bsonType": "objectId",
+        },
+        "compteurs": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "contactes": {
+              "bsonType": "int",
+            },
+            "deja_connus": {
+              "bsonType": "int",
+            },
+            "delai_count": {
+              "bsonType": "int",
+            },
+            "delai_total": {
+              "bsonType": "int",
+            },
+            "envoyes": {
+              "bsonType": "int",
+            },
+            "nps_reponses": {
+              "bsonType": "int",
+            },
+            "nps_somme": {
+              "bsonType": "int",
+            },
+            "objectif_administratif": {
+              "bsonType": "int",
+            },
+            "objectif_autre": {
+              "bsonType": "int",
+            },
+            "objectif_finance": {
+              "bsonType": "int",
+            },
+            "objectif_logement": {
+              "bsonType": "int",
+            },
+            "objectif_mobilite": {
+              "bsonType": "int",
+            },
+            "objectif_recherche_emploi": {
+              "bsonType": "int",
+            },
+            "objectif_reorientation": {
+              "bsonType": "int",
+            },
+            "objectif_sante": {
+              "bsonType": "int",
+            },
+            "objectif_social_familial": {
+              "bsonType": "int",
+            },
+            "repondus": {
+              "bsonType": "int",
+            },
+            "resultat_autre": {
+              "bsonType": "int",
+            },
+            "resultat_injoignable": {
+              "bsonType": "int",
+            },
+            "resultat_ne_souhaite_pas_accompagnement": {
+              "bsonType": "int",
+            },
+            "resultat_projet_pro_securise": {
+              "bsonType": "int",
+            },
+            "resultat_rdv_pris": {
+              "bsonType": "int",
+            },
+            "situation_abandon": {
+              "bsonType": "int",
+            },
+            "situation_besoin_aide_hors_rupture": {
+              "bsonType": "int",
+            },
+            "situation_prevention_inevitable": {
+              "bsonType": "int",
+            },
+            "situation_prevention_modere": {
+              "bsonType": "int",
+            },
+            "situation_prevention_tres_eleve": {
+              "bsonType": "int",
+            },
+            "situation_rupture": {
+              "bsonType": "int",
+            },
+            "traitees": {
+              "bsonType": "int",
+            },
+            "v2_envoyes": {
+              "bsonType": "int",
+            },
+            "v2_rdv": {
+              "bsonType": "int",
+            },
+            "v2_repondus": {
+              "bsonType": "int",
+            },
+            "v2_traites": {
+              "bsonType": "int",
+            },
+          },
+          "required": [
+            "envoyes",
+            "contactes",
+            "traitees",
+            "resultat_rdv_pris",
+            "resultat_projet_pro_securise",
+            "resultat_ne_souhaite_pas_accompagnement",
+            "resultat_injoignable",
+            "resultat_autre",
+            "repondus",
+            "deja_connus",
+            "delai_total",
+            "delai_count",
+            "situation_rupture",
+            "situation_abandon",
+            "situation_prevention_inevitable",
+            "situation_prevention_tres_eleve",
+            "situation_prevention_modere",
+            "situation_besoin_aide_hors_rupture",
+            "objectif_mobilite",
+            "objectif_logement",
+            "objectif_sante",
+            "objectif_finance",
+            "objectif_administratif",
+            "objectif_social_familial",
+            "objectif_reorientation",
+            "objectif_recherche_emploi",
+            "objectif_autre",
+            "nps_reponses",
+            "nps_somme",
+            "v2_envoyes",
+            "v2_traites",
+            "v2_repondus",
+            "v2_rdv",
+          ],
+        },
+        "departement": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+          "description": "Département du CFA au moment de la suppression",
+        },
+        "mission_locale_id": {
+          "bsonType": "objectId",
+          "description": "Mission locale du dossier supprimé",
+        },
+        "mois": {
+          "bsonType": "string",
+          "description": "Mois, heure de Paris, de la création du dossier, de l'envoi par le CFA ou du dernier message WhatsApp",
+          "pattern": "^\\d{4}-\\d{2}$",
+        },
+        "organisme_id": {
+          "anyOf": [
+            {
+              "bsonType": "objectId",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "CFA du dossier supprimé",
+        },
+        "region": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+          "description": "Région du CFA au moment de la suppression",
+        },
+        "type": {
+          "bsonType": "string",
+        },
+        "updated_at": {
+          "bsonType": "date",
+          "description": "Date du dernier ajout",
+        },
+      },
+      "required": [
+        "_id",
+        "mission_locale_id",
+        "organisme_id",
+        "region",
+        "departement",
+        "mois",
+        "updated_at",
+        "type",
+        "compteurs",
+      ],
+    },
+    {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "bsonType": "objectId",
+        },
+        "compteurs": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "echec": {
+              "bsonType": "int",
+            },
+            "envoyes": {
+              "bsonType": "int",
+            },
+            "opt_out": {
+              "bsonType": "int",
+            },
+            "prequalif_backfill": {
+              "bsonType": "int",
+            },
+            "prequalif_clics": {
+              "bsonType": "int",
+            },
+            "prequalif_cliqueurs": {
+              "bsonType": "int",
+            },
+            "prequalif_daily": {
+              "bsonType": "int",
+            },
+            "prequalif_echec": {
+              "bsonType": "int",
+            },
+            "prequalif_envoyes": {
+              "bsonType": "int",
+            },
+            "prequalif_liens": {
+              "bsonType": "int",
+            },
+            "prequalif_non": {
+              "bsonType": "int",
+            },
+            "prequalif_opt_out": {
+              "bsonType": "int",
+            },
+            "prequalif_oui": {
+              "bsonType": "int",
+            },
+            "prequalif_reponse_auto": {
+              "bsonType": "int",
+            },
+            "rappel": {
+              "bsonType": "int",
+            },
+            "rappel_autre": {
+              "bsonType": "int",
+            },
+            "rappel_coordonnees_incorrect": {
+              "bsonType": "int",
+            },
+            "rappel_deja_accompagne": {
+              "bsonType": "int",
+            },
+            "rappel_injoignable": {
+              "bsonType": "int",
+            },
+            "rappel_nouveau_projet": {
+              "bsonType": "int",
+            },
+            "rappel_rdv_pris": {
+              "bsonType": "int",
+            },
+            "sans_aide": {
+              "bsonType": "int",
+            },
+            "sans_reponse": {
+              "bsonType": "int",
+            },
+          },
+          "required": [
+            "envoyes",
+            "rappel",
+            "sans_aide",
+            "sans_reponse",
+            "opt_out",
+            "echec",
+            "rappel_rdv_pris",
+            "rappel_nouveau_projet",
+            "rappel_deja_accompagne",
+            "rappel_injoignable",
+            "rappel_coordonnees_incorrect",
+            "rappel_autre",
+            "prequalif_envoyes",
+            "prequalif_backfill",
+            "prequalif_daily",
+            "prequalif_echec",
+            "prequalif_opt_out",
+            "prequalif_oui",
+            "prequalif_non",
+            "prequalif_reponse_auto",
+            "prequalif_liens",
+            "prequalif_clics",
+            "prequalif_cliqueurs",
+          ],
+        },
+        "departement": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+          "description": "Département du CFA au moment de la suppression",
+        },
+        "mission_locale_id": {
+          "bsonType": "objectId",
+          "description": "Mission locale du dossier supprimé",
+        },
+        "mois": {
+          "bsonType": "string",
+          "description": "Mois, heure de Paris, de la création du dossier, de l'envoi par le CFA ou du dernier message WhatsApp",
+          "pattern": "^\\d{4}-\\d{2}$",
+        },
+        "organisme_id": {
+          "anyOf": [
+            {
+              "bsonType": "objectId",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "CFA du dossier supprimé",
+        },
+        "region": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+          "description": "Région du CFA au moment de la suppression",
+        },
+        "type": {
+          "bsonType": "string",
+        },
+        "updated_at": {
+          "bsonType": "date",
+          "description": "Date du dernier ajout",
+        },
+      },
+      "required": [
+        "_id",
+        "mission_locale_id",
+        "organisme_id",
+        "region",
+        "departement",
+        "mois",
+        "updated_at",
+        "type",
+        "compteurs",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for missionLocaleStats > missionLocaleStats 1`] = `
 {
   "additionalProperties": false,

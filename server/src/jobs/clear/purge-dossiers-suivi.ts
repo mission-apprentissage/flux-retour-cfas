@@ -15,6 +15,7 @@ import {
   calculerContributions,
   type DossierMlACompter,
   ecrireContributions,
+  nombreDeDossiersComptes,
   retirerRestants,
 } from "./compteurs-dossiers-ml";
 import { executerPurgeDossiersMlMasques, type ResultatPurgeDossiersMasques } from "./purge-ml-dossiers-masques";
@@ -118,7 +119,7 @@ const purgerParLots = async (
 
     if (dryRun) {
       compterSupprimes(aSupprimer);
-      comptes += comptables.length;
+      comptes += contributions ? nombreDeDossiersComptes(contributions) : 0;
       resultat.liesSupprimes += lies ? await lies.compter(ids) : 0;
       return;
     }
@@ -139,7 +140,7 @@ const purgerParLots = async (
           await retirerRestants(contributions, comptablesRestants);
         }
         await ecrireContributions(contributions, WRITE_CONCERN);
-        comptes += comptables.length - comptablesRestants.length;
+        comptes += nombreDeDossiersComptes(contributions);
       }
     } catch (error) {
       logger.error(

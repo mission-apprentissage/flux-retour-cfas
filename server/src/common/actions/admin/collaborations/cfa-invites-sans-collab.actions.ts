@@ -1,4 +1,5 @@
 import type { Document } from "mongodb";
+import missionLocaleEffectifsPurgesStatsDescriptor from "shared/models/data/missionLocaleEffectifsPurgesStats.model";
 import type {
   ICfaInviteSansCollabRow,
   ICfaInvitesExportRow,
@@ -10,6 +11,7 @@ import type {
 import { listCfaInvitationsExportRows } from "@/common/actions/admin/collaborations/cfa-invitations-export.actions";
 import { buildDossierEnvoyeMatch } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
 import { buildCfaTerritoireMatch, type CfaTerritoire } from "@/common/actions/cfa/cfa-stats.actions";
+import { moisParis } from "@/common/actions/mission-locale/mission-locale-purges-stats.actions";
 import { missionLocaleCfaInvitationsDb } from "@/common/model/collections";
 
 const SORT_STAGES: Record<ICfaInvitesSortBy, (direction: 1 | -1) => Record<string, 1 | -1>> = {
@@ -96,6 +98,30 @@ const buildPipeline = ({
       as: "collaborations",
     },
   },
+  {
+    $lookup: {
+      from: missionLocaleEffectifsPurgesStatsDescriptor.collectionName,
+      let: { organismeId: "$_id" },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $eq: ["$organisme_id", "$$organismeId"] },
+            type: "collab",
+            ...(collaborationsDepuis ? { mois: { $gte: moisParis(collaborationsDepuis) } } : {}),
+          },
+        },
+        { $group: { _id: null, nb: { $sum: "$compteurs.envoyes" }, premier_mois: { $min: "$mois" } } },
+        { $match: { nb: { $gt: 0 } } },
+        {
+          $project: {
+            nb: 1,
+            premiere: { $dateFromString: { dateString: { $concat: ["$premier_mois", "-01T00:00:00.000Z"] } } },
+          },
+        },
+      ],
+      as: "collaborations_purgees",
+    },
+  },
   // Activation V2 du CFA (`CFA_DATE_ACTIVATION_V2` de Brevo) : plus ancienne `ml_beta_activated_at` de ses organisations.
   {
     $lookup: {
@@ -114,7 +140,7 @@ const buildPipeline = ({
       as: "activation",
     },
   },
-  ...(inclureAvecCollab ? [] : [{ $match: { collaborations: { $size: 0 } } }]),
+  ...(inclureAvecCollab ? [] : [{ $match: { collaborations: { $size: 0 }, collaborations_purgees: { $size: 0 } } }]),
   {
     $project: {
       _id: 0,
@@ -136,8 +162,18 @@ const buildPipeline = ({
         ],
       },
       has_account: { $eq: ["$organisme.has_account", true] },
-      nb_collaborations: { $ifNull: [{ $first: "$collaborations.nb" }, 0] },
-      date_premiere_collaboration: { $ifNull: [{ $first: "$collaborations.premiere" }, null] },
+      nb_collaborations: {
+        $add: [
+          { $ifNull: [{ $first: "$collaborations.nb" }, 0] },
+          { $ifNull: [{ $first: "$collaborations_purgees.nb" }, 0] },
+        ],
+      },
+      date_premiere_collaboration: {
+        $ifNull: [
+          { $min: [{ $first: "$collaborations.premiere" }, { $first: "$collaborations_purgees.premiere" }] },
+          null,
+        ],
+      },
       date_activation: { $ifNull: [{ $first: "$activation.date" }, null] },
       invitations_recues: 1,
       ml_invitantes: { $size: "$mission_locale_ids" },

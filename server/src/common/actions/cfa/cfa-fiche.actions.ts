@@ -2,6 +2,7 @@ import * as Boom from "@hapi/boom";
 import { ObjectId } from "bson";
 import type { ICfaFiche, ICfaFicheContactReferent, ICfaMembre } from "shared/models/data/nationalStats.model";
 
+import { listerCfaPurges, moisParis } from "@/common/actions/mission-locale/mission-locale-purges-stats.actions";
 import { batchInviteUsersToOrganisation, createOrganisation } from "@/common/actions/organisations.actions";
 import {
   invitationsDb,
@@ -62,7 +63,7 @@ export async function getCfaFiche(
   if (!organisme) throw Boom.notFound("Organisme introuvable");
 
   const organisation = await findCfaOrganisation(organisme);
-  const [comptes, invitations, collaborations] = await Promise.all([
+  const [comptes, invitations, collaborations, collaborationsPurgees] = await Promise.all([
     getComptes(organisation as { _id: ObjectId; derniere_activite?: Date | null } | null),
     missionLocaleCfaInvitationsDb().countDocuments({ organisme_id: organismeId }),
     missionLocaleEffectifsDb().countDocuments(
@@ -74,6 +75,7 @@ export async function getCfaFiche(
       },
       { limit: 1 }
     ),
+    listerCfaPurges({ organismeIds: [organismeId] }, { jusqua: moisParis(now) }),
   ]);
 
   const hasAccount = organisme.has_account === true;
@@ -106,7 +108,7 @@ export async function getCfaFiche(
       erreurs_transmission: organisme.has_transmission_errors === true,
     },
     has_account: hasAccount,
-    collabore: collaborations > 0,
+    collabore: collaborations > 0 || collaborationsPurgees.length > 0,
     derniere_activite_at: comptes.derniereActivite,
     alertes: !hasAccount && invitations > 0 ? [{ type: "invitations_sans_compte", valeur: invitations }] : [],
     peut_voir_nominatif: nominatif,

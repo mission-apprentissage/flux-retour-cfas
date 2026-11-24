@@ -13,6 +13,7 @@ import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-local
 import { getMissionLocaleStat } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   missionLocaleEffectifsDb,
+  missionLocaleEffectifsPurgesStatsDb,
   missionLocaleStatsDb,
   missionLocaleStatsPurgesDb,
   organisationsDb,
@@ -196,6 +197,8 @@ describe("compteurs des photos ML à la purge des dossiers de suivi", () => {
     expect(await missionLocaleEffectifsDb().countDocuments({ _id: reste._id })).toBe(1);
     const purges = await missionLocaleStatsPurgesDb().findOne({ mission_locale_id: ML_ID });
     expect(purges?.stats).toMatchObject({ total: 1, traite: 1, rdv_pris: 1 });
+    const lignes = await missionLocaleEffectifsPurgesStatsDb().find({ type: "suivi" }).toArray();
+    expect(lignes.map(({ compteurs }) => compteurs)).toStrictEqual([{ dossiers: 1, v2_dossiers: 0 }]);
   });
 
   it("garde les traités purgés dans l'admin ML, hors stock à traiter", async () => {

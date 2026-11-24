@@ -14,6 +14,11 @@ import {
   fetchCollaborationsByOrgId,
 } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
 import {
+  listerCfaPurges,
+  moisParis,
+  veilleDe,
+} from "@/common/actions/mission-locale/mission-locale-purges-stats.actions";
+import {
   calculateStartDateAsync,
   calculatePreviousStartDate,
   createEtatStatWithVariation,
@@ -39,15 +44,17 @@ export const buildCfaActifMatch = () => ({
   $or: [{ formations_count: { $gt: 0 } }, { effectifs_annees_actives_count: { $gt: 0 } }, { has_account: true }],
 });
 
-const countOrganismesWithCollaboration = async (organismeIds: ObjectId[], endExclusive: Date) =>
-  organismeIds.length === 0
-    ? 0
-    : (
-        await missionLocaleEffectifsDb().distinct(
-          "effectif_snapshot.organisme_id",
-          buildDossierEnvoyeMatch(endExclusive, organismeIds, null)
-        )
-      ).length;
+const countOrganismesWithCollaboration = async (organismeIds: ObjectId[], endExclusive: Date) => {
+  if (organismeIds.length === 0) return 0;
+  const [vivants, purges] = await Promise.all([
+    missionLocaleEffectifsDb().distinct(
+      "effectif_snapshot.organisme_id",
+      buildDossierEnvoyeMatch(endExclusive, organismeIds, null)
+    ),
+    listerCfaPurges({ organismeIds }, { jusqua: moisParis(veilleDe(endExclusive)) }),
+  ]);
+  return new Set([...vivants, ...purges].map(String)).size;
+};
 
 /** CFA dont l'organisation compte un utilisateur confirmé avant `endExclusive` (date de confirmation, à défaut de création). */
 const countOrganismesWithAccount = async (organismeIds: ObjectId[], endExclusive: Date) => {
