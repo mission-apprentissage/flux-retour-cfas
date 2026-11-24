@@ -10,6 +10,7 @@ import {
 import type { IMissionLocaleStats, IMissionLocaleStatsSegments } from "shared/models/data/missionLocaleStats.model";
 
 import { RESULTAT_SITUATIONS } from "@/common/actions/mission-locale/collaboration-dossiers.actions";
+import { moisUTC } from "@/common/actions/mission-locale/mission-locale-purges-stats.actions";
 import { DEFAULT_MOTIFS } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import {
   addCollabSituationField,
@@ -28,7 +29,12 @@ import {
   usersMigrationDb,
 } from "@/common/model/collections";
 
-export type DossierMlACompter = { _id: ObjectId; mission_locale_id: ObjectId; soft_deleted?: boolean | null };
+export type DossierMlACompter = {
+  _id: ObjectId;
+  mission_locale_id: ObjectId;
+  created_at?: Date | null;
+  soft_deleted?: boolean | null;
+};
 
 type Increments = Record<string, number>;
 
@@ -44,7 +50,7 @@ type Ligne = {
 };
 
 export type ContributionsLot = {
-  photos: Map<string, { missionLocaleId: ObjectId; increments: Increments }>;
+  photos: Map<string, { missionLocaleId: ObjectId; mois: string; increments: Increments }>;
   lignes: Map<string, Ligne[]>;
 };
 
@@ -308,10 +314,32 @@ const grouperParMl = (dossiers: DossierMlACompter[]) => {
   return groupes;
 };
 
+const grouperParPhoto = (dossiers: DossierMlACompter[]) => {
+  const groupes = new Map<string, { missionLocaleId: ObjectId; mois: string; ids: ObjectId[] }>();
+  for (const { _id, mission_locale_id, created_at, soft_deleted } of dossiers) {
+    if (soft_deleted || !created_at) continue;
+    const mois = moisUTC(created_at);
+    const cle = `${mission_locale_id.toString()} ${mois}`;
+    const groupe = groupes.get(cle);
+    if (groupe) {
+      groupe.ids.push(_id);
+    } else {
+      groupes.set(cle, { missionLocaleId: mission_locale_id, mois, ids: [_id] });
+    }
+  }
+  return groupes;
+};
+
 const calculerPhotos = async (dossiers: DossierMlACompter[]): Promise<ContributionsLot["photos"]> => {
   const photos: ContributionsLot["photos"] = new Map();
-  for (const [cle, { missionLocaleId, ids }] of grouperParMl(dossiers.filter(({ soft_deleted }) => !soft_deleted))) {
-    const organisation = await organisationsDb().findOne({ _id: missionLocaleId, type: "MISSION_LOCALE" });
+  const organisations = new Map<string, IOrganisationMissionLocale | null>();
+  for (const [cle, { missionLocaleId, mois, ids }] of grouperParPhoto(dossiers)) {
+    const idMl = missionLocaleId.toString();
+    if (!organisations.has(idMl)) {
+      const organisation = await organisationsDb().findOne({ _id: missionLocaleId, type: "MISSION_LOCALE" });
+      organisations.set(idMl, organisation as IOrganisationMissionLocale | null);
+    }
+    const organisation = organisations.get(idMl);
     if (!organisation) {
       logger.warn(
         { mission_locale_id: missionLocaleId, dossiers: ids.length },
@@ -319,8 +347,8 @@ const calculerPhotos = async (dossiers: DossierMlACompter[]): Promise<Contributi
       );
       continue;
     }
-    const photo = await computeMissionLocaleStats(organisation as IOrganisationMissionLocale, new Date(), ids);
-    photos.set(cle, { missionLocaleId, increments: aplatir(photo) });
+    const photo = await computeMissionLocaleStats(organisation, new Date(), ids);
+    photos.set(cle, { missionLocaleId, mois, increments: aplatir(photo) });
   }
   return photos;
 };
@@ -385,9 +413,9 @@ export const ecrireContributions = async (
   const maintenant = new Date();
   const photos = [...contributions.photos.values()]
     .filter(({ increments }) => Object.values(increments).some((valeur) => valeur !== 0))
-    .map(({ missionLocaleId, increments }) => ({
+    .map(({ missionLocaleId, mois, increments }) => ({
       updateOne: {
-        filter: { mission_locale_id: missionLocaleId },
+        filter: { mission_locale_id: missionLocaleId, mois },
         update: { $inc: increments, $set: { updated_at: maintenant } },
         upsert: true,
       },

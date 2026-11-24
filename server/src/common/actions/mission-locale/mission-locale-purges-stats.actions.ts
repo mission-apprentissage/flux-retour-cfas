@@ -4,8 +4,9 @@ import {
   type CompteursPurgeMl,
   type TypePurgeMl,
 } from "shared/models/data/missionLocaleEffectifsPurgesStats.model";
+import type { IMissionLocaleStatsPurges } from "shared/models/data/missionLocaleStatsPurges.model";
 
-import { missionLocaleEffectifsPurgesStatsDb } from "@/common/model/collections";
+import { missionLocaleEffectifsPurgesStatsDb, missionLocaleStatsPurgesDb } from "@/common/model/collections";
 
 export type PerimetrePurges = {
   regions?: string[];
@@ -28,6 +29,8 @@ export type LignePurges<T extends TypePurgeMl> = {
 const FORMAT_MOIS = new Intl.DateTimeFormat("fr-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit" });
 
 export const moisParis = (date: Date) => FORMAT_MOIS.format(date);
+
+export const moisUTC = (date: Date) => date.toISOString().slice(0, 7);
 
 export const veilleDe = (date: Date) => new Date(date.getTime() - 1);
 
@@ -112,3 +115,34 @@ export const listerCfaPurges = async (perimetre: PerimetrePurges = {}, bornes: B
       organisme_id: { $ne: null, ...(perimetre.organismeIds ? { $in: perimetre.organismeIds } : {}) },
     })
   ).filter((id): id is ObjectId => id !== null);
+
+type Arbre = { [cle: string]: number | Arbre };
+
+const additionner = (gauche: Arbre, droite: Arbre): Arbre => {
+  const somme: Arbre = { ...gauche };
+  for (const [cle, valeur] of Object.entries(droite)) {
+    const actuelle = somme[cle];
+    somme[cle] =
+      typeof valeur === "number"
+        ? (typeof actuelle === "number" ? actuelle : 0) + valeur
+        : additionner(typeof actuelle === "object" ? actuelle : {}, valeur);
+  }
+  return somme;
+};
+
+export const sommerPhotosPurges = async (
+  missionLocaleId: ObjectId,
+  jour?: Date
+): Promise<Pick<IMissionLocaleStatsPurges, "stats" | "segments"> | null> => {
+  const documents = await missionLocaleStatsPurgesDb()
+    .find(
+      { mission_locale_id: missionLocaleId, ...(jour ? { mois: { $lte: moisUTC(jour) } } : {}) },
+      { projection: { _id: 0, stats: 1, segments: 1 } }
+    )
+    .toArray();
+  if (documents.length === 0) return null;
+  return documents.reduce<Arbre>(
+    (somme, { stats, segments }) => additionner(somme, { stats, segments } as unknown as Arbre),
+    {}
+  ) as unknown as Pick<IMissionLocaleStatsPurges, "stats" | "segments">;
+};

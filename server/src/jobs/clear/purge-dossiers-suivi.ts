@@ -28,6 +28,7 @@ const WRITE_CONCERN = { w: "majority", wtimeoutMS: 30_000 } as const;
 type DossierSuivi = {
   _id: ObjectId;
   mission_locale_id?: ObjectId;
+  created_at?: Date | null;
   soft_deleted?: boolean | null;
   effectif_snapshot?: { annee_scolaire?: string | null; source?: string | null } | null;
 };
@@ -159,7 +160,7 @@ const purgerParLots = async (
       _id: 1,
       "effectif_snapshot.annee_scolaire": 1,
       "effectif_snapshot.source": 1,
-      ...(compteurs ? { mission_locale_id: 1, soft_deleted: 1 } : {}),
+      ...(compteurs ? { mission_locale_id: 1, created_at: 1, soft_deleted: 1 } : {}),
     },
     ...(compteurs ? { sort: { mission_locale_id: 1 } } : {}),
     batchSize: TAILLE_LOT,

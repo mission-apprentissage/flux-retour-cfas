@@ -35,7 +35,6 @@ import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
 import {
   missionLocaleEffectifsDb,
   missionLocaleStatsDb,
-  missionLocaleStatsPurgesDb,
   organisationsDb,
   organismesDb,
 } from "@/common/model/collections";
@@ -47,6 +46,7 @@ import {
   listerCfaPurges,
   moisParis,
   type PerimetrePurges,
+  sommerPhotosPurges,
   sommerPurges,
   sommerPurgesPar,
 } from "./mission-locale-purges-stats.actions";
@@ -114,10 +114,7 @@ const addPurgedToMissionLocaleStats = (
 
 const computeMissionLocalePhoto = async (missionLocaleId: ObjectId, day: Date) => {
   const ml = (await getOrganisationById(missionLocaleId)) as IOrganisationMissionLocale;
-  const [live, purged] = await Promise.all([
-    computeMissionLocaleStats(ml, day),
-    missionLocaleStatsPurgesDb().findOne({ mission_locale_id: ml._id }),
-  ]);
+  const [live, purged] = await Promise.all([computeMissionLocaleStats(ml, day), sommerPhotosPurges(ml._id, day)]);
   return { ml, ...addPurgedToMissionLocaleStats(live, purged) };
 };
 
