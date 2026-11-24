@@ -16,7 +16,7 @@ import {
 } from "@/jobs/hydrate/mission-locale/hydrate-mission-locale";
 
 import { createEffectifMissionLocaleLog } from "../../mission-locale/mission-locale-logs.actions";
-import { sommerPhotosPurges } from "../../mission-locale/mission-locale-purges-stats.actions";
+import { moisParis, sommerPurges } from "../../mission-locale/mission-locale-purges-stats.actions";
 import { createOrUpdateMissionLocaleStats } from "../../mission-locale/mission-locale-stats.actions";
 import { computeSuiviDatesSet } from "../../mission-locale/mission-locale-suivi-dates";
 import { getMissionLocaleStat } from "../../mission-locale/mission-locale.actions";
@@ -436,27 +436,26 @@ export const getMissionLocaleDetail = async (missionLocaleId: ObjectId): Promise
     throw new Error(`Mission Locale not found: ${missionLocaleId}`);
   }
 
-  const mlEffectifs = await missionLocaleEffectifsDb()
-    .find(
-      { mission_locale_id: missionLocaleId },
-      { projection: { _id: 1, situation: 1, "effectif_snapshot.organisme_id": 1 } }
-    )
-    .toArray();
-
-  const hasCfaCollaboration = await missionLocaleEffectifsDb().countDocuments({
-    mission_locale_id: missionLocaleId,
-    "organisme_data.acc_conjoint": true,
-  });
-
-  const purged = await sommerPhotosPurges(missionLocaleId);
-
-  const traitesCount = mlEffectifs.filter((e) => e.situation != null).length + (purged?.stats.traite ?? 0);
+  const now = new Date();
+  const [collaborationsVivantes, collaborationsPurgees, stats] = await Promise.all([
+    missionLocaleEffectifsDb().countDocuments(
+      {
+        mission_locale_id: missionLocaleId,
+        "organisme_data.acc_conjoint": true,
+        "organisme_data.acc_conjoint_at": { $lte: now },
+        soft_deleted: { $ne: true },
+      },
+      { limit: 1 }
+    ),
+    sommerPurges("collab", { missionLocaleIds: [missionLocaleId] }, { jusqua: moisParis(now) }),
+    getMissionLocaleStat(ml),
+  ]);
 
   return {
     ml,
     activated_at: ml.activated_at || null,
     is_active: !!ml.activated_at,
-    has_cfa_collaboration: hasCfaCollaboration > 0 || (purged?.segments.collab.total ?? 0) > 0,
-    traites_count: traitesCount,
+    has_cfa_collaboration: collaborationsVivantes > 0 || collaborationsPurgees.envoyes > 0,
+    traites_count: stats.traite,
   };
 };

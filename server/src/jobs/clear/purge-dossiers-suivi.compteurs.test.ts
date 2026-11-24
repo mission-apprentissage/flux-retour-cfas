@@ -329,6 +329,21 @@ describe("compteurs des photos ML à la purge des dossiers de suivi", () => {
     expect(await missionLocaleStatsPurgesDb().countDocuments()).toBe(0);
   });
 
+  it("garde les traités et la collaboration du détail admin d'une ML, dossiers masqués compris", async () => {
+    const { vivant, traite, masque } = jeu();
+    await inserer([vivant, traite, masque]);
+    const lire = async () => {
+      const { traites_count, has_cfa_collaboration } = await getMissionLocaleDetail(ML_ID);
+      return { traites_count, has_cfa_collaboration };
+    };
+    const avant = await lire();
+
+    await purgerDossiersSuivi({ maintenant });
+
+    expect(avant).toStrictEqual({ traites_count: 2, has_cfa_collaboration: false });
+    expect(await lire()).toStrictEqual(avant);
+  });
+
   it("garde les traités purgés dans l'admin ML, hors stock à traiter", async () => {
     const { vivant, traite, jamaisTraite } = jeu();
     await inserer([vivant, traite, jamaisTraite]);
