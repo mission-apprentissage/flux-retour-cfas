@@ -95,6 +95,10 @@ const zDimensions = {
     .string()
     .regex(/^\d{4}-\d{2}$/)
     .describe("Mois, heure de Paris, de la création du dossier, de l'envoi par le CFA ou du dernier message WhatsApp"),
+  cfa_active_le: z
+    .date()
+    .optional()
+    .describe("Plus ancienne date d'activation du CFA pour les ML connue à la suppression de ses dossiers"),
   updated_at: z.date().describe("Date du dernier ajout"),
 };
 

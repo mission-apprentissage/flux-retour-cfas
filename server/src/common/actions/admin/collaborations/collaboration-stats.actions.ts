@@ -261,7 +261,10 @@ async function addPurgedUsage(
 
   for (const organismeId of ids) {
     const id = organismeId.toString();
-    if (!activatedOrganismeIds.has(id) && regionsActuelles.has(id)) continue;
+    const activeALaPurge = [suivi.get(id)?.cfa_active_le, collab.get(id)?.cfa_active_le].some(
+      (date) => date && date < endExclusive
+    );
+    if (regionsActuelles.has(id) ? !activatedOrganismeIds.has(id) : !activeALaPurge) continue;
     const compteursSuivi = suivi.get(id)?.compteurs;
     const compteursCollab = collab.get(id)?.compteurs;
     const row = rows.get(id) ?? {

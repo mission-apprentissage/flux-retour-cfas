@@ -22,6 +22,7 @@ export type LignePurges<T extends TypePurgeMl> = {
   departement: string | null;
   premier_mois: string;
   dernier_mois: string;
+  cfa_active_le: Date | null;
 };
 
 const FORMAT_MOIS = new Intl.DateTimeFormat("fr-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit" });
@@ -82,6 +83,7 @@ export const sommerPurgesPar = async <T extends TypePurgeMl>(
           departement: { $last: "$departement" },
           premier_mois: { $min: "$mois" },
           dernier_mois: { $max: "$mois" },
+          cfa_active_le: { $min: "$cfa_active_le" },
         },
       },
     ])
@@ -97,6 +99,7 @@ export const sommerPurgesPar = async <T extends TypePurgeMl>(
           departement: ligne.departement ?? null,
           premier_mois: ligne.premier_mois,
           dernier_mois: ligne.dernier_mois,
+          cfa_active_le: ligne.cfa_active_le ?? null,
         },
       ])
   );

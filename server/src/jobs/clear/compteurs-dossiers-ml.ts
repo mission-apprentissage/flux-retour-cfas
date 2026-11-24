@@ -40,6 +40,7 @@ type Ligne = {
   departement: string | null;
   mois: string;
   compteurs: Increments;
+  cfa_active_le: Date | null;
 };
 
 export type ContributionsLot = {
@@ -173,6 +174,7 @@ type ContributionDossier = {
   organisme_id: ObjectId | null;
   region: string | null;
   departement: string | null;
+  cfa_active_le: Date | null;
   suivi: { mois: string; compteurs: Increments } | null;
   collab: { mois: string; compteurs: Increments } | null;
   whatsapp: { mois: string; compteurs: Increments } | null;
@@ -206,6 +208,23 @@ const calculerLignes = async (missionLocaleId: ObjectId, ids: ObjectId[], mainte
         },
       },
       {
+        $lookup: {
+          from: "organisations",
+          let: { organisme: { $toString: "$effectif_snapshot.organisme_id" } },
+          pipeline: [
+            {
+              $match: {
+                type: "ORGANISME_FORMATION",
+                ml_beta_activated_at: { $type: "date" },
+                $expr: { $and: [{ $ne: ["$$organisme", null] }, { $eq: ["$organisme_id", "$$organisme"] }] },
+              },
+            },
+            { $group: { _id: null, date: { $min: "$ml_beta_activated_at" } } },
+          ],
+          as: "activation",
+        },
+      },
+      {
         $project: {
           _id: 1,
           mission_locale_id: 1,
@@ -220,6 +239,7 @@ const calculerLignes = async (missionLocaleId: ObjectId, ids: ObjectId[], mainte
               null,
             ],
           },
+          cfa_active_le: { $ifNull: [{ $first: "$activation.date" }, null] },
           suivi: {
             $cond: [
               NON_MASQUE,
@@ -255,6 +275,7 @@ const calculerLignes = async (missionLocaleId: ObjectId, ids: ObjectId[], mainte
       organisme_id: contribution.organisme_id,
       region: contribution.region,
       departement: contribution.departement,
+      cfa_active_le: contribution.cfa_active_le,
     };
     const lignes: Ligne[] = [];
     if (contribution.suivi) lignes.push({ ...dimensions, type: "suivi", ...contribution.suivi });
@@ -333,15 +354,19 @@ export const retirerRestants = async (
 const sommerLignes = (lignes: Ligne[]) => {
   const sommes = new Map<string, Ligne>();
   for (const ligne of lignes) {
-    const { compteurs, ...dimensions } = ligne;
+    const { compteurs, cfa_active_le, ...dimensions } = ligne;
     const cle = JSON.stringify(dimensions);
     const somme = sommes.get(cle);
     if (!somme) {
       sommes.set(cle, {
         ...dimensions,
+        cfa_active_le,
         compteurs: Object.fromEntries(COMPTEURS_PURGES_ML[ligne.type].map((champ) => [champ, compteurs[champ] ?? 0])),
       });
       continue;
+    }
+    if (cfa_active_le && (!somme.cfa_active_le || cfa_active_le < somme.cfa_active_le)) {
+      somme.cfa_active_le = cfa_active_le;
     }
     for (const champ of COMPTEURS_PURGES_ML[ligne.type]) {
       somme.compteurs[champ] += compteurs[champ] ?? 0;
@@ -368,10 +393,14 @@ export const ecrireContributions = async (
       },
     }));
   const lignes = sommerLignes([...contributions.lignes.values()].flat()).map(
-    ({ compteurs, ...dimensions }): AnyBulkWriteOperation<IMissionLocaleEffectifsPurgesStats> => ({
+    ({ compteurs, cfa_active_le, ...dimensions }): AnyBulkWriteOperation<IMissionLocaleEffectifsPurgesStats> => ({
       updateOne: {
         filter: dimensions,
-        update: { $inc: prefixer("compteurs", compteurs), $set: { updated_at: maintenant } },
+        update: {
+          $inc: prefixer("compteurs", compteurs),
+          $set: { updated_at: maintenant },
+          ...(cfa_active_le ? { $min: { cfa_active_le } } : {}),
+        },
         upsert: true,
       },
     })
