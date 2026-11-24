@@ -161,7 +161,21 @@ async function aggregateCollabDossiers(match: Document, now: Date, purgesPerimet
           from: "missionLocaleEffectifLog",
           localField: "_id",
           foreignField: "mission_locale_effectif_id",
-          pipeline: [{ $match: { created_at: { $lte: now } } }, { $project: { created_at: 1, created_by: 1 } }],
+          let: { missionLocaleId: "$mission_locale_id" },
+          pipeline: [
+            { $match: { created_at: { $lte: now } } },
+            {
+              $lookup: {
+                from: "usersMigration",
+                localField: "created_by",
+                foreignField: "_id",
+                pipeline: [{ $project: { organisation_id: 1 } }],
+                as: "auteur",
+              },
+            },
+            { $match: { $expr: { $eq: [{ $first: "$auteur.organisation_id" }, "$$missionLocaleId"] } } },
+            { $project: { created_at: 1, created_by: 1 } },
+          ],
           as: "filteredLogs",
         },
       },
