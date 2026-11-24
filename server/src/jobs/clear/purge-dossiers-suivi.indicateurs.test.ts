@@ -72,6 +72,7 @@ const dossier = ({
   situation = null,
   collab,
   whatsapp = false,
+  masque = false,
 }: {
   organismeId?: ObjectId;
   rupture?: string;
@@ -79,6 +80,7 @@ const dossier = ({
   situation?: SITUATION_ENUM | null;
   collab?: { envoi: string; reponse: string };
   whatsapp?: boolean;
+  masque?: boolean;
 }) => ({
   _id: new ObjectId(),
   mission_locale_id: ML_ID,
@@ -87,6 +89,7 @@ const dossier = ({
   date_rupture: date(rupture),
   current_status: { value: STATUT_APPRENANT.RUPTURANT, date: date(rupture) },
   situation,
+  ...(masque ? { soft_deleted: true } : {}),
   ...(collab
     ? {
         organisme_data: {
@@ -277,6 +280,22 @@ describe("compteurs des indicateurs ML vivants à la purge des dossiers de suivi
     expect(avant[0]).toMatchObject({ summary: { totalSent: 1 }, callbackOutcomes: { rdv_pris: 1 } });
     expect(avant[1]).toMatchObject({ volume: { total_sent: 1 }, rdv_tracking: { total_clicks: 1 } });
     expect(await lire()).toStrictEqual(avant);
+  });
+
+  it("garde les envois WhatsApp d'un dossier masqué, hors préqualif", async () => {
+    const { collabVivante } = jeu();
+    await inserer([collabVivante, dossier({ situation: SITUATION_ENUM.RDV_PRIS, whatsapp: true, masque: true })]);
+    const lire = () => Promise.all([getWhatsAppStats("all"), getPrequalifStats("all")]);
+    const avant = await lire();
+
+    const resultat = await purgerDossiersSuivi({ maintenant });
+
+    expect(resultat.missionLocale).toMatchObject({ supprimes: 1, comptes: 0 });
+    expect(avant[0]).toMatchObject({ summary: { totalSent: 1 }, callbackOutcomes: { rdv_pris: 1 } });
+    expect(avant[1]).toMatchObject({ volume: { total_sent: 0 } });
+    expect(await lire()).toStrictEqual(avant);
+    const lignes = await missionLocaleEffectifsPurgesStatsDb().find({}).toArray();
+    expect(lignes.map(({ type }) => type)).toStrictEqual(["whatsapp"]);
   });
 
   it("garde un CFA dont toutes les collaborations sont purgées", async () => {
