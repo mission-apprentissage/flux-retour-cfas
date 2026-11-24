@@ -248,17 +248,11 @@ const calculerLignes = async (missionLocaleId: ObjectId, ids: ObjectId[], mainte
           _id: 1,
           mission_locale_id: 1,
           organisme_id: { $ifNull: ["$effectif_snapshot.organisme_id", null] },
-          region: {
-            $ifNull: [{ $first: "$organisme.adresse.region" }, "$effectif_snapshot._computed.organisme.region", null],
+          region: { $ifNull: [{ $first: "$organisme.adresse.region" }, null] },
+          departement: { $ifNull: [{ $first: "$organisme.adresse.departement" }, null] },
+          cfa_active_le: {
+            $cond: [{ $gt: [{ $size: "$organisme" }, 0] }, { $ifNull: [{ $first: "$activation.date" }, null] }, null],
           },
-          departement: {
-            $ifNull: [
-              { $first: "$organisme.adresse.departement" },
-              "$effectif_snapshot._computed.organisme.departement",
-              null,
-            ],
-          },
-          cfa_active_le: { $ifNull: [{ $first: "$activation.date" }, null] },
           suivi: {
             $cond: [
               NON_MASQUE,

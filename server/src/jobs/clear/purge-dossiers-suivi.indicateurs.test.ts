@@ -377,6 +377,35 @@ describe("compteurs des indicateurs ML vivants à la purge des dossiers de suivi
     expect(await lire()).toStrictEqual(avant);
   });
 
+  it("range sans région ni activation un CFA déjà absent des organismes à la purge", async () => {
+    const cfaAbsent = new ObjectId();
+    await organisationsDb().insertOne(
+      {
+        _id: new ObjectId(),
+        type: "ORGANISME_FORMATION",
+        created_at: date("2025-01-01"),
+        siret: "00000000000000",
+        uai: null,
+        organisme_id: cfaAbsent.toString(),
+        ml_beta_activated_at: date("2025-12-01"),
+      } as IOrganisation,
+      { bypassDocumentValidation: true }
+    );
+    await inserer([dossier({ organismeId: cfaAbsent, collab: { envoi: "2025-04-10", reponse: "2026-02-01" } })]);
+    const lire = async () => {
+      const { national } = await computeStatsForDate(addDaysUTC(normalizeToUTCDay(new Date()), 1));
+      return { usage: national.usage, territoire: await getTerritoireCollaborationStats("all", { regions: [REGION] }) };
+    };
+    const avant = await lire();
+
+    await purgerDossiersSuivi({ maintenant });
+
+    const ligne = await missionLocaleEffectifsPurgesStatsDb().findOne({ type: "collab" });
+    expect(ligne).toMatchObject({ organisme_id: cfaAbsent, region: null, departement: null });
+    expect(ligne).not.toHaveProperty("cfa_active_le");
+    expect(await lire()).toStrictEqual(avant);
+  });
+
   it("garde dans sa région un CFA supprimé après la purge", async () => {
     await inserer([
       dossier({
