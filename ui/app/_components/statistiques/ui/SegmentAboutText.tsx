@@ -2,6 +2,9 @@ import { Tooltip } from "@codegouvfr/react-dsfr/Tooltip";
 
 import styles from "./SegmentAboutText.module.css";
 
+const DOSSIERS_SUPPRIMES =
+  "Les totaux comprennent les dossiers supprimés deux ans après la rupture, qui ne figurent plus parmi les dossiers à traiter ni à recontacter.";
+
 interface SegmentAboutTextProps {
   variant: "rupture" | "collab";
 }
@@ -16,7 +19,7 @@ export function SegmentAboutText({ variant }: SegmentAboutTextProps) {
           le Tableau de bord de l&apos;apprentissage permet aux CFA de solliciter des collaborations pour des jeunes sur
           de la prévention de rupture. Ces dossiers ne sont pas inclus dans ces données chiffrées, seuls sont
           représentés ici les dossiers de rupture identifiés (sources : DECA, les ERP des CFA connectés et le déclaratif
-          des CFA lors de collaborations sollicitées pour ce motif).
+          des CFA lors de collaborations sollicitées pour ce motif). {DOSSIERS_SUPPRIMES}
           <span className={styles.info}>
             <Tooltip
               kind="hover"
@@ -33,7 +36,8 @@ export function SegmentAboutText({ variant }: SegmentAboutTextProps) {
           des dossiers, classés par date d&apos;envoi de la collaboration : les compteurs d&apos;une période passée
           décrivent la situation d&apos;aujourd&apos;hui des dossiers envoyés pendant cette période. La table «
           Déploiement aux CFA » de l&apos;onglet Suivi déploiement compte, elle, toutes les collaborations à la date de
-          réponse du CFA, sans filtre de période : ses totaux peuvent différer de ceux affichés ici.
+          réponse du CFA, sans filtre de période : ses totaux peuvent différer de ceux affichés ici.{" "}
+          {DOSSIERS_SUPPRIMES}
         </p>
       )}
     </div>
