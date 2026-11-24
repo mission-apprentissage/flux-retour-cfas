@@ -108,11 +108,16 @@ export const sommerPurgesPar = async <T extends TypePurgeMl>(
   );
 };
 
-export const listerCfaPurges = async (perimetre: PerimetrePurges = {}, bornes: BornesMois = {}) =>
+export const listerCfaPurges = async (
+  perimetre: PerimetrePurges = {},
+  bornes: BornesMois = {},
+  { agesMissionLocale = false }: { agesMissionLocale?: boolean } = {}
+) =>
   (
     await missionLocaleEffectifsPurgesStatsDb().distinct("organisme_id", {
       ...buildMatch("collab", perimetre, bornes),
       organisme_id: { $ne: null, ...(perimetre.organismeIds ? { $in: perimetre.organismeIds } : {}) },
+      ...(agesMissionLocale ? { "compteurs.ages_ml_envoyes": { $gt: 0 } } : {}),
     })
   ).filter((id): id is ObjectId => id !== null);
 

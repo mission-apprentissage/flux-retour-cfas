@@ -8,6 +8,7 @@ import {
   type TypePurgeMl,
 } from "shared/models/data/missionLocaleEffectifsPurgesStats.model";
 import type { IMissionLocaleStats, IMissionLocaleStatsSegments } from "shared/models/data/missionLocaleStats.model";
+import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
 
 import { RESULTAT_SITUATIONS } from "@/common/actions/mission-locale/collaboration-dossiers.actions";
 import { moisUTC } from "@/common/actions/mission-locale/mission-locale-purges-stats.actions";
@@ -89,7 +90,17 @@ const MOTIFS = {
   $cond: [{ $isArray: "$organisme_data.motif" }, "$organisme_data.motif", ["$organisme_data.motif"]],
 };
 
-const compteursCollab = () => ({
+const objectif = (motif: string) => ({
+  $size: { $filter: { input: MOTIFS, cond: egal("$$this", motif.toUpperCase()) } },
+});
+
+const agesMissionLocale = (maintenant: Date) => {
+  const { nesApres, nesAvant } = getBornesNaissanceMissionLocale(maintenant);
+  const naissance = "$effectif_snapshot.apprenant.date_de_naissance";
+  return { $and: [{ $gte: [naissance, nesApres] }, { $lte: [naissance, nesAvant] }] };
+};
+
+const compteursCollab = (maintenant: Date) => ({
   envoyes: UN,
   contactes: un(SITUATION_RENSEIGNEE),
   traitees: un({
@@ -114,10 +125,12 @@ const compteursCollab = () => ({
       "besoin_aide_hors_rupture",
     ].map((situation) => [`situation_${situation}`, un(egal("$collab_situation", situation))])
   ),
+  ...Object.fromEntries(Object.keys(DEFAULT_MOTIFS).map((motif) => [`objectif_${motif}`, objectif(motif)])),
+  ages_ml_envoyes: un(agesMissionLocale(maintenant)),
   ...Object.fromEntries(
     Object.keys(DEFAULT_MOTIFS).map((motif) => [
-      `objectif_${motif}`,
-      { $size: { $filter: { input: MOTIFS, cond: egal("$$this", motif.toUpperCase()) } } },
+      `ages_ml_objectif_${motif}`,
+      { $cond: [agesMissionLocale(maintenant), objectif(motif), 0] },
     ])
   ),
   nps_reponses: un({ $isNumber: "$organisme_data.form_feedback.note" }),
@@ -259,7 +272,7 @@ const calculerLignes = async (missionLocaleId: ObjectId, ids: ObjectId[], mainte
           collab: {
             $cond: [
               { $and: [NON_MASQUE, collabEnvoye] },
-              { mois: moisParis("$organisme_data.acc_conjoint_at"), compteurs: compteursCollab() },
+              { mois: moisParis("$organisme_data.acc_conjoint_at"), compteurs: compteursCollab(maintenant) },
               null,
             ],
           },
