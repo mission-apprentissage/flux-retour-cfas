@@ -8,9 +8,8 @@ import { addDaysUTC, normalizeToUTCDay, subtractDaysUTC } from "shared/utils/dat
 
 import {
   debutDuMois,
-  moisParis,
+  moisAvant,
   sommerPurgesPar,
-  veilleDe,
 } from "@/common/actions/mission-locale/mission-locale-purges-stats.actions";
 import { getCfaAccountsByOrganismeIds } from "@/common/actions/organisations.actions";
 import { findEligibleOrganismes, type IEligibleOrganismeRow } from "@/common/actions/organismes/deca-cfa-eligibility";
@@ -146,7 +145,7 @@ export async function fetchCollaborationsByOrgId(
         },
       ])
       .toArray(),
-    sommerPurgesPar("collab", "organisme_id", { organismeIds }, { jusqua: moisParis(veilleDe(endExclusive)) }),
+    sommerPurgesPar("collab", "organisme_id", { organismeIds }, { jusqua: moisAvant(endExclusive) }),
   ]);
 
   const collaborations = new Map(rows.map((r) => [r._id.toString(), { nb: r.nb, last: r.last }]));
@@ -154,7 +153,9 @@ export async function fetchCollaborationsByOrgId(
     const nb = depuis ? compteurs.v2_envoyes : compteurs.envoyes;
     if (nb === 0) continue;
     const vivante = collaborations.get(id);
-    collaborations.set(id, { nb: (vivante?.nb ?? 0) + nb, last: vivante?.last ?? debutDuMois(dernier_mois) });
+    const debut = debutDuMois(dernier_mois);
+    const last = vivante?.last ?? (depuis && depuis > debut ? depuis : debut);
+    collaborations.set(id, { nb: (vivante?.nb ?? 0) + nb, last });
   }
   return collaborations;
 }
@@ -243,7 +244,7 @@ async function addPurgedUsage(
   activatedOrganismeIds: Set<string>,
   depuis: Date | null
 ) {
-  const bornes = { jusqua: moisParis(veilleDe(endExclusive)) };
+  const bornes = { jusqua: moisAvant(endExclusive) };
   const [suivi, collab] = await Promise.all([
     sommerPurgesPar("suivi", "organisme_id", {}, bornes),
     sommerPurgesPar("collab", "organisme_id", {}, bornes),

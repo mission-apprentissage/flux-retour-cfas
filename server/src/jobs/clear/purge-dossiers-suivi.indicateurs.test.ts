@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
+import { COLLABORATION_CUTOFF_DATE } from "shared/constants/collaboration";
 import { STATUT_PRESENCE_REFERENTIEL } from "shared/constants/organisme";
 import type { IMissionLocaleEffectif, IOrganisationMissionLocale, IOrganisme } from "shared/models";
 import type { IMissionLocaleCfaInvitation } from "shared/models/data/missionLocaleCfaInvitations.model";
@@ -328,7 +329,12 @@ describe("compteurs des indicateurs ML vivants à la purge des dossiers de suivi
     await purgerDossiersSuivi({ maintenant });
 
     const collaborations = await fetchCollaborationsByOrgId([CFA_PURGE_ID], new Date(), null);
-    expect(collaborations.get(CFA_PURGE_ID.toString())).toStrictEqual({ nb: 1, last: date("2025-04-01") });
+    expect(collaborations.get(CFA_PURGE_ID.toString())).toStrictEqual({
+      nb: 1,
+      last: new Date("2025-03-31T22:00:00.000Z"),
+    });
+    const collaborationsV2 = await fetchCollaborationsByOrgId([CFA_PURGE_ID], new Date(), COLLABORATION_CUTOFF_DATE);
+    expect(collaborationsV2.get(CFA_PURGE_ID.toString())).toStrictEqual({ nb: 1, last: COLLABORATION_CUTOFF_DATE });
     expect((await getCfaFiche(CFA_PURGE_ID, { nominatif: false })).collabore).toBe(true);
     expect(
       (await getCfaInvitesSansCollab({ ...page, sort_by: "invitations" }, { inclureAvecCollab: false })).total

@@ -27,14 +27,23 @@ export type LignePurges<T extends TypePurgeMl> = {
 };
 
 const FORMAT_MOIS = new Intl.DateTimeFormat("fr-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit" });
+const FORMAT_HEURE = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", hour: "2-digit", hourCycle: "h23" });
+const UN_JOUR_MS = 86_400_000;
+const UNE_HEURE_MS = 3_600_000;
 
 export const moisParis = (date: Date) => FORMAT_MOIS.format(date);
 
 export const moisUTC = (date: Date) => date.toISOString().slice(0, 7);
 
-export const veilleDe = (date: Date) => new Date(date.getTime() - 1);
+export const moisAvant = (finExclue: Date) => {
+  const dernierInstant = new Date(finExclue.getTime() - 1);
+  return finExclue.getTime() % UN_JOUR_MS === 0 ? moisUTC(dernierInstant) : moisParis(dernierInstant);
+};
 
-export const debutDuMois = (mois: string) => new Date(`${mois}-01T00:00:00.000Z`);
+export const debutDuMois = (mois: string) => {
+  const minuitUTC = new Date(`${mois}-01T00:00:00.000Z`);
+  return new Date(minuitUTC.getTime() - Number(FORMAT_HEURE.format(minuitUTC)) * UNE_HEURE_MS);
+};
 
 const buildMatch = (
   type: TypePurgeMl,
