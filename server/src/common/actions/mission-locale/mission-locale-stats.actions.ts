@@ -1141,7 +1141,7 @@ export async function getCollaborationSegmentStats(
   const countCfaAyantCollabore = async (date: Date) => {
     const [vivants, purges] = await Promise.all([
       missionLocaleEffectifsDb().distinct("effectif_snapshot.organisme_id", collabMatch(date)),
-      listerCfaPurges(purgesPerimetre, { jusqua: moisParis(date) }),
+      listerCfaPurges(purgesPerimetre, { jusqua: moisParis(date) }, { agesMissionLocale: true }),
     ]);
     return new Set([...vivants, ...purges].map(String)).size;
   };
@@ -1170,7 +1170,7 @@ export async function getCollaborationSegmentStats(
   const motifs = Object.fromEntries(
     Object.entries(motifsVivants).map(([cle, valeur]) => [
       cle,
-      (valeur || 0) + purged[`objectif_${cle as keyof typeof DEFAULT_MOTIFS}`],
+      (valeur || 0) + purged[`ages_ml_objectif_${cle as keyof typeof DEFAULT_MOTIFS}`],
     ])
   ) as typeof DEFAULT_MOTIFS;
   const variationSituation = (cle: keyof ICollabSegmentStats & `situation_${string}`) =>
@@ -1220,7 +1220,7 @@ export async function getCollaborationSegmentStats(
       reorientation: motifs.reorientation || 0,
       recherche_emploi: motifs.recherche_emploi || 0,
       autre: motifs.autre || 0,
-      total_dossiers: (objectifsResult?.total?.[0]?.count || 0) + purged.envoyes,
+      total_dossiers: (objectifsResult?.total?.[0]?.count || 0) + purged.ages_ml_envoyes,
     },
   };
 }

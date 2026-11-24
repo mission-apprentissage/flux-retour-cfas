@@ -73,6 +73,8 @@ const dossier = ({
   collab,
   whatsapp = false,
   masque = false,
+  age = 20,
+  missionLocaleId = ML_ID,
 }: {
   organismeId?: ObjectId;
   rupture?: string;
@@ -81,9 +83,11 @@ const dossier = ({
   collab?: { envoi: string; reponse: string };
   whatsapp?: boolean;
   masque?: boolean;
+  age?: number;
+  missionLocaleId?: ObjectId;
 }) => ({
   _id: new ObjectId(),
-  mission_locale_id: ML_ID,
+  mission_locale_id: missionLocaleId,
   effectif_id: new ObjectId(),
   created_at: date(rupture),
   date_rupture: date(rupture),
@@ -123,7 +127,7 @@ const dossier = ({
     apprenant: {
       nom: "DOE",
       prenom: "John",
-      date_de_naissance: new Date(new Date().setFullYear(new Date().getFullYear() - 20)),
+      date_de_naissance: new Date(new Date().setFullYear(new Date().getFullYear() - age)),
     },
     formation: {},
     _computed: { statut: { en_cours: STATUT_APPRENANT.RUPTURANT }, organisme: { region: REGION } },
@@ -352,6 +356,24 @@ describe("compteurs des indicateurs ML vivants à la purge des dossiers de suivi
     await organismesDb().deleteOne({ _id: cfaNonActive });
 
     expect(avant.usage).toMatchObject({ rupturants: 0, dossiers_envoyes_cfa: 0 });
+    expect(await lire()).toStrictEqual(avant);
+  });
+
+  it("garde les objectifs et les CFA du segment collaborations d'une ML, âges ML compris", async () => {
+    await inserer([
+      dossier({ collab: { envoi: "2025-04-10", reponse: "2026-02-01" }, age: 27 }),
+      dossier({ organismeId: CFA_PURGE_ID, collab: { envoi: "2025-04-10", reponse: "2026-02-01" } }),
+    ]);
+    const lire = async () => {
+      await createOrUpdateMissionLocaleStats(ML_ID);
+      const { objectifs, cfa_ayant_collabore } = await getCollaborationSegmentStats("all", {}, ML_ID.toString());
+      return { objectifs, cfa_ayant_collabore };
+    };
+    const avant = await lire();
+
+    await purgerDossiersSuivi({ maintenant });
+
+    expect(avant).toMatchObject({ objectifs: { sante: 1, total_dossiers: 1 }, cfa_ayant_collabore: { current: 1 } });
     expect(await lire()).toStrictEqual(avant);
   });
 

@@ -18220,6 +18220,36 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
           "additionalProperties": false,
           "bsonType": "object",
           "properties": {
+            "ages_ml_envoyes": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_administratif": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_autre": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_finance": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_logement": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_mobilite": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_recherche_emploi": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_reorientation": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_sante": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_social_familial": {
+              "bsonType": "int",
+            },
             "contactes": {
               "bsonType": "int",
             },
@@ -18348,6 +18378,16 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
             "objectif_reorientation",
             "objectif_recherche_emploi",
             "objectif_autre",
+            "ages_ml_envoyes",
+            "ages_ml_objectif_mobilite",
+            "ages_ml_objectif_logement",
+            "ages_ml_objectif_sante",
+            "ages_ml_objectif_finance",
+            "ages_ml_objectif_administratif",
+            "ages_ml_objectif_social_familial",
+            "ages_ml_objectif_reorientation",
+            "ages_ml_objectif_recherche_emploi",
+            "ages_ml_objectif_autre",
             "nps_reponses",
             "nps_somme",
             "v2_envoyes",
