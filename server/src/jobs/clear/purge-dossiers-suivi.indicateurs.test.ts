@@ -7,6 +7,7 @@ import { CFA_SITUATION_TYPE_ENUM, SITUATION_ENUM } from "shared/models/data/miss
 import missionLocaleEffectifsPurgesStatsDescriptor from "shared/models/data/missionLocaleEffectifsPurgesStats.model";
 import missionLocaleStatsPurgesDescriptor from "shared/models/data/missionLocaleStatsPurges.model";
 import type { IOrganisation } from "shared/models/data/organisations.model";
+import type { IUsersMigration } from "shared/models/data/usersMigration.model";
 import { addDaysUTC, normalizeToUTCDay } from "shared/utils/date";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -35,9 +36,11 @@ import {
 import {
   missionLocaleCfaInvitationsDb,
   missionLocaleEffectifsDb,
+  missionLocaleEffectifsLogDb,
   missionLocaleEffectifsPurgesStatsDb,
   organisationsDb,
   organismesDb,
+  usersMigrationDb,
 } from "@/common/model/collections";
 import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -403,6 +406,58 @@ describe("compteurs des indicateurs ML vivants à la purge des dossiers de suivi
     const ligne = await missionLocaleEffectifsPurgesStatsDb().findOne({ type: "collab" });
     expect(ligne).toMatchObject({ organisme_id: cfaAbsent, region: null, departement: null });
     expect(ligne).not.toHaveProperty("cfa_active_le");
+    expect(await lire()).toStrictEqual(avant);
+  });
+
+  it("garde le délai de première action quand une autre ML a écrit sur le dossier", async () => {
+    const autreMl = new ObjectId();
+    await organisationsDb().insertOne(
+      {
+        _id: autreMl,
+        type: "MISSION_LOCALE",
+        ml_id: 4343,
+        nom: "Autre ML",
+        created_at: date("2025-01-01"),
+        activated_at: date("2025-03-01"),
+        adresse: { region: REGION, departement: DEPARTEMENT },
+      } as IOrganisationMissionLocale as IOrganisation,
+      { bypassDocumentValidation: true }
+    );
+    const conseiller = (organisationId: ObjectId) => ({
+      _id: new ObjectId(),
+      organisation_id: organisationId,
+      email: `${new ObjectId().toString()}@tdb.local`,
+    });
+    const [conseillerMl, conseillerAutreMl] = [conseiller(ML_ID), conseiller(autreMl)];
+    await usersMigrationDb().insertMany([conseillerMl, conseillerAutreMl] as unknown as IUsersMigration[], {
+      bypassDocumentValidation: true,
+    });
+    const purge = dossier({ collab: { envoi: "2025-04-10", reponse: "2026-02-01" } });
+    const vivant = dossier({
+      missionLocaleId: autreMl,
+      rupture: "2026-09-01",
+      anneeScolaire: "2026-2027",
+      collab: { envoi: "2026-09-10", reponse: "2026-09-10" },
+    });
+    await inserer([purge, vivant]);
+    const log = (dossierId: ObjectId, createdBy: ObjectId, jour: string) => ({
+      _id: new ObjectId(),
+      mission_locale_effectif_id: dossierId,
+      situation: SITUATION_ENUM.RDV_PRIS,
+      created_at: date(jour),
+      created_by: createdBy,
+      read_by: [],
+    });
+    await missionLocaleEffectifsLogDb().insertMany(
+      [log(purge._id, conseillerAutreMl._id, "2025-04-20"), log(purge._id, conseillerMl._id, "2025-04-30")] as never[],
+      { bypassDocumentValidation: true }
+    );
+    const lire = () => getTerritoireCollaborationStats("all", {});
+    const avant = await lire();
+
+    await purgerDossiersSuivi({ maintenant });
+
+    expect(avant).toMatchObject({ delai_moyen_jours: 20 });
     expect(await lire()).toStrictEqual(avant);
   });
 
