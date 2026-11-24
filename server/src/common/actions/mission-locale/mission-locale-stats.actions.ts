@@ -587,7 +587,7 @@ const TRAITEMENT_ML_SORT_FIELD_MAP: Record<TraitementMlSortBy, string> = {
 };
 
 const buildPourcentageTraitesExpr = (viewPath: string) => {
-  const totalJeunes = { $add: [`${viewPath}.a_traiter`, `${viewPath}.traite`] };
+  const totalJeunes = `${viewPath}.total`;
   return {
     $cond: [{ $eq: [totalJeunes, 0] }, 0, { $multiply: [{ $divide: [`${viewPath}.traite`, totalJeunes] }, 100] }],
   };
@@ -713,7 +713,7 @@ export const getTraitementStatsByMissionLocale = async (
     },
     {
       $addFields: {
-        total_jeunes: { $add: ["$view.a_traiter", "$view.traite"] },
+        total_jeunes: "$view.total",
         pourcentage_traites: { $round: [buildPourcentageTraitesExpr("$view"), 0] },
         first_pourcentage_traites: buildPourcentageTraitesExpr("$first_view"),
         nom: { $trim: { input: "$nom" } },
@@ -858,6 +858,7 @@ export const getSuiviTraitementByRegion = async (segment: StatsSegment = "all"):
     {
       $group: {
         _id: "$ml.adresse.region",
+        total_jeunes: { $sum: "$view.total" },
         a_traiter: { $sum: "$view.a_traiter" },
         traites: { $sum: "$view.traite" },
         ml_actives: {
@@ -875,8 +876,8 @@ export const getSuiviTraitementByRegion = async (segment: StatsSegment = "all"):
         nom: 1,
         a_traiter: 1,
         traites: 1,
-        total_jeunes: { $add: ["$a_traiter", "$traites"] },
-        pourcentage_traites: buildPercentageExpression("$traites", { $add: ["$a_traiter", "$traites"] }),
+        total_jeunes: 1,
+        pourcentage_traites: buildPercentageExpression("$traites", "$total_jeunes"),
         ml_actives: 1,
       },
     },
@@ -1383,7 +1384,7 @@ const buildSegmentRowsPipeline = (basePipeline: Record<string, unknown>[], segme
       siret: { $ifNull: ["$ml.siret", null] },
       date_activation: DATE_ACTIVATION_EXPR,
       derniere_activite: { $ifNull: ["$ml.derniere_activite", null] },
-      total_jeunes: { $add: ["$view.a_traiter", "$view.traite"] },
+      total_jeunes: "$view.total",
       a_traiter: "$view.a_traiter",
       traites: "$view.traite",
       pourcentage_traites: { $round: [buildPourcentageTraitesExpr("$view"), 1] },
@@ -1430,7 +1431,7 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
     { $lookup: { from: "regions", localField: "ml.adresse.region", foreignField: "code", as: "region_info" } },
     {
       $addFields: {
-        total_jeunes: { $add: ["$latest_stats.a_traiter", "$latest_stats.traite"] },
+        total_jeunes: { $ifNull: ["$latest_stats.total", 0] },
         traites: buildTotalTraitesV2Expression(),
         a_traiter: "$latest_stats.a_traiter",
         rdv_pris: { $ifNull: ["$latest_stats.rdv_pris", 0] },
@@ -1470,7 +1471,7 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
     {
       $group: {
         _id: "$ml.adresse.region",
-        total_jeunes: { $sum: { $add: ["$latest_stats.a_traiter", "$latest_stats.traite"] } },
+        total_jeunes: { $sum: { $ifNull: ["$latest_stats.total", 0] } },
         a_traiter: { $sum: "$latest_stats.a_traiter" },
         traites: { $sum: buildTotalTraitesV2Expression() },
         rdv_pris: { $sum: { $ifNull: ["$latest_stats.rdv_pris", 0] } },

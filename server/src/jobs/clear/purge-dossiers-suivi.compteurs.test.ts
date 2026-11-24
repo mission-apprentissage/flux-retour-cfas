@@ -9,7 +9,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getMissionLocaleDetail } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { getMissionLocaleFicheIndicateurs } from "@/common/actions/mission-locale/mission-locale-fiche.actions";
-import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
+import {
+  createOrUpdateMissionLocaleStats,
+  getSuiviTraitementByRegion,
+  getTraitementExportData,
+  getTraitementStatsByMissionLocale,
+} from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { getMissionLocaleStat } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   missionLocaleEffectifsDb,
@@ -42,6 +47,7 @@ const ML_ORGANISATION = {
   nom: "ML Test",
   created_at: date("2025-01-01"),
   activated_at: date("2025-03-01"),
+  adresse: { region: "84", departement: "01" },
 } as IOrganisationMissionLocale;
 
 type Options = {
@@ -199,6 +205,44 @@ describe("compteurs des photos ML à la purge des dossiers de suivi", () => {
     expect(purges?.stats).toMatchObject({ total: 1, traite: 1, rdv_pris: 1 });
     const lignes = await missionLocaleEffectifsPurgesStatsDb().find({ type: "suivi" }).toArray();
     expect(lignes.map(({ compteurs }) => compteurs)).toStrictEqual([{ dossiers: 1, v2_dossiers: 0 }]);
+  });
+
+  it("garde le total et le taux de traités des tableaux de suivi et de l'export", async () => {
+    const { vivant, jamaisTraite } = jeu();
+    await inserer([vivant, jamaisTraite]);
+    const suivi = (ligne: Record<string, unknown>) => ({
+      total_jeunes: ligne.total_jeunes,
+      pourcentage_traites: ligne.pourcentage_traites,
+    });
+    const lire = async () => {
+      await createOrUpdateMissionLocaleStats(ML_ID);
+      const [parMl, parRegion, export_] = await Promise.all([
+        getTraitementStatsByMissionLocale({
+          period: "30days",
+          segment: "all",
+          page: 1,
+          limit: 10,
+          sort_by: "nom",
+          sort_order: "asc",
+        }),
+        getSuiviTraitementByRegion("all"),
+        getTraitementExportData({}),
+      ]);
+      return {
+        parMl: parMl.data.map(suivi),
+        parRegion: parRegion.map(suivi),
+        exportMl: export_.mlData.map(suivi),
+        exportRegion: export_.regionData.map(suivi),
+        exportRupture: export_.rows_rupture.map(suivi),
+      };
+    };
+    const avant = await lire();
+
+    await purgerDossiersSuivi({ maintenant });
+
+    expect(avant.parMl).toStrictEqual([{ total_jeunes: 2, pourcentage_traites: 50 }]);
+    expect(avant.parRegion).toStrictEqual([{ total_jeunes: 2, pourcentage_traites: 50 }]);
+    expect(await lire()).toStrictEqual(avant);
   });
 
   it("garde les traités purgés dans l'admin ML, hors stock à traiter", async () => {
