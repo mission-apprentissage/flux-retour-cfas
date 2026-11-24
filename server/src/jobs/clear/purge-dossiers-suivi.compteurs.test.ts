@@ -344,6 +344,27 @@ describe("compteurs des photos ML à la purge des dossiers de suivi", () => {
     expect(await lire()).toStrictEqual(avant);
   });
 
+  it("garde le stock admin d'une ML sans dossier vivant, et celui des mineurs hors déjà connus", async () => {
+    await inserer([
+      dossier({ situation: SITUATION_ENUM.CHERCHE_CONTRAT }),
+      dossier({ age: 17, situation: SITUATION_ENUM.RDV_PRIS, dejaConnu: true }),
+    ]);
+    const sansId = ({ _id, ...stats }: Record<string, unknown>) => stats;
+    const lire = async () =>
+      (await Promise.all([getMissionLocaleStat(ML_ORGANISATION), getMissionLocaleStat(ML_ORGANISATION, true)])).map(
+        sansId
+      );
+    const [tous, mineurs] = await lire();
+
+    await purgerDossiersSuivi({ maintenant });
+
+    expect(tous).toMatchObject({ total: 2, traite: 2, cherche_contrat: 1, rdv_pris: 1, deja_connu: 1 });
+    expect(mineurs).toMatchObject({ total: 1, traite: 1, rdv_pris: 1, deja_connu: 1 });
+    const [tousApres, mineursApres] = await lire();
+    expect(tousApres).toStrictEqual({ ...tous, a_traiter: 0 });
+    expect(mineursApres).toStrictEqual({ ...mineurs, a_traiter: 0, deja_connu: 0 });
+  });
+
   it("garde les traités purgés dans l'admin ML, hors stock à traiter", async () => {
     const { vivant, traite, jamaisTraite } = jeu();
     await inserer([vivant, traite, jamaisTraite]);

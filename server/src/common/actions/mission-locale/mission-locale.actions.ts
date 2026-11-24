@@ -3646,6 +3646,9 @@ export const getMissionLocaleStat = async (
     injoignables: 0,
     coordonnees_incorrectes: 0,
     autre: 0,
+    cherche_contrat: 0,
+    reorientation: 0,
+    ne_veut_pas_accompagnement: 0,
     deja_connu: 0,
   };
   if (organisation.type !== "MISSION_LOCALE" || (mineur && rqth)) {
@@ -3659,7 +3662,7 @@ export const getMissionLocaleStat = async (
   const purgedCounters: Record<string, number> = purged.stats;
   return Object.fromEntries(
     Object.entries(live).map(([key, value]) => {
-      if (!PURGED_STAT_KEYS.has(key)) return [key, value];
+      if (!PURGED_STAT_KEYS.has(key) || (prefix && key === "deja_connu")) return [key, value];
       const purgedKey = !prefix ? key : key === "total" ? prefix : `${prefix}_${key}`;
       return [key, value + (purgedCounters[purgedKey] ?? 0)];
     })
