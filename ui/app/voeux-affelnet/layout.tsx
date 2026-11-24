@@ -7,7 +7,6 @@ import { UserContextProvider } from "@/app/_components/context/UserContext";
 import { Footer } from "@/app/_components/Footer";
 import { isEnTravaux } from "@/app/_components/travaux/isEnTravaux";
 import { TravauxPageClient } from "@/app/_components/travaux/TravauxPageClient";
-import { TravauxBanner } from "@/app/_components/TravauxBanner";
 import { getSession } from "@/app/_utils/session.utils";
 import { Providers } from "@/app/providers";
 
@@ -33,7 +32,6 @@ export default async function VoeuxAffelnetLayout({ children }: { children: Reac
     <Providers>
       <UserContextProvider user={user}>
         <div className={styles.layout}>
-          <TravauxBanner />
           <ConnectedHeader />
           {enTravaux ? <TravauxPageClient /> : <div className={styles.main}>{children}</div>}
           <Footer />
