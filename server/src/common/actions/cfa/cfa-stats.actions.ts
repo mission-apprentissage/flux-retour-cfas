@@ -13,11 +13,7 @@ import {
   buildDossierEnvoyeMatch,
   fetchCollaborationsByOrgId,
 } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
-import {
-  listerCfaPurges,
-  moisParis,
-  veilleDe,
-} from "@/common/actions/mission-locale/mission-locale-purges-stats.actions";
+import { listerCfaPurges, moisAvant } from "@/common/actions/mission-locale/mission-locale-purges-stats.actions";
 import {
   calculateStartDateAsync,
   calculatePreviousStartDate,
@@ -51,7 +47,7 @@ const countOrganismesWithCollaboration = async (organismeIds: ObjectId[], endExc
       "effectif_snapshot.organisme_id",
       buildDossierEnvoyeMatch(endExclusive, organismeIds, null)
     ),
-    listerCfaPurges({ organismeIds }, { jusqua: moisParis(veilleDe(endExclusive)) }),
+    listerCfaPurges({ organismeIds }, { jusqua: moisAvant(endExclusive) }),
   ]);
   return new Set([...vivants, ...purges].map(String)).size;
 };
