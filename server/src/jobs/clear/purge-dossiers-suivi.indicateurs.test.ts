@@ -328,6 +328,33 @@ describe("compteurs des indicateurs ML vivants à la purge des dossiers de suivi
     ).toBe(0);
   });
 
+  it("n'ajoute pas à l'admin un CFA jamais activé supprimé après la purge", async () => {
+    const cfaNonActive = new ObjectId();
+    await organismesDb().insertOne(organisme(cfaNonActive), { bypassDocumentValidation: true });
+    await inserer([
+      dossier({
+        organismeId: cfaNonActive,
+        situation: SITUATION_ENUM.RDV_PRIS,
+        collab: { envoi: "2025-04-10", reponse: "2026-02-01" },
+      }),
+    ]);
+    const lire = async () => {
+      const { national, regions } = await computeStatsForDate(addDaysUTC(normalizeToUTCDay(new Date()), 1));
+      const region = regions.find(({ region_code }) => region_code === REGION);
+      return {
+        usage: national.usage,
+        region: { dossiers_envoyes_cfa: region?.dossiers_envoyes_cfa, cfa_with_collab: region?.cfa_with_collab },
+      };
+    };
+    const avant = await lire();
+
+    await purgerDossiersSuivi({ maintenant });
+    await organismesDb().deleteOne({ _id: cfaNonActive });
+
+    expect(avant.usage).toMatchObject({ rupturants: 0, dossiers_envoyes_cfa: 0 });
+    expect(await lire()).toStrictEqual(avant);
+  });
+
   it("garde dans sa région un CFA supprimé après la purge", async () => {
     await inserer([
       dossier({
