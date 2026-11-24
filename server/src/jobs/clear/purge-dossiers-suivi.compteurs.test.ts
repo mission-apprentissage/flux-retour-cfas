@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
 import type { IMissionLocaleEffectif, IOrganisationMissionLocale } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import type { IMissionLocaleEffectifLog } from "shared/models/data/missionLocaleEffectifLog.model";
 import missionLocaleStatsPurgesDescriptor from "shared/models/data/missionLocaleStatsPurges.model";
 import type { IOrganisation } from "shared/models/data/organisations.model";
 import { normalizeToUTCDay } from "shared/utils/date";
@@ -18,6 +19,7 @@ import {
 import { getMissionLocaleStat } from "@/common/actions/mission-locale/mission-locale.actions";
 import {
   missionLocaleEffectifsDb,
+  missionLocaleEffectifsLogDb,
   missionLocaleEffectifsPurgesStatsDb,
   missionLocaleStatsDb,
   missionLocaleStatsPurgesDb,
@@ -31,7 +33,11 @@ import { purgerDossiersSuivi } from "./purge-dossiers-suivi";
 
 vi.mock("./compteurs-dossiers-ml", async (importOriginal) => {
   const original = await importOriginal<typeof import("./compteurs-dossiers-ml")>();
-  return { ...original, calculerContributions: vi.fn(original.calculerContributions) };
+  return {
+    ...original,
+    calculerContributions: vi.fn(original.calculerContributions),
+    ecrireContributions: vi.fn(original.ecrireContributions),
+  };
 });
 
 useMongo();
@@ -243,6 +249,26 @@ describe("compteurs des photos ML à la purge des dossiers de suivi", () => {
     expect(avant.parMl).toStrictEqual([{ total_jeunes: 2, pourcentage_traites: 50 }]);
     expect(avant.parRegion).toStrictEqual([{ total_jeunes: 2, pourcentage_traites: 50 }]);
     expect(await lire()).toStrictEqual(avant);
+  });
+
+  it("supprime les logs des dossiers supprimés quand l'écriture des compteurs échoue", async () => {
+    const traite = dossier({ situation: SITUATION_ENUM.RDV_PRIS });
+    await inserer([traite]);
+    await missionLocaleEffectifsLogDb().insertOne({
+      _id: new ObjectId(),
+      mission_locale_effectif_id: traite._id,
+      situation: SITUATION_ENUM.RDV_PRIS,
+      commentaires: "texte libre",
+      created_at: date("2025-04-01"),
+      created_by: null,
+      read_by: [],
+    } as IMissionLocaleEffectifLog);
+    vi.mocked(compteurs.ecrireContributions).mockRejectedValueOnce(new Error("wtimeout"));
+
+    await expect(purgerDossiersSuivi({ maintenant })).rejects.toThrow("wtimeout");
+
+    expect(await missionLocaleEffectifsDb().countDocuments({ _id: traite._id })).toBe(0);
+    expect(await missionLocaleEffectifsLogDb().countDocuments({ mission_locale_effectif_id: traite._id })).toBe(0);
   });
 
   it("garde les traités purgés dans l'admin ML, hors stock à traiter", async () => {
