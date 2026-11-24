@@ -82,6 +82,7 @@ describe("purgerDossiersSuivi()", () => {
       gardesAnneeActive: 0,
       liesSupprimes: 1,
       parAnnee: { "2023-2024": { inconnue: 1 } },
+      comptes: 1,
     });
     expect(await idsMl()).toStrictEqual([recent._id.toString()]);
     expect(
@@ -147,6 +148,7 @@ describe("purgerDossiersSuivi()", () => {
       gardesAnneeActive: 1,
       liesSupprimes: 0,
       parAnnee: {},
+      comptes: 0,
     });
     expect(await idsMl()).toStrictEqual([actif._id.toString()]);
   });
@@ -192,6 +194,7 @@ describe("purgerDossiersSuivi()", () => {
       gardesAnneeActive: 0,
       liesSupprimes: 1,
       parAnnee: { "2023-2024": { inconnue: 1 } },
+      comptes: 1,
     });
     expect(resultat.franceTravail.supprimes).toBe(1);
     expect(await idsMl()).toStrictEqual(ids([ancien, masqueAncien]));

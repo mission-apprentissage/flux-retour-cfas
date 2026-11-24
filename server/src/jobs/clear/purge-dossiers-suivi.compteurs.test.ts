@@ -1,0 +1,212 @@
+import { ObjectId } from "mongodb";
+import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
+import type { IMissionLocaleEffectif, IOrganisationMissionLocale } from "shared/models";
+import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
+import missionLocaleStatsPurgesDescriptor from "shared/models/data/missionLocaleStatsPurges.model";
+import type { IOrganisation } from "shared/models/data/organisations.model";
+import { normalizeToUTCDay } from "shared/utils/date";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { getMissionLocaleDetail } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
+import { getMissionLocaleFicheIndicateurs } from "@/common/actions/mission-locale/mission-locale-fiche.actions";
+import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
+import { getMissionLocaleStat } from "@/common/actions/mission-locale/mission-locale.actions";
+import {
+  missionLocaleEffectifsDb,
+  missionLocaleStatsDb,
+  missionLocaleStatsPurgesDb,
+  organisationsDb,
+} from "@/common/model/collections";
+import { createCollectionIndexes } from "@/common/model/indexes/createCollectionIndexes";
+import { useMongo } from "@tests/jest/setupMongo";
+
+import * as compteurs from "./compteurs-dossiers-ml";
+import { purgerDossiersSuivi } from "./purge-dossiers-suivi";
+
+vi.mock("./compteurs-dossiers-ml", async (importOriginal) => {
+  const original = await importOriginal<typeof import("./compteurs-dossiers-ml")>();
+  return { ...original, calculerContributions: vi.fn(original.calculerContributions) };
+});
+
+useMongo();
+
+const maintenant = new Date("2027-09-01T00:00:00Z");
+const date = (iso: string) => new Date(`${iso}T00:00:00Z`);
+
+const ML_ID = new ObjectId();
+const ML_ORGANISATION = {
+  _id: ML_ID,
+  type: "MISSION_LOCALE",
+  ml_id: 4242,
+  nom: "ML Test",
+  created_at: date("2025-01-01"),
+  activated_at: date("2025-03-01"),
+} as IOrganisationMissionLocale;
+
+type Options = {
+  rupture?: string;
+  anneeScolaire?: string;
+  situation?: SITUATION_ENUM | null;
+  softDeleted?: boolean;
+};
+
+const dossier = ({
+  rupture = "2025-03-01",
+  anneeScolaire = "2024-2025",
+  situation = null,
+  softDeleted = false,
+}: Options = {}) => ({
+  _id: new ObjectId(),
+  mission_locale_id: ML_ID,
+  effectif_id: new ObjectId(),
+  created_at: date(rupture),
+  date_rupture: date(rupture),
+  current_status: { value: STATUT_APPRENANT.RUPTURANT, date: date(rupture) },
+  situation,
+  ...(softDeleted ? { soft_deleted: true } : {}),
+  effectif_snapshot: {
+    _id: new ObjectId(),
+    organisme_id: new ObjectId(),
+    source: SOURCE_APPRENANT.ERP,
+    annee_scolaire: anneeScolaire,
+    apprenant: {
+      nom: "DOE",
+      prenom: "John",
+      date_de_naissance: new Date(new Date().setFullYear(new Date().getFullYear() - 20)),
+    },
+    formation: {},
+    _computed: { statut: { en_cours: STATUT_APPRENANT.RUPTURANT } },
+  },
+});
+
+const inserer = async (dossiers: ReturnType<typeof dossier>[]) => {
+  await missionLocaleEffectifsDb().insertMany(dossiers as unknown as IMissionLocaleEffectif[], {
+    bypassDocumentValidation: true,
+  });
+};
+
+const photoDuJour = async () => {
+  await createOrUpdateMissionLocaleStats(ML_ID);
+  const photo = await missionLocaleStatsDb().findOne({
+    mission_locale_id: ML_ID,
+    computed_day: normalizeToUTCDay(new Date()),
+  });
+  if (!photo?.segments) throw new Error("photo absente");
+  return { stats: photo.stats, segments: photo.segments };
+};
+
+const jeu = () => {
+  const vivant = dossier({ rupture: "2026-09-01", anneeScolaire: "2026-2027", situation: SITUATION_ENUM.RDV_PRIS });
+  const traite = dossier({ situation: SITUATION_ENUM.RDV_PRIS });
+  const jamaisTraite = dossier();
+  const aRecontacter = dossier({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR });
+  const masque = dossier({ softDeleted: true, situation: SITUATION_ENUM.RDV_PRIS });
+  return { vivant, traite, jamaisTraite, aRecontacter, masque };
+};
+
+describe("compteurs des photos ML à la purge des dossiers de suivi", () => {
+  beforeEach(async () => {
+    await organisationsDb().insertOne(ML_ORGANISATION as IOrganisation, { bypassDocumentValidation: true });
+    await createCollectionIndexes(missionLocaleStatsPurgesDescriptor);
+  });
+
+  it("garde les cumuls de la photo du jour et retire les purgés des stocks", async () => {
+    const { vivant, traite, jamaisTraite, aRecontacter, masque } = jeu();
+    await inserer([vivant, traite, jamaisTraite, aRecontacter, masque]);
+    const avant = await photoDuJour();
+
+    const resultat = await purgerDossiersSuivi({ maintenant });
+    const apres = await photoDuJour();
+
+    expect(resultat.missionLocale).toMatchObject({ supprimes: 4, comptes: 3 });
+    expect(await missionLocaleEffectifsDb().countDocuments()).toBe(1);
+    expect(avant.stats).toMatchObject({ total: 4, a_traiter: 1, traite: 3, contacte_sans_retour: 1 });
+    expect(apres.stats).toStrictEqual({ ...avant.stats, a_traiter: 0, contacte_sans_retour: 0 });
+    expect(apres.segments).toStrictEqual({
+      rupture: { ...avant.segments.rupture, a_traiter: 0, a_recontacter: 0 },
+      collab: avant.segments.collab,
+    });
+  });
+
+  it("garde dans les compteurs autant de dossiers que la photo en perd", async () => {
+    const { vivant, traite, jamaisTraite, aRecontacter } = jeu();
+    await inserer([vivant, traite, jamaisTraite, aRecontacter]);
+
+    const resultat = await purgerDossiersSuivi({ maintenant });
+
+    const purges = await missionLocaleStatsPurgesDb().findOne({ mission_locale_id: ML_ID });
+    expect(purges?.stats).toMatchObject({ total: 3, a_traiter: 1, traite: 2, rdv_pris: 1, contacte_sans_retour: 1 });
+    expect(purges?.segments.rupture).toMatchObject({ total: 3, a_recontacter: 1 });
+    expect(resultat.missionLocale.comptes).toBe(3);
+  });
+
+  it("additionne les purges successives", async () => {
+    await inserer([dossier({ situation: SITUATION_ENUM.RDV_PRIS })]);
+    await purgerDossiersSuivi({ maintenant });
+    await inserer([dossier({ situation: SITUATION_ENUM.RDV_PRIS })]);
+    await purgerDossiersSuivi({ maintenant });
+
+    const purges = await missionLocaleStatsPurgesDb().find({}).toArray();
+    expect(purges).toHaveLength(1);
+    expect(purges[0].stats).toMatchObject({ total: 2, traite: 2, rdv_pris: 2 });
+  });
+
+  it("n'écrit aucun compteur en simulation", async () => {
+    const { traite, jamaisTraite, masque } = jeu();
+    await inserer([traite, jamaisTraite, masque]);
+
+    const resultat = await purgerDossiersSuivi({ maintenant, dryRun: true });
+
+    expect(resultat.missionLocale).toMatchObject({ supprimes: 3, comptes: 2 });
+    expect(await missionLocaleStatsPurgesDb().countDocuments()).toBe(0);
+  });
+
+  it("lève l'alerte à recontacter quand les dossiers purgés la portaient", async () => {
+    await inserer(Array.from({ length: 31 }, () => dossier({ situation: SITUATION_ENUM.CONTACTE_SANS_RETOUR })));
+    await createOrUpdateMissionLocaleStats(ML_ID);
+    const avant = await getMissionLocaleFicheIndicateurs(ML_ID);
+
+    await purgerDossiersSuivi({ maintenant });
+    await createOrUpdateMissionLocaleStats(ML_ID);
+    const apres = await getMissionLocaleFicheIndicateurs(ML_ID);
+
+    expect(avant.alertes.map(({ type }) => type)).toContain("a_recontacter");
+    expect(apres.alertes.map(({ type }) => type)).not.toContain("a_recontacter");
+    expect(apres.taux_traitement).toBe(100);
+  });
+
+  it("retranche un dossier modifié entre le calcul et la suppression", async () => {
+    const reste = dossier({ situation: SITUATION_ENUM.RDV_PRIS });
+    const part = dossier({ situation: SITUATION_ENUM.RDV_PRIS });
+    await inserer([reste, part]);
+    const original = await vi.importActual<typeof import("./compteurs-dossiers-ml")>("./compteurs-dossiers-ml");
+    vi.mocked(compteurs.calculerContributions).mockImplementationOnce(async (dossiers) => {
+      const contributions = await original.calculerContributions(dossiers);
+      await missionLocaleEffectifsDb().updateOne(
+        { _id: reste._id },
+        { $set: { date_rupture: date("2026-06-01") } },
+        { bypassDocumentValidation: true }
+      );
+      return contributions;
+    });
+
+    const resultat = await purgerDossiersSuivi({ maintenant });
+
+    expect(resultat.missionLocale).toMatchObject({ supprimes: 1, comptes: 1 });
+    expect(await missionLocaleEffectifsDb().countDocuments({ _id: reste._id })).toBe(1);
+    const purges = await missionLocaleStatsPurgesDb().findOne({ mission_locale_id: ML_ID });
+    expect(purges?.stats).toMatchObject({ total: 1, traite: 1, rdv_pris: 1 });
+  });
+
+  it("garde les traités purgés dans l'admin ML, hors stock à traiter", async () => {
+    const { vivant, traite, jamaisTraite } = jeu();
+    await inserer([vivant, traite, jamaisTraite]);
+    const avant = await getMissionLocaleStat(ML_ORGANISATION);
+
+    await purgerDossiersSuivi({ maintenant });
+
+    expect(avant).toMatchObject({ total: 3, a_traiter: 1, traite: 2, rdv_pris: 2 });
+    expect(await getMissionLocaleStat(ML_ORGANISATION)).toStrictEqual({ ...avant, a_traiter: 0 });
+    expect((await getMissionLocaleDetail(ML_ID)).traites_count).toBe(2);
+  });
+});

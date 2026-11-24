@@ -189,6 +189,18 @@ program
   .action(createJobAction("hydrate:daily"));
 
 program
+  .command("hydrate:daily-mission-locale-stats")
+  .description(
+    "Crée les photos ML quotidiennes absentes depuis le premier dossier, sans réécrire les photos existantes"
+  )
+  .option(
+    "--champs <champs...>",
+    "Pose aussi ces champs sur les photos existantes, par exemple stats.traite ou segments.collab.total"
+  )
+  .option("-q, --queued", "Run job asynchronously", false)
+  .action(createJobAction("hydrate:daily-mission-locale-stats"));
+
+program
   .command("db:validate")
   .description("Validate Documents")
   .option("-q, --queued", "Run job asynchronously", false)

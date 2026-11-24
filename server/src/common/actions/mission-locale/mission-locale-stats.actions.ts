@@ -3,7 +3,13 @@ import { ACTIVATION_RATTRAPAGE_DATE } from "shared/constants/missionLocale";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import { IOrganisationMissionLocale } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
-import type { ICollabSegmentStats } from "shared/models/data/missionLocaleStats.model";
+import {
+  type ICollabSegmentStats,
+  type IMissionLocaleStats,
+  type IMissionLocaleStatsSegments,
+  zMissionLocaleStatsCompteurs,
+} from "shared/models/data/missionLocaleStats.model";
+import type { IMissionLocaleStatsPurges } from "shared/models/data/missionLocaleStatsPurges.model";
 import {
   ICollabSegmentExportRow,
   ICollaborationMensuelStats,
@@ -29,6 +35,7 @@ import { getBornesNaissanceMissionLocale } from "shared/utils/missionLocaleAge";
 import {
   missionLocaleEffectifsDb,
   missionLocaleStatsDb,
+  missionLocaleStatsPurgesDb,
   organisationsDb,
   organismesDb,
 } from "@/common/model/collections";
@@ -39,6 +46,7 @@ import { getOrganisationById } from "../organisations.actions";
 import {
   buildCumulativeStatsPipeline,
   buildDelaiMoyenExpr,
+  buildEmptySegments,
   buildLatestPerMlStages,
   buildLatestStatsMatch,
   buildOrgLookupPipeline,
@@ -64,11 +72,52 @@ import {
 } from "./mission-locale-stats.helpers";
 import { computeMissionLocaleStats } from "./mission-locale.actions";
 
+type MissionLocalePhoto = { stats: IMissionLocaleStats["stats"]; segments: IMissionLocaleStatsSegments };
+type MissionLocalePhotoPurges = Pick<IMissionLocaleStatsPurges, "stats" | "segments">;
+
+const PHOTO_STOCK_KEYS = new Set([
+  "a_traiter",
+  "contacte_sans_retour",
+  "mineur_a_traiter",
+  "mineur_contacte_sans_retour",
+  "rqth_a_traiter",
+  "rqth_contacte_sans_retour",
+]);
+const SEGMENT_STOCK_KEYS = new Set(["a_traiter", "a_recontacter"]);
+
+const addCounters = <T extends Record<string, number>>(
+  live: T,
+  purged: Partial<Record<keyof T, number>> | undefined,
+  stockKeys: Set<string>
+): T =>
+  Object.fromEntries(
+    Object.entries(live).map(([key, value]) => [key, stockKeys.has(key) ? value : value + (purged?.[key] ?? 0)])
+  ) as T;
+
+const addPurgedToMissionLocaleStats = (
+  live: MissionLocalePhoto,
+  purged: MissionLocalePhotoPurges | null
+): MissionLocalePhoto => ({
+  stats: addCounters(live.stats, purged?.stats, PHOTO_STOCK_KEYS),
+  segments: {
+    rupture: addCounters(live.segments.rupture, purged?.segments.rupture, SEGMENT_STOCK_KEYS),
+    collab: addCounters(live.segments.collab, purged?.segments.collab, SEGMENT_STOCK_KEYS),
+  },
+});
+
+const computeMissionLocalePhoto = async (missionLocaleId: ObjectId, day: Date) => {
+  const ml = (await getOrganisationById(missionLocaleId)) as IOrganisationMissionLocale;
+  const [live, purged] = await Promise.all([
+    computeMissionLocaleStats(ml, day),
+    missionLocaleStatsPurgesDb().findOne({ mission_locale_id: ml._id }),
+  ]);
+  return { ml, ...addPurgedToMissionLocaleStats(live, purged) };
+};
+
 export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId, date?: Date) => {
   const dateToUse = normalizeToUTCDay(date ?? new Date());
 
-  const ml = (await getOrganisationById(missionLocaleId)) as IOrganisationMissionLocale;
-  const { stats, segments } = await computeMissionLocaleStats(ml, dateToUse);
+  const { ml, stats, segments } = await computeMissionLocalePhoto(missionLocaleId, dateToUse);
 
   await missionLocaleStatsDb().findOneAndUpdate(
     {
@@ -92,6 +141,57 @@ export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId
       upsert: true,
     }
   );
+};
+
+export const createMissionLocaleStatsIfMissing = async (missionLocaleId: ObjectId, date: Date) => {
+  const dateToUse = normalizeToUTCDay(date);
+  const { ml, stats, segments } = await computeMissionLocalePhoto(missionLocaleId, dateToUse);
+  const now = new Date();
+
+  const { upsertedCount } = await missionLocaleStatsDb().updateOne(
+    { mission_locale_id: ml._id, computed_day: dateToUse },
+    { $setOnInsert: { _id: new ObjectId(), stats, segments, created_at: now, updated_at: now } },
+    { upsert: true }
+  );
+  return upsertedCount > 0;
+};
+
+const readPath = (source: unknown, path: string): unknown =>
+  path
+    .split(".")
+    .reduce<unknown>(
+      (value, key) =>
+        value !== null && typeof value === "object" && Object.hasOwn(value, key)
+          ? (value as Record<string, unknown>)[key]
+          : undefined,
+      source
+    );
+
+export const assertMissionLocaleStatsFields = (fields: string[]) => {
+  const emptyPhoto: MissionLocalePhoto = {
+    stats: zMissionLocaleStatsCompteurs.parse({}),
+    segments: buildEmptySegments(),
+  };
+  const unknownFields = fields.filter((field) => readPath(emptyPhoto, field) === undefined);
+  if (unknownFields.length > 0) {
+    throw new Error(`Champs de photo ML inconnus : ${unknownFields.join(", ")}`);
+  }
+};
+
+export const setMissionLocaleStatsFields = async (missionLocaleId: ObjectId, date: Date, fields: string[]) => {
+  const dateToUse = normalizeToUTCDay(date);
+  const photo = await computeMissionLocalePhoto(missionLocaleId, dateToUse);
+
+  const { modifiedCount } = await missionLocaleStatsDb().updateOne(
+    { mission_locale_id: photo.ml._id, computed_day: dateToUse },
+    {
+      $set: {
+        ...Object.fromEntries(fields.map((field) => [field, readPath(photo, field)])),
+        updated_at: new Date(),
+      },
+    }
+  );
+  return modifiedCount > 0;
 };
 
 export const getSummaryStats = async (evaluationDate: Date, period: StatsPeriod = "all") => {

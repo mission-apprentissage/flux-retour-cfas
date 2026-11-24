@@ -6,6 +6,7 @@ import { CONNAISSANCE_ML_ENUM } from "shared/models/data/missionLocaleEffectif.m
 import {
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogDb,
+  missionLocaleStatsPurgesDb,
   organisationsDb,
   usersMigrationDb,
 } from "@/common/model/collections";
@@ -447,13 +448,15 @@ export const getMissionLocaleDetail = async (missionLocaleId: ObjectId): Promise
     "organisme_data.acc_conjoint": true,
   });
 
-  const traitesCount = mlEffectifs.filter((e) => e.situation != null).length;
+  const purged = await missionLocaleStatsPurgesDb().findOne({ mission_locale_id: missionLocaleId });
+
+  const traitesCount = mlEffectifs.filter((e) => e.situation != null).length + (purged?.stats.traite ?? 0);
 
   return {
     ml,
     activated_at: ml.activated_at || null,
     is_active: !!ml.activated_at,
-    has_cfa_collaboration: hasCfaCollaboration > 0,
+    has_cfa_collaboration: hasCfaCollaboration > 0 || (purged?.segments.collab.total ?? 0) > 0,
     traites_count: traitesCount,
   };
 };

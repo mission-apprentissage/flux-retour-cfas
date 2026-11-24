@@ -8,7 +8,12 @@ import { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif
 import { activateMissionLocale } from "@/common/actions/admin/mission-locale/mission-locale.admin.actions";
 import { updateEffectifStatut } from "@/common/actions/effectifs.statut.actions";
 import { getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
-import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
+import {
+  assertMissionLocaleStatsFields,
+  createMissionLocaleStatsIfMissing,
+  createOrUpdateMissionLocaleStats,
+  setMissionLocaleStatsFields,
+} from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import { listUtcDays } from "@/common/actions/mission-locale/mission-locale-stats.helpers";
 import {
   checkMissionLocaleEffectifDoublon,
@@ -23,7 +28,13 @@ import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.ac
 import { getCurrentStatutFromParcours } from "@/common/actions/shared/rupture-pipeline.utils";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
-import { effectifsDb, effectifsQueueDb, missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
+import {
+  effectifsDb,
+  effectifsQueueDb,
+  missionLocaleEffectifsDb,
+  missionLocaleStatsDb,
+  organisationsDb,
+} from "@/common/model/collections";
 import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import { normalisePersonIdentifiant } from "@/common/utils/identifiantUtils";
 
@@ -915,7 +926,8 @@ const runWithConcurrency = async <T>(items: T[], concurrency: number, task: (ite
   await Promise.all(workers);
 };
 
-export const hydrateDailyMissionLocaleStats = async () => {
+export const hydrateDailyMissionLocaleStats = async ({ champs = [] }: { champs?: string[] } = {}) => {
+  assertMissionLocaleStatsFields(champs);
   const mls = (await organisationsDb().find({ type: "MISSION_LOCALE" }).toArray()) as Array<IOrganisationMissionLocale>;
 
   const firstDate = await missionLocaleEffectifsDb().findOne({}, { sort: { created_at: 1 } });
@@ -927,11 +939,21 @@ export const hydrateDailyMissionLocaleStats = async () => {
   const allDates = listUtcDays(firstDate.created_at, new Date());
   let errors = 0;
   let firstError: unknown;
+  let created = 0;
+  let completed = 0;
 
   for (const date of allDates) {
+    const existing = new Set(
+      (await missionLocaleStatsDb().distinct("mission_locale_id", { computed_day: date })).map((id) => id.toString())
+    );
     await runWithConcurrency(mls, DAILY_STATS_CONCURRENCY, async (ml) => {
+      const missionLocaleId = new ObjectId(ml._id);
       try {
-        await createOrUpdateMissionLocaleStats(new ObjectId(ml._id), date);
+        if (!existing.has(missionLocaleId.toString())) {
+          if (await createMissionLocaleStatsIfMissing(missionLocaleId, date)) created++;
+        } else if (champs.length > 0) {
+          if (await setMissionLocaleStatsFields(missionLocaleId, date, champs)) completed++;
+        }
       } catch (err) {
         errors++;
         firstError ??= err;
@@ -941,7 +963,7 @@ export const hydrateDailyMissionLocaleStats = async () => {
   }
 
   logger.info(
-    { days: allDates.length, missionLocales: mls.length, errors },
+    { days: allDates.length, missionLocales: mls.length, created, completed, champs, errors },
     "daily mission locale stats backfill finished"
   );
 
