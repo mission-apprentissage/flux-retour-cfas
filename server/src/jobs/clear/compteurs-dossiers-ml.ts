@@ -28,7 +28,7 @@ import {
   usersMigrationDb,
 } from "@/common/model/collections";
 
-export type DossierMlACompter = { _id: ObjectId; mission_locale_id: ObjectId };
+export type DossierMlACompter = { _id: ObjectId; mission_locale_id: ObjectId; soft_deleted?: boolean | null };
 
 type Increments = Record<string, number>;
 
@@ -61,6 +61,7 @@ const egal = (champ: string | Document, valeur: unknown) => ({ $eq: [champ, vale
 const taille = (champ: string) => ({ $size: { $ifNull: [champ, []] } });
 
 const SITUATION_RENSEIGNEE = { $ne: [{ $ifNull: ["$situation", null] }, null] };
+const NON_MASQUE = { $ne: ["$soft_deleted", true] };
 
 const COLLAB_ENVOYE = (maintenant: Date) => ({
   $and: [
@@ -122,7 +123,7 @@ const compteursCollab = () => ({
 
 const RAPPEL = egal("$whatsapp_callback_requested", true);
 const rappelEn = (situations: SITUATION_ENUM[]) => un({ $and: [RAPPEL, situationIn(situations)] });
-const PREQUALIF = egal("$whatsapp_contact.template_type", "prequalif");
+const PREQUALIF = { $and: [egal("$whatsapp_contact.template_type", "prequalif"), NON_MASQUE] };
 const prequalif = (condition: Document) => un({ $and: [PREQUALIF, condition] });
 const LIEN_RDV = { $ne: [{ $type: "$whatsapp_contact.rdv_redirect_token" }, "missing"] };
 const SITUATIONS_RAPPEL_CLASSEES = [
@@ -172,7 +173,7 @@ type ContributionDossier = {
   organisme_id: ObjectId | null;
   region: string | null;
   departement: string | null;
-  suivi: { mois: string; compteurs: Increments };
+  suivi: { mois: string; compteurs: Increments } | null;
   collab: { mois: string; compteurs: Increments } | null;
   whatsapp: { mois: string; compteurs: Increments } | null;
 };
@@ -182,7 +183,7 @@ const calculerLignes = async (missionLocaleId: ObjectId, ids: ObjectId[], mainte
   const collabEnvoye = COLLAB_ENVOYE(maintenant);
   const contributions = await missionLocaleEffectifsDb()
     .aggregate<ContributionDossier>([
-      { $match: { _id: { $in: ids }, soft_deleted: { $ne: true } } },
+      { $match: { _id: { $in: ids } } },
       {
         $lookup: {
           from: "missionLocaleEffectifLog",
@@ -220,12 +221,18 @@ const calculerLignes = async (missionLocaleId: ObjectId, ids: ObjectId[], mainte
             ],
           },
           suivi: {
-            mois: moisParis("$created_at"),
-            compteurs: { dossiers: UN, v2_dossiers: un({ $gte: ["$created_at", COLLABORATION_CUTOFF_DATE] }) },
+            $cond: [
+              NON_MASQUE,
+              {
+                mois: moisParis("$created_at"),
+                compteurs: { dossiers: UN, v2_dossiers: un({ $gte: ["$created_at", COLLABORATION_CUTOFF_DATE] }) },
+              },
+              null,
+            ],
           },
           collab: {
             $cond: [
-              collabEnvoye,
+              { $and: [NON_MASQUE, collabEnvoye] },
               { mois: moisParis("$organisme_data.acc_conjoint_at"), compteurs: compteursCollab() },
               null,
             ],
@@ -249,7 +256,8 @@ const calculerLignes = async (missionLocaleId: ObjectId, ids: ObjectId[], mainte
       region: contribution.region,
       departement: contribution.departement,
     };
-    const lignes: Ligne[] = [{ ...dimensions, type: "suivi", ...contribution.suivi }];
+    const lignes: Ligne[] = [];
+    if (contribution.suivi) lignes.push({ ...dimensions, type: "suivi", ...contribution.suivi });
     if (contribution.collab) lignes.push({ ...dimensions, type: "collab", ...contribution.collab });
     if (contribution.whatsapp) lignes.push({ ...dimensions, type: "whatsapp", ...contribution.whatsapp });
     return [contribution._id.toString(), lignes];
@@ -281,7 +289,7 @@ const grouperParMl = (dossiers: DossierMlACompter[]) => {
 
 const calculerPhotos = async (dossiers: DossierMlACompter[]): Promise<ContributionsLot["photos"]> => {
   const photos: ContributionsLot["photos"] = new Map();
-  for (const [cle, { missionLocaleId, ids }] of grouperParMl(dossiers)) {
+  for (const [cle, { missionLocaleId, ids }] of grouperParMl(dossiers.filter(({ soft_deleted }) => !soft_deleted))) {
     const organisation = await organisationsDb().findOne({ _id: missionLocaleId, type: "MISSION_LOCALE" });
     if (!organisation) {
       logger.warn(
@@ -342,7 +350,8 @@ const sommerLignes = (lignes: Ligne[]) => {
   return [...sommes.values()];
 };
 
-export const nombreDeDossiersComptes = (contributions: ContributionsLot) => contributions.lignes.size;
+export const nombreDeDossiersComptes = (contributions: ContributionsLot) =>
+  [...contributions.lignes.values()].filter((lignes) => lignes.some(({ type }) => type === "suivi")).length;
 
 export const ecrireContributions = async (
   contributions: ContributionsLot,

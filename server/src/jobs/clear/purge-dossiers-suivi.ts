@@ -79,9 +79,7 @@ const LOGS_ML: Lies = {
 };
 
 const aCompter = (dossiers: DossierSuivi[]): DossierMlACompter[] =>
-  dossiers.filter(
-    (dossier): dossier is DossierMlACompter & DossierSuivi => !dossier.soft_deleted && !!dossier.mission_locale_id
-  );
+  dossiers.filter((dossier): dossier is DossierMlACompter & DossierSuivi => !!dossier.mission_locale_id);
 
 const purgerParLots = async (
   collection: Collection<DossierSuivi>,
