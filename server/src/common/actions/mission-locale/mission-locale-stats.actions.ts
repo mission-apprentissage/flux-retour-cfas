@@ -171,7 +171,7 @@ const readPath = (source: unknown, path: string): unknown =>
       source
     );
 
-export const assertMissionLocaleStatsFields = (fields: string[]) => {
+export const assertMissionLocaleStatsFields = (fields: string[], { borne = false }: { borne?: boolean } = {}) => {
   const emptyPhoto: MissionLocalePhoto = {
     stats: zMissionLocaleStatsCompteurs.parse({}),
     segments: buildEmptySegments(),
@@ -180,20 +180,26 @@ export const assertMissionLocaleStatsFields = (fields: string[]) => {
   if (unknownFields.length > 0) {
     throw new Error(`Champs de photo ML inconnus : ${unknownFields.join(", ")}`);
   }
+  const overlappingFields = fields.filter((field, index) =>
+    fields.some((other, otherIndex) => otherIndex !== index && (other === field || field.startsWith(`${other}.`)))
+  );
+  if (overlappingFields.length > 0) {
+    throw new Error(`Champs de photo ML qui se recouvrent : ${overlappingFields.join(", ")}`);
+  }
+  const groupFields = fields.filter((field) => typeof readPath(emptyPhoto, field) !== "number");
+  if (groupFields.length > 0 && !borne) {
+    throw new Error(`Champs de photo ML à borner par une date de début : ${groupFields.join(", ")}`);
+  }
 };
 
 export const setMissionLocaleStatsFields = async (missionLocaleId: ObjectId, date: Date, fields: string[]) => {
   const dateToUse = normalizeToUTCDay(date);
   const photo = await computeMissionLocalePhoto(missionLocaleId, dateToUse);
+  const values = Object.fromEntries(fields.map((field) => [field, readPath(photo, field)]));
 
   const { modifiedCount } = await missionLocaleStatsDb().updateOne(
-    { mission_locale_id: photo.ml._id, computed_day: dateToUse },
-    {
-      $set: {
-        ...Object.fromEntries(fields.map((field) => [field, readPath(photo, field)])),
-        updated_at: new Date(),
-      },
-    }
+    { mission_locale_id: photo.ml._id, computed_day: dateToUse, $nor: [values] },
+    { $set: { ...values, updated_at: new Date() } }
   );
   return modifiedCount > 0;
 };

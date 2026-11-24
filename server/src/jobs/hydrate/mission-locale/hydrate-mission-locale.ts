@@ -926,17 +926,30 @@ const runWithConcurrency = async <T>(items: T[], concurrency: number, task: (ite
   await Promise.all(workers);
 };
 
-export const hydrateDailyMissionLocaleStats = async ({ champs = [] }: { champs?: string[] } = {}) => {
-  assertMissionLocaleStatsFields(champs);
+export const hydrateDailyMissionLocaleStats = async ({
+  champs = [],
+  depuis,
+  jusqua,
+}: { champs?: string[]; depuis?: Date; jusqua?: Date } = {}) => {
+  const datesInvalides = [depuis, jusqua].filter((date) => date && Number.isNaN(date.getTime()));
+  if (datesInvalides.length > 0) {
+    throw new Error("Dates de début ou de fin invalides");
+  }
+  assertMissionLocaleStatsFields(champs, { borne: !!depuis });
   const mls = (await organisationsDb().find({ type: "MISSION_LOCALE" }).toArray()) as Array<IOrganisationMissionLocale>;
 
-  const firstDate = await missionLocaleEffectifsDb().findOne({}, { sort: { created_at: 1 } });
+  const [firstDossier, firstPhoto] = await Promise.all([
+    missionLocaleEffectifsDb().findOne({}, { sort: { created_at: 1 }, projection: { created_at: 1 } }),
+    missionLocaleStatsDb().findOne({}, { sort: { computed_day: 1 }, projection: { computed_day: 1 } }),
+  ]);
+  const debuts = [firstDossier?.created_at, firstPhoto?.computed_day].filter((date): date is Date => !!date);
+  const debut = depuis ?? (debuts.length > 0 ? new Date(Math.min(...debuts.map((date) => date.getTime()))) : null);
 
-  if (!firstDate) {
+  if (!debut) {
     return;
   }
 
-  const allDates = listUtcDays(firstDate.created_at, new Date());
+  const allDates = listUtcDays(debut, jusqua ?? new Date());
   let errors = 0;
   let firstError: unknown;
   let created = 0;
@@ -963,7 +976,7 @@ export const hydrateDailyMissionLocaleStats = async ({ champs = [] }: { champs?:
   }
 
   logger.info(
-    { days: allDates.length, missionLocales: mls.length, created, completed, champs, errors },
+    { days: allDates.length, missionLocales: mls.length, created, completed, champs, depuis, jusqua, errors },
     "daily mission locale stats backfill finished"
   );
 
