@@ -128,6 +128,9 @@ const purgerParLots = async (
       const restants = await collection.find({ _id: { $in: ids } }, { projection: { _id: 1 } }).toArray();
       const idsRestants = new Set(restants.map(({ _id }) => _id.toString()));
       supprimes = aSupprimer.filter(({ _id }) => !idsRestants.has(_id.toString()));
+      if (lies && supprimes.length > 0) {
+        resultat.liesSupprimes += await lies.supprimer(supprimes.map(({ _id }) => _id));
+      }
       if (contributions) {
         const comptablesRestants = comptables.filter(({ _id }) => idsRestants.has(_id.toString()));
         if (comptablesRestants.length > 0) {
@@ -148,10 +151,7 @@ const purgerParLots = async (
       throw error;
     }
     compterSupprimes(supprimes);
-    if (supprimes.length > 0) {
-      resultat.liesSupprimes += lies ? await lies.supprimer(supprimes.map(({ _id }) => _id)) : 0;
-      await sleep(PAUSE_MS);
-    }
+    if (supprimes.length > 0) await sleep(PAUSE_MS);
   };
 
   const curseur = collection.find(filtre, {
