@@ -34,7 +34,7 @@ import { migrateAutreSituations } from "../migration/migrate-autre-situations";
 import { migrateCommuneApprenant } from "../migration/migrate-commune-apprenant";
 import { seedMlRdvUrl } from "../tmp/seed-ml-rdv-url";
 
-import { payloadBoolean, payloadDate } from "./payload";
+import { payloadBoolean, payloadDate, payloadStringArray } from "./payload";
 
 export const missionLocaleJobs = {
   "purge:ml-dossiers-masques": {
@@ -158,8 +158,8 @@ export const missionLocaleJobs = {
     },
   },
   "hydrate:daily-mission-locale-stats": {
-    handler: async () => {
-      return hydrateDailyMissionLocaleStats();
+    handler: async (job) => {
+      return hydrateDailyMissionLocaleStats({ champs: payloadStringArray(job.payload, "champs") });
     },
   },
   "tmp:migrate:autre-situations": {

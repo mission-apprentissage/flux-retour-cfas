@@ -18464,6 +18464,347 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
 }
 `;
 
+exports[`validation-schema > should create validation schema for missionLocaleStatsPurges > missionLocaleStatsPurges 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "mission_locale_id": {
+      "bsonType": "objectId",
+      "description": "Mission locale des dossiers supprimés",
+    },
+    "segments": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "description": "Contribution des dossiers supprimés aux segments des photos",
+      "properties": {
+        "collab": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "a_recontacter": {
+              "bsonType": "int",
+            },
+            "a_traiter": {
+              "bsonType": "int",
+            },
+            "autre": {
+              "bsonType": "int",
+            },
+            "autre_avec_contact": {
+              "bsonType": "int",
+            },
+            "deja_connu_accompagne": {
+              "bsonType": "int",
+            },
+            "delai_premiere_activite_count": {
+              "bsonType": "int",
+            },
+            "delai_premiere_activite_jours_total": {
+              "bsonType": "int",
+            },
+            "injoignable": {
+              "bsonType": "int",
+            },
+            "ne_souhaite_pas_accompagnement": {
+              "bsonType": "int",
+            },
+            "projet_pro_securise": {
+              "bsonType": "int",
+            },
+            "rdv_pris": {
+              "bsonType": "int",
+            },
+            "rdv_pris_decouverts": {
+              "bsonType": "int",
+            },
+            "repondu": {
+              "bsonType": "int",
+            },
+            "situation_abandon": {
+              "bsonType": "int",
+            },
+            "situation_besoin_aide_hors_rupture": {
+              "bsonType": "int",
+            },
+            "situation_prevention_inevitable": {
+              "bsonType": "int",
+            },
+            "situation_prevention_modere": {
+              "bsonType": "int",
+            },
+            "situation_prevention_tres_eleve": {
+              "bsonType": "int",
+            },
+            "situation_rupture": {
+              "bsonType": "int",
+            },
+            "total": {
+              "bsonType": "int",
+            },
+            "traite": {
+              "bsonType": "int",
+            },
+          },
+          "required": [
+            "total",
+            "a_traiter",
+            "traite",
+            "repondu",
+            "rdv_pris",
+            "rdv_pris_decouverts",
+            "projet_pro_securise",
+            "ne_souhaite_pas_accompagnement",
+            "a_recontacter",
+            "injoignable",
+            "autre",
+            "autre_avec_contact",
+            "deja_connu_accompagne",
+            "situation_rupture",
+            "situation_abandon",
+            "situation_prevention_inevitable",
+            "situation_prevention_tres_eleve",
+            "situation_prevention_modere",
+            "situation_besoin_aide_hors_rupture",
+            "delai_premiere_activite_jours_total",
+            "delai_premiere_activite_count",
+          ],
+        },
+        "rupture": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "a_recontacter": {
+              "bsonType": "int",
+            },
+            "a_traiter": {
+              "bsonType": "int",
+            },
+            "autre": {
+              "bsonType": "int",
+            },
+            "autre_avec_contact": {
+              "bsonType": "int",
+            },
+            "deja_connu_accompagne": {
+              "bsonType": "int",
+            },
+            "injoignable": {
+              "bsonType": "int",
+            },
+            "ne_souhaite_pas_accompagnement": {
+              "bsonType": "int",
+            },
+            "projet_pro_securise": {
+              "bsonType": "int",
+            },
+            "rdv_pris": {
+              "bsonType": "int",
+            },
+            "rdv_pris_decouverts": {
+              "bsonType": "int",
+            },
+            "repondu": {
+              "bsonType": "int",
+            },
+            "total": {
+              "bsonType": "int",
+            },
+            "traite": {
+              "bsonType": "int",
+            },
+          },
+          "required": [
+            "total",
+            "a_traiter",
+            "traite",
+            "repondu",
+            "rdv_pris",
+            "rdv_pris_decouverts",
+            "projet_pro_securise",
+            "ne_souhaite_pas_accompagnement",
+            "a_recontacter",
+            "injoignable",
+            "autre",
+            "autre_avec_contact",
+            "deja_connu_accompagne",
+          ],
+        },
+      },
+      "required": [
+        "rupture",
+        "collab",
+      ],
+    },
+    "stats": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "description": "Contribution des dossiers supprimés aux photos de la mission locale",
+      "properties": {
+        "a_traiter": {
+          "bsonType": "int",
+        },
+        "abandon": {
+          "bsonType": "int",
+        },
+        "autre": {
+          "bsonType": "int",
+        },
+        "autre_avec_contact": {
+          "bsonType": "int",
+        },
+        "cherche_contrat": {
+          "bsonType": "int",
+        },
+        "contacte_sans_retour": {
+          "bsonType": "int",
+        },
+        "coordonnees_incorrectes": {
+          "bsonType": "int",
+        },
+        "deja_accompagne": {
+          "bsonType": "int",
+        },
+        "deja_connu": {
+          "bsonType": "int",
+        },
+        "injoignables": {
+          "bsonType": "int",
+        },
+        "mineur": {
+          "bsonType": "int",
+        },
+        "mineur_a_traiter": {
+          "bsonType": "int",
+        },
+        "mineur_autre": {
+          "bsonType": "int",
+        },
+        "mineur_autre_avec_contact": {
+          "bsonType": "int",
+        },
+        "mineur_cherche_contrat": {
+          "bsonType": "int",
+        },
+        "mineur_contacte_sans_retour": {
+          "bsonType": "int",
+        },
+        "mineur_coordonnees_incorrectes": {
+          "bsonType": "int",
+        },
+        "mineur_deja_accompagne": {
+          "bsonType": "int",
+        },
+        "mineur_injoignables": {
+          "bsonType": "int",
+        },
+        "mineur_ne_souhaite_pas_etre_recontacte": {
+          "bsonType": "int",
+        },
+        "mineur_ne_veut_pas_accompagnement": {
+          "bsonType": "int",
+        },
+        "mineur_nouveau_projet": {
+          "bsonType": "int",
+        },
+        "mineur_rdv_pris": {
+          "bsonType": "int",
+        },
+        "mineur_reorientation": {
+          "bsonType": "int",
+        },
+        "mineur_traite": {
+          "bsonType": "int",
+        },
+        "ne_souhaite_pas_etre_recontacte": {
+          "bsonType": "int",
+        },
+        "ne_veut_pas_accompagnement": {
+          "bsonType": "int",
+        },
+        "nouveau_projet": {
+          "bsonType": "int",
+        },
+        "rdv_pris": {
+          "bsonType": "int",
+        },
+        "rdv_pris_decouverts": {
+          "bsonType": "int",
+        },
+        "reorientation": {
+          "bsonType": "int",
+        },
+        "rqth": {
+          "bsonType": "int",
+        },
+        "rqth_a_traiter": {
+          "bsonType": "int",
+        },
+        "rqth_autre": {
+          "bsonType": "int",
+        },
+        "rqth_autre_avec_contact": {
+          "bsonType": "int",
+        },
+        "rqth_cherche_contrat": {
+          "bsonType": "int",
+        },
+        "rqth_contacte_sans_retour": {
+          "bsonType": "int",
+        },
+        "rqth_coordonnees_incorrectes": {
+          "bsonType": "int",
+        },
+        "rqth_deja_accompagne": {
+          "bsonType": "int",
+        },
+        "rqth_injoignables": {
+          "bsonType": "int",
+        },
+        "rqth_ne_souhaite_pas_etre_recontacte": {
+          "bsonType": "int",
+        },
+        "rqth_ne_veut_pas_accompagnement": {
+          "bsonType": "int",
+        },
+        "rqth_nouveau_projet": {
+          "bsonType": "int",
+        },
+        "rqth_rdv_pris": {
+          "bsonType": "int",
+        },
+        "rqth_reorientation": {
+          "bsonType": "int",
+        },
+        "rqth_traite": {
+          "bsonType": "int",
+        },
+        "total": {
+          "bsonType": "int",
+        },
+        "traite": {
+          "bsonType": "int",
+        },
+      },
+    },
+    "updated_at": {
+      "bsonType": "date",
+      "description": "Date du dernier ajout",
+    },
+  },
+  "required": [
+    "_id",
+    "mission_locale_id",
+    "stats",
+    "segments",
+    "updated_at",
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for opcoRncp > opcoRncp 1`] = `
 {
   "additionalProperties": false,

@@ -34,6 +34,7 @@ import {
   effectifsDb,
   missionLocaleEffectifsDb,
   missionLocaleEffectifsLogDb,
+  missionLocaleStatsPurgesDb,
   organisationsDb,
   organismesDb,
   usersMigrationDb,
@@ -2389,7 +2390,8 @@ export const DELAI_PREMIERE_ACTIVITE_EXPR = {
 
 export const computeMissionLocaleStats = async (
   organisation: IOrganisationMissionLocale,
-  endDate: Date = new Date()
+  endDate: Date = new Date(),
+  ids?: ObjectId[]
 ): Promise<{ stats: IMissionLocaleStats["stats"]; segments: IMissionLocaleStatsSegments }> => {
   const mineurCondition = {
     $gte: [
@@ -2425,6 +2427,7 @@ export const computeMissionLocaleStats = async (
   const collabWith = (condition: Document) => countIf({ $and: [isCollabCondition, condition] });
 
   const effectifsMissionLocaleAggregation = [
+    ...(ids ? [{ $match: { _id: { $in: ids } } }] : []),
     ...(endDate
       ? [
           {
@@ -3556,6 +3559,21 @@ function scoreEffectifInBackground(missionLocaleEffectifId: ObjectId, effectif: 
     });
 }
 
+const PURGED_STAT_KEYS = new Set([
+  "total",
+  "traite",
+  "rdv_pris",
+  "nouveau_projet",
+  "deja_accompagne",
+  "injoignables",
+  "coordonnees_incorrectes",
+  "autre",
+  "cherche_contrat",
+  "reorientation",
+  "ne_veut_pas_accompagnement",
+  "deja_connu",
+]);
+
 export const getMissionLocaleStat = async (
   organisation: IOrganisationMissionLocale | IOrganisationOrganismeFormation,
   mineur?: boolean,
@@ -3617,22 +3635,35 @@ export const getMissionLocaleStat = async (
   const data = (await missionLocaleEffectifsDb()
     .aggregate(effectifsMissionLocaleAggregation)
     .next()) as IMissionLocaleStats["stats"];
-  if (!data) {
-    return {
-      total: 0,
-      a_traiter: 0,
-      traite: 0,
-      rdv_pris: 0,
-      nouveau_projet: 0,
-      deja_accompagne: 0,
-      contacte_sans_retour: 0,
-      injoignables: 0,
-      coordonnees_incorrectes: 0,
-      autre: 0,
-      deja_connu: 0,
-    };
+  const live = data ?? {
+    total: 0,
+    a_traiter: 0,
+    traite: 0,
+    rdv_pris: 0,
+    nouveau_projet: 0,
+    deja_accompagne: 0,
+    contacte_sans_retour: 0,
+    injoignables: 0,
+    coordonnees_incorrectes: 0,
+    autre: 0,
+    deja_connu: 0,
+  };
+  if (organisation.type !== "MISSION_LOCALE" || (mineur && rqth)) {
+    return live;
   }
-  return data;
+  const purged = await missionLocaleStatsPurgesDb().findOne({ mission_locale_id: organisation._id });
+  if (!purged) {
+    return live;
+  }
+  const prefix = mineur ? "mineur" : rqth ? "rqth" : null;
+  const purgedCounters: Record<string, number> = purged.stats;
+  return Object.fromEntries(
+    Object.entries(live).map(([key, value]) => {
+      if (!PURGED_STAT_KEYS.has(key)) return [key, value];
+      const purgedKey = !prefix ? key : key === "total" ? prefix : `${prefix}_${key}`;
+      return [key, value + (purgedCounters[purgedKey] ?? 0)];
+    })
+  ) as typeof live;
 };
 
 const MERGEABLE_FIELDS = [
