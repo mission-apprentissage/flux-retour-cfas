@@ -7,6 +7,7 @@ import nock from "nock";
 import { cyrb53Hash } from "shared/utils";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { withStatsMlDifferees } from "@/common/actions/mission-locale/statsMlDifferees";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { effectifsDECADb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes";
@@ -26,6 +27,11 @@ vi.mock("@sentry/node", async (importOriginal) => ({
   captureMessage: vi.fn(),
   setMeasurement: vi.fn(),
 }));
+
+vi.mock("@/common/actions/mission-locale/statsMlDifferees", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/common/actions/mission-locale/statsMlDifferees")>();
+  return { ...actual, withStatsMlDifferees: vi.fn(actual.withStatsMlDifferees) };
+});
 
 vi.mock("@/common/apis/apiAlternance/client", () => ({
   apiAlternanceClient: {
@@ -96,6 +102,7 @@ describe("import DECA par l'API de la BAL", () => {
     vi.mocked(setMeasurement).mockClear();
     vi.mocked(captureMessage).mockClear();
     vi.mocked(addJob).mockClear();
+    vi.mocked(withStatsMlDifferees).mockClear();
     await organismesDb().insertOne({ _id: new ObjectId(), ...createRandomOrganisme({ uai: UAI, siret: SIRET }) });
   });
 
@@ -233,6 +240,7 @@ describe("import DECA par l'API de la BAL", () => {
     expect(await effectifsDECADb().countDocuments()).toBe(1);
     expect(setMeasurement).not.toHaveBeenCalled();
     expect(addJob).not.toHaveBeenCalled();
+    expect(withStatsMlDifferees).toHaveBeenCalledTimes(1);
   });
 
   it("reprend après --after normalisé en minuscules, sans publier de mesures", async () => {

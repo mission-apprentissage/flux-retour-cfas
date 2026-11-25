@@ -395,8 +395,9 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
   });
 
   describe("Statistiques ML différées", () => {
-    it("écrit en fin de contexte les mêmes statistiques qu'un calcul immédiat", async () => {
+    it("écrit en fin de contexte le document du jour de fin, identique à un recalcul à ce moment", async () => {
       const ml = await organisationsDb().findOne({ type: "MISSION_LOCALE", ml_id: ML_ID });
+      const jourDeFin = { mission_locale_id: ml?._id, computed_day: new Date("2025-12-16T00:00:00.000Z") };
       let statsPendant: unknown = "non lu";
 
       await withStatsMlDifferees(async () => {
@@ -405,14 +406,29 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
         vi.setSystemTime(new Date("2025-12-16T10:00:00Z"));
       });
 
-      const differees = await missionLocaleStatsDb().findOne({ mission_locale_id: ml?._id });
+      const differees = await missionLocaleStatsDb().findOne(jourDeFin);
       await createOrUpdateMissionLocaleStats(ml!._id);
-      const immediates = await missionLocaleStatsDb().findOne({ mission_locale_id: ml?._id });
+      const immediates = await missionLocaleStatsDb().findOne(jourDeFin);
 
       expect(statsPendant).toBeNull();
       expect(differees?.stats.total).toBe(1);
       expect(differees?.stats).toEqual(immediates?.stats);
       expect(differees?.segments).toEqual(immediates?.segments);
+    });
+
+    it("garde immédiat le recalcul du dédoublonnage quand l'ERP remplace le DECA", async () => {
+      const ml = await organisationsDb().findOne({ type: "MISSION_LOCALE", ml_id: ML_ID });
+      let statsPendant: unknown = null;
+
+      await withStatsMlDifferees(async () => {
+        await createMissionLocaleSnapshot(createBaseDecaEffectif({ apprenant: makeApprenant("DUPONT", "Jean", 20) }));
+        await createMissionLocaleSnapshot(
+          createBaseErpEffectif({ _id: new ObjectId(), apprenant: makeApprenant("DUPONT", "Jean", 20) })
+        );
+        statsPendant = await missionLocaleStatsDb().findOne({ mission_locale_id: ml?._id });
+      });
+
+      expect(statsPendant).not.toBeNull();
     });
   });
 
