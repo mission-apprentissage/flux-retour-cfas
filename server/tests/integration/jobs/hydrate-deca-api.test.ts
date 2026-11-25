@@ -112,11 +112,21 @@ describe("import DECA par l'API de la BAL", () => {
     expect(effectif.annee_scolaire).toBe("2025-2026");
     expect(effectif.apprenant.date_de_naissance).toEqual(new Date(DATE_NAISSANCE));
     expect(effectif.contrats?.[0].date_debut).toEqual(new Date("2025-09-01T00:00:00.000Z"));
+    expect(effectif.contrats?.[0].type_employeur).toBe(12);
     expect(effectif.formation?.date_fin).toEqual(new Date("2026-06-30T00:00:00.000Z"));
     expect(effectif.id_erp_apprenant).toBe(
       cyrb53Hash(normalize("Jean").trim() + normalize("DUPONT").trim() + new Date(DATE_NAISSANCE))
     );
     expect(mesures()).toMatchObject({ "deca.contrats": 1, "deca.effectifs": 1, "deca.echecs": 0, "deca.ecartes": 0 });
+  });
+
+  it("met type_employeur à null pour un code hors de l'énumération", async () => {
+    bal().reply(200, { contrats: [contratBal({ type_employeur: 99 })], pagination: { next: null, ecartes: 0 } });
+
+    await hydrateDecaRaw();
+
+    const effectif = await effectifsDECADb().findOne({});
+    expect(effectif?.contrats?.[0].type_employeur).toBeNull();
   });
 
   it("compte un échec pour un contrat sans alternant et signale les contrats écartés par la BAL", async () => {

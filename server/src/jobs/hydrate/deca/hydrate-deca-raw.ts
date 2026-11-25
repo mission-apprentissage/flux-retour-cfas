@@ -619,6 +619,11 @@ const calculerIdErpApprenant = (
   dateNaissance: Date | null
 ) => cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (dateNaissance || ""));
 
+const typeEmployeurReconnu = (valeur: number | null | undefined) => {
+  const resultat = zContrat.shape.type_employeur.safeParse(valeur);
+  return resultat.success ? (resultat.data ?? null) : null;
+};
+
 const STATUTS_ECARTES = new Set(["annule", "supprime"]);
 
 const normaliserStatut = (statut: string | null | undefined) =>
@@ -701,7 +706,7 @@ async function createEffectif(
     date_debut_contrat,
     date_fin_contrat,
     date_effet_rupture,
-    type_contrat,
+    type_employeur,
   } = document;
 
   if (!alternant) {
@@ -808,7 +813,7 @@ async function createEffectif(
       {
         siret,
         denomination,
-        type_employeur: parseInt(type_contrat ?? "", 10) as zodOpenApi.TypeOf<typeof zContrat>["type_employeur"],
+        type_employeur: typeEmployeurReconnu(type_employeur),
         naf,
         adresse: { code_postal: adresse?.code_postal },
         date_debut: dateDebutContrat,
