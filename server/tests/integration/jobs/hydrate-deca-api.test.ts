@@ -147,7 +147,7 @@ describe("import DECA par l'API de la BAL", () => {
       .query({ after: curseur })
       .reply(400, { message: "Paramètre invalide" });
 
-    await expect(hydrateDecaRaw()).rejects.toMatchObject({ response: { status: 400 } });
+    await expect(hydrateDecaRaw()).rejects.toMatchObject({ name: "ErreurApiDecaBal", statut: 400 });
 
     expect(await effectifsDECADb().countDocuments()).toBe(1);
     expect(setMeasurement).not.toHaveBeenCalled();
@@ -252,7 +252,7 @@ describe("import DECA par l'API de la BAL", () => {
         .query({ after: curseur })
         .reply(400, { message: "Paramètre invalide" });
 
-      await expect(hydrateDecaRaw()).rejects.toMatchObject({ response: { status: 400 } });
+      await expect(hydrateDecaRaw()).rejects.toMatchObject({ name: "ErreurApiDecaBal", statut: 400 });
 
       expect(await effectifsDECADb().countDocuments({ deca_raw_id: new ObjectId(contrat._id) })).toBe(1);
     });

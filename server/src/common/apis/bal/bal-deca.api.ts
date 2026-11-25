@@ -23,6 +23,22 @@ export type PageContratsDecaBal = {
   ecartes: number;
 };
 
+export class ErreurApiDecaBal extends Error {
+  readonly statut: number | undefined;
+  readonly code: string | undefined;
+
+  constructor(erreur: AxiosError) {
+    super(
+      erreur.response
+        ? `API DECA de la BAL : réponse ${erreur.response.status}`
+        : `API DECA de la BAL : échec ${erreur.code ?? "réseau"}`
+    );
+    this.name = "ErreurApiDecaBal";
+    this.statut = erreur.response?.status;
+    this.code = erreur.code;
+  }
+}
+
 export function estErreurPassagere(erreur: AxiosError): boolean {
   if (!erreur.response) {
     return !CODES_SANS_NOUVELLE_TENTATIVE.includes(erreur.code ?? "");
@@ -43,6 +59,7 @@ export function creerClientDecaBal({
     baseURL,
     timeout: delaiRequeteMs,
     headers: { Authorization: `Bearer ${cle}`, "Accept-Encoding": "gzip" },
+    redact: ["authorization"],
   });
   axiosRetry(client, {
     retries: tentatives,
@@ -79,10 +96,17 @@ async function lirePageContratsDeca(
   client: AxiosInstance,
   { after, limit }: { after: string | undefined; limit: number | undefined }
 ): Promise<IPageContratsDecaBal> {
-  const { data } = await client.get("v1/deca/contrats", {
-    params: { ...(after ? { after } : {}), ...(limit !== undefined ? { limit } : {}) },
-  });
-  return zPageContratsDecaBal.parse(data);
+  try {
+    const { data } = await client.get("v1/deca/contrats", {
+      params: { ...(after ? { after } : {}), ...(limit !== undefined ? { limit } : {}) },
+    });
+    return zPageContratsDecaBal.parse(data);
+  } catch (erreur) {
+    if (axios.isAxiosError(erreur)) {
+      throw new ErreurApiDecaBal(erreur);
+    }
+    throw erreur;
+  }
 }
 
 export async function* lirePagesContratsDeca(

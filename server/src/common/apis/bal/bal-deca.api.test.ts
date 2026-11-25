@@ -1,7 +1,13 @@
 import nock from "nock";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
-import { creerClientDecaBal, lireExpirationCle, lirePagesContratsDeca, type PageContratsDecaBal } from "./bal-deca.api";
+import {
+  creerClientDecaBal,
+  ErreurApiDecaBal,
+  lireExpirationCle,
+  lirePagesContratsDeca,
+  type PageContratsDecaBal,
+} from "./bal-deca.api";
 
 const BAL = "https://bal.test";
 const CLE = "cle-de-test";
@@ -117,8 +123,22 @@ describe("lirePagesContratsDeca", () => {
   it("ne rejoue pas un 400", async () => {
     nock(BAL).get("/api/v1/deca/contrats").reply(400, { message: "Paramètre inconnu" });
 
-    await expect(lireTout()).rejects.toMatchObject({ response: { status: 400 } });
+    await expect(lireTout()).rejects.toMatchObject({ name: "ErreurApiDecaBal", statut: 400 });
     expect(nock.pendingMocks()).toEqual([]);
+  });
+
+  it("lève une erreur qui ne porte ni la clé ni la configuration de la requête", async () => {
+    nock(BAL).get("/api/v1/deca/contrats").reply(403, { message: "Jeton invalide" });
+    const clientSansNouvelleTentative = creerClientDecaBal({ baseURL: `${BAL}/api/`, cle: CLE, tentatives: 0 });
+
+    const erreur = await lirePagesContratsDeca(clientSansNouvelleTentative)
+      .next()
+      .catch((e: unknown) => e);
+
+    expect(erreur).toBeInstanceOf(ErreurApiDecaBal);
+    expect(erreur).toMatchObject({ statut: 403, message: "API DECA de la BAL : réponse 403" });
+    expect(JSON.stringify({ error: erreur })).not.toContain(CLE);
+    expect(Object.keys(erreur as object)).not.toContain("config");
   });
 
   it("refuse une réponse au mauvais format", async () => {
