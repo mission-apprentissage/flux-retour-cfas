@@ -13,11 +13,6 @@ if [ -z "${SENTRY_AUTH_TOKEN:-}" ]; then
   exit 1
 fi
 
-if [ -z "${SENTRY_DSN:-}" ]; then
-  echo "Missing SENTRY_DSN"
-  exit 1
-fi
-
 export SENTRY_URL=https://sentry.apprentissage.beta.gouv.fr
 export SENTRY_ORG=sentry
 export SENTRY_PROJECT=tdb-api

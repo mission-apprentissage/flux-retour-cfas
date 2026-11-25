@@ -34,8 +34,8 @@ on:
       SLACK_WEBHOOK_ALERTING:
         description: Slack webhook alerting URL
         required: true
-      OPENPGP_PRIVATE_SUBKEY:
-        description: Github Actions' OpenPGP private subkey (notification Sentry)
+      SENTRY_AUTH_TOKEN:
+        description: Jeton Sentry (releases uniquement) pour la déclaration du déploiement
         required: true
 
 jobs:
@@ -147,15 +147,15 @@ jobs:
           fetch-depth: 2
           submodules: true
 
+      # Sans clé OpenPGP : ni GnuPG ni SOPS sur ce runner hébergé
       - name: Setup project
         if: ${{ needs.deploy.result == 'success' }}
         uses: ./.github/actions/setup-project
-        with:
-          openpgp-key: ${{ secrets.OPENPGP_PRIVATE_SUBKEY }}
 
       - name: Notify sentry that a new version has been deployed
         if: ${{ needs.deploy.result == 'success' }}
         run: .bin/mna sentry:deploy ${{ inputs.environment }} ${{ needs.version.outputs.VERSION }}
         env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REF_NAME: ${{ env.GITHUB_REF_NAME }}
