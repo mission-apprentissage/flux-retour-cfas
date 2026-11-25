@@ -283,6 +283,7 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
   const curseurDepart = after ? new ObjectId(after).toHexString() : undefined;
   const importComplet = !limit && !curseurDepart;
   const suivi = creerSuiviPages(curseurDepart);
+  const dansLOrdre = creerOrdreParCle();
   const contratsEcartes: ClesContratEcarte[] = [];
   let totalCount = 0;
   let ecartes = 0;
@@ -308,20 +309,22 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
       traiter: async ({ contrat, suiviPage }) => {
         totalCount++;
         try {
-          if (!dryRun && estContratEcarte(contrat)) {
-            nbContratsEcartes++;
-            const cles = await clesContratDeca(contrat);
-            if (cles) {
-              contratsEcartes.push(cles);
+          await dansLOrdre(cleApprenant(contrat), async () => {
+            if (!dryRun && estContratEcarte(contrat)) {
+              nbContratsEcartes++;
+              const cles = await clesContratDeca(contrat);
+              if (cles) {
+                contratsEcartes.push(cles);
+              }
+              echecs.ok();
+              return;
             }
+            const stats = dryRun
+              ? await inspectEffectifDeca(contrat, dryRunStats)
+              : await updateEffectifDeca(contrat, responsablesFleches);
+            mergeStats(totalStats, stats);
             echecs.ok();
-            return;
-          }
-          const stats = dryRun
-            ? await inspectEffectifDeca(contrat, dryRunStats)
-            : await updateEffectifDeca(contrat, responsablesFleches);
-          mergeStats(totalStats, stats);
-          echecs.ok();
+          });
         } finally {
           suivi.terminer(suiviPage);
         }
@@ -628,6 +631,35 @@ const typeEmployeurReconnu = (valeur: number | null | undefined) => {
   const resultat = zContrat.shape.type_employeur.safeParse(valeur);
   return resultat.success ? (resultat.data ?? null) : null;
 };
+
+const cleApprenant = (contrat: IContratDecaBal) => {
+  const uai = contrat.organisme_formation?.uai_cfa;
+  const siret = contrat.organisme_formation?.siret;
+  if (!uai || !siret) {
+    return contrat._id;
+  }
+  const dateNaissance = contrat.alternant?.date_naissance ? new Date(contrat.alternant.date_naissance) : null;
+  return `${uai}|${siret}|${calculerIdErpApprenant(contrat.alternant?.prenom, contrat.alternant?.nom, dateNaissance)}`;
+};
+
+export function creerOrdreParCle() {
+  const dernieres = new Map<string, Promise<void>>();
+  return async (cle: string, traiter: () => Promise<void>) => {
+    const courante = (dernieres.get(cle) ?? Promise.resolve()).then(traiter);
+    const garde = courante.then(
+      () => undefined,
+      () => undefined
+    );
+    dernieres.set(cle, garde);
+    try {
+      await courante;
+    } finally {
+      if (dernieres.get(cle) === garde) {
+        dernieres.delete(cle);
+      }
+    }
+  };
+}
 
 const STATUTS_ECARTES = new Set(["annule", "supprime"]);
 

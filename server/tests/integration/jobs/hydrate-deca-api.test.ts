@@ -7,6 +7,7 @@ import nock from "nock";
 import { cyrb53Hash } from "shared/utils";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import { effectifsDECADb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes";
 import config from "@/config";
@@ -124,6 +125,29 @@ describe("import DECA par l'API de la BAL", () => {
       cyrb53Hash(normalize("Jean").trim() + normalize("DUPONT").trim() + DATE_NAISSANCE)
     );
     expect(mesures()).toMatchObject({ "deca.contrats": 1, "deca.effectifs": 1, "deca.echecs": 0, "deca.ecartes": 0 });
+  });
+
+  it("écrit en dernier le contrat le plus récent d'un même apprenant, même si l'ancien est plus lent", async () => {
+    const ancien = contratBal();
+    const recent = contratBal({ formation: { ...contratBal().formation, code_diplome: "50022138" } });
+    vi.mocked(apiAlternanceClient.certification.index).mockImplementation(async ({ identifiant }) => {
+      if (identifiant && "cfd" in identifiant && identifiant.cfd === "50022137") {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      return [];
+    });
+    bal().reply(200, { contrats: [ancien, recent], pagination: { next: null, ecartes: 0 } });
+
+    try {
+      await hydrateDecaRaw();
+    } finally {
+      vi.mocked(apiAlternanceClient.certification.index).mockResolvedValue([]);
+    }
+
+    const effectifs = await effectifsDECADb().find({}).toArray();
+    expect(effectifs).toHaveLength(1);
+    expect(effectifs[0].deca_raw_id).toEqual(new ObjectId(recent._id));
+    expect(effectifs[0].formation?.cfd).toBe("50022138");
   });
 
   it("met type_employeur à null pour un code hors de l'énumération", async () => {

@@ -113,4 +113,58 @@ describe("traiterEnParallele", () => {
     expect(load).toHaveBeenCalledTimes(1);
     expect(stats?.cle).toMatchObject({ acces: 3, defauts: 1 });
   });
+
+  it("finit la file puis lève l'erreur d'un surErreur qui lève, sans rejet non géré", async () => {
+    const rejetsNonGeres: unknown[] = [];
+    const ecouteur = (raison: unknown) => rejetsNonGeres.push(raison);
+    process.on("unhandledRejection", ecouteur);
+    const traites: number[] = [];
+
+    try {
+      await expect(
+        traiterEnParallele([1, 2, 3, 4], {
+          concurrence: 2,
+          traiter: async (element) => {
+            await attendre(5);
+            if (element === 1) throw new Error("échec 1");
+            traites.push(element);
+          },
+          surErreur: () => {
+            throw new Error("surErreur lève");
+          },
+        })
+      ).rejects.toThrow("surErreur lève");
+      await attendre(10);
+    } finally {
+      process.off("unhandledRejection", ecouteur);
+    }
+
+    expect(traites.sort()).toEqual([2, 3, 4]);
+    expect(rejetsNonGeres).toEqual([]);
+  });
+
+  it("donne la priorité à l'erreur de la source sur celle de surErreur", async () => {
+    async function* source() {
+      yield 1;
+      throw new Error("source coupée");
+    }
+
+    await expect(
+      traiterEnParallele(source(), {
+        concurrence: 2,
+        traiter: async () => {
+          throw new Error("échec");
+        },
+        surErreur: () => {
+          throw new Error("surErreur lève");
+        },
+      })
+    ).rejects.toThrow("source coupée");
+  });
+
+  it.each([0, -1, 1.5])("refuse une concurrence de %s", async (concurrence) => {
+    await expect(
+      traiterEnParallele([1], { concurrence, traiter: async () => {}, surErreur: () => {} })
+    ).rejects.toThrow("concurrence invalide");
+  });
 });
