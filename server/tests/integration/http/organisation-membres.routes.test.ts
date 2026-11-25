@@ -10,6 +10,7 @@ import { createSession } from "@/common/actions/sessions.actions";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import { invitationsDb, organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
 import { sendTransactionalEmail } from "@/common/services/brevo/brevo";
+import { createActivationToken } from "@/common/utils/jwtUtils";
 import { useMongo } from "@tests/jest/setupMongo";
 import { id, initTestApp, Method, testDoc, testPasswordHash } from "@tests/utils/testUtils";
 
@@ -333,6 +334,13 @@ describe("Gestion de l'équipe d'une organisation", () => {
         expect(await cible.effetApplique()).toBe(true);
       });
 
+      it("est autorisée à un administrateur TBA en imposture de la DREETS sur une DDETS de sa région", async () => {
+        const cible = await preparer(ddetsRegionOrganisationId);
+        const response = await appeler(cible, await cookieImpostureDreets());
+        expect(response.status).toBe(200);
+        expect(await cible.effetApplique()).toBe(true);
+      });
+
       it("est refusée à un administrateur de la DREETS sur une DDETS d'une autre région", async () => {
         const cible = await preparer(ddetsAutreRegionOrganisationId);
         const response = await appeler(cible, await cookieDe(ADMIN_DREETS));
@@ -462,32 +470,11 @@ describe("Gestion de l'équipe d'une organisation", () => {
     });
   });
 
-  describe("Dernier administrateur d'une DDETS gérée par la DREETS", () => {
-    const adminDdetsId = async () => (await usersMigrationDb().findOne({ email: ADMIN_DDETS }))!._id;
+  describe("Dernier administrateur", () => {
+    const idDe = async (email: string) => (await usersMigrationDb().findOne({ email }))!._id;
 
-    it("ne peut pas être retiré par un administrateur de la DREETS", async () => {
-      const id = await adminDdetsId();
-      const response = await httpClient.delete(`/api/v1/organisation/membres/${id}`, {
-        headers: { cookie: await cookieDe(ADMIN_DREETS) },
-      });
-      expect(response.status).toBe(400);
-      expect(await usersMigrationDb().findOne({ _id: id })).not.toBeNull();
-    });
-
-    it("ne peut pas être rétrogradé par un administrateur de la DREETS", async () => {
-      const id = await adminDdetsId();
-      const response = await httpClient.put(
-        `/api/v1/organisation/membres/${id}/role`,
-        { role: "member" },
-        { headers: { cookie: await cookieDe(ADMIN_DREETS) } }
-      );
-      expect(response.status).toBe(400);
-      expect((await usersMigrationDb().findOne({ _id: id }))?.organisation_role).toBe("admin");
-    });
-
-    it("peut être retiré quand la DDETS a un autre administrateur", async () => {
-      await insererUtilisateur(ddetsRegionOrganisationId, "CONFIRMED", "admin");
-      const id = await adminDdetsId();
+    it("peut être retiré d'une DDETS par un administrateur de la DREETS", async () => {
+      const id = await idDe(ADMIN_DDETS);
       const response = await httpClient.delete(`/api/v1/organisation/membres/${id}`, {
         headers: { cookie: await cookieDe(ADMIN_DREETS) },
       });
@@ -495,13 +482,63 @@ describe("Gestion de l'équipe d'une organisation", () => {
       expect(await usersMigrationDb().findOne({ _id: id })).toBeNull();
     });
 
-    it("compte les administrateurs de la DDETS et non ceux de la DREETS", async () => {
-      await insererUtilisateur(dreetsOrganisationId, "CONFIRMED", "admin");
-      const id = await adminDdetsId();
+    it("peut être rétrogradé dans une DDETS par un administrateur de la DREETS", async () => {
+      const id = await idDe(ADMIN_DDETS);
+      const response = await httpClient.put(
+        `/api/v1/organisation/membres/${id}/role`,
+        { role: "member" },
+        { headers: { cookie: await cookieDe(ADMIN_DREETS) } }
+      );
+      expect(response.status).toBe(200);
+      expect((await usersMigrationDb().findOne({ _id: id }))?.organisation_role).toBe("member");
+    });
+
+    it("ne peut pas se retirer lui-même de sa propre organisation", async () => {
+      const id = await idDe(ADMIN_DREETS);
       const response = await httpClient.delete(`/api/v1/organisation/membres/${id}`, {
         headers: { cookie: await cookieDe(ADMIN_DREETS) },
       });
       expect(response.status).toBe(400);
+      expect(await usersMigrationDb().findOne({ _id: id })).not.toBeNull();
+    });
+
+    it("peut être retiré par un administrateur TBA en imposture", async () => {
+      const id = await idDe(ADMIN_DREETS);
+      const response = await httpClient.delete(`/api/v1/organisation/membres/${id}`, {
+        headers: { cookie: await cookieImpostureDreets() },
+      });
+      expect(response.status).toBe(200);
+      expect(await usersMigrationDb().findOne({ _id: id })).toBeNull();
+    });
+  });
+
+  describe("POST /api/v1/organisation/membres/batch", () => {
+    const inviter = async (cookie: string, email: string) =>
+      httpClient.post(
+        "/api/v1/organisation/membres/batch",
+        { emails: [email], roles: ["admin"] },
+        { headers: { cookie } }
+      );
+
+    it("invite dans la DREETS pour un administrateur de la DREETS", async () => {
+      const response = await inviter(await cookieDe(ADMIN_DREETS), "nouvel@dreets.local");
+      expect(response.status).toBe(200);
+      const invitation = await invitationsDb().findOne({ email: "nouvel@dreets.local" });
+      expect(invitation?.organisation_id.equals(dreetsOrganisationId)).toBe(true);
+      expect(invitation?.role).toBe("admin");
+    });
+
+    it("invite dans la DDETS pour un administrateur de la DDETS", async () => {
+      const response = await inviter(await cookieDe(ADMIN_DDETS), "nouvel@ddets.local");
+      expect(response.status).toBe(200);
+      const invitation = await invitationsDb().findOne({ email: "nouvel@ddets.local" });
+      expect(invitation?.organisation_id.equals(ddetsRegionOrganisationId)).toBe(true);
+    });
+
+    it("est refusé à un agent de la DREETS sans rôle admin", async () => {
+      const response = await inviter(await cookieDe(AGENT_DREETS), "refus@dreets.local");
+      expect(response.status).toBe(403);
+      expect(await invitationsDb().findOne({ email: "refus@dreets.local" })).toBeNull();
     });
   });
 
@@ -554,6 +591,40 @@ describe("Gestion de l'équipe d'une organisation", () => {
       const compte = await usersMigrationDb().findOne({ email: EMAIL });
       expect(compte?.account_status).toBe("CONFIRMED");
       expect(compte?.organisation_role).toBe("admin");
+    });
+  });
+
+  describe("POST /api/v1/auth/activation", () => {
+    const activer = async (organisationId: ObjectId) => {
+      const email = `${new ObjectId()}@activation.local`;
+      await insererUtilisateur(organisationId, "PENDING_EMAIL_VALIDATION", undefined, email);
+      return httpClient.post("/api/v1/auth/activation", { activationToken: createActivationToken(email) });
+    };
+
+    it("n'annonce pas de gestionnaire pour une DREETS sans administrateur", async () => {
+      await usersMigrationDb().updateMany(
+        { organisation_id: dreetsOrganisationId },
+        { $unset: { organisation_role: "" } }
+      );
+      const response = await activer(dreetsOrganisationId);
+      expect(response.status).toBe(200);
+      expect(response.data.validationByGestionnaire).toBe(false);
+    });
+
+    it("annonce un gestionnaire pour une DDETS sans administrateur quand la DREETS de la région en a un", async () => {
+      await usersMigrationDb().updateMany(
+        { organisation_id: ddetsRegionOrganisationId },
+        { $unset: { organisation_role: "" } }
+      );
+      const response = await activer(ddetsRegionOrganisationId);
+      expect(response.status).toBe(200);
+      expect(response.data.validationByGestionnaire).toBe(true);
+    });
+
+    it("annonce un gestionnaire pour une DRAAF dont un membre est confirmé", async () => {
+      const response = await activer(draafOrganisationId);
+      expect(response.status).toBe(200);
+      expect(response.data.validationByGestionnaire).toBe(true);
     });
   });
 });

@@ -459,17 +459,19 @@ export default function RolesHabilitationsClient({
   const isLoading = isLoadingMembres || isLoadingInvitations;
 
   const estDdets = user?.organisation?.type === "DDETS";
+  const contact = <a href={`mailto:${CONTACT_ADDRESS}`}>{CONTACT_ADDRESS}</a>;
   const messageNonAdmin = aucunAdmin ? (
     estDdets ? (
-      "Votre organisation n'a pas encore d'administrateur. Les administrateurs de la DREETS de votre région peuvent ajouter, valider ou retirer des utilisateurs."
-    ) : (
       <>
-        Votre organisation n&apos;a pas encore d&apos;administrateur. Pour en désigner un, écrivez-nous à{" "}
-        <a href={`mailto:${CONTACT_ADDRESS}`}>{CONTACT_ADDRESS}</a>.
+        Votre organisation n&apos;a pas encore d&apos;administrateur. Les administrateurs de la DREETS de votre région
+        peuvent valider ou retirer des utilisateurs. À défaut, ou pour désigner un administrateur, écrivez-nous à{" "}
+        {contact}.
       </>
+    ) : (
+      <>Votre organisation n&apos;a pas encore d&apos;administrateur. Pour en désigner un, écrivez-nous à {contact}.</>
     )
   ) : estDdets ? (
-    "Seuls les administrateurs de votre organisation et ceux de la DREETS de votre région peuvent ajouter, valider ou retirer des utilisateurs."
+    "Seuls les administrateurs de votre organisation peuvent ajouter des utilisateurs. Ceux de la DREETS de votre région peuvent aussi valider ou retirer des utilisateurs."
   ) : (
     "Seuls les administrateurs de votre organisation peuvent ajouter, valider ou retirer des utilisateurs."
   );

@@ -113,9 +113,29 @@ async function getOrganisationsGerees(ctx: AuthContext): Promise<OrganisationGer
   return [organisation, ...ddets];
 }
 
+export async function getOrganisationIdsPouvantValider(
+  organisationId: ObjectId,
+  organisation: Pick<IOrganisation, "type"> & { code_departement?: string }
+): Promise<ObjectId[]> {
+  const departement =
+    organisation.type === "DDETS" && organisation.code_departement
+      ? DEPARTEMENTS_BY_CODE[organisation.code_departement as keyof typeof DEPARTEMENTS_BY_CODE]
+      : undefined;
+  if (!departement) {
+    return [organisationId];
+  }
+  const dreets = await organisationsDb()
+    .find({ type: "DREETS", code_region: departement.region.code }, { projection: { _id: 1 } })
+    .toArray();
+  return [organisationId, ...dreets.map((o) => o._id)];
+}
+
 async function getOrganisationGereeIds(ctx: AuthContext): Promise<ObjectId[]> {
   return (await getOrganisationsGerees(ctx)).map((organisation) => organisation._id);
 }
+
+const estDansSaPropreOrganisation = (ctx: AuthContext, organisationId: ObjectId): boolean =>
+  !ctx.impersonating && organisationId.equals(ctx.organisation_id);
 
 async function estOrganisationGeree(ctx: AuthContext, organisationId: ObjectId): Promise<boolean> {
   return (await getOrganisationGereeIds(ctx)).some((id) => id.equals(organisationId));
@@ -504,7 +524,7 @@ export async function removeUserFromOrganisation(ctx: AuthContext, userId: strin
     throw Boom.forbidden("Permissions invalides");
   }
 
-  if (userToDelete.organisation_role === "admin") {
+  if (userToDelete.organisation_role === "admin" && estDansSaPropreOrganisation(ctx, userToDelete.organisation_id)) {
     const adminCount = await usersMigrationDb().countDocuments({
       organisation_id: userToDelete.organisation_id,
       organisation_role: "admin",
@@ -546,7 +566,11 @@ export async function updateMemberRole(ctx: AuthContext, userId: string, newRole
     throw Boom.badRequest(`L'utilisateur est déjà ${newRole === "admin" ? "administrateur" : "non-administrateur"}`);
   }
 
-  if (user.organisation_role === "admin" && newRole === "member") {
+  if (
+    user.organisation_role === "admin" &&
+    newRole === "member" &&
+    estDansSaPropreOrganisation(ctx, user.organisation_id)
+  ) {
     const adminCount = await usersMigrationDb().countDocuments({
       organisation_id: user.organisation_id,
       organisation_role: "admin",
