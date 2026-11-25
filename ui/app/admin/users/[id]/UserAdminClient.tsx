@@ -41,7 +41,9 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
 
   const user = data?.user;
   const isCfa = user?.organisation?.type === "ORGANISME_FORMATION";
-  const avecAdministrateurs = organisationAvecAdministrateurs(user?.organisation?.type);
+  const avecAdministrateurs =
+    organisationAvecAdministrateurs(user?.organisation?.type) &&
+    (isCfa || user?.account_status !== "PENDING_EMAIL_VALIDATION");
   const libelleStructure = isCfa ? "l'établissement" : "l'organisation";
   const currentRole = user?.organisation_role ?? "member";
 

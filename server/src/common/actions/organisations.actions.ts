@@ -96,7 +96,8 @@ type OrganisationGeree = Pick<IOrganisation, "_id" | "type"> & { code_departemen
 
 async function getOrganisationsGerees(ctx: AuthContext): Promise<OrganisationGeree[]> {
   const organisation: OrganisationGeree = { _id: ctx.organisation_id, type: ctx.organisation.type };
-  if (ctx.organisation.type !== "DREETS") {
+  const estAdmin = ctx.organisation_role === "admin" || ctx.impersonating === true;
+  if (ctx.organisation.type !== "DREETS" || !estAdmin) {
     return [organisation];
   }
   const codeRegion = ctx.organisation.code_region;
@@ -535,6 +536,10 @@ export async function updateMemberRole(ctx: AuthContext, userId: string, newRole
   });
   if (!user) {
     throw Boom.notFound("Utilisateur non trouvé dans votre organisation");
+  }
+
+  if (ctx.organisation.type !== "ORGANISME_FORMATION" && user.account_status === "PENDING_EMAIL_VALIDATION") {
+    throw Boom.badRequest("Ce compte doit d'abord valider son adresse courriel");
   }
 
   if (user.organisation_role === newRole) {

@@ -501,6 +501,10 @@ export async function adminUpdateUserRole(userId: string, newRole: "admin" | "me
     throw Boom.badRequest("Le changement de rôle n'est pas disponible pour ce type d'organisation");
   }
 
+  if (organisation.type !== "ORGANISME_FORMATION" && user.account_status === "PENDING_EMAIL_VALIDATION") {
+    throw Boom.badRequest("Ce compte doit d'abord valider son adresse courriel");
+  }
+
   if (user.organisation_role === newRole) {
     throw Boom.badRequest(`L'utilisateur est déjà ${newRole === "admin" ? "administrateur" : "non-administrateur"}`);
   }

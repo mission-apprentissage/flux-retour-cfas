@@ -18,6 +18,7 @@ import { PageHeader } from "@/app/_components/page-header/PageHeader";
 import { DataTable } from "@/app/_components/table/DataTable";
 import { ColumnData } from "@/app/_components/table/types";
 import { useCfaAdmin } from "@/app/_hooks/useCfaAdmin";
+import { CONTACT_ADDRESS } from "@/common/constants/product";
 import { _delete, _get, _post, _put } from "@/common/httpClient";
 import { getServerErrorMessage } from "@/common/rateLimit";
 
@@ -282,6 +283,10 @@ export default function RolesHabilitationsClient({
   }, [invitations, searchTerm]);
 
   const avecService = useMemo(() => (membres ?? []).some((m) => m.service), [membres]);
+  const aucunAdmin = useMemo(
+    () => !!membres && !membres.some((m) => m.account_status === "CONFIRMED" && m.organisation_role === "admin"),
+    [membres]
+  );
 
   const tableData = useMemo(() => {
     const membresRows = filteredMembres.map((m) => ({
@@ -453,6 +458,22 @@ export default function RolesHabilitationsClient({
 
   const isLoading = isLoadingMembres || isLoadingInvitations;
 
+  const estDdets = user?.organisation?.type === "DDETS";
+  const messageNonAdmin = aucunAdmin ? (
+    estDdets ? (
+      "Votre organisation n'a pas encore d'administrateur. Les administrateurs de la DREETS de votre région peuvent ajouter, valider ou retirer des utilisateurs."
+    ) : (
+      <>
+        Votre organisation n&apos;a pas encore d&apos;administrateur. Pour en désigner un, écrivez-nous à{" "}
+        <a href={`mailto:${CONTACT_ADDRESS}`}>{CONTACT_ADDRESS}</a>.
+      </>
+    )
+  ) : estDdets ? (
+    "Seuls les administrateurs de votre organisation et ceux de la DREETS de votre région peuvent ajouter, valider ou retirer des utilisateurs."
+  ) : (
+    "Seuls les administrateurs de votre organisation peuvent ajouter, valider ou retirer des utilisateurs."
+  );
+
   // Redirect non-admin users after all hooks
   if (!canDisplay) {
     router.replace("/cfa");
@@ -548,14 +569,7 @@ export default function RolesHabilitationsClient({
           )}
         </div>
 
-        {!peutGerer && (
-          <Alert
-            severity="info"
-            small
-            description="Seuls les administrateurs de votre organisation peuvent ajouter, valider ou retirer des utilisateurs."
-            className="fr-mb-2w"
-          />
-        )}
+        {!peutGerer && <Alert severity="info" small description={messageNonAdmin} className="fr-mb-2w" />}
 
         {user?.organisation?.type === "ADMINISTRATEUR" && <InviteMissionLocaleSection />}
 
