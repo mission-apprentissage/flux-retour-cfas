@@ -91,6 +91,9 @@ export async function register(registration: RegistrationSchema): Promise<{
     if (orga.type === "ORGANISME_FORMATION") {
       throw Boom.badRequest("Une invitation CFA est en attente pour cet email. Utilisez le lien reçu par email.");
     }
+    if (registration.invitationToken !== invitation.token) {
+      throw Boom.badRequest("Une invitation est en attente pour cet email. Utilisez le lien reçu par email.");
+    }
     if (invitation.expires_at && getCurrentTime() > invitation.expires_at) {
       throw Boom.unauthorized("Le lien d'invitation a expiré. Veuillez demander une nouvelle invitation.");
     }

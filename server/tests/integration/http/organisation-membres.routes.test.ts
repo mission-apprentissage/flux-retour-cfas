@@ -504,4 +504,56 @@ describe("Gestion de l'équipe d'une organisation", () => {
       expect(response.status).toBe(400);
     });
   });
+
+  describe("POST /api/v1/auth/register sur invitation", () => {
+    const EMAIL = "invite@dreets.local";
+    const JETON = "jeton-invitation-dreets";
+    const inscrire = (invitationToken?: string) =>
+      httpClient.post("/api/v1/auth/register", {
+        user: {
+          email: EMAIL,
+          civility: "Madame",
+          nom: "Dupont",
+          prenom: "Jeanne",
+          fonction: "Référente apprentissage",
+          telephone: "0102030405",
+          password: "MDP-azerty123!",
+          has_accept_cgu_version: "v0.4",
+        },
+        organisation: { type: "DREETS", code_region: "75" },
+        ...(invitationToken ? { invitationToken } : {}),
+      });
+
+    beforeEach(async () => {
+      await invitationsDb().insertOne(
+        testDoc<IInvitation>({
+          _id: new ObjectId(),
+          organisation_id: dreetsOrganisationId,
+          email: EMAIL,
+          token: JETON,
+          author_id: new ObjectId(),
+          role: "admin",
+          created_at: new Date(),
+          expires_at: new Date(Date.now() + 96 * 60 * 60 * 1000),
+        })
+      );
+    });
+
+    it.each([
+      ["sans jeton", undefined],
+      ["avec un autre jeton", "jeton-devine"],
+    ])("refuse l'inscription %s", async (_libelle, jeton) => {
+      const response = await inscrire(jeton);
+      expect(response.status).toBe(400);
+      expect(await usersMigrationDb().findOne({ email: EMAIL })).toBeNull();
+    });
+
+    it("confirme le compte avec le rôle de l'invitation quand le jeton est le bon", async () => {
+      const response = await inscrire(JETON);
+      expect(response.status).toBe(200);
+      const compte = await usersMigrationDb().findOne({ email: EMAIL });
+      expect(compte?.account_status).toBe("CONFIRMED");
+      expect(compte?.organisation_role).toBe("admin");
+    });
+  });
 });
