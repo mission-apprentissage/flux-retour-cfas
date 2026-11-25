@@ -202,10 +202,10 @@ type OptionsImportDeca = { dryRun?: boolean; limit?: number; after?: string };
 
 type SuiviPage = { curseur: string | undefined; restants: number };
 
-function creerSuiviPages() {
+export function creerSuiviPages(curseurDepart: string | undefined) {
   const ouvertes: SuiviPage[] = [];
   let pages = 0;
-  let derniere: string | undefined;
+  let derniere = curseurDepart;
 
   const elaguer = () => {
     while (ouvertes.length > 0 && ouvertes[0].restants <= 0) {
@@ -230,7 +230,7 @@ function creerSuiviPages() {
       elaguer();
     },
     reprise(): string | undefined {
-      return ouvertes[0]?.curseur ?? derniere;
+      return ouvertes.length > 0 ? ouvertes[0].curseur : derniere;
     },
   };
 }
@@ -280,17 +280,17 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
   const dryRunStats = createEmptyDryRunStats();
   const debutMs = Date.now();
   const echecs = createErrorAggregator("hydrate:contrats-deca-raw");
-  const suivi = creerSuiviPages();
+  const curseurDepart = after ? new ObjectId(after).toHexString() : undefined;
+  const importComplet = !limit && !curseurDepart;
+  const suivi = creerSuiviPages(curseurDepart);
   const contratsEcartes: ClesContratEcarte[] = [];
   let totalCount = 0;
   let ecartes = 0;
   let nbContratsEcartes = 0;
   let effectifsAnnules = 0;
-  let curseurDepart: string | undefined;
   let erreur: unknown = null;
 
   try {
-    curseurDepart = after ? new ObjectId(after).toHexString() : undefined;
     signalerExpirationCle();
     const client = creerClientDecaBalDepuisConfig();
     const responsablesFleches = dryRun ? new Set<string>() : await chargerResponsablesFleches();
@@ -329,7 +329,12 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
       surErreur: (erreurContrat) => echecs.record(erreurContrat),
     });
 
-    if (contratsEcartes.length > 0) {
+    if (contratsEcartes.length > 0 && !importComplet) {
+      logger.info(
+        { contrats: nbContratsEcartes },
+        "DECA : contrats annulés ou supprimés lus, effectifs gardés faute d'import complet"
+      );
+    } else if (contratsEcartes.length > 0) {
       effectifsAnnules = await supprimerEffectifsEcartes(contratsEcartes);
       const voeuxDelies = effectifsAnnules > 0 ? await delierVoeuxEffectifsDecaOrphelins() : 0;
       logger.info(
@@ -376,7 +381,7 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
     if (!dryRun && ecartes > 0) {
       signalerContratsEcartes(ecartes);
     }
-    if (!dryRun && !limit && !curseurDepart && !erreur) {
+    if (!dryRun && importComplet && !erreur) {
       publierMesures(bilan);
     }
   }
@@ -712,12 +717,6 @@ async function createEffectif(
   if (!alternant) {
     throw new Error("Contrat DECA incomplet : alternant absent");
   }
-  if (!alternant.nom || !alternant.prenom) {
-    throw new Error("Contrat DECA incomplet : nom ou prénom de l'alternant absent");
-  }
-  if (!alternant.adresse) {
-    throw new Error("Contrat DECA incomplet : adresse de l'alternant absente");
-  }
   if (!formation) {
     throw new Error("Contrat DECA incomplet : formation absente");
   }
@@ -744,8 +743,6 @@ async function createEffectif(
   const { date_debut_formation, date_fin_formation, code_diplome, rncp, intitule_ou_qualification } = formation;
   const { siret, denomination, naf, adresse, nombre_de_salaries } = employeur;
   const { uai_cfa, siret: orgSiret } = organisme_formation;
-  const nomAlternant = alternant.nom;
-  const prenomAlternant = alternant.prenom;
 
   const organisme = await cachedInRun(`organisme:${uai_cfa}|${orgSiret}`, () =>
     getOrganismeByUAIAndSIRET(uai_cfa, orgSiret)
@@ -753,6 +750,12 @@ async function createEffectif(
 
   if (!organisme) {
     return null;
+  }
+  if (!nom || !prenom) {
+    throw new Error("Contrat DECA incomplet : nom ou prénom de l'alternant absent");
+  }
+  if (!adresseAlternant) {
+    throw new Error("Contrat DECA incomplet : adresse de l'alternant absente");
   }
 
   const dateDebutContrat = date_debut_contrat ? new Date(date_debut_contrat) : null;
@@ -791,8 +794,8 @@ async function createEffectif(
   const effectif: WithoutId<IEffectifDECA> = {
     deca_raw_id: new ObjectId(document._id),
     apprenant: {
-      nom: nomAlternant,
-      prenom: prenomAlternant,
+      nom,
+      prenom,
       date_de_naissance: dateNaissance,
       nationalite: nationalite as zodOpenApi.TypeOf<typeof zApprenant>["nationalite"],
       historique_statut: [],

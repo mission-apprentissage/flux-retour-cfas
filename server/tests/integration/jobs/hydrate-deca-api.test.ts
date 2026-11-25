@@ -2,12 +2,14 @@ import { normalize } from "path";
 
 import { captureMessage, setMeasurement } from "@sentry/node";
 import { ObjectId } from "bson";
+import { addJob } from "job-processor";
 import nock from "nock";
 import { cyrb53Hash } from "shared/utils";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { effectifsDECADb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes";
+import config from "@/config";
 import { estContratEcarte, hydrateDecaRaw } from "@/jobs/hydrate/deca/hydrate-deca-raw";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -92,6 +94,7 @@ describe("import DECA par l'API de la BAL", () => {
   beforeEach(async () => {
     vi.mocked(setMeasurement).mockClear();
     vi.mocked(captureMessage).mockClear();
+    vi.mocked(addJob).mockClear();
     await organismesDb().insertOne({ _id: new ObjectId(), ...createRandomOrganisme({ uai: UAI, siret: SIRET }) });
   });
 
@@ -117,6 +120,9 @@ describe("import DECA par l'API de la BAL", () => {
     expect(effectif.id_erp_apprenant).toBe(
       cyrb53Hash(normalize("Jean").trim() + normalize("DUPONT").trim() + new Date(DATE_NAISSANCE))
     );
+    expect(effectif.id_erp_apprenant).not.toBe(
+      cyrb53Hash(normalize("Jean").trim() + normalize("DUPONT").trim() + DATE_NAISSANCE)
+    );
     expect(mesures()).toMatchObject({ "deca.contrats": 1, "deca.effectifs": 1, "deca.echecs": 0, "deca.ecartes": 0 });
   });
 
@@ -127,6 +133,57 @@ describe("import DECA par l'API de la BAL", () => {
 
     const effectif = await effectifsDECADb().findOne({});
     expect(effectif?.contrats?.[0].type_employeur).toBeNull();
+  });
+
+  it("ne compte pas d'échec pour un contrat incomplet chez un organisme inconnu, comme avant", async () => {
+    const alternantSansAdresse = { ...contratBal().alternant, adresse: null };
+    bal().reply(200, {
+      contrats: [
+        contratBal({
+          alternant: alternantSansAdresse,
+          organisme_formation: { siret: "11111111111111", uai_cfa: "1111111A" },
+        }),
+        contratBal({ alternant: alternantSansAdresse }),
+      ],
+      pagination: { next: null, ecartes: 0 },
+    });
+
+    await hydrateDecaRaw();
+
+    expect(mesures()).toMatchObject({ "deca.contrats": 2, "deca.echecs": 1, "deca.effectifs": 0 });
+  });
+
+  describe("échéance de la clé", () => {
+    const cleInitiale = config.bal.deca_api_key;
+    const jwt = (exp: number) =>
+      ["e30", Buffer.from(JSON.stringify({ _id: "x", api_key: "secret", exp })).toString("base64url"), "s"].join(".");
+    const dans = (jours: number) => Math.floor(Date.now() / 1000) + jours * 86_400;
+
+    afterEach(() => {
+      config.bal.deca_api_key = cleInitiale;
+    });
+
+    it("prévient Sentry à moins de 30 jours de l'échéance, sans le secret", async () => {
+      config.bal.deca_api_key = jwt(dans(10));
+      bal().reply(200, { contrats: [], pagination: { next: null, ecartes: 0 } });
+
+      await hydrateDecaRaw();
+
+      expect(captureMessage).toHaveBeenCalledWith(
+        "La clé de l'API DECA de la BAL expire bientôt",
+        expect.objectContaining({ fingerprint: ["deca-bal-cle-expiration"] })
+      );
+      expect(JSON.stringify(vi.mocked(captureMessage).mock.calls)).not.toContain("secret");
+    });
+
+    it("ne prévient pas plus de 30 jours avant l'échéance", async () => {
+      config.bal.deca_api_key = jwt(dans(60));
+      bal().reply(200, { contrats: [], pagination: { next: null, ecartes: 0 } });
+
+      await hydrateDecaRaw();
+
+      expect(captureMessage).not.toHaveBeenCalled();
+    });
   });
 
   it("compte un échec pour un contrat sans alternant et signale les contrats écartés par la BAL", async () => {
@@ -151,6 +208,7 @@ describe("import DECA par l'API de la BAL", () => {
 
     expect(await effectifsDECADb().countDocuments()).toBe(1);
     expect(setMeasurement).not.toHaveBeenCalled();
+    expect(addJob).not.toHaveBeenCalled();
   });
 
   it("reprend après --after normalisé en minuscules, sans publier de mesures", async () => {
@@ -229,6 +287,20 @@ describe("import DECA par l'API de la BAL", () => {
       const effectifs = await effectifsDECADb().find({}).toArray();
       expect(effectifs).toHaveLength(1);
       expect(effectifs[0].deca_raw_id).toEqual(new ObjectId(nouveau._id));
+    });
+
+    it("garde les effectifs des contrats annulés lors d'un import partiel", async () => {
+      const contrat = contratBal();
+      bal().reply(200, page([contrat]));
+      await hydrateDecaRaw();
+
+      nock("https://bal.test")
+        .get("/api/v1/deca/contrats")
+        .query({ limit: 1 })
+        .reply(200, page([{ ...contrat, statut: "Annulé" }]));
+      await hydrateDecaRaw({ limit: 1 });
+
+      expect(await effectifsDECADb().countDocuments({ deca_raw_id: new ObjectId(contrat._id) })).toBe(1);
     });
 
     it("ne crée rien pour un contrat annulé jamais importé", async () => {
