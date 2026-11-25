@@ -183,6 +183,7 @@ const config = {
   },
   deca: {
     flechageAuto: env.get("MNA_TDB_DECA_FLECHAGE_AUTO").default("false").asBool(),
+    concurrence: env.get("MNA_TDB_DECA_CONCURRENCE").default("100").asIntPositive(),
   },
 };
 

@@ -29,6 +29,7 @@ import { effectifsDECADb, organismesDb } from "@/common/model/collections";
 import { getBALMongodbUri } from "@/common/mongodb";
 import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import { cachedInRun, getRunCacheStats, withRunCache } from "@/common/utils/runCache";
+import { traiterEnParallele } from "@/common/utils/traiterEnParallele";
 import config from "@/config";
 import {
   fiabilisationEffectifFormation,
@@ -194,19 +195,6 @@ async function importerContratsDeca({ dryRun = false, limit }: { dryRun?: boolea
   const echecs = createErrorAggregator("hydrate:contrats-deca-raw");
   let totalCount = 0;
 
-  const processBuffer = async (buffer: Promise<IProcessingStats>[]) => {
-    const results = await Promise.allSettled(buffer);
-    for (const result of results) {
-      if (result.status === "fulfilled") {
-        mergeStats(totalStats, result.value);
-        echecs.ok();
-      } else {
-        echecs.record(result.reason);
-      }
-    }
-    totalCount += buffer.length;
-  };
-
   try {
     await client.connect();
     const responsablesFleches = dryRun ? new Set<string>() : await chargerResponsablesFleches();
@@ -223,21 +211,18 @@ async function importerContratsDeca({ dryRun = false, limit }: { dryRun?: boolea
     if (dryRun) cursor.sort({ created_at: -1 });
     if (limit) cursor.limit(limit);
 
-    let promiseArray: Promise<IProcessingStats>[] = [];
-    for await (const document of cursor) {
-      promiseArray.push(
-        dryRun ? inspectEffectifDeca(document, dryRunStats) : updateEffectifDeca(document, responsablesFleches)
-      );
-
-      if (promiseArray.length === 100) {
-        await processBuffer(promiseArray);
-        promiseArray = [];
-      }
-    }
-
-    if (promiseArray.length > 0) {
-      await processBuffer(promiseArray);
-    }
+    await traiterEnParallele(cursor, {
+      concurrence: config.deca.concurrence,
+      traiter: async (document) => {
+        totalCount++;
+        const stats = dryRun
+          ? await inspectEffectifDeca(document, dryRunStats)
+          : await updateEffectifDeca(document, responsablesFleches);
+        mergeStats(totalStats, stats);
+        echecs.ok();
+      },
+      surErreur: (erreur) => echecs.record(erreur),
+    });
 
     if (dryRun) {
       logger.info({ ...dryRunStats, totalCount }, "DECA dry-run : aucune écriture");
