@@ -44,18 +44,6 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Initialize the GnuPG keyring
-        run: |
-          install -d -m 700 "${RUNNER_TEMP}/gnupg"
-          echo "GNUPGHOME=${RUNNER_TEMP}/gnupg" >> "${GITHUB_ENV}"
-          export GNUPGHOME="${RUNNER_TEMP}/gnupg"
-          printf '%s' "$OPENPGP_KEY" | gpg --batch --import
-        env:
-          OPENPGP_KEY: ${{ secrets.OPENPGP_PRIVATE_SUBKEY }}
-
-      - name: Setup SOPS
-        uses: nhedger/setup-sops@v3
-
       - uses: actions/setup-node@v6
         with:
           node-version-file: ".node-version"
@@ -107,8 +95,6 @@ jobs:
       environment: ${{ inputs.environment }}
       app_version: ${{ inputs.version }}
     secrets:
-      DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-      DEPLOY_PASS: ${{ secrets.DEPLOY_PASS }}
       SLACK_WEBHOOK_NOTIF: ${{ secrets.SLACK_WEBHOOK }}
       SLACK_WEBHOOK_ALERTING: ${{ secrets.SLACK_WEBHOOK_ALERTING }}
-      OPENPGP_PRIVATE_SUBKEY: ${{ secrets.OPENPGP_PRIVATE_SUBKEY }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
