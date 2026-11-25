@@ -1,5 +1,6 @@
 import * as Boom from "@hapi/boom";
 import { Document, ObjectId, WithId } from "mongodb";
+import { organisationAvecAdministrateurs } from "shared";
 import { getOrganisationLabel } from "shared/models/data/organisations.model";
 import { IUsersMigration } from "shared/models/data/usersMigration.model";
 
@@ -496,8 +497,8 @@ export async function adminUpdateUserRole(userId: string, newRole: "admin" | "me
   }
 
   const organisation = await organisationsDb().findOne({ _id: user.organisation_id });
-  if (!organisation || organisation.type !== "ORGANISME_FORMATION") {
-    throw Boom.badRequest("Le changement de rôle n'est possible que pour les utilisateurs d'un CFA");
+  if (!organisation || !organisationAvecAdministrateurs(organisation.type)) {
+    throw Boom.badRequest("Le changement de rôle n'est pas disponible pour ce type d'organisation");
   }
 
   if (user.organisation_role === newRole) {

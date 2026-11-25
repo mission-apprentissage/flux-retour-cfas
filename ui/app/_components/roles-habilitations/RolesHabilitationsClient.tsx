@@ -11,6 +11,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { fr as frLocale } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { organisationAvecAdministrateurs } from "shared";
 
 import { SearchField } from "@/app/_components/common/SearchField";
 import { PageHeader } from "@/app/_components/page-header/PageHeader";
@@ -36,6 +37,7 @@ interface Member {
   last_connection?: string;
   organisation_role?: "admin" | "member";
   fonction?: string;
+  service?: string;
 }
 
 interface Invitation {
@@ -96,6 +98,16 @@ const COLUMNS: ColumnData[] = [
   { label: centered("Actions"), dataKey: "actions", width: "14%", sortable: false },
 ];
 
+const COLUMNS_AVEC_SERVICE: ColumnData[] = [
+  { label: "Nom et prénom", dataKey: "nom", width: "18%" },
+  { label: "Service", dataKey: "service", width: "14%" },
+  { label: centered("Téléphone"), dataKey: "telephone", width: "11%", sortable: false },
+  { label: centered("Courriel"), dataKey: "email", width: "18%" },
+  { label: "Intitulé de poste", dataKey: "fonction", width: "9%", sortable: false },
+  { label: centered("Date d'activation"), dataKey: "dateActivation", width: "17%" },
+  { label: centered("Actions"), dataKey: "actions", width: "13%", sortable: false },
+];
+
 interface RolesHabilitationsClientProps {
   /** Montage /cfa/roles-habilitations : réservé aux admins de CFA ML-beta, les autres sont renvoyés vers /cfa. */
   requireCfaAdmin?: boolean;
@@ -109,6 +121,9 @@ export default function RolesHabilitationsClient({
   const { user, isCfaAdmin } = useCfaAdmin();
   const router = useRouter();
   const canDisplay = requireCfaAdmin ? isCfaAdmin : true;
+  const avecAdministrateurs = organisationAvecAdministrateurs(user?.organisation?.type);
+  const peutGerer = !avecAdministrateurs || user?.organisation_role === "admin" || user?.impersonating === true;
+  const libelleStructure = user?.organisation?.type === "ORGANISME_FORMATION" ? "l'établissement" : "l'organisation";
   const [feedback, setFeedback] = useState<{ severity: "success" | "error"; message: string } | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isInvitationPanelOpen, setIsInvitationPanelOpen] = useState(false);
@@ -266,11 +281,14 @@ export default function RolesHabilitationsClient({
     return invitations.filter((inv) => inv.email?.toLowerCase().includes(term));
   }, [invitations, searchTerm]);
 
+  const avecService = useMemo(() => (membres ?? []).some((m) => m.service), [membres]);
+
   const tableData = useMemo(() => {
     const membresRows = filteredMembres.map((m) => ({
       _id: m._id,
       rawData: {
         nom: `${m.nom ?? ""} ${m.prenom ?? ""}`.trim(),
+        service: m.service ?? "",
         telephone: m.telephone ?? "",
         email: m.email,
         fonction: m.fonction ?? "",
@@ -284,7 +302,7 @@ export default function RolesHabilitationsClient({
               {m.nom} {m.prenom}
               {user?.email === m.email && <span className={styles.youSuffix}> (vous)</span>}
             </span>
-            {m.organisation_role === "admin" && <AdminTag />}
+            {avecAdministrateurs && m.organisation_role === "admin" && <AdminTag />}
             {m.account_status === "PENDING_ADMIN_VALIDATION" && (
               <Badge small noIcon severity="warning">
                 En attente de validation
@@ -292,6 +310,7 @@ export default function RolesHabilitationsClient({
             )}
           </span>
         ),
+        service: m.service ?? "—",
         telephone: <div className={styles.textCenter}>{m.telephone || "—"}</div>,
         email: <div className={styles.textCenter}>{m.email}</div>,
         fonction: (
@@ -306,7 +325,7 @@ export default function RolesHabilitationsClient({
         ),
         actions: (
           <div className={styles.actionsCell}>
-            {user?.email !== m.email ? (
+            {peutGerer && user?.email !== m.email ? (
               m.account_status === "PENDING_ADMIN_VALIDATION" ? (
                 <>
                   <Button
@@ -332,18 +351,20 @@ export default function RolesHabilitationsClient({
                 </>
               ) : (
                 <>
-                  <Button
-                    iconId={m.organisation_role === "admin" ? "ri-shield-line" : "ri-shield-star-line"}
-                    priority="tertiary no outline"
-                    size="small"
-                    title={
-                      m.organisation_role === "admin" ? "Retirer le rôle administrateur" : "Promouvoir administrateur"
-                    }
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openRoleChangeModal(m._id, m.email, m.organisation_role ?? "member");
-                    }}
-                  />
+                  {avecAdministrateurs && (
+                    <Button
+                      iconId={m.organisation_role === "admin" ? "ri-shield-line" : "ri-shield-star-line"}
+                      priority="tertiary no outline"
+                      size="small"
+                      title={
+                        m.organisation_role === "admin" ? "Retirer le rôle administrateur" : "Promouvoir administrateur"
+                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openRoleChangeModal(m._id, m.email, m.organisation_role ?? "member");
+                      }}
+                    />
+                  )}
                   <Button
                     iconId="fr-icon-close-line"
                     priority="secondary"
@@ -366,6 +387,7 @@ export default function RolesHabilitationsClient({
       _id: inv._id,
       rawData: {
         nom: "",
+        service: "",
         telephone: "",
         email: inv.email,
         fonction: "",
@@ -379,14 +401,15 @@ export default function RolesHabilitationsClient({
             <Badge small noIcon severity="warning">
               En attente
             </Badge>
-            {inv.role === "admin" && <AdminTag />}
+            {avecAdministrateurs && inv.role === "admin" && <AdminTag />}
           </span>
         ),
+        service: "—",
         telephone: <div className={styles.textCenter}>—</div>,
         email: <div className={styles.textCenter}>{inv.email}</div>,
         fonction: "—",
         dateActivation: <div className={styles.textCenter}>—</div>,
-        actions: (
+        actions: peutGerer ? (
           <div className={styles.actionsCell}>
             <Button
               iconId="fr-icon-mail-line"
@@ -409,7 +432,7 @@ export default function RolesHabilitationsClient({
               }}
             />
           </div>
-        ),
+        ) : null,
       },
     }));
 
@@ -418,6 +441,8 @@ export default function RolesHabilitationsClient({
     filteredMembres,
     filteredInvitations,
     user?.email,
+    peutGerer,
+    avecAdministrateurs,
     openDeleteMembreModal,
     openRoleChangeModal,
     handleResendInvitation,
@@ -489,7 +514,7 @@ export default function RolesHabilitationsClient({
           />
         )}
         {pendingRoleChange?.newRole === "admin"
-          ? `Voulez-vous vraiment promouvoir ${pendingRoleChange?.email} en administrateur ? Cette personne pourra gérer les utilisateurs de l'établissement.`
+          ? `Voulez-vous vraiment promouvoir ${pendingRoleChange?.email} en administrateur ? Cette personne pourra gérer les utilisateurs de ${libelleStructure}.`
           : `Voulez-vous vraiment retirer le rôle administrateur à ${pendingRoleChange?.email} ? Cette personne ne pourra plus gérer les utilisateurs.`}
       </roleChangeModal.Component>
       <div>
@@ -516,10 +541,21 @@ export default function RolesHabilitationsClient({
               onChange={setSearchTerm}
             />
           </div>
-          <Button iconId="fr-icon-add-line" iconPosition="right" onClick={() => setIsInvitationPanelOpen(true)}>
-            Ajouter un utilisateur
-          </Button>
+          {peutGerer && (
+            <Button iconId="fr-icon-add-line" iconPosition="right" onClick={() => setIsInvitationPanelOpen(true)}>
+              Ajouter un utilisateur
+            </Button>
+          )}
         </div>
+
+        {!peutGerer && (
+          <Alert
+            severity="info"
+            small
+            description="Seuls les administrateurs de votre organisation peuvent ajouter, valider ou retirer des utilisateurs."
+            className="fr-mb-2w"
+          />
+        )}
 
         {user?.organisation?.type === "ADMINISTRATEUR" && <InviteMissionLocaleSection />}
 
@@ -530,10 +566,16 @@ export default function RolesHabilitationsClient({
             ))}
           </div>
         ) : (
-          <DataTable data={tableData} columns={COLUMNS} emptyMessage="Aucun utilisateur trouvé" hasPagination={false} />
+          <DataTable
+            data={tableData}
+            columns={avecService ? COLUMNS_AVEC_SERVICE : COLUMNS}
+            emptyMessage="Aucun utilisateur trouvé"
+            hasPagination={false}
+          />
         )}
       </div>
       <InvitationSidePanel
+        withRoles={avecAdministrateurs}
         isOpen={isInvitationPanelOpen}
         onClose={() => setIsInvitationPanelOpen(false)}
         onSuccess={handleInvitationSuccess}

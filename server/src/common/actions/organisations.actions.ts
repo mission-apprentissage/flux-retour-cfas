@@ -1,7 +1,14 @@
 import * as Boom from "@hapi/boom";
 import { format } from "date-fns";
 import { ObjectId, WithId } from "mongodb";
-import { REGIONS_BY_CODE, DEPARTEMENTS_BY_CODE, withOrganismeListSummary, getAcademieByCode } from "shared";
+import {
+  REGIONS_BY_CODE,
+  DEPARTEMENTS,
+  DEPARTEMENTS_BY_CODE,
+  withOrganismeListSummary,
+  getAcademieByCode,
+  organisationAvecAdministrateurs,
+} from "shared";
 import { IInvitation } from "shared/models/data/invitations.model";
 import {
   IOrganisationCreate,
@@ -85,11 +92,52 @@ export async function getOrganisationById(organisationId: ObjectId): Promise<IOr
   return organisation;
 }
 
-export async function listOrganisationMembers(ctx: AuthContext): Promise<Partial<IUsersMigration[]>> {
-  return await usersMigrationDb()
+type OrganisationGeree = Pick<IOrganisation, "_id" | "type"> & { code_departement?: string };
+
+async function getOrganisationsGerees(ctx: AuthContext): Promise<OrganisationGeree[]> {
+  const organisation: OrganisationGeree = { _id: ctx.organisation_id, type: ctx.organisation.type };
+  if (ctx.organisation.type !== "DREETS") {
+    return [organisation];
+  }
+  const codeRegion = ctx.organisation.code_region;
+  const departements = DEPARTEMENTS.filter((departement) => departement.region.code === codeRegion).map(
+    (departement) => departement.code
+  );
+  const ddets = await organisationsDb()
+    .find<OrganisationGeree>(
+      { type: "DDETS", code_departement: { $in: departements } },
+      { projection: { _id: 1, type: 1, code_departement: 1 } }
+    )
+    .toArray();
+  return [organisation, ...ddets];
+}
+
+async function getOrganisationGereeIds(ctx: AuthContext): Promise<ObjectId[]> {
+  return (await getOrganisationsGerees(ctx)).map((organisation) => organisation._id);
+}
+
+async function estOrganisationGeree(ctx: AuthContext, organisationId: ObjectId): Promise<boolean> {
+  return (await getOrganisationGereeIds(ctx)).some((id) => id.equals(organisationId));
+}
+
+const libelleService = (organisation: OrganisationGeree): string => {
+  if (organisation.type !== "DDETS" || !organisation.code_departement) {
+    return organisation.type;
+  }
+  const departement = DEPARTEMENTS_BY_CODE[organisation.code_departement as keyof typeof DEPARTEMENTS_BY_CODE];
+  return departement
+    ? `DDETS ${departement.nom} (${organisation.code_departement})`
+    : `DDETS ${organisation.code_departement}`;
+};
+
+export async function listOrganisationMembers(
+  ctx: AuthContext
+): Promise<Array<Partial<IUsersMigration> & { service?: string }>> {
+  const organisations = await getOrganisationsGerees(ctx);
+  const membres = await usersMigrationDb()
     .find(
       {
-        organisation_id: ctx.organisation_id,
+        organisation_id: { $in: organisations.map((organisation) => organisation._id) },
         account_status: {
           $in: ["PENDING_ADMIN_VALIDATION", "CONFIRMED"],
         },
@@ -107,10 +155,19 @@ export async function listOrganisationMembers(ctx: AuthContext): Promise<Partial
           confirmed_at: 1,
           last_connection: 1,
           organisation_role: 1,
+          organisation_id: 1,
         },
       }
     )
     .toArray();
+
+  if (organisations.length === 1) {
+    return membres;
+  }
+  return membres.map((membre) => {
+    const organisation = organisations.find((o) => o._id.equals(membre.organisation_id));
+    return { ...membre, service: organisation ? libelleService(organisation) : undefined };
+  });
 }
 
 export async function listContactsOrganisation(organisationId: ObjectId): Promise<Partial<IUsersMigration>[]> {
@@ -341,7 +398,10 @@ export async function validateMembre(ctx: AuthContext, userId: string): Promise<
   // seul un administrateur ou gestionnaire de l'organisation peut valider un utilisateur
   // un administrateur peut aussi valider un compte non vérifié par email
   if (ctx.organisation.type !== "ADMINISTRATEUR") {
-    if (user.account_status !== "PENDING_ADMIN_VALIDATION" || !user.organisation_id.equals(ctx.organisation_id)) {
+    if (
+      user.account_status !== "PENDING_ADMIN_VALIDATION" ||
+      !(await estOrganisationGeree(ctx, user.organisation_id))
+    ) {
       throw Boom.forbidden("Permissions invalides");
     }
   }
@@ -408,7 +468,10 @@ export async function rejectMembre(ctx: AuthContext, userId: string): Promise<vo
   // seul un administrateur ou gestionnaire de l'organisation peut valider un utilisateur
   // un administrateur peut aussi valider un compte non vérifié par email
   if (ctx.organisation.type !== "ADMINISTRATEUR") {
-    if (user.account_status !== "PENDING_ADMIN_VALIDATION" || !user.organisation_id.equals(ctx.organisation_id)) {
+    if (
+      user.account_status !== "PENDING_ADMIN_VALIDATION" ||
+      !(await estOrganisationGeree(ctx, user.organisation_id))
+    ) {
       throw Boom.forbidden("Permissions invalides");
     }
   }
@@ -433,7 +496,7 @@ export async function removeUserFromOrganisation(ctx: AuthContext, userId: strin
   const userObjectId = new ObjectId(userId);
 
   const userToDelete = await usersMigrationDb().findOne({
-    organisation_id: ctx.organisation_id,
+    organisation_id: { $in: await getOrganisationGereeIds(ctx) },
     _id: userObjectId,
   });
   if (!userToDelete) {
@@ -442,7 +505,7 @@ export async function removeUserFromOrganisation(ctx: AuthContext, userId: strin
 
   if (userToDelete.organisation_role === "admin") {
     const adminCount = await usersMigrationDb().countDocuments({
-      organisation_id: ctx.organisation_id,
+      organisation_id: userToDelete.organisation_id,
       organisation_role: "admin",
       account_status: "CONFIRMED",
     });
@@ -452,12 +515,12 @@ export async function removeUserFromOrganisation(ctx: AuthContext, userId: strin
   }
 
   // Idem rejectMembre : pas de retrait du contact côté Brevo (synchro upsert-only).
-  await usersMigrationDb().deleteOne({ _id: userObjectId, organisation_id: ctx.organisation_id });
+  await usersMigrationDb().deleteOne({ _id: userObjectId, organisation_id: userToDelete.organisation_id });
 }
 
 export async function updateMemberRole(ctx: AuthContext, userId: string, newRole: "admin" | "member"): Promise<void> {
-  if (ctx.organisation.type !== "ORGANISME_FORMATION") {
-    throw Boom.badRequest("Le changement de rôle n'est possible que pour les utilisateurs d'un CFA");
+  if (!organisationAvecAdministrateurs(ctx.organisation.type)) {
+    throw Boom.badRequest("Le changement de rôle n'est pas disponible pour ce type d'organisation");
   }
 
   const userObjectId = new ObjectId(userId);
@@ -467,7 +530,7 @@ export async function updateMemberRole(ctx: AuthContext, userId: string, newRole
   }
 
   const user = await usersMigrationDb().findOne({
-    organisation_id: ctx.organisation_id,
+    organisation_id: { $in: await getOrganisationGereeIds(ctx) },
     _id: userObjectId,
   });
   if (!user) {
@@ -480,7 +543,7 @@ export async function updateMemberRole(ctx: AuthContext, userId: string, newRole
 
   if (user.organisation_role === "admin" && newRole === "member") {
     const adminCount = await usersMigrationDb().countDocuments({
-      organisation_id: ctx.organisation_id,
+      organisation_id: user.organisation_id,
       organisation_role: "admin",
       account_status: "CONFIRMED",
     });
@@ -490,7 +553,7 @@ export async function updateMemberRole(ctx: AuthContext, userId: string, newRole
   }
 
   await usersMigrationDb().updateOne(
-    { _id: userObjectId, organisation_id: ctx.organisation_id },
+    { _id: userObjectId, organisation_id: user.organisation_id },
     { $set: { organisation_role: newRole } }
   );
 }

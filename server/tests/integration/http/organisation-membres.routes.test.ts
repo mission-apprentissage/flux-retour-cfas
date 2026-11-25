@@ -26,12 +26,18 @@ const cfaOrganisationId = new ObjectId(id(1));
 const cfaOrganismeId = new ObjectId(id(2));
 const dreetsOrganisationId = new ObjectId(id(3));
 const tbaOrganisationId = new ObjectId(id(4));
+const ddetsRegionOrganisationId = new ObjectId(id(5));
+const ddetsAutreRegionOrganisationId = new ObjectId(id(6));
+const draafOrganisationId = new ObjectId(id(7));
 
 const ADMIN_CFA = "admin@cfa.local";
 const MEMBRE_CFA = "membre@cfa.local";
 const SANS_ROLE_CFA = "sans-role@cfa.local";
 const ADMIN_TBA = "admin@tba.local";
 const AGENT_DREETS = "agent@dreets.local";
+const ADMIN_DREETS = "admin@dreets.local";
+const ADMIN_DDETS = "admin@ddets.local";
+const AGENT_DRAAF = "agent@draaf.local";
 
 let httpClient: AxiosInstance;
 
@@ -94,6 +100,16 @@ async function cookieImpostureCfa(): Promise<string> {
   return response.headers["set-cookie"]![0];
 }
 
+async function cookieImpostureDreets(): Promise<string> {
+  const response = await httpClient.post(
+    "/api/v1/admin/impersonate",
+    { type: "DREETS", code_region: "75" },
+    { headers: { cookie: await cookieDe(ADMIN_TBA) } }
+  );
+  expect(response.status).toBe(200);
+  return response.headers["set-cookie"]![0];
+}
+
 async function cookieImpostureLectureSeuleCfa(): Promise<string> {
   const response = await httpClient.post(
     "/api/v1/organisation/indicateurs-ml/impersonate",
@@ -106,9 +122,15 @@ async function cookieImpostureLectureSeuleCfa(): Promise<string> {
 
 type Cible = { method: Method; url: string; data?: unknown; effetApplique: () => Promise<boolean> };
 
-const routes: Array<{ libelle: string; cfaSeulement?: boolean; preparer: (orgId: ObjectId) => Promise<Cible> }> = [
+const routes: Array<{
+  libelle: string;
+  avecAdministrateursSeulement?: boolean;
+  membreDuService?: boolean;
+  preparer: (orgId: ObjectId) => Promise<Cible>;
+}> = [
   {
     libelle: "DELETE /api/v1/organisation/membres/:userId",
+    membreDuService: true,
     preparer: async (orgId) => {
       const userId = await insererUtilisateur(orgId, "CONFIRMED", "member");
       return {
@@ -120,6 +142,7 @@ const routes: Array<{ libelle: string; cfaSeulement?: boolean; preparer: (orgId:
   },
   {
     libelle: "POST /api/v1/organisation/membres/:userId/validate",
+    membreDuService: true,
     preparer: async (orgId) => {
       const userId = await insererUtilisateur(orgId, "PENDING_ADMIN_VALIDATION");
       return {
@@ -131,6 +154,7 @@ const routes: Array<{ libelle: string; cfaSeulement?: boolean; preparer: (orgId:
   },
   {
     libelle: "POST /api/v1/organisation/membres/:userId/reject",
+    membreDuService: true,
     preparer: async (orgId) => {
       const userId = await insererUtilisateur(orgId, "PENDING_ADMIN_VALIDATION");
       return {
@@ -142,7 +166,8 @@ const routes: Array<{ libelle: string; cfaSeulement?: boolean; preparer: (orgId:
   },
   {
     libelle: "PUT /api/v1/organisation/membres/:userId/role",
-    cfaSeulement: true,
+    avecAdministrateursSeulement: true,
+    membreDuService: true,
     preparer: async (orgId) => {
       const userId = await insererUtilisateur(orgId, "CONFIRMED", "member");
       return {
@@ -211,6 +236,19 @@ describe("Gestion de l'équipe d'une organisation", () => {
       }),
       testDoc<IOrganisation>({ _id: dreetsOrganisationId, created_at: new Date(), type: "DREETS", code_region: "75" }),
       testDoc<IOrganisation>({ _id: tbaOrganisationId, created_at: new Date(), type: "ADMINISTRATEUR" }),
+      testDoc<IOrganisation>({
+        _id: ddetsRegionOrganisationId,
+        created_at: new Date(),
+        type: "DDETS",
+        code_departement: "33",
+      }),
+      testDoc<IOrganisation>({
+        _id: ddetsAutreRegionOrganisationId,
+        created_at: new Date(),
+        type: "DDETS",
+        code_departement: "92",
+      }),
+      testDoc<IOrganisation>({ _id: draafOrganisationId, created_at: new Date(), type: "DRAAF", code_region: "75" }),
     ]);
 
     await insererUtilisateur(cfaOrganisationId, "CONFIRMED", "admin", ADMIN_CFA);
@@ -218,9 +256,12 @@ describe("Gestion de l'équipe d'une organisation", () => {
     await insererUtilisateur(cfaOrganisationId, "CONFIRMED", undefined, SANS_ROLE_CFA);
     await insererUtilisateur(tbaOrganisationId, "CONFIRMED", undefined, ADMIN_TBA);
     await insererUtilisateur(dreetsOrganisationId, "CONFIRMED", undefined, AGENT_DREETS);
+    await insererUtilisateur(dreetsOrganisationId, "CONFIRMED", "admin", ADMIN_DREETS);
+    await insererUtilisateur(ddetsRegionOrganisationId, "CONFIRMED", "admin", ADMIN_DDETS);
+    await insererUtilisateur(draafOrganisationId, "CONFIRMED", undefined, AGENT_DRAAF);
   });
 
-  describe.each(routes)("$libelle", ({ cfaSeulement, preparer }) => {
+  describe.each(routes)("$libelle", ({ avecAdministrateursSeulement, membreDuService, preparer }) => {
     it("est autorisée à un administrateur du CFA", async () => {
       const cible = await preparer(cfaOrganisationId);
       const response = await appeler(cible, await cookieDe(ADMIN_CFA));
@@ -256,13 +297,132 @@ describe("Gestion de l'équipe d'une organisation", () => {
       expect(await cible.effetApplique()).toBe(false);
     });
 
-    if (!cfaSeulement) {
-      it("reste ouverte aux utilisateurs d'une organisation qui n'est pas un CFA", async () => {
-        const cible = await preparer(dreetsOrganisationId);
-        const response = await appeler(cible, await cookieDe(AGENT_DREETS));
+    it("est autorisée à un administrateur de la DREETS", async () => {
+      const cible = await preparer(dreetsOrganisationId);
+      const response = await appeler(cible, await cookieDe(ADMIN_DREETS));
+      expect(response.status).toBe(200);
+      expect(await cible.effetApplique()).toBe(true);
+    });
+
+    it("est refusée à un agent de la DREETS sans rôle admin", async () => {
+      const cible = await preparer(dreetsOrganisationId);
+      const response = await appeler(cible, await cookieDe(AGENT_DREETS));
+      expect(response.status).toBe(403);
+      expect(await cible.effetApplique()).toBe(false);
+    });
+
+    it("est autorisée à un administrateur TBA en imposture de la DREETS", async () => {
+      const cible = await preparer(dreetsOrganisationId);
+      const response = await appeler(cible, await cookieImpostureDreets());
+      expect(response.status).toBe(200);
+      expect(await cible.effetApplique()).toBe(true);
+    });
+
+    it("est autorisée à un administrateur de la DDETS", async () => {
+      const cible = await preparer(ddetsRegionOrganisationId);
+      const response = await appeler(cible, await cookieDe(ADMIN_DDETS));
+      expect(response.status).toBe(200);
+      expect(await cible.effetApplique()).toBe(true);
+    });
+
+    if (membreDuService) {
+      it("est autorisée à un administrateur de la DREETS sur une DDETS de sa région", async () => {
+        const cible = await preparer(ddetsRegionOrganisationId);
+        const response = await appeler(cible, await cookieDe(ADMIN_DREETS));
         expect(response.status).toBe(200);
         expect(await cible.effetApplique()).toBe(true);
       });
+
+      it("est refusée à un administrateur de la DREETS sur une DDETS d'une autre région", async () => {
+        const cible = await preparer(ddetsAutreRegionOrganisationId);
+        const response = await appeler(cible, await cookieDe(ADMIN_DREETS));
+        expect([403, 404]).toContain(response.status);
+        expect(await cible.effetApplique()).toBe(false);
+      });
+
+      it("est refusée à un administrateur de la DDETS sur la DREETS", async () => {
+        const cible = await preparer(dreetsOrganisationId);
+        const response = await appeler(cible, await cookieDe(ADMIN_DDETS));
+        expect([403, 404]).toContain(response.status);
+        expect(await cible.effetApplique()).toBe(false);
+      });
     }
+
+    if (!avecAdministrateursSeulement) {
+      it("reste ouverte aux utilisateurs d'une organisation sans administrateurs", async () => {
+        const cible = await preparer(draafOrganisationId);
+        const response = await appeler(cible, await cookieDe(AGENT_DRAAF));
+        expect(response.status).toBe(200);
+        expect(await cible.effetApplique()).toBe(true);
+      });
+    } else {
+      it("est refusée aux utilisateurs d'une organisation sans administrateurs", async () => {
+        const cible = await preparer(draafOrganisationId);
+        const response = await appeler(cible, await cookieDe(AGENT_DRAAF));
+        expect(response.status).toBe(400);
+        expect(await cible.effetApplique()).toBe(false);
+      });
+    }
+  });
+
+  describe("GET /api/v1/organisation/membres", () => {
+    it("liste pour la DREETS ses agents et ceux des DDETS de sa région, avec leur service", async () => {
+      await insererUtilisateur(
+        ddetsAutreRegionOrganisationId,
+        "PENDING_ADMIN_VALIDATION",
+        undefined,
+        "hors@ddets.local"
+      );
+      await insererUtilisateur(ddetsRegionOrganisationId, "PENDING_ADMIN_VALIDATION", undefined, "attente@ddets.local");
+
+      const response = await httpClient.get("/api/v1/organisation/membres", {
+        headers: { cookie: await cookieDe(ADMIN_DREETS) },
+      });
+
+      expect(response.status).toBe(200);
+      const services = Object.fromEntries(
+        response.data.map((membre: { email: string; service?: string }) => [membre.email, membre.service])
+      );
+      expect(services).toEqual({
+        [AGENT_DREETS]: "DREETS",
+        [ADMIN_DREETS]: "DREETS",
+        [ADMIN_DDETS]: "DDETS Gironde (33)",
+        "attente@ddets.local": "DDETS Gironde (33)",
+      });
+    });
+
+    it("ne liste pour la DDETS que ses propres agents", async () => {
+      const response = await httpClient.get("/api/v1/organisation/membres", {
+        headers: { cookie: await cookieDe(ADMIN_DDETS) },
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.data.map((membre: { email: string }) => membre.email)).toEqual([ADMIN_DDETS]);
+      expect(response.data[0].service).toBeUndefined();
+    });
+  });
+
+  describe("PUT /api/v1/admin/users/:id/role", () => {
+    it("permet à l'équipe TBA de nommer un administrateur de DREETS", async () => {
+      const agent = await usersMigrationDb().findOne({ email: AGENT_DREETS });
+      const response = await httpClient.put(
+        `/api/v1/admin/users/${agent!._id}/role`,
+        { role: "admin" },
+        { headers: { cookie: await cookieDe(ADMIN_TBA) } }
+      );
+      expect(response.status).toBe(200);
+      expect((await usersMigrationDb().findOne({ _id: agent!._id }))?.organisation_role).toBe("admin");
+    });
+
+    it("reste refusé pour une organisation sans administrateurs", async () => {
+      const agent = await usersMigrationDb().findOne({ email: AGENT_DRAAF });
+      const response = await httpClient.put(
+        `/api/v1/admin/users/${agent!._id}/role`,
+        { role: "admin" },
+        { headers: { cookie: await cookieDe(ADMIN_TBA) } }
+      );
+      expect(response.status).toBe(400);
+      expect((await usersMigrationDb().findOne({ _id: agent!._id }))?.organisation_role).toBeUndefined();
+    });
   });
 });
