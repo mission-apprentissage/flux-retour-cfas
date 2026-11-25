@@ -120,7 +120,6 @@ const config = {
   disable_processors: env.get("FLUX_RETOUR_CFAS_DISABLE_PROCESSORS").default("false").asBool(),
   bal: {
     endpoint: env.get("MNA_TDB_BAL_API_URL").asString(),
-    api_key: env.get("MNA_TDB_BAL_API_KEY").required().asString(),
     bearer_key: env.get("MNA_TDB_BAL_BEARER_KEY").asString(),
     deca_api_key: env.get("MNA_TDB_BAL_DECA_API_KEY").asString(),
   },

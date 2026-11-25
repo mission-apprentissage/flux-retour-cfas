@@ -99,7 +99,7 @@ export const decaJobs = {
 export const decaCrons = {
   // 19h00 Paris le dimanche — import hebdomadaire des contrats DECA bruts (production uniquement).
   //
-  // L'import dure 6h30 en moyenne et occupe le worker, qui est séquentiel et unique.
+  // L'import dure près de 7 h et occupe le worker, qui est séquentiel et unique.
   // À 10h30 il entrait en collision avec le récap quotidien des CFA, planifié à la même
   // minute : chaque dimanche, CFA et Missions Locales recevaient leur récap vers 17h00
   // au lieu de 10h30 et 13h30.
@@ -107,7 +107,7 @@ export const decaCrons = {
   // 19h00 est le seul créneau qui convienne : après l'envoi WhatsApp de 18h30, et assez
   // tôt pour finir avant le batch quotidien de 2h30.
   //
-  // Mesuré sur 13 occurrences : durée moyenne 388 min, max 411 min.
+  // Relevé du 30/08 au 04/10/2026, à la lecture Mongo de la BAL : de 385 à 447 min, en hausse à la rentrée.
   "hydrate:contrats-deca-raw": {
     cron_string: "0 19 * * 7",
     checkinMargin: 15,

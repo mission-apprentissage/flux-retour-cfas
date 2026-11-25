@@ -36,3 +36,14 @@ https://www.cfadock.fr/Home/ApiDescription
 ## LaBonneAlternance
 
 https://labonnealternance.apprentissage.beta.gouv.fr/
+
+## DECA, par l'API de la BAL
+
+Les contrats d'apprentissage DECA de la DGEFP arrivent par la BAL, maintenue par l'équipe La bonne alternance, qui interroge l'API DECA chaque nuit.
+
+- Le job `hydrate:contrats-deca-raw` lit chaque dimanche à 19h00, en production, la route `GET /v1/deca/contrats` de l'API de la BAL, page par page, jusqu'au dernier contrat.
+- Il crée ou met à jour un effectif DECA par année scolaire du contrat.
+- Les contrats aux statuts Annulé et Supprimé ne sont pas importés. Leurs effectifs déjà en base sont supprimés en fin d'import, et les vœux Affelnet qui pointaient vers eux sont déliés.
+- La BAL anonymise un contrat deux ans après sa date de fin.
+- Accès : une clé d'API de la BAL dans `MNA_TDB_BAL_DECA_API_KEY`, en production seulement. Elle vaut un an, et le job prévient dans Sentry trente jours avant l'échéance. La BAL la régénère sur demande, ce qui invalide l'ancienne aussitôt : mettre à jour la variable et déployer le même jour.
+- Reprise : après un échec, le job journalise le curseur à passer en `--after` pour reprendre la lecture.
