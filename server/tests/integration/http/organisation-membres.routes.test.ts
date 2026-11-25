@@ -585,6 +585,14 @@ describe("Gestion de l'équipe d'une organisation", () => {
       expect(await usersMigrationDb().findOne({ email: EMAIL })).toBeNull();
     });
 
+    it("annonce l'expiration avant de demander le lien quand l'invitation a expiré", async () => {
+      await invitationsDb().updateOne({ email: EMAIL }, { $set: { expires_at: new Date(Date.now() - 1000) } });
+      const response = await inscrire();
+      expect(response.status).toBe(401);
+      expect(response.data.message).toBe("Le lien d'invitation a expiré. Veuillez demander une nouvelle invitation.");
+      expect(await usersMigrationDb().findOne({ email: EMAIL })).toBeNull();
+    });
+
     it("confirme le compte avec le rôle de l'invitation quand le jeton est le bon", async () => {
       const response = await inscrire(JETON);
       expect(response.status).toBe(200);
