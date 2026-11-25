@@ -6,9 +6,9 @@ import nock from "nock";
 import { cyrb53Hash } from "shared/utils";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { effectifsDECADb, organismesDb } from "@/common/model/collections";
+import { effectifsDECADb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes";
-import { hydrateDecaRaw } from "@/jobs/hydrate/deca/hydrate-deca-raw";
+import { estContratEcarte, hydrateDecaRaw } from "@/jobs/hydrate/deca/hydrate-deca-raw";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
 
@@ -155,5 +155,106 @@ describe("import DECA par l'API de la BAL", () => {
     expect(scope.isDone()).toBe(true);
     expect(await effectifsDECADb().countDocuments()).toBe(1);
     expect(setMeasurement).not.toHaveBeenCalled();
+  });
+
+  describe("contrats annulés et supprimés", () => {
+    const page = (contrats: unknown[]) => ({ contrats, pagination: { next: null, ecartes: 0 } });
+    const voeuLie = (effectifDecaId: ObjectId) => ({
+      _id: new ObjectId(),
+      effectif_deca_id: effectifDecaId,
+      created_at: new Date(),
+      updated_at: new Date(),
+      is_contacted: false,
+      raw: {},
+      history: [],
+      _computed: { formation: {} },
+    });
+
+    it.each(["Annulé", "Supprimé", " SUPPRIME "])(
+      "écarte un contrat au statut %s, ses copies fléchées et le lien de son vœu",
+      async (statut) => {
+        const contrat = contratBal();
+        const autre = contratBal({ alternant: { ...contratBal().alternant, nom: "MARTIN" } });
+        bal().reply(200, page([contrat, autre]));
+        await hydrateDecaRaw();
+
+        const effectif = await effectifsDECADb().findOne({ deca_raw_id: new ObjectId(contrat._id) });
+        const autreEffectif = await effectifsDECADb().findOne({ deca_raw_id: new ObjectId(autre._id) });
+        await effectifsDECADb().insertOne({
+          ...effectif!,
+          _id: new ObjectId(),
+          organisme_id: new ObjectId(),
+          fleche: { regle: "lieu_declare", le: new Date() },
+        });
+        await effectifsDECADb().updateOne(
+          { _id: effectif!._id },
+          { $set: { fleche: { regle: "lieu_declare", le: new Date(), annule_le: new Date() } } }
+        );
+        const voeu = await voeuxAffelnetDb().insertOne(voeuLie(effectif!._id));
+        const voeuAutre = await voeuxAffelnetDb().insertOne(voeuLie(autreEffectif!._id));
+        vi.mocked(setMeasurement).mockClear();
+
+        bal().reply(200, page([{ ...contrat, statut }, autre]));
+        await hydrateDecaRaw();
+
+        expect(await effectifsDECADb().countDocuments({ deca_raw_id: new ObjectId(contrat._id) })).toBe(0);
+        expect(await effectifsDECADb().countDocuments({ deca_raw_id: new ObjectId(autre._id) })).toBe(1);
+        expect((await voeuxAffelnetDb().findOne({ _id: voeu.insertedId }))?.effectif_deca_id).toBeUndefined();
+        expect((await voeuxAffelnetDb().findOne({ _id: voeuAutre.insertedId }))?.effectif_deca_id).toEqual(
+          autreEffectif!._id
+        );
+        expect(mesures()).toMatchObject({ "deca.annules": 2 });
+      }
+    );
+
+    it("garde l'effectif écrit en dernier par un autre contrat du même apprenant", async () => {
+      const ancien = contratBal();
+      const nouveau = contratBal();
+      bal().reply(200, page([ancien]));
+      await hydrateDecaRaw();
+
+      bal().reply(200, page([{ ...ancien, statut: "Annulé" }, nouveau]));
+      await hydrateDecaRaw();
+
+      const effectifs = await effectifsDECADb().find({}).toArray();
+      expect(effectifs).toHaveLength(1);
+      expect(effectifs[0].deca_raw_id).toEqual(new ObjectId(nouveau._id));
+    });
+
+    it("ne crée rien pour un contrat annulé jamais importé", async () => {
+      bal().reply(200, page([contratBal({ statut: "Annulé" })]));
+
+      await hydrateDecaRaw();
+
+      expect(await effectifsDECADb().countDocuments()).toBe(0);
+      expect(mesures()).toMatchObject({ "deca.annules": 0 });
+    });
+
+    it("ne supprime rien quand la lecture est interrompue", async () => {
+      const contrat = contratBal();
+      bal().reply(200, page([contrat]));
+      await hydrateDecaRaw();
+
+      const curseur = new ObjectId().toHexString();
+      bal()
+        .reply(200, { contrats: [{ ...contrat, statut: "Annulé" }], pagination: { next: curseur, ecartes: 0 } })
+        .get("/api/v1/deca/contrats")
+        .query({ after: curseur })
+        .reply(400, { message: "Paramètre invalide" });
+
+      await expect(hydrateDecaRaw()).rejects.toMatchObject({ response: { status: 400 } });
+
+      expect(await effectifsDECADb().countDocuments({ deca_raw_id: new ObjectId(contrat._id) })).toBe(1);
+    });
+
+    it("reconnaît les statuts écartés", () => {
+      expect(estContratEcarte({ statut: "Annulé" })).toBe(true);
+      expect(estContratEcarte({ statut: " annule" })).toBe(true);
+      expect(estContratEcarte({ statut: "Supprimé" })).toBe(true);
+      expect(estContratEcarte({ statut: "Corrigé" })).toBe(false);
+      expect(estContratEcarte({ statut: "Rompu" })).toBe(false);
+      expect(estContratEcarte({ statut: "" })).toBe(false);
+      expect(estContratEcarte({ statut: null })).toBe(false);
+    });
   });
 });

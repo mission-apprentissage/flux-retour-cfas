@@ -12,7 +12,7 @@ import { IOrganisme } from "shared/models/data/organismes.model";
 import { zodOpenApi } from "shared/models/zodOpenApi";
 import { cyrb53Hash, getYearFromDate } from "shared/utils";
 
-import { updateVoeuxAffelnetEffectifDeca } from "@/common/actions/affelnet.actions";
+import { delierVoeuxEffectifsDecaOrphelins, updateVoeuxAffelnetEffectifDeca } from "@/common/actions/affelnet.actions";
 import {
   appliquerCible,
   chargerResponsablesFleches,
@@ -281,8 +281,11 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
   const debutMs = Date.now();
   const echecs = createErrorAggregator("hydrate:contrats-deca-raw");
   const suivi = creerSuiviPages();
+  const contratsEcartes: ClesContratEcarte[] = [];
   let totalCount = 0;
   let ecartes = 0;
+  let nbContratsEcartes = 0;
+  let effectifsAnnules = 0;
   let curseurDepart: string | undefined;
   let erreur: unknown = null;
 
@@ -305,6 +308,15 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
       traiter: async ({ contrat, suiviPage }) => {
         totalCount++;
         try {
+          if (!dryRun && estContratEcarte(contrat)) {
+            nbContratsEcartes++;
+            const cles = await clesContratDeca(contrat);
+            if (cles) {
+              contratsEcartes.push(cles);
+            }
+            echecs.ok();
+            return;
+          }
           const stats = dryRun
             ? await inspectEffectifDeca(contrat, dryRunStats)
             : await updateEffectifDeca(contrat, responsablesFleches);
@@ -316,6 +328,15 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
       },
       surErreur: (erreurContrat) => echecs.record(erreurContrat),
     });
+
+    if (contratsEcartes.length > 0) {
+      effectifsAnnules = await supprimerEffectifsEcartes(contratsEcartes);
+      const voeuxDelies = effectifsAnnules > 0 ? await delierVoeuxEffectifsDecaOrphelins() : 0;
+      logger.info(
+        { contrats: nbContratsEcartes, effectifs: effectifsAnnules, voeux: voeuxDelies },
+        "DECA : contrats annulés ou supprimés écartés"
+      );
+    }
 
     if (dryRun) {
       logger.info({ ...dryRunStats, totalCount }, "DECA dry-run : aucune écriture");
@@ -345,6 +366,7 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
       effectifs: totalStats.created + totalStats.updated,
       echecs: nbEchecs,
       ecartes,
+      annules: effectifsAnnules,
       cache: getRunCacheStats(),
     });
     logger.info(
@@ -371,12 +393,14 @@ function publierMesures({
   effectifsParSeconde,
   echecs,
   ecartes,
+  annules,
   tauxDefautCache,
 }: BilanImportDeca) {
   Sentry.setMeasurement("deca.contrats", contrats, "none");
   Sentry.setMeasurement("deca.effectifs", effectifs, "none");
   Sentry.setMeasurement("deca.echecs", echecs, "none");
   Sentry.setMeasurement("deca.ecartes", ecartes, "none");
+  Sentry.setMeasurement("deca.annules", annules, "none");
   Sentry.setMeasurement("deca.contrats_par_seconde", contratsParSeconde, "none");
   Sentry.setMeasurement("deca.effectifs_par_seconde", effectifsParSeconde, "none");
   if (tauxDefautCache !== null) {
@@ -556,7 +580,7 @@ async function updateOrganismesLastEffectifUpdate(organismeIds: Set<string>) {
   }
 }
 
-async function transformDocument(document: IContratDecaBal): Promise<WithoutId<IEffectifDECA>[]> {
+function anneesScolairesDuContrat(document: IContratDecaBal): string[] {
   const { formation } = document;
 
   const dateDebutFormation = formation?.date_debut_formation ? new Date(formation.date_debut_formation) : null;
@@ -572,25 +596,96 @@ async function transformDocument(document: IContratDecaBal): Promise<WithoutId<I
     );
   }
 
-  const effectifs: WithoutId<IEffectifDECA>[] = [];
-
   if (startYear === endYear) {
-    const anneeScolaire = `${startYear}-${startYear}`;
+    return [`${startYear}-${startYear}`];
+  }
+  return Array.from({ length: endYear - startYear }, (_, index) => `${startYear + index}-${startYear + index + 1}`);
+}
+
+async function transformDocument(document: IContratDecaBal): Promise<WithoutId<IEffectifDECA>[]> {
+  const effectifs: WithoutId<IEffectifDECA>[] = [];
+  for (const anneeScolaire of anneesScolairesDuContrat(document)) {
     const effectif = await createEffectif(document, anneeScolaire);
     if (effectif) {
       effectifs.push(effectif);
     }
-  } else {
-    for (let year = startYear; year < endYear; year++) {
-      const anneeScolaire = `${year}-${year + 1}`;
-      const effectif = await createEffectif(document, anneeScolaire);
-      if (effectif) {
-        effectifs.push(effectif);
-      }
-    }
+  }
+  return effectifs;
+}
+
+const calculerIdErpApprenant = (
+  prenom: string | null | undefined,
+  nom: string | null | undefined,
+  dateNaissance: Date | null
+) => cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (dateNaissance || ""));
+
+const STATUTS_ECARTES = new Set(["annule", "supprime"]);
+
+const normaliserStatut = (statut: string | null | undefined) =>
+  (statut ?? "")
+    .trim()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+
+export const estContratEcarte = (contrat: Pick<IContratDecaBal, "statut">) =>
+  STATUTS_ECARTES.has(normaliserStatut(contrat.statut));
+
+type ClesContratEcarte = {
+  organismeId: ObjectId;
+  idErpApprenant: string;
+  anneesScolaires: string[];
+  decaRawId: ObjectId;
+};
+
+async function clesContratDeca(document: IContratDecaBal): Promise<ClesContratEcarte | null> {
+  const uai = document.organisme_formation?.uai_cfa;
+  const siret = document.organisme_formation?.siret;
+  if (!uai || !siret) {
+    return null;
   }
 
-  return effectifs;
+  const organisme = await cachedInRun(`organisme:${uai}|${siret}`, () => getOrganismeByUAIAndSIRET(uai, siret));
+  if (!organisme) {
+    return null;
+  }
+
+  let anneesScolaires: string[];
+  try {
+    anneesScolaires = anneesScolairesDuContrat(document);
+  } catch {
+    return null;
+  }
+
+  const dateNaissance = document.alternant?.date_naissance ? new Date(document.alternant.date_naissance) : null;
+  return {
+    organismeId: organisme._id,
+    idErpApprenant: calculerIdErpApprenant(document.alternant?.prenom, document.alternant?.nom, dateNaissance),
+    anneesScolaires,
+    decaRawId: new ObjectId(document._id),
+  };
+}
+
+async function supprimerEffectifsEcartes(contrats: ClesContratEcarte[]): Promise<number> {
+  let supprimes = 0;
+  for (const { organismeId, idErpApprenant, anneesScolaires, decaRawId } of contrats) {
+    for (const anneeScolaire of anneesScolaires) {
+      const { deletedCount } = await effectifsDECADb().deleteOne({
+        organisme_id: organismeId,
+        id_erp_apprenant: idErpApprenant,
+        annee_scolaire: anneeScolaire,
+        deca_raw_id: decaRawId,
+      });
+      supprimes += deletedCount;
+    }
+    const { deletedCount } = await effectifsDECADb().deleteMany({
+      organisme_responsable_id: organismeId,
+      deca_raw_id: decaRawId,
+      fleche: { $exists: true },
+    });
+    supprimes += deletedCount;
+  }
+  return supprimes;
 }
 
 async function createEffectif(
@@ -740,7 +835,7 @@ async function createEffectif(
     created_at: new Date(),
     updated_at: new Date(),
     transmitted_at: new Date(),
-    id_erp_apprenant: cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (dateNaissance || "")),
+    id_erp_apprenant: calculerIdErpApprenant(prenom, nom, dateNaissance),
     source: SOURCE_APPRENANT.DECA,
     annee_scolaire: anneeScolaire,
   };

@@ -295,3 +295,40 @@ export const updateVoeuxAffelnetEffectifDeca = async (
     return await voeuxAffelnetDb().updateMany({ _id: { $in: voeuxId } }, { $set: { effectif_deca_id: effectif_id } });
   }
 };
+
+const TAILLE_LOT_VOEUX = 1_000;
+
+export const delierVoeuxEffectifsDecaOrphelins = async (): Promise<number> => {
+  const orphelins = await voeuxAffelnetDb()
+    .aggregate<{ _id: ObjectId; cible: ObjectId }>([
+      { $match: { effectif_deca_id: { $type: "objectId" } } },
+      { $project: { cible: "$effectif_deca_id" } },
+      {
+        $lookup: {
+          from: "effectifsDECA",
+          localField: "cible",
+          foreignField: "_id",
+          as: "trouves",
+          pipeline: [{ $project: { _id: 1 } }],
+        },
+      },
+      { $match: { trouves: { $size: 0 } } },
+      { $project: { cible: 1 } },
+    ])
+    .toArray();
+
+  let delies = 0;
+  for (let debut = 0; debut < orphelins.length; debut += TAILLE_LOT_VOEUX) {
+    const { modifiedCount } = await voeuxAffelnetDb().bulkWrite(
+      orphelins.slice(debut, debut + TAILLE_LOT_VOEUX).map(({ _id, cible }) => ({
+        updateOne: {
+          filter: { _id, effectif_deca_id: cible },
+          update: { $unset: { effectif_deca_id: "" } },
+        },
+      })),
+      { ordered: false }
+    );
+    delies += modifiedCount;
+  }
+  return delies;
+};

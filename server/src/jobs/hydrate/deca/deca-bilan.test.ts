@@ -11,6 +11,7 @@ describe("construireBilanImport", () => {
       effectifs: 3_600_000,
       echecs: 12,
       ecartes: 3,
+      annules: 4,
       cache: {
         organisme: { acces: 300, defauts: 3, tauxDefaut: 0.01 },
         "opcos-rncp": { acces: 100, defauts: 7, tauxDefaut: 0.07 },
@@ -33,6 +34,7 @@ describe("construireBilanImport", () => {
       effectifs: 0,
       echecs: 0,
       ecartes: 0,
+      annules: 0,
       cache: null,
     });
 
@@ -44,6 +46,7 @@ describe("construireBilanImport", () => {
       effectifsParSeconde: 0,
       echecs: 0,
       ecartes: 0,
+      annules: 0,
       cache: null,
       tauxDefautCache: null,
     });

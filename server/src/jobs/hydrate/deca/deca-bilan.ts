@@ -8,6 +8,7 @@ export type BilanImportDeca = {
   effectifsParSeconde: number;
   echecs: number;
   ecartes: number;
+  annules: number;
   cache: RunCacheStats | null;
   tauxDefautCache: number | null;
 };
@@ -19,6 +20,7 @@ export function construireBilanImport({
   effectifs,
   echecs,
   ecartes,
+  annules,
   cache,
 }: {
   debutMs: number;
@@ -27,6 +29,7 @@ export function construireBilanImport({
   effectifs: number;
   echecs: number;
   ecartes: number;
+  annules: number;
   cache: RunCacheStats | null;
 }): BilanImportDeca {
   const secondes = Math.max((finMs - debutMs) / 1000, 1);
@@ -43,6 +46,7 @@ export function construireBilanImport({
     effectifsParSeconde: Math.round((effectifs / secondes) * 10) / 10,
     echecs,
     ecartes,
+    annules,
     cache,
     tauxDefautCache: totaux.acces > 0 ? Math.round((totaux.defauts / totaux.acces) * 10_000) / 10_000 : null,
   };
