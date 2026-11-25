@@ -15,6 +15,7 @@ export const registrationSchema = {
     has_accept_cgu_version: z.string(),
   }),
   organisation: zOrganisationCreate,
+  invitationToken: z.string().optional(),
 };
 
 export type RegistrationSchema = z.infer<z.ZodObject<typeof registrationSchema>>;

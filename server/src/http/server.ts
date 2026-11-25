@@ -122,7 +122,7 @@ import { authMiddleware, checkActivationToken, checkPasswordToken } from "./help
 import errorMiddleware, { dependanceIndisponible } from "./middlewares/errorMiddleware";
 import {
   requireAdministrator,
-  requireCfaAdminIfCfa,
+  requireAdminSiOrganisationAvecAdministrateurs,
   requireEffectifOrganismePermission,
   requireMissionLocale,
   requireOrganismePermission,
@@ -939,7 +939,7 @@ function setupRoutes(app: Application) {
       )
       .post(
         "/membres/batch",
-        requireCfaAdminIfCfa,
+        requireAdminSiOrganisationAvecAdministrateurs,
         heavyLimiter,
         returnResult(async (req) => {
           const batchSchema = {
@@ -961,28 +961,28 @@ function setupRoutes(app: Application) {
       )
       .delete(
         "/membres/:userId",
-        requireCfaAdminIfCfa,
+        requireAdminSiOrganisationAvecAdministrateurs,
         returnResult(async (req) => {
           await removeUserFromOrganisation(req.user, req.params.userId as string);
         })
       )
       .post(
         "/membres/:userId/validate",
-        requireCfaAdminIfCfa,
+        requireAdminSiOrganisationAvecAdministrateurs,
         returnResult(async (req) => {
           await validateMembre(req.user, req.params.userId as string);
         })
       )
       .post(
         "/membres/:userId/reject",
-        requireCfaAdminIfCfa,
+        requireAdminSiOrganisationAvecAdministrateurs,
         returnResult(async (req) => {
           await rejectMembre(req.user, req.params.userId as string);
         })
       )
       .put(
         "/membres/:userId/role",
-        requireCfaAdminIfCfa,
+        requireAdminSiOrganisationAvecAdministrateurs,
         returnResult(async (req) => {
           const { role } = await validateFullZodObjectSchema(req.body, { role: z.enum(["admin", "member"]) });
           await updateMemberRole(req.user, req.params.userId as string, role);
@@ -996,14 +996,14 @@ function setupRoutes(app: Application) {
       )
       .delete(
         "/invitations/:invitationId",
-        requireCfaAdminIfCfa,
+        requireAdminSiOrganisationAvecAdministrateurs,
         returnResult(async (req) => {
           await cancelInvitation(req.user, req.params.invitationId as string);
         })
       )
       .post(
         "/invitations/:invitationId/resend",
-        requireCfaAdminIfCfa,
+        requireAdminSiOrganisationAvecAdministrateurs,
         returnResult(async (req) => {
           await resendInvitationEmail(req.user, req.params.invitationId as string);
         })

@@ -145,6 +145,7 @@ export default function ProfilClient() {
           has_accept_cgu_version: CGU_VERSION,
         },
         organisation,
+        ...(invitationToken ? { invitationToken } : {}),
       });
 
       if (account_status === "CONFIRMED") {

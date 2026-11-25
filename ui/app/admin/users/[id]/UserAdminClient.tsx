@@ -8,6 +8,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
+import { organisationAvecAdministrateurs } from "shared";
 
 import UserForm from "@/app/_components/admin/UserForm";
 import { PageWithSidebarSkeleton } from "@/app/_components/suspense/LoadingSkeletons";
@@ -40,6 +41,10 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
 
   const user = data?.user;
   const isCfa = user?.organisation?.type === "ORGANISME_FORMATION";
+  const avecAdministrateurs =
+    organisationAvecAdministrateurs(user?.organisation?.type) &&
+    (isCfa || user?.account_status !== "PENDING_EMAIL_VALIDATION");
+  const libelleStructure = isCfa ? "l'établissement" : "l'organisation";
   const currentRole = user?.organisation_role ?? "member";
 
   const openRoleChangeModal = useCallback((newRole: "admin" | "member") => {
@@ -92,7 +97,7 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
           />
         )}
         {pendingRole === "admin"
-          ? `Voulez-vous vraiment promouvoir ${user?.email} en administrateur ? Cette personne pourra gérer les utilisateurs de l'établissement.`
+          ? `Voulez-vous vraiment promouvoir ${user?.email} en administrateur ? Cette personne pourra gérer les utilisateurs de ${libelleStructure}.`
           : `Voulez-vous vraiment retirer le rôle administrateur à ${user?.email} ? Cette personne ne pourra plus gérer les utilisateurs.`}
       </adminRoleChangeModal.Component>
       <div className={styles.page}>
@@ -124,9 +129,9 @@ export default function UserAdminClient({ id }: UserAdminClientProps) {
               {user.last_connection ? new Date(user.last_connection).toLocaleString() : "jamais connecté"}
             </p>
           </div>
-          {isCfa && (
+          {avecAdministrateurs && (
             <div className={styles.roleCard}>
-              <p className={styles.roleCardTitle}>Rôle au sein du CFA</p>
+              <p className={styles.roleCardTitle}>{isCfa ? "Rôle au sein du CFA" : "Rôle au sein de l'organisation"}</p>
               <div className={styles.roleCardRow}>
                 <Badge noIcon severity={currentRole === "admin" ? "info" : "new"}>
                   {currentRole === "admin" ? "Administrateur" : "Non-administrateur"}

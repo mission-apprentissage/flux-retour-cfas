@@ -1,5 +1,6 @@
 import * as Boom from "@hapi/boom";
 import { ObjectId } from "mongodb";
+import { organisationAvecAdministrateurs } from "shared";
 import type { IOrganisationMissionLocale } from "shared/models";
 import { IInvitation } from "shared/models/data/invitations.model";
 
@@ -28,7 +29,12 @@ import {
 } from "./admin/mission-locale/mission-locale.admin.actions";
 import { enqueueBrevoContactSync, enqueueBrevoOrganisationContactSync } from "./brevo/contacts/enqueue-sync";
 import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
-import { buildOrganisationLabel, createOrganisation, getOrganisationById } from "./organisations.actions";
+import {
+  buildOrganisationLabel,
+  createOrganisation,
+  getOrganisationById,
+  getOrganisationIdsPouvantValider,
+} from "./organisations.actions";
 import { getOrganismeByUAIAndSIRET } from "./organismes/organismes.actions";
 import { resumeCollab } from "./organismes/organismes.admin.actions";
 import { createSession } from "./sessions.actions";
@@ -93,6 +99,9 @@ export async function register(registration: RegistrationSchema): Promise<{
     }
     if (invitation.expires_at && getCurrentTime() > invitation.expires_at) {
       throw Boom.unauthorized("Le lien d'invitation a expiré. Veuillez demander une nouvelle invitation.");
+    }
+    if (registration.invitationToken !== invitation.token) {
+      throw Boom.badRequest("Une invitation est en attente pour cet email. Utilisez le lien reçu par email.");
     }
   }
 
@@ -205,12 +214,11 @@ async function resumeCollabOnReconnection(organisationId: ObjectId, userId: Obje
  * - Utilisateur standard → passe en PENDING_ADMIN_VALIDATION (flow existant).
  */
 export async function activateUser(ctx: AuthContext) {
-  const gestionnaires = await usersMigrationDb()
-    .find({
-      organisation_id: ctx.organisation_id,
-      account_status: "CONFIRMED",
-    })
-    .toArray();
+  const gestionnaires = await usersMigrationDb().countDocuments({
+    organisation_id: { $in: await getOrganisationIdsPouvantValider(ctx.organisation_id, ctx.organisation) },
+    account_status: "CONFIRMED",
+    ...(organisationAvecAdministrateurs(ctx.organisation.type) ? { organisation_role: "admin" } : {}),
+  });
 
   // tant que l'utilisateur n'est pas confirmé
   if (ctx.account_status === "PENDING_EMAIL_VALIDATION") {
@@ -308,7 +316,7 @@ export async function activateUser(ctx: AuthContext) {
         }
       )
     )?.account_status,
-    validationByGestionnaire: gestionnaires.length > 0,
+    validationByGestionnaire: gestionnaires > 0,
   };
 }
 

@@ -79,6 +79,7 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
       const result = await register({
         user: buildRegistrationUser("invite@example.com"),
         organisation: { type: "ADMINISTRATEUR" },
+        invitationToken: "tok-invite",
       });
 
       expect(result.account_status).toBe("CONFIRMED");
@@ -109,7 +110,11 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
       it("active la ML à l'inscription de son premier invité, comme une validation admin", async () => {
         const organisationId = await inviter("premier@example.com");
 
-        await register({ user: buildRegistrationUser("premier@example.com"), organisation: { ...ML_ORGA } });
+        await register({
+          user: buildRegistrationUser("premier@example.com"),
+          organisation: { ...ML_ORGA },
+          invitationToken: "tok-premier@example.com",
+        });
 
         const ml = await organisationsDb().findOne({ _id: organisationId });
         expect((ml as { activated_at?: Date }).activated_at).toBeInstanceOf(Date);
@@ -120,7 +125,11 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
         const activatedAt = new Date("2025-03-01T00:00:00.000Z");
         const organisationId = await inviter("second@example.com", { activated_at: activatedAt });
 
-        await register({ user: buildRegistrationUser("second@example.com"), organisation: { ...ML_ORGA } });
+        await register({
+          user: buildRegistrationUser("second@example.com"),
+          organisation: { ...ML_ORGA },
+          invitationToken: "tok-second@example.com",
+        });
 
         const ml = await organisationsDb().findOne({ _id: organisationId });
         expect((ml as { activated_at?: Date }).activated_at).toEqual(activatedAt);
@@ -131,7 +140,11 @@ describe("account.actions — câblage de la synchro Brevo instantanée", () => 
         const organisationId = await inviter("troisieme@example.com");
         await usersMigrationDb().insertOne(testDoc<IUsersMigration>(buildUser({ _id: organisationId })));
 
-        await register({ user: buildRegistrationUser("troisieme@example.com"), organisation: { ...ML_ORGA } });
+        await register({
+          user: buildRegistrationUser("troisieme@example.com"),
+          organisation: { ...ML_ORGA },
+          invitationToken: "tok-troisieme@example.com",
+        });
 
         const ml = await organisationsDb().findOne({ _id: organisationId });
         expect((ml as { activated_at?: Date }).activated_at).toBeUndefined();
