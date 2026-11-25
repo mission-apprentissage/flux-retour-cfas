@@ -163,8 +163,6 @@ jobs:
       environment: recette
       app_version: ${{ needs.release.outputs.VERSION }}
     secrets:
-      DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-      DEPLOY_PASS: ${{ secrets.DEPLOY_PASS }}
       SLACK_WEBHOOK_NOTIF: ${{ secrets.SLACK_WEBHOOK }}
       SLACK_WEBHOOK_ALERTING: ${{ secrets.SLACK_WEBHOOK_ALERTING }}
       OPENPGP_PRIVATE_SUBKEY: ${{ secrets.OPENPGP_PRIVATE_SUBKEY }}
