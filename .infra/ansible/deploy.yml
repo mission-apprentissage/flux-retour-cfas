@@ -113,6 +113,7 @@
       shell:
         chdir: /opt/app
         cmd: "sudo /opt/app/tools/ssl/renew-certificate.sh {{dns_name}}"
+      when: certbot | default(true) | bool
 
     - name: "Setup de la Metabase"
       shell:
