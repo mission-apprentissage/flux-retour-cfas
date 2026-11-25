@@ -126,6 +126,7 @@ const config = {
     endpoint: env.get("MNA_TDB_BAL_API_URL").asString(),
     api_key: env.get("MNA_TDB_BAL_API_KEY").required().asString(),
     bearer_key: env.get("MNA_TDB_BAL_BEARER_KEY").asString(),
+    deca_api_key: env.get("MNA_TDB_BAL_DECA_API_KEY").asString(),
   },
   classifier: {
     endpoint: env.get("MNA_TDB_CLASSIFIER_ENDPOINT").default("http://server-classifier:8000").asString(),
