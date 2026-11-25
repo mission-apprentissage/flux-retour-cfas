@@ -6,12 +6,19 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { it, expect, describe, beforeAll, beforeEach, vi } from "vitest";
 
+import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import {
   createMissionLocaleSnapshot,
   matchFromJointOrganisme,
 } from "@/common/actions/mission-locale/mission-locale.actions";
+import { withStatsMlDifferees } from "@/common/actions/mission-locale/statsMlDifferees";
 import * as collectionsModule from "@/common/model/collections";
-import { missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import {
+  missionLocaleEffectifsDb,
+  missionLocaleStatsDb,
+  organisationsDb,
+  organismesDb,
+} from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -384,6 +391,28 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       const result = await createMissionLocaleSnapshot(effectif);
 
       expect(result?.upserted).toBe(true);
+    });
+  });
+
+  describe("Statistiques ML différées", () => {
+    it("écrit en fin de contexte les mêmes statistiques qu'un calcul immédiat", async () => {
+      const ml = await organisationsDb().findOne({ type: "MISSION_LOCALE", ml_id: ML_ID });
+      let statsPendant: unknown = "non lu";
+
+      await withStatsMlDifferees(async () => {
+        await createMissionLocaleSnapshot(createBaseDecaEffectif());
+        statsPendant = await missionLocaleStatsDb().findOne({ mission_locale_id: ml?._id });
+        vi.setSystemTime(new Date("2025-12-16T10:00:00Z"));
+      });
+
+      const differees = await missionLocaleStatsDb().findOne({ mission_locale_id: ml?._id });
+      await createOrUpdateMissionLocaleStats(ml!._id);
+      const immediates = await missionLocaleStatsDb().findOne({ mission_locale_id: ml?._id });
+
+      expect(statsPendant).toBeNull();
+      expect(differees?.stats.total).toBe(1);
+      expect(differees?.stats).toEqual(immediates?.stats);
+      expect(differees?.segments).toEqual(immediates?.segments);
     });
   });
 

@@ -23,6 +23,7 @@ import {
 import { withComputedFields } from "@/common/actions/effectifs.actions";
 import { checkIfEffectifExists, getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
 import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
+import { withStatsMlDifferees } from "@/common/actions/mission-locale/statsMlDifferees";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { effectifsDECADb, organismesDb } from "@/common/model/collections";
@@ -185,7 +186,7 @@ async function inspectEffectifDeca(document: IRawBalDeca, stats: IDryRunStats): 
 }
 
 export function hydrateDecaRaw(options: { dryRun?: boolean; limit?: number } = {}) {
-  return withRunCache(() => importerContratsDeca(options));
+  return withRunCache(() => withStatsMlDifferees(() => importerContratsDeca(options)));
 }
 
 async function importerContratsDeca({ dryRun = false, limit }: { dryRun?: boolean; limit?: number }) {

@@ -68,6 +68,7 @@ import {
 } from "./mission-locale-stats.helpers";
 import { computeSuiviDatesSet } from "./mission-locale-suivi-dates";
 import { CONTACT_OPPORTUN_SCORE_THRESHOLD } from "./mission-locale.constants";
+import { recalculerStatsMl } from "./statsMlDifferees";
 
 const DECA_RUPTURE_DATE_DEBUT = new Date("2025-11-01");
 const DELAI_MIN_RUPTURE_FIN_FORMATION_DAYS = 90;
@@ -3504,7 +3505,7 @@ export const createMissionLocaleSnapshot = async (
   }
 
   if (mongoInfo.lastErrorObject?.n > 0) {
-    await createOrUpdateMissionLocaleStats(mlData._id);
+    await recalculerStatsMl(mlData._id);
     if (upsertedId) {
       // Si on a remplacé un DECA, merger les données utilisateur du DECA vers le nouveau keeper ERP
       if (softDeletedId) {
