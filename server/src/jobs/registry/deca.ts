@@ -16,11 +16,12 @@ export const decaJobs = {
     handler: async (job) => {
       const dryRun = payloadBoolean(job.payload, "dryRun") ?? false;
       const limit = payloadNumber(job.payload, "limit");
+      const after = payloadString(job.payload, "after");
       if (!dryRun && config.env !== "production") {
         logger.warn("hydrate:contrats-deca-raw job can only be run in production environment");
         return 0;
       }
-      return hydrateDecaRaw({ dryRun, limit });
+      return hydrateDecaRaw({ dryRun, limit, after });
     },
   },
   "tmp:retablir-deca-fichier": {

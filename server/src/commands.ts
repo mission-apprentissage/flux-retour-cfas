@@ -383,8 +383,10 @@ program
     "Lit sans écrire : un log par contrat (responsable vs établissement de formation) puis un bilan",
     false
   )
-  .option("-l, --limit <number>", "Limiter le nombre de contrats bruts lus (les plus récents en dry-run)", (n) =>
-    parseInt(n, 10)
+  .option("-l, --limit <number>", "Limiter le nombre de contrats lus", (n) => parseInt(n, 10))
+  .option(
+    "--after <id>",
+    "Reprendre la lecture après ce contrat BAL (curseur journalisé par l'import, ou ObjectId.createFromTime pour les plus récents)"
   )
   .option("-q, --queued", "Run job asynchronously", false)
   .action(createJobAction("hydrate:contrats-deca-raw"));
