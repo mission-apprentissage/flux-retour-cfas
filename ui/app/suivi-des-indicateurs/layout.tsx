@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { ConnectedHeader } from "@/app/_components/ConnectedHeader";
 import { UserContextProvider } from "@/app/_components/context/UserContext";
 import { Footer } from "@/app/_components/Footer";
-import { PublicHeaderWithoutAuth } from "@/app/_components/PublicHeaderWithoutAuth";
+import { PublicHeader } from "@/app/_components/PublicHeader";
 import { getSession } from "@/app/_utils/session.utils";
 import { Providers } from "@/app/providers";
 
@@ -45,7 +45,7 @@ export default async function StatistiquesLayout({ children }: { children: JSX.E
 
   return (
     <Providers>
-      <PublicHeaderWithoutAuth />
+      <PublicHeader withNav={false} />
       <StatistiquesPublicLayoutClient>{children}</StatistiquesPublicLayoutClient>
       <Footer />
     </Providers>
