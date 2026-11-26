@@ -289,6 +289,8 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
   let ecartes = 0;
   let nbContratsEcartes = 0;
   let effectifsAnnules = 0;
+  const clesEnEchec = new Set<string>();
+  let lectureTerminee = false;
   let erreur: unknown = null;
 
   try {
@@ -329,8 +331,13 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
           suivi.terminer(suiviPage);
         }
       },
-      surErreur: (erreurContrat) => echecs.record(erreurContrat),
+      surErreur: (erreurContrat, { contrat }) => {
+        clesEnEchec.add(cleApprenant(contrat));
+        echecs.record(erreurContrat);
+      },
     });
+
+    lectureTerminee = true;
 
     if (contratsEcartes.length > 0 && !importComplet) {
       logger.info(
@@ -338,12 +345,21 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
         "DECA : contrats annulés ou supprimés lus, effectifs gardés faute d'import complet"
       );
     } else if (contratsEcartes.length > 0) {
-      effectifsAnnules = await supprimerEffectifsEcartes(contratsEcartes);
-      const voeuxDelies = effectifsAnnules > 0 ? await delierVoeuxEffectifsDecaOrphelins() : 0;
+      const aSupprimer = contratsEcartes.filter(({ cle }) => !clesEnEchec.has(cle));
+      effectifsAnnules = await supprimerEffectifsEcartes(aSupprimer);
       logger.info(
-        { contrats: nbContratsEcartes, effectifs: effectifsAnnules, voeux: voeuxDelies },
+        {
+          contrats: nbContratsEcartes,
+          gardes: contratsEcartes.length - aSupprimer.length,
+          effectifs: effectifsAnnules,
+        },
         "DECA : contrats annulés ou supprimés écartés"
       );
+    }
+
+    if (!dryRun && importComplet) {
+      const voeuxDelies = await delierVoeuxEffectifsDecaOrphelins();
+      logger.info({ voeux: voeuxDelies }, "DECA : vœux Affelnet déliés de leurs effectifs disparus");
     }
 
     if (dryRun) {
@@ -361,7 +377,11 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
     }
   } catch (err) {
     erreur = err;
-    logger.error({ err, reprise: suivi.reprise() }, "DECA : import interrompu, reprendre avec --after");
+    if (lectureTerminee) {
+      logger.error({ err }, "DECA : échec après la lecture des contrats, relancer un import complet");
+    } else {
+      logger.error({ err, reprise: suivi.reprise() }, "DECA : import interrompu, reprendre avec --after");
+    }
   } finally {
     const nbEchecs = echecs.failed;
     if (!dryRun) {
@@ -674,9 +694,9 @@ export const estContratEcarte = (contrat: Pick<IContratDecaBal, "statut">) =>
   STATUTS_ECARTES.has(normaliserStatut(contrat.statut));
 
 type ClesContratEcarte = {
+  cle: string;
   organismeId: ObjectId;
   idErpApprenant: string;
-  anneesScolaires: string[];
   decaRawId: ObjectId;
 };
 
@@ -692,34 +712,24 @@ async function clesContratDeca(document: IContratDecaBal): Promise<ClesContratEc
     return null;
   }
 
-  let anneesScolaires: string[];
-  try {
-    anneesScolaires = anneesScolairesDuContrat(document);
-  } catch {
-    return null;
-  }
-
   const dateNaissance = document.alternant?.date_naissance ? new Date(document.alternant.date_naissance) : null;
   return {
+    cle: cleApprenant(document),
     organismeId: organisme._id,
     idErpApprenant: calculerIdErpApprenant(document.alternant?.prenom, document.alternant?.nom, dateNaissance),
-    anneesScolaires,
     decaRawId: new ObjectId(document._id),
   };
 }
 
 async function supprimerEffectifsEcartes(contrats: ClesContratEcarte[]): Promise<number> {
   let supprimes = 0;
-  for (const { organismeId, idErpApprenant, anneesScolaires, decaRawId } of contrats) {
-    for (const anneeScolaire of anneesScolaires) {
-      const { deletedCount } = await effectifsDECADb().deleteOne({
-        organisme_id: organismeId,
-        id_erp_apprenant: idErpApprenant,
-        annee_scolaire: anneeScolaire,
-        deca_raw_id: decaRawId,
-      });
-      supprimes += deletedCount;
-    }
+  for (const { organismeId, idErpApprenant, decaRawId } of contrats) {
+    const directs = await effectifsDECADb().deleteMany({
+      organisme_id: organismeId,
+      id_erp_apprenant: idErpApprenant,
+      deca_raw_id: decaRawId,
+    });
+    supprimes += directs.deletedCount;
     const { deletedCount } = await effectifsDECADb().deleteMany({
       organisme_responsable_id: organismeId,
       deca_raw_id: decaRawId,

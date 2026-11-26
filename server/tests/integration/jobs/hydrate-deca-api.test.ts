@@ -286,10 +286,6 @@ describe("import DECA par l'API de la BAL", () => {
           organisme_id: new ObjectId(),
           fleche: { regle: "lieu_declare", le: new Date() },
         });
-        await effectifsDECADb().updateOne(
-          { _id: effectif!._id },
-          { $set: { fleche: { regle: "lieu_declare", le: new Date(), annule_le: new Date() } } }
-        );
         const voeu = await voeuxAffelnetDb().insertOne(voeuLie(effectif!._id));
         const voeuAutre = await voeuxAffelnetDb().insertOne(voeuLie(autreEffectif!._id));
         vi.mocked(setMeasurement).mockClear();
@@ -306,6 +302,77 @@ describe("import DECA par l'API de la BAL", () => {
         expect(mesures()).toMatchObject({ "deca.annules": 2 });
       }
     );
+
+    it("écarte la copie rendue d'un contrat annulé", async () => {
+      const contrat = contratBal();
+      bal().reply(200, page([contrat]));
+      await hydrateDecaRaw();
+      await effectifsDECADb().updateOne(
+        { deca_raw_id: new ObjectId(contrat._id) },
+        { $set: { fleche: { regle: "lieu_declare", le: new Date(), annule_le: new Date() } } }
+      );
+      vi.mocked(setMeasurement).mockClear();
+
+      bal().reply(200, page([{ ...contrat, statut: "Annulé" }]));
+      await hydrateDecaRaw();
+
+      expect(await effectifsDECADb().countDocuments()).toBe(0);
+      expect(mesures()).toMatchObject({ "deca.annules": 1 });
+    });
+
+    it("écarte aussi les effectifs des années retirées par une version précédente du contrat", async () => {
+      const formation = contratBal().formation;
+      const contrat = contratBal({
+        formation: { ...formation, date_debut_formation: "2024-09-01T00:00:00.000Z" },
+        date_debut_contrat: "2024-09-01T00:00:00.000Z",
+      });
+      bal().reply(200, page([contrat]));
+      await hydrateDecaRaw();
+      bal().reply(200, page([{ ...contrat, formation }]));
+      await hydrateDecaRaw();
+      expect((await effectifsDECADb().find({}).toArray()).map((e) => e.annee_scolaire).sort()).toEqual([
+        "2024-2025",
+        "2025-2026",
+      ]);
+
+      bal().reply(200, page([{ ...contrat, formation, statut: "Annulé" }]));
+      await hydrateDecaRaw();
+
+      expect(await effectifsDECADb().countDocuments()).toBe(0);
+    });
+
+    it("garde l'effectif d'un apprenant dont un contrat valide a échoué dans le même import", async () => {
+      const valide = contratBal();
+      const recent = contratBal();
+      bal().reply(200, page([valide, recent]));
+      await hydrateDecaRaw();
+
+      const formationInvalide = {
+        ...valide.formation,
+        date_debut_formation: "2027-09-01T00:00:00.000Z",
+        date_fin_formation: "2026-06-30T00:00:00.000Z",
+      };
+      bal().reply(
+        200,
+        page([
+          { ...valide, formation: formationInvalide },
+          { ...recent, statut: "Annulé" },
+        ])
+      );
+      await hydrateDecaRaw();
+
+      expect(await effectifsDECADb().countDocuments()).toBe(1);
+      expect(mesures()).toMatchObject({ "deca.echecs": 1, "deca.annules": 0 });
+    });
+
+    it("délie à chaque import complet les vœux dont l'effectif a disparu", async () => {
+      const orphelin = await voeuxAffelnetDb().insertOne(voeuLie(new ObjectId()));
+      bal().reply(200, page([contratBal()]));
+
+      await hydrateDecaRaw();
+
+      expect((await voeuxAffelnetDb().findOne({ _id: orphelin.insertedId }))?.effectif_deca_id).toBeUndefined();
+    });
 
     it("garde l'effectif écrit en dernier par un autre contrat du même apprenant", async () => {
       const ancien = contratBal();
