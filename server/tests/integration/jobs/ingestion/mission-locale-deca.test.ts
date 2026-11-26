@@ -807,6 +807,24 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       expect(active[0].effectif_id.toString()).toBe(erpML2._id.toString());
     });
 
+    it("garde immédiat le recalcul de l'ancienne ML pendant l'import DECA", async () => {
+      const mlA = await organisationsDb().findOne({ type: "MISSION_LOCALE", ml_id: ML_ID });
+      let statsPendant: unknown = null;
+
+      await withStatsMlDifferees(async () => {
+        await createMissionLocaleSnapshot(
+          createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_G", "Prenomg", 21) })
+        );
+        await missionLocaleStatsDb().deleteMany({});
+        await createMissionLocaleSnapshot(
+          createBaseErpEffectif({ _id: new ObjectId(), apprenant: makeApprenant("TESTNOM_G", "Prenomg", 21, ML_ID_2) })
+        );
+        statsPendant = await missionLocaleStatsDb().findOne({ mission_locale_id: mlA?._id });
+      });
+
+      expect(statsPendant).not.toBeNull();
+    });
+
     it("ERP dans ML-A, puis DECA pour même personne dans ML-B → DECA rejeté, ERP intact", async () => {
       const erpML1 = createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_F", "Prenomf", 23) });
       const result1 = await createMissionLocaleSnapshot(erpML1);

@@ -23,6 +23,7 @@ describe("creerOrdreParCle", () => {
     ]);
 
     expect(ordre).toEqual(["b1", "a1", "a2"]);
+    expect(dansLOrdre.enAttente()).toBe(0);
   });
 
   it("passe au suivant d'une clé après un échec, et remonte l'échec à son appelant", async () => {

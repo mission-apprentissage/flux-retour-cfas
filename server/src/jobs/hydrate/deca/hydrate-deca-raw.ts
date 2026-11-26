@@ -664,7 +664,7 @@ const cleApprenant = (contrat: IContratDecaBal) => {
 
 export function creerOrdreParCle() {
   const dernieres = new Map<string, Promise<void>>();
-  return async (cle: string, traiter: () => Promise<void>) => {
+  const dansLOrdre = async (cle: string, traiter: () => Promise<void>) => {
     const courante = (dernieres.get(cle) ?? Promise.resolve()).then(traiter);
     const garde = courante.then(
       () => undefined,
@@ -679,6 +679,7 @@ export function creerOrdreParCle() {
       }
     }
   };
+  return Object.assign(dansLOrdre, { enAttente: () => dernieres.size });
 }
 
 const STATUTS_ECARTES = new Set(["annule", "supprime"]);

@@ -1,6 +1,6 @@
 import { normalize } from "path";
 
-import { captureMessage, setMeasurement } from "@sentry/node";
+import { captureException, captureMessage, setMeasurement } from "@sentry/node";
 import { ObjectId } from "bson";
 import { addJob } from "job-processor";
 import nock from "nock";
@@ -9,6 +9,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 
 import { withStatsMlDifferees } from "@/common/actions/mission-locale/statsMlDifferees";
 import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
+import parentLogger from "@/common/logger";
 import { effectifsDECADb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes";
 import config from "@/config";
@@ -101,6 +102,7 @@ describe("import DECA par l'API de la BAL", () => {
   beforeEach(async () => {
     vi.mocked(setMeasurement).mockClear();
     vi.mocked(captureMessage).mockClear();
+    vi.mocked(captureException).mockClear();
     vi.mocked(addJob).mockClear();
     vi.mocked(withStatsMlDifferees).mockClear();
     await organismesDb().insertOne({ _id: new ObjectId(), ...createRandomOrganisme({ uai: UAI, siret: SIRET }) });
@@ -110,7 +112,7 @@ describe("import DECA par l'API de la BAL", () => {
     nock.cleanAll();
   });
 
-  it("crée l'effectif depuis un contrat de la route, avec les mêmes clés qu'à la lecture Mongo", async () => {
+  it("crée l'effectif depuis un contrat de la route, avec un identifiant calculé sur la date de naissance en Date", async () => {
     const contrat = contratBal();
     bal().reply(200, { contrats: [contrat], pagination: { next: null, ecartes: 0 } });
 
@@ -194,27 +196,88 @@ describe("import DECA par l'API de la BAL", () => {
       config.bal.deca_api_key = cleInitiale;
     });
 
-    it("prévient Sentry à moins de 30 jours de l'échéance, sans le secret", async () => {
-      config.bal.deca_api_key = jwt(dans(10));
+    it("prévient Sentry à moins de 30 jours de l'échéance, avec la seule date", async () => {
+      const cle = jwt(dans(29));
+      config.bal.deca_api_key = cle;
       bal().reply(200, { contrats: [], pagination: { next: null, ecartes: 0 } });
 
       await hydrateDecaRaw();
 
-      expect(captureMessage).toHaveBeenCalledWith(
-        "La clé de l'API DECA de la BAL expire bientôt",
-        expect.objectContaining({ fingerprint: ["deca-bal-cle-expiration"] })
-      );
-      expect(JSON.stringify(vi.mocked(captureMessage).mock.calls)).not.toContain("secret");
+      const date = new Date(dans(29) * 1000).toISOString().slice(0, 10);
+      expect(captureMessage).toHaveBeenCalledWith("La clé de l'API DECA de la BAL expire bientôt", {
+        level: "warning",
+        fingerprint: ["deca-bal-cle-expiration"],
+        extra: { expiration: date },
+      });
+      expect(JSON.stringify(vi.mocked(captureMessage).mock.calls)).not.toContain(cle.split(".")[1]);
     });
 
     it("ne prévient pas plus de 30 jours avant l'échéance", async () => {
-      config.bal.deca_api_key = jwt(dans(60));
+      config.bal.deca_api_key = jwt(dans(31));
       bal().reply(200, { contrats: [], pagination: { next: null, ecartes: 0 } });
 
       await hydrateDecaRaw();
 
       expect(captureMessage).not.toHaveBeenCalled();
     });
+  });
+
+  it("cumule les contrats écartés par la BAL sur toutes les pages, et compte les mises à jour", async () => {
+    const contrat = contratBal();
+    const curseur = new ObjectId().toHexString();
+    bal().reply(200, { contrats: [contrat], pagination: { next: null, ecartes: 0 } });
+    await hydrateDecaRaw();
+    vi.mocked(setMeasurement).mockClear();
+
+    bal()
+      .reply(200, { contrats: [contrat], pagination: { next: curseur, ecartes: 1 } })
+      .get("/api/v1/deca/contrats")
+      .query({ after: curseur })
+      .reply(200, { contrats: [], pagination: { next: null, ecartes: 2 } });
+    await hydrateDecaRaw();
+
+    expect(mesures()).toMatchObject({ "deca.ecartes": 3, "deca.effectifs": 1 });
+  });
+
+  it("journalise le curseur de la dernière page lue quand une page suivante échoue", async () => {
+    const journal = vi.spyOn(Object.getPrototypeOf(parentLogger), "error");
+    const [x, y, z] = [new ObjectId(), new ObjectId(), new ObjectId()].map((id) => id.toHexString());
+    nock("https://bal.test")
+      .get("/api/v1/deca/contrats")
+      .query({ after: x })
+      .reply(200, { contrats: [contratBal()], pagination: { next: y, ecartes: 0 } })
+      .get("/api/v1/deca/contrats")
+      .query({ after: y })
+      .reply(200, { contrats: [contratBal()], pagination: { next: z, ecartes: 0 } })
+      .get("/api/v1/deca/contrats")
+      .query({ after: z })
+      .reply(400, {});
+
+    try {
+      await expect(hydrateDecaRaw({ after: x })).rejects.toMatchObject({ statut: 400 });
+      expect(journal).toHaveBeenCalledWith(
+        expect.objectContaining({ reprise: y }),
+        "DECA : import interrompu, reprendre avec --after"
+      );
+    } finally {
+      journal.mockRestore();
+    }
+  });
+
+  it("journalise le curseur de départ quand la première page d'une reprise échoue", async () => {
+    const journal = vi.spyOn(Object.getPrototypeOf(parentLogger), "error");
+    const curseur = new ObjectId().toHexString();
+    nock("https://bal.test").get("/api/v1/deca/contrats").query({ after: curseur }).reply(400, {});
+
+    try {
+      await expect(hydrateDecaRaw({ after: curseur })).rejects.toMatchObject({ statut: 400 });
+      expect(journal).toHaveBeenCalledWith(
+        expect.objectContaining({ reprise: curseur }),
+        "DECA : import interrompu, reprendre avec --after"
+      );
+    } finally {
+      journal.mockRestore();
+    }
   });
 
   it("compte un échec pour un contrat sans alternant et signale les contrats écartés par la BAL", async () => {
@@ -225,6 +288,11 @@ describe("import DECA par l'API de la BAL", () => {
     expect(await effectifsDECADb().countDocuments()).toBe(0);
     expect(mesures()).toMatchObject({ "deca.contrats": 1, "deca.effectifs": 0, "deca.echecs": 1, "deca.ecartes": 2 });
     expect(captureMessage).toHaveBeenCalledWith("Contrats DECA écartés par la BAL", expect.anything());
+    const agrege = vi
+      .mocked(captureException)
+      .mock.calls.map(([erreur]) => erreur)
+      .find((erreur) => erreur instanceof Error && erreur.message.includes("échecs agrégés")) as Error | undefined;
+    expect((agrege?.cause as Error | undefined)?.message).toBe("Contrat DECA incomplet : alternant absent");
   });
 
   it("lève sur une lecture interrompue, sans publier de mesures", async () => {

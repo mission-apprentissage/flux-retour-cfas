@@ -7,7 +7,7 @@ import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
 import type { IMissionLocaleEffectif } from "shared/models";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IOrganisme } from "shared/models/data/organismes.model";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, type MockInstance, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, type MockInstance, vi } from "vitest";
 
 import {
   appliquerCible,
@@ -1012,6 +1012,15 @@ describe("fléchage des contrats DECA", () => {
             date_fin_formation: "2026-06-30T00:00:00.000Z",
           },
         };
+
+        beforeAll(() => {
+          nock.disableNetConnect();
+          nock.enableNetConnect(/127\.0\.0\.1|localhost/);
+        });
+
+        afterAll(() => {
+          nock.enableNetConnect();
+        });
 
         beforeEach(() => {
           vi.mocked(addJob).mockReset();
