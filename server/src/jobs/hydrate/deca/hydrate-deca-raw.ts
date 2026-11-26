@@ -12,7 +12,7 @@ import { IOrganisme } from "shared/models/data/organismes.model";
 import { zodOpenApi } from "shared/models/zodOpenApi";
 import { cyrb53Hash, getYearFromDate } from "shared/utils";
 
-import { delierVoeuxEffectifsDecaOrphelins, updateVoeuxAffelnetEffectifDeca } from "@/common/actions/affelnet.actions";
+import { updateVoeuxAffelnetEffectifDeca } from "@/common/actions/affelnet.actions";
 import {
   appliquerCible,
   chargerResponsablesFleches,
@@ -284,12 +284,8 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
   const importComplet = !limit && !curseurDepart;
   const suivi = creerSuiviPages(curseurDepart);
   const dansLOrdre = creerOrdreParCle();
-  const contratsEcartes: ClesContratEcarte[] = [];
   let totalCount = 0;
   let ecartes = 0;
-  let nbContratsEcartes = 0;
-  let effectifsAnnules = 0;
-  const clesEnEchec = new Set<string>();
   let lectureTerminee = false;
   let erreur: unknown = null;
 
@@ -312,15 +308,6 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
         totalCount++;
         try {
           await dansLOrdre(cleApprenant(contrat), async () => {
-            if (!dryRun && estContratEcarte(contrat)) {
-              nbContratsEcartes++;
-              const cles = await clesContratDeca(contrat);
-              if (cles) {
-                contratsEcartes.push(cles);
-              }
-              echecs.ok();
-              return;
-            }
             const stats = dryRun
               ? await inspectEffectifDeca(contrat, dryRunStats)
               : await updateEffectifDeca(contrat, responsablesFleches);
@@ -331,36 +318,10 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
           suivi.terminer(suiviPage);
         }
       },
-      surErreur: (erreurContrat, { contrat }) => {
-        clesEnEchec.add(cleApprenant(contrat));
-        echecs.record(erreurContrat);
-      },
+      surErreur: (erreurContrat) => echecs.record(erreurContrat),
     });
 
     lectureTerminee = true;
-
-    if (contratsEcartes.length > 0 && !importComplet) {
-      logger.info(
-        { contrats: nbContratsEcartes },
-        "DECA : contrats annulés ou supprimés lus, effectifs gardés faute d'import complet"
-      );
-    } else if (contratsEcartes.length > 0) {
-      const aSupprimer = contratsEcartes.filter(({ cle }) => !clesEnEchec.has(cle));
-      effectifsAnnules = await supprimerEffectifsEcartes(aSupprimer);
-      logger.info(
-        {
-          contrats: nbContratsEcartes,
-          gardes: contratsEcartes.length - aSupprimer.length,
-          effectifs: effectifsAnnules,
-        },
-        "DECA : contrats annulés ou supprimés écartés"
-      );
-    }
-
-    if (!dryRun && importComplet) {
-      const voeuxDelies = await delierVoeuxEffectifsDecaOrphelins();
-      logger.info({ voeux: voeuxDelies }, "DECA : vœux Affelnet déliés de leurs effectifs disparus");
-    }
 
     if (dryRun) {
       logger.info({ ...dryRunStats, totalCount }, "DECA dry-run : aucune écriture");
@@ -394,7 +355,6 @@ async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImp
       effectifs: totalStats.created + totalStats.updated,
       echecs: nbEchecs,
       ecartes,
-      annules: effectifsAnnules,
       cache: getRunCacheStats(),
     });
     logger.info(
@@ -421,14 +381,12 @@ function publierMesures({
   effectifsParSeconde,
   echecs,
   ecartes,
-  annules,
   tauxDefautCache,
 }: BilanImportDeca) {
   Sentry.setMeasurement("deca.contrats", contrats, "none");
   Sentry.setMeasurement("deca.effectifs", effectifs, "none");
   Sentry.setMeasurement("deca.echecs", echecs, "none");
   Sentry.setMeasurement("deca.ecartes", ecartes, "none");
-  Sentry.setMeasurement("deca.annules", annules, "none");
   Sentry.setMeasurement("deca.contrats_par_seconde", contratsParSeconde, "none");
   Sentry.setMeasurement("deca.effectifs_par_seconde", effectifsParSeconde, "none");
   if (tauxDefautCache !== null) {
@@ -680,65 +638,6 @@ export function creerOrdreParCle() {
     }
   };
   return Object.assign(dansLOrdre, { enAttente: () => dernieres.size });
-}
-
-const STATUTS_ECARTES = new Set(["annule", "supprime"]);
-
-const normaliserStatut = (statut: string | null | undefined) =>
-  (statut ?? "")
-    .trim()
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
-
-export const estContratEcarte = (contrat: Pick<IContratDecaBal, "statut">) =>
-  STATUTS_ECARTES.has(normaliserStatut(contrat.statut));
-
-type ClesContratEcarte = {
-  cle: string;
-  organismeId: ObjectId;
-  idErpApprenant: string;
-  decaRawId: ObjectId;
-};
-
-async function clesContratDeca(document: IContratDecaBal): Promise<ClesContratEcarte | null> {
-  const uai = document.organisme_formation?.uai_cfa;
-  const siret = document.organisme_formation?.siret;
-  if (!uai || !siret) {
-    return null;
-  }
-
-  const organisme = await cachedInRun(`organisme:${uai}|${siret}`, () => getOrganismeByUAIAndSIRET(uai, siret));
-  if (!organisme) {
-    return null;
-  }
-
-  const dateNaissance = document.alternant?.date_naissance ? new Date(document.alternant.date_naissance) : null;
-  return {
-    cle: cleApprenant(document),
-    organismeId: organisme._id,
-    idErpApprenant: calculerIdErpApprenant(document.alternant?.prenom, document.alternant?.nom, dateNaissance),
-    decaRawId: new ObjectId(document._id),
-  };
-}
-
-async function supprimerEffectifsEcartes(contrats: ClesContratEcarte[]): Promise<number> {
-  let supprimes = 0;
-  for (const { organismeId, idErpApprenant, decaRawId } of contrats) {
-    const directs = await effectifsDECADb().deleteMany({
-      organisme_id: organismeId,
-      id_erp_apprenant: idErpApprenant,
-      deca_raw_id: decaRawId,
-    });
-    supprimes += directs.deletedCount;
-    const { deletedCount } = await effectifsDECADb().deleteMany({
-      organisme_responsable_id: organismeId,
-      deca_raw_id: decaRawId,
-      fleche: { $exists: true },
-    });
-    supprimes += deletedCount;
-  }
-  return supprimes;
 }
 
 async function createEffectif(
