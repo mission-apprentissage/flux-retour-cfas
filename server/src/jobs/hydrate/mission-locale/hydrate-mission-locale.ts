@@ -26,6 +26,7 @@ import { apiAlternanceClient } from "@/common/apis/apiAlternance/client";
 import logger from "@/common/logger";
 import { effectifsDb, effectifsQueueDb, missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
 import { createErrorAggregator } from "@/common/utils/errorAggregator";
+import { traiterEnParallele } from "@/common/utils/traiterEnParallele";
 
 export const hydrateMissionLocaleSnapshot = async (missionLocaleStructureId: number | null) => {
   const cursor = organisationsDb().find({
@@ -901,17 +902,6 @@ export const hydrateMissionLocaleStats = async () => {
 
 const DAILY_STATS_CONCURRENCY = 8;
 
-const runWithConcurrency = async <T>(items: T[], concurrency: number, task: (item: T) => Promise<void>) => {
-  let nextIndex = 0;
-  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
-    while (nextIndex < items.length) {
-      const item = items[nextIndex++];
-      await task(item);
-    }
-  });
-  await Promise.all(workers);
-};
-
 export const hydrateDailyMissionLocaleStats = async () => {
   const mls = (await organisationsDb().find({ type: "MISSION_LOCALE" }).toArray()) as Array<IOrganisationMissionLocale>;
 
@@ -926,14 +916,16 @@ export const hydrateDailyMissionLocaleStats = async () => {
   let firstError: unknown;
 
   for (const date of allDates) {
-    await runWithConcurrency(mls, DAILY_STATS_CONCURRENCY, async (ml) => {
-      try {
+    await traiterEnParallele(mls, {
+      concurrence: DAILY_STATS_CONCURRENCY,
+      traiter: async (ml) => {
         await createOrUpdateMissionLocaleStats(new ObjectId(ml._id), date);
-      } catch (err) {
+      },
+      surErreur: (err, ml) => {
         errors++;
         firstError ??= err;
         logger.error({ err, missionLocaleId: ml._id, date }, "daily mission locale stats computation failed");
-      }
+      },
     });
   }
 
