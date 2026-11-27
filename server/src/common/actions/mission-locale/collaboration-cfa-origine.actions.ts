@@ -72,7 +72,7 @@ export async function listCollaborationsCfaOrigine(
     const groupe = groupesById.get(id);
     if (groupe) {
       groupe.collaborations += compteurs.envoyes;
-    } else if (organismeById.has(id)) {
+    } else {
       groupesById.set(id, { _id: new ObjectId(id), collaborations: compteurs.envoyes });
     }
   }

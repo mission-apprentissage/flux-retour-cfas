@@ -487,4 +487,24 @@ describe("compteurs des indicateurs ML vivants à la purge des dossiers de suivi
       cfa_with_collab: 1,
     });
   });
+
+  it("garde en organisme inconnu la ligne d'un CFA d'origine supprimé après la purge", async () => {
+    await inserer([
+      dossier({
+        organismeId: CFA_PURGE_ID,
+        situation: SITUATION_ENUM.RDV_PRIS,
+        collab: { envoi: "2025-04-10", reponse: "2026-02-01" },
+      }),
+    ]);
+    const lire = () => listCollaborationsCfaOrigine(ML_ID, { ...page, sort_by: "collaborations" });
+    await organismesDb().deleteOne({ _id: CFA_PURGE_ID });
+    const avant = await lire();
+
+    await purgerDossiersSuivi({ maintenant });
+
+    expect(avant.data).toMatchObject([
+      { organisme_id: CFA_PURGE_ID.toString(), collaborations: 1, organisme_connu: false },
+    ]);
+    expect(await lire()).toStrictEqual(avant);
+  });
 });
