@@ -1,4 +1,4 @@
-import { Collection, Filter, ObjectId } from "mongodb";
+import { Collection, Filter, MongoWriteConcernError, ObjectId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
 import { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
 import { estAnneeScolaireActive, getFinAnneeScolaire } from "shared/utils/anneeScolaire";
@@ -23,6 +23,7 @@ import { compterOrganismesSupprimables } from "@/jobs/hydrate/organismes/organis
 const TAILLE_LOT = 1000;
 const PAUSE_MS = 200;
 const WRITE_CONCERN = { w: "majority", wtimeoutMS: 30_000 } as const;
+const WRITE_CONCERN_APRES_SUPPRESSION = { w: "majority" } as const;
 
 type DossierPurge = {
   _id: ObjectId;
@@ -164,7 +165,7 @@ const incrementerCompteurs = async (passe: Passe, supprimes: DossierPurge[]) => 
         upsert: true,
       },
     })),
-    { ordered: false, writeConcern: WRITE_CONCERN }
+    { ordered: false, writeConcern: WRITE_CONCERN_APRES_SUPPRESSION }
   );
 };
 
@@ -189,20 +190,27 @@ const supprimerLot = async (
 
   const ids = candidats.map((dossier) => dossier._id);
   let supprimes: DossierPurge[] = [];
+  let retard: MongoWriteConcernError | null = null;
   try {
-    const { deletedCount } = await passe
-      .collection()
-      .deleteMany(
-        { ...filtre, _id: { $in: ids }, transmitted_at: { $not: { $gt: contexte.lancement } } },
-        { writeConcern: WRITE_CONCERN }
-      );
+    let deletedCount: number | null = null;
+    try {
+      ({ deletedCount } = await passe
+        .collection()
+        .deleteMany(
+          { ...filtre, _id: { $in: ids }, transmitted_at: { $not: { $gt: contexte.lancement } } },
+          { writeConcern: WRITE_CONCERN }
+        ));
+    } catch (error) {
+      if (!(error instanceof MongoWriteConcernError)) throw error;
+      retard = error;
+    }
     const restants = await passe
       .collection()
       .find({ _id: { $in: ids } }, { projection: { _id: 1 } })
       .toArray();
     const idsRestants = new Set(restants.map((dossier) => dossier._id.toString()));
     supprimes = candidats.filter((dossier) => !idsRestants.has(dossier._id.toString()));
-    if (deletedCount !== supprimes.length) {
+    if (deletedCount !== null && deletedCount !== supprimes.length) {
       logger.warn(
         { collection: passe.nom, deletedCount, absents: supprimes.length },
         "Purge des effectifs anciens : des dossiers du lot ont disparu sans cette purge"
@@ -211,11 +219,12 @@ const supprimerLot = async (
     if (passe.compteurs) await incrementerCompteurs(passe, supprimes);
   } catch (error) {
     logger.error(
-      { err: error, collection: passe.nom, candidats: ids.length, supprimes: supprimes.length },
+      { err: error, collection: passe.nom, candidats: ids.length, supprimes: supprimes.length, ids: ids.map(String) },
       "Purge des effectifs anciens : lot interrompu, ses compteurs peuvent manquer"
     );
     throw error;
   }
+  if (retard) throw retard;
   return supprimes;
 };
 

@@ -201,4 +201,20 @@ describe("purgerDossiersSuivi()", () => {
     expect(await missionLocaleEffectifsLogDb().countDocuments()).toBe(1);
     expect(await franceTravailEffectifsDb().countDocuments()).toBe(1);
   });
+
+  it("supprime les logs restés sans dossier après un lot interrompu", async () => {
+    const vivant = dossierMl({ date_rupture: date("2025-06-01") });
+    await insererMl([vivant]);
+    await missionLocaleEffectifsLogDb().insertMany([log(vivant._id), log(new ObjectId()), log(new ObjectId())]);
+
+    expect((await purgerDossiersSuivi({ maintenant, dryRun: true })).logsOrphelinsSupprimes).toBe(2);
+    expect(await missionLocaleEffectifsLogDb().countDocuments()).toBe(3);
+
+    expect((await purgerDossiersSuivi({ maintenant })).logsOrphelinsSupprimes).toBe(2);
+    expect(
+      await missionLocaleEffectifsLogDb()
+        .find({}, { projection: { _id: 0, mission_locale_effectif_id: 1 } })
+        .toArray()
+    ).toStrictEqual([{ mission_locale_effectif_id: vivant._id }]);
+  });
 });

@@ -1,4 +1,4 @@
-import { Collection, Filter, ObjectId } from "mongodb";
+import { Collection, Filter, MongoWriteConcernError, ObjectId } from "mongodb";
 import { STATUT_APPRENANT } from "shared/constants";
 import { estAnneeScolaireActive } from "shared/utils/anneeScolaire";
 
@@ -24,6 +24,7 @@ import { ventiler, type Ventilation } from "./ventilation";
 const TAILLE_LOT = 1000;
 const PAUSE_MS = 200;
 const WRITE_CONCERN = { w: "majority", wtimeoutMS: 30_000 } as const;
+const WRITE_CONCERN_APRES_SUPPRESSION = { w: "majority" } as const;
 
 type DossierSuivi = {
   _id: ObjectId;
@@ -50,6 +51,7 @@ export type ResultatPurgeSuivi = {
 export type ResultatPurgeDossiersSuivi = {
   dryRun: boolean;
   limite: Date;
+  logsOrphelinsSupprimes: number;
   dossiersMasques: ResultatPurgeDossiersMasques;
   missionLocale: ResultatPurgeSuivi & { comptes: number };
   franceTravail: ResultatPurgeSuivi;
@@ -74,9 +76,36 @@ const LOGS_ML: Lies = {
     (
       await missionLocaleEffectifsLogDb().deleteMany(
         { mission_locale_effectif_id: { $in: ids } },
-        { writeConcern: WRITE_CONCERN }
+        { writeConcern: WRITE_CONCERN_APRES_SUPPRESSION }
       )
     ).deletedCount,
+};
+
+const supprimerLogsOrphelins = async (dryRun: boolean): Promise<number> => {
+  const orphelins = await missionLocaleEffectifsLogDb()
+    .aggregate<{ _id: ObjectId }>([
+      {
+        $lookup: {
+          from: missionLocaleEffectifsDb().collectionName,
+          localField: "mission_locale_effectif_id",
+          foreignField: "_id",
+          pipeline: [{ $project: { _id: 1 } }],
+          as: "dossier",
+        },
+      },
+      { $match: { dossier: { $size: 0 } } },
+      { $project: { _id: 1 } },
+    ])
+    .toArray();
+  if (dryRun || orphelins.length === 0) return orphelins.length;
+  let supprimes = 0;
+  for (let debut = 0; debut < orphelins.length; debut += TAILLE_LOT) {
+    const ids = orphelins.slice(debut, debut + TAILLE_LOT).map(({ _id }) => _id);
+    supprimes += (
+      await missionLocaleEffectifsLogDb().deleteMany({ _id: { $in: ids } }, { writeConcern: WRITE_CONCERN })
+    ).deletedCount;
+  }
+  return supprimes;
 };
 
 const aCompter = (dossiers: DossierSuivi[]): DossierMlACompter[] =>
@@ -124,8 +153,14 @@ const purgerParLots = async (
     }
 
     let supprimes: DossierSuivi[] = [];
+    let retard: MongoWriteConcernError | null = null;
     try {
-      await collection.deleteMany({ ...filtre, _id: { $in: ids } }, { writeConcern: WRITE_CONCERN });
+      try {
+        await collection.deleteMany({ ...filtre, _id: { $in: ids } }, { writeConcern: WRITE_CONCERN });
+      } catch (error) {
+        if (!(error instanceof MongoWriteConcernError)) throw error;
+        retard = error;
+      }
       const restants = await collection.find({ _id: { $in: ids } }, { projection: { _id: 1 } }).toArray();
       const idsRestants = new Set(restants.map(({ _id }) => _id.toString()));
       supprimes = aSupprimer.filter(({ _id }) => !idsRestants.has(_id.toString()));
@@ -141,17 +176,18 @@ const purgerParLots = async (
           );
           await retirerRestants(contributions, comptablesRestants);
         }
-        await ecrireContributions(contributions, WRITE_CONCERN);
+        await ecrireContributions(contributions, WRITE_CONCERN_APRES_SUPPRESSION);
         comptes += nombreDeDossiersComptes(contributions);
       }
     } catch (error) {
       logger.error(
-        { err: error, candidats: ids.length, supprimes: supprimes.length },
+        { err: error, candidats: ids.length, supprimes: supprimes.length, ids: ids.map(String) },
         "Purge des dossiers de suivi : lot interrompu, ses compteurs peuvent manquer"
       );
       throw error;
     }
     compterSupprimes(supprimes);
+    if (retard) throw retard;
     if (supprimes.length > 0) await sleep(PAUSE_MS);
   };
 
@@ -184,6 +220,7 @@ export const purgerDossiersSuivi = async ({
   }
   const contexte: Contexte = { dryRun, maintenant };
 
+  const logsOrphelinsSupprimes = await supprimerLogsOrphelins(dryRun);
   const { resultat: dossiersMasques, idsSupprimes } = await executerPurgeDossiersMlMasques({ dryRun, maintenant });
   const passeMl = await purgerParLots(
     missionLocaleEffectifsDb() as unknown as Collection<DossierSuivi>,
@@ -198,7 +235,14 @@ export const purgerDossiersSuivi = async ({
     contexte
   );
 
-  const resultat: ResultatPurgeDossiersSuivi = { dryRun, limite, dossiersMasques, missionLocale, franceTravail };
+  const resultat: ResultatPurgeDossiersSuivi = {
+    dryRun,
+    limite,
+    logsOrphelinsSupprimes,
+    dossiersMasques,
+    missionLocale,
+    franceTravail,
+  };
   logger.info(resultat, dryRun ? "Purge des dossiers de suivi simulée" : "Purge des dossiers de suivi terminée");
   return resultat;
 };

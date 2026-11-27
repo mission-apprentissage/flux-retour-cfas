@@ -419,7 +419,7 @@ export const nombreDeDossiersComptes = (contributions: ContributionsLot) =>
 
 export const ecrireContributions = async (
   contributions: ContributionsLot,
-  writeConcern: { w: "majority"; wtimeoutMS: number }
+  writeConcern: { w: "majority"; wtimeoutMS?: number }
 ) => {
   const maintenant = new Date();
   const photos = [...contributions.photos.values()]

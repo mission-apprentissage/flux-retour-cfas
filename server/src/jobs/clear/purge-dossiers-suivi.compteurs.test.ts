@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { Collection, MongoWriteConcernError, ObjectId } from "mongodb";
 import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
 import type { IMissionLocaleEffectif, IOrganisationMissionLocale } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
@@ -276,6 +276,39 @@ describe("compteurs des photos ML à la purge des dossiers de suivi", () => {
 
     expect(await missionLocaleEffectifsDb().countDocuments({ _id: traite._id })).toBe(0);
     expect(await missionLocaleEffectifsLogDb().countDocuments({ mission_locale_effectif_id: traite._id })).toBe(0);
+  });
+
+  it("finit le lot quand la suppression dépasse l'acquittement majority, puis s'arrête", async () => {
+    const traite = dossier({ situation: SITUATION_ENUM.RDV_PRIS });
+    await inserer([traite]);
+    await missionLocaleEffectifsLogDb().insertOne({
+      _id: new ObjectId(),
+      mission_locale_effectif_id: traite._id,
+      situation: SITUATION_ENUM.RDV_PRIS,
+      commentaires: "texte libre",
+      created_at: date("2025-04-01"),
+      created_by: null,
+      read_by: [],
+    } as IMissionLocaleEffectifLog);
+    const deleteMany = Collection.prototype.deleteMany;
+    const retard = Object.assign(Object.create(MongoWriteConcernError.prototype), {
+      message: "waiting for replication timed out",
+    }) as MongoWriteConcernError;
+    const espion = vi.spyOn(Collection.prototype, "deleteMany").mockImplementationOnce(async function (
+      this: Collection,
+      ...args: Parameters<Collection["deleteMany"]>
+    ) {
+      await deleteMany.apply(this, args);
+      throw retard;
+    });
+
+    await expect(purgerDossiersSuivi({ maintenant })).rejects.toBe(retard);
+    espion.mockRestore();
+
+    expect(await missionLocaleEffectifsDb().countDocuments({ _id: traite._id })).toBe(0);
+    expect(await missionLocaleEffectifsLogDb().countDocuments({ mission_locale_effectif_id: traite._id })).toBe(0);
+    expect(compteurs.ecrireContributions).toHaveBeenCalledTimes(1);
+    expect(await missionLocaleStatsPurgesDb().countDocuments({ mission_locale_id: ML_ID })).toBe(1);
   });
 
   it("n'ajoute à une photo passée que les dossiers purgés créés jusqu'à son mois", async () => {

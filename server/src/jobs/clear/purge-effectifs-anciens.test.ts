@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { Collection, MongoWriteConcernError, ObjectId } from "mongodb";
 import { STATUT_PRESENCE_REFERENTIEL } from "shared/constants";
 import type { IEffectif } from "shared/models/data/effectifs.model";
 import type { IEffectifArchive } from "shared/models/data/effectifsArchive.model";
@@ -7,7 +7,7 @@ import effectifsPurgesStatsDescriptor from "shared/models/data/effectifsPurgesSt
 import type { IMissionLocaleEffectif } from "shared/models/data/missionLocaleEffectif.model";
 import type { IVoeuAffelnet } from "shared/models/data/voeuxAffelnet.model";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   effectifsArchiveDb,
@@ -114,6 +114,29 @@ describe("purgerEffectifsAnciens()", () => {
 
     expect(await idsRestants()).toStrictEqual({ effectifs: [], deca: [] });
     expect(resultat.effectifs).toStrictEqual({ total: 1, parAnnee: { "2022-2023": { ERP: 1 } } });
+    expect(await compteurs()).toStrictEqual([compteur("2022-2023", "ERP", 1)]);
+  });
+
+  it("compte le lot quand la suppression dépasse l'acquittement majority, puis s'arrête", async () => {
+    await insererEffectifs([effectif("2022-2023", { formation: "2023-06-30", contrats: [{ fin: "2023-08-31" }] })]);
+    const deleteMany = Collection.prototype.deleteMany;
+    const retard = Object.assign(Object.create(MongoWriteConcernError.prototype), {
+      message: "waiting for replication timed out",
+    }) as MongoWriteConcernError;
+    let retardes = 0;
+    const espion = vi.spyOn(Collection.prototype, "deleteMany").mockImplementation(async function (
+      this: Collection,
+      ...args: Parameters<Collection["deleteMany"]>
+    ) {
+      const resultat = await deleteMany.apply(this, args);
+      if (this.collectionName === effectifsDb().collectionName && retardes++ === 0) throw retard;
+      return resultat;
+    });
+
+    await expect(purgerEffectifsAnciens({ maintenant })).rejects.toBe(retard);
+    espion.mockRestore();
+
+    expect(await idsRestants()).toStrictEqual({ effectifs: [], deca: [] });
     expect(await compteurs()).toStrictEqual([compteur("2022-2023", "ERP", 1)]);
   });
 
