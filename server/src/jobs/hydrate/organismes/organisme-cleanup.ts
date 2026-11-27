@@ -16,7 +16,7 @@ const CRITERES_SUPPRESSION = {
 
 const TAILLE_LOT = 1000;
 
-const evaluerOrganisme = async (organismeId: ObjectId, effectifsRetires = 0) => {
+const evaluerOrganisme = async (organismeId: ObjectId, effectifsRetires = 0, flechesRetires = 0) => {
   const organisation = await organisationsDb().findOne({
     type: "ORGANISME_FORMATION",
     organisme_id: organismeId.toString(),
@@ -28,13 +28,13 @@ const evaluerOrganisme = async (organismeId: ObjectId, effectifsRetires = 0) => 
     effectifsDECADb().countDocuments({ organisme_id: organismeId }),
     effectifsDECADb().countDocuments(
       { organisme_responsable_id: organismeId, fleche: { $exists: true } },
-      { limit: 1 }
+      { limit: flechesRetires + 1 }
     ),
   ]);
 
   return {
     organisation,
-    supprimable: userCount === 0 && effectifCount + decaCount <= effectifsRetires && decaFlecheCount === 0,
+    supprimable: userCount === 0 && effectifCount + decaCount <= effectifsRetires && decaFlecheCount <= flechesRetires,
   };
 };
 
@@ -54,9 +54,12 @@ export async function cleanupOrganismes() {
 }
 
 export async function compterOrganismesSupprimables(
-  effectifsRetiresParOrganisme: Map<string, number>
+  effectifsRetiresParOrganisme: Map<string, number>,
+  flechesRetiresParResponsable: Map<string, number> = new Map()
 ): Promise<number> {
-  const ids = [...effectifsRetiresParOrganisme.keys()].map((id) => new ObjectId(id));
+  const ids = [...new Set([...effectifsRetiresParOrganisme.keys(), ...flechesRetiresParResponsable.keys()])].map(
+    (id) => new ObjectId(id)
+  );
   let supprimables = 0;
 
   for (let debut = 0; debut < ids.length; debut += TAILLE_LOT) {
@@ -64,7 +67,11 @@ export async function compterOrganismesSupprimables(
       .find({ _id: { $in: ids.slice(debut, debut + TAILLE_LOT) }, ...CRITERES_SUPPRESSION }, { projection: { _id: 1 } })
       .toArray();
     for (const { _id } of organismes) {
-      const { supprimable } = await evaluerOrganisme(_id, effectifsRetiresParOrganisme.get(_id.toString()) ?? 0);
+      const { supprimable } = await evaluerOrganisme(
+        _id,
+        effectifsRetiresParOrganisme.get(_id.toString()) ?? 0,
+        flechesRetiresParResponsable.get(_id.toString()) ?? 0
+      );
       if (supprimable) supprimables++;
     }
   }

@@ -295,6 +295,50 @@ describe("purgerEffectifsAnciens()", () => {
     expect(await organismesDb().countDocuments()).toBe(3);
   });
 
+  it("compte le responsable que la purge prive de ses contrats DECA fléchés", async () => {
+    const responsable = generateOrganismeFixture({
+      siret: "13002975400020",
+      uai: null,
+      effectifs_count: 0,
+      est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.ABSENT,
+    });
+    const formateur = generateOrganismeFixture({
+      siret: "19590065900028",
+      uai: null,
+      est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.PRESENT,
+    });
+    await organismesDb().insertMany([responsable, formateur]);
+    const fleche = (finContrat: string) => ({
+      ...effectifDeca("2022-2023", finContrat, new ObjectId()),
+      organisme_id: formateur._id,
+      organisme_responsable_id: responsable._id,
+      fleche: { date: date("2023-01-01") },
+    });
+    await insererDeca([fleche("2023-08-31"), fleche("2023-07-31")]);
+
+    expect((await purgerEffectifsAnciens({ maintenant, dryRun: true })).organismesVides).toBe(1);
+    expect((await purgerEffectifsAnciens({ maintenant })).organismesVides).toBe(1);
+  });
+
+  it("garde le responsable qui garde un contrat DECA fléché récent", async () => {
+    const responsable = generateOrganismeFixture({
+      siret: "13002975400020",
+      uai: null,
+      effectifs_count: 0,
+      est_dans_le_referentiel: STATUT_PRESENCE_REFERENTIEL.ABSENT,
+    });
+    await organismesDb().insertOne(responsable);
+    const fleche = (annee: string, finContrat: string) => ({
+      ...effectifDeca(annee, finContrat, new ObjectId()),
+      organisme_id: new ObjectId(),
+      organisme_responsable_id: responsable._id,
+      fleche: { date: date("2023-01-01") },
+    });
+    await insererDeca([fleche("2022-2023", "2023-08-31"), fleche("2025-2026", "2026-08-31")]);
+
+    expect((await purgerEffectifsAnciens({ maintenant, dryRun: true })).organismesVides).toBe(0);
+  });
+
   it("supprime aussi les archives d'effectifs hors conservation, sans les compter", async () => {
     const archive = (dates: Dates, annee: string) => ({
       ...effectif(annee, dates),

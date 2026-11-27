@@ -28,6 +28,8 @@ const WRITE_CONCERN_APRES_SUPPRESSION = { w: "majority" } as const;
 type DossierPurge = {
   _id: ObjectId;
   organisme_id: ObjectId;
+  organisme_responsable_id?: ObjectId | null;
+  fleche?: unknown;
   annee_scolaire: string;
   source?: string | null;
   formation?: { date_fin?: Date | null; niveau?: string | null } | null;
@@ -81,6 +83,8 @@ const PASSE_ARCHIVE: Passe = {
 const PROJECTION = {
   _id: 1,
   organisme_id: 1,
+  organisme_responsable_id: 1,
+  fleche: 1,
   annee_scolaire: 1,
   source: 1,
   "formation.date_fin": 1,
@@ -98,6 +102,7 @@ type Contexte = {
   limite: Date;
   lancement: Date;
   retiresParOrganisme: Map<string, number>;
+  flechesRetiresParResponsable: Map<string, number>;
   voeuxParEffectif: Map<string, number>;
   voeuxLiesSimules: number;
 };
@@ -242,6 +247,13 @@ const purgerAnnee = async (passe: Passe, anneeScolaire: string, contexte: Contex
         const organisme = dossier.organisme_id.toString();
         contexte.retiresParOrganisme.set(organisme, (contexte.retiresParOrganisme.get(organisme) ?? 0) + 1);
       }
+      if (passe.nom === PASSE_DECA.nom && dossier.fleche !== undefined && dossier.organisme_responsable_id) {
+        const responsable = dossier.organisme_responsable_id.toString();
+        contexte.flechesRetiresParResponsable.set(
+          responsable,
+          (contexte.flechesRetiresParResponsable.get(responsable) ?? 0) + 1
+        );
+      }
     }
     lot = [];
     if (!contexte.dryRun && supprimes.length > 0) await sleep(PAUSE_MS);
@@ -328,6 +340,9 @@ const delierVoeuxOrphelins = async (passe: Passe, dryRun: boolean): Promise<numb
   return delies;
 };
 
+const sansRetraits = (retraits: Map<string, number>) =>
+  new Map([...retraits.keys()].map((organisme) => [organisme, 0]));
+
 export const purgerEffectifsAnciens = async ({
   dryRun = false,
   maintenant = new Date(),
@@ -343,6 +358,7 @@ export const purgerEffectifsAnciens = async ({
     limite,
     lancement,
     retiresParOrganisme: new Map(),
+    flechesRetiresParResponsable: new Map(),
     voeuxParEffectif: new Map(),
     voeuxLiesSimules: 0,
   };
@@ -361,9 +377,8 @@ export const purgerEffectifsAnciens = async ({
     effectifsArchive,
     voeuxDelies: { effectif_id: voeuxEffectifs, effectif_deca_id: voeuxDeca },
     organismesVides: await compterOrganismesSupprimables(
-      dryRun
-        ? contexte.retiresParOrganisme
-        : new Map([...contexte.retiresParOrganisme.keys()].map((organisme) => [organisme, 0]))
+      dryRun ? contexte.retiresParOrganisme : sansRetraits(contexte.retiresParOrganisme),
+      dryRun ? contexte.flechesRetiresParResponsable : sansRetraits(contexte.flechesRetiresParResponsable)
     ),
   };
   logger.info(resultat, dryRun ? "Purge des effectifs anciens simulée" : "Purge des effectifs anciens terminée");
