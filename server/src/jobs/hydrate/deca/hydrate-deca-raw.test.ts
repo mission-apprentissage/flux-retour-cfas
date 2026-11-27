@@ -6,9 +6,9 @@ import { getAnneesScolairesAImporter } from "./hydrate-deca-raw";
 const maintenant = new Date("2026-11-18T00:00:00Z");
 
 const contrat = (date_debut_formation: string, date_fin_formation: string, date_fin_contrat: string | null) => ({
-  _id: new ObjectId(),
-  formation: { date_debut_formation, date_fin_formation },
-  date_fin_contrat,
+  _id: new ObjectId().toString(),
+  formation: { date_debut_formation: new Date(date_debut_formation), date_fin_formation: new Date(date_fin_formation) },
+  date_fin_contrat: date_fin_contrat ? new Date(date_fin_contrat) : null,
 });
 
 describe("getAnneesScolairesAImporter()", () => {

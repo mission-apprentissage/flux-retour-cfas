@@ -1,12 +1,13 @@
 import { captureException } from "@sentry/node";
 import { ObjectId } from "bson";
 import { addJob } from "job-processor";
-import { Collection, MongoClient, type WithoutId } from "mongodb";
+import { Collection, type WithoutId } from "mongodb";
+import nock from "nock";
 import { SOURCE_APPRENANT, STATUT_APPRENANT } from "shared/constants";
 import type { IMissionLocaleEffectif } from "shared/models";
 import type { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import type { IOrganisme } from "shared/models/data/organismes.model";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, type MockInstance, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, type MockInstance, vi } from "vitest";
 
 import {
   appliquerCible,
@@ -31,7 +32,7 @@ import {
   usersMigrationDb,
 } from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes";
-import { getBALMongodbUri, getDatabase } from "@/common/mongodb";
+import { getDatabase } from "@/common/mongodb";
 import { dateMetier } from "@/common/utils/dateUtils";
 import { dateMetierExpr, dedupNom, dedupNomExpr } from "@/common/utils/mongoUtils";
 import config from "@/config";
@@ -1002,26 +1003,35 @@ describe("fléchage des contrats DECA", () => {
       });
 
       describe("fin de l'import DECA", () => {
-        const bal = new MongoClient(getBALMongodbUri(config.mongodb.dbNameBal));
-        const contratBrutId = new ObjectId();
+        const contratBal = {
+          _id: new ObjectId().toHexString(),
+          updated_at: "2026-11-20T00:00:00.000Z",
+          organisme_formation: { uai_cfa: "0000000A", siret: "00000000000000" },
+          formation: {
+            date_debut_formation: "2025-09-01T00:00:00.000Z",
+            date_fin_formation: "2026-06-30T00:00:00.000Z",
+          },
+        };
 
-        beforeEach(async () => {
-          vi.mocked(addJob).mockReset();
-          await bal.connect();
-          await bal
-            .db()
-            .collection(config.mongodb.decaDbCollectionBal)
-            .insertOne({
-              _id: contratBrutId,
-              dispositif: "APPR",
-              organisme_formation: { uai_cfa: "0000000A", siret: "00000000000000" },
-              formation: { date_debut_formation: "2025-09-01", date_fin_formation: "2026-06-30" },
-            });
+        beforeAll(() => {
+          nock.disableNetConnect();
+          nock.enableNetConnect(/127\.0\.0\.1|localhost/);
         });
 
-        afterEach(async () => {
-          await bal.db().collection(config.mongodb.decaDbCollectionBal).deleteOne({ _id: contratBrutId });
-          await bal.close();
+        afterAll(() => {
+          nock.enableNetConnect();
+        });
+
+        beforeEach(() => {
+          vi.mocked(addJob).mockReset();
+          nock("https://bal.test")
+            .get("/api/v1/deca/contrats")
+            .query(true)
+            .reply(200, { contrats: [contratBal], pagination: { next: null, ecartes: 0 } });
+        });
+
+        afterEach(() => {
+          nock.cleanAll();
         });
 
         it("met le fléchage en file après un import complet quand l'interrupteur est allumé", async () => {

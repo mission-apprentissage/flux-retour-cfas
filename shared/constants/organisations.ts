@@ -18,6 +18,15 @@ export const ORGANISATION_TYPE = {
   FRANCE_TRAVAIL: "FRANCE_TRAVAIL",
 };
 
+const ORGANISATION_TYPES_AVEC_ADMINISTRATEURS: string[] = [
+  ORGANISATION_TYPE.ORGANISME_FORMATION,
+  ORGANISATION_TYPE.DREETS,
+  ORGANISATION_TYPE.DDETS,
+];
+
+export const organisationAvecAdministrateurs = (type: string | undefined): boolean =>
+  !!type && ORGANISATION_TYPES_AVEC_ADMINISTRATEURS.includes(type);
+
 export const ORGANISATIONS_NATIONALES_MAP = {
   PREMIER_MINISTRE: "Services de la Première ministre",
   AGRICULTURE: "Ministère de l'Agriculture et de la Souveraineté alimentaire",

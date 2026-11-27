@@ -8,8 +8,12 @@ shift
 export VERSION="${1:?"Veuillez préciser la version"}";
 shift
 
-export SENTRY_AUTH_TOKEN=$(sops --decrypt --extract '["SENTRY_AUTH_TOKEN"]' ${ROOT_DIR}/.infra/env.global.yml)
+# En CI : jeton fourni par le secret GitHub SENTRY_AUTH_TOKEN (aucune clé
+# OpenPGP sur les runners hébergés). En local : lu dans les fichiers SOPS.
+if [[ -z "${SENTRY_AUTH_TOKEN:-}" ]]; then
+  SENTRY_AUTH_TOKEN="$(sops --decrypt --extract '["SENTRY_AUTH_TOKEN"]' "${ROOT_DIR}/.infra/env.global.yml")"
+fi
+export SENTRY_AUTH_TOKEN
 
-export SENTRY_DSN=$(sops --decrypt --extract '["SERVER_SENTRY_DSN"]' ${ROOT_DIR}/.infra/env.global.yml)
 cd "$ROOT_DIR/server"
 "./sentry-deploy-server.sh" "${ENVIRONMENT}" "${VERSION}"

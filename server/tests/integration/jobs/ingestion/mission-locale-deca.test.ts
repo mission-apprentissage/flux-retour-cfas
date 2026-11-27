@@ -6,12 +6,19 @@ import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import { it, expect, describe, beforeAll, beforeEach, vi } from "vitest";
 
+import { createOrUpdateMissionLocaleStats } from "@/common/actions/mission-locale/mission-locale-stats.actions";
 import {
   createMissionLocaleSnapshot,
   matchFromJointOrganisme,
 } from "@/common/actions/mission-locale/mission-locale.actions";
+import { withStatsMlDifferees } from "@/common/actions/mission-locale/statsMlDifferees";
 import * as collectionsModule from "@/common/model/collections";
-import { missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
+import {
+  missionLocaleEffectifsDb,
+  missionLocaleStatsDb,
+  organisationsDb,
+  organismesDb,
+} from "@/common/model/collections";
 import { createIndexes } from "@/common/model/indexes";
 import { createRandomOrganisme } from "@tests/data/randomizedSample";
 import { useMongo } from "@tests/jest/setupMongo";
@@ -384,6 +391,44 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       const result = await createMissionLocaleSnapshot(effectif);
 
       expect(result?.upserted).toBe(true);
+    });
+  });
+
+  describe("Statistiques ML différées", () => {
+    it("écrit en fin de contexte le document du jour de fin, identique à un recalcul à ce moment", async () => {
+      const ml = await organisationsDb().findOne({ type: "MISSION_LOCALE", ml_id: ML_ID });
+      const jourDeFin = { mission_locale_id: ml?._id, computed_day: new Date("2025-12-16T00:00:00.000Z") };
+      let statsPendant: unknown = "non lu";
+
+      await withStatsMlDifferees(async () => {
+        await createMissionLocaleSnapshot(createBaseDecaEffectif());
+        statsPendant = await missionLocaleStatsDb().findOne({ mission_locale_id: ml?._id });
+        vi.setSystemTime(new Date("2025-12-16T10:00:00Z"));
+      });
+
+      const differees = await missionLocaleStatsDb().findOne(jourDeFin);
+      await createOrUpdateMissionLocaleStats(ml!._id);
+      const immediates = await missionLocaleStatsDb().findOne(jourDeFin);
+
+      expect(statsPendant).toBeNull();
+      expect(differees?.stats.total).toBe(1);
+      expect(differees?.stats).toEqual(immediates?.stats);
+      expect(differees?.segments).toEqual(immediates?.segments);
+    });
+
+    it("garde immédiat le recalcul du dédoublonnage quand l'ERP remplace le DECA", async () => {
+      const ml = await organisationsDb().findOne({ type: "MISSION_LOCALE", ml_id: ML_ID });
+      let statsPendant: unknown = null;
+
+      await withStatsMlDifferees(async () => {
+        await createMissionLocaleSnapshot(createBaseDecaEffectif({ apprenant: makeApprenant("DUPONT", "Jean", 20) }));
+        await createMissionLocaleSnapshot(
+          createBaseErpEffectif({ _id: new ObjectId(), apprenant: makeApprenant("DUPONT", "Jean", 20) })
+        );
+        statsPendant = await missionLocaleStatsDb().findOne({ mission_locale_id: ml?._id });
+      });
+
+      expect(statsPendant).not.toBeNull();
     });
   });
 
@@ -760,6 +805,24 @@ describe("Filtrage DECA pour les snapshots Mission Locale", () => {
       expect(active.length).toBe(1);
       expect(softDeleted.length).toBe(1);
       expect(active[0].effectif_id.toString()).toBe(erpML2._id.toString());
+    });
+
+    it("garde immédiat le recalcul de l'ancienne ML pendant l'import DECA", async () => {
+      const mlA = await organisationsDb().findOne({ type: "MISSION_LOCALE", ml_id: ML_ID });
+      let statsPendant: unknown = null;
+
+      await withStatsMlDifferees(async () => {
+        await createMissionLocaleSnapshot(
+          createBaseErpEffectif({ apprenant: makeApprenant("TESTNOM_G", "Prenomg", 21) })
+        );
+        await missionLocaleStatsDb().deleteMany({});
+        await createMissionLocaleSnapshot(
+          createBaseErpEffectif({ _id: new ObjectId(), apprenant: makeApprenant("TESTNOM_G", "Prenomg", 21, ML_ID_2) })
+        );
+        statsPendant = await missionLocaleStatsDb().findOne({ mission_locale_id: mlA?._id });
+      });
+
+      expect(statsPendant).not.toBeNull();
     });
 
     it("ERP dans ML-A, puis DECA pour même personne dans ML-B → DECA rejeté, ERP intact", async () => {

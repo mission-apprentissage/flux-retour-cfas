@@ -37,6 +37,7 @@ import {
 } from "@/common/model/collections";
 import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import { normalisePersonIdentifiant } from "@/common/utils/identifiantUtils";
+import { traiterEnParallele } from "@/common/utils/traiterEnParallele";
 
 export const hydrateMissionLocaleSnapshot = async (missionLocaleStructureId: number | null) => {
   const cursor = organisationsDb().find({
@@ -915,17 +916,6 @@ export const hydrateMissionLocaleStats = async () => {
 
 const DAILY_STATS_CONCURRENCY = 8;
 
-const runWithConcurrency = async <T>(items: T[], concurrency: number, task: (item: T) => Promise<void>) => {
-  let nextIndex = 0;
-  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
-    while (nextIndex < items.length) {
-      const item = items[nextIndex++];
-      await task(item);
-    }
-  });
-  await Promise.all(workers);
-};
-
 export const hydrateDailyMissionLocaleStats = async ({
   champs = [],
   depuis,
@@ -959,19 +949,21 @@ export const hydrateDailyMissionLocaleStats = async ({
     const existing = new Set(
       (await missionLocaleStatsDb().distinct("mission_locale_id", { computed_day: date })).map((id) => id.toString())
     );
-    await runWithConcurrency(mls, DAILY_STATS_CONCURRENCY, async (ml) => {
-      const missionLocaleId = new ObjectId(ml._id);
-      try {
+    await traiterEnParallele(mls, {
+      concurrence: DAILY_STATS_CONCURRENCY,
+      traiter: async (ml) => {
+        const missionLocaleId = new ObjectId(ml._id);
         if (!existing.has(missionLocaleId.toString())) {
           if (await createMissionLocaleStatsIfMissing(missionLocaleId, date)) created++;
         } else if (champs.length > 0) {
           if (await setMissionLocaleStatsFields(missionLocaleId, date, champs)) completed++;
         }
-      } catch (err) {
+      },
+      surErreur: (err, ml) => {
         errors++;
         firstError ??= err;
         logger.error({ err, missionLocaleId: ml._id, date }, "daily mission locale stats computation failed");
-      }
+      },
     });
   }
 

@@ -3,9 +3,8 @@ import { normalize } from "path";
 import { captureException } from "@sentry/node";
 import * as Sentry from "@sentry/node";
 import { addJob } from "job-processor";
-import { MongoClient, MongoError, ObjectId, WithoutId } from "mongodb";
+import { MongoError, ObjectId, WithoutId } from "mongodb";
 import { SOURCE_APPRENANT } from "shared/constants";
-import { IRawBalDeca } from "shared/models/data/airbyteRawBalDeca.model";
 import { zApprenant } from "shared/models/data/effectifs/apprenant.part";
 import { zContrat } from "shared/models/data/effectifs/contrat.part";
 import { IEffectifDECA } from "shared/models/data/effectifsDECA.model";
@@ -23,13 +22,21 @@ import {
 import { withComputedFields } from "@/common/actions/effectifs.actions";
 import { checkIfEffectifExists, getAndFormatCommuneFromCode } from "@/common/actions/engine/engine.actions";
 import { createMissionLocaleSnapshot } from "@/common/actions/mission-locale/mission-locale.actions";
+import { withStatsMlDifferees } from "@/common/actions/mission-locale/statsMlDifferees";
 import { getOrganismeByUAIAndSIRET } from "@/common/actions/organismes/organismes.actions";
+import {
+  creerClientDecaBalDepuisConfig,
+  lireExpirationCle,
+  lirePagesContratsDeca,
+  type PageContratsDecaBal,
+} from "@/common/apis/bal/bal-deca.api";
+import type { IContratDecaBal } from "@/common/apis/bal/bal-deca.model";
 import parentLogger from "@/common/logger";
 import { effectifsDECADb, organismesDb } from "@/common/model/collections";
-import { getBALMongodbUri } from "@/common/mongodb";
 import { estHorsConservation } from "@/common/utils/conservationUtils";
 import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import { cachedInRun, getRunCacheStats, withRunCache } from "@/common/utils/runCache";
+import { traiterEnParallele } from "@/common/utils/traiterEnParallele";
 import config from "@/config";
 import {
   fiabilisationEffectifFormation,
@@ -40,7 +47,8 @@ import { construireBilanImport, type BilanImportDeca } from "./deca-bilan";
 
 const logger = parentLogger.child({ module: "job:hydrate:contrats-deca-raw" });
 
-const client = new MongoClient(getBALMongodbUri(config.mongodb.dbNameBal));
+const ALERTE_EXPIRATION_CLE_JOURS = 30;
+const PAGES_ENTRE_DEUX_JOURNAUX = 100;
 
 interface IProcessingStats {
   created: number;
@@ -118,14 +126,21 @@ function libelleOrganisme(organisme: OrganismeResume | null): string {
   return `${nom} (${organisme.nature ?? "nature inconnue"}${organisme.ferme ? ", fermé" : ""})`;
 }
 
-async function inspectEffectifDeca(document: IRawBalDeca, stats: IDryRunStats): Promise<IProcessingStats> {
+const jour = (date: Date | null | undefined) => (date ? date.toISOString().slice(0, 10) : "?");
+
+async function inspectEffectifDeca(document: IContratDecaBal, stats: IDryRunStats): Promise<IProcessingStats> {
   const { no_contrat, organisme_formation, etablissement_formation, formation } = document;
+  const siretResponsable = organisme_formation?.siret ?? null;
+  const uaiResponsable = organisme_formation?.uai_cfa ?? null;
   stats.contrats++;
 
-  const responsable = await organismesDb().findOne(
-    { siret: organisme_formation.siret, uai: organisme_formation.uai_cfa },
-    { projection: organismeResumeProjection }
-  );
+  const responsable =
+    siretResponsable && uaiResponsable
+      ? await organismesDb().findOne(
+          { siret: siretResponsable, uai: uaiResponsable },
+          { projection: organismeResumeProjection }
+        )
+      : null;
   if (!responsable) stats.responsableIntrouvable++;
 
   const siretEtablissement = etablissement_formation?.siret ?? null;
@@ -137,7 +152,7 @@ async function inspectEffectifDeca(document: IRawBalDeca, stats: IDryRunStats): 
   } else if (!siretEtablissement) {
     stats.etablissementVide++;
     relation = "siret vide";
-  } else if (siretEtablissement === organisme_formation.siret) {
+  } else if (siretEtablissement === siretResponsable) {
     stats.etablissementIdentiqueAuResponsable++;
     relation = "identique au responsable";
   } else {
@@ -162,7 +177,7 @@ async function inspectEffectifDeca(document: IRawBalDeca, stats: IDryRunStats): 
     if (responsable?.organismesFormateurs?.some((formateur) => formateur.siret === siretEtablissement)) {
       stats.etablissementFormateurDuResponsable++;
       relation = "formateur du responsable au catalogue";
-    } else if (siretEtablissement.slice(0, 9) === organisme_formation.siret.slice(0, 9)) {
+    } else if (siretResponsable && siretEtablissement.slice(0, 9) === siretResponsable.slice(0, 9)) {
       stats.etablissementMemeSiren++;
       relation = "même SIREN, autre établissement";
     } else {
@@ -174,8 +189,8 @@ async function inspectEffectifDeca(document: IRawBalDeca, stats: IDryRunStats): 
   logger.info(
     {
       no_contrat,
-      formation: `${formation.code_diplome} / ${formation.rncp} (${formation.date_debut_formation} → ${formation.date_fin_formation})`,
-      responsable: `${organisme_formation.siret}/${organisme_formation.uai_cfa} ${libelleOrganisme(responsable)}`,
+      formation: `${formation?.code_diplome} / ${formation?.rncp} (${jour(formation?.date_debut_formation)} → ${jour(formation?.date_fin_formation)})`,
+      responsable: `${siretResponsable}/${uaiResponsable} ${libelleOrganisme(responsable)}`,
       etablissement: `${siretEtablissement ?? "-"} ${relation} ${resolution}`.trim(),
     },
     "DECA dry-run contrat"
@@ -184,61 +199,130 @@ async function inspectEffectifDeca(document: IRawBalDeca, stats: IDryRunStats): 
   return createEmptyStats();
 }
 
-export function hydrateDecaRaw(options: { dryRun?: boolean; limit?: number } = {}) {
-  return withRunCache(() => importerContratsDeca(options));
+type OptionsImportDeca = { dryRun?: boolean; limit?: number; after?: string };
+
+type SuiviPage = { curseur: string | undefined; restants: number };
+
+export function creerSuiviPages(curseurDepart: string | undefined) {
+  const ouvertes: SuiviPage[] = [];
+  let pages = 0;
+  let derniere = curseurDepart;
+
+  const elaguer = () => {
+    while (ouvertes.length > 0 && ouvertes[0].restants <= 0) {
+      ouvertes.shift();
+    }
+  };
+
+  return {
+    get pages() {
+      return pages;
+    },
+    ouvrir(curseur: string | undefined, taille: number): SuiviPage {
+      pages++;
+      derniere = curseur;
+      const page = { curseur, restants: taille };
+      ouvertes.push(page);
+      elaguer();
+      return page;
+    },
+    terminer(page: SuiviPage) {
+      page.restants--;
+      elaguer();
+    },
+    reprise(): string | undefined {
+      return ouvertes.length > 0 ? ouvertes[0].curseur : derniere;
+    },
+  };
 }
 
-async function importerContratsDeca({ dryRun = false, limit }: { dryRun?: boolean; limit?: number }) {
+async function* contratsSuivis(
+  pages: AsyncIterable<PageContratsDecaBal>,
+  suivi: ReturnType<typeof creerSuiviPages>,
+  surPage: (page: PageContratsDecaBal) => void
+) {
+  for await (const page of pages) {
+    const suiviPage = suivi.ouvrir(page.curseur, page.contrats.length);
+    surPage(page);
+    for (const contrat of page.contrats) {
+      yield { contrat, suiviPage };
+    }
+  }
+}
+
+function signalerExpirationCle() {
+  const expiration = config.bal.deca_api_key ? lireExpirationCle(config.bal.deca_api_key) : null;
+  if (!expiration || expiration.getTime() - Date.now() > ALERTE_EXPIRATION_CLE_JOURS * 86_400_000) {
+    return;
+  }
+  const date = jour(expiration);
+  logger.warn({ expiration: date }, "La clé de l'API DECA de la BAL expire bientôt");
+  Sentry.captureMessage("La clé de l'API DECA de la BAL expire bientôt", {
+    level: "warning",
+    fingerprint: ["deca-bal-cle-expiration"],
+    extra: { expiration: date },
+  });
+}
+
+function signalerContratsEcartes(ecartes: number) {
+  Sentry.captureMessage("Contrats DECA écartés par la BAL", {
+    level: "warning",
+    fingerprint: ["deca-bal-contrats-ecartes"],
+    extra: { ecartes },
+  });
+}
+
+export function hydrateDecaRaw(options: OptionsImportDeca = {}) {
+  return withRunCache(() => withStatsMlDifferees(() => importerContratsDeca(options)));
+}
+
+async function importerContratsDeca({ dryRun = false, limit, after }: OptionsImportDeca) {
   const totalStats = createEmptyStats();
   const dryRunStats = createEmptyDryRunStats();
   const debutMs = Date.now();
   const echecs = createErrorAggregator("hydrate:contrats-deca-raw");
+  const curseurDepart = after ? new ObjectId(after).toHexString() : undefined;
+  const importComplet = !limit && !curseurDepart;
+  const suivi = creerSuiviPages(curseurDepart);
+  const dansLOrdre = creerOrdreParCle();
   let totalCount = 0;
-
-  const processBuffer = async (buffer: Promise<IProcessingStats>[]) => {
-    const results = await Promise.allSettled(buffer);
-    for (const result of results) {
-      if (result.status === "fulfilled") {
-        mergeStats(totalStats, result.value);
-        echecs.ok();
-      } else {
-        echecs.record(result.reason);
-      }
-    }
-    totalCount += buffer.length;
-  };
+  let ecartes = 0;
+  let lectureTerminee = false;
+  let erreur: unknown = null;
 
   try {
-    await client.connect();
+    signalerExpirationCle();
+    const client = creerClientDecaBalDepuisConfig();
     const responsablesFleches = dryRun ? new Set<string>() : await chargerResponsablesFleches();
 
-    const query = {
-      dispositif: "APPR",
-      "organisme_formation.uai_cfa": { $exists: true },
-      "organisme_formation.siret": { $exists: true },
-      "formation.date_debut_formation": { $exists: true },
-      "formation.date_fin_formation": { $exists: true },
-    };
-
-    const cursor = client.db().collection<IRawBalDeca>(config.mongodb.decaDbCollectionBal).find(query);
-    if (dryRun) cursor.sort({ created_at: -1 });
-    if (limit) cursor.limit(limit);
-
-    let promiseArray: Promise<IProcessingStats>[] = [];
-    for await (const document of cursor) {
-      promiseArray.push(
-        dryRun ? inspectEffectifDeca(document, dryRunStats) : updateEffectifDeca(document, responsablesFleches)
-      );
-
-      if (promiseArray.length === 100) {
-        await processBuffer(promiseArray);
-        promiseArray = [];
+    const pages = lirePagesContratsDeca(client, { after: curseurDepart, limit });
+    const contrats = contratsSuivis(pages, suivi, (page) => {
+      ecartes += page.ecartes;
+      if (suivi.pages % PAGES_ENTRE_DEUX_JOURNAUX === 0) {
+        logger.info({ pages: suivi.pages, contrats: totalCount, reprise: suivi.reprise() }, "DECA lecture en cours");
       }
-    }
+    });
 
-    if (promiseArray.length > 0) {
-      await processBuffer(promiseArray);
-    }
+    await traiterEnParallele(contrats, {
+      concurrence: config.deca.concurrence,
+      traiter: async ({ contrat, suiviPage }) => {
+        totalCount++;
+        try {
+          await dansLOrdre(cleApprenant(contrat), async () => {
+            const stats = dryRun
+              ? await inspectEffectifDeca(contrat, dryRunStats)
+              : await updateEffectifDeca(contrat, responsablesFleches);
+            mergeStats(totalStats, stats);
+            echecs.ok();
+          });
+        } finally {
+          suivi.terminer(suiviPage);
+        }
+      },
+      surErreur: (erreurContrat) => echecs.record(erreurContrat),
+    });
+
+    lectureTerminee = true;
 
     if (dryRun) {
       logger.info({ ...dryRunStats, totalCount }, "DECA dry-run : aucune écriture");
@@ -254,10 +338,13 @@ async function importerContratsDeca({ dryRun = false, limit }: { dryRun?: boolea
       logger.error("No documents found matching the criteria.");
     }
   } catch (err) {
-    logger.error(`Échec de la mise à jour des effectifs: ${err}`);
-    captureException(err);
+    erreur = err;
+    if (lectureTerminee) {
+      logger.error({ err }, "DECA : échec après la lecture des contrats, relancer un import complet");
+    } else {
+      logger.error({ err, reprise: suivi.reprise() }, "DECA : import interrompu, reprendre avec --after");
+    }
   } finally {
-    await client.close();
     const nbEchecs = echecs.failed;
     if (!dryRun) {
       echecs.flush();
@@ -266,23 +353,43 @@ async function importerContratsDeca({ dryRun = false, limit }: { dryRun?: boolea
       debutMs,
       finMs: Date.now(),
       contrats: totalCount,
+      effectifs: totalStats.created + totalStats.updated,
       echecs: nbEchecs,
+      ecartes,
       cache: getRunCacheStats(),
     });
     logger.info(
       bilan,
       `DECA terminé: ${totalCount} traités, ${totalStats.created} créés, ${totalStats.updated} mis à jour`
     );
-    if (!dryRun && !limit) {
+    if (!dryRun && ecartes > 0) {
+      signalerContratsEcartes(ecartes);
+    }
+    if (!dryRun && importComplet && !erreur) {
       publierMesures(bilan);
     }
   }
+
+  if (erreur) {
+    throw erreur;
+  }
 }
 
-function publierMesures({ contrats, contratsParSeconde, echecs, tauxDefautCache }: BilanImportDeca) {
+function publierMesures({
+  contrats,
+  contratsParSeconde,
+  effectifs,
+  effectifsParSeconde,
+  echecs,
+  ecartes,
+  tauxDefautCache,
+}: BilanImportDeca) {
   Sentry.setMeasurement("deca.contrats", contrats, "none");
+  Sentry.setMeasurement("deca.effectifs", effectifs, "none");
   Sentry.setMeasurement("deca.echecs", echecs, "none");
+  Sentry.setMeasurement("deca.ecartes", ecartes, "none");
   Sentry.setMeasurement("deca.contrats_par_seconde", contratsParSeconde, "none");
+  Sentry.setMeasurement("deca.effectifs_par_seconde", effectifsParSeconde, "none");
   if (tauxDefautCache !== null) {
     Sentry.setMeasurement("deca.cache_taux_defaut", tauxDefautCache, "ratio");
   }
@@ -405,7 +512,10 @@ export async function upsertEffectifDeca(
   return { created: false };
 }
 
-async function updateEffectifDeca(document: IRawBalDeca, responsablesFleches: Set<string>): Promise<IProcessingStats> {
+async function updateEffectifDeca(
+  document: IContratDecaBal,
+  responsablesFleches: Set<string>
+): Promise<IProcessingStats> {
   return Sentry.startSpan(
     {
       name: "DECA Update Effectif",
@@ -458,9 +568,7 @@ async function updateOrganismesLastEffectifUpdate(organismeIds: Set<string>) {
 }
 
 export function getAnneesScolairesAImporter(
-  document: Pick<IRawBalDeca, "_id" | "date_fin_contrat"> & {
-    formation: Pick<IRawBalDeca["formation"], "date_debut_formation" | "date_fin_formation">;
-  },
+  document: Pick<IContratDecaBal, "_id" | "date_fin_contrat" | "formation">,
   maintenant: Date = new Date()
 ): string[] {
   const { formation } = document;
@@ -489,7 +597,7 @@ export function getAnneesScolairesAImporter(
   );
 }
 
-async function transformDocument(document: IRawBalDeca): Promise<WithoutId<IEffectifDECA>[]> {
+async function transformDocument(document: IContratDecaBal): Promise<WithoutId<IEffectifDECA>[]> {
   const effectifs: WithoutId<IEffectifDECA>[] = [];
   for (const anneeScolaire of getAnneesScolairesAImporter(document)) {
     const effectif = await createEffectif(document, anneeScolaire);
@@ -497,11 +605,54 @@ async function transformDocument(document: IRawBalDeca): Promise<WithoutId<IEffe
       effectifs.push(effectif);
     }
   }
-
   return effectifs;
 }
 
-async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Promise<WithoutId<IEffectifDECA> | null> {
+const calculerIdErpApprenant = (
+  prenom: string | null | undefined,
+  nom: string | null | undefined,
+  dateNaissance: Date | null
+) => cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (dateNaissance || ""));
+
+const typeEmployeurReconnu = (valeur: number | null | undefined) => {
+  const resultat = zContrat.shape.type_employeur.safeParse(valeur);
+  return resultat.success ? (resultat.data ?? null) : null;
+};
+
+const cleApprenant = (contrat: IContratDecaBal) => {
+  const uai = contrat.organisme_formation?.uai_cfa;
+  const siret = contrat.organisme_formation?.siret;
+  if (!uai || !siret) {
+    return contrat._id;
+  }
+  const dateNaissance = contrat.alternant?.date_naissance ? new Date(contrat.alternant.date_naissance) : null;
+  return `${uai}|${siret}|${calculerIdErpApprenant(contrat.alternant?.prenom, contrat.alternant?.nom, dateNaissance)}`;
+};
+
+export function creerOrdreParCle() {
+  const dernieres = new Map<string, Promise<void>>();
+  const dansLOrdre = async (cle: string, traiter: () => Promise<void>) => {
+    const courante = (dernieres.get(cle) ?? Promise.resolve()).then(traiter);
+    const garde = courante.then(
+      () => undefined,
+      () => undefined
+    );
+    dernieres.set(cle, garde);
+    try {
+      await courante;
+    } finally {
+      if (dernieres.get(cle) === garde) {
+        dernieres.delete(cle);
+      }
+    }
+  };
+  return Object.assign(dansLOrdre, { enAttente: () => dernieres.size });
+}
+
+async function createEffectif(
+  document: IContratDecaBal,
+  anneeScolaire: string
+): Promise<WithoutId<IEffectifDECA> | null> {
   const {
     alternant,
     formation,
@@ -511,8 +662,21 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
     date_debut_contrat,
     date_fin_contrat,
     date_effet_rupture,
-    type_contrat,
+    type_employeur,
   } = document;
+
+  if (!alternant) {
+    throw new Error("Contrat DECA incomplet : alternant absent");
+  }
+  if (!formation) {
+    throw new Error("Contrat DECA incomplet : formation absente");
+  }
+  if (!employeur) {
+    throw new Error("Contrat DECA incomplet : employeur absent");
+  }
+  if (!organisme_formation?.uai_cfa || !organisme_formation.siret) {
+    throw new Error("Contrat DECA incomplet : organisme de formation absent");
+  }
 
   const {
     nom,
@@ -538,6 +702,12 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
   if (!organisme) {
     return null;
   }
+  if (!nom || !prenom) {
+    throw new Error("Contrat DECA incomplet : nom ou prénom de l'alternant absent");
+  }
+  if (!adresseAlternant) {
+    throw new Error("Contrat DECA incomplet : adresse de l'alternant absente");
+  }
 
   const dateDebutContrat = date_debut_contrat ? new Date(date_debut_contrat) : null;
   const dateFinContrat = date_fin_contrat ? new Date(date_fin_contrat) : null;
@@ -559,7 +729,7 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
     throw new Error("L'année de début et l'année de fin doivent être définies");
   }
 
-  if (adresseAlternant.code_postal.length !== 5) {
+  if (adresseAlternant.code_postal?.length !== 5) {
     logger.warn(
       `Le code postal de l'alternant est invalide. Document ID: ${document._id}, code postal: ${adresseAlternant.code_postal}`
     );
@@ -597,9 +767,9 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
       {
         siret,
         denomination,
-        type_employeur: parseInt(type_contrat, 10) as zodOpenApi.TypeOf<typeof zContrat>["type_employeur"],
+        type_employeur: typeEmployeurReconnu(type_employeur),
         naf,
-        adresse: { code_postal: adresse.code_postal },
+        adresse: { code_postal: adresse?.code_postal },
         date_debut: dateDebutContrat,
         date_fin: dateFinContrat,
         date_rupture: dateEffetRupture,
@@ -624,7 +794,7 @@ async function createEffectif(document: IRawBalDeca, anneeScolaire: string): Pro
     created_at: new Date(),
     updated_at: new Date(),
     transmitted_at: new Date(),
-    id_erp_apprenant: cyrb53Hash(normalize(prenom || "").trim() + normalize(nom || "").trim() + (dateNaissance || "")),
+    id_erp_apprenant: calculerIdErpApprenant(prenom, nom, dateNaissance),
     source: SOURCE_APPRENANT.DECA,
     annee_scolaire: anneeScolaire,
   };

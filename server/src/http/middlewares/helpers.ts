@@ -9,6 +9,7 @@ import {
   IOrganisationOperateurPublicAcademie,
   IOrganisationOperateurPublicRegion,
   ORGANISATION_TYPE,
+  organisationAvecAdministrateurs,
   PermissionOrganisme,
 } from "shared";
 import { getAcademieListByRegion } from "shared/constants/territoires";
@@ -113,15 +114,21 @@ export function requireCfaAdmin(req: Request, _res: Response, next: NextFunction
 }
 
 /**
- * Pour les routes partagées entre tous les types d'org :
- * si l'org est un CFA, on exige le rôle admin CFA. Sinon, on laisse passer.
+ * Pour les routes partagées entre tous les types d'org : si l'org a des administrateurs (CFA, DREETS, DDETS), on
+ * exige le rôle admin. Sinon, on laisse passer.
  */
-export function requireCfaAdminIfCfa(req: Request, _res: Response, next: NextFunction) {
+export function requireAdminSiOrganisationAvecAdministrateurs(req: Request, _res: Response, next: NextFunction) {
   const user = req.user as AuthContext;
   ensureValidUser(user);
 
   if (user.organisation.type === "ORGANISME_FORMATION") {
     return requireCfaAdmin(req, _res, next);
+  }
+
+  if (organisationAvecAdministrateurs(user.organisation.type) && !user.impersonating) {
+    if (user.organisation_role !== "admin") {
+      throw Boom.forbidden("Accès réservé aux administrateurs de l'organisation");
+    }
   }
 
   next();
