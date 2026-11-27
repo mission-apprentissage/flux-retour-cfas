@@ -24,7 +24,7 @@ export const createCollectionIndexes = async (collectionDescriptor?: CollectionD
           "Erreur lors de la création des index"
         );
         captureTiered(new Error(`Error creating indexes for ${collectionDescriptor.collectionName}`, { cause: err }), {
-          tier: "veille",
+          tier: "jour",
           errorKind: "db",
           fingerprintKey: `indexes:${collectionDescriptor.collectionName}`,
         });
