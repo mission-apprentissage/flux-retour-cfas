@@ -46,14 +46,14 @@ const apprenant = () => ({
   adresse: { code_postal: "75001", mission_locale_id: ML_ID },
 });
 
-const effectifErp = (parcours: Parcours, _id = new ObjectId()) =>
+const effectifErp = (parcours: Parcours, _id = new ObjectId(), identite: Partial<ReturnType<typeof apprenant>> = {}) =>
   ({
     _id,
     organisme_id: new ObjectId(),
     id_erp_apprenant: "erp-1",
     source: SOURCE_APPRENANT.ERP,
     annee_scolaire: "2025-2026",
-    apprenant: apprenant(),
+    apprenant: { ...apprenant(), ...identite },
     formation: { cfd: "50022137", rncp: "RNCP12345", periode: [2025, 2026], date_fin: new Date("2026-06-30") },
     contrats: [
       {
@@ -229,7 +229,10 @@ describe("purgerDossiersMlMasques()", () => {
         { date: new Date("2023-09-01"), valeur: STATUT_APPRENANT.APPRENTI },
         { date: new Date("2024-03-01"), valeur: STATUT_APPRENANT.RUPTURANT },
       ];
-      const nouveau = effectifErp(parcoursRuptureAncienne);
+      const nouveau = effectifErp(parcoursRuptureAncienne, new ObjectId(), {
+        prenom: "Paul",
+        courriel: "paul.dupont@example.com",
+      });
       const suivi = effectifErp(parcoursRupturant);
       expect((await createMissionLocaleSnapshot(suivi))?.upserted).toBe(true);
 
