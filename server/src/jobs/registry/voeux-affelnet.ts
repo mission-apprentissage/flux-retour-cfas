@@ -1,5 +1,7 @@
 import type { JobDef } from "job-processor";
 
+import { purgerVoeuxAffelnet } from "../clear/purge-voeux-affelnet";
+import { refuserPurgesConcurrentes } from "../clear/verrou-purges";
 import {
   hydrateVoeuxEffectifsDECARelations,
   hydrateVoeuxEffectifsRelations,
@@ -7,9 +9,15 @@ import {
 } from "../hydrate/affelnet/hydrate-voeux-effectifs";
 import { seedSipaTestNancy } from "../tmp/seed-sipa-test-nancy";
 
-import { payloadString } from "./payload";
+import { payloadBoolean, payloadString } from "./payload";
 
 export const voeuxAffelnetJobs = {
+  "purge:voeux-affelnet": {
+    handler: async (job) => {
+      await refuserPurgesConcurrentes(job.name);
+      return purgerVoeuxAffelnet({ dryRun: payloadBoolean(job.payload, "dryRun") ?? false });
+    },
+  },
   "hydrate:voeux-effectifs-relations": {
     handler: async (job) => {
       const anneeScolaireRentree = payloadString(job.payload, "anneeScolaireRentree");

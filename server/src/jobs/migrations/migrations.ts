@@ -7,6 +7,8 @@ import logger from "@/common/logger";
 import { getMongodbClient } from "@/common/mongodb";
 import { __dirname } from "@/common/utils/esmUtils";
 
+const LOCK_COLLECTION_NAME = "changelog_lock";
+
 const myConfig = {
   mongodb: {
     url: process.env.FLUX_RETOUR_CFAS_MONGODB_URI as string,
@@ -28,6 +30,9 @@ const myConfig = {
   // The mongodb collection where the applied changes are stored. Only edit this when really necessary.
   changelogCollectionName: "changelog",
 
+  lockCollectionName: LOCK_COLLECTION_NAME,
+  lockTtl: 43200,
+
   // The file extension to create migrations and search for in migration dir
   migrationFileExtension: ".js",
 
@@ -38,6 +43,15 @@ const myConfig = {
   // Don't change this, unless you know what you're doing
   moduleSystem: "esm",
 };
+
+export async function assertNoMigrationLock() {
+  const locks = await getMongodbClient().db().collection(LOCK_COLLECTION_NAME).countDocuments({});
+  if (locks > 0) {
+    throw new Error(
+      `Migrations verrouillées : ${LOCK_COLLECTION_NAME} n'est pas vide. Vérifier qu'aucun migrations:up ne tourne avant de vider la collection.`
+    );
+  }
+}
 
 export async function up() {
   config.set(myConfig);

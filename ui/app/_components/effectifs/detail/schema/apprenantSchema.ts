@@ -219,7 +219,6 @@ export const apprenantSchema = {
   },
   "apprenant.adresse.complete": {
     label: "Complete :",
-    locked: true,
     mask: "C",
     maskBlocks: [
       {

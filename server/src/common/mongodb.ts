@@ -1,8 +1,10 @@
-import { CollectionInfo, Document, MongoClient } from "mongodb";
+import { isEqual } from "lodash-es";
+import { CollectionInfo, Document, MongoClient, MongoServerError } from "mongodb";
 import { zodToMongoSchema } from "shared/models";
 import type { ZodTypeAny } from "zod";
 
 import logger from "@/common/logger";
+import { captureTiered } from "@/common/services/sentry/alertContract";
 import config from "@/config";
 
 let mongodbClient: MongoClient | null = null;
@@ -78,48 +80,85 @@ export const getDbCollectionSchema = async (name: string) => {
   return collectionInfo?.options?.validator;
 };
 
-/**
- * Création d'une collection si elle n'existe pas
- * @param {string} collectionName
- */
-const createCollectionIfDoesNotExist = async (collectionName: string) => {
-  const db = getDatabase();
-  const collectionsInDb = await db.listCollections().toArray();
-  const collectionExistsInDb = collectionsInDb.map(({ name }) => name).includes(collectionName);
+export type ValidationLevel = "strict" | "moderate";
 
-  if (!collectionExistsInDb) {
-    await db.createCollection(collectionName);
+type ValidationOptions = {
+  level?: ValidationLevel;
+  onIndexBuild?: "throw" | "warn";
+};
+
+const NAMESPACE_EXISTS = 48;
+const INDEX_BUILD_IN_PROGRESS = 12587;
+
+const createCollectionIfDoesNotExist = async (collectionName: string) => {
+  try {
+    await getDatabase().createCollection(collectionName);
+  } catch (err) {
+    if (err instanceof MongoServerError && err.code === NAMESPACE_EXISTS) {
+      return;
+    }
+    throw err;
   }
 };
 
-/**
- * Config de la validation
- * @param {*} modelDescriptors
- */
+export const buildCollectionValidator = (collectionName: string, zod?: ZodTypeAny | null) => {
+  if (!zod) {
+    return null;
+  }
+  const convertedSchema = zodToMongoSchema(zod);
+  if (!convertedSchema) {
+    return null;
+  }
+  return { $jsonSchema: { title: collectionName, ...omitDeepKeys(convertedSchema, ["example"]) } };
+};
+
 export const configureDbSchemaValidation = async (
-  modelDescriptors: ReadonlyArray<{ collectionName: string; zod?: ZodTypeAny | null }>
+  modelDescriptors: ReadonlyArray<{ collectionName: string; zod?: ZodTypeAny | null }>,
+  { level = "strict", onIndexBuild = "throw" }: ValidationOptions = {}
 ) => {
   const db = getDatabase();
+  const collections = await db.listCollections().toArray();
+  const optionsByName = new Map(collections.map((collection: CollectionInfo) => [collection.name, collection.options]));
+
   await Promise.all(
     modelDescriptors.map(async ({ collectionName, zod }) => {
-      await createCollectionIfDoesNotExist(collectionName);
-
-      if (!zod) {
-        return;
-      }
-      let convertedSchema = zodToMongoSchema(zod);
-      if (!convertedSchema) {
-        return;
+      if (!optionsByName.has(collectionName)) {
+        await createCollectionIfDoesNotExist(collectionName);
       }
 
-      await db.command({
-        collMod: collectionName,
-        validationLevel: "strict",
-        validationAction: "error",
-        validator: {
-          $jsonSchema: { title: collectionName, ...omitDeepKeys(convertedSchema, ["example"]) }, // strip example field because NON STANDARD jsonSchema
-        },
-      });
+      const validator = buildCollectionValidator(collectionName, zod);
+      if (!validator) {
+        return;
+      }
+
+      const current = optionsByName.get(collectionName);
+      if (
+        current?.validationLevel === level &&
+        current?.validationAction === "error" &&
+        isEqual(current?.validator, validator)
+      ) {
+        return;
+      }
+
+      try {
+        await db.command({
+          collMod: collectionName,
+          validationLevel: level,
+          validationAction: "error",
+          validator,
+        });
+      } catch (err) {
+        if (onIndexBuild === "warn" && err instanceof MongoServerError && err.code === INDEX_BUILD_IN_PROGRESS) {
+          logger.warn({ err, collectionName }, "Validateur non appliqué : construction d'index en cours");
+          captureTiered(new Error(`Validateur non appliqué sur ${collectionName}`, { cause: err }), {
+            tier: "jour",
+            errorKind: "db",
+            fingerprintKey: `validators:${collectionName}`,
+          });
+          return;
+        }
+        throw err;
+      }
     })
   );
 };

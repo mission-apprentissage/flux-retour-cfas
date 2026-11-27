@@ -335,7 +335,7 @@ describe("fléchage des contrats DECA", () => {
       expect(mockUpdateVoeux).toHaveBeenCalledWith(
         nouvelleAnnee?._id,
         expect.objectContaining({ organisme_formateur_id: cible._id }),
-        cible._id.toString()
+        cible._id
       );
     });
 

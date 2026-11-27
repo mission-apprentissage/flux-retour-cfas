@@ -2,11 +2,14 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
+import { DOUZE_MOIS_EN_SECONDES } from "./common";
+
 const collectionName = "invitations";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ token: 1 }, { name: "token", unique: true }],
   [{ organisation_id: 1 }, { name: "organisation_id" }],
+  [{ expires_at: 1 }, { name: "ttl_expires_at", expireAfterSeconds: DOUZE_MOIS_EN_SECONDES }],
 ];
 
 const zInvitation = z.object({
@@ -19,7 +22,7 @@ const zInvitation = z.object({
   prenom: z.string().optional().describe("Prénom de l'invité (si fourni à la création)"),
   nom: z.string().optional().describe("Nom de l'invité (si fourni à la création)"),
   created_at: z.date({ description: "Date de création en base de données" }),
-  expires_at: z.date().optional().describe("Date d'expiration de l'invitation (96h après création)"),
+  expires_at: z.date().describe("Date d'expiration de l'invitation (96h après création)"),
   demande_id: zObjectId.optional().describe("Demande d'activation à l'origine de l'invitation"),
   relance_admin_at: z.date().optional().describe("Relance de l'admin auteur, invitation restée en attente 48 h"),
 });

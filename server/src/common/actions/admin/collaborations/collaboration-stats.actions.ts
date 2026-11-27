@@ -6,9 +6,14 @@ import { UNKNOWN_REGION_CODE } from "shared/models/data/nationalStats.model";
 import type { ICollaborationsCfaSyntheseResponse } from "shared/models/routes/admin/collaboration-stats.api";
 import { addDaysUTC, normalizeToUTCDay, subtractDaysUTC } from "shared/utils/date";
 
+import {
+  debutDuMois,
+  moisAvant,
+  sommerPurgesPar,
+} from "@/common/actions/mission-locale/mission-locale-purges-stats.actions";
 import { getCfaAccountsByOrganismeIds } from "@/common/actions/organisations.actions";
 import { findEligibleOrganismes, type IEligibleOrganismeRow } from "@/common/actions/organismes/deca-cfa-eligibility";
-import { missionLocaleEffectifsDb, organisationsDb } from "@/common/model/collections";
+import { missionLocaleEffectifsDb, organisationsDb, organismesDb } from "@/common/model/collections";
 
 export type IStatWithVariation = { current: number; variation: string };
 
@@ -127,20 +132,32 @@ export async function fetchCollaborationsByOrgId(
 ): Promise<Map<string, ICollaborationsByOrg>> {
   if (organismeIds.length === 0) return new Map();
 
-  const rows = await missionLocaleEffectifsDb()
-    .aggregate<{ _id: ObjectId; nb: number; last: Date }>([
-      { $match: buildDossierEnvoyeMatch(endExclusive, organismeIds, depuis) },
-      {
-        $group: {
-          _id: "$effectif_snapshot.organisme_id",
-          nb: { $sum: 1 },
-          last: { $max: "$organisme_data.reponse_at" },
+  const [rows, purges] = await Promise.all([
+    missionLocaleEffectifsDb()
+      .aggregate<{ _id: ObjectId; nb: number; last: Date }>([
+        { $match: buildDossierEnvoyeMatch(endExclusive, organismeIds, depuis) },
+        {
+          $group: {
+            _id: "$effectif_snapshot.organisme_id",
+            nb: { $sum: 1 },
+            last: { $max: "$organisme_data.reponse_at" },
+          },
         },
-      },
-    ])
-    .toArray();
+      ])
+      .toArray(),
+    sommerPurgesPar("collab", "organisme_id", { organismeIds }, { jusqua: moisAvant(endExclusive) }),
+  ]);
 
-  return new Map(rows.map((r) => [r._id.toString(), { nb: r.nb, last: r.last }]));
+  const collaborations = new Map(rows.map((r) => [r._id.toString(), { nb: r.nb, last: r.last }]));
+  for (const [id, { compteurs, dernier_mois }] of purges) {
+    const nb = depuis ? compteurs.v2_envoyes : compteurs.envoyes;
+    if (nb === 0) continue;
+    const vivante = collaborations.get(id);
+    const debut = debutDuMois(dernier_mois);
+    const last = vivante?.last ?? (depuis && depuis > debut ? depuis : debut);
+    collaborations.set(id, { nb: (vivante?.nb ?? 0) + nb, last });
+  }
+  return collaborations;
 }
 
 export async function fetchOrganismeIdsWithConfirmedAccount(organismeIds: ObjectId[]): Promise<Set<string>> {
@@ -221,6 +238,54 @@ type RegionUsageAccumulator = {
   cfa_with_collab: number;
 };
 
+async function addPurgedUsage(
+  rows: Map<string, UsageRow>,
+  endExclusive: Date,
+  activatedOrganismeIds: Set<string>,
+  depuis: Date | null
+) {
+  const bornes = { jusqua: moisAvant(endExclusive) };
+  const [suivi, collab] = await Promise.all([
+    sommerPurgesPar("suivi", "organisme_id", {}, bornes),
+    sommerPurgesPar("collab", "organisme_id", {}, bornes),
+  ]);
+  const ids = [...new Set([...suivi.keys(), ...collab.keys()])].map((id) => new ObjectId(id));
+  if (ids.length === 0) return;
+
+  const regionsActuelles = new Map(
+    (
+      await organismesDb()
+        .find({ _id: { $in: ids } }, { projection: { "adresse.region": 1 } })
+        .toArray()
+    ).map((organisme) => [organisme._id.toString(), organisme.adresse?.region ?? null])
+  );
+
+  for (const organismeId of ids) {
+    const id = organismeId.toString();
+    const activeALaPurge = [suivi.get(id)?.cfa_active_le, collab.get(id)?.cfa_active_le].some(
+      (date) => date && date < endExclusive
+    );
+    if (regionsActuelles.has(id) ? !activatedOrganismeIds.has(id) : !activeALaPurge) continue;
+    const compteursSuivi = suivi.get(id)?.compteurs;
+    const compteursCollab = collab.get(id)?.compteurs;
+    const row = rows.get(id) ?? {
+      organisme_id: organismeId,
+      region: regionsActuelles.get(id) ?? suivi.get(id)?.region ?? collab.get(id)?.region ?? null,
+      rupturants: 0,
+      dossiers_envoyes_cfa: 0,
+      dossiers_traites_ml: 0,
+      jeunes_repondus: 0,
+      rdv_pris: 0,
+    };
+    row.rupturants += (depuis ? compteursSuivi?.v2_dossiers : compteursSuivi?.dossiers) ?? 0;
+    row.dossiers_envoyes_cfa += (depuis ? compteursCollab?.v2_envoyes : compteursCollab?.envoyes) ?? 0;
+    row.dossiers_traites_ml += (depuis ? compteursCollab?.v2_traites : compteursCollab?.contactes) ?? 0;
+    row.jeunes_repondus += (depuis ? compteursCollab?.v2_repondus : compteursCollab?.repondus) ?? 0;
+    row.rdv_pris += (depuis ? compteursCollab?.v2_rdv : compteursCollab?.resultat_rdv_pris) ?? 0;
+    rows.set(id, row);
+  }
+}
+
 async function computeUsage(
   endExclusive: Date,
   activatedOrganismeIds: Set<string>,
@@ -300,6 +365,10 @@ async function computeUsage(
     },
   ]);
 
+  const rows = new Map<string, UsageRow>();
+  for await (const row of cursor) rows.set(row.organisme_id.toString(), row);
+  await addPurgedUsage(rows, endExclusive, activatedOrganismeIds, depuis);
+
   const national: ICollaborationStatsSnapshot["national"]["usage"] = {
     rupturants: 0,
     dossiers_envoyes_cfa: 0,
@@ -310,7 +379,7 @@ async function computeUsage(
   const perRegion = new Map<string, RegionUsageAccumulator>();
   let cfaWithCollabNational = 0;
 
-  for await (const row of cursor) {
+  for (const row of rows.values()) {
     const hasEnvoye = row.dossiers_envoyes_cfa > 0;
 
     national.rupturants += row.rupturants;

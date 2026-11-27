@@ -47,7 +47,6 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ organisme_id: 1, created_at: 1 }, {}],
   [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
   [{ id_erp_apprenant: 1 }, { name: "id_erp_apprenant" }],
-  [{ date_de_naissance: 1 }, { name: "date_de_naissance" }],
   [{ "formation.cfd": 1 }, { name: "formation.cfd" }],
   [
     { "apprenant.nom": 1 },
@@ -159,8 +158,6 @@ export const zEffectif = z.object({
       description: "Historique des contrats de l'apprenant",
     })
     .nullish(),
-  // TODO: remove any
-  is_lock: z.any(),
   updated_at: z.date({ description: "Date de mise à jour en base de données" }).nullish(),
   created_at: z.date({ description: "Date d'ajout en base de données" }).nullish(),
   transmitted_at: z.date({ description: "Date de transmission de l'effectif" }).nullish(),
@@ -208,11 +205,6 @@ export const zEffectif = z.object({
         .nullish(),
     })
     .nullish(),
-  _raw: z
-    .object({
-      formation: zFormationEffectif.nullish(),
-    })
-    .nullish(),
   _computed: z
     .object(
       {
@@ -241,6 +233,7 @@ export type IStatutApprenantEnum = z.infer<typeof zStatutApprenantEnum>;
 export const ORGANISME_LIEU_NOT_FOUND = "organisme lieu de formation non trouvé";
 export const ORGANISME_FORMATEUR_NOT_FOUND = "organisme formateur non trouvé";
 export const ORGANISME_RESPONSABLE_NOT_FOUND = "organisme responsable non trouvé";
+export const EFFECTIF_HORS_CONSERVATION = "dossier terminé depuis plus de deux ans, non conservé";
 
 export const createCustomEffectifIssue = (message: string, paths: string[], params: { [key: string]: string }) => ({
   code: ZodIssueCode.custom,

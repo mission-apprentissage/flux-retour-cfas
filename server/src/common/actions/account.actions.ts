@@ -30,6 +30,7 @@ import {
 import { enqueueBrevoContactSync, enqueueBrevoOrganisationContactSync } from "./brevo/contacts/enqueue-sync";
 import { enqueueBrevoEvent } from "./brevo/events/enqueue-event";
 import {
+  archiverInvitation,
   buildOrganisationLabel,
   createOrganisation,
   getOrganisationById,
@@ -125,7 +126,7 @@ export async function register(registration: RegistrationSchema): Promise<{
         },
       }
     );
-    await invitationsArchiveDb().insertOne(invitation);
+    await archiverInvitation(invitation);
     await invitationsDb().deleteOne({ _id: invitation._id });
     await enqueueBrevoContactSync(userId);
     // Transition -> CONFIRMED (invitation) : émet l'événement Brevo pour le scénario d'automation.
@@ -380,7 +381,7 @@ export async function registerCfa(data: RegistrationCfaSchema): Promise<{
 
   const isAdmin = invitation.role === "admin";
 
-  await invitationsArchiveDb().insertOne(invitation);
+  await archiverInvitation(invitation);
 
   let userId: ObjectId | null = null;
   try {

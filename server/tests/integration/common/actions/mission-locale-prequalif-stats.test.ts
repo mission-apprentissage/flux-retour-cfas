@@ -66,7 +66,6 @@ describe("getPrequalifStats", () => {
           annee_scolaire: "2024-2025",
           apprenant: { nom: "X", prenom: "Y", telephone: "0600000000" },
           formation: {},
-          is_lock: false,
           created_at: new Date(),
           updated_at: new Date(),
         },

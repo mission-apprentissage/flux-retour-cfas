@@ -8,9 +8,8 @@ import { zAdresse } from "../parts/adresseSchema";
 const collectionName = "voeuxAffelnet";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
-  [{ voeu_id: 1 }, {}],
-  [{ revision: -1 }, {}],
   [{ "raw.ine": 1 }, {}],
+  [{ annee_scolaire_rentree: 1, "raw.nom": 1, "raw.prenom_1": 1 }, {}],
   [{ deleted_at: 1 }, {}],
   [{ effectif_id: 1 }, {}],
 ];
@@ -29,49 +28,15 @@ const zVoeuAffelnetRaw = z.object({
   code_postal: z.string().nullish(),
   ville: z.string().nullish(),
   pays: z.string().nullish(),
-  telephone: z.string().nullish(),
-  telephone_pro: z.string().nullish(),
-  telephone_portable: z.string().nullish(),
   telephone_responsable_1: z.string().nullish(),
   telephone_responsable_2: z.string().nullish(),
   mail_responsable_1: z.string().nullish(),
   mail_responsable_2: z.string().nullish(),
-  mnemonique_mef_origine: z.string().nullish(),
-  code_mef_origine: z.string().nullish(),
-  libelle_formation_origine: z.string().nullish(),
-  code_origine_1: z.string().nullish(),
-  libelle_option_1: z.string().nullish(),
-  code_origine_2: z.string().nullish(),
-  libelle_option_2: z.string().nullish(),
-  code_lv1: z.string().nullish(),
-  libelle_lv1: z.string().nullish(),
-  code_lv2: z.string().nullish(),
-  libelle_lv2: z.string().nullish(),
-  code_uai_etab_origine: z.string().nullish(),
   type_etab_origine: z.string().nullish(),
   libelle_etab_origine: z.string().nullish(),
   ville_etab_origine: z.string().nullish(),
-  code_uai_cio_origine: z.string().nullish(),
-  libelle_cio_origine: z.string().nullish(),
-  rang: z.string().nullish(),
-  code_offre_formation: z.string().nullish(),
-  code_mef: z.string().nullish(),
-  bareme: z.string().nullish(),
-  mnemonique_mef_offre_formation: z.string().nullish(),
-  code_specialite_offre_formation: z.string().nullish(),
-  libelle_formation: z.string().nullish(),
-  code_enseignement: z.string().nullish(),
-  libelle_enseignement: z.string().nullish(),
-  candidature_internat: z.string().nullish(),
-  demande_code_lv1: z.string().nullish(),
-  demande_libelle_lv1: z.string().nullish(),
-  demande_code_lv2: z.string().nullish(),
-  demande_libelle_lv2: z.string().nullish(),
-  code_uai_etab_accueil: z.string().nullish(),
   type_etab_accueil: z.string().nullish(),
   libelle_etab_accueil: z.string().nullish(),
-  ville_etab_accueil: z.string().nullish(),
-  siret_uai_gestionnaire: z.string().nullish(),
   cle_ministere_educatif: z.string().nullish(),
   uai_cio_etab_accueil: z.string().nullish(),
   uai_etatblissement_formateur: z.string().nullish(),
@@ -98,12 +63,6 @@ const zVoeuAffelnet = z.object({
     .regex(YEAR_REGEX)
     .nullish(),
   raw: zVoeuAffelnetRaw,
-  history: z.array(
-    z.object({
-      created_at: z.date(),
-      raw: zVoeuAffelnetRaw,
-    })
-  ),
   _computed: z.object({
     formation: z.object({
       libelle: z.string().nullish(),
@@ -144,4 +103,5 @@ const zVoeuAffelnet = z.object({
 
 export type IVoeuAffelnet = z.output<typeof zVoeuAffelnet>;
 export type IVoeuAffelnetRaw = z.output<typeof zVoeuAffelnet.shape.raw>;
+export const COLONNES_AFFELNET_CONSERVEES = Object.keys(zVoeuAffelnetRaw.shape) as Array<keyof IVoeuAffelnetRaw>;
 export default { zod: zVoeuAffelnet, indexes, collectionName };

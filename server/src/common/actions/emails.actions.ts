@@ -116,7 +116,7 @@ export async function unsubscribeUser(id: string) {
 export async function renderEmail(token: string) {
   const user = await usersMigrationDb().findOne({ "emails.token": token });
   const email = user?.emails?.find((e) => e.token === token);
-  if (!user || !email) {
+  if (!user || !email || email.payload === undefined) {
     throw Boom.notFound("Email introuvable");
   }
   const { templateName, payload } = email;

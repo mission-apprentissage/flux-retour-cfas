@@ -2,13 +2,17 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
+import { VINGT_QUATRE_MOIS_EN_SECONDES } from "./common";
+
 const collectionName = "invitationsArchive";
 
-const indexes: [IndexSpecification, CreateIndexesOptions][] = [[{ author_id: 1 }, { name: "author_id" }]];
+const indexes: [IndexSpecification, CreateIndexesOptions][] = [
+  [{ author_id: 1 }, { name: "author_id" }],
+  [{ created_at: 1 }, { name: "ttl_created_at", expireAfterSeconds: VINGT_QUATRE_MOIS_EN_SECONDES }],
+];
 
 const zInvitationArchive = z.object({
   _id: zObjectId,
-  token: z.string({ description: "Jeton d'invitation" }),
   email: z.string({ description: "Email destinataire" }),
   organisation_id: zObjectId.describe("Organisation cible de l'invitation"),
   author_id: zObjectId.describe("Auteur de l'invitation"),

@@ -3,6 +3,9 @@ import type { CronDef, JobDef } from "job-processor";
 import { effectifsDb } from "@/common/model/collections";
 
 import { verifyMissionLocaleEffectifMail } from "../bal/bal.job";
+import { purgerDossiersSuivi } from "../clear/purge-dossiers-suivi";
+import { purgerDossiersMlMasques } from "../clear/purge-ml-dossiers-masques";
+import { refuserPurgesConcurrentes } from "../clear/verrou-purges";
 import { hydrateCommunesVoies } from "../hydrate/communes-voies/hydrate-communes-voies";
 import {
   hydrateEffectifsComputedTypes,
@@ -31,9 +34,21 @@ import { migrateAutreSituations } from "../migration/migrate-autre-situations";
 import { migrateCommuneApprenant } from "../migration/migrate-commune-apprenant";
 import { seedMlRdvUrl } from "../tmp/seed-ml-rdv-url";
 
-import { payloadDate } from "./payload";
+import { payloadBoolean, payloadDate, payloadStringArray } from "./payload";
 
 export const missionLocaleJobs = {
+  "purge:ml-dossiers-masques": {
+    handler: async (job) => {
+      await refuserPurgesConcurrentes(job.name);
+      return purgerDossiersMlMasques({ dryRun: payloadBoolean(job.payload, "dryRun") ?? false });
+    },
+  },
+  "purge:dossiers-suivi": {
+    handler: async (job) => {
+      await refuserPurgesConcurrentes(job.name);
+      return purgerDossiersSuivi({ dryRun: payloadBoolean(job.payload, "dryRun") ?? false });
+    },
+  },
   "hydrate:mission-locale-effectif-snapshot": {
     handler: async (job) => {
       const missionLocaleStructureId = (job.payload?.ml_id as string) ? parseInt(job.payload?.ml_id as string) : null;
@@ -143,8 +158,12 @@ export const missionLocaleJobs = {
     },
   },
   "hydrate:daily-mission-locale-stats": {
-    handler: async () => {
-      return hydrateDailyMissionLocaleStats();
+    handler: async (job) => {
+      return hydrateDailyMissionLocaleStats({
+        champs: payloadStringArray(job.payload, "champs"),
+        depuis: payloadDate(job.payload, "depuis"),
+        jusqua: payloadDate(job.payload, "jusqua"),
+      });
     },
   },
   "tmp:migrate:autre-situations": {

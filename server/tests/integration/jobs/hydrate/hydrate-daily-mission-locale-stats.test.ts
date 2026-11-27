@@ -28,7 +28,7 @@ describe("hydrateDailyMissionLocaleStats", () => {
   let calculs: ReturnType<typeof vi.spyOn>;
 
   beforeEach(async () => {
-    calculs = vi.spyOn(statsActions, "createOrUpdateMissionLocaleStats").mockResolvedValue(undefined);
+    calculs = vi.spyOn(statsActions, "createMissionLocaleStatsIfMissing").mockResolvedValue(true);
     vi.spyOn(collectionsModule, "missionLocaleEffectifsDb").mockImplementation(
       () =>
         ({ findOne: async () => ({ created_at: premierDossier }) }) as unknown as ReturnType<
@@ -43,7 +43,7 @@ describe("hydrateDailyMissionLocaleStats", () => {
     vi.restoreAllMocks();
   });
 
-  it("recalcule chaque ML pour chaque jour depuis le premier dossier", async () => {
+  it("crée la photo absente de chaque ML pour chaque jour depuis le premier dossier", async () => {
     await hydrateDailyMissionLocaleStats();
 
     expect(calculs).toHaveBeenCalledTimes(2 * listUtcDays(premierDossier, new Date()).length);

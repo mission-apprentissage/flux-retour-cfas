@@ -46,6 +46,7 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   "Révoque les clés API des organismes inactifs depuis +12 mois, tous les jours à 4h": { tier: "veille" },
   "Validation des constantes de territoires": { tier: "veille" },
   "Supprimer les doublons obsolètes d'effectifs tous les lundis à 6h30": { tier: "veille" },
+  "Purger les données conservées plus de deux ans le samedi à 14h": { tier: "veille" },
 
   // ─── Jobs enfilés par le cron de 02h30 ────────────────────────────────────
   "hydrate:daily": { tier: "jour" },
@@ -61,6 +62,7 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   "fiabilisation:uai-siret:run": { tier: "jour" },
   "hydrate:effectifs-formation-niveaux": { tier: "jour" },
   "purge:queues": { tier: "jour" },
+  "purge:traces": { tier: "jour" },
   "hydrate:organismes-effectifs-count": { tier: "jour" },
   "fiabilisation:effectifs:transform-inscritsSansContrats-en-abandons-depuis": { tier: "jour" },
   "fiabilisation:effectifs:transform-rupturants-en-abandons-depuis": { tier: "jour" },
@@ -79,6 +81,12 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   "deca:flechage": { tier: "jour" },
   "demandes-activation:flechables": { tier: "jour" },
   "organismes:revoke-stale-api-keys": { tier: "veille" },
+  "purge:effectifs-anciens": { tier: "jour" },
+  "purge:ml-dossiers-masques": { tier: "jour" },
+  "purge:dossiers-suivi": { tier: "jour" },
+  "purge:voeux-affelnet": { tier: "jour" },
+  "clear:queue-orphans": { tier: "jour" },
+  "db:validate": { tier: "jour" },
 };
 
 type JobContext = { type?: string };

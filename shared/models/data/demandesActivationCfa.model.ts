@@ -2,9 +2,9 @@ import type { CreateIndexesOptions, IndexSpecification } from "mongodb";
 import { z } from "zod";
 import { zObjectId } from "zod-mongodb-schema";
 
-const collectionName = "demandesActivationCfa";
+import { DOUZE_MOIS_EN_SECONDES } from "./common";
 
-const DOUZE_MOIS_EN_SECONDES = 365 * 24 * 3600;
+const collectionName = "demandesActivationCfa";
 
 const indexes: [IndexSpecification, CreateIndexesOptions][] = [
   [{ created_at: 1 }, { name: "created_at_ttl", expireAfterSeconds: DOUZE_MOIS_EN_SECONDES }],

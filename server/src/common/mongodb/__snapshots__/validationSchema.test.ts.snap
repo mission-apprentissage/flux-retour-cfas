@@ -647,432 +647,6 @@ exports[`validation-schema > should create validation schema for demandesActivat
 }
 `;
 
-exports[`validation-schema > should create validation schema for effectifV2 > effectifV2 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_computed": {
-      "additionalProperties": false,
-      "bsonType": "object",
-      "properties": {
-        "session": {
-          "anyOf": [
-            {},
-            {
-              "bsonType": "null",
-            },
-          ],
-        },
-        "statut": {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "en_cours": {
-              "bsonType": "string",
-              "enum": [
-                "ABANDON",
-                "PRE_INSCRIT",
-                "INSCRIT",
-                "APPRENTI",
-                "RUPTURANT",
-                "FIN_DE_FORMATION",
-              ],
-            },
-            "parcours": {
-              "bsonType": "array",
-              "items": {
-                "additionalProperties": false,
-                "bsonType": "object",
-                "properties": {
-                  "date": {
-                    "bsonType": "date",
-                  },
-                  "valeur": {
-                    "bsonType": "string",
-                    "enum": [
-                      "ABANDON",
-                      "PRE_INSCRIT",
-                      "INSCRIT",
-                      "APPRENTI",
-                      "RUPTURANT",
-                      "FIN_DE_FORMATION",
-                    ],
-                  },
-                },
-                "required": [
-                  "date",
-                  "valeur",
-                ],
-              },
-            },
-          },
-          "required": [
-            "en_cours",
-            "parcours",
-          ],
-        },
-      },
-      "required": [
-        "statut",
-      ],
-    },
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "adresse": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "code_academie": {
-              "bsonType": "string",
-            },
-            "code_commune_insee": {
-              "bsonType": "string",
-            },
-            "code_departement": {
-              "bsonType": "string",
-            },
-            "code_postal": {
-              "bsonType": "string",
-            },
-            "code_region": {
-              "bsonType": "string",
-            },
-            "commune": {
-              "bsonType": "string",
-            },
-            "label": {
-              "bsonType": [
-                "string",
-                "null",
-              ],
-            },
-            "mission_locale_id": {
-              "bsonType": [
-                "number",
-                "null",
-              ],
-            },
-          },
-          "required": [
-            "label",
-            "code_postal",
-            "code_commune_insee",
-            "commune",
-            "code_region",
-            "code_departement",
-            "code_academie",
-            "mission_locale_id",
-          ],
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
-    "annee_scolaires": {
-      "bsonType": "array",
-      "items": {
-        "bsonType": "string",
-        "description": "Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")",
-        "pattern": "^[12][0-9]{3}-[12][0-9]{3}$",
-      },
-    },
-    "contrats": {
-      "additionalProperties": {
-        "additionalProperties": false,
-        "bsonType": "object",
-        "properties": {
-          "date_debut": {
-            "bsonType": "date",
-          },
-          "date_fin": {
-            "anyOf": [
-              {
-                "bsonType": "date",
-              },
-              {
-                "bsonType": "null",
-              },
-            ],
-          },
-          "employeur": {
-            "additionalProperties": false,
-            "bsonType": "object",
-            "properties": {
-              "siret": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-            },
-            "required": [
-              "siret",
-            ],
-          },
-          "rupture": {
-            "anyOf": [
-              {
-                "additionalProperties": false,
-                "bsonType": "object",
-                "properties": {
-                  "cause": {
-                    "bsonType": [
-                      "string",
-                      "null",
-                    ],
-                  },
-                  "date_rupture": {
-                    "bsonType": "date",
-                  },
-                },
-                "required": [
-                  "cause",
-                  "date_rupture",
-                ],
-              },
-              {
-                "bsonType": "null",
-              },
-            ],
-          },
-        },
-        "required": [
-          "date_debut",
-          "date_fin",
-          "employeur",
-          "rupture",
-        ],
-      },
-      "bsonType": "object",
-    },
-    "custom_statut_apprenant": {
-      "bsonType": [
-        "string",
-        "null",
-      ],
-    },
-    "date_inscription": {
-      "bsonType": "date",
-    },
-    "derniere_transmission": {
-      "bsonType": "date",
-    },
-    "diplome": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "date": {
-              "anyOf": [
-                {
-                  "bsonType": "date",
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-            },
-            "obtention": {
-              "bsonType": "bool",
-            },
-          },
-          "required": [
-            "date",
-            "obtention",
-          ],
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
-    "exclusion": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "cause": {
-              "bsonType": [
-                "string",
-                "null",
-              ],
-            },
-            "date": {
-              "bsonType": "date",
-            },
-          },
-          "required": [
-            "cause",
-            "date",
-          ],
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
-    "id_erp": {
-      "bsonType": "array",
-      "items": {
-        "bsonType": "string",
-      },
-    },
-    "identifiant": {
-      "additionalProperties": false,
-      "bsonType": "object",
-      "properties": {
-        "formation_id": {
-          "bsonType": "objectId",
-        },
-        "person_id": {
-          "bsonType": "objectId",
-        },
-      },
-      "required": [
-        "person_id",
-        "formation_id",
-      ],
-    },
-    "informations_personnelles": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "email": {
-              "anyOf": [
-                {
-                  "bsonType": "string",
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-            },
-            "rqth": {
-              "bsonType": "bool",
-            },
-            "telephone": {
-              "bsonType": [
-                "string",
-                "null",
-              ],
-            },
-          },
-          "required": [
-            "rqth",
-          ],
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
-    "referent_handicap": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "email": {
-              "bsonType": [
-                "string",
-                "null",
-              ],
-            },
-            "nom": {
-              "bsonType": [
-                "string",
-                "null",
-              ],
-            },
-            "prenom": {
-              "bsonType": [
-                "string",
-                "null",
-              ],
-            },
-          },
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
-    "responsable_apprenant": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "email1": {
-              "anyOf": [
-                {
-                  "bsonType": "string",
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-            },
-            "email2": {
-              "anyOf": [
-                {
-                  "bsonType": "string",
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-            },
-          },
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
-    "session": {
-      "additionalProperties": false,
-      "bsonType": "object",
-      "properties": {
-        "debut": {
-          "bsonType": "date",
-        },
-        "fin": {
-          "bsonType": "date",
-        },
-      },
-      "required": [
-        "debut",
-        "fin",
-      ],
-    },
-  },
-  "required": [
-    "_id",
-    "identifiant",
-    "annee_scolaires",
-    "id_erp",
-    "date_inscription",
-    "exclusion",
-    "diplome",
-    "session",
-    "adresse",
-    "contrats",
-    "derniere_transmission",
-    "_computed",
-  ],
-}
-`;
-
 exports[`validation-schema > should create validation schema for effectifs > effectifs 1`] = `
 {
   "additionalProperties": false,
@@ -1290,264 +864,6 @@ exports[`validation-schema > should create validation schema for effectifs > eff
     "_id": {
       "bsonType": "objectId",
       "description": "Identifiant MongoDB de l'effectif",
-    },
-    "_raw": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "formation": {
-              "anyOf": [
-                {
-                  "additionalProperties": false,
-                  "bsonType": "object",
-                  "properties": {
-                    "annee": {
-                      "anyOf": [
-                        {
-                          "bsonType": "int",
-                          "description": "Numéro de l'année dans la formation (promo)",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Numéro de l'année dans la formation (promo)",
-                    },
-                    "cause_exclusion": {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Cause de l'exclusion",
-                    },
-                    "cfd": {
-                      "anyOf": [
-                        {
-                          "bsonType": "string",
-                          "description": "Code CFD de la formation",
-                          "pattern": "^[A-Z0-9]{8}$",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Code CFD de la formation",
-                    },
-                    "date_entree": {
-                      "anyOf": [
-                        {
-                          "bsonType": "date",
-                          "description": "Date d'entrée en formation",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Date d'entrée en formation",
-                    },
-                    "date_exclusion": {
-                      "anyOf": [
-                        {
-                          "bsonType": "date",
-                          "description": "Date d'exclusion",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Date d'exclusion",
-                    },
-                    "date_fin": {
-                      "anyOf": [
-                        {
-                          "bsonType": "date",
-                          "description": "Date de fin de la formation",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Date de fin de la formation",
-                    },
-                    "date_inscription": {
-                      "anyOf": [
-                        {
-                          "bsonType": "date",
-                          "description": "Date d'inscription",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Date d'inscription",
-                    },
-                    "date_obtention_diplome": {
-                      "anyOf": [
-                        {
-                          "bsonType": "date",
-                          "description": "Date d'obtention du diplôme",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Date d'obtention du diplôme",
-                    },
-                    "duree_formation_relle": {
-                      "anyOf": [
-                        {
-                          "bsonType": "int",
-                          "description": "Durée réelle de la formation en mois",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Durée réelle de la formation en mois",
-                    },
-                    "duree_theorique": {
-                      "anyOf": [
-                        {
-                          "bsonType": "int",
-                          "description": "Durée théorique de la formation en année",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Durée théorique de la formation en année",
-                    },
-                    "duree_theorique_mois": {
-                      "anyOf": [
-                        {
-                          "bsonType": "int",
-                          "description": "Durée théorique de la formation en mois",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Durée théorique de la formation en mois",
-                    },
-                    "formation_presentielle": {
-                      "bsonType": [
-                        "bool",
-                        "null",
-                      ],
-                      "description": "Formation en présentiel",
-                    },
-                    "libelle_court": {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Libellé court de la formation visée",
-                    },
-                    "libelle_long": {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Libellé long de la formation visée",
-                    },
-                    "niveau": {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Niveau de formation récupéré via Tables de Correspondances",
-                    },
-                    "niveau_libelle": {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                    },
-                    "obtention_diplome": {
-                      "bsonType": [
-                        "bool",
-                        "null",
-                      ],
-                      "description": "Diplôme obtenu",
-                    },
-                    "periode": {
-                      "anyOf": [
-                        {
-                          "bsonType": "array",
-                          "description": "Période de la formation, en année (peut être sur plusieurs années)",
-                          "items": {
-                            "bsonType": "int",
-                          },
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Période de la formation, en année (peut être sur plusieurs années)",
-                    },
-                    "referent_handicap": {
-                      "anyOf": [
-                        {
-                          "additionalProperties": false,
-                          "bsonType": "object",
-                          "properties": {
-                            "email": {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Email du référent handicap",
-                            },
-                            "nom": {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Nom du référent handicap",
-                            },
-                            "prenom": {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Prénom du référent handicap",
-                            },
-                          },
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                    },
-                    "rncp": {
-                      "anyOf": [
-                        {
-                          "bsonType": "string",
-                          "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
-                          "pattern": "^(RNCP)?[0-9]{2,5}$",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
-                    },
-                  },
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-            },
-          },
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
     },
     "annee_scolaire": {
       "bsonType": "string",
@@ -3693,7 +3009,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
       "bsonType": "string",
       "description": "Identifiant de l'apprenant dans l'erp",
     },
-    "is_lock": {},
     "lieu_de_formation": {
       "anyOf": [
         {
@@ -4090,264 +3405,6 @@ exports[`validation-schema > should create validation schema for effectifsArchiv
       "bsonType": "objectId",
       "description": "Identifiant MongoDB de l'effectif",
     },
-    "_raw": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "formation": {
-              "anyOf": [
-                {
-                  "additionalProperties": false,
-                  "bsonType": "object",
-                  "properties": {
-                    "annee": {
-                      "anyOf": [
-                        {
-                          "bsonType": "int",
-                          "description": "Numéro de l'année dans la formation (promo)",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Numéro de l'année dans la formation (promo)",
-                    },
-                    "cause_exclusion": {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Cause de l'exclusion",
-                    },
-                    "cfd": {
-                      "anyOf": [
-                        {
-                          "bsonType": "string",
-                          "description": "Code CFD de la formation",
-                          "pattern": "^[A-Z0-9]{8}$",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Code CFD de la formation",
-                    },
-                    "date_entree": {
-                      "anyOf": [
-                        {
-                          "bsonType": "date",
-                          "description": "Date d'entrée en formation",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Date d'entrée en formation",
-                    },
-                    "date_exclusion": {
-                      "anyOf": [
-                        {
-                          "bsonType": "date",
-                          "description": "Date d'exclusion",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Date d'exclusion",
-                    },
-                    "date_fin": {
-                      "anyOf": [
-                        {
-                          "bsonType": "date",
-                          "description": "Date de fin de la formation",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Date de fin de la formation",
-                    },
-                    "date_inscription": {
-                      "anyOf": [
-                        {
-                          "bsonType": "date",
-                          "description": "Date d'inscription",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Date d'inscription",
-                    },
-                    "date_obtention_diplome": {
-                      "anyOf": [
-                        {
-                          "bsonType": "date",
-                          "description": "Date d'obtention du diplôme",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Date d'obtention du diplôme",
-                    },
-                    "duree_formation_relle": {
-                      "anyOf": [
-                        {
-                          "bsonType": "int",
-                          "description": "Durée réelle de la formation en mois",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Durée réelle de la formation en mois",
-                    },
-                    "duree_theorique": {
-                      "anyOf": [
-                        {
-                          "bsonType": "int",
-                          "description": "Durée théorique de la formation en année",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Durée théorique de la formation en année",
-                    },
-                    "duree_theorique_mois": {
-                      "anyOf": [
-                        {
-                          "bsonType": "int",
-                          "description": "Durée théorique de la formation en mois",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Durée théorique de la formation en mois",
-                    },
-                    "formation_presentielle": {
-                      "bsonType": [
-                        "bool",
-                        "null",
-                      ],
-                      "description": "Formation en présentiel",
-                    },
-                    "libelle_court": {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Libellé court de la formation visée",
-                    },
-                    "libelle_long": {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Libellé long de la formation visée",
-                    },
-                    "niveau": {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Niveau de formation récupéré via Tables de Correspondances",
-                    },
-                    "niveau_libelle": {
-                      "bsonType": [
-                        "string",
-                        "null",
-                      ],
-                      "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                    },
-                    "obtention_diplome": {
-                      "bsonType": [
-                        "bool",
-                        "null",
-                      ],
-                      "description": "Diplôme obtenu",
-                    },
-                    "periode": {
-                      "anyOf": [
-                        {
-                          "bsonType": "array",
-                          "description": "Période de la formation, en année (peut être sur plusieurs années)",
-                          "items": {
-                            "bsonType": "int",
-                          },
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Période de la formation, en année (peut être sur plusieurs années)",
-                    },
-                    "referent_handicap": {
-                      "anyOf": [
-                        {
-                          "additionalProperties": false,
-                          "bsonType": "object",
-                          "properties": {
-                            "email": {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Email du référent handicap",
-                            },
-                            "nom": {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Nom du référent handicap",
-                            },
-                            "prenom": {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Prénom du référent handicap",
-                            },
-                          },
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                    },
-                    "rncp": {
-                      "anyOf": [
-                        {
-                          "bsonType": "string",
-                          "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
-                          "pattern": "^(RNCP)?[0-9]{2,5}$",
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                      "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
-                    },
-                  },
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-            },
-          },
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
     "annee_scolaire": {
       "bsonType": "string",
       "description": "Année scolaire sur laquelle l'apprenant est enregistré (ex: "2020-2021")",
@@ -6492,7 +5549,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
       "bsonType": "string",
       "description": "Identifiant de l'apprenant dans l'erp",
     },
-    "is_lock": {},
     "lieu_de_formation": {
       "anyOf": [
         {
@@ -8768,7 +7824,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
         "null",
       ],
     },
-    "is_lock": {},
     "organisme_formateur_id": {
       "anyOf": [
         {
@@ -8887,6 +7942,78 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     "source",
     "annee_scolaire",
     "apprenant",
+  ],
+}
+`;
+
+exports[`validation-schema > should create validation schema for effectifsPurgesStats > effectifsPurgesStats 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "annee_scolaire": {
+      "bsonType": "string",
+      "description": "Année scolaire du dossier supprimé",
+    },
+    "niveau": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Niveau de formation du dossier",
+    },
+    "nombre": {
+      "bsonType": "int",
+      "description": "Nombre de dossiers supprimés pour ces dimensions",
+    },
+    "organisme_id": {
+      "bsonType": "objectId",
+      "description": "Organisme du dossier supprimé",
+    },
+    "siret": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "SIRET de l'organisme au moment de la suppression",
+    },
+    "source": {
+      "bsonType": "string",
+      "description": "ERP, FICHIER ou DECA",
+    },
+    "statut": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "Statut en cours du dossier au moment de la suppression",
+    },
+    "uai": {
+      "bsonType": [
+        "string",
+        "null",
+      ],
+      "description": "UAI de l'organisme au moment de la suppression",
+    },
+    "updated_at": {
+      "bsonType": "date",
+      "description": "Date du dernier ajout",
+    },
+  },
+  "required": [
+    "_id",
+    "organisme_id",
+    "uai",
+    "siret",
+    "annee_scolaire",
+    "source",
+    "statut",
+    "niveau",
+    "nombre",
+    "updated_at",
   ],
 }
 `;
@@ -9016,18 +8143,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
     },
     "duree_theorique_formation_mois": {
       "description": "Durée théorique de la formation en mois",
-    },
-    "effectifV2_id": {
-      "anyOf": [
-        {
-          "bsonType": "objectId",
-          "description": "Id de l'effectif v2 associé",
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-      "description": "Id de l'effectif v2 associé",
     },
     "effectif_id": {
       "anyOf": [
@@ -10207,264 +9322,6 @@ exports[`validation-schema > should create validation schema for franceTravailEf
         "_id": {
           "bsonType": "objectId",
           "description": "Identifiant MongoDB de l'effectif",
-        },
-        "_raw": {
-          "anyOf": [
-            {
-              "additionalProperties": false,
-              "bsonType": "object",
-              "properties": {
-                "formation": {
-                  "anyOf": [
-                    {
-                      "additionalProperties": false,
-                      "bsonType": "object",
-                      "properties": {
-                        "annee": {
-                          "anyOf": [
-                            {
-                              "bsonType": "int",
-                              "description": "Numéro de l'année dans la formation (promo)",
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                          "description": "Numéro de l'année dans la formation (promo)",
-                        },
-                        "cause_exclusion": {
-                          "bsonType": [
-                            "string",
-                            "null",
-                          ],
-                          "description": "Cause de l'exclusion",
-                        },
-                        "cfd": {
-                          "anyOf": [
-                            {
-                              "bsonType": "string",
-                              "description": "Code CFD de la formation",
-                              "pattern": "^[A-Z0-9]{8}$",
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                          "description": "Code CFD de la formation",
-                        },
-                        "date_entree": {
-                          "anyOf": [
-                            {
-                              "bsonType": "date",
-                              "description": "Date d'entrée en formation",
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                          "description": "Date d'entrée en formation",
-                        },
-                        "date_exclusion": {
-                          "anyOf": [
-                            {
-                              "bsonType": "date",
-                              "description": "Date d'exclusion",
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                          "description": "Date d'exclusion",
-                        },
-                        "date_fin": {
-                          "anyOf": [
-                            {
-                              "bsonType": "date",
-                              "description": "Date de fin de la formation",
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                          "description": "Date de fin de la formation",
-                        },
-                        "date_inscription": {
-                          "anyOf": [
-                            {
-                              "bsonType": "date",
-                              "description": "Date d'inscription",
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                          "description": "Date d'inscription",
-                        },
-                        "date_obtention_diplome": {
-                          "anyOf": [
-                            {
-                              "bsonType": "date",
-                              "description": "Date d'obtention du diplôme",
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                          "description": "Date d'obtention du diplôme",
-                        },
-                        "duree_formation_relle": {
-                          "anyOf": [
-                            {
-                              "bsonType": "int",
-                              "description": "Durée réelle de la formation en mois",
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                          "description": "Durée réelle de la formation en mois",
-                        },
-                        "duree_theorique": {
-                          "anyOf": [
-                            {
-                              "bsonType": "int",
-                              "description": "Durée théorique de la formation en année",
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                          "description": "Durée théorique de la formation en année",
-                        },
-                        "duree_theorique_mois": {
-                          "anyOf": [
-                            {
-                              "bsonType": "int",
-                              "description": "Durée théorique de la formation en mois",
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                          "description": "Durée théorique de la formation en mois",
-                        },
-                        "formation_presentielle": {
-                          "bsonType": [
-                            "bool",
-                            "null",
-                          ],
-                          "description": "Formation en présentiel",
-                        },
-                        "libelle_court": {
-                          "bsonType": [
-                            "string",
-                            "null",
-                          ],
-                          "description": "Libellé court de la formation visée",
-                        },
-                        "libelle_long": {
-                          "bsonType": [
-                            "string",
-                            "null",
-                          ],
-                          "description": "Libellé long de la formation visée",
-                        },
-                        "niveau": {
-                          "bsonType": [
-                            "string",
-                            "null",
-                          ],
-                          "description": "Niveau de formation récupéré via Tables de Correspondances",
-                        },
-                        "niveau_libelle": {
-                          "bsonType": [
-                            "string",
-                            "null",
-                          ],
-                          "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                        },
-                        "obtention_diplome": {
-                          "bsonType": [
-                            "bool",
-                            "null",
-                          ],
-                          "description": "Diplôme obtenu",
-                        },
-                        "periode": {
-                          "anyOf": [
-                            {
-                              "bsonType": "array",
-                              "description": "Période de la formation, en année (peut être sur plusieurs années)",
-                              "items": {
-                                "bsonType": "int",
-                              },
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                          "description": "Période de la formation, en année (peut être sur plusieurs années)",
-                        },
-                        "referent_handicap": {
-                          "anyOf": [
-                            {
-                              "additionalProperties": false,
-                              "bsonType": "object",
-                              "properties": {
-                                "email": {
-                                  "bsonType": [
-                                    "string",
-                                    "null",
-                                  ],
-                                  "description": "Email du référent handicap",
-                                },
-                                "nom": {
-                                  "bsonType": [
-                                    "string",
-                                    "null",
-                                  ],
-                                  "description": "Nom du référent handicap",
-                                },
-                                "prenom": {
-                                  "bsonType": [
-                                    "string",
-                                    "null",
-                                  ],
-                                  "description": "Prénom du référent handicap",
-                                },
-                              },
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                        },
-                        "rncp": {
-                          "anyOf": [
-                            {
-                              "bsonType": "string",
-                              "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
-                              "pattern": "^(RNCP)?[0-9]{2,5}$",
-                            },
-                            {
-                              "bsonType": "null",
-                            },
-                          ],
-                          "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
-                        },
-                      },
-                    },
-                    {
-                      "bsonType": "null",
-                    },
-                  ],
-                },
-              },
-            },
-            {
-              "bsonType": "null",
-            },
-          ],
         },
         "annee_scolaire": {
           "bsonType": "string",
@@ -12610,7 +11467,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
           "bsonType": "string",
           "description": "Identifiant de l'apprenant dans l'erp",
         },
-        "is_lock": {},
         "lieu_de_formation": {
           "anyOf": [
             {
@@ -12836,16 +11692,32 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
       },
       "bsonType": "object",
     },
-    "person_id": {
+    "identifiant_normalise": {
       "anyOf": [
         {
-          "bsonType": "objectId",
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "date_de_naissance": {
+              "bsonType": "date",
+            },
+            "nom": {
+              "bsonType": "string",
+            },
+            "prenom": {
+              "bsonType": "string",
+            },
+          },
+          "required": [
+            "nom",
+            "prenom",
+            "date_de_naissance",
+          ],
         },
         {
           "bsonType": "null",
         },
       ],
-      "description": "Identifiant unique",
     },
     "romes": {
       "additionalProperties": false,
@@ -12964,6 +11836,7 @@ exports[`validation-schema > should create validation schema for invitations > i
     "organisation_id",
     "author_id",
     "created_at",
+    "expires_at",
   ],
 }
 `;
@@ -13020,14 +11893,9 @@ exports[`validation-schema > should create validation schema for invitationsArch
         "member",
       ],
     },
-    "token": {
-      "bsonType": "string",
-      "description": "Jeton d'invitation",
-    },
   },
   "required": [
     "_id",
-    "token",
     "email",
     "organisation_id",
     "author_id",
@@ -13044,6 +11912,10 @@ exports[`validation-schema > should create validation schema for jwtSessions > j
     "_id": {
       "bsonType": "objectId",
     },
+    "created_at": {
+      "bsonType": "date",
+      "description": "Date de création de la session (support du TTL)",
+    },
     "jwt": {
       "bsonType": "string",
       "description": "Session token",
@@ -13052,6 +11924,7 @@ exports[`validation-schema > should create validation schema for jwtSessions > j
   "required": [
     "_id",
     "jwt",
+    "created_at",
   ],
 }
 `;
@@ -13819,264 +12692,6 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
             "_id": {
               "bsonType": "objectId",
               "description": "Identifiant MongoDB de l'effectif",
-            },
-            "_raw": {
-              "anyOf": [
-                {
-                  "additionalProperties": false,
-                  "bsonType": "object",
-                  "properties": {
-                    "formation": {
-                      "anyOf": [
-                        {
-                          "additionalProperties": false,
-                          "bsonType": "object",
-                          "properties": {
-                            "annee": {
-                              "anyOf": [
-                                {
-                                  "bsonType": "int",
-                                  "description": "Numéro de l'année dans la formation (promo)",
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                              "description": "Numéro de l'année dans la formation (promo)",
-                            },
-                            "cause_exclusion": {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Cause de l'exclusion",
-                            },
-                            "cfd": {
-                              "anyOf": [
-                                {
-                                  "bsonType": "string",
-                                  "description": "Code CFD de la formation",
-                                  "pattern": "^[A-Z0-9]{8}$",
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                              "description": "Code CFD de la formation",
-                            },
-                            "date_entree": {
-                              "anyOf": [
-                                {
-                                  "bsonType": "date",
-                                  "description": "Date d'entrée en formation",
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                              "description": "Date d'entrée en formation",
-                            },
-                            "date_exclusion": {
-                              "anyOf": [
-                                {
-                                  "bsonType": "date",
-                                  "description": "Date d'exclusion",
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                              "description": "Date d'exclusion",
-                            },
-                            "date_fin": {
-                              "anyOf": [
-                                {
-                                  "bsonType": "date",
-                                  "description": "Date de fin de la formation",
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                              "description": "Date de fin de la formation",
-                            },
-                            "date_inscription": {
-                              "anyOf": [
-                                {
-                                  "bsonType": "date",
-                                  "description": "Date d'inscription",
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                              "description": "Date d'inscription",
-                            },
-                            "date_obtention_diplome": {
-                              "anyOf": [
-                                {
-                                  "bsonType": "date",
-                                  "description": "Date d'obtention du diplôme",
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                              "description": "Date d'obtention du diplôme",
-                            },
-                            "duree_formation_relle": {
-                              "anyOf": [
-                                {
-                                  "bsonType": "int",
-                                  "description": "Durée réelle de la formation en mois",
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                              "description": "Durée réelle de la formation en mois",
-                            },
-                            "duree_theorique": {
-                              "anyOf": [
-                                {
-                                  "bsonType": "int",
-                                  "description": "Durée théorique de la formation en année",
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                              "description": "Durée théorique de la formation en année",
-                            },
-                            "duree_theorique_mois": {
-                              "anyOf": [
-                                {
-                                  "bsonType": "int",
-                                  "description": "Durée théorique de la formation en mois",
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                              "description": "Durée théorique de la formation en mois",
-                            },
-                            "formation_presentielle": {
-                              "bsonType": [
-                                "bool",
-                                "null",
-                              ],
-                              "description": "Formation en présentiel",
-                            },
-                            "libelle_court": {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Libellé court de la formation visée",
-                            },
-                            "libelle_long": {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Libellé long de la formation visée",
-                            },
-                            "niveau": {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Niveau de formation récupéré via Tables de Correspondances",
-                            },
-                            "niveau_libelle": {
-                              "bsonType": [
-                                "string",
-                                "null",
-                              ],
-                              "description": "Libellé du niveau de formation récupéré via Tables de Correspondances",
-                            },
-                            "obtention_diplome": {
-                              "bsonType": [
-                                "bool",
-                                "null",
-                              ],
-                              "description": "Diplôme obtenu",
-                            },
-                            "periode": {
-                              "anyOf": [
-                                {
-                                  "bsonType": "array",
-                                  "description": "Période de la formation, en année (peut être sur plusieurs années)",
-                                  "items": {
-                                    "bsonType": "int",
-                                  },
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                              "description": "Période de la formation, en année (peut être sur plusieurs années)",
-                            },
-                            "referent_handicap": {
-                              "anyOf": [
-                                {
-                                  "additionalProperties": false,
-                                  "bsonType": "object",
-                                  "properties": {
-                                    "email": {
-                                      "bsonType": [
-                                        "string",
-                                        "null",
-                                      ],
-                                      "description": "Email du référent handicap",
-                                    },
-                                    "nom": {
-                                      "bsonType": [
-                                        "string",
-                                        "null",
-                                      ],
-                                      "description": "Nom du référent handicap",
-                                    },
-                                    "prenom": {
-                                      "bsonType": [
-                                        "string",
-                                        "null",
-                                      ],
-                                      "description": "Prénom du référent handicap",
-                                    },
-                                  },
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                            },
-                            "rncp": {
-                              "anyOf": [
-                                {
-                                  "bsonType": "string",
-                                  "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
-                                  "pattern": "^(RNCP)?[0-9]{2,5}$",
-                                },
-                                {
-                                  "bsonType": "null",
-                                },
-                              ],
-                              "description": "Code RNCP de la formation à laquelle l'apprenant est inscrit",
-                            },
-                          },
-                        },
-                        {
-                          "bsonType": "null",
-                        },
-                      ],
-                    },
-                  },
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
             },
             "annee_scolaire": {
               "bsonType": "string",
@@ -16222,7 +14837,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
               "bsonType": "string",
               "description": "Identifiant de l'apprenant dans l'erp",
             },
-            "is_lock": {},
             "lieu_de_formation": {
               "anyOf": [
                 {
@@ -18446,7 +17060,6 @@ Pour les jeunes résidents à l’étranger, il conviendra de mettre « 99 » su
                 "null",
               ],
             },
-            "is_lock": {},
             "organisme_formateur_id": {
               "anyOf": [
                 {
@@ -19508,6 +18121,504 @@ exports[`validation-schema > should create validation schema for missionLocaleEf
 }
 `;
 
+exports[`validation-schema > should create validation schema for missionLocaleEffectifsPurgesStats > missionLocaleEffectifsPurgesStats 1`] = `
+{
+  "anyOf": [
+    {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "bsonType": "objectId",
+        },
+        "cfa_active_le": {
+          "bsonType": "date",
+          "description": "Plus ancienne date d'activation du CFA pour les ML connue à la suppression de ses dossiers",
+        },
+        "compteurs": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "dossiers": {
+              "bsonType": "int",
+            },
+            "v2_dossiers": {
+              "bsonType": "int",
+            },
+          },
+          "required": [
+            "dossiers",
+            "v2_dossiers",
+          ],
+        },
+        "departement": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+          "description": "Département du CFA au moment de la suppression",
+        },
+        "mission_locale_id": {
+          "bsonType": "objectId",
+          "description": "Mission locale du dossier supprimé",
+        },
+        "mois": {
+          "bsonType": "string",
+          "description": "Mois, heure de Paris, de la création du dossier, de l'envoi par le CFA ou du dernier message WhatsApp",
+          "pattern": "^\\d{4}-\\d{2}$",
+        },
+        "organisme_id": {
+          "anyOf": [
+            {
+              "bsonType": "objectId",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "CFA du dossier supprimé",
+        },
+        "region": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+          "description": "Région du CFA au moment de la suppression",
+        },
+        "type": {
+          "bsonType": "string",
+        },
+        "updated_at": {
+          "bsonType": "date",
+          "description": "Date du dernier ajout",
+        },
+      },
+      "required": [
+        "_id",
+        "mission_locale_id",
+        "organisme_id",
+        "region",
+        "departement",
+        "mois",
+        "updated_at",
+        "type",
+        "compteurs",
+      ],
+    },
+    {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "bsonType": "objectId",
+        },
+        "cfa_active_le": {
+          "bsonType": "date",
+          "description": "Plus ancienne date d'activation du CFA pour les ML connue à la suppression de ses dossiers",
+        },
+        "compteurs": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "ages_ml_envoyes": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_administratif": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_autre": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_finance": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_logement": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_mobilite": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_recherche_emploi": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_reorientation": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_sante": {
+              "bsonType": "int",
+            },
+            "ages_ml_objectif_social_familial": {
+              "bsonType": "int",
+            },
+            "contactes": {
+              "bsonType": "int",
+            },
+            "deja_connus": {
+              "bsonType": "int",
+            },
+            "delai_count": {
+              "bsonType": "int",
+            },
+            "delai_total": {
+              "bsonType": "int",
+            },
+            "envoyes": {
+              "bsonType": "int",
+            },
+            "nps_reponses": {
+              "bsonType": "int",
+            },
+            "nps_somme": {
+              "bsonType": "int",
+            },
+            "objectif_administratif": {
+              "bsonType": "int",
+            },
+            "objectif_autre": {
+              "bsonType": "int",
+            },
+            "objectif_finance": {
+              "bsonType": "int",
+            },
+            "objectif_logement": {
+              "bsonType": "int",
+            },
+            "objectif_mobilite": {
+              "bsonType": "int",
+            },
+            "objectif_recherche_emploi": {
+              "bsonType": "int",
+            },
+            "objectif_reorientation": {
+              "bsonType": "int",
+            },
+            "objectif_sante": {
+              "bsonType": "int",
+            },
+            "objectif_social_familial": {
+              "bsonType": "int",
+            },
+            "repondus": {
+              "bsonType": "int",
+            },
+            "resultat_autre": {
+              "bsonType": "int",
+            },
+            "resultat_injoignable": {
+              "bsonType": "int",
+            },
+            "resultat_ne_souhaite_pas_accompagnement": {
+              "bsonType": "int",
+            },
+            "resultat_projet_pro_securise": {
+              "bsonType": "int",
+            },
+            "resultat_rdv_pris": {
+              "bsonType": "int",
+            },
+            "situation_abandon": {
+              "bsonType": "int",
+            },
+            "situation_besoin_aide_hors_rupture": {
+              "bsonType": "int",
+            },
+            "situation_prevention_inevitable": {
+              "bsonType": "int",
+            },
+            "situation_prevention_modere": {
+              "bsonType": "int",
+            },
+            "situation_prevention_tres_eleve": {
+              "bsonType": "int",
+            },
+            "situation_rupture": {
+              "bsonType": "int",
+            },
+            "traitees": {
+              "bsonType": "int",
+            },
+            "v2_envoyes": {
+              "bsonType": "int",
+            },
+            "v2_rdv": {
+              "bsonType": "int",
+            },
+            "v2_repondus": {
+              "bsonType": "int",
+            },
+            "v2_traites": {
+              "bsonType": "int",
+            },
+          },
+          "required": [
+            "envoyes",
+            "contactes",
+            "traitees",
+            "resultat_rdv_pris",
+            "resultat_projet_pro_securise",
+            "resultat_ne_souhaite_pas_accompagnement",
+            "resultat_injoignable",
+            "resultat_autre",
+            "repondus",
+            "deja_connus",
+            "delai_total",
+            "delai_count",
+            "situation_rupture",
+            "situation_abandon",
+            "situation_prevention_inevitable",
+            "situation_prevention_tres_eleve",
+            "situation_prevention_modere",
+            "situation_besoin_aide_hors_rupture",
+            "objectif_mobilite",
+            "objectif_logement",
+            "objectif_sante",
+            "objectif_finance",
+            "objectif_administratif",
+            "objectif_social_familial",
+            "objectif_reorientation",
+            "objectif_recherche_emploi",
+            "objectif_autre",
+            "ages_ml_envoyes",
+            "ages_ml_objectif_mobilite",
+            "ages_ml_objectif_logement",
+            "ages_ml_objectif_sante",
+            "ages_ml_objectif_finance",
+            "ages_ml_objectif_administratif",
+            "ages_ml_objectif_social_familial",
+            "ages_ml_objectif_reorientation",
+            "ages_ml_objectif_recherche_emploi",
+            "ages_ml_objectif_autre",
+            "nps_reponses",
+            "nps_somme",
+            "v2_envoyes",
+            "v2_traites",
+            "v2_repondus",
+            "v2_rdv",
+          ],
+        },
+        "departement": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+          "description": "Département du CFA au moment de la suppression",
+        },
+        "mission_locale_id": {
+          "bsonType": "objectId",
+          "description": "Mission locale du dossier supprimé",
+        },
+        "mois": {
+          "bsonType": "string",
+          "description": "Mois, heure de Paris, de la création du dossier, de l'envoi par le CFA ou du dernier message WhatsApp",
+          "pattern": "^\\d{4}-\\d{2}$",
+        },
+        "organisme_id": {
+          "anyOf": [
+            {
+              "bsonType": "objectId",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "CFA du dossier supprimé",
+        },
+        "region": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+          "description": "Région du CFA au moment de la suppression",
+        },
+        "type": {
+          "bsonType": "string",
+        },
+        "updated_at": {
+          "bsonType": "date",
+          "description": "Date du dernier ajout",
+        },
+      },
+      "required": [
+        "_id",
+        "mission_locale_id",
+        "organisme_id",
+        "region",
+        "departement",
+        "mois",
+        "updated_at",
+        "type",
+        "compteurs",
+      ],
+    },
+    {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "bsonType": "objectId",
+        },
+        "cfa_active_le": {
+          "bsonType": "date",
+          "description": "Plus ancienne date d'activation du CFA pour les ML connue à la suppression de ses dossiers",
+        },
+        "compteurs": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "echec": {
+              "bsonType": "int",
+            },
+            "envoyes": {
+              "bsonType": "int",
+            },
+            "opt_out": {
+              "bsonType": "int",
+            },
+            "prequalif_backfill": {
+              "bsonType": "int",
+            },
+            "prequalif_clics": {
+              "bsonType": "int",
+            },
+            "prequalif_cliqueurs": {
+              "bsonType": "int",
+            },
+            "prequalif_daily": {
+              "bsonType": "int",
+            },
+            "prequalif_echec": {
+              "bsonType": "int",
+            },
+            "prequalif_envoyes": {
+              "bsonType": "int",
+            },
+            "prequalif_liens": {
+              "bsonType": "int",
+            },
+            "prequalif_non": {
+              "bsonType": "int",
+            },
+            "prequalif_opt_out": {
+              "bsonType": "int",
+            },
+            "prequalif_oui": {
+              "bsonType": "int",
+            },
+            "prequalif_reponse_auto": {
+              "bsonType": "int",
+            },
+            "rappel": {
+              "bsonType": "int",
+            },
+            "rappel_autre": {
+              "bsonType": "int",
+            },
+            "rappel_coordonnees_incorrect": {
+              "bsonType": "int",
+            },
+            "rappel_deja_accompagne": {
+              "bsonType": "int",
+            },
+            "rappel_injoignable": {
+              "bsonType": "int",
+            },
+            "rappel_nouveau_projet": {
+              "bsonType": "int",
+            },
+            "rappel_rdv_pris": {
+              "bsonType": "int",
+            },
+            "sans_aide": {
+              "bsonType": "int",
+            },
+            "sans_reponse": {
+              "bsonType": "int",
+            },
+          },
+          "required": [
+            "envoyes",
+            "rappel",
+            "sans_aide",
+            "sans_reponse",
+            "opt_out",
+            "echec",
+            "rappel_rdv_pris",
+            "rappel_nouveau_projet",
+            "rappel_deja_accompagne",
+            "rappel_injoignable",
+            "rappel_coordonnees_incorrect",
+            "rappel_autre",
+            "prequalif_envoyes",
+            "prequalif_backfill",
+            "prequalif_daily",
+            "prequalif_echec",
+            "prequalif_opt_out",
+            "prequalif_oui",
+            "prequalif_non",
+            "prequalif_reponse_auto",
+            "prequalif_liens",
+            "prequalif_clics",
+            "prequalif_cliqueurs",
+          ],
+        },
+        "departement": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+          "description": "Département du CFA au moment de la suppression",
+        },
+        "mission_locale_id": {
+          "bsonType": "objectId",
+          "description": "Mission locale du dossier supprimé",
+        },
+        "mois": {
+          "bsonType": "string",
+          "description": "Mois, heure de Paris, de la création du dossier, de l'envoi par le CFA ou du dernier message WhatsApp",
+          "pattern": "^\\d{4}-\\d{2}$",
+        },
+        "organisme_id": {
+          "anyOf": [
+            {
+              "bsonType": "objectId",
+            },
+            {
+              "bsonType": "null",
+            },
+          ],
+          "description": "CFA du dossier supprimé",
+        },
+        "region": {
+          "bsonType": [
+            "string",
+            "null",
+          ],
+          "description": "Région du CFA au moment de la suppression",
+        },
+        "type": {
+          "bsonType": "string",
+        },
+        "updated_at": {
+          "bsonType": "date",
+          "description": "Date du dernier ajout",
+        },
+      },
+      "required": [
+        "_id",
+        "mission_locale_id",
+        "organisme_id",
+        "region",
+        "departement",
+        "mois",
+        "updated_at",
+        "type",
+        "compteurs",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`validation-schema > should create validation schema for missionLocaleStats > missionLocaleStats 1`] = `
 {
   "additionalProperties": false,
@@ -19847,6 +18958,353 @@ exports[`validation-schema > should create validation schema for missionLocaleSt
     "computed_day",
     "mission_locale_id",
     "stats",
+  ],
+}
+`;
+
+exports[`validation-schema > should create validation schema for missionLocaleStatsPurges > missionLocaleStatsPurges 1`] = `
+{
+  "additionalProperties": false,
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId",
+    },
+    "mission_locale_id": {
+      "bsonType": "objectId",
+      "description": "Mission locale des dossiers supprimés",
+    },
+    "mois": {
+      "bsonType": "string",
+      "description": "Mois, en UTC comme les photos, de la création des dossiers supprimés",
+      "pattern": "^\\d{4}-\\d{2}$",
+    },
+    "segments": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "description": "Contribution des dossiers supprimés aux segments des photos",
+      "properties": {
+        "collab": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "a_recontacter": {
+              "bsonType": "int",
+            },
+            "a_traiter": {
+              "bsonType": "int",
+            },
+            "autre": {
+              "bsonType": "int",
+            },
+            "autre_avec_contact": {
+              "bsonType": "int",
+            },
+            "deja_connu_accompagne": {
+              "bsonType": "int",
+            },
+            "delai_premiere_activite_count": {
+              "bsonType": "int",
+            },
+            "delai_premiere_activite_jours_total": {
+              "bsonType": "int",
+            },
+            "injoignable": {
+              "bsonType": "int",
+            },
+            "ne_souhaite_pas_accompagnement": {
+              "bsonType": "int",
+            },
+            "projet_pro_securise": {
+              "bsonType": "int",
+            },
+            "rdv_pris": {
+              "bsonType": "int",
+            },
+            "rdv_pris_decouverts": {
+              "bsonType": "int",
+            },
+            "repondu": {
+              "bsonType": "int",
+            },
+            "situation_abandon": {
+              "bsonType": "int",
+            },
+            "situation_besoin_aide_hors_rupture": {
+              "bsonType": "int",
+            },
+            "situation_prevention_inevitable": {
+              "bsonType": "int",
+            },
+            "situation_prevention_modere": {
+              "bsonType": "int",
+            },
+            "situation_prevention_tres_eleve": {
+              "bsonType": "int",
+            },
+            "situation_rupture": {
+              "bsonType": "int",
+            },
+            "total": {
+              "bsonType": "int",
+            },
+            "traite": {
+              "bsonType": "int",
+            },
+          },
+          "required": [
+            "total",
+            "a_traiter",
+            "traite",
+            "repondu",
+            "rdv_pris",
+            "rdv_pris_decouverts",
+            "projet_pro_securise",
+            "ne_souhaite_pas_accompagnement",
+            "a_recontacter",
+            "injoignable",
+            "autre",
+            "autre_avec_contact",
+            "deja_connu_accompagne",
+            "situation_rupture",
+            "situation_abandon",
+            "situation_prevention_inevitable",
+            "situation_prevention_tres_eleve",
+            "situation_prevention_modere",
+            "situation_besoin_aide_hors_rupture",
+            "delai_premiere_activite_jours_total",
+            "delai_premiere_activite_count",
+          ],
+        },
+        "rupture": {
+          "additionalProperties": false,
+          "bsonType": "object",
+          "properties": {
+            "a_recontacter": {
+              "bsonType": "int",
+            },
+            "a_traiter": {
+              "bsonType": "int",
+            },
+            "autre": {
+              "bsonType": "int",
+            },
+            "autre_avec_contact": {
+              "bsonType": "int",
+            },
+            "deja_connu_accompagne": {
+              "bsonType": "int",
+            },
+            "injoignable": {
+              "bsonType": "int",
+            },
+            "ne_souhaite_pas_accompagnement": {
+              "bsonType": "int",
+            },
+            "projet_pro_securise": {
+              "bsonType": "int",
+            },
+            "rdv_pris": {
+              "bsonType": "int",
+            },
+            "rdv_pris_decouverts": {
+              "bsonType": "int",
+            },
+            "repondu": {
+              "bsonType": "int",
+            },
+            "total": {
+              "bsonType": "int",
+            },
+            "traite": {
+              "bsonType": "int",
+            },
+          },
+          "required": [
+            "total",
+            "a_traiter",
+            "traite",
+            "repondu",
+            "rdv_pris",
+            "rdv_pris_decouverts",
+            "projet_pro_securise",
+            "ne_souhaite_pas_accompagnement",
+            "a_recontacter",
+            "injoignable",
+            "autre",
+            "autre_avec_contact",
+            "deja_connu_accompagne",
+          ],
+        },
+      },
+      "required": [
+        "rupture",
+        "collab",
+      ],
+    },
+    "stats": {
+      "additionalProperties": false,
+      "bsonType": "object",
+      "description": "Contribution des dossiers supprimés aux photos de la mission locale",
+      "properties": {
+        "a_traiter": {
+          "bsonType": "int",
+        },
+        "abandon": {
+          "bsonType": "int",
+        },
+        "autre": {
+          "bsonType": "int",
+        },
+        "autre_avec_contact": {
+          "bsonType": "int",
+        },
+        "cherche_contrat": {
+          "bsonType": "int",
+        },
+        "contacte_sans_retour": {
+          "bsonType": "int",
+        },
+        "coordonnees_incorrectes": {
+          "bsonType": "int",
+        },
+        "deja_accompagne": {
+          "bsonType": "int",
+        },
+        "deja_connu": {
+          "bsonType": "int",
+        },
+        "injoignables": {
+          "bsonType": "int",
+        },
+        "mineur": {
+          "bsonType": "int",
+        },
+        "mineur_a_traiter": {
+          "bsonType": "int",
+        },
+        "mineur_autre": {
+          "bsonType": "int",
+        },
+        "mineur_autre_avec_contact": {
+          "bsonType": "int",
+        },
+        "mineur_cherche_contrat": {
+          "bsonType": "int",
+        },
+        "mineur_contacte_sans_retour": {
+          "bsonType": "int",
+        },
+        "mineur_coordonnees_incorrectes": {
+          "bsonType": "int",
+        },
+        "mineur_deja_accompagne": {
+          "bsonType": "int",
+        },
+        "mineur_injoignables": {
+          "bsonType": "int",
+        },
+        "mineur_ne_souhaite_pas_etre_recontacte": {
+          "bsonType": "int",
+        },
+        "mineur_ne_veut_pas_accompagnement": {
+          "bsonType": "int",
+        },
+        "mineur_nouveau_projet": {
+          "bsonType": "int",
+        },
+        "mineur_rdv_pris": {
+          "bsonType": "int",
+        },
+        "mineur_reorientation": {
+          "bsonType": "int",
+        },
+        "mineur_traite": {
+          "bsonType": "int",
+        },
+        "ne_souhaite_pas_etre_recontacte": {
+          "bsonType": "int",
+        },
+        "ne_veut_pas_accompagnement": {
+          "bsonType": "int",
+        },
+        "nouveau_projet": {
+          "bsonType": "int",
+        },
+        "rdv_pris": {
+          "bsonType": "int",
+        },
+        "rdv_pris_decouverts": {
+          "bsonType": "int",
+        },
+        "reorientation": {
+          "bsonType": "int",
+        },
+        "rqth": {
+          "bsonType": "int",
+        },
+        "rqth_a_traiter": {
+          "bsonType": "int",
+        },
+        "rqth_autre": {
+          "bsonType": "int",
+        },
+        "rqth_autre_avec_contact": {
+          "bsonType": "int",
+        },
+        "rqth_cherche_contrat": {
+          "bsonType": "int",
+        },
+        "rqth_contacte_sans_retour": {
+          "bsonType": "int",
+        },
+        "rqth_coordonnees_incorrectes": {
+          "bsonType": "int",
+        },
+        "rqth_deja_accompagne": {
+          "bsonType": "int",
+        },
+        "rqth_injoignables": {
+          "bsonType": "int",
+        },
+        "rqth_ne_souhaite_pas_etre_recontacte": {
+          "bsonType": "int",
+        },
+        "rqth_ne_veut_pas_accompagnement": {
+          "bsonType": "int",
+        },
+        "rqth_nouveau_projet": {
+          "bsonType": "int",
+        },
+        "rqth_rdv_pris": {
+          "bsonType": "int",
+        },
+        "rqth_reorientation": {
+          "bsonType": "int",
+        },
+        "rqth_traite": {
+          "bsonType": "int",
+        },
+        "total": {
+          "bsonType": "int",
+        },
+        "traite": {
+          "bsonType": "int",
+        },
+      },
+    },
+    "updated_at": {
+      "bsonType": "date",
+      "description": "Date du dernier ajout",
+    },
+  },
+  "required": [
+    "_id",
+    "mission_locale_id",
+    "mois",
+    "stats",
+    "segments",
+    "updated_at",
   ],
 }
 `;
@@ -20852,21 +20310,6 @@ exports[`validation-schema > should create validation schema for organisations >
 }
 `;
 
-exports[`validation-schema > should create validation schema for organismeV2 > organismeV2 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-  },
-  "required": [
-    "_id",
-  ],
-}
-`;
-
 exports[`validation-schema > should create validation schema for organismes > organismes 1`] = `
 {
   "additionalProperties": false,
@@ -21741,101 +21184,6 @@ exports[`validation-schema > should create validation schema for organismes > or
 }
 `;
 
-exports[`validation-schema > should create validation schema for personV2 > personV2 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-    "identifiant": {
-      "additionalProperties": false,
-      "bsonType": "object",
-      "properties": {
-        "date_de_naissance": {
-          "bsonType": "date",
-        },
-        "nom": {
-          "bsonType": "string",
-        },
-        "prenom": {
-          "bsonType": "string",
-        },
-      },
-      "required": [
-        "nom",
-        "prenom",
-        "date_de_naissance",
-      ],
-    },
-    "parcours": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "bsonType": "object",
-          "properties": {
-            "chronologie": {
-              "bsonType": "array",
-              "items": {
-                "additionalProperties": false,
-                "bsonType": "object",
-                "properties": {
-                  "date": {
-                    "bsonType": "date",
-                  },
-                  "id": {
-                    "bsonType": "objectId",
-                  },
-                },
-                "required": [
-                  "id",
-                  "date",
-                ],
-              },
-            },
-            "en_cours": {
-              "anyOf": [
-                {
-                  "additionalProperties": false,
-                  "bsonType": "object",
-                  "properties": {
-                    "date": {
-                      "bsonType": "date",
-                    },
-                    "id": {
-                      "bsonType": "objectId",
-                    },
-                  },
-                  "required": [
-                    "id",
-                    "date",
-                  ],
-                },
-                {
-                  "bsonType": "null",
-                },
-              ],
-            },
-          },
-          "required": [
-            "en_cours",
-            "chronologie",
-          ],
-        },
-        {
-          "bsonType": "null",
-        },
-      ],
-    },
-  },
-  "required": [
-    "_id",
-    "identifiant",
-  ],
-}
-`;
-
 exports[`validation-schema > should create validation schema for regions > regions 1`] = `
 {
   "additionalProperties": false,
@@ -22172,21 +21520,6 @@ exports[`validation-schema > should create validation schema for transmissionDai
     "success_count",
     "error_count",
     "current_day",
-  ],
-}
-`;
-
-exports[`validation-schema > should create validation schema for transmissionV2 > transmissionV2 1`] = `
-{
-  "additionalProperties": false,
-  "bsonType": "object",
-  "properties": {
-    "_id": {
-      "bsonType": "objectId",
-    },
-  },
-  "required": [
-    "_id",
   ],
 }
 `;
@@ -22606,400 +21939,6 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
       ],
       "description": "Identifiant unique",
     },
-    "history": {
-      "bsonType": "array",
-      "items": {
-        "additionalProperties": false,
-        "bsonType": "object",
-        "properties": {
-          "created_at": {
-            "bsonType": "date",
-          },
-          "raw": {
-            "additionalProperties": false,
-            "bsonType": "object",
-            "properties": {
-              "academie": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "adresse_1": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "adresse_2": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "adresse_3": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "adresse_4": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "annee_scolaire_rentree": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "bareme": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "candidature_internat": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "cle_ministere_educatif": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "code_enseignement": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "code_lv1": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "code_lv2": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "code_mef": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "code_mef_origine": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "code_offre_formation": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "code_origine_1": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "code_origine_2": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "code_postal": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "code_specialite_offre_formation": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "code_uai_cio_origine": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "code_uai_etab_accueil": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "code_uai_etab_origine": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "demande_code_lv1": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "demande_code_lv2": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "demande_libelle_lv1": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "demande_libelle_lv2": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "ine": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "libelle_cio_origine": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "libelle_enseignement": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "libelle_etab_accueil": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "libelle_etab_origine": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "libelle_formation": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "libelle_formation_origine": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "libelle_lv1": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "libelle_lv2": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "libelle_option_1": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "libelle_option_2": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "libelle_public_etablissement": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "mail_responsable_1": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "mail_responsable_2": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "mnemonique_mef_offre_formation": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "mnemonique_mef_origine": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "nom": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "pays": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "prenom_1": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "prenom_2": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "prenom_3": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "rang": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "siret_uai_gestionnaire": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "telephone": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "telephone_portable": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "telephone_pro": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "telephone_responsable_1": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "telephone_responsable_2": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "type_etab_accueil": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "type_etab_origine": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "uai_cio_etab_accueil": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "uai_etablissement_responsable": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "uai_etatblissement_formateur": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "ville": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "ville_etab_accueil": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-              "ville_etab_origine": {
-                "bsonType": [
-                  "string",
-                  "null",
-                ],
-              },
-            },
-          },
-        },
-        "required": [
-          "created_at",
-          "raw",
-        ],
-      },
-    },
     "is_contacted": {
       "bsonType": "bool",
       "description": "Indique si le jeune a été contacté",
@@ -23068,67 +22007,7 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
             "null",
           ],
         },
-        "bareme": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "candidature_internat": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
         "cle_ministere_educatif": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_enseignement": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_lv1": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_lv2": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_mef": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_mef_origine": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_offre_formation": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_origine_1": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_origine_2": {
           "bsonType": [
             "string",
             "null",
@@ -23140,67 +22019,7 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
             "null",
           ],
         },
-        "code_specialite_offre_formation": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_uai_cio_origine": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_uai_etab_accueil": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "code_uai_etab_origine": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "demande_code_lv1": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "demande_code_lv2": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "demande_libelle_lv1": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "demande_libelle_lv2": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
         "ine": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_cio_origine": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_enseignement": {
           "bsonType": [
             "string",
             "null",
@@ -23213,42 +22032,6 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
           ],
         },
         "libelle_etab_origine": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_formation": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_formation_origine": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_lv1": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_lv2": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_option_1": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "libelle_option_2": {
           "bsonType": [
             "string",
             "null",
@@ -23267,18 +22050,6 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
           ],
         },
         "mail_responsable_2": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "mnemonique_mef_offre_formation": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "mnemonique_mef_origine": {
           "bsonType": [
             "string",
             "null",
@@ -23309,36 +22080,6 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
           ],
         },
         "prenom_3": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "rang": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "siret_uai_gestionnaire": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "telephone": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "telephone_portable": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
-        "telephone_pro": {
           "bsonType": [
             "string",
             "null",
@@ -23392,12 +22133,6 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
             "null",
           ],
         },
-        "ville_etab_accueil": {
-          "bsonType": [
-            "string",
-            "null",
-          ],
-        },
         "ville_etab_origine": {
           "bsonType": [
             "string",
@@ -23417,7 +22152,6 @@ exports[`validation-schema > should create validation schema for voeuxAffelnet >
     "updated_at",
     "is_contacted",
     "raw",
-    "history",
     "_computed",
   ],
 }

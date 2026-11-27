@@ -1,18 +1,21 @@
+import * as Boom from "@hapi/boom";
 import { PromisePool } from "@supercharge/promise-pool";
 import { parse } from "csv-parse/sync";
 import express from "express";
 import { ObjectId } from "mongodb";
 import multer from "multer";
 import { getAcademieById } from "shared/constants";
-import { IVoeuAffelnet, IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelnet.model";
+import { COLONNES_AFFELNET_CONSERVEES, IVoeuAffelnet, IVoeuAffelnetRaw } from "shared/models/data/voeuxAffelnet.model";
+import { getPremiereCampagneAffelnetConservee } from "shared/utils/campagnesAffelnet";
 
+import { findDeletedVoeux } from "@/common/actions/affelnet.actions";
 import { generateOrganismeComputed } from "@/common/actions/organismes/organismes.actions";
 import parentLogger from "@/common/logger";
 import { formationsCatalogueDb, organismesDb, voeuxAffelnetDb } from "@/common/model/collections";
 import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import { returnResult, RouteHandler } from "@/http/middlewares/helpers";
 
-const AFFELNET_HEADER = [
+export const AFFELNET_HEADER = [
   "academie",
   "ine",
   "nom",
@@ -93,39 +96,41 @@ export default () => {
   return router;
 };
 
-const findDeletedVoeux = async (date: Date) => {
-  const currentDate = new Date();
-
-  const cursor = voeuxAffelnetDb().find({ updated_at: { $lt: date } });
-  while (await cursor.hasNext()) {
-    const voeu = await cursor.next();
-    if (voeu) {
-      await voeuxAffelnetDb().updateOne({ _id: voeu._id }, { $set: { deleted_at: currentDate } });
-    }
-  }
-};
+const garderColonnesLues = (ligne: Record<string, string>): IVoeuAffelnetRaw =>
+  Object.fromEntries(COLONNES_AFFELNET_CONSERVEES.map((colonne) => [colonne, ligne[colonne]]));
 
 const parseCsvFile = async (buffer: Buffer) => {
-  const records = parse<IVoeuAffelnetRaw>(buffer, {
+  const records = parse<Record<string, string>>(buffer, {
     columns: AFFELNET_HEADER,
     skip_empty_lines: true,
     delimiter: ";",
   });
-  return records;
+  return records.map(garderColonnesLues);
 };
 
-const createVoeux: RouteHandler = async (req, res) => {
+const createVoeux: RouteHandler = async (req) => {
   const file = req.file;
   if (!file) {
-    return res.status(400).send("No file uploaded.");
+    throw Boom.badRequest("No file uploaded.");
   }
 
   const parsedCSV: Array<IVoeuAffelnetRaw> = await parseCsvFile(file.buffer);
   const currentDate = new Date();
+  const premiereCampagne = getPremiereCampagneAffelnetConservee(currentDate);
+  const lignes = parsedCSV.filter((voeu) => Number(voeu.annee_scolaire_rentree) >= premiereCampagne);
+  if (lignes.length < parsedCSV.length) {
+    logger.warn(
+      { ignorees: parsedCSV.length - lignes.length, premiereCampagne },
+      "Import Affelnet : lignes de campagnes non conservées ignorées"
+    );
+  }
+  if (lignes.length === 0) {
+    throw Boom.badRequest(`Aucune ligne d'une campagne conservée, à partir de ${premiereCampagne}.`);
+  }
   const errors = createErrorAggregator("admin-import-voeux-affelnet");
 
   await PromisePool.withConcurrency(100)
-    .for(parsedCSV)
+    .for(lignes)
     .process(async (voeuRaw: IVoeuAffelnetRaw) => {
       const voeu: IVoeuAffelnet = {
         _id: new ObjectId(),
@@ -135,7 +140,6 @@ const createVoeux: RouteHandler = async (req, res) => {
         created_at: currentDate,
         updated_at: currentDate,
         is_contacted: false,
-        history: [],
         annee_scolaire_rentree: voeuRaw.annee_scolaire_rentree,
         raw: voeuRaw,
         _computed: {
@@ -222,14 +226,10 @@ const createVoeux: RouteHandler = async (req, res) => {
                 formation_catalogue_id: voeu.formation_catalogue_id,
                 is_contacted: false,
                 _computed: voeu._computed,
+                raw: voeu.raw,
                 updated_at: currentDate,
               },
-              $push: {
-                history: {
-                  created_at: currentDate,
-                  raw: voeu.raw,
-                },
-              },
+              $unset: { deleted_at: "" },
             }
           );
         }
@@ -239,7 +239,7 @@ const createVoeux: RouteHandler = async (req, res) => {
       }
     });
 
-  errors.ok(parsedCSV.length - errors.failed);
+  errors.ok(lignes.length - errors.failed);
   errors.flush();
 
   logger.info("Voeux mis à jour");

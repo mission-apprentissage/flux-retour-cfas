@@ -3,21 +3,14 @@ import type { IncomingMessage } from "node:http";
 
 import * as Boom from "@hapi/boom";
 import * as Sentry from "@sentry/node";
-import { zUai } from "api-alternance-sdk/internal";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application, Response } from "express";
 import { ObjectId } from "mongodb";
 import passport from "passport";
 import { RateLimiterMemory } from "rate-limiter-flexible";
-import {
-  CODE_POSTAL_REGEX,
-  ERREURS_TELEVERSEMENT,
-  SOURCE_APPRENANT,
-  TELEVERSEMENT_MAX_LIGNES,
-  zEffectifArchive,
-} from "shared";
-import { extensions, primitivesV1 } from "shared/models/parts/zodPrimitives";
+import { ERREURS_TELEVERSEMENT, SOURCE_APPRENANT, TELEVERSEMENT_MAX_LIGNES } from "shared";
+import { primitivesV1 } from "shared/models/parts/zodPrimitives";
 import swaggerUi from "swagger-ui-express";
 import { z } from "zod";
 
@@ -30,7 +23,7 @@ import {
   registerUnknownNetwork,
   sendForgotPasswordRequest,
 } from "@/common/actions/account.actions";
-import { getEffectifForm, softDeleteEffectif, updateEffectifFromForm } from "@/common/actions/effectifs.actions";
+import { getEffectifForm } from "@/common/actions/effectifs.actions";
 import {
   getDuplicatesEffectifsForOrganismeIdWithPagination,
   supprimerDoublon,
@@ -39,7 +32,6 @@ import {
 import { effectifsFiltersTerritoireSchema } from "@/common/actions/helpers/filters";
 import { journaliserImposture } from "@/common/actions/impersonation.actions";
 import { getOrganismeIndicateursEffectifs } from "@/common/actions/indicateurs/indicateurs-with-deca.actions";
-import { findDataFromSiret } from "@/common/actions/infoSiret.actions";
 import {
   cancelInvitation,
   createOrganisation,
@@ -94,7 +86,7 @@ import {
   resendConfirmationEmail,
   updateUserProfile,
 } from "@/common/actions/users.actions";
-import { getCfdInfo, getCommune, getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
+import { getCfdInfo, getRncpInfo } from "@/common/apis/apiAlternance/apiAlternance";
 import { COOKIE_NAME } from "@/common/constants/cookieName";
 import logger from "@/common/logger";
 import { organisationsDb, organismesDb, usersMigrationDb } from "@/common/model/collections";
@@ -103,7 +95,6 @@ import { reportDependencyHealth } from "@/common/services/sentry/reportOnce";
 import { initSentryExpress } from "@/common/services/sentry/sentry";
 import { __dirname } from "@/common/utils/esmUtils";
 import { responseWithCookie } from "@/common/utils/httpUtils";
-import { stripEmptyFields } from "@/common/utils/miscUtils";
 import { validateFullZodObjectSchema } from "@/common/utils/validationUtils";
 import { SReqPostVerifyUser } from "@/common/validation/ApiERPSchema";
 import { configurationERPSchema } from "@/common/validation/configurationERPSchema";
@@ -802,65 +793,11 @@ function setupRoutes(app: Application) {
   );
 
   authRouter
-    .post(
-      "/api/v1/effectif/recherche-siret",
-      returnResult(async (req) => {
-        const { siret } = await validateFullZodObjectSchema(req.body, {
-          siret: extensions.siret(),
-        });
-
-        return await findDataFromSiret(siret);
-      })
-    )
-    .post(
-      "/api/v1/effectif/recherche-uai",
-      returnResult(async (req) => {
-        const { uai } = await validateFullZodObjectSchema(req.body, {
-          uai: extensions.uai(),
-        });
-
-        return stripEmptyFields({
-          uai,
-          error: zUai.safeParse(uai).success ? null : `L'UAI ${uai} n'est pas valide`,
-        });
-      })
-    )
-    .post(
-      "/api/v1/effectif/recherche-code-postal",
-      returnResult(async (req) => {
-        const { codePostal } = await validateFullZodObjectSchema(req.body, {
-          codePostal: z
-            .string()
-            .trim()
-            .regex(CODE_POSTAL_REGEX, "Le code postal doit faire 5 caractères numériques exactement"),
-        });
-        return await getCommune({ codePostal });
-      })
-    )
     .get(
       "/api/v1/effectif/:id",
       requireEffectifOrganismePermission("manageEffectifs"),
       returnResult(async (req) => {
         return await getEffectifForm(new ObjectId(req.params.id));
-      })
-    )
-    .put(
-      "/api/v1/effectif/:id",
-      requireEffectifOrganismePermission("manageEffectifs"),
-      returnResult(async (req) => {
-        return await updateEffectifFromForm(new ObjectId(req.params.id), req.body);
-      })
-    )
-    .post(
-      "/api/v1/effectif/:id/delete",
-      requireEffectifOrganismePermission("manageEffectifs"),
-      returnResult(async (req) => {
-        const { motif, description } = await validateFullZodObjectSchema(req.body, {
-          motif: zEffectifArchive.shape.suppression.shape.motif,
-          description: zEffectifArchive.shape.suppression.shape.description,
-        });
-
-        await softDeleteEffectif(new ObjectId(req.params.id), req.user._id, { motif, description });
       })
     )
     .delete(

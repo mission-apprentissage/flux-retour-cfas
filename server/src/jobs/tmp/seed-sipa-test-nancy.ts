@@ -550,7 +550,6 @@ async function buildEffectif(record: SeedRecord, now: Date) {
     apprenant: buildApprenant(record),
     formation: buildFormation(record),
     contrats: buildContrats(record),
-    is_lock: false,
     validation_errors: [],
     created_at: now,
     updated_at: now,

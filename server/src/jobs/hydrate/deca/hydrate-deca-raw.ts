@@ -33,6 +33,7 @@ import {
 import type { IContratDecaBal } from "@/common/apis/bal/bal-deca.model";
 import parentLogger from "@/common/logger";
 import { effectifsDECADb, organismesDb } from "@/common/model/collections";
+import { estHorsConservation } from "@/common/utils/conservationUtils";
 import { createErrorAggregator } from "@/common/utils/errorAggregator";
 import { cachedInRun, getRunCacheStats, withRunCache } from "@/common/utils/runCache";
 import { traiterEnParallele } from "@/common/utils/traiterEnParallele";
@@ -469,7 +470,7 @@ async function upsertEffectifDecaChezCible(
     }
     throw err;
   }
-  await updateVoeuxAffelnetEffectifDeca(nouveau._id, nouveau, cible._id.toString());
+  await updateVoeuxAffelnetEffectifDeca(nouveau._id, nouveau, cible._id);
   await createMissionLocaleSnapshot(nouveau);
   return { created: true };
 }
@@ -492,7 +493,7 @@ export async function upsertEffectifDeca(
     try {
       const id = new ObjectId();
       await effectifsDECADb().insertOne({ ...effectif, _id: id });
-      await updateVoeuxAffelnetEffectifDeca(id, effectif, effectif.organisme_formateur_id?.toString());
+      await updateVoeuxAffelnetEffectifDeca(id, effectif, effectif.organisme_formateur_id);
       await createMissionLocaleSnapshot({ ...effectif, _id: id });
       return { created: true };
     } catch (err) {
@@ -566,7 +567,10 @@ async function updateOrganismesLastEffectifUpdate(organismeIds: Set<string>) {
   }
 }
 
-function anneesScolairesDuContrat(document: IContratDecaBal): string[] {
+export function getAnneesScolairesAImporter(
+  document: Pick<IContratDecaBal, "_id" | "date_fin_contrat" | "formation">,
+  maintenant: Date = new Date()
+): string[] {
   const { formation } = document;
 
   const dateDebutFormation = formation?.date_debut_formation ? new Date(formation.date_debut_formation) : null;
@@ -582,15 +586,20 @@ function anneesScolairesDuContrat(document: IContratDecaBal): string[] {
     );
   }
 
-  if (startYear === endYear) {
-    return [`${startYear}-${startYear}`];
-  }
-  return Array.from({ length: endYear - startYear }, (_, index) => `${startYear + index}-${startYear + index + 1}`);
+  const anneesScolaires =
+    startYear === endYear
+      ? [`${startYear}-${startYear}`]
+      : Array.from({ length: endYear - startYear }, (_, index) => `${startYear + index}-${startYear + index + 1}`);
+  const dateFinContrat = document.date_fin_contrat ? new Date(document.date_fin_contrat) : null;
+
+  return anneesScolaires.filter(
+    (anneeScolaire) => !estHorsConservation({ annee_scolaire: anneeScolaire, datesDeFin: [dateFinContrat] }, maintenant)
+  );
 }
 
 async function transformDocument(document: IContratDecaBal): Promise<WithoutId<IEffectifDECA>[]> {
   const effectifs: WithoutId<IEffectifDECA>[] = [];
-  for (const anneeScolaire of anneesScolairesDuContrat(document)) {
+  for (const anneeScolaire of getAnneesScolairesAImporter(document)) {
     const effectif = await createEffectif(document, anneeScolaire);
     if (effectif) {
       effectifs.push(effectif);

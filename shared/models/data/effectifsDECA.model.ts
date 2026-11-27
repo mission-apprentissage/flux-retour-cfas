@@ -40,9 +40,8 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
     },
   ],
   [{ organisme_id: 1, created_at: 1 }, {}],
-  [{ annee_scolaire: 1 }, { name: "annee_scolaire" }],
+  [{ annee_scolaire: 1, "formation.cfd": 1, id_erp_apprenant: 1, organisme_id: 1 }, {}],
   [{ id_erp_apprenant: 1 }, { name: "id_erp_apprenant" }],
-  [{ date_de_naissance: 1 }, { name: "date_de_naissance" }],
   [{ "formation.cfd": 1 }, { name: "formation.cfd" }],
   [
     { "apprenant.nom": 1 },
@@ -65,7 +64,6 @@ const indexes: [IndexSpecification, CreateIndexesOptions][] = [
     },
   ],
   [{ source: 1 }, { name: "source" }],
-  [{ source_organisme_id: 1 }, { name: "source_organisme_id" }],
   [{ created_at: 1 }, { name: "created_at" }],
   [{ transmitted_at: 1 }, {}],
   [{ "_computed.organisme.region": 1 }, {}],
@@ -162,9 +160,6 @@ export const zEffectifDECA = z.object({
       description: "Historique des contrats de l'apprenant",
     })
     .nullish(),
-  // TODO: remove any
-  is_lock: z.any(),
-
   updated_at: z.date({ description: "Date de mise à jour en base de données" }).nullish(),
   created_at: z.date({ description: "Date d'ajout en base de données" }).nullish(),
   transmitted_at: z.date({ description: "Date de transmission de l'effectif" }).nullish(),

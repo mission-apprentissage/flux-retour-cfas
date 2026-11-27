@@ -13,7 +13,6 @@ import { getAnneesScolaireListFromDate, getBornesNaissanceMissionLocale } from "
 
 import { ensureMissionLocaleEffectifRecord } from "@/common/actions/mission-locale/mission-locale-record.actions";
 import { getFamilyOrganismeIds } from "@/common/actions/organismes/organismes.actions";
-import { normalisePersonIdentifiant } from "@/common/actions/personV2/personV2.actions";
 import {
   buildCollabStatusSwitch,
   buildCsvInConditions,
@@ -28,6 +27,7 @@ import {
   organisationsDb,
   organismesDb,
 } from "@/common/model/collections";
+import { normalisePersonIdentifiant } from "@/common/utils/identifiantUtils";
 import { dateMetierExpr, dedupNom, dedupNomExpr } from "@/common/utils/mongoUtils";
 
 interface CfaEffectifsQueryParams {

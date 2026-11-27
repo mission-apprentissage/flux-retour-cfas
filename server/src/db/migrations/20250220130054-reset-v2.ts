@@ -1,9 +1,7 @@
-import { effectifV2Db, formationV2Db, organismeV2Db, personV2Db, transmissionV2Db } from "@/common/model/collections";
+import { Db } from "mongodb";
 
-export const up = async () => {
-  await organismeV2Db().deleteMany({});
-  await formationV2Db().deleteMany({});
-  await effectifV2Db().deleteMany({});
-  await transmissionV2Db().deleteMany({});
-  await personV2Db().deleteMany({});
+export const up = async (db: Db) => {
+  for (const name of ["organismeV2", "formationV2", "effectifV2", "transmissionV2", "personV2"]) {
+    await db.collection(name).deleteMany({});
+  }
 };

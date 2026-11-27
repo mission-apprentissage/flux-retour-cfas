@@ -82,6 +82,21 @@ export function getAnneeScolaireFromDate(date: Date): string {
   return date.getUTCMonth() < AUGUST_MONTH_INDEX ? `${year - 1}-${year}` : `${year}-${year + 1}`;
 }
 
+export function getFinAnneeScolaire(anneeScolaire: string): Date | null {
+  const match = /^(\d{4})-(\d{4})$/.exec(anneeScolaire);
+  if (!match) return null;
+  const debut = Number(match[1]);
+  const fin = Number(match[2]);
+  return debut === fin ? new Date(Date.UTC(fin + 1, 0, 1)) : new Date(Date.UTC(fin, AUGUST_MONTH_INDEX, 1));
+}
+
+export function estAnneeScolaireActive(anneeScolaire: string, date: Date): boolean {
+  const fin = getFinAnneeScolaire(anneeScolaire);
+  if (!fin) return true;
+  const [debutCourante] = getAnneeScolaireFromDate(date).split("-").map(Number);
+  return fin.getTime() > Date.UTC(debutCourante - 1, AUGUST_MONTH_INDEX, 1);
+}
+
 /**
  * Renvoie les années scolaires considérées "actives" pour une date donnée :
  * l'année scolaire en cours et la précédente.

@@ -1,7 +1,11 @@
 import { STATUT_APPRENANT } from "shared/constants";
 import { IEffectif } from "shared/models";
+import type { IIdentifiantNormalise } from "shared/models/parts/identifiantNormalise";
 
-import { createFranceTravailEffectifSnapshot } from "@/common/actions/franceTravail/franceTravailEffectif.actions";
+import {
+  createFranceTravailEffectifSnapshot,
+  filtreIdentifiantNormalise,
+} from "@/common/actions/franceTravail/franceTravailEffectif.actions";
 import { effectifsDb, franceTravailEffectifsDb } from "@/common/model/collections";
 
 export const hydrateInscritSansContrat = async (signal?: AbortSignal) => {
@@ -34,10 +38,15 @@ export const hydrateInscritSansContrat = async (signal?: AbortSignal) => {
 };
 
 export const dedupeInscritSansContrat = async () => {
-  const cursor = franceTravailEffectifsDb().aggregate([
+  const cursor = franceTravailEffectifsDb().aggregate<{ _id: IIdentifiantNormalise; count: number }>([
+    { $match: { "identifiant_normalise.nom": { $exists: true } } },
     {
       $group: {
-        _id: "$person_id",
+        _id: {
+          nom: "$identifiant_normalise.nom",
+          prenom: "$identifiant_normalise.prenom",
+          date_de_naissance: "$identifiant_normalise.date_de_naissance",
+        },
         count: { $sum: 1 },
       },
     },
@@ -52,18 +61,16 @@ export const dedupeInscritSansContrat = async () => {
     const group = await cursor.next();
 
     if (!group) continue;
-    const personId = group._id;
-
-    if (!personId) continue;
+    const identite = filtreIdentifiantNormalise(group._id);
 
     const mostRecent = await franceTravailEffectifsDb()
-      .find({ person_id: personId })
+      .find(identite)
       .sort({ "effectif_snapshot.transmitted_at": -1 })
       .limit(1)
       .toArray();
     await franceTravailEffectifsDb().updateMany(
       {
-        person_id: personId,
+        ...identite,
         _id: { $ne: mostRecent[0]._id },
       },
       {

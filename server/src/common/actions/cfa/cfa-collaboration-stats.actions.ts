@@ -3,6 +3,7 @@ import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
 import type { CfaInjoignablesSortBy, ICfaInjoignablesRow, ICfaNpsStats } from "shared/models/data/nationalStats.model";
 
 import { buildDossierEnvoyeMatch } from "@/common/actions/admin/collaborations/collaboration-stats.actions";
+import { sommerPurgesPar } from "@/common/actions/mission-locale/mission-locale-purges-stats.actions";
 import { missionLocaleEffectifsDb, organismesDb } from "@/common/model/collections";
 
 import { buildCfaTerritoireMatch, type CfaTerritoire } from "./cfa-stats.actions";
@@ -28,33 +29,40 @@ export async function getCfaNpsStats(territoire: CfaTerritoire): Promise<ICfaNps
 export async function getNpsStatsForOrganismes(organismeIds: ObjectId[]): Promise<ICfaNpsStats> {
   if (organismeIds.length === 0) return { note_moyenne: null, total_reponses: 0, utilisateurs: 0, cfa: 0 };
 
-  const [result] = await missionLocaleEffectifsDb()
-    .aggregate<{ total: number; moyenne: number; utilisateurs: unknown[]; cfa: unknown[] }>([
-      {
-        $match: {
-          ...buildDossierEnvoyeMatch(new Date(), organismeIds, null),
-          "organisme_data.form_feedback.note": { $type: "number" },
+  const [[result], purges] = await Promise.all([
+    missionLocaleEffectifsDb()
+      .aggregate<{ total: number; somme: number; utilisateurs: unknown[]; cfa: unknown[] }>([
+        {
+          $match: {
+            ...buildDossierEnvoyeMatch(new Date(), organismeIds, null),
+            "organisme_data.form_feedback.note": { $type: "number" },
+          },
         },
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: 1 },
-          moyenne: { $avg: "$organisme_data.form_feedback.note" },
-          utilisateurs: { $addToSet: "$organisme_data.acc_conjoint_by" },
-          cfa: { $addToSet: "$effectif_snapshot.organisme_id" },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: 1 },
+            somme: { $sum: "$organisme_data.form_feedback.note" },
+            utilisateurs: { $addToSet: "$organisme_data.acc_conjoint_by" },
+            cfa: { $addToSet: "$effectif_snapshot.organisme_id" },
+          },
         },
-      },
-    ])
-    .toArray();
+      ])
+      .toArray(),
+    sommerPurgesPar("collab", "organisme_id", { organismeIds }),
+  ]);
 
-  if (!result?.total) return { note_moyenne: null, total_reponses: 0, utilisateurs: 0, cfa: 0 };
+  const cfaPurges = [...purges].filter(([, { compteurs }]) => compteurs.nps_reponses > 0);
+  const total =
+    (result?.total ?? 0) + cfaPurges.reduce((somme, [, { compteurs }]) => somme + compteurs.nps_reponses, 0);
+  if (!total) return { note_moyenne: null, total_reponses: 0, utilisateurs: 0, cfa: 0 };
+  const somme = (result?.somme ?? 0) + cfaPurges.reduce((acc, [, { compteurs }]) => acc + compteurs.nps_somme, 0);
 
   return {
-    note_moyenne: Math.round(result.moyenne * 10) / 10,
-    total_reponses: result.total,
-    utilisateurs: result.utilisateurs.filter(Boolean).length,
-    cfa: result.cfa.length,
+    note_moyenne: Math.round((somme / total) * 10) / 10,
+    total_reponses: total,
+    utilisateurs: (result?.utilisateurs ?? []).filter(Boolean).length,
+    cfa: new Set([...(result?.cfa ?? []).map(String), ...cfaPurges.map(([id]) => id)]).size,
   };
 }
 

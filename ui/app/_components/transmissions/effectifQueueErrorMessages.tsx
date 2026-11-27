@@ -1,4 +1,9 @@
-import { ORGANISME_FORMATEUR_NOT_FOUND, ORGANISME_LIEU_NOT_FOUND, ORGANISME_RESPONSABLE_NOT_FOUND } from "shared";
+import {
+  EFFECTIF_HORS_CONSERVATION,
+  ORGANISME_FORMATEUR_NOT_FOUND,
+  ORGANISME_LIEU_NOT_FOUND,
+  ORGANISME_RESPONSABLE_NOT_FOUND,
+} from "shared";
 
 const organismeNotFound = (type: string) => (
   <>
@@ -40,4 +45,10 @@ export const ErrorMessages = {
   [`${ORGANISME_FORMATEUR_NOT_FOUND}:etablissement_formateur_uai`]: organismeNotFound("formateur"),
   [`${ORGANISME_RESPONSABLE_NOT_FOUND}:etablissement_responsable_uai`]: organismeNotFound("responsable"),
   [`${ORGANISME_RESPONSABLE_NOT_FOUND}:etablissement_responsable_siret`]: organismeNotFound("responsable"),
+  [`${EFFECTIF_HORS_CONSERVATION}:date_fin_formation`]: (
+    <>
+      Dossier terminé depuis plus de deux ans : le Tableau de bord ne le conserve plus. Vous pouvez retirer cette ligne
+      de vos prochains envois.
+    </>
+  ),
 };

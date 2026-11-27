@@ -10,6 +10,7 @@ import { useMongo } from "@tests/jest/setupMongo";
 import {
   PermissionsTestConfig,
   commonEffectifsAttributes,
+  profilsPermissionByLabel,
   testPermissions,
   organismes,
   reseaux,
@@ -29,6 +30,61 @@ describe("Routes diverses", () => {
   beforeEach(async () => {
     await organismesDb().insertMany(organismes);
     await reseauxDb().insertMany(reseaux);
+  });
+
+  describe("GET /api/v1/effectif/:id - détail d'un effectif", () => {
+    let effectifId: ObjectId;
+
+    beforeEach(async () => {
+      const effectif = await createSampleEffectif({
+        ...commonEffectifsAttributes(),
+        annee_scolaire: getAnneesScolaireListFromDate(new Date())[0],
+        id_erp_apprenant: "ERP-1",
+        apprenant: {
+          nom: "DURAND",
+          prenom: "Léa",
+          date_de_naissance: new Date("2007-03-04T00:00:00Z"),
+          historique_statut: historySequenceInscritToApprenti,
+        },
+        organisme_id: organismes[0]._id,
+      });
+      const { insertedId } = await effectifsDb().insertOne({ _id: new ObjectId(), ...effectif });
+      effectifId = insertedId;
+    });
+
+    it("Vérifie qu'on ne peut pas accéder à la route sans être authentifié", async () => {
+      const response = await httpClient.get(`/api/v1/effectif/${effectifId}`);
+      expectUnauthorizedError(response);
+    });
+
+    it("renvoie chaque champ du formulaire avec sa valeur et sa description", async () => {
+      const response = await requestAsOrganisation(
+        profilsPermissionByLabel["OF cible"],
+        "get",
+        `/api/v1/effectif/${effectifId}`
+      );
+
+      expect(response.status).toStrictEqual(200);
+      expect(response.data).toMatchObject({
+        apprenant: {
+          nom: { value: "DURAND", description: expect.any(String) },
+          prenom: { value: "Léa", description: expect.any(String) },
+        },
+        formation: {
+          cfd: { description: expect.any(String) },
+        },
+      });
+    });
+
+    it("renvoie 404 pour un effectif inconnu", async () => {
+      const response = await requestAsOrganisation(
+        profilsPermissionByLabel["Administrateur"],
+        "get",
+        `/api/v1/effectif/${new ObjectId()}`
+      );
+
+      expect(response.status).toStrictEqual(404);
+    });
   });
 
   describe("DELETE /api/v1/effectif - suppression d'un doublon d'effectif", () => {

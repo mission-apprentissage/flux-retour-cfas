@@ -150,7 +150,7 @@ export const mergeOrganismeSansUaiDansOrganismeFiable = async (
       organisationsUpdatedCount,
       effectifsDeletedCount,
       organismeDeletedCount,
-      duplicatesForFiableAndNonFiable,
+      duplicatesCount: duplicatesForFiableAndNonFiable.length,
     },
   });
 };

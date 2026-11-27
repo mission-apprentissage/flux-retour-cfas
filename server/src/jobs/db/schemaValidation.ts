@@ -1,25 +1,38 @@
+import { isEqual } from "lodash-es";
+
 import { modelDescriptors } from "@/common/model/collections";
-import { getDatabase } from "@/common/mongodb";
-
-async function countInvalidDocuments(collectionName: string): Promise<number> {
-  const collection = getDatabase().collection(collectionName);
-  const options = await collection.options();
-
-  return collection.countDocuments({ $nor: [options.validator] });
-}
+import { buildCollectionValidator, getDatabase } from "@/common/mongodb";
 
 export async function validateModels(): Promise<void> {
-  const counts = await Promise.all(
-    modelDescriptors.map(async (d) => ({
-      collectionName: d.collectionName,
-      invalidCount: await countInvalidDocuments(d.collectionName),
-    }))
-  );
+  const db = getDatabase();
+  const collections = await db.listCollections({}, { nameOnly: false }).toArray();
+  const optionsByName = new Map(collections.map((collection) => [collection.name, collection.options]));
 
-  const invalid = counts.filter(({ invalidCount }) => invalidCount > 0);
-  if (invalid.length > 0) {
-    const detail = invalid.map(({ collectionName, invalidCount }) => `${collectionName} (${invalidCount})`).join(", ");
-    // Le job relance : job-processor capture, inutile de le faire ici.
-    throw new Error(`Documents invalides : ${detail}`);
+  const misconfigured: string[] = [];
+  const invalid: string[] = [];
+  for (const { collectionName, zod } of modelDescriptors) {
+    const validator = buildCollectionValidator(collectionName, zod);
+    if (!validator || !optionsByName.has(collectionName)) continue;
+
+    const options = optionsByName.get(collectionName);
+    if (!isEqual(options?.validator, validator)) {
+      misconfigured.push(`${collectionName} (absent ou différent du modèle)`);
+    } else if (options?.validationLevel !== "strict" || options?.validationAction !== "error") {
+      misconfigured.push(`${collectionName} (${options?.validationLevel}, ${options?.validationAction})`);
+    }
+
+    const invalidCount = await db.collection(collectionName).countDocuments({ $nor: [validator] });
+    if (invalidCount > 0) {
+      invalid.push(`${collectionName} (${invalidCount})`);
+    }
+  }
+
+  const problems = [
+    misconfigured.length > 0 ? `Validateurs non conformes : ${misconfigured.join(", ")}` : null,
+    invalid.length > 0 ? `Documents invalides : ${invalid.join(", ")}` : null,
+  ].filter((problem) => problem !== null);
+
+  if (problems.length > 0) {
+    throw new Error(problems.join(". "));
   }
 }

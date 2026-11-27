@@ -3,7 +3,13 @@ import { ACTIVATION_RATTRAPAGE_DATE } from "shared/constants/missionLocale";
 import { DEPARTEMENTS_BY_CODE } from "shared/constants/territoires";
 import { IOrganisationMissionLocale } from "shared/models";
 import { SITUATION_ENUM } from "shared/models/data/missionLocaleEffectif.model";
-import type { ICollabSegmentStats } from "shared/models/data/missionLocaleStats.model";
+import {
+  type ICollabSegmentStats,
+  type IMissionLocaleStats,
+  type IMissionLocaleStatsSegments,
+  zMissionLocaleStatsCompteurs,
+} from "shared/models/data/missionLocaleStats.model";
+import type { IMissionLocaleStatsPurges } from "shared/models/data/missionLocaleStatsPurges.model";
 import {
   ICollabSegmentExportRow,
   ICollaborationMensuelStats,
@@ -37,8 +43,17 @@ import { escapeRegex } from "@/common/utils/usersFiltersUtils";
 import { getOrganisationById } from "../organisations.actions";
 
 import {
+  listerCfaPurges,
+  moisParis,
+  type PerimetrePurges,
+  sommerPhotosPurges,
+  sommerPurges,
+  sommerPurgesPar,
+} from "./mission-locale-purges-stats.actions";
+import {
   buildCumulativeStatsPipeline,
   buildDelaiMoyenExpr,
+  buildEmptySegments,
   buildLatestPerMlStages,
   buildLatestStatsMatch,
   buildOrgLookupPipeline,
@@ -64,11 +79,49 @@ import {
 } from "./mission-locale-stats.helpers";
 import { computeMissionLocaleStats } from "./mission-locale.actions";
 
+type MissionLocalePhoto = { stats: IMissionLocaleStats["stats"]; segments: IMissionLocaleStatsSegments };
+type MissionLocalePhotoPurges = Pick<IMissionLocaleStatsPurges, "stats" | "segments">;
+
+const PHOTO_STOCK_KEYS = new Set([
+  "a_traiter",
+  "contacte_sans_retour",
+  "mineur_a_traiter",
+  "mineur_contacte_sans_retour",
+  "rqth_a_traiter",
+  "rqth_contacte_sans_retour",
+]);
+const SEGMENT_STOCK_KEYS = new Set(["a_traiter", "a_recontacter"]);
+
+const addCounters = <T extends Record<string, number>>(
+  live: T,
+  purged: Partial<Record<keyof T, number>> | undefined,
+  stockKeys: Set<string>
+): T =>
+  Object.fromEntries(
+    Object.entries(live).map(([key, value]) => [key, stockKeys.has(key) ? value : value + (purged?.[key] ?? 0)])
+  ) as T;
+
+const addPurgedToMissionLocaleStats = (
+  live: MissionLocalePhoto,
+  purged: MissionLocalePhotoPurges | null
+): MissionLocalePhoto => ({
+  stats: addCounters(live.stats, purged?.stats, PHOTO_STOCK_KEYS),
+  segments: {
+    rupture: addCounters(live.segments.rupture, purged?.segments.rupture, SEGMENT_STOCK_KEYS),
+    collab: addCounters(live.segments.collab, purged?.segments.collab, SEGMENT_STOCK_KEYS),
+  },
+});
+
+const computeMissionLocalePhoto = async (missionLocaleId: ObjectId, day: Date) => {
+  const ml = (await getOrganisationById(missionLocaleId)) as IOrganisationMissionLocale;
+  const [live, purged] = await Promise.all([computeMissionLocaleStats(ml, day), sommerPhotosPurges(ml._id, day)]);
+  return { ml, ...addPurgedToMissionLocaleStats(live, purged) };
+};
+
 export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId, date?: Date) => {
   const dateToUse = normalizeToUTCDay(date ?? new Date());
 
-  const ml = (await getOrganisationById(missionLocaleId)) as IOrganisationMissionLocale;
-  const { stats, segments } = await computeMissionLocaleStats(ml, dateToUse);
+  const { ml, stats, segments } = await computeMissionLocalePhoto(missionLocaleId, dateToUse);
 
   await missionLocaleStatsDb().findOneAndUpdate(
     {
@@ -92,6 +145,63 @@ export const createOrUpdateMissionLocaleStats = async (missionLocaleId: ObjectId
       upsert: true,
     }
   );
+};
+
+export const createMissionLocaleStatsIfMissing = async (missionLocaleId: ObjectId, date: Date) => {
+  const dateToUse = normalizeToUTCDay(date);
+  const { ml, stats, segments } = await computeMissionLocalePhoto(missionLocaleId, dateToUse);
+  const now = new Date();
+
+  const { upsertedCount } = await missionLocaleStatsDb().updateOne(
+    { mission_locale_id: ml._id, computed_day: dateToUse },
+    { $setOnInsert: { _id: new ObjectId(), stats, segments, created_at: now, updated_at: now } },
+    { upsert: true }
+  );
+  return upsertedCount > 0;
+};
+
+const readPath = (source: unknown, path: string): unknown =>
+  path
+    .split(".")
+    .reduce<unknown>(
+      (value, key) =>
+        value !== null && typeof value === "object" && Object.hasOwn(value, key)
+          ? (value as Record<string, unknown>)[key]
+          : undefined,
+      source
+    );
+
+export const assertMissionLocaleStatsFields = (fields: string[], { borne = false }: { borne?: boolean } = {}) => {
+  const emptyPhoto: MissionLocalePhoto = {
+    stats: zMissionLocaleStatsCompteurs.parse({}),
+    segments: buildEmptySegments(),
+  };
+  const unknownFields = fields.filter((field) => readPath(emptyPhoto, field) === undefined);
+  if (unknownFields.length > 0) {
+    throw new Error(`Champs de photo ML inconnus : ${unknownFields.join(", ")}`);
+  }
+  const overlappingFields = fields.filter((field, index) =>
+    fields.some((other, otherIndex) => otherIndex !== index && (other === field || field.startsWith(`${other}.`)))
+  );
+  if (overlappingFields.length > 0) {
+    throw new Error(`Champs de photo ML qui se recouvrent : ${overlappingFields.join(", ")}`);
+  }
+  const groupFields = fields.filter((field) => typeof readPath(emptyPhoto, field) !== "number");
+  if (groupFields.length > 0 && !borne) {
+    throw new Error(`Champs de photo ML à borner par une date de début : ${groupFields.join(", ")}`);
+  }
+};
+
+export const setMissionLocaleStatsFields = async (missionLocaleId: ObjectId, date: Date, fields: string[]) => {
+  const dateToUse = normalizeToUTCDay(date);
+  const photo = await computeMissionLocalePhoto(missionLocaleId, dateToUse);
+  const values = Object.fromEntries(fields.map((field) => [field, readPath(photo, field)]));
+
+  const { modifiedCount } = await missionLocaleStatsDb().updateOne(
+    { mission_locale_id: photo.ml._id, computed_day: dateToUse, $nor: [values] },
+    { $set: { ...values, updated_at: new Date() } }
+  );
+  return modifiedCount > 0;
 };
 
 export const getSummaryStats = async (evaluationDate: Date, period: StatsPeriod = "all") => {
@@ -480,7 +590,7 @@ const TRAITEMENT_ML_SORT_FIELD_MAP: Record<TraitementMlSortBy, string> = {
 };
 
 const buildPourcentageTraitesExpr = (viewPath: string) => {
-  const totalJeunes = { $add: [`${viewPath}.a_traiter`, `${viewPath}.traite`] };
+  const totalJeunes = `${viewPath}.total`;
   return {
     $cond: [{ $eq: [totalJeunes, 0] }, 0, { $multiply: [{ $divide: [`${viewPath}.traite`, totalJeunes] }, 100] }],
   };
@@ -606,7 +716,7 @@ export const getTraitementStatsByMissionLocale = async (
     },
     {
       $addFields: {
-        total_jeunes: { $add: ["$view.a_traiter", "$view.traite"] },
+        total_jeunes: "$view.total",
         pourcentage_traites: { $round: [buildPourcentageTraitesExpr("$view"), 0] },
         first_pourcentage_traites: buildPourcentageTraitesExpr("$first_view"),
         nom: { $trim: { input: "$nom" } },
@@ -751,6 +861,7 @@ export const getSuiviTraitementByRegion = async (segment: StatsSegment = "all"):
     {
       $group: {
         _id: "$ml.adresse.region",
+        total_jeunes: { $sum: "$view.total" },
         a_traiter: { $sum: "$view.a_traiter" },
         traites: { $sum: "$view.traite" },
         ml_actives: {
@@ -768,8 +879,8 @@ export const getSuiviTraitementByRegion = async (segment: StatsSegment = "all"):
         nom: 1,
         a_traiter: 1,
         traites: 1,
-        total_jeunes: { $add: ["$a_traiter", "$traites"] },
-        pourcentage_traites: buildPercentageExpression("$traites", { $add: ["$a_traiter", "$traites"] }),
+        total_jeunes: 1,
+        pourcentage_traites: buildPercentageExpression("$traites", "$total_jeunes"),
         ml_actives: 1,
       },
     },
@@ -1032,26 +1143,42 @@ export async function getCollaborationSegmentStats(
     "effectif_snapshot.apprenant.date_de_naissance": { $gte: nesApres, $lte: nesAvant },
   });
 
-  const countCfaAyantCollabore = async (date: Date) =>
-    (await missionLocaleEffectifsDb().distinct("effectif_snapshot.organisme_id", collabMatch(date))).length;
+  const purgesPerimetre: PerimetrePurges = { missionLocaleIds };
+  const countCfaAyantCollabore = async (date: Date) => {
+    const [vivants, purges] = await Promise.all([
+      missionLocaleEffectifsDb().distinct("effectif_snapshot.organisme_id", collabMatch(date)),
+      listerCfaPurges(purgesPerimetre, { jusqua: moisParis(date) }, { agesMissionLocale: true }),
+    ]);
+    return new Set([...vivants, ...purges].map(String)).size;
+  };
 
   const previousStartDate = calculatePreviousStartDate(period, startDate);
-  const [current, previous, precedent, cfaCurrent, cfaPrevious, cfaPrecedent, objectifsResult] = await Promise.all([
-    getSegmentStatsForPeriod(evaluationDate, missionLocaleIds, "collab"),
-    getSegmentStatsForPeriod(startDate, missionLocaleIds, "collab"),
-    previousStartDate ? getSegmentStatsForPeriod(previousStartDate, missionLocaleIds, "collab") : Promise.resolve(null),
-    countCfaAyantCollabore(evaluationDate),
-    countCfaAyantCollabore(startDate),
-    previousStartDate ? countCfaAyantCollabore(previousStartDate) : Promise.resolve(null),
-    missionLocaleEffectifsDb()
-      .aggregate([
-        { $match: collabMatch(evaluationDate) },
-        { $facet: { motifs: MOTIFS_PIPELINE, total: [{ $count: "count" }] } },
-      ])
-      .next(),
-  ]);
+  const [current, previous, precedent, cfaCurrent, cfaPrevious, cfaPrecedent, objectifsResult, purged] =
+    await Promise.all([
+      getSegmentStatsForPeriod(evaluationDate, missionLocaleIds, "collab"),
+      getSegmentStatsForPeriod(startDate, missionLocaleIds, "collab"),
+      previousStartDate
+        ? getSegmentStatsForPeriod(previousStartDate, missionLocaleIds, "collab")
+        : Promise.resolve(null),
+      countCfaAyantCollabore(evaluationDate),
+      countCfaAyantCollabore(startDate),
+      previousStartDate ? countCfaAyantCollabore(previousStartDate) : Promise.resolve(null),
+      missionLocaleEffectifsDb()
+        .aggregate([
+          { $match: collabMatch(evaluationDate) },
+          { $facet: { motifs: MOTIFS_PIPELINE, total: [{ $count: "count" }] } },
+        ])
+        .next(),
+      sommerPurges("collab", purgesPerimetre, { jusqua: moisParis(evaluationDate) }),
+    ]);
 
-  const motifs = { ...DEFAULT_MOTIFS, ...objectifsResult?.motifs?.[0] };
+  const motifsVivants: typeof DEFAULT_MOTIFS = { ...DEFAULT_MOTIFS, ...objectifsResult?.motifs?.[0] };
+  const motifs = Object.fromEntries(
+    Object.entries(motifsVivants).map(([cle, valeur]) => [
+      cle,
+      (valeur || 0) + purged[`ages_ml_objectif_${cle as keyof typeof DEFAULT_MOTIFS}`],
+    ])
+  ) as typeof DEFAULT_MOTIFS;
   const variationSituation = (cle: keyof ICollabSegmentStats & `situation_${string}`) =>
     createCumulStatWithVariation(current[cle], previous[cle], precedent?.[cle] ?? null).variation;
   const situations = {
@@ -1099,7 +1226,7 @@ export async function getCollaborationSegmentStats(
       reorientation: motifs.reorientation || 0,
       recherche_emploi: motifs.recherche_emploi || 0,
       autre: motifs.autre || 0,
-      total_dossiers: objectifsResult?.total?.[0]?.count || 0,
+      total_dossiers: (objectifsResult?.total?.[0]?.count || 0) + purged.ages_ml_envoyes,
     },
   };
 }
@@ -1135,6 +1262,15 @@ export async function getCollaborationMensuelStats(
   const perimetre = organismeId
     ? { "effectif_snapshot.organisme_id": organismeId }
     : await buildCollabPerimetreMatch(territoire, mlId);
+  const purgesPerimetre: PerimetrePurges = organismeId
+    ? { organismeIds: [organismeId] }
+    : mlId
+      ? { missionLocaleIds: [new ObjectId(mlId)] }
+      : { regions: territoire.regions, departements: territoire.departements };
+  const purgesPromise = sommerPurgesPar("collab", "mois", purgesPerimetre, {
+    ...(debutPeriode ? { depuis: toMonthKey(debutPeriode) } : {}),
+    jusqua: toMonthKey(now),
+  });
 
   const rows = await missionLocaleEffectifsDb()
     .aggregate<ICollaborationMois>([
@@ -1161,9 +1297,16 @@ export async function getCollaborationMensuelStats(
     ])
     .toArray();
 
-  const premierMois = debutPeriode ? toMonthKey(debutPeriode) : rows.map((row) => row.mois).sort()[0];
+  const byMonth = new Map(rows.map((row) => [row.mois, { ...row }]));
+  for (const [mois, { compteurs }] of await purgesPromise) {
+    const row = byMonth.get(mois) ?? { mois, envoyes: 0, contactes: 0, acceptes: 0 };
+    row.envoyes += compteurs.envoyes;
+    row.contactes += compteurs.contactes;
+    row.acceptes += compteurs.resultat_rdv_pris;
+    byMonth.set(mois, row);
+  }
+  const premierMois = debutPeriode ? toMonthKey(debutPeriode) : [...byMonth.keys()].sort()[0];
   const monthKeys = premierMois ? listMonthKeys(premierMois, now) : [toMonthKey(now)];
-  const byMonth = new Map(rows.map((row) => [row.mois, row]));
   return {
     mois: monthKeys.map((mois) => byMonth.get(mois) ?? { mois, envoyes: 0, contactes: 0, acceptes: 0 }),
     period,
@@ -1244,7 +1387,7 @@ const buildSegmentRowsPipeline = (basePipeline: Record<string, unknown>[], segme
       siret: { $ifNull: ["$ml.siret", null] },
       date_activation: DATE_ACTIVATION_EXPR,
       derniere_activite: { $ifNull: ["$ml.derniere_activite", null] },
-      total_jeunes: { $add: ["$view.a_traiter", "$view.traite"] },
+      total_jeunes: "$view.total",
       a_traiter: "$view.a_traiter",
       traites: "$view.traite",
       pourcentage_traites: { $round: [buildPourcentageTraitesExpr("$view"), 1] },
@@ -1291,7 +1434,7 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
     { $lookup: { from: "regions", localField: "ml.adresse.region", foreignField: "code", as: "region_info" } },
     {
       $addFields: {
-        total_jeunes: { $add: ["$latest_stats.a_traiter", "$latest_stats.traite"] },
+        total_jeunes: { $ifNull: ["$latest_stats.total", 0] },
         traites: buildTotalTraitesV2Expression(),
         a_traiter: "$latest_stats.a_traiter",
         rdv_pris: { $ifNull: ["$latest_stats.rdv_pris", 0] },
@@ -1331,7 +1474,7 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
     {
       $group: {
         _id: "$ml.adresse.region",
-        total_jeunes: { $sum: { $add: ["$latest_stats.a_traiter", "$latest_stats.traite"] } },
+        total_jeunes: { $sum: { $ifNull: ["$latest_stats.total", 0] } },
         a_traiter: { $sum: "$latest_stats.a_traiter" },
         traites: { $sum: buildTotalTraitesV2Expression() },
         rdv_pris: { $sum: { $ifNull: ["$latest_stats.rdv_pris", 0] } },
@@ -1402,7 +1545,7 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
     },
   ];
 
-  const [mlDataRaw, regionData, collabData, rowsRuptureRaw, rowsCollabRaw] = await Promise.all([
+  const [mlDataRaw, regionData, collabDataVivants, rowsRuptureRaw, rowsCollabRaw, collabPurges] = await Promise.all([
     missionLocaleStatsDb().aggregate(mlPipeline, { allowDiskUse: true }).toArray(),
     missionLocaleStatsDb().aggregate(regionPipeline, { allowDiskUse: true }).toArray(),
     missionLocaleEffectifsDb().aggregate(collabByMlPipeline).toArray(),
@@ -1416,9 +1559,22 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
         allowDiskUse: true,
       })
       .toArray(),
+    sommerPurgesPar("collab", "mission_locale_id", { missionLocaleIds: collabMissionLocaleIds }),
   ]);
 
-  const collabByMl = new Map(collabData.map((c) => [c._id.toString(), c]));
+  const collabByMl = new Map(collabDataVivants.map((c) => [c._id.toString(), { ...c }]));
+  for (const [id, { compteurs }] of collabPurges) {
+    const collab = collabByMl.get(id) ?? {
+      _id: new ObjectId(id),
+      collab_total: 0,
+      collab_non_traite: 0,
+      collab_traite: 0,
+      collab_a_recontacter: 0,
+    };
+    collab.collab_total += compteurs.envoyes;
+    collab.collab_traite += compteurs.traitees;
+    collabByMl.set(id, collab);
+  }
 
   const mlData = mlDataRaw.map((ml) => {
     const deptCode = ml.departement_code as string | null;
@@ -1469,6 +1625,9 @@ export const getTraitementExportData = async (params: TraitementExportParams) =>
     exportDate: evaluationDate,
   };
 };
+
+const whatsAppPurgesBornes = (period: StatsPeriod, startDate: Date, evaluationDate: Date) =>
+  period === "all" ? {} : { depuis: moisParis(startDate), jusqua: moisParis(evaluationDate) };
 
 export const getWhatsAppStats = async (period: StatsPeriod = "all") => {
   const evaluationDate = normalizeToUTCDay(new Date());
@@ -1522,26 +1681,31 @@ export const getWhatsAppStats = async (period: StatsPeriod = "all") => {
     },
   ];
 
-  const [result] = await missionLocaleEffectifsDb().aggregate(pipeline, { allowDiskUse: true }).toArray();
+  const [[result], purged] = await Promise.all([
+    missionLocaleEffectifsDb().aggregate(pipeline, { allowDiskUse: true }).toArray(),
+    sommerPurges("whatsapp", {}, whatsAppPurgesBornes(period, startDate, evaluationDate)),
+  ]);
 
-  const totalSent = result?.totalSent?.[0]?.count || 0;
+  const totalSent = (result?.totalSent?.[0]?.count || 0) + purged.envoyes;
   const callbackCount =
-    result?.responses?.find((r: { _id: string; count: number }) => r._id === "callback")?.count || 0;
-  const noHelpCount = result?.responses?.find((r: { _id: string; count: number }) => r._id === "no_help")?.count || 0;
-  const optOutsCount = result?.optOuts?.[0]?.count || 0;
-  const failedCount = result?.failed?.[0]?.count || 0;
-  const noResponseCount = result?.noResponse?.[0]?.count || 0;
+    (result?.responses?.find((r: { _id: string; count: number }) => r._id === "callback")?.count || 0) + purged.rappel;
+  const noHelpCount =
+    (result?.responses?.find((r: { _id: string; count: number }) => r._id === "no_help")?.count || 0) +
+    purged.sans_aide;
+  const optOutsCount = (result?.optOuts?.[0]?.count || 0) + purged.opt_out;
+  const failedCount = (result?.failed?.[0]?.count || 0) + purged.echec;
+  const noResponseCount = (result?.noResponse?.[0]?.count || 0) + purged.sans_reponse;
 
   const totalResponded = callbackCount + noHelpCount;
   const responseRate = totalSent > 0 ? Math.round((totalResponded / totalSent) * 100) : 0;
 
   const outcomesMap: Record<string, number> = {
-    rdv_pris: 0,
-    nouveau_projet: 0,
-    deja_accompagne: 0,
-    injoignable: 0,
-    coordonnees_incorrect: 0,
-    autre: 0,
+    rdv_pris: purged.rappel_rdv_pris,
+    nouveau_projet: purged.rappel_nouveau_projet,
+    deja_accompagne: purged.rappel_deja_accompagne,
+    injoignable: purged.rappel_injoignable,
+    coordonnees_incorrect: purged.rappel_coordonnees_incorrect,
+    autre: purged.rappel_autre,
     en_attente: 0,
   };
 
@@ -1639,43 +1803,52 @@ export const getPrequalifStats = async (period: StatsPeriod = "all"): Promise<IP
     },
   });
 
-  const [result] = await missionLocaleEffectifsDb().aggregate(pipeline, { allowDiskUse: true }).toArray();
+  const [[result], purged] = await Promise.all([
+    missionLocaleEffectifsDb().aggregate(pipeline, { allowDiskUse: true }).toArray(),
+    sommerPurges("whatsapp", {}, whatsAppPurgesBornes(period, startDate, evaluationDate)),
+  ]);
 
-  const totalSent: number = result?.totalSent?.[0]?.count ?? 0;
-  const sentByModeMap: Record<string, number> = { backfill: 0, daily: 0 };
+  const totalSent: number = (result?.totalSent?.[0]?.count ?? 0) + purged.prequalif_envoyes;
+  const sentByModeMap: Record<string, number> = {
+    backfill: purged.prequalif_backfill,
+    daily: purged.prequalif_daily,
+  };
   for (const row of (result?.sentByMode ?? []) as Array<{ _id: string | null; count: number }>) {
-    if (row._id === "backfill" || row._id === "daily") sentByModeMap[row._id] = row.count;
+    if (row._id === "backfill" || row._id === "daily") sentByModeMap[row._id] += row.count;
   }
 
   const yesCount: number =
-    (result?.responses ?? []).find((r: { _id: string }) => r._id === "prequalif_yes")?.count ?? 0;
-  const noCount: number = (result?.responses ?? []).find((r: { _id: string }) => r._id === "prequalif_no")?.count ?? 0;
+    ((result?.responses ?? []).find((r: { _id: string }) => r._id === "prequalif_yes")?.count ?? 0) +
+    purged.prequalif_oui;
+  const noCount: number =
+    ((result?.responses ?? []).find((r: { _id: string }) => r._id === "prequalif_no")?.count ?? 0) +
+    purged.prequalif_non;
   const responded = yesCount + noCount;
 
-  const tokensGenerated: number = result?.tokens?.[0]?.count ?? 0;
-  const totalClicks: number = result?.clickStats?.[0]?.totalClicks ?? 0;
-  const uniqueClickers: number = result?.clickStats?.[0]?.uniqueClickers ?? 0;
+  const tokensGenerated: number = (result?.tokens?.[0]?.count ?? 0) + purged.prequalif_liens;
+  const totalClicks: number = (result?.clickStats?.[0]?.totalClicks ?? 0) + purged.prequalif_clics;
+  const uniqueClickers: number = (result?.clickStats?.[0]?.uniqueClickers ?? 0) + purged.prequalif_cliqueurs;
 
   const [mlTotal, mlWithUrl] = await Promise.all([
     organisationsDb().countDocuments({ type: "MISSION_LOCALE" }),
     organisationsDb().countDocuments({ type: "MISSION_LOCALE", rdv_url: { $exists: true, $ne: null } }),
   ]);
 
-  const optedOutCount: number = result?.optedOut?.[0]?.count ?? 0;
+  const optedOutCount: number = (result?.optedOut?.[0]?.count ?? 0) + purged.prequalif_opt_out;
 
   return {
     period,
     volume: {
       total_sent: totalSent,
       sent_by_mode: { backfill: sentByModeMap.backfill, daily: sentByModeMap.daily },
-      failed_send: result?.failedSend?.[0]?.count ?? 0,
+      failed_send: (result?.failedSend?.[0]?.count ?? 0) + purged.prequalif_echec,
       opted_out: optedOutCount,
     },
     responses: {
       yes_count: yesCount,
       no_count: noCount,
       no_response: Math.max(0, totalSent - responded),
-      auto_reply_sent: result?.autoReply?.[0]?.count ?? 0,
+      auto_reply_sent: (result?.autoReply?.[0]?.count ?? 0) + purged.prequalif_reponse_auto,
       response_rate: totalSent > 0 ? Math.round((responded / totalSent) * 1000) / 10 : 0,
       yes_rate: responded > 0 ? Math.round((yesCount / responded) * 1000) / 10 : 0,
       opt_out_rate: totalSent > 0 ? Math.round((optedOutCount / totalSent) * 1000) / 10 : 0,
