@@ -195,7 +195,7 @@ program
   )
   .option(
     "--champs <champs...>",
-    "Pose aussi sur les photos existantes ces champs ajoutés aux photos, sous la forme stats.<champ> ou segments.<segment>.<champ>"
+    "Pose aussi sur les photos existantes ces champs ajoutés aux photos, sous la forme stats.<champ> ou segments.<segment>.<champ>. Les dossiers purgés y entrent dans leur état au moment de la purge"
   )
   .option("--depuis <date>", "Premier jour traité, AAAA-MM-JJ, nécessaire pour poser stats ou segments entiers")
   .option("--jusqua <date>", "Dernier jour traité, AAAA-MM-JJ")

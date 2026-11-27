@@ -144,13 +144,15 @@ const additionner = (gauche: Arbre, droite: Arbre): Arbre => {
   return somme;
 };
 
+const borneDuMois = (jour: Date) => (jour.getUTCDate() === 1 ? { $lt: moisUTC(jour) } : { $lte: moisUTC(jour) });
+
 export const sommerPhotosPurges = async (
   missionLocaleId: ObjectId,
   jour?: Date
 ): Promise<Pick<IMissionLocaleStatsPurges, "stats" | "segments"> | null> => {
   const documents = await missionLocaleStatsPurgesDb()
     .find(
-      { mission_locale_id: missionLocaleId, ...(jour ? { mois: { $lte: moisUTC(jour) } } : {}) },
+      { mission_locale_id: missionLocaleId, ...(jour ? { mois: borneDuMois(jour) } : {}) },
       { projection: { _id: 0, stats: 1, segments: 1 } }
     )
     .toArray();

@@ -318,10 +318,14 @@ describe("compteurs des photos ML à la purge des dossiers de suivi", () => {
     ]);
     await purgerDossiersSuivi({ maintenant });
     const fevrier = date("2025-02-01");
+    const mars = date("2025-03-01");
+    const miMars = date("2025-03-15");
     const avril = date("2025-04-01");
 
     await createMissionLocaleStatsIfMissing(ML_ID, fevrier);
     await setMissionLocaleStatsFields(ML_ID, fevrier, ["stats.traite"]);
+    await createMissionLocaleStatsIfMissing(ML_ID, mars);
+    await createMissionLocaleStatsIfMissing(ML_ID, miMars);
     await createMissionLocaleStatsIfMissing(ML_ID, avril);
 
     const photos = await missionLocaleStatsDb()
@@ -329,6 +333,8 @@ describe("compteurs des photos ML à la purge des dossiers de suivi", () => {
       .toArray();
     expect(photos.map(({ computed_day, stats }) => [computed_day, stats.total, stats.traite])).toStrictEqual([
       [fevrier, 0, 0],
+      [mars, 0, 0],
+      [miMars, 1, 1],
       [avril, 1, 1],
     ]);
     expect((await photoDuJour()).stats).toMatchObject({ total: 2, traite: 2 });
