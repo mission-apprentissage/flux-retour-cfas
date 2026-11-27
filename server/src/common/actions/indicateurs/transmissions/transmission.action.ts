@@ -1,17 +1,36 @@
 import type { ObjectId } from "bson";
 import { startOfDay, endOfDay } from "date-fns";
 import { TransmissionStat } from "shared/models";
+import { EFFECTIF_HORS_CONSERVATION } from "shared/models/data/effectifs.model";
 
 import { effectifsQueueDb, transmissionDailyReportDb } from "@/common/model/collections";
 
 const estEnAttente = { $eq: [{ $ifNull: ["$processed_at", null] }, null] };
+
+const erreursDeValidation = { $ifNull: ["$validation_errors", []] };
+const refuseSeulementHorsConservation = {
+  $and: [
+    { $gt: [{ $size: erreursDeValidation }, 0] },
+    {
+      $allElementsTrue: [
+        {
+          $map: {
+            input: erreursDeValidation,
+            as: "erreur",
+            in: { $eq: ["$$erreur.message", EFFECTIF_HORS_CONSERVATION] },
+          },
+        },
+      ],
+    },
+  ],
+};
 
 const groupPipeline = {
   total: {
     $sum: 1,
   },
   error: {
-    $sum: { $cond: [{ $eq: ["$has_error", true] }, 1, 0] },
+    $sum: { $cond: [{ $and: [{ $eq: ["$has_error", true] }, { $not: [refuseSeulementHorsConservation] }] }, 1, 0] },
   },
   success: {
     $sum: { $cond: [{ $and: [{ $eq: ["$has_error", false] }, { $not: [estEnAttente] }] }, 1, 0] },

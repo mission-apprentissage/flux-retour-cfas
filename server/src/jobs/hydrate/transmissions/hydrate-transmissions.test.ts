@@ -1,5 +1,6 @@
 import type { IJobsSimple } from "job-processor";
 import { ObjectId } from "mongodb";
+import { EFFECTIF_HORS_CONSERVATION } from "shared/models/data/effectifs.model";
 import { describe, expect, it } from "vitest";
 
 import { effectifsQueueDb, transmissionDailyReportDb } from "@/common/model/collections";
@@ -21,15 +22,16 @@ const yesterdayNoon = () => noonDaysAgo(1);
 
 const insertQueueItems = async (
   organismeId: ObjectId,
-  items: Array<{ has_error: boolean }>,
+  items: Array<{ has_error: boolean; validation_errors?: Array<{ message: string; path: string[] }> }>,
   processedAt: Date = yesterdayNoon()
 ) => {
   await effectifsQueueDb().insertMany(
-    items.map(({ has_error }) => ({
+    items.map(({ has_error, validation_errors }) => ({
       source_organisme_id: organismeId.toString(),
       processed_at: processedAt,
       created_at: processedAt,
       has_error,
+      ...(validation_errors ? { validation_errors } : {}),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     })) as any[],
     { bypassDocumentValidation: true }
@@ -57,6 +59,23 @@ describe("hydrate:transmission-daily", () => {
       organisme_id: organismeId,
       current_day: formatDateYYYYMMDD(yesterdayNoon()),
       success_count: 2,
+      error_count: 1,
+    });
+  });
+
+  it("ne compte pas en erreur un effectif refusé seulement parce qu'il est hors conservation", async () => {
+    const organismeId = new ObjectId();
+    const horsConservation = { message: EFFECTIF_HORS_CONSERVATION, path: ["date_fin_formation"] };
+    await insertQueueItems(organismeId, [
+      { has_error: false },
+      { has_error: true, validation_errors: [horsConservation] },
+      { has_error: true, validation_errors: [horsConservation, { message: "UAI invalide", path: ["uai"] }] },
+    ]);
+
+    await computeDailyTransmissions();
+
+    expect(await transmissionDailyReportDb().findOne({ organisme_id: organismeId })).toMatchObject({
+      success_count: 1,
       error_count: 1,
     });
   });
