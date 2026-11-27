@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { getDbCollection } from "@/common/mongodb";
 import { effectifsJobs } from "@/jobs/registry/effectifs";
+import { missionLocaleJobs } from "@/jobs/registry/mission-locale";
 import { voeuxAffelnetJobs } from "@/jobs/registry/voeux-affelnet";
 import { useMongo } from "@tests/jest/setupMongo";
 
@@ -43,14 +44,16 @@ describe("refuserPurgesConcurrentes()", () => {
     await expect(refuserPurgesConcurrentes("purge:effectifs-anciens")).resolves.toBeUndefined();
   });
 
-  it("est appelé par les jobs de purge", async () => {
-    await inserer([job("purge:effectifs-anciens", "running"), job("purge:voeux-affelnet", "running")]);
-    const simulation = (name: string) => ({ name, payload: { dryRun: true } }) as unknown as IJobsSimple;
+  it.each([
+    ["purge:effectifs-anciens", effectifsJobs["purge:effectifs-anciens"].handler],
+    ["purge:ml-dossiers-masques", missionLocaleJobs["purge:ml-dossiers-masques"].handler],
+    ["purge:dossiers-suivi", missionLocaleJobs["purge:dossiers-suivi"].handler],
+    ["purge:voeux-affelnet", voeuxAffelnetJobs["purge:voeux-affelnet"].handler],
+  ])("est appelé par le job %s", async (name, handler) => {
+    const autre = name === "purge:voeux-affelnet" ? "purge:effectifs-anciens" : "purge:voeux-affelnet";
+    await inserer([job(name, "running"), job(autre, "running")]);
 
-    await expect(
-      effectifsJobs["purge:effectifs-anciens"].handler(simulation("purge:effectifs-anciens"))
-    ).rejects.toThrow("une autre purge");
-    await expect(voeuxAffelnetJobs["purge:voeux-affelnet"].handler(simulation("purge:voeux-affelnet"))).rejects.toThrow(
+    await expect(handler({ name, payload: { dryRun: true } } as unknown as IJobsSimple)).rejects.toThrow(
       "une autre purge"
     );
   });
