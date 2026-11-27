@@ -82,8 +82,10 @@ export const JOB_META: Record<string, { tier: AlertTier }> = {
   "demandes-activation:flechables": { tier: "jour" },
   "organismes:revoke-stale-api-keys": { tier: "veille" },
   "purge:effectifs-anciens": { tier: "jour" },
+  "purge:ml-dossiers-masques": { tier: "jour" },
   "purge:dossiers-suivi": { tier: "jour" },
   "purge:voeux-affelnet": { tier: "jour" },
+  "clear:queue-orphans": { tier: "jour" },
   "db:validate": { tier: "jour" },
 };
 
