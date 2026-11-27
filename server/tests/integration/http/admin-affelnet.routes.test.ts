@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import { COLONNES_AFFELNET_CONSERVEES } from "shared/models/data/voeuxAffelnet.model";
 import { generateFormationCatalogueFixture } from "shared/models/fixtures/formationsCatalogue.fixture";
 import { generateOrganismeFixture } from "shared/models/fixtures/organisme.fixture";
@@ -7,6 +8,11 @@ import { formationsCatalogueDb, organismesDb, voeuxAffelnetDb } from "@/common/m
 import { AFFELNET_HEADER } from "@/http/routes/admin.routes/affelnet.routes";
 import { useMongo } from "@tests/jest/setupMongo";
 import { initTestApp, RequestAsOrganisationFunc } from "@tests/utils/testUtils";
+
+vi.mock("@sentry/node", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@sentry/node")>()),
+  captureException: vi.fn(),
+}));
 
 useMongo();
 
@@ -91,6 +97,8 @@ describe("POST /api/v1/admin/affelnet/create", () => {
     const response = await importer([ligne("INE1", { annee_scolaire_rentree: "2024" })]);
 
     expect(response.status).toBe(400);
+    expect(response.data.message).toBe("Aucune ligne d'une campagne conservée, à partir de 2025.");
+    expect(captureException).not.toHaveBeenCalled();
     expect(await voeuxAffelnetDb().countDocuments({})).toBe(0);
   });
 

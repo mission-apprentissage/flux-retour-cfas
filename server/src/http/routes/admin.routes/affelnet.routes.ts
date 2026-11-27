@@ -1,3 +1,4 @@
+import * as Boom from "@hapi/boom";
 import { PromisePool } from "@supercharge/promise-pool";
 import { parse } from "csv-parse/sync";
 import express from "express";
@@ -107,10 +108,10 @@ const parseCsvFile = async (buffer: Buffer) => {
   return records.map(garderColonnesLues);
 };
 
-const createVoeux: RouteHandler = async (req, res) => {
+const createVoeux: RouteHandler = async (req) => {
   const file = req.file;
   if (!file) {
-    return res.status(400).send("No file uploaded.");
+    throw Boom.badRequest("No file uploaded.");
   }
 
   const parsedCSV: Array<IVoeuAffelnetRaw> = await parseCsvFile(file.buffer);
@@ -124,7 +125,7 @@ const createVoeux: RouteHandler = async (req, res) => {
     );
   }
   if (lignes.length === 0) {
-    return res.status(400).send(`Aucune ligne d'une campagne conservée, à partir de ${premiereCampagne}.`);
+    throw Boom.badRequest(`Aucune ligne d'une campagne conservée, à partir de ${premiereCampagne}.`);
   }
   const errors = createErrorAggregator("admin-import-voeux-affelnet");
 
