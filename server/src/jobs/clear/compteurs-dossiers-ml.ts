@@ -222,7 +222,7 @@ const calculerLignes = async (missionLocaleId: ObjectId, ids: ObjectId[], mainte
           from: "organismes",
           localField: "effectif_snapshot.organisme_id",
           foreignField: "_id",
-          pipeline: [{ $project: { "adresse.region": 1, "adresse.departement": 1 } }],
+          pipeline: [{ $project: { "adresse.region": 1, "adresse.departement": 1, ferme: 1 } }],
           as: "organisme",
         },
       },
@@ -251,7 +251,11 @@ const calculerLignes = async (missionLocaleId: ObjectId, ids: ObjectId[], mainte
           region: { $ifNull: [{ $first: "$organisme.adresse.region" }, null] },
           departement: { $ifNull: [{ $first: "$organisme.adresse.departement" }, null] },
           cfa_active_le: {
-            $cond: [{ $gt: [{ $size: "$organisme" }, 0] }, { $ifNull: [{ $first: "$activation.date" }, null] }, null],
+            $cond: [
+              { $and: [{ $gt: [{ $size: "$organisme" }, 0] }, { $ne: [{ $first: "$organisme.ferme" }, true] }] },
+              { $ifNull: [{ $first: "$activation.date" }, null] },
+              null,
+            ],
           },
           suivi: {
             $cond: [

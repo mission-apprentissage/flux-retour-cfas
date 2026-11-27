@@ -488,6 +488,32 @@ describe("compteurs des indicateurs ML vivants à la purge des dossiers de suivi
     });
   });
 
+  it("ne fait pas revenir dans l'admin un CFA fermé à la purge puis supprimé", async () => {
+    await inserer([
+      dossier({
+        organismeId: CFA_PURGE_ID,
+        situation: SITUATION_ENUM.RDV_PRIS,
+        collab: { envoi: "2025-04-10", reponse: "2026-02-01" },
+      }),
+    ]);
+    await organismesDb().updateOne(
+      { _id: CFA_PURGE_ID },
+      { $set: { ferme: true } },
+      { bypassDocumentValidation: true }
+    );
+    const lire = async () =>
+      (await computeStatsForDate(addDaysUTC(normalizeToUTCDay(new Date()), 1))).regions.find(
+        ({ region_code }) => region_code === REGION
+      );
+    const avant = await lire();
+
+    await purgerDossiersSuivi({ maintenant });
+    await organismesDb().deleteOne({ _id: CFA_PURGE_ID });
+
+    expect(avant?.dossiers_envoyes_cfa ?? 0).toBe(0);
+    expect(await lire()).toStrictEqual(avant);
+  });
+
   it("garde en organisme inconnu la ligne d'un CFA d'origine supprimé après la purge", async () => {
     await inserer([
       dossier({
